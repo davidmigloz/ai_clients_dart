@@ -1,0 +1,55 @@
+name: ai_clients_dart_workspace
+description: A collection of Dart client libraries for popular AI APIs. Provides type-safe, well-documented, and idiomatic interfaces to OpenAI, Anthropic, Google AI (Gemini), Mistral, Ollama, and other providers. Ready for Dart and Flutter.
+publish_to: none
+
+environment:
+  sdk: ^3.8.0
+
+dev_dependencies:
+  melos: ^7.3.0
+
+workspace:
+  - packages/*
+
+melos:
+  repository: https://github.com/davidmigloz/ai_clients_dart
+
+  command:
+    version:
+      linkToCommits: true
+      includeCommitId: true
+      workspaceChangelog: true
+      releaseUrl: true
+      branch: main
+      changelogs:
+        - path: CHANGELOG.md
+          packageFilters:
+            no-private: true
+    bootstrap:
+      environment:
+        sdk: ">=3.8.0 <4.0.0"
+      dependencies:
+        http: ^1.6.0
+        meta: ^1.16.0
+      dev_dependencies:
+        test: ^1.26.2
+
+  scripts:
+    test:
+      description: Run all Dart tests
+      run: dart test
+      exec:
+        concurrency: 1
+        failFast: true
+      packageFilters:
+        dirExists: test
+
+    test:diff:
+      description: Run tests for changed packages
+      run: dart test
+      exec:
+        concurrency: 1
+        failFast: true
+      packageFilters:
+        diff: origin/main
+        dirExists: test
