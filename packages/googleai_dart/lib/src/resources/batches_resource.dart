@@ -37,8 +37,8 @@ class BatchesResource extends ResourceBase {
   }) async {
     final queryParams = <String, String>{
       if (pageSize != null) 'pageSize': pageSize.toString(),
-      if (pageToken != null) 'pageToken': pageToken,
-      if (filter != null) 'filter': filter,
+      'pageToken': ?pageToken,
+      'filter': ?filter,
       if (returnPartialSuccess != null)
         'returnPartialSuccess': returnPartialSuccess.toString(),
     };
@@ -110,9 +110,7 @@ class BatchesResource extends ResourceBase {
     required GenerateContentBatch batch,
     String? updateMask,
   }) async {
-    final queryParams = <String, String>{
-      if (updateMask != null) 'updateMask': updateMask,
-    };
+    final queryParams = <String, String>{'updateMask': ?updateMask};
 
     final url = requestBuilder.buildUrl(
       '/{version}/$name:updateGenerateContentBatch',
@@ -145,9 +143,7 @@ class BatchesResource extends ResourceBase {
     required EmbedContentBatch batch,
     String? updateMask,
   }) async {
-    final queryParams = <String, String>{
-      if (updateMask != null) 'updateMask': updateMask,
-    };
+    final queryParams = <String, String>{'updateMask': ?updateMask};
 
     final url = requestBuilder.buildUrl(
       '/{version}/$name:updateEmbedContentBatch',

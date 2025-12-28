@@ -33,7 +33,7 @@ class GeneratedFilesResource extends ResourceBase {
   }) async {
     final queryParams = <String, String>{
       if (pageSize != null) 'pageSize': pageSize.toString(),
-      if (pageToken != null) 'pageToken': pageToken,
+      'pageToken': ?pageToken,
     };
 
     final url = requestBuilder.buildUrl(

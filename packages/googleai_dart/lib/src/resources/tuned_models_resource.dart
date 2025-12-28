@@ -321,9 +321,7 @@ class TunedModelsResource extends ResourceBase {
   }) async {
     _validateGoogleAIOnly();
 
-    final queryParams = <String, String>{
-      if (tunedModelId != null) 'tunedModelId': tunedModelId,
-    };
+    final queryParams = <String, String>{'tunedModelId': ?tunedModelId};
 
     final url = requestBuilder.buildUrl(
       '/{version}/tunedModels',
@@ -358,9 +356,7 @@ class TunedModelsResource extends ResourceBase {
   }) async {
     _validateGoogleAIOnly();
 
-    final queryParams = <String, String>{
-      if (updateMask != null) 'updateMask': updateMask,
-    };
+    final queryParams = <String, String>{'updateMask': ?updateMask};
 
     final url = requestBuilder.buildUrl(
       '/{version}/$name',
@@ -412,8 +408,8 @@ class TunedModelsResource extends ResourceBase {
 
     final queryParams = <String, String>{
       if (pageSize != null) 'pageSize': pageSize.toString(),
-      if (pageToken != null) 'pageToken': pageToken,
-      if (filter != null) 'filter': filter,
+      'pageToken': ?pageToken,
+      'filter': ?filter,
     };
 
     final url = requestBuilder.buildUrl(

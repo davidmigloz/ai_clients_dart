@@ -88,7 +88,7 @@ class FileSearchStoresResource extends ResourceBase {
 
     final queryParams = <String, String>{
       if (pageSize != null) 'pageSize': pageSize.toString(),
-      if (pageToken != null) 'pageToken': pageToken,
+      'pageToken': ?pageToken,
     };
 
     final url = requestBuilder.buildUrl(
@@ -400,7 +400,7 @@ class FileSearchStoresResource extends ResourceBase {
 
     final queryParams = <String, String>{
       if (pageSize != null) 'pageSize': pageSize.toString(),
-      if (pageToken != null) 'pageToken': pageToken,
+      'pageToken': ?pageToken,
     };
 
     final url = requestBuilder.buildUrl(

@@ -103,9 +103,7 @@ class CachedContentsResource extends ResourceBase {
     required CachedContent cachedContent,
     String? updateMask,
   }) async {
-    final queryParams = <String, String>{
-      if (updateMask != null) 'updateMask': updateMask,
-    };
+    final queryParams = <String, String>{'updateMask': ?updateMask};
 
     final url = requestBuilder.buildUrl(
       '/{version}/$name',
@@ -153,7 +151,7 @@ class CachedContentsResource extends ResourceBase {
   }) async {
     final queryParams = <String, String>{
       if (pageSize != null) 'pageSize': pageSize.toString(),
-      if (pageToken != null) 'pageToken': pageToken,
+      'pageToken': ?pageToken,
     };
 
     final url = requestBuilder.buildUrl(

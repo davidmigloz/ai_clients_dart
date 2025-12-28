@@ -46,8 +46,8 @@ class OpenAIClient extends g.OpenAIClient {
          bearerToken: apiKey ?? '',
          baseUrl: baseUrl,
          headers: {
-           if (organization != null) 'OpenAI-Organization': organization,
-           if (beta != null) 'OpenAI-Beta': beta,
+           'OpenAI-Organization': ?organization,
+           'OpenAI-Beta': ?beta,
            ...?headers,
          },
          queryParams: queryParams ?? const {},

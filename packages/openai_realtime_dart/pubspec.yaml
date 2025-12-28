@@ -20,7 +20,7 @@ resolution: workspace
 
 dependencies:
   freezed_annotation: ^3.1.0
-  http: ^1.5.0
+  http: ^1.6.0
   json_annotation: ^4.9.0
   logging: ^1.3.0
   web_socket_channel: ^3.0.2

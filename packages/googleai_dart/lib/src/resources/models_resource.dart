@@ -704,7 +704,7 @@ class ModelsResource extends ResourceBase {
   Future<ListModelsResponse> list({int? pageSize, String? pageToken}) async {
     final queryParams = <String, String>{
       if (pageSize != null) 'pageSize': pageSize.toString(),
-      if (pageToken != null) 'pageToken': pageToken,
+      'pageToken': ?pageToken,
     };
 
     final url = requestBuilder.buildUrl(

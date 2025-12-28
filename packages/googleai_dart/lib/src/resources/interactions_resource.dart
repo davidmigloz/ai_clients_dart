@@ -55,12 +55,11 @@ class InteractionsResource extends ResourceBase {
     final body = <String, dynamic>{
       'model': model,
       if (input != null) 'input': _serializeInput(input),
-      if (systemInstruction != null) 'system_instruction': systemInstruction,
+      'system_instruction': ?systemInstruction,
       if (tools != null) 'tools': tools.map((t) => t.toJson()).toList(),
-      if (generationConfig != null) 'generation_config': generationConfig,
-      if (previousInteractionId != null)
-        'previous_interaction_id': previousInteractionId,
-      if (background != null) 'background': background,
+      'generation_config': ?generationConfig,
+      'previous_interaction_id': ?previousInteractionId,
+      'background': ?background,
     };
 
     final httpRequest = http.Request('POST', url)
@@ -94,10 +93,9 @@ class InteractionsResource extends ResourceBase {
     final body = <String, dynamic>{
       'agent': agent,
       if (input != null) 'input': _serializeInput(input),
-      if (agentConfig != null) 'agent_config': agentConfig,
-      if (previousInteractionId != null)
-        'previous_interaction_id': previousInteractionId,
-      if (background != null) 'background': background,
+      'agent_config': ?agentConfig,
+      'previous_interaction_id': ?previousInteractionId,
+      'background': ?background,
     };
 
     final httpRequest = http.Request('POST', url)
@@ -180,11 +178,10 @@ class InteractionsResource extends ResourceBase {
     final body = <String, dynamic>{
       'model': model,
       if (input != null) 'input': _serializeInput(input),
-      if (systemInstruction != null) 'system_instruction': systemInstruction,
+      'system_instruction': ?systemInstruction,
       if (tools != null) 'tools': tools.map((t) => t.toJson()).toList(),
-      if (generationConfig != null) 'generation_config': generationConfig,
-      if (previousInteractionId != null)
-        'previous_interaction_id': previousInteractionId,
+      'generation_config': ?generationConfig,
+      'previous_interaction_id': ?previousInteractionId,
     };
 
     var httpRequest = http.Request('POST', url)
@@ -233,7 +230,7 @@ class InteractionsResource extends ResourceBase {
     final queryParams = <String, String>{
       'stream': 'true',
       'alt': 'sse',
-      if (lastEventId != null) 'last_event_id': lastEventId,
+      'last_event_id': ?lastEventId,
     };
 
     final url = requestBuilder.buildUrl(

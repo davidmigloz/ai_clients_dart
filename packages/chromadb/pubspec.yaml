@@ -20,7 +20,7 @@ resolution: workspace
 
 dependencies:
   freezed_annotation: ^3.1.0
-  http: ^1.5.0
+  http: ^1.6.0
   json_annotation: ^4.9.0
   meta: ^1.16.0
 

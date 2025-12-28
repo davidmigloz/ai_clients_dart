@@ -40,8 +40,8 @@ class OperationsResource extends ResourceBase {
   }) async {
     final queryParams = <String, String>{
       if (pageSize != null) 'pageSize': pageSize.toString(),
-      if (pageToken != null) 'pageToken': pageToken,
-      if (filter != null) 'filter': filter,
+      'pageToken': ?pageToken,
+      'filter': ?filter,
       if (returnPartialSuccess != null)
         'returnPartialSuccess': returnPartialSuccess.toString(),
     };
