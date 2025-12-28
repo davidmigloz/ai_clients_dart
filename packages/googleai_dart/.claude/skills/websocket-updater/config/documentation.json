@@ -1,0 +1,60 @@
+{
+  "live_features": {
+    "liveClient": {
+      "description": "LiveClient for WebSocket connections",
+      "search_terms": ["liveclient", "live client", "websocket"]
+    },
+    "audioInput": {
+      "description": "Audio input support",
+      "search_terms": ["audio input", "16khz", "pcm input"]
+    },
+    "audioOutput": {
+      "description": "Audio output support",
+      "search_terms": ["audio output", "24khz", "pcm output"]
+    },
+    "toolCalling": {
+      "description": "Tool/function calling in live sessions",
+      "search_terms": ["tool calling", "function calling", "functioncall"]
+    },
+    "sessionResumption": {
+      "description": "Session resumption",
+      "search_terms": ["session resumption", "resumption token"]
+    },
+    "vad": {
+      "description": "Voice activity detection",
+      "search_terms": ["vad", "voice activity", "activity detection"]
+    }
+  },
+  "removed_apis": [],
+  "tool_properties": {},
+  "excluded_resources": [
+    "base_resource",
+    "resource_base"
+  ],
+  "resource_to_example": {
+    "live": "live"
+  },
+  "excluded_from_examples": [],
+  "drift_patterns": [
+    {
+      "pattern": "session\\.text\\b",
+      "message": "Use session.sendText() instead",
+      "severity": "error"
+    },
+    {
+      "pattern": "session\\.audio\\b",
+      "message": "Use session.sendAudio() instead",
+      "severity": "error"
+    },
+    {
+      "pattern": "liveClient\\.send\\(",
+      "message": "Use session.sendXxx() methods instead",
+      "severity": "error"
+    },
+    {
+      "pattern": "session\\.response\\b",
+      "message": "Use session.messages stream instead",
+      "severity": "error"
+    }
+  ]
+}

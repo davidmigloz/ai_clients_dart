@@ -1,0 +1,72 @@
+{
+  "categories": {
+    "embeddings": {
+      "patterns": ["embed"],
+      "directory": "embeddings"
+    },
+    "corpus": {
+      "patterns": ["corpus", "document", "chunk"],
+      "directory": "corpus"
+    },
+    "caching": {
+      "patterns": ["cache"],
+      "directory": "caching"
+    },
+    "batch": {
+      "patterns": ["batch"],
+      "directory": "batch"
+    },
+    "files": {
+      "patterns": ["file"],
+      "directory": "files"
+    },
+    "models": {
+      "patterns": ["model", "tuned"],
+      "directory": "models"
+    },
+    "permissions": {
+      "patterns": ["permission"],
+      "directory": "permissions"
+    },
+    "safety": {
+      "patterns": ["harm", "safety"],
+      "directory": "safety"
+    },
+    "tools": {
+      "patterns": ["tool", "function"],
+      "directory": "tools"
+    },
+    "generation": {
+      "patterns": ["generate", "content"],
+      "directory": "generation"
+    }
+  },
+  "default_category": "common",
+  "parent_model_patterns": {
+    "Tool": [
+      ".*Search$",
+      ".*Execution$",
+      ".*Context$",
+      ".*Maps$",
+      "Mcp.*",
+      ".*Grounding$",
+      ".*Retrieval$"
+    ],
+    "Candidate": [
+      ".*Metadata$",
+      ".*Feedback$",
+      ".*Attribution$"
+    ],
+    "Content": [
+      ".*Part$",
+      ".*Content$"
+    ],
+    "Part": [
+      ".*Part$"
+    ],
+    "GroundingChunk": [
+      ".*Chunk$",
+      "GroundingChunk.*"
+    ]
+  }
+}

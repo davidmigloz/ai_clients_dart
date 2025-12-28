@@ -1,20 +1,21 @@
 #!/usr/bin/env python3
 """
-Fetch the latest GoogleAI OpenAPI specifications.
+Fetch the latest OpenAPI specifications.
 
-Supports multiple specs via registry (specs.json) and auto-discovery of new specs.
+This is a config-driven script that loads spec URLs from config files.
 
 Usage:
-    python3 fetch_spec.py [--spec NAME] [--no-discover] [--output DIR]
+    python3 fetch_spec.py --config-dir CONFIG_DIR [--spec NAME] [--no-discover]
 
 Examples:
-    python3 fetch_spec.py                    # Fetch all specs + discover new
-    python3 fetch_spec.py --spec main        # Fetch only main spec
-    python3 fetch_spec.py --spec interactions # Fetch only interactions spec
-    python3 fetch_spec.py --no-discover      # Skip discovery probing
+    python3 fetch_spec.py --config-dir config/      # Fetch all specs + discover new
+    python3 fetch_spec.py --config-dir config/ --spec main   # Fetch only main spec
+    python3 fetch_spec.py --config-dir config/ --no-discover # Skip discovery probing
 
-Environment:
-    GEMINI_API_KEY or GOOGLE_AI_API_KEY: API key for authenticated specs
+Exit codes:
+    0 - Success
+    1 - Partial failure (some specs failed)
+    2 - Error (config not found, etc.)
 """
 
 import argparse
@@ -26,25 +27,46 @@ from pathlib import Path
 from urllib.request import urlopen, Request
 from urllib.error import URLError, HTTPError
 
-# Configuration
-SCRIPT_DIR = Path(__file__).parent
-REGISTRY_PATH = SCRIPT_DIR.parent / "specs.json"
-DEFAULT_OUTPUT_DIR = Path("/tmp/openapi-updater")
+
+def load_config(config_dir: Path) -> dict:
+    """Load configuration from config directory."""
+    config = {
+        'specs': {},
+        'output_dir': '/tmp/openapi-updater',
+        'discovery_patterns': [],
+        'discovery_names': [],
+        'auth_env_vars': ['GEMINI_API_KEY', 'GOOGLE_AI_API_KEY'],
+    }
+
+    # Load specs.json
+    specs_file = config_dir / 'specs.json'
+    if specs_file.exists():
+        with open(specs_file) as f:
+            specs = json.load(f)
+            config['specs'] = specs.get('specs', {})
+            config['output_dir'] = specs.get('output_dir', config['output_dir'])
+            config['discovery_patterns'] = specs.get('discovery_patterns', [])
+            config['discovery_names'] = specs.get('discovery_names', [])
+
+    return config
 
 
-def load_registry() -> dict:
-    """Load spec registry from specs.json."""
-    if not REGISTRY_PATH.exists():
-        print(f"ERROR: Registry not found: {REGISTRY_PATH}", file=sys.stderr)
-        sys.exit(1)
-
-    with open(REGISTRY_PATH) as f:
-        return json.load(f)
-
-
-def get_api_key() -> str | None:
+def get_api_key(config: dict) -> str | None:
     """Get API key from environment (optional for some specs)."""
-    return os.environ.get('GEMINI_API_KEY') or os.environ.get('GOOGLE_AI_API_KEY')
+    # Check all possible auth env vars
+    for env_var in config.get('auth_env_vars', []):
+        key = os.environ.get(env_var)
+        if key:
+            return key
+
+    # Also check spec-specific auth_env_vars
+    for spec_config in config.get('specs', {}).values():
+        for env_var in spec_config.get('auth_env_vars', []):
+            key = os.environ.get(env_var)
+            if key:
+                return key
+
+    return None
 
 
 def fetch_url(url: str, api_key: str | None = None, requires_auth: bool = False) -> dict | None:
@@ -62,7 +84,7 @@ def fetch_url(url: str, api_key: str | None = None, requires_auth: bool = False)
             return json.loads(data)
     except HTTPError as e:
         if e.code == 404:
-            return None  # Not found is expected for discovery
+            return None
         print(f"  ERROR: HTTP {e.code}: {e.reason}", file=sys.stderr)
         return None
     except URLError as e:
@@ -108,19 +130,19 @@ def print_spec_info(spec: dict, filepath: Path):
     print(f"  Schemas: {count_schemas(spec)}")
 
 
-def fetch_registered_specs(registry: dict, spec_filter: str | None, output_dir: Path, api_key: str | None) -> int:
+def fetch_registered_specs(config: dict, spec_filter: str | None, output_dir: Path, api_key: str | None) -> int:
     """Fetch all registered specs (or a specific one)."""
-    specs = registry.get('specs', {})
+    specs = config.get('specs', {})
     fetched = 0
 
-    for name, config in specs.items():
+    for name, spec_config in specs.items():
         if spec_filter and name != spec_filter:
             continue
 
-        print(f"\n[{name}] {config.get('name', 'Unknown')}")
-        url = config['url']
-        requires_auth = config.get('requires_auth', False)
-        experimental = config.get('experimental', False)
+        print(f"\n[{name}] {spec_config.get('name', 'Unknown')}")
+        url = spec_config['url']
+        requires_auth = spec_config.get('requires_auth', False)
+        experimental = spec_config.get('experimental', False)
 
         if experimental:
             print(f"  (experimental)")
@@ -143,86 +165,111 @@ def fetch_registered_specs(registry: dict, spec_filter: str | None, output_dir: 
     return fetched
 
 
-def discover_new_specs(registry: dict) -> list[str]:
+def discover_new_specs(config: dict) -> list[tuple[str, str]]:
     """Probe for new specs at discovery patterns."""
-    patterns = registry.get('discovery_patterns', [])
-    names = registry.get('discovery_names', [])
-    registered = set(registry.get('specs', {}).keys())
+    patterns = config.get('discovery_patterns', [])
+    names = config.get('discovery_names', [])
+    registered = set(config.get('specs', {}).keys())
 
     discovered = []
 
     for pattern in patterns:
         for name in names:
             if name in registered:
-                continue  # Already registered
+                continue
 
             url = pattern.replace('{name}', name)
-            # Quick HEAD-like check using a GET with timeout
             try:
                 req = Request(url, headers={'User-Agent': 'OpenAPI-Updater/1.0'})
                 with urlopen(req, timeout=5) as response:
                     if response.status == 200:
                         discovered.append((name, url))
             except:
-                pass  # Not found or error, skip
+                pass
 
     return discovered
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Fetch GoogleAI OpenAPI specs")
-    parser.add_argument('--spec', '-s', type=str, default=None,
-                        help="Fetch only this spec (default: all)")
-    parser.add_argument('--no-discover', action='store_true',
-                        help="Skip discovery probing for new specs")
-    parser.add_argument('--output', '-o', type=Path, default=DEFAULT_OUTPUT_DIR,
-                        help=f"Output directory (default: {DEFAULT_OUTPUT_DIR})")
+    parser = argparse.ArgumentParser(description="Fetch OpenAPI specs")
+    parser.add_argument(
+        '--config-dir', type=Path, required=True,
+        help='Directory containing config files'
+    )
+    parser.add_argument(
+        '--spec', '-s', type=str, default=None,
+        help="Fetch only this spec (default: all)"
+    )
+    parser.add_argument(
+        '--no-discover', action='store_true',
+        help="Skip discovery probing for new specs"
+    )
+    parser.add_argument(
+        '--output', '-o', type=Path, default=None,
+        help="Output directory (overrides config)"
+    )
     args = parser.parse_args()
 
-    registry = load_registry()
-    api_key = get_api_key()
+    # Validate config directory
+    if not args.config_dir.exists():
+        print(f"Error: Config directory not found: {args.config_dir}")
+        sys.exit(2)
+
+    # Load configuration
+    config = load_config(args.config_dir)
+
+    if not config['specs']:
+        print(f"Error: No specs defined in {args.config_dir / 'specs.json'}")
+        sys.exit(2)
+
+    # Determine output directory
+    output_dir = args.output or Path(config['output_dir'])
+
+    api_key = get_api_key(config)
 
     print(f"OpenAPI Spec Fetcher")
-    print(f"Registry: {REGISTRY_PATH}")
-    print(f"Output: {args.output}")
+    print(f"Config: {args.config_dir}")
+    print(f"Output: {output_dir}")
 
     # Check for API key if needed
     if args.spec:
-        spec_config = registry.get('specs', {}).get(args.spec)
+        spec_config = config.get('specs', {}).get(args.spec)
         if not spec_config:
             print(f"\nERROR: Unknown spec '{args.spec}'", file=sys.stderr)
-            print(f"Available specs: {', '.join(registry.get('specs', {}).keys())}")
-            sys.exit(1)
+            print(f"Available specs: {', '.join(config.get('specs', {}).keys())}")
+            sys.exit(2)
         if spec_config.get('requires_auth') and not api_key:
-            print(f"\nERROR: GEMINI_API_KEY or GOOGLE_AI_API_KEY required for '{args.spec}'",
+            auth_vars = spec_config.get('auth_env_vars', config.get('auth_env_vars', []))
+            print(f"\nERROR: {' or '.join(auth_vars)} required for '{args.spec}'",
                   file=sys.stderr)
-            sys.exit(1)
+            sys.exit(2)
     else:
-        # Check if any spec requires auth
-        for name, config in registry.get('specs', {}).items():
-            if config.get('requires_auth') and not api_key:
+        for name, spec_config in config.get('specs', {}).items():
+            if spec_config.get('requires_auth') and not api_key:
                 print(f"\nWARNING: API key not set - will skip '{name}' spec")
 
     # Fetch specs
-    fetched = fetch_registered_specs(registry, args.spec, args.output, api_key)
+    fetched = fetch_registered_specs(config, args.spec, output_dir, api_key)
 
     # Auto-discover new specs
     if not args.no_discover and not args.spec:
         print(f"\n--- Discovery ---")
         print(f"Probing for new specs...")
-        discovered = discover_new_specs(registry)
+        discovered = discover_new_specs(config)
 
         if discovered:
             print(f"\n⚠️  NEW SPECS DISCOVERED:")
             for name, url in discovered:
                 print(f"  - {name}: {url}")
-            print(f"\nTo add to registry, update: {REGISTRY_PATH}")
+            print(f"\nTo add to registry, update: {args.config_dir / 'specs.json'}")
         else:
             print(f"No new specs found.")
 
     print(f"\n--- Summary ---")
     print(f"Fetched: {fetched} spec(s)")
     print(f"Time: {datetime.now().isoformat()}")
+
+    sys.exit(0 if fetched > 0 else 1)
 
 
 if __name__ == '__main__':

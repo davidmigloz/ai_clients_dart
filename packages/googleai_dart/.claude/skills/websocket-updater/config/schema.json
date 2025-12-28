@@ -1,0 +1,194 @@
+{
+  "info": {
+    "title": "Gemini Live API",
+    "version": "v1beta",
+    "description": "Real-time bidirectional audio/video streaming via WebSocket"
+  },
+  "websocket_endpoints": {
+    "google_ai": "wss://generativelanguage.googleapis.com/{version}/models/{model}:BidiGenerateContent",
+    "vertex_ai": "wss://{location}-aiplatform.googleapis.com/ws/google.cloud.aiplatform.{version}.PredictionService.BidiGenerateContent"
+  },
+  "message_types": {
+    "client": {
+      "BidiGenerateContentSetup": {
+        "description": "Initial session configuration",
+        "fields": {
+          "model": {"type": "string", "required": true},
+          "generationConfig": {"type": "LiveGenerationConfig", "required": false},
+          "systemInstruction": {"type": "Content", "required": false},
+          "tools": {"type": "array", "items": "Tool", "required": false},
+          "realtimeInputConfig": {"type": "RealtimeInputConfig", "required": false},
+          "sessionResumption": {"type": "SessionResumptionConfig", "required": false},
+          "contextWindowCompression": {"type": "ContextWindowCompressionConfig", "required": false},
+          "inputAudioTranscription": {"type": "AudioTranscriptionConfig", "required": false},
+          "outputAudioTranscription": {"type": "AudioTranscriptionConfig", "required": false},
+          "proactivity": {"type": "ProactivityConfig", "required": false}
+        }
+      },
+      "BidiGenerateContentClientContent": {
+        "description": "User content/context",
+        "fields": {
+          "turns": {"type": "array", "items": "Content", "required": true},
+          "turnComplete": {"type": "boolean", "required": false}
+        }
+      },
+      "BidiGenerateContentRealtimeInput": {
+        "description": "Real-time streaming input",
+        "fields": {
+          "audio": {"type": "Blob", "required": false},
+          "video": {"type": "Blob", "required": false},
+          "text": {"type": "string", "required": false},
+          "activityStart": {"type": "boolean", "required": false},
+          "activityEnd": {"type": "boolean", "required": false},
+          "audioStreamEnd": {"type": "boolean", "required": false}
+        }
+      },
+      "BidiGenerateContentToolResponse": {
+        "description": "Tool execution response",
+        "fields": {
+          "functionResponses": {"type": "array", "items": "FunctionResponse", "required": true}
+        }
+      }
+    },
+    "server": {
+      "BidiGenerateContentSetupComplete": {
+        "description": "Session setup confirmation",
+        "fields": {
+          "sessionId": {"type": "string", "required": false}
+        }
+      },
+      "BidiGenerateContentServerContent": {
+        "description": "Model-generated content",
+        "fields": {
+          "modelTurn": {"type": "Content", "required": false},
+          "turnComplete": {"type": "boolean", "required": false},
+          "generationComplete": {"type": "boolean", "required": false},
+          "interrupted": {"type": "boolean", "required": false},
+          "inputTranscription": {"type": "Transcription", "required": false},
+          "outputTranscription": {"type": "Transcription", "required": false},
+          "groundingMetadata": {"type": "GroundingMetadata", "required": false},
+          "usageMetadata": {"type": "UsageMetadata", "required": false}
+        }
+      },
+      "BidiGenerateContentToolCall": {
+        "description": "Tool execution request",
+        "fields": {
+          "functionCalls": {"type": "array", "items": "FunctionCall", "required": true}
+        }
+      },
+      "BidiGenerateContentToolCallCancellation": {
+        "description": "Cancel pending tool calls",
+        "fields": {
+          "ids": {"type": "array", "items": "string", "required": true}
+        }
+      },
+      "GoAway": {
+        "description": "Session ending notification",
+        "fields": {
+          "timeLeft": {"type": "string", "required": false}
+        }
+      },
+      "SessionResumptionUpdate": {
+        "description": "Resumption token update",
+        "fields": {
+          "newHandle": {"type": "string", "required": false},
+          "resumable": {"type": "boolean", "required": false}
+        }
+      }
+    }
+  },
+  "config_types": {
+    "LiveGenerationConfig": {
+      "fields": {
+        "responseModalities": {"type": "array", "items": "string"},
+        "speechConfig": {"type": "SpeechConfig"},
+        "temperature": {"type": "number"},
+        "maxOutputTokens": {"type": "integer"},
+        "topP": {"type": "number"},
+        "topK": {"type": "integer"}
+      }
+    },
+    "SpeechConfig": {
+      "fields": {
+        "voiceConfig": {"type": "VoiceConfig"},
+        "languageCode": {"type": "string"}
+      }
+    },
+    "VoiceConfig": {
+      "fields": {
+        "prebuiltVoiceConfig": {"type": "PrebuiltVoiceConfig"}
+      }
+    },
+    "PrebuiltVoiceConfig": {
+      "fields": {
+        "voiceName": {"type": "string"}
+      }
+    },
+    "RealtimeInputConfig": {
+      "fields": {
+        "automaticActivityDetection": {"type": "AutomaticActivityDetection"},
+        "activityHandling": {"type": "ActivityHandling"},
+        "turnCoverage": {"type": "TurnCoverage"}
+      }
+    },
+    "AutomaticActivityDetection": {
+      "fields": {
+        "disabled": {"type": "boolean"},
+        "startOfSpeechSensitivity": {"type": "StartSensitivity"},
+        "endOfSpeechSensitivity": {"type": "EndSensitivity"},
+        "prefixPaddingMs": {"type": "integer"},
+        "silenceDurationMs": {"type": "integer"}
+      }
+    },
+    "SessionResumptionConfig": {
+      "fields": {
+        "handle": {"type": "string"},
+        "transparent": {"type": "boolean"}
+      }
+    },
+    "ContextWindowCompressionConfig": {
+      "fields": {
+        "triggerTokens": {"type": "integer"},
+        "slidingWindow": {"type": "SlidingWindow"}
+      }
+    },
+    "SlidingWindow": {
+      "fields": {
+        "targetTokens": {"type": "integer"}
+      }
+    },
+    "AudioTranscriptionConfig": {
+      "fields": {
+        "enabled": {"type": "boolean"}
+      }
+    },
+    "ProactivityConfig": {
+      "fields": {
+        "proactiveAudio": {"type": "boolean"}
+      }
+    },
+    "Transcription": {
+      "fields": {
+        "text": {"type": "string"}
+      }
+    }
+  },
+  "enums": {
+    "ActivityHandling": {
+      "values": ["START_OF_ACTIVITY_INTERRUPTS", "NO_INTERRUPTION"]
+    },
+    "StartSensitivity": {
+      "values": ["HIGH", "LOW"]
+    },
+    "EndSensitivity": {
+      "values": ["HIGH", "LOW"]
+    },
+    "TurnCoverage": {
+      "values": ["TURN_INCLUDES_ONLY_ACTIVITY", "TURN_INCLUDES_ALL_INPUT"]
+    }
+  },
+  "voices": [
+    "Puck", "Charon", "Kore", "Fenrir", "Aoede",
+    "Leda", "Orus", "Zephyr"
+  ]
+}

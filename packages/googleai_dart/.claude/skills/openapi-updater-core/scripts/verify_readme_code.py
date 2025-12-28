@@ -2,12 +2,10 @@
 """
 Verify README code examples match actual Dart API.
 
-Extracts dart code blocks from README.md and checks for common
-documentation drift patterns where the documentation uses APIs
-that don't actually exist or have different signatures.
+This is a config-driven script that loads drift patterns from config files.
 
 Usage:
-    python3 .claude/skills/openapi-updater/scripts/verify_readme_code.py
+    python3 verify_readme_code.py --config-dir CONFIG_DIR
 
 Exit codes:
     0 - No issues found
@@ -15,58 +13,31 @@ Exit codes:
     2 - Error (wrong directory, missing files, etc.)
 """
 
+import argparse
+import json
 import re
 import sys
 from pathlib import Path
 
-# Patterns that indicate documentation drift
-# Each pattern is checked against code blocks extracted from README
-DRIFT_PATTERNS = [
-    {
-        'pattern': r'response\.text\b',
-        'message': 'response.text does not exist on GenerateContentResponse - '
-                   'use response.candidates?.first.content?.parts',
-        'severity': 'error',
-    },
-    {
-        'pattern': r'delta\.query\b(?!ies)',  # 'query' not followed by 'ies'
-        'message': 'GoogleSearchCallDelta uses .queries (plural List<String>?), not .query',
-        'severity': 'error',
-    },
-    {
-        'pattern': r'delta\.url\b(?!s)',  # 'url' not followed by 's'
-        'message': 'UrlContextCallDelta uses .urls (plural List<String>?), not .url',
-        'severity': 'error',
-    },
-    {
-        'pattern': r'delta\.result\b(?!s)',  # 'result' not followed by 's'
-        'message': 'Delta classes use .results (plural), not .result',
-        'severity': 'warning',
-    },
-    {
-        'pattern': r'\bToolConfig\s*\(',
-        'message': 'ToolConfig is Map<String, dynamic>?, not a typed class with constructor',
-        'severity': 'warning',
-    },
-    {
-        'pattern': r'\bRetrievalConfig\s*\(',
-        'message': 'RetrievalConfig should be a Map in toolConfig, not a typed class',
-        'severity': 'warning',
-    },
-    {
-        'pattern': r'\bLatLng\s*\(',
-        'message': 'LatLng should be a Map in toolConfig.retrievalConfig, not a typed class',
-        'severity': 'warning',
-    },
-]
+
+def load_config(config_dir: Path) -> dict:
+    """Load configuration from config directory."""
+    config = {
+        'drift_patterns': [],
+    }
+
+    # Load documentation.json
+    doc_file = config_dir / 'documentation.json'
+    if doc_file.exists():
+        with open(doc_file) as f:
+            doc = json.load(f)
+            config['drift_patterns'] = doc.get('drift_patterns', [])
+
+    return config
 
 
 def extract_dart_blocks(readme_path: Path) -> list[tuple[int, str]]:
-    """
-    Extract dart code blocks with their starting line numbers.
-
-    Returns list of (line_number, code_content) tuples.
-    """
+    """Extract dart code blocks with their starting line numbers."""
     content = readme_path.read_text()
     blocks = []
     in_dart = False
@@ -87,32 +58,53 @@ def extract_dart_blocks(readme_path: Path) -> list[tuple[int, str]]:
     return blocks
 
 
-def check_block(line_num: int, code: str) -> list[dict]:
-    """
-    Check a code block for drift patterns.
-
-    Returns list of issue dictionaries with line, match, message, severity.
-    """
+def check_block(line_num: int, code: str, config: dict) -> list[dict]:
+    """Check a code block for drift patterns."""
     issues = []
-    for pattern_info in DRIFT_PATTERNS:
-        for match in re.finditer(pattern_info['pattern'], code):
-            # Calculate line number within the code block
+    for pattern_info in config['drift_patterns']:
+        pattern = pattern_info.get('pattern', '')
+        message = pattern_info.get('message', 'Documentation drift detected')
+        severity = pattern_info.get('severity', 'warning')
+
+        for match in re.finditer(pattern, code):
             block_line = code[:match.start()].count('\n') + 1
             issues.append({
                 'line': line_num + block_line,
                 'match': match.group(),
-                'message': pattern_info['message'],
-                'severity': pattern_info['severity'],
+                'message': message,
+                'severity': severity,
             })
     return issues
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description='Verify README code examples for API drift'
+    )
+    parser.add_argument(
+        '--config-dir', type=Path, required=True,
+        help='Directory containing config files'
+    )
+    args = parser.parse_args()
+
+    # Validate config directory
+    if not args.config_dir.exists():
+        print(f"Error: Config directory not found: {args.config_dir}")
+        sys.exit(2)
+
+    # Load configuration
+    config = load_config(args.config_dir)
+
     # Verify we're in the right directory
     readme = Path('README.md')
     if not readme.exists():
         print("Error: README.md not found. Run from package root directory.")
         sys.exit(2)
+
+    if not config['drift_patterns']:
+        print("Warning: No drift patterns defined in config/documentation.json")
+        print("✓ No README code drift detected (no patterns to check)")
+        sys.exit(0)
 
     print("Checking README code examples for API drift...\n")
 
@@ -120,7 +112,7 @@ def main():
     all_issues = []
 
     for line_num, code in blocks:
-        all_issues.extend(check_block(line_num, code))
+        all_issues.extend(check_block(line_num, code, config))
 
     if all_issues:
         errors = [i for i in all_issues if i['severity'] == 'error']

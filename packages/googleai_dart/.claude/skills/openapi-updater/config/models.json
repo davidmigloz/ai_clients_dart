@@ -1,0 +1,55 @@
+{
+  "critical_models": [
+    {
+      "name": "Tool",
+      "file": "lib/src/models/tools/tool.dart",
+      "spec_schema": "Tool"
+    },
+    {
+      "name": "Candidate",
+      "file": "lib/src/models/content/candidate.dart",
+      "spec_schema": "Candidate"
+    },
+    {
+      "name": "Content",
+      "file": "lib/src/models/content/content.dart",
+      "spec_schema": "Content"
+    },
+    {
+      "name": "Part",
+      "file": "lib/src/models/content/part.dart",
+      "spec_schema": "Part"
+    },
+    {
+      "name": "GenerationConfig",
+      "file": "lib/src/models/generation/generation_config.dart",
+      "spec_schema": "GenerationConfig"
+    },
+    {
+      "name": "ToolConfig",
+      "file": "lib/src/models/tools/tool_config.dart",
+      "spec_schema": "ToolConfig"
+    },
+    {
+      "name": "GroundingMetadata",
+      "file": "lib/src/models/metadata/grounding_metadata.dart",
+      "spec_schema": "GroundingMetadata"
+    },
+    {
+      "name": "GroundingChunk",
+      "file": "lib/src/models/metadata/grounding_chunk.dart",
+      "spec_schema": "GroundingChunk"
+    },
+    {
+      "name": "FunctionCall",
+      "file": "lib/src/models/tools/function_call.dart",
+      "spec_schema": "FunctionCall"
+    },
+    {
+      "name": "FunctionResponse",
+      "file": "lib/src/models/tools/function_response.dart",
+      "spec_schema": "FunctionResponse"
+    }
+  ],
+  "expected_properties": {}
+}

@@ -1,0 +1,91 @@
+{
+  "removed_apis": [
+    {"api": "ragStores", "reason": "RAG Stores API removed - use fileSearchStores instead"},
+    {"api": "chunks.batchCreate", "reason": "Chunk batch operations removed from API"},
+    {"api": "chunks.batchUpdate", "reason": "Chunk batch operations removed from API"},
+    {"api": "chunks.batchDelete", "reason": "Chunk batch operations removed from API"},
+    {"api": "chunks(document).create", "reason": "Chunk management removed from API"},
+    {"api": "chunks(document).list", "reason": "Chunk management removed from API"},
+    {"api": "chunks(document).get", "reason": "Chunk management removed from API"},
+    {"api": "chunks(document).update", "reason": "Chunk management removed from API"},
+    {"api": "chunks(document).delete", "reason": "Chunk management removed from API"}
+  ],
+  "tool_properties": {
+    "functionDeclarations": {
+      "description": "Function calling with custom functions",
+      "search_terms": ["functiondeclarations", "function calling", "function declarations"]
+    },
+    "codeExecution": {
+      "description": "Code execution capability",
+      "search_terms": ["codeexecution", "code execution"]
+    },
+    "googleSearch": {
+      "description": "Google Search grounding",
+      "search_terms": ["googlesearch", "google search"]
+    },
+    "fileSearch": {
+      "description": "File search using Semantic Retrieval (FileSearchStores)",
+      "search_terms": ["filesearch", "file search"]
+    },
+    "mcpServers": {
+      "description": "MCP (Model Context Protocol) server integration",
+      "search_terms": ["mcpservers", "mcp server", "model context protocol"]
+    },
+    "googleMaps": {
+      "description": "Google Maps geospatial context",
+      "search_terms": ["googlemaps", "google maps"]
+    },
+    "urlContext": {
+      "description": "URL Context for fetching and analyzing web content",
+      "search_terms": ["urlcontext", "url context"]
+    }
+  },
+  "excluded_resources": [
+    "documents_resource",
+    "permissions_resource",
+    "operations_resource",
+    "generated_files_resource",
+    "base_resource",
+    "resource_base"
+  ],
+  "resource_to_example": {
+    "batches": "batch",
+    "cachedContents": "caching",
+    "tunedModels": "tunedModelGeneration",
+    "fileSearchStores": "completeApi",
+    "corpora": "completeApi"
+  },
+  "excluded_from_examples": ["documents", "permissions", "operations", "generatedFiles"],
+  "drift_patterns": [
+    {
+      "pattern": "response\\.text\\b",
+      "message": "response.text does not exist - use response.candidates?.first.content?.parts",
+      "severity": "error"
+    },
+    {
+      "pattern": "delta\\.query\\b(?!ies)",
+      "message": "GoogleSearchCallDelta uses .queries (plural), not .query",
+      "severity": "error"
+    },
+    {
+      "pattern": "delta\\.url\\b(?!s)",
+      "message": "Uses .urls (plural), not .url",
+      "severity": "error"
+    },
+    {
+      "pattern": "\\bToolConfig\\s*\\(",
+      "message": "ToolConfig is Map<String, dynamic>, not a typed class",
+      "severity": "warning"
+    },
+    {
+      "pattern": "\\bRetrievalConfig\\s*\\(",
+      "message": "RetrievalConfig should be Map, not typed class",
+      "severity": "warning"
+    },
+    {
+      "pattern": "\\bLatLng\\s*\\(",
+      "message": "LatLng should be Map, not typed class",
+      "severity": "warning"
+    }
+  ]
+}

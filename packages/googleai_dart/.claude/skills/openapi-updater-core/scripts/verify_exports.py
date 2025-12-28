@@ -2,12 +2,10 @@
 """
 Verify all model files are exported in the barrel file.
 
-This script scans all .dart files in lib/src/models/ subdirectories and checks
-that each is exported in lib/googleai_dart.dart. It also checks for transitive
-dependencies (types used by exported classes that should also be exported).
+This is a config-driven script that loads package structure from config files.
 
 Usage:
-    python3 .claude/skills/openapi-updater/scripts/verify_exports.py
+    python3 verify_exports.py --config-dir CONFIG_DIR
 
 Exit codes:
     0 - All files are exported
@@ -16,25 +14,44 @@ Exit codes:
 """
 
 import argparse
+import json
 import re
 import sys
 from pathlib import Path
+
+
+def load_config(config_dir: Path) -> dict:
+    """Load configuration from config directory."""
+    config = {
+        'barrel_file': 'lib/googleai_dart.dart',
+        'models_dir': 'lib/src/models',
+        'skip_files': ['copy_with_sentinel.dart'],
+        'internal_barrel_files': [],
+    }
+
+    # Load package.json
+    pkg_file = config_dir / 'package.json'
+    if pkg_file.exists():
+        with open(pkg_file) as f:
+            pkg = json.load(f)
+            config['barrel_file'] = pkg.get('barrel_file', config['barrel_file'])
+            config['models_dir'] = pkg.get('models_dir', config['models_dir'])
+            config['skip_files'] = pkg.get('skip_files', config['skip_files'])
+            config['internal_barrel_files'] = pkg.get('internal_barrel_files', config['internal_barrel_files'])
+
+    return config
 
 
 def is_part_file(file: Path) -> bool:
     """Check if a file uses 'part of' directive (included in another file)."""
     try:
         content = file.read_text()
-        # Check for 'part of' at the start of a line (ignoring comments)
         for line in content.split('\n'):
             line = line.strip()
-            # Skip empty lines and comments
             if not line or line.startswith('//'):
                 continue
-            # If we hit 'part of', it's a part file
             if line.startswith('part of'):
                 return True
-            # If we hit import/export/library, it's not a part file
             if line.startswith(('import ', 'export ', 'library ')):
                 return False
         return False
@@ -42,33 +59,20 @@ def is_part_file(file: Path) -> bool:
         return False
 
 
-def find_model_files(models_dir: Path) -> list[Path]:
+def find_model_files(models_dir: Path, config: dict) -> list[Path]:
     """Find all .dart files in models subdirectories (recursive)."""
     files = []
 
-    # Internal files that should be skipped (utility files, internal barrel files)
-    skip_files = {
-        'copy_with_sentinel.dart',  # Internal utility
-    }
-
-    # Internal barrel files that re-export other files (not meant for direct export)
-    # These are used to organize exports within a module
-    internal_barrel_files = {
-        'interactions.dart',  # Re-exports all interactions models
-    }
+    skip_files = set(config['skip_files'])
+    internal_barrel_files = set(config['internal_barrel_files'])
 
     for dart_file in models_dir.glob('**/*.dart'):
-        # Skip hidden directories
         if any(part.startswith('.') for part in dart_file.parts):
             continue
-        # Skip internal utility files
         if dart_file.name in skip_files:
             continue
-        # Skip internal barrel files in subdirectories
-        # (these re-export files that are already exported via their own barrel)
         if dart_file.name in internal_barrel_files:
             continue
-        # Skip 'part of' files (they are included in their parent file)
         if is_part_file(dart_file):
             continue
         files.append(dart_file)
@@ -80,7 +84,6 @@ def get_barrel_exports(barrel_file: Path) -> set[str]:
     """Extract exported filenames from barrel file."""
     exports = set()
     content = barrel_file.read_text()
-    # Match: export 'src/models/xxx/filename.dart';
     pattern = r"export\s+'[^']*?([^/]+\.dart)'"
     for match in re.finditer(pattern, content):
         exports.add(match.group(1))
@@ -99,8 +102,6 @@ def find_type_usages(file: Path, type_names: set[str]) -> set[str]:
     content = file.read_text()
     used = set()
     for type_name in type_names:
-        # Look for type usage: as type annotation, in generics, etc.
-        # Pattern matches: TypeName, List<TypeName>, TypeName?, etc.
         if re.search(rf'\b{type_name}\b', content):
             used.add(type_name)
     return used
@@ -111,18 +112,12 @@ def check_transitive_dependencies(
     exported_files: list[Path],
     models_dir: Path,
 ) -> dict[str, list[str]]:
-    """
-    Check if unexported types are used by exported types.
-
-    Returns a dict mapping unexported file names to list of exported files using them.
-    """
-    # Build map of type -> file for unexported files
+    """Check if unexported types are used by exported types."""
     unexported_types: dict[str, Path] = {}
     for f in unexported_files:
         for type_name in extract_types_from_file(f):
             unexported_types[type_name] = f
 
-    # Check each exported file for usage of unexported types
     dependencies: dict[str, list[str]] = {}
 
     for exported_file in exported_files:
@@ -132,7 +127,6 @@ def check_transitive_dependencies(
             file_key = unexported_file.name
             if file_key not in dependencies:
                 dependencies[file_key] = []
-            # Record which exported file uses this unexported type
             dependencies[file_key].append(f"{type_name} (used by {exported_file.name})")
 
     return dependencies
@@ -141,6 +135,10 @@ def check_transitive_dependencies(
 def main():
     parser = argparse.ArgumentParser(
         description='Verify all model files are exported in barrel file.'
+    )
+    parser.add_argument(
+        '--config-dir', type=Path, required=True,
+        help='Directory containing config files'
     )
     parser.add_argument(
         '--verbose', '-v',
@@ -155,23 +153,31 @@ def main():
     )
     args = parser.parse_args()
 
-    models_dir = Path('lib/src/models')
-    barrel_file = Path('lib/googleai_dart.dart')
+    # Validate config directory
+    if not args.config_dir.exists():
+        print(f"Error: Config directory not found: {args.config_dir}")
+        sys.exit(2)
+
+    # Load configuration
+    config = load_config(args.config_dir)
+
+    models_dir = Path(config['models_dir'])
+    barrel_file = Path(config['barrel_file'])
 
     # Verify we're in the right directory
     if not models_dir.exists():
-        print("Error: lib/src/models/ not found. Run from package root directory.")
+        print(f"Error: {config['models_dir']}/ not found. Run from package root directory.")
         sys.exit(2)
 
     if not barrel_file.exists():
-        print("Error: lib/googleai_dart.dart not found. Run from package root directory.")
+        print(f"Error: {config['barrel_file']} not found. Run from package root directory.")
         sys.exit(2)
 
     print("Checking barrel file completeness...")
     print()
 
     # Find all model files and check exports
-    model_files = find_model_files(models_dir)
+    model_files = find_model_files(models_dir, config)
     exports = get_barrel_exports(barrel_file)
 
     unexported = []
@@ -195,7 +201,6 @@ def main():
     # Report unexported files
     print("UNEXPORTED FILES:")
     for f in unexported:
-        # Path is already relative from glob
         print(f"  - {f}")
     print()
 
@@ -216,7 +221,7 @@ def main():
     # Summary
     print(f"Found {len(unexported)} unexported file(s).")
     print()
-    print("To fix, add exports to lib/googleai_dart.dart:")
+    print(f"To fix, add exports to {config['barrel_file']}:")
     print()
     for f in unexported:
         relative_import = str(f.relative_to(Path('lib')))

@@ -1,0 +1,13 @@
+{
+  "name": "googleai_dart",
+  "display_name": "Google AI",
+  "barrel_file": "lib/googleai_dart.dart",
+  "models_dir": "lib/src/models",
+  "resources_dir": "lib/src/resources",
+  "tests_dir": "test/unit/models",
+  "examples_dir": "example",
+  "skip_files": ["copy_with_sentinel.dart"],
+  "internal_barrel_files": ["interactions.dart"],
+  "pr_title_prefix": "feat(googleai_dart)",
+  "changelog_title": "GoogleAI API Changelog"
+}

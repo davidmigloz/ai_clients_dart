@@ -2,8 +2,11 @@
 """
 Compare two OpenAPI specifications and generate changelog/implementation plan.
 
+This is a config-driven script that loads categorization rules and patterns
+from JSON config files.
+
 Usage:
-    python3 analyze_changes.py OLD_SPEC NEW_SPEC [--format FORMAT] [--output FILE]
+    python3 analyze_changes.py --config-dir CONFIG_DIR OLD_SPEC NEW_SPEC [--format FORMAT]
 
 Formats:
     json      - Structured diff data
@@ -43,6 +46,46 @@ class SchemaInfo:
     properties: dict = field(default_factory=dict)
     required: list = field(default_factory=list)
     enum_values: list = field(default_factory=list)
+
+
+@dataclass
+class Config:
+    """Configuration loaded from config files."""
+    package_name: str = "dart_api_client"
+    display_name: str = "API"
+    models_dir: str = "lib/src/models"
+    pr_title_prefix: str = "feat(dart_api_client)"
+    changelog_title: str = "API Changelog"
+    categories: dict = field(default_factory=dict)
+    default_category: str = "common"
+    parent_model_patterns: dict = field(default_factory=dict)
+
+
+def load_config(config_dir: Path) -> Config:
+    """Load configuration from config directory."""
+    config = Config()
+
+    # Load package.json
+    package_file = config_dir / 'package.json'
+    if package_file.exists():
+        with open(package_file) as f:
+            pkg = json.load(f)
+            config.package_name = pkg.get('name', config.package_name)
+            config.display_name = pkg.get('display_name', config.display_name)
+            config.models_dir = pkg.get('models_dir', config.models_dir)
+            config.pr_title_prefix = pkg.get('pr_title_prefix', config.pr_title_prefix)
+            config.changelog_title = pkg.get('changelog_title', config.changelog_title)
+
+    # Load schemas.json
+    schemas_file = config_dir / 'schemas.json'
+    if schemas_file.exists():
+        with open(schemas_file) as f:
+            schemas = json.load(f)
+            config.categories = schemas.get('categories', {})
+            config.default_category = schemas.get('default_category', 'common')
+            config.parent_model_patterns = schemas.get('parent_model_patterns', {})
+
+    return config
 
 
 def load_spec(path: Path) -> dict:
@@ -260,63 +303,20 @@ def to_snake_case(name: str) -> str:
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
 
-def categorize_schema(name: str) -> str:
-    """Determine category for schema based on name."""
+def categorize_schema(name: str, config: Config) -> str:
+    """Determine category for schema based on name using config."""
     name_lower = name.lower()
-    if 'embed' in name_lower:
-        return 'embeddings'
-    if 'corpus' in name_lower or 'document' in name_lower or 'chunk' in name_lower:
-        return 'corpus'
-    if 'cache' in name_lower:
-        return 'caching'
-    if 'batch' in name_lower:
-        return 'batch'
-    if 'file' in name_lower:
-        return 'files'
-    if 'model' in name_lower or 'tuned' in name_lower:
-        return 'models'
-    if 'permission' in name_lower:
-        return 'permissions'
-    if 'harm' in name_lower or 'safety' in name_lower:
-        return 'safety'
-    if 'tool' in name_lower or 'function' in name_lower:
-        return 'tools'
-    if 'generate' in name_lower or 'content' in name_lower:
-        return 'generation'
-    return 'common'
+
+    for category, cat_config in config.categories.items():
+        patterns = cat_config.get('patterns', [])
+        for pattern in patterns:
+            if pattern.lower() in name_lower:
+                return cat_config.get('directory', category)
+
+    return config.default_category
 
 
-# Patterns for detecting schemas that may need parent model updates
-PARENT_MODEL_PATTERNS = {
-    'Tool': [
-        r'.*Search$',           # GoogleSearch, FileSearch, UrlSearch
-        r'.*Execution$',        # CodeExecution
-        r'.*Context$',          # UrlContext
-        r'.*Maps$',             # GoogleMaps
-        r'Mcp.*',               # McpServers, McpTool
-        r'.*Grounding$',        # Any grounding type
-        r'.*Retrieval$',        # Any retrieval type
-    ],
-    'Candidate': [
-        r'.*Metadata$',         # GroundingMetadata, UrlContextMetadata
-        r'.*Feedback$',         # ContentFeedback
-        r'.*Attribution$',      # Any attribution
-    ],
-    'Content': [
-        r'.*Part$',             # TextPart, InlineDataPart, etc.
-        r'.*Content$',          # Any content type
-    ],
-    'Part': [
-        r'.*Part$',             # New part types
-    ],
-    'GroundingChunk': [
-        r'.*Chunk$',            # New chunk types
-        r'GroundingChunk.*',    # Grounding chunk variants
-    ],
-}
-
-
-def detect_parent_model_updates(new_schemas: list) -> dict[str, list[str]]:
+def detect_parent_model_updates(new_schemas: list, config: Config) -> dict[str, list[str]]:
     """
     Detect schemas that may require parent model updates.
 
@@ -327,7 +327,7 @@ def detect_parent_model_updates(new_schemas: list) -> dict[str, list[str]]:
     for schema in new_schemas:
         schema_name = schema.get('name', '') if isinstance(schema, dict) else schema.name
 
-        for parent, patterns in PARENT_MODEL_PATTERNS.items():
+        for parent, patterns in config.parent_model_patterns.items():
             for pattern in patterns:
                 if re.match(pattern, schema_name, re.IGNORECASE):
                     if parent not in parent_updates:
@@ -338,20 +338,20 @@ def detect_parent_model_updates(new_schemas: list) -> dict[str, list[str]]:
     return parent_updates
 
 
-def schema_to_file_path(name: str) -> str:
+def schema_to_file_path(name: str, config: Config) -> str:
     """Map schema name to Dart file path."""
-    category = categorize_schema(name)
+    category = categorize_schema(name, config)
     snake_name = to_snake_case(name)
-    return f"lib/src/models/{category}/{snake_name}.dart"
+    return f"{config.models_dir}/{category}/{snake_name}.dart"
 
 
-def generate_changelog(analysis: dict) -> str:
+def generate_changelog(analysis: dict, config: Config) -> str:
     """Generate human-readable changelog."""
     meta = analysis['metadata']
     summary = analysis['summary']
 
     lines = [
-        "# GoogleAI API Changelog",
+        f"# {config.changelog_title}",
         "",
         f"**From**: {meta['old_version']} ({meta['old_endpoints']} endpoints, {meta['old_schemas']} schemas)",
         f"**To**: {meta['new_version']} ({meta['new_endpoints']} endpoints, {meta['new_schemas']} schemas)",
@@ -440,7 +440,7 @@ def generate_changelog(analysis: dict) -> str:
     return "\n".join(lines)
 
 
-def generate_plan(analysis: dict) -> str:
+def generate_plan(analysis: dict, config: Config) -> str:
     """Generate implementation plan."""
     summary = analysis['summary']
     total = (summary['new_endpoints'] + summary['new_schemas'] +
@@ -499,12 +499,12 @@ def generate_plan(analysis: dict) -> str:
                 "",
             ])
             if ep['request_schema']:
-                lines.append(f"- `{schema_to_file_path(ep['request_schema'])}`")
+                lines.append(f"- `{schema_to_file_path(ep['request_schema'], config)}`")
             if ep['response_schema']:
-                lines.append(f"- `{schema_to_file_path(ep['response_schema'])}`")
+                lines.append(f"- `{schema_to_file_path(ep['response_schema'], config)}`")
             lines.extend([
                 "",
-                f"**PR Title**: `feat(googleai_dart): Add {to_snake_case(ep['operation_id'])} endpoint`",
+                f"**PR Title**: `{config.pr_title_prefix}: Add {to_snake_case(ep['operation_id'])} endpoint`",
                 "",
             ])
 
@@ -513,7 +513,7 @@ def generate_plan(analysis: dict) -> str:
         lines.extend(["---", "", "## P2: New Schemas", ""])
         for sc in analysis['schemas']['added']:
             change_id += 1
-            file_path = schema_to_file_path(sc['name'])
+            file_path = schema_to_file_path(sc['name'], config)
             test_path = file_path.replace('lib/src/', 'test/unit/').replace('.dart', '_test.dart')
             lines.extend([
                 f"### CHANGE-{change_id:03d}: Add {sc['name']} schema",
@@ -526,7 +526,7 @@ def generate_plan(analysis: dict) -> str:
                 f"- `{file_path}`",
                 f"- `{test_path}`",
                 "",
-                f"**PR Title**: `feat(googleai_dart): Add {sc['name']} model`",
+                f"**PR Title**: `{config.pr_title_prefix}: Add {sc['name']} model`",
                 "",
             ])
 
@@ -608,7 +608,7 @@ def generate_plan(analysis: dict) -> str:
     if analysis['schemas']['added']:
         lines.append("### New Schemas")
         for sc in analysis['schemas']['added']:
-            file_path = schema_to_file_path(sc['name'])
+            file_path = schema_to_file_path(sc['name'], config)
             props = ', '.join(list(sc['properties'].keys())[:5])
             if len(sc['properties']) > 5:
                 props += f" (+{len(sc['properties'])-5} more)"
@@ -626,10 +626,10 @@ def generate_plan(analysis: dict) -> str:
         lines.append("")
 
     # Parent model update detection
-    parent_updates = detect_parent_model_updates(analysis['schemas']['added'])
+    parent_updates = detect_parent_model_updates(analysis['schemas']['added'], config)
     if parent_updates:
         lines.extend([
-            "### ⚠️ Parent Model Updates Required",
+            "### Parent Model Updates Required",
             "",
             "The following new schemas may need to be added to parent models:",
             "",
@@ -642,7 +642,7 @@ def generate_plan(analysis: dict) -> str:
         lines.extend([
             "Run property verification to confirm:",
             "```bash",
-            "python3 .claude/skills/openapi-updater/scripts/verify_model_properties.py",
+            "python3 scripts/verify_model_properties.py --config-dir CONFIG_DIR",
             "```",
             "",
         ])
@@ -650,15 +650,15 @@ def generate_plan(analysis: dict) -> str:
     # Cross-reference reminders
     lines.extend([
         "### Cross-Reference Checks",
-        "- [ ] All new models exported in `lib/googleai_dart.dart`",
-        "- [ ] Sealed classes (Part, etc.) handle new variants",
+        "- [ ] All new models exported in barrel file",
+        "- [ ] Sealed classes handle new variants",
         "- [ ] Parent models reference new child types (see above)",
         "",
         "### Quality Gates",
         "- [ ] `dart analyze --fatal-infos` - no issues",
         "- [ ] `dart format --set-exit-if-changed .` - no changes",
         "- [ ] `dart test test/unit/` - all pass",
-        "- [ ] `python3 .claude/skills/.../verify_model_properties.py` - all pass",
+        "- [ ] `python3 scripts/verify_model_properties.py --config-dir CONFIG_DIR` - all pass",
     ])
 
     return "\n".join(lines)
@@ -666,6 +666,8 @@ def generate_plan(analysis: dict) -> str:
 
 def main():
     parser = argparse.ArgumentParser(description="Analyze OpenAPI spec changes")
+    parser.add_argument('--config-dir', type=Path, required=True,
+                        help="Directory containing config files (package.json, schemas.json)")
     parser.add_argument('old_spec', type=Path, help="Path to old spec")
     parser.add_argument('new_spec', type=Path, help="Path to new spec")
     parser.add_argument('--format', '-f', choices=['json', 'changelog', 'plan', 'all'],
@@ -674,6 +676,14 @@ def main():
     parser.add_argument('--changelog-out', type=Path, help="Changelog output (for --format all)")
     parser.add_argument('--plan-out', type=Path, help="Plan output (for --format all)")
     args = parser.parse_args()
+
+    # Validate config directory
+    if not args.config_dir.exists():
+        print(f"ERROR: Config directory not found: {args.config_dir}", file=sys.stderr)
+        sys.exit(1)
+
+    # Load configuration
+    config = load_config(args.config_dir)
 
     if not args.old_spec.exists():
         print(f"ERROR: Old spec not found: {args.old_spec}", file=sys.stderr)
@@ -690,12 +700,12 @@ def main():
     if args.format == 'json':
         output = json.dumps(analysis, indent=2)
     elif args.format == 'changelog':
-        output = generate_changelog(analysis)
+        output = generate_changelog(analysis, config)
     elif args.format == 'plan':
-        output = generate_plan(analysis)
+        output = generate_plan(analysis, config)
     elif args.format == 'all':
-        changelog = generate_changelog(analysis)
-        plan = generate_plan(analysis)
+        changelog = generate_changelog(analysis, config)
+        plan = generate_plan(analysis, config)
 
         if args.changelog_out:
             args.changelog_out.parent.mkdir(parents=True, exist_ok=True)

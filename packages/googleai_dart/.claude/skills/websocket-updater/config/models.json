@@ -1,0 +1,58 @@
+{
+  "critical_models": [
+    {
+      "name": "LiveConfig",
+      "file": "lib/src/models/live/config/live_config.dart",
+      "spec_schema": "LiveConfig"
+    },
+    {
+      "name": "LiveGenerationConfig",
+      "file": "lib/src/models/live/config/live_generation_config.dart",
+      "spec_schema": "LiveGenerationConfig"
+    },
+    {
+      "name": "SpeechConfig",
+      "file": "lib/src/models/live/config/speech_config.dart",
+      "spec_schema": "SpeechConfig"
+    },
+    {
+      "name": "RealtimeInputConfig",
+      "file": "lib/src/models/live/config/realtime_input_config.dart",
+      "spec_schema": "RealtimeInputConfig"
+    },
+    {
+      "name": "SessionResumptionConfig",
+      "file": "lib/src/models/live/config/session_resumption_config.dart",
+      "spec_schema": "SessionResumptionConfig"
+    },
+    {
+      "name": "BidiGenerateContentClientMessage",
+      "file": "lib/src/models/live/messages/client/client_message.dart",
+      "spec_schema": "BidiGenerateContentClientMessage"
+    },
+    {
+      "name": "BidiGenerateContentServerMessage",
+      "file": "lib/src/models/live/messages/server/server_message.dart",
+      "spec_schema": "BidiGenerateContentServerMessage"
+    },
+    {
+      "name": "FunctionCall",
+      "file": "lib/src/models/tools/function_call.dart",
+      "spec_schema": "FunctionCall"
+    },
+    {
+      "name": "FunctionResponse",
+      "file": "lib/src/models/tools/function_response.dart",
+      "spec_schema": "FunctionResponse"
+    }
+  ],
+  "expected_properties": {
+    "LiveConfig": ["generationConfig", "realtimeInputConfig", "tools", "systemInstruction", "sessionResumption", "contextWindowCompression", "inputAudioTranscription", "outputAudioTranscription", "proactivity"],
+    "LiveGenerationConfig": ["responseModalities", "speechConfig", "temperature", "maxOutputTokens", "topP", "topK"],
+    "SpeechConfig": ["voiceConfig", "languageCode"],
+    "RealtimeInputConfig": ["automaticActivityDetection", "activityHandling", "turnCoverage"],
+    "SessionResumptionConfig": ["handle", "transparent"],
+    "FunctionCall": ["id", "name", "args"],
+    "FunctionResponse": ["id", "name", "response"]
+  }
+}

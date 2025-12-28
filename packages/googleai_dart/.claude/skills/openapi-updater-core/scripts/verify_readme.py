@@ -2,19 +2,10 @@
 """
 Verify README.md completeness and accuracy against actual API implementation.
 
-This script validates that the README documentation is COMPLETE (all features
-documented) and ACCURATE (no stale references):
-
-1. Resources: All implemented resources are documented (auto-detected from *_resource.dart)
-2. Tool types: All Tool class properties are documented
-3. Stale references: No references to removed APIs remain
-4. Example files: Referenced example files exist
-
-The script auto-detects resources from lib/src/resources/*_resource.dart files,
-so new resources are automatically checked without needing to update hardcoded lists.
+This is a config-driven script that loads verification rules from config files.
 
 Usage:
-    python3 .claude/skills/openapi-updater/scripts/verify_readme.py
+    python3 verify_readme.py --config-dir CONFIG_DIR
 
 Exit codes:
     0 - All checks passed
@@ -23,53 +14,42 @@ Exit codes:
 """
 
 import argparse
+import json
 import re
 import sys
 from pathlib import Path
 
 
-# Known removed APIs to check for stale references
-REMOVED_APIS = [
-    ('ragStores', 'RAG Stores API removed - use fileSearchStores instead'),
-    ('chunks.batchCreate', 'Chunk batch operations removed from API'),
-    ('chunks.batchUpdate', 'Chunk batch operations removed from API'),
-    ('chunks.batchDelete', 'Chunk batch operations removed from API'),
-    ('chunks(document).create', 'Chunk management removed from API'),
-    ('chunks(document).list', 'Chunk management removed from API'),
-    ('chunks(document).get', 'Chunk management removed from API'),
-    ('chunks(document).update', 'Chunk management removed from API'),
-    ('chunks(document).delete', 'Chunk management removed from API'),
-]
+def load_config(config_dir: Path) -> dict:
+    """Load configuration from config directory."""
+    config = {
+        'removed_apis': [],
+        'tool_properties': {},
+        'excluded_resources': [],
+        'resources_dir': 'lib/src/resources',
+        'tool_file': 'lib/src/models/tools/tool.dart',
+    }
 
-# Tool properties that should be documented
-# Maps property name to (description, [search_terms])
-TOOL_PROPERTIES = {
-    'functionDeclarations': ('Function calling with custom functions',
-                             ['functiondeclarations', 'function calling', 'function declarations']),
-    'codeExecution': ('Code execution capability',
-                      ['codeexecution', 'code execution']),
-    'googleSearch': ('Google Search grounding',
-                     ['googlesearch', 'google search']),
-    'fileSearch': ('File search using Semantic Retrieval (FileSearchStores)',
-                   ['filesearch', 'file search']),
-    'mcpServers': ('MCP (Model Context Protocol) server integration',
-                   ['mcpservers', 'mcp server', 'model context protocol']),
-    'googleMaps': ('Google Maps geospatial context',
-                   ['googlemaps', 'google maps']),
-    'urlContext': ('URL Context for fetching and analyzing web content',
-                   ['urlcontext', 'url context']),
-}
+    # Load documentation.json
+    doc_file = config_dir / 'documentation.json'
+    if doc_file.exists():
+        with open(doc_file) as f:
+            doc = json.load(f)
+            config['removed_apis'] = doc.get('removed_apis', [])
+            config['tool_properties'] = doc.get('tool_properties', {})
+            config['excluded_resources'] = doc.get('excluded_resources', [])
 
-# Resources that should NOT be documented as standalone client accessors
-# (nested resources, base classes, internal utilities)
-EXCLUDED_RESOURCES = {
-    'documents_resource',    # Nested under corpora
-    'permissions_resource',  # Nested under other resources
-    'operations_resource',   # Universal, mentioned separately
-    'generated_files_resource',  # Nested under files
-    'base_resource',         # Base class, not a resource
-    'resource_base',         # Base class, not a resource
-}
+    # Load package.json for paths
+    pkg_file = config_dir / 'package.json'
+    if pkg_file.exists():
+        with open(pkg_file) as f:
+            pkg = json.load(f)
+            config['resources_dir'] = pkg.get('resources_dir', config['resources_dir'])
+            # Tool file is typically in models/tools/
+            models_dir = pkg.get('models_dir', 'lib/src/models')
+            config['tool_file'] = f"{models_dir}/tools/tool.dart"
+
+    return config
 
 
 def snake_to_camel(name: str) -> str:
@@ -78,27 +58,24 @@ def snake_to_camel(name: str) -> str:
     return components[0] + ''.join(x.title() for x in components[1:])
 
 
-def find_implemented_resources() -> set[str]:
-    """Find all resource files and return expected client names.
-
-    Automatically detects resources from *_resource.dart files and converts
-    to camelCase client accessor names (e.g., interactions_resource.dart -> interactions).
-    """
-    resources_dir = Path('lib/src/resources')
+def find_implemented_resources(config: dict) -> set[str]:
+    """Find all resource files and return expected client names."""
+    resources_dir = Path(config['resources_dir'])
+    excluded = set(config['excluded_resources'])
     resources = set()
+
+    if not resources_dir.exists():
+        return resources
 
     for item in resources_dir.iterdir():
         if item.name.startswith('.'):
             continue
 
-        # Skip directories - we only care about resource files
         if item.is_dir():
-            # Check for resource file inside directory
             resource_file = item / f'{item.name}_resource.dart'
             if resource_file.exists():
                 name = item.name + '_resource'
             else:
-                # Check for other patterns
                 dart_files = list(item.glob('*_resource.dart'))
                 if dart_files:
                     name = dart_files[0].stem
@@ -109,21 +86,15 @@ def find_implemented_resources() -> set[str]:
         else:
             continue
 
-        # Skip backup files and non-resource files
         if name.endswith('.bak'):
             continue
         if not name.endswith('_resource'):
             continue
-
-        # Skip excluded resources (internal, nested, base classes)
-        if name in EXCLUDED_RESOURCES:
+        if name in excluded:
             continue
 
-        # Convert to client accessor name
-        # Remove _resource suffix and convert to camelCase
         base_name = name.replace('_resource', '')
         client_name = snake_to_camel(base_name)
-
         resources.add(client_name)
 
     return resources
@@ -131,19 +102,20 @@ def find_implemented_resources() -> set[str]:
 
 def extract_documented_resources(readme: str) -> set[str]:
     """Extract resource names from README API Coverage section."""
-    # Match: ### ResourceName Resource (`client.resourceName`)
     pattern = r"### \w+(?:\s+\w+)* Resource \(`client\.(\w+)`\)"
     return set(re.findall(pattern, readme))
 
 
-def find_tool_properties() -> dict[str, int]:
+def find_tool_properties(config: dict) -> dict[str, int]:
     """Extract tool properties from Tool class with line numbers."""
-    tool_file = Path('lib/src/models/tools/tool.dart')
+    tool_file = Path(config['tool_file'])
+    if not tool_file.exists():
+        return {}
+
     content = tool_file.read_text()
     properties = {}
 
     for i, line in enumerate(content.split('\n'), 1):
-        # Match: final Type? propertyName;
         match = re.search(r'final\s+[\w<>?]+\s+(\w+);', line)
         if match:
             properties[match.group(1)] = i
@@ -151,13 +123,16 @@ def find_tool_properties() -> dict[str, int]:
     return properties
 
 
-def check_tool_documentation(readme: str) -> list[tuple[str, str]]:
+def check_tool_documentation(readme: str, config: dict) -> list[tuple[str, str]]:
     """Check if all tool properties are documented in README."""
     missing = []
     readme_lower = readme.lower()
+    tool_properties = config['tool_properties']
 
-    for prop, (description, search_terms) in TOOL_PROPERTIES.items():
-        # Check if any of the search terms are found in README
+    for prop, prop_config in tool_properties.items():
+        description = prop_config.get('description', '')
+        search_terms = prop_config.get('search_terms', [prop.lower()])
+
         found = any(term in readme_lower for term in search_terms)
         if not found:
             missing.append((prop, description))
@@ -165,13 +140,16 @@ def check_tool_documentation(readme: str) -> list[tuple[str, str]]:
     return missing
 
 
-def check_stale_references(readme: str) -> list[tuple[int, str, str]]:
+def check_stale_references(readme: str, config: dict) -> list[tuple[int, str, str]]:
     """Find references to removed APIs with line numbers."""
     issues = []
     lines = readme.split('\n')
+    removed_apis = config['removed_apis']
 
     for i, line in enumerate(lines, 1):
-        for api, reason in REMOVED_APIS:
+        for api_info in removed_apis:
+            api = api_info.get('api', '')
+            reason = api_info.get('reason', 'API removed')
             if api in line:
                 issues.append((i, api, reason))
 
@@ -182,17 +160,13 @@ def check_example_files(readme: str) -> list[str]:
     """Check that referenced example files exist."""
     example_dir = Path('example')
 
-    # Find all .dart file references in README
-    # Match patterns like: example/filename.dart, `filename.dart`, filename.dart
     pattern = r'[`/]?(\w+(?:_\w+)*\.dart)[`]?'
     referenced = set(re.findall(pattern, readme))
 
-    # Filter to likely example files (contain 'example' or common patterns)
     example_patterns = ['_example.dart', 'example.dart']
 
     missing = []
     for filename in referenced:
-        # Only check files that look like examples
         is_example = any(p in filename for p in example_patterns)
         if is_example and not (example_dir / filename).exists():
             missing.append(filename)
@@ -205,11 +179,23 @@ def main():
         description='Verify README accuracy against implementation'
     )
     parser.add_argument(
+        '--config-dir', type=Path, required=True,
+        help='Directory containing config files'
+    )
+    parser.add_argument(
         '--verbose', '-v',
         action='store_true',
         help='Show detailed output'
     )
     args = parser.parse_args()
+
+    # Validate config directory
+    if not args.config_dir.exists():
+        print(f"Error: Config directory not found: {args.config_dir}")
+        sys.exit(2)
+
+    # Load configuration
+    config = load_config(args.config_dir)
 
     # Validate directory
     readme_path = Path('README.md')
@@ -217,9 +203,9 @@ def main():
         print("Error: README.md not found. Run from package root directory.")
         sys.exit(2)
 
-    resources_dir = Path('lib/src/resources')
+    resources_dir = Path(config['resources_dir'])
     if not resources_dir.exists():
-        print("Error: lib/src/resources/ not found. Run from package root directory.")
+        print(f"Error: {config['resources_dir']}/ not found. Run from package root directory.")
         sys.exit(2)
 
     print("Checking README completeness and accuracy...")
@@ -229,7 +215,7 @@ def main():
     total_issues = 0
 
     # Check 1: Resource validation
-    impl_resources = find_implemented_resources()
+    impl_resources = find_implemented_resources(config)
     doc_resources = extract_documented_resources(readme)
 
     stale_resources = doc_resources - impl_resources
@@ -241,10 +227,10 @@ def main():
         print()
 
     # Check 2: Tool properties
-    missing_tools = check_tool_documentation(readme)
+    missing_tools = check_tool_documentation(readme, config)
 
     # Check 3: Stale references
-    stale_refs = check_stale_references(readme)
+    stale_refs = check_stale_references(readme, config)
 
     # Check 4: Example files
     missing_examples = check_example_files(readme)
@@ -270,17 +256,17 @@ def main():
     if missing_resources:
         print("MISSING RESOURCES (implemented but not documented):")
         for res in sorted(missing_resources):
-            print(f"  - client.{res} (lib/src/resources/)")
+            print(f"  - client.{res} ({config['resources_dir']}/)")
         print()
         total_issues += len(missing_resources)
 
     # Report missing tool documentation
     if missing_tools:
         print("MISSING TOOL DOCUMENTATION:")
-        tool_props = find_tool_properties()
+        tool_props = find_tool_properties(config)
         for prop, description in missing_tools:
             line = tool_props.get(prop, '?')
-            print(f"  - Tool.{prop} (lib/src/models/tools/tool.dart:{line})")
+            print(f"  - Tool.{prop} ({config['tool_file']}:{line})")
             print(f"      → {description}")
         print()
         total_issues += len(missing_tools)
@@ -301,13 +287,11 @@ def main():
         print(f"Found {total_issues} issue(s).")
         print()
 
-        # Provide actionable suggestions
         if stale_refs or stale_resources:
             print("SUGGESTED REMOVALS:")
             if stale_resources:
                 for res in sorted(stale_resources):
                     print(f"  - Remove '{res} Resource' section from API Coverage")
-            # Group stale refs by section
             chunk_refs = [r for r in stale_refs if 'chunk' in r[1].lower()]
             rag_refs = [r for r in stale_refs if 'rag' in r[1].lower()]
             if chunk_refs:

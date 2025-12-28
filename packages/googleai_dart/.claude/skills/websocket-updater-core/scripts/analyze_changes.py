@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
 """
-Analyze changes between current and latest Live API schema.
+Analyze changes between current and latest WebSocket API schema.
 
-Compares two schema files and generates a changelog and implementation plan.
+This is a config-driven script that loads configuration from config files.
 
 Usage:
-    python3 .claude/skills/websocket-updater/scripts/analyze_changes.py \\
-        live-api-schema.json /tmp/websocket-updater/latest-live.json \\
-        --format all \\
-        --changelog-out /tmp/websocket-updater/changelog-live.md \\
-        --plan-out /tmp/websocket-updater/plan-live.md
+    python3 analyze_changes.py --config-dir CONFIG_DIR \\
+        current.json latest.json --format all
 
 Exit codes:
     0 - Analysis complete
@@ -20,7 +17,24 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Any
+
+
+def load_config(config_dir: Path) -> dict:
+    """Load configuration from config directory."""
+    config = {
+        'pr_title_prefix': 'feat(googleai_dart)',
+        'changelog_title': 'Live API Changelog',
+    }
+
+    # Load package.json
+    pkg_file = config_dir / 'package.json'
+    if pkg_file.exists():
+        with open(pkg_file) as f:
+            pkg = json.load(f)
+            config['pr_title_prefix'] = pkg.get('pr_title_prefix', config['pr_title_prefix'])
+            config['changelog_title'] = pkg.get('changelog_title', config['changelog_title'])
+
+    return config
 
 
 def load_schema(path: Path) -> dict | None:
@@ -44,17 +58,18 @@ def compare_message_types(
 
     # Check for modified (field changes)
     modified = []
-    for msg_type in current_types & latest_types:
-        current_fields = set(current['message_types'][side][msg_type].get('fields', {}).keys())
-        latest_fields = set(latest['message_types'][side][msg_type].get('fields', {}).keys())
-        if current_fields != latest_fields:
-            new_fields = latest_fields - current_fields
-            removed_fields = current_fields - latest_fields
-            modified.append({
-                'name': msg_type,
-                'added_fields': list(new_fields),
-                'removed_fields': list(removed_fields)
-            })
+    if current:
+        for msg_type in current_types & latest_types:
+            current_fields = set(current['message_types'][side][msg_type].get('fields', {}).keys())
+            latest_fields = set(latest['message_types'][side][msg_type].get('fields', {}).keys())
+            if current_fields != latest_fields:
+                new_fields = latest_fields - current_fields
+                removed_fields = current_fields - latest_fields
+                modified.append({
+                    'name': msg_type,
+                    'added_fields': list(new_fields),
+                    'removed_fields': list(removed_fields)
+                })
 
     return sorted(added), sorted(removed), modified
 
@@ -72,17 +87,18 @@ def compare_config_types(
 
     # Check for modified
     modified = []
-    for config_type in current_types & latest_types:
-        current_fields = set(current['config_types'][config_type].get('fields', {}).keys())
-        latest_fields = set(latest['config_types'][config_type].get('fields', {}).keys())
-        if current_fields != latest_fields:
-            new_fields = latest_fields - current_fields
-            removed_fields = current_fields - latest_fields
-            modified.append({
-                'name': config_type,
-                'added_fields': list(new_fields),
-                'removed_fields': list(removed_fields)
-            })
+    if current:
+        for config_type in current_types & latest_types:
+            current_fields = set(current['config_types'][config_type].get('fields', {}).keys())
+            latest_fields = set(latest['config_types'][config_type].get('fields', {}).keys())
+            if current_fields != latest_fields:
+                new_fields = latest_fields - current_fields
+                removed_fields = current_fields - latest_fields
+                modified.append({
+                    'name': config_type,
+                    'added_fields': list(new_fields),
+                    'removed_fields': list(removed_fields)
+                })
 
     return sorted(added), sorted(removed), modified
 
@@ -100,24 +116,25 @@ def compare_enums(
 
     # Check for modified (new values)
     modified = []
-    for enum_type in current_enums & latest_enums:
-        current_values = set(current['enums'][enum_type].get('values', []))
-        latest_values = set(latest['enums'][enum_type].get('values', []))
-        if current_values != latest_values:
-            new_values = latest_values - current_values
-            removed_values = current_values - latest_values
-            modified.append({
-                'name': enum_type,
-                'added_values': list(new_values),
-                'removed_values': list(removed_values)
-            })
+    if current:
+        for enum_type in current_enums & latest_enums:
+            current_values = set(current['enums'][enum_type].get('values', []))
+            latest_values = set(latest['enums'][enum_type].get('values', []))
+            if current_values != latest_values:
+                new_values = latest_values - current_values
+                removed_values = current_values - latest_values
+                modified.append({
+                    'name': enum_type,
+                    'added_values': list(new_values),
+                    'removed_values': list(removed_values)
+                })
 
     return sorted(added), sorted(removed), modified
 
 
-def generate_changelog(analysis: dict) -> str:
+def generate_changelog(analysis: dict, config: dict) -> str:
     """Generate human-readable changelog."""
-    lines = ["# Live API Changelog", ""]
+    lines = [f"# {config['changelog_title']}", ""]
 
     # Breaking changes (removed)
     removed_count = (
@@ -192,9 +209,9 @@ def generate_changelog(analysis: dict) -> str:
     return "\n".join(lines)
 
 
-def generate_plan(analysis: dict) -> str:
+def generate_plan(analysis: dict, config: dict) -> str:
     """Generate prioritized implementation plan."""
-    lines = ["# Live API Implementation Plan", ""]
+    lines = [f"# {config['changelog_title']} Implementation Plan", ""]
 
     # P0: Breaking changes
     if any(analysis[k]['removed'] for k in ['client_messages', 'server_messages', 'config_types', 'enums']):
@@ -253,7 +270,7 @@ def generate_plan(analysis: dict) -> str:
     # Cross-reference checks
     lines.extend([
         "## Cross-Reference Checks",
-        "- [ ] All new models exported in `lib/googleai_dart.dart`",
+        "- [ ] All new models exported in barrel file",
         "- [ ] Sealed classes handle new variants",
         "- [ ] Parent models reference new child types",
         "",
@@ -261,7 +278,7 @@ def generate_plan(analysis: dict) -> str:
         "- [ ] `dart analyze --fatal-infos` - no issues",
         "- [ ] `dart format --set-exit-if-changed .` - no changes",
         "- [ ] `dart test test/unit/` - all pass",
-        "- [ ] `python3 .claude/skills/.../verify_model_properties.py` - all pass",
+        "- [ ] Verification scripts pass",
     ])
 
     return "\n".join(lines)
@@ -269,7 +286,11 @@ def generate_plan(analysis: dict) -> str:
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Analyze changes between Live API schemas.'
+        description='Analyze changes between WebSocket API schemas.'
+    )
+    parser.add_argument(
+        '--config-dir', type=Path, required=True,
+        help='Directory containing config files'
     )
     parser.add_argument(
         'current',
@@ -298,6 +319,14 @@ def main():
         help='Output file for implementation plan'
     )
     args = parser.parse_args()
+
+    # Validate config directory
+    if not args.config_dir.exists():
+        print(f"Error: Config directory not found: {args.config_dir}")
+        sys.exit(1)
+
+    # Load configuration
+    config = load_config(args.config_dir)
 
     if not args.latest.exists():
         print(f"Error: Latest schema not found: {args.latest}")
@@ -343,7 +372,7 @@ def main():
 
     # Generate outputs
     if args.format in ['changelog', 'all']:
-        changelog = generate_changelog(analysis)
+        changelog = generate_changelog(analysis, config)
         if args.changelog_out:
             args.changelog_out.parent.mkdir(parents=True, exist_ok=True)
             args.changelog_out.write_text(changelog)
@@ -353,7 +382,7 @@ def main():
             print()
 
     if args.format in ['plan', 'all']:
-        plan = generate_plan(analysis)
+        plan = generate_plan(analysis, config)
         if args.plan_out:
             args.plan_out.parent.mkdir(parents=True, exist_ok=True)
             args.plan_out.write_text(plan)
