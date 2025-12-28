@@ -1,9 +1,9 @@
 name: mistralai_dart
 description: Dart Client for the Mistral AI API (Mistral-7B, Mixtral 8x7B, embeddings, etc.).
 version: 0.1.1+1
-repository: https://github.com/davidmigloz/langchain_dart/tree/main/packages/mistralai_dart
-issue_tracker: https://github.com/davidmigloz/langchain_dart/issues?q=label:p:mistralai_dart
-homepage: https://github.com/davidmigloz/langchain_dart
+repository: https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/mistralai_dart
+issue_tracker: https://github.com/davidmigloz/ai_clients_dart/issues?q=label:p:mistralai_dart
+homepage: https://github.com/davidmigloz/ai_clients_dart
 documentation: https://langchaindart.dev
 
 funding:

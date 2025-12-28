@@ -9,7 +9,15 @@ dev_dependencies:
   melos: ^7.3.0
 
 workspace:
-  - packages/*
+  - packages/anthropic_sdk_dart
+  - packages/chromadb
+  - packages/googleai_dart
+  - packages/mistralai_dart
+  - packages/ollama_dart
+  - packages/openai_dart
+  - packages/openai_realtime_dart
+  - packages/tavily_dart
+  - packages/vertex_ai
 
 melos:
   repository: https://github.com/davidmigloz/ai_clients_dart

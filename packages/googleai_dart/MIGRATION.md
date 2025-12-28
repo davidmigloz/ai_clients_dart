@@ -352,7 +352,7 @@ final client = GoogleAIClient(
 
 * Browse the [examples](example/)
 * Check the [API docs](https://pub.dev/documentation/googleai_dart/latest/)
-* Open an issue: [https://github.com/davidmigloz/langchain_dart/issues](https://github.com/davidmigloz/langchain_dart/issues)
+* Open an issue: [https://github.com/davidmigloz/ai_clients_dart/issues](https://github.com/davidmigloz/ai_clients_dart/issues)
 
 ---
 

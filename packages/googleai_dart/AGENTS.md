@@ -324,7 +324,7 @@ git commit -m "feat(googleai_dart): add new feature"
 git push -u origin feat/my-feature
 
 # Add metadata via GitHub API (gh pr edit has issues with classic projects)
-gh api repos/davidmigloz/langchain_dart/issues/<PR_NUMBER> -X PATCH \
+gh api repos/davidmigloz/ai_clients_dart/issues/<PR_NUMBER> -X PATCH \
   -f 'labels[]=p:googleai_dart' \
   -f 'labels[]=t:feat' \
   -f 'assignees[]=davidmigloz' \
