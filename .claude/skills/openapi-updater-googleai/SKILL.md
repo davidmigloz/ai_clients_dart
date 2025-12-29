@@ -1,16 +1,16 @@
 ---
-name: openapi-updater
+name: openapi-updater-googleai
 description: Automates updating googleai_dart when Google AI OpenAPI spec changes. Fetches latest spec, compares against current, generates changelogs and prioritized implementation plans. Use for: (1) Checking for API updates, (2) Generating implementation plans for spec changes, (3) Creating new models/endpoints from spec, (4) Syncing local spec with upstream. Triggers: "update api", "sync openapi", "new endpoints", "api changes", "check for updates", "update spec", "api version", "fetch spec", "compare spec", "what changed in the api", "implementation plan".
 ---
 
 # OpenAPI Updater (googleai_dart)
 
-Extends [openapi-updater-core](../openapi-updater-core/SKILL.md) with googleai_dart-specific configuration.
+Uses shared scripts from [openapi-updater](../../shared/openapi-updater/README.md) with googleai_dart-specific configuration.
 
 ## Prerequisites
 
 - `GEMINI_API_KEY` or `GOOGLE_AI_API_KEY` environment variable set
-- Working directory: `packages/googleai_dart`
+- Working directory: Repository root
 - Python 3
 
 ## Spec Registry
@@ -26,25 +26,25 @@ Extends [openapi-updater-core](../openapi-updater-core/SKILL.md) with googleai_d
 
 ```bash
 # Fetch all specs + auto-discover new ones
-python3 .claude/skills/openapi-updater-core/scripts/fetch_spec.py \
-  --config-dir .claude/skills/openapi-updater/config
+python3 .claude/shared/openapi-updater/scripts/fetch_spec.py \
+  --config-dir .claude/skills/openapi-updater-googleai/config
 
 # Fetch specific spec only
-python3 .claude/skills/openapi-updater-core/scripts/fetch_spec.py \
-  --config-dir .claude/skills/openapi-updater/config --spec main
+python3 .claude/shared/openapi-updater/scripts/fetch_spec.py \
+  --config-dir .claude/skills/openapi-updater-googleai/config --spec main
 ```
 
-Output: `/tmp/openapi-updater/latest-main.json`, `/tmp/openapi-updater/latest-interactions.json`
+Output: `/tmp/openapi-updater-googleai/latest-main.json`, `/tmp/openapi-updater-googleai/latest-interactions.json`
 
 ### 2. Analyze Changes
 
 ```bash
-python3 .claude/skills/openapi-updater-core/scripts/analyze_changes.py \
-  --config-dir .claude/skills/openapi-updater/config \
-  openapi.json /tmp/openapi-updater/latest-main.json \
+python3 .claude/shared/openapi-updater/scripts/analyze_changes.py \
+  --config-dir .claude/skills/openapi-updater-googleai/config \
+  packages/googleai_dart/openapi.json /tmp/openapi-updater-googleai/latest-main.json \
   --format all \
-  --changelog-out /tmp/openapi-updater/changelog-main.md \
-  --plan-out /tmp/openapi-updater/plan-main.md
+  --changelog-out /tmp/openapi-updater-googleai/changelog-main.md \
+  --plan-out /tmp/openapi-updater-googleai/plan-main.md
 ```
 
 Generates:
@@ -59,7 +59,7 @@ Before implementing, read `references/implementation-patterns.md` for:
 - JSON serialization patterns
 - Test patterns and PR templates
 
-Use templates from `../openapi-updater-core/assets/`:
+Use templates from `../../shared/openapi-updater/assets/`:
 - `model_template.dart` - Model class structure
 - `enum_template.dart` - Enum type structure
 - `test_template.dart` - Unit test structure
@@ -85,23 +85,23 @@ Perform the four-pass review documented in `references/REVIEW_CHECKLIST.md`:
 
 ```bash
 # Pass 2: Barrel file verification
-python3 .claude/skills/openapi-updater-core/scripts/verify_exports.py \
-  --config-dir .claude/skills/openapi-updater/config
+python3 .claude/shared/openapi-updater/scripts/verify_exports.py \
+  --config-dir .claude/skills/openapi-updater-googleai/config
 
 # Pass 3: Documentation completeness
-python3 .claude/skills/openapi-updater-core/scripts/verify_readme.py \
-  --config-dir .claude/skills/openapi-updater/config
-python3 .claude/skills/openapi-updater-core/scripts/verify_examples.py \
-  --config-dir .claude/skills/openapi-updater/config
-python3 .claude/skills/openapi-updater-core/scripts/verify_readme_code.py \
-  --config-dir .claude/skills/openapi-updater/config
+python3 .claude/shared/openapi-updater/scripts/verify_readme.py \
+  --config-dir .claude/skills/openapi-updater-googleai/config
+python3 .claude/shared/openapi-updater/scripts/verify_examples.py \
+  --config-dir .claude/skills/openapi-updater-googleai/config
+python3 .claude/shared/openapi-updater/scripts/verify_readme_code.py \
+  --config-dir .claude/skills/openapi-updater-googleai/config
 
 # Pass 4: Property-level verification
-python3 .claude/skills/openapi-updater-core/scripts/verify_model_properties.py \
-  --config-dir .claude/skills/openapi-updater/config
+python3 .claude/shared/openapi-updater/scripts/verify_model_properties.py \
+  --config-dir .claude/skills/openapi-updater-googleai/config
 
-# Dart quality checks
-dart analyze --fatal-infos && dart format --set-exit-if-changed . && dart test test/unit/
+# Dart quality checks (run from packages/googleai_dart)
+cd packages/googleai_dart && dart analyze --fatal-infos && dart format --set-exit-if-changed . && dart test test/unit/
 ```
 
 **Pass 4 is critical** - catches missing properties in parent models (e.g., `Tool`, `Candidate`).
@@ -110,11 +110,11 @@ dart analyze --fatal-infos && dart format --set-exit-if-changed . && dart test t
 
 ```bash
 # Copy fetched specs to persisted locations
-cp /tmp/openapi-updater/latest-main.json openapi.json
-cp /tmp/openapi-updater/latest-interactions.json openapi-interactions.json
+cp /tmp/openapi-updater-googleai/latest-main.json packages/googleai_dart/openapi.json
+cp /tmp/openapi-updater-googleai/latest-interactions.json packages/googleai_dart/openapi-interactions.json
 
-# Run quality checks
-dart test && dart analyze && dart format --set-exit-if-changed .
+# Run quality checks (from packages/googleai_dart)
+cd packages/googleai_dart && dart test && dart analyze && dart format --set-exit-if-changed .
 ```
 
 ## Package-Specific References

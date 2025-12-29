@@ -20,12 +20,13 @@ Systematic verification after implementing OpenAPI changes.
 
 ## Pre-Review
 
-Re-run the analysis to get a fresh spec comparison:
+Re-run the analysis to get a fresh spec comparison (from repository root):
 ```bash
-python3 .claude/skills/openapi-updater/scripts/analyze_changes.py \
-  openapi.json /tmp/openapi-updater/latest.json --format all \
-  --changelog-out /tmp/openapi-updater/review-changelog.md \
-  --plan-out /tmp/openapi-updater/review-plan.md
+python3 .claude/shared/openapi-updater/scripts/analyze_changes.py \
+  --config-dir .claude/skills/openapi-updater-googleai/config \
+  packages/googleai_dart/openapi.json /tmp/openapi-updater-googleai/latest.json --format all \
+  --changelog-out /tmp/openapi-updater-googleai/review-changelog.md \
+  --plan-out /tmp/openapi-updater-googleai/review-plan.md
 ```
 
 Use the generated plan as your verification source.
@@ -89,7 +90,8 @@ Check these sealed classes handle all their variants:
 
 Run the property verification script to detect missing properties:
 ```bash
-python3 .claude/skills/openapi-updater/scripts/verify_model_properties.py
+python3 .claude/shared/openapi-updater/scripts/verify_model_properties.py \
+  --config-dir .claude/skills/openapi-updater-googleai/config
 ```
 
 The script checks these critical models automatically:
@@ -126,7 +128,8 @@ These are frequently missed - explicitly check:
 **This is the most commonly missed check.** Run the verification script:
 
 ```bash
-python3 .claude/skills/openapi-updater/scripts/verify_exports.py
+python3 .claude/shared/openapi-updater/scripts/verify_exports.py \
+  --config-dir .claude/skills/openapi-updater-googleai/config
 ```
 
 The script will:
@@ -179,10 +182,12 @@ For EACH new resource:
 
 ```bash
 # README validation
-python3 .claude/skills/openapi-updater/scripts/verify_readme.py
+python3 .claude/shared/openapi-updater/scripts/verify_readme.py \
+  --config-dir .claude/skills/openapi-updater-googleai/config
 
 # Example completeness
-python3 .claude/skills/openapi-updater/scripts/verify_examples.py
+python3 .claude/shared/openapi-updater/scripts/verify_examples.py \
+  --config-dir .claude/skills/openapi-updater-googleai/config
 ```
 
 **verify_readme.py** validates:
@@ -206,7 +211,8 @@ python3 .claude/skills/openapi-updater/scripts/verify_examples.py
 Verify README code examples match actual Dart API:
 
 ```bash
-python3 .claude/skills/openapi-updater/scripts/verify_readme_code.py
+python3 .claude/shared/openapi-updater/scripts/verify_readme_code.py \
+  --config-dir .claude/skills/openapi-updater-googleai/config
 ```
 
 This catches common documentation drift patterns:
@@ -273,7 +279,8 @@ that should reference it (e.g., `Tool`) is not updated to include the new proper
 ### 4a. Run Property Verification Script
 
 ```bash
-python3 .claude/skills/openapi-updater/scripts/verify_model_properties.py
+python3 .claude/shared/openapi-updater/scripts/verify_model_properties.py \
+  --config-dir .claude/skills/openapi-updater-googleai/config
 ```
 
 The script compares Dart model classes against the OpenAPI spec and reports:
@@ -334,30 +341,35 @@ This pass closes that gap.
 
 ## Quality Gates
 
-Run all commands - all must pass:
+Run all commands - all must pass (from repository root):
 
 ```bash
 # Static analysis (zero issues - info, warning, or error)
-dart analyze --fatal-infos
+cd packages/googleai_dart && dart analyze --fatal-infos
 
 # Formatting check
-dart format --set-exit-if-changed .
+cd packages/googleai_dart && dart format --set-exit-if-changed .
 
 # Unit tests
-dart test test/unit/
+cd packages/googleai_dart && dart test test/unit/
 
 # Barrel file verification (CRITICAL)
-python3 .claude/skills/openapi-updater/scripts/verify_exports.py
+python3 .claude/shared/openapi-updater/scripts/verify_exports.py \
+  --config-dir .claude/skills/openapi-updater-googleai/config
 
 # Documentation verification (CRITICAL - often missed!)
-python3 .claude/skills/openapi-updater/scripts/verify_readme.py
-python3 .claude/skills/openapi-updater/scripts/verify_examples.py
+python3 .claude/shared/openapi-updater/scripts/verify_readme.py \
+  --config-dir .claude/skills/openapi-updater-googleai/config
+python3 .claude/shared/openapi-updater/scripts/verify_examples.py \
+  --config-dir .claude/skills/openapi-updater-googleai/config
 
 # Property-level verification (CRITICAL - catches parent model gaps!)
-python3 .claude/skills/openapi-updater/scripts/verify_model_properties.py
+python3 .claude/shared/openapi-updater/scripts/verify_model_properties.py \
+  --config-dir .claude/skills/openapi-updater-googleai/config
 
 # README code validation (catches documentation drift)
-python3 .claude/skills/openapi-updater/scripts/verify_readme_code.py
+python3 .claude/shared/openapi-updater/scripts/verify_readme_code.py \
+  --config-dir .claude/skills/openapi-updater-googleai/config
 ```
 
 ---

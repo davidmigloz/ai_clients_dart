@@ -18,7 +18,7 @@
       "description": "Server-side state, agents, background execution"
     }
   },
-  "output_dir": "/tmp/openapi-updater",
+  "output_dir": "/tmp/openapi-updater-googleai",
   "discovery_patterns": [
     "https://ai.google.dev/static/api/{name}.openapi.json"
   ],

@@ -1,6 +1,6 @@
 # googleai_dart Specification
 
-This specification extends [spec-core.md](./spec-core.md) with googleai_dart-specific details.
+This specification extends [spec-core.md](../../../docs/spec-core.md) with `googleai_dart`-specific details.
 
 ## Package Configuration
 
@@ -157,26 +157,26 @@ dart test
 
 ## Verification Scripts
 
-All verification scripts are in `.claude/skills/openapi-updater-core/scripts/` and require `--config-dir .claude/skills/openapi-updater/config`:
+All verification scripts are in `.claude/shared/openapi-updater/scripts/` and require `--config-dir .claude/skills/openapi-updater-googleai/config`:
 
 ```bash
 # Verify barrel file exports
-python3 .claude/skills/openapi-updater-core/scripts/verify_exports.py \
-  --config-dir .claude/skills/openapi-updater/config
+python3 .claude/shared/openapi-updater/scripts/verify_exports.py \
+  --config-dir .claude/skills/openapi-updater-googleai/config
 
 # Verify README completeness
-python3 .claude/skills/openapi-updater-core/scripts/verify_readme.py \
-  --config-dir .claude/skills/openapi-updater/config
+python3 .claude/shared/openapi-updater/scripts/verify_readme.py \
+  --config-dir .claude/skills/openapi-updater-googleai/config
 
 # Verify model properties match spec
-python3 .claude/skills/openapi-updater-core/scripts/verify_model_properties.py \
-  --config-dir .claude/skills/openapi-updater/config
+python3 .claude/shared/openapi-updater/scripts/verify_model_properties.py \
+  --config-dir .claude/skills/openapi-updater-googleai/config
 ```
 
 ---
 
 ## Related Documentation
 
-- [Implementation Patterns](../.claude/skills/openapi-updater/references/implementation-patterns.md)
-- [Review Checklist](../.claude/skills/openapi-updater/references/REVIEW_CHECKLIST.md)
-- [OpenAPI Updater Skill](../.claude/skills/openapi-updater/SKILL.md)
+- [Implementation Patterns](../../../.claude/skills/openapi-updater-googleai/references/implementation-patterns.md)
+- [Review Checklist](../../../.claude/skills/openapi-updater-googleai/references/REVIEW_CHECKLIST.md)
+- [OpenAPI Updater Skill](../../../.claude/skills/openapi-updater-googleai/SKILL.md)

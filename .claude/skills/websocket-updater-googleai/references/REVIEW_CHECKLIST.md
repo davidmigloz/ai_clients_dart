@@ -21,12 +21,13 @@ Systematic verification after implementing WebSocket/Live API changes.
 
 ## Pre-Review
 
-Re-run the analysis to get a fresh spec comparison:
+Re-run the analysis to get a fresh spec comparison (from repository root):
 ```bash
-python3 .claude/skills/websocket-updater/scripts/analyze_changes.py \
-  live-api-schema.json /tmp/websocket-updater/latest-live.json --format all \
-  --changelog-out /tmp/websocket-updater/review-changelog.md \
-  --plan-out /tmp/websocket-updater/review-plan.md
+python3 .claude/shared/websocket-updater/scripts/analyze_changes.py \
+  --config-dir .claude/skills/websocket-updater-googleai/config \
+  packages/googleai_dart/live-api-schema.json /tmp/websocket-updater-googleai/latest-live.json --format all \
+  --changelog-out /tmp/websocket-updater-googleai/review-changelog.md \
+  --plan-out /tmp/websocket-updater-googleai/review-plan.md
 ```
 
 Use the generated plan as your verification source.
@@ -90,7 +91,8 @@ Check these sealed classes handle all their variants:
 
 Run the property verification script to detect missing properties:
 ```bash
-python3 .claude/skills/websocket-updater/scripts/verify_model_properties.py
+python3 .claude/shared/openapi-updater/scripts/verify_model_properties.py \
+  --config-dir .claude/skills/websocket-updater-googleai/config
 ```
 
 The script checks these critical models automatically:
@@ -119,7 +121,8 @@ These are frequently missed - explicitly check:
 **This is the most commonly missed check.** Run the verification script:
 
 ```bash
-python3 .claude/skills/websocket-updater/scripts/verify_exports.py
+python3 .claude/shared/openapi-updater/scripts/verify_exports.py \
+  --config-dir .claude/skills/websocket-updater-googleai/config
 ```
 
 The script will:
@@ -151,8 +154,10 @@ For Live API implementation:
 ### 3c. Run Verification Scripts
 
 ```bash
-python3 .claude/skills/websocket-updater/scripts/verify_readme.py
-python3 .claude/skills/websocket-updater/scripts/verify_examples.py
+python3 .claude/shared/openapi-updater/scripts/verify_readme.py \
+  --config-dir .claude/skills/websocket-updater-googleai/config
+python3 .claude/shared/openapi-updater/scripts/verify_examples.py \
+  --config-dir .claude/skills/websocket-updater-googleai/config
 ```
 
 ### 3d. CHANGELOG
@@ -170,7 +175,8 @@ python3 .claude/skills/websocket-updater/scripts/verify_examples.py
 ### 4a. Run Property Verification Script
 
 ```bash
-python3 .claude/skills/websocket-updater/scripts/verify_model_properties.py
+python3 .claude/shared/openapi-updater/scripts/verify_model_properties.py \
+  --config-dir .claude/skills/websocket-updater-googleai/config
 ```
 
 The script compares Dart model classes against the schema and reports:
@@ -180,7 +186,8 @@ The script compares Dart model classes against the schema and reports:
 ### 4b. README Code Validation
 
 ```bash
-python3 .claude/skills/websocket-updater/scripts/verify_readme_code.py
+python3 .claude/shared/openapi-updater/scripts/verify_readme_code.py \
+  --config-dir .claude/skills/websocket-updater-googleai/config
 ```
 
 This catches documentation drift patterns:
@@ -245,30 +252,35 @@ Check that each source file has a corresponding test:
 
 ## Quality Gates
 
-Run all commands - all must pass:
+Run all commands - all must pass (from repository root):
 
 ```bash
 # Static analysis (zero issues - info, warning, or error)
-dart analyze --fatal-infos
+cd packages/googleai_dart && dart analyze --fatal-infos
 
 # Formatting check
-dart format --set-exit-if-changed .
+cd packages/googleai_dart && dart format --set-exit-if-changed .
 
 # Unit tests
-dart test test/unit/
+cd packages/googleai_dart && dart test test/unit/
 
 # Barrel file verification (CRITICAL)
-python3 .claude/skills/websocket-updater/scripts/verify_exports.py
+python3 .claude/shared/openapi-updater/scripts/verify_exports.py \
+  --config-dir .claude/skills/websocket-updater-googleai/config
 
 # Documentation verification (CRITICAL)
-python3 .claude/skills/websocket-updater/scripts/verify_readme.py
-python3 .claude/skills/websocket-updater/scripts/verify_examples.py
+python3 .claude/shared/openapi-updater/scripts/verify_readme.py \
+  --config-dir .claude/skills/websocket-updater-googleai/config
+python3 .claude/shared/openapi-updater/scripts/verify_examples.py \
+  --config-dir .claude/skills/websocket-updater-googleai/config
 
 # Property-level verification (CRITICAL)
-python3 .claude/skills/websocket-updater/scripts/verify_model_properties.py
+python3 .claude/shared/openapi-updater/scripts/verify_model_properties.py \
+  --config-dir .claude/skills/websocket-updater-googleai/config
 
 # README code validation
-python3 .claude/skills/websocket-updater/scripts/verify_readme_code.py
+python3 .claude/shared/openapi-updater/scripts/verify_readme_code.py \
+  --config-dir .claude/skills/websocket-updater-googleai/config
 ```
 
 ---

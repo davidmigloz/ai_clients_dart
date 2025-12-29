@@ -1,9 +1,4 @@
----
-name: openapi-updater-core
-description: Generic OpenAPI updater for Dart API clients. Config-driven scripts for fetching specs, analyzing changes, generating implementation plans, and verifying completeness. ALL scripts are config-driven - no code modifications needed to support new packages.
----
-
-# OpenAPI Updater Core
+# OpenAPI Updater (Shared)
 
 Generic, config-driven OpenAPI update workflow for Dart API client packages.
 
@@ -18,8 +13,8 @@ This core skill contains **ALL scripts** - they are 100% config-driven. To suppo
 ## Directory Structure
 
 ```
-openapi-updater-core/
-├── SKILL.md              # This file
+openapi-updater/
+├── README.md                   # This file
 ├── scripts/
 │   ├── fetch_spec.py           # Fetch OpenAPI specs from URLs
 │   ├── analyze_changes.py      # Compare specs, generate changelog/plan

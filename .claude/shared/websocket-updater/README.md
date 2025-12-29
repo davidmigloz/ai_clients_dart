@@ -1,21 +1,16 @@
----
-name: websocket-updater-core
-description: Generic WebSocket API updater for Dart API clients. Config-driven scripts for fetching schemas, analyzing changes, and generating implementation plans. ALL scripts are config-driven - no code modifications needed to support new packages.
----
-
-# WebSocket Updater Core
+# WebSocket Updater (Shared)
 
 Generic, config-driven WebSocket API update workflow for Dart API client packages.
 
 ## Design Philosophy
 
-This core skill contains **unique WebSocket scripts** that are 100% config-driven. For verification scripts, use [openapi-updater-core](../openapi-updater-core/SKILL.md) since they work with both REST and WebSocket APIs.
+This core skill contains **unique WebSocket scripts** that are 100% config-driven. For verification scripts, use [openapi-updater](../openapi-updater/README.md) since they work with both REST and WebSocket APIs.
 
 ## Directory Structure
 
 ```
-websocket-updater-core/
-├── SKILL.md              # This file
+websocket-updater/
+├── README.md             # This file
 ├── scripts/
 │   ├── fetch_schema.py         # Fetch WebSocket schema from config
 │   └── analyze_changes.py      # Compare schemas, generate changelog/plan
@@ -98,13 +93,13 @@ python3 {core}/scripts/analyze_changes.py --config-dir {ext}/config \
   current.json latest.json --format all
 ```
 
-### Verification (use openapi-updater-core)
+### Verification (use openapi-updater)
 
 ```bash
 # These work for both REST and WebSocket APIs
-python3 ../openapi-updater-core/scripts/verify_exports.py --config-dir {ext}/config
-python3 ../openapi-updater-core/scripts/verify_readme.py --config-dir {ext}/config
-python3 ../openapi-updater-core/scripts/verify_model_properties.py --config-dir {ext}/config
+python3 ../openapi-updater/scripts/verify_exports.py --config-dir {ext}/config
+python3 ../openapi-updater/scripts/verify_readme.py --config-dir {ext}/config
+python3 ../openapi-updater/scripts/verify_model_properties.py --config-dir {ext}/config
 ```
 
 ## Templates
@@ -118,7 +113,7 @@ Use for client/server message hierarchies:
 
 ### Other Templates
 
-Same as openapi-updater-core - see that skill for details.
+Same as openapi-updater - see that shared library for details.
 
 ## WebSocket-Specific Patterns
 

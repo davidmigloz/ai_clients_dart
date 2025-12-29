@@ -632,18 +632,20 @@ Add entry for new features:
 
 ### Verification
 
-Run these scripts to validate documentation completeness:
+Run these scripts to validate documentation completeness (from repository root):
 
 ```bash
 # Verify README mentions all resources
-python3 .claude/skills/openapi-updater/scripts/verify_readme.py
+python3 .claude/shared/openapi-updater/scripts/verify_readme.py \
+  --config-dir .claude/skills/openapi-updater-googleai/config
 
 # Verify all resources have examples
-python3 .claude/skills/openapi-updater/scripts/verify_examples.py
+python3 .claude/shared/openapi-updater/scripts/verify_examples.py \
+  --config-dir .claude/skills/openapi-updater-googleai/config
 ```
 
 ---
 
 ## Additional Resources
 
-For core implementation principles, see `docs/spec.md`.
+For core implementation principles, see [spec-core.md](../../../../docs/spec-core.md) and [googleai_dart spec.md](../../../../packages/googleai_dart/docs/spec.md).

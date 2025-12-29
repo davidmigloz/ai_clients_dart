@@ -406,14 +406,13 @@ Follow Dart conventions rather than porting patterns from other SDKs:
 | Role variants | Named constructors (`Content.user()`, `Content.model()`) |
 | Response helpers | Extension methods (keeps model classes clean) |
 | Async streaming | Dart `Stream` (not generators) |
-| Deep copy | `copyWith()` or `fromJson(toJson())` |
 
 ### Type Safety
 
 Use strong types wherever possible:
 - Replace `List<dynamic>` with typed lists when the element type is known
-- Keep `dynamic` only for truly polymorphic API fields (e.g., Vertex AI generic payloads)
-- Use sealed classes for discriminated unions
+- Use sealed classes for polymorphic types
+- Keep `dynamic` only when semantically necessary (e.g., arbitrary JSON)
 
 ### Extension Method Principles
 
@@ -471,7 +470,7 @@ Extensions should:
 2. Follow pattern:
 ```dart
 Future<ResponseType> methodName({required String param}) async {
-  final url = requestBuilder.buildUrl('/v1beta/path');
+  final url = requestBuilder.buildUrl('/v1/path');
   final headers = requestBuilder.buildHeaders();
   final request = http.Request('POST', url)
     ..headers.addAll(headers)
@@ -527,7 +526,15 @@ Future<ResponseType> methodName({required String param}) async {
 ### Quality Commands
 
 ```bash
-dart analyze --fatal-infos    # Zero warnings required
-dart format --set-exit-if-changed .
-dart test                     # All tests pass
+dart analyze --fatal-infos          # Zero warnings required
+dart format --set-exit-if-changed . # Code should be formatted
+dart test                           # All tests pass
+```
+
+Or using the Dart MCP:
+
+```bash
+mcp__dart__analyze_files()
+mcp__dart__dart_format()
+mcp__dart__run_tests()
 ```

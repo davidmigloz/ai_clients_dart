@@ -13,7 +13,7 @@ After the refactoring of the updater skills, adding a new package requires **ONL
 
 ## Prerequisites
 
-- The core skills available at `packages/googleai_dart/.claude/skills/openapi-updater-core/`
+- The core skills available at `.claude/shared/openapi-updater/` (repository root)
 - Access to the API's OpenAPI specification
 - API key for testing (if required)
 - Python 3 for running verification scripts
@@ -32,14 +32,17 @@ mkdir -p lib/src/{client,models,resources}
 mkdir -p test/{unit,integration}
 mkdir -p example
 mkdir -p docs
-mkdir -p .claude/skills/openapi-updater/{config,references}
+
+# Create skill config directory at repository root
+cd ../..
+mkdir -p .claude/skills/openapi-updater-yourpackage/{config,references}
 ```
 
 ---
 
 ## Step 2: Create Config Files
 
-### 2.1 `config/package.json` - Package Structure
+### 2.1 `.claude/skills/openapi-updater-yourpackage/config/package.json` - Package Structure
 
 Defines your package paths and naming conventions.
 
@@ -73,7 +76,7 @@ Defines your package paths and naming conventions.
 | `pr_title_prefix` | Prefix for generated PR titles |
 | `changelog_title` | Title for generated changelogs |
 
-### 2.2 `config/specs.json` - API Specifications
+### 2.2 `.claude/skills/openapi-updater-yourpackage/config/specs.json` - API Specifications
 
 Defines where to fetch the OpenAPI specification.
 
@@ -105,7 +108,7 @@ Defines where to fetch the OpenAPI specification.
 | `discovery_patterns` | URL patterns for auto-discovering additional specs |
 | `discovery_names` | Names to try with discovery patterns |
 
-### 2.3 `config/schemas.json` - Schema Organization
+### 2.3 `.claude/skills/openapi-updater-yourpackage/config/schemas.json` - Schema Organization
 
 Defines how schemas are organized into directories.
 
@@ -140,7 +143,7 @@ Defines how schemas are organized into directories.
 | `default_category` | Category for schemas that don't match any pattern |
 | `parent_model_patterns` | Regex patterns for detecting child schemas |
 
-### 2.4 `config/models.json` - Critical Models
+### 2.4 `.claude/skills/openapi-updater-yourpackage/config/models.json` - Critical Models
 
 Defines critical models to verify for property completeness.
 
@@ -169,7 +172,7 @@ Defines critical models to verify for property completeness.
 | `critical_models.*.spec_schema` | Schema name in OpenAPI spec |
 | `expected_properties` | Optional explicit property lists |
 
-### 2.5 `config/documentation.json` - Documentation Verification
+### 2.5 `.claude/skills/openapi-updater-yourpackage/config/documentation.json` - Documentation Verification
 
 Configures README and documentation verification.
 
@@ -211,42 +214,42 @@ Configures README and documentation verification.
 
 ## Step 3: Create SKILL.md
 
-Create `.claude/skills/openapi-updater/SKILL.md`:
+Create `.claude/skills/openapi-updater-yourpackage/SKILL.md`:
 
 ```markdown
 ---
-name: openapi-updater
+name: openapi-updater-yourpackage
 description: Automates your_package_dart updates from API OpenAPI spec.
 ---
 
 # OpenAPI Updater (your_package_dart)
 
-Extends [openapi-updater-core](../../../googleai_dart/.claude/skills/openapi-updater-core/SKILL.md).
+Uses shared scripts from [openapi-updater](../../shared/openapi-updater/README.md).
 
 ## Prerequisites
 
 - `YOUR_API_KEY` environment variable set
-- Working directory: `packages/your_package_dart`
+- Working directory: Repository root
 
 ## Quick Start
 
 ```bash
 # Fetch latest spec
-python3 ../googleai_dart/.claude/skills/openapi-updater-core/scripts/fetch_spec.py \
-  --config-dir .claude/skills/openapi-updater/config
+python3 .claude/shared/openapi-updater/scripts/fetch_spec.py \
+  --config-dir .claude/skills/openapi-updater-yourpackage/config
 
 # Analyze changes
-python3 ../googleai_dart/.claude/skills/openapi-updater-core/scripts/analyze_changes.py \
-  --config-dir .claude/skills/openapi-updater/config \
-  openapi.json /tmp/openapi-updater-your-package/latest-main.json \
+python3 .claude/shared/openapi-updater/scripts/analyze_changes.py \
+  --config-dir .claude/skills/openapi-updater-yourpackage/config \
+  packages/your_package_dart/openapi.json /tmp/openapi-updater-your-package/latest-main.json \
   --format all
 
 # Verify implementation
-python3 ../googleai_dart/.claude/skills/openapi-updater-core/scripts/verify_exports.py \
-  --config-dir .claude/skills/openapi-updater/config
+python3 .claude/shared/openapi-updater/scripts/verify_exports.py \
+  --config-dir .claude/skills/openapi-updater-yourpackage/config
 
-python3 ../googleai_dart/.claude/skills/openapi-updater-core/scripts/verify_model_properties.py \
-  --config-dir .claude/skills/openapi-updater/config
+python3 .claude/shared/openapi-updater/scripts/verify_model_properties.py \
+  --config-dir .claude/skills/openapi-updater-yourpackage/config
 ```
 
 ## Package-Specific References
@@ -259,12 +262,12 @@ python3 ../googleai_dart/.claude/skills/openapi-updater-core/scripts/verify_mode
 
 ## Step 4: Create Package Specification
 
-Create `docs/spec.md`:
+Create `packages/your_package_dart/docs/spec.md`:
 
 ```markdown
 # your_package_dart Specification
 
-This specification extends [spec-core.md](../../googleai_dart/docs/spec-core.md) with package-specific details.
+This specification extends [spec-core.md](../../../docs/spec-core.md) with package-specific details.
 
 ## Package Configuration
 
@@ -302,14 +305,14 @@ lib/src/
 
 ## Step 5: Create Reference Documentation
 
-### `references/implementation-patterns.md`
+### `.claude/skills/openapi-updater-yourpackage/references/implementation-patterns.md`
 
 Document API-specific implementation patterns:
 
 ```markdown
 # Implementation Patterns (your_package_dart)
 
-Extends [implementation-patterns-core.md](../../../googleai_dart/.claude/skills/openapi-updater-core/references/implementation-patterns-core.md).
+Extends [implementation-patterns-core.md](../../../shared/openapi-updater/references/implementation-patterns-core.md).
 
 ## API-Specific Patterns
 
@@ -323,12 +326,12 @@ Extends [implementation-patterns-core.md](../../../googleai_dart/.claude/skills/
 [Document API-specific error codes and handling]
 ```
 
-### `references/REVIEW_CHECKLIST.md`
+### `.claude/skills/openapi-updater-yourpackage/references/REVIEW_CHECKLIST.md`
 
 ```markdown
 # Review Checklist (your_package_dart)
 
-Extends [REVIEW_CHECKLIST-core.md](../../../googleai_dart/.claude/skills/openapi-updater-core/references/REVIEW_CHECKLIST-core.md).
+Extends [REVIEW_CHECKLIST-core.md](../../../shared/openapi-updater/references/REVIEW_CHECKLIST-core.md).
 
 ## Package-Specific Checks
 
@@ -340,15 +343,15 @@ Extends [REVIEW_CHECKLIST-core.md](../../../googleai_dart/.claude/skills/openapi
 ## Step 6: Verify Setup
 
 ```bash
-cd packages/your_package_dart
+# From repository root
 
 # Fetch the spec
-python3 ../googleai_dart/.claude/skills/openapi-updater-core/scripts/fetch_spec.py \
-  --config-dir .claude/skills/openapi-updater/config
+python3 .claude/shared/openapi-updater/scripts/fetch_spec.py \
+  --config-dir .claude/skills/openapi-updater-yourpackage/config
 
 # Check that config is valid (will show errors if misconfigured)
-python3 ../googleai_dart/.claude/skills/openapi-updater-core/scripts/analyze_changes.py \
-  --config-dir .claude/skills/openapi-updater/config \
+python3 .claude/shared/openapi-updater/scripts/analyze_changes.py \
+  --config-dir .claude/skills/openapi-updater-yourpackage/config \
   /tmp/openapi-updater-your-package/latest-main.json \
   /tmp/openapi-updater-your-package/latest-main.json \
   --format plan
@@ -358,10 +361,10 @@ python3 ../googleai_dart/.claude/skills/openapi-updater-core/scripts/analyze_cha
 
 ## Adding WebSocket Support
 
-If your API has a WebSocket/streaming component, also create:
+If your API has a WebSocket/streaming component, also create at the repository root:
 
 ```
-.claude/skills/websocket-updater/
+.claude/skills/websocket-updater-yourpackage/
 ├── SKILL.md
 ├── config/
 │   ├── package.json      # Can share with openapi-updater
@@ -378,18 +381,18 @@ If your API has a WebSocket/streaming component, also create:
 
 ## Checklist
 
-- [ ] Package directory structure created
-- [ ] `config/package.json` - Package paths and names
-- [ ] `config/specs.json` - API spec URL(s)
-- [ ] `config/schemas.json` - Category patterns
-- [ ] `config/models.json` - Critical models list
-- [ ] `config/documentation.json` - README verification config
-- [ ] `SKILL.md` - Skill documentation
-- [ ] `docs/spec.md` - Package specification
-- [ ] `references/implementation-patterns.md` - API-specific patterns
-- [ ] `references/REVIEW_CHECKLIST.md` - Verification checklist
-- [ ] Fetch spec works: `python3 .../fetch_spec.py --config-dir ...`
-- [ ] Analyze works: `python3 .../analyze_changes.py --config-dir ...`
+- [ ] Package directory structure created (`packages/your_package_dart/`)
+- [ ] `.claude/skills/openapi-updater-yourpackage/config/package.json` - Package paths and names
+- [ ] `.claude/skills/openapi-updater-yourpackage/config/specs.json` - API spec URL(s)
+- [ ] `.claude/skills/openapi-updater-yourpackage/config/schemas.json` - Category patterns
+- [ ] `.claude/skills/openapi-updater-yourpackage/config/models.json` - Critical models list
+- [ ] `.claude/skills/openapi-updater-yourpackage/config/documentation.json` - README verification config
+- [ ] `.claude/skills/openapi-updater-yourpackage/SKILL.md` - Skill documentation
+- [ ] `packages/your_package_dart/docs/spec.md` - Package specification
+- [ ] `.claude/skills/openapi-updater-yourpackage/references/implementation-patterns.md` - API-specific patterns
+- [ ] `.claude/skills/openapi-updater-yourpackage/references/REVIEW_CHECKLIST.md` - Verification checklist
+- [ ] Fetch spec works: `python3 .claude/shared/openapi-updater/scripts/fetch_spec.py --config-dir .claude/skills/openapi-updater-yourpackage/config`
+- [ ] Analyze works: `python3 .claude/shared/openapi-updater/scripts/analyze_changes.py --config-dir .claude/skills/openapi-updater-yourpackage/config ...`
 
 ---
 
@@ -447,7 +450,10 @@ If the spec requires authentication to fetch:
 ## Reference Implementation
 
 See `packages/googleai_dart` for a complete reference implementation:
-- Config files: `.claude/skills/openapi-updater/config/`
-- Reference docs: `.claude/skills/openapi-updater/references/`
-- Core scripts: `.claude/skills/openapi-updater-core/scripts/`
-- Core templates: `.claude/skills/openapi-updater-core/assets/`
+- Package code: `packages/googleai_dart/`
+- Package spec: `packages/googleai_dart/docs/spec.md`
+- Config files: `.claude/skills/openapi-updater-googleai/config/`
+- Reference docs: `.claude/skills/openapi-updater-googleai/references/`
+- Core scripts: `.claude/shared/openapi-updater/scripts/`
+- Core templates: `.claude/shared/openapi-updater/assets/`
+- Core spec: `docs/spec-core.md`
