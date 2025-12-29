@@ -1,0 +1,35 @@
+{
+  "categories": {
+    "chat": {
+      "patterns": ["chat", "message"],
+      "directory": "chat"
+    },
+    "completions": {
+      "patterns": ["completion", "generate"],
+      "directory": "completions"
+    },
+    "embeddings": {
+      "patterns": ["embed"],
+      "directory": "embeddings"
+    },
+    "models": {
+      "patterns": ["model", "process", "pull", "push", "create"],
+      "directory": "models"
+    },
+    "tools": {
+      "patterns": ["tool", "function"],
+      "directory": "tools"
+    },
+    "metadata": {
+      "patterns": ["version", "option", "format", "tensor", "capability"],
+      "directory": "metadata"
+    }
+  },
+  "default_category": "common",
+  "parent_model_patterns": {
+    "Message": [".*Content$"],
+    "Tool": [".*Function$", ".*Call$"],
+    "GenerateChatCompletionRequest": [".*Message$", ".*Tool$"],
+    "GenerateCompletionRequest": [".*Options$"]
+  }
+}

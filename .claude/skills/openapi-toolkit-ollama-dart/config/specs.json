@@ -1,0 +1,15 @@
+{
+  "specs": {
+    "main": {
+      "name": "Ollama API",
+      "url": "https://raw.githubusercontent.com/ollama/ollama/refs/heads/main/docs/openapi.yaml",
+      "local_file": "openapi.json",
+      "requires_auth": false,
+      "auth_env_vars": [],
+      "description": "Ollama API for running LLMs locally"
+    }
+  },
+  "output_dir": "/tmp/openapi-toolkit-ollama-dart",
+  "discovery_patterns": [],
+  "discovery_names": []
+}

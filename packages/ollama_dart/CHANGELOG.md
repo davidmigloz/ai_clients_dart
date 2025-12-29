@@ -1,3 +1,71 @@
+## 1.0.0
+
+> Note: This release has breaking changes.
+
+**TL;DR**: Complete reimplementation with a new architecture, minimal dependencies, resource-based API, and improved developer experience. Hand-crafted models (no code generation), interceptor-driven architecture, comprehensive error handling, and full Ollama API coverage.
+
+### What's new
+
+- **Resource-based API organization**:
+  - `client.chat` — Chat completions (multi-turn conversations)
+  - `client.completions` — Text generation (single-turn)
+  - `client.embeddings` — Generate text embeddings
+  - `client.models` — Model management (list, show, pull, push, copy, delete, create, ps)
+  - `client.version` — Server version info
+- **Architecture**:
+  - Interceptor chain (Auth → Logging → Error → Transport with Retry wrapper).
+  - **Authentication**: Bearer token or custom via `AuthProvider` interface.
+  - **Retry** with exponential backoff + jitter (only for idempotent methods on 429, 5xx, timeouts).
+  - **Abortable** requests via `abortTrigger` parameter.
+  - **NDJSON** streaming parser for real-time responses.
+  - Central `OllamaConfig` (timeouts, retry policy, log level, baseUrl, auth).
+- **Hand-crafted models**:
+  - No code generation dependencies (no freezed, json_serializable).
+  - Minimal runtime dependencies (`http`, `logging` only).
+  - Immutable models with `copyWith` using sentinel pattern.
+  - Full type safety with sealed exception hierarchy.
+- **Improved DX**:
+  - Simplified model names (e.g., `ChatRequest` instead of `GenerateChatCompletionRequest`).
+  - Named constructors for common patterns (e.g., `ChatMessage.user()`, `ChatMessage.system()`).
+  - Explicit streaming methods (`createStream()` vs `create()`).
+  - Rich logging with field redaction for sensitive data.
+- **Full API coverage**:
+  - Chat completions with tool calling support.
+  - Text completions with thinking mode.
+  - Embeddings generation.
+  - Model management (list, show, create, copy, delete, pull, push, ps).
+  - Server version info.
+
+### Breaking Changes
+
+- **Resource-based API**: Methods reorganized under strongly-typed resources:
+  - `client.generateChatCompletion()` → `client.chat.create()`
+  - `client.generateChatCompletionStream()` → `client.chat.createStream()`
+  - `client.generateCompletion()` → `client.completions.generate()`
+  - `client.generateCompletionStream()` → `client.completions.generateStream()`
+  - `client.generateEmbedding()` → `client.embeddings.create()`
+  - `client.listModels()` → `client.models.list()`
+  - `client.showModelInfo()` → `client.models.show()`
+  - `client.listRunningModels()` → `client.models.ps()`
+  - `client.getVersion()` → `client.version.get()`
+- **Model class renames**:
+  - `GenerateChatCompletionRequest` → `ChatRequest`
+  - `GenerateChatCompletionResponse` → `ChatResponse`
+  - `GenerateCompletionRequest` → `GenerateRequest`
+  - `GenerateCompletionResponse` → `GenerateResponse`
+  - `GenerateEmbeddingRequest` → `EmbedRequest`
+  - `GenerateEmbeddingResponse` → `EmbedResponse`
+  - `Message` → `ChatMessage`
+  - `Tool` → `ToolDefinition`
+  - `RequestOptions` → `ModelOptions`
+- **Configuration**: New `OllamaConfig` with `AuthProvider` pattern.
+- **Exceptions**: Replaced `OllamaClientException` with typed hierarchy:
+  - `ApiException`, `ValidationException`, `RateLimitException`, `TimeoutException`, `AbortedException`.
+- **Dependencies**: Removed `freezed`, `json_serializable`; now minimal (`http`, `logging`).
+- **Base URL**: No longer needs `/api` suffix — just use `http://localhost:11434`.
+
+See **[MIGRATION.md](MIGRATION.md)** for step-by-step examples and mapping tables.
+
 ## 0.3.0+1
 
  - **REFACTOR**: Fix pub format warnings ([#809](https://github.com/davidmigloz/langchain_dart/issues/809)). ([640cdefb](https://github.com/davidmigloz/langchain_dart/commit/640cdefbede9c0a0182fb6bb4005a20aa6f35635))
@@ -111,3 +179,4 @@
 ## 0.0.1-dev.1
 
 - Bootstrap project.
+

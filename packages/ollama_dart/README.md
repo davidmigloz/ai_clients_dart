@@ -5,425 +5,364 @@
 ![Discord](https://img.shields.io/discord/1123158322812555295?label=discord)
 [![MIT](https://img.shields.io/badge/license-MIT-purple.svg)](https://github.com/davidmigloz/ai_clients_dart/blob/main/LICENSE)
 
-Unofficial Dart client for [Ollama](https://ollama.ai/) API.
+Dart client for the **[Ollama API](https://ollama.com/)** to run LLMs locally (OpenAI gpt-oss, DeepSeek-R1, Gemma 3, Llama 4, and more).
+
+<details>
+<summary><b>Table of Contents</b></summary>
+
+- [Features](#features)
+- [Why choose this client?](#why-choose-this-client)
+- [Quickstart](#quickstart)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [Examples](#examples)
+- [API Coverage](#api-coverage)
+- [Development](#development)
+- [License](#license)
+
+</details>
 
 ## Features
 
-- Fully type-safe, [documented](https://pub.dev/documentation/ollama_dart/latest/) and tested
-- All platforms supported (including streaming on web)
-- Custom base URL, headers and query params support (e.g. HTTP proxies)
-- Custom HTTP client support (e.g. SOCKS5 proxies or advanced use cases)
+### Generation & Streaming
 
-**Supported endpoints:**
-
-- Completions (with streaming support)
-- Chat completions (with streaming and tool calling support)
-- Embeddings
-- Models
-- Blobs
-- Version
-
-## Table of contents
-
-- [Usage](#usage)
-  * [Completions](#completions)
-    + [Generate completion](#generate-completion)
-    + [Stream completion](#stream-completion)
-  * [Chat completions](#chat-completions)
-    + [Generate chat completion](#generate-chat-completion)
-    + [Stream chat completion](#stream-chat-completion)
-    + [Tool calling](#tool-calling)
-  * [Embeddings](#embeddings)
-    + [Generate embedding](#generate-embedding)
-  * [Models](#models)
-    + [Create model](#create-model)
-    + [List models](#list-models)
-    + [List running models](#list-running-models)
-    + [Show Model Information](#show-model-information)
-    + [Pull a Model](#pull-a-model)
-    + [Push a Model](#push-a-model)
-    + [Check if a Blob Exists](#check-if-a-blob-exists)
-  * [Version](#version)
-- [Advance Usage](#advance-usage)
-  * [Default HTTP client](#default-http-client)
-  * [Custom HTTP client ](#custom-http-client)
-  * [Using a proxy](#using-a-proxy)
-    + [HTTP proxy](#http-proxy)
-    + [SOCKS5 proxy](#socks5-proxy)
-- [Acknowledgements](#acknowledgements)
-- [License](#license)
-
-## Usage
-
-Refer to the [documentation](https://github.com/jmorganca/ollama/blob/main/docs/api.md) for more information about the API.
-
-### Completions
-
-Given a prompt, the model will generate a response.
-
-#### Generate completion
-
-```dart
-final generated = await client.generateCompletion(
-  request: GenerateCompletionRequest(
-    model: 'mistral:latest',
-    prompt: 'Why is the sky blue?',
-  ),
-);
-print(generated.response);
-// The sky appears blue because of a phenomenon called Rayleigh scattering...
-```
-
-#### Stream completion
-
-```dart
-final stream = client.generateCompletionStream(
-  request: GenerateCompletionRequest(
-    model: 'mistral:latest',
-    prompt: 'Why is the sky blue?',
-  ),
-);
-String text = '';
-await for (final res in stream) {
-  text += res.response?.trim() ?? '';
-}
-print(text);
-// The sky appears blue because of a phenomenon called Rayleigh scattering...
-```
-
-### Chat completions
-
-Given a prompt, the model will generate a response in a chat format.
-
-#### Generate chat completion
-
-```dart
-final res = await client.generateChatCompletion(
-  request: GenerateChatCompletionRequest(
-    model: defaultModel,
-    messages: [
-      Message(
-        role: MessageRole.system,
-        content: 'You are a helpful assistant.',
-      ),
-      Message(
-        role: MessageRole.user,
-        content: 'List the numbers from 1 to 9 in order.',
-      ),
-    ],
-    keepAlive: 1,
-  ),
-);
-print(res);
-// Message(role: MessageRole.assistant, content: 123456789)
-```
-
-#### Stream chat completion
-
-```dart
-final stream = client.generateChatCompletionStream(
-  request: GenerateChatCompletionRequest(
-    model: defaultModel,
-    messages: [
-      Message(
-        role: MessageRole.system,
-        content: 'You are a helpful assistant.',
-      ),
-      Message(
-        role: MessageRole.user,
-        content: 'List the numbers from 1 to 9 in order.',
-      ),
-    ],
-    keepAlive: 1,
-  ),
-);
-
-String text = '';
-await for (final res in stream) {
-  text += (res.message?.content ?? '').trim();
-}
-print(text);
-// 123456789
-```
-
-#### Tool calling
-
-Tool calling allows a model to respond to a given prompt by generating output that matches a user-defined schema, that you can then use to call the tools in your code and return the result back to the model to complete the conversation.
-
-**Notes:** 
-- Tool calling requires Ollama 0.2.8 or newer.
-- Streaming tool calls is not supported at the moment.
-- Not all models support tool calls. Check the Ollama catalogue for models that have the `Tools` tag (e.g. [`llama3.2`](https://ollama.com/library/llama3.2)). 
-
-```dart
-const tool = Tool(
-  function: ToolFunction(
-    name: 'get_current_weather',
-    description: 'Get the current weather in a given location',
-    parameters: {
-      'type': 'object',
-      'properties': {
-        'location': {
-          'type': 'string',
-          'description': 'The city and country, e.g. San Francisco, US',
-        },
-        'unit': {
-          'type': 'string',
-          'description': 'The unit of temperature to return',
-          'enum': ['celsius', 'fahrenheit'],
-        },
-      },
-      'required': ['location'],
-    },
-  ),
-);
-
-const userMsg = Message(
-  role: MessageRole.user,
-  content: 'What’s the weather like in Barcelona in celsius?',
-);
-
-final res1 = await client.generateChatCompletion(
-  request: GenerateChatCompletionRequest(
-    model: 'llama3.2',
-    messages: [userMsg],
-    tools: [tool],
-  ),
-);
-
-print(res1.message.toolCalls);
-// [
-//   ToolCall(
-//     function:
-//       ToolCallFunction(
-//         name: get_current_weather,
-//         arguments: {
-//           location: Barcelona, ES,
-//           unit: celsius
-//         }
-//       )
-//   )
-// ]
-
-// Call your tool here. For this example, we'll just mock the response.
-const toolResult = '{"location": "Barcelona, ES", "temperature": 20, "unit": "celsius"}';
-
-// Submit the response of the tool call to the model
-final res2 = await client.generateChatCompletion(
-  request: GenerateChatCompletionRequest(
-    model: 'llama3.2',
-    messages: [
-      userMsg,
-      res1.message,
-      Message(
-        role: MessageRole.tool,
-        content: toolResult,
-      ),
-    ],
-  ),
-);
-print(res2.message.content);
-// The current weather in Barcelona is 20°C.
-```
+- ✅ Text generation (`generate`)
+- ✅ Chat completions (`chat`)
+- ✅ Streaming support with NDJSON
+- ✅ Tool/function calling
+- ✅ Thinking mode (reasoning)
+- ✅ Structured output (JSON mode and JSON schema)
+- ✅ Multimodal support (images)
+- ✅ Context memory for conversation continuity
 
 ### Embeddings
 
-Given a prompt, the model will generate an embedding representing the prompt.
+- ✅ Generate embeddings (`embed`)
 
-#### Generate embedding
+### Model Management
 
-```dart
-final generated = await client.generateEmbedding(
-  request: GenerateEmbeddingRequest(
-    model: 'mistral:latest',
-    prompt: 'Here is an article about llamas...',
-  ),
-);
-print(generated.embedding);
-// [8.566641807556152, 5.315540313720703, ...]
-```
+- ✅ List local models (`list`)
+- ✅ Show model details (`show`)
+- ✅ Pull models from library (`pull`)
+- ✅ Push models to library (`push`)
+- ✅ Create models from Modelfile (`create`)
+- ✅ Copy models (`copy`)
+- ✅ Delete models (`delete`)
+- ✅ List running models (`ps`)
+- ✅ Get server version (`version`)
 
-### Models
+## Why choose this client?
 
-#### Create model
+- ✅ Type-safe with sealed classes
+- ✅ Minimal dependencies (http, logging only)
+- ✅ Works on all compilation targets (native, web, WASM)
+- ✅ Interceptor-driven architecture
+- ✅ Comprehensive error handling
+- ✅ Automatic retry with exponential backoff
+- ✅ NDJSON streaming support
 
-Creates a new local model using a modelfile.
-
-```dart
-await client.createModel(
-  request: CreateModelRequest(
-    model: 'mario',
-    modelfile: 'FROM mistral:latest\nSYSTEM You are mario from Super Mario Bros.',
-  ),
-);
-```
-
-You can also stream the status of the model creation:
+## Quickstart
 
 ```dart
-final stream = client.createModelStream(
-  request: CreateModelRequest(
-    model: 'mario',
-    modelfile: 'FROM mistral:latest\nSYSTEM You are mario from Super Mario Bros.',
-  ),
-);
-await for (final res in stream) {
-  print(res.status);
+import 'package:ollama_dart/ollama_dart.dart';
+
+void main() async {
+  final client = OllamaClient();
+
+  // Chat completion
+  final response = await client.chat.create(
+    request: ChatRequest(
+      model: 'gpt-oss',
+      messages: [
+        ChatMessage.user('Hello, how are you?'),
+      ],
+    ),
+  );
+
+  print(response.message?.content);
+
+  client.close();
 }
 ```
 
-#### List models
+## Installation
 
-List models that are available locally.
-
-```dart
-final res = await client.listModels();
-print(res.models);
+```yaml
+dependencies:
+  ollama_dart: ^1.0.0
 ```
 
-#### List running models
+## Configuration
 
-Lists models currently loaded and their memory footprint.
-
-```dart
-final res = await client.listRunningModels();
-print(res.models);
-```
-
-#### Show Model Information
-
-Show details about a model including modelfile, template, parameters, license, and system prompt.
+<details>
+<summary><b>Configuration Options</b></summary>
 
 ```dart
-final res = await client.showModelInfo(
-  request: ModelInfoRequest(model: 'mistral:latest'),
+import 'package:ollama_dart/ollama_dart.dart';
+
+final client = OllamaClient(
+  config: OllamaConfig(
+    baseUrl: 'http://localhost:11434',  // Default Ollama server
+    timeout: Duration(minutes: 5),
+    retryPolicy: RetryPolicy(
+      maxRetries: 3,
+      initialDelay: Duration(seconds: 1),
+    ),
+  ),
 );
-print(res);
 ```
 
-#### Pull a Model
-
-Download a model from the ollama library. Cancelled pulls are resumed from where they left off, and multiple calls will share the same download progress.
+**Authentication (for remote Ollama servers):**
 
 ```dart
-final res = await client.pullModel(
-  request: PullModelRequest(model: 'yarn-llama3:13b-128k-q4_1'),
+final client = OllamaClient(
+  config: OllamaConfig(
+    baseUrl: 'https://my-ollama-server.example.com',
+    authProvider: BearerTokenProvider('YOUR_TOKEN'),
+  ),
 );
-print(res.status);
 ```
 
-You can also stream the pulling status:
+</details>
+
+## Usage
+
+### Chat Completions
+
+<details>
+<summary><b>Chat Completions Example</b></summary>
 
 ```dart
-final stream = client.pullModelStream(
-  request: PullModelRequest(model: 'yarn-llama3:13b-128k-q4_1'),
+import 'package:ollama_dart/ollama_dart.dart';
+
+final client = OllamaClient();
+
+final response = await client.chat.create(
+  request: ChatRequest(
+    model: 'gpt-oss',
+    messages: [
+      ChatMessage.system('You are a helpful assistant.'),
+      ChatMessage.user('What is the capital of France?'),
+    ],
+  ),
 );
-await for (final res in stream) {
-  print(res.status);
+
+print(response.message?.content);
+client.close();
+```
+
+</details>
+
+### Streaming
+
+<details>
+<summary><b>Streaming Example</b></summary>
+
+```dart
+import 'package:ollama_dart/ollama_dart.dart';
+
+final client = OllamaClient();
+
+final stream = client.chat.createStream(
+  request: ChatRequest(
+    model: 'gpt-oss',
+    messages: [
+      ChatMessage.user('Tell me a story.'),
+    ],
+  ),
+);
+
+await for (final chunk in stream) {
+  stdout.write(chunk.message?.content ?? '');
 }
+
+client.close();
 ```
 
-#### Push a Model
+</details>
 
-Upload a model to a model library. 
+### Tool Calling
 
-Requires registering for ollama.ai and adding a public key first.
-
-```dart
-final res = await client.pushModel(
-  request: PushModelRequest(model: 'mattw/pygmalion:latest'),
-);
-print(res.status);
-```
-
-You can also stream the pushing status:
+<details>
+<summary><b>Tool Calling Example</b></summary>
 
 ```dart
-final stream = client.pushModelStream(
-  request: PushModelRequest(model: 'mattw/pygmalion:latest'),
+import 'package:ollama_dart/ollama_dart.dart';
+
+final client = OllamaClient();
+
+final response = await client.chat.create(
+  request: ChatRequest(
+    model: 'gpt-oss',
+    messages: [
+      ChatMessage.user('What is the weather in Paris?'),
+    ],
+    tools: [
+      ToolDefinition(
+        type: ToolType.function,
+        function: ToolFunction(
+          name: 'get_weather',
+          description: 'Get the current weather for a location',
+          parameters: {
+            'type': 'object',
+            'properties': {
+              'location': {'type': 'string', 'description': 'City name'},
+            },
+            'required': ['location'],
+          },
+        ),
+      ),
+    ],
+  ),
 );
-await for (final res in stream) {
-  print(res.status);
+
+if (response.message?.toolCalls != null) {
+  for (final toolCall in response.message!.toolCalls!) {
+    print('Tool: ${toolCall.function?.name}');
+    print('Args: ${toolCall.function?.arguments}');
+  }
 }
+
+client.close();
 ```
 
-#### Check if a Blob Exists
+</details>
 
-Ensures that the file blob used for a FROM or ADAPTER field exists on the server. This is checking your Ollama server and not Ollama.ai.
+### Text Generation
+
+<details>
+<summary><b>Text Generation Example</b></summary>
 
 ```dart
-await client.checkBlob(
-  digest: 'sha256:29fdb92e57cf0827ded04ae6461b5931d01fa595843f55d36f5b275a52087dd2',
+import 'package:ollama_dart/ollama_dart.dart';
+
+final client = OllamaClient();
+
+final response = await client.completions.generate(
+  request: GenerateRequest(
+    model: 'gpt-oss',
+    prompt: 'Complete this: The capital of France is',
+  ),
 );
+
+print(response.response);
+client.close();
 ```
 
-If the blob doesn't exist, an `OllamaClientException` exception will be thrown.
+</details>
 
-### Version
+### Embeddings
 
-Get the version of the Ollama server.
+<details>
+<summary><b>Embeddings Example</b></summary>
 
 ```dart
-final res = await client.getVersion();
-print(res.version);
+import 'package:ollama_dart/ollama_dart.dart';
+
+final client = OllamaClient();
+
+final response = await client.embeddings.create(
+  request: EmbedRequest(
+    model: 'nomic-embed-text',
+    input: 'The quick brown fox jumps over the lazy dog.',
+  ),
+);
+
+print(response.embeddings);
+client.close();
 ```
 
-## Advance Usage
+</details>
 
-### Default HTTP client
+### Model Management
 
-By default, the client uses `http://localhost:11434/api` as the `baseUrl` and the following implementations of `http.Client`:
-
-- Non-web: [`IOClient`](https://pub.dev/documentation/http/latest/io_client/IOClient-class.html)
-- Web: [`FetchClient`](https://pub.dev/documentation/fetch_client/latest/fetch_client/FetchClient-class.html) (to support streaming on web)
-
-### Custom HTTP client 
-
-You can always provide your own implementation of `http.Client` for further customization:
+<details>
+<summary><b>Model Management Examples</b></summary>
 
 ```dart
-final client = OllamaClient(
-  client: MyHttpClient(),
+import 'package:ollama_dart/ollama_dart.dart';
+
+final client = OllamaClient();
+
+// List models
+final models = await client.models.list();
+for (final model in models.models ?? []) {
+  print('${model.name}: ${model.size}');
+}
+
+// Pull a model
+await for (final progress in client.models.pullStream(
+  request: PullRequest(model: 'gpt-oss'),
+)) {
+  print('${progress.status}: ${progress.completed}/${progress.total}');
+}
+
+// Show model details
+final info = await client.models.show(
+  request: ShowRequest(model: 'gpt-oss'),
 );
+print(info.license);
+
+// List running models
+final running = await client.models.ps();
+for (final model in running.models ?? []) {
+  print('Running: ${model.name}');
+}
+
+// Get server version
+final version = await client.version.get();
+print('Ollama version: ${version.version}');
+
+client.close();
 ```
 
-### Using a proxy
+</details>
 
-#### HTTP proxy
+## Examples
 
-You can use your own HTTP proxy by overriding the `baseUrl` and providing your required `headers`:
+See the [`example/`](example/) directory for comprehensive examples:
 
-```dart 
-final client = OllamaClient(
-  baseUrl: 'https://my-proxy.com',
-  headers: {
-      'x-my-proxy-header': 'value',
-  },
-);
-```
+1. **[ollama_dart_example.dart](example/ollama_dart_example.dart)** - Basic usage
+2. **[chat_example.dart](example/chat_example.dart)** - Chat completions
+3. **[streaming_example.dart](example/streaming_example.dart)** - Streaming responses
+4. **[tool_calling_example.dart](example/tool_calling_example.dart)** - Function calling
+5. **[embeddings_example.dart](example/embeddings_example.dart)** - Generate embeddings
+6. **[models_example.dart](example/models_example.dart)** - Model management
 
-If you need further customization, you can always provide your own `http.Client`.
+## API Coverage
 
-#### SOCKS5 proxy
+This client implements **100% of the Ollama REST API**:
 
-To use a SOCKS5 proxy, you can use the [`socks5_proxy`](https://pub.dev/packages/socks5_proxy) package:
+### Chat Resource (`client.chat`)
 
-```dart
-final baseHttpClient = HttpClient();
-SocksTCPClient.assignToHttpClient(baseHttpClient, [
-  ProxySettings(InternetAddress.loopbackIPv4, 1080),
-]);
-final httpClient = IOClient(baseClient);
+- **create** - Generate a chat completion
+- **createStream** - Generate a streaming chat completion
 
-final client = OllamaClient(
-  client: httpClient,
-);
-```
+### Completions Resource (`client.completions`)
 
-## Acknowledgements
+- **generate** - Generate a text completion
+- **generateStream** - Generate a streaming text completion
 
-The generation of this client was made possible by the [openapi_spec](https://github.com/tazatechnology/openapi_spec) package.
+### Embeddings Resource (`client.embeddings`)
+
+- **create** - Generate embeddings for text
+
+### Models Resource (`client.models`)
+
+- **list** - List local models (`GET /api/tags`)
+- **show** - Show model details (`POST /api/show`)
+- **create** / **createStream** - Create a model from Modelfile (`POST /api/create`)
+- **copy** - Copy a model (`POST /api/copy`)
+- **delete** - Delete a model (`DELETE /api/delete`)
+- **pull** / **pullStream** - Pull a model from library (`POST /api/pull`)
+- **push** / **pushStream** - Push a model to library (`POST /api/push`)
+- **ps** - List running models (`GET /api/ps`)
+
+### Version Resource (`client.version`)
+
+- **get** - Get server version (`GET /api/version`)
 
 ## License
 
-Ollama Dart Client is licensed under the [MIT License](https://github.com/davidmigloz/ai_clients_dart/blob/main/LICENSE).
+`ollama_dart` is licensed under the [MIT License](https://github.com/davidmigloz/ai_clients_dart/blob/main/LICENSE).
