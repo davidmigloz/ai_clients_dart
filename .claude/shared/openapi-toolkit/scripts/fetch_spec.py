@@ -32,7 +32,7 @@ def load_config(config_dir: Path) -> dict:
     """Load configuration from config directory."""
     config = {
         'specs': {},
-        'output_dir': '/tmp/openapi-updater',
+        'output_dir': '/tmp/openapi-toolkit',
         'discovery_patterns': [],
         'discovery_names': [],
         'auth_env_vars': ['GEMINI_API_KEY', 'GOOGLE_AI_API_KEY'],

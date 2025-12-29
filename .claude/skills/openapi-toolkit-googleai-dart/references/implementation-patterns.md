@@ -636,16 +636,16 @@ Run these scripts to validate documentation completeness (from repository root):
 
 ```bash
 # Verify README mentions all resources
-python3 .claude/shared/openapi-updater/scripts/verify_readme.py \
-  --config-dir .claude/skills/openapi-updater-googleai/config
+python3 .claude/shared/openapi-toolkit/scripts/verify_readme.py \
+  --config-dir .claude/skills/openapi-toolkit-googleai-dart/config
 
 # Verify all resources have examples
-python3 .claude/shared/openapi-updater/scripts/verify_examples.py \
-  --config-dir .claude/skills/openapi-updater-googleai/config
+python3 .claude/shared/openapi-toolkit/scripts/verify_examples.py \
+  --config-dir .claude/skills/openapi-toolkit-googleai-dart/config
 ```
 
 ---
 
 ## Additional Resources
 
-For core implementation principles, see [spec-core.md](../../../../docs/spec-core.md) and [googleai_dart spec.md](../../../../packages/googleai_dart/docs/spec.md).
+For core implementation principles, see [spec-core.md](../../../../docs/spec-core.md) and [package-guide.md](./package-guide.md).

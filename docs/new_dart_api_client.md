@@ -1,19 +1,19 @@
 # Adding a New Dart API Client Package
 
-This guide explains how to create a new Dart API client package (e.g., `openai_dart`, `anthropic_dart`, `mistral_dart`) using the generic updater skills.
+This guide explains how to create a new Dart API client package (e.g., `openai_dart`, `anthropic_dart`, `mistral_dart`) using the generic toolkit skills.
 
 ## Overview
 
-After the refactoring of the updater skills, adding a new package requires **ONLY configuration files** - no Python code modifications. You will:
+Adding a new package requires **ONLY configuration files** - no Python code modifications. You will:
 
 1. Create the package structure
-2. Create config files for the updater skills
-3. Create the package-specific spec
+2. Create config files for the toolkit skills
+3. Create the package-specific references
 4. Start implementing models
 
 ## Prerequisites
 
-- The core skills available at `.claude/shared/openapi-updater/` (repository root)
+- The core skills available at `.claude/shared/openapi-toolkit/` (repository root)
 - Access to the API's OpenAPI specification
 - API key for testing (if required)
 - Python 3 for running verification scripts
@@ -28,21 +28,42 @@ mkdir -p packages/your_package_dart
 
 # Create standard Dart package structure
 cd packages/your_package_dart
-mkdir -p lib/src/{client,models,resources}
+mkdir -p lib/src/{client,models,resources,auth,interceptors,errors}
 mkdir -p test/{unit,integration}
 mkdir -p example
-mkdir -p docs
+mkdir -p specs
 
 # Create skill config directory at repository root
 cd ../..
-mkdir -p .claude/skills/openapi-updater-yourpackage/{config,references}
+mkdir -p .claude/skills/openapi-toolkit-yourpackage-dart/{config,references}
+```
+
+**Package Structure:**
+```
+packages/your_package_dart/
+├── lib/
+│   ├── your_package_dart.dart      # Main barrel file
+│   └── src/
+│       ├── client/                  # Client configuration
+│       ├── models/                  # Model classes
+│       ├── resources/               # API resources
+│       ├── auth/                    # Authentication providers
+│       ├── interceptors/            # Request interceptors
+│       └── errors/                  # Exceptions
+├── test/
+│   ├── unit/                        # Unit tests
+│   └── integration/                 # Integration tests
+├── example/                         # Example files
+├── specs/                           # OpenAPI specifications
+│   └── openapi.json                 # Main API spec
+└── pubspec.yaml
 ```
 
 ---
 
 ## Step 2: Create Config Files
 
-### 2.1 `.claude/skills/openapi-updater-yourpackage/config/package.json` - Package Structure
+### 2.1 `.claude/skills/openapi-toolkit-yourpackage-dart/config/package.json` - Package Structure
 
 Defines your package paths and naming conventions.
 
@@ -76,7 +97,7 @@ Defines your package paths and naming conventions.
 | `pr_title_prefix` | Prefix for generated PR titles |
 | `changelog_title` | Title for generated changelogs |
 
-### 2.2 `.claude/skills/openapi-updater-yourpackage/config/specs.json` - API Specifications
+### 2.2 `.claude/skills/openapi-toolkit-yourpackage-dart/config/specs.json` - API Specifications
 
 Defines where to fetch the OpenAPI specification.
 
@@ -92,7 +113,7 @@ Defines where to fetch the OpenAPI specification.
       "description": "Main API description"
     }
   },
-  "output_dir": "/tmp/openapi-updater-your-package",
+  "output_dir": "/tmp/openapi-toolkit-yourpackage-dart",
   "discovery_patterns": [],
   "discovery_names": []
 }
@@ -108,7 +129,7 @@ Defines where to fetch the OpenAPI specification.
 | `discovery_patterns` | URL patterns for auto-discovering additional specs |
 | `discovery_names` | Names to try with discovery patterns |
 
-### 2.3 `.claude/skills/openapi-updater-yourpackage/config/schemas.json` - Schema Organization
+### 2.3 `.claude/skills/openapi-toolkit-yourpackage-dart/config/schemas.json` - Schema Organization
 
 Defines how schemas are organized into directories.
 
@@ -143,7 +164,7 @@ Defines how schemas are organized into directories.
 | `default_category` | Category for schemas that don't match any pattern |
 | `parent_model_patterns` | Regex patterns for detecting child schemas |
 
-### 2.4 `.claude/skills/openapi-updater-yourpackage/config/models.json` - Critical Models
+### 2.4 `.claude/skills/openapi-toolkit-yourpackage-dart/config/models.json` - Critical Models
 
 Defines critical models to verify for property completeness.
 
@@ -172,7 +193,7 @@ Defines critical models to verify for property completeness.
 | `critical_models.*.spec_schema` | Schema name in OpenAPI spec |
 | `expected_properties` | Optional explicit property lists |
 
-### 2.5 `.claude/skills/openapi-updater-yourpackage/config/documentation.json` - Documentation Verification
+### 2.5 `.claude/skills/openapi-toolkit-yourpackage-dart/config/documentation.json` - Documentation Verification
 
 Configures README and documentation verification.
 
@@ -214,17 +235,17 @@ Configures README and documentation verification.
 
 ## Step 3: Create SKILL.md
 
-Create `.claude/skills/openapi-updater-yourpackage/SKILL.md`:
+Create `.claude/skills/openapi-toolkit-yourpackage-dart/SKILL.md`:
 
 ```markdown
 ---
-name: openapi-updater-yourpackage
+name: openapi-toolkit-yourpackage-dart
 description: Automates your_package_dart updates from API OpenAPI spec.
 ---
 
-# OpenAPI Updater (your_package_dart)
+# OpenAPI Toolkit (your_package_dart)
 
-Uses shared scripts from [openapi-updater](../../shared/openapi-updater/README.md).
+Uses shared scripts from [openapi-toolkit](../../shared/openapi-toolkit/README.md).
 
 ## Prerequisites
 
@@ -235,39 +256,96 @@ Uses shared scripts from [openapi-updater](../../shared/openapi-updater/README.m
 
 ```bash
 # Fetch latest spec
-python3 .claude/shared/openapi-updater/scripts/fetch_spec.py \
-  --config-dir .claude/skills/openapi-updater-yourpackage/config
+python3 .claude/shared/openapi-toolkit/scripts/fetch_spec.py \
+  --config-dir .claude/skills/openapi-toolkit-yourpackage-dart/config
 
 # Analyze changes
-python3 .claude/shared/openapi-updater/scripts/analyze_changes.py \
-  --config-dir .claude/skills/openapi-updater-yourpackage/config \
-  packages/your_package_dart/openapi.json /tmp/openapi-updater-your-package/latest-main.json \
+python3 .claude/shared/openapi-toolkit/scripts/analyze_changes.py \
+  --config-dir .claude/skills/openapi-toolkit-yourpackage-dart/config \
+  packages/your_package_dart/specs/openapi.json /tmp/openapi-toolkit-yourpackage-dart/latest-main.json \
   --format all
 
 # Verify implementation
-python3 .claude/shared/openapi-updater/scripts/verify_exports.py \
-  --config-dir .claude/skills/openapi-updater-yourpackage/config
+python3 .claude/shared/openapi-toolkit/scripts/verify_exports.py \
+  --config-dir .claude/skills/openapi-toolkit-yourpackage-dart/config
 
-python3 .claude/shared/openapi-updater/scripts/verify_model_properties.py \
-  --config-dir .claude/skills/openapi-updater-yourpackage/config
+python3 .claude/shared/openapi-toolkit/scripts/verify_model_properties.py \
+  --config-dir .claude/skills/openapi-toolkit-yourpackage-dart/config
 ```
 
 ## Package-Specific References
 
+- [Package Guide](references/package-guide.md)
 - [Implementation Patterns](references/implementation-patterns.md)
 - [Review Checklist](references/REVIEW_CHECKLIST.md)
 ```
 
 ---
 
-## Step 4: Create Package Specification
+## Step 3.5: Generate Boilerplate Code
 
-Create `packages/your_package_dart/docs/spec.md`:
+Use the generation scripts to create initial model and enum files:
+
+### Generate Enums
+
+```bash
+# Generate a single enum
+python3 .claude/shared/openapi-toolkit/scripts/generate_enum.py \
+  --config-dir .claude/skills/openapi-toolkit-yourpackage-dart/config \
+  --schema FinishReason \
+  --output packages/your_package_dart/lib/src/models/metadata/finish_reason.dart
+
+# Or batch generate all enums
+python3 .claude/shared/openapi-toolkit/scripts/generate_enum.py \
+  --config-dir .claude/skills/openapi-toolkit-yourpackage-dart/config \
+  --batch --output-dir packages/your_package_dart/lib/src/models
+```
+
+### Generate Models
+
+```bash
+# Generate a single model
+python3 .claude/shared/openapi-toolkit/scripts/generate_model.py \
+  --config-dir .claude/skills/openapi-toolkit-yourpackage-dart/config \
+  --schema GenerationConfig \
+  --output packages/your_package_dart/lib/src/models/config/generation_config.dart
+
+# Or batch generate all models (skip sealed class parents)
+python3 .claude/shared/openapi-toolkit/scripts/generate_model.py \
+  --config-dir .claude/skills/openapi-toolkit-yourpackage-dart/config \
+  --batch --output-dir packages/your_package_dart/lib/src/models \
+  --skip Part,Content
+```
+
+### Generate Barrel Files
+
+```bash
+# Generate barrel file for a subdirectory
+python3 .claude/shared/openapi-toolkit/scripts/generate_barrel.py \
+  --config-dir .claude/skills/openapi-toolkit-yourpackage-dart/config \
+  --subdirectory models/metadata
+
+# Or generate for all model subdirectories
+python3 .claude/shared/openapi-toolkit/scripts/generate_barrel.py \
+  --config-dir .claude/skills/openapi-toolkit-yourpackage-dart/config
+```
+
+**Note:** Generated code provides a starting point. You may need to:
+- Add imports for referenced types
+- Implement sealed class parents manually (these are skipped by `--skip`)
+- Adjust complex type mappings
+- Add custom validation logic
+
+---
+
+## Step 4: Create Reference Documentation
+
+### `.claude/skills/openapi-toolkit-yourpackage-dart/references/package-guide.md`
+
+Package-specific configuration and structure:
 
 ```markdown
-# your_package_dart Specification
-
-This specification extends [spec-core.md](../../../docs/spec-core.md) with package-specific details.
+# your_package_dart Package Guide
 
 ## Package Configuration
 
@@ -277,6 +355,7 @@ This specification extends [spec-core.md](../../../docs/spec-core.md) with packa
 | API | Your API Name |
 | API Key Env Var | `YOUR_API_KEY` |
 | Barrel File | `lib/your_package_dart.dart` |
+| Specs Directory | `specs/` |
 
 ## Directory Structure
 
@@ -301,18 +380,14 @@ lib/src/
 | Examples | `example/{name}_example.dart` |
 ```
 
----
-
-## Step 5: Create Reference Documentation
-
-### `.claude/skills/openapi-updater-yourpackage/references/implementation-patterns.md`
+### `.claude/skills/openapi-toolkit-yourpackage-dart/references/implementation-patterns.md`
 
 Document API-specific implementation patterns:
 
 ```markdown
 # Implementation Patterns (your_package_dart)
 
-Extends [implementation-patterns-core.md](../../../shared/openapi-updater/references/implementation-patterns-core.md).
+Extends [implementation-patterns-core.md](../../../shared/openapi-toolkit/references/implementation-patterns-core.md).
 
 ## API-Specific Patterns
 
@@ -326,12 +401,12 @@ Extends [implementation-patterns-core.md](../../../shared/openapi-updater/refere
 [Document API-specific error codes and handling]
 ```
 
-### `.claude/skills/openapi-updater-yourpackage/references/REVIEW_CHECKLIST.md`
+### `.claude/skills/openapi-toolkit-yourpackage-dart/references/REVIEW_CHECKLIST.md`
 
 ```markdown
 # Review Checklist (your_package_dart)
 
-Extends [REVIEW_CHECKLIST-core.md](../../../shared/openapi-updater/references/REVIEW_CHECKLIST-core.md).
+Extends [REVIEW_CHECKLIST-core.md](../../../shared/openapi-toolkit/references/REVIEW_CHECKLIST-core.md).
 
 ## Package-Specific Checks
 
@@ -340,22 +415,64 @@ Extends [REVIEW_CHECKLIST-core.md](../../../shared/openapi-updater/references/RE
 
 ---
 
-## Step 6: Verify Setup
+## Step 5: Verify Setup
 
 ```bash
 # From repository root
 
 # Fetch the spec
-python3 .claude/shared/openapi-updater/scripts/fetch_spec.py \
-  --config-dir .claude/skills/openapi-updater-yourpackage/config
+python3 .claude/shared/openapi-toolkit/scripts/fetch_spec.py \
+  --config-dir .claude/skills/openapi-toolkit-yourpackage-dart/config
 
 # Check that config is valid (will show errors if misconfigured)
-python3 .claude/shared/openapi-updater/scripts/analyze_changes.py \
-  --config-dir .claude/skills/openapi-updater-yourpackage/config \
-  /tmp/openapi-updater-your-package/latest-main.json \
-  /tmp/openapi-updater-your-package/latest-main.json \
+python3 .claude/shared/openapi-toolkit/scripts/analyze_changes.py \
+  --config-dir .claude/skills/openapi-toolkit-yourpackage-dart/config \
+  /tmp/openapi-toolkit-yourpackage-dart/latest-main.json \
+  /tmp/openapi-toolkit-yourpackage-dart/latest-main.json \
   --format plan
 ```
+
+---
+
+## Workflow Modes
+
+The toolkit supports two operational modes depending on your task:
+
+### Create Mode (New Package)
+
+Use this when building a new API client package from scratch:
+
+1. **Setup** (Steps 1-4 above)
+2. **Fetch spec**: `python3 .../fetch_spec.py --config-dir ...`
+3. **Generate implementation plan**:
+   ```bash
+   python3 .claude/shared/openapi-toolkit/scripts/analyze_changes.py \
+     --config-dir .claude/skills/openapi-toolkit-yourpackage-dart/config \
+     --mode create /tmp/openapi-toolkit-yourpackage-dart/latest-main.json \
+     --plan-out /tmp/implementation-plan.md
+   ```
+4. **Generate models/enums** using generation scripts (batch mode recommended)
+5. **Implement infrastructure** (client, auth, resources) - AI-guided
+6. **Run verification scripts**
+7. **Copy spec** to `packages/yourpackage_dart/specs/openapi.json`
+
+### Update Mode (Existing Package)
+
+Use this when updating an existing package after API changes:
+
+1. **Fetch latest spec**: `python3 .../fetch_spec.py --config-dir ...`
+2. **Analyze changes**:
+   ```bash
+   python3 .claude/shared/openapi-toolkit/scripts/analyze_changes.py \
+     --config-dir .claude/skills/openapi-toolkit-yourpackage-dart/config \
+     packages/yourpackage_dart/specs/openapi.json \
+     /tmp/openapi-toolkit-yourpackage-dart/latest-main.json \
+     --format all --changelog-out /tmp/changelog.md --plan-out /tmp/plan.md
+   ```
+3. **Implement changes** based on the changelog/plan
+4. **Update documentation** (README, CHANGELOG, examples)
+5. **Run verification scripts**
+6. **Copy updated spec** to package
 
 ---
 
@@ -364,10 +481,10 @@ python3 .claude/shared/openapi-updater/scripts/analyze_changes.py \
 If your API has a WebSocket/streaming component, also create at the repository root:
 
 ```
-.claude/skills/websocket-updater-yourpackage/
+.claude/skills/websocket-toolkit-yourpackage-dart/
 ├── SKILL.md
 ├── config/
-│   ├── package.json      # Can share with openapi-updater
+│   ├── package.json      # Can share with openapi-toolkit
 │   ├── specs.json        # WebSocket endpoints
 │   ├── schema.json       # Message type definitions
 │   ├── models.json       # Critical live/streaming models
@@ -382,17 +499,18 @@ If your API has a WebSocket/streaming component, also create at the repository r
 ## Checklist
 
 - [ ] Package directory structure created (`packages/your_package_dart/`)
-- [ ] `.claude/skills/openapi-updater-yourpackage/config/package.json` - Package paths and names
-- [ ] `.claude/skills/openapi-updater-yourpackage/config/specs.json` - API spec URL(s)
-- [ ] `.claude/skills/openapi-updater-yourpackage/config/schemas.json` - Category patterns
-- [ ] `.claude/skills/openapi-updater-yourpackage/config/models.json` - Critical models list
-- [ ] `.claude/skills/openapi-updater-yourpackage/config/documentation.json` - README verification config
-- [ ] `.claude/skills/openapi-updater-yourpackage/SKILL.md` - Skill documentation
-- [ ] `packages/your_package_dart/docs/spec.md` - Package specification
-- [ ] `.claude/skills/openapi-updater-yourpackage/references/implementation-patterns.md` - API-specific patterns
-- [ ] `.claude/skills/openapi-updater-yourpackage/references/REVIEW_CHECKLIST.md` - Verification checklist
-- [ ] Fetch spec works: `python3 .claude/shared/openapi-updater/scripts/fetch_spec.py --config-dir .claude/skills/openapi-updater-yourpackage/config`
-- [ ] Analyze works: `python3 .claude/shared/openapi-updater/scripts/analyze_changes.py --config-dir .claude/skills/openapi-updater-yourpackage/config ...`
+- [ ] `specs/` directory created for OpenAPI specs
+- [ ] `.claude/skills/openapi-toolkit-yourpackage-dart/config/package.json` - Package paths and names
+- [ ] `.claude/skills/openapi-toolkit-yourpackage-dart/config/specs.json` - API spec URL(s)
+- [ ] `.claude/skills/openapi-toolkit-yourpackage-dart/config/schemas.json` - Category patterns
+- [ ] `.claude/skills/openapi-toolkit-yourpackage-dart/config/models.json` - Critical models list
+- [ ] `.claude/skills/openapi-toolkit-yourpackage-dart/config/documentation.json` - README verification config
+- [ ] `.claude/skills/openapi-toolkit-yourpackage-dart/SKILL.md` - Skill documentation
+- [ ] `.claude/skills/openapi-toolkit-yourpackage-dart/references/package-guide.md` - Package structure
+- [ ] `.claude/skills/openapi-toolkit-yourpackage-dart/references/implementation-patterns.md` - API-specific patterns
+- [ ] `.claude/skills/openapi-toolkit-yourpackage-dart/references/REVIEW_CHECKLIST.md` - Verification checklist
+- [ ] Fetch spec works: `python3 .claude/shared/openapi-toolkit/scripts/fetch_spec.py --config-dir .claude/skills/openapi-toolkit-yourpackage-dart/config`
+- [ ] Analyze works: `python3 .claude/shared/openapi-toolkit/scripts/analyze_changes.py --config-dir .claude/skills/openapi-toolkit-yourpackage-dart/config ...`
 
 ---
 
@@ -451,9 +569,9 @@ If the spec requires authentication to fetch:
 
 See `packages/googleai_dart` for a complete reference implementation:
 - Package code: `packages/googleai_dart/`
-- Package spec: `packages/googleai_dart/docs/spec.md`
-- Config files: `.claude/skills/openapi-updater-googleai/config/`
-- Reference docs: `.claude/skills/openapi-updater-googleai/references/`
-- Core scripts: `.claude/shared/openapi-updater/scripts/`
-- Core templates: `.claude/shared/openapi-updater/assets/`
+- Package specs: `packages/googleai_dart/specs/`
+- Config files: `.claude/skills/openapi-toolkit-googleai-dart/config/`
+- Reference docs: `.claude/skills/openapi-toolkit-googleai-dart/references/`
+- Core scripts: `.claude/shared/openapi-toolkit/scripts/`
+- Core templates: `.claude/shared/openapi-toolkit/assets/`
 - Core spec: `docs/spec-core.md`

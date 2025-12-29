@@ -23,7 +23,7 @@ def load_config(config_dir: Path) -> dict:
     """Load configuration from config directory."""
     config = {
         'specs': {},
-        'output_dir': '/tmp/websocket-updater',
+        'output_dir': '/tmp/websocket-toolkit',
         'schema': {},
     }
 

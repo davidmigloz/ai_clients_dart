@@ -14,7 +14,7 @@
       }
     }
   },
-  "output_dir": "/tmp/websocket-updater-googleai",
+  "output_dir": "/tmp/websocket-toolkit-googleai-dart",
   "message_types": {
     "client": [
       "BidiGenerateContentSetup",

@@ -1,10 +1,10 @@
-# OpenAPI Updater (Shared)
+# OpenAPI Toolkit (Shared)
 
-Generic, config-driven OpenAPI update workflow for Dart API client packages.
+Generic, config-driven OpenAPI toolkit for creating and updating Dart API client packages.
 
 ## Design Philosophy
 
-This core skill contains **ALL scripts** - they are 100% config-driven. To support a new Dart API client package, you only need to:
+This core toolkit contains **ALL scripts** - they are 100% config-driven. To support a new Dart API client package, you only need to:
 
 1. Create config JSON files (no Python modifications)
 2. Create package-specific reference documentation
@@ -13,11 +13,14 @@ This core skill contains **ALL scripts** - they are 100% config-driven. To suppo
 ## Directory Structure
 
 ```
-openapi-updater/
+openapi-toolkit/
 ├── README.md                   # This file
 ├── scripts/
 │   ├── fetch_spec.py           # Fetch OpenAPI specs from URLs
 │   ├── analyze_changes.py      # Compare specs, generate changelog/plan
+│   ├── generate_model.py       # Generate model class from schema
+│   ├── generate_enum.py        # Generate enum from schema
+│   ├── generate_barrel.py      # Generate barrel file exports
 │   ├── verify_exports.py       # Verify barrel file completeness
 │   ├── verify_readme.py        # Verify README accuracy
 │   ├── verify_examples.py      # Verify example file existence
@@ -74,7 +77,7 @@ Create these in your extension skill's `config/` directory:
       "description": "Main API description"
     }
   },
-  "output_dir": "/tmp/openapi-updater",
+  "output_dir": "/tmp/openapi-toolkit-{package}-dart",
   "discovery_patterns": [],
   "discovery_names": []
 }
@@ -166,14 +169,38 @@ python3 {core}/scripts/verify_model_properties.py --config-dir {ext}/config
 python3 {core}/scripts/verify_readme_code.py --config-dir {ext}/config
 ```
 
+### Generation Scripts
+
+```bash
+# Generate a single model
+python3 {core}/scripts/generate_model.py --config-dir {ext}/config \
+  --schema GenerationConfig --output lib/src/models/config/generation_config.dart
+
+# Generate a single enum
+python3 {core}/scripts/generate_enum.py --config-dir {ext}/config \
+  --schema HarmCategory --output lib/src/models/safety/harm_category.dart
+
+# Generate barrel file for a subdirectory
+python3 {core}/scripts/generate_barrel.py --config-dir {ext}/config \
+  --subdirectory models/safety
+
+# Batch generate all enums
+python3 {core}/scripts/generate_enum.py --config-dir {ext}/config \
+  --batch --output-dir lib/src/models
+
+# Batch generate all models (skip sealed parents)
+python3 {core}/scripts/generate_model.py --config-dir {ext}/config \
+  --batch --output-dir lib/src/models --skip Part,Content
+```
+
 ## Creating a New Package Extension
 
-1. **Create config directory**: `.claude/skills/openapi-updater/config/`
+1. **Create config directory**: `.claude/skills/openapi-toolkit-{package}-dart/config/`
 2. **Create config files**: `package.json`, `specs.json`, `schemas.json`, `models.json`, `documentation.json`
-3. **Create SKILL.md**: Reference this core skill
+3. **Create SKILL.md**: Reference this core toolkit
 4. **Create references**: Package-specific patterns and checklists
 
-See the guide in the plan for detailed instructions.
+See `docs/new_dart_api_client.md` for detailed instructions.
 
 ## Templates
 

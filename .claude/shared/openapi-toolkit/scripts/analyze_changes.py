@@ -7,6 +7,11 @@ from JSON config files.
 
 Usage:
     python3 analyze_changes.py --config-dir CONFIG_DIR OLD_SPEC NEW_SPEC [--format FORMAT]
+    python3 analyze_changes.py --config-dir CONFIG_DIR --mode create SPEC [--format plan]
+
+Modes:
+    update    - Compare two specs, generate changelog/plan for updates (default)
+    create    - Analyze single spec, generate creation plan for new package
 
 Formats:
     json      - Structured diff data
@@ -664,12 +669,233 @@ def generate_plan(analysis: dict, config: Config) -> str:
     return "\n".join(lines)
 
 
+def analyze_spec_for_creation(spec: dict) -> dict:
+    """Analyze a spec for creating a new package (everything is 'new')."""
+    endpoints = extract_endpoints(spec)
+    schemas = extract_schemas(spec)
+
+    return {
+        'metadata': {
+            'version': spec.get('info', {}).get('version', 'unknown'),
+            'title': spec.get('info', {}).get('title', 'unknown'),
+            'analysis_date': datetime.now().isoformat(),
+            'total_endpoints': len(endpoints),
+            'total_schemas': len(schemas),
+        },
+        'summary': {
+            'new_endpoints': len(endpoints),
+            'modified_endpoints': 0,
+            'removed_endpoints': 0,
+            'new_schemas': len(schemas),
+            'modified_schemas': 0,
+            'removed_schemas': 0,
+            'breaking_changes': 0,
+        },
+        'endpoints': {
+            'added': [asdict(e) for e in endpoints.values()],
+            'modified': [],
+            'removed': [],
+        },
+        'schemas': {
+            'added': [asdict(s) for s in schemas.values()],
+            'modified': [],
+            'removed': [],
+        },
+    }
+
+
+def generate_creation_plan(analysis: dict, config: Config) -> str:
+    """Generate implementation plan for creating a new package."""
+    meta = analysis['metadata']
+    summary = analysis['summary']
+
+    # Separate enums from models
+    enums = [s for s in analysis['schemas']['added'] if s.get('enum_values')]
+    models = [s for s in analysis['schemas']['added'] if not s.get('enum_values')]
+
+    lines = [
+        "# New Package Creation Plan",
+        "",
+        f"**API**: {meta.get('title', 'Unknown')}",
+        f"**Version**: {meta.get('version', 'unknown')}",
+        f"**Generated**: {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+        "",
+        "---",
+        "",
+        "## Overview",
+        "",
+        f"| Item | Count |",
+        f"|------|-------|",
+        f"| Endpoints | {summary['new_endpoints']} |",
+        f"| Models | {len(models)} |",
+        f"| Enums | {len(enums)} |",
+        "",
+        "---",
+        "",
+        "## Implementation Order",
+        "",
+        "1. **Phase 1**: Core enums (no dependencies)",
+        "2. **Phase 2**: Base models (simple types only)",
+        "3. **Phase 3**: Complex models (with references)",
+        "4. **Phase 4**: Resource classes and endpoints",
+        "5. **Phase 5**: Tests and examples",
+        "",
+    ]
+
+    # Phase 1: Enums
+    if enums:
+        lines.extend(["---", "", "## Phase 1: Enums", ""])
+        for i, sc in enumerate(enums, 1):
+            file_path = schema_to_file_path(sc['name'], config)
+            lines.extend([
+                f"### 1.{i}. {sc['name']}",
+                "",
+                f"**File**: `{file_path}`",
+                f"**Values**: {', '.join(sc['enum_values'][:5])}{'...' if len(sc['enum_values']) > 5 else ''}",
+                "",
+                "```bash",
+                f"python3 .claude/shared/openapi-toolkit/scripts/generate_enum.py \\",
+                f"  --config-dir {config.package_name}/config --schema {sc['name']} \\",
+                f"  --output {file_path}",
+                "```",
+                "",
+            ])
+
+    # Phase 2 & 3: Models
+    if models:
+        lines.extend(["---", "", "## Phase 2-3: Models", ""])
+        for i, sc in enumerate(models, 1):
+            file_path = schema_to_file_path(sc['name'], config)
+            test_path = file_path.replace('lib/src/', 'test/unit/').replace('.dart', '_test.dart')
+            props = list(sc.get('properties', {}).keys())[:5]
+            props_str = ', '.join(props)
+            if len(sc.get('properties', {})) > 5:
+                props_str += f" (+{len(sc['properties'])-5} more)"
+
+            lines.extend([
+                f"### 2.{i}. {sc['name']}",
+                "",
+                f"**File**: `{file_path}`",
+                f"**Test**: `{test_path}`",
+            ])
+            if props_str:
+                lines.append(f"**Properties**: {props_str}")
+            lines.extend([
+                "",
+                "```bash",
+                f"python3 .claude/shared/openapi-toolkit/scripts/generate_model.py \\",
+                f"  --config-dir {config.package_name}/config --schema {sc['name']} \\",
+                f"  --output {file_path}",
+                "```",
+                "",
+            ])
+
+    # Phase 4: Endpoints
+    if analysis['endpoints']['added']:
+        lines.extend(["---", "", "## Phase 4: Endpoints", ""])
+
+        # Group endpoints by resource
+        resources = {}
+        for ep in analysis['endpoints']['added']:
+            # Extract resource from path (e.g., /v1/models/{model} -> models)
+            path_parts = ep['path'].strip('/').split('/')
+            # Skip version prefix
+            if path_parts and path_parts[0].startswith('v'):
+                path_parts = path_parts[1:]
+            resource = path_parts[0] if path_parts else 'root'
+            if resource not in resources:
+                resources[resource] = []
+            resources[resource].append(ep)
+
+        for resource, endpoints in sorted(resources.items()):
+            lines.extend([
+                f"### {resource.title()} Resource",
+                "",
+                f"**File**: `lib/src/resources/{resource}_resource.dart`",
+                "",
+                "| Method | Path | Operation ID |",
+                "|--------|------|--------------|",
+            ])
+            for ep in endpoints:
+                lines.append(f"| {ep['method']} | `{ep['path']}` | {ep['operation_id']} |")
+            lines.append("")
+
+    # Phase 5: Tests and examples
+    lines.extend([
+        "---",
+        "",
+        "## Phase 5: Tests and Examples",
+        "",
+        "### Unit Tests",
+        "",
+        "Create test files for each model using the test template:",
+        "",
+        "```bash",
+        "python3 .claude/shared/openapi-toolkit/scripts/generate_barrel.py \\",
+        f"  --config-dir {config.package_name}/config",
+        "```",
+        "",
+        "### Examples",
+        "",
+    ])
+
+    # Generate example file list based on resources
+    if analysis['endpoints']['added']:
+        for resource in sorted(resources.keys()):
+            lines.append(f"- [ ] `example/{resource}_example.dart`")
+        lines.append("")
+
+    # Verification checklist
+    lines.extend([
+        "---",
+        "",
+        "## Verification Checklist",
+        "",
+        "### After Each Phase",
+        "",
+        "```bash",
+        f"cd packages/{config.package_name}",
+        "dart analyze --fatal-infos",
+        "dart format --set-exit-if-changed .",
+        "```",
+        "",
+        "### Final Verification",
+        "",
+        "```bash",
+        "# Export verification",
+        "python3 .claude/shared/openapi-toolkit/scripts/verify_exports.py \\",
+        f"  --config-dir .claude/skills/openapi-toolkit-{config.package_name}/config",
+        "",
+        "# Model property verification",
+        "python3 .claude/shared/openapi-toolkit/scripts/verify_model_properties.py \\",
+        f"  --config-dir .claude/skills/openapi-toolkit-{config.package_name}/config",
+        "",
+        "# Run tests",
+        f"cd packages/{config.package_name} && dart test",
+        "```",
+        "",
+        "---",
+        "",
+        "## Quick Stats",
+        "",
+        f"- **Total files to create**: ~{len(enums) + len(models) + len(resources) + len(resources)} files",
+        f"- **Enums**: {len(enums)}",
+        f"- **Models**: {len(models)}",
+        f"- **Resources**: {len(resources) if analysis['endpoints']['added'] else 0}",
+        f"- **Examples**: {len(resources) if analysis['endpoints']['added'] else 0}",
+    ])
+
+    return "\n".join(lines)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Analyze OpenAPI spec changes")
     parser.add_argument('--config-dir', type=Path, required=True,
                         help="Directory containing config files (package.json, schemas.json)")
-    parser.add_argument('old_spec', type=Path, help="Path to old spec")
-    parser.add_argument('new_spec', type=Path, help="Path to new spec")
+    parser.add_argument('--mode', '-m', choices=['update', 'create'],
+                        default='update', help="Analysis mode (default: update)")
+    parser.add_argument('old_spec', type=Path, nargs='?', help="Path to old spec (or only spec in create mode)")
+    parser.add_argument('new_spec', type=Path, nargs='?', help="Path to new spec (not used in create mode)")
     parser.add_argument('--format', '-f', choices=['json', 'changelog', 'plan', 'all'],
                         default='changelog', help="Output format")
     parser.add_argument('--output', '-o', type=Path, help="Output file (for single format)")
@@ -685,6 +911,52 @@ def main():
     # Load configuration
     config = load_config(args.config_dir)
 
+    # Handle create mode
+    if args.mode == 'create':
+        if not args.old_spec:
+            print("ERROR: Spec file required for create mode", file=sys.stderr)
+            sys.exit(1)
+        if not args.old_spec.exists():
+            print(f"ERROR: Spec not found: {args.old_spec}", file=sys.stderr)
+            sys.exit(1)
+
+        spec = load_spec(args.old_spec)
+        analysis = analyze_spec_for_creation(spec)
+
+        # For create mode, default to plan format
+        if args.format == 'changelog':
+            args.format = 'plan'
+
+        if args.format == 'plan':
+            output = generate_creation_plan(analysis, config)
+        elif args.format == 'json':
+            output = json.dumps(analysis, indent=2)
+        else:
+            output = generate_creation_plan(analysis, config)
+
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            with open(args.output, 'w') as f:
+                f.write(output)
+            print(f"Creation plan saved to: {args.output}")
+        else:
+            print(output)
+
+        # Print summary
+        print(f"\n{'='*50}")
+        print("Creation Summary")
+        print(f"{'='*50}")
+        print(f"  Endpoints: {analysis['summary']['new_endpoints']}")
+        print(f"  Schemas: {analysis['summary']['new_schemas']}")
+        return
+
+    # Update mode - validate both specs
+    if not args.old_spec:
+        print("ERROR: Old spec required for update mode", file=sys.stderr)
+        sys.exit(1)
+    if not args.new_spec:
+        print("ERROR: New spec required for update mode", file=sys.stderr)
+        sys.exit(1)
     if not args.old_spec.exists():
         print(f"ERROR: Old spec not found: {args.old_spec}", file=sys.stderr)
         sys.exit(1)
