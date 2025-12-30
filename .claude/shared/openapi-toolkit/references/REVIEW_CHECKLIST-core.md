@@ -39,6 +39,14 @@ For each schema with new/changed properties:
 - [ ] `toString` updated
 - [ ] Tests updated for new fields
 
+### Streaming Resources
+For resources with streaming methods:
+- [ ] Uses `StreamingResource` mixin (not duplicated helpers)
+- [ ] Mixin methods are package-internal (not exported)
+- [ ] `prepareStreamingRequest()` applies auth and logging
+- [ ] `sendStreamingRequest()` handles HTTP errors before streaming
+- [ ] Abort monitoring tested (if applicable)
+
 ---
 
 ## Cross-Reference Verification

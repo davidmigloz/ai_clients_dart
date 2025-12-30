@@ -288,6 +288,91 @@ export 'src/resources/resources.dart';
 
 ---
 
+## Streaming Patterns
+
+### Why Streaming Bypasses Interceptors
+
+The interceptor chain operates on buffered `http.Response`. Streaming requires unbuffered `http.StreamedResponse` access. Resources with streaming must:
+1. Apply auth/logging manually to the request
+2. Send via `httpClient.send()` to get `StreamedResponse`
+3. Check status and map errors before consuming stream
+
+### Streaming Resource Mixin
+
+Create a package-specific mixin that extends `ResourceBase`:
+
+```dart
+mixin StreamingResource on ResourceBase {
+  /// Prepares request with auth and logging.
+  Future<http.Request> prepareStreamingRequest(http.Request request) async {
+    var req = request;
+    if (config.authProvider != null) {
+      final creds = await config.authProvider!.getCredentials();
+      req = _applyAuth(req, creds);
+    }
+    return _applyLogging(req);
+  }
+
+  /// Sends streaming request with error handling.
+  Future<http.StreamedResponse> sendStreamingRequest(http.Request request) async {
+    final response = await httpClient.send(request);
+    if (response.statusCode >= 400) {
+      throw mapHttpError(await http.Response.fromStream(response));
+    }
+    return response;
+  }
+
+  // Package-specific auth helpers (_applyAuth, _applyLogging, mapHttpError)
+}
+```
+
+### Using the Mixin
+
+Resources opt-in to streaming by adding the mixin:
+
+```dart
+class ChatResource extends ResourceBase with StreamingResource {
+  Stream<Event> createStream({required Request request}) async* {
+    var httpRequest = http.Request('POST', url)...;
+
+    // Use mixin methods for streaming request handling
+    httpRequest = await prepareStreamingRequest(httpRequest);
+    final streamedResponse = await sendStreamingRequest(httpRequest);
+
+    // Parse stream (NDJSON or SSE depending on package)
+    await for (final json in parseStream(streamedResponse.stream)) {
+      yield Event.fromJson(json);
+    }
+  }
+}
+```
+
+### Abort Monitoring (for cancellable streams)
+
+For APIs that support abort triggers, the mixin can provide:
+
+```dart
+/// Monitors an abort trigger while streaming.
+Stream<T> streamWithAbortMonitoring<T>({
+  required Stream<Map<String, dynamic>> source,
+  required Future<void> abortTrigger,
+  required String requestId,
+  required T Function(Map<String, dynamic>) fromJson,
+}) {
+  // StreamController that:
+  // 1. Yields items from source until abortTrigger completes
+  // 2. On abort: cancels source, adds AbortedException, closes
+}
+```
+
+### Package-Specific Considerations
+
+- **Auth handling**: Each package has different credential types (API key, Bearer token, ephemeral token)
+- **Stream format**: Some packages use NDJSON, others use SSE
+- **Error mapping**: Exception types are package-specific
+
+---
+
 ## PR Templates
 
 ### New Model PR

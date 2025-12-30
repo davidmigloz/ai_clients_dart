@@ -1,18 +1,14 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:logging/logging.dart';
 
-import '../auth/auth_provider.dart';
-import '../errors/exceptions.dart';
 import '../models/interactions/content/content.dart';
 import '../models/interactions/events/events.dart';
 import '../models/interactions/interaction.dart';
 import '../models/interactions/tools/tools.dart';
-import '../utils/request_id.dart';
 import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
+import 'streaming_resource.dart';
 
 /// Resource for the Interactions API.
 ///
@@ -21,7 +17,7 @@ import 'base_resource.dart';
 /// function calling with automatic result handling, and streaming responses.
 ///
 /// This is an experimental API and is subject to change.
-class InteractionsResource extends ResourceBase {
+class InteractionsResource extends ResourceBase with StreamingResource {
   /// Creates an [InteractionsResource].
   InteractionsResource({
     required super.config,
@@ -188,28 +184,9 @@ class InteractionsResource extends ResourceBase {
       ..headers.addAll(headers)
       ..body = jsonEncode(body);
 
-    // Apply auth manually for streaming
-    final credentials = config.authProvider != null
-        ? await config.authProvider!.getCredentials()
-        : null;
-    httpRequest = _applyAuthToRequestSync(httpRequest, credentials);
-    httpRequest = _applyLoggingToRequest(httpRequest);
-
-    http.StreamedResponse streamedResponse;
-    try {
-      streamedResponse = await httpClient.send(httpRequest);
-
-      if (streamedResponse.statusCode >= 400) {
-        final response = await http.Response.fromStream(streamedResponse);
-        throw _mapHttpErrorForStreaming(response);
-      }
-    } catch (e) {
-      _logStreamError(
-        e,
-        httpRequest.headers['X-Request-ID'] ?? generateRequestId(),
-      );
-      rethrow;
-    }
+    // Use mixin methods for streaming request handling
+    httpRequest = await prepareStreamingRequest(httpRequest);
+    final streamedResponse = await sendStreamingRequest(httpRequest);
 
     final lineStream = bytesToLines(streamedResponse.stream);
     final jsonStream = parseSSE(lineStream);
@@ -242,28 +219,9 @@ class InteractionsResource extends ResourceBase {
 
     var httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
-    // Apply auth manually for streaming
-    final credentials = config.authProvider != null
-        ? await config.authProvider!.getCredentials()
-        : null;
-    httpRequest = _applyAuthToRequestSync(httpRequest, credentials);
-    httpRequest = _applyLoggingToRequest(httpRequest);
-
-    http.StreamedResponse streamedResponse;
-    try {
-      streamedResponse = await httpClient.send(httpRequest);
-
-      if (streamedResponse.statusCode >= 400) {
-        final response = await http.Response.fromStream(streamedResponse);
-        throw _mapHttpErrorForStreaming(response);
-      }
-    } catch (e) {
-      _logStreamError(
-        e,
-        httpRequest.headers['X-Request-ID'] ?? generateRequestId(),
-      );
-      rethrow;
-    }
+    // Use mixin methods for streaming request handling
+    httpRequest = await prepareStreamingRequest(httpRequest);
+    final streamedResponse = await sendStreamingRequest(httpRequest);
 
     final lineStream = bytesToLines(streamedResponse.stream);
     final jsonStream = parseSSE(lineStream);
@@ -283,159 +241,6 @@ class InteractionsResource extends ResourceBase {
       return input;
     } else {
       return input;
-    }
-  }
-
-  // Helper methods for streaming (same as ModelsResource)
-
-  http.Request _applyAuthToRequestSync(
-    http.Request request,
-    AuthCredentials? credentials,
-  ) {
-    if (credentials == null) return request;
-
-    return switch (credentials) {
-      ApiKeyCredentials(:final apiKey, :final placement) => _addApiKey(
-        request,
-        apiKey,
-        placement,
-      ),
-      BearerTokenCredentials(:final token) => _addBearerToken(request, token),
-      EphemeralTokenCredentials(:final token) => _addEphemeralToken(
-        request,
-        token,
-      ),
-      NoAuthCredentials() => request,
-    };
-  }
-
-  http.Request _addApiKey(
-    http.Request request,
-    String apiKey,
-    AuthPlacement placement,
-  ) {
-    if (placement == AuthPlacement.header) {
-      if (!request.headers.containsKey('X-Goog-Api-Key')) {
-        return http.Request(request.method, request.url)
-          ..headers.addAll(request.headers)
-          ..headers['X-Goog-Api-Key'] = apiKey
-          ..bodyBytes = request.bodyBytes
-          ..encoding = request.encoding;
-      }
-    } else {
-      final uri = request.url;
-      if (!uri.queryParameters.containsKey('key')) {
-        final queryParams = Map<String, dynamic>.from(uri.queryParameters);
-        queryParams['key'] = apiKey;
-        final newUri = uri.replace(queryParameters: queryParams);
-
-        return http.Request(request.method, newUri)
-          ..headers.addAll(request.headers)
-          ..bodyBytes = request.bodyBytes
-          ..encoding = request.encoding;
-      }
-    }
-
-    return request;
-  }
-
-  http.Request _addBearerToken(http.Request request, String bearerToken) {
-    if (!request.headers.containsKey('Authorization')) {
-      return http.Request(request.method, request.url)
-        ..headers.addAll(request.headers)
-        ..headers['Authorization'] = 'Bearer $bearerToken'
-        ..bodyBytes = request.bodyBytes
-        ..encoding = request.encoding;
-    }
-
-    return request;
-  }
-
-  http.Request _addEphemeralToken(http.Request request, String token) {
-    final uri = request.url;
-    if (uri.queryParameters.containsKey('access_token')) {
-      return request;
-    }
-    final queryParams = Map<String, dynamic>.from(uri.queryParameters);
-    queryParams['access_token'] = token;
-    final newUri = uri.replace(queryParameters: queryParams);
-
-    return http.Request(request.method, newUri)
-      ..headers.addAll(request.headers)
-      ..bodyBytes = request.bodyBytes
-      ..encoding = request.encoding;
-  }
-
-  http.Request _applyLoggingToRequest(http.Request request) {
-    if (!request.headers.containsKey('X-Request-ID')) {
-      final requestId = 'req_${DateTime.now().millisecondsSinceEpoch}';
-      final updatedRequest = http.Request(request.method, request.url)
-        ..headers.addAll(request.headers)
-        ..headers['X-Request-ID'] = requestId
-        ..bodyBytes = request.bodyBytes
-        ..encoding = request.encoding;
-
-      if (config.logLevel.value <= Level.INFO.value) {
-        Logger(
-          'GoogleAI.HTTP',
-        ).info('REQUEST [$requestId] ${request.method} ${request.url}');
-      }
-
-      return updatedRequest;
-    }
-
-    return request;
-  }
-
-  GoogleAIException _mapHttpErrorForStreaming(http.Response response) {
-    final statusCode = response.statusCode;
-    final body = response.body;
-
-    var message = 'HTTP $statusCode error';
-    final details = <Object>[];
-
-    try {
-      final errorDetails = jsonDecode(body);
-      if (errorDetails is Map<String, dynamic>) {
-        final error = errorDetails['error'] as Map<String, dynamic>?;
-        message = error?['message']?.toString() ?? message;
-        if (error?['details'] != null) {
-          final errorDetailsList = error!['details'];
-          if (errorDetailsList is List) {
-            details.addAll(errorDetailsList.cast<Object>());
-          }
-        }
-      }
-    } catch (_) {
-      if (body.length < 200 && body.isNotEmpty) {
-        message = body;
-      }
-    }
-
-    if (statusCode == 429) {
-      DateTime? retryAfter;
-      final retryHeader = response.headers['retry-after'];
-      if (retryHeader != null) {
-        final seconds = int.tryParse(retryHeader);
-        if (seconds != null) {
-          retryAfter = DateTime.now().add(Duration(seconds: seconds));
-        }
-      }
-
-      return RateLimitException(
-        code: statusCode,
-        message: message,
-        details: details,
-        retryAfter: retryAfter,
-      );
-    }
-
-    return ApiException(code: statusCode, message: message, details: details);
-  }
-
-  void _logStreamError(Object error, String requestId) {
-    if (config.logLevel.value <= Level.SEVERE.value) {
-      Logger('GoogleAI.HTTP').severe('STREAM ERROR [$requestId] $error', error);
     }
   }
 }

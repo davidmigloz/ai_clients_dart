@@ -1,10 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:logging/logging.dart';
 
-import '../auth/auth_provider.dart';
-import '../errors/exceptions.dart';
 import '../models/models/copy_request.dart';
 import '../models/models/create_request.dart';
 import '../models/models/delete_request.dart';
@@ -16,15 +13,15 @@ import '../models/models/show_request.dart';
 import '../models/models/show_response.dart';
 import '../models/models/status_event.dart';
 import '../models/models/status_response.dart';
-import '../utils/request_id.dart';
 import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
+import 'streaming_resource.dart';
 
 /// Resource for the Models API.
 ///
 /// Provides model management operations: list, show, create, copy, delete,
 /// pull, and push.
-class ModelsResource extends ResourceBase {
+class ModelsResource extends ResourceBase with StreamingResource {
   /// Creates a [ModelsResource].
   ModelsResource({
     required super.config,
@@ -129,9 +126,9 @@ class ModelsResource extends ResourceBase {
       ..headers.addAll(headers)
       ..body = jsonEncode(requestData.toJson());
 
-    httpRequest = await _prepareStreamingRequest(httpRequest);
-
-    final streamedResponse = await _sendStreamingRequest(httpRequest);
+    // Use mixin methods for streaming request handling
+    httpRequest = await prepareStreamingRequest(httpRequest);
+    final streamedResponse = await sendStreamingRequest(httpRequest);
 
     await for (final json in parseNDJSON(streamedResponse.stream)) {
       yield StatusEvent.fromJson(json);
@@ -216,9 +213,9 @@ class ModelsResource extends ResourceBase {
       ..headers.addAll(headers)
       ..body = jsonEncode(requestData.toJson());
 
-    httpRequest = await _prepareStreamingRequest(httpRequest);
-
-    final streamedResponse = await _sendStreamingRequest(httpRequest);
+    // Use mixin methods for streaming request handling
+    httpRequest = await prepareStreamingRequest(httpRequest);
+    final streamedResponse = await sendStreamingRequest(httpRequest);
 
     await for (final json in parseNDJSON(streamedResponse.stream)) {
       yield StatusEvent.fromJson(json);
@@ -269,129 +266,12 @@ class ModelsResource extends ResourceBase {
       ..headers.addAll(headers)
       ..body = jsonEncode(requestData.toJson());
 
-    httpRequest = await _prepareStreamingRequest(httpRequest);
-
-    final streamedResponse = await _sendStreamingRequest(httpRequest);
+    // Use mixin methods for streaming request handling
+    httpRequest = await prepareStreamingRequest(httpRequest);
+    final streamedResponse = await sendStreamingRequest(httpRequest);
 
     await for (final json in parseNDJSON(streamedResponse.stream)) {
       yield StatusEvent.fromJson(json);
-    }
-  }
-
-  // Helper methods for streaming
-
-  Future<http.Request> _prepareStreamingRequest(http.Request request) async {
-    var req = request;
-
-    // 1. Auth
-    final credentials = config.authProvider != null
-        ? await config.authProvider!.getCredentials()
-        : null;
-    req = _applyAuthToRequest(req, credentials);
-
-    // 2. Logging
-    req = _applyLoggingToRequest(req);
-
-    return req;
-  }
-
-  Future<http.StreamedResponse> _sendStreamingRequest(
-    http.Request request,
-  ) async {
-    try {
-      final streamedResponse = await httpClient.send(request);
-
-      if (streamedResponse.statusCode >= 400) {
-        final response = await http.Response.fromStream(streamedResponse);
-        throw _mapHttpError(response);
-      }
-
-      return streamedResponse;
-    } catch (e) {
-      _logStreamError(
-        e,
-        request.headers['X-Request-ID'] ?? generateRequestId(),
-      );
-      rethrow;
-    }
-  }
-
-  http.Request _applyAuthToRequest(
-    http.Request request,
-    AuthCredentials? credentials,
-  ) {
-    if (credentials == null) return request;
-
-    return switch (credentials) {
-      BearerTokenCredentials(:final token) =>
-        http.Request(request.method, request.url)
-          ..headers.addAll(request.headers)
-          ..headers['Authorization'] = 'Bearer $token'
-          ..bodyBytes = request.bodyBytes
-          ..encoding = request.encoding,
-      NoAuthCredentials() => request,
-    };
-  }
-
-  http.Request _applyLoggingToRequest(http.Request request) {
-    if (!request.headers.containsKey('X-Request-ID')) {
-      final requestId = generateRequestId();
-      final updatedRequest = http.Request(request.method, request.url)
-        ..headers.addAll(request.headers)
-        ..headers['X-Request-ID'] = requestId
-        ..bodyBytes = request.bodyBytes
-        ..encoding = request.encoding;
-
-      if (config.logLevel.value <= Level.INFO.value) {
-        Logger(
-          'Ollama.HTTP',
-        ).info('REQUEST [$requestId] ${request.method} ${request.url}');
-      }
-
-      return updatedRequest;
-    }
-
-    return request;
-  }
-
-  OllamaException _mapHttpError(http.Response response) {
-    final statusCode = response.statusCode;
-    var message = 'HTTP $statusCode error';
-
-    try {
-      final errorDetails = jsonDecode(response.body);
-      if (errorDetails is Map<String, dynamic>) {
-        message = errorDetails['error']?.toString() ?? message;
-      }
-    } catch (_) {
-      if (response.body.isNotEmpty && response.body.length < 200) {
-        message = response.body;
-      }
-    }
-
-    if (statusCode == 429) {
-      DateTime? retryAfter;
-      final retryHeader = response.headers['retry-after'];
-      if (retryHeader != null) {
-        final seconds = int.tryParse(retryHeader);
-        if (seconds != null) {
-          retryAfter = DateTime.now().add(Duration(seconds: seconds));
-        }
-      }
-
-      return RateLimitException(
-        code: statusCode,
-        message: message,
-        retryAfter: retryAfter,
-      );
-    }
-
-    return ApiException(code: statusCode, message: message);
-  }
-
-  void _logStreamError(Object error, String requestId) {
-    if (config.logLevel.value <= Level.SEVERE.value) {
-      Logger('Ollama.HTTP').severe('STREAM ERROR [$requestId] $error', error);
     }
   }
 }

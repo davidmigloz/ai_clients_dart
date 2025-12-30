@@ -6,6 +6,7 @@
 - [Model Conventions](#model-conventions)
 - [Enum Conventions](#enum-conventions)
 - [Resource Methods](#resource-methods)
+- [Streaming Patterns](#streaming-patterns)
 - [JSON Serialization](#json-serialization)
 - [Test Patterns](#test-patterns)
 - [Export Organization](#export-organization)
@@ -279,6 +280,99 @@ class FileSearchStoresResource extends ResourceBase {
   }
 }
 ```
+
+---
+
+## Streaming Patterns
+
+See also: [Streaming Patterns](../../../shared/openapi-toolkit/references/implementation-patterns-core.md#streaming-patterns) in core patterns.
+
+### StreamingResource Mixin
+
+Resources with streaming methods use the `StreamingResource` mixin:
+
+```dart
+class ModelsResource extends ResourceBase with StreamingResource {
+  // Non-streaming methods use interceptorChain as normal
+  // Streaming methods use mixin helpers
+}
+```
+
+### SSE Streaming
+
+Google AI uses Server-Sent Events (SSE) for streaming responses:
+
+```dart
+/// Generates content using streaming.
+Stream<GenerateContentResponse> streamGenerateContent({
+  required String model,
+  required GenerateContentRequest request,
+  Future<void>? abortTrigger,
+}) async* {
+  final url = requestBuilder.buildUrl(
+    '/{version}/models/$model:streamGenerateContent',
+    queryParams: {'alt': 'sse'},
+  );
+
+  final headers = requestBuilder.buildHeaders(
+    additionalHeaders: {'Content-Type': 'application/json'},
+  );
+
+  var httpRequest = http.Request('POST', url)
+    ..headers.addAll(headers)
+    ..body = jsonEncode(request.toJson());
+
+  // Use mixin methods for streaming request handling
+  httpRequest = await prepareStreamingRequest(httpRequest);
+  final streamedResponse = await sendStreamingRequest(httpRequest);
+
+  // Parse SSE stream
+  final lineStream = bytesToLines(streamedResponse.stream);
+  final jsonStream = parseSSE(lineStream);
+
+  // Get request ID for abortion tracking
+  final requestId = httpRequest.headers['X-Request-ID'] ?? generateRequestId();
+
+  if (abortTrigger != null) {
+    // Monitor abort trigger during streaming
+    yield* streamWithAbortMonitoring(
+      source: jsonStream,
+      abortTrigger: abortTrigger,
+      requestId: requestId,
+      fromJson: GenerateContentResponse.fromJson,
+    );
+  } else {
+    // No abort trigger, stream normally
+    await for (final json in jsonStream) {
+      yield GenerateContentResponse.fromJson(json);
+    }
+  }
+}
+```
+
+### Auth Handling
+
+The `StreamingResource` mixin handles four credential types for googleai_dart:
+
+- `ApiKeyCredentials` - adds API key via header (`X-Goog-Api-Key`) or query param (`key`)
+- `BearerTokenCredentials` - adds `Authorization: Bearer <token>` header
+- `EphemeralTokenCredentials` - adds `access_token` query parameter (for Live API)
+- `NoAuthCredentials` - no authentication applied
+
+### Abort Monitoring
+
+The mixin provides `streamWithAbortMonitoring()` for cancellable streams:
+
+```dart
+yield* streamWithAbortMonitoring(
+  source: jsonStream,
+  abortTrigger: abortTrigger,
+  requestId: requestId,
+  fromJson: GenerateContentResponse.fromJson,
+);
+```
+
+This emits `AbortedException` with `AbortionStage.duringStream` when aborted.
 
 ---
 
