@@ -1,0 +1,25 @@
+{
+  "removed_apis": [],
+  "tool_properties": {
+    "function": {
+      "description": "Function/tool calling support",
+      "search_terms": ["function calling", "tools", "tool_calls"]
+    }
+  },
+  "excluded_resources": ["base_resource"],
+  "resource_to_example": {
+    "chat": "chat",
+    "completions": "completions",
+    "embeddings": "embeddings",
+    "models": "models",
+    "version": "version"
+  },
+  "excluded_from_examples": [],
+  "drift_patterns": [
+    {
+      "pattern": "response\\.response\\b",
+      "message": "Use appropriate accessor based on endpoint type",
+      "severity": "warning"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "ollama_dart",
+  "display_name": "Ollama",
+  "barrel_file": "lib/ollama_dart.dart",
+  "models_dir": "lib/src/models",
+  "resources_dir": "lib/src/resources",
+  "tests_dir": "test/unit/models",
+  "examples_dir": "example",
+  "skip_files": ["copy_with_sentinel.dart"],
+  "internal_barrel_files": [],
+  "pr_title_prefix": "feat(ollama_dart)",
+  "changelog_title": "Ollama API Changelog"
+}

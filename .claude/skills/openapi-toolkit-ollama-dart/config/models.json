@@ -1,0 +1,55 @@
+{
+  "critical_models": [
+    {
+      "name": "ChatMessage",
+      "file": "lib/src/models/chat/chat_message.dart",
+      "spec_schema": "Message"
+    },
+    {
+      "name": "ChatRequest",
+      "file": "lib/src/models/chat/chat_request.dart",
+      "spec_schema": "GenerateChatCompletionRequest"
+    },
+    {
+      "name": "ChatResponse",
+      "file": "lib/src/models/chat/chat_response.dart",
+      "spec_schema": "GenerateChatCompletionResponse"
+    },
+    {
+      "name": "GenerateRequest",
+      "file": "lib/src/models/completions/generate_request.dart",
+      "spec_schema": "GenerateCompletionRequest"
+    },
+    {
+      "name": "GenerateResponse",
+      "file": "lib/src/models/completions/generate_response.dart",
+      "spec_schema": "GenerateCompletionResponse"
+    },
+    {
+      "name": "EmbedRequest",
+      "file": "lib/src/models/embeddings/embed_request.dart",
+      "spec_schema": "GenerateEmbeddingRequest"
+    },
+    {
+      "name": "EmbedResponse",
+      "file": "lib/src/models/embeddings/embed_response.dart",
+      "spec_schema": "GenerateEmbeddingResponse"
+    },
+    {
+      "name": "ToolDefinition",
+      "file": "lib/src/models/tools/tool_definition.dart",
+      "spec_schema": "Tool"
+    },
+    {
+      "name": "ModelSummary",
+      "file": "lib/src/models/models/model_summary.dart",
+      "spec_schema": "Model"
+    },
+    {
+      "name": "ShowResponse",
+      "file": "lib/src/models/models/show_response.dart",
+      "spec_schema": "ModelInfo"
+    }
+  ],
+  "expected_properties": {}
+}
