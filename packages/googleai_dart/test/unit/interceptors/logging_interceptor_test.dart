@@ -242,6 +242,70 @@ void main() {
         expect(headerLogs.any((r) => r.message.contains('REDACTED')), isTrue);
       });
 
+      test('redacts API key from URL query parameters', () async {
+        const config = GoogleAIConfig(logLevel: Level.INFO);
+        final interceptor = LoggingInterceptor(config: config);
+
+        Future<http.Response> mockNext(RequestContext context) async {
+          return createSuccessResponse(body: {'result': 'ok'});
+        }
+
+        final request = http.Request(
+          'POST',
+          Uri.parse('https://example.com/api?key=secret-api-key&other=value'),
+        );
+        final context = RequestContext(request: request, metadata: {});
+
+        await interceptor.intercept(context, mockNext);
+
+        final requestLogs = logRecords.where(
+          (r) => r.message.contains('REQUEST') && r.level == Level.INFO,
+        );
+        expect(requestLogs, isNotEmpty);
+        // URL should be logged but key value should be redacted
+        expect(
+          requestLogs.any((r) => r.message.contains('secret-api-key')),
+          isFalse,
+        );
+        expect(
+          requestLogs.any((r) => r.message.contains('REDACTED')),
+          isTrue,
+        );
+      });
+
+      test('redacts access_token from URL query parameters', () async {
+        const config = GoogleAIConfig(logLevel: Level.INFO);
+        final interceptor = LoggingInterceptor(config: config);
+
+        Future<http.Response> mockNext(RequestContext context) async {
+          return createSuccessResponse(body: {'result': 'ok'});
+        }
+
+        final request = http.Request(
+          'POST',
+          Uri.parse(
+            'https://example.com/api?access_token=secret-token&other=value',
+          ),
+        );
+        final context = RequestContext(request: request, metadata: {});
+
+        await interceptor.intercept(context, mockNext);
+
+        final requestLogs = logRecords.where(
+          (r) => r.message.contains('REQUEST') && r.level == Level.INFO,
+        );
+        expect(requestLogs, isNotEmpty);
+        // URL should be logged but access_token value should be redacted
+        expect(
+          requestLogs.any((r) => r.message.contains('secret-token')),
+          isFalse,
+        );
+        expect(
+          requestLogs.any((r) => r.message.contains('REDACTED')),
+          isTrue,
+        );
+      });
+
       test('redacts response body with sensitive data', () async {
         const config = GoogleAIConfig(
           logLevel: Level.FINE, // Need FINE to see body

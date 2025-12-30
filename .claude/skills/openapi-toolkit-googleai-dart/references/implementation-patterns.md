@@ -374,6 +374,20 @@ yield* streamWithAbortMonitoring(
 
 This emits `AbortedException` with `AbortionStage.duringStream` when aborted.
 
+### Security: URL Logging
+
+When logging request URLs, always redact credential-bearing query parameters:
+- `key` - API key (when using `ApiKeyCredentials` with `AuthPlacement.queryParam`)
+- `access_token` - Ephemeral token (when using `EphemeralTokenCredentials`)
+
+Use `Redactor.redactString()` on URLs before logging to prevent credential exposure:
+
+```dart
+final redactor = Redactor(redactionList: const ['key', 'access_token']);
+final safeUrl = redactor.redactString(request.url.toString());
+logger.info('REQUEST $safeUrl');
+```
+
 ---
 
 ## JSON Serialization

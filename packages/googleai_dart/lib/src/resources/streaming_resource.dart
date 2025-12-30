@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 
 import '../auth/auth_provider.dart';
 import '../errors/exceptions.dart';
+import '../utils/redactor.dart';
 import '../utils/request_id.dart';
 import 'base_resource.dart';
 
@@ -266,9 +267,12 @@ mixin StreamingResource on ResourceBase {
         ..encoding = request.encoding;
 
       if (config.logLevel.value <= Level.INFO.value) {
+        // Redact credentials from URL before logging
+        const redactor = Redactor(redactionList: ['key', 'access_token']);
+        final safeUrl = redactor.redactString(request.url.toString());
         Logger(
           'GoogleAI.HTTP',
-        ).info('REQUEST [$requestId] ${request.method} ${request.url}');
+        ).info('REQUEST [$requestId] ${request.method} $safeUrl');
       }
 
       return updatedRequest;

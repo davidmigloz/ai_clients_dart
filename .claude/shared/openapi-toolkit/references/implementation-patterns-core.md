@@ -371,6 +371,17 @@ Stream<T> streamWithAbortMonitoring<T>({
 - **Stream format**: Some packages use NDJSON, others use SSE
 - **Error mapping**: Exception types are package-specific
 
+### Security: URL Redaction
+
+When logging URLs in streaming methods, ensure credential query parameters are redacted.
+Use the `Redactor` utility to mask sensitive values before logging:
+
+```dart
+final redactor = Redactor(redactionList: const ['key', 'access_token']);
+final safeUrl = redactor.redactString(request.url.toString());
+logger.info('REQUEST $safeUrl');
+```
+
 ---
 
 ## PR Templates
