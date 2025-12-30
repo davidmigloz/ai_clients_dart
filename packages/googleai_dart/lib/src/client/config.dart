@@ -128,6 +128,8 @@ class GoogleAIConfig {
       'password',
       'secret',
       'bearer',
+      'key', // API key query param
+      'access_token', // Ephemeral token query param
     ],
   });
 
@@ -157,6 +159,8 @@ class GoogleAIConfig {
       'password',
       'secret',
       'bearer',
+      'key', // API key query param
+      'access_token', // Ephemeral token query param
     ],
   }) : this(
          baseUrl: 'https://generativelanguage.googleapis.com',
@@ -204,6 +208,8 @@ class GoogleAIConfig {
       'password',
       'secret',
       'bearer',
+      'key', // API key query param
+      'access_token', // Ephemeral token query param
     ],
   }) : this(
          baseUrl: 'https://$location-aiplatform.googleapis.com',

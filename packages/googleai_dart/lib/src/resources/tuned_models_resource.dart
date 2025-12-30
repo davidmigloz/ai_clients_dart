@@ -1,12 +1,8 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:logging/logging.dart';
 
-import '../auth/auth_provider.dart';
 import '../client/config.dart';
-import '../errors/exceptions.dart';
 import '../models/batch/embed_content_batch.dart';
 import '../models/batch/generate_content_batch.dart';
 import '../models/generation/generate_content_request.dart';
@@ -19,6 +15,7 @@ import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
 import 'operations_resource.dart';
 import 'permissions_resource.dart';
+import 'streaming_resource.dart';
 
 /// Resource for the Tuned Models API.
 ///
@@ -29,7 +26,7 @@ import 'permissions_resource.dart';
 /// Vertex AI has a different tuning API structure.
 ///
 /// See: https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/tuning
-class TunedModelsResource extends ResourceBase {
+class TunedModelsResource extends ResourceBase with StreamingResource {
   /// Creates a [TunedModelsResource].
   TunedModelsResource({
     required super.config,
@@ -119,36 +116,9 @@ class TunedModelsResource extends ResourceBase {
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
 
-    // Apply interceptor logic manually for streaming
-    // 1. Auth: Get credentials from provider and add authentication
-    final credentials = config.authProvider != null
-        ? await config.authProvider!.getCredentials()
-        : null;
-    httpRequest = _applyAuthToRequestSync(httpRequest, credentials);
-
-    // 2. Logging: Add request ID and log request
-    httpRequest = _applyLoggingToRequest(httpRequest);
-
-    // 3. Send streaming request (no retry for streams currently)
-    http.StreamedResponse streamedResponse;
-    try {
-      streamedResponse = await httpClient.send(httpRequest);
-
-      // Check for HTTP errors before processing stream
-      if (streamedResponse.statusCode >= 400) {
-        // Convert streamed response to regular response for error handling
-        final response = await http.Response.fromStream(streamedResponse);
-        // This will throw the appropriate exception
-        throw _mapHttpErrorForStreaming(response);
-      }
-    } catch (e) {
-      // Log error
-      _logStreamError(
-        e,
-        httpRequest.headers['X-Request-ID'] ?? generateRequestId(),
-      );
-      rethrow;
-    }
+    // Use mixin methods for streaming request handling
+    httpRequest = await prepareStreamingRequest(httpRequest);
+    final streamedResponse = await sendStreamingRequest(httpRequest);
 
     // Parse SSE stream
     final lineStream = bytesToLines(streamedResponse.stream);
@@ -160,80 +130,18 @@ class TunedModelsResource extends ResourceBase {
 
     if (abortTrigger != null) {
       // Monitor abort trigger during streaming
-      yield* _streamWithAbortMonitoring(jsonStream, abortTrigger, requestId);
+      yield* streamWithAbortMonitoring(
+        source: jsonStream,
+        abortTrigger: abortTrigger,
+        requestId: requestId,
+        fromJson: GenerateContentResponse.fromJson,
+      );
     } else {
       // No abort trigger, stream normally
       await for (final json in jsonStream) {
         yield GenerateContentResponse.fromJson(json);
       }
     }
-  }
-
-  /// Helper to monitor abort trigger while streaming.
-  Stream<GenerateContentResponse> _streamWithAbortMonitoring(
-    Stream<Map<String, dynamic>> jsonStream,
-    Future<void> abortTrigger,
-    String requestId,
-  ) {
-    late StreamController<GenerateContentResponse> controller;
-    late StreamSubscription<Map<String, dynamic>> subscription;
-    var aborted = false;
-    var controllerClosed = false; // Track controller state
-
-    controller = StreamController<GenerateContentResponse>(
-      onListen: () {
-        // Initialize subscription FIRST (fixes race condition)
-        subscription = jsonStream.listen(
-          (json) {
-            if (!aborted && !controllerClosed) {
-              controller.add(GenerateContentResponse.fromJson(json));
-            }
-          },
-          onError: (Object error, StackTrace stackTrace) {
-            if (!aborted && !controllerClosed) {
-              controller.addError(error, stackTrace);
-            }
-          },
-          onDone: () {
-            if (!aborted && !controllerClosed) {
-              controllerClosed = true;
-              unawaited(controller.close());
-            }
-          },
-          cancelOnError: true,
-        );
-
-        // THEN register abort handler (fixes race condition)
-        unawaited(
-          abortTrigger.then((_) {
-            if (!aborted && !controllerClosed) {
-              aborted = true;
-              // Immediately cancel upstream subscription
-              unawaited(subscription.cancel());
-              // Double-check before adding error
-              if (!controller.isClosed) {
-                controller.addError(
-                  AbortedException(
-                    message: 'Stream aborted by user',
-                    correlationId: requestId,
-                    timestamp: DateTime.now(),
-                    stage: AbortionStage.duringStream,
-                  ),
-                );
-                controllerClosed = true;
-                unawaited(controller.close());
-              }
-            }
-          }),
-        );
-      },
-      onCancel: () {
-        controllerClosed = true; // Mark as closed BEFORE cancelling
-        return subscription.cancel();
-      },
-    );
-
-    return controller.stream;
   }
 
   /// Creates a batch of generate content requests using a tuned model.
@@ -467,175 +375,5 @@ class TunedModelsResource extends ResourceBase {
       interceptorChain: interceptorChain,
       requestBuilder: requestBuilder,
     );
-  }
-
-  // Helper methods for streaming (copied from GoogleAIClient)
-
-  /// Applies authentication to a request (mirrors AuthInterceptor logic).
-  ///
-  /// Note: This is synchronous for streaming requests. The auth provider's
-  /// `getCredentials()` must be awaited by the caller before passing credentials here.
-  http.Request _applyAuthToRequestSync(
-    http.Request request,
-    AuthCredentials? credentials,
-  ) {
-    if (credentials == null) return request;
-
-    return switch (credentials) {
-      ApiKeyCredentials(:final apiKey, :final placement) => _addApiKey(
-        request,
-        apiKey,
-        placement,
-      ),
-      BearerTokenCredentials(:final token) => _addBearerToken(request, token),
-      EphemeralTokenCredentials(:final token) => _addEphemeralToken(
-        request,
-        token,
-      ),
-      NoAuthCredentials() => request,
-    };
-  }
-
-  /// Adds ephemeral token to request as query parameter.
-  http.Request _addEphemeralToken(http.Request request, String token) {
-    final uri = request.url;
-    if (uri.queryParameters.containsKey('access_token')) {
-      return request;
-    }
-    final queryParams = Map<String, dynamic>.from(uri.queryParameters);
-    queryParams['access_token'] = token;
-    final newUri = uri.replace(queryParameters: queryParams);
-
-    return http.Request(request.method, newUri)
-      ..headers.addAll(request.headers)
-      ..bodyBytes = request.bodyBytes
-      ..encoding = request.encoding;
-  }
-
-  /// Adds API key to request based on placement strategy.
-  http.Request _addApiKey(
-    http.Request request,
-    String apiKey,
-    AuthPlacement placement,
-  ) {
-    if (placement == AuthPlacement.header) {
-      // Add as header (only if not already present)
-      if (!request.headers.containsKey('X-Goog-Api-Key')) {
-        return http.Request(request.method, request.url)
-          ..headers.addAll(request.headers)
-          ..headers['X-Goog-Api-Key'] = apiKey
-          ..bodyBytes = request.bodyBytes
-          ..encoding = request.encoding;
-      }
-    } else {
-      // Add as query parameter (only if not already present)
-      final uri = request.url;
-      if (!uri.queryParameters.containsKey('key')) {
-        final queryParams = Map<String, dynamic>.from(uri.queryParameters);
-        queryParams['key'] = apiKey;
-        final newUri = uri.replace(queryParameters: queryParams);
-
-        return http.Request(request.method, newUri)
-          ..headers.addAll(request.headers)
-          ..bodyBytes = request.bodyBytes
-          ..encoding = request.encoding;
-      }
-    }
-
-    return request;
-  }
-
-  /// Adds Bearer token to request headers.
-  http.Request _addBearerToken(http.Request request, String bearerToken) {
-    // Add Bearer token (only if not already present)
-    if (!request.headers.containsKey('Authorization')) {
-      return http.Request(request.method, request.url)
-        ..headers.addAll(request.headers)
-        ..headers['Authorization'] = 'Bearer $bearerToken'
-        ..bodyBytes = request.bodyBytes
-        ..encoding = request.encoding;
-    }
-
-    return request;
-  }
-
-  /// Applies logging to a request (mirrors LoggingInterceptor logic).
-  http.Request _applyLoggingToRequest(http.Request request) {
-    // Add X-Request-ID if not present
-    if (!request.headers.containsKey('X-Request-ID')) {
-      final requestId = 'req_${DateTime.now().millisecondsSinceEpoch}';
-      final updatedRequest = http.Request(request.method, request.url)
-        ..headers.addAll(request.headers)
-        ..headers['X-Request-ID'] = requestId
-        ..bodyBytes = request.bodyBytes
-        ..encoding = request.encoding;
-
-      // Log request if logging is enabled
-      if (config.logLevel.value <= Level.INFO.value) {
-        Logger(
-          'GoogleAI.HTTP',
-        ).info('REQUEST [$requestId] ${request.method} ${request.url}');
-      }
-
-      return updatedRequest;
-    }
-
-    return request;
-  }
-
-  /// Maps HTTP errors for streaming (mirrors ErrorInterceptor logic).
-  GoogleAIException _mapHttpErrorForStreaming(http.Response response) {
-    final statusCode = response.statusCode;
-    final body = response.body;
-
-    // Try to parse error details from response body
-    var message = 'HTTP $statusCode error';
-    final details = <Object>[];
-
-    try {
-      final errorDetails = jsonDecode(body);
-      if (errorDetails is Map<String, dynamic>) {
-        final error = errorDetails['error'] as Map<String, dynamic>?;
-        message = error?['message']?.toString() ?? message;
-        if (error?['details'] != null) {
-          final errorDetailsList = error!['details'];
-          if (errorDetailsList is List) {
-            details.addAll(errorDetailsList.cast<Object>());
-          }
-        }
-      }
-    } catch (_) {
-      if (body.length < 200 && body.isNotEmpty) {
-        message = body;
-      }
-    }
-
-    // Map to specific exception types
-    if (statusCode == 429) {
-      DateTime? retryAfter;
-      final retryHeader = response.headers['retry-after'];
-      if (retryHeader != null) {
-        final seconds = int.tryParse(retryHeader);
-        if (seconds != null) {
-          retryAfter = DateTime.now().add(Duration(seconds: seconds));
-        }
-      }
-
-      return RateLimitException(
-        code: statusCode,
-        message: message,
-        details: details,
-        retryAfter: retryAfter,
-      );
-    }
-
-    return ApiException(code: statusCode, message: message, details: details);
-  }
-
-  /// Logs streaming errors.
-  void _logStreamError(Object error, String requestId) {
-    if (config.logLevel.value <= Level.SEVERE.value) {
-      Logger('GoogleAI.HTTP').severe('STREAM ERROR [$requestId] $error', error);
-    }
   }
 }

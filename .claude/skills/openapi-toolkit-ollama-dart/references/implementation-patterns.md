@@ -217,60 +217,55 @@ class ChatResource extends ResourceBase {
 
 ## Streaming Patterns
 
+See also: [Streaming Patterns](../../../shared/openapi-toolkit/references/implementation-patterns-core.md#streaming-patterns) in core patterns.
+
+### StreamingResource Mixin
+
+Resources with streaming methods use the `StreamingResource` mixin:
+
+```dart
+class ChatResource extends ResourceBase with StreamingResource {
+  // Non-streaming methods use interceptorChain as normal
+  // Streaming methods use mixin helpers
+}
+```
+
 ### NDJSON Streaming
 
 Ollama uses NDJSON (newline-delimited JSON) for streaming responses:
 
 ```dart
 /// Creates a streaming chat completion.
-Stream<GenerateChatCompletionResponse> createStream({
-  required String model,
-  required List<Message> messages,
-  ...
-}) async* {
-  final request = GenerateChatCompletionRequest(
-    model: model,
-    messages: messages,
-    stream: true,  // Enable streaming
-  );
-
+Stream<ChatStreamEvent> createStream({required ChatRequest request}) async* {
   final url = requestBuilder.buildUrl('/api/chat');
   final headers = requestBuilder.buildHeaders(
     additionalHeaders: {'Content-Type': 'application/json'},
   );
-  final httpRequest = http.Request('POST', url)
+
+  // Ensure stream is true for streaming
+  final requestData = request.copyWith(stream: true);
+
+  var httpRequest = http.Request('POST', url)
     ..headers.addAll(headers)
-    ..body = jsonEncode(request.toJson());
+    ..body = jsonEncode(requestData.toJson());
 
-  final streamedResponse = await httpClient.send(httpRequest);
+  // Use mixin methods for streaming request handling
+  httpRequest = await prepareStreamingRequest(httpRequest);
+  final streamedResponse = await sendStreamingRequest(httpRequest);
 
-  yield* streamedResponse.stream
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .where((line) => line.isNotEmpty)
-      .map((line) => GenerateChatCompletionResponse.fromJson(
-        jsonDecode(line) as Map<String, dynamic>,
-      ));
-}
-```
-
-### Stream Transformer
-
-```dart
-/// Transforms byte stream to NDJSON lines.
-class NdjsonStreamTransformer
-    extends StreamTransformerBase<List<int>, String> {
-  const NdjsonStreamTransformer();
-
-  @override
-  Stream<String> bind(Stream<List<int>> stream) {
-    return stream
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .where((line) => line.isNotEmpty);
+  // Parse NDJSON stream
+  await for (final json in parseNDJSON(streamedResponse.stream)) {
+    yield ChatStreamEvent.fromJson(json);
   }
 }
 ```
+
+### Auth Handling
+
+The `StreamingResource` mixin handles two credential types for ollama_dart:
+
+- `BearerTokenCredentials` - adds `Authorization: Bearer <token>` header
+- `NoAuthCredentials` - no authentication applied
 
 ---
 

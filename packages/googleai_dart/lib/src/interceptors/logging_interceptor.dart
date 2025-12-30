@@ -121,8 +121,9 @@ class LoggingInterceptor implements Interceptor {
   void _logRequest(http.BaseRequest request, String requestId) {
     if (logger.level <= Level.INFO) {
       final headers = redactor.redactMap(request.headers);
+      final safeUrl = redactor.redactString(request.url.toString());
       logger
-        ..info('REQUEST [$requestId] ${request.method} ${request.url}')
+        ..info('REQUEST [$requestId] ${request.method} $safeUrl')
         ..fine('Headers: $headers');
     }
   }
