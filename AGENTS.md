@@ -98,3 +98,29 @@ This repository uses [Conventional Commits](https://www.conventionalcommits.org/
 melos version    # Bump versions based on conventional commits, update changelogs
 melos publish    # Publish packages to pub.dev
 ```
+
+## GitHub
+
+### Labels
+
+When creating issues or pull requests, you **must** always set the following labels:
+
+- **`p:{package}`** (required) - The package(s) affected (e.g., `p:openai_dart`, `p:googleai_dart`)
+- **`t:{type}`** (required) - The type of issue/PR (e.g., `t:bug`, `t:feature`, `t:enhancement`)
+- **`f:{flag}`** (optional) - Additional flags (e.g., `f:help-wanted`, `f:good-first-issue`)
+
+To list all available labels:
+
+```bash
+gh label list --repo davidmigloz/ai_clients_dart
+```
+
+### Assignees
+
+Issues and pull requests should be assigned to the code owner of the affected code. Code owners are defined in `.github/CODEOWNERS`.
+
+To find the code owner for a path:
+
+```bash
+cat .github/CODEOWNERS
+```
