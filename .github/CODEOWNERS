@@ -1,0 +1,18 @@
+# CODEOWNERS - https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# These owners will be automatically requested for review when someone opens
+# a pull request that modifies code that they own.
+
+# Default owner for everything in the repository
+* @davidmigloz
+
+# Packages
+/packages/anthropic_sdk_dart/    @davidmigloz
+/packages/chromadb/              @davidmigloz
+/packages/googleai_dart/         @davidmigloz
+/packages/mistralai_dart/        @davidmigloz
+/packages/ollama_dart/           @davidmigloz
+/packages/openai_dart/           @davidmigloz
+/packages/openai_realtime_dart/  @davidmigloz
+/packages/tavily_dart/           @davidmigloz
+/packages/vertex_ai/             @davidmigloz
