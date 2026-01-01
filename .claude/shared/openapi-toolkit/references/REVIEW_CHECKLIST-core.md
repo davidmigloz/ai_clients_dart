@@ -47,6 +47,14 @@ For resources with streaming methods:
 - [ ] `sendStreamingRequest()` handles HTTP errors before streaming
 - [ ] Abort monitoring tested (if applicable)
 
+### Multipart Upload Resources
+For resources with file uploads using `MultipartRequest`:
+- [ ] Has `_applyAuthentication()` helper method
+- [ ] Calls `_applyAuthentication(request)` before `httpClient.send()`
+- [ ] Removes `content-type` header (multipart sets its own boundary)
+- [ ] Handles HTTP errors with proper exception mapping
+- [ ] Imports `AuthProvider` and credential types
+
 ---
 
 ## Cross-Reference Verification

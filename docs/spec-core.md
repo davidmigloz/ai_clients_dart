@@ -139,6 +139,23 @@ Streaming responses (SSE) cannot pass through the full interceptor chain since `
 
 This is an acceptable tradeoff for real-time streaming while maintaining security.
 
+### Multipart Uploads
+
+Like streaming, multipart form uploads use `httpClient.send()` directly, bypassing the interceptor chain.
+
+**Pattern**: Resources with multipart uploads must:
+1. Include an `_applyAuthentication(http.BaseRequest request)` helper
+2. Call it before `httpClient.send(request)`
+3. Handle HTTP errors manually with proper exception mapping
+
+```dart
+// CRITICAL: Apply auth before sending multipart requests
+await _applyAuthentication(request);
+final response = await httpClient.send(request);
+```
+
+**Common mistake**: Forgetting to apply auth to multipart/streaming requests results in `401 Unauthorized`.
+
 ### Request Cancellation
 
 Requests can be canceled via `abortTrigger` parameter:

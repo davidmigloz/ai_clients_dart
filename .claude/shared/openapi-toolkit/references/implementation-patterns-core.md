@@ -384,6 +384,155 @@ logger.info('REQUEST $safeUrl');
 
 ---
 
+## Multipart Upload Patterns
+
+### Why Multipart Bypasses Interceptors
+
+Like streaming, multipart form uploads use `httpClient.send()` directly with `MultipartRequest`, which bypasses the interceptor chain. Resources with multipart uploads must:
+
+1. Apply authentication manually to the `MultipartRequest`
+2. Send via `httpClient.send()` to get `StreamedResponse`
+3. Check status and map errors before consuming response
+
+### Authentication Helper Pattern
+
+Every resource that uses `httpClient.send()` directly (streaming or multipart) needs this helper:
+
+> **Note**: Streaming resources use the `StreamingResource` mixin because multiple resources need streaming (messages, batches, completions). For multipart uploads, which are typically isolated to a single resource (e.g., FilesResource), a private helper method is sufficient and avoids over-abstraction.
+
+```dart
+/// Applies authentication to a request that bypasses the interceptor chain.
+Future<void> _applyAuthentication(http.BaseRequest request) async {
+  final provider = requestBuilder.config.authProvider;
+  if (provider == null) return;
+
+  final credentials = await provider.getCredentials();
+  switch (credentials) {
+    case ApiKeyCredentials(:final apiKey):
+      if (!request.headers.containsKey('x-api-key')) {
+        request.headers['x-api-key'] = apiKey;
+      }
+    case BearerTokenCredentials(:final token):
+      if (!request.headers.containsKey('authorization')) {
+        request.headers['authorization'] = 'Bearer $token';
+      }
+    case NoAuthCredentials():
+      break;
+  }
+}
+```
+
+### Multipart Upload Example
+
+```dart
+Future<FileMetadata> upload({
+  required Uint8List bytes,
+  required String fileName,
+}) async {
+  final uri = requestBuilder.buildUrl('/v1/files');
+  final headers = requestBuilder.buildHeaders()
+    ..remove('content-type'); // Multipart sets its own
+
+  final request = http.MultipartRequest('POST', uri)
+    ..headers.addAll(headers)
+    ..files.add(http.MultipartFile.fromBytes('file', bytes, filename: fileName));
+
+  // CRITICAL: Apply authentication manually
+  await _applyAuthentication(request);
+
+  final streamedResponse = await httpClient.send(request);
+  final response = await http.Response.fromStream(streamedResponse);
+
+  if (response.statusCode >= 400) {
+    _throwError(response);
+  }
+
+  return FileMetadata.fromJson(jsonDecode(response.body));
+}
+```
+
+### Common Mistake
+
+**Wrong**: Forgetting to apply auth to multipart requests
+```dart
+// BROKEN - Missing authentication!
+final request = http.MultipartRequest('POST', uri)..headers.addAll(headers);
+final response = await httpClient.send(request); // 401 Unauthorized
+```
+
+**Right**: Always apply authentication before sending
+```dart
+final request = http.MultipartRequest('POST', uri)..headers.addAll(headers);
+await _applyAuthentication(request);  // <-- Don't forget!
+final response = await httpClient.send(request);
+```
+
+---
+
+---
+
+## Integration Test Patterns
+
+### Using Real Data
+
+For integration tests that require real data (images, files, etc.), don't use inline placeholders:
+
+**Wrong**: Invalid inline data that API rejects
+```dart
+// BROKEN - API rejects this tiny invalid image
+const base64Image = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB...';
+```
+
+**Right**: Fetch real data from a reliable source
+```dart
+test('analyzes image from base64', () async {
+  // Fetch a real image and convert to base64
+  final imageUrl = Uri.parse('https://example.com/real-image.jpg');
+  final imageResponse = await http.get(imageUrl);
+
+  // Gracefully skip if external resource unavailable
+  if (imageResponse.statusCode != 200) {
+    markTestSkipped('Could not fetch test image');
+    return;
+  }
+
+  final imageBase64 = base64Encode(imageResponse.bodyBytes);
+  // Now test with valid base64 data
+});
+```
+
+### Graceful Skip Pattern
+
+Integration tests should handle external dependencies gracefully:
+
+```dart
+test('uploads file', () async {
+  // Skip if API key not available
+  if (apiKey == null) {
+    markTestSkipped('API key not available');
+    return;
+  }
+
+  // Skip if test file not available
+  final testFile = File('test/fixtures/sample.pdf');
+  if (!testFile.existsSync()) {
+    markTestSkipped('Test file not found');
+    return;
+  }
+
+  // Proceed with test...
+});
+```
+
+### Test Fixture Guidelines
+
+1. **Don't inline large binary data** - Use files or fetch from URLs
+2. **Handle rate limits** - External services may rate limit test fetches
+3. **Use stable URLs** - Prefer stable CDN URLs over dynamic sources
+4. **Skip gracefully** - Use `markTestSkipped()` for unavailable dependencies
+
+---
+
 ## PR Templates
 
 ### New Model PR
