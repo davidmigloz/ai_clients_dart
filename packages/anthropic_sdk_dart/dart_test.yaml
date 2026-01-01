@@ -1,0 +1,8 @@
+# Test configuration for anthropic_sdk_dart
+#
+# Integration tests require ANTHROPIC_API_KEY environment variable.
+# Run with: dart test --tags=integration
+
+tags:
+  integration:
+    # Register the integration tag to suppress warnings

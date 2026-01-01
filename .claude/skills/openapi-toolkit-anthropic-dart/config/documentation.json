@@ -1,0 +1,17 @@
+{
+  "removed_apis": [],
+  "tool_properties": {
+    "tools": {
+      "description": "Tool use / function calling",
+      "search_terms": ["tool use", "function calling", "tools"]
+    }
+  },
+  "excluded_resources": ["base_resource"],
+  "resource_to_example": {
+    "messages": "messages",
+    "models": "models",
+    "batches": "batches"
+  },
+  "excluded_from_examples": [],
+  "drift_patterns": []
+}
