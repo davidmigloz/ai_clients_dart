@@ -1,0 +1,29 @@
+{
+  "categories": {
+    "messages": {
+      "patterns": ["message", "content", "block"],
+      "directory": "messages"
+    },
+    "models": {
+      "patterns": ["model"],
+      "directory": "models"
+    },
+    "batches": {
+      "patterns": ["batch"],
+      "directory": "batches"
+    },
+    "tools": {
+      "patterns": ["tool", "function"],
+      "directory": "tools"
+    },
+    "metadata": {
+      "patterns": ["usage", "stop", "reason", "error"],
+      "directory": "metadata"
+    }
+  },
+  "default_category": "common",
+  "parent_model_patterns": {
+    "Message": [".*Block$", ".*Content$"],
+    "Tool": [".*Input$", ".*Result$"]
+  }
+}

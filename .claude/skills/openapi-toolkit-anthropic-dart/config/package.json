@@ -1,0 +1,13 @@
+{
+  "name": "anthropic_sdk_dart",
+  "display_name": "Anthropic",
+  "barrel_file": "lib/anthropic_sdk_dart.dart",
+  "models_dir": "lib/src/models",
+  "resources_dir": "lib/src/resources",
+  "tests_dir": "test/unit/models",
+  "examples_dir": "example",
+  "skip_files": ["copy_with_sentinel.dart"],
+  "internal_barrel_files": [],
+  "pr_title_prefix": "feat(anthropic_sdk_dart)",
+  "changelog_title": "Anthropic API Changelog"
+}

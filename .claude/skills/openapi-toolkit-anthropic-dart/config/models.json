@@ -1,0 +1,25 @@
+{
+  "critical_models": [
+    {
+      "name": "Message",
+      "file": "lib/src/models/messages/message.dart",
+      "spec_schema": "Message"
+    },
+    {
+      "name": "MessageCreateRequest",
+      "file": "lib/src/models/messages/message_create_request.dart",
+      "spec_schema": "CreateMessageRequest"
+    },
+    {
+      "name": "ContentBlock",
+      "file": "lib/src/models/messages/content_block.dart",
+      "spec_schema": "ContentBlock"
+    },
+    {
+      "name": "Tool",
+      "file": "lib/src/models/tools/tool.dart",
+      "spec_schema": "Tool"
+    }
+  ],
+  "expected_properties": {}
+}
