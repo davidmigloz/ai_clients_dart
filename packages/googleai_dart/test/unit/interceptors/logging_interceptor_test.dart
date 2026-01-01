@@ -267,10 +267,7 @@ void main() {
           requestLogs.any((r) => r.message.contains('secret-api-key')),
           isFalse,
         );
-        expect(
-          requestLogs.any((r) => r.message.contains('REDACTED')),
-          isTrue,
-        );
+        expect(requestLogs.any((r) => r.message.contains('REDACTED')), isTrue);
       });
 
       test('redacts access_token from URL query parameters', () async {
@@ -300,10 +297,7 @@ void main() {
           requestLogs.any((r) => r.message.contains('secret-token')),
           isFalse,
         );
-        expect(
-          requestLogs.any((r) => r.message.contains('REDACTED')),
-          isTrue,
-        );
+        expect(requestLogs.any((r) => r.message.contains('REDACTED')), isTrue);
       });
 
       test('redacts response body with sensitive data', () async {

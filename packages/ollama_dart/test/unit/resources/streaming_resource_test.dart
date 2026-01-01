@@ -34,7 +34,9 @@ void main() {
   late TestStreamingResource resource;
 
   setUpAll(() {
-    registerFallbackValue(http.Request('GET', Uri.parse('https://example.com')));
+    registerFallbackValue(
+      http.Request('GET', Uri.parse('https://example.com')),
+    );
   });
 
   setUp(() {
@@ -77,10 +79,7 @@ void main() {
 
       test('extracts error message from JSON body', () {
         resource = createResource();
-        final response = http.Response(
-          '{"error": "Model not found"}',
-          404,
-        );
+        final response = http.Response('{"error": "Model not found"}', 404);
 
         final exception = resource.testMapHttpError(response);
 
@@ -144,9 +143,9 @@ void main() {
     group('prepareStreamingRequest', () {
       test('applies BearerTokenCredentials to request header', () async {
         final authProvider = MockAuthProvider();
-        when(authProvider.getCredentials).thenAnswer(
-          (_) async => const BearerTokenCredentials('test-token'),
-        );
+        when(
+          authProvider.getCredentials,
+        ).thenAnswer((_) async => const BearerTokenCredentials('test-token'));
 
         resource = createResource(authProvider: authProvider);
         final request = http.Request(
@@ -161,9 +160,9 @@ void main() {
 
       test('passes through request unchanged with NoAuthCredentials', () async {
         final authProvider = MockAuthProvider();
-        when(authProvider.getCredentials).thenAnswer(
-          (_) async => const NoAuthCredentials(),
-        );
+        when(
+          authProvider.getCredentials,
+        ).thenAnswer((_) async => const NoAuthCredentials());
 
         resource = createResource(authProvider: authProvider);
         final request = http.Request(
@@ -226,8 +225,9 @@ void main() {
           Stream.value([]),
           200,
         );
-        when(() => mockHttpClient.send(any()))
-            .thenAnswer((_) async => mockStreamedResponse);
+        when(
+          () => mockHttpClient.send(any()),
+        ).thenAnswer((_) async => mockStreamedResponse);
 
         final response = await resource.sendStreamingRequest(request);
 
@@ -245,8 +245,9 @@ void main() {
           Stream.value('{"error": "Bad request"}'.codeUnits),
           400,
         );
-        when(() => mockHttpClient.send(any()))
-            .thenAnswer((_) async => mockStreamedResponse);
+        when(
+          () => mockHttpClient.send(any()),
+        ).thenAnswer((_) async => mockStreamedResponse);
 
         expect(
           () => resource.sendStreamingRequest(request),
@@ -266,8 +267,9 @@ void main() {
           429,
           headers: {'retry-after': '30'},
         );
-        when(() => mockHttpClient.send(any()))
-            .thenAnswer((_) async => mockStreamedResponse);
+        when(
+          () => mockHttpClient.send(any()),
+        ).thenAnswer((_) async => mockStreamedResponse);
 
         expect(
           () => resource.sendStreamingRequest(request),
