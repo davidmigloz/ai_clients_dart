@@ -36,7 +36,9 @@ void main() {
   late TestStreamingResource resource;
 
   setUpAll(() {
-    registerFallbackValue(http.Request('GET', Uri.parse('https://example.com')));
+    registerFallbackValue(
+      http.Request('GET', Uri.parse('https://example.com')),
+    );
   });
 
   setUp(() {
@@ -164,45 +166,51 @@ void main() {
     });
 
     group('prepareStreamingRequest', () {
-      test('applies ApiKeyCredentials via header (default placement)', () async {
-        final authProvider = MockAuthProvider();
-        when(authProvider.getCredentials).thenAnswer(
-          (_) async => const ApiKeyCredentials(
-            'test-api-key',
-            placement: AuthPlacement.header,
-          ),
-        );
+      test(
+        'applies ApiKeyCredentials via header (default placement)',
+        () async {
+          final authProvider = MockAuthProvider();
+          when(authProvider.getCredentials).thenAnswer(
+            (_) async => const ApiKeyCredentials(
+              'test-api-key',
+              placement: AuthPlacement.header,
+            ),
+          );
 
-        resource = createResource(authProvider: authProvider);
-        final request = http.Request(
-          'POST',
-          Uri.parse('https://generativelanguage.googleapis.com/v1/models'),
-        );
+          resource = createResource(authProvider: authProvider);
+          final request = http.Request(
+            'POST',
+            Uri.parse('https://generativelanguage.googleapis.com/v1/models'),
+          );
 
-        final prepared = await resource.prepareStreamingRequest(request);
+          final prepared = await resource.prepareStreamingRequest(request);
 
-        expect(prepared.headers['X-Goog-Api-Key'], 'test-api-key');
-      });
+          expect(prepared.headers['X-Goog-Api-Key'], 'test-api-key');
+        },
+      );
 
-      test('applies ApiKeyCredentials via query param when specified', () async {
-        final authProvider = MockAuthProvider();
-        when(authProvider.getCredentials).thenAnswer(
-          (_) async => const ApiKeyCredentials(
-            'test-api-key',
-            placement: AuthPlacement.queryParam,
-          ),
-        );
+      test(
+        'applies ApiKeyCredentials via query param when specified',
+        () async {
+          final authProvider = MockAuthProvider();
+          when(authProvider.getCredentials).thenAnswer(
+            (_) async => const ApiKeyCredentials(
+              'test-api-key',
+              placement: AuthPlacement.queryParam,
+            ),
+          );
 
-        resource = createResource(authProvider: authProvider);
-        final request = http.Request(
-          'POST',
-          Uri.parse('https://generativelanguage.googleapis.com/v1/models'),
-        );
+          resource = createResource(authProvider: authProvider);
+          final request = http.Request(
+            'POST',
+            Uri.parse('https://generativelanguage.googleapis.com/v1/models'),
+          );
 
-        final prepared = await resource.prepareStreamingRequest(request);
+          final prepared = await resource.prepareStreamingRequest(request);
 
-        expect(prepared.url.queryParameters['key'], 'test-api-key');
-      });
+          expect(prepared.url.queryParameters['key'], 'test-api-key');
+        },
+      );
 
       test('applies BearerTokenCredentials to Authorization header', () async {
         final authProvider = MockAuthProvider();
@@ -235,14 +243,17 @@ void main() {
 
         final prepared = await resource.prepareStreamingRequest(request);
 
-        expect(prepared.url.queryParameters['access_token'], 'ephemeral-token-123');
+        expect(
+          prepared.url.queryParameters['access_token'],
+          'ephemeral-token-123',
+        );
       });
 
       test('passes through request unchanged with NoAuthCredentials', () async {
         final authProvider = MockAuthProvider();
-        when(authProvider.getCredentials).thenAnswer(
-          (_) async => const NoAuthCredentials(),
-        );
+        when(
+          authProvider.getCredentials,
+        ).thenAnswer((_) async => const NoAuthCredentials());
 
         resource = createResource(authProvider: authProvider);
         final request = http.Request(
@@ -295,8 +306,9 @@ void main() {
           Stream.value([]),
           200,
         );
-        when(() => mockHttpClient.send(any()))
-            .thenAnswer((_) async => mockStreamedResponse);
+        when(
+          () => mockHttpClient.send(any()),
+        ).thenAnswer((_) async => mockStreamedResponse);
 
         final response = await resource.sendStreamingRequest(request);
 
@@ -314,8 +326,9 @@ void main() {
           Stream.value('{"error": {"message": "Bad request"}}'.codeUnits),
           400,
         );
-        when(() => mockHttpClient.send(any()))
-            .thenAnswer((_) async => mockStreamedResponse);
+        when(
+          () => mockHttpClient.send(any()),
+        ).thenAnswer((_) async => mockStreamedResponse);
 
         expect(
           () => resource.sendStreamingRequest(request),
@@ -335,8 +348,9 @@ void main() {
           429,
           headers: {'retry-after': '30'},
         );
-        when(() => mockHttpClient.send(any()))
-            .thenAnswer((_) async => mockStreamedResponse);
+        when(
+          () => mockHttpClient.send(any()),
+        ).thenAnswer((_) async => mockStreamedResponse);
 
         expect(
           () => resource.sendStreamingRequest(request),
@@ -356,12 +370,14 @@ void main() {
         ];
         final source = Stream.fromIterable(sourceItems);
 
-        final results = await resource.streamWithAbortMonitoring<Map<String, dynamic>>(
-          source: source,
-          abortTrigger: abortCompleter.future,
-          requestId: 'test-123',
-          fromJson: (json) => json,
-        ).toList();
+        final results = await resource
+            .streamWithAbortMonitoring<Map<String, dynamic>>(
+              source: source,
+              abortTrigger: abortCompleter.future,
+              requestId: 'test-123',
+              fromJson: (json) => json,
+            )
+            .toList();
 
         expect(results, hasLength(3));
         expect(results[0]['value'], 'first');
@@ -369,46 +385,51 @@ void main() {
         expect(results[2]['value'], 'third');
       });
 
-      test('stops yielding and throws AbortedException when triggered', () async {
-        resource = createResource();
-        final abortCompleter = Completer<void>();
+      test(
+        'stops yielding and throws AbortedException when triggered',
+        () async {
+          resource = createResource();
+          final abortCompleter = Completer<void>();
 
-        // Create a slow stream that we can abort mid-way
-        final controller = StreamController<Map<String, dynamic>>();
+          // Create a slow stream that we can abort mid-way
+          final controller = StreamController<Map<String, dynamic>>();
 
-        final results = <Map<String, dynamic>>[];
-        Object? caughtError;
+          final results = <Map<String, dynamic>>[];
+          Object? caughtError;
 
-        // Start consuming the stream
-        final subscription = resource.streamWithAbortMonitoring<Map<String, dynamic>>(
-          source: controller.stream,
-          abortTrigger: abortCompleter.future,
-          requestId: 'test-456',
-          fromJson: (json) => json,
-        ).listen(
-          results.add,
-          onError: (Object error) {
-            caughtError = error;
-          },
-        );
+          // Start consuming the stream
+          final subscription = resource
+              .streamWithAbortMonitoring<Map<String, dynamic>>(
+                source: controller.stream,
+                abortTrigger: abortCompleter.future,
+                requestId: 'test-456',
+                fromJson: (json) => json,
+              )
+              .listen(
+                results.add,
+                onError: (Object error) {
+                  caughtError = error;
+                },
+              );
 
-        // Add first item
-        controller.add({'id': '1'});
-        await Future<void>.delayed(const Duration(milliseconds: 10));
+          // Add first item
+          controller.add({'id': '1'});
+          await Future<void>.delayed(const Duration(milliseconds: 10));
 
-        // Abort before more items
-        abortCompleter.complete();
-        await Future<void>.delayed(const Duration(milliseconds: 50));
+          // Abort before more items
+          abortCompleter.complete();
+          await Future<void>.delayed(const Duration(milliseconds: 50));
 
-        // Try to add more (should be ignored)
-        controller.add({'id': '2'});
+          // Try to add more (should be ignored)
+          controller.add({'id': '2'});
 
-        await subscription.cancel();
-        await controller.close();
+          await subscription.cancel();
+          await controller.close();
 
-        expect(results, hasLength(1));
-        expect(caughtError, isA<AbortedException>());
-      });
+          expect(results, hasLength(1));
+          expect(caughtError, isA<AbortedException>());
+        },
+      );
 
       test('emits AbortedException with duringStream stage', () async {
         resource = createResource();
@@ -417,17 +438,19 @@ void main() {
 
         Object? caughtError;
 
-        final subscription = resource.streamWithAbortMonitoring<Map<String, dynamic>>(
-          source: controller.stream,
-          abortTrigger: abortCompleter.future,
-          requestId: 'test-789',
-          fromJson: (json) => json,
-        ).listen(
-          (_) {},
-          onError: (Object error) {
-            caughtError = error;
-          },
-        );
+        final subscription = resource
+            .streamWithAbortMonitoring<Map<String, dynamic>>(
+              source: controller.stream,
+              abortTrigger: abortCompleter.future,
+              requestId: 'test-789',
+              fromJson: (json) => json,
+            )
+            .listen(
+              (_) {},
+              onError: (Object error) {
+                caughtError = error;
+              },
+            );
 
         // Trigger abort
         abortCompleter.complete();
@@ -448,17 +471,19 @@ void main() {
 
         Object? caughtError;
 
-        final subscription = resource.streamWithAbortMonitoring<Map<String, dynamic>>(
-          source: controller.stream,
-          abortTrigger: abortCompleter.future,
-          requestId: 'unique-request-id',
-          fromJson: (json) => json,
-        ).listen(
-          (_) {},
-          onError: (Object error) {
-            caughtError = error;
-          },
-        );
+        final subscription = resource
+            .streamWithAbortMonitoring<Map<String, dynamic>>(
+              source: controller.stream,
+              abortTrigger: abortCompleter.future,
+              requestId: 'unique-request-id',
+              fromJson: (json) => json,
+            )
+            .listen(
+              (_) {},
+              onError: (Object error) {
+                caughtError = error;
+              },
+            );
 
         abortCompleter.complete();
         await Future<void>.delayed(const Duration(milliseconds: 50));
@@ -478,17 +503,19 @@ void main() {
 
         Object? caughtError;
 
-        final subscription = resource.streamWithAbortMonitoring<Map<String, dynamic>>(
-          source: controller.stream,
-          abortTrigger: abortCompleter.future,
-          requestId: 'test-error',
-          fromJson: (json) => json,
-        ).listen(
-          (_) {},
-          onError: (Object error) {
-            caughtError = error;
-          },
-        );
+        final subscription = resource
+            .streamWithAbortMonitoring<Map<String, dynamic>>(
+              source: controller.stream,
+              abortTrigger: abortCompleter.future,
+              requestId: 'test-error',
+              fromJson: (json) => json,
+            )
+            .listen(
+              (_) {},
+              onError: (Object error) {
+                caughtError = error;
+              },
+            );
 
         // Add an error to the source stream
         controller.addError(Exception('Source stream error'));
@@ -510,12 +537,14 @@ void main() {
         ];
         final source = Stream.fromIterable(sourceItems);
 
-        final results = await resource.streamWithAbortMonitoring<String>(
-          source: source,
-          abortTrigger: abortCompleter.future,
-          requestId: 'test-converter',
-          fromJson: (json) => json['name'] as String,
-        ).toList();
+        final results = await resource
+            .streamWithAbortMonitoring<String>(
+              source: source,
+              abortTrigger: abortCompleter.future,
+              requestId: 'test-converter',
+              fromJson: (json) => json['name'] as String,
+            )
+            .toList();
 
         expect(results, ['Alice', 'Bob']);
       });
