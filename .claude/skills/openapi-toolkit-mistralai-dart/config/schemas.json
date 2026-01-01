@@ -1,0 +1,41 @@
+{
+  "categories": {
+    "chat": {
+      "patterns": ["chat", "completion", "choice", "delta"],
+      "directory": "chat"
+    },
+    "content": {
+      "patterns": ["content", "chunk", "image"],
+      "directory": "content"
+    },
+    "embeddings": {
+      "patterns": ["embed"],
+      "directory": "embeddings"
+    },
+    "fim": {
+      "patterns": ["fim"],
+      "directory": "fim"
+    },
+    "models": {
+      "patterns": ["model"],
+      "directory": "models"
+    },
+    "files": {
+      "patterns": ["file", "upload"],
+      "directory": "files"
+    },
+    "tools": {
+      "patterns": ["tool", "function"],
+      "directory": "tools"
+    },
+    "metadata": {
+      "patterns": ["usage", "format", "response", "finish", "role", "prediction"],
+      "directory": "metadata"
+    }
+  },
+  "default_category": "common",
+  "parent_model_patterns": {
+    "ChatCompletionRequest": [".*Message$", ".*Tool$"],
+    "UserMessage": [".*Content$", ".*Chunk$"]
+  }
+}

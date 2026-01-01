@@ -1,3 +1,57 @@
+## 1.0.0
+
+**TL;DR**: Complete, type-safe Dart client for the Mistral AI API. Hand-crafted models (no code generation), resource-based API, interceptor-driven architecture, comprehensive error handling, and full API coverage including stable and beta endpoints.
+
+### What's new
+
+- **Resource-based API organization**:
+  - `client.chat` — Chat completions (streaming, tool calling, multimodal, JSON mode)
+  - `client.embeddings` — Text embeddings for semantic search and clustering
+  - `client.models` — Model listing and retrieval
+  - `client.fim` — Fill-in-the-Middle code completions (Codestral)
+  - `client.files` — File upload and management
+  - `client.fineTuning` — Fine-tuning jobs and model management
+  - `client.batch` — Asynchronous large-scale batch processing
+  - `client.moderations` — Content moderation for safety
+  - `client.classifications` — Text classification (spam, topic, sentiment)
+  - `client.ocr` — OCR for documents and images
+  - `client.audio` — Speech-to-text transcription with streaming
+  - `client.agents` — Pre-configured AI assistants (beta)
+  - `client.conversations` — Stateful multi-turn conversations (beta)
+  - `client.libraries` — Document storage and retrieval for RAG (beta)
+- **Architecture**:
+  - Interceptor chain (Auth → Logging → Error → Transport with Retry wrapper).
+  - **Authentication**: API key or custom via `AuthProvider` interface.
+  - **Retry** with exponential backoff + jitter (only for idempotent methods on 429, 5xx, timeouts).
+  - **Abortable** requests via `abortTrigger` parameter.
+  - **SSE** streaming parser for real-time responses with `[DONE]` marker handling.
+  - Central `MistralConfig` (timeouts, retry policy, log level, baseUrl, auth).
+- **Hand-crafted models**:
+  - No code generation dependencies (no freezed, json_serializable).
+  - Minimal runtime dependencies (`http`, `logging` only).
+  - Immutable models with `copyWith` using sentinel pattern for nullable fields.
+  - Full type safety with sealed exception hierarchy.
+  - Sealed classes for polymorphic types (`ChatMessage`, `ContentPart`, `ToolChoice`, `ResponseFormat`, `Tool`, `OcrDocument`).
+- **Improved DX**:
+  - Named constructors for common patterns (e.g., `ChatMessage.user()`, `ChatMessage.system()`, `Tool.function()`, `Tool.webSearch()`).
+  - Explicit streaming methods (`createStream()` vs `create()`).
+  - Extension methods for convenient response access (`response.text`, `response.toolCalls`, `response.hasToolCalls`).
+  - Rich logging with field redaction for sensitive data.
+  - Pagination utilities (`Paginator`) and job polling helpers (`FineTuningJobPoller`, `BatchJobPoller`).
+- **Full API coverage**:
+  - Chat completions with tool calling, multimodal inputs, and JSON schema validation.
+  - Fill-in-the-Middle (FIM) code completions with streaming.
+  - Text embeddings with dimension control and quantization options.
+  - File management (upload, download, signed URLs).
+  - Fine-tuning with hyperparameter control and W&B integration.
+  - Batch processing for large-scale async operations.
+  - Content moderation and text classification.
+  - OCR for PDFs and images with markdown output.
+  - Audio transcription with word-level timestamps.
+  - Agents with built-in tools (web search, code interpreter, image generation).
+  - Stateful conversations with context management.
+  - Document libraries for RAG workflows.
+
 ## 0.1.1+1
 
  - **FIX**(mistralai_dart): Fix streaming tool calls deserialization error ([#913](https://github.com/davidmigloz/langchain_dart/issues/913)) ([#914](https://github.com/davidmigloz/langchain_dart/issues/914)). ([ec4d20bf](https://github.com/davidmigloz/langchain_dart/commit/ec4d20bfd966a6c04ab44d47fd9baa175343a990))
