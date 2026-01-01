@@ -1,0 +1,18 @@
+{
+  "removed_apis": [],
+  "tool_properties": {
+    "function": {
+      "description": "Function/tool calling support",
+      "search_terms": ["function calling", "tools", "tool_calls"]
+    }
+  },
+  "excluded_resources": ["base_resource", "streaming_resource"],
+  "resource_to_example": {
+    "chat": "chat",
+    "embeddings": "embeddings",
+    "models": "models",
+    "fim": "fim"
+  },
+  "excluded_from_examples": ["files"],
+  "drift_patterns": []
+}

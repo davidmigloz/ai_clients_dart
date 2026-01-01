@@ -1,0 +1,35 @@
+{
+  "critical_models": [
+    {
+      "name": "ChatCompletionRequest",
+      "file": "lib/src/models/chat/chat_completion_request.dart",
+      "spec_schema": "ChatCompletionRequest"
+    },
+    {
+      "name": "ChatCompletionResponse",
+      "file": "lib/src/models/chat/chat_completion_response.dart",
+      "spec_schema": "ChatCompletionResponse"
+    },
+    {
+      "name": "ChatMessage",
+      "file": "lib/src/models/chat/chat_message.dart",
+      "spec_schema": "Messages"
+    },
+    {
+      "name": "EmbeddingRequest",
+      "file": "lib/src/models/embeddings/embedding_request.dart",
+      "spec_schema": "EmbeddingRequest"
+    },
+    {
+      "name": "EmbeddingResponse",
+      "file": "lib/src/models/embeddings/embedding_response.dart",
+      "spec_schema": "EmbeddingResponse"
+    },
+    {
+      "name": "Model",
+      "file": "lib/src/models/models/model.dart",
+      "spec_schema": "ModelCard"
+    }
+  ],
+  "expected_properties": {}
+}
