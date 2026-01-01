@@ -1,6 +1,6 @@
 name: anthropic_sdk_dart
 description: Dart client for the Anthropic API. Provides type-safe access to Claude models with streaming, tool use, and batch processing support.
-version: 1.0.0
+version: 0.3.1
 repository: https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/anthropic_sdk_dart
 issue_tracker: https://github.com/davidmigloz/ai_clients_dart/issues?q=label:p:anthropic_sdk_dart
 homepage: https://github.com/davidmigloz/ai_clients_dart
