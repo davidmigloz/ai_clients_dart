@@ -1,0 +1,11 @@
+{
+  "removed_apis": [],
+  "tool_properties": {},
+  "excluded_resources": ["base_resource"],
+  "resource_to_example": {
+    "collections": "collections",
+    "embeddings": "embeddings"
+  },
+  "excluded_from_examples": [],
+  "drift_patterns": []
+}

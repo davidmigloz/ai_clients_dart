@@ -1,3 +1,54 @@
+## 1.0.0
+
+> Note: This release has breaking changes.
+
+**TL;DR**: Complete reimplementation with a new architecture, minimal dependencies, unified resource-based API, and full ChromaDB v2 API coverage. Includes new Search API, Functions, multi-tenant management, automatic retry, and comprehensive exception handling.
+
+### What's new
+
+- **Complete ChromaDB v2 API coverage**: All endpoints implemented.
+  - **Collections API**: create, get, list, update, delete, count, fork.
+  - **Records API**: add, update, upsert, get, query, search, delete, count.
+  - **Search API**: Advanced hybrid search with filtering, grouping, ranking, and pagination.
+  - **Functions API**: attach, get, detach serverless functions.
+  - **Multi-tenant**: Full tenant and database management.
+  - **Health API**: heartbeat, version, pre-flight checks, healthcheck, reset.
+  - **Auth API**: User identity retrieval.
+- **Architecture**:
+  - Interceptor chain (Auth → Logging → Error).
+  - **Authentication**: API key, Bearer token, custom OAuth via `AuthProvider`.
+  - **Retry** with exponential backoff + jitter (configurable `RetryPolicy`).
+  - Central `ChromaConfig` (timeouts, retry policy, log level, baseUrl, tenant, database).
+- **High-level wrapper** (`ChromaCollection`):
+  - Automatic embedding generation from documents, images, or URIs.
+  - Convenient query methods accepting text instead of embeddings.
+  - DataLoader interface for loading content from URIs.
+  - Input validation and error handling.
+- **Convenience constructors**: `ChromaClient.local()`, `ChromaClient.withApiKey()`.
+- **Minimal dependencies**: Only `http` and `logging`.
+- **Testing**: 200+ unit tests covering models, resources, and error handling.
+
+### Breaking Changes
+
+- **Resource-based API**: Methods reorganized under strongly-typed resources:
+  - `client.health.*` (heartbeat, version, healthcheck, reset)
+  - `client.collections.*` (low-level collection CRUD)
+  - `client.records(collectionId).*` (record operations)
+  - `client.functions(collectionId).*` (serverless functions)
+  - `client.tenants.*`, `client.databases.*` (multi-tenant)
+  - `client.auth.*` (identity)
+- **Configuration**: New `ChromaConfig` with `AuthProvider` pattern (API key / bearer / custom).
+- **Collection wrapper**: `Collection` class renamed to `ChromaCollection`.
+- **Metadata access**: `collection.metadata` → `collection.metadata.metadata` for custom metadata.
+- **Modify parameters**: `name` → `newName`, `metadata` → `newMetadata`.
+- **Health methods moved**: `client.heartbeat()` → `client.health.heartbeat()`.
+- **Return types**: Primitives replaced with response objects (`HeartbeatResponse`, `VersionResponse`).
+- **Default includes changed**: `get()`, `peek()`, `query()` no longer include embeddings by default.
+- **Exceptions**: Replaced `ChromaApiClientException` with typed hierarchy:
+  - `ApiException`, `AuthenticationException`, `NotFoundException`, `ConflictException`, `RateLimitException`, `ServerException`, `ValidationException`, `TimeoutException`, `AbortedException`.
+
+See **[MIGRATION.md](MIGRATION.md)** for step-by-step examples and mapping tables.
+
 ## 0.3.0+1
 
  - **REFACTOR**: Fix pub format warnings ([#809](https://github.com/davidmigloz/langchain_dart/issues/809)). ([640cdefb](https://github.com/davidmigloz/langchain_dart/commit/640cdefbede9c0a0182fb6bb4005a20aa6f35635))

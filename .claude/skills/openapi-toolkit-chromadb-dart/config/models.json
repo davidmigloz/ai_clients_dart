@@ -1,0 +1,20 @@
+{
+  "critical_models": [
+    {
+      "name": "Collection",
+      "file": "lib/src/models/collections/collection.dart",
+      "spec_schema": "Collection"
+    },
+    {
+      "name": "QueryResponse",
+      "file": "lib/src/models/records/query_response.dart",
+      "spec_schema": "QueryResponse"
+    },
+    {
+      "name": "GetResponse",
+      "file": "lib/src/models/records/get_response.dart",
+      "spec_schema": "GetResponse"
+    }
+  ],
+  "expected_properties": {}
+}
