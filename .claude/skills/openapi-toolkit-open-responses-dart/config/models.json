@@ -1,0 +1,45 @@
+{
+  "critical_models": [
+    {
+      "name": "ResponseResource",
+      "file": "lib/src/models/response/response_resource.dart",
+      "spec_schema": "ResponseResource"
+    },
+    {
+      "name": "CreateResponseRequest",
+      "file": "lib/src/models/request/create_response_request.dart",
+      "spec_schema": "CreateResponseBody"
+    },
+    {
+      "name": "Item",
+      "file": "lib/src/models/items/item.dart",
+      "spec_schema": "ItemParam"
+    },
+    {
+      "name": "OutputItem",
+      "file": "lib/src/models/items/output_item.dart",
+      "spec_schema": "ItemField"
+    },
+    {
+      "name": "Tool",
+      "file": "lib/src/models/tools/tool.dart",
+      "spec_schema": "ToolParam"
+    },
+    {
+      "name": "StreamingEvent",
+      "file": "lib/src/models/streaming/streaming_event.dart",
+      "spec_schema": "StreamingEvent"
+    },
+    {
+      "name": "InputContent",
+      "file": "lib/src/models/content/input_content.dart",
+      "spec_schema": "InputContentParam"
+    },
+    {
+      "name": "OutputContent",
+      "file": "lib/src/models/content/output_content.dart",
+      "spec_schema": "OutputContentField"
+    }
+  ],
+  "expected_properties": {}
+}

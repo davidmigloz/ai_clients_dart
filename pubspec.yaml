@@ -16,6 +16,7 @@ workspace:
   - packages/ollama_dart
   - packages/openai_dart
   - packages/openai_realtime_dart
+  - packages/open_responses_dart
   - packages/tavily_dart
   - packages/vertex_ai
 

@@ -1,0 +1,15 @@
+{
+  "specs": {
+    "main": {
+      "name": "OpenResponses API",
+      "url": "https://www.openresponses.org/openapi/openapi.json",
+      "local_file": "openapi.json",
+      "requires_auth": false,
+      "auth_env_vars": [],
+      "description": "OpenResponses unified LLM API specification"
+    }
+  },
+  "output_dir": "/tmp/openapi-toolkit-open-responses-dart",
+  "discovery_patterns": [],
+  "discovery_names": []
+}

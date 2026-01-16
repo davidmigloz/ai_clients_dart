@@ -1,0 +1,8 @@
+# Test configuration for open_responses_dart
+#
+# Integration tests require appropriate API keys.
+# Run with: dart test --tags=integration
+
+tags:
+  integration:
+    # Register the integration tag to suppress warnings

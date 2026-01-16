@@ -1,0 +1,23 @@
+{
+  "removed_apis": [],
+  "tool_properties": {
+    "tools": {
+      "description": "Tool use / function calling",
+      "search_terms": ["tool use", "function calling", "tools", "MCP"]
+    },
+    "streaming": {
+      "description": "Server-sent event streaming",
+      "search_terms": ["streaming", "SSE", "events"]
+    },
+    "reasoning": {
+      "description": "Extended thinking / reasoning",
+      "search_terms": ["reasoning", "thinking", "o1", "o3"]
+    }
+  },
+  "excluded_resources": ["base_resource"],
+  "resource_to_example": {
+    "responses": "createResponse"
+  },
+  "excluded_from_examples": [],
+  "drift_patterns": []
+}

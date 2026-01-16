@@ -1,0 +1,41 @@
+{
+  "categories": {
+    "response": {
+      "patterns": ["response"],
+      "directory": "response"
+    },
+    "request": {
+      "patterns": ["request", "create"],
+      "directory": "request"
+    },
+    "content": {
+      "patterns": ["content", "annotation", "logprob"],
+      "directory": "content"
+    },
+    "items": {
+      "patterns": ["item", "message", "function"],
+      "directory": "items"
+    },
+    "streaming": {
+      "patterns": ["event", "stream", "delta"],
+      "directory": "streaming"
+    },
+    "tools": {
+      "patterns": ["tool"],
+      "directory": "tools"
+    },
+    "metadata": {
+      "patterns": ["status", "role", "usage", "error", "detail", "tier", "effort", "summary", "truncation", "verbosity", "include"],
+      "directory": "metadata"
+    }
+  },
+  "default_category": "common",
+  "parent_model_patterns": {
+    "Item": [".*Item$", ".*Reference$"],
+    "OutputItem": [".*OutputItem.*"],
+    "InputContent": [".*InputContent$", ".*Part$"],
+    "OutputContent": [".*OutputContent$"],
+    "Tool": [".*Tool$"],
+    "StreamingEvent": [".*Event$"]
+  }
+}

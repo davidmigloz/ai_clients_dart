@@ -1,0 +1,30 @@
+name: open_responses_dart
+description: Dart client for the OpenResponses API. Provides a unified, type-safe interface for interacting with multiple LLM providers through the OpenResponses specification.
+version: 0.0.1
+repository: https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/open_responses_dart
+issue_tracker: https://github.com/davidmigloz/ai_clients_dart/issues?q=label:p:open_responses_dart
+homepage: https://github.com/davidmigloz/ai_clients_dart
+documentation: https://langchaindart.dev
+
+funding:
+  - https://github.com/sponsors/davidmigloz
+
+topics:
+  - nlp
+  - gen-ai
+  - llms
+  - openresponses
+
+environment:
+  sdk: ">=3.8.0 <4.0.0"
+resolution: workspace
+
+dependencies:
+  http: ^1.6.0
+  logging: ^1.3.0
+  meta: ^1.16.0
+
+dev_dependencies:
+  test: ^1.26.2
+  mocktail: ^1.0.4
+  coverage: ^1.15.0
