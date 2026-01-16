@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality_helpers.dart';
+
 /// Log probability information for a token.
 @immutable
 class LogProb {
@@ -51,8 +53,8 @@ class LogProb {
           runtimeType == other.runtimeType &&
           token == other.token &&
           logprob == other.logprob &&
-          _listsEqual(bytes, other.bytes) &&
-          _listsEqual(topLogprobs, other.topLogprobs);
+          listsEqual(bytes, other.bytes) &&
+          listsEqual(topLogprobs, other.topLogprobs);
 
   @override
   int get hashCode => Object.hash(token, logprob, bytes, topLogprobs);
@@ -100,7 +102,7 @@ class TopLogProb {
           runtimeType == other.runtimeType &&
           token == other.token &&
           logprob == other.logprob &&
-          _listsEqual(bytes, other.bytes);
+          listsEqual(bytes, other.bytes);
 
   @override
   int get hashCode => Object.hash(token, logprob, bytes);
@@ -108,14 +110,4 @@ class TopLogProb {
   @override
   String toString() =>
       'TopLogProb(token: $token, logprob: $logprob, bytes: $bytes)';
-}
-
-bool _listsEqual<T>(List<T>? a, List<T>? b) {
-  if (a == null && b == null) return true;
-  if (a == null || b == null) return false;
-  if (a.length != b.length) return false;
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] != b[i]) return false;
-  }
-  return true;
 }

@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 import 'annotation.dart';
 import 'logprob.dart';
 
@@ -88,8 +89,8 @@ class OutputTextContent extends OutputContent {
       other is OutputTextContent &&
           runtimeType == other.runtimeType &&
           text == other.text &&
-          _listsEqual(annotations, other.annotations) &&
-          _listsEqual(logprobs, other.logprobs);
+          listsEqual(annotations, other.annotations) &&
+          listsEqual(logprobs, other.logprobs);
 
   @override
   int get hashCode => Object.hash(text, annotations, logprobs);
@@ -159,14 +160,4 @@ class RefusalContent extends OutputContent {
 
   @override
   String toString() => 'RefusalContent(refusal: $refusal)';
-}
-
-bool _listsEqual<T>(List<T>? a, List<T>? b) {
-  if (a == null && b == null) return true;
-  if (a == null || b == null) return false;
-  if (a.length != b.length) return false;
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] != b[i]) return false;
-  }
-  return true;
 }

@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality_helpers.dart';
+
 /// Configuration for text output.
 @immutable
 class TextConfig {
@@ -148,7 +150,7 @@ class JsonSchemaFormat extends TextFormat {
           runtimeType == other.runtimeType &&
           name == other.name &&
           description == other.description &&
-          _mapsEqual(schema, other.schema) &&
+          mapsEqual(schema, other.schema) &&
           strict == other.strict;
 
   @override
@@ -157,14 +159,4 @@ class JsonSchemaFormat extends TextFormat {
   @override
   String toString() =>
       'JsonSchemaFormat(name: $name, description: $description, schema: $schema, strict: $strict)';
-}
-
-bool _mapsEqual<K, V>(Map<K, V>? a, Map<K, V>? b) {
-  if (a == null && b == null) return true;
-  if (a == null || b == null) return false;
-  if (a.length != b.length) return false;
-  for (final key in a.keys) {
-    if (a[key] != b[key]) return false;
-  }
-  return true;
 }

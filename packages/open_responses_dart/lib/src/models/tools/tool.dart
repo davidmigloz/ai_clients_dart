@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality_helpers.dart';
+
 /// Tool definition for function calling.
 sealed class Tool {
   /// Creates a [Tool].
@@ -68,7 +70,7 @@ class FunctionTool extends Tool {
           runtimeType == other.runtimeType &&
           name == other.name &&
           description == other.description &&
-          _mapsEqual(parameters, other.parameters) &&
+          mapsEqual(parameters, other.parameters) &&
           strict == other.strict;
 
   @override
@@ -130,7 +132,7 @@ class McpTool extends Tool {
           runtimeType == other.runtimeType &&
           serverLabel == other.serverLabel &&
           serverUrl == other.serverUrl &&
-          _listsEqual(allowedTools, other.allowedTools) &&
+          listsEqual(allowedTools, other.allowedTools) &&
           requireApproval == other.requireApproval;
 
   @override
@@ -140,24 +142,4 @@ class McpTool extends Tool {
   @override
   String toString() =>
       'McpTool(serverLabel: $serverLabel, serverUrl: $serverUrl, allowedTools: $allowedTools, requireApproval: $requireApproval)';
-}
-
-bool _listsEqual<T>(List<T>? a, List<T>? b) {
-  if (a == null && b == null) return true;
-  if (a == null || b == null) return false;
-  if (a.length != b.length) return false;
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] != b[i]) return false;
-  }
-  return true;
-}
-
-bool _mapsEqual<K, V>(Map<K, V>? a, Map<K, V>? b) {
-  if (a == null && b == null) return true;
-  if (a == null || b == null) return false;
-  if (a.length != b.length) return false;
-  for (final key in a.keys) {
-    if (a[key] != b[key]) return false;
-  }
-  return true;
 }

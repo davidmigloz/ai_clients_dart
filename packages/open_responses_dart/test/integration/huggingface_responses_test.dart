@@ -55,12 +55,15 @@ void main() {
       expect(response.outputText, contains('8'));
     });
 
-    // Bug in responses.js server: streaming fails with "Cannot set headers
-    // after they are sent to the client" regardless of provider. Non-streaming
-    // works fine. See: https://huggingface.co/spaces/evalstate/openresponses
+    // TODO(open_responses_dart): Re-enable when upstream bug is fixed.
+    // Bug in responses.js server (discovered 2025-01): streaming fails with
+    // "Cannot set headers after they are sent to the client" regardless of
+    // provider. Non-streaming works fine.
+    // Upstream: https://huggingface.co/spaces/evalstate/openresponses
+    // Track: https://github.com/anthropics/responses.js/issues (if reported)
     test(
       'streaming response',
-      skip: 'responses.js bug: headers set after stream started',
+      skip: 'Upstream responses.js bug: headers set after stream started',
       () async {
         final events = <StreamingEvent>[];
 

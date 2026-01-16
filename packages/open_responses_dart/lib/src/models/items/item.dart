@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality_helpers.dart';
 import '../content/input_content.dart';
 import '../metadata/item_status.dart';
 import '../metadata/message_role.dart';
@@ -120,7 +121,7 @@ class MessageItem extends Item {
           runtimeType == other.runtimeType &&
           id == other.id &&
           role == other.role &&
-          _listsEqual(content, other.content) &&
+          listsEqual(content, other.content) &&
           status == other.status;
 
   @override
@@ -282,14 +283,4 @@ class ItemReference extends Item {
 
   @override
   String toString() => 'ItemReference(id: $id)';
-}
-
-bool _listsEqual<T>(List<T>? a, List<T>? b) {
-  if (a == null && b == null) return true;
-  if (a == null || b == null) return false;
-  if (a.length != b.length) return false;
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] != b[i]) return false;
-  }
-  return true;
 }
