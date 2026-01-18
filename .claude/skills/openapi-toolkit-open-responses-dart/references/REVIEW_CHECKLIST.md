@@ -124,7 +124,8 @@ python3 .claude/shared/openapi-toolkit/scripts/verify_examples.py \
 
 ```bash
 python3 .claude/shared/openapi-toolkit/scripts/verify_model_properties.py \
-  --config-dir .claude/skills/openapi-toolkit-open-responses-dart/config
+  --config-dir .claude/skills/openapi-toolkit-open-responses-dart/config \
+  --spec packages/open_responses_dart/specs/openapi.json
 ```
 
 Critical models checked:

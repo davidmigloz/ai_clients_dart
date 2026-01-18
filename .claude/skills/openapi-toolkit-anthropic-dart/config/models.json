@@ -2,24 +2,154 @@
   "critical_models": [
     {
       "name": "Message",
-      "file": "lib/src/models/messages/message.dart",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/messages/message.dart",
       "spec_schema": "Message"
     },
     {
       "name": "MessageCreateRequest",
-      "file": "lib/src/models/messages/message_create_request.dart",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/messages/message_create_request.dart",
       "spec_schema": "CreateMessageRequest"
     },
     {
-      "name": "ContentBlock",
-      "file": "lib/src/models/messages/content_block.dart",
-      "spec_schema": "ContentBlock"
-    },
-    {
       "name": "Tool",
-      "file": "lib/src/models/tools/tool.dart",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/tools/tool.dart",
       "spec_schema": "Tool"
     }
   ],
+  "nested_schemas": [
+    {
+      "name": "Usage",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/metadata/usage.dart",
+      "spec_schema": "Usage"
+    },
+    {
+      "name": "ThinkingConfig",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/messages/thinking_config.dart",
+      "spec_schema": "ThinkingConfig"
+    },
+    {
+      "name": "CacheControlEphemeral",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/metadata/cache_control.dart",
+      "spec_schema": "CacheControlEphemeral"
+    },
+    {
+      "name": "InputSchema",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/tools/input_schema.dart",
+      "spec_schema": "InputSchema"
+    }
+  ],
+  "sealed_classes": [
+    {
+      "name": "ContentBlock",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/content/content_block.dart",
+      "discriminator": "type",
+      "variants": [
+        {"dart_class": "TextBlock", "spec_schema": "TextBlock", "discriminator_value": "text"},
+        {"dart_class": "ThinkingBlock", "spec_schema": "ThinkingBlock", "discriminator_value": "thinking"},
+        {"dart_class": "RedactedThinkingBlock", "spec_schema": "RedactedThinkingBlock", "discriminator_value": "redacted_thinking"},
+        {"dart_class": "ToolUseBlock", "spec_schema": "ToolUseBlock", "discriminator_value": "tool_use"},
+        {"dart_class": "ServerToolUseBlock", "spec_schema": "ServerToolUseBlock", "discriminator_value": "server_tool_use"},
+        {"dart_class": "WebSearchToolResultBlock", "spec_schema": "WebSearchToolResultBlock", "discriminator_value": "web_search_tool_result"}
+      ]
+    },
+    {
+      "name": "InputContentBlock",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/content/input_content_block.dart",
+      "discriminator": "type",
+      "variants": [
+        {"dart_class": "TextInputBlock", "spec_schema": "TextBlockParam", "discriminator_value": "text"},
+        {"dart_class": "ImageInputBlock", "spec_schema": "ImageBlockParam", "discriminator_value": "image"},
+        {"dart_class": "DocumentInputBlock", "spec_schema": "DocumentBlockParam", "discriminator_value": "document"},
+        {"dart_class": "ToolUseInputBlock", "spec_schema": "ToolUseBlockParam", "discriminator_value": "tool_use"},
+        {"dart_class": "ToolResultInputBlock", "spec_schema": "ToolResultBlockParam", "discriminator_value": "tool_result"}
+      ]
+    },
+    {
+      "name": "ToolResultContent",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/content/input_content_block.dart",
+      "discriminator": "type",
+      "variants": [
+        {"dart_class": "ToolResultTextContent", "spec_schema": "ToolResultBlockParamContentVariant0", "discriminator_value": "text"},
+        {"dart_class": "ToolResultImageContent", "spec_schema": "ToolResultBlockParamContentVariant1", "discriminator_value": "image"}
+      ]
+    },
+    {
+      "name": "Citation",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/content/content_block.dart",
+      "discriminator": "type",
+      "variants": [
+        {"dart_class": "CharLocationCitation", "spec_schema": "CitationCharLocation", "discriminator_value": "char_location"},
+        {"dart_class": "PageLocationCitation", "spec_schema": "CitationPageLocation", "discriminator_value": "page_location"},
+        {"dart_class": "ContentBlockLocationCitation", "spec_schema": "CitationContentBlockLocation", "discriminator_value": "content_block_location"},
+        {"dart_class": "WebSearchResultLocationCitation", "spec_schema": "CitationWebSearchResultLocation", "discriminator_value": "web_search_result_location"}
+      ]
+    },
+    {
+      "name": "WebSearchResult",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/content/content_block.dart",
+      "discriminator": "type",
+      "variants": [
+        {"dart_class": "WebSearchResultSuccess", "spec_schema": "WebSearchToolResult", "discriminator_value": "web_search_result"},
+        {"dart_class": "WebSearchResultError", "spec_schema": "WebSearchToolResultError", "discriminator_value": "web_search_result_error"}
+      ]
+    },
+    {
+      "name": "ImageSource",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/sources/image_source.dart",
+      "discriminator": "type",
+      "variants": [
+        {"dart_class": "Base64ImageSource", "spec_schema": "Base64ImageSource", "discriminator_value": "base64"},
+        {"dart_class": "UrlImageSource", "spec_schema": "URLImageSource", "discriminator_value": "url"}
+      ]
+    },
+    {
+      "name": "DocumentSource",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/sources/document_source.dart",
+      "discriminator": "type",
+      "variants": [
+        {"dart_class": "Base64PdfSource", "spec_schema": "Base64PDFSource", "discriminator_value": "base64"},
+        {"dart_class": "PlainTextSource", "spec_schema": "PlainTextSource", "discriminator_value": "text"},
+        {"dart_class": "UrlPdfSource", "spec_schema": "URLPDFSource", "discriminator_value": "url"}
+      ]
+    },
+    {
+      "name": "MessageStreamEvent",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/streaming/message_stream_event.dart",
+      "discriminator": "type",
+      "variants": [
+        {"dart_class": "MessageStartEvent", "spec_schema": "MessageStartEvent", "discriminator_value": "message_start"},
+        {"dart_class": "MessageDeltaEvent", "spec_schema": "MessageDeltaEvent", "discriminator_value": "message_delta"},
+        {"dart_class": "MessageStopEvent", "spec_schema": "MessageStopEvent", "discriminator_value": "message_stop"},
+        {"dart_class": "ContentBlockStartEvent", "spec_schema": "ContentBlockStartEvent", "discriminator_value": "content_block_start"},
+        {"dart_class": "ContentBlockDeltaEvent", "spec_schema": "ContentBlockDeltaEvent", "discriminator_value": "content_block_delta"},
+        {"dart_class": "ContentBlockStopEvent", "spec_schema": "ContentBlockStopEvent", "discriminator_value": "content_block_stop"},
+        {"dart_class": "PingEvent", "spec_schema": "PingEvent", "discriminator_value": "ping"},
+        {"dart_class": "ErrorEvent", "spec_schema": "ErrorEvent", "discriminator_value": "error"}
+      ]
+    },
+    {
+      "name": "ContentBlockDelta",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/streaming/content_block_delta.dart",
+      "discriminator": "type",
+      "variants": [
+        {"dart_class": "TextDelta", "spec_schema": "TextDelta", "discriminator_value": "text_delta"},
+        {"dart_class": "InputJsonDelta", "spec_schema": "InputJSONDelta", "discriminator_value": "input_json_delta"},
+        {"dart_class": "ThinkingDelta", "spec_schema": "ThinkingDelta", "discriminator_value": "thinking_delta"},
+        {"dart_class": "SignatureDelta", "spec_schema": "SignatureDelta", "discriminator_value": "signature_delta"},
+        {"dart_class": "CitationsDelta", "spec_schema": "CitationsDelta", "discriminator_value": "citations_delta"}
+      ]
+    }
+  ],
+  "type_mappings": {
+    "string": "String",
+    "integer": "int",
+    "number": "double",
+    "boolean": "bool",
+    "array": "List",
+    "object": "Map"
+  },
+  "excluded_properties": {
+    "global": []
+  },
   "expected_properties": {}
 }

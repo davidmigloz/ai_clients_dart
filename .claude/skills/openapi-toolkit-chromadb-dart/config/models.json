@@ -2,19 +2,32 @@
   "critical_models": [
     {
       "name": "Collection",
-      "file": "lib/src/models/collections/collection.dart",
+      "file": "packages/chromadb/lib/src/models/collections/collection.dart",
       "spec_schema": "Collection"
     },
     {
       "name": "QueryResponse",
-      "file": "lib/src/models/records/query_response.dart",
+      "file": "packages/chromadb/lib/src/models/records/query_response.dart",
       "spec_schema": "QueryResponse"
     },
     {
       "name": "GetResponse",
-      "file": "lib/src/models/records/get_response.dart",
+      "file": "packages/chromadb/lib/src/models/records/get_response.dart",
       "spec_schema": "GetResponse"
     }
   ],
+  "nested_schemas": [],
+  "sealed_classes": [],
+  "type_mappings": {
+    "string": "String",
+    "integer": "int",
+    "number": "double",
+    "boolean": "bool",
+    "array": "List",
+    "object": "Map"
+  },
+  "excluded_properties": {
+    "global": []
+  },
   "expected_properties": {}
 }

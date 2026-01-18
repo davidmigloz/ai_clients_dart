@@ -2,54 +2,103 @@
   "critical_models": [
     {
       "name": "Tool",
-      "file": "lib/src/models/tools/tool.dart",
+      "file": "packages/googleai_dart/lib/src/models/tools/tool.dart",
       "spec_schema": "Tool"
     },
     {
       "name": "Candidate",
-      "file": "lib/src/models/content/candidate.dart",
+      "file": "packages/googleai_dart/lib/src/models/content/candidate.dart",
       "spec_schema": "Candidate"
     },
     {
       "name": "Content",
-      "file": "lib/src/models/content/content.dart",
+      "file": "packages/googleai_dart/lib/src/models/content/content.dart",
       "spec_schema": "Content"
     },
     {
-      "name": "Part",
-      "file": "lib/src/models/content/part.dart",
-      "spec_schema": "Part"
-    },
-    {
       "name": "GenerationConfig",
-      "file": "lib/src/models/generation/generation_config.dart",
+      "file": "packages/googleai_dart/lib/src/models/generation/generation_config.dart",
       "spec_schema": "GenerationConfig"
     },
     {
       "name": "ToolConfig",
-      "file": "lib/src/models/tools/tool_config.dart",
+      "file": "packages/googleai_dart/lib/src/models/tools/tool_config.dart",
       "spec_schema": "ToolConfig"
     },
     {
       "name": "GroundingMetadata",
-      "file": "lib/src/models/metadata/grounding_metadata.dart",
+      "file": "packages/googleai_dart/lib/src/models/metadata/grounding_metadata.dart",
       "spec_schema": "GroundingMetadata"
     },
     {
-      "name": "GroundingChunk",
-      "file": "lib/src/models/metadata/grounding_chunk.dart",
-      "spec_schema": "GroundingChunk"
-    },
-    {
       "name": "FunctionCall",
-      "file": "lib/src/models/tools/function_call.dart",
+      "file": "packages/googleai_dart/lib/src/models/tools/function_call.dart",
       "spec_schema": "FunctionCall"
     },
     {
       "name": "FunctionResponse",
-      "file": "lib/src/models/tools/function_response.dart",
+      "file": "packages/googleai_dart/lib/src/models/tools/function_response.dart",
       "spec_schema": "FunctionResponse"
     }
   ],
+  "nested_schemas": [
+    {
+      "name": "GroundingChunk",
+      "file": "packages/googleai_dart/lib/src/models/metadata/grounding_chunk.dart",
+      "spec_schema": "GroundingChunk"
+    },
+    {
+      "name": "Blob",
+      "file": "packages/googleai_dart/lib/src/models/content/blob.dart",
+      "spec_schema": "Blob"
+    },
+    {
+      "name": "FileData",
+      "file": "packages/googleai_dart/lib/src/models/content/file_data.dart",
+      "spec_schema": "FileData"
+    },
+    {
+      "name": "ExecutableCode",
+      "file": "packages/googleai_dart/lib/src/models/tools/executable_code.dart",
+      "spec_schema": "ExecutableCode"
+    },
+    {
+      "name": "CodeExecutionResult",
+      "file": "packages/googleai_dart/lib/src/models/tools/code_execution_result.dart",
+      "spec_schema": "CodeExecutionResult"
+    }
+  ],
+  "sealed_classes": [
+    {
+      "name": "Part",
+      "file": "packages/googleai_dart/lib/src/models/content/part.dart",
+      "discriminator": null,
+      "note": "Uses field presence for discrimination, not a 'type' field",
+      "variants": [
+        {"dart_class": "TextPart", "spec_schema": "Part", "discriminator_value": "text", "extension": true},
+        {"dart_class": "InlineDataPart", "spec_schema": "Part", "discriminator_value": "inlineData", "extension": true},
+        {"dart_class": "FileDataPart", "spec_schema": "Part", "discriminator_value": "fileData", "extension": true},
+        {"dart_class": "FunctionCallPart", "spec_schema": "Part", "discriminator_value": "functionCall", "extension": true},
+        {"dart_class": "FunctionResponsePart", "spec_schema": "Part", "discriminator_value": "functionResponse", "extension": true},
+        {"dart_class": "ExecutableCodePart", "spec_schema": "Part", "discriminator_value": "executableCode", "extension": true},
+        {"dart_class": "CodeExecutionResultPart", "spec_schema": "Part", "discriminator_value": "codeExecutionResult", "extension": true},
+        {"dart_class": "VideoMetadataPart", "spec_schema": "Part", "discriminator_value": "videoMetadata", "extension": true},
+        {"dart_class": "ThoughtPart", "spec_schema": "Part", "discriminator_value": "thought", "extension": true},
+        {"dart_class": "ThoughtSignaturePart", "spec_schema": "Part", "discriminator_value": "thoughtSignature", "extension": true},
+        {"dart_class": "PartMetadataPart", "spec_schema": "Part", "discriminator_value": "partMetadata", "extension": true}
+      ]
+    }
+  ],
+  "type_mappings": {
+    "string": "String",
+    "integer": "int",
+    "number": "double",
+    "boolean": "bool",
+    "array": "List",
+    "object": "Map"
+  },
+  "excluded_properties": {
+    "global": []
+  },
   "expected_properties": {}
 }
