@@ -769,6 +769,108 @@ See the [example](example/) directory for comprehensive examples:
 - [Configuration](example/config_example.dart) - Client setup
 - [Parallel Requests](example/parallel_requests_example.dart) - Concurrent calls
 
+## API Coverage
+
+This client implements the Mistral AI REST API:
+
+### Chat Resource (`client.chat`)
+
+- **create** - Create a chat completion
+- **createStream** - Create a streaming chat completion (SSE)
+
+### Embeddings Resource (`client.embeddings`)
+
+- **create** - Generate embeddings for text
+
+### Models Resource (`client.models`)
+
+- **list** - List available models
+- **get** - Retrieve a model by ID
+- **delete** - Delete a fine-tuned model
+
+### FIM Resource (`client.fim`)
+
+- **create** - Create a fill-in-the-middle completion
+- **createStream** - Create a streaming FIM completion (SSE)
+
+### Files Resource (`client.files`)
+
+- **upload** - Upload a file
+- **list** - List files
+- **retrieve** - Get file metadata
+- **delete** - Delete a file
+- **downloadContent** - Download file content
+
+### FineTuning Resource (`client.fineTuning`)
+
+- **jobs.create** - Create a fine-tuning job
+- **jobs.list** - List fine-tuning jobs
+- **jobs.retrieve** - Get job status
+- **jobs.cancel** - Cancel a job
+- **jobs.start** - Start a job
+- **models.archive** - Archive a fine-tuned model
+- **models.unarchive** - Unarchive a fine-tuned model
+- **models.update** - Update a fine-tuned model
+
+### Batch Resource (`client.batch`)
+
+- **jobs.create** - Create a batch job
+- **jobs.list** - List batch jobs
+- **jobs.retrieve** - Get job status
+- **jobs.cancel** - Cancel a job
+
+### Moderations Resource (`client.moderations`)
+
+- **create** - Moderate text content
+- **createChat** - Moderate chat messages
+
+### Classifications Resource (`client.classifications`)
+
+- **create** - Classify text content
+- **createChat** - Classify chat messages
+
+### OCR Resource (`client.ocr`)
+
+- **process** - Extract text from documents/images
+
+### Audio Resource (`client.audio`)
+
+- **transcribe** - Transcribe audio to text
+- **transcribeStream** - Stream transcription results
+
+### Agents Resource (`client.agents`) - Beta
+
+- **create** - Create an agent
+- **list** - List agents
+- **retrieve** - Get an agent
+- **update** - Update an agent
+- **delete** - Delete an agent
+- **updateVersion** - Update active version
+- **complete** - Generate completion with agent
+- **completeStream** - Stream completion with agent
+
+### Conversations Resource (`client.conversations`) - Beta
+
+- **start** - Start a conversation
+- **startStream** - Start a streaming conversation
+- **append** - Continue a conversation
+- **appendStream** - Stream continuation
+- **get** - Get conversation history
+- **getEntry** - Get a specific entry
+- **list** - List conversations
+- **delete** - Delete a conversation
+
+### Libraries Resource (`client.libraries`) - Beta
+
+- **create** - Create a document library
+- **list** - List libraries
+- **retrieve** - Get a library
+- **delete** - Delete a library
+- **uploadDocument** - Upload a document
+- **listDocuments** - List documents in a library
+- **retrieveDocument** - Get document metadata
+- **deleteDocument** - Delete a document
+
 ## Documentation
 
 - [Mistral AI API Documentation](https://docs.mistral.ai/)

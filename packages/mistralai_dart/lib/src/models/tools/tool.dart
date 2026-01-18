@@ -83,6 +83,9 @@ sealed class Tool {
 /// A user-defined function tool.
 @immutable
 class FunctionTool extends Tool {
+  /// The tool type, always 'function'.
+  String get type => 'function';
+
   /// The function definition.
   final FunctionDefinition function;
 
@@ -119,6 +122,9 @@ class FunctionTool extends Tool {
 /// A built-in web search tool.
 @immutable
 class WebSearchTool extends Tool {
+  /// The tool type, always 'web_search'.
+  String get type => 'web_search';
+
   /// Creates a [WebSearchTool].
   const WebSearchTool();
 
@@ -139,6 +145,9 @@ class WebSearchTool extends Tool {
 /// A built-in premium web search tool with news agency access.
 @immutable
 class WebSearchPremiumTool extends Tool {
+  /// The tool type, always 'web_search_premium'.
+  String get type => 'web_search_premium';
+
   /// Creates a [WebSearchPremiumTool].
   const WebSearchPremiumTool();
 
@@ -159,6 +168,9 @@ class WebSearchPremiumTool extends Tool {
 /// A built-in code interpreter tool.
 @immutable
 class CodeInterpreterTool extends Tool {
+  /// The tool type, always 'code_interpreter'.
+  String get type => 'code_interpreter';
+
   /// Creates a [CodeInterpreterTool].
   const CodeInterpreterTool();
 
@@ -179,6 +191,9 @@ class CodeInterpreterTool extends Tool {
 /// A built-in image generation tool.
 @immutable
 class ImageGenerationTool extends Tool {
+  /// The tool type, always 'image_generation'.
+  String get type => 'image_generation';
+
   /// Creates an [ImageGenerationTool].
   const ImageGenerationTool();
 
@@ -199,6 +214,9 @@ class ImageGenerationTool extends Tool {
 /// A built-in document library tool for RAG.
 @immutable
 class DocumentLibraryTool extends Tool {
+  /// The tool type, always 'document_library'.
+  String get type => 'document_library';
+
   /// The library IDs to use for document search.
   final List<String>? libraryIds;
 
