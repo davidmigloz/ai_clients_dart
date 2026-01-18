@@ -29,7 +29,7 @@ void main() {
     print('   );');
     print('');
     print('   // Poll for completion');
-    print('   while (!operation.done!) {');
+    print('   while (operation.done != true) {');
     print('     await Future.delayed(Duration(seconds: 10));');
     print('     // Check operation status...');
     print('   }');

@@ -31,7 +31,7 @@ void main() async {
 
     print('✅ Token created successfully!');
     print('   Token: ${token.name}');
-    print('   Expire time: ${token.expireTime}');
+    print('   Expires: ${token.expireTime}');
     print('   New session expire time: ${token.newSessionExpireTime}');
     print('   Uses: ${token.uses}');
 
