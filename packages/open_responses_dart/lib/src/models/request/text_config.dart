@@ -3,8 +3,6 @@ import 'package:meta/meta.dart';
 import '../common/equality_helpers.dart';
 import '../metadata/verbosity.dart';
 
-export '../metadata/verbosity.dart' show Verbosity;
-
 /// Configuration for text output.
 @immutable
 class TextConfig {

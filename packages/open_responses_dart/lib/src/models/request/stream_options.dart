@@ -3,7 +3,11 @@ import 'package:meta/meta.dart';
 /// Options that control streamed response behavior.
 @immutable
 class StreamOptions {
-  /// Whether to obfuscate sensitive information in streamed output.
+  /// Controls whether the server includes obfuscation padding in streamed events.
+  ///
+  /// When enabled, the server adds random padding to response events to help
+  /// prevent timing-based side-channel attacks that could reveal sensitive
+  /// information about the response content.
   ///
   /// Defaults to `true` on the server.
   final bool? includeObfuscation;

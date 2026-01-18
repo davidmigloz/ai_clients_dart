@@ -366,7 +366,7 @@ class CreateResponseRequest {
           topLogprobs == other.topLogprobs;
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     model,
     input,
     instructions,
@@ -386,7 +386,11 @@ class CreateResponseRequest {
     serviceTier,
     store,
     background,
-  );
+    maxToolCalls,
+    safetyIdentifier,
+    promptCacheKey,
+    topLogprobs,
+  ]);
 
   @override
   String toString() =>

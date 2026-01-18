@@ -384,7 +384,7 @@ class ResponseResource {
           promptCacheKey == other.promptCacheKey;
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     object,
     createdAt,
@@ -401,7 +401,18 @@ class ResponseResource {
     text,
     temperature,
     topP,
-  );
+    presencePenalty,
+    frequencyPenalty,
+    topLogprobs,
+    reasoning,
+    maxOutputTokens,
+    maxToolCalls,
+    store,
+    background,
+    serviceTier,
+    safetyIdentifier,
+    promptCacheKey,
+  ]);
 
   @override
   String toString() =>

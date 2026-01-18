@@ -90,6 +90,9 @@ class ResponseCreatedEvent extends StreamingEvent {
   String get type => 'response.created';
 
   /// The sequence number of the event.
+  ///
+  /// Defaults to 0 if not provided by the server, for compatibility with
+  /// providers that don't include this field in their responses.
   final int sequenceNumber;
 
   /// The created response.
