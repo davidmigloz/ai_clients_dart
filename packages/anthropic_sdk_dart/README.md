@@ -70,10 +70,18 @@ Unofficial Dart client for the **[Anthropic API](https://docs.anthropic.com/en/a
 - ✅ List available models
 - ✅ Retrieve model details
 
-### Legacy
+### Files (Beta)
 
-- ✅ Text completions (deprecated but supported)
-- ✅ Streaming completions
+- ✅ File upload (from path or bytes)
+- ✅ File listing and retrieval
+- ✅ File download
+- ✅ File deletion
+
+### Skills (Beta)
+
+- ✅ Skill creation and management
+- ✅ Skill version control
+- ✅ Custom skill uploads (ZIP archives)
 
 ## Why choose this client?
 
@@ -642,10 +650,25 @@ This client implements **100% of the Anthropic REST API**:
 - **list** - List available models
 - **retrieve** - Get model details
 
-### Completions Resource (`client.completions`) - Legacy
+### Files Resource (`client.files`) - Beta
 
-- **create** - Create a text completion (deprecated)
-- **createStream** - Create a streaming completion (deprecated)
+- **upload** - Upload a file from a file path
+- **uploadBytes** - Upload a file from bytes
+- **list** - List uploaded files
+- **retrieve** - Get file metadata
+- **deleteFile** - Delete a file
+- **download** - Download file content
+
+### Skills Resource (`client.skills`) - Beta
+
+- **create** - Create a new skill
+- **list** - List skills
+- **retrieve** - Get skill details
+- **deleteSkill** - Delete a skill
+- **createVersion** - Create a new skill version
+- **listVersions** - List skill versions
+- **retrieveVersion** - Get skill version details
+- **deleteVersion** - Delete a skill version
 
 ## Development
 

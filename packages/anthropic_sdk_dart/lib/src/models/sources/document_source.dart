@@ -33,6 +33,12 @@ sealed class DocumentSource {
 /// Base64-encoded PDF document source.
 @immutable
 class Base64PdfSource extends DocumentSource {
+  /// The source type, always 'base64'.
+  String get type => 'base64';
+
+  /// The media type, always 'application/pdf'.
+  String get mediaType => 'application/pdf';
+
   /// Base64-encoded PDF data.
   final String data;
 
@@ -73,6 +79,12 @@ class Base64PdfSource extends DocumentSource {
 /// Plain text document source.
 @immutable
 class PlainTextSource extends DocumentSource {
+  /// The source type, always 'text'.
+  String get type => 'text';
+
+  /// The media type, always 'text/plain'.
+  String get mediaType => 'text/plain';
+
   /// Plain text data.
   final String data;
 
@@ -113,6 +125,9 @@ class PlainTextSource extends DocumentSource {
 /// URL-based PDF document source.
 @immutable
 class UrlPdfSource extends DocumentSource {
+  /// The source type, always 'url'.
+  String get type => 'url';
+
   /// URL of the PDF document.
   final String url;
 

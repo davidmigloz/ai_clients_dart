@@ -64,6 +64,9 @@ sealed class ImageSource {
 /// Base64-encoded image source.
 @immutable
 class Base64ImageSource extends ImageSource {
+  /// The source type, always 'base64'.
+  String get type => 'base64';
+
   /// Base64-encoded image data.
   final String data;
 
@@ -115,6 +118,9 @@ class Base64ImageSource extends ImageSource {
 /// URL-based image source.
 @immutable
 class UrlImageSource extends ImageSource {
+  /// The source type, always 'url'.
+  String get type => 'url';
+
   /// URL of the image.
   final String url;
 

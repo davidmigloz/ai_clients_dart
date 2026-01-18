@@ -32,6 +32,9 @@ sealed class MessageStreamEvent {
 /// Event indicating the start of message generation.
 @immutable
 class MessageStartEvent extends MessageStreamEvent {
+  /// The event type, always 'message_start'.
+  String get type => 'message_start';
+
   /// The initial message object.
   final Message message;
 
@@ -68,6 +71,9 @@ class MessageStartEvent extends MessageStreamEvent {
 /// Event indicating an update to the message.
 @immutable
 class MessageDeltaEvent extends MessageStreamEvent {
+  /// The event type, always 'message_delta'.
+  String get type => 'message_delta';
+
   /// The delta update.
   final MessageDelta delta;
 
@@ -110,6 +116,9 @@ class MessageDeltaEvent extends MessageStreamEvent {
 /// Event indicating the end of message generation.
 @immutable
 class MessageStopEvent extends MessageStreamEvent {
+  /// The event type, always 'message_stop'.
+  String get type => 'message_stop';
+
   /// Creates a [MessageStopEvent].
   const MessageStopEvent();
 
@@ -136,6 +145,9 @@ class MessageStopEvent extends MessageStreamEvent {
 /// Event indicating the start of a content block.
 @immutable
 class ContentBlockStartEvent extends MessageStreamEvent {
+  /// The event type, always 'content_block_start'.
+  String get type => 'content_block_start';
+
   /// The index of the content block.
   final int index;
 
@@ -184,6 +196,9 @@ class ContentBlockStartEvent extends MessageStreamEvent {
 /// Event indicating an update to a content block.
 @immutable
 class ContentBlockDeltaEvent extends MessageStreamEvent {
+  /// The event type, always 'content_block_delta'.
+  String get type => 'content_block_delta';
+
   /// The index of the content block being updated.
   final int index;
 
@@ -226,6 +241,9 @@ class ContentBlockDeltaEvent extends MessageStreamEvent {
 /// Event indicating the end of a content block.
 @immutable
 class ContentBlockStopEvent extends MessageStreamEvent {
+  /// The event type, always 'content_block_stop'.
+  String get type => 'content_block_stop';
+
   /// The index of the content block that finished.
   final int index;
 

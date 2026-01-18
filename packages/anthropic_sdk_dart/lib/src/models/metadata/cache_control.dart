@@ -29,6 +29,9 @@ enum CacheTtl {
 /// When applied to content, enables prompt caching with the specified TTL.
 @immutable
 class CacheControlEphemeral {
+  /// The cache control type, always 'ephemeral'.
+  String get type => 'ephemeral';
+
   /// The time-to-live for the cache control breakpoint.
   ///
   /// Defaults to `5m` (5 minutes).
