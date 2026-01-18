@@ -2,11 +2,14 @@
 """
 Deep verification of Dart model classes against OpenAPI spec.
 
-This script performs comprehensive schema verification including:
-1. Property type validation (not just names)
+This script performs schema verification including:
+1. Property name validation (checks that all spec properties exist in Dart)
 2. Required/optional (nullable) validation
 3. Nested schema verification
 4. Sealed class variant verification
+
+Note: Full type validation is not yet implemented. The script currently
+focuses on property presence and nullability checks.
 
 Usage:
     python3 verify_schema_deep.py --config-dir CONFIG_DIR --spec SPEC_FILE
@@ -29,7 +32,7 @@ from typing import Optional
 @dataclass
 class Issue:
     """Represents a verification issue."""
-    level: str  # 'error' or 'warning'
+    level: str  # 'error', 'warning', or 'info'
     schema: str
     message: str
     property_name: Optional[str] = None
@@ -118,6 +121,8 @@ def extract_dart_properties_with_types(
     # If class_name is specified, find that class's content
     if class_name:
         # Find the class block
+        # Note: This regex assumes standard Dart class patterns without deeply nested
+        # braces in the class signature. Works for typical generated model classes.
         class_pattern = rf'class\s+{re.escape(class_name)}\s*[^{{]*\{{(.*?)\n}}'
         class_match = re.search(class_pattern, content, re.DOTALL)
         if class_match:
@@ -225,7 +230,6 @@ def parse_property_spec(
         'ref': None,
         'items': None,
         'format': prop_spec.get('format'),
-        'enum': prop_spec.get('enum'),
     }
 
     # Handle anyOf (often used for nullable)
