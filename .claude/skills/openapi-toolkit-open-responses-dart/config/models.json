@@ -89,7 +89,7 @@
       "discriminator": "type",
       "variants": [
         {"dart_class": "InputTextContent", "spec_schema": "InputTextContentParam", "discriminator_value": "input_text"},
-        {"dart_class": "InputImageContent", "spec_schema": "InputImageContentParamAutoParam", "discriminator_value": "input_image"},
+        {"dart_class": "InputImageContent", "spec_schema": "InputImageContentParam", "discriminator_value": "input_image"},
         {"dart_class": "InputFileContent", "spec_schema": "InputFileContentParam", "discriminator_value": "input_file"},
         {"dart_class": "InputVideoContent", "spec_schema": "InputVideoContentParam", "discriminator_value": "input_video"}
       ]
