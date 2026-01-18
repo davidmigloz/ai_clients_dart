@@ -166,7 +166,9 @@ def verify_model(
     extra_in_dart = normalized_dart - normalized_spec
 
     # Filter out false positives (common internal fields)
-    common_internal = {'value', 'values', 'map', 'type', 'key', 'index'}
+    # Note: 'type' is NOT included here as it's a valid property for many schemas
+    # (e.g., ErrorPayload.type, Tool.type, etc.)
+    common_internal = {'value', 'values', 'map', 'key', 'index'}
     extra_in_dart -= common_internal
 
     return len(missing_in_dart) == 0, missing_in_dart, extra_in_dart
