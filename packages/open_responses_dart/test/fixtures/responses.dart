@@ -56,7 +56,8 @@ Map<String, dynamic> functionCallResponse({
 /// A failed response.
 Map<String, dynamic> failedResponse({
   String id = 'resp_123',
-  String errorCode = 'server_error',
+  String errorType = 'server_error',
+  String? errorCode = 'server_error',
   String errorMessage = 'An internal error occurred',
 }) {
   return {
@@ -65,7 +66,12 @@ Map<String, dynamic> failedResponse({
     'created_at': 1700000000,
     'model': 'gpt-4o',
     'status': 'failed',
-    'error': {'code': errorCode, 'message': errorMessage},
+    'error': {
+      'type': errorType,
+      'code': errorCode,
+      'message': errorMessage,
+      'param': null,
+    },
   };
 }
 
@@ -245,6 +251,7 @@ List<Map<String, dynamic>> basicStreamingEvents({
   return [
     {
       'type': 'response.created',
+      'sequence_number': 0,
       'response': {
         'id': responseId,
         'object': 'response',
@@ -256,6 +263,7 @@ List<Map<String, dynamic>> basicStreamingEvents({
     },
     {
       'type': 'response.output_item.added',
+      'sequence_number': 1,
       'output_index': 0,
       'item': {
         'type': 'message',
@@ -266,6 +274,7 @@ List<Map<String, dynamic>> basicStreamingEvents({
     },
     {
       'type': 'response.content_part.added',
+      'sequence_number': 2,
       'item_id': 'msg_001',
       'output_index': 0,
       'content_index': 0,
@@ -273,20 +282,25 @@ List<Map<String, dynamic>> basicStreamingEvents({
     },
     {
       'type': 'response.output_text.delta',
+      'sequence_number': 3,
       'item_id': 'msg_001',
       'output_index': 0,
       'content_index': 0,
       'delta': outputText,
+      'logprobs': <dynamic>[],
     },
     {
       'type': 'response.output_text.done',
+      'sequence_number': 4,
       'item_id': 'msg_001',
       'output_index': 0,
       'content_index': 0,
       'text': outputText,
+      'logprobs': <dynamic>[],
     },
     {
       'type': 'response.completed',
+      'sequence_number': 5,
       'response': {
         'id': responseId,
         'object': 'response',

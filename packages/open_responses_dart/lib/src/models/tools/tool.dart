@@ -84,6 +84,10 @@ class FunctionTool extends Tool {
 /// A Model Context Protocol (MCP) tool.
 ///
 /// Allows connecting to remote MCP servers for extended capabilities.
+///
+/// **Note:** This is an extension tool type not present in the official
+/// OpenResponses spec. It is included for compatibility with providers that
+/// support the Model Context Protocol.
 @immutable
 class McpTool extends Tool {
   /// Label for the MCP server.

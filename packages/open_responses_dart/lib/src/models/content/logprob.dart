@@ -12,9 +12,15 @@ class LogProb {
   final double logprob;
 
   /// The byte representation.
+  ///
+  /// **Note:** While the spec marks this as required, it's kept nullable for
+  /// defensive parsing since some providers may not include it.
   final List<int>? bytes;
 
   /// Top alternative tokens.
+  ///
+  /// **Note:** While the spec marks this as required, it's kept nullable for
+  /// defensive parsing since some providers may not include it.
   final List<TopLogProb>? topLogprobs;
 
   /// Creates a [LogProb].
@@ -74,6 +80,9 @@ class TopLogProb {
   final double logprob;
 
   /// The byte representation.
+  ///
+  /// **Note:** While the spec marks this as required, it's kept nullable for
+  /// defensive parsing since some providers may not include it.
   final List<int>? bytes;
 
   /// Creates a [TopLogProb].

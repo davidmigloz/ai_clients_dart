@@ -61,6 +61,10 @@ class InputImageContent extends InputContent {
   final String? imageUrl;
 
   /// The file ID (for uploaded files).
+  ///
+  /// **Note:** This is an extension field not present in the official
+  /// OpenResponses spec. It is included for compatibility with providers
+  /// that support file uploads.
   final String? fileId;
 
   /// Optional detail level.
@@ -119,26 +123,59 @@ class InputImageContent extends InputContent {
       'InputImageContent(imageUrl: $imageUrl, fileId: $fileId, detail: $detail)';
 }
 
-/// File content via URL or file ID.
+/// File content via URL, file ID, or base64-encoded data.
 @immutable
 class InputFileContent extends InputContent {
   /// The file URL.
-  final String? url;
+  final String? fileUrl;
 
   /// The file ID.
+  ///
+  /// **Note:** This is an extension field not present in the official
+  /// OpenResponses spec. It is included for compatibility with providers
+  /// that support file uploads.
   final String? fileId;
+
+  /// Base64-encoded file content.
+  ///
+  /// Maximum length: 33554432 characters.
+  final String? fileData;
 
   /// The filename.
   final String? filename;
 
   /// Creates an [InputFileContent].
-  const InputFileContent({this.url, this.fileId, this.filename});
+  const InputFileContent({
+    this.fileUrl,
+    this.fileId,
+    this.fileData,
+    this.filename,
+  });
+
+  /// Creates an [InputFileContent] from a URL.
+  const InputFileContent.url(String url, {this.filename})
+    : fileUrl = url,
+      fileId = null,
+      fileData = null;
+
+  /// Creates an [InputFileContent] from a file ID.
+  const InputFileContent.file(String id, {this.filename})
+    : fileUrl = null,
+      fileId = id,
+      fileData = null;
+
+  /// Creates an [InputFileContent] from base64-encoded data.
+  const InputFileContent.data(String data, {this.filename})
+    : fileUrl = null,
+      fileId = null,
+      fileData = data;
 
   /// Creates an [InputFileContent] from JSON.
   factory InputFileContent.fromJson(Map<String, dynamic> json) {
     return InputFileContent(
-      url: json['url'] as String?,
+      fileUrl: json['file_url'] as String?,
       fileId: json['file_id'] as String?,
+      fileData: json['file_data'] as String?,
       filename: json['filename'] as String?,
     );
   }
@@ -146,8 +183,9 @@ class InputFileContent extends InputContent {
   @override
   Map<String, dynamic> toJson() => {
     'type': 'input_file',
-    if (url != null) 'url': url,
+    if (fileUrl != null) 'file_url': fileUrl,
     if (fileId != null) 'file_id': fileId,
+    if (fileData != null) 'file_data': fileData,
     if (filename != null) 'filename': filename,
   };
 
@@ -156,45 +194,49 @@ class InputFileContent extends InputContent {
       identical(this, other) ||
       other is InputFileContent &&
           runtimeType == other.runtimeType &&
-          url == other.url &&
+          fileUrl == other.fileUrl &&
           fileId == other.fileId &&
+          fileData == other.fileData &&
           filename == other.filename;
 
   @override
-  int get hashCode => Object.hash(url, fileId, filename);
+  int get hashCode => Object.hash(fileUrl, fileId, fileData, filename);
 
   @override
   String toString() =>
-      'InputFileContent(url: $url, fileId: $fileId, filename: $filename)';
+      'InputFileContent(fileUrl: $fileUrl, fileId: $fileId, fileData: $fileData, filename: $filename)';
 }
 
 /// Video content via URL.
 @immutable
 class InputVideoContent extends InputContent {
   /// The video URL.
-  final String url;
+  final String videoUrl;
 
   /// Creates an [InputVideoContent].
-  const InputVideoContent({required this.url});
+  const InputVideoContent({required this.videoUrl});
 
   /// Creates an [InputVideoContent] from JSON.
   factory InputVideoContent.fromJson(Map<String, dynamic> json) {
-    return InputVideoContent(url: json['url'] as String);
+    return InputVideoContent(videoUrl: json['video_url'] as String);
   }
 
   @override
-  Map<String, dynamic> toJson() => {'type': 'input_video', 'url': url};
+  Map<String, dynamic> toJson() => {
+    'type': 'input_video',
+    'video_url': videoUrl,
+  };
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is InputVideoContent &&
           runtimeType == other.runtimeType &&
-          url == other.url;
+          videoUrl == other.videoUrl;
 
   @override
-  int get hashCode => url.hashCode;
+  int get hashCode => videoUrl.hashCode;
 
   @override
-  String toString() => 'InputVideoContent(url: $url)';
+  String toString() => 'InputVideoContent(videoUrl: $videoUrl)';
 }

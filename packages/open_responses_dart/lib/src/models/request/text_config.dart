@@ -1,6 +1,9 @@
 import 'package:meta/meta.dart';
 
 import '../common/equality_helpers.dart';
+import '../metadata/verbosity.dart';
+
+export '../metadata/verbosity.dart' show Verbosity;
 
 /// Configuration for text output.
 @immutable
@@ -8,8 +11,11 @@ class TextConfig {
   /// The output format.
   final TextFormat? format;
 
+  /// The verbosity level for text output.
+  final Verbosity? verbosity;
+
   /// Creates a [TextConfig].
-  const TextConfig({this.format});
+  const TextConfig({this.format, this.verbosity});
 
   /// Creates a [TextConfig] from JSON.
   factory TextConfig.fromJson(Map<String, dynamic> json) {
@@ -17,12 +23,16 @@ class TextConfig {
       format: json['format'] != null
           ? TextFormat.fromJson(json['format'] as Map<String, dynamic>)
           : null,
+      verbosity: json['verbosity'] != null
+          ? Verbosity.fromJson(json['verbosity'] as String)
+          : null,
     );
   }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (format != null) 'format': format!.toJson(),
+    if (verbosity != null) 'verbosity': verbosity!.toJson(),
   };
 
   @override
@@ -30,13 +40,14 @@ class TextConfig {
       identical(this, other) ||
       other is TextConfig &&
           runtimeType == other.runtimeType &&
-          format == other.format;
+          format == other.format &&
+          verbosity == other.verbosity;
 
   @override
-  int get hashCode => format.hashCode;
+  int get hashCode => Object.hash(format, verbosity);
 
   @override
-  String toString() => 'TextConfig(format: $format)';
+  String toString() => 'TextConfig(format: $format, verbosity: $verbosity)';
 }
 
 /// Text output format.

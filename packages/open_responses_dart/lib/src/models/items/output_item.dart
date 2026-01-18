@@ -176,36 +176,40 @@ class ReasoningItem extends OutputItem {
   /// Unique identifier.
   final String id;
 
+  /// The reasoning content that was generated.
+  ///
+  /// Contains a list of content parts that make up the reasoning. Each item
+  /// can be of various types (text, image, file, etc.) based on the model's
+  /// reasoning output.
+  final List<Map<String, dynamic>>? content;
+
   /// The reasoning summary content.
   final List<ReasoningSummaryContent> summary;
 
   /// Encrypted reasoning content (if requested via include).
   final String? encryptedContent;
 
-  /// Item status.
-  final ItemStatus? status;
-
   /// Creates a [ReasoningItem].
   const ReasoningItem({
     required this.id,
+    this.content,
     required this.summary,
     this.encryptedContent,
-    this.status,
   });
 
   /// Creates a [ReasoningItem] from JSON.
   factory ReasoningItem.fromJson(Map<String, dynamic> json) {
     return ReasoningItem(
       id: json['id'] as String,
+      content: (json['content'] as List?)
+          ?.map((e) => e as Map<String, dynamic>)
+          .toList(),
       summary: (json['summary'] as List)
           .map(
             (e) => ReasoningSummaryContent.fromJson(e as Map<String, dynamic>),
           )
           .toList(),
       encryptedContent: json['encrypted_content'] as String?,
-      status: json['status'] != null
-          ? ItemStatus.fromJson(json['status'] as String)
-          : null,
     );
   }
 
@@ -213,9 +217,9 @@ class ReasoningItem extends OutputItem {
   Map<String, dynamic> toJson() => {
     'type': 'reasoning',
     'id': id,
+    if (content != null) 'content': content,
     'summary': summary.map((e) => e.toJson()).toList(),
     if (encryptedContent != null) 'encrypted_content': encryptedContent,
-    if (status != null) 'status': status!.toJson(),
   };
 
   @override
@@ -225,15 +229,14 @@ class ReasoningItem extends OutputItem {
           runtimeType == other.runtimeType &&
           id == other.id &&
           listsEqual(summary, other.summary) &&
-          encryptedContent == other.encryptedContent &&
-          status == other.status;
+          encryptedContent == other.encryptedContent;
 
   @override
-  int get hashCode => Object.hash(id, summary, encryptedContent, status);
+  int get hashCode => Object.hash(id, summary, encryptedContent);
 
   @override
   String toString() =>
-      'ReasoningItem(id: $id, summary: $summary, encryptedContent: $encryptedContent, status: $status)';
+      'ReasoningItem(id: $id, content: $content, summary: $summary, encryptedContent: $encryptedContent)';
 }
 
 /// Content within a reasoning summary.

@@ -33,14 +33,14 @@ class UrlCitation extends Annotation {
   final String url;
 
   /// The title of the cited resource.
-  final String? title;
+  final String title;
 
   /// Creates a [UrlCitation].
   const UrlCitation({
     required this.startIndex,
     required this.endIndex,
     required this.url,
-    this.title,
+    required this.title,
   });
 
   /// Creates a [UrlCitation] from JSON.
@@ -49,7 +49,7 @@ class UrlCitation extends Annotation {
       startIndex: json['start_index'] as int,
       endIndex: json['end_index'] as int,
       url: json['url'] as String,
-      title: json['title'] as String?,
+      title: json['title'] as String,
     );
   }
 
@@ -59,7 +59,7 @@ class UrlCitation extends Annotation {
     'start_index': startIndex,
     'end_index': endIndex,
     'url': url,
-    if (title != null) 'title': title,
+    'title': title,
   };
 
   @override
@@ -81,6 +81,10 @@ class UrlCitation extends Annotation {
 }
 
 /// File citation annotation.
+///
+/// **Note:** This is an extension annotation type not present in the official
+/// OpenResponses spec. It is included for compatibility with providers that
+/// support file citations.
 @immutable
 class FileCitation extends Annotation {
   /// The start index in the text.
@@ -141,6 +145,10 @@ class FileCitation extends Annotation {
 }
 
 /// File path annotation.
+///
+/// **Note:** This is an extension annotation type not present in the official
+/// OpenResponses spec. It is included for compatibility with providers that
+/// support file path annotations.
 @immutable
 class FilePathAnnotation extends Annotation {
   /// The start index in the text.

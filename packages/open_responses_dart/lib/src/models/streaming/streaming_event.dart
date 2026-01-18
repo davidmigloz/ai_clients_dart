@@ -1,6 +1,8 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality_helpers.dart';
 import '../content/annotation.dart';
+import '../content/logprob.dart';
 import '../content/output_content.dart';
 import '../items/output_item.dart';
 import '../response/error_payload.dart';
@@ -84,15 +86,25 @@ sealed class StreamingEvent {
 /// Event indicating a response was created.
 @immutable
 class ResponseCreatedEvent extends StreamingEvent {
+  /// The event type.
+  String get type => 'response.created';
+
+  /// The sequence number of the event.
+  final int sequenceNumber;
+
   /// The created response.
   final ResponseResource response;
 
   /// Creates a [ResponseCreatedEvent].
-  const ResponseCreatedEvent({required this.response});
+  const ResponseCreatedEvent({
+    required this.sequenceNumber,
+    required this.response,
+  });
 
   /// Creates a [ResponseCreatedEvent] from JSON.
   factory ResponseCreatedEvent.fromJson(Map<String, dynamic> json) {
     return ResponseCreatedEvent(
+      sequenceNumber: json['sequence_number'] as int? ?? 0,
       response: ResponseResource.fromJson(
         json['response'] as Map<String, dynamic>,
       ),
@@ -102,6 +114,7 @@ class ResponseCreatedEvent extends StreamingEvent {
   @override
   Map<String, dynamic> toJson() => {
     'type': 'response.created',
+    'sequence_number': sequenceNumber,
     'response': response.toJson(),
   };
 
@@ -110,27 +123,39 @@ class ResponseCreatedEvent extends StreamingEvent {
       identical(this, other) ||
       other is ResponseCreatedEvent &&
           runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
           response == other.response;
 
   @override
-  int get hashCode => response.hashCode;
+  int get hashCode => Object.hash(sequenceNumber, response);
 
   @override
-  String toString() => 'ResponseCreatedEvent(response: $response)';
+  String toString() =>
+      'ResponseCreatedEvent(sequenceNumber: $sequenceNumber, response: $response)';
 }
 
 /// Event indicating a response was queued.
 @immutable
 class ResponseQueuedEvent extends StreamingEvent {
+  /// The event type.
+  String get type => 'response.queued';
+
+  /// The sequence number of the event.
+  final int sequenceNumber;
+
   /// The queued response.
   final ResponseResource response;
 
   /// Creates a [ResponseQueuedEvent].
-  const ResponseQueuedEvent({required this.response});
+  const ResponseQueuedEvent({
+    required this.sequenceNumber,
+    required this.response,
+  });
 
   /// Creates a [ResponseQueuedEvent] from JSON.
   factory ResponseQueuedEvent.fromJson(Map<String, dynamic> json) {
     return ResponseQueuedEvent(
+      sequenceNumber: json['sequence_number'] as int? ?? 0,
       response: ResponseResource.fromJson(
         json['response'] as Map<String, dynamic>,
       ),
@@ -140,6 +165,7 @@ class ResponseQueuedEvent extends StreamingEvent {
   @override
   Map<String, dynamic> toJson() => {
     'type': 'response.queued',
+    'sequence_number': sequenceNumber,
     'response': response.toJson(),
   };
 
@@ -148,27 +174,39 @@ class ResponseQueuedEvent extends StreamingEvent {
       identical(this, other) ||
       other is ResponseQueuedEvent &&
           runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
           response == other.response;
 
   @override
-  int get hashCode => response.hashCode;
+  int get hashCode => Object.hash(sequenceNumber, response);
 
   @override
-  String toString() => 'ResponseQueuedEvent(response: $response)';
+  String toString() =>
+      'ResponseQueuedEvent(sequenceNumber: $sequenceNumber, response: $response)';
 }
 
 /// Event indicating a response is in progress.
 @immutable
 class ResponseInProgressEvent extends StreamingEvent {
+  /// The event type.
+  String get type => 'response.in_progress';
+
+  /// The sequence number of the event.
+  final int sequenceNumber;
+
   /// The in-progress response.
   final ResponseResource response;
 
   /// Creates a [ResponseInProgressEvent].
-  const ResponseInProgressEvent({required this.response});
+  const ResponseInProgressEvent({
+    required this.sequenceNumber,
+    required this.response,
+  });
 
   /// Creates a [ResponseInProgressEvent] from JSON.
   factory ResponseInProgressEvent.fromJson(Map<String, dynamic> json) {
     return ResponseInProgressEvent(
+      sequenceNumber: json['sequence_number'] as int? ?? 0,
       response: ResponseResource.fromJson(
         json['response'] as Map<String, dynamic>,
       ),
@@ -178,6 +216,7 @@ class ResponseInProgressEvent extends StreamingEvent {
   @override
   Map<String, dynamic> toJson() => {
     'type': 'response.in_progress',
+    'sequence_number': sequenceNumber,
     'response': response.toJson(),
   };
 
@@ -186,27 +225,39 @@ class ResponseInProgressEvent extends StreamingEvent {
       identical(this, other) ||
       other is ResponseInProgressEvent &&
           runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
           response == other.response;
 
   @override
-  int get hashCode => response.hashCode;
+  int get hashCode => Object.hash(sequenceNumber, response);
 
   @override
-  String toString() => 'ResponseInProgressEvent(response: $response)';
+  String toString() =>
+      'ResponseInProgressEvent(sequenceNumber: $sequenceNumber, response: $response)';
 }
 
 /// Event indicating a response completed successfully.
 @immutable
 class ResponseCompletedEvent extends StreamingEvent {
+  /// The event type.
+  String get type => 'response.completed';
+
+  /// The sequence number of the event.
+  final int sequenceNumber;
+
   /// The completed response.
   final ResponseResource response;
 
   /// Creates a [ResponseCompletedEvent].
-  const ResponseCompletedEvent({required this.response});
+  const ResponseCompletedEvent({
+    required this.sequenceNumber,
+    required this.response,
+  });
 
   /// Creates a [ResponseCompletedEvent] from JSON.
   factory ResponseCompletedEvent.fromJson(Map<String, dynamic> json) {
     return ResponseCompletedEvent(
+      sequenceNumber: json['sequence_number'] as int? ?? 0,
       response: ResponseResource.fromJson(
         json['response'] as Map<String, dynamic>,
       ),
@@ -216,6 +267,7 @@ class ResponseCompletedEvent extends StreamingEvent {
   @override
   Map<String, dynamic> toJson() => {
     'type': 'response.completed',
+    'sequence_number': sequenceNumber,
     'response': response.toJson(),
   };
 
@@ -224,27 +276,39 @@ class ResponseCompletedEvent extends StreamingEvent {
       identical(this, other) ||
       other is ResponseCompletedEvent &&
           runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
           response == other.response;
 
   @override
-  int get hashCode => response.hashCode;
+  int get hashCode => Object.hash(sequenceNumber, response);
 
   @override
-  String toString() => 'ResponseCompletedEvent(response: $response)';
+  String toString() =>
+      'ResponseCompletedEvent(sequenceNumber: $sequenceNumber, response: $response)';
 }
 
 /// Event indicating a response failed.
 @immutable
 class ResponseFailedEvent extends StreamingEvent {
+  /// The event type.
+  String get type => 'response.failed';
+
+  /// The sequence number of the event.
+  final int sequenceNumber;
+
   /// The failed response.
   final ResponseResource response;
 
   /// Creates a [ResponseFailedEvent].
-  const ResponseFailedEvent({required this.response});
+  const ResponseFailedEvent({
+    required this.sequenceNumber,
+    required this.response,
+  });
 
   /// Creates a [ResponseFailedEvent] from JSON.
   factory ResponseFailedEvent.fromJson(Map<String, dynamic> json) {
     return ResponseFailedEvent(
+      sequenceNumber: json['sequence_number'] as int? ?? 0,
       response: ResponseResource.fromJson(
         json['response'] as Map<String, dynamic>,
       ),
@@ -254,6 +318,7 @@ class ResponseFailedEvent extends StreamingEvent {
   @override
   Map<String, dynamic> toJson() => {
     'type': 'response.failed',
+    'sequence_number': sequenceNumber,
     'response': response.toJson(),
   };
 
@@ -262,27 +327,39 @@ class ResponseFailedEvent extends StreamingEvent {
       identical(this, other) ||
       other is ResponseFailedEvent &&
           runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
           response == other.response;
 
   @override
-  int get hashCode => response.hashCode;
+  int get hashCode => Object.hash(sequenceNumber, response);
 
   @override
-  String toString() => 'ResponseFailedEvent(response: $response)';
+  String toString() =>
+      'ResponseFailedEvent(sequenceNumber: $sequenceNumber, response: $response)';
 }
 
 /// Event indicating a response was incomplete.
 @immutable
 class ResponseIncompleteEvent extends StreamingEvent {
+  /// The event type.
+  String get type => 'response.incomplete';
+
+  /// The sequence number of the event.
+  final int sequenceNumber;
+
   /// The incomplete response.
   final ResponseResource response;
 
   /// Creates a [ResponseIncompleteEvent].
-  const ResponseIncompleteEvent({required this.response});
+  const ResponseIncompleteEvent({
+    required this.sequenceNumber,
+    required this.response,
+  });
 
   /// Creates a [ResponseIncompleteEvent] from JSON.
   factory ResponseIncompleteEvent.fromJson(Map<String, dynamic> json) {
     return ResponseIncompleteEvent(
+      sequenceNumber: json['sequence_number'] as int? ?? 0,
       response: ResponseResource.fromJson(
         json['response'] as Map<String, dynamic>,
       ),
@@ -292,6 +369,7 @@ class ResponseIncompleteEvent extends StreamingEvent {
   @override
   Map<String, dynamic> toJson() => {
     'type': 'response.incomplete',
+    'sequence_number': sequenceNumber,
     'response': response.toJson(),
   };
 
@@ -300,13 +378,15 @@ class ResponseIncompleteEvent extends StreamingEvent {
       identical(this, other) ||
       other is ResponseIncompleteEvent &&
           runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
           response == other.response;
 
   @override
-  int get hashCode => response.hashCode;
+  int get hashCode => Object.hash(sequenceNumber, response);
 
   @override
-  String toString() => 'ResponseIncompleteEvent(response: $response)';
+  String toString() =>
+      'ResponseIncompleteEvent(sequenceNumber: $sequenceNumber, response: $response)';
 }
 
 // ============================================================================
@@ -316,6 +396,12 @@ class ResponseIncompleteEvent extends StreamingEvent {
 /// Event indicating an output item was added.
 @immutable
 class OutputItemAddedEvent extends StreamingEvent {
+  /// The event type.
+  String get type => 'response.output_item.added';
+
+  /// The sequence number of the event.
+  final int sequenceNumber;
+
   /// The index of the output item.
   final int outputIndex;
 
@@ -323,11 +409,16 @@ class OutputItemAddedEvent extends StreamingEvent {
   final OutputItem item;
 
   /// Creates an [OutputItemAddedEvent].
-  const OutputItemAddedEvent({required this.outputIndex, required this.item});
+  const OutputItemAddedEvent({
+    required this.sequenceNumber,
+    required this.outputIndex,
+    required this.item,
+  });
 
   /// Creates an [OutputItemAddedEvent] from JSON.
   factory OutputItemAddedEvent.fromJson(Map<String, dynamic> json) {
     return OutputItemAddedEvent(
+      sequenceNumber: json['sequence_number'] as int? ?? 0,
       outputIndex: json['output_index'] as int,
       item: OutputItem.fromJson(json['item'] as Map<String, dynamic>),
     );
@@ -336,6 +427,7 @@ class OutputItemAddedEvent extends StreamingEvent {
   @override
   Map<String, dynamic> toJson() => {
     'type': 'response.output_item.added',
+    'sequence_number': sequenceNumber,
     'output_index': outputIndex,
     'item': item.toJson(),
   };
@@ -345,20 +437,27 @@ class OutputItemAddedEvent extends StreamingEvent {
       identical(this, other) ||
       other is OutputItemAddedEvent &&
           runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
           outputIndex == other.outputIndex &&
           item == other.item;
 
   @override
-  int get hashCode => Object.hash(outputIndex, item);
+  int get hashCode => Object.hash(sequenceNumber, outputIndex, item);
 
   @override
   String toString() =>
-      'OutputItemAddedEvent(outputIndex: $outputIndex, item: $item)';
+      'OutputItemAddedEvent(sequenceNumber: $sequenceNumber, outputIndex: $outputIndex, item: $item)';
 }
 
 /// Event indicating an output item is done.
 @immutable
 class OutputItemDoneEvent extends StreamingEvent {
+  /// The event type.
+  String get type => 'response.output_item.done';
+
+  /// The sequence number of the event.
+  final int sequenceNumber;
+
   /// The index of the output item.
   final int outputIndex;
 
@@ -366,11 +465,16 @@ class OutputItemDoneEvent extends StreamingEvent {
   final OutputItem item;
 
   /// Creates an [OutputItemDoneEvent].
-  const OutputItemDoneEvent({required this.outputIndex, required this.item});
+  const OutputItemDoneEvent({
+    required this.sequenceNumber,
+    required this.outputIndex,
+    required this.item,
+  });
 
   /// Creates an [OutputItemDoneEvent] from JSON.
   factory OutputItemDoneEvent.fromJson(Map<String, dynamic> json) {
     return OutputItemDoneEvent(
+      sequenceNumber: json['sequence_number'] as int? ?? 0,
       outputIndex: json['output_index'] as int,
       item: OutputItem.fromJson(json['item'] as Map<String, dynamic>),
     );
@@ -379,6 +483,7 @@ class OutputItemDoneEvent extends StreamingEvent {
   @override
   Map<String, dynamic> toJson() => {
     'type': 'response.output_item.done',
+    'sequence_number': sequenceNumber,
     'output_index': outputIndex,
     'item': item.toJson(),
   };
@@ -388,15 +493,16 @@ class OutputItemDoneEvent extends StreamingEvent {
       identical(this, other) ||
       other is OutputItemDoneEvent &&
           runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
           outputIndex == other.outputIndex &&
           item == other.item;
 
   @override
-  int get hashCode => Object.hash(outputIndex, item);
+  int get hashCode => Object.hash(sequenceNumber, outputIndex, item);
 
   @override
   String toString() =>
-      'OutputItemDoneEvent(outputIndex: $outputIndex, item: $item)';
+      'OutputItemDoneEvent(sequenceNumber: $sequenceNumber, outputIndex: $outputIndex, item: $item)';
 }
 
 // ============================================================================
@@ -406,6 +512,12 @@ class OutputItemDoneEvent extends StreamingEvent {
 /// Event indicating a content part was added.
 @immutable
 class ContentPartAddedEvent extends StreamingEvent {
+  /// The event type.
+  String get type => 'response.content_part.added';
+
+  /// The sequence number of the event.
+  final int sequenceNumber;
+
   /// The item ID.
   final String itemId;
 
@@ -420,6 +532,7 @@ class ContentPartAddedEvent extends StreamingEvent {
 
   /// Creates a [ContentPartAddedEvent].
   const ContentPartAddedEvent({
+    required this.sequenceNumber,
     required this.itemId,
     required this.outputIndex,
     required this.contentIndex,
@@ -429,6 +542,7 @@ class ContentPartAddedEvent extends StreamingEvent {
   /// Creates a [ContentPartAddedEvent] from JSON.
   factory ContentPartAddedEvent.fromJson(Map<String, dynamic> json) {
     return ContentPartAddedEvent(
+      sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       contentIndex: json['content_index'] as int,
@@ -439,6 +553,7 @@ class ContentPartAddedEvent extends StreamingEvent {
   @override
   Map<String, dynamic> toJson() => {
     'type': 'response.content_part.added',
+    'sequence_number': sequenceNumber,
     'item_id': itemId,
     'output_index': outputIndex,
     'content_index': contentIndex,
@@ -450,22 +565,30 @@ class ContentPartAddedEvent extends StreamingEvent {
       identical(this, other) ||
       other is ContentPartAddedEvent &&
           runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
           contentIndex == other.contentIndex &&
           part == other.part;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, contentIndex, part);
+  int get hashCode =>
+      Object.hash(sequenceNumber, itemId, outputIndex, contentIndex, part);
 
   @override
   String toString() =>
-      'ContentPartAddedEvent(itemId: $itemId, outputIndex: $outputIndex, contentIndex: $contentIndex)';
+      'ContentPartAddedEvent(sequenceNumber: $sequenceNumber, itemId: $itemId, outputIndex: $outputIndex, contentIndex: $contentIndex)';
 }
 
 /// Event indicating a content part is done.
 @immutable
 class ContentPartDoneEvent extends StreamingEvent {
+  /// The event type.
+  String get type => 'response.content_part.done';
+
+  /// The sequence number of the event.
+  final int sequenceNumber;
+
   /// The item ID.
   final String itemId;
 
@@ -480,6 +603,7 @@ class ContentPartDoneEvent extends StreamingEvent {
 
   /// Creates a [ContentPartDoneEvent].
   const ContentPartDoneEvent({
+    required this.sequenceNumber,
     required this.itemId,
     required this.outputIndex,
     required this.contentIndex,
@@ -489,6 +613,7 @@ class ContentPartDoneEvent extends StreamingEvent {
   /// Creates a [ContentPartDoneEvent] from JSON.
   factory ContentPartDoneEvent.fromJson(Map<String, dynamic> json) {
     return ContentPartDoneEvent(
+      sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       contentIndex: json['content_index'] as int,
@@ -499,6 +624,7 @@ class ContentPartDoneEvent extends StreamingEvent {
   @override
   Map<String, dynamic> toJson() => {
     'type': 'response.content_part.done',
+    'sequence_number': sequenceNumber,
     'item_id': itemId,
     'output_index': outputIndex,
     'content_index': contentIndex,
@@ -510,17 +636,19 @@ class ContentPartDoneEvent extends StreamingEvent {
       identical(this, other) ||
       other is ContentPartDoneEvent &&
           runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
           contentIndex == other.contentIndex &&
           part == other.part;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, contentIndex, part);
+  int get hashCode =>
+      Object.hash(sequenceNumber, itemId, outputIndex, contentIndex, part);
 
   @override
   String toString() =>
-      'ContentPartDoneEvent(itemId: $itemId, outputIndex: $outputIndex, contentIndex: $contentIndex)';
+      'ContentPartDoneEvent(sequenceNumber: $sequenceNumber, itemId: $itemId, outputIndex: $outputIndex, contentIndex: $contentIndex)';
 }
 
 // ============================================================================
@@ -530,6 +658,12 @@ class ContentPartDoneEvent extends StreamingEvent {
 /// Event with a text delta.
 @immutable
 class OutputTextDeltaEvent extends StreamingEvent {
+  /// The event type.
+  String get type => 'response.output_text.delta';
+
+  /// The sequence number of the event.
+  final int sequenceNumber;
+
   /// The item ID.
   final String itemId;
 
@@ -542,31 +676,50 @@ class OutputTextDeltaEvent extends StreamingEvent {
   /// The text delta.
   final String delta;
 
+  /// Token log probabilities emitted with the delta.
+  final List<LogProb> logprobs;
+
+  /// An obfuscation string added to pad the event payload.
+  final String? obfuscation;
+
   /// Creates an [OutputTextDeltaEvent].
   const OutputTextDeltaEvent({
+    required this.sequenceNumber,
     required this.itemId,
     required this.outputIndex,
     required this.contentIndex,
     required this.delta,
+    required this.logprobs,
+    this.obfuscation,
   });
 
   /// Creates an [OutputTextDeltaEvent] from JSON.
   factory OutputTextDeltaEvent.fromJson(Map<String, dynamic> json) {
     return OutputTextDeltaEvent(
+      sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       contentIndex: json['content_index'] as int,
       delta: json['delta'] as String,
+      logprobs:
+          (json['logprobs'] as List?)
+              ?.map((e) => LogProb.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      obfuscation: json['obfuscation'] as String?,
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
     'type': 'response.output_text.delta',
+    'sequence_number': sequenceNumber,
     'item_id': itemId,
     'output_index': outputIndex,
     'content_index': contentIndex,
     'delta': delta,
+    'logprobs': logprobs.map((e) => e.toJson()).toList(),
+    if (obfuscation != null) 'obfuscation': obfuscation,
   };
 
   @override
@@ -574,13 +727,24 @@ class OutputTextDeltaEvent extends StreamingEvent {
       identical(this, other) ||
       other is OutputTextDeltaEvent &&
           runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
           contentIndex == other.contentIndex &&
-          delta == other.delta;
+          delta == other.delta &&
+          listsEqual(logprobs, other.logprobs) &&
+          obfuscation == other.obfuscation;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, contentIndex, delta);
+  int get hashCode => Object.hash(
+    sequenceNumber,
+    itemId,
+    outputIndex,
+    contentIndex,
+    delta,
+    Object.hashAll(logprobs),
+    obfuscation,
+  );
 
   @override
   String toString() => 'OutputTextDeltaEvent(delta: $delta)';
@@ -589,6 +753,12 @@ class OutputTextDeltaEvent extends StreamingEvent {
 /// Event indicating output text is done.
 @immutable
 class OutputTextDoneEvent extends StreamingEvent {
+  /// The event type.
+  String get type => 'response.output_text.done';
+
+  /// The sequence number of the event.
+  final int sequenceNumber;
+
   /// The item ID.
   final String itemId;
 
@@ -601,31 +771,44 @@ class OutputTextDoneEvent extends StreamingEvent {
   /// The complete text.
   final String text;
 
+  /// Token log probabilities for the complete text.
+  final List<LogProb> logprobs;
+
   /// Creates an [OutputTextDoneEvent].
   const OutputTextDoneEvent({
+    required this.sequenceNumber,
     required this.itemId,
     required this.outputIndex,
     required this.contentIndex,
     required this.text,
+    required this.logprobs,
   });
 
   /// Creates an [OutputTextDoneEvent] from JSON.
   factory OutputTextDoneEvent.fromJson(Map<String, dynamic> json) {
     return OutputTextDoneEvent(
+      sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       contentIndex: json['content_index'] as int,
       text: json['text'] as String,
+      logprobs:
+          (json['logprobs'] as List?)
+              ?.map((e) => LogProb.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
     'type': 'response.output_text.done',
+    'sequence_number': sequenceNumber,
     'item_id': itemId,
     'output_index': outputIndex,
     'content_index': contentIndex,
     'text': text,
+    'logprobs': logprobs.map((e) => e.toJson()).toList(),
   };
 
   @override
@@ -633,13 +816,22 @@ class OutputTextDoneEvent extends StreamingEvent {
       identical(this, other) ||
       other is OutputTextDoneEvent &&
           runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
           contentIndex == other.contentIndex &&
-          text == other.text;
+          text == other.text &&
+          listsEqual(logprobs, other.logprobs);
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, contentIndex, text);
+  int get hashCode => Object.hash(
+    sequenceNumber,
+    itemId,
+    outputIndex,
+    contentIndex,
+    text,
+    Object.hashAll(logprobs),
+  );
 
   @override
   String toString() => 'OutputTextDoneEvent(text: $text)';
@@ -648,6 +840,12 @@ class OutputTextDoneEvent extends StreamingEvent {
 /// Event indicating an annotation was added.
 @immutable
 class OutputTextAnnotationAddedEvent extends StreamingEvent {
+  /// The event type.
+  String get type => 'response.output_text.annotation.added';
+
+  /// The sequence number of the event.
+  final int sequenceNumber;
+
   /// The item ID.
   final String itemId;
 
@@ -665,6 +863,7 @@ class OutputTextAnnotationAddedEvent extends StreamingEvent {
 
   /// Creates an [OutputTextAnnotationAddedEvent].
   const OutputTextAnnotationAddedEvent({
+    required this.sequenceNumber,
     required this.itemId,
     required this.outputIndex,
     required this.contentIndex,
@@ -675,6 +874,7 @@ class OutputTextAnnotationAddedEvent extends StreamingEvent {
   /// Creates an [OutputTextAnnotationAddedEvent] from JSON.
   factory OutputTextAnnotationAddedEvent.fromJson(Map<String, dynamic> json) {
     return OutputTextAnnotationAddedEvent(
+      sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       contentIndex: json['content_index'] as int,
@@ -688,6 +888,7 @@ class OutputTextAnnotationAddedEvent extends StreamingEvent {
   @override
   Map<String, dynamic> toJson() => {
     'type': 'response.output_text.annotation.added',
+    'sequence_number': sequenceNumber,
     'item_id': itemId,
     'output_index': outputIndex,
     'content_index': contentIndex,
@@ -700,6 +901,7 @@ class OutputTextAnnotationAddedEvent extends StreamingEvent {
       identical(this, other) ||
       other is OutputTextAnnotationAddedEvent &&
           runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
           contentIndex == other.contentIndex &&
@@ -708,6 +910,7 @@ class OutputTextAnnotationAddedEvent extends StreamingEvent {
 
   @override
   int get hashCode => Object.hash(
+    sequenceNumber,
     itemId,
     outputIndex,
     contentIndex,
@@ -727,6 +930,12 @@ class OutputTextAnnotationAddedEvent extends StreamingEvent {
 /// Event with a refusal delta.
 @immutable
 class RefusalDeltaEvent extends StreamingEvent {
+  /// The event type.
+  String get type => 'response.refusal.delta';
+
+  /// The sequence number of the event.
+  final int sequenceNumber;
+
   /// The item ID.
   final String itemId;
 
@@ -741,6 +950,7 @@ class RefusalDeltaEvent extends StreamingEvent {
 
   /// Creates a [RefusalDeltaEvent].
   const RefusalDeltaEvent({
+    required this.sequenceNumber,
     required this.itemId,
     required this.outputIndex,
     required this.contentIndex,
@@ -750,6 +960,7 @@ class RefusalDeltaEvent extends StreamingEvent {
   /// Creates a [RefusalDeltaEvent] from JSON.
   factory RefusalDeltaEvent.fromJson(Map<String, dynamic> json) {
     return RefusalDeltaEvent(
+      sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       contentIndex: json['content_index'] as int,
@@ -760,6 +971,7 @@ class RefusalDeltaEvent extends StreamingEvent {
   @override
   Map<String, dynamic> toJson() => {
     'type': 'response.refusal.delta',
+    'sequence_number': sequenceNumber,
     'item_id': itemId,
     'output_index': outputIndex,
     'content_index': contentIndex,
@@ -771,13 +983,15 @@ class RefusalDeltaEvent extends StreamingEvent {
       identical(this, other) ||
       other is RefusalDeltaEvent &&
           runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
           contentIndex == other.contentIndex &&
           delta == other.delta;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, contentIndex, delta);
+  int get hashCode =>
+      Object.hash(sequenceNumber, itemId, outputIndex, contentIndex, delta);
 
   @override
   String toString() => 'RefusalDeltaEvent(delta: $delta)';
@@ -786,6 +1000,12 @@ class RefusalDeltaEvent extends StreamingEvent {
 /// Event indicating refusal is done.
 @immutable
 class RefusalDoneEvent extends StreamingEvent {
+  /// The event type.
+  String get type => 'response.refusal.done';
+
+  /// The sequence number of the event.
+  final int sequenceNumber;
+
   /// The item ID.
   final String itemId;
 
@@ -800,6 +1020,7 @@ class RefusalDoneEvent extends StreamingEvent {
 
   /// Creates a [RefusalDoneEvent].
   const RefusalDoneEvent({
+    required this.sequenceNumber,
     required this.itemId,
     required this.outputIndex,
     required this.contentIndex,
@@ -809,6 +1030,7 @@ class RefusalDoneEvent extends StreamingEvent {
   /// Creates a [RefusalDoneEvent] from JSON.
   factory RefusalDoneEvent.fromJson(Map<String, dynamic> json) {
     return RefusalDoneEvent(
+      sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       contentIndex: json['content_index'] as int,
@@ -819,6 +1041,7 @@ class RefusalDoneEvent extends StreamingEvent {
   @override
   Map<String, dynamic> toJson() => {
     'type': 'response.refusal.done',
+    'sequence_number': sequenceNumber,
     'item_id': itemId,
     'output_index': outputIndex,
     'content_index': contentIndex,
@@ -830,13 +1053,15 @@ class RefusalDoneEvent extends StreamingEvent {
       identical(this, other) ||
       other is RefusalDoneEvent &&
           runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
           contentIndex == other.contentIndex &&
           refusal == other.refusal;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, contentIndex, refusal);
+  int get hashCode =>
+      Object.hash(sequenceNumber, itemId, outputIndex, contentIndex, refusal);
 
   @override
   String toString() => 'RefusalDoneEvent(refusal: $refusal)';
@@ -849,6 +1074,12 @@ class RefusalDoneEvent extends StreamingEvent {
 /// Event with function call arguments delta.
 @immutable
 class FunctionCallArgumentsDeltaEvent extends StreamingEvent {
+  /// The event type.
+  String get type => 'response.function_call_arguments.delta';
+
+  /// The sequence number of the event.
+  final int sequenceNumber;
+
   /// The item ID.
   final String itemId;
 
@@ -861,31 +1092,40 @@ class FunctionCallArgumentsDeltaEvent extends StreamingEvent {
   /// The arguments delta.
   final String delta;
 
+  /// An obfuscation string added to pad the event payload.
+  final String? obfuscation;
+
   /// Creates a [FunctionCallArgumentsDeltaEvent].
   const FunctionCallArgumentsDeltaEvent({
+    required this.sequenceNumber,
     required this.itemId,
     required this.outputIndex,
     required this.callId,
     required this.delta,
+    this.obfuscation,
   });
 
   /// Creates a [FunctionCallArgumentsDeltaEvent] from JSON.
   factory FunctionCallArgumentsDeltaEvent.fromJson(Map<String, dynamic> json) {
     return FunctionCallArgumentsDeltaEvent(
+      sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       callId: json['call_id'] as String,
       delta: json['delta'] as String,
+      obfuscation: json['obfuscation'] as String?,
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
     'type': 'response.function_call_arguments.delta',
+    'sequence_number': sequenceNumber,
     'item_id': itemId,
     'output_index': outputIndex,
     'call_id': callId,
     'delta': delta,
+    if (obfuscation != null) 'obfuscation': obfuscation,
   };
 
   @override
@@ -893,13 +1133,22 @@ class FunctionCallArgumentsDeltaEvent extends StreamingEvent {
       identical(this, other) ||
       other is FunctionCallArgumentsDeltaEvent &&
           runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
           callId == other.callId &&
-          delta == other.delta;
+          delta == other.delta &&
+          obfuscation == other.obfuscation;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, callId, delta);
+  int get hashCode => Object.hash(
+    sequenceNumber,
+    itemId,
+    outputIndex,
+    callId,
+    delta,
+    obfuscation,
+  );
 
   @override
   String toString() =>
@@ -909,6 +1158,12 @@ class FunctionCallArgumentsDeltaEvent extends StreamingEvent {
 /// Event indicating function call arguments are done.
 @immutable
 class FunctionCallArgumentsDoneEvent extends StreamingEvent {
+  /// The event type.
+  String get type => 'response.function_call_arguments.done';
+
+  /// The sequence number of the event.
+  final int sequenceNumber;
+
   /// The item ID.
   final String itemId;
 
@@ -923,6 +1178,7 @@ class FunctionCallArgumentsDoneEvent extends StreamingEvent {
 
   /// Creates a [FunctionCallArgumentsDoneEvent].
   const FunctionCallArgumentsDoneEvent({
+    required this.sequenceNumber,
     required this.itemId,
     required this.outputIndex,
     required this.callId,
@@ -932,6 +1188,7 @@ class FunctionCallArgumentsDoneEvent extends StreamingEvent {
   /// Creates a [FunctionCallArgumentsDoneEvent] from JSON.
   factory FunctionCallArgumentsDoneEvent.fromJson(Map<String, dynamic> json) {
     return FunctionCallArgumentsDoneEvent(
+      sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       callId: json['call_id'] as String,
@@ -942,6 +1199,7 @@ class FunctionCallArgumentsDoneEvent extends StreamingEvent {
   @override
   Map<String, dynamic> toJson() => {
     'type': 'response.function_call_arguments.done',
+    'sequence_number': sequenceNumber,
     'item_id': itemId,
     'output_index': outputIndex,
     'call_id': callId,
@@ -953,13 +1211,15 @@ class FunctionCallArgumentsDoneEvent extends StreamingEvent {
       identical(this, other) ||
       other is FunctionCallArgumentsDoneEvent &&
           runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
           callId == other.callId &&
           arguments == other.arguments;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, callId, arguments);
+  int get hashCode =>
+      Object.hash(sequenceNumber, itemId, outputIndex, callId, arguments);
 
   @override
   String toString() =>
@@ -973,6 +1233,12 @@ class FunctionCallArgumentsDoneEvent extends StreamingEvent {
 /// Event with reasoning delta.
 @immutable
 class ReasoningDeltaEvent extends StreamingEvent {
+  /// The event type.
+  String get type => 'response.reasoning.delta';
+
+  /// The sequence number of the event.
+  final int sequenceNumber;
+
   /// The item ID.
   final String itemId;
 
@@ -985,31 +1251,40 @@ class ReasoningDeltaEvent extends StreamingEvent {
   /// The reasoning delta.
   final String delta;
 
+  /// An obfuscation string added to pad the event payload.
+  final String? obfuscation;
+
   /// Creates a [ReasoningDeltaEvent].
   const ReasoningDeltaEvent({
+    required this.sequenceNumber,
     required this.itemId,
     required this.outputIndex,
     required this.contentIndex,
     required this.delta,
+    this.obfuscation,
   });
 
   /// Creates a [ReasoningDeltaEvent] from JSON.
   factory ReasoningDeltaEvent.fromJson(Map<String, dynamic> json) {
     return ReasoningDeltaEvent(
+      sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       contentIndex: json['content_index'] as int,
       delta: json['delta'] as String,
+      obfuscation: json['obfuscation'] as String?,
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
     'type': 'response.reasoning.delta',
+    'sequence_number': sequenceNumber,
     'item_id': itemId,
     'output_index': outputIndex,
     'content_index': contentIndex,
     'delta': delta,
+    if (obfuscation != null) 'obfuscation': obfuscation,
   };
 
   @override
@@ -1017,13 +1292,22 @@ class ReasoningDeltaEvent extends StreamingEvent {
       identical(this, other) ||
       other is ReasoningDeltaEvent &&
           runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
           contentIndex == other.contentIndex &&
-          delta == other.delta;
+          delta == other.delta &&
+          obfuscation == other.obfuscation;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, contentIndex, delta);
+  int get hashCode => Object.hash(
+    sequenceNumber,
+    itemId,
+    outputIndex,
+    contentIndex,
+    delta,
+    obfuscation,
+  );
 
   @override
   String toString() => 'ReasoningDeltaEvent(delta: $delta)';
@@ -1032,6 +1316,12 @@ class ReasoningDeltaEvent extends StreamingEvent {
 /// Event indicating reasoning is done.
 @immutable
 class ReasoningDoneEvent extends StreamingEvent {
+  /// The event type.
+  String get type => 'response.reasoning.done';
+
+  /// The sequence number of the event.
+  final int sequenceNumber;
+
   /// The item ID.
   final String itemId;
 
@@ -1046,6 +1336,7 @@ class ReasoningDoneEvent extends StreamingEvent {
 
   /// Creates a [ReasoningDoneEvent].
   const ReasoningDoneEvent({
+    required this.sequenceNumber,
     required this.itemId,
     required this.outputIndex,
     required this.contentIndex,
@@ -1055,6 +1346,7 @@ class ReasoningDoneEvent extends StreamingEvent {
   /// Creates a [ReasoningDoneEvent] from JSON.
   factory ReasoningDoneEvent.fromJson(Map<String, dynamic> json) {
     return ReasoningDoneEvent(
+      sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       contentIndex: json['content_index'] as int,
@@ -1065,6 +1357,7 @@ class ReasoningDoneEvent extends StreamingEvent {
   @override
   Map<String, dynamic> toJson() => {
     'type': 'response.reasoning.done',
+    'sequence_number': sequenceNumber,
     'item_id': itemId,
     'output_index': outputIndex,
     'content_index': contentIndex,
@@ -1076,13 +1369,15 @@ class ReasoningDoneEvent extends StreamingEvent {
       identical(this, other) ||
       other is ReasoningDoneEvent &&
           runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
           contentIndex == other.contentIndex &&
           text == other.text;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, contentIndex, text);
+  int get hashCode =>
+      Object.hash(sequenceNumber, itemId, outputIndex, contentIndex, text);
 
   @override
   String toString() => 'ReasoningDoneEvent(text: $text)';
@@ -1091,6 +1386,12 @@ class ReasoningDoneEvent extends StreamingEvent {
 /// Event indicating a reasoning summary part was added.
 @immutable
 class ReasoningSummaryPartAddedEvent extends StreamingEvent {
+  /// The event type.
+  String get type => 'response.reasoning_summary_part.added';
+
+  /// The sequence number of the event.
+  final int sequenceNumber;
+
   /// The item ID.
   final String itemId;
 
@@ -1100,28 +1401,41 @@ class ReasoningSummaryPartAddedEvent extends StreamingEvent {
   /// The summary index.
   final int summaryIndex;
 
+  /// The summary part, if available.
+  final ReasoningSummaryContent? part;
+
   /// Creates a [ReasoningSummaryPartAddedEvent].
   const ReasoningSummaryPartAddedEvent({
+    required this.sequenceNumber,
     required this.itemId,
     required this.outputIndex,
     required this.summaryIndex,
+    this.part,
   });
 
   /// Creates a [ReasoningSummaryPartAddedEvent] from JSON.
   factory ReasoningSummaryPartAddedEvent.fromJson(Map<String, dynamic> json) {
     return ReasoningSummaryPartAddedEvent(
+      sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       summaryIndex: json['summary_index'] as int,
+      part: json['part'] != null
+          ? ReasoningSummaryContent.fromJson(
+              json['part'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
     'type': 'response.reasoning_summary_part.added',
+    'sequence_number': sequenceNumber,
     'item_id': itemId,
     'output_index': outputIndex,
     'summary_index': summaryIndex,
+    if (part != null) 'part': part!.toJson(),
   };
 
   @override
@@ -1129,21 +1443,30 @@ class ReasoningSummaryPartAddedEvent extends StreamingEvent {
       identical(this, other) ||
       other is ReasoningSummaryPartAddedEvent &&
           runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
-          summaryIndex == other.summaryIndex;
+          summaryIndex == other.summaryIndex &&
+          part == other.part;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, summaryIndex);
+  int get hashCode =>
+      Object.hash(sequenceNumber, itemId, outputIndex, summaryIndex, part);
 
   @override
   String toString() =>
-      'ReasoningSummaryPartAddedEvent(summaryIndex: $summaryIndex)';
+      'ReasoningSummaryPartAddedEvent(summaryIndex: $summaryIndex, part: $part)';
 }
 
 /// Event indicating a reasoning summary part is done.
 @immutable
 class ReasoningSummaryPartDoneEvent extends StreamingEvent {
+  /// The event type.
+  String get type => 'response.reasoning_summary_part.done';
+
+  /// The sequence number of the event.
+  final int sequenceNumber;
+
   /// The item ID.
   final String itemId;
 
@@ -1158,6 +1481,7 @@ class ReasoningSummaryPartDoneEvent extends StreamingEvent {
 
   /// Creates a [ReasoningSummaryPartDoneEvent].
   const ReasoningSummaryPartDoneEvent({
+    required this.sequenceNumber,
     required this.itemId,
     required this.outputIndex,
     required this.summaryIndex,
@@ -1167,6 +1491,7 @@ class ReasoningSummaryPartDoneEvent extends StreamingEvent {
   /// Creates a [ReasoningSummaryPartDoneEvent] from JSON.
   factory ReasoningSummaryPartDoneEvent.fromJson(Map<String, dynamic> json) {
     return ReasoningSummaryPartDoneEvent(
+      sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       summaryIndex: json['summary_index'] as int,
@@ -1179,6 +1504,7 @@ class ReasoningSummaryPartDoneEvent extends StreamingEvent {
   @override
   Map<String, dynamic> toJson() => {
     'type': 'response.reasoning_summary_part.done',
+    'sequence_number': sequenceNumber,
     'item_id': itemId,
     'output_index': outputIndex,
     'summary_index': summaryIndex,
@@ -1190,13 +1516,15 @@ class ReasoningSummaryPartDoneEvent extends StreamingEvent {
       identical(this, other) ||
       other is ReasoningSummaryPartDoneEvent &&
           runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
           summaryIndex == other.summaryIndex &&
           part == other.part;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, summaryIndex, part);
+  int get hashCode =>
+      Object.hash(sequenceNumber, itemId, outputIndex, summaryIndex, part);
 
   @override
   String toString() =>
@@ -1206,6 +1534,12 @@ class ReasoningSummaryPartDoneEvent extends StreamingEvent {
 /// Event with reasoning summary delta.
 @immutable
 class ReasoningSummaryDeltaEvent extends StreamingEvent {
+  /// The event type.
+  String get type => 'response.reasoning_summary.delta';
+
+  /// The sequence number of the event.
+  final int sequenceNumber;
+
   /// The item ID.
   final String? itemId;
 
@@ -1218,31 +1552,40 @@ class ReasoningSummaryDeltaEvent extends StreamingEvent {
   /// The summary delta.
   final String delta;
 
+  /// An obfuscation string added to pad the event payload.
+  final String? obfuscation;
+
   /// Creates a [ReasoningSummaryDeltaEvent].
   const ReasoningSummaryDeltaEvent({
+    required this.sequenceNumber,
     this.itemId,
     this.outputIndex,
     this.summaryIndex,
     required this.delta,
+    this.obfuscation,
   });
 
   /// Creates a [ReasoningSummaryDeltaEvent] from JSON.
   factory ReasoningSummaryDeltaEvent.fromJson(Map<String, dynamic> json) {
     return ReasoningSummaryDeltaEvent(
+      sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String?,
       outputIndex: json['output_index'] as int?,
       summaryIndex: json['summary_index'] as int?,
       delta: json['delta'] as String,
+      obfuscation: json['obfuscation'] as String?,
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
     'type': 'response.reasoning_summary.delta',
+    'sequence_number': sequenceNumber,
     if (itemId != null) 'item_id': itemId,
     if (outputIndex != null) 'output_index': outputIndex,
     if (summaryIndex != null) 'summary_index': summaryIndex,
     'delta': delta,
+    if (obfuscation != null) 'obfuscation': obfuscation,
   };
 
   @override
@@ -1250,13 +1593,22 @@ class ReasoningSummaryDeltaEvent extends StreamingEvent {
       identical(this, other) ||
       other is ReasoningSummaryDeltaEvent &&
           runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
           summaryIndex == other.summaryIndex &&
-          delta == other.delta;
+          delta == other.delta &&
+          obfuscation == other.obfuscation;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, summaryIndex, delta);
+  int get hashCode => Object.hash(
+    sequenceNumber,
+    itemId,
+    outputIndex,
+    summaryIndex,
+    delta,
+    obfuscation,
+  );
 
   @override
   String toString() => 'ReasoningSummaryDeltaEvent(delta: $delta)';
@@ -1265,6 +1617,12 @@ class ReasoningSummaryDeltaEvent extends StreamingEvent {
 /// Event indicating reasoning summary is done.
 @immutable
 class ReasoningSummaryDoneEvent extends StreamingEvent {
+  /// The event type.
+  String get type => 'response.reasoning_summary.done';
+
+  /// The sequence number of the event.
+  final int sequenceNumber;
+
   /// The item ID.
   final String? itemId;
 
@@ -1279,6 +1637,7 @@ class ReasoningSummaryDoneEvent extends StreamingEvent {
 
   /// Creates a [ReasoningSummaryDoneEvent].
   const ReasoningSummaryDoneEvent({
+    required this.sequenceNumber,
     this.itemId,
     this.outputIndex,
     this.summaryIndex,
@@ -1288,6 +1647,7 @@ class ReasoningSummaryDoneEvent extends StreamingEvent {
   /// Creates a [ReasoningSummaryDoneEvent] from JSON.
   factory ReasoningSummaryDoneEvent.fromJson(Map<String, dynamic> json) {
     return ReasoningSummaryDoneEvent(
+      sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String?,
       outputIndex: json['output_index'] as int?,
       summaryIndex: json['summary_index'] as int?,
@@ -1298,6 +1658,7 @@ class ReasoningSummaryDoneEvent extends StreamingEvent {
   @override
   Map<String, dynamic> toJson() => {
     'type': 'response.reasoning_summary.done',
+    'sequence_number': sequenceNumber,
     if (itemId != null) 'item_id': itemId,
     if (outputIndex != null) 'output_index': outputIndex,
     if (summaryIndex != null) 'summary_index': summaryIndex,
@@ -1309,13 +1670,15 @@ class ReasoningSummaryDoneEvent extends StreamingEvent {
       identical(this, other) ||
       other is ReasoningSummaryDoneEvent &&
           runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
           summaryIndex == other.summaryIndex &&
           text == other.text;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, summaryIndex, text);
+  int get hashCode =>
+      Object.hash(sequenceNumber, itemId, outputIndex, summaryIndex, text);
 
   @override
   String toString() => 'ReasoningSummaryDoneEvent(text: $text)';
@@ -1328,32 +1691,45 @@ class ReasoningSummaryDoneEvent extends StreamingEvent {
 /// Error event during streaming.
 @immutable
 class ErrorEvent extends StreamingEvent {
+  /// The event type.
+  String get type => 'error';
+
+  /// The sequence number of the event.
+  final int sequenceNumber;
+
   /// The error information.
   final ErrorPayload error;
 
   /// Creates an [ErrorEvent].
-  const ErrorEvent({required this.error});
+  const ErrorEvent({required this.sequenceNumber, required this.error});
 
   /// Creates an [ErrorEvent] from JSON.
   factory ErrorEvent.fromJson(Map<String, dynamic> json) {
     return ErrorEvent(
+      sequenceNumber: json['sequence_number'] as int? ?? 0,
       error: ErrorPayload.fromJson(json['error'] as Map<String, dynamic>),
     );
   }
 
   @override
-  Map<String, dynamic> toJson() => {'type': 'error', 'error': error.toJson()};
+  Map<String, dynamic> toJson() => {
+    'type': 'error',
+    'sequence_number': sequenceNumber,
+    'error': error.toJson(),
+  };
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ErrorEvent &&
           runtimeType == other.runtimeType &&
+          sequenceNumber == other.sequenceNumber &&
           error == other.error;
 
   @override
-  int get hashCode => error.hashCode;
+  int get hashCode => Object.hash(sequenceNumber, error);
 
   @override
-  String toString() => 'ErrorEvent(error: $error)';
+  String toString() =>
+      'ErrorEvent(sequenceNumber: $sequenceNumber, error: $error)';
 }

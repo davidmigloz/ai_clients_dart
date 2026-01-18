@@ -69,6 +69,7 @@ export 'src/extensions/streaming_extensions.dart';
 
 // Models - Common
 export 'src/models/common/copy_with_sentinel.dart';
+export 'src/models/common/equality_helpers.dart';
 
 // Models - Content
 export 'src/models/content/annotation.dart';
@@ -81,6 +82,7 @@ export 'src/models/items/item.dart';
 export 'src/models/items/output_item.dart';
 
 // Models - Metadata (Enums)
+export 'src/models/metadata/function_call_status.dart';
 export 'src/models/metadata/image_detail.dart';
 export 'src/models/metadata/include.dart';
 export 'src/models/metadata/item_status.dart';
@@ -95,6 +97,7 @@ export 'src/models/metadata/verbosity.dart';
 // Models - Request
 export 'src/models/request/create_response_request.dart';
 export 'src/models/request/reasoning_config.dart';
+export 'src/models/request/stream_options.dart';
 export 'src/models/request/text_config.dart';
 
 // Models - Response

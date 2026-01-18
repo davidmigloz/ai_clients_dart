@@ -91,7 +91,7 @@ void main() async {
         print('Result: $result\n');
 
         toolResults.add(
-          FunctionCallOutputItem(callId: call.callId, output: result),
+          FunctionCallOutputItem.string(callId: call.callId, output: result),
         );
       }
 

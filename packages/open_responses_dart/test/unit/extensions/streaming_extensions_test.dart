@@ -8,10 +8,12 @@ void main() {
     group('textDelta', () {
       test('returns delta from OutputTextDeltaEvent', () {
         const event = OutputTextDeltaEvent(
+          sequenceNumber: 0,
           itemId: 'msg_001',
           outputIndex: 0,
           contentIndex: 0,
           delta: 'Hello',
+          logprobs: [],
         );
 
         expect(event.textDelta, equals('Hello'));
@@ -20,6 +22,7 @@ void main() {
       test('returns null for ResponseCreatedEvent', () {
         final json = basicCompletedResponse();
         final event = ResponseCreatedEvent(
+          sequenceNumber: 0,
           response: ResponseResource.fromJson(json),
         );
 
@@ -29,6 +32,7 @@ void main() {
       test('returns null for ResponseCompletedEvent', () {
         final json = basicCompletedResponse();
         final event = ResponseCompletedEvent(
+          sequenceNumber: 0,
           response: ResponseResource.fromJson(json),
         );
 
@@ -37,6 +41,7 @@ void main() {
 
       test('returns null for FunctionCallArgumentsDeltaEvent', () {
         const event = FunctionCallArgumentsDeltaEvent(
+          sequenceNumber: 0,
           itemId: 'call_001',
           outputIndex: 0,
           callId: 'call_abc',
@@ -51,6 +56,7 @@ void main() {
       test('returns true for ResponseCompletedEvent', () {
         final json = basicCompletedResponse();
         final event = ResponseCompletedEvent(
+          sequenceNumber: 0,
           response: ResponseResource.fromJson(json),
         );
 
@@ -60,6 +66,7 @@ void main() {
       test('returns true for ResponseFailedEvent', () {
         final json = failedResponse();
         final event = ResponseFailedEvent(
+          sequenceNumber: 0,
           response: ResponseResource.fromJson(json),
         );
 
@@ -69,6 +76,7 @@ void main() {
       test('returns true for ResponseIncompleteEvent', () {
         final json = incompleteResponse();
         final event = ResponseIncompleteEvent(
+          sequenceNumber: 0,
           response: ResponseResource.fromJson(json),
         );
 
@@ -78,6 +86,7 @@ void main() {
       test('returns false for ResponseCreatedEvent', () {
         final json = inProgressResponse();
         final event = ResponseCreatedEvent(
+          sequenceNumber: 0,
           response: ResponseResource.fromJson(json),
         );
 
@@ -86,10 +95,12 @@ void main() {
 
       test('returns false for OutputTextDeltaEvent', () {
         const event = OutputTextDeltaEvent(
+          sequenceNumber: 0,
           itemId: 'msg_001',
           outputIndex: 0,
           contentIndex: 0,
           delta: 'Hello',
+          logprobs: [],
         );
 
         expect(event.isFinal, isFalse);
@@ -98,6 +109,7 @@ void main() {
       test('returns false for ResponseInProgressEvent', () {
         final json = inProgressResponse();
         final event = ResponseInProgressEvent(
+          sequenceNumber: 0,
           response: ResponseResource.fromJson(json),
         );
 
@@ -121,28 +133,36 @@ void main() {
       test('accumulates multiple text deltas', () async {
         final events = Stream<StreamingEvent>.fromIterable([
           const OutputTextDeltaEvent(
+            sequenceNumber: 0,
             itemId: 'msg_001',
             outputIndex: 0,
             contentIndex: 0,
             delta: 'Hello',
+            logprobs: [],
           ),
           const OutputTextDeltaEvent(
+            sequenceNumber: 1,
             itemId: 'msg_001',
             outputIndex: 0,
             contentIndex: 0,
             delta: ' ',
+            logprobs: [],
           ),
           const OutputTextDeltaEvent(
+            sequenceNumber: 2,
             itemId: 'msg_001',
             outputIndex: 0,
             contentIndex: 0,
             delta: 'world',
+            logprobs: [],
           ),
           const OutputTextDeltaEvent(
+            sequenceNumber: 3,
             itemId: 'msg_001',
             outputIndex: 0,
             contentIndex: 0,
             delta: '!',
+            logprobs: [],
           ),
         ]);
 
@@ -154,9 +174,11 @@ void main() {
       test('returns empty string when no text events', () async {
         final events = Stream<StreamingEvent>.fromIterable([
           ResponseCreatedEvent(
+            sequenceNumber: 0,
             response: ResponseResource.fromJson(inProgressResponse()),
           ),
           ResponseCompletedEvent(
+            sequenceNumber: 1,
             response: ResponseResource.fromJson(basicCompletedResponse()),
           ),
         ]);
@@ -169,25 +191,31 @@ void main() {
       test('ignores non-text events', () async {
         final events = Stream<StreamingEvent>.fromIterable([
           ResponseCreatedEvent(
+            sequenceNumber: 0,
             response: ResponseResource.fromJson(inProgressResponse()),
           ),
           const OutputTextDeltaEvent(
+            sequenceNumber: 1,
             itemId: 'msg_001',
             outputIndex: 0,
             contentIndex: 0,
             delta: 'Hello',
+            logprobs: [],
           ),
           const FunctionCallArgumentsDeltaEvent(
+            sequenceNumber: 2,
             itemId: 'call_001',
             outputIndex: 1,
             callId: 'call_abc',
             delta: '{"x": 1}',
           ),
           const OutputTextDeltaEvent(
+            sequenceNumber: 3,
             itemId: 'msg_001',
             outputIndex: 0,
             contentIndex: 0,
             delta: ' world',
+            logprobs: [],
           ),
         ]);
 
@@ -202,15 +230,19 @@ void main() {
         final completedJson = basicCompletedResponse(id: 'resp_final');
         final events = Stream<StreamingEvent>.fromIterable([
           ResponseCreatedEvent(
+            sequenceNumber: 0,
             response: ResponseResource.fromJson(inProgressResponse()),
           ),
           const OutputTextDeltaEvent(
+            sequenceNumber: 1,
             itemId: 'msg_001',
             outputIndex: 0,
             contentIndex: 0,
             delta: 'Hello',
+            logprobs: [],
           ),
           ResponseCompletedEvent(
+            sequenceNumber: 2,
             response: ResponseResource.fromJson(completedJson),
           ),
         ]);
@@ -225,13 +257,16 @@ void main() {
       test('returns null when no completion event', () async {
         final events = Stream<StreamingEvent>.fromIterable([
           ResponseCreatedEvent(
+            sequenceNumber: 0,
             response: ResponseResource.fromJson(inProgressResponse()),
           ),
           const OutputTextDeltaEvent(
+            sequenceNumber: 1,
             itemId: 'msg_001',
             outputIndex: 0,
             contentIndex: 0,
             delta: 'Hello',
+            logprobs: [],
           ),
         ]);
 
@@ -243,9 +278,11 @@ void main() {
       test('returns null for failed stream (no completed event)', () async {
         final events = Stream<StreamingEvent>.fromIterable([
           ResponseCreatedEvent(
+            sequenceNumber: 0,
             response: ResponseResource.fromJson(inProgressResponse()),
           ),
           ResponseFailedEvent(
+            sequenceNumber: 1,
             response: ResponseResource.fromJson(failedResponse()),
           ),
         ]);
@@ -260,21 +297,27 @@ void main() {
       test('filters stream to only text deltas', () async {
         final events = Stream<StreamingEvent>.fromIterable([
           ResponseCreatedEvent(
+            sequenceNumber: 0,
             response: ResponseResource.fromJson(inProgressResponse()),
           ),
           const OutputTextDeltaEvent(
+            sequenceNumber: 1,
             itemId: 'msg_001',
             outputIndex: 0,
             contentIndex: 0,
             delta: 'Hello',
+            logprobs: [],
           ),
           const OutputTextDeltaEvent(
+            sequenceNumber: 2,
             itemId: 'msg_001',
             outputIndex: 0,
             contentIndex: 0,
             delta: ' world',
+            logprobs: [],
           ),
           ResponseCompletedEvent(
+            sequenceNumber: 3,
             response: ResponseResource.fromJson(basicCompletedResponse()),
           ),
         ]);
@@ -287,9 +330,11 @@ void main() {
       test('returns empty stream when no text delta events', () async {
         final events = Stream<StreamingEvent>.fromIterable([
           ResponseCreatedEvent(
+            sequenceNumber: 0,
             response: ResponseResource.fromJson(inProgressResponse()),
           ),
           ResponseCompletedEvent(
+            sequenceNumber: 1,
             response: ResponseResource.fromJson(basicCompletedResponse()),
           ),
         ]);
@@ -302,22 +347,28 @@ void main() {
       test('maps to string values correctly', () async {
         final events = Stream<StreamingEvent>.fromIterable([
           const OutputTextDeltaEvent(
+            sequenceNumber: 0,
             itemId: 'msg_001',
             outputIndex: 0,
             contentIndex: 0,
             delta: 'A',
+            logprobs: [],
           ),
           const OutputTextDeltaEvent(
+            sequenceNumber: 1,
             itemId: 'msg_001',
             outputIndex: 0,
             contentIndex: 0,
             delta: 'B',
+            logprobs: [],
           ),
           const OutputTextDeltaEvent(
+            sequenceNumber: 2,
             itemId: 'msg_001',
             outputIndex: 0,
             contentIndex: 0,
             delta: 'C',
+            logprobs: [],
           ),
         ]);
 

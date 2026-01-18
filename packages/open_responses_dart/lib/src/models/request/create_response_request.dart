@@ -8,6 +8,7 @@ import '../metadata/truncation.dart';
 import '../tools/tool.dart';
 import '../tools/tool_choice.dart';
 import 'reasoning_config.dart';
+import 'stream_options.dart';
 import 'text_config.dart';
 
 /// Request to create a response.
@@ -42,8 +43,17 @@ class CreateResponseRequest {
   /// Top-p sampling parameter.
   final double? topP;
 
+  /// Penalizes new tokens based on whether they appear in the text so far.
+  final double? presencePenalty;
+
+  /// Penalizes new tokens based on their frequency in the text so far.
+  final double? frequencyPenalty;
+
   /// Whether to stream the response.
   final bool? stream;
+
+  /// Options that control streamed response behavior.
+  final StreamOptions? streamOptions;
 
   /// Configuration for reasoning models.
   final ReasoningConfig? reasoning;
@@ -54,6 +64,9 @@ class CreateResponseRequest {
   /// Truncation strategy for long inputs.
   final Truncation? truncation;
 
+  /// Whether the model may call multiple tools in parallel.
+  final bool? parallelToolCalls;
+
   /// Service tier for request processing.
   final ServiceTier? serviceTier;
 
@@ -63,11 +76,23 @@ class CreateResponseRequest {
   /// Additional data to include in response.
   final List<Include>? include;
 
-  /// Sequences that stop generation.
-  final List<String>? stop;
-
   /// Whether to store the response for later retrieval.
   final bool? store;
+
+  /// Whether to run the request in the background and return immediately.
+  final bool? background;
+
+  /// The maximum number of tool calls the model may make while generating.
+  final int? maxToolCalls;
+
+  /// A stable identifier used for safety monitoring and abuse detection.
+  final String? safetyIdentifier;
+
+  /// A key to use when reading from or writing to the prompt cache.
+  final String? promptCacheKey;
+
+  /// The number of most likely tokens to return at each position.
+  final int? topLogprobs;
 
   /// Creates a [CreateResponseRequest].
   const CreateResponseRequest({
@@ -80,15 +105,23 @@ class CreateResponseRequest {
     this.maxOutputTokens,
     this.temperature,
     this.topP,
+    this.presencePenalty,
+    this.frequencyPenalty,
     this.stream,
+    this.streamOptions,
     this.reasoning,
     this.text,
     this.truncation,
+    this.parallelToolCalls,
     this.serviceTier,
     this.metadata,
     this.include,
-    this.stop,
     this.store,
+    this.background,
+    this.maxToolCalls,
+    this.safetyIdentifier,
+    this.promptCacheKey,
+    this.topLogprobs,
   });
 
   /// Creates a simple text request.
@@ -124,7 +157,14 @@ class CreateResponseRequest {
       maxOutputTokens: json['max_output_tokens'] as int?,
       temperature: (json['temperature'] as num?)?.toDouble(),
       topP: (json['top_p'] as num?)?.toDouble(),
+      presencePenalty: (json['presence_penalty'] as num?)?.toDouble(),
+      frequencyPenalty: (json['frequency_penalty'] as num?)?.toDouble(),
       stream: json['stream'] as bool?,
+      streamOptions: json['stream_options'] != null
+          ? StreamOptions.fromJson(
+              json['stream_options'] as Map<String, dynamic>,
+            )
+          : null,
       reasoning: json['reasoning'] != null
           ? ReasoningConfig.fromJson(json['reasoning'] as Map<String, dynamic>)
           : null,
@@ -134,6 +174,7 @@ class CreateResponseRequest {
       truncation: json['truncation'] != null
           ? Truncation.fromJson(json['truncation'] as String)
           : null,
+      parallelToolCalls: json['parallel_tool_calls'] as bool?,
       serviceTier: json['service_tier'] != null
           ? ServiceTier.fromJson(json['service_tier'] as String)
           : null,
@@ -141,8 +182,12 @@ class CreateResponseRequest {
       include: (json['include'] as List?)
           ?.map((e) => Include.fromJson(e as String))
           .toList(),
-      stop: (json['stop'] as List?)?.cast<String>(),
       store: json['store'] as bool?,
+      background: json['background'] as bool?,
+      maxToolCalls: json['max_tool_calls'] as int?,
+      safetyIdentifier: json['safety_identifier'] as String?,
+      promptCacheKey: json['prompt_cache_key'] as String?,
+      topLogprobs: json['top_logprobs'] as int?,
     );
   }
 
@@ -167,15 +212,23 @@ class CreateResponseRequest {
     if (maxOutputTokens != null) 'max_output_tokens': maxOutputTokens,
     if (temperature != null) 'temperature': temperature,
     if (topP != null) 'top_p': topP,
+    if (presencePenalty != null) 'presence_penalty': presencePenalty,
+    if (frequencyPenalty != null) 'frequency_penalty': frequencyPenalty,
     if (stream != null) 'stream': stream,
+    if (streamOptions != null) 'stream_options': streamOptions!.toJson(),
     if (reasoning != null) 'reasoning': reasoning!.toJson(),
     if (text != null) 'text': text!.toJson(),
     if (truncation != null) 'truncation': truncation!.toJson(),
+    if (parallelToolCalls != null) 'parallel_tool_calls': parallelToolCalls,
     if (serviceTier != null) 'service_tier': serviceTier!.toJson(),
     if (metadata != null) 'metadata': metadata,
     if (include != null) 'include': include!.map((e) => e.toJson()).toList(),
-    if (stop != null) 'stop': stop,
     if (store != null) 'store': store,
+    if (background != null) 'background': background,
+    if (maxToolCalls != null) 'max_tool_calls': maxToolCalls,
+    if (safetyIdentifier != null) 'safety_identifier': safetyIdentifier,
+    if (promptCacheKey != null) 'prompt_cache_key': promptCacheKey,
+    if (topLogprobs != null) 'top_logprobs': topLogprobs,
   };
 
   Object _inputToJson() {
@@ -197,15 +250,23 @@ class CreateResponseRequest {
     Object? maxOutputTokens = unsetCopyWithValue,
     Object? temperature = unsetCopyWithValue,
     Object? topP = unsetCopyWithValue,
+    Object? presencePenalty = unsetCopyWithValue,
+    Object? frequencyPenalty = unsetCopyWithValue,
     Object? stream = unsetCopyWithValue,
+    Object? streamOptions = unsetCopyWithValue,
     Object? reasoning = unsetCopyWithValue,
     Object? text = unsetCopyWithValue,
     Object? truncation = unsetCopyWithValue,
+    Object? parallelToolCalls = unsetCopyWithValue,
     Object? serviceTier = unsetCopyWithValue,
     Object? metadata = unsetCopyWithValue,
     Object? include = unsetCopyWithValue,
-    Object? stop = unsetCopyWithValue,
     Object? store = unsetCopyWithValue,
+    Object? background = unsetCopyWithValue,
+    Object? maxToolCalls = unsetCopyWithValue,
+    Object? safetyIdentifier = unsetCopyWithValue,
+    Object? promptCacheKey = unsetCopyWithValue,
+    Object? topLogprobs = unsetCopyWithValue,
   }) {
     return CreateResponseRequest(
       model: model ?? this.model,
@@ -227,7 +288,16 @@ class CreateResponseRequest {
           ? this.temperature
           : temperature as double?,
       topP: topP == unsetCopyWithValue ? this.topP : topP as double?,
+      presencePenalty: presencePenalty == unsetCopyWithValue
+          ? this.presencePenalty
+          : presencePenalty as double?,
+      frequencyPenalty: frequencyPenalty == unsetCopyWithValue
+          ? this.frequencyPenalty
+          : frequencyPenalty as double?,
       stream: stream == unsetCopyWithValue ? this.stream : stream as bool?,
+      streamOptions: streamOptions == unsetCopyWithValue
+          ? this.streamOptions
+          : streamOptions as StreamOptions?,
       reasoning: reasoning == unsetCopyWithValue
           ? this.reasoning
           : reasoning as ReasoningConfig?,
@@ -235,6 +305,9 @@ class CreateResponseRequest {
       truncation: truncation == unsetCopyWithValue
           ? this.truncation
           : truncation as Truncation?,
+      parallelToolCalls: parallelToolCalls == unsetCopyWithValue
+          ? this.parallelToolCalls
+          : parallelToolCalls as bool?,
       serviceTier: serviceTier == unsetCopyWithValue
           ? this.serviceTier
           : serviceTier as ServiceTier?,
@@ -244,8 +317,22 @@ class CreateResponseRequest {
       include: include == unsetCopyWithValue
           ? this.include
           : include as List<Include>?,
-      stop: stop == unsetCopyWithValue ? this.stop : stop as List<String>?,
       store: store == unsetCopyWithValue ? this.store : store as bool?,
+      background: background == unsetCopyWithValue
+          ? this.background
+          : background as bool?,
+      maxToolCalls: maxToolCalls == unsetCopyWithValue
+          ? this.maxToolCalls
+          : maxToolCalls as int?,
+      safetyIdentifier: safetyIdentifier == unsetCopyWithValue
+          ? this.safetyIdentifier
+          : safetyIdentifier as String?,
+      promptCacheKey: promptCacheKey == unsetCopyWithValue
+          ? this.promptCacheKey
+          : promptCacheKey as String?,
+      topLogprobs: topLogprobs == unsetCopyWithValue
+          ? this.topLogprobs
+          : topLogprobs as int?,
     );
   }
 
@@ -262,12 +349,21 @@ class CreateResponseRequest {
           maxOutputTokens == other.maxOutputTokens &&
           temperature == other.temperature &&
           topP == other.topP &&
+          presencePenalty == other.presencePenalty &&
+          frequencyPenalty == other.frequencyPenalty &&
           stream == other.stream &&
+          streamOptions == other.streamOptions &&
           reasoning == other.reasoning &&
           text == other.text &&
           truncation == other.truncation &&
+          parallelToolCalls == other.parallelToolCalls &&
           serviceTier == other.serviceTier &&
-          store == other.store;
+          store == other.store &&
+          background == other.background &&
+          maxToolCalls == other.maxToolCalls &&
+          safetyIdentifier == other.safetyIdentifier &&
+          promptCacheKey == other.promptCacheKey &&
+          topLogprobs == other.topLogprobs;
 
   @override
   int get hashCode => Object.hash(
@@ -279,12 +375,17 @@ class CreateResponseRequest {
     maxOutputTokens,
     temperature,
     topP,
+    presencePenalty,
+    frequencyPenalty,
     stream,
+    streamOptions,
     reasoning,
     text,
     truncation,
+    parallelToolCalls,
     serviceTier,
     store,
+    background,
   );
 
   @override

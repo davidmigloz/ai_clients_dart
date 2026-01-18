@@ -6,6 +6,7 @@ void main() {
     test('fromJson parses response.created event', () {
       final json = {
         'type': 'response.created',
+        'sequence_number': 0,
         'response': {
           'id': 'resp_123',
           'object': 'response',
@@ -24,6 +25,7 @@ void main() {
     test('fromJson parses response.completed event', () {
       final json = {
         'type': 'response.completed',
+        'sequence_number': 1,
         'response': {
           'id': 'resp_123',
           'object': 'response',
@@ -46,10 +48,12 @@ void main() {
     test('fromJson parses output_text.delta event', () {
       final json = {
         'type': 'response.output_text.delta',
+        'sequence_number': 2,
         'item_id': 'msg_001',
         'output_index': 0,
         'content_index': 0,
         'delta': 'Hello',
+        'logprobs': <dynamic>[],
       };
 
       final event = StreamingEvent.fromJson(json);
@@ -62,6 +66,7 @@ void main() {
     test('fromJson parses function_call_arguments.delta event', () {
       final json = {
         'type': 'response.function_call_arguments.delta',
+        'sequence_number': 3,
         'item_id': 'call_001',
         'output_index': 0,
         'call_id': 'call_abc123',
@@ -78,7 +83,12 @@ void main() {
     test('fromJson parses error event', () {
       final json = {
         'type': 'error',
-        'error': {'code': 'server_error', 'message': 'Something went wrong'},
+        'sequence_number': 4,
+        'error': {
+          'type': 'server_error',
+          'code': 'server_error',
+          'message': 'Something went wrong',
+        },
       };
 
       final event = StreamingEvent.fromJson(json);
@@ -90,10 +100,12 @@ void main() {
 
     test('toJson round-trips correctly', () {
       const original = OutputTextDeltaEvent(
+        sequenceNumber: 5,
         itemId: 'msg_001',
         outputIndex: 0,
         contentIndex: 0,
         delta: 'Hello',
+        logprobs: [],
       );
 
       final json = original.toJson();
@@ -105,10 +117,12 @@ void main() {
 
     test('textDelta extension returns delta for text events', () {
       const event = OutputTextDeltaEvent(
+        sequenceNumber: 6,
         itemId: 'msg_001',
         outputIndex: 0,
         contentIndex: 0,
         delta: 'Hello',
+        logprobs: [],
       );
 
       expect(event.textDelta, 'Hello');
@@ -116,6 +130,7 @@ void main() {
 
     test('textDelta extension returns null for non-text events', () {
       const event = ResponseCompletedEvent(
+        sequenceNumber: 7,
         response: ResponseResource(
           id: 'resp_123',
           createdAt: 1700000000,
@@ -129,6 +144,7 @@ void main() {
 
     test('isFinal returns true for terminal events', () {
       const completed = ResponseCompletedEvent(
+        sequenceNumber: 8,
         response: ResponseResource(
           id: 'resp_123',
           createdAt: 1700000000,
@@ -137,6 +153,7 @@ void main() {
         ),
       );
       const failed = ResponseFailedEvent(
+        sequenceNumber: 9,
         response: ResponseResource(
           id: 'resp_123',
           createdAt: 1700000000,
@@ -151,10 +168,12 @@ void main() {
 
     test('isFinal returns false for non-terminal events', () {
       const event = OutputTextDeltaEvent(
+        sequenceNumber: 10,
         itemId: 'msg_001',
         outputIndex: 0,
         contentIndex: 0,
         delta: 'Hello',
+        logprobs: [],
       );
 
       expect(event.isFinal, isFalse);

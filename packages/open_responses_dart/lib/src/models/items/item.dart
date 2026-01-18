@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../common/equality_helpers.dart';
 import '../content/input_content.dart';
+import '../metadata/function_call_status.dart';
 import '../metadata/item_status.dart';
 import '../metadata/message_role.dart';
 
@@ -201,6 +202,82 @@ class FunctionCallItem extends Item {
       'FunctionCallItem(id: $id, callId: $callId, name: $name, arguments: $arguments, status: $status)';
 }
 
+/// The output of a function call.
+///
+/// Can be either a simple string or a list of content items.
+sealed class FunctionCallOutput {
+  /// Creates a [FunctionCallOutput].
+  const FunctionCallOutput();
+
+  /// Creates a [FunctionCallOutput] from JSON.
+  factory FunctionCallOutput.fromJson(Object json) {
+    if (json is String) {
+      return FunctionCallOutputString(json);
+    }
+    if (json is List) {
+      return FunctionCallOutputContent(
+        json.map((e) => InputContent.fromJson(e as Map<String, dynamic>)).toList(),
+      );
+    }
+    throw FormatException('Invalid FunctionCallOutput format: $json');
+  }
+
+  /// Converts to JSON.
+  Object toJson();
+}
+
+/// A string output from a function call.
+@immutable
+class FunctionCallOutputString extends FunctionCallOutput {
+  /// The string output.
+  final String value;
+
+  /// Creates a [FunctionCallOutputString].
+  const FunctionCallOutputString(this.value);
+
+  @override
+  Object toJson() => value;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FunctionCallOutputString &&
+          runtimeType == other.runtimeType &&
+          value == other.value;
+
+  @override
+  int get hashCode => value.hashCode;
+
+  @override
+  String toString() => 'FunctionCallOutputString($value)';
+}
+
+/// A list of content items output from a function call.
+@immutable
+class FunctionCallOutputContent extends FunctionCallOutput {
+  /// The content items.
+  final List<InputContent> content;
+
+  /// Creates a [FunctionCallOutputContent].
+  const FunctionCallOutputContent(this.content);
+
+  @override
+  Object toJson() => content.map((e) => e.toJson()).toList();
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FunctionCallOutputContent &&
+          runtimeType == other.runtimeType &&
+          listsEqual(content, other.content);
+
+  @override
+  int get hashCode => Object.hashAll(content);
+
+  @override
+  String toString() => 'FunctionCallOutputContent($content)';
+}
+
 /// A function call output item.
 @immutable
 class FunctionCallOutputItem extends Item {
@@ -211,21 +288,43 @@ class FunctionCallOutputItem extends Item {
   final String callId;
 
   /// The output content.
-  final String output;
+  final FunctionCallOutput output;
+
+  /// The status of the function call.
+  final FunctionCallStatus? status;
 
   /// Creates a [FunctionCallOutputItem].
   const FunctionCallOutputItem({
     this.id,
     required this.callId,
     required this.output,
+    this.status,
   });
+
+  /// Creates a [FunctionCallOutputItem] with a simple string output.
+  factory FunctionCallOutputItem.string({
+    String? id,
+    required String callId,
+    required String output,
+    FunctionCallStatus? status,
+  }) {
+    return FunctionCallOutputItem(
+      id: id,
+      callId: callId,
+      output: FunctionCallOutputString(output),
+      status: status,
+    );
+  }
 
   /// Creates a [FunctionCallOutputItem] from JSON.
   factory FunctionCallOutputItem.fromJson(Map<String, dynamic> json) {
     return FunctionCallOutputItem(
       id: json['id'] as String?,
       callId: json['call_id'] as String,
-      output: json['output'] as String,
+      output: FunctionCallOutput.fromJson(json['output']),
+      status: json['status'] != null
+          ? FunctionCallStatus.fromJson(json['status'] as String)
+          : null,
     );
   }
 
@@ -234,7 +333,8 @@ class FunctionCallOutputItem extends Item {
     'type': 'function_call_output',
     if (id != null) 'id': id,
     'call_id': callId,
-    'output': output,
+    'output': output.toJson(),
+    if (status != null) 'status': status!.toJson(),
   };
 
   @override
@@ -244,14 +344,15 @@ class FunctionCallOutputItem extends Item {
           runtimeType == other.runtimeType &&
           id == other.id &&
           callId == other.callId &&
-          output == other.output;
+          output == other.output &&
+          status == other.status;
 
   @override
-  int get hashCode => Object.hash(id, callId, output);
+  int get hashCode => Object.hash(id, callId, output, status);
 
   @override
   String toString() =>
-      'FunctionCallOutputItem(id: $id, callId: $callId, output: $output)';
+      'FunctionCallOutputItem(id: $id, callId: $callId, output: $output, status: $status)';
 }
 
 /// Reference to a previously created item.
