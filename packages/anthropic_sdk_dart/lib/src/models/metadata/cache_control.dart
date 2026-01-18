@@ -51,7 +51,7 @@ class CacheControlEphemeral {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
-    'type': 'ephemeral',
+    'type': type,
     if (ttl != null) 'ttl': ttl!.toJson(),
   };
 

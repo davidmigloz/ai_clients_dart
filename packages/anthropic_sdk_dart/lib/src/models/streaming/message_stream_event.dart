@@ -50,7 +50,7 @@ class MessageStartEvent extends MessageStreamEvent {
 
   @override
   Map<String, dynamic> toJson() => {
-    'type': 'message_start',
+    'type': type,
     'message': message.toJson(),
   };
 
@@ -93,7 +93,7 @@ class MessageDeltaEvent extends MessageStreamEvent {
 
   @override
   Map<String, dynamic> toJson() => {
-    'type': 'message_delta',
+    'type': type,
     'delta': delta.toJson(),
     'usage': usage.toJson(),
   };
@@ -128,7 +128,7 @@ class MessageStopEvent extends MessageStreamEvent {
   }
 
   @override
-  Map<String, dynamic> toJson() => {'type': 'message_stop'};
+  Map<String, dynamic> toJson() => {'type': type};
 
   @override
   bool operator ==(Object other) =>
@@ -172,7 +172,7 @@ class ContentBlockStartEvent extends MessageStreamEvent {
 
   @override
   Map<String, dynamic> toJson() => {
-    'type': 'content_block_start',
+    'type': type,
     'index': index,
     'content_block': contentBlock.toJson(),
   };
@@ -218,7 +218,7 @@ class ContentBlockDeltaEvent extends MessageStreamEvent {
 
   @override
   Map<String, dynamic> toJson() => {
-    'type': 'content_block_delta',
+    'type': type,
     'index': index,
     'delta': delta.toJson(),
   };
@@ -257,7 +257,7 @@ class ContentBlockStopEvent extends MessageStreamEvent {
 
   @override
   Map<String, dynamic> toJson() => {
-    'type': 'content_block_stop',
+    'type': type,
     'index': index,
   };
 

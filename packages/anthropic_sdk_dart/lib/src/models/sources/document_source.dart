@@ -52,9 +52,9 @@ class Base64PdfSource extends DocumentSource {
 
   @override
   Map<String, dynamic> toJson() => {
-    'type': 'base64',
+    'type': type,
     'data': data,
-    'media_type': 'application/pdf',
+    'media_type': mediaType,
   };
 
   /// Creates a copy with replaced values.
@@ -98,9 +98,9 @@ class PlainTextSource extends DocumentSource {
 
   @override
   Map<String, dynamic> toJson() => {
-    'type': 'text',
+    'type': type,
     'data': data,
-    'media_type': 'text/plain',
+    'media_type': mediaType,
   };
 
   /// Creates a copy with replaced values.
@@ -140,7 +140,7 @@ class UrlPdfSource extends DocumentSource {
   }
 
   @override
-  Map<String, dynamic> toJson() => {'type': 'url', 'url': url};
+  Map<String, dynamic> toJson() => {'type': type, 'url': url};
 
   /// Creates a copy with replaced values.
   UrlPdfSource copyWith({String? url}) {

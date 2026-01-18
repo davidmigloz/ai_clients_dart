@@ -86,7 +86,7 @@ class Base64ImageSource extends ImageSource {
 
   @override
   Map<String, dynamic> toJson() => {
-    'type': 'base64',
+    'type': type,
     'data': data,
     'media_type': mediaType.toJson(),
   };
@@ -133,7 +133,7 @@ class UrlImageSource extends ImageSource {
   }
 
   @override
-  Map<String, dynamic> toJson() => {'type': 'url', 'url': url};
+  Map<String, dynamic> toJson() => {'type': type, 'url': url};
 
   /// Creates a copy with replaced values.
   UrlImageSource copyWith({String? url}) {
