@@ -83,6 +83,9 @@ def load_config(config_dir: Path) -> dict:
         except json.JSONDecodeError as e:
             print(f"Error: Invalid JSON in {models_file}: {e}")
             sys.exit(2)
+        except (OSError, IOError) as e:
+            print(f"Error: Unable to read config file {models_file}: {e}")
+            sys.exit(2)
 
     return config
 
@@ -94,6 +97,9 @@ def load_openapi_spec(spec_path: Path) -> dict:
             return json.load(f)
     except json.JSONDecodeError as e:
         print(f"Error: Invalid JSON in {spec_path}: {e}")
+        sys.exit(2)
+    except (OSError, IOError) as e:
+        print(f"Error: Unable to read OpenAPI spec {spec_path}: {e}")
         sys.exit(2)
 
 
@@ -114,7 +120,12 @@ def extract_dart_properties_with_types(
     if not file_path.exists():
         return {}
 
-    content = file_path.read_text()
+    try:
+        content = file_path.read_text()
+    except (OSError, UnicodeDecodeError) as e:
+        print(f"Warning: Could not read Dart file {file_path}: {e}", file=sys.stderr)
+        return {}
+
     properties = {}
 
     # Pattern for final field declarations: final Type? propertyName;
@@ -645,7 +656,17 @@ def main():
         print()
         print("Checking sealed class variants...")
         for sealed_config in config['sealed_classes']:
-            sealed_name = sealed_config['name']
+            # Validate 'name' key exists before accessing
+            sealed_name = sealed_config.get('name')
+            if not sealed_name:
+                print("  [!] <unknown>: Sealed class config missing required 'name' key")
+                all_issues.append(Issue(
+                    level='error',
+                    schema='<unknown>',
+                    message="Sealed class config missing required 'name' key"
+                ))
+                continue
+
             if args.schema and sealed_name != args.schema:
                 continue
 
