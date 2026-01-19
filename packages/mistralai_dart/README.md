@@ -835,8 +835,8 @@ This client implements the Mistral AI REST API:
 
 ### Audio Resource (`client.audio`)
 
-- **transcribe** - Transcribe audio to text
-- **transcribeStream** - Stream transcription results
+- **transcriptions.create** - Transcribe audio to text
+- **transcriptions.createStream** - Stream transcription results
 
 ### Agents Resource (`client.agents`) - Beta
 
@@ -851,25 +851,28 @@ This client implements the Mistral AI REST API:
 
 ### Conversations Resource (`client.conversations`) - Beta
 
-- **start** - Start a conversation
-- **startStream** - Start a streaming conversation
-- **append** - Continue a conversation
-- **appendStream** - Stream continuation
-- **get** - Get conversation history
-- **getEntry** - Get a specific entry
+- **start** - Start a new conversation
+- **append** - Append entries to a conversation
+- **getEntries** - Get all entries in a conversation
+- **restart** - Restart from a specific entry
 - **list** - List conversations
+- **retrieve** - Get a conversation
 - **delete** - Delete a conversation
+- **sendMessage** - Send a message (convenience)
+- **sendFunctionResult** - Send function result (convenience)
 
 ### Libraries Resource (`client.libraries`) - Beta
 
 - **create** - Create a document library
 - **list** - List libraries
 - **retrieve** - Get a library
+- **update** - Update a library
 - **delete** - Delete a library
-- **uploadDocument** - Upload a document
-- **listDocuments** - List documents in a library
-- **retrieveDocument** - Get document metadata
-- **deleteDocument** - Delete a document
+- **documents.create** - Add a document to a library
+- **documents.list** - List documents in a library
+- **documents.retrieve** - Get document metadata
+- **documents.update** - Update document metadata
+- **documents.delete** - Delete a document
 
 ## Documentation
 
