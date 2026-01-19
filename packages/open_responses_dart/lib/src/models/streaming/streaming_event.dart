@@ -692,7 +692,7 @@ class OutputTextDeltaEvent extends StreamingEvent {
     required this.outputIndex,
     required this.contentIndex,
     required this.delta,
-    required this.logprobs,
+    this.logprobs = const [],
     this.obfuscation,
   });
 
@@ -784,7 +784,7 @@ class OutputTextDoneEvent extends StreamingEvent {
     required this.outputIndex,
     required this.contentIndex,
     required this.text,
-    required this.logprobs,
+    this.logprobs = const [],
   });
 
   /// Creates an [OutputTextDoneEvent] from JSON.
