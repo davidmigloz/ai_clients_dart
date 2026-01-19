@@ -9,7 +9,9 @@ class StreamOptions {
   /// prevent timing-based side-channel attacks that could reveal sensitive
   /// information about the response content.
   ///
-  /// Defaults to `true` on the server.
+  /// When `null`, the field is omitted from the request and the server applies
+  /// its default behavior (typically `true`). Set to an explicit `true` or
+  /// `false` to override the server's default.
   final bool? includeObfuscation;
 
   /// Creates a [StreamOptions].
