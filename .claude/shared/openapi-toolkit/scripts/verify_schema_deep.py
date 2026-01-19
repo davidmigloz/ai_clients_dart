@@ -241,6 +241,9 @@ def get_schema_properties(spec: dict, schema_name: str) -> dict:
         if 'properties' in item:
             item_required = set(item.get('required', []))
             for prop_name, prop_spec in item['properties'].items():
+                # Skip underscore-prefixed properties (same as direct properties)
+                if prop_name.startswith('_'):
+                    continue
                 prop_info = parse_property_spec(prop_spec, item_required, prop_name)
                 properties[prop_name] = prop_info
         elif '$ref' in item:
