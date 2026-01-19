@@ -721,7 +721,8 @@ class OutputTextDeltaEvent extends StreamingEvent {
     'output_index': outputIndex,
     'content_index': contentIndex,
     'delta': delta,
-    'logprobs': logprobs.map((e) => e.toJson()).toList(),
+    if (logprobs.isNotEmpty)
+      'logprobs': logprobs.map((e) => e.toJson()).toList(),
     if (obfuscation != null) 'obfuscation': obfuscation,
   };
 
@@ -811,7 +812,8 @@ class OutputTextDoneEvent extends StreamingEvent {
     'output_index': outputIndex,
     'content_index': contentIndex,
     'text': text,
-    'logprobs': logprobs.map((e) => e.toJson()).toList(),
+    if (logprobs.isNotEmpty)
+      'logprobs': logprobs.map((e) => e.toJson()).toList(),
   };
 
   @override
