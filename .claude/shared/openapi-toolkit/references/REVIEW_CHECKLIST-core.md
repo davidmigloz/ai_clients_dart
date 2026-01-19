@@ -132,10 +132,10 @@ python3 {core}/scripts/verify_schema_deep.py \
 ```
 
 Performs comprehensive schema verification beyond property names:
-- [ ] All property types match spec (not just names)
-- [ ] Required fields are non-nullable in Dart
-- [ ] All nested schemas have complete properties
-- [ ] All sealed class variants have correct properties
+- All property types match spec (not just names)
+- Required fields are non-nullable in Dart
+- All nested schemas have complete properties
+- All sealed class variants have correct properties
 
 This is optional but recommended for:
 - Initial implementation reviews

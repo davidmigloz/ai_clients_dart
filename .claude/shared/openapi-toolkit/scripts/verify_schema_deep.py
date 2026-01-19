@@ -70,23 +70,31 @@ def load_config(config_dir: Path) -> dict:
 
     models_file = config_dir / 'models.json'
     if models_file.exists():
-        with open(models_file) as f:
-            data = json.load(f)
-            config['critical_models'] = data.get('critical_models', [])
-            config['nested_schemas'] = data.get('nested_schemas', [])
-            config['sealed_classes'] = data.get('sealed_classes', [])
-            if 'type_mappings' in data:
-                config['type_mappings'].update(data['type_mappings'])
-            if 'excluded_properties' in data:
-                config['excluded_properties'].update(data['excluded_properties'])
+        try:
+            with open(models_file) as f:
+                data = json.load(f)
+                config['critical_models'] = data.get('critical_models', [])
+                config['nested_schemas'] = data.get('nested_schemas', [])
+                config['sealed_classes'] = data.get('sealed_classes', [])
+                if 'type_mappings' in data:
+                    config['type_mappings'].update(data['type_mappings'])
+                if 'excluded_properties' in data:
+                    config['excluded_properties'].update(data['excluded_properties'])
+        except json.JSONDecodeError as e:
+            print(f"Error: Invalid JSON in {models_file}: {e}")
+            sys.exit(2)
 
     return config
 
 
 def load_openapi_spec(spec_path: Path) -> dict:
     """Load OpenAPI specification."""
-    with open(spec_path) as f:
-        return json.load(f)
+    try:
+        with open(spec_path) as f:
+            return json.load(f)
+    except json.JSONDecodeError as e:
+        print(f"Error: Invalid JSON in {spec_path}: {e}")
+        sys.exit(2)
 
 
 def extract_dart_properties_with_types(
@@ -419,6 +427,23 @@ def verify_sealed_class(
     Returns list of issues found.
     """
     issues = []
+
+    # Validate required config keys
+    if 'name' not in sealed_config:
+        issues.append(Issue(
+            level='error',
+            schema='<unknown>',
+            message="Sealed class config missing required 'name' key"
+        ))
+        return issues
+    if 'file' not in sealed_config:
+        issues.append(Issue(
+            level='error',
+            schema=sealed_config['name'],
+            message="Sealed class config missing required 'file' key"
+        ))
+        return issues
+
     sealed_name = sealed_config['name']
     dart_file = Path(sealed_config['file'])
 
@@ -431,6 +456,15 @@ def verify_sealed_class(
         return issues
 
     for variant in sealed_config.get('variants', []):
+        # Validate required variant keys
+        if 'dart_class' not in variant:
+            issues.append(Issue(
+                level='error',
+                schema=sealed_name,
+                message="Variant config missing required 'dart_class' key"
+            ))
+            continue
+
         dart_class = variant['dart_class']
         spec_schema = variant.get('spec_schema')
         is_extension = variant.get('extension', False)
@@ -511,6 +545,24 @@ def main():
     if config['critical_models']:
         print("Checking critical models...")
         for model in config['critical_models']:
+            # Validate required config keys
+            if 'name' not in model:
+                print("  [!] <unknown>: Critical model config missing required 'name' key")
+                all_issues.append(Issue(
+                    level='error',
+                    schema='<unknown>',
+                    message="Critical model config missing required 'name' key"
+                ))
+                continue
+            if 'file' not in model:
+                print(f"  [!] {model['name']}: Critical model config missing required 'file' key")
+                all_issues.append(Issue(
+                    level='error',
+                    schema=model['name'],
+                    message="Critical model config missing required 'file' key"
+                ))
+                continue
+
             model_name = model['name']
             if args.schema and model_name != args.schema:
                 continue
@@ -543,6 +595,24 @@ def main():
         print()
         print("Checking nested schemas...")
         for nested in config['nested_schemas']:
+            # Validate required config keys
+            if 'name' not in nested:
+                print("  [!] <unknown>: Nested schema config missing required 'name' key")
+                all_issues.append(Issue(
+                    level='error',
+                    schema='<unknown>',
+                    message="Nested schema config missing required 'name' key"
+                ))
+                continue
+            if 'file' not in nested:
+                print(f"  [!] {nested['name']}: Nested schema config missing required 'file' key")
+                all_issues.append(Issue(
+                    level='error',
+                    schema=nested['name'],
+                    message="Nested schema config missing required 'file' key"
+                ))
+                continue
+
             schema_name = nested['name']
             if args.schema and schema_name != args.schema:
                 continue
