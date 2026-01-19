@@ -20,6 +20,8 @@ Exit codes:
     2 - Error (missing files, invalid config, etc.)
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 import re
@@ -182,7 +184,8 @@ def extract_dart_properties_with_types(
             full_type = getter_match.group(1).strip()
             prop_name = getter_match.group(2)
 
-            # Skip if it's an override annotation or other keyword
+            # Skip if the extracted "type" is actually a keyword or empty
+            # (can happen with malformed matches or static/abstract getters)
             if full_type in ('', '@override', 'static', 'abstract'):
                 continue
 
@@ -225,6 +228,8 @@ def get_schema_properties(spec: dict, schema_name: str) -> dict:
 
     # Direct properties
     for prop_name, prop_spec in schema.get('properties', {}).items():
+        # Skip underscore-prefixed properties - these are typically internal/metadata
+        # fields in OpenAPI specs that don't map to public Dart class properties
         if prop_name.startswith('_'):
             continue
 

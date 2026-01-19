@@ -123,7 +123,9 @@ Compares Dart model classes against OpenAPI spec:
 - Missing properties in critical parent models
 - Properties that exist in spec but not in Dart class
 
-### Pass 5: Deep Schema Verification (Optional)
+### Pass 5: Deep Schema Verification
+
+This pass is optional but strongly recommended for thorough verification.
 
 ```bash
 python3 {core}/scripts/verify_schema_deep.py \
@@ -140,7 +142,7 @@ Performs comprehensive schema verification beyond property names:
 Note: Full type validation is not yet implemented; the script currently
 focuses on property presence and nullability checks.
 
-This is optional but recommended for:
+Recommended for:
 - Initial implementation reviews
 - Major spec updates affecting critical models
 - Debugging serialization issues
@@ -245,9 +247,8 @@ When adding new features, update your config files:
     {
       "name": "SealedClassName",
       "file": "path/to/file.dart",
-      "discriminator": "type",
       "variants": [
-        {"dart_class": "VariantA", "spec_schema": "SpecVariantA", "discriminator_value": "a"},
+        {"dart_class": "VariantA", "spec_schema": "SpecVariantA"},
         {"dart_class": "VariantB", "spec_schema": null, "extension": true}
       ]
     }
