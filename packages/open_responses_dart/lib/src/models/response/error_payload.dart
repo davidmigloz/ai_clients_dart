@@ -52,9 +52,9 @@ class ErrorPayload {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'type': type,
-    'code': code,
+    if (code != null) 'code': code,
     'message': message,
-    'param': param,
+    if (param != null) 'param': param,
     if (headers != null) 'headers': headers,
   };
 

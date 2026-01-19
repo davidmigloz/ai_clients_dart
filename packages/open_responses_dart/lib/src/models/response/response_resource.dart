@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 import '../items/output_item.dart';
 import '../metadata/response_status.dart';
 import '../metadata/service_tier.dart';
@@ -363,9 +364,12 @@ class ResponseResource {
           status == other.status &&
           previousResponseId == other.previousResponseId &&
           instructions == other.instructions &&
+          listsEqual(output, other.output) &&
           usage == other.usage &&
           error == other.error &&
           incompleteDetails == other.incompleteDetails &&
+          listsEqual(tools, other.tools) &&
+          toolChoice == other.toolChoice &&
           truncation == other.truncation &&
           parallelToolCalls == other.parallelToolCalls &&
           text == other.text &&
@@ -380,6 +384,7 @@ class ResponseResource {
           store == other.store &&
           background == other.background &&
           serviceTier == other.serviceTier &&
+          mapsEqual(metadata, other.metadata) &&
           safetyIdentifier == other.safetyIdentifier &&
           promptCacheKey == other.promptCacheKey;
 
@@ -393,9 +398,12 @@ class ResponseResource {
     status,
     previousResponseId,
     instructions,
+    output,
     usage,
     error,
     incompleteDetails,
+    tools,
+    toolChoice,
     truncation,
     parallelToolCalls,
     text,
@@ -410,6 +418,7 @@ class ResponseResource {
     store,
     background,
     serviceTier,
+    metadata,
     safetyIdentifier,
     promptCacheKey,
   ]);
