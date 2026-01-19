@@ -58,6 +58,15 @@ DEFAULT_TYPE_MAPPINGS = {
 }
 
 
+def get_level_marker(level: str) -> str:
+    """Get the display marker for an issue level."""
+    if level == 'error':
+        return '!'
+    elif level == 'warning':
+        return '?'
+    return 'i'
+
+
 def load_config(config_dir: Path) -> dict:
     """Load configuration from config directory."""
     config = {
@@ -598,7 +607,7 @@ def main():
             else:
                 for issue in issues:
                     all_issues.append(issue)
-                    level_marker = '!' if issue.level == 'error' else '?' if issue.level == 'warning' else 'i'
+                    level_marker = get_level_marker(issue.level)
                     print(f"  [{level_marker}] {model_name}: {issue.message}")
 
     # Verify nested schemas
@@ -648,7 +657,7 @@ def main():
             else:
                 for issue in issues:
                     all_issues.append(issue)
-                    level_marker = '!' if issue.level == 'error' else '?' if issue.level == 'warning' else 'i'
+                    level_marker = get_level_marker(issue.level)
                     print(f"  [{level_marker}] {schema_name}: {issue.message}")
 
     # Verify sealed classes
@@ -685,7 +694,7 @@ def main():
             else:
                 for issue in issues:
                     all_issues.append(issue)
-                    level_marker = '!' if issue.level == 'error' else '?' if issue.level == 'warning' else 'i'
+                    level_marker = get_level_marker(issue.level)
                     print(f"    [{level_marker}] {issue.schema}: {issue.message}")
 
     # Summary
