@@ -65,7 +65,7 @@ openapi-toolkit/
 # From package root - CORRECT
 cd packages/your_package
 python3 ../../.claude/shared/openapi-toolkit/scripts/verify_coverage.py \
-  --config-dir .claude/skills/openapi/config \
+  --config-dir .claude/skills/openapi-{shortname}/config \
   --spec /tmp/openapi-your-package/latest-main.json
 ```
 
@@ -209,7 +209,7 @@ When updating an API client, follow this workflow to avoid missing new APIs:
 ```bash
 # From repository root
 python3 .claude/shared/openapi-toolkit/scripts/fetch_spec.py \
-  --config-dir packages/{package}/.claude/skills/openapi/config
+  --config-dir packages/{package}/.claude/skills/openapi-{shortname}/config
 ```
 
 ### 2. Analyze Changes (from REPO ROOT)
@@ -218,7 +218,7 @@ Compare old spec vs new spec to find what changed. **Specs are auto-located** fr
 ```bash
 # From repository root - specs auto-located from specs.json config
 python3 .claude/shared/openapi-toolkit/scripts/analyze_changes.py \
-  --config-dir packages/{package}/.claude/skills/openapi/config \
+  --config-dir packages/{package}/.claude/skills/openapi-{shortname}/config \
   --format all
 ```
 
@@ -232,7 +232,7 @@ python3 .claude/shared/openapi-toolkit/scripts/analyze_changes.py \
 cd packages/{package}
 # Spec auto-located from config
 python3 ../../.claude/shared/openapi-toolkit/scripts/verify_coverage.py \
-  --config-dir .claude/skills/openapi/config --verbose
+  --config-dir .claude/skills/openapi-{shortname}/config --verbose
 ```
 
 If missing resources are found, prioritize implementing them.
@@ -245,10 +245,10 @@ After implementation, verify completeness. **Barrel files are auto-discovered**:
 cd packages/{package}
 # Auto-discovers all library entry points (*.dart files in lib/)
 python3 ../../.claude/shared/openapi-toolkit/scripts/verify_exports.py \
-  --config-dir .claude/skills/openapi/config
+  --config-dir .claude/skills/openapi-{shortname}/config
 # Spec auto-located
 python3 ../../.claude/shared/openapi-toolkit/scripts/verify_coverage.py \
-  --config-dir .claude/skills/openapi/config
+  --config-dir .claude/skills/openapi-{shortname}/config
 ```
 
 ## Script Usage
@@ -262,9 +262,9 @@ All scripts require `--config-dir` pointing to your config directory.
 ```bash
 # From repository root
 python3 .claude/shared/openapi-toolkit/scripts/fetch_spec.py \
-  --config-dir packages/{package}/.claude/skills/openapi/config
+  --config-dir packages/{package}/.claude/skills/openapi-{shortname}/config
 python3 .claude/shared/openapi-toolkit/scripts/fetch_spec.py \
-  --config-dir packages/{package}/.claude/skills/openapi/config --spec main
+  --config-dir packages/{package}/.claude/skills/openapi-{shortname}/config --spec main
 ```
 
 ### Analyze Changes (REPO ROOT)
@@ -272,12 +272,12 @@ python3 .claude/shared/openapi-toolkit/scripts/fetch_spec.py \
 ```bash
 # From repository root - specs auto-located
 python3 .claude/shared/openapi-toolkit/scripts/analyze_changes.py \
-  --config-dir packages/{package}/.claude/skills/openapi/config \
+  --config-dir packages/{package}/.claude/skills/openapi-{shortname}/config \
   --format all
 
 # Or with explicit paths (optional)
 python3 .claude/shared/openapi-toolkit/scripts/analyze_changes.py \
-  --config-dir packages/{package}/.claude/skills/openapi/config \
+  --config-dir packages/{package}/.claude/skills/openapi-{shortname}/config \
   packages/{package}/specs/openapi.json /tmp/openapi-{package}/latest-main.json \
   --format all
 ```
@@ -290,27 +290,27 @@ cd packages/{package}
 
 # Check API coverage (spec auto-located from config)
 python3 ../../.claude/shared/openapi-toolkit/scripts/verify_coverage.py \
-  --config-dir .claude/skills/openapi/config --verbose
+  --config-dir .claude/skills/openapi-{shortname}/config --verbose
 
 # Check all models are exported (barrel files auto-discovered)
 python3 ../../.claude/shared/openapi-toolkit/scripts/verify_exports.py \
-  --config-dir .claude/skills/openapi/config
+  --config-dir .claude/skills/openapi-{shortname}/config
 
 # Check model properties match spec
 python3 ../../.claude/shared/openapi-toolkit/scripts/verify_model_properties.py \
-  --config-dir .claude/skills/openapi/config
+  --config-dir .claude/skills/openapi-{shortname}/config
 
 # Check README accuracy
 python3 ../../.claude/shared/openapi-toolkit/scripts/verify_readme.py \
-  --config-dir .claude/skills/openapi/config
+  --config-dir .claude/skills/openapi-{shortname}/config
 
 # Check example files exist
 python3 ../../.claude/shared/openapi-toolkit/scripts/verify_examples.py \
-  --config-dir .claude/skills/openapi/config
+  --config-dir .claude/skills/openapi-{shortname}/config
 
 # Detect README code drift
 python3 ../../.claude/shared/openapi-toolkit/scripts/verify_readme_code.py \
-  --config-dir .claude/skills/openapi/config
+  --config-dir .claude/skills/openapi-{shortname}/config
 ```
 
 ### Generation Scripts (PACKAGE ROOT)
@@ -321,33 +321,33 @@ cd packages/{package}
 
 # Generate a single model
 python3 ../../.claude/shared/openapi-toolkit/scripts/generate_model.py \
-  --config-dir .claude/skills/openapi/config \
+  --config-dir .claude/skills/openapi-{shortname}/config \
   --schema GenerationConfig --output lib/src/models/config/generation_config.dart
 
 # Generate a single enum
 python3 ../../.claude/shared/openapi-toolkit/scripts/generate_enum.py \
-  --config-dir .claude/skills/openapi/config \
+  --config-dir .claude/skills/openapi-{shortname}/config \
   --schema HarmCategory --output lib/src/models/safety/harm_category.dart
 
 # Generate barrel file for a subdirectory
 python3 ../../.claude/shared/openapi-toolkit/scripts/generate_barrel.py \
-  --config-dir .claude/skills/openapi/config \
+  --config-dir .claude/skills/openapi-{shortname}/config \
   --subdirectory models/safety
 
 # Batch generate all enums
 python3 ../../.claude/shared/openapi-toolkit/scripts/generate_enum.py \
-  --config-dir .claude/skills/openapi/config \
+  --config-dir .claude/skills/openapi-{shortname}/config \
   --batch --output-dir lib/src/models
 
 # Batch generate all models (skip sealed parents)
 python3 ../../.claude/shared/openapi-toolkit/scripts/generate_model.py \
-  --config-dir .claude/skills/openapi/config \
+  --config-dir .claude/skills/openapi-{shortname}/config \
   --batch --output-dir lib/src/models --skip Part,Content
 ```
 
 ## Creating a New Package Extension
 
-1. **Create config directory**: `packages/{package}/.claude/skills/openapi/config/`
+1. **Create config directory**: `packages/{package}/.claude/skills/openapi-{shortname}/config/`
 2. **Create config files**: `package.json`, `specs.json`, `schemas.json`, `models.json`, `documentation.json`
 3. **Create SKILL.md**: Reference this core toolkit at `packages/{package}/.claude/skills/openapi/SKILL.md`
 4. **Create references**: Package-specific patterns and checklists

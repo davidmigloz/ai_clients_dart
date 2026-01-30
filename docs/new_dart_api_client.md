@@ -291,13 +291,13 @@ Use the generation scripts to create initial model and enum files:
 ```bash
 # Generate a single enum
 python3 .claude/shared/openapi-toolkit/scripts/generate_enum.py \
-  --config-dir packages/your_package_dart/.claude/skills/openapi/config \
+  --config-dir packages/your_package_dart/.claude/skills/openapi-{shortname}/config \
   --schema FinishReason \
   --output packages/your_package_dart/lib/src/models/metadata/finish_reason.dart
 
 # Or batch generate all enums
 python3 .claude/shared/openapi-toolkit/scripts/generate_enum.py \
-  --config-dir packages/your_package_dart/.claude/skills/openapi/config \
+  --config-dir packages/your_package_dart/.claude/skills/openapi-{shortname}/config \
   --batch --output-dir packages/your_package_dart/lib/src/models
 ```
 
@@ -306,13 +306,13 @@ python3 .claude/shared/openapi-toolkit/scripts/generate_enum.py \
 ```bash
 # Generate a single model
 python3 .claude/shared/openapi-toolkit/scripts/generate_model.py \
-  --config-dir packages/your_package_dart/.claude/skills/openapi/config \
+  --config-dir packages/your_package_dart/.claude/skills/openapi-{shortname}/config \
   --schema GenerationConfig \
   --output packages/your_package_dart/lib/src/models/config/generation_config.dart
 
 # Or batch generate all models (skip sealed class parents)
 python3 .claude/shared/openapi-toolkit/scripts/generate_model.py \
-  --config-dir packages/your_package_dart/.claude/skills/openapi/config \
+  --config-dir packages/your_package_dart/.claude/skills/openapi-{shortname}/config \
   --batch --output-dir packages/your_package_dart/lib/src/models \
   --skip Part,Content
 ```
@@ -322,12 +322,12 @@ python3 .claude/shared/openapi-toolkit/scripts/generate_model.py \
 ```bash
 # Generate barrel file for a subdirectory
 python3 .claude/shared/openapi-toolkit/scripts/generate_barrel.py \
-  --config-dir packages/your_package_dart/.claude/skills/openapi/config \
+  --config-dir packages/your_package_dart/.claude/skills/openapi-{shortname}/config \
   --subdirectory models/metadata
 
 # Or generate for all model subdirectories
 python3 .claude/shared/openapi-toolkit/scripts/generate_barrel.py \
-  --config-dir packages/your_package_dart/.claude/skills/openapi/config
+  --config-dir packages/your_package_dart/.claude/skills/openapi-{shortname}/config
 ```
 
 **Note:** Generated code provides a starting point. You may need to:
