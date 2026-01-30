@@ -27,12 +27,20 @@ from pathlib import Path
 from urllib.request import urlopen, Request
 from urllib.error import URLError, HTTPError
 
+# Optional YAML support for specs served in YAML format
+try:
+    import yaml
+    HAS_YAML = True
+except ImportError:
+    HAS_YAML = False
+
 
 def load_config(config_dir: Path) -> dict:
     """Load configuration from config directory."""
     config = {
         'specs': {},
         'output_dir': '/tmp/openapi-toolkit',
+        'specs_dir': None,
         'discovery_patterns': [],
         'discovery_names': [],
         'auth_env_vars': ['GEMINI_API_KEY', 'GOOGLE_AI_API_KEY'],
@@ -45,6 +53,7 @@ def load_config(config_dir: Path) -> dict:
             specs = json.load(f)
             config['specs'] = specs.get('specs', {})
             config['output_dir'] = specs.get('output_dir', config['output_dir'])
+            config['specs_dir'] = specs.get('specs_dir')
             config['discovery_patterns'] = specs.get('discovery_patterns', [])
             config['discovery_names'] = specs.get('discovery_names', [])
 
@@ -70,7 +79,7 @@ def get_api_key(config: dict) -> str | None:
 
 
 def fetch_url(url: str, api_key: str | None = None, requires_auth: bool = False) -> dict | None:
-    """Fetch JSON from URL with optional auth."""
+    """Fetch JSON or YAML from URL with optional auth."""
     if requires_auth:
         if not api_key:
             print(f"  ERROR: API key required but not set", file=sys.stderr)
@@ -81,7 +90,24 @@ def fetch_url(url: str, api_key: str | None = None, requires_auth: bool = False)
         req = Request(url, headers={'User-Agent': 'OpenAPI-Updater/1.0'})
         with urlopen(req, timeout=30) as response:
             data = response.read().decode('utf-8')
-            return json.loads(data)
+
+            # Try JSON first
+            try:
+                return json.loads(data)
+            except json.JSONDecodeError:
+                pass
+
+            # Try YAML as fallback
+            if HAS_YAML:
+                try:
+                    return yaml.safe_load(data)
+                except yaml.YAMLError as e:
+                    print(f"  ERROR: Failed to parse as JSON or YAML: {e}", file=sys.stderr)
+                    return None
+            else:
+                print("  ERROR: Response is not JSON and PyYAML not installed", file=sys.stderr)
+                print("  TIP: Install PyYAML with 'pip install pyyaml' to parse YAML specs", file=sys.stderr)
+                return None
     except HTTPError as e:
         if e.code == 404:
             return None
@@ -89,9 +115,6 @@ def fetch_url(url: str, api_key: str | None = None, requires_auth: bool = False)
         return None
     except URLError as e:
         print(f"  ERROR: Network error: {e.reason}", file=sys.stderr)
-        return None
-    except json.JSONDecodeError as e:
-        print(f"  ERROR: Invalid JSON: {e}", file=sys.stderr)
         return None
 
 
@@ -117,6 +140,53 @@ def save_spec(spec: dict, output_dir: Path, spec_name: str) -> Path:
     with open(filepath, 'w') as f:
         json.dump(spec, f, indent=2)
     return filepath
+
+
+def save_spec_metadata(specs_dir: Path, spec_name: str, spec: dict, url: str) -> tuple[str, str | None]:
+    """Save spec version metadata to specs_dir/spec_metadata.json.
+
+    Returns:
+        Tuple of (current_version, previous_version or None)
+    """
+    metadata_file = specs_dir / "spec_metadata.json"
+    info = spec.get("info", {})
+    current_version = info.get("version", "unknown")
+
+    # Load existing metadata or create new
+    metadata = {}
+    if metadata_file.exists():
+        with open(metadata_file) as f:
+            metadata = json.load(f)
+
+    # Track version history
+    spec_meta = metadata.get("specs", {}).get(spec_name, {})
+    history = spec_meta.get("version_history", [])
+    prev_version = spec_meta.get("current_version")
+
+    # If version changed, add previous to history
+    if prev_version and prev_version != current_version:
+        history.insert(0, {
+            "version": prev_version,
+            "fetched_at": spec_meta.get("last_fetched")
+        })
+        history = history[:10]  # Keep last 10 versions
+
+    # Update metadata
+    if "specs" not in metadata:
+        metadata["specs"] = {}
+    metadata["specs"][spec_name] = {
+        "title": info.get("title", "Unknown"),
+        "current_version": current_version,
+        "last_fetched": datetime.utcnow().isoformat() + "Z",
+        "source_url": url,
+        "version_history": history
+    }
+
+    # Write metadata file
+    with open(metadata_file, "w") as f:
+        json.dump(metadata, f, indent=2)
+
+    return current_version, prev_version
 
 
 def print_spec_info(spec: dict, filepath: Path):
@@ -160,6 +230,16 @@ def fetch_registered_specs(config: dict, spec_filter: str | None, output_dir: Pa
 
         filepath = save_spec(spec, output_dir, name)
         print_spec_info(spec, filepath)
+
+        # Save version metadata if specs_dir is configured
+        specs_dir = config.get('specs_dir')
+        if specs_dir:
+            specs_path = Path(specs_dir)
+            if specs_path.exists():
+                version, prev = save_spec_metadata(specs_path, name, spec, url)
+                if prev and prev != version:
+                    print(f"  Version: {prev} → {version}")
+
         fetched += 1
 
     return fetched

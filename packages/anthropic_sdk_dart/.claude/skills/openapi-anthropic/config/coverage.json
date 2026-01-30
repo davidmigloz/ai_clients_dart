@@ -1,0 +1,10 @@
+{
+  "excluded_paths": [],
+  "excluded_tags": [],
+  "priority_resources": [
+    "messages",
+    "models",
+    "message_batches"
+  ],
+  "notes": {}
+}

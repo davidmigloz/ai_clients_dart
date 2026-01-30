@@ -1,0 +1,11 @@
+{
+  "excluded_paths": [],
+  "excluded_tags": [],
+  "priority_resources": [
+    "chat",
+    "generate",
+    "embed",
+    "models"
+  ],
+  "notes": {}
+}

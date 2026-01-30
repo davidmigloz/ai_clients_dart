@@ -1,0 +1,10 @@
+{
+  "excluded_paths": [],
+  "excluded_tags": [],
+  "priority_resources": [
+    "collections",
+    "tenants",
+    "databases"
+  ],
+  "notes": {}
+}

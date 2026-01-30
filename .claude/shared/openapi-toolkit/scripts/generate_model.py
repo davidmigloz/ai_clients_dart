@@ -69,7 +69,7 @@ def get_schema_category(schema_name: str, config: dict) -> str:
 
 
 def load_spec(config: dict, spec_name: str = 'main') -> dict | None:
-    """Load OpenAPI spec from local file."""
+    """Load OpenAPI spec from local file (JSON or YAML)."""
     specs = config.get('specs', {}).get('specs', {})
     spec_config = specs.get(spec_name)
     if not spec_config:
@@ -80,16 +80,53 @@ def load_spec(config: dict, spec_name: str = 'main') -> dict | None:
         return None
 
     package_name = config.get('package', {}).get('name', '')
-    spec_path = Path(f'packages/{package_name}/specs/{local_file}')
+    base_name = Path(local_file).stem
 
-    if not spec_path.exists():
-        spec_path = Path(f'packages/{package_name}/{local_file}')
+    # Try multiple locations and extensions
+    locations = [
+        Path(f'packages/{package_name}/specs'),
+        Path(f'packages/{package_name}'),
+    ]
+    extensions = ['.json', '.yaml', '.yml']
 
-    if not spec_path.exists():
+    spec_path = None
+    for loc in locations:
+        # Try exact filename first
+        candidate = loc / local_file
+        if candidate.exists():
+            spec_path = candidate
+            break
+        # Try with different extensions
+        for ext in extensions:
+            candidate = loc / f"{base_name}{ext}"
+            if candidate.exists():
+                spec_path = candidate
+                break
+        if spec_path:
+            break
+
+    if not spec_path:
         return None
 
-    with open(spec_path) as f:
-        return json.load(f)
+    content = spec_path.read_text()
+
+    # Try JSON first
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError:
+        pass
+
+    # Try YAML
+    try:
+        import yaml
+        return yaml.safe_load(content)
+    except ImportError:
+        print("ERROR: PyYAML not available.", file=sys.stderr)
+        print(f"       Install: {sys.executable} -m pip install pyyaml --user", file=sys.stderr)
+        return None
+    except Exception as e:
+        print(f"ERROR: Failed to parse spec: {e}", file=sys.stderr)
+        return None
 
 
 def to_snake_case(name: str) -> str:

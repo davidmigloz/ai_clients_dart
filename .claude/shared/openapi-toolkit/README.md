@@ -18,6 +18,7 @@ openapi-toolkit/
 ├── scripts/
 │   ├── fetch_spec.py           # Fetch OpenAPI specs from URLs
 │   ├── analyze_changes.py      # Compare specs, generate changelog/plan
+│   ├── verify_coverage.py      # Check API coverage (spec vs implementation)
 │   ├── generate_model.py       # Generate model class from schema
 │   ├── generate_enum.py        # Generate enum from schema
 │   ├── generate_barrel.py      # Generate barrel file exports
@@ -33,6 +34,41 @@ openapi-toolkit/
     └── example_template.dart   # Example file template
 ```
 
+## Prerequisites
+
+- Python 3.9+ with `pyyaml` installed
+  - **Important**: Install for your active Python version: `python3 -m pip install pyyaml --user`
+  - Verify: `python3 -c "import yaml; print(yaml.__version__)"`
+
+## Working Directory Requirements
+
+**Different scripts have different working directory requirements:**
+
+| Script | Working Directory | Reason |
+|--------|-------------------|--------|
+| `fetch_spec.py` | Any (repo root recommended) | Uses absolute paths from args |
+| `analyze_changes.py` | Any (repo root recommended) | Uses absolute paths from args |
+| `verify_coverage.py` | **Package root** | Uses relative paths like `lib/src/resources` |
+| `verify_exports.py` | **Package root** | Uses relative paths like `lib/src/models` |
+| `verify_model_properties.py` | **Package root** | Uses relative paths from config |
+| `verify_readme.py` | **Package root** | Uses relative paths like `README.md` |
+| `verify_examples.py` | **Package root** | Uses relative paths like `example/` |
+| `verify_readme_code.py` | **Package root** | Uses relative paths |
+| `generate_*.py` | **Package root** | Uses relative paths for output |
+
+**Example for package-root scripts:**
+
+```bash
+# From repo root - WRONG for verification scripts!
+# python3 .claude/shared/openapi-toolkit/scripts/verify_coverage.py ...
+
+# From package root - CORRECT
+cd packages/your_package
+python3 ../../.claude/shared/openapi-toolkit/scripts/verify_coverage.py \
+  --config-dir .claude/skills/openapi/config \
+  --spec /tmp/openapi-your-package/latest-main.json
+```
+
 ## Required Config Files
 
 Create these in your extension skill's `config/` directory:
@@ -43,6 +79,7 @@ Create these in your extension skill's `config/` directory:
 | `specs.json` | API spec URLs and authentication |
 | `schemas.json` | Schema categorization and parent model patterns |
 | `models.json` | Critical models for property verification |
+| `coverage.json` | API coverage exclusions (intentionally unimplemented) |
 | `documentation.json` | README verification rules, drift patterns |
 
 ### `package.json` - Package Structure
@@ -77,7 +114,7 @@ Create these in your extension skill's `config/` directory:
       "description": "Main API description"
     }
   },
-  "output_dir": "/tmp/openapi-toolkit-{package}-dart",
+  "output_dir": "/tmp/openapi-{package}",
   "discovery_patterns": [],
   "discovery_names": []
 }
@@ -115,6 +152,29 @@ Create these in your extension skill's `config/` directory:
 }
 ```
 
+### `coverage.json` - API Coverage Exclusions
+
+```json
+{
+  "excluded_paths": [
+    "^/organization/.*",
+    "^/admin/.*"
+  ],
+  "excluded_tags": [
+    "Administration",
+    "Internal"
+  ],
+  "priority_resources": [
+    "responses",
+    "chat",
+    "embeddings"
+  ],
+  "notes": {
+    "organization": "Admin APIs - not needed for client usage"
+  }
+}
+```
+
 ### `documentation.json` - README Verification
 
 ```json
@@ -141,63 +201,155 @@ Create these in your extension skill's `config/` directory:
 }
 ```
 
+## Recommended Workflow
+
+When updating an API client, follow this workflow to avoid missing new APIs:
+
+### 1. Fetch Latest Spec (from REPO ROOT)
+```bash
+# From repository root
+python3 .claude/shared/openapi-toolkit/scripts/fetch_spec.py \
+  --config-dir packages/{package}/.claude/skills/openapi/config
+```
+
+### 2. Analyze Changes (from REPO ROOT)
+Compare old spec vs new spec to find what changed. **Specs are auto-located** from config:
+
+```bash
+# From repository root - specs auto-located from specs.json config
+python3 .claude/shared/openapi-toolkit/scripts/analyze_changes.py \
+  --config-dir packages/{package}/.claude/skills/openapi/config \
+  --format all
+```
+
+**Note:** The script auto-locates the old spec from `specs_dir` and the new spec from `output_dir` in specs.json. You can still provide explicit paths if needed.
+
+### 3. Check Coverage (CRITICAL - from PACKAGE ROOT)
+**Always run coverage check.** This catches APIs that exist in the spec but were never implemented. **Spec is auto-located** if not provided:
+
+```bash
+# Change to package directory first
+cd packages/{package}
+# Spec auto-located from config
+python3 ../../.claude/shared/openapi-toolkit/scripts/verify_coverage.py \
+  --config-dir .claude/skills/openapi/config --verbose
+```
+
+If missing resources are found, prioritize implementing them.
+
+### 4. Implement & Verify (from PACKAGE ROOT)
+After implementation, verify completeness. **Barrel files are auto-discovered**:
+
+```bash
+# From package directory
+cd packages/{package}
+# Auto-discovers all library entry points (*.dart files in lib/)
+python3 ../../.claude/shared/openapi-toolkit/scripts/verify_exports.py \
+  --config-dir .claude/skills/openapi/config
+# Spec auto-located
+python3 ../../.claude/shared/openapi-toolkit/scripts/verify_coverage.py \
+  --config-dir .claude/skills/openapi/config
+```
+
 ## Script Usage
 
 All scripts require `--config-dir` pointing to your config directory.
 
-### Fetch Specs
+**Note:** See [Working Directory Requirements](#working-directory-requirements) above for which scripts need repo root vs package root.
+
+### Fetch Specs (REPO ROOT)
 
 ```bash
-python3 {core}/scripts/fetch_spec.py --config-dir {ext}/config
-python3 {core}/scripts/fetch_spec.py --config-dir {ext}/config --spec main
+# From repository root
+python3 .claude/shared/openapi-toolkit/scripts/fetch_spec.py \
+  --config-dir packages/{package}/.claude/skills/openapi/config
+python3 .claude/shared/openapi-toolkit/scripts/fetch_spec.py \
+  --config-dir packages/{package}/.claude/skills/openapi/config --spec main
 ```
 
-### Analyze Changes
+### Analyze Changes (REPO ROOT)
 
 ```bash
-python3 {core}/scripts/analyze_changes.py --config-dir {ext}/config \
-  old.json new.json --format all
+# From repository root - specs auto-located
+python3 .claude/shared/openapi-toolkit/scripts/analyze_changes.py \
+  --config-dir packages/{package}/.claude/skills/openapi/config \
+  --format all
+
+# Or with explicit paths (optional)
+python3 .claude/shared/openapi-toolkit/scripts/analyze_changes.py \
+  --config-dir packages/{package}/.claude/skills/openapi/config \
+  packages/{package}/specs/openapi.json /tmp/openapi-{package}/latest-main.json \
+  --format all
 ```
 
-### Verification Scripts
+### Verification Scripts (PACKAGE ROOT)
 
 ```bash
-python3 {core}/scripts/verify_exports.py --config-dir {ext}/config
-python3 {core}/scripts/verify_readme.py --config-dir {ext}/config
-python3 {core}/scripts/verify_examples.py --config-dir {ext}/config
-python3 {core}/scripts/verify_model_properties.py --config-dir {ext}/config
-python3 {core}/scripts/verify_readme_code.py --config-dir {ext}/config
+# Change to package directory first
+cd packages/{package}
+
+# Check API coverage (spec auto-located from config)
+python3 ../../.claude/shared/openapi-toolkit/scripts/verify_coverage.py \
+  --config-dir .claude/skills/openapi/config --verbose
+
+# Check all models are exported (barrel files auto-discovered)
+python3 ../../.claude/shared/openapi-toolkit/scripts/verify_exports.py \
+  --config-dir .claude/skills/openapi/config
+
+# Check model properties match spec
+python3 ../../.claude/shared/openapi-toolkit/scripts/verify_model_properties.py \
+  --config-dir .claude/skills/openapi/config
+
+# Check README accuracy
+python3 ../../.claude/shared/openapi-toolkit/scripts/verify_readme.py \
+  --config-dir .claude/skills/openapi/config
+
+# Check example files exist
+python3 ../../.claude/shared/openapi-toolkit/scripts/verify_examples.py \
+  --config-dir .claude/skills/openapi/config
+
+# Detect README code drift
+python3 ../../.claude/shared/openapi-toolkit/scripts/verify_readme_code.py \
+  --config-dir .claude/skills/openapi/config
 ```
 
-### Generation Scripts
+### Generation Scripts (PACKAGE ROOT)
 
 ```bash
+# Change to package directory first
+cd packages/{package}
+
 # Generate a single model
-python3 {core}/scripts/generate_model.py --config-dir {ext}/config \
+python3 ../../.claude/shared/openapi-toolkit/scripts/generate_model.py \
+  --config-dir .claude/skills/openapi/config \
   --schema GenerationConfig --output lib/src/models/config/generation_config.dart
 
 # Generate a single enum
-python3 {core}/scripts/generate_enum.py --config-dir {ext}/config \
+python3 ../../.claude/shared/openapi-toolkit/scripts/generate_enum.py \
+  --config-dir .claude/skills/openapi/config \
   --schema HarmCategory --output lib/src/models/safety/harm_category.dart
 
 # Generate barrel file for a subdirectory
-python3 {core}/scripts/generate_barrel.py --config-dir {ext}/config \
+python3 ../../.claude/shared/openapi-toolkit/scripts/generate_barrel.py \
+  --config-dir .claude/skills/openapi/config \
   --subdirectory models/safety
 
 # Batch generate all enums
-python3 {core}/scripts/generate_enum.py --config-dir {ext}/config \
+python3 ../../.claude/shared/openapi-toolkit/scripts/generate_enum.py \
+  --config-dir .claude/skills/openapi/config \
   --batch --output-dir lib/src/models
 
 # Batch generate all models (skip sealed parents)
-python3 {core}/scripts/generate_model.py --config-dir {ext}/config \
+python3 ../../.claude/shared/openapi-toolkit/scripts/generate_model.py \
+  --config-dir .claude/skills/openapi/config \
   --batch --output-dir lib/src/models --skip Part,Content
 ```
 
 ## Creating a New Package Extension
 
-1. **Create config directory**: `.claude/skills/openapi-toolkit-{package}-dart/config/`
+1. **Create config directory**: `packages/{package}/.claude/skills/openapi/config/`
 2. **Create config files**: `package.json`, `specs.json`, `schemas.json`, `models.json`, `documentation.json`
-3. **Create SKILL.md**: Reference this core toolkit
+3. **Create SKILL.md**: Reference this core toolkit at `packages/{package}/.claude/skills/openapi/SKILL.md`
 4. **Create references**: Package-specific patterns and checklists
 
 See `docs/new_dart_api_client.md` for detailed instructions.

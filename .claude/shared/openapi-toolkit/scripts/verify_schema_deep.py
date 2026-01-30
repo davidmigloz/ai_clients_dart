@@ -102,15 +102,29 @@ def load_config(config_dir: Path) -> dict:
 
 
 def load_openapi_spec(spec_path: Path) -> dict:
-    """Load OpenAPI specification."""
+    """Load OpenAPI specification (JSON or YAML)."""
     try:
-        with open(spec_path) as f:
-            return json.load(f)
-    except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON in {spec_path}: {e}")
-        sys.exit(2)
+        content = spec_path.read_text()
     except (OSError, IOError) as e:
         print(f"Error: Unable to read OpenAPI spec {spec_path}: {e}")
+        sys.exit(2)
+
+    # Try JSON first
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError:
+        pass
+
+    # Try YAML
+    try:
+        import yaml
+        return yaml.safe_load(content)
+    except ImportError:
+        print("ERROR: PyYAML not available.", file=sys.stderr)
+        print(f"       Install: {sys.executable} -m pip install pyyaml --user", file=sys.stderr)
+        sys.exit(2)
+    except Exception as e:
+        print(f"Error: Failed to parse spec: {e}", file=sys.stderr)
         sys.exit(2)
 
 

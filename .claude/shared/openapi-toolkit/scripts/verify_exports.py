@@ -23,7 +23,8 @@ from pathlib import Path
 def load_config(config_dir: Path) -> dict:
     """Load configuration from config directory."""
     config = {
-        'barrel_file': 'lib/googleai_dart.dart',
+        'barrel_file': 'lib/googleai_dart.dart',  # Legacy single-file option
+        'barrel_files': [],  # New: explicit list of barrel files
         'models_dir': 'lib/src/models',
         'skip_files': ['copy_with_sentinel.dart'],
         'internal_barrel_files': [],
@@ -35,11 +36,33 @@ def load_config(config_dir: Path) -> dict:
         with open(pkg_file) as f:
             pkg = json.load(f)
             config['barrel_file'] = pkg.get('barrel_file', config['barrel_file'])
+            config['barrel_files'] = pkg.get('barrel_files', [])
             config['models_dir'] = pkg.get('models_dir', config['models_dir'])
             config['skip_files'] = pkg.get('skip_files', config['skip_files'])
             config['internal_barrel_files'] = pkg.get('internal_barrel_files', config['internal_barrel_files'])
 
     return config
+
+
+def discover_barrel_files(lib_dir: Path) -> list[Path]:
+    """
+    Auto-discover library entry points.
+
+    In Dart, files directly in lib/ (not lib/src/) are public library entry points.
+    This follows the standard Dart package layout convention.
+    """
+    barrel_files = []
+
+    if not lib_dir.exists():
+        return barrel_files
+
+    for dart_file in lib_dir.glob('*.dart'):
+        # Skip private files (starting with underscore)
+        if dart_file.name.startswith('_'):
+            continue
+        barrel_files.append(dart_file)
+
+    return sorted(barrel_files)
 
 
 def is_part_file(file: Path) -> bool:
@@ -80,14 +103,46 @@ def find_model_files(models_dir: Path, config: dict) -> list[Path]:
     return sorted(files)
 
 
+def parse_exports_from_file(file_path: Path) -> list[str]:
+    """Extract export paths from a Dart file."""
+    if not file_path.exists():
+        return []
+    content = file_path.read_text()
+    # Match: export 'path/to/file.dart';
+    pattern = r"export\s+'([^']+\.dart)'"
+    return re.findall(pattern, content)
+
+
+def get_transitive_exports(barrel_file: Path, visited: set[Path] | None = None) -> set[Path]:
+    """Recursively collect all transitively exported files."""
+    if visited is None:
+        visited = set()
+
+    if barrel_file in visited or not barrel_file.exists():
+        return set()
+
+    visited.add(barrel_file)
+    exported = set()
+    base_dir = barrel_file.parent
+
+    for export_path in parse_exports_from_file(barrel_file):
+        # Resolve relative path from the barrel file's directory
+        full_path = (base_dir / export_path).resolve()
+        exported.add(full_path)
+
+        # Recursively follow exports from this file
+        exported.update(get_transitive_exports(full_path, visited))
+
+    return exported
+
+
 def get_barrel_exports(barrel_file: Path) -> set[str]:
-    """Extract exported filenames from barrel file."""
-    exports = set()
-    content = barrel_file.read_text()
-    pattern = r"export\s+'[^']*?([^/]+\.dart)'"
-    for match in re.finditer(pattern, content):
-        exports.add(match.group(1))
-    return exports
+    """Extract exported filenames from barrel file (with transitive support)."""
+    # Get all transitively exported file paths
+    transitive_paths = get_transitive_exports(barrel_file)
+
+    # Return just the filenames for backward compatibility
+    return {p.name for p in transitive_paths}
 
 
 def extract_types_from_file(file: Path) -> set[str]:
@@ -162,23 +217,74 @@ def main():
     config = load_config(args.config_dir)
 
     models_dir = Path(config['models_dir'])
-    barrel_file = Path(config['barrel_file'])
+
+    # Load package name for error messages
+    pkg_file = args.config_dir / 'package.json'
+    pkg_name = 'unknown'
+    if pkg_file.exists():
+        with open(pkg_file) as f:
+            pkg_name = json.load(f).get('name', 'unknown')
 
     # Verify we're in the right directory
     if not models_dir.exists():
-        print(f"Error: {config['models_dir']}/ not found. Run from package root directory.")
+        skill_suffix = pkg_name.replace('_dart', '-dart').replace('_sdk_dart', '-dart')
+        print(f"ERROR: Directory '{config['models_dir']}' not found.", file=sys.stderr)
+        print("", file=sys.stderr)
+        print("This script must be run from the PACKAGE ROOT directory,", file=sys.stderr)
+        print("not from the repository root.", file=sys.stderr)
+        print("", file=sys.stderr)
+        print("Example:", file=sys.stderr)
+        print(f"  cd packages/{pkg_name}", file=sys.stderr)
+        print(f"  python3 ../../.claude/shared/openapi-toolkit/scripts/verify_exports.py \\", file=sys.stderr)
+        print(f"    --config-dir ../../.claude/skills/openapi-toolkit-{skill_suffix}/config", file=sys.stderr)
+        print("", file=sys.stderr)
+        print(f"Current working directory: {Path.cwd()}", file=sys.stderr)
         sys.exit(2)
 
-    if not barrel_file.exists():
-        print(f"Error: {config['barrel_file']} not found. Run from package root directory.")
+    # Determine barrel files to check
+    # Priority: 1) config barrel_files list, 2) auto-discover, 3) legacy single barrel_file
+    barrel_files_to_check = []
+    lib_dir = Path('lib')
+
+    if config.get('barrel_files'):
+        # Explicit list in config
+        barrel_files_to_check = [Path(bf) for bf in config['barrel_files']]
+    else:
+        # Auto-discover barrel files
+        discovered = discover_barrel_files(lib_dir)
+        if discovered:
+            barrel_files_to_check = discovered
+        else:
+            # Fall back to legacy single barrel_file
+            barrel_files_to_check = [Path(config['barrel_file'])]
+
+    # Validate barrel files exist
+    missing_barrels = [bf for bf in barrel_files_to_check if not bf.exists()]
+    if missing_barrels:
+        if len(barrel_files_to_check) == 1:
+            print(f"ERROR: Barrel file '{barrel_files_to_check[0]}' not found.", file=sys.stderr)
+        else:
+            print("ERROR: Some barrel files not found:", file=sys.stderr)
+            for bf in missing_barrels:
+                print(f"  - {bf}", file=sys.stderr)
+        print("", file=sys.stderr)
+        print("Make sure you're running from the package root directory.", file=sys.stderr)
+        print(f"Current working directory: {Path.cwd()}", file=sys.stderr)
         sys.exit(2)
 
     print("Checking barrel file completeness...")
+    print(f"Discovered {len(barrel_files_to_check)} barrel file(s):")
+    for bf in barrel_files_to_check:
+        print(f"  - {bf}")
     print()
 
-    # Find all model files and check exports
+    # Find all model files
     model_files = find_model_files(models_dir, config)
-    exports = get_barrel_exports(barrel_file)
+
+    # Collect exports from ALL barrel files
+    exports = set()
+    for barrel_file in barrel_files_to_check:
+        exports.update(get_barrel_exports(barrel_file))
 
     unexported = []
     exported_paths = []
@@ -221,8 +327,10 @@ def main():
     # Summary
     print(f"Found {len(unexported)} unexported file(s).")
     print()
-    print(f"To fix, add exports to {config['barrel_file']}:")
+    barrel_names = ', '.join(str(bf) for bf in barrel_files_to_check)
+    print(f"To fix, add exports to one of: {barrel_names}")
     print()
+    print("Suggested exports:")
     for f in unexported:
         relative_import = str(f.relative_to(Path('lib')))
         print(f"export '{relative_import}';")

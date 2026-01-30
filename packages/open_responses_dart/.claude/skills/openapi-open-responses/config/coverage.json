@@ -1,0 +1,9 @@
+{
+  "excluded_paths": [],
+  "excluded_tags": [],
+  "priority_resources": [
+    "responses",
+    "models"
+  ],
+  "notes": {}
+}

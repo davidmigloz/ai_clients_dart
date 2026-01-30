@@ -94,9 +94,80 @@ def load_config(config_dir: Path) -> Config:
 
 
 def load_spec(path: Path) -> dict:
-    """Load and parse OpenAPI spec."""
-    with open(path) as f:
-        return json.load(f)
+    """Load and parse OpenAPI spec (JSON or YAML)."""
+    content = path.read_text()
+
+    # Try JSON first
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError:
+        pass
+
+    # Try YAML
+    try:
+        import yaml
+        return yaml.safe_load(content)
+    except ImportError:
+        print("ERROR: PyYAML not available.", file=sys.stderr)
+        print(f"       Python executable: {sys.executable}", file=sys.stderr)
+        print("", file=sys.stderr)
+        print("       Install for this Python version:", file=sys.stderr)
+        print(f"         {sys.executable} -m pip install pyyaml --user", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"ERROR: Failed to parse spec: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
+def auto_locate_specs(config_dir: Path) -> tuple[Path | None, Path | None]:
+    """
+    Auto-locate old and new spec files from specs.json config.
+
+    Returns (old_spec_path, new_spec_path) or (None, None) if not found.
+    """
+    specs_config = config_dir / 'specs.json'
+    if not specs_config.exists():
+        return None, None
+
+    try:
+        with open(specs_config) as f:
+            cfg = json.load(f)
+    except (json.JSONDecodeError, IOError):
+        return None, None
+
+    specs_dir_str = cfg.get('specs_dir', '')
+    output_dir = Path(cfg.get('output_dir', '/tmp'))
+
+    old_spec = None
+    new_spec = None
+
+    for spec_name, spec_info in cfg.get('specs', {}).items():
+        # Find old spec: try in specs_dir with multiple extensions
+        local_file = spec_info.get('local_file', 'openapi.json')
+        base_name = Path(local_file).stem  # e.g., "openapi"
+
+        # Try to find the spec in the specs_dir
+        if specs_dir_str:
+            specs_dir = Path(specs_dir_str)
+            for ext in ['.json', '.yaml', '.yml']:
+                candidate = specs_dir / f"{base_name}{ext}"
+                if candidate.exists():
+                    old_spec = candidate
+                    break
+            # Also try the exact local_file name
+            if not old_spec:
+                candidate = specs_dir / local_file
+                if candidate.exists():
+                    old_spec = candidate
+
+        # Find new spec: fetch_spec.py outputs to output_dir/latest-{name}.json
+        new_candidate = output_dir / f"latest-{spec_name}.json"
+        if new_candidate.exists():
+            new_spec = new_candidate
+
+        break  # Use first spec (typically 'main')
+
+    return old_spec, new_spec
 
 
 def extract_endpoints(spec: dict) -> dict[str, EndpointInfo]:
@@ -950,22 +1021,38 @@ def main():
         print(f"  Schemas: {analysis['summary']['new_schemas']}")
         return
 
-    # Update mode - validate both specs
-    if not args.old_spec:
-        print("ERROR: Old spec required for update mode", file=sys.stderr)
+    # Update mode - auto-locate specs if not provided
+    old_spec_path = args.old_spec
+    new_spec_path = args.new_spec
+
+    if not old_spec_path or not new_spec_path:
+        auto_old, auto_new = auto_locate_specs(args.config_dir)
+        if not old_spec_path and auto_old:
+            old_spec_path = auto_old
+            print(f"Auto-located old spec: {old_spec_path}", file=sys.stderr)
+        if not new_spec_path and auto_new:
+            new_spec_path = auto_new
+            print(f"Auto-located new spec: {new_spec_path}", file=sys.stderr)
+
+    # Validate specs
+    if not old_spec_path:
+        print("ERROR: Old spec required for update mode.", file=sys.stderr)
+        print("       Provide path as argument or ensure specs_dir in specs.json is correct.", file=sys.stderr)
         sys.exit(1)
-    if not args.new_spec:
-        print("ERROR: New spec required for update mode", file=sys.stderr)
+    if not new_spec_path:
+        print("ERROR: New spec required for update mode.", file=sys.stderr)
+        print("       Run fetch_spec.py first, or provide path as argument.", file=sys.stderr)
         sys.exit(1)
-    if not args.old_spec.exists():
-        print(f"ERROR: Old spec not found: {args.old_spec}", file=sys.stderr)
+    if not old_spec_path.exists():
+        print(f"ERROR: Old spec not found: {old_spec_path}", file=sys.stderr)
         sys.exit(1)
-    if not args.new_spec.exists():
-        print(f"ERROR: New spec not found: {args.new_spec}", file=sys.stderr)
+    if not new_spec_path.exists():
+        print(f"ERROR: New spec not found: {new_spec_path}", file=sys.stderr)
+        print("       Did you run fetch_spec.py first?", file=sys.stderr)
         sys.exit(1)
 
-    old_spec = load_spec(args.old_spec)
-    new_spec = load_spec(args.new_spec)
+    old_spec = load_spec(old_spec_path)
+    new_spec = load_spec(new_spec_path)
 
     analysis = analyze_specs(old_spec, new_spec)
 

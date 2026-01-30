@@ -1,0 +1,16 @@
+{
+  "specs": {
+    "main": {
+      "name": "Mistral AI API",
+      "url": "https://docs.mistral.ai/openapi.yaml",
+      "local_file": "openapi.json",
+      "requires_auth": false,
+      "auth_env_vars": ["MISTRAL_API_KEY"],
+      "description": "Mistral AI API for chat, embeddings, and more"
+    }
+  },
+  "specs_dir": "packages/mistralai_dart/specs",
+  "output_dir": "/tmp/openapi-mistralai-dart",
+  "discovery_patterns": [],
+  "discovery_names": []
+}
