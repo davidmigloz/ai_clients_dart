@@ -410,8 +410,6 @@ def main():
     # Check for wrong working directory - provide helpful error
     if not resource_files and not resources_dir.exists():
         pkg_name = config.get('package_name', 'unknown')
-        # Try to derive a sensible skill name from package name
-        skill_suffix = pkg_name.replace('_dart', '-dart').replace('_sdk_dart', '-dart')
         print(f"ERROR: Directory '{config['resources_dir']}' not found.", file=sys.stderr)
         print("", file=sys.stderr)
         print("This script must be run from the PACKAGE ROOT directory,", file=sys.stderr)

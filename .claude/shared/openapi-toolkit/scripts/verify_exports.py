@@ -233,7 +233,6 @@ def main():
 
     # Verify we're in the right directory
     if not models_dir.exists():
-        skill_suffix = pkg_name.replace('_dart', '-dart').replace('_sdk_dart', '-dart')
         print(f"ERROR: Directory '{config['models_dir']}' not found.", file=sys.stderr)
         print("", file=sys.stderr)
         print("This script must be run from the PACKAGE ROOT directory,", file=sys.stderr)
