@@ -136,13 +136,19 @@ def get_transitive_exports(barrel_file: Path, visited: set[Path] | None = None) 
     return exported
 
 
-def get_barrel_exports(barrel_file: Path) -> set[str]:
-    """Extract exported filenames from barrel file (with transitive support)."""
+def get_barrel_exports(barrel_file: Path) -> tuple[set[str], set[Path]]:
+    """Extract exported filenames from barrel file (with transitive support).
+
+    Returns:
+        Tuple of (filename set, full path set) to handle both simple cases
+        and potential filename collisions across subdirectories.
+    """
     # Get all transitively exported file paths
     transitive_paths = get_transitive_exports(barrel_file)
 
-    # Return just the filenames for backward compatibility
-    return {p.name for p in transitive_paths}
+    # Return both filenames (for simple matching) and full paths (for collision handling)
+    filenames = {p.name for p in transitive_paths}
+    return filenames, transitive_paths
 
 
 def extract_types_from_file(file: Path) -> set[str]:
@@ -236,7 +242,7 @@ def main():
         print("Example:", file=sys.stderr)
         print(f"  cd packages/{pkg_name}", file=sys.stderr)
         print(f"  python3 ../../.claude/shared/openapi-toolkit/scripts/verify_exports.py \\", file=sys.stderr)
-        print(f"    --config-dir ../../.claude/skills/openapi-toolkit-{skill_suffix}/config", file=sys.stderr)
+        print(f"    --config-dir {args.config_dir}", file=sys.stderr)
         print("", file=sys.stderr)
         print(f"Current working directory: {Path.cwd()}", file=sys.stderr)
         sys.exit(2)
@@ -282,18 +288,36 @@ def main():
     model_files = find_model_files(models_dir, config)
 
     # Collect exports from ALL barrel files
-    exports = set()
+    export_filenames = set()
+    export_full_paths = set()
     for barrel_file in barrel_files_to_check:
-        exports.update(get_barrel_exports(barrel_file))
+        filenames, full_paths = get_barrel_exports(barrel_file)
+        export_filenames.update(filenames)
+        export_full_paths.update(full_paths)
+
+    # Check for filename collisions in model files (different paths, same filename)
+    filename_to_paths: dict[str, list[Path]] = {}
+    for f in model_files:
+        filename_to_paths.setdefault(f.name, []).append(f)
+
+    has_collisions = any(len(paths) > 1 for paths in filename_to_paths.values())
 
     unexported = []
     exported_paths = []
 
     for f in model_files:
-        if f.name not in exports:
-            unexported.append(f)
+        # Use full path comparison if there are filename collisions
+        if has_collisions and len(filename_to_paths.get(f.name, [])) > 1:
+            # For colliding filenames, check against resolved full paths
+            is_exported = f.resolve() in export_full_paths
         else:
+            # Simple filename comparison for unique filenames
+            is_exported = f.name in export_filenames
+
+        if is_exported:
             exported_paths.append(f)
+        else:
+            unexported.append(f)
 
     if args.verbose:
         print(f"Found {len(model_files)} model files")

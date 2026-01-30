@@ -22,9 +22,6 @@ import re
 import sys
 from pathlib import Path
 from dataclasses import dataclass, field
-from typing import Optional
-
-
 @dataclass
 class EndpointInfo:
     """Information about an API endpoint."""
@@ -36,12 +33,17 @@ class EndpointInfo:
 
     @property
     def resource_name(self) -> str:
-        """Extract resource name from path (e.g., /v1/responses -> responses)."""
+        """Extract resource name from path (e.g., /v1/responses -> responses, /api/v2/chat -> chat)."""
         parts = self.path.strip('/').split('/')
-        # Skip version prefix (v1, v2, etc.)
-        if parts and re.match(r'^v\d+$', parts[0]):
-            parts = parts[1:]
-        return parts[0] if parts else 'root'
+        idx = 0
+        # Skip leading "api" prefix if present (e.g., /api/..., /api/v2/...)
+        if idx < len(parts) and parts[idx] == 'api':
+            idx += 1
+        # Skip version prefix (v1, v2, etc.) whether or not it follows "api"
+        if idx < len(parts) and re.match(r'^v\d+$', parts[idx]):
+            idx += 1
+        normalized_parts = parts[idx:]
+        return normalized_parts[0] if normalized_parts else 'root'
 
 
 def load_config(config_dir: Path) -> dict:
@@ -249,8 +251,6 @@ def analyze_coverage(
     }
 
     for resource, endpoints in sorted(spec_by_resource.items()):
-        is_implemented = resource in implemented_resources
-
         # Handle special cases (pluralization, naming differences)
         alt_names = [
             resource,
@@ -420,8 +420,7 @@ def main():
         print("Example:", file=sys.stderr)
         print(f"  cd packages/{pkg_name}", file=sys.stderr)
         print(f"  python3 ../../.claude/shared/openapi-toolkit/scripts/verify_coverage.py \\", file=sys.stderr)
-        print(f"    --config-dir ../../.claude/skills/openapi-toolkit-{skill_suffix}/config \\", file=sys.stderr)
-        print(f"    --spec /tmp/openapi-toolkit-{skill_suffix}/latest-main.json", file=sys.stderr)
+        print(f"    --config-dir {args.config_dir}", file=sys.stderr)
         print("", file=sys.stderr)
         print(f"Current working directory: {Path.cwd()}", file=sys.stderr)
         sys.exit(2)
