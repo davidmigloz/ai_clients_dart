@@ -1,0 +1,7 @@
+tags:
+  integration:
+    # Integration tests require API keys
+    # Run with: dart test --tags integration
+
+# By default, skip integration tests
+override_platforms: {}

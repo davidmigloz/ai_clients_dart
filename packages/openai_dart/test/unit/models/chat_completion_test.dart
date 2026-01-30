@@ -1,0 +1,644 @@
+import 'package:openai_dart/openai_dart.dart';
+import 'package:test/test.dart';
+
+void main() {
+  group('ChatCompletion', () {
+    test('fromJson parses response correctly', () {
+      final json = {
+        'id': 'chatcmpl-123',
+        'object': 'chat.completion',
+        'created': 1677652288,
+        'model': 'gpt-4o',
+        'choices': [
+          {
+            'index': 0,
+            'message': {
+              'role': 'assistant',
+              'content': 'Hello! How can I help you today?',
+            },
+            'finish_reason': 'stop',
+          },
+        ],
+        'usage': {
+          'prompt_tokens': 9,
+          'completion_tokens': 12,
+          'total_tokens': 21,
+        },
+        'system_fingerprint': 'fp_123',
+      };
+
+      final completion = ChatCompletion.fromJson(json);
+
+      expect(completion.id, 'chatcmpl-123');
+      expect(completion.object, 'chat.completion');
+      expect(completion.created, 1677652288);
+      expect(completion.model, 'gpt-4o');
+      expect(completion.choices.length, 1);
+      expect(
+        completion.choices.first.message.content,
+        'Hello! How can I help you today?',
+      );
+      expect(completion.choices.first.finishReason, FinishReason.stop);
+      expect(completion.usage?.promptTokens, 9);
+      expect(completion.usage?.completionTokens, 12);
+      expect(completion.usage?.totalTokens, 21);
+      expect(completion.systemFingerprint, 'fp_123');
+    });
+
+    test('text getter returns first choice content', () {
+      final json = {
+        'id': 'chatcmpl-123',
+        'object': 'chat.completion',
+        'created': 1677652288,
+        'model': 'gpt-4o',
+        'choices': [
+          {
+            'index': 0,
+            'message': {'role': 'assistant', 'content': 'The answer is 42.'},
+            'finish_reason': 'stop',
+          },
+        ],
+        'usage': {
+          'prompt_tokens': 9,
+          'completion_tokens': 5,
+          'total_tokens': 14,
+        },
+      };
+
+      final completion = ChatCompletion.fromJson(json);
+      expect(completion.text, 'The answer is 42.');
+    });
+
+    test('handles tool calls correctly', () {
+      final json = {
+        'id': 'chatcmpl-123',
+        'object': 'chat.completion',
+        'created': 1677652288,
+        'model': 'gpt-4o',
+        'choices': [
+          {
+            'index': 0,
+            'message': {
+              'role': 'assistant',
+              'content': null,
+              'tool_calls': [
+                {
+                  'id': 'call_abc123',
+                  'type': 'function',
+                  'function': {
+                    'name': 'get_weather',
+                    'arguments': '{"location":"Boston","unit":"celsius"}',
+                  },
+                },
+              ],
+            },
+            'finish_reason': 'tool_calls',
+          },
+        ],
+        'usage': {
+          'prompt_tokens': 20,
+          'completion_tokens': 15,
+          'total_tokens': 35,
+        },
+      };
+
+      final completion = ChatCompletion.fromJson(json);
+
+      expect(completion.choices.first.finishReason, FinishReason.toolCalls);
+      expect(completion.choices.first.message.toolCalls, isNotNull);
+      expect(completion.choices.first.message.toolCalls!.length, 1);
+
+      final toolCall = completion.choices.first.message.toolCalls!.first;
+      expect(toolCall.id, 'call_abc123');
+      expect(toolCall.type, 'function');
+      expect(toolCall.function.name, 'get_weather');
+      expect(
+        toolCall.function.arguments,
+        '{"location":"Boston","unit":"celsius"}',
+      );
+    });
+
+    test('toJson produces valid output', () {
+      const completion = ChatCompletion(
+        id: 'chatcmpl-123',
+        object: 'chat.completion',
+        created: 1677652288,
+        model: 'gpt-4o',
+        choices: [
+          ChatChoice(
+            index: 0,
+            message: AssistantMessage(content: 'Hello!'),
+            finishReason: FinishReason.stop,
+          ),
+        ],
+        usage: Usage(promptTokens: 5, completionTokens: 3, totalTokens: 8),
+      );
+
+      final json = completion.toJson();
+
+      expect(json['id'], 'chatcmpl-123');
+      expect(json['model'], 'gpt-4o');
+      expect(json['choices'], isA<List<dynamic>>());
+      expect(json['usage'], isA<Map<String, dynamic>>());
+    });
+  });
+
+  group('ChatMessage', () {
+    test('system message creates correctly', () {
+      final message = ChatMessage.system('You are a helpful assistant.');
+
+      expect(message, isA<SystemMessage>());
+      expect(message.role, 'system');
+      expect(
+        (message as SystemMessage).content,
+        'You are a helpful assistant.',
+      );
+    });
+
+    test('user message creates correctly', () {
+      final message = ChatMessage.user('Hello!');
+
+      expect(message, isA<UserMessage>());
+      expect(message.role, 'user');
+    });
+
+    test('assistant message creates correctly', () {
+      final message = ChatMessage.assistant(content: 'Hi there!');
+
+      expect(message, isA<AssistantMessage>());
+      expect(message.role, 'assistant');
+      expect((message as AssistantMessage).content, 'Hi there!');
+    });
+
+    test('tool message creates correctly', () {
+      final message = ChatMessage.tool(
+        toolCallId: 'call_123',
+        content: '{"result": 42}',
+      );
+
+      expect(message, isA<ToolMessage>());
+      expect(message.role, 'tool');
+      expect((message as ToolMessage).toolCallId, 'call_123');
+      expect(message.content, '{"result": 42}');
+    });
+
+    test('fromJson parses different message types', () {
+      final systemJson = {'role': 'system', 'content': 'Be helpful'};
+      final userJson = {'role': 'user', 'content': 'Hello'};
+      final assistantJson = {'role': 'assistant', 'content': 'Hi'};
+      final toolJson = {
+        'role': 'tool',
+        'tool_call_id': 'call_123',
+        'content': 'result',
+      };
+
+      expect(ChatMessage.fromJson(systemJson), isA<SystemMessage>());
+      expect(ChatMessage.fromJson(userJson), isA<UserMessage>());
+      expect(ChatMessage.fromJson(assistantJson), isA<AssistantMessage>());
+      expect(ChatMessage.fromJson(toolJson), isA<ToolMessage>());
+    });
+  });
+
+  group('ChatCompletionCreateRequest', () {
+    test('creates minimal request', () {
+      final request = ChatCompletionCreateRequest(
+        model: 'gpt-4o',
+        messages: [ChatMessage.user('Hello!')],
+      );
+
+      expect(request.model, 'gpt-4o');
+      expect(request.messages.length, 1);
+    });
+
+    test('toJson excludes null values', () {
+      final request = ChatCompletionCreateRequest(
+        model: 'gpt-4o',
+        messages: [ChatMessage.user('Hello!')],
+      );
+
+      final json = request.toJson();
+
+      expect(json['model'], 'gpt-4o');
+      expect(json['messages'], isA<List<dynamic>>());
+      expect(json.containsKey('temperature'), false);
+      expect(json.containsKey('max_tokens'), false);
+    });
+
+    test('toJson includes all specified parameters', () {
+      final request = ChatCompletionCreateRequest(
+        model: 'gpt-4o',
+        messages: [ChatMessage.user('Hello!')],
+        temperature: 0.7,
+        maxTokens: 100,
+        topP: 0.9,
+        n: 2,
+        stop: const ['END'],
+        presencePenalty: 0.5,
+        frequencyPenalty: 0.5,
+        user: 'user-123',
+      );
+
+      final json = request.toJson();
+
+      expect(json['temperature'], 0.7);
+      expect(json['max_tokens'], 100);
+      expect(json['top_p'], 0.9);
+      expect(json['n'], 2);
+      expect(json['stop'], ['END']);
+      expect(json['presence_penalty'], 0.5);
+      expect(json['frequency_penalty'], 0.5);
+      expect(json['user'], 'user-123');
+    });
+
+    test('supports reasoning_effort for reasoning models', () {
+      final request = ChatCompletionCreateRequest(
+        model: 'o3',
+        messages: [ChatMessage.user('Solve this problem...')],
+        reasoningEffort: ReasoningEffort.high,
+      );
+
+      final json = request.toJson();
+
+      expect(json['reasoning_effort'], 'high');
+      expect(request.reasoningEffort, ReasoningEffort.high);
+    });
+
+    test('supports prediction for faster responses', () {
+      final request = ChatCompletionCreateRequest(
+        model: 'gpt-4o',
+        messages: [ChatMessage.user('Update this code...')],
+        prediction: const Prediction.content('predicted output here'),
+      );
+
+      final json = request.toJson();
+
+      expect(json['prediction'], {
+        'type': 'content',
+        'content': 'predicted output here',
+      });
+    });
+
+    test('supports modalities for audio output', () {
+      final request = ChatCompletionCreateRequest(
+        model: 'gpt-4o-audio-preview',
+        messages: [ChatMessage.user('Tell me a story.')],
+        modalities: const [ChatModality.text, ChatModality.audio],
+        audio: const ChatAudioConfig(
+          voice: ChatAudioVoice.alloy,
+          format: ChatAudioFormat.mp3,
+        ),
+      );
+
+      final json = request.toJson();
+
+      expect(json['modalities'], ['text', 'audio']);
+      expect(json['audio'], {'voice': 'alloy', 'format': 'mp3'});
+    });
+
+    test('fromJson parses new parameters correctly', () {
+      final json = {
+        'model': 'o3',
+        'messages': [
+          {'role': 'user', 'content': 'Hello'},
+        ],
+        'reasoning_effort': 'medium',
+        'prediction': {'type': 'content', 'content': 'predicted text'},
+        'modalities': ['text', 'audio'],
+        'audio': {'voice': 'shimmer', 'format': 'wav'},
+      };
+
+      final request = ChatCompletionCreateRequest.fromJson(json);
+
+      expect(request.reasoningEffort, ReasoningEffort.medium);
+      expect(request.prediction, isA<Prediction>());
+      expect(request.modalities, [ChatModality.text, ChatModality.audio]);
+      expect(request.audio?.voice, ChatAudioVoice.shimmer);
+      expect(request.audio?.format, ChatAudioFormat.wav);
+    });
+
+    test('copyWith works with new parameters', () {
+      final request = ChatCompletionCreateRequest(
+        model: 'gpt-4o',
+        messages: [ChatMessage.user('Hello!')],
+      );
+
+      final updated = request.copyWith(
+        reasoningEffort: ReasoningEffort.low,
+        modalities: const [ChatModality.text],
+      );
+
+      expect(updated.reasoningEffort, ReasoningEffort.low);
+      expect(updated.modalities, [ChatModality.text]);
+      expect(updated.model, 'gpt-4o'); // unchanged
+    });
+  });
+
+  group('FinishReason', () {
+    test('parses all valid values', () {
+      expect(FinishReason.fromJson('stop'), FinishReason.stop);
+      expect(FinishReason.fromJson('length'), FinishReason.length);
+      expect(FinishReason.fromJson('tool_calls'), FinishReason.toolCalls);
+      expect(
+        FinishReason.fromJson('content_filter'),
+        FinishReason.contentFilter,
+      );
+      expect(FinishReason.fromJson('function_call'), FinishReason.functionCall);
+    });
+
+    test('toJson returns correct values', () {
+      expect(FinishReason.stop.toJson(), 'stop');
+      expect(FinishReason.length.toJson(), 'length');
+      expect(FinishReason.toolCalls.toJson(), 'tool_calls');
+      expect(FinishReason.contentFilter.toJson(), 'content_filter');
+    });
+  });
+
+  // OpenAI-Compatible APIs Tests
+  group('OpenAI-Compatible APIs', () {
+    group('ChatCompletion nullable fields', () {
+      test('handles missing id (OpenRouter compatibility)', () {
+        final json = {
+          // No 'id' field
+          'object': 'chat.completion',
+          'created': 1677652288,
+          'model': 'openai/gpt-4o',
+          'choices': [
+            {
+              'index': 0,
+              'message': {'role': 'assistant', 'content': 'Hello!'},
+              'finish_reason': 'stop',
+            },
+          ],
+        };
+
+        final completion = ChatCompletion.fromJson(json);
+
+        expect(completion.id, isNull);
+        expect(completion.model, 'openai/gpt-4o');
+        expect(completion.text, 'Hello!');
+      });
+
+      test('handles provider field (OpenRouter)', () {
+        final json = {
+          'id': 'chatcmpl-123',
+          'object': 'chat.completion',
+          'created': 1677652288,
+          'model': 'openai/gpt-4o',
+          'provider': 'OpenAI',
+          'choices': [
+            {
+              'message': {'role': 'assistant', 'content': 'Hello!'},
+              'finish_reason': 'stop',
+            },
+          ],
+        };
+
+        final completion = ChatCompletion.fromJson(json);
+
+        expect(completion.provider, 'OpenAI');
+      });
+
+      test(
+        'handles different object values (Anyscale sends text_completion)',
+        () {
+          final json = {
+            'id': 'chatcmpl-123',
+            'object': 'text_completion', // Different from 'chat.completion'
+            'created': 1677652288,
+            'model': 'meta-llama/Llama-2-70b',
+            'choices': [
+              {
+                'index': 0,
+                'message': {'role': 'assistant', 'content': 'Hello!'},
+                'finish_reason': 'stop',
+              },
+            ],
+          };
+
+          final completion = ChatCompletion.fromJson(json);
+
+          expect(completion.object, 'text_completion');
+        },
+      );
+    });
+
+    group('ChatChoice nullable index', () {
+      test('handles missing index (OpenRouter compatibility)', () {
+        final json = {
+          'id': 'chatcmpl-123',
+          'object': 'chat.completion',
+          'created': 1677652288,
+          'model': 'gpt-4o',
+          'choices': [
+            {
+              // No 'index' field
+              'message': {'role': 'assistant', 'content': 'Hello!'},
+              'finish_reason': 'stop',
+            },
+          ],
+        };
+
+        final completion = ChatCompletion.fromJson(json);
+
+        expect(completion.choices.first.index, isNull);
+        expect(completion.choices.first.message.content, 'Hello!');
+      });
+    });
+
+    group('AssistantMessage reasoning fields', () {
+      test('parses reasoning_content (DeepSeek R1)', () {
+        final json = {
+          'role': 'assistant',
+          'content': 'The answer is 42.',
+          'reasoning_content': 'Let me think about this...',
+        };
+
+        final message = AssistantMessage.fromJson(json);
+
+        expect(message.content, 'The answer is 42.');
+        expect(message.reasoningContent, 'Let me think about this...');
+        expect(message.hasReasoningContent, true);
+      });
+
+      test('parses reasoning (OpenRouter)', () {
+        final json = {
+          'role': 'assistant',
+          'content': 'The answer is 42.',
+          'reasoning': 'Quick summary of reasoning...',
+        };
+
+        final message = AssistantMessage.fromJson(json);
+
+        expect(message.reasoning, 'Quick summary of reasoning...');
+        expect(message.hasReasoningContent, true);
+      });
+
+      test('parses reasoning_details (OpenRouter)', () {
+        final json = {
+          'role': 'assistant',
+          'content': 'The answer is 42.',
+          'reasoning_details': [
+            {'type': 'reasoning.summary', 'text': 'I analyzed the question.'},
+            {'type': 'reasoning.encrypted', 'data': 'YmFzZTY0ZGF0YQ=='},
+          ],
+        };
+
+        final message = AssistantMessage.fromJson(json);
+
+        expect(message.reasoningDetails, isNotNull);
+        expect(message.reasoningDetails!.length, 2);
+        expect(message.reasoningDetails!.first.type, 'reasoning.summary');
+        expect(
+          message.reasoningDetails!.first.text,
+          'I analyzed the question.',
+        );
+        expect(message.reasoningDetails!.last.type, 'reasoning.encrypted');
+        expect(message.hasReasoningContent, true);
+      });
+
+      test('toApiJson excludes reasoning fields', () {
+        const message = AssistantMessage(
+          content: 'The answer is 42.',
+          reasoningContent: 'Let me think...',
+          reasoning: 'Summary...',
+        );
+
+        final apiJson = message.toApiJson();
+
+        expect(apiJson['content'], 'The answer is 42.');
+        expect(apiJson.containsKey('reasoning_content'), false);
+        expect(apiJson.containsKey('reasoning'), false);
+        expect(apiJson.containsKey('reasoning_details'), false);
+      });
+
+      test('toJson includes reasoning fields', () {
+        const message = AssistantMessage(
+          content: 'The answer is 42.',
+          reasoningContent: 'Let me think...',
+        );
+
+        final json = message.toJson();
+
+        expect(json['content'], 'The answer is 42.');
+        expect(json['reasoning_content'], 'Let me think...');
+      });
+    });
+
+    group('OpenRouter request parameters', () {
+      test('serializes sampling parameters', () {
+        final request = ChatCompletionCreateRequest(
+          model: 'openai/gpt-4o',
+          messages: [ChatMessage.user('Hello!')],
+          topK: 40,
+          minP: 0.1,
+          topA: 0.5,
+          repetitionPenalty: 1.2,
+        );
+
+        final json = request.toJson();
+
+        expect(json['top_k'], 40);
+        expect(json['min_p'], 0.1);
+        expect(json['top_a'], 0.5);
+        expect(json['repetition_penalty'], 1.2);
+      });
+
+      test('serializes routing parameters', () {
+        final request = ChatCompletionCreateRequest(
+          model: 'openai/gpt-4o',
+          messages: [ChatMessage.user('Hello!')],
+          openRouterProvider: const OpenRouterProviderPreferences(
+            order: ['OpenAI', 'Azure'],
+            allowFallbacks: true,
+          ),
+          models: const ['openai/gpt-4o', 'anthropic/claude-3'],
+          route: 'fallback',
+          transforms: const ['middle-out'],
+        );
+
+        final json = request.toJson();
+
+        expect(json['provider'], isA<Map<String, dynamic>>());
+        expect((json['provider'] as Map)['order'], ['OpenAI', 'Azure']);
+        expect(json['models'], ['openai/gpt-4o', 'anthropic/claude-3']);
+        expect(json['route'], 'fallback');
+        expect(json['transforms'], ['middle-out']);
+      });
+
+      test('serializes config parameters', () {
+        final request = ChatCompletionCreateRequest(
+          model: 'deepseek/deepseek-r1',
+          messages: [ChatMessage.user('Hello!')],
+          openRouterUsage: const OpenRouterUsageConfig(include: true),
+          openRouterReasoning: const OpenRouterReasoning(
+            effort: 'high',
+            maxTokens: 8000,
+          ),
+        );
+
+        final json = request.toJson();
+
+        expect(json['usage'], {'include': true});
+        expect(json['reasoning'], {'effort': 'high', 'max_tokens': 8000});
+      });
+
+      test('fromJson parses OpenRouter parameters', () {
+        final json = {
+          'model': 'openai/gpt-4o',
+          'messages': [
+            {'role': 'user', 'content': 'Hello'},
+          ],
+          'top_k': 40,
+          'min_p': 0.1,
+          'provider': {
+            'order': ['OpenAI'],
+          },
+          'models': ['openai/gpt-4o'],
+          'reasoning': {'effort': 'medium'},
+        };
+
+        final request = ChatCompletionCreateRequest.fromJson(json);
+
+        expect(request.topK, 40);
+        expect(request.minP, 0.1);
+        expect(request.openRouterProvider?.order, ['OpenAI']);
+        expect(request.models, ['openai/gpt-4o']);
+        expect(request.openRouterReasoning?.effort, 'medium');
+      });
+
+      test('copyWith works with OpenRouter parameters', () {
+        final request = ChatCompletionCreateRequest(
+          model: 'gpt-4o',
+          messages: [ChatMessage.user('Hello!')],
+        );
+
+        final updated = request.copyWith(
+          topK: 50,
+          openRouterProvider: const OpenRouterProviderPreferences(
+            order: ['Azure'],
+          ),
+        );
+
+        expect(updated.topK, 50);
+        expect(updated.openRouterProvider?.order, ['Azure']);
+        expect(updated.model, 'gpt-4o'); // unchanged
+      });
+    });
+
+    group('Usage nullable completionTokens', () {
+      test('handles missing completion_tokens', () {
+        final json = {
+          'prompt_tokens': 10,
+          'total_tokens': 10,
+          // No 'completion_tokens'
+        };
+
+        final usage = Usage.fromJson(json);
+
+        expect(usage.promptTokens, 10);
+        expect(usage.completionTokens, isNull);
+        expect(usage.totalTokens, 10);
+      });
+    });
+  });
+}

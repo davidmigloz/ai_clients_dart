@@ -1,0 +1,11 @@
+{
+  "specs": {
+    "main": {
+      "title": "OpenAI API",
+      "current_version": "2.3.0",
+      "last_fetched": "2026-01-30T16:56:22.621241Z",
+      "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/openai%2Fopenai-9442fa9212dd61aac2bb0edd19744bee381e75888712f9098bc6ebb92c52b557.yml",
+      "version_history": []
+    }
+  }
+}

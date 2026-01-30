@@ -1,0 +1,22 @@
+{
+  "excluded_paths": [
+    "^/organization/.*",
+    "^/projects/.*"
+  ],
+  "excluded_tags": [
+    "Administration"
+  ],
+  "priority_resources": [
+    "responses",
+    "chat",
+    "embeddings",
+    "audio",
+    "images",
+    "files",
+    "models"
+  ],
+  "notes": {
+    "organization": "Admin APIs - not typically needed for client usage",
+    "projects": "Project management - admin feature"
+  }
+}
