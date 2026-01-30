@@ -43,7 +43,9 @@ void main() {
     print('   Generated files can be accessed from the operation response:');
     print('   ```dart');
     print('   if (operation.done == true && operation.response != null) {');
-    print('     final videoResponse = operation.response!.generateVideoResponse;');
+    print(
+      '     final videoResponse = operation.response!.generateVideoResponse;',
+    );
     print('     if (videoResponse?.generatedSamples != null) {');
     print('       for (final media in videoResponse!.generatedSamples!) {');
     print('         if (media.video?.uri != null) {');
@@ -59,13 +61,17 @@ void main() {
     print('   Some generated content may be filtered:');
     print('   ```dart');
     print('   if (videoResponse?.raiMediaFilteredCount != null) {');
-    print(r'     print("Filtered: ${videoResponse!.raiMediaFilteredCount} videos");');
+    print(
+      r'     print("Filtered: ${videoResponse!.raiMediaFilteredCount} videos");',
+    );
     print(r'     print("Reasons: ${videoResponse.raiMediaFilteredReasons}");');
     print('   }');
     print('   ```');
 
     print('\n📝 Notes:');
-    print('   - Generated files are created by video/media generation operations');
+    print(
+      '   - Generated files are created by video/media generation operations',
+    );
     print('   - Files are available for download via their URI');
     print('   - Files have an expiration time and will be auto-deleted');
     print('   - Use long-running operations to track generation progress');

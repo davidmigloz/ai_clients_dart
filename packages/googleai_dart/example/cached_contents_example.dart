@@ -55,7 +55,9 @@ void main() async {
     print('\n3️⃣  Getting cached content details...\n');
 
     if (cachedContentName != null) {
-      final retrieved = await client.cachedContents.get(name: cachedContentName);
+      final retrieved = await client.cachedContents.get(
+        name: cachedContentName,
+      );
 
       print('📄 Cached Content Details:');
       print('   Name: ${retrieved.name}');
@@ -89,7 +91,9 @@ void main() async {
     print('     model: "gemini-3-flash-preview",');
     print('     request: GenerateContentRequest(');
     print('       cachedContent: "$cachedContentName",');
-    print('       contents: [Content.text("Explain the Pythagorean theorem")],');
+    print(
+      '       contents: [Content.text("Explain the Pythagorean theorem")],',
+    );
     print('     ),');
     print('   );');
     print('   ```');

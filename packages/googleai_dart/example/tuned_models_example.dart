@@ -59,8 +59,9 @@ void main() async {
         // 3. List operations for tuning progress
         print('\n3️⃣  Listing operations...\n');
 
-        final opsResponse =
-            await client.tunedModels.operations(tunedModel: firstModel.name!).list();
+        final opsResponse = await client.tunedModels
+            .operations(tunedModel: firstModel.name!)
+            .list();
 
         if (opsResponse.operations.isEmpty) {
           print('   No operations found for this model.');
@@ -93,7 +94,9 @@ void main() async {
 
     print('   To stream responses:');
     print('   ```dart');
-    print('   await for (final chunk in client.tunedModels.streamGenerateContent(');
+    print(
+      '   await for (final chunk in client.tunedModels.streamGenerateContent(',
+    );
     print('     tunedModel: "my-model-abc123",');
     print('     request: request,');
     print('   )) {');
@@ -106,7 +109,9 @@ void main() async {
     print('   - Check model.state for training status');
     print('   - Use operations to monitor training progress');
     print('   - Permissions control access to tuned models');
-    print('   - See tuned_model_generation_example.dart for generation examples');
+    print(
+      '   - See tuned_model_generation_example.dart for generation examples',
+    );
   } catch (e) {
     print('❌ Error: $e');
   } finally {

@@ -65,7 +65,9 @@ void main() async {
 
     print('   To manage documents within this corpus:');
     print('   ```dart');
-    print('   final docs = client.corpora.documents(corpus: "$createdCorpusName");');
+    print(
+      '   final docs = client.corpora.documents(corpus: "$createdCorpusName");',
+    );
     print('   final docList = await docs.list();');
     print('   ```');
     print('   See documents_example.dart for full document operations.');
@@ -75,7 +77,9 @@ void main() async {
 
     print('   To manage permissions for this corpus:');
     print('   ```dart');
-    print('   final perms = client.corpora.permissions(parent: "$createdCorpusName");');
+    print(
+      '   final perms = client.corpora.permissions(parent: "$createdCorpusName");',
+    );
     print('   final permList = await perms.list();');
     print('   ```');
     print('   See permissions_example.dart for full permission operations.');
