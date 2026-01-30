@@ -59,6 +59,13 @@ class ChromaConfig {
   /// Defaults to [Level.INFO].
   final Level logLevel;
 
+  /// Custom headers to include in all requests.
+  ///
+  /// These headers are merged with built-in headers (Accept, User-Agent).
+  /// Request-specific headers override these if they have the same key.
+  /// Defaults to an empty map.
+  final Map<String, String> defaultHeaders;
+
   /// Creates a ChromaDB configuration.
   ///
   /// All parameters have sensible defaults for local development:
@@ -77,6 +84,7 @@ class ChromaConfig {
     this.timeout = const Duration(seconds: 30),
     this.retryPolicy = const RetryPolicy(),
     this.logLevel = Level.INFO,
+    this.defaultHeaders = const {},
   });
 
   /// Creates a copy of this configuration with optional modifications.
@@ -88,6 +96,7 @@ class ChromaConfig {
     Duration? timeout,
     RetryPolicy? retryPolicy,
     Level? logLevel,
+    Map<String, String>? defaultHeaders,
   }) {
     return ChromaConfig(
       baseUrl: baseUrl ?? this.baseUrl,
@@ -97,6 +106,7 @@ class ChromaConfig {
       timeout: timeout ?? this.timeout,
       retryPolicy: retryPolicy ?? this.retryPolicy,
       logLevel: logLevel ?? this.logLevel,
+      defaultHeaders: defaultHeaders ?? this.defaultHeaders,
     );
   }
 }

@@ -105,9 +105,15 @@ class ChromaClient {
   /// Creates a client for a local ChromaDB instance.
   ///
   /// This is a convenience constructor for development with a local server.
-  factory ChromaClient.local({int port = 8000}) {
+  factory ChromaClient.local({
+    int port = 8000,
+    Map<String, String> defaultHeaders = const {},
+  }) {
     return ChromaClient(
-      config: ChromaConfig(baseUrl: 'http://localhost:$port'),
+      config: ChromaConfig(
+        baseUrl: 'http://localhost:$port',
+        defaultHeaders: defaultHeaders,
+      ),
     );
   }
 
@@ -120,6 +126,7 @@ class ChromaClient {
     String baseUrl = 'http://localhost:8000',
     String tenant = 'default_tenant',
     String database = 'default_database',
+    Map<String, String> defaultHeaders = const {},
   }) {
     return ChromaClient(
       config: ChromaConfig(
@@ -127,6 +134,7 @@ class ChromaClient {
         tenant: tenant,
         database: database,
         authProvider: ApiKeyProvider(apiKey),
+        defaultHeaders: defaultHeaders,
       ),
     );
   }
@@ -143,6 +151,7 @@ class ChromaClient {
       defaultHeaders: {
         'Accept': 'application/json',
         'User-Agent': 'chromadb-dart/0.1.0',
+        ...config.defaultHeaders, // User headers can override built-in
       },
     );
 

@@ -737,6 +737,43 @@ print('Databases: ${identity.databases}');
 8. ☐ Update exception handling to use typed exceptions
 9. ☐ Add `client.close()` calls in cleanup code
 
+## FAQ
+
+### How do I set custom HTTP headers?
+
+Use the `defaultHeaders` parameter in `ChromaConfig`:
+
+```dart
+final client = ChromaClient(
+  config: ChromaConfig(
+    baseUrl: 'https://your-chroma-instance.com',
+    defaultHeaders: {
+      'X-Custom-Header': 'value',
+      'X-Correlation-ID': 'request-123',
+    },
+    authProvider: ApiKeyProvider('your-api-key'),
+  ),
+);
+```
+
+Custom headers are merged with authentication headers and included in every request.
+
+### Can I use both custom headers and authentication?
+
+Yes, authentication headers from `authProvider` are combined with `defaultHeaders`:
+
+```dart
+final client = ChromaClient(
+  config: ChromaConfig(
+    baseUrl: 'https://api.trychroma.com',
+    authProvider: ApiKeyProvider('your-api-key'), // Adds X-Chroma-Token header
+    defaultHeaders: {
+      'X-Request-Source': 'my-app', // Additional custom header
+    },
+  ),
+);
+```
+
 ## Getting Help
 
 * Browse the [examples](example/)
