@@ -58,11 +58,9 @@ export 'src/auth/auth_provider.dart'
         BearerTokenProvider,
         NoAuthCredentials,
         NoAuthProvider;
-
 // Client
 export 'src/client/config.dart' show OllamaConfig, RetryPolicy;
 export 'src/client/ollama_client.dart' show OllamaClient;
-
 // Exceptions
 export 'src/errors/exceptions.dart'
     show
@@ -72,31 +70,38 @@ export 'src/errors/exceptions.dart'
         RateLimitException,
         TimeoutException,
         ValidationException;
-
 // Chat Models
 export 'src/models/chat/chat_message.dart'
-    show ChatMessage, MessageRole, messageRoleFromString, messageRoleToString;
+    show
+        ChatMessage,
+        MessageRole,
+        messageRoleFromNullableString,
+        messageRoleFromString,
+        messageRoleToString;
 export 'src/models/chat/chat_request.dart' show ChatRequest;
 export 'src/models/chat/chat_response.dart'
     show ChatResponse, ChatResponseMessage;
 export 'src/models/chat/chat_stream_event.dart' show ChatStreamEvent;
-
+// Common Models
+export 'src/models/common/done_reason.dart'
+    show DoneReason, doneReasonFromString, doneReasonToString;
+export 'src/models/common/response_format.dart'
+    show JsonFormat, ResponseFormat, SchemaFormat;
+export 'src/models/common/think_value.dart'
+    show ThinkEnabled, ThinkLevel, ThinkValue, ThinkWithLevel;
 // Completions Models
 export 'src/models/completions/generate_request.dart' show GenerateRequest;
 export 'src/models/completions/generate_response.dart' show GenerateResponse;
 export 'src/models/completions/generate_stream_event.dart'
     show GenerateStreamEvent;
 export 'src/models/completions/logprob.dart' show Logprob, TokenLogprob;
-
 // Embeddings Models
 export 'src/models/embeddings/embed_request.dart' show EmbedRequest;
 export 'src/models/embeddings/embed_response.dart' show EmbedResponse;
-
 // Metadata Models
 export 'src/models/metadata/error_response.dart' show ErrorResponse;
 export 'src/models/metadata/model_options.dart' show ModelOptions;
 export 'src/models/metadata/version_response.dart' show VersionResponse;
-
 // Models Management
 export 'src/models/models/copy_request.dart' show CopyRequest;
 export 'src/models/models/create_request.dart' show CreateRequest;
@@ -112,12 +117,10 @@ export 'src/models/models/show_request.dart' show ShowRequest;
 export 'src/models/models/show_response.dart' show ShowResponse;
 export 'src/models/models/status_event.dart' show StatusEvent;
 export 'src/models/models/status_response.dart' show StatusResponse;
-
 // Tools Models
 export 'src/models/tools/tool_call.dart' show ToolCall, ToolCallFunction;
 export 'src/models/tools/tool_definition.dart'
     show ToolDefinition, ToolFunction, ToolType;
-
 // Web Models
 export 'src/models/web/web_fetch_request.dart' show WebFetchRequest;
 export 'src/models/web/web_fetch_response.dart' show WebFetchResponse;

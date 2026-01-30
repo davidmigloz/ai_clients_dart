@@ -437,11 +437,37 @@ final response = await client.chat.create(
   request: ChatRequest(
     model: 'llama3.1',
     messages: [ChatMessage.user('What is 15 * 7?')],
-    think: true,
+    think: ThinkValue.enabled(true),
+    // Or use a specific level: ThinkValue.level(ThinkLevel.high)
   ),
 );
-print('Thinking: ${response.thinking}');
+print('Thinking: ${response.message?.thinking}');
 print('Answer: ${response.message?.content}');
+```
+
+### Multi-turn Conversations with Context
+
+Use the `context` parameter for efficient multi-turn conversations with the generate API:
+
+```dart
+// First request
+final response1 = await client.completions.generate(
+  request: GenerateRequest(
+    model: 'llama3.1',
+    prompt: 'What is the capital of France?',
+  ),
+);
+print(response1.response); // "Paris is the capital of France..."
+
+// Continue the conversation using the context
+final response2 = await client.completions.generate(
+  request: GenerateRequest(
+    model: 'llama3.1',
+    prompt: 'And what about Germany?',
+    context: response1.context, // Pass the context from previous response
+  ),
+);
+print(response2.response); // "Berlin is the capital of Germany..."
 ```
 
 ### Log Probabilities
@@ -493,6 +519,23 @@ class CustomAuthProvider implements AuthProvider {
 }
 ```
 
+### Convenient Single Embedding Access
+
+When generating a single embedding, use the convenience getter:
+
+```dart
+final response = await client.embeddings.create(
+  request: EmbedRequest(
+    model: 'nomic-embed-text',
+    input: 'Hello, world!',
+  ),
+);
+
+// Access first embedding directly
+final vector = response.embedding; // Same as response.embeddings?.firstOrNull
+print('Vector dimensions: ${vector?.length}');
+```
+
 ## Model Class Renames
 
 | Old Class (v0.x) | New Class (v1.0.0) |
@@ -533,6 +576,104 @@ class CustomAuthProvider implements AuthProvider {
 5. **Embedding input**: The `input` parameter in `EmbedRequest` accepts both a single string and a list of strings.
 
 6. **Base URL**: No longer needs `/api` suffix - just use `http://localhost:11434`.
+
+## Type-Safe Enums and Sealed Classes
+
+v1.0.0 uses type-safe enums and sealed classes instead of raw strings/objects.
+
+### DoneReason Enum
+
+The `doneReason` field in response classes uses the `DoneReason` enum:
+
+```dart
+// Before (v0.x)
+if (response.doneReason == 'stop') {
+  print('Generation stopped');
+}
+
+// After (v1.0.0)
+if (response.doneReason == DoneReason.stop) {
+  print('Generation stopped');
+}
+```
+
+Available values:
+- `DoneReason.stop` - Generation completed naturally
+- `DoneReason.length` - Generation stopped due to length limits
+- `DoneReason.load` - Model is being loaded
+- `DoneReason.unload` - Model is being unloaded
+
+### ThinkValue Sealed Class
+
+The `think` parameter uses the `ThinkValue` sealed class:
+
+```dart
+// Enable/disable thinking
+final request = ChatRequest(
+  model: 'qwen3:1.7b',
+  messages: [ChatMessage.user('What is 15 * 7?')],
+  think: ThinkEnabled(true),
+);
+
+// Or use a specific level
+final request = ChatRequest(
+  model: 'qwen3:1.7b',
+  messages: [ChatMessage.user('What is 15 * 7?')],
+  think: ThinkWithLevel(ThinkLevel.high),
+);
+```
+
+Available classes:
+- `ThinkEnabled(bool)` - Enable/disable thinking
+- `ThinkWithLevel(ThinkLevel)` - Set thinking level (`ThinkLevel.high`, `ThinkLevel.medium`, `ThinkLevel.low`)
+
+### ResponseFormat Sealed Class
+
+The `format` parameter uses the `ResponseFormat` sealed class:
+
+```dart
+// JSON mode (unstructured JSON output)
+final request = ChatRequest(
+  model: 'llama3.2',
+  messages: [ChatMessage.user('Return JSON with name and age')],
+  format: JsonFormat(),
+);
+
+// Structured output with JSON schema
+final request = ChatRequest(
+  model: 'llama3.2',
+  messages: [ChatMessage.user('Return person data')],
+  format: SchemaFormat({
+    'type': 'object',
+    'properties': {
+      'name': {'type': 'string'},
+      'age': {'type': 'integer'},
+    },
+    'required': ['name', 'age'],
+  }),
+);
+```
+
+Available classes:
+- `JsonFormat()` - JSON mode (unstructured JSON output)
+- `SchemaFormat(Map<String, dynamic>)` - Structured output with JSON schema
+
+### MessageRole Enum
+
+Message roles use the `MessageRole` enum:
+
+```dart
+// Check response message role
+if (response.message?.role == MessageRole.assistant) {
+  print('Assistant message');
+}
+```
+
+Available values:
+- `MessageRole.system`
+- `MessageRole.user`
+- `MessageRole.assistant`
+- `MessageRole.tool`
 
 ## Getting Help
 

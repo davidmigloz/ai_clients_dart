@@ -24,6 +24,11 @@
   - Minimal runtime dependencies (`http`, `logging` only).
   - Immutable models with `copyWith` using sentinel pattern.
   - Full type safety with sealed exception hierarchy.
+- **Type-safe enums and sealed classes**:
+  - `DoneReason` enum for completion stop reasons (`stop`, `length`, `load`, `unload`).
+  - `ThinkValue` sealed class for thinking mode (`ThinkEnabled`, `ThinkWithLevel`).
+  - `ResponseFormat` sealed class for format options (`JsonFormat`, `SchemaFormat`).
+  - `MessageRole` enum for message roles (`system`, `user`, `assistant`, `tool`).
 - **Improved DX**:
   - Simplified model names (e.g., `ChatRequest` instead of `GenerateChatCompletionRequest`).
   - Named constructors for common patterns (e.g., `ChatMessage.user()`, `ChatMessage.system()`).

@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/done_reason.dart';
 import 'logprob.dart';
 
 /// Response from text generation.
@@ -22,7 +23,13 @@ class GenerateResponse {
   final bool? done;
 
   /// Reason the generation stopped.
-  final String? doneReason;
+  final DoneReason? doneReason;
+
+  /// Conversation context for use in the next request.
+  ///
+  /// Pass this value to [GenerateRequest.context] to enable
+  /// multi-turn conversations.
+  final List<int>? context;
 
   /// Time spent generating the response in nanoseconds.
   final int? totalDuration;
@@ -53,6 +60,7 @@ class GenerateResponse {
     this.thinking,
     this.done,
     this.doneReason,
+    this.context,
     this.totalDuration,
     this.loadDuration,
     this.promptEvalCount,
@@ -70,7 +78,8 @@ class GenerateResponse {
         response: json['response'] as String?,
         thinking: json['thinking'] as String?,
         done: json['done'] as bool?,
-        doneReason: json['done_reason'] as String?,
+        doneReason: doneReasonFromString(json['done_reason'] as String?),
+        context: (json['context'] as List?)?.cast<int>(),
         totalDuration: json['total_duration'] as int?,
         loadDuration: json['load_duration'] as int?,
         promptEvalCount: json['prompt_eval_count'] as int?,
@@ -89,7 +98,8 @@ class GenerateResponse {
     if (response != null) 'response': response,
     if (thinking != null) 'thinking': thinking,
     if (done != null) 'done': done,
-    if (doneReason != null) 'done_reason': doneReason,
+    if (doneReason != null) 'done_reason': doneReasonToString(doneReason!),
+    if (context != null) 'context': context,
     if (totalDuration != null) 'total_duration': totalDuration,
     if (loadDuration != null) 'load_duration': loadDuration,
     if (promptEvalCount != null) 'prompt_eval_count': promptEvalCount,
@@ -107,6 +117,7 @@ class GenerateResponse {
     Object? thinking = unsetCopyWithValue,
     Object? done = unsetCopyWithValue,
     Object? doneReason = unsetCopyWithValue,
+    Object? context = unsetCopyWithValue,
     Object? totalDuration = unsetCopyWithValue,
     Object? loadDuration = unsetCopyWithValue,
     Object? promptEvalCount = unsetCopyWithValue,
@@ -129,7 +140,10 @@ class GenerateResponse {
       done: done == unsetCopyWithValue ? this.done : done as bool?,
       doneReason: doneReason == unsetCopyWithValue
           ? this.doneReason
-          : doneReason as String?,
+          : doneReason as DoneReason?,
+      context: context == unsetCopyWithValue
+          ? this.context
+          : context as List<int>?,
       totalDuration: totalDuration == unsetCopyWithValue
           ? this.totalDuration
           : totalDuration as int?,

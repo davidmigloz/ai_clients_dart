@@ -11,6 +11,12 @@ class EmbedResponse {
   /// Array of vector embeddings.
   final List<List<double>>? embeddings;
 
+  /// Convenience getter for the first embedding.
+  ///
+  /// Returns the first embedding in the [embeddings] list, or `null` if
+  /// the list is empty or null. Useful when generating a single embedding.
+  List<double>? get embedding => embeddings?.firstOrNull;
+
   /// Total time spent generating in nanoseconds.
   final int? totalDuration;
 

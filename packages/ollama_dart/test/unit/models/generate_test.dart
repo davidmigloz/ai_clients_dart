@@ -27,10 +27,10 @@ void main() {
         prompt: 'Hello',
         suffix: ' world',
         images: ['base64data'],
-        format: 'json',
+        format: JsonFormat(),
         system: 'You are helpful',
         stream: true,
-        think: true,
+        think: ThinkEnabled(true),
         raw: false,
         keepAlive: '5m',
         logprobs: true,
@@ -182,7 +182,7 @@ void main() {
       final event = GenerateStreamEvent.fromJson(json);
 
       expect(event.done, true);
-      expect(event.doneReason, 'stop');
+      expect(event.doneReason, DoneReason.stop);
       expect(event.totalDuration, 5000000000);
       expect(event.evalCount, 50);
     });

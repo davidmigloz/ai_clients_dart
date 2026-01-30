@@ -82,14 +82,14 @@ void main() {
       const request = ChatRequest(
         model: 'llama3.2',
         messages: [ChatMessage.user('List items')],
-        format: 'json',
+        format: JsonFormat(),
       );
 
       final json = request.toJson();
       expect(json['format'], 'json');
 
       final restored = ChatRequest.fromJson(json);
-      expect(restored.format, 'json');
+      expect(restored.format, isA<JsonFormat>());
     });
 
     test('handles model options', () {

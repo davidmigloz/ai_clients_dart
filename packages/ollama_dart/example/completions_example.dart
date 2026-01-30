@@ -89,7 +89,7 @@ void main() async {
         model: 'gpt-oss',
         prompt:
             'Return a JSON object with keys "name" and "age" for a person named Bob who is 25.',
-        format: 'json',
+        format: JsonFormat(),
       ),
     );
     print('JSON: ${jsonResponse.response}');
@@ -101,7 +101,8 @@ void main() async {
       request: const GenerateRequest(
         model: 'gpt-oss',
         prompt: 'What is 15 * 7?',
-        think: true,
+        think: ThinkEnabled(true),
+        // Or use a specific level: ThinkWithLevel(ThinkLevel.high)
       ),
     );
     if (thinkingResponse.thinking != null) {

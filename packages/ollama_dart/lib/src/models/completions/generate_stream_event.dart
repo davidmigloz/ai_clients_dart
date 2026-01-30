@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../common/done_reason.dart';
+
 /// A streaming event from text generation.
 @immutable
 class GenerateStreamEvent {
@@ -19,7 +21,7 @@ class GenerateStreamEvent {
   final bool? done;
 
   /// Reason streaming finished.
-  final String? doneReason;
+  final DoneReason? doneReason;
 
   /// Time spent generating the response in nanoseconds.
   final int? totalDuration;
@@ -63,7 +65,7 @@ class GenerateStreamEvent {
         response: json['response'] as String?,
         thinking: json['thinking'] as String?,
         done: json['done'] as bool?,
-        doneReason: json['done_reason'] as String?,
+        doneReason: doneReasonFromString(json['done_reason'] as String?),
         totalDuration: json['total_duration'] as int?,
         loadDuration: json['load_duration'] as int?,
         promptEvalCount: json['prompt_eval_count'] as int?,
@@ -79,7 +81,7 @@ class GenerateStreamEvent {
     if (response != null) 'response': response,
     if (thinking != null) 'thinking': thinking,
     if (done != null) 'done': done,
-    if (doneReason != null) 'done_reason': doneReason,
+    if (doneReason != null) 'done_reason': doneReasonToString(doneReason!),
     if (totalDuration != null) 'total_duration': totalDuration,
     if (loadDuration != null) 'load_duration': loadDuration,
     if (promptEvalCount != null) 'prompt_eval_count': promptEvalCount,

@@ -72,7 +72,7 @@ void main() {
             model: model,
             prompt:
                 'Return a JSON object with key "greeting" and value "hello"',
-            format: 'json',
+            format: const JsonFormat(),
           ),
         );
 

@@ -108,7 +108,7 @@ void main() {
               'Return a JSON object with name "Alice" and age 30.',
             ),
           ],
-          format: 'json',
+          format: const JsonFormat(),
         ),
       );
 

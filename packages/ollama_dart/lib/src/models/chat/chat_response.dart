@@ -1,14 +1,16 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/done_reason.dart';
 import '../completions/logprob.dart';
 import '../tools/tool_call.dart';
+import 'chat_message.dart';
 
 /// Response message from the assistant.
 @immutable
 class ChatResponseMessage {
   /// Always `assistant` for model responses.
-  final String? role;
+  final MessageRole? role;
 
   /// Assistant message text.
   final String? content;
@@ -34,7 +36,7 @@ class ChatResponseMessage {
   /// Creates a [ChatResponseMessage] from JSON.
   factory ChatResponseMessage.fromJson(Map<String, dynamic> json) =>
       ChatResponseMessage(
-        role: json['role'] as String?,
+        role: messageRoleFromNullableString(json['role'] as String?),
         content: json['content'] as String?,
         thinking: json['thinking'] as String?,
         toolCalls: (json['tool_calls'] as List?)
@@ -45,7 +47,7 @@ class ChatResponseMessage {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
-    if (role != null) 'role': role,
+    if (role != null) 'role': messageRoleToString(role!),
     if (content != null) 'content': content,
     if (thinking != null) 'thinking': thinking,
     if (toolCalls != null)
@@ -89,7 +91,7 @@ class ChatResponse {
   final bool? done;
 
   /// Reason the response finished.
-  final String? doneReason;
+  final DoneReason? doneReason;
 
   /// Total time spent generating in nanoseconds.
   final int? totalDuration;
@@ -136,7 +138,7 @@ class ChatResponse {
         ? ChatResponseMessage.fromJson(json['message'] as Map<String, dynamic>)
         : null,
     done: json['done'] as bool?,
-    doneReason: json['done_reason'] as String?,
+    doneReason: doneReasonFromString(json['done_reason'] as String?),
     totalDuration: json['total_duration'] as int?,
     loadDuration: json['load_duration'] as int?,
     promptEvalCount: json['prompt_eval_count'] as int?,
@@ -154,7 +156,7 @@ class ChatResponse {
     if (createdAt != null) 'created_at': createdAt,
     if (message != null) 'message': message!.toJson(),
     if (done != null) 'done': done,
-    if (doneReason != null) 'done_reason': doneReason,
+    if (doneReason != null) 'done_reason': doneReasonToString(doneReason!),
     if (totalDuration != null) 'total_duration': totalDuration,
     if (loadDuration != null) 'load_duration': loadDuration,
     if (promptEvalCount != null) 'prompt_eval_count': promptEvalCount,
@@ -190,7 +192,7 @@ class ChatResponse {
       done: done == unsetCopyWithValue ? this.done : done as bool?,
       doneReason: doneReason == unsetCopyWithValue
           ? this.doneReason
-          : doneReason as String?,
+          : doneReason as DoneReason?,
       totalDuration: totalDuration == unsetCopyWithValue
           ? this.totalDuration
           : totalDuration as int?,

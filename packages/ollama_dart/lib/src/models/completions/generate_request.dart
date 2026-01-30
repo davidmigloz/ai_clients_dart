@@ -1,6 +1,8 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/response_format.dart';
+import '../common/think_value.dart';
 import '../metadata/model_options.dart';
 
 /// Request for text generation.
@@ -20,19 +22,32 @@ class GenerateRequest {
 
   /// Structured output format.
   ///
-  /// Can be `"json"` or a JSON schema object.
-  final Object? format;
+  /// Use [ResponseFormat.json] for JSON mode or [ResponseFormat.schema] for
+  /// structured output with a specific JSON schema.
+  final ResponseFormat? format;
 
   /// System prompt for the model.
   final String? system;
+
+  /// Override the model's default prompt template.
+  ///
+  /// Use this to customize how the prompt is formatted before sending
+  /// to the model.
+  final String? template;
+
+  /// Conversation context from a previous generate response.
+  ///
+  /// This enables multi-turn conversations by passing the context
+  /// from a previous response into the next request.
+  final List<int>? context;
 
   /// Whether to stream the response.
   final bool? stream;
 
   /// Enable thinking mode.
   ///
-  /// Can be `true`, `false`, or `"high"`, `"medium"`, `"low"`.
-  final Object? think;
+  /// Use [ThinkValue.enabled] for boolean or [ThinkValue.level] for levels.
+  final ThinkValue? think;
 
   /// Whether to skip prompt templating.
   final bool? raw;
@@ -57,6 +72,8 @@ class GenerateRequest {
     this.images,
     this.format,
     this.system,
+    this.template,
+    this.context,
     this.stream,
     this.think,
     this.raw,
@@ -73,10 +90,12 @@ class GenerateRequest {
         prompt: json['prompt'] as String?,
         suffix: json['suffix'] as String?,
         images: (json['images'] as List?)?.cast<String>(),
-        format: json['format'],
+        format: ResponseFormat.fromJson(json['format']),
         system: json['system'] as String?,
+        template: json['template'] as String?,
+        context: (json['context'] as List?)?.cast<int>(),
         stream: json['stream'] as bool?,
-        think: json['think'],
+        think: ThinkValue.fromJson(json['think']),
         raw: json['raw'] as bool?,
         keepAlive: json['keep_alive'],
         options: json['options'] != null
@@ -92,10 +111,12 @@ class GenerateRequest {
     if (prompt != null) 'prompt': prompt,
     if (suffix != null) 'suffix': suffix,
     if (images != null) 'images': images,
-    if (format != null) 'format': format,
+    if (format != null) 'format': format!.toJson(),
     if (system != null) 'system': system,
+    if (template != null) 'template': template,
+    if (context != null) 'context': context,
     if (stream != null) 'stream': stream,
-    if (think != null) 'think': think,
+    if (think != null) 'think': think!.toJson(),
     if (raw != null) 'raw': raw,
     if (keepAlive != null) 'keep_alive': keepAlive,
     if (options != null) 'options': options!.toJson(),
@@ -111,6 +132,8 @@ class GenerateRequest {
     Object? images = unsetCopyWithValue,
     Object? format = unsetCopyWithValue,
     Object? system = unsetCopyWithValue,
+    Object? template = unsetCopyWithValue,
+    Object? context = unsetCopyWithValue,
     Object? stream = unsetCopyWithValue,
     Object? think = unsetCopyWithValue,
     Object? raw = unsetCopyWithValue,
@@ -126,10 +149,18 @@ class GenerateRequest {
       images: images == unsetCopyWithValue
           ? this.images
           : images as List<String>?,
-      format: format == unsetCopyWithValue ? this.format : format,
+      format: format == unsetCopyWithValue
+          ? this.format
+          : format as ResponseFormat?,
       system: system == unsetCopyWithValue ? this.system : system as String?,
+      template: template == unsetCopyWithValue
+          ? this.template
+          : template as String?,
+      context: context == unsetCopyWithValue
+          ? this.context
+          : context as List<int>?,
       stream: stream == unsetCopyWithValue ? this.stream : stream as bool?,
-      think: think == unsetCopyWithValue ? this.think : think,
+      think: think == unsetCopyWithValue ? this.think : think as ThinkValue?,
       raw: raw == unsetCopyWithValue ? this.raw : raw as bool?,
       keepAlive: keepAlive == unsetCopyWithValue ? this.keepAlive : keepAlive,
       options: options == unsetCopyWithValue

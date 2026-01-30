@@ -19,6 +19,8 @@ enum MessageRole {
 }
 
 /// Converts string to [MessageRole] enum.
+///
+/// Returns [MessageRole.user] for unknown or null values.
 MessageRole messageRoleFromString(String? value) {
   return switch (value) {
     'system' => MessageRole.system,
@@ -26,6 +28,19 @@ MessageRole messageRoleFromString(String? value) {
     'assistant' => MessageRole.assistant,
     'tool' => MessageRole.tool,
     _ => MessageRole.user,
+  };
+}
+
+/// Converts string to [MessageRole] enum.
+///
+/// Returns `null` for unknown or null values.
+MessageRole? messageRoleFromNullableString(String? value) {
+  return switch (value) {
+    'system' => MessageRole.system,
+    'user' => MessageRole.user,
+    'assistant' => MessageRole.assistant,
+    'tool' => MessageRole.tool,
+    _ => null,
   };
 }
 

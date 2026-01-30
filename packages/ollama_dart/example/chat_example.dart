@@ -56,7 +56,7 @@ void main() async {
             'Return a JSON object with name "Alice" and age 30.',
           ),
         ],
-        format: 'json',
+        format: JsonFormat(),
       ),
     );
     print('JSON: ${jsonResponse.message?.content}\n');
