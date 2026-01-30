@@ -52,7 +52,8 @@ python3 ../../.claude/shared/openapi-toolkit/scripts/verify_exports.py \
 
 cd "$(git rev-parse --show-toplevel)/packages/chromadb" && \
 python3 ../../.claude/shared/openapi-toolkit/scripts/verify_model_properties.py \
-  --config-dir .claude/skills/openapi-chromadb/config
+  --config-dir .claude/skills/openapi-chromadb/config \
+  --spec specs/openapi.json
 
 # Re-run coverage to confirm full implementation
 cd "$(git rev-parse --show-toplevel)/packages/chromadb" && \

@@ -53,7 +53,8 @@ python3 ../../.claude/shared/openapi-toolkit/scripts/verify_exports.py \
 
 cd "$(git rev-parse --show-toplevel)/packages/anthropic_sdk_dart" && \
 python3 ../../.claude/shared/openapi-toolkit/scripts/verify_model_properties.py \
-  --config-dir .claude/skills/openapi-anthropic/config
+  --config-dir .claude/skills/openapi-anthropic/config \
+  --spec specs/openapi.yaml
 
 # Re-run coverage to confirm full implementation
 cd "$(git rev-parse --show-toplevel)/packages/anthropic_sdk_dart" && \
