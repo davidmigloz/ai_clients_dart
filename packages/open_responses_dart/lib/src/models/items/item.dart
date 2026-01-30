@@ -216,7 +216,9 @@ sealed class FunctionCallOutput {
     }
     if (json is List) {
       return FunctionCallOutputContent(
-        json.map((e) => InputContent.fromJson(e as Map<String, dynamic>)).toList(),
+        json
+            .map((e) => InputContent.fromJson(e as Map<String, dynamic>))
+            .toList(),
       );
     }
     throw FormatException('Invalid FunctionCallOutput format: $json');

@@ -79,15 +79,9 @@ void main() {
     });
 
     test('equality works correctly', () {
-      const a = FunctionCallOutputContent([
-        InputTextContent(text: 'Hello'),
-      ]);
-      const b = FunctionCallOutputContent([
-        InputTextContent(text: 'Hello'),
-      ]);
-      const c = FunctionCallOutputContent([
-        InputTextContent(text: 'World'),
-      ]);
+      const a = FunctionCallOutputContent([InputTextContent(text: 'Hello')]);
+      const b = FunctionCallOutputContent([InputTextContent(text: 'Hello')]);
+      const c = FunctionCallOutputContent([InputTextContent(text: 'World')]);
       const d = FunctionCallOutputContent([]);
 
       expect(a, equals(b));
@@ -96,12 +90,8 @@ void main() {
     });
 
     test('hashCode is consistent with equality', () {
-      const a = FunctionCallOutputContent([
-        InputTextContent(text: 'Hello'),
-      ]);
-      const b = FunctionCallOutputContent([
-        InputTextContent(text: 'Hello'),
-      ]);
+      const a = FunctionCallOutputContent([InputTextContent(text: 'Hello')]);
+      const b = FunctionCallOutputContent([InputTextContent(text: 'Hello')]);
 
       expect(a.hashCode, equals(b.hashCode));
     });
