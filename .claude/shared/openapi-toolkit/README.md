@@ -349,7 +349,7 @@ python3 ../../.claude/shared/openapi-toolkit/scripts/generate_model.py \
 
 1. **Create config directory**: `packages/{package}/.claude/skills/openapi-{shortname}/config/`
 2. **Create config files**: `package.json`, `specs.json`, `schemas.json`, `models.json`, `documentation.json`
-3. **Create SKILL.md**: Reference this core toolkit at `packages/{package}/.claude/skills/openapi/SKILL.md`
+3. **Create SKILL.md**: Reference this core toolkit at `packages/{package}/.claude/skills/openapi-{shortname}/SKILL.md`
 4. **Create references**: Package-specific patterns and checklists
 
 See `docs/new_dart_api_client.md` for detailed instructions.

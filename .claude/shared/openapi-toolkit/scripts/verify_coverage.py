@@ -168,10 +168,11 @@ def extract_endpoints(spec: dict, config: dict) -> list[EndpointInfo]:
 
 
 def find_resource_files(resources_dir: Path) -> list[Path]:
-    """Find all resource files in the resources directory."""
+    """Find all resource files in the resources directory (including subdirectories)."""
     if not resources_dir.exists():
         return []
-    return sorted(resources_dir.glob('*_resource.dart'))
+    # Use recursive glob to find resources in subdirectories
+    return sorted(resources_dir.glob('**/*_resource.dart'))
 
 
 def extract_implemented_methods(resource_file: Path) -> set[str]:
