@@ -119,7 +119,7 @@ void main() async {
       // List Anthropic-provided skills
       print('\n=== Anthropic Skills ===');
       final anthropicSkills = await client.skills.list(
-        source: 'anthropic',
+        source: SkillSource.anthropic,
         limit: 10,
       );
 

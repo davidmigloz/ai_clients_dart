@@ -66,9 +66,9 @@ export 'src/models/beta/config/container.dart';
 export 'src/models/beta/config/output_config.dart';
 
 // Models - Beta Tools
+// Note: ComputerUseTool and McpToolset are exported via built_in_tools.dart
+// since they extend BuiltInTool (sealed class)
 export 'src/models/beta/tools/code_execution_tool.dart';
-export 'src/models/beta/tools/computer_use_tool.dart';
-export 'src/models/beta/tools/mcp_toolset.dart';
 
 // Models - Completions (Legacy)
 export 'src/models/completions/completion.dart';
@@ -103,6 +103,7 @@ export 'src/models/models/model_info.dart';
 // Models - Skills (Beta)
 export 'src/models/skills/skill.dart';
 export 'src/models/skills/skill_list_response.dart';
+export 'src/models/skills/skill_source.dart';
 export 'src/models/skills/skill_version.dart';
 
 // Models - Sources
@@ -122,6 +123,7 @@ export 'src/models/tools/built_in_tools.dart';
 export 'src/models/tools/input_schema.dart';
 export 'src/models/tools/tool.dart';
 export 'src/models/tools/tool_choice.dart';
+export 'src/models/tools/tool_definition.dart';
 
 // Resources
 export 'src/resources/files_resource.dart';

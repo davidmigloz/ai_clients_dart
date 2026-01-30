@@ -112,25 +112,24 @@ void main() async {
 
     // Example 6: Count tokens with tools
     print('\n=== With Tools ===');
+    const weatherTool = Tool(
+      name: 'get_weather',
+      description: 'Get the current weather for a location',
+      inputSchema: InputSchema(
+        properties: {
+          'location': {
+            'type': 'string',
+            'description': 'City and state, e.g. San Francisco, CA',
+          },
+        },
+        required: ['location'],
+      ),
+    );
+
     final toolsCount = await client.messages.countTokens(
       TokenCountRequest(
         model: 'claude-sonnet-4-20250514',
-        tools: const [
-          {
-            'name': 'get_weather',
-            'description': 'Get the current weather for a location',
-            'input_schema': {
-              'type': 'object',
-              'properties': {
-                'location': {
-                  'type': 'string',
-                  'description': 'City and state, e.g. San Francisco, CA',
-                },
-              },
-              'required': ['location'],
-            },
-          },
-        ],
+        tools: [ToolDefinition.custom(weatherTool)],
         messages: [InputMessage.user("What's the weather in New York?")],
       ),
     );

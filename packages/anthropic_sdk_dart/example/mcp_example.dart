@@ -24,15 +24,17 @@ void main() {
 The MCP Toolset connects Claude to external tool servers:
 
 final tools = [
-  McpToolset(
-    serverDefinition: McpServerUrlDefinition(
-      url: 'https://mcp.example.com/tools',
+  ToolDefinition.builtIn(
+    McpToolset(
+      serverDefinition: McpServerUrlDefinition(
+        url: 'https://mcp.example.com/tools',
+      ),
+      toolConfiguration: McpToolConfig(
+        allowedTools: ['calculator', 'translator', 'code_runner'],
+      ),
+      authorizationToken: 'Bearer your-token-here',
     ),
-    toolConfiguration: McpToolConfig(
-      allowedTools: ['calculator', 'translator', 'code_runner'],
-    ),
-    authorizationToken: 'Bearer your-token-here',
-  ).toJson(),
+  ),
 ];
 
 final response = await client.messages.create(
@@ -51,12 +53,14 @@ Claude will discover and use tools from your MCP server.
 
     // Example 2: MCP with specific tools
     print('\n=== Tool Filtering ===');
-    const tool = McpToolset(
-      serverDefinition: McpServerUrlDefinition(
-        url: 'https://code-tools.example.com/mcp',
-      ),
-      toolConfiguration: McpToolConfig(
-        allowedTools: ['run_python', 'lint_code', 'format_code'],
+    final tool = ToolDefinition.builtIn(
+      const McpToolset(
+        serverDefinition: McpServerUrlDefinition(
+          url: 'https://code-tools.example.com/mcp',
+        ),
+        toolConfiguration: McpToolConfig(
+          allowedTools: ['run_python', 'lint_code', 'format_code'],
+        ),
       ),
     );
     print('McpToolset JSON:');
@@ -73,22 +77,26 @@ from your MCP server to Claude.
 You can connect to multiple MCP servers:
 
 final tools = [
-  McpToolset(
-    serverDefinition: McpServerUrlDefinition(
-      url: 'https://db.example.com/mcp',
+  ToolDefinition.builtIn(
+    McpToolset(
+      serverDefinition: McpServerUrlDefinition(
+        url: 'https://db.example.com/mcp',
+      ),
+      toolConfiguration: McpToolConfig(
+        allowedTools: ['query', 'insert', 'update'],
+      ),
     ),
-    toolConfiguration: McpToolConfig(
-      allowedTools: ['query', 'insert', 'update'],
+  ),
+  ToolDefinition.builtIn(
+    McpToolset(
+      serverDefinition: McpServerUrlDefinition(
+        url: 'https://files.example.com/mcp',
+      ),
+      toolConfiguration: McpToolConfig(
+        allowedTools: ['read_file', 'write_file', 'list_files'],
+      ),
     ),
-  ).toJson(),
-  McpToolset(
-    serverDefinition: McpServerUrlDefinition(
-      url: 'https://files.example.com/mcp',
-    ),
-    toolConfiguration: McpToolConfig(
-      allowedTools: ['read_file', 'write_file', 'list_files'],
-    ),
-  ).toJson(),
+  ),
 ];
 
 Claude can then use tools from any of the configured servers.
@@ -118,11 +126,13 @@ The MCP protocol handles:
     print('''
 MCP servers can be authenticated using:
 
-McpToolset(
-  serverDefinition: McpServerUrlDefinition(
-    url: 'https://secure.example.com/mcp',
+ToolDefinition.builtIn(
+  McpToolset(
+    serverDefinition: McpServerUrlDefinition(
+      url: 'https://secure.example.com/mcp',
+    ),
+    authorizationToken: 'Bearer eyJhbGciOiJIUzI1NiIs...',
   ),
-  authorizationToken: 'Bearer eyJhbGciOiJIUzI1NiIs...',
 )
 
 The authorizationToken is passed in the Authorization header

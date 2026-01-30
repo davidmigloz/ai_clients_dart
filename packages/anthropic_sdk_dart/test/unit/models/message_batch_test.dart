@@ -270,7 +270,7 @@ void main() {
       expect(response.result, isA<BatchResultSucceeded>());
       final succeeded = response.result as BatchResultSucceeded;
       expect(succeeded.message.id, 'msg_123');
-      expect(succeeded.message.role, 'assistant');
+      expect(succeeded.message.role, MessageRole.assistant);
     });
 
     test('errored result deserializes correctly', () {

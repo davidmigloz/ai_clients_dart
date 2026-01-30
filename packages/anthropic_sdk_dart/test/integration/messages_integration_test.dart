@@ -47,7 +47,7 @@ void main() {
         );
 
         expect(response.id, isNotEmpty);
-        expect(response.role, 'assistant');
+        expect(response.role, MessageRole.assistant);
         expect(response.content, isNotEmpty);
         expect(response.stopReason, StopReason.endTurn);
         expect(response.text, contains('4'));
@@ -141,27 +141,23 @@ void main() {
           return;
         }
 
+        const weatherTool = Tool(
+          name: 'get_weather',
+          description: 'Get the current weather for a location',
+          inputSchema: InputSchema(
+            properties: {
+              'location': {'type': 'string', 'description': 'The city name'},
+            },
+            required: ['location'],
+          ),
+        );
+
         final response = await client!.messages.create(
           MessageCreateRequest(
             model: 'claude-3-5-haiku-20241022',
             maxTokens: 200,
-            tools: const [
-              {
-                'name': 'get_weather',
-                'description': 'Get the current weather for a location',
-                'input_schema': {
-                  'type': 'object',
-                  'properties': {
-                    'location': {
-                      'type': 'string',
-                      'description': 'The city name',
-                    },
-                  },
-                  'required': ['location'],
-                },
-              },
-            ],
-            toolChoice: const {'type': 'tool', 'name': 'get_weather'},
+            tools: [ToolDefinition.custom(weatherTool)],
+            toolChoice: ToolChoice.tool('get_weather'),
             messages: [InputMessage.user("What's the weather in Tokyo?")],
           ),
         );

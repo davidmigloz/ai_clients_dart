@@ -1,13 +1,11 @@
-import 'package:meta/meta.dart';
+part of '../../tools/built_in_tools.dart';
 
-import '../../common/copy_with_sentinel.dart';
-import '../../metadata/cache_control.dart';
-
-/// Computer use tool for GUI automation.
+/// Computer use tool for GUI automation (Beta).
 ///
 /// Allows Claude to interact with a computer display.
+/// This is a beta feature.
 @immutable
-class ComputerUseTool {
+class ComputerUseTool extends BuiltInTool {
   /// The tool type version.
   final String type;
 
@@ -79,7 +77,7 @@ class ComputerUseTool {
     );
   }
 
-  /// Converts to JSON.
+  @override
   Map<String, dynamic> toJson() => {
     'type': type,
     'name': 'computer',

@@ -54,7 +54,7 @@ void main() {
           MessageCreateRequest(
             model: 'claude-sonnet-4-20250514',
             maxTokens: 1024,
-            tools: [calculatorTool.toJson()],
+            tools: [ToolDefinition.custom(calculatorTool)],
             messages: [
               InputMessage.user('What is 15 + 27? Use the calculator tool.'),
             ],
@@ -104,7 +104,7 @@ void main() {
           MessageCreateRequest(
             model: 'claude-sonnet-4-20250514',
             maxTokens: 1024,
-            tools: [weatherTool.toJson()],
+            tools: [ToolDefinition.custom(weatherTool)],
             messages: [InputMessage.user('What is the weather in Paris?')],
           ),
         );
@@ -123,7 +123,7 @@ void main() {
           MessageCreateRequest(
             model: 'claude-sonnet-4-20250514',
             maxTokens: 1024,
-            tools: [weatherTool.toJson()],
+            tools: [ToolDefinition.custom(weatherTool)],
             messages: [
               InputMessage.user('What is the weather in Paris?'),
               InputMessage.assistantBlocks(assistantBlocks),
@@ -167,8 +167,8 @@ void main() {
           MessageCreateRequest(
             model: 'claude-sonnet-4-20250514',
             maxTokens: 1024,
-            tools: [tool.toJson()],
-            toolChoice: const ToolChoiceAuto().toJson(),
+            tools: [ToolDefinition.custom(tool)],
+            toolChoice: ToolChoice.auto(),
             messages: [InputMessage.user('Hello, how are you?')],
           ),
         );
@@ -204,8 +204,8 @@ void main() {
           MessageCreateRequest(
             model: 'claude-sonnet-4-20250514',
             maxTokens: 1024,
-            tools: [tool.toJson()],
-            toolChoice: const ToolChoiceTool('random_number').toJson(),
+            tools: [ToolDefinition.custom(tool)],
+            toolChoice: ToolChoice.tool('random_number'),
             messages: [
               InputMessage.user('Give me a number between 1 and 100.'),
             ],
@@ -242,7 +242,7 @@ void main() {
           MessageCreateRequest(
             model: 'claude-sonnet-4-20250514',
             maxTokens: 1024,
-            tools: [tool.toJson()],
+            tools: [ToolDefinition.custom(tool)],
             messages: [
               InputMessage.user('Search for information about Dart language.'),
             ],

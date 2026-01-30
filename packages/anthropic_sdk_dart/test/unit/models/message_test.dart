@@ -21,7 +21,7 @@ void main() {
 
       expect(message.id, 'msg_123');
       expect(message.type, 'message');
-      expect(message.role, 'assistant');
+      expect(message.role, MessageRole.assistant);
       expect(message.model, 'claude-sonnet-4-20250514');
       expect(message.content, hasLength(1));
       expect(message.content.first, isA<TextBlock>());
@@ -98,7 +98,7 @@ void main() {
     test('toJson produces valid JSON', () {
       const message = Message(
         id: 'msg_test',
-        role: 'assistant',
+        role: MessageRole.assistant,
         content: [TextBlock(text: 'Test response')],
         model: 'claude-sonnet-4-20250514',
         stopReason: StopReason.endTurn,
@@ -121,7 +121,7 @@ void main() {
     test('copyWith creates a modified copy', () {
       const original = Message(
         id: 'msg_orig',
-        role: 'assistant',
+        role: MessageRole.assistant,
         content: [TextBlock(text: 'Original')],
         model: 'claude-sonnet-4-20250514',
         stopReason: StopReason.endTurn,
@@ -135,7 +135,7 @@ void main() {
 
       expect(modified.id, 'msg_copy');
       expect((modified.content.first as TextBlock).text, 'Modified');
-      expect(modified.role, 'assistant'); // Unchanged
+      expect(modified.role, MessageRole.assistant); // Unchanged
       expect(modified.model, 'claude-sonnet-4-20250514'); // Unchanged
     });
   });
@@ -144,7 +144,7 @@ void main() {
     test('text getter concatenates all text blocks', () {
       const message = Message(
         id: 'msg_1',
-        role: 'assistant',
+        role: MessageRole.assistant,
         content: [
           TextBlock(text: 'Hello, '),
           TextBlock(text: 'world!'),
@@ -160,7 +160,7 @@ void main() {
     test('toolUseBlocks returns only tool use blocks', () {
       const message = Message(
         id: 'msg_1',
-        role: 'assistant',
+        role: MessageRole.assistant,
         content: [
           TextBlock(text: 'Let me help.'),
           ToolUseBlock(id: 'tu_1', name: 'tool1', input: {}),
@@ -178,7 +178,7 @@ void main() {
     test('thinkingBlocks returns only thinking blocks', () {
       const message = Message(
         id: 'msg_1',
-        role: 'assistant',
+        role: MessageRole.assistant,
         content: [
           ThinkingBlock(thinking: 'Thinking 1...', signature: 'sig1'),
           TextBlock(text: 'Response'),
@@ -197,7 +197,7 @@ void main() {
     test('isEndTurn returns true for end_turn stop reason', () {
       const message = Message(
         id: 'msg_1',
-        role: 'assistant',
+        role: MessageRole.assistant,
         content: [TextBlock(text: 'Done')],
         model: 'claude-sonnet-4-20250514',
         stopReason: StopReason.endTurn,
@@ -212,7 +212,7 @@ void main() {
     test('isMaxTokens returns true for max_tokens stop reason', () {
       const message = Message(
         id: 'msg_1',
-        role: 'assistant',
+        role: MessageRole.assistant,
         content: [TextBlock(text: 'Truncated...')],
         model: 'claude-sonnet-4-20250514',
         stopReason: StopReason.maxTokens,

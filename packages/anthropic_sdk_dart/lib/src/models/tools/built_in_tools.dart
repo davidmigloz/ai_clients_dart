@@ -3,6 +3,10 @@ import 'package:meta/meta.dart';
 import '../common/copy_with_sentinel.dart';
 import '../metadata/cache_control.dart';
 
+// Include beta tools as part of this library to allow them to extend BuiltInTool
+part '../beta/tools/computer_use_tool.dart';
+part '../beta/tools/mcp_toolset.dart';
+
 // ============================================================================
 // User Location
 // ============================================================================
@@ -107,6 +111,26 @@ sealed class BuiltInTool {
     UserLocation? userLocation,
   }) = WebSearchTool;
 
+  /// Creates a computer use tool (Beta).
+  ///
+  /// Allows Claude to interact with a computer display.
+  factory BuiltInTool.computerUse({
+    required int displayWidthPx,
+    required int displayHeightPx,
+    int? displayNumber,
+    CacheControlEphemeral? cacheControl,
+  }) = ComputerUseTool;
+
+  /// Creates an MCP toolset (Beta).
+  ///
+  /// Connects Claude to external tool servers via MCP.
+  factory BuiltInTool.mcp({
+    required McpServerUrlDefinition serverDefinition,
+    String? authorizationToken,
+    McpToolConfig? toolConfiguration,
+    CacheControlEphemeral? cacheControl,
+  }) = McpToolset;
+
   /// Creates a [BuiltInTool] from JSON.
   factory BuiltInTool.fromJson(Map<String, dynamic> json) {
     final type = json['type'] as String;
@@ -116,6 +140,11 @@ sealed class BuiltInTool {
       'text_editor_20250429' => TextEditorTool20250429.fromJson(json),
       'text_editor_20250728' => TextEditorTool.fromJson(json),
       'web_search_20250305' => WebSearchTool.fromJson(json),
+      // Beta tools
+      final String t when t.startsWith('computer_') => ComputerUseTool.fromJson(
+        json,
+      ),
+      final String t when t.startsWith('mcp_') => McpToolset.fromJson(json),
       _ => throw FormatException('Unknown BuiltInTool type: $type'),
     };
   }

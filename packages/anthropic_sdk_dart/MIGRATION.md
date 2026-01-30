@@ -209,8 +209,8 @@ if (toolUse is ToolUseBlock) {
   print('Input: ${toolUse.input}');
 }
 
-// After
-const tool = Tool(
+// After - Typed tools with ToolDefinition
+final tool = Tool(
   name: 'get_weather',
   description: 'Get weather for a location',
   inputSchema: InputSchema(
@@ -224,8 +224,8 @@ const tool = Tool(
 final response = await client.messages.create(
   MessageCreateRequest(
     model: 'claude-sonnet-4-20250514',
-    tools: [tool.toJson()],
-    toolChoice: ToolChoiceAuto().toJson(),
+    tools: [ToolDefinition.custom(tool)],
+    toolChoice: ToolChoice.auto(),
     messages: [...],
     maxTokens: 1024,
   ),
@@ -242,9 +242,61 @@ if (response.hasToolUse) {
 
 **Key changes:**
 
-* `Tool.custom()` → `Tool()` with `InputSchema` object
-* `ToolChoice(type: ToolChoiceType.auto)` → `ToolChoiceAuto().toJson()`
+* `Tool.custom()` → `ToolDefinition.custom(Tool(...))` - explicit wrapper
+* `ToolChoice(type: ToolChoiceType.auto)` → `ToolChoice.auto()`
+* Tools now use typed `List<ToolDefinition>` instead of `List<Map<String, dynamic>>`
 * New helpers: `response.hasToolUse`, `response.toolUseBlocks`
+
+### Built-in Tools
+
+v1.0.0 adds support for Anthropic's built-in tools:
+
+```dart
+final response = await client.messages.create(
+  MessageCreateRequest(
+    model: 'claude-sonnet-4-20250514',
+    maxTokens: 4096,
+    tools: [
+      // Web search tool
+      ToolDefinition.builtIn(
+        BuiltInTool.webSearch(
+          maxUses: 5,
+          allowedDomains: ['wikipedia.org', 'docs.anthropic.com'],
+        ),
+      ),
+      // Bash tool (computer use)
+      ToolDefinition.builtIn(BuiltInTool.bash()),
+      // Text editor tool
+      ToolDefinition.builtIn(
+        BuiltInTool.textEditor(maxCharacters: 50000),
+      ),
+      // Mix with custom tools
+      ToolDefinition.custom(myCustomTool),
+    ],
+    toolChoice: ToolChoice.auto(),
+    messages: [InputMessage.user('Search for the latest Claude release')],
+  ),
+);
+```
+
+### Tool Choice Options
+
+```dart
+// Let Claude decide whether to use tools
+toolChoice: ToolChoice.auto()
+
+// Force Claude to use any available tool
+toolChoice: ToolChoice.any()
+
+// Force Claude to use a specific tool
+toolChoice: ToolChoice.tool('get_weather')
+
+// Prevent tool use entirely
+toolChoice: ToolChoice.none()
+
+// Disable parallel tool use (one tool at a time)
+toolChoice: ToolChoice.auto(disableParallelToolUse: true)
+```
 
 ## 6) Tool Results
 
@@ -506,6 +558,32 @@ final client = AnthropicClient(
     apiVersion: '2023-06-01',
   ),
 );
+```
+
+## 15) Enum Type Changes
+
+Some fields that were previously `String` are now typed enums for better type safety.
+
+### Skill.source (String → SkillSource)
+
+```dart
+// Before
+if (skill.source == 'anthropic') { ... }
+final skills = await client.skills.list(source: 'anthropic');
+
+// After
+if (skill.source == SkillSource.anthropic) { ... }
+final skills = await client.skills.list(source: SkillSource.anthropic);
+```
+
+### Message.role (String → MessageRole)
+
+```dart
+// Before
+if (message.role == 'assistant') { ... }
+
+// After
+if (message.role == MessageRole.assistant) { ... }
 ```
 
 ## Common Pitfalls & Notes

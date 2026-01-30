@@ -22,7 +22,7 @@ void main() {
       expect(skill.createdAt, DateTime.utc(2025, 1, 15, 10, 0, 0));
       expect(skill.updatedAt, DateTime.utc(2025, 1, 20, 15, 30, 0));
       expect(skill.latestVersion, '1234567890123');
-      expect(skill.source, 'custom');
+      expect(skill.source, SkillSource.custom);
     });
 
     test('fromJson handles anthropic source', () {
@@ -38,7 +38,7 @@ void main() {
 
       final skill = Skill.fromJson(json);
 
-      expect(skill.source, 'anthropic');
+      expect(skill.source, SkillSource.anthropic);
     });
 
     test('toJson produces valid JSON', () {
@@ -48,7 +48,7 @@ void main() {
         createdAt: DateTime.utc(2025, 3, 1, 12, 0, 0),
         updatedAt: DateTime.utc(2025, 3, 5, 18, 0, 0),
         latestVersion: '9876543210987',
-        source: 'custom',
+        source: SkillSource.custom,
       );
 
       final json = skill.toJson();
@@ -69,7 +69,7 @@ void main() {
         createdAt: DateTime.utc(2025, 1, 1),
         updatedAt: DateTime.utc(2025, 1, 1),
         latestVersion: '1',
-        source: 'custom',
+        source: SkillSource.custom,
       );
 
       final skill2 = Skill(
@@ -78,7 +78,7 @@ void main() {
         createdAt: DateTime.utc(2025, 1, 1),
         updatedAt: DateTime.utc(2025, 1, 1),
         latestVersion: '1',
-        source: 'custom',
+        source: SkillSource.custom,
       );
 
       final skill3 = Skill(
@@ -87,7 +87,7 @@ void main() {
         createdAt: DateTime.utc(2025, 1, 2),
         updatedAt: DateTime.utc(2025, 1, 2),
         latestVersion: '2',
-        source: 'anthropic',
+        source: SkillSource.anthropic,
       );
 
       expect(skill1, equals(skill2));
@@ -258,7 +258,7 @@ void main() {
             createdAt: DateTime.utc(2025, 1, 1),
             updatedAt: DateTime.utc(2025, 1, 1),
             latestVersion: '1',
-            source: 'custom',
+            source: SkillSource.custom,
           ),
         ],
         hasMore: false,
@@ -370,6 +370,28 @@ void main() {
 
       expect(secondPage.hasMore, isFalse);
       expect(secondPage.nextPage, isNull);
+    });
+  });
+
+  group('SkillSource', () {
+    test('fromJson converts known values', () {
+      expect(SkillSource.fromJson('custom'), SkillSource.custom);
+      expect(SkillSource.fromJson('anthropic'), SkillSource.anthropic);
+    });
+
+    test('fromJson throws for unknown values', () {
+      expect(() => SkillSource.fromJson('invalid'), throwsFormatException);
+    });
+
+    test('toJson returns correct values', () {
+      expect(SkillSource.custom.toJson(), 'custom');
+      expect(SkillSource.anthropic.toJson(), 'anthropic');
+    });
+
+    test('round-trip preserves value', () {
+      for (final value in SkillSource.values) {
+        expect(SkillSource.fromJson(value.toJson()), value);
+      }
     });
   });
 }

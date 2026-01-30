@@ -7,6 +7,7 @@ import '../auth/auth_provider.dart';
 import '../errors/exceptions.dart';
 import '../models/skills/skill.dart';
 import '../models/skills/skill_list_response.dart';
+import '../models/skills/skill_source.dart';
 import '../models/skills/skill_version.dart';
 import 'base_resource.dart';
 
@@ -85,7 +86,8 @@ class SkillsResource extends ResourceBase {
   ///
   /// The [limit] specifies the maximum number of skills to return (default 20).
   /// The [page] is an optional pagination token from a previous response.
-  /// The [source] filters by source ("custom" or "anthropic").
+  /// The [source] filters by source ([SkillSource.custom] or
+  /// [SkillSource.anthropic]).
   ///
   /// Returns a [SkillListResponse] with the list of skills and pagination info.
   ///
@@ -99,12 +101,12 @@ class SkillsResource extends ResourceBase {
   Future<SkillListResponse> list({
     int? limit,
     String? page,
-    String? source,
+    SkillSource? source,
   }) async {
     final queryParams = <String, dynamic>{
       'limit': ?limit?.toString(),
       'page': ?page,
-      'source': ?source,
+      'source': ?source?.toJson(),
     };
 
     final json = await get(

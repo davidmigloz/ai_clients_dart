@@ -1,11 +1,10 @@
-import 'package:meta/meta.dart';
+part of '../../tools/built_in_tools.dart';
 
-import '../../common/copy_with_sentinel.dart';
-import '../../metadata/cache_control.dart';
-
-/// MCP (Model Context Protocol) toolset configuration.
+/// MCP (Model Context Protocol) toolset configuration (Beta).
+///
+/// This is a beta feature.
 @immutable
-class McpToolset {
+class McpToolset extends BuiltInTool {
   /// The tool type. Always "mcp_20250819".
   final String type;
 
@@ -51,7 +50,7 @@ class McpToolset {
     );
   }
 
-  /// Converts to JSON.
+  @override
   Map<String, dynamic> toJson() => {
     'type': type,
     'name': 'mcp',
@@ -186,7 +185,7 @@ class McpToolConfig {
       identical(this, other) ||
       other is McpToolConfig &&
           runtimeType == other.runtimeType &&
-          _listsEqual(allowedTools, other.allowedTools) &&
+          _mcpListsEqual(allowedTools, other.allowedTools) &&
           enabled == other.enabled;
 
   @override
@@ -197,7 +196,7 @@ class McpToolConfig {
       'McpToolConfig(allowedTools: $allowedTools, enabled: $enabled)';
 }
 
-bool _listsEqual<T>(List<T>? a, List<T>? b) {
+bool _mcpListsEqual<T>(List<T>? a, List<T>? b) {
   if (a == null && b == null) return true;
   if (a == null || b == null) return false;
   if (a.length != b.length) return false;

@@ -133,25 +133,24 @@ void main() {
           ),
         );
 
+        const weatherTool = Tool(
+          name: 'get_weather',
+          description: 'Get the current weather for a location',
+          inputSchema: InputSchema(
+            properties: {
+              'location': {
+                'type': 'string',
+                'description': 'City and state, e.g. San Francisco, CA',
+              },
+            },
+            required: ['location'],
+          ),
+        );
+
         final withTools = await client!.messages.countTokens(
           TokenCountRequest(
             model: 'claude-3-5-haiku-20241022',
-            tools: const [
-              {
-                'name': 'get_weather',
-                'description': 'Get the current weather for a location',
-                'input_schema': {
-                  'type': 'object',
-                  'properties': {
-                    'location': {
-                      'type': 'string',
-                      'description': 'City and state, e.g. San Francisco, CA',
-                    },
-                  },
-                  'required': ['location'],
-                },
-              },
-            ],
+            tools: [ToolDefinition.custom(weatherTool)],
             messages: [InputMessage.user("What's the weather?")],
           ),
         );

@@ -24,17 +24,19 @@ void main() {
 The Web Search tool is configured as part of the tools array:
 
 final tools = [
-  const WebSearchTool(
-    allowedDomains: ['wikipedia.org', 'github.com'],
-    blockedDomains: ['example.com'],
-    maxUses: 5,
-    userLocation: UserLocation(
-      city: 'San Francisco',
-      region: 'California',
-      country: 'US',
-      timezone: 'America/Los_Angeles',
+  ToolDefinition.builtIn(
+    WebSearchTool(
+      allowedDomains: ['wikipedia.org', 'github.com'],
+      blockedDomains: ['example.com'],
+      maxUses: 5,
+      userLocation: UserLocation(
+        city: 'San Francisco',
+        region: 'California',
+        country: 'US',
+        timezone: 'America/Los_Angeles',
+      ),
     ),
-  ).toJson(),
+  ),
 ];
 
 final response = await client.messages.create(
@@ -58,7 +60,7 @@ the search results in the response.
 For basic web search, you can use minimal configuration:
 
 final tools = [
-  const WebSearchTool().toJson(),
+  ToolDefinition.builtIn(WebSearchTool()),
 ];
 
 This allows Claude to search any domain without restrictions.
@@ -66,9 +68,11 @@ This allows Claude to search any domain without restrictions.
 
     // Example 3: Using web search with allowed domains
     print('\n=== Domain Filtering ===');
-    const tool = WebSearchTool(
-      allowedDomains: ['wikipedia.org', 'bbc.com', 'reuters.com'],
-      maxUses: 3,
+    final tool = ToolDefinition.builtIn(
+      const WebSearchTool(
+        allowedDomains: ['wikipedia.org', 'bbc.com', 'reuters.com'],
+        maxUses: 3,
+      ),
     );
     print('WebSearchTool JSON:');
     print(tool.toJson());
@@ -105,12 +109,14 @@ Claude's response - you don't need to handle them separately.
 
     // Example 5: Location-aware search
     print('\n=== Location-Aware Search ===');
-    const locationTool = WebSearchTool(
-      userLocation: UserLocation(
-        city: 'Tokyo',
-        region: 'Tokyo',
-        country: 'JP',
-        timezone: 'Asia/Tokyo',
+    final locationTool = ToolDefinition.builtIn(
+      const WebSearchTool(
+        userLocation: UserLocation(
+          city: 'Tokyo',
+          region: 'Tokyo',
+          country: 'JP',
+          timezone: 'Asia/Tokyo',
+        ),
       ),
     );
     print('Location-aware WebSearchTool:');

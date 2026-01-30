@@ -87,29 +87,28 @@ void main() {
           return;
         }
 
+        const calculatorTool = Tool(
+          name: 'calculator',
+          description: 'Perform basic math operations',
+          inputSchema: InputSchema(
+            properties: {
+              'operation': {
+                'type': 'string',
+                'enum': ['add', 'subtract', 'multiply', 'divide'],
+              },
+              'a': {'type': 'number'},
+              'b': {'type': 'number'},
+            },
+            required: ['operation', 'a', 'b'],
+          ),
+        );
+
         final stream = client!.messages.createStream(
           MessageCreateRequest(
             model: 'claude-3-5-haiku-20241022',
             maxTokens: 200,
-            tools: const [
-              {
-                'name': 'calculator',
-                'description': 'Perform basic math operations',
-                'input_schema': {
-                  'type': 'object',
-                  'properties': {
-                    'operation': {
-                      'type': 'string',
-                      'enum': ['add', 'subtract', 'multiply', 'divide'],
-                    },
-                    'a': {'type': 'number'},
-                    'b': {'type': 'number'},
-                  },
-                  'required': ['operation', 'a', 'b'],
-                },
-              },
-            ],
-            toolChoice: const {'type': 'tool', 'name': 'calculator'},
+            tools: [ToolDefinition.custom(calculatorTool)],
+            toolChoice: ToolChoice.tool('calculator'),
             messages: [InputMessage.user('What is 15 times 7?')],
           ),
         );

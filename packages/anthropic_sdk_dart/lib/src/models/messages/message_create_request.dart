@@ -4,6 +4,8 @@ import '../common/copy_with_sentinel.dart';
 import '../metadata/cache_control.dart';
 import '../metadata/metadata.dart';
 import '../metadata/service_tier.dart';
+import '../tools/tool_choice.dart';
+import '../tools/tool_definition.dart';
 import 'input_message.dart';
 import 'thinking_config.dart';
 
@@ -173,14 +175,15 @@ class MessageCreateRequest {
 
   /// Tool choice configuration.
   ///
-  /// Controls how the model chooses tools.
-  /// Use `Map<String, dynamic>` for now, will be replaced with ToolChoice type.
-  final Map<String, dynamic>? toolChoice;
+  /// Controls how the model chooses tools. Use [ToolChoice.auto],
+  /// [ToolChoice.any], [ToolChoice.tool], or [ToolChoice.none].
+  final ToolChoice? toolChoice;
 
   /// Tools available to the model.
   ///
-  /// Use `List<Map<String, dynamic>>` for now, will be replaced with Tool types.
-  final List<Map<String, dynamic>>? tools;
+  /// Can include custom tools ([ToolDefinition.custom]) and built-in tools
+  /// ([ToolDefinition.builtIn]).
+  final List<ToolDefinition>? tools;
 
   /// Nucleus sampling parameter.
   final double? topP;
@@ -229,9 +232,11 @@ class MessageCreateRequest {
       thinking: json['thinking'] != null
           ? ThinkingConfig.fromJson(json['thinking'] as Map<String, dynamic>)
           : null,
-      toolChoice: json['tool_choice'] as Map<String, dynamic>?,
+      toolChoice: json['tool_choice'] != null
+          ? ToolChoice.fromJson(json['tool_choice'] as Map<String, dynamic>)
+          : null,
       tools: (json['tools'] as List?)
-          ?.map((e) => e as Map<String, dynamic>)
+          ?.map((e) => ToolDefinition.fromJson(e as Map<String, dynamic>))
           .toList(),
       topP: (json['top_p'] as num?)?.toDouble(),
       topK: json['top_k'] as int?,
@@ -250,8 +255,8 @@ class MessageCreateRequest {
     if (stream != null) 'stream': stream,
     if (temperature != null) 'temperature': temperature,
     if (thinking != null) 'thinking': thinking!.toJson(),
-    if (toolChoice != null) 'tool_choice': toolChoice,
-    if (tools != null) 'tools': tools,
+    if (toolChoice != null) 'tool_choice': toolChoice!.toJson(),
+    if (tools != null) 'tools': tools!.map((e) => e.toJson()).toList(),
     if (topP != null) 'top_p': topP,
     if (topK != null) 'top_k': topK,
   };
@@ -298,10 +303,10 @@ class MessageCreateRequest {
           : thinking as ThinkingConfig?,
       toolChoice: toolChoice == unsetCopyWithValue
           ? this.toolChoice
-          : toolChoice as Map<String, dynamic>?,
+          : toolChoice as ToolChoice?,
       tools: tools == unsetCopyWithValue
           ? this.tools
-          : tools as List<Map<String, dynamic>>?,
+          : tools as List<ToolDefinition>?,
       topP: topP == unsetCopyWithValue ? this.topP : topP as double?,
       topK: topK == unsetCopyWithValue ? this.topK : topK as int?,
     );
@@ -322,7 +327,7 @@ class MessageCreateRequest {
           stream == other.stream &&
           temperature == other.temperature &&
           thinking == other.thinking &&
-          _mapsEqual(toolChoice, other.toolChoice) &&
+          toolChoice == other.toolChoice &&
           _listsEqual(tools, other.tools) &&
           topP == other.topP &&
           topK == other.topK;
@@ -360,16 +365,6 @@ bool _listsEqual<T>(List<T>? a, List<T>? b) {
   if (a.length != b.length) return false;
   for (var i = 0; i < a.length; i++) {
     if (a[i] != b[i]) return false;
-  }
-  return true;
-}
-
-bool _mapsEqual<K, V>(Map<K, V>? a, Map<K, V>? b) {
-  if (a == null && b == null) return true;
-  if (a == null || b == null) return false;
-  if (a.length != b.length) return false;
-  for (final key in a.keys) {
-    if (!b.containsKey(key) || a[key] != b[key]) return false;
   }
   return true;
 }

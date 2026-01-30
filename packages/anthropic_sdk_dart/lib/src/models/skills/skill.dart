@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import 'skill_source.dart';
 
 /// A skill in the Anthropic API.
 ///
@@ -33,10 +34,9 @@ class Skill {
 
   /// Source of the skill.
   ///
-  /// This may be one of the following values:
-  /// * `"custom"`: the skill was created by a user
-  /// * `"anthropic"`: the skill was created by Anthropic
-  final String source;
+  /// Indicates whether this skill was created by a user ([SkillSource.custom])
+  /// or provided by Anthropic ([SkillSource.anthropic]).
+  final SkillSource source;
 
   /// Object type. Always "skill".
   final String type;
@@ -60,7 +60,7 @@ class Skill {
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
       latestVersion: json['latest_version'] as String?,
-      source: json['source'] as String,
+      source: SkillSource.fromJson(json['source'] as String),
       type: json['type'] as String? ?? 'skill',
     );
   }
@@ -72,7 +72,7 @@ class Skill {
     'created_at': createdAt.toUtc().toIso8601String(),
     'updated_at': updatedAt.toUtc().toIso8601String(),
     'latest_version': latestVersion,
-    'source': source,
+    'source': source.toJson(),
     'type': type,
   };
 
@@ -87,7 +87,7 @@ class Skill {
     DateTime? createdAt,
     DateTime? updatedAt,
     Object? latestVersion = unsetCopyWithValue,
-    String? source,
+    SkillSource? source,
     String? type,
   }) {
     return Skill(

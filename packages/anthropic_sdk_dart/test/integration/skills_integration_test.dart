@@ -56,23 +56,23 @@ void main() {
         // List only anthropic-provided skills
         final anthropicSkills = await client!.skills.list(
           limit: 10,
-          source: 'anthropic',
+          source: SkillSource.anthropic,
         );
 
         // All returned skills should be from anthropic
         for (final skill in anthropicSkills.data) {
-          expect(skill.source, 'anthropic');
+          expect(skill.source, SkillSource.anthropic);
         }
 
         // List only custom skills
         final customSkills = await client!.skills.list(
           limit: 10,
-          source: 'custom',
+          source: SkillSource.custom,
         );
 
         // All returned skills should be custom
         for (final skill in customSkills.data) {
-          expect(skill.source, 'custom');
+          expect(skill.source, SkillSource.custom);
         }
       },
     );
@@ -139,7 +139,7 @@ void main() {
 
         expect(skill.id, skillId);
         expect(skill.displayTitle, isNotEmpty);
-        expect(skill.source, anyOf('custom', 'anthropic'));
+        expect(skill.source, anyOf(SkillSource.custom, SkillSource.anthropic));
       },
     );
 

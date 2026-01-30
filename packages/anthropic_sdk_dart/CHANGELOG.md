@@ -1,5 +1,3 @@
-
-
 ## 1.0.0
 
 > Note: This release has breaking changes.
@@ -12,8 +10,8 @@
   - `client.messages` — Message creation, streaming, token counting
   - `client.messages.batches` — Batch message processing
   - `client.models` — Model listing and retrieval
-  - `client.files` — File upload/management (Beta)
-  - `client.skills` — Custom skills management (Beta)
+  - `client.files` — File upload/management
+  - `client.skills` — Custom skills management
   - `client.completions` — Legacy text completions
 - **Architecture**:
   - Interceptor chain (Auth → Logging → Error → Transport with Retry wrapper).
@@ -64,6 +62,10 @@
   - `ApiException`, `AuthenticationException`, `RateLimitException`, `ValidationException`, `TimeoutException`, `AbortedException`.
 - **Streaming**: Pattern matching replaces `.map()` callbacks:
   - `event.map(contentBlockDelta: (e) => ...)` → `if (event is ContentBlockDeltaEvent) ...`
+- **Enum type changes** for better type safety:
+  - `Skill.source`: `String` → `SkillSource` enum (`SkillSource.custom`, `SkillSource.anthropic`)
+  - `Message.role`: `String` → `MessageRole` enum (`MessageRole.assistant`)
+  - `SkillsResource.list()` `source` parameter: `String?` → `SkillSource?`
 - **Session cleanup**: `endSession()` → `close()`.
 - **Dependencies**: Removed `freezed`, `json_serializable`; now minimal (`http`, `logging`, `meta`).
 

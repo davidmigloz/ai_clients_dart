@@ -25,11 +25,13 @@ void main() {
 The Computer Use tool is configured as part of the tools array:
 
 final tools = [
-  ComputerUseTool(
-    displayWidthPx: 1920,
-    displayHeightPx: 1080,
-    displayNumber: 1,
-  ).toJson(),
+  ToolDefinition.builtIn(
+    ComputerUseTool(
+      displayWidthPx: 1920,
+      displayHeightPx: 1080,
+      displayNumber: 1,
+    ),
+  ),
 ];
 
 final response = await client.messages.create(
@@ -60,11 +62,13 @@ Your application should:
 The 2025-01 version adds more capabilities:
 
 final tools = [
-  ComputerUseTool2025_01(
-    displayWidthPx: 1920,
-    displayHeightPx: 1080,
-    displayNumber: 1,
-  ).toJson(),
+  ToolDefinition.builtIn(
+    ComputerUseTool.v20250124(
+      displayWidthPx: 1920,
+      displayHeightPx: 1080,
+      displayNumber: 1,
+    ),
+  ),
 ];
 
 Available actions in 2025-01:
@@ -124,10 +128,12 @@ A typical computer use interaction:
 
     // Example 4: Display the tool JSON structure
     print('\n=== Tool JSON Structure ===');
-    const tool = ComputerUseTool(
-      displayWidthPx: 1920,
-      displayHeightPx: 1080,
-      displayNumber: 1,
+    final tool = ToolDefinition.builtIn(
+      const ComputerUseTool(
+        displayWidthPx: 1920,
+        displayHeightPx: 1080,
+        displayNumber: 1,
+      ),
     );
     print('ComputerUseTool JSON:');
     print(tool.toJson());

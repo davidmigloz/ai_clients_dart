@@ -40,7 +40,7 @@ void main() async {
       MessageCreateRequest(
         model: 'claude-sonnet-4-20250514',
         maxTokens: 1024,
-        tools: [weatherTool.toJson()],
+        tools: [ToolDefinition.custom(weatherTool)],
         messages: [InputMessage.user('What is the weather in San Francisco?')],
       ),
     );
@@ -60,7 +60,7 @@ void main() async {
           MessageCreateRequest(
             model: 'claude-sonnet-4-20250514',
             maxTokens: 1024,
-            tools: [weatherTool.toJson()],
+            tools: [ToolDefinition.custom(weatherTool)],
             messages: [
               InputMessage.user('What is the weather in San Francisco?'),
               InputMessage.assistantBlocks(
