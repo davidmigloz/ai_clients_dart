@@ -201,19 +201,30 @@ class RetryWrapper {
 
   /// Computes a delay with jitter to avoid thundering herd problem.
   ///
-  /// Adds up to 25% random jitter to the base delay, clamped to the
-  /// configured maximum retry delay to ensure jitter doesn't push
-  /// the effective delay past the configured maximum.
+  /// Adds up to 25% random jitter to the base delay. The jitter amount is
+  /// bounded so that it never pushes the effective delay past the configured
+  /// maximum retry delay. If the base delay already exceeds the maximum
+  /// (e.g., from a server-provided Retry-After header), it is returned
+  /// unchanged to preserve the server's requested delay.
   Duration _computeJitteredDelay(Duration delay) {
     const jitterFactor = 0.25;
-    final jitterMs =
-        (_random.nextDouble() * jitterFactor * delay.inMilliseconds).round();
-    final jitteredDelay = delay + Duration(milliseconds: jitterMs);
+    final baseMs = delay.inMilliseconds;
+    final maxMs = config.maxRetryDelay.inMilliseconds;
 
-    // Clamp to maxRetryDelay to ensure jitter doesn't exceed the configured max
-    return jitteredDelay > config.maxRetryDelay
-        ? config.maxRetryDelay
-        : jitteredDelay;
+    // If the base delay is already at or above the max, don't add jitter.
+    // This preserves server-provided Retry-After values that may exceed
+    // maxRetryDelay (up to 2x maxRetryDelay per upstream clamping).
+    if (baseMs >= maxMs) {
+      return delay;
+    }
+
+    // Compute jitter bounded by both the factor and available headroom
+    final maxJitterFromFactor = (jitterFactor * baseMs).round();
+    final headroom = maxMs - baseMs;
+    final allowedJitterMs = min(maxJitterFromFactor, headroom);
+    final jitterMs = (_random.nextDouble() * allowedJitterMs).round();
+
+    return delay + Duration(milliseconds: jitterMs);
   }
 
   /// Delays with jitter to avoid thundering herd problem.

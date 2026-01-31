@@ -5,6 +5,10 @@ import '../models/streaming/streaming.dart';
 extension ChatStreamExtension on Stream<ChatStreamEvent> {
   /// Collects all text deltas into a single string.
   ///
+  /// **Note:** For multi-choice streams (`n > 1`), this concatenates text
+  /// from all choices into a single string. For separate choice handling,
+  /// use [accumulate] which provides per-choice access via the accumulator.
+  ///
   /// ## Example
   ///
   /// ```dart
@@ -59,6 +63,10 @@ extension ChatStreamExtension on Stream<ChatStreamEvent> {
   /// Maps each event to its text delta content.
   ///
   /// Null deltas are filtered out.
+  ///
+  /// **Note:** For multi-choice streams (`n > 1`), this yields text from
+  /// all choices interleaved. For separate choice handling, use [accumulate]
+  /// which provides per-choice access via the accumulator.
   ///
   /// ## Example
   ///

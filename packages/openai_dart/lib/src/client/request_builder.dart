@@ -116,11 +116,14 @@ class RequestBuilder {
   ///
   /// Includes all standard headers plus `Accept: text/event-stream`
   /// for Server-Sent Events (SSE) streaming.
+  ///
+  /// The `Accept` header is always set to `text/event-stream` and cannot
+  /// be overridden by [additionalHeaders] to ensure SSE streaming works.
   Map<String, String> buildStreamingHeaders({
     Map<String, String>? additionalHeaders,
   }) {
     return buildHeaders(
-      additionalHeaders: {'Accept': 'text/event-stream', ...?additionalHeaders},
+      additionalHeaders: {...?additionalHeaders, 'Accept': 'text/event-stream'},
     );
   }
 
@@ -128,12 +131,15 @@ class RequestBuilder {
   ///
   /// Includes the `OpenAI-Beta` header for accessing beta features
   /// like the Assistants API.
+  ///
+  /// The `OpenAI-Beta` header is set to the specified [betaFeature] and
+  /// cannot be overridden by [additionalHeaders] to ensure beta routing works.
   Map<String, String> buildBetaHeaders({
     required String betaFeature,
     Map<String, String>? additionalHeaders,
   }) {
     return buildHeaders(
-      additionalHeaders: {'OpenAI-Beta': betaFeature, ...?additionalHeaders},
+      additionalHeaders: {...?additionalHeaders, 'OpenAI-Beta': betaFeature},
     );
   }
 }
