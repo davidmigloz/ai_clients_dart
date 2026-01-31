@@ -125,15 +125,21 @@ class OpenAIClient {
   ///
   /// Reads `OPENAI_API_KEY` for authentication.
   /// Optionally reads `OPENAI_BASE_URL`, `OPENAI_ORG_ID`, `OPENAI_PROJECT_ID`.
+  ///
+  /// Empty environment variable values are treated the same as unset.
   factory OpenAIClient.fromEnvironment({http.Client? httpClient}) {
+    final baseUrl = Platform.environment['OPENAI_BASE_URL'];
+    final orgId = Platform.environment['OPENAI_ORG_ID'];
+    final projectId = Platform.environment['OPENAI_PROJECT_ID'];
+
     return OpenAIClient(
       config: OpenAIConfig(
         authProvider: ApiKeyProvider.fromEnvironment(),
-        organization: Platform.environment['OPENAI_ORG_ID'],
-        project: Platform.environment['OPENAI_PROJECT_ID'],
-        baseUrl:
-            Platform.environment['OPENAI_BASE_URL'] ??
-            'https://api.openai.com/v1',
+        organization: (orgId != null && orgId.isNotEmpty) ? orgId : null,
+        project: (projectId != null && projectId.isNotEmpty) ? projectId : null,
+        baseUrl: (baseUrl != null && baseUrl.isNotEmpty)
+            ? baseUrl
+            : 'https://api.openai.com/v1',
       ),
       httpClient: httpClient,
     );
