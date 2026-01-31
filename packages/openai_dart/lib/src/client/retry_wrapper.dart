@@ -257,19 +257,25 @@ class RetryWrapper {
     if (abortTrigger == null) {
       await _delayWithJitter(delay);
     } else {
-      // Race the delay with abort trigger
+      // Race the delay with abort trigger.
+      // We use boolean futures instead of throwing in the future chain
+      // to avoid unhandled async errors when the delay wins.
       final finalDelay = _computeJitteredDelay(delay);
 
-      await Future.any([
-        Future<void>.delayed(finalDelay),
-        // Use whenComplete to abort on both success and error completion
-        abortTrigger.whenComplete(() {
-          throw AbortedException(
-            message: 'Request aborted during retry delay',
-            correlationId: correlationId,
-          );
-        }),
-      ]);
+      final delayFuture = Future<bool>.delayed(finalDelay, () => false);
+      final abortFuture = abortTrigger.then(
+        (_) => true,
+        onError: (_) => true, // Also abort on error completion
+      );
+
+      final wasAborted = await Future.any([delayFuture, abortFuture]);
+
+      if (wasAborted) {
+        throw AbortedException(
+          message: 'Request aborted during retry delay',
+          correlationId: correlationId,
+        );
+      }
     }
   }
 }
