@@ -120,5 +120,16 @@ extension ListPageSizeHeuristicsExtension<T> on List<T> {
   ///
   /// Returns true if the list length equals or exceeds the typical
   /// page size, suggesting there might be more items.
-  bool likelyHasMore({int pageSize = 20}) => length >= pageSize;
+  ///
+  /// Throws [ArgumentError] if [pageSize] is not positive.
+  bool likelyHasMore({int pageSize = 20}) {
+    if (pageSize <= 0) {
+      throw ArgumentError.value(
+        pageSize,
+        'pageSize',
+        'pageSize must be greater than 0',
+      );
+    }
+    return length >= pageSize;
+  }
 }

@@ -174,20 +174,27 @@ class RetryWrapper {
   /// Parses the Retry-After header value.
   ///
   /// Supports both delta-seconds and HTTP-date formats.
+  /// Handles leading/trailing whitespace in header values.
   Duration? _parseRetryAfter(String? value) {
-    if (value == null || value.isEmpty) {
+    if (value == null) {
+      return null;
+    }
+
+    // Trim whitespace - HTTP headers can contain leading/trailing spaces
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) {
       return null;
     }
 
     // Try parsing as seconds (clamp to >= 0 to avoid negative durations)
-    final seconds = int.tryParse(value);
+    final seconds = int.tryParse(trimmed);
     if (seconds != null) {
       return Duration(seconds: max(0, seconds));
     }
 
     // Try parsing as HTTP-date
     try {
-      final date = _parseHttpDate(value);
+      final date = _parseHttpDate(trimmed);
       final now = DateTime.now();
       if (date.isAfter(now)) {
         return date.difference(now);
@@ -256,7 +263,8 @@ class RetryWrapper {
 
       await Future.any([
         Future<void>.delayed(finalDelay),
-        abortTrigger.then((_) {
+        // Use whenComplete to abort on both success and error completion
+        abortTrigger.whenComplete(() {
           throw AbortedException(
             message: 'Request aborted during retry delay',
             correlationId: correlationId,
