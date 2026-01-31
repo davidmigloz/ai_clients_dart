@@ -120,16 +120,16 @@ void main() {
     });
   });
 
-  group('TimeoutException', () {
+  group('RequestTimeoutException', () {
     test('creates with message', () {
-      const exception = TimeoutException(message: 'Request timed out');
+      const exception = RequestTimeoutException(message: 'Request timed out');
 
       expect(exception.message, 'Request timed out');
       expect(exception.timeout, isNull);
     });
 
     test('includes timeout duration', () {
-      const exception = TimeoutException(
+      const exception = RequestTimeoutException(
         message: 'Request timed out',
         timeout: Duration(seconds: 30),
       );

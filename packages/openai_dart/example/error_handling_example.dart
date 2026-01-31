@@ -112,7 +112,7 @@ void main() async {
     } on InternalServerException catch (e) {
       print('Server error (${e.statusCode}): ${e.message}');
       // Server errors are typically transient - retry is appropriate
-    } on TimeoutException catch (e) {
+    } on RequestTimeoutException catch (e) {
       print('Request timed out: ${e.message}');
       if (e.timeout != null) {
         print('Timeout was: ${e.timeout!.inSeconds} seconds');

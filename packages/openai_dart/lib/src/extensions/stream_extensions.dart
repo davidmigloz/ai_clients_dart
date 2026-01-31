@@ -31,6 +31,10 @@ extension ChatStreamExtension on Stream<ChatStreamEvent> {
   /// Yields the accumulator after each event, allowing you to
   /// access both deltas and the accumulated state.
   ///
+  /// **Note:** This method consumes the entire stream. The same mutable
+  /// accumulator instance is yielded after each event, so each yield
+  /// reflects the current accumulated state (not a snapshot).
+  ///
   /// ## Example
   ///
   /// ```dart
@@ -80,6 +84,9 @@ extension ChatStreamExtension on Stream<ChatStreamEvent> {
   /// Returns the last non-null finish reason from the stream.
   ///
   /// Useful for checking why the stream ended.
+  ///
+  /// **Note:** This method consumes the entire stream to find the finish
+  /// reason. The stream cannot be listened to again after calling this.
   Future<FinishReason?> get finishReason async {
     FinishReason? reason;
     await for (final event in this) {

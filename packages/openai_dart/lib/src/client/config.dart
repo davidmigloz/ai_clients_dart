@@ -126,6 +126,10 @@ class OpenAIConfig {
   final String? project;
 
   /// Creates a copy of this configuration with the given fields replaced.
+  ///
+  /// **Note:** This method cannot clear nullable fields to `null` because
+  /// `null` is used as the sentinel for "keep existing value". To disable
+  /// a feature, create a new [OpenAIConfig] directly without that field.
   OpenAIConfig copyWith({
     AuthProvider? authProvider,
     String? baseUrl,
@@ -249,9 +253,10 @@ class RetryPolicy {
   /// Whether to retry on 5xx (server error) responses.
   final bool retryOn5xx;
 
-  /// Calculates the delay for the given retry attempt.
+  /// Calculates the base delay for the given retry attempt.
   ///
-  /// Uses exponential backoff with jitter.
+  /// Uses exponential backoff. Jitter is applied separately by the
+  /// [RetryWrapper] to avoid thundering herd problems.
   Duration getDelayForAttempt(int attempt) {
     if (attempt <= 0) return Duration.zero;
 

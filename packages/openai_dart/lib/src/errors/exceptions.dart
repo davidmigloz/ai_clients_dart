@@ -273,11 +273,17 @@ class InternalServerException extends ApiException {
 ///
 /// This can occur due to network issues or the server taking too long
 /// to respond.
+///
+/// Note: This is named `RequestTimeoutException` to avoid conflicts with
+/// `dart:async`'s `TimeoutException`.
 @immutable
-class TimeoutException extends OpenAIException {
-  /// Creates a new [TimeoutException].
-  const TimeoutException({required String message, this.timeout, Object? cause})
-    : super(message, cause: cause);
+class RequestTimeoutException extends OpenAIException {
+  /// Creates a new [RequestTimeoutException].
+  const RequestTimeoutException({
+    required String message,
+    this.timeout,
+    Object? cause,
+  }) : super(message, cause: cause);
 
   /// The timeout duration that was exceeded.
   final Duration? timeout;
@@ -285,11 +291,15 @@ class TimeoutException extends OpenAIException {
   @override
   String toString() {
     if (timeout case final duration?) {
-      return 'TimeoutException: $message (after ${duration.inSeconds}s)';
+      return 'RequestTimeoutException: $message (after ${duration.inSeconds}s)';
     }
-    return 'TimeoutException: $message';
+    return 'RequestTimeoutException: $message';
   }
 }
+
+/// Alias for [RequestTimeoutException] for backwards compatibility.
+@Deprecated('Use RequestTimeoutException instead')
+typedef TimeoutException = RequestTimeoutException;
 
 /// The stage at which the request was aborted.
 enum AbortionStage {

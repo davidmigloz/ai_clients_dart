@@ -127,7 +127,10 @@ class InterceptorChain {
     }
 
     // Execute with or without retry wrapper
-    if (retryWrapper case final wrapper?) {
+    // Note: Retries are only supported for http.Request types because other
+    // request types (MultipartRequest, StreamedRequest) cannot be safely cloned.
+    if (retryWrapper case final wrapper?
+        when originalRequest is http.Request) {
       // Extract correlation ID for retry wrapper tracing
       final correlationId =
           context.metadata['correlationId'] as String? ??
@@ -158,6 +161,7 @@ class _AbortableRequestWrapper extends http.BaseRequest
     followRedirects = _inner.followRedirects;
     maxRedirects = _inner.maxRedirects;
     persistentConnection = _inner.persistentConnection;
+    contentLength = _inner.contentLength;
   }
 
   final http.BaseRequest _inner;

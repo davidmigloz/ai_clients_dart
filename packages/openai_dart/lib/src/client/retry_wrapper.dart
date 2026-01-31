@@ -126,7 +126,7 @@ class RetryWrapper {
           // 4xx errors are client errors, don't retry
           rethrow;
         }
-      } on TimeoutException {
+      } on RequestTimeoutException {
         // Retry on timeout for idempotent methods only
         if (!_isIdempotent(request.method)) {
           rethrow;

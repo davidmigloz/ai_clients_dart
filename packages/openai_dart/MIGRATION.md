@@ -426,7 +426,7 @@ OpenAIException (sealed base)
 │   ├── UnprocessableEntityException (422)
 │   ├── RateLimitException (429)
 │   └── InternalServerException (5xx)
-├── TimeoutException
+├── RequestTimeoutException
 ├── AbortedException
 ├── ConnectionException
 ├── ParseException
@@ -449,7 +449,7 @@ try {
   print('Code: ${e.code}');
   print('Message: ${e.message}');
   print('Request ID: ${e.requestId}');
-} on TimeoutException catch (e) {
+} on RequestTimeoutException catch (e) {
   print('Request timed out');
 } on ConnectionException catch (e) {
   print('Network error: ${e.message}');

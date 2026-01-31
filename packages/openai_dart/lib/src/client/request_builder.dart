@@ -25,7 +25,13 @@ class RequestBuilder {
   /// The [path] should start with a `/`, e.g., `/chat/completions`.
   /// Optional [queryParams] are appended to the URL.
   Uri buildUrl(String path, {Map<String, String>? queryParams}) {
-    final uri = Uri.parse('${config.baseUrl}$path');
+    // Normalize baseUrl and path to avoid double slashes
+    final baseUrl = config.baseUrl.endsWith('/')
+        ? config.baseUrl.substring(0, config.baseUrl.length - 1)
+        : config.baseUrl;
+    final normalizedPath = path.startsWith('/') ? path : '/$path';
+
+    final uri = Uri.parse('$baseUrl$normalizedPath');
 
     if (queryParams == null || queryParams.isEmpty) {
       return uri;

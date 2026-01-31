@@ -888,7 +888,7 @@ Future<T> waitForEvent<T extends realtime.RealtimeEvent>(
     await subscription.cancel();
     if (!completer.isCompleted) {
       completer.completeError(
-        TimeoutException(message: 'Timeout waiting for $T', timeout: timeout),
+        RequestTimeoutException(message: 'Timeout waiting for $T', timeout: timeout),
       );
     }
   });
@@ -931,7 +931,7 @@ Future<List<realtime.RealtimeEvent>> collectEventsUntil<T>(
     await subscription.cancel();
     if (!completer.isCompleted) {
       completer.completeError(
-        TimeoutException(message: 'Timeout waiting for $T', timeout: timeout),
+        RequestTimeoutException(message: 'Timeout waiting for $T', timeout: timeout),
       );
     }
   });

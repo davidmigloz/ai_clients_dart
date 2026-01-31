@@ -82,7 +82,7 @@ void main() {
       print('Video ${video.id}: ${video.progress}% - ${video.status}');
       await Future<void>.delayed(pollInterval);
     }
-    throw TimeoutException(
+    throw RequestTimeoutException(
       message: 'Video generation timed out after $timeout',
       timeout: timeout,
     );
