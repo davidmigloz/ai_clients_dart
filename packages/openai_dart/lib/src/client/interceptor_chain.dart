@@ -172,6 +172,16 @@ class _AbortableRequestWrapper extends http.BaseRequest
   @override
   http.ByteStream finalize() {
     super.finalize();
-    return _inner.finalize();
+    final stream = _inner.finalize();
+
+    // Synchronize headers with the inner request after it has been
+    // finalized. This ensures that any headers set during finalize(),
+    // such as multipart Content-Type boundaries, are visible to the
+    // HTTP client when sending this wrapper request.
+    headers
+      ..clear()
+      ..addAll(_inner.headers);
+
+    return stream;
   }
 }
