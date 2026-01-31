@@ -8,6 +8,9 @@ import 'interceptor.dart';
 /// This interceptor retrieves authentication headers from the configured
 /// [AuthProvider] and adds them to every outgoing request.
 ///
+/// Note: Organization and project headers are added in the base headers
+/// of the client, not here, so they work regardless of auth mechanism.
+///
 /// ## Example
 ///
 /// ```dart
@@ -17,20 +20,10 @@ import 'interceptor.dart';
 /// ```
 class AuthInterceptor implements Interceptor {
   /// Creates an [AuthInterceptor] with the given auth provider.
-  const AuthInterceptor({
-    required this.authProvider,
-    this.organization,
-    this.project,
-  });
+  const AuthInterceptor({required this.authProvider});
 
   /// The authentication provider for obtaining credentials.
   final AuthProvider authProvider;
-
-  /// Optional organization ID to include in requests.
-  final String? organization;
-
-  /// Optional project ID to include in requests.
-  final String? project;
 
   @override
   Future<http.Response> intercept(
@@ -40,20 +33,8 @@ class AuthInterceptor implements Interceptor {
     // Get auth headers from provider
     final authHeaders = authProvider.getHeaders();
 
-    // Build additional headers
-    final additionalHeaders = <String, String>{...authHeaders};
-    if (organization case final org?) {
-      additionalHeaders['OpenAI-Organization'] = org;
-    }
-    if (project case final proj?) {
-      additionalHeaders['OpenAI-Project'] = proj;
-    }
-
     // Create a new request with auth headers
-    final request = _cloneRequestWithHeaders(
-      context.request,
-      additionalHeaders,
-    );
+    final request = _cloneRequestWithHeaders(context.request, authHeaders);
 
     // Continue with the updated request
     return next(context.copyWith(request: request));

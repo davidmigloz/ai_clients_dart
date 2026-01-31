@@ -1,5 +1,7 @@
 // ignore_for_file: avoid_print, unreachable_from_main
 
+import 'dart:io';
+
 import 'package:openai_dart/openai_dart.dart';
 
 /// Example demonstrating the ChatKit API for building chat interfaces.
@@ -128,10 +130,7 @@ Future<void> sessionExample(OpenAIClient client) async {
   print('=== ChatKit Session Example ===\n');
 
   // Get workflow ID from environment
-  const workflowId = String.fromEnvironment(
-    'OPENAI_CHATKIT_WORKFLOW_ID',
-    defaultValue: '',
-  );
+  final workflowId = Platform.environment['OPENAI_CHATKIT_WORKFLOW_ID'] ?? '';
 
   if (workflowId.isEmpty) {
     print('OPENAI_CHATKIT_WORKFLOW_ID not set. Skipping session example.');
@@ -143,7 +142,7 @@ Future<void> sessionExample(OpenAIClient client) async {
   final userId = 'example-user-${DateTime.now().millisecondsSinceEpoch}';
   final session = await client.chatkit.sessions.create(
     CreateChatSessionRequest(
-      workflow: const WorkflowParam(id: workflowId),
+      workflow: WorkflowParam(id: workflowId),
       user: userId,
     ),
   );
@@ -195,10 +194,7 @@ Future<void> fullSessionExample(OpenAIClient client) async {
   print('=== Full Session Configuration Example ===\n');
 
   // Get workflow ID from environment
-  const workflowId = String.fromEnvironment(
-    'OPENAI_CHATKIT_WORKFLOW_ID',
-    defaultValue: '',
-  );
+  final workflowId = Platform.environment['OPENAI_CHATKIT_WORKFLOW_ID'] ?? '';
 
   if (workflowId.isEmpty) {
     print('OPENAI_CHATKIT_WORKFLOW_ID not set. Skipping example.');
@@ -208,19 +204,19 @@ Future<void> fullSessionExample(OpenAIClient client) async {
 
   // Create a session with all configuration options
   final session = await client.chatkit.sessions.create(
-    const CreateChatSessionRequest(
+    CreateChatSessionRequest(
       workflow: WorkflowParam(
         id: workflowId,
         // Enable tracing for debugging
-        tracing: TracingParam(enabled: true),
+        tracing: const TracingParam(enabled: true),
       ),
       user: 'full-example-user',
       // Session expires in 10 minutes
       expiresAfter: 600,
       // Custom rate limits
-      rateLimits: RateLimitsParam(maxRequestsPer1Minute: 30),
+      rateLimits: const RateLimitsParam(maxRequestsPer1Minute: 30),
       // ChatKit-specific features
-      chatkitConfiguration: ChatkitConfigurationParam(
+      chatkitConfiguration: const ChatkitConfigurationParam(
         // Auto-generate thread titles
         automaticThreadTitling: AutomaticThreadTitlingParam(enabled: true),
         // Allow file uploads

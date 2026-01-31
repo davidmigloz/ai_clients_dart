@@ -1,3 +1,5 @@
+import 'dart:async' show TimeoutException;
+import 'dart:io' show HttpDate, SocketException;
 import 'dart:math';
 
 import 'package:http/http.dart' as http;
@@ -90,62 +92,27 @@ class RetryWrapper {
       } on AbortedException {
         // Don't retry after abort - propagate immediately
         rethrow;
-      } on RateLimitException catch (e) {
-        // Handle rate limiting
-        if (attempt >= config.maxRetries) {
-          rethrow;
-        }
-
-        // Honor retryAfter from exception if provided
-        if (e.retryAfter != null) {
-          final serverDelay = e.retryAfter!;
-          // Use server's suggested delay if reasonable
-          if (serverDelay <= config.maxRetryDelay * 2) {
-            delay = serverDelay;
-          }
-        }
-
-        await _delayWithAbortCheck(delay, abortTrigger, correlationId);
-        attempt++;
-        delay = _exponentialBackoff(delay);
-      } on ApiException catch (e) {
-        // Retry on 5xx server errors (transient failures)
-        if (e.statusCode >= 500 && e.statusCode < 600) {
-          if (!_isIdempotent(request.method)) {
-            rethrow; // Don't retry non-idempotent operations
-          }
-
-          if (attempt >= config.maxRetries) {
-            rethrow;
-          }
-
-          await _delayWithAbortCheck(delay, abortTrigger, correlationId);
-          attempt++;
-          delay = _exponentialBackoff(delay);
-        } else {
-          // 4xx errors are client errors, don't retry
-          rethrow;
-        }
-      } on RequestTimeoutException {
+      } on TimeoutException {
         // Retry on timeout for idempotent methods only
-        if (!_isIdempotent(request.method)) {
-          rethrow;
-        }
-
-        if (attempt >= config.maxRetries) {
+        if (!_isIdempotent(request.method) || attempt >= config.maxRetries) {
           rethrow;
         }
 
         await _delayWithAbortCheck(delay, abortTrigger, correlationId);
         attempt++;
         delay = _exponentialBackoff(delay);
-      } on ConnectionException {
+      } on SocketException {
         // Retry on connection errors for idempotent methods only
-        if (!_isIdempotent(request.method)) {
+        if (!_isIdempotent(request.method) || attempt >= config.maxRetries) {
           rethrow;
         }
 
-        if (attempt >= config.maxRetries) {
+        await _delayWithAbortCheck(delay, abortTrigger, correlationId);
+        attempt++;
+        delay = _exponentialBackoff(delay);
+      } on http.ClientException {
+        // Retry on HTTP client errors for idempotent methods only
+        if (!_isIdempotent(request.method) || attempt >= config.maxRetries) {
           rethrow;
         }
 
@@ -225,43 +192,12 @@ class RetryWrapper {
   }
 
   /// Parses an HTTP-date string.
-  DateTime _parseHttpDate(String value) {
-    // RFC 7231 defines three formats, but DateTime.parse handles ISO 8601
-    // For HTTP dates, we need custom parsing
-    // Format: "Wed, 21 Oct 2015 07:28:00 GMT"
-    final httpDateRegex = RegExp(
-      r'^[A-Za-z]{3}, (\d{2}) ([A-Za-z]{3}) (\d{4}) (\d{2}):(\d{2}):(\d{2}) GMT$',
-    );
-
-    final match = httpDateRegex.firstMatch(value);
-    if (match == null) {
-      throw FormatException('Invalid HTTP date: $value');
-    }
-
-    const months = {
-      'Jan': 1,
-      'Feb': 2,
-      'Mar': 3,
-      'Apr': 4,
-      'May': 5,
-      'Jun': 6,
-      'Jul': 7,
-      'Aug': 8,
-      'Sep': 9,
-      'Oct': 10,
-      'Nov': 11,
-      'Dec': 12,
-    };
-
-    final day = int.parse(match.group(1)!);
-    final month = months[match.group(2)!]!;
-    final year = int.parse(match.group(3)!);
-    final hour = int.parse(match.group(4)!);
-    final minute = int.parse(match.group(5)!);
-    final second = int.parse(match.group(6)!);
-
-    return DateTime.utc(year, month, day, hour, minute, second);
-  }
+  ///
+  /// Uses [HttpDate.parse] which supports all RFC 7231 date formats:
+  /// - RFC 1123 (preferred): "Wed, 21 Oct 2015 07:28:00 GMT"
+  /// - RFC 850: "Wednesday, 21-Oct-15 07:28:00 GMT"
+  /// - ANSI C asctime(): "Wed Oct 21 07:28:00 2015"
+  DateTime _parseHttpDate(String value) => HttpDate.parse(value);
 
   /// Delays with jitter to avoid thundering herd problem.
   Future<void> _delayWithJitter(Duration delay) async {

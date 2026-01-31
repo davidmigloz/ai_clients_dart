@@ -188,13 +188,7 @@ class OpenAIClient {
 
     // Add auth interceptor if auth provider is configured
     if (_config.authProvider case final authProvider?) {
-      interceptors.add(
-        AuthInterceptor(
-          authProvider: authProvider,
-          organization: _config.organization,
-          project: _config.project,
-        ),
-      );
+      interceptors.add(AuthInterceptor(authProvider: authProvider));
     }
 
     // Add logging interceptor if logging is enabled
@@ -227,8 +221,8 @@ class OpenAIClient {
 
   /// Returns the base headers for API requests.
   ///
-  /// Note: Auth and organization headers are now added by the
-  /// [AuthInterceptor] in the interceptor chain.
+  /// Note: Auth headers are added by the [AuthInterceptor] in the
+  /// interceptor chain.
   Map<String, String> get _baseHeaders {
     final headers = <String, String>{
       'Content-Type': 'application/json',
@@ -240,10 +234,40 @@ class OpenAIClient {
       headers['OpenAI-Version'] = version;
     }
 
+    // Add organization/project headers if configured
+    // These are added here (not in AuthInterceptor) so they work regardless
+    // of the auth mechanism (authProvider, defaultHeaders, or custom interceptor)
+    if (_config.organization case final org?) {
+      headers['OpenAI-Organization'] = org;
+    }
+    if (_config.project case final proj?) {
+      headers['OpenAI-Project'] = proj;
+    }
+
     // Add request ID for tracing
     headers['X-Request-ID'] = generateRequestId();
 
     return headers;
+  }
+
+  /// Builds a URL for an API endpoint.
+  ///
+  /// Normalizes the base URL and endpoint to avoid double slashes or
+  /// missing separators.
+  Uri _buildUrl(String endpoint, {Map<String, String>? queryParameters}) {
+    // Normalize baseUrl and endpoint to avoid double slashes
+    final baseUrl = _config.baseUrl.endsWith('/')
+        ? _config.baseUrl.substring(0, _config.baseUrl.length - 1)
+        : _config.baseUrl;
+    final normalizedEndpoint = endpoint.startsWith('/') ? endpoint : '/$endpoint';
+
+    var uri = Uri.parse('$baseUrl$normalizedEndpoint');
+
+    if (queryParameters != null && queryParameters.isNotEmpty) {
+      uri = uri.replace(queryParameters: queryParameters);
+    }
+
+    return uri;
   }
 
   // ============================================================
@@ -761,11 +785,7 @@ class OpenAIClient {
   }) {
     _ensureNotClosed();
 
-    var url = Uri.parse('${_config.baseUrl}$endpoint');
-    if (queryParameters != null && queryParameters.isNotEmpty) {
-      url = url.replace(queryParameters: queryParameters);
-    }
-
+    final url = _buildUrl(endpoint, queryParameters: queryParameters);
     final request = http.Request('GET', url)
       ..headers.addAll({..._baseHeaders, ...?headers});
 
@@ -783,7 +803,7 @@ class OpenAIClient {
   }) {
     _ensureNotClosed();
 
-    final url = Uri.parse('${_config.baseUrl}$endpoint');
+    final url = _buildUrl(endpoint);
     final request = http.Request('POST', url)
       ..headers.addAll({..._baseHeaders, ...?headers});
 
@@ -810,7 +830,7 @@ class OpenAIClient {
   }) {
     _ensureNotClosed();
 
-    final url = Uri.parse('${_config.baseUrl}$endpoint');
+    final url = _buildUrl(endpoint);
     final request = http.Request('DELETE', url)
       ..headers.addAll({..._baseHeaders, ...?headers});
 
