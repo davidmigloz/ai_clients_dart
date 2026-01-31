@@ -814,6 +814,11 @@ class OpenAIClient {
         request.bodyBytes = body;
       } else if (body is Map) {
         request.body = jsonEncode(body);
+      } else {
+        throw ArgumentError(
+          'Unsupported body type: ${body.runtimeType}. '
+          'Supported types are String, List<int>, and Map.',
+        );
       }
     }
 

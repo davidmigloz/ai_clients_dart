@@ -52,37 +52,10 @@ class RequestBuilder {
   /// - `OpenAI-Project` if configured
   /// - `OpenAI-Version` if configured
   Map<String, String> buildHeaders({Map<String, String>? additionalHeaders}) {
-    final headers = <String, String>{
-      'Content-Type': 'application/json',
-      ...config.defaultHeaders,
-    };
-
-    // Add auth headers
-    if (config.authProvider case final authProvider?) {
-      headers.addAll(authProvider.getHeaders());
-    }
-
-    // Add organization header if configured
-    if (config.organization case final org?) {
-      headers['OpenAI-Organization'] = org;
-    }
-
-    // Add project header if configured
-    if (config.project case final proj?) {
-      headers['OpenAI-Project'] = proj;
-    }
-
-    // Add API version if configured
-    if (config.apiVersion case final version?) {
-      headers['OpenAI-Version'] = version;
-    }
-
-    // Add any additional request-specific headers
-    if (additionalHeaders != null) {
-      headers.addAll(additionalHeaders);
-    }
-
-    return headers;
+    return _buildBaseHeaders(
+      includeContentType: true,
+      additionalHeaders: additionalHeaders,
+    );
   }
 
   /// Builds headers for a multipart form request.
@@ -92,7 +65,24 @@ class RequestBuilder {
   Map<String, String> buildMultipartHeaders({
     Map<String, String>? additionalHeaders,
   }) {
-    final headers = <String, String>{...config.defaultHeaders};
+    return _buildBaseHeaders(
+      includeContentType: false,
+      additionalHeaders: additionalHeaders,
+    );
+  }
+
+  /// Shared header building logic.
+  ///
+  /// The [includeContentType] flag controls whether to add
+  /// `Content-Type: application/json` (omitted for multipart requests).
+  Map<String, String> _buildBaseHeaders({
+    required bool includeContentType,
+    Map<String, String>? additionalHeaders,
+  }) {
+    final headers = <String, String>{
+      if (includeContentType) 'Content-Type': 'application/json',
+      ...config.defaultHeaders,
+    };
 
     // Add auth headers
     if (config.authProvider case final authProvider?) {

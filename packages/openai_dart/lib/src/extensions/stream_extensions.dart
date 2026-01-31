@@ -102,8 +102,12 @@ extension ChatStreamExtension on Stream<ChatStreamEvent> {
   }
 }
 
-/// Extension methods for lists that support pagination.
-extension PaginatedListExtension<T> on List<T> {
+/// Extension providing heuristic pagination checks for lists.
+///
+/// These methods provide a simple heuristic for detecting whether
+/// a list might have more items available. Use this when the API
+/// response doesn't include explicit pagination metadata.
+extension ListPageSizeHeuristicsExtension<T> on List<T> {
   /// Checks if this list likely has more items available.
   ///
   /// Returns true if the list length equals or exceeds the typical
