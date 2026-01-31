@@ -368,10 +368,14 @@ class AbortedException extends OpenAIException {
 
   @override
   String toString() {
-    final parts = ['AbortedException: $message'];
-    if (stage != null) parts.add('stage: ${stage!.name}');
-    if (correlationId != null) parts.add('correlationId: $correlationId');
-    return parts.join(' (') + (parts.length > 1 ? ')' : '');
+    final buffer = StringBuffer('AbortedException: $message');
+    final details = <String>[];
+    if (stage != null) details.add('stage: ${stage!.name}');
+    if (correlationId != null) details.add('correlationId: $correlationId');
+    if (details.isNotEmpty) {
+      buffer.write(' (${details.join(', ')})');
+    }
+    return buffer.toString();
   }
 }
 

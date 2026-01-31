@@ -75,10 +75,36 @@ class InterceptorChain {
 
   /// Executes the HTTP transport with optional retry wrapper.
   Future<http.Response> _executeTransport(RequestContext context) {
-    final requestToSend = context.request;
+    final originalRequest = context.request;
+
+    // For retries, we need to clone the request since http.BaseRequest
+    // can only be finalized once. Capture body bytes upfront.
+    List<int>? bodyBytes;
+    if (originalRequest is http.Request) {
+      bodyBytes = originalRequest.bodyBytes;
+    }
+
+    // Creates a fresh request for each attempt (required for retries)
+    http.BaseRequest createRequest() {
+      if (originalRequest is http.Request) {
+        final request = http.Request(originalRequest.method, originalRequest.url)
+          ..headers.addAll(originalRequest.headers)
+          ..followRedirects = originalRequest.followRedirects
+          ..maxRedirects = originalRequest.maxRedirects
+          ..persistentConnection = originalRequest.persistentConnection;
+        if (bodyBytes != null && bodyBytes.isNotEmpty) {
+          request.bodyBytes = bodyBytes;
+        }
+        return request;
+      }
+      // For other request types, return as-is (retries may fail)
+      return originalRequest;
+    }
 
     // Transport execution function
     Future<http.Response> executeTransport() async {
+      final requestToSend = createRequest();
+
       if (context.abortTrigger != null) {
         // Wrap request to enable http client's native abort support
         final abortableRequest = _AbortableRequestWrapper(
@@ -109,7 +135,7 @@ class InterceptorChain {
           generateRequestId();
 
       return wrapper.executeWithRetry(
-        requestToSend,
+        originalRequest,
         executeTransport,
         context.abortTrigger,
         correlationId,

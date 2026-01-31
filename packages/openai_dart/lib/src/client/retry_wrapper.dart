@@ -22,7 +22,10 @@ import 'config.dart';
 /// Retries are NOT attempted for:
 /// - Client errors (HTTP 4xx except 429)
 /// - Aborted requests
-/// - Non-idempotent methods (POST, PATCH) by default
+/// - Non-idempotent methods (POST, PATCH) for 5xx errors
+///
+/// Note: HTTP 429 (rate limit) is always retried regardless of method,
+/// as the request was not processed due to rate limiting.
 ///
 /// ## Example
 ///
@@ -290,8 +293,9 @@ class RetryWrapper {
       await Future.any([
         Future<void>.delayed(finalDelay),
         abortTrigger.then((_) {
-          throw const AbortedException(
+          throw AbortedException(
             message: 'Request aborted during retry delay',
+            correlationId: correlationId,
           );
         }),
       ]);
