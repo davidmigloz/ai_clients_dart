@@ -842,12 +842,12 @@ class OpenAIClient {
     return _interceptorChain.execute(request, abortTrigger: abortTrigger);
   }
 
-  /// Makes a multipart POST request to the given endpoint.
+  /// Makes a multipart POST request.
   ///
-  /// Used for file uploads and other multipart form data.
+  /// The [request] should already have its URL set. Used for file uploads
+  /// and other multipart form data.
   /// The optional [abortTrigger] allows canceling the request before completion.
-  Future<http.Response> postMultipart(
-    String endpoint, {
+  Future<http.Response> postMultipart({
     required http.MultipartRequest request,
     Map<String, String>? headers,
     Future<void>? abortTrigger,

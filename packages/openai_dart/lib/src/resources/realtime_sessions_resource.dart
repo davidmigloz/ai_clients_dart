@@ -238,7 +238,6 @@ class RealtimeCallsResource extends BaseResource {
     }
 
     final response = await client.postMultipart(
-      _callsEndpoint,
       request: multipartRequest,
       abortTrigger: abortTrigger,
     );

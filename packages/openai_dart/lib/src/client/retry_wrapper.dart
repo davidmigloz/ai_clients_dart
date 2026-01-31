@@ -199,14 +199,19 @@ class RetryWrapper {
   /// - ANSI C asctime(): "Wed Oct 21 07:28:00 2015"
   DateTime _parseHttpDate(String value) => HttpDate.parse(value);
 
-  /// Delays with jitter to avoid thundering herd problem.
-  Future<void> _delayWithJitter(Duration delay) async {
-    // Add up to 25% jitter
+  /// Computes a delay with jitter to avoid thundering herd problem.
+  ///
+  /// Adds up to 25% random jitter to the base delay.
+  Duration _computeJitteredDelay(Duration delay) {
     const jitterFactor = 0.25;
     final jitterMs =
         (_random.nextDouble() * jitterFactor * delay.inMilliseconds).round();
-    final finalDelay = delay + Duration(milliseconds: jitterMs);
-    await Future<void>.delayed(finalDelay);
+    return delay + Duration(milliseconds: jitterMs);
+  }
+
+  /// Delays with jitter to avoid thundering herd problem.
+  Future<void> _delayWithJitter(Duration delay) async {
+    await Future<void>.delayed(_computeJitteredDelay(delay));
   }
 
   /// Delays with abort check.
@@ -221,10 +226,7 @@ class RetryWrapper {
       await _delayWithJitter(delay);
     } else {
       // Race the delay with abort trigger
-      const jitterFactor = 0.25;
-      final jitterMs =
-          (_random.nextDouble() * jitterFactor * delay.inMilliseconds).round();
-      final finalDelay = delay + Duration(milliseconds: jitterMs);
+      final finalDelay = _computeJitteredDelay(delay);
 
       await Future.any([
         Future<void>.delayed(finalDelay),
