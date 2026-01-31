@@ -51,6 +51,14 @@ class RetryWrapper {
   /// Random number generator for jitter.
   final Random _random;
 
+  /// Multiplier for clamping server-provided Retry-After values.
+  ///
+  /// When a server returns a Retry-After header, we clamp it to
+  /// `maxRetryDelay * _serverRetryAfterMultiplier` to prevent excessively
+  /// long delays while still respecting server guidance. The 2x multiplier
+  /// balances server intent with configured client policy.
+  static const _serverRetryAfterMultiplier = 2;
+
   /// Executes an HTTP request with retry logic.
   ///
   /// The [execute] function performs the actual HTTP transport.
@@ -78,7 +86,8 @@ class RetryWrapper {
           if (retryAfter != null) {
             // Clamp server-provided Retry-After to a reasonable maximum to avoid
             // excessively long sleeps that bypass our configured retry policy.
-            final maxServerDelay = config.maxRetryDelay * 2;
+            final maxServerDelay =
+                config.maxRetryDelay * _serverRetryAfterMultiplier;
             delay = retryAfter <= maxServerDelay ? retryAfter : maxServerDelay;
           }
 
