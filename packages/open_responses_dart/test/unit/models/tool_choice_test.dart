@@ -251,9 +251,7 @@ void main() {
 
       test('toJson returns correct map with mode', () {
         const choice = ToolChoiceAllowedTools(
-          tools: [
-            SpecificFunctionChoice(name: 'func1'),
-          ],
+          tools: [SpecificFunctionChoice(name: 'func1')],
           mode: ToolChoiceMode.required,
         );
         expect(choice.toJson(), {
@@ -333,10 +331,7 @@ void main() {
     });
 
     test('fromJson throws on invalid format', () {
-      expect(
-        () => ToolChoice.fromJson(123),
-        throwsA(isA<FormatException>()),
-      );
+      expect(() => ToolChoice.fromJson(123), throwsA(isA<FormatException>()));
     });
 
     test('fromJson throws on unknown object type', () {
