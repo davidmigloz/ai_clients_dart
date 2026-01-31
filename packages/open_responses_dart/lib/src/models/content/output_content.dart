@@ -16,6 +16,7 @@ sealed class OutputContent {
     return switch (type) {
       'output_text' => OutputTextContent.fromJson(json),
       'reasoning_text' => ReasoningTextContent.fromJson(json),
+      'summary_text' => SummaryTextContent.fromJson(json),
       'refusal' => RefusalContent.fromJson(json),
       _ => throw FormatException('Unknown OutputContent type: $type'),
     };
@@ -160,4 +161,35 @@ class RefusalContent extends OutputContent {
 
   @override
   String toString() => 'RefusalContent(refusal: $refusal)';
+}
+
+/// Summary text content from reasoning models.
+@immutable
+class SummaryTextContent extends OutputContent {
+  /// The summary text from the reasoning output.
+  final String text;
+
+  /// Creates a [SummaryTextContent].
+  const SummaryTextContent({required this.text});
+
+  /// Creates a [SummaryTextContent] from JSON.
+  factory SummaryTextContent.fromJson(Map<String, dynamic> json) {
+    return SummaryTextContent(text: json['text'] as String);
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': 'summary_text', 'text': text};
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SummaryTextContent &&
+          runtimeType == other.runtimeType &&
+          text == other.text;
+
+  @override
+  int get hashCode => text.hashCode;
+
+  @override
+  String toString() => 'SummaryTextContent(text: $text)';
 }

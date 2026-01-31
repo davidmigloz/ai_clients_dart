@@ -29,10 +29,7 @@ void main() {
         FunctionCallStatus.fromJson('some_new_status'),
         FunctionCallStatus.unknown,
       );
-      expect(
-        FunctionCallStatus.fromJson(''),
-        FunctionCallStatus.unknown,
-      );
+      expect(FunctionCallStatus.fromJson(''), FunctionCallStatus.unknown);
     });
 
     test('toJson returns correct value', () {
@@ -53,14 +50,16 @@ void main() {
 
   group('StreamOptions', () {
     test('fromJson parses includeObfuscation true', () {
-      final options =
-          StreamOptions.fromJson(const {'include_obfuscation': true});
+      final options = StreamOptions.fromJson(const {
+        'include_obfuscation': true,
+      });
       expect(options.includeObfuscation, true);
     });
 
     test('fromJson parses includeObfuscation false', () {
-      final options =
-          StreamOptions.fromJson(const {'include_obfuscation': false});
+      final options = StreamOptions.fromJson(const {
+        'include_obfuscation': false,
+      });
       expect(options.includeObfuscation, false);
     });
 
