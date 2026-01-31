@@ -1,3 +1,4 @@
+import 'dart:convert' show jsonEncode;
 import 'dart:io' show Platform;
 
 import 'package:http/http.dart' as http;
@@ -177,8 +178,7 @@ class OpenAIClient {
   void _initializeLogging() {
     // Set up logging if configured
     if (_config.logLevel case final level?) {
-      _logger = Logger('OpenAIClient');
-      Logger.root.level = level;
+      _logger = Logger('OpenAIClient')..level = level;
     }
   }
 
@@ -793,7 +793,7 @@ class OpenAIClient {
       } else if (body is List<int>) {
         request.bodyBytes = body;
       } else if (body is Map) {
-        request.body = body.toString();
+        request.body = jsonEncode(body);
       }
     }
 

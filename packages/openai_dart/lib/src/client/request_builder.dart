@@ -2,9 +2,8 @@ import 'config.dart';
 
 /// Builds API request URLs and headers with proper precedence.
 ///
-/// This class implements last-write-wins merge semantics:
+/// This class implements last-write-wins merge semantics for headers:
 /// - Headers: Global → Request (later values override)
-/// - Query Params: Global → Request (later values override)
 ///
 /// ## Example
 ///
@@ -23,10 +22,8 @@ class RequestBuilder {
 
   /// Builds a URL for an API endpoint.
   ///
-  /// Merges query parameters in order: Global → Request.
-  /// Later values override earlier ones (last-write-wins).
-  ///
   /// The [path] should start with a `/`, e.g., `/chat/completions`.
+  /// Optional [queryParams] are appended to the URL.
   Uri buildUrl(String path, {Map<String, String>? queryParams}) {
     final uri = Uri.parse('${config.baseUrl}$path');
 

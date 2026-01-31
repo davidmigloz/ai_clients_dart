@@ -77,7 +77,7 @@ extension ChatStreamExtension on Stream<ChatStreamEvent> {
     }
   }
 
-  /// Returns the first non-null finish reason from the stream.
+  /// Returns the last non-null finish reason from the stream.
   ///
   /// Useful for checking why the stream ended.
   Future<FinishReason?> get finishReason async {

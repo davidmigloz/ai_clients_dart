@@ -71,7 +71,10 @@ class RetryWrapper {
         if (_shouldRetry(response.statusCode, request.method, attempt)) {
           final retryAfter = _parseRetryAfter(response.headers['retry-after']);
           if (retryAfter != null) {
-            delay = retryAfter;
+            // Clamp server-provided Retry-After to a reasonable maximum to avoid
+            // excessively long sleeps that bypass our configured retry policy.
+            final maxServerDelay = config.maxRetryDelay * 2;
+            delay = retryAfter <= maxServerDelay ? retryAfter : maxServerDelay;
           }
 
           await _delayWithAbortCheck(delay, abortTrigger, correlationId);

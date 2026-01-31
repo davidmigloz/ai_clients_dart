@@ -184,7 +184,10 @@ class OpenAIConfig {
     retryDelay,
     maxRetryDelay,
     logLevel,
-    Object.hashAll(defaultHeaders.entries),
+    // Use order-insensitive hash to match order-insensitive equality
+    Object.hashAllUnordered(
+      defaultHeaders.entries.map((e) => Object.hash(e.key, e.value)),
+    ),
     apiVersion,
     organization,
     project,
