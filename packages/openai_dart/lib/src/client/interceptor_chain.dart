@@ -174,13 +174,14 @@ class _AbortableRequestWrapper extends http.BaseRequest
     super.finalize();
     final stream = _inner.finalize();
 
-    // Synchronize headers with the inner request after it has been
-    // finalized. This ensures that any headers set during finalize(),
-    // such as multipart Content-Type boundaries, are visible to the
-    // HTTP client when sending this wrapper request.
+    // Synchronize headers and contentLength with the inner request after it
+    // has been finalized. This ensures that any values set during finalize(),
+    // such as multipart Content-Type boundaries and computed content length,
+    // are visible to the HTTP client when sending this wrapper request.
     headers
       ..clear()
       ..addAll(_inner.headers);
+    contentLength = _inner.contentLength;
 
     return stream;
   }
