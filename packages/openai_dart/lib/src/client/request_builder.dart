@@ -5,6 +5,11 @@ import 'config.dart';
 /// This class implements last-write-wins merge semantics for headers:
 /// - Headers: Default → Global → Request (later values override)
 ///
+/// Regardless of caller-specified headers, [RequestBuilder] will inject:
+/// - `Content-Type: application/json` (for non-multipart requests)
+/// - Authentication headers from the configured [AuthProvider]
+/// - `OpenAI-Organization` / `OpenAI-Project` / `OpenAI-Version` when configured
+///
 /// ## Example
 ///
 /// ```dart
@@ -23,21 +28,32 @@ class RequestBuilder {
   /// Builds a URL for an API endpoint.
   ///
   /// The [path] should start with a `/`, e.g., `/chat/completions`.
-  /// Optional [queryParams] are appended to the URL.
+  /// Optional [queryParams] are merged with any query parameters in the
+  /// base URL (request-level params override base-level on key conflicts).
+  ///
+  /// This correctly handles base URLs with existing query parameters,
+  /// such as Azure OpenAI endpoints with `api-version`.
   Uri buildUrl(String path, {Map<String, String>? queryParams}) {
-    // Normalize baseUrl and path to avoid double slashes
-    final baseUrl = config.baseUrl.endsWith('/')
-        ? config.baseUrl.substring(0, config.baseUrl.length - 1)
-        : config.baseUrl;
+    // Parse baseUrl as a Uri to correctly handle existing paths and query params
+    final baseUri = Uri.parse(config.baseUrl);
+
+    // Normalize base path and requested path to avoid double slashes
+    final basePath = baseUri.path.endsWith('/')
+        ? baseUri.path.substring(0, baseUri.path.length - 1)
+        : baseUri.path;
     final normalizedPath = path.startsWith('/') ? path : '/$path';
+    final combinedPath = '$basePath$normalizedPath';
 
-    final uri = Uri.parse('$baseUrl$normalizedPath');
+    // Merge query params: base URL params + request params (request wins on conflict)
+    final mergedQueryParams = <String, String>{
+      ...baseUri.queryParameters,
+      if (queryParams != null) ...queryParams,
+    };
 
-    if (queryParams == null || queryParams.isEmpty) {
-      return uri;
-    }
-
-    return uri.replace(queryParameters: queryParams);
+    return baseUri.replace(
+      path: combinedPath,
+      queryParameters: mergedQueryParams.isEmpty ? null : mergedQueryParams,
+    );
   }
 
   /// Builds headers for a request.
