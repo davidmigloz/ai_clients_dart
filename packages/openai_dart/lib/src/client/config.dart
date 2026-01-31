@@ -3,6 +3,9 @@ import 'package:meta/meta.dart';
 
 import '../auth/auth_provider.dart';
 
+/// Sentinel value for copyWith to distinguish "not provided" from "set to null".
+const Object _unset = Object();
+
 /// Configuration for the OpenAI client.
 ///
 /// This class provides a centralized way to configure all aspects of the
@@ -127,36 +130,37 @@ class OpenAIConfig {
 
   /// Creates a copy of this configuration with the given fields replaced.
   ///
-  /// **Note:** This method cannot clear nullable fields to `null` because
-  /// `null` is used as the sentinel for "keep existing value". To disable
-  /// a feature, create a new [OpenAIConfig] directly without that field.
+  /// To clear a nullable field, pass `null` explicitly. Fields not provided
+  /// retain their current values.
   OpenAIConfig copyWith({
-    AuthProvider? authProvider,
+    Object? authProvider = _unset,
     String? baseUrl,
     Duration? timeout,
     Duration? connectTimeout,
     int? maxRetries,
     Duration? retryDelay,
     Duration? maxRetryDelay,
-    Level? logLevel,
+    Object? logLevel = _unset,
     Map<String, String>? defaultHeaders,
-    String? apiVersion,
-    String? organization,
-    String? project,
+    Object? apiVersion = _unset,
+    Object? organization = _unset,
+    Object? project = _unset,
   }) {
     return OpenAIConfig(
-      authProvider: authProvider ?? this.authProvider,
+      authProvider:
+          authProvider == _unset ? this.authProvider : authProvider as AuthProvider?,
       baseUrl: baseUrl ?? this.baseUrl,
       timeout: timeout ?? this.timeout,
       connectTimeout: connectTimeout ?? this.connectTimeout,
       maxRetries: maxRetries ?? this.maxRetries,
       retryDelay: retryDelay ?? this.retryDelay,
       maxRetryDelay: maxRetryDelay ?? this.maxRetryDelay,
-      logLevel: logLevel ?? this.logLevel,
+      logLevel: logLevel == _unset ? this.logLevel : logLevel as Level?,
       defaultHeaders: defaultHeaders ?? this.defaultHeaders,
-      apiVersion: apiVersion ?? this.apiVersion,
-      organization: organization ?? this.organization,
-      project: project ?? this.project,
+      apiVersion: apiVersion == _unset ? this.apiVersion : apiVersion as String?,
+      organization:
+          organization == _unset ? this.organization : organization as String?,
+      project: project == _unset ? this.project : project as String?,
     );
   }
 
