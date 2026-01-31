@@ -260,21 +260,29 @@ class OpenAIClient {
   /// Builds a URL for an API endpoint.
   ///
   /// Normalizes the base URL and endpoint to avoid double slashes or
-  /// missing separators.
+  /// missing separators. Correctly handles base URLs with existing query
+  /// parameters (e.g., Azure OpenAI endpoints with `api-version`).
   Uri _buildUrl(String endpoint, {Map<String, String>? queryParameters}) {
-    // Normalize baseUrl and endpoint to avoid double slashes
-    final baseUrl = _config.baseUrl.endsWith('/')
-        ? _config.baseUrl.substring(0, _config.baseUrl.length - 1)
-        : _config.baseUrl;
+    // Parse baseUrl as a Uri to correctly handle existing paths and query params
+    final baseUri = Uri.parse(_config.baseUrl);
+
+    // Normalize base path and requested path to avoid double slashes
+    final basePath = baseUri.path.endsWith('/')
+        ? baseUri.path.substring(0, baseUri.path.length - 1)
+        : baseUri.path;
     final normalizedEndpoint = endpoint.startsWith('/') ? endpoint : '/$endpoint';
+    final combinedPath = '$basePath$normalizedEndpoint';
 
-    var uri = Uri.parse('$baseUrl$normalizedEndpoint');
+    // Merge query params: base URL params + request params (request wins on conflict)
+    final mergedQueryParams = <String, String>{
+      ...baseUri.queryParameters,
+      if (queryParameters != null) ...queryParameters,
+    };
 
-    if (queryParameters != null && queryParameters.isNotEmpty) {
-      uri = uri.replace(queryParameters: queryParameters);
-    }
-
-    return uri;
+    return baseUri.replace(
+      path: combinedPath,
+      queryParameters: mergedQueryParams.isEmpty ? null : mergedQueryParams,
+    );
   }
 
   // ============================================================

@@ -150,8 +150,8 @@ class RetryWrapper {
 
   /// Checks if an HTTP method is idempotent and safe to retry.
   ///
-  /// Safe methods: GET, HEAD, OPTIONS, PUT, DELETE
-  /// Unsafe: POST, PATCH (may create duplicates)
+  /// Idempotent methods: GET, HEAD, OPTIONS, PUT, DELETE
+  /// Non-idempotent: POST, PATCH (may create duplicates on retry)
   bool _isIdempotent(String method) {
     const idempotentMethods = {'GET', 'HEAD', 'OPTIONS', 'PUT', 'DELETE'};
     return idempotentMethods.contains(method.toUpperCase());
