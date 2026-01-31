@@ -44,10 +44,22 @@ class OpenAIConfig {
 
   /// Creates an [OpenAIConfig] using environment variables.
   ///
-  /// Reads `OPENAI_API_KEY` for the API key.
-  /// Optionally reads `OPENAI_BASE_URL`, `OPENAI_ORG_ID`, and `OPENAI_PROJECT_ID`.
+  /// Reads `OPENAI_API_KEY` for the API key (required).
+  /// Optionally reads:
+  /// - `OPENAI_BASE_URL` for a custom base URL
+  /// - `OPENAI_ORG_ID` for the organization ID
+  /// - `OPENAI_PROJECT_ID` for the project ID
   factory OpenAIConfig.fromEnvironment() {
-    return OpenAIConfig(authProvider: ApiKeyProvider.fromEnvironment());
+    const baseUrl = String.fromEnvironment('OPENAI_BASE_URL');
+    const orgId = String.fromEnvironment('OPENAI_ORG_ID');
+    const projectId = String.fromEnvironment('OPENAI_PROJECT_ID');
+
+    return OpenAIConfig(
+      authProvider: ApiKeyProvider.fromEnvironment(),
+      baseUrl: baseUrl.isNotEmpty ? baseUrl : 'https://api.openai.com/v1',
+      organization: orgId.isNotEmpty ? orgId : null,
+      project: projectId.isNotEmpty ? projectId : null,
+    );
   }
 
   /// The authentication provider for API requests.

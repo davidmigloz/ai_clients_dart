@@ -3,7 +3,7 @@ import 'config.dart';
 /// Builds API request URLs and headers with proper precedence.
 ///
 /// This class implements last-write-wins merge semantics for headers:
-/// - Headers: Global → Request (later values override)
+/// - Headers: Default → Global → Request (later values override)
 ///
 /// ## Example
 ///
