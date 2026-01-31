@@ -122,10 +122,9 @@ class RetryWrapper {
       }
     }
 
-    // Should never reach here, but throw if we somehow do
-    throw ApiException(
-      message: 'Max retries (${config.maxRetries}) exceeded',
-      statusCode: 0,
+    // Should never reach here; reaching this point indicates a logic error.
+    throw StateError(
+      'Unreachable: executeWithRetry fell through retry loop',
     );
   }
 
