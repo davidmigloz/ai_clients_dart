@@ -158,7 +158,15 @@ class RetryWrapper {
   }
 
   /// Applies exponential backoff to the current delay.
+  ///
+  /// Ensures monotonic backoff: once we reach or exceed maxRetryDelay, we
+  /// don't decrease the delay on subsequent attempts. This handles the case
+  /// where a server-provided Retry-After exceeded maxRetryDelay.
   Duration _exponentialBackoff(Duration currentDelay) {
+    // If current delay already meets or exceeds max, keep it (monotonic)
+    if (currentDelay >= config.maxRetryDelay) {
+      return currentDelay;
+    }
     final nextDelay = currentDelay * 2;
     return nextDelay > config.maxRetryDelay ? config.maxRetryDelay : nextDelay;
   }

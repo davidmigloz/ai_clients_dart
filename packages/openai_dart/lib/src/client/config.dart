@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 
@@ -42,23 +44,28 @@ class OpenAIConfig {
     this.project,
   });
 
-  /// Creates an [OpenAIConfig] using environment variables.
+  /// Creates an [OpenAIConfig] using runtime environment variables.
   ///
   /// Reads `OPENAI_API_KEY` for the API key (required).
   /// Optionally reads:
   /// - `OPENAI_BASE_URL` for a custom base URL
   /// - `OPENAI_ORG_ID` for the organization ID
   /// - `OPENAI_PROJECT_ID` for the project ID
+  ///
+  /// All environment variables are read at runtime via [Platform.environment],
+  /// consistent with [ApiKeyProvider.fromEnvironment].
   factory OpenAIConfig.fromEnvironment() {
-    const baseUrl = String.fromEnvironment('OPENAI_BASE_URL');
-    const orgId = String.fromEnvironment('OPENAI_ORG_ID');
-    const projectId = String.fromEnvironment('OPENAI_PROJECT_ID');
+    final baseUrl = Platform.environment['OPENAI_BASE_URL'];
+    final orgId = Platform.environment['OPENAI_ORG_ID'];
+    final projectId = Platform.environment['OPENAI_PROJECT_ID'];
 
     return OpenAIConfig(
       authProvider: ApiKeyProvider.fromEnvironment(),
-      baseUrl: baseUrl.isNotEmpty ? baseUrl : 'https://api.openai.com/v1',
-      organization: orgId.isNotEmpty ? orgId : null,
-      project: projectId.isNotEmpty ? projectId : null,
+      baseUrl: (baseUrl != null && baseUrl.isNotEmpty)
+          ? baseUrl
+          : 'https://api.openai.com/v1',
+      organization: (orgId != null && orgId.isNotEmpty) ? orgId : null,
+      project: (projectId != null && projectId.isNotEmpty) ? projectId : null,
     );
   }
 
