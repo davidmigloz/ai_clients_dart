@@ -116,8 +116,9 @@ class OpenAIClient {
     : _config = config ?? const OpenAIConfig(),
       _httpClient = httpClient ?? http.Client(),
       _ownsHttpClient = httpClient == null {
-    _initializeInterceptorChain();
+    // Initialize logging first so LoggingInterceptor uses the configured level
     _initializeLogging();
+    _initializeInterceptorChain();
   }
 
   /// Creates a new [OpenAIClient] using environment variables.

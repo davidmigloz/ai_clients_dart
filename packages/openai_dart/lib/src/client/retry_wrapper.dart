@@ -179,10 +179,10 @@ class RetryWrapper {
       return null;
     }
 
-    // Try parsing as seconds
+    // Try parsing as seconds (clamp to >= 0 to avoid negative durations)
     final seconds = int.tryParse(value);
     if (seconds != null) {
-      return Duration(seconds: seconds);
+      return Duration(seconds: max(0, seconds));
     }
 
     // Try parsing as HTTP-date

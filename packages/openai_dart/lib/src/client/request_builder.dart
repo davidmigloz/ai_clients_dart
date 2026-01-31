@@ -5,10 +5,14 @@ import 'config.dart';
 /// This class implements last-write-wins merge semantics for headers:
 /// - Headers: Default → Global → Request (later values override)
 ///
-/// Regardless of caller-specified headers, [RequestBuilder] will inject:
+/// The following headers are automatically included (but can be overridden
+/// by request-level headers unless otherwise noted):
 /// - `Content-Type: application/json` (for non-multipart requests)
 /// - Authentication headers from the configured [AuthProvider]
 /// - `OpenAI-Organization` / `OpenAI-Project` / `OpenAI-Version` when configured
+///
+/// Note: [buildStreamingHeaders] and [buildBetaHeaders] enforce their
+/// required headers (`Accept` and `OpenAI-Beta`) and prevent overrides.
 ///
 /// ## Example
 ///
