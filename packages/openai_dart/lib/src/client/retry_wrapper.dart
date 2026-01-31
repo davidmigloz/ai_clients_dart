@@ -36,7 +36,10 @@ import 'config.dart';
 ///
 /// final response = await wrapper.executeWithRetry(
 ///   request,
-///   () => httpClient.send(request),
+///   () async {
+///     final streamedResponse = await httpClient.send(request);
+///     return http.Response.fromStream(streamedResponse);
+///   },
 ///   null,
 ///   'req_123',
 /// );

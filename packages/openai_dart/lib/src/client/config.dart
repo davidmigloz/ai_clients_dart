@@ -174,20 +174,45 @@ class OpenAIConfig {
     Object? project = _unset,
   }) {
     return OpenAIConfig(
-      authProvider:
-          authProvider == _unset ? this.authProvider : authProvider as AuthProvider?,
+      authProvider: _resolveField<AuthProvider>(
+        authProvider,
+        'authProvider',
+        this.authProvider,
+      ),
       baseUrl: baseUrl ?? this.baseUrl,
       timeout: timeout ?? this.timeout,
       connectTimeout: connectTimeout ?? this.connectTimeout,
       maxRetries: maxRetries ?? this.maxRetries,
       retryDelay: retryDelay ?? this.retryDelay,
       maxRetryDelay: maxRetryDelay ?? this.maxRetryDelay,
-      logLevel: logLevel == _unset ? this.logLevel : logLevel as Level?,
+      logLevel: _resolveField<Level>(logLevel, 'logLevel', this.logLevel),
       defaultHeaders: defaultHeaders ?? this.defaultHeaders,
-      apiVersion: apiVersion == _unset ? this.apiVersion : apiVersion as String?,
-      organization:
-          organization == _unset ? this.organization : organization as String?,
-      project: project == _unset ? this.project : project as String?,
+      apiVersion: _resolveField<String>(apiVersion, 'apiVersion', this.apiVersion),
+      organization: _resolveField<String>(
+        organization,
+        'organization',
+        this.organization,
+      ),
+      project: _resolveField<String>(project, 'project', this.project),
+    );
+  }
+
+  /// Resolves a copyWith field with runtime type checking.
+  ///
+  /// Returns [currentValue] if [value] is the sentinel, otherwise validates
+  /// that [value] is of type [T] and returns it. Throws [ArgumentError] with
+  /// a clear message if the type is wrong.
+  static T? _resolveField<T>(Object? value, String fieldName, T? currentValue) {
+    if (value == _unset) {
+      return currentValue;
+    }
+    if (value == null || value is T) {
+      return value as T?;
+    }
+    throw ArgumentError.value(
+      value,
+      fieldName,
+      'Expected $T?, but got ${value.runtimeType}',
     );
   }
 
