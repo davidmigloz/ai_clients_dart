@@ -297,10 +297,6 @@ class RequestTimeoutException extends OpenAIException {
   }
 }
 
-/// Alias for [RequestTimeoutException] for backwards compatibility.
-@Deprecated('Use RequestTimeoutException instead')
-typedef TimeoutException = RequestTimeoutException;
-
 /// The stage at which the request was aborted.
 enum AbortionStage {
   /// Aborted before the request was sent.
