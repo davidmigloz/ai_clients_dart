@@ -16,15 +16,15 @@ import 'config.dart';
 /// ## Retry Conditions
 ///
 /// Retries are attempted for:
-/// - Rate limit responses (HTTP 429)
-/// - Server errors (HTTP 5xx)
-/// - Timeout exceptions
-/// - Connection errors
+/// - Rate limit responses (HTTP 429) - always retried regardless of method
+/// - Server errors (HTTP 5xx) - idempotent methods only
+/// - Timeout exceptions - idempotent methods only
+/// - Connection errors - idempotent methods only
 ///
 /// Retries are NOT attempted for:
 /// - Client errors (HTTP 4xx except 429)
 /// - Aborted requests
-/// - Non-idempotent methods (POST, PATCH) for 5xx errors
+/// - Non-idempotent methods (POST, PATCH) for 5xx, timeout, or connection errors
 ///
 /// Note: HTTP 429 (rate limit) is always retried regardless of method,
 /// as the request was not processed due to rate limiting.
@@ -201,12 +201,19 @@ class RetryWrapper {
 
   /// Computes a delay with jitter to avoid thundering herd problem.
   ///
-  /// Adds up to 25% random jitter to the base delay.
+  /// Adds up to 25% random jitter to the base delay, clamped to the
+  /// configured maximum retry delay to ensure jitter doesn't push
+  /// the effective delay past the configured maximum.
   Duration _computeJitteredDelay(Duration delay) {
     const jitterFactor = 0.25;
     final jitterMs =
         (_random.nextDouble() * jitterFactor * delay.inMilliseconds).round();
-    return delay + Duration(milliseconds: jitterMs);
+    final jitteredDelay = delay + Duration(milliseconds: jitterMs);
+
+    // Clamp to maxRetryDelay to ensure jitter doesn't exceed the configured max
+    return jitteredDelay > config.maxRetryDelay
+        ? config.maxRetryDelay
+        : jitteredDelay;
   }
 
   /// Delays with jitter to avoid thundering herd problem.
