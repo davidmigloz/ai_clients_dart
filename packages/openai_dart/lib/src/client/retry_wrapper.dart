@@ -198,8 +198,10 @@ class RetryWrapper {
       if (date.isAfter(now)) {
         return date.difference(now);
       }
+      // Date is now or in the past (clock skew, coarse timestamp) - retry immediately
+      return Duration.zero;
     } catch (_) {
-      // Ignore parse errors
+      // Ignore parse errors - fall through to return null
     }
 
     return null;
