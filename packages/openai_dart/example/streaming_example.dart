@@ -8,7 +8,7 @@ import 'dart:io';
 
 import 'package:openai_dart/openai_dart.dart';
 
-void main() async {
+Future<void> main() async {
   final client = OpenAIClient.fromEnvironment();
 
   try {

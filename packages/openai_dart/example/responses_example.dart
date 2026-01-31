@@ -7,7 +7,7 @@ import 'package:openai_dart/openai_dart.dart';
 ///
 /// The Responses API is OpenAI's next-generation interface that unifies
 /// chat completions, reasoning, and tool use into a single API.
-void main() async {
+Future<void> main() async {
   final client = OpenAIClient.fromEnvironment();
 
   await simpleResponse(client);

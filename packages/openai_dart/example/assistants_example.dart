@@ -13,7 +13,7 @@ import 'package:openai_dart/openai_dart.dart'
     hide CodeInterpreterTool, FileSearchTool, FunctionTool;
 import 'package:openai_dart/openai_dart_assistants.dart';
 
-void main() async {
+Future<void> main() async {
   // Create client from environment variable
   final client = OpenAIClient.fromEnvironment();
 

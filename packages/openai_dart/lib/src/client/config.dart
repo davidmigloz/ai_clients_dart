@@ -5,8 +5,16 @@ import 'package:meta/meta.dart';
 
 import '../auth/auth_provider.dart';
 
+/// Private sentinel class to distinguish "not provided" from "set to null".
+///
+/// Using a private class prevents callers from accidentally passing the sentinel
+/// value, unlike `const Object()` which is globally canonicalized.
+class _Unset {
+  const _Unset();
+}
+
 /// Sentinel value for copyWith to distinguish "not provided" from "set to null".
-const Object _unset = Object();
+const Object _unset = _Unset();
 
 /// Configuration for the OpenAI client.
 ///

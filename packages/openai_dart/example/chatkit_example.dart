@@ -21,7 +21,7 @@ import 'package:openai_dart/openai_dart.dart';
 /// export OPENAI_CHATKIT_THREAD_ID=your-thread-id      # Optional for thread tests
 /// dart run example/chatkit_example.dart
 /// ```
-void main() async {
+Future<void> main() async {
   // Create client from environment variables
   final client = OpenAIClient.fromEnvironment();
 

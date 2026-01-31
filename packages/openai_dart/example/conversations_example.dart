@@ -15,7 +15,7 @@ import 'package:openai_dart/openai_dart.dart';
 /// export OPENAI_API_KEY=your-api-key
 /// dart run example/conversations_example.dart
 /// ```
-void main() async {
+Future<void> main() async {
   // Create client from environment variables
   final client = OpenAIClient.fromEnvironment();
 

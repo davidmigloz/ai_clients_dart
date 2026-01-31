@@ -6,7 +6,7 @@ library;
 
 import 'package:openai_dart/openai_dart.dart';
 
-void main() async {
+Future<void> main() async {
   // Create client from environment variable
   final client = OpenAIClient.fromEnvironment();
 
