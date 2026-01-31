@@ -92,7 +92,9 @@ void main() async {
 
     print('\n📝 Notes:');
     print('   - Documents belong to corpora');
-    print('   - Documents API is only available with Google AI (not Vertex AI)');
+    print(
+      '   - Documents API is only available with Google AI (not Vertex AI)',
+    );
     print('   - Vertex AI uses RAG stores for document management');
     print('   - A corpus can contain multiple documents');
     print('   - Use updateMask to specify which fields to update');

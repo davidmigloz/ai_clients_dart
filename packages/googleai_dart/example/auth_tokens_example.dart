@@ -68,7 +68,9 @@ void main() async {
     print('   ```');
 
     print('\n📝 Notes:');
-    print('   - Ephemeral tokens are only available with Google AI (not Vertex AI)');
+    print(
+      '   - Ephemeral tokens are only available with Google AI (not Vertex AI)',
+    );
     print('   - Currently only compatible with the Live API');
     print('   - Create tokens server-side and pass to client applications');
     print('   - Use short expiration times for security');

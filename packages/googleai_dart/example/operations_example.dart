@@ -25,7 +25,9 @@ void main() async {
 
     if (tunedModels.tunedModels.isEmpty) {
       print('   No tuned models found.');
-      print('   Operations are created when tuning models or running batch jobs.');
+      print(
+        '   Operations are created when tuning models or running batch jobs.',
+      );
     } else {
       final firstModel = tunedModels.tunedModels.first;
       print('   Found tuned model: ${firstModel.name}');
