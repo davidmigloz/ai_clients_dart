@@ -95,7 +95,10 @@ class RetryWrapper {
             delay = retryAfter <= maxServerDelay ? retryAfter : maxServerDelay;
           }
 
-          await _delayWithAbortCheck(delay, abortTrigger, correlationId);
+          // Enforce minimum delay to prevent tight retry loops (e.g., Retry-After: 0)
+          final effectiveDelay =
+              delay < config.retryDelay ? config.retryDelay : delay;
+          await _delayWithAbortCheck(effectiveDelay, abortTrigger, correlationId);
           attempt++;
           delay = _exponentialBackoff(delay);
           continue;
@@ -177,10 +180,16 @@ class RetryWrapper {
 
   /// Applies exponential backoff to the current delay.
   ///
-  /// Ensures monotonic backoff: once we reach or exceed maxRetryDelay, we
-  /// don't decrease the delay on subsequent attempts. This handles the case
-  /// where a server-provided Retry-After exceeded maxRetryDelay.
+  /// Ensures:
+  /// - Minimum delay of config.retryDelay to avoid tight retry loops when
+  ///   Retry-After is 0 or resolves to a past/now HTTP-date
+  /// - Monotonic backoff: once we reach or exceed maxRetryDelay, we
+  ///   don't decrease the delay on subsequent attempts
   Duration _exponentialBackoff(Duration currentDelay) {
+    // Enforce minimum delay to prevent tight retry loops
+    if (currentDelay < config.retryDelay) {
+      return config.retryDelay;
+    }
     // If current delay already meets or exceeds max, keep it (monotonic)
     if (currentDelay >= config.maxRetryDelay) {
       return currentDelay;

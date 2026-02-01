@@ -429,6 +429,35 @@ void main() {
 
         expect(callCount, 2);
       });
+
+      test('enforces minimum delay when Retry-After is 0', () async {
+        var callCount = 0;
+        final request = http.Request('GET', Uri.parse('https://api.example.com'));
+        final stopwatch = Stopwatch()..start();
+
+        await wrapper.executeWithRetry(
+          request,
+          () async {
+            callCount++;
+            if (callCount == 1) {
+              // Retry-After: 0 should NOT cause a tight loop
+              return http.Response(
+                'rate limited',
+                429,
+                headers: {'retry-after': '0'},
+              );
+            }
+            return http.Response('{"ok": true}', 200);
+          },
+          null,
+          'req_123',
+        );
+
+        stopwatch.stop();
+        expect(callCount, 2);
+        // Should have waited at least config.retryDelay (10ms) despite Retry-After: 0
+        expect(stopwatch.elapsedMilliseconds, greaterThanOrEqualTo(10));
+      });
     });
   });
 }

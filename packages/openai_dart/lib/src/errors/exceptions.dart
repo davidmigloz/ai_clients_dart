@@ -69,6 +69,7 @@ class ApiException extends OpenAIException {
       ..write(' (status: $statusCode');
     if (type != null) buffer.write(', type: $type');
     if (code != null) buffer.write(', code: $code');
+    if (param != null) buffer.write(', param: $param');
     if (requestId != null) buffer.write(', request_id: $requestId');
     buffer.write(')');
     return buffer.toString();

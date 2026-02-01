@@ -51,6 +51,23 @@ void main() {
       expect(str, contains('type: test_error'));
       expect(str, contains('request_id: req_456'));
     });
+
+    test('toString includes param when present', () {
+      const exception = ApiException(
+        message: 'Invalid parameter',
+        statusCode: 400,
+        type: 'invalid_request_error',
+        param: 'model',
+        code: 'invalid_value',
+      );
+
+      final str = exception.toString();
+
+      expect(str, contains('status: 400'));
+      expect(str, contains('type: invalid_request_error'));
+      expect(str, contains('param: model'));
+      expect(str, contains('code: invalid_value'));
+    });
   });
 
   group('AuthenticationException', () {
