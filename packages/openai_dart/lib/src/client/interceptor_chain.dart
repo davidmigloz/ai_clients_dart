@@ -77,6 +77,12 @@ class InterceptorChain {
   Future<http.Response> _executeTransport(RequestContext context) {
     final originalRequest = context.request;
 
+    // Extract correlation ID upfront for tracing (used in retries and abort)
+    final correlationId =
+        context.metadata['correlationId'] as String? ??
+        context.request.headers['X-Request-ID'] ??
+        generateRequestId();
+
     // For retries, we need to clone the request since http.BaseRequest
     // can only be finalized once. Capture body bytes upfront.
     List<int>? bodyBytes;
@@ -117,7 +123,12 @@ class InterceptorChain {
           return http.Response.fromStream(streamedResponse);
         } on http.RequestAbortedException catch (e) {
           // Convert http package's abort exception to our AbortedException
-          throw AbortedException(message: 'Request aborted by user', cause: e);
+          throw AbortedException(
+            message: 'Request aborted by user',
+            cause: e,
+            stage: AbortionStage.duringRequest,
+            correlationId: correlationId,
+          );
         }
       } else {
         // No abort trigger - normal execution
@@ -131,12 +142,6 @@ class InterceptorChain {
     // request types (MultipartRequest, StreamedRequest) cannot be safely cloned.
     if (retryWrapper case final wrapper?
         when originalRequest is http.Request) {
-      // Extract correlation ID for retry wrapper tracing
-      final correlationId =
-          context.metadata['correlationId'] as String? ??
-          context.request.headers['X-Request-ID'] ??
-          generateRequestId();
-
       return wrapper.executeWithRetry(
         originalRequest,
         executeTransport,
