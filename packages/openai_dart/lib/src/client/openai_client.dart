@@ -1,9 +1,11 @@
+import 'dart:async' show StreamTransformer, unawaited;
 import 'dart:convert' show jsonEncode;
 
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 
 import '../auth/auth_provider.dart';
+import '../errors/exceptions.dart';
 import '../interceptors/auth_interceptor.dart';
 import '../interceptors/error_interceptor.dart';
 import '../interceptors/interceptor.dart';
@@ -226,6 +228,7 @@ class OpenAIClient {
       interceptors: interceptors,
       httpClient: _httpClient,
       retryWrapper: retryWrapper,
+      timeout: _config.timeout,
     );
   }
 
@@ -265,7 +268,10 @@ class OpenAIClient {
   /// Normalizes the base URL and endpoint to avoid double slashes or
   /// missing separators. Correctly handles base URLs with existing query
   /// parameters (e.g., Azure OpenAI endpoints with `api-version`).
-  Uri _buildUrl(String endpoint, {Map<String, String>? queryParameters}) {
+  ///
+  /// This method is exposed for resources that need to build URLs manually
+  /// (e.g., for multipart or streaming requests).
+  Uri buildUrl(String endpoint, {Map<String, String>? queryParameters}) {
     // Parse baseUrl as a Uri to correctly handle existing paths and query params
     final baseUri = Uri.parse(_config.baseUrl);
 
@@ -273,7 +279,9 @@ class OpenAIClient {
     final basePath = baseUri.path.endsWith('/')
         ? baseUri.path.substring(0, baseUri.path.length - 1)
         : baseUri.path;
-    final normalizedEndpoint = endpoint.startsWith('/') ? endpoint : '/$endpoint';
+    final normalizedEndpoint = endpoint.startsWith('/')
+        ? endpoint
+        : '/$endpoint';
     final combinedPath = '$basePath$normalizedEndpoint';
 
     // Merge query params: base URL params + request params (request wins on conflict)
@@ -286,6 +294,192 @@ class OpenAIClient {
       path: combinedPath,
       queryParameters: mergedQueryParams.isEmpty ? null : mergedQueryParams,
     );
+  }
+
+  /// Builds a URL for an API endpoint with support for repeated query parameters.
+  ///
+  /// This method handles arrays in query parameters using `queryParametersAll`,
+  /// which is necessary for OpenAI's API where array params must be sent as
+  /// repeated keys (e.g., `?include[]=a&include[]=b`).
+  ///
+  /// Use this instead of [buildUrl] when you need to pass array-valued query
+  /// parameters. Single-value params can be passed directly in [queryParameters],
+  /// while repeated params go in [queryParametersAll].
+  Uri buildUrlWithQueryAll(
+    String endpoint, {
+    Map<String, String>? queryParameters,
+    Map<String, List<String>>? queryParametersAll,
+  }) {
+    // Parse baseUrl as a Uri to correctly handle existing paths and query params
+    final baseUri = Uri.parse(_config.baseUrl);
+
+    // Normalize base path and requested path to avoid double slashes
+    final basePath = baseUri.path.endsWith('/')
+        ? baseUri.path.substring(0, baseUri.path.length - 1)
+        : baseUri.path;
+    final normalizedEndpoint = endpoint.startsWith('/')
+        ? endpoint
+        : '/$endpoint';
+    final combinedPath = '$basePath$normalizedEndpoint';
+
+    // Merge query params: base URL params + single params + repeated params
+    // Convert everything to List<String> format for queryParametersAll
+    final mergedQueryParamsAll = <String, List<String>>{
+      // Add base URL params
+      for (final entry in baseUri.queryParametersAll.entries)
+        entry.key: entry.value,
+      // Add single-value params (converted to list)
+      if (queryParameters != null)
+        for (final entry in queryParameters.entries) entry.key: [entry.value],
+      // Add repeated params (these override single-value params with same key)
+      if (queryParametersAll != null) ...queryParametersAll,
+    };
+
+    // Use Uri constructor to properly build the URI with queryParametersAll
+    return Uri(
+      scheme: baseUri.scheme,
+      host: baseUri.host,
+      port: baseUri.port == 443 || baseUri.port == 80 ? null : baseUri.port,
+      path: combinedPath,
+      queryParameters:
+          mergedQueryParamsAll.isEmpty ? null : mergedQueryParamsAll,
+    );
+  }
+
+  /// Returns the base headers for API requests.
+  ///
+  /// These include authentication, organization/project, API version,
+  /// and request ID headers. Exposed for resources that need to build
+  /// requests manually (e.g., streaming or multipart).
+  ///
+  /// Note: Auth headers are added by the [AuthInterceptor] in the
+  /// interceptor chain for regular requests, but streaming requests
+  /// bypass the chain and need these headers directly.
+  Map<String, String> get baseHeaders => _baseHeaders;
+
+  /// Sends a streaming request with proper headers and URL building.
+  ///
+  /// This method is used by streaming resources to ensure they use the
+  /// same headers and URL normalization as regular requests. Returns a
+  /// [http.StreamedResponse] for processing as a stream.
+  ///
+  /// The [abortTrigger] parameter allows canceling the request. When the
+  /// future completes, the underlying HTTP connection is closed, which
+  /// terminates the stream. Downstream stream consumers will receive an
+  /// error or the stream will end.
+  ///
+  /// Note: Streaming requests are NOT retried (non-idempotent, body consumed).
+  /// The interceptor chain is bypassed since streaming requires low-level
+  /// access to the response stream.
+  Future<http.StreamedResponse> sendStream({
+    required String endpoint,
+    required Object body,
+    Map<String, String>? headers,
+    Future<void>? abortTrigger,
+  }) async {
+    _ensureNotClosed();
+
+    final url = buildUrl(endpoint);
+    final request = http.Request('POST', url);
+
+    // Add base headers (org/project, api version, request ID, default headers)
+    request.headers.addAll(_baseHeaders);
+
+    // Add auth headers (normally handled by AuthInterceptor, but streaming
+    // bypasses the interceptor chain)
+    if (_config.authProvider case final authProvider?) {
+      request.headers.addAll(authProvider.getHeaders());
+    }
+
+    // Add streaming-specific header
+    request.headers['Accept'] = 'text/event-stream';
+
+    // Add any additional headers
+    if (headers != null) {
+      request.headers.addAll(headers);
+    }
+
+    // Encode body
+    request.body = jsonEncode(body);
+
+    // Log request if logging is enabled
+    _logger?.fine('Streaming POST $url');
+
+    // For abort support, create a dedicated HTTP client for this stream.
+    // When abortTrigger completes, we close the client which cancels
+    // the in-flight request and terminates the stream.
+    if (abortTrigger != null) {
+      final streamClient = http.Client();
+      var aborted = false;
+      var clientClosed = false;
+
+      void closeClientOnce() {
+        if (!clientClosed) {
+          clientClosed = true;
+          streamClient.close();
+        }
+      }
+
+      unawaited(
+        abortTrigger.then(
+          (_) {
+            aborted = true;
+            closeClientOnce();
+          },
+          onError: (_) {
+            // Treat any abort trigger error as an abort signal
+            aborted = true;
+            closeClientOnce();
+          },
+        ),
+      );
+
+      try {
+        final response = await streamClient.send(request);
+
+        // Wrap stream to ensure client cleanup on completion.
+        // This handles normal completion, errors, and stream cancellation.
+        final wrappedStream = response.stream.transform(
+          StreamTransformer<List<int>, List<int>>.fromHandlers(
+            handleData: (data, sink) => sink.add(data),
+            handleError: (error, stackTrace, sink) {
+              closeClientOnce();
+              sink.addError(error, stackTrace);
+            },
+            handleDone: (sink) {
+              closeClientOnce();
+              sink.close();
+            },
+          ),
+        );
+
+        return http.StreamedResponse(
+          wrappedStream,
+          response.statusCode,
+          contentLength: response.contentLength,
+          request: response.request,
+          headers: response.headers,
+          isRedirect: response.isRedirect,
+          persistentConnection: response.persistentConnection,
+          reasonPhrase: response.reasonPhrase,
+        );
+      } catch (e) {
+        // If we were aborted, convert the exception to AbortedException
+        if (aborted) {
+          throw AbortedException.fromHttpException(
+            e,
+            stage: AbortionStage.duringStream,
+            correlationId: request.headers['X-Request-ID'],
+          );
+        }
+        // Close client on send() error too
+        closeClientOnce();
+        rethrow;
+      }
+    }
+
+    // No abort trigger - use the shared HTTP client
+    return _httpClient.send(request);
   }
 
   // ============================================================
@@ -803,7 +997,31 @@ class OpenAIClient {
   }) {
     _ensureNotClosed();
 
-    final url = _buildUrl(endpoint, queryParameters: queryParameters);
+    final url = buildUrl(endpoint, queryParameters: queryParameters);
+    final request = http.Request('GET', url)
+      ..headers.addAll({..._baseHeaders, ...?headers});
+
+    return _interceptorChain.execute(request, abortTrigger: abortTrigger);
+  }
+
+  /// Makes a GET request with support for repeated query parameters.
+  ///
+  /// Use this for endpoints that require array parameters like `include[]`.
+  /// The optional [abortTrigger] allows canceling the request before completion.
+  Future<http.Response> getWithRepeatedParams(
+    String endpoint, {
+    Map<String, String>? headers,
+    Map<String, String>? queryParameters,
+    Map<String, List<String>>? queryParametersAll,
+    Future<void>? abortTrigger,
+  }) {
+    _ensureNotClosed();
+
+    final url = buildUrlWithQueryAll(
+      endpoint,
+      queryParameters: queryParameters,
+      queryParametersAll: queryParametersAll,
+    );
     final request = http.Request('GET', url)
       ..headers.addAll({..._baseHeaders, ...?headers});
 
@@ -821,7 +1039,7 @@ class OpenAIClient {
   }) {
     _ensureNotClosed();
 
-    final url = _buildUrl(endpoint);
+    final url = buildUrl(endpoint);
     final request = http.Request('POST', url)
       ..headers.addAll({..._baseHeaders, ...?headers});
 
@@ -853,7 +1071,7 @@ class OpenAIClient {
   }) {
     _ensureNotClosed();
 
-    final url = _buildUrl(endpoint);
+    final url = buildUrl(endpoint);
     final request = http.Request('DELETE', url)
       ..headers.addAll({..._baseHeaders, ...?headers});
 

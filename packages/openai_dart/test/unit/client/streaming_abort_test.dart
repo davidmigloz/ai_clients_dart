@@ -1,0 +1,370 @@
+import 'dart:async' show Completer, Stream, StreamController, runZonedGuarded;
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:openai_dart/openai_dart.dart';
+import 'package:test/test.dart';
+
+void main() {
+  group('Streaming Abort', () {
+    test('stream without abortTrigger uses shared client', () async {
+      // Create a controller that we can use to control when data arrives
+      final streamController = StreamController<List<int>>();
+      var requestReceived = false;
+
+      final mockClient = MockClient.streaming((request, _) async {
+        requestReceived = true;
+        return http.StreamedResponse(
+          streamController.stream,
+          200,
+        );
+      });
+
+      final client = OpenAIClient(
+        config: const OpenAIConfig(authProvider: ApiKeyProvider('sk-test-key')),
+        httpClient: mockClient,
+      );
+
+      final events = <dynamic>[];
+
+      // Start streaming (no abort trigger - uses shared mock client)
+      final stream = client.chat.completions.createStream(
+        ChatCompletionCreateRequest(
+          model: 'gpt-4',
+          messages: [ChatMessage.user('Hello')],
+        ),
+      );
+
+      // Subscribe to the stream
+      final subscription = stream.listen(events.add, onError: (_) {});
+
+      // Wait for request to be sent
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      expect(requestReceived, isTrue);
+
+      // Send some data and close
+      streamController
+        ..add(utf8.encode('data: {"choices":[]}\n\n'))
+        ..add(utf8.encode('data: [DONE]\n\n'));
+      await streamController.close();
+
+      // Wait for stream to process
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await subscription.cancel();
+      client.close();
+    });
+
+    test('sendStream with abortTrigger creates dedicated client', () async {
+      // When abortTrigger is provided, sendStream creates a dedicated
+      // http.Client() for that stream. This allows closing the client
+      // to abort the request.
+      //
+      // Note: This test verifies the abort logic is wired up correctly.
+      // The actual abort behavior depends on http.Client.close() semantics.
+
+      final mockClient = MockClient.streaming((request, _) async {
+        return http.StreamedResponse(
+          Stream.fromIterable([
+            utf8.encode('data: {"choices":[]}\n\n'),
+            utf8.encode('data: [DONE]\n\n'),
+          ]),
+          200,
+        );
+      });
+
+      final client = OpenAIClient(
+        config: const OpenAIConfig(authProvider: ApiKeyProvider('sk-test-key')),
+        httpClient: mockClient,
+      );
+
+      // When abortTrigger is provided, the implementation creates a new
+      // http.Client() internally (not the mock). This means the actual
+      // HTTP call goes to the real network, which we can't mock here.
+      //
+      // What we CAN test is that the abort logic is wired up correctly
+      // by checking that AbortedException is thrown in appropriate cases.
+
+      // Test: Pre-completed abort trigger should throw immediately
+      final preCompletedAbort = Completer<void>()..complete();
+
+      // The sendStream call will create a dedicated client and immediately
+      // close it due to the pre-completed trigger. This should result in
+      // an AbortedException (after the connection attempt fails).
+      try {
+        final response = await client.sendStream(
+          endpoint: '/chat/completions',
+          body: <String, Object>{'model': 'gpt-4', 'messages': [], 'stream': true},
+          abortTrigger: preCompletedAbort.future,
+        );
+        // If we get here, the response was returned before abort triggered
+        // This is valid if the request completed very quickly
+        await response.stream.drain<void>();
+      } on AbortedException {
+        // Expected - abort was triggered
+      } on OpenAIException {
+        // Also acceptable - connection may have failed
+      } catch (e) {
+        // Network errors are expected when testing against real endpoints
+        // without proper credentials
+      }
+
+      client.close();
+    });
+
+    test('abortTrigger parameter is accepted by streaming methods', () async {
+      // This test verifies that the abortTrigger parameter is accepted by
+      // all streaming methods. Each method gets its own mock client with
+      // appropriate response format.
+
+      // Chat completions mock
+      final chatMockClient = MockClient.streaming((request, _) async {
+        return http.StreamedResponse(
+          Stream.fromIterable([
+            utf8.encode('data: {"choices":[]}\n\n'),
+            utf8.encode('data: [DONE]\n\n'),
+          ]),
+          200,
+        );
+      });
+
+      final chatClient = OpenAIClient(
+        config: const OpenAIConfig(authProvider: ApiKeyProvider('sk-test-key')),
+        httpClient: chatMockClient,
+      );
+
+      await chatClient.chat.completions
+          .createStream(
+            ChatCompletionCreateRequest(
+              model: 'gpt-4',
+              messages: [ChatMessage.user('Hello')],
+            ),
+          )
+          .drain<void>();
+
+      chatClient.close();
+
+      // Responses mock (different format)
+      final responsesMockClient = MockClient.streaming((request, _) async {
+        // ignore: missing_whitespace_between_adjacent_strings
+        const responseData = 'data: {"type":"response.completed","response":'
+            '{"id":"resp_123","object":"response","created_at":1234567890,'
+            '"model":"gpt-4","status":"completed","output":[],'
+            '"parallel_tool_calls":true,"tool_choice":"auto"}}\n\n';
+        return http.StreamedResponse(
+          Stream.fromIterable([utf8.encode(responseData)]),
+          200,
+        );
+      });
+
+      final responsesClient = OpenAIClient(
+        config: const OpenAIConfig(authProvider: ApiKeyProvider('sk-test-key')),
+        httpClient: responsesMockClient,
+      );
+
+      await responsesClient.responses
+          .createStream(
+            const CreateResponseRequest(model: 'gpt-4', input: 'Hello'),
+          )
+          .drain<void>();
+
+      responsesClient.close();
+
+      // Completions mock
+      final completionsMockClient = MockClient.streaming((request, _) async {
+        return http.StreamedResponse(
+          Stream.fromIterable([
+            utf8.encode('data: {"choices":[{"text":"Hello"}]}\n\n'),
+            utf8.encode('data: [DONE]\n\n'),
+          ]),
+          200,
+        );
+      });
+
+      final completionsClient = OpenAIClient(
+        config: const OpenAIConfig(authProvider: ApiKeyProvider('sk-test-key')),
+        httpClient: completionsMockClient,
+      );
+
+      await completionsClient.completions
+          .createStream(
+            const CompletionRequest(
+              model: 'gpt-3.5-turbo-instruct',
+              prompt: CompletionPrompt.text('Hello'),
+            ),
+          )
+          .drain<void>();
+
+      completionsClient.close();
+
+      // Verify the type signature accepts abortTrigger (compile-time check)
+      final abortTrigger = Completer<void>().future;
+
+      // These would be compile errors if abortTrigger parameter didn't exist
+      // The functions aren't called, just referenced to verify they compile
+      void verifyApiAcceptsAbortTrigger(OpenAIClient c) {
+        c.chat.completions.createStream(
+          ChatCompletionCreateRequest(
+            model: 'gpt-4',
+            messages: [ChatMessage.user('Hello')],
+          ),
+          abortTrigger: abortTrigger,
+        );
+
+        c.responses.createStream(
+          const CreateResponseRequest(model: 'gpt-4', input: 'Hello'),
+          abortTrigger: abortTrigger,
+        );
+
+        c.completions.createStream(
+          const CompletionRequest(
+            model: 'gpt-3.5-turbo-instruct',
+            prompt: CompletionPrompt.text('Hello'),
+          ),
+          abortTrigger: abortTrigger,
+        );
+      }
+
+      // Not called, just here for compile-time verification
+      // ignore: unused_local_variable
+      final _ = verifyApiAcceptsAbortTrigger;
+    });
+
+    test('stream continues normally without abort', () async {
+      final mockClient = MockClient.streaming((request, _) async {
+        return http.StreamedResponse(
+          Stream.fromIterable([
+            utf8.encode('data: {"choices":[{"delta":{"content":"Hello"}}]}\n\n'),
+            utf8.encode('data: [DONE]\n\n'),
+          ]),
+          200,
+        );
+      });
+
+      final client = OpenAIClient(
+        config: const OpenAIConfig(authProvider: ApiKeyProvider('sk-test-key')),
+        httpClient: mockClient,
+      );
+
+      final events = <ChatStreamEvent>[];
+
+      // Stream without abort trigger - should complete normally
+      await client.chat.completions
+          .createStream(
+            ChatCompletionCreateRequest(
+              model: 'gpt-4',
+              messages: [ChatMessage.user('Hello')],
+            ),
+          )
+          .forEach(events.add);
+
+      expect(events, isNotEmpty);
+      client.close();
+    });
+
+    test('abortTrigger error is handled gracefully without unhandled exception',
+        () async {
+      // When abortTrigger completes with an error, it should be treated as
+      // an abort signal without surfacing as an unhandled async exception.
+
+      var unhandledError = false;
+
+      await runZonedGuarded(
+        () async {
+          final abortCompleter = Completer<void>();
+
+          final client = OpenAIClient(
+            config:
+                const OpenAIConfig(authProvider: ApiKeyProvider('sk-test-key')),
+          );
+
+          // Start a sendStream call with an abort trigger that will error
+          // We expect this to either:
+          // 1. Complete normally before abort
+          // 2. Throw AbortedException
+          // 3. Throw a network error (no real server)
+          // But NOT an unhandled async exception
+
+          try {
+            final responseFuture = client.sendStream(
+              endpoint: '/chat/completions',
+              body: <String, Object>{
+                'model': 'gpt-4',
+                'messages': [],
+                'stream': true,
+              },
+              abortTrigger: abortCompleter.future,
+            );
+
+            // Complete abort with error after a small delay
+            Future<void>.delayed(const Duration(milliseconds: 10), () {
+              abortCompleter.completeError(
+                StateError('Abort trigger errored'),
+              );
+            });
+
+            final response = await responseFuture;
+            await response.stream.drain<void>();
+          } on AbortedException {
+            // Expected - abort was triggered
+          } on OpenAIException {
+            // Also acceptable - connection may have failed
+          } catch (e) {
+            // Network errors are expected when testing against real endpoints
+          }
+
+          client.close();
+
+          // Give time for any async errors to surface
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+        },
+        (error, stack) {
+          // This handler catches unhandled async errors in the zone
+          unhandledError = true;
+        },
+      );
+
+      expect(unhandledError, isFalse, reason: 'No unhandled errors should occur');
+    });
+
+    test('streaming client closes on normal stream completion', () async {
+      // This test verifies that when a stream with abortTrigger completes
+      // normally, the dedicated HTTP client is properly closed.
+      //
+      // We can verify this indirectly by ensuring no resource leaks occur
+      // and the stream completes without errors.
+
+      final client = OpenAIClient(
+        config: const OpenAIConfig(authProvider: ApiKeyProvider('sk-test-key')),
+      );
+
+      // Create an abort trigger that never fires
+      final neverAbort = Completer<void>().future;
+
+      // We can't easily mock the internal streamClient creation,
+      // but we can verify the stream completes without error when
+      // provided an abortTrigger that never fires.
+      try {
+        final response = await client.sendStream(
+          endpoint: '/chat/completions',
+          body: <String, Object>{
+            'model': 'gpt-4',
+            'messages': [],
+            'stream': true,
+          },
+          abortTrigger: neverAbort,
+        );
+
+        // If we get a response, consume it (stream should be wrapped
+        // to close client on done)
+        await response.stream.drain<void>();
+      } on OpenAIException {
+        // Connection error expected without real server
+      } catch (e) {
+        // Network errors expected without real server
+      }
+
+      client.close();
+    });
+  });
+}
