@@ -1,12 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show WebSocket;
 
-import 'package:web_socket_channel/io.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:web_socket/web_socket.dart';
 
 import '../models/realtime/realtime.dart';
 import 'base_resource.dart';
+import 'realtime/websocket_connector.dart';
 
 /// Resource for Realtime API operations.
 ///
@@ -51,6 +50,13 @@ class RealtimeResource extends BaseResource {
   ///
   /// A [RealtimeConnection] for sending and receiving events.
   ///
+  /// ## Platform Notes
+  ///
+  /// On web platforms, browser WebSocket connections do not support custom
+  /// headers. Direct connections with API keys will throw [ConnectionException].
+  /// For web, use ephemeral tokens from [OpenAIClient.realtimeSessions.create()]
+  /// to authenticate.
+  ///
   /// ## Example
   ///
   /// ```dart
@@ -76,11 +82,9 @@ class RealtimeResource extends BaseResource {
       headers.addAll(authProvider.getHeaders());
     }
 
-    // Connect to WebSocket with headers using dart:io WebSocket
-    final socket = await WebSocket.connect(wsUrl.toString(), headers: headers);
-
-    final channel = IOWebSocketChannel(socket);
-    final connection = RealtimeConnection._(channel);
+    // Connect to WebSocket using platform-specific implementation
+    final socket = await connectWebSocket(wsUrl, headers: headers);
+    final connection = RealtimeConnection._(socket);
 
     // Apply config if provided
     if (config != null) {
@@ -95,16 +99,16 @@ class RealtimeResource extends BaseResource {
 ///
 /// Use this to send and receive events from the Realtime API.
 class RealtimeConnection {
-  RealtimeConnection._(this._channel) {
-    _subscription = _channel.stream.listen(
-      _handleMessage,
+  RealtimeConnection._(this._socket) {
+    _subscription = _socket.events.listen(
+      _handleEvent,
       onError: _handleError,
       onDone: _handleDone,
     );
   }
 
-  final WebSocketChannel _channel;
-  late final StreamSubscription<dynamic> _subscription;
+  final WebSocket _socket;
+  late final StreamSubscription<WebSocketEvent> _subscription;
   final _eventController = StreamController<RealtimeEvent>.broadcast();
   bool _closed = false;
 
@@ -131,9 +135,21 @@ class RealtimeConnection {
   /// Whether the connection is closed.
   bool get isClosed => _closed;
 
-  void _handleMessage(dynamic message) {
+  void _handleEvent(WebSocketEvent event) {
+    switch (event) {
+      case TextDataReceived(:final text):
+        _handleMessage(text);
+      case BinaryDataReceived():
+        // Binary data not expected from OpenAI Realtime API
+        break;
+      case CloseReceived():
+        _handleDone();
+    }
+  }
+
+  void _handleMessage(String message) {
     try {
-      final json = jsonDecode(message as String) as Map<String, dynamic>;
+      final json = jsonDecode(message) as Map<String, dynamic>;
       final event = RealtimeEvent.fromJson(json);
       _eventController.add(event);
     } catch (e) {
@@ -157,7 +173,7 @@ class RealtimeConnection {
   /// - [event] - The event to send as JSON.
   void send(Map<String, dynamic> event) {
     _ensureNotClosed();
-    _channel.sink.add(jsonEncode(event));
+    _socket.sendText(jsonEncode(event));
   }
 
   /// Updates the session configuration.
@@ -395,7 +411,7 @@ class RealtimeConnection {
     _closed = true;
 
     await _subscription.cancel();
-    await _channel.sink.close(code, reason);
+    await _socket.close(code, reason);
     await _eventController.close();
   }
 }

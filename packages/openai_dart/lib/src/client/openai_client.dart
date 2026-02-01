@@ -1,5 +1,4 @@
 import 'dart:convert' show jsonEncode;
-import 'dart:io' show Platform;
 
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
@@ -9,6 +8,7 @@ import '../interceptors/auth_interceptor.dart';
 import '../interceptors/error_interceptor.dart';
 import '../interceptors/interceptor.dart';
 import '../interceptors/logging_interceptor.dart';
+import '../platform/environment.dart';
 import '../resources/audio_resource.dart';
 import '../resources/batches_resource.dart';
 import '../resources/beta_resource.dart';
@@ -127,10 +127,13 @@ class OpenAIClient {
   /// Optionally reads `OPENAI_BASE_URL`, `OPENAI_ORG_ID`, `OPENAI_PROJECT_ID`.
   ///
   /// Empty environment variable values are treated the same as unset.
+  ///
+  /// Throws [UnsupportedError] on web platforms where environment variables
+  /// are not available.
   factory OpenAIClient.fromEnvironment({http.Client? httpClient}) {
-    final baseUrl = Platform.environment['OPENAI_BASE_URL'];
-    final orgId = Platform.environment['OPENAI_ORG_ID'];
-    final projectId = Platform.environment['OPENAI_PROJECT_ID'];
+    final baseUrl = getEnvironmentVariable('OPENAI_BASE_URL');
+    final orgId = getEnvironmentVariable('OPENAI_ORG_ID');
+    final projectId = getEnvironmentVariable('OPENAI_PROJECT_ID');
 
     return OpenAIClient(
       config: OpenAIConfig(

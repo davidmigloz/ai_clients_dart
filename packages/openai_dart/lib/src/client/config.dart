@@ -1,9 +1,8 @@
-import 'dart:io' show Platform;
-
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 
 import '../auth/auth_provider.dart';
+import '../platform/environment.dart';
 
 /// Private sentinel class to distinguish "not provided" from "set to null".
 ///
@@ -60,12 +59,15 @@ class OpenAIConfig {
   /// - `OPENAI_ORG_ID` for the organization ID
   /// - `OPENAI_PROJECT_ID` for the project ID
   ///
-  /// All environment variables are read at runtime via [Platform.environment],
+  /// All environment variables are read at runtime via [getEnvironmentVariable],
   /// consistent with [ApiKeyProvider.fromEnvironment].
+  ///
+  /// Throws [UnsupportedError] on web platforms where environment variables
+  /// are not available.
   factory OpenAIConfig.fromEnvironment() {
-    final baseUrl = Platform.environment['OPENAI_BASE_URL'];
-    final orgId = Platform.environment['OPENAI_ORG_ID'];
-    final projectId = Platform.environment['OPENAI_PROJECT_ID'];
+    final baseUrl = getEnvironmentVariable('OPENAI_BASE_URL');
+    final orgId = getEnvironmentVariable('OPENAI_ORG_ID');
+    final projectId = getEnvironmentVariable('OPENAI_PROJECT_ID');
 
     return OpenAIConfig(
       authProvider: ApiKeyProvider.fromEnvironment(),

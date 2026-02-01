@@ -1,10 +1,10 @@
 import 'dart:async' show TimeoutException;
-import 'dart:io' show HttpDate, SocketException;
 import 'dart:math';
 
 import 'package:http/http.dart' as http;
 
 import '../errors/exceptions.dart';
+import '../platform/http_utils.dart';
 import 'config.dart';
 
 /// Wraps HTTP transport execution with retry logic.
@@ -114,17 +114,10 @@ class RetryWrapper {
         await _delayWithAbortCheck(delay, abortTrigger, correlationId);
         attempt++;
         delay = _exponentialBackoff(delay);
-      } on SocketException {
-        // Retry on connection errors for idempotent methods only
-        if (!_isIdempotent(request.method) || attempt >= config.maxRetries) {
-          rethrow;
-        }
-
-        await _delayWithAbortCheck(delay, abortTrigger, correlationId);
-        attempt++;
-        delay = _exponentialBackoff(delay);
       } on http.ClientException {
-        // Retry on HTTP client errors for idempotent methods only
+        // Retry on HTTP client errors for idempotent methods only.
+        // This also handles SocketException on IO platforms (wrapped by http package)
+        // and network errors on web platforms.
         if (!_isIdempotent(request.method) || attempt >= config.maxRetries) {
           rethrow;
         }
@@ -132,6 +125,19 @@ class RetryWrapper {
         await _delayWithAbortCheck(delay, abortTrigger, correlationId);
         attempt++;
         delay = _exponentialBackoff(delay);
+      } catch (e) {
+        // Handle SocketException on IO platforms (when not wrapped by http package)
+        if (isSocketException(e)) {
+          if (!_isIdempotent(request.method) || attempt >= config.maxRetries) {
+            rethrow;
+          }
+
+          await _delayWithAbortCheck(delay, abortTrigger, correlationId);
+          attempt++;
+          delay = _exponentialBackoff(delay);
+        } else {
+          rethrow;
+        }
       }
     }
 
@@ -222,11 +228,13 @@ class RetryWrapper {
 
   /// Parses an HTTP-date string.
   ///
-  /// Uses [HttpDate.parse] which supports all RFC 7231 date formats:
+  /// Supports RFC 7231 date formats. On IO platforms, all formats are supported:
   /// - RFC 1123 (preferred): "Wed, 21 Oct 2015 07:28:00 GMT"
   /// - RFC 850: "Wednesday, 21-Oct-15 07:28:00 GMT"
   /// - ANSI C asctime(): "Wed Oct 21 07:28:00 2015"
-  DateTime _parseHttpDate(String value) => HttpDate.parse(value);
+  ///
+  /// On web platforms, only RFC 1123 format is supported.
+  DateTime _parseHttpDate(String value) => parseHttpDate(value);
 
   /// Computes a delay with jitter to avoid thundering herd problem.
   ///

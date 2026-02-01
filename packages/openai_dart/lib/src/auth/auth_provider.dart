@@ -1,4 +1,4 @@
-import 'dart:io' show Platform;
+import '../platform/environment.dart';
 
 /// Abstract interface for providing authentication credentials.
 ///
@@ -29,8 +29,10 @@ class ApiKeyProvider implements AuthProvider {
   /// Creates an [ApiKeyProvider] from the `OPENAI_API_KEY` environment variable.
   ///
   /// Throws [StateError] if the environment variable is not set.
+  /// Throws [UnsupportedError] on web platforms where environment variables
+  /// are not available.
   factory ApiKeyProvider.fromEnvironment([String envVar = 'OPENAI_API_KEY']) {
-    final apiKey = Platform.environment[envVar];
+    final apiKey = getEnvironmentVariable(envVar);
     if (apiKey == null || apiKey.isEmpty) {
       throw StateError(
         'Environment variable $envVar is not set. '
@@ -77,10 +79,12 @@ class OrganizationApiKeyProvider implements AuthProvider {
   /// organization ID. Optionally reads `OPENAI_PROJECT_ID` for the project.
   ///
   /// Throws [StateError] if required environment variables are not set.
+  /// Throws [UnsupportedError] on web platforms where environment variables
+  /// are not available.
   factory OrganizationApiKeyProvider.fromEnvironment() {
-    final apiKey = Platform.environment['OPENAI_API_KEY'];
-    final organization = Platform.environment['OPENAI_ORG_ID'];
-    final project = Platform.environment['OPENAI_PROJECT_ID'];
+    final apiKey = getEnvironmentVariable('OPENAI_API_KEY');
+    final organization = getEnvironmentVariable('OPENAI_ORG_ID');
+    final project = getEnvironmentVariable('OPENAI_PROJECT_ID');
 
     if (apiKey == null || apiKey.isEmpty) {
       throw StateError(
@@ -147,10 +151,12 @@ class AzureApiKeyProvider implements AuthProvider {
   /// environment variable.
   ///
   /// Throws [StateError] if the environment variable is not set.
+  /// Throws [UnsupportedError] on web platforms where environment variables
+  /// are not available.
   factory AzureApiKeyProvider.fromEnvironment([
     String envVar = 'AZURE_OPENAI_API_KEY',
   ]) {
-    final apiKey = Platform.environment[envVar];
+    final apiKey = getEnvironmentVariable(envVar);
     if (apiKey == null || apiKey.isEmpty) {
       throw StateError(
         'Environment variable $envVar is not set. '
