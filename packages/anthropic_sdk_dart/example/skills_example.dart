@@ -16,8 +16,7 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 void main() async {
   final client = AnthropicClient(
     config: const AnthropicConfig(
-      authProvider:
-          ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
+      authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
     ),
   );
 
@@ -63,8 +62,8 @@ void main() async {
 
       // Example 4: Create a new version
       print('\n=== Create Version ===');
-      final newVersionBytes =
-          await skillFile.readAsBytes(); // In practice, different content
+      final newVersionBytes = await skillFile
+          .readAsBytes(); // In practice, different content
       final version = await client.skills.createVersion(
         skillId: skill.id,
         versionBytes: newVersionBytes,
