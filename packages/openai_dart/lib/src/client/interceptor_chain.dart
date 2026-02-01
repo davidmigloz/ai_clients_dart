@@ -113,7 +113,11 @@ class InterceptorChain {
         }
         return request;
       }
-      // For other request types, return as-is (retries may fail)
+      // For other request types (MultipartRequest, etc.), add correlation ID
+      // header directly since we can't clone them for retries anyway.
+      if (needsCorrelationIdHeader) {
+        originalRequest.headers['X-Request-ID'] = correlationId;
+      }
       return originalRequest;
     }
 

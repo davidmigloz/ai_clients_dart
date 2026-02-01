@@ -2,17 +2,19 @@ import 'config.dart';
 
 /// Builds API request URLs and headers with proper precedence.
 ///
-/// This class implements last-write-wins merge semantics for headers:
-/// - Headers: Default → Global → Request (later values override)
+/// Headers are merged in this order (later values override earlier):
+/// 1. `Content-Type: application/json` (for non-multipart requests)
+/// 2. [OpenAIConfig.defaultHeaders] (global headers)
+/// 3. [AuthProvider.getHeaders] (authentication headers)
+/// 4. `OpenAI-Organization` / `OpenAI-Project` / `OpenAI-Version` (from config)
+/// 5. `additionalHeaders` (request-specific headers)
 ///
-/// The following headers are automatically included (but can be overridden
-/// by request-level headers unless otherwise noted):
-/// - `Content-Type: application/json` (for non-multipart requests)
-/// - Authentication headers from the configured [AuthProvider]
-/// - `OpenAI-Organization` / `OpenAI-Project` / `OpenAI-Version` when configured
+/// This means request-level headers can override organization/project/version,
+/// which can override auth headers, which can override global defaults.
 ///
 /// Note: [buildStreamingHeaders] and [buildBetaHeaders] enforce their
-/// required headers (`Accept` and `OpenAI-Beta`) and prevent overrides.
+/// required headers (`Accept` and `OpenAI-Beta`) by placing them last,
+/// preventing overrides from earlier merge stages.
 ///
 /// ## Example
 ///
