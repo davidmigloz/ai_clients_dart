@@ -499,6 +499,7 @@ class OpenAIClient {
           onError: (Object e, StackTrace st) {
             closeClientOnce();
             controller.addError(e, st);
+            unawaited(subscription.cancel());
             closeController();
           },
           onDone: () {

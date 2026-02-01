@@ -704,6 +704,112 @@ void main() {
         client.close();
       });
 
+      test('onError cancels subscription to prevent post-error data delivery',
+          () async {
+        // This test verifies that when the source stream emits an error and
+        // then continues emitting data (allowed with cancelOnError: false),
+        // our onError handler cancels the subscription to prevent data from
+        // being pushed into a closed controller.
+        var clientClosed = false;
+        var subscriptionCancelled = false;
+        final dataAfterError = <List<int>>[];
+
+        // Create a source stream that will emit error then more data
+        final sourceController = StreamController<List<int>>(
+          onCancel: () {
+            subscriptionCancelled = true;
+          },
+        );
+
+        final mockStreamClient = MockClient.streaming((request, _) async {
+          return http.StreamedResponse(
+            sourceController.stream,
+            200,
+          );
+        });
+
+        final trackingClient = _TrackingClient(
+          mockStreamClient,
+          onClose: () => clientClosed = true,
+        );
+
+        final client = OpenAIClient(
+          config:
+              const OpenAIConfig(authProvider: ApiKeyProvider('sk-test-key')),
+          streamClientFactory: () => trackingClient,
+        );
+
+        final neverAbort = Completer<void>().future;
+
+        final response = await client.sendStream(
+          endpoint: '/chat/completions',
+          body: <String, Object>{
+            'model': 'gpt-4',
+            'messages': [],
+            'stream': true,
+          },
+          abortTrigger: neverAbort,
+        );
+
+        Object? caughtError;
+        final doneCompleter = Completer<void>();
+
+        // Track any data received after the error
+        var errorReceived = false;
+        response.stream.listen(
+          (data) {
+            if (errorReceived) {
+              dataAfterError.add(data);
+            }
+          },
+          onError: (Object e) {
+            errorReceived = true;
+            caughtError = e;
+          },
+          onDone: doneCompleter.complete,
+          cancelOnError: false,
+        );
+
+        // Emit some data, then error, then more data
+        sourceController.add(utf8.encode('data: {"choices":[]}\n\n'));
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+
+        sourceController.addError(Exception('Stream error'));
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+
+        // Try to emit more data after the error
+        // This should NOT reach the wrapped stream because the subscription
+        // should have been cancelled in onError
+        sourceController.add(utf8.encode('data: {"choices":[]}\n\n'));
+        sourceController.add(utf8.encode('data: [DONE]\n\n'));
+
+        // Close the source to complete the test
+        await sourceController.close();
+
+        // Wait for wrapped stream to complete
+        await doneCompleter.future.timeout(
+          const Duration(seconds: 1),
+          onTimeout: () =>
+              throw TimeoutException('Wrapped stream did not complete'),
+        );
+
+        // Verify expected behavior
+        expect(caughtError, isA<Exception>());
+        expect(
+          subscriptionCancelled,
+          isTrue,
+          reason: 'Subscription should be cancelled in onError',
+        );
+        expect(
+          dataAfterError,
+          isEmpty,
+          reason: 'No data should be received after error',
+        );
+        expect(clientClosed, isTrue);
+
+        client.close();
+      });
+
       test('withApiKey factory accepts streamClientFactory', () async {
         var factoryCalled = false;
 
