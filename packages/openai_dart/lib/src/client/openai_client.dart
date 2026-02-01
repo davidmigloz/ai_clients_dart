@@ -485,16 +485,25 @@ class OpenAIClient {
         // resource leak.
         final controller = StreamController<List<int>>();
         late final StreamSubscription<List<int>> subscription;
+        var controllerClosed = false;
+
+        void closeController() {
+          if (!controllerClosed) {
+            controllerClosed = true;
+            unawaited(controller.close());
+          }
+        }
 
         subscription = response.stream.listen(
           controller.add,
           onError: (Object e, StackTrace st) {
             closeClientOnce();
             controller.addError(e, st);
+            closeController();
           },
           onDone: () {
             closeClientOnce();
-            unawaited(controller.close());
+            closeController();
           },
           cancelOnError: false,
         );
@@ -502,6 +511,7 @@ class OpenAIClient {
         controller.onCancel = () async {
           closeClientOnce();
           await subscription.cancel();
+          closeController();
         };
 
         return http.StreamedResponse(
