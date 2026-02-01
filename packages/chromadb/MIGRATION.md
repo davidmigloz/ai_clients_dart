@@ -766,7 +766,7 @@ Yes, authentication headers from `authProvider` are combined with `defaultHeader
 final client = ChromaClient(
   config: ChromaConfig(
     baseUrl: 'https://api.trychroma.com',
-    authProvider: ApiKeyProvider('your-api-key'), // Adds X-Chroma-Token header
+    authProvider: ApiKeyProvider('your-api-key'), // Adds x-chroma-token header
     defaultHeaders: {
       'X-Request-Source': 'my-app', // Additional custom header
     },

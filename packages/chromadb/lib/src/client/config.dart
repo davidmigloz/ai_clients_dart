@@ -63,6 +63,17 @@ class ChromaConfig {
   ///
   /// These headers are merged with built-in headers (Accept, User-Agent).
   /// Request-specific headers override these if they have the same key.
+  ///
+  /// **Note on header precedence:** Headers from [authProvider] (e.g., the
+  /// `x-chroma-token` header from [ApiKeyProvider]) are added by interceptors
+  /// and will override any matching key in [defaultHeaders].
+  ///
+  /// **Immutability expectation:** This map is intended to be treated as
+  /// immutable after a [ChromaConfig] instance is created. Mutating the map
+  /// instance that was passed to the constructor may change [defaultHeaders]
+  /// as observed on the config object, but such changes will not be reflected
+  /// in already-initialized HTTP clients.
+  ///
   /// Defaults to an empty map.
   final Map<String, String> defaultHeaders;
 
