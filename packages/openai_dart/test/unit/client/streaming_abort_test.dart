@@ -429,7 +429,6 @@ void main() {
       test('streaming client closes on early subscription cancellation',
           () async {
         var clientClosed = false;
-        var wrappedStreamDone = false;
 
         // Create a stream that never ends - it will be cancelled early
         final streamController = StreamController<List<int>>();
@@ -470,7 +469,7 @@ void main() {
         // Subscribe with onDone tracking and then cancel
         final subscription = response.stream.listen(
           (_) {},
-          onDone: () => wrappedStreamDone = true,
+          onDone: () {},
         );
         await Future<void>.delayed(const Duration(milliseconds: 10));
         await subscription.cancel();
@@ -780,8 +779,9 @@ void main() {
         // Try to emit more data after the error
         // This should NOT reach the wrapped stream because the subscription
         // should have been cancelled in onError
-        sourceController.add(utf8.encode('data: {"choices":[]}\n\n'));
-        sourceController.add(utf8.encode('data: [DONE]\n\n'));
+        sourceController
+          ..add(utf8.encode('data: {"choices":[]}\n\n'))
+          ..add(utf8.encode('data: [DONE]\n\n'));
 
         // Close the source to complete the test
         await sourceController.close();
