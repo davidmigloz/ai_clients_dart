@@ -78,13 +78,14 @@ class InterceptorChain {
     final originalRequest = context.request;
 
     // Extract correlation ID upfront for tracing (used in retries and abort).
-    // If neither metadata nor request headers contain an ID, generate one
-    // and ensure it's included in the outgoing request for server-side tracing.
-    final existingCorrelationId =
-        context.metadata['correlationId'] as String? ??
-        context.request.headers['X-Request-ID'];
-    final correlationId = existingCorrelationId ?? generateRequestId();
-    final needsCorrelationIdHeader = existingCorrelationId == null;
+    // Priority: metadata > request header > generate new.
+    // Always ensure X-Request-ID header is present for server-side tracing.
+    final metadataCorrelationId = context.metadata['correlationId'] as String?;
+    final headerCorrelationId = context.request.headers['X-Request-ID'];
+    final correlationId =
+        metadataCorrelationId ?? headerCorrelationId ?? generateRequestId();
+    // Add header if not already present (even if metadata had the ID)
+    final needsCorrelationIdHeader = headerCorrelationId == null;
 
     // Persist to metadata for downstream interceptors and logging
     context.metadata['correlationId'] = correlationId;

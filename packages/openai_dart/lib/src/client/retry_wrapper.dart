@@ -307,6 +307,7 @@ class RetryWrapper {
           message: 'Request aborted during retry delay',
           correlationId: correlationId,
           stage: AbortionStage.beforeRequest,
+          timestamp: DateTime.now(),
         );
       }
     }
