@@ -48,15 +48,134 @@ void main() {
       expect(SchemaFormat(schema), equals(SchemaFormat(schema)));
       expect(
         SchemaFormat(schema),
-        isNot(equals(const SchemaFormat({'type': 'array'}))),
+        isNot(equals(SchemaFormat(const {'type': 'array'}))),
       );
     });
 
     test('ResponseFormat toString returns readable string', () {
       expect(const JsonFormat().toString(), 'JsonFormat()');
       expect(
-        const SchemaFormat({'type': 'object'}).toString(),
+        SchemaFormat(const {'type': 'object'}).toString(),
         'SchemaFormat({type: object})',
+      );
+    });
+
+    test('SchemaFormat equality works with nested maps', () {
+      final schema1 = {
+        'type': 'object',
+        'properties': {
+          'address': {
+            'type': 'object',
+            'properties': {
+              'street': {'type': 'string'},
+              'city': {'type': 'string'},
+            },
+          },
+        },
+      };
+      final schema2 = {
+        'type': 'object',
+        'properties': {
+          'address': {
+            'type': 'object',
+            'properties': {
+              'street': {'type': 'string'},
+              'city': {'type': 'string'},
+            },
+          },
+        },
+      };
+
+      expect(SchemaFormat(schema1), equals(SchemaFormat(schema2)));
+    });
+
+    test('SchemaFormat equality works with nested lists', () {
+      final schema1 = {
+        'type': 'object',
+        'required': ['name', 'age'],
+        'properties': {
+          'tags': {
+            'type': 'array',
+            'items': {'type': 'string'},
+          },
+        },
+      };
+      final schema2 = {
+        'type': 'object',
+        'required': ['name', 'age'],
+        'properties': {
+          'tags': {
+            'type': 'array',
+            'items': {'type': 'string'},
+          },
+        },
+      };
+
+      expect(SchemaFormat(schema1), equals(SchemaFormat(schema2)));
+    });
+
+    test('SchemaFormat inequality works with different nested values', () {
+      final schema1 = {
+        'properties': {
+          'address': {'type': 'object'},
+        },
+      };
+      final schema2 = {
+        'properties': {
+          'address': {'type': 'string'},
+        },
+      };
+
+      expect(SchemaFormat(schema1), isNot(equals(SchemaFormat(schema2))));
+    });
+
+    test('SchemaFormat stores unmodifiable copy of schema', () {
+      final originalSchema = {
+        'type': 'object',
+        'properties': {
+          'name': {'type': 'string'},
+        },
+      };
+      final format = SchemaFormat(originalSchema);
+
+      // Modifying original should not affect stored schema
+      originalSchema['type'] = 'array';
+      expect(format.schema['type'], 'object');
+    });
+
+    test('SchemaFormat schema is deeply unmodifiable', () {
+      final format = SchemaFormat(const {
+        'type': 'object',
+        'properties': {
+          'name': {'type': 'string'},
+        },
+      });
+
+      // Attempting to modify should throw
+      expect(() => format.schema['type'] = 'array', throwsUnsupportedError);
+      expect(
+        () => (format.schema['properties'] as Map)['age'] = {'type': 'int'},
+        throwsUnsupportedError,
+      );
+    });
+
+    test('SchemaFormat hashCode is consistent for equal schemas', () {
+      final schema1 = {
+        'type': 'object',
+        'properties': {
+          'name': {'type': 'string'},
+        },
+      };
+      final schema2 = {
+        'type': 'object',
+        'properties': {
+          'name': {'type': 'string'},
+        },
+      };
+
+      expect(
+        SchemaFormat(schema1).hashCode,
+        equals(SchemaFormat(schema2).hashCode),
       );
     });
   });

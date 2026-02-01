@@ -15,6 +15,21 @@ void main() {
       expect(messageRoleFromString(null), MessageRole.user);
     });
 
+    test('messageRoleFromNullableString returns correct enum values', () {
+      expect(messageRoleFromNullableString('system'), MessageRole.system);
+      expect(messageRoleFromNullableString('user'), MessageRole.user);
+      expect(messageRoleFromNullableString('assistant'), MessageRole.assistant);
+      expect(messageRoleFromNullableString('tool'), MessageRole.tool);
+    });
+
+    test('messageRoleFromNullableString returns null for unknown or null values',
+        () {
+      expect(messageRoleFromNullableString('unknown'), isNull);
+      expect(messageRoleFromNullableString(null), isNull);
+      expect(messageRoleFromNullableString(''), isNull);
+      expect(messageRoleFromNullableString('SYSTEM'), isNull);
+    });
+
     test('messageRoleToString returns correct string values', () {
       expect(messageRoleToString(MessageRole.system), 'system');
       expect(messageRoleToString(MessageRole.user), 'user');

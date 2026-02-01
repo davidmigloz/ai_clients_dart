@@ -66,6 +66,58 @@ void main() {
 
       expect(request1, equals(request2));
     });
+
+    test('template field serializes and deserializes correctly', () {
+      const request = GenerateRequest(
+        model: 'llama3.2',
+        prompt: 'Hello',
+        template: '{{ .System }}\n{{ .Prompt }}',
+      );
+
+      final json = request.toJson();
+      expect(json['template'], '{{ .System }}\n{{ .Prompt }}');
+
+      final restored = GenerateRequest.fromJson(json);
+      expect(restored.template, '{{ .System }}\n{{ .Prompt }}');
+    });
+
+    test('context field serializes and deserializes correctly', () {
+      const request = GenerateRequest(
+        model: 'llama3.2',
+        prompt: 'Hello',
+        context: [1, 2, 3, 4, 5],
+      );
+
+      final json = request.toJson();
+      expect(json['context'], [1, 2, 3, 4, 5]);
+
+      final restored = GenerateRequest.fromJson(json);
+      expect(restored.context, [1, 2, 3, 4, 5]);
+    });
+
+    test('context field handles empty list', () {
+      const request = GenerateRequest(
+        model: 'llama3.2',
+        prompt: 'Hello',
+        context: <int>[],
+      );
+
+      final json = request.toJson();
+      expect(json['context'], <int>[]);
+
+      final restored = GenerateRequest.fromJson(json);
+      expect(restored.context, <int>[]);
+    });
+
+    test('context field handles null', () {
+      final json = {'model': 'llama3.2', 'prompt': 'Hello'};
+
+      final request = GenerateRequest.fromJson(json);
+      expect(request.context, isNull);
+
+      final outputJson = request.toJson();
+      expect(outputJson.containsKey('context'), isFalse);
+    });
   });
 
   group('GenerateResponse', () {
@@ -155,6 +207,66 @@ void main() {
       expect(response.logprobs?.length, 1);
       expect(response.logprobs?.first.token, 'Hello');
       expect(response.logprobs?.first.topLogprobs?.length, 2);
+    });
+
+    test('context field deserializes correctly', () {
+      final json = {
+        'model': 'llama3.2',
+        'response': 'Hello there!',
+        'done': true,
+        'context': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      };
+
+      final response = GenerateResponse.fromJson(json);
+
+      expect(response.context, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    });
+
+    test('context field serializes correctly', () {
+      const response = GenerateResponse(
+        model: 'llama3.2',
+        response: 'Hello!',
+        done: true,
+        context: [1, 2, 3],
+      );
+
+      final json = response.toJson();
+
+      expect(json['context'], [1, 2, 3]);
+    });
+
+    test('context field handles null', () {
+      final json = {
+        'model': 'llama3.2',
+        'response': 'Hello there!',
+        'done': true,
+      };
+
+      final response = GenerateResponse.fromJson(json);
+      expect(response.context, isNull);
+
+      final outputJson = response.toJson();
+      expect(outputJson.containsKey('context'), isFalse);
+    });
+
+    test('context can be used for multi-turn conversations', () {
+      // Simulate first response with context
+      final firstResponse = GenerateResponse.fromJson(const {
+        'model': 'llama3.2',
+        'response': 'Hello!',
+        'done': true,
+        'context': [100, 200, 300],
+      });
+
+      // Use context in next request
+      final nextRequest = GenerateRequest(
+        model: 'llama3.2',
+        prompt: 'How are you?',
+        context: firstResponse.context,
+      );
+
+      expect(nextRequest.context, [100, 200, 300]);
+      expect(nextRequest.toJson()['context'], [100, 200, 300]);
     });
   });
 

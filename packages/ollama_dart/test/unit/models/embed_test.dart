@@ -123,5 +123,32 @@ void main() {
       expect(copied.model, 'other-model');
       expect(copied.embeddings, original.embeddings);
     });
+
+    test('embedding getter returns first embedding when present', () {
+      const response = EmbedResponse(
+        model: 'nomic-embed-text',
+        embeddings: [
+          [0.1, 0.2, 0.3],
+          [0.4, 0.5, 0.6],
+        ],
+      );
+
+      expect(response.embedding, [0.1, 0.2, 0.3]);
+    });
+
+    test('embedding getter returns null when embeddings is empty', () {
+      const response = EmbedResponse(
+        model: 'nomic-embed-text',
+        embeddings: [],
+      );
+
+      expect(response.embedding, isNull);
+    });
+
+    test('embedding getter returns null when embeddings is null', () {
+      const response = EmbedResponse(model: 'nomic-embed-text');
+
+      expect(response.embedding, isNull);
+    });
   });
 }
