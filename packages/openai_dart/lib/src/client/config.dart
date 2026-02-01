@@ -103,6 +103,25 @@ class OpenAIConfig {
   /// The timeout for establishing a connection.
   ///
   /// Defaults to 30 seconds.
+  ///
+  /// **Note:** This parameter is currently not enforced by the default HTTP
+  /// client. The standard `package:http` `Client` does not support connection
+  /// timeouts. To use connection timeouts, provide a custom [http.Client] with
+  /// platform-specific timeout configuration (e.g., `IOClient` with a
+  /// configured `HttpClient` on native platforms).
+  ///
+  /// Example using `IOClient`:
+  /// ```dart
+  /// import 'dart:io';
+  /// import 'package:http/io_client.dart';
+  ///
+  /// final httpClient = HttpClient()
+  ///   ..connectionTimeout = Duration(seconds: 30);
+  /// final client = OpenAIClient(
+  ///   config: OpenAIConfig(...),
+  ///   httpClient: IOClient(httpClient),
+  /// );
+  /// ```
   final Duration connectTimeout;
 
   /// The maximum number of retry attempts for failed requests.
@@ -191,7 +210,11 @@ class OpenAIConfig {
       maxRetryDelay: maxRetryDelay ?? this.maxRetryDelay,
       logLevel: _resolveField<Level>(logLevel, 'logLevel', this.logLevel),
       defaultHeaders: defaultHeaders ?? this.defaultHeaders,
-      apiVersion: _resolveField<String>(apiVersion, 'apiVersion', this.apiVersion),
+      apiVersion: _resolveField<String>(
+        apiVersion,
+        'apiVersion',
+        this.apiVersion,
+      ),
       organization: _resolveField<String>(
         organization,
         'organization',
@@ -265,4 +288,3 @@ class OpenAIConfig {
     return true;
   }
 }
-

@@ -10,72 +10,74 @@ import 'package:test/test.dart';
 
 void main() {
   group('Runs Streaming Headers', () {
-    test('runs stream includes all required headers including OpenAI-Beta',
-        () async {
-      final requestCompleter = Completer<http.BaseRequest>();
+    test(
+      'runs stream includes all required headers including OpenAI-Beta',
+      () async {
+        final requestCompleter = Completer<http.BaseRequest>();
 
-      final mockClient = MockClient.streaming((request, _) async {
-        requestCompleter.complete(request);
-        return http.StreamedResponse(
-          Stream.fromIterable([
-            utf8.encode(
-              'data: {"object":"thread.run.step.delta","data":{}}\n\n',
-            ),
-            utf8.encode('data: [DONE]\n\n'),
-          ]),
-          200,
+        final mockClient = MockClient.streaming((request, _) async {
+          requestCompleter.complete(request);
+          return http.StreamedResponse(
+            Stream.fromIterable([
+              utf8.encode(
+                'data: {"object":"thread.run.step.delta","data":{}}\n\n',
+              ),
+              utf8.encode('data: [DONE]\n\n'),
+            ]),
+            200,
+          );
+        });
+
+        final client = OpenAIClient(
+          config: const OpenAIConfig(
+            authProvider: ApiKeyProvider('sk-test-key'),
+            organization: 'test-org',
+            project: 'test-project',
+            apiVersion: '2024-01-01',
+            defaultHeaders: {'X-Custom-Header': 'custom-value'},
+          ),
+          httpClient: mockClient,
         );
-      });
 
-      final client = OpenAIClient(
-        config: const OpenAIConfig(
-          authProvider: ApiKeyProvider('sk-test-key'),
-          organization: 'test-org',
-          project: 'test-project',
-          apiVersion: '2024-01-01',
-          defaultHeaders: {'X-Custom-Header': 'custom-value'},
-        ),
-        httpClient: mockClient,
-      );
+        // Consume the stream to trigger the request
+        await client.beta.threads.runs
+            .createStream(
+              'thread_123',
+              const CreateRunRequest(assistantId: 'asst_456'),
+            )
+            .drain<void>();
 
-      // Consume the stream to trigger the request
-      await client.beta.threads.runs
-          .createStream(
-            'thread_123',
-            const CreateRunRequest(assistantId: 'asst_456'),
-          )
-          .drain<void>();
+        final request = await requestCompleter.future;
 
-      final request = await requestCompleter.future;
+        // Verify auth header
+        expect(request.headers['Authorization'], equals('Bearer sk-test-key'));
 
-      // Verify auth header
-      expect(request.headers['Authorization'], equals('Bearer sk-test-key'));
+        // Verify organization and project headers
+        expect(request.headers['OpenAI-Organization'], equals('test-org'));
+        expect(request.headers['OpenAI-Project'], equals('test-project'));
 
-      // Verify organization and project headers
-      expect(request.headers['OpenAI-Organization'], equals('test-org'));
-      expect(request.headers['OpenAI-Project'], equals('test-project'));
+        // Verify API version header
+        expect(request.headers['OpenAI-Version'], equals('2024-01-01'));
 
-      // Verify API version header
-      expect(request.headers['OpenAI-Version'], equals('2024-01-01'));
+        // IMPORTANT: Verify OpenAI-Beta header for Assistants API
+        expect(request.headers['OpenAI-Beta'], equals('assistants=v2'));
 
-      // IMPORTANT: Verify OpenAI-Beta header for Assistants API
-      expect(request.headers['OpenAI-Beta'], equals('assistants=v2'));
+        // Verify streaming header
+        expect(request.headers['Accept'], equals('text/event-stream'));
 
-      // Verify streaming header
-      expect(request.headers['Accept'], equals('text/event-stream'));
+        // Verify content type
+        expect(request.headers['Content-Type'], equals('application/json'));
 
-      // Verify content type
-      expect(request.headers['Content-Type'], equals('application/json'));
+        // Verify X-Request-ID is present
+        expect(request.headers['X-Request-ID'], isNotNull);
+        expect(request.headers['X-Request-ID'], isNotEmpty);
 
-      // Verify X-Request-ID is present
-      expect(request.headers['X-Request-ID'], isNotNull);
-      expect(request.headers['X-Request-ID'], isNotEmpty);
+        // Verify custom default header
+        expect(request.headers['X-Custom-Header'], equals('custom-value'));
 
-      // Verify custom default header
-      expect(request.headers['X-Custom-Header'], equals('custom-value'));
-
-      client.close();
-    });
+        client.close();
+      },
+    );
 
     test('runs stream sets stream=true in request body', () async {
       final requestCompleter = Completer<http.BaseRequest>();
@@ -191,10 +193,7 @@ void main() {
         equals('/openai/deployments/my-deploy/threads/thread_123/runs'),
       );
       // Verify query params are preserved
-      expect(
-        request.url.queryParameters['api-version'],
-        equals('2024-10-01'),
-      );
+      expect(request.url.queryParameters['api-version'], equals('2024-10-01'));
 
       client.close();
     });

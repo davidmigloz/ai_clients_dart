@@ -44,8 +44,14 @@ void main() {
         };
 
         for (final entry in months.entries) {
-          final result = parseHttpDate('Mon, 15 ${entry.key} 2024 00:00:00 GMT');
-          expect(result.month, entry.value, reason: '${entry.key} should be month ${entry.value}');
+          final result = parseHttpDate(
+            'Mon, 15 ${entry.key} 2024 00:00:00 GMT',
+          );
+          expect(
+            result.month,
+            entry.value,
+            reason: '${entry.key} should be month ${entry.value}',
+          );
         }
       });
 
@@ -72,17 +78,11 @@ void main() {
       // Both are Exceptions, so we test for that common base.
 
       test('throws exception for empty string', () {
-        expect(
-          () => parseHttpDate(''),
-          throwsException,
-        );
+        expect(() => parseHttpDate(''), throwsException);
       });
 
       test('throws exception for invalid format', () {
-        expect(
-          () => parseHttpDate('not a date'),
-          throwsException,
-        );
+        expect(() => parseHttpDate('not a date'), throwsException);
       });
 
       test('throws exception for invalid month', () {
@@ -93,10 +93,7 @@ void main() {
       });
 
       test('throws exception for missing parts', () {
-        expect(
-          () => parseHttpDate('Mon, 15 Jan 2024'),
-          throwsException,
-        );
+        expect(() => parseHttpDate('Mon, 15 Jan 2024'), throwsException);
       });
     });
   });

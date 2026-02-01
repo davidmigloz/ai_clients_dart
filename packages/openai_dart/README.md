@@ -153,7 +153,7 @@ Unofficial Dart client for the **[OpenAI API](https://platform.openai.com/docs/a
 ## Why choose this client?
 
 - Type-safe with sealed classes
-- Minimal dependencies (http, logging, web_socket_channel only)
+- Minimal dependencies (http, logging, meta, web_socket only)
 - Works on all compilation targets (native, web, WASM)
 - Interceptor-driven architecture
 - Comprehensive error handling

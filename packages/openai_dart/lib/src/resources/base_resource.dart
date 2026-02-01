@@ -63,4 +63,23 @@ abstract class BaseResource {
     final response = await client.delete(endpoint, abortTrigger: abortTrigger);
     return jsonDecode(response.body) as Map<String, dynamic>;
   }
+
+  /// Makes a GET request with support for repeated query parameters.
+  ///
+  /// Use this for endpoints that require array parameters like `include[]`.
+  /// The optional [abortTrigger] allows canceling the request.
+  Future<Map<String, dynamic>> getJsonWithRepeatedParams(
+    String endpoint, {
+    Map<String, String>? queryParameters,
+    Map<String, List<String>>? queryParametersAll,
+    Future<void>? abortTrigger,
+  }) async {
+    final response = await client.getWithRepeatedParams(
+      endpoint,
+      queryParameters: queryParameters,
+      queryParametersAll: queryParametersAll,
+      abortTrigger: abortTrigger,
+    );
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
 }

@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../client/openai_client.dart';
-import '../errors/exceptions.dart';
 import '../models/images/images.dart';
 import 'base_resource.dart';
 
@@ -102,22 +101,8 @@ class ImagesResource extends BaseResource {
   /// ```
   Future<ImageResponse> edit(ImageEditRequest request) async {
     final httpRequest = _createEditMultipartRequest(request);
-    final response = await httpRequest.send();
-    final body = await response.stream.bytesToString();
-
-    if (response.statusCode >= 400) {
-      final json = jsonDecode(body) as Map<String, dynamic>;
-      final error = json['error'] as Map<String, dynamic>?;
-      throw createApiException(
-        statusCode: response.statusCode,
-        message: error?['message'] as String? ?? 'Unknown error',
-        type: error?['type'] as String?,
-        code: error?['code'] as String?,
-        body: json,
-      );
-    }
-
-    final json = jsonDecode(body) as Map<String, dynamic>;
+    final response = await client.postMultipart(request: httpRequest);
+    final json = jsonDecode(response.body) as Map<String, dynamic>;
     return ImageResponse.fromJson(json);
   }
 
@@ -150,30 +135,14 @@ class ImagesResource extends BaseResource {
   /// ```
   Future<ImageResponse> createVariation(ImageVariationRequest request) async {
     final httpRequest = _createVariationMultipartRequest(request);
-    final response = await httpRequest.send();
-    final body = await response.stream.bytesToString();
-
-    if (response.statusCode >= 400) {
-      final json = jsonDecode(body) as Map<String, dynamic>;
-      final error = json['error'] as Map<String, dynamic>?;
-      throw createApiException(
-        statusCode: response.statusCode,
-        message: error?['message'] as String? ?? 'Unknown error',
-        type: error?['type'] as String?,
-        code: error?['code'] as String?,
-        body: json,
-      );
-    }
-
-    final json = jsonDecode(body) as Map<String, dynamic>;
+    final response = await client.postMultipart(request: httpRequest);
+    final json = jsonDecode(response.body) as Map<String, dynamic>;
     return ImageResponse.fromJson(json);
   }
 
   http.MultipartRequest _createEditMultipartRequest(ImageEditRequest request) {
-    final url = Uri.parse('${client.config.baseUrl}$_editEndpoint');
+    final url = client.buildUrl(_editEndpoint);
     final httpRequest = http.MultipartRequest('POST', url);
-
-    _addCommonHeaders(httpRequest);
 
     // Add image file
     httpRequest.files.add(
@@ -221,10 +190,8 @@ class ImagesResource extends BaseResource {
   http.MultipartRequest _createVariationMultipartRequest(
     ImageVariationRequest request,
   ) {
-    final url = Uri.parse('${client.config.baseUrl}$_variationEndpoint');
+    final url = client.buildUrl(_variationEndpoint);
     final httpRequest = http.MultipartRequest('POST', url);
-
-    _addCommonHeaders(httpRequest);
 
     // Add image file
     httpRequest.files.add(
@@ -253,20 +220,5 @@ class ImagesResource extends BaseResource {
     }
 
     return httpRequest;
-  }
-
-  void _addCommonHeaders(http.MultipartRequest request) {
-    // Add auth headers
-    if (client.config.authProvider case final authProvider?) {
-      request.headers.addAll(authProvider.getHeaders());
-    }
-
-    // Add organization and project headers
-    if (client.config.organization case final org?) {
-      request.headers['OpenAI-Organization'] = org;
-    }
-    if (client.config.project case final proj?) {
-      request.headers['OpenAI-Project'] = proj;
-    }
   }
 }

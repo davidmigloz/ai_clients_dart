@@ -96,9 +96,14 @@ class RetryWrapper {
           }
 
           // Enforce minimum delay to prevent tight retry loops (e.g., Retry-After: 0)
-          final effectiveDelay =
-              delay < config.retryDelay ? config.retryDelay : delay;
-          await _delayWithAbortCheck(effectiveDelay, abortTrigger, correlationId);
+          final effectiveDelay = delay < config.retryDelay
+              ? config.retryDelay
+              : delay;
+          await _delayWithAbortCheck(
+            effectiveDelay,
+            abortTrigger,
+            correlationId,
+          );
           attempt++;
           delay = _exponentialBackoff(delay);
           continue;
@@ -145,9 +150,7 @@ class RetryWrapper {
     }
 
     // Should never reach here; reaching this point indicates a logic error.
-    throw StateError(
-      'Unreachable: executeWithRetry fell through retry loop',
-    );
+    throw StateError('Unreachable: executeWithRetry fell through retry loop');
   }
 
   /// Determines if a response should be retried based on status code.

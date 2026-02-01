@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
-
 import '../errors/exceptions.dart';
 import '../models/runs/runs.dart';
 import '../utils/streaming_parser.dart';
@@ -69,6 +67,7 @@ class RunsResource extends BetaBaseResource {
   ///
   /// - [threadId] - The ID of the thread to run.
   /// - [request] - The run creation request.
+  /// - [abortTrigger] - Optional future that cancels the stream when completed.
   ///
   /// ## Returns
   ///
@@ -88,41 +87,38 @@ class RunsResource extends BetaBaseResource {
   /// ```
   Stream<Map<String, dynamic>> createStream(
     String threadId,
-    CreateRunRequest request,
-  ) async* {
-    final url = Uri.parse('${client.config.baseUrl}${_endpoint(threadId)}');
-    final httpRequest = http.Request('POST', url);
+    CreateRunRequest request, {
+    Future<void>? abortTrigger,
+  }) async* {
+    // Ensure stream is enabled in the request body
+    final requestBody = request.toJson();
+    requestBody['stream'] = true;
 
-    _addStreamHeaders(httpRequest);
+    final response = await client.sendStream(
+      endpoint: _endpoint(threadId),
+      body: requestBody,
+      headers: {'OpenAI-Beta': betaVersion},
+      abortTrigger: abortTrigger,
+    );
 
-    final streamRequest = request.toJson();
-    streamRequest['stream'] = true;
-    httpRequest.body = jsonEncode(streamRequest);
-
-    final httpClient = http.Client();
+    // Extract request ID from response headers for error reporting
+    final requestId =
+        response.headers['x-request-id'] ??
+        response.request?.headers['X-Request-ID'] ??
+        'unknown';
 
     try {
-      final response = await httpClient.send(httpRequest);
-
       if (response.statusCode >= 400) {
         final body = await response.stream.bytesToString();
-        final json = jsonDecode(body) as Map<String, dynamic>;
-        final error = json['error'] as Map<String, dynamic>?;
-        throw createApiException(
-          statusCode: response.statusCode,
-          message: error?['message'] as String? ?? 'Unknown error',
-          type: error?['type'] as String?,
-          code: error?['code'] as String?,
-          body: json,
-        );
+        throw _parseStreamError(response.statusCode, body, requestId);
       }
 
       const parser = SseParser();
       await for (final json in parser.parse(response.stream)) {
         yield json;
       }
-    } finally {
-      httpClient.close();
+    } on AbortedException {
+      rethrow;
     }
   }
 
@@ -344,19 +340,29 @@ class RunsResource extends BetaBaseResource {
     return RunStep.fromJson(json);
   }
 
-  void _addStreamHeaders(http.Request request) {
-    request.headers['Content-Type'] = 'application/json';
-    request.headers['Accept'] = 'text/event-stream';
-
-    if (client.config.authProvider case final authProvider?) {
-      request.headers.addAll(authProvider.getHeaders());
+  /// Parses an error response from a streaming request.
+  ApiException _parseStreamError(
+    int statusCode,
+    String body,
+    String requestId,
+  ) {
+    try {
+      final json = jsonDecode(body) as Map<String, dynamic>;
+      final error = json['error'] as Map<String, dynamic>?;
+      return createApiException(
+        statusCode: statusCode,
+        message: error?['message'] as String? ?? 'Unknown error',
+        type: error?['type'] as String?,
+        code: error?['code'] as String?,
+        requestId: requestId,
+        body: json,
+      );
+    } catch (_) {
+      return ApiException(
+        message: body.isNotEmpty ? body : 'HTTP $statusCode error',
+        statusCode: statusCode,
+        requestId: requestId,
+      );
     }
-    if (client.config.organization case final org?) {
-      request.headers['OpenAI-Organization'] = org;
-    }
-    if (client.config.project case final proj?) {
-      request.headers['OpenAI-Project'] = proj;
-    }
-    request.headers.addAll(client.config.defaultHeaders);
   }
 }

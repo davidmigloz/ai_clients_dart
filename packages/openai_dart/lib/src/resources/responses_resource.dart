@@ -1,12 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 
 import '../errors/exceptions.dart';
 import '../models/responses/responses.dart';
-import '../utils/request_id.dart';
 import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
 import 'input_tokens_resource.dart';
@@ -166,20 +164,23 @@ class ResponsesResource extends BaseResource {
     CreateResponseRequest request, {
     Future<void>? abortTrigger,
   }) async* {
-    final httpRequest = _createStreamRequest(request);
-    final httpClient = http.Client();
-    final requestId =
-        httpRequest.headers['X-Request-ID'] ?? generateRequestId();
+    // Ensure stream is enabled in the request body
+    final requestBody = request.toJson();
+    requestBody['stream'] = true;
 
-    // Set up abort monitoring if provided
-    if (abortTrigger != null) {
-      // ignore: unawaited_futures
-      abortTrigger.then((_) => httpClient.close());
-    }
+    final response = await client.sendStream(
+      endpoint: _endpoint,
+      body: requestBody,
+      abortTrigger: abortTrigger,
+    );
+
+    // Extract request ID from response headers for error reporting
+    final requestId =
+        response.headers['x-request-id'] ??
+        response.request?.headers['X-Request-ID'] ??
+        'unknown';
 
     try {
-      final response = await httpClient.send(httpRequest);
-
       if (response.statusCode >= 400) {
         final body = await response.stream.bytesToString();
         throw _parseStreamError(response.statusCode, body, requestId);
@@ -191,8 +192,6 @@ class ResponsesResource extends BaseResource {
       }
     } on AbortedException {
       rethrow;
-    } finally {
-      httpClient.close();
     }
   }
 
@@ -255,17 +254,20 @@ class ResponsesResource extends BaseResource {
     List<Include>? include,
     Future<void>? abortTrigger,
   }) async {
-    final queryParameters = <String, String>{};
-    if (include != null && include.isNotEmpty) {
-      queryParameters['include[]'] = include.map((e) => e.toJson()).join(',');
-    }
-
-    final json = await getJson(
+    final json = await getJsonWithRepeatedParams(
       '$_endpoint/$responseId',
-      queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
+      queryParametersAll: _buildIncludeParams(include),
       abortTrigger: abortTrigger,
     );
     return Response.fromJson(json);
+  }
+
+  /// Converts include values to repeated query parameters format.
+  Map<String, List<String>>? _buildIncludeParams(List<Include>? include) {
+    if (include == null || include.isEmpty) {
+      return null;
+    }
+    return {'include[]': include.map((e) => e.toJson()).toList()};
   }
 
   /// Lists responses.
@@ -408,41 +410,6 @@ class ResponsesResource extends BaseResource {
         requestId: requestId,
       );
     }
-  }
-
-  http.Request _createStreamRequest(CreateResponseRequest request) {
-    final url = Uri.parse('${client.config.baseUrl}$_endpoint');
-    final httpRequest = http.Request('POST', url);
-
-    // Add headers
-    httpRequest.headers['Content-Type'] = 'application/json';
-    httpRequest.headers['Accept'] = 'text/event-stream';
-    httpRequest.headers['X-Request-ID'] = generateRequestId();
-
-    // Add auth headers
-    if (client.config.authProvider case final authProvider?) {
-      httpRequest.headers.addAll(authProvider.getHeaders());
-    }
-
-    // Add organization header if configured
-    if (client.config.organization case final org?) {
-      httpRequest.headers['OpenAI-Organization'] = org;
-    }
-
-    // Add project header if configured
-    if (client.config.project case final proj?) {
-      httpRequest.headers['OpenAI-Project'] = proj;
-    }
-
-    // Add default headers
-    httpRequest.headers.addAll(client.config.defaultHeaders);
-
-    // Ensure stream is enabled in the request body
-    final requestBody = request.toJson();
-    requestBody['stream'] = true;
-    httpRequest.body = jsonEncode(requestBody);
-
-    return httpRequest;
   }
 }
 

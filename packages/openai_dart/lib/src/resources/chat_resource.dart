@@ -1,12 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
-
 import '../errors/exceptions.dart';
 import '../models/chat/chat.dart';
 import '../models/streaming/streaming.dart';
-import '../utils/request_id.dart';
 import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
 
@@ -146,20 +143,23 @@ class ChatCompletionsResource extends BaseResource {
     ChatCompletionCreateRequest request, {
     Future<void>? abortTrigger,
   }) async* {
-    final httpRequest = _createStreamRequest(request);
-    final httpClient = http.Client();
-    final requestId =
-        httpRequest.headers['X-Request-ID'] ?? generateRequestId();
+    // Ensure stream is enabled in the request body
+    final requestBody = request.toJson();
+    requestBody['stream'] = true;
 
-    // Set up abort monitoring if provided
-    if (abortTrigger != null) {
-      // ignore: unawaited_futures
-      abortTrigger.then((_) => httpClient.close());
-    }
+    final response = await client.sendStream(
+      endpoint: _endpoint,
+      body: requestBody,
+      abortTrigger: abortTrigger,
+    );
+
+    // Extract request ID from response headers for error reporting
+    final requestId =
+        response.headers['x-request-id'] ??
+        response.request?.headers['X-Request-ID'] ??
+        'unknown';
 
     try {
-      final response = await httpClient.send(httpRequest);
-
       if (response.statusCode >= 400) {
         final body = await response.stream.bytesToString();
         throw _parseStreamError(response.statusCode, body, requestId);
@@ -172,8 +172,6 @@ class ChatCompletionsResource extends BaseResource {
     } on AbortedException {
       // Abort is expected, just re-throw
       rethrow;
-    } finally {
-      httpClient.close();
     }
   }
 
@@ -240,40 +238,5 @@ class ChatCompletionsResource extends BaseResource {
         requestId: requestId,
       );
     }
-  }
-
-  http.Request _createStreamRequest(ChatCompletionCreateRequest request) {
-    final url = Uri.parse('${client.config.baseUrl}$_endpoint');
-    final httpRequest = http.Request('POST', url);
-
-    // Add headers
-    httpRequest.headers['Content-Type'] = 'application/json';
-    httpRequest.headers['Accept'] = 'text/event-stream';
-    httpRequest.headers['X-Request-ID'] = generateRequestId();
-
-    // Add auth headers
-    if (client.config.authProvider case final authProvider?) {
-      httpRequest.headers.addAll(authProvider.getHeaders());
-    }
-
-    // Add organization header if configured
-    if (client.config.organization case final org?) {
-      httpRequest.headers['OpenAI-Organization'] = org;
-    }
-
-    // Add project header if configured
-    if (client.config.project case final proj?) {
-      httpRequest.headers['OpenAI-Project'] = proj;
-    }
-
-    // Add default headers
-    httpRequest.headers.addAll(client.config.defaultHeaders);
-
-    // Ensure stream is enabled in the request body
-    final requestBody = request.toJson();
-    requestBody['stream'] = true;
-    httpRequest.body = jsonEncode(requestBody);
-
-    return httpRequest;
   }
 }

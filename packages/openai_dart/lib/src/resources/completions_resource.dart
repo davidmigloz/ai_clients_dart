@@ -1,10 +1,7 @@
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
-
 import '../errors/exceptions.dart';
 import '../models/completions/completions.dart';
-import '../utils/request_id.dart';
 import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
 
@@ -75,6 +72,7 @@ class CompletionsResource extends BaseResource {
   /// ## Parameters
   ///
   /// - [request] - The completion request.
+  /// - [abortTrigger] - Optional future that cancels the stream when completed.
   ///
   /// ## Returns
   ///
@@ -100,39 +98,26 @@ class CompletionsResource extends BaseResource {
     CompletionRequest request, {
     Future<void>? abortTrigger,
   }) async* {
-    final url = Uri.parse('${client.config.baseUrl}$_endpoint');
-    final httpRequest = http.Request('POST', url);
+    // Ensure stream is enabled in the request body
+    final requestBody = request.toJson();
+    requestBody['stream'] = true;
 
-    _addStreamHeaders(httpRequest);
+    final response = await client.sendStream(
+      endpoint: _endpoint,
+      body: requestBody,
+      abortTrigger: abortTrigger,
+    );
 
-    final streamRequest = request.toJson();
-    streamRequest['stream'] = true;
-    httpRequest.body = jsonEncode(streamRequest);
-
-    final httpClient = http.Client();
-    final requestId = httpRequest.headers['X-Request-ID']!;
-
-    // Set up abort monitoring if provided
-    if (abortTrigger != null) {
-      // ignore: unawaited_futures
-      abortTrigger.then((_) => httpClient.close());
-    }
+    // Extract request ID from response headers for error reporting
+    final requestId =
+        response.headers['x-request-id'] ??
+        response.request?.headers['X-Request-ID'] ??
+        'unknown';
 
     try {
-      final response = await httpClient.send(httpRequest);
-
       if (response.statusCode >= 400) {
         final body = await response.stream.bytesToString();
-        final json = jsonDecode(body) as Map<String, dynamic>;
-        final error = json['error'] as Map<String, dynamic>?;
-        throw createApiException(
-          statusCode: response.statusCode,
-          message: error?['message'] as String? ?? 'Unknown error',
-          type: error?['type'] as String?,
-          code: error?['code'] as String?,
-          requestId: requestId,
-          body: json,
-        );
+        throw _parseStreamError(response.statusCode, body, requestId);
       }
 
       const parser = SseParser();
@@ -141,25 +126,32 @@ class CompletionsResource extends BaseResource {
       }
     } on AbortedException {
       rethrow;
-    } finally {
-      httpClient.close();
     }
   }
 
-  void _addStreamHeaders(http.Request request) {
-    request.headers['Content-Type'] = 'application/json';
-    request.headers['Accept'] = 'text/event-stream';
-    request.headers['X-Request-ID'] = generateRequestId();
-
-    if (client.config.authProvider case final authProvider?) {
-      request.headers.addAll(authProvider.getHeaders());
+  /// Parses an error response from a streaming request.
+  ApiException _parseStreamError(
+    int statusCode,
+    String body,
+    String requestId,
+  ) {
+    try {
+      final json = jsonDecode(body) as Map<String, dynamic>;
+      final error = json['error'] as Map<String, dynamic>?;
+      return createApiException(
+        statusCode: statusCode,
+        message: error?['message'] as String? ?? 'Unknown error',
+        type: error?['type'] as String?,
+        code: error?['code'] as String?,
+        requestId: requestId,
+        body: json,
+      );
+    } catch (_) {
+      return ApiException(
+        message: body.isNotEmpty ? body : 'HTTP $statusCode error',
+        statusCode: statusCode,
+        requestId: requestId,
+      );
     }
-    if (client.config.organization case final org?) {
-      request.headers['OpenAI-Organization'] = org;
-    }
-    if (client.config.project case final proj?) {
-      request.headers['OpenAI-Project'] = proj;
-    }
-    request.headers.addAll(client.config.defaultHeaders);
   }
 }

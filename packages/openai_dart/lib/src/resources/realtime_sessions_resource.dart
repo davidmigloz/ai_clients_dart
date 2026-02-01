@@ -224,8 +224,8 @@ class RealtimeCallsResource extends BaseResource {
     RealtimeCallCreateRequest request, {
     Future<void>? abortTrigger,
   }) async {
-    // Create multipart request
-    final url = Uri.parse('${client.config.baseUrl}$_callsEndpoint');
+    // Create multipart request with properly normalized URL
+    final url = client.buildUrl(_callsEndpoint);
     final multipartRequest = http.MultipartRequest('POST', url);
 
     // Add SDP as a field

@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../client/openai_client.dart';
-import '../errors/exceptions.dart';
 import '../models/files/files.dart';
 import 'base_resource.dart';
 
@@ -98,30 +97,15 @@ class UploadsResource extends BaseResource {
   /// print('Added part: ${part.id}');
   /// ```
   Future<UploadPart> addPart(String uploadId, {required List<int> data}) async {
-    final url = Uri.parse('${client.config.baseUrl}$_endpoint/$uploadId/parts');
-    final httpRequest = http.MultipartRequest('POST', url);
+    final url = client.buildUrl('$_endpoint/$uploadId/parts');
+    final request = http.MultipartRequest('POST', url);
 
-    _addHeaders(httpRequest);
-    httpRequest.files.add(
+    request.files.add(
       http.MultipartFile.fromBytes('data', data, filename: 'part'),
     );
 
-    final response = await httpRequest.send();
-    final body = await response.stream.bytesToString();
-
-    if (response.statusCode >= 400) {
-      final json = jsonDecode(body) as Map<String, dynamic>;
-      final error = json['error'] as Map<String, dynamic>?;
-      throw createApiException(
-        statusCode: response.statusCode,
-        message: error?['message'] as String? ?? 'Unknown error',
-        type: error?['type'] as String?,
-        code: error?['code'] as String?,
-        body: json,
-      );
-    }
-
-    final json = jsonDecode(body) as Map<String, dynamic>;
+    final response = await client.postMultipart(request: request);
+    final json = jsonDecode(response.body) as Map<String, dynamic>;
     return UploadPart.fromJson(json);
   }
 
@@ -184,17 +168,5 @@ class UploadsResource extends BaseResource {
   Future<Upload> cancel(String uploadId) async {
     final json = await postJson('$_endpoint/$uploadId/cancel', body: {});
     return Upload.fromJson(json);
-  }
-
-  void _addHeaders(http.MultipartRequest request) {
-    if (client.config.authProvider case final authProvider?) {
-      request.headers.addAll(authProvider.getHeaders());
-    }
-    if (client.config.organization case final org?) {
-      request.headers['OpenAI-Organization'] = org;
-    }
-    if (client.config.project case final proj?) {
-      request.headers['OpenAI-Project'] = proj;
-    }
   }
 }

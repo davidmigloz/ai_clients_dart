@@ -72,14 +72,41 @@ class RealtimeResource extends BaseResource {
     required String model,
     SessionUpdateConfig? config,
   }) async {
-    // Build WebSocket URL
-    final baseUrl = client.config.baseUrl.replaceFirst('https://', 'wss://');
-    final wsUrl = Uri.parse('$baseUrl/realtime?model=$model');
+    // Build URL with proper normalization using client's URL builder
+    final httpUrl = client.buildUrl(
+      '/realtime',
+      queryParameters: {'model': model},
+    );
 
-    // Get auth headers
-    final headers = <String, String>{'OpenAI-Beta': 'realtime=v1'};
+    // Convert to WebSocket scheme
+    final wsUrl = httpUrl.replace(
+      scheme: httpUrl.scheme == 'https' ? 'wss' : 'ws',
+    );
+
+    // Build headers with all config options
+    final headers = <String, String>{
+      'OpenAI-Beta': 'realtime=v1',
+      ...client.config.defaultHeaders,
+    };
+
+    // Add auth headers
     if (client.config.authProvider case final authProvider?) {
       headers.addAll(authProvider.getHeaders());
+    }
+
+    // Add organization header if configured
+    if (client.config.organization case final org?) {
+      headers['OpenAI-Organization'] = org;
+    }
+
+    // Add project header if configured
+    if (client.config.project case final proj?) {
+      headers['OpenAI-Project'] = proj;
+    }
+
+    // Add API version if configured
+    if (client.config.apiVersion case final version?) {
+      headers['OpenAI-Version'] = version;
     }
 
     // Connect to WebSocket using platform-specific implementation

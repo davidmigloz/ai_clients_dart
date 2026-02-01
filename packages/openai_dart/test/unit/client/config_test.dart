@@ -83,5 +83,4 @@ void main() {
       expect(config1, isNot(equals(config3)));
     });
   });
-
 }

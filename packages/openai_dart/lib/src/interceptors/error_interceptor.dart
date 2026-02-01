@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../errors/exceptions.dart';
+import '../platform/http_utils.dart';
 import 'interceptor.dart';
 
 /// Interceptor that handles error responses from the API.
@@ -87,21 +88,31 @@ class ErrorInterceptor implements Interceptor {
   }
 
   /// Parses the Retry-After header value.
+  ///
+  /// Supports both seconds (`"120"`) and HTTP-date formats (RFC 7231).
+  /// Trims whitespace before parsing. Returns null if parsing fails.
   Duration? _parseRetryAfter(String? value) {
     if (value == null || value.isEmpty) {
       return null;
     }
 
+    // Trim whitespace
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) {
+      return null;
+    }
+
     // Try parsing as seconds
-    final seconds = int.tryParse(value);
+    final seconds = int.tryParse(trimmed);
     if (seconds != null) {
       return Duration(seconds: seconds);
     }
 
-    // Try parsing as HTTP-date (simplified)
+    // Try parsing as HTTP-date using platform-specific implementation
+    // which supports IMF-fixdate, RFC 850, and ANSI C formats
     try {
-      final date = HttpDate.parse(value);
-      final now = DateTime.now();
+      final date = parseHttpDate(trimmed);
+      final now = DateTime.now().toUtc();
       if (date.isAfter(now)) {
         return date.difference(now);
       }
@@ -110,52 +121,5 @@ class ErrorInterceptor implements Interceptor {
     }
 
     return null;
-  }
-}
-
-/// Utility class for parsing HTTP dates.
-///
-/// Supports RFC 7231 date formats:
-/// - IMF-fixdate: `Sun, 06 Nov 1994 08:49:37 GMT`
-/// - RFC 850: `Sunday, 06-Nov-94 08:49:37 GMT`
-/// - ANSI C: `Sun Nov  6 08:49:37 1994`
-class HttpDate {
-  HttpDate._();
-
-  static const _months = {
-    'Jan': 1,
-    'Feb': 2,
-    'Mar': 3,
-    'Apr': 4,
-    'May': 5,
-    'Jun': 6,
-    'Jul': 7,
-    'Aug': 8,
-    'Sep': 9,
-    'Oct': 10,
-    'Nov': 11,
-    'Dec': 12,
-  };
-
-  /// Parses an HTTP date string.
-  static DateTime parse(String value) {
-    // IMF-fixdate: "Sun, 06 Nov 1994 08:49:37 GMT"
-    final imfRegex = RegExp(
-      r'^[A-Za-z]{3}, (\d{2}) ([A-Za-z]{3}) (\d{4}) (\d{2}):(\d{2}):(\d{2}) GMT$',
-    );
-
-    final match = imfRegex.firstMatch(value);
-    if (match == null) {
-      throw FormatException('Invalid HTTP date: $value');
-    }
-
-    final day = int.parse(match.group(1)!);
-    final month = _months[match.group(2)!]!;
-    final year = int.parse(match.group(3)!);
-    final hour = int.parse(match.group(4)!);
-    final minute = int.parse(match.group(5)!);
-    final second = int.parse(match.group(6)!);
-
-    return DateTime.utc(year, month, day, hour, minute, second);
   }
 }

@@ -284,13 +284,11 @@ class ConversationItemsResource extends BaseResource {
     if (after != null) queryParameters['after'] = after;
     if (limit != null) queryParameters['limit'] = limit.toString();
     if (order != null) queryParameters['order'] = order;
-    if (include != null && include.isNotEmpty) {
-      queryParameters['include[]'] = include.join(',');
-    }
 
-    final json = await getJson(
+    final json = await getJsonWithRepeatedParams(
       '/conversations/$conversationId/items',
       queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
+      queryParametersAll: _buildIncludeParams(include),
       abortTrigger: abortTrigger,
     );
     return ConversationItemList.fromJson(json);
@@ -323,14 +321,9 @@ class ConversationItemsResource extends BaseResource {
     List<String>? include,
     Future<void>? abortTrigger,
   }) async {
-    final queryParameters = <String, String>{};
-    if (include != null && include.isNotEmpty) {
-      queryParameters['include[]'] = include.join(',');
-    }
-
-    final json = await getJson(
+    final json = await getJsonWithRepeatedParams(
       '/conversations/$conversationId/items/$itemId',
-      queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
+      queryParametersAll: _buildIncludeParams(include),
       abortTrigger: abortTrigger,
     );
     return ConversationItem.fromJson(json);
@@ -366,5 +359,13 @@ class ConversationItemsResource extends BaseResource {
       abortTrigger: abortTrigger,
     );
     return Conversation.fromJson(json);
+  }
+
+  /// Converts include values to repeated query parameters format.
+  Map<String, List<String>>? _buildIncludeParams(List<String>? include) {
+    if (include == null || include.isEmpty) {
+      return null;
+    }
+    return {'include[]': include};
   }
 }

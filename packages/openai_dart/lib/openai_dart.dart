@@ -32,7 +32,6 @@ export 'src/auth/auth_provider.dart';
 export 'src/client/config.dart';
 export 'src/client/interceptor_chain.dart';
 export 'src/client/openai_client.dart';
-export 'src/client/request_builder.dart';
 export 'src/client/retry_wrapper.dart';
 // Errors
 export 'src/errors/exceptions.dart';

@@ -301,7 +301,8 @@ void main() {
       final client = OpenAIClient(
         config: const OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test'),
-          baseUrl: 'https://user:pass@api.example.com:443/v1?api-version=1#frag',
+          baseUrl:
+              'https://user:pass@api.example.com:443/v1?api-version=1#frag',
         ),
         httpClient: mockClient,
       );

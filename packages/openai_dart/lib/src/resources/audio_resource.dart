@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 
 import '../client/openai_client.dart';
-import '../errors/exceptions.dart';
 import '../models/audio/audio.dart';
 import 'base_resource.dart';
 
@@ -93,23 +92,11 @@ class SpeechResource extends BaseResource {
   /// File('output.mp3').writeAsBytesSync(audioBytes);
   /// ```
   Future<Uint8List> create(SpeechRequest request) async {
+    // ErrorInterceptor handles error responses, so we can return bodyBytes directly
     final response = await client.post(
       _endpoint,
       body: jsonEncode(request.toJson()),
     );
-
-    if (response.statusCode >= 400) {
-      final json = jsonDecode(response.body) as Map<String, dynamic>;
-      final error = json['error'] as Map<String, dynamic>?;
-      throw createApiException(
-        statusCode: response.statusCode,
-        message: error?['message'] as String? ?? 'Unknown error',
-        type: error?['type'] as String?,
-        code: error?['code'] as String?,
-        body: json,
-      );
-    }
-
     return response.bodyBytes;
   }
 }
@@ -154,22 +141,8 @@ class TranscriptionsResource extends BaseResource {
   /// ```
   Future<TranscriptionResponse> create(TranscriptionRequest request) async {
     final httpRequest = _createMultipartRequest(request);
-    final response = await httpRequest.send();
-    final body = await response.stream.bytesToString();
-
-    if (response.statusCode >= 400) {
-      final json = jsonDecode(body) as Map<String, dynamic>;
-      final error = json['error'] as Map<String, dynamic>?;
-      throw createApiException(
-        statusCode: response.statusCode,
-        message: error?['message'] as String? ?? 'Unknown error',
-        type: error?['type'] as String?,
-        code: error?['code'] as String?,
-        body: json,
-      );
-    }
-
-    final json = jsonDecode(body) as Map<String, dynamic>;
+    final response = await client.postMultipart(request: httpRequest);
+    final json = jsonDecode(response.body) as Map<String, dynamic>;
     return TranscriptionResponse.fromJson(json);
   }
 
@@ -213,41 +186,14 @@ class TranscriptionsResource extends BaseResource {
     );
 
     final httpRequest = _createMultipartRequest(verboseRequest);
-    final response = await httpRequest.send();
-    final body = await response.stream.bytesToString();
-
-    if (response.statusCode >= 400) {
-      final json = jsonDecode(body) as Map<String, dynamic>;
-      final error = json['error'] as Map<String, dynamic>?;
-      throw createApiException(
-        statusCode: response.statusCode,
-        message: error?['message'] as String? ?? 'Unknown error',
-        type: error?['type'] as String?,
-        code: error?['code'] as String?,
-        body: json,
-      );
-    }
-
-    final json = jsonDecode(body) as Map<String, dynamic>;
+    final response = await client.postMultipart(request: httpRequest);
+    final json = jsonDecode(response.body) as Map<String, dynamic>;
     return TranscriptionVerboseResponse.fromJson(json);
   }
 
   http.MultipartRequest _createMultipartRequest(TranscriptionRequest request) {
-    final url = Uri.parse('${client.config.baseUrl}$_endpoint');
+    final url = client.buildUrl(_endpoint);
     final httpRequest = http.MultipartRequest('POST', url);
-
-    // Add auth headers
-    if (client.config.authProvider case final authProvider?) {
-      httpRequest.headers.addAll(authProvider.getHeaders());
-    }
-
-    // Add organization and project headers
-    if (client.config.organization case final org?) {
-      httpRequest.headers['OpenAI-Organization'] = org;
-    }
-    if (client.config.project case final proj?) {
-      httpRequest.headers['OpenAI-Project'] = proj;
-    }
 
     // Add file
     httpRequest.files.add(
@@ -275,8 +221,13 @@ class TranscriptionsResource extends BaseResource {
       httpRequest.fields['temperature'] = request.temperature.toString();
     }
     if (request.timestampGranularities != null) {
-      for (final granularity in request.timestampGranularities!) {
-        httpRequest.fields['timestamp_granularities[]'] = granularity.toJson();
+      // OpenAI API expects repeated form fields for array parameters.
+      // Using indexed field names (timestamp_granularities[0], etc.) is a
+      // common pattern that servers typically understand for repeated fields.
+      for (var i = 0; i < request.timestampGranularities!.length; i++) {
+        httpRequest.fields['timestamp_granularities[$i]'] = request
+            .timestampGranularities![i]
+            .toJson();
       }
     }
 
@@ -323,41 +274,14 @@ class TranslationsResource extends BaseResource {
   /// ```
   Future<TranslationResponse> create(TranslationRequest request) async {
     final httpRequest = _createMultipartRequest(request);
-    final response = await httpRequest.send();
-    final body = await response.stream.bytesToString();
-
-    if (response.statusCode >= 400) {
-      final json = jsonDecode(body) as Map<String, dynamic>;
-      final error = json['error'] as Map<String, dynamic>?;
-      throw createApiException(
-        statusCode: response.statusCode,
-        message: error?['message'] as String? ?? 'Unknown error',
-        type: error?['type'] as String?,
-        code: error?['code'] as String?,
-        body: json,
-      );
-    }
-
-    final json = jsonDecode(body) as Map<String, dynamic>;
+    final response = await client.postMultipart(request: httpRequest);
+    final json = jsonDecode(response.body) as Map<String, dynamic>;
     return TranslationResponse.fromJson(json);
   }
 
   http.MultipartRequest _createMultipartRequest(TranslationRequest request) {
-    final url = Uri.parse('${client.config.baseUrl}$_endpoint');
+    final url = client.buildUrl(_endpoint);
     final httpRequest = http.MultipartRequest('POST', url);
-
-    // Add auth headers
-    if (client.config.authProvider case final authProvider?) {
-      httpRequest.headers.addAll(authProvider.getHeaders());
-    }
-
-    // Add organization and project headers
-    if (client.config.organization case final org?) {
-      httpRequest.headers['OpenAI-Organization'] = org;
-    }
-    if (client.config.project case final proj?) {
-      httpRequest.headers['OpenAI-Project'] = proj;
-    }
 
     // Add file
     httpRequest.files.add(

@@ -28,6 +28,7 @@ class InterceptorChain {
     required this.interceptors,
     required this.httpClient,
     this.retryWrapper,
+    this.timeout,
   });
 
   /// The list of interceptors to execute in order.
@@ -38,6 +39,12 @@ class InterceptorChain {
 
   /// Optional retry wrapper for handling transient failures.
   final RetryWrapper? retryWrapper;
+
+  /// Optional timeout for individual requests.
+  ///
+  /// If set, requests will throw [RequestTimeoutException] if they exceed
+  /// this duration.
+  final Duration? timeout;
 
   /// Executes the interceptor chain for a request.
   ///
@@ -100,11 +107,12 @@ class InterceptorChain {
     // Creates a fresh request for each attempt (required for retries)
     http.BaseRequest createRequest() {
       if (originalRequest is http.Request) {
-        final request = http.Request(originalRequest.method, originalRequest.url)
-          ..headers.addAll(originalRequest.headers)
-          ..followRedirects = originalRequest.followRedirects
-          ..maxRedirects = originalRequest.maxRedirects
-          ..persistentConnection = originalRequest.persistentConnection;
+        final request =
+            http.Request(originalRequest.method, originalRequest.url)
+              ..headers.addAll(originalRequest.headers)
+              ..followRedirects = originalRequest.followRedirects
+              ..maxRedirects = originalRequest.maxRedirects
+              ..persistentConnection = originalRequest.persistentConnection;
         // Add correlation ID header if it was generated (not already present)
         if (needsCorrelationIdHeader) {
           request.headers['X-Request-ID'] = correlationId;
@@ -155,17 +163,32 @@ class InterceptorChain {
     // Execute with or without retry wrapper
     // Note: Retries are only supported for http.Request types because other
     // request types (MultipartRequest, StreamedRequest) cannot be safely cloned.
-    if (retryWrapper case final wrapper?
-        when originalRequest is http.Request) {
-      return wrapper.executeWithRetry(
+    Future<http.Response> result;
+    if (retryWrapper case final wrapper? when originalRequest is http.Request) {
+      result = wrapper.executeWithRetry(
         originalRequest,
         executeTransport,
         context.abortTrigger,
         correlationId,
       );
     } else {
-      return executeTransport();
+      result = executeTransport();
     }
+
+    // Apply timeout if configured
+    if (timeout case final timeoutDuration?) {
+      return result.timeout(
+        timeoutDuration,
+        onTimeout: () {
+          throw RequestTimeoutException(
+            message: 'Request timed out after ${timeoutDuration.inSeconds}s',
+            timeout: timeoutDuration,
+          );
+        },
+      );
+    }
+
+    return result;
   }
 }
 

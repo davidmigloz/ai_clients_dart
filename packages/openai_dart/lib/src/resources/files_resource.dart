@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../client/openai_client.dart';
-import '../errors/exceptions.dart';
 import '../models/files/files.dart';
 import 'base_resource.dart';
 
@@ -104,32 +103,16 @@ class FilesResource extends BaseResource {
     required String filename,
     required FilePurpose purpose,
   }) async {
-    final url = Uri.parse('${client.config.baseUrl}$_endpoint');
-    final httpRequest = http.MultipartRequest('POST', url);
+    final url = client.buildUrl(_endpoint);
+    final request = http.MultipartRequest('POST', url);
 
-    _addHeaders(httpRequest);
-
-    httpRequest.files.add(
+    request.files.add(
       http.MultipartFile.fromBytes('file', bytes, filename: filename),
     );
-    httpRequest.fields['purpose'] = purpose.toJson();
+    request.fields['purpose'] = purpose.toJson();
 
-    final response = await httpRequest.send();
-    final body = await response.stream.bytesToString();
-
-    if (response.statusCode >= 400) {
-      final json = jsonDecode(body) as Map<String, dynamic>;
-      final error = json['error'] as Map<String, dynamic>?;
-      throw createApiException(
-        statusCode: response.statusCode,
-        message: error?['message'] as String? ?? 'Unknown error',
-        type: error?['type'] as String?,
-        code: error?['code'] as String?,
-        body: json,
-      );
-    }
-
-    final json = jsonDecode(body) as Map<String, dynamic>;
+    final response = await client.postMultipart(request: request);
+    final json = jsonDecode(response.body) as Map<String, dynamic>;
     return FileObject.fromJson(json);
   }
 
@@ -192,32 +175,8 @@ class FilesResource extends BaseResource {
   /// print(content);
   /// ```
   Future<String> retrieveContent(String fileId) async {
+    // ErrorInterceptor handles error responses, so we can return body directly
     final response = await client.get('$_endpoint/$fileId/content');
-
-    if (response.statusCode >= 400) {
-      final json = jsonDecode(response.body) as Map<String, dynamic>;
-      final error = json['error'] as Map<String, dynamic>?;
-      throw createApiException(
-        statusCode: response.statusCode,
-        message: error?['message'] as String? ?? 'Unknown error',
-        type: error?['type'] as String?,
-        code: error?['code'] as String?,
-        body: json,
-      );
-    }
-
     return response.body;
-  }
-
-  void _addHeaders(http.MultipartRequest request) {
-    if (client.config.authProvider case final authProvider?) {
-      request.headers.addAll(authProvider.getHeaders());
-    }
-    if (client.config.organization case final org?) {
-      request.headers['OpenAI-Organization'] = org;
-    }
-    if (client.config.project case final proj?) {
-      request.headers['OpenAI-Project'] = proj;
-    }
   }
 }
