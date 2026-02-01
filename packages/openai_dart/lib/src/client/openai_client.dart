@@ -1,4 +1,4 @@
-import 'dart:async' show StreamController, unawaited;
+import 'dart:async' show StreamController, StreamSubscription, unawaited;
 import 'dart:convert' show jsonEncode;
 
 import 'package:http/http.dart' as http;
@@ -138,9 +138,16 @@ class OpenAIClient {
   ///
   /// Empty environment variable values are treated the same as unset.
   ///
+  /// The optional [streamClientFactory] is used to create HTTP clients for
+  /// streaming requests with abort support. This is primarily useful for
+  /// testing, allowing mock clients to be injected for the abort path.
+  ///
   /// Throws [UnsupportedError] on web platforms where environment variables
   /// are not available.
-  factory OpenAIClient.fromEnvironment({http.Client? httpClient}) {
+  factory OpenAIClient.fromEnvironment({
+    http.Client? httpClient,
+    http.Client Function()? streamClientFactory,
+  }) {
     final baseUrl = getEnvironmentVariable('OPENAI_BASE_URL');
     final orgId = getEnvironmentVariable('OPENAI_ORG_ID');
     final projectId = getEnvironmentVariable('OPENAI_PROJECT_ID');
@@ -155,17 +162,23 @@ class OpenAIClient {
             : 'https://api.openai.com/v1',
       ),
       httpClient: httpClient,
+      streamClientFactory: streamClientFactory,
     );
   }
 
   /// Creates a new [OpenAIClient] with the given API key.
   ///
   /// This is a convenience constructor for simple use cases.
+  ///
+  /// The optional [streamClientFactory] is used to create HTTP clients for
+  /// streaming requests with abort support. This is primarily useful for
+  /// testing, allowing mock clients to be injected for the abort path.
   factory OpenAIClient.withApiKey(
     String apiKey, {
     String? organization,
     String? project,
     http.Client? httpClient,
+    http.Client Function()? streamClientFactory,
   }) {
     return OpenAIClient(
       config: OpenAIConfig(
@@ -174,6 +187,7 @@ class OpenAIClient {
         project: project,
       ),
       httpClient: httpClient,
+      streamClientFactory: streamClientFactory,
     );
   }
 
@@ -349,13 +363,20 @@ class OpenAIClient {
     // queryParameters parameter, treating each list as repeated query parameters
     // (e.g., include[]=a&include[]=b). This behavior is documented in the Dart
     // SDK and is used here to support OpenAI's array query parameter format.
+    //
+    // We preserve all URI components from the base URL:
+    // - userInfo: credentials in URL (user:pass@host)
+    // - fragment: hash section (#section)
+    // - port: explicit port (even standard ports like 80/443 if specified)
     return Uri(
       scheme: baseUri.scheme,
+      userInfo: baseUri.userInfo.isEmpty ? null : baseUri.userInfo,
       host: baseUri.host,
-      port: baseUri.port == 443 || baseUri.port == 80 ? null : baseUri.port,
+      port: baseUri.hasPort ? baseUri.port : null,
       path: combinedPath,
       queryParameters:
           mergedQueryParamsAll.isEmpty ? null : mergedQueryParamsAll,
+      fragment: baseUri.fragment.isEmpty ? null : baseUri.fragment,
     );
   }
 
@@ -457,11 +478,15 @@ class OpenAIClient {
         //
         // StreamTransformer.fromHandlers does NOT handle subscription
         // cancellation, which would leak the client.
-        final controller = StreamController<List<int>>(
-          onCancel: closeClientOnce,
-        );
+        //
+        // IMPORTANT: We capture the subscription and cancel it in onCancel.
+        // Without this, the underlying subscription continues pushing data
+        // into the controller even when there are no listeners, causing a
+        // resource leak.
+        final controller = StreamController<List<int>>();
+        late final StreamSubscription<List<int>> subscription;
 
-        response.stream.listen(
+        subscription = response.stream.listen(
           controller.add,
           onError: (Object e, StackTrace st) {
             closeClientOnce();
@@ -473,6 +498,11 @@ class OpenAIClient {
           },
           cancelOnError: false,
         );
+
+        controller.onCancel = () async {
+          closeClientOnce();
+          await subscription.cancel();
+        };
 
         return http.StreamedResponse(
           controller.stream,

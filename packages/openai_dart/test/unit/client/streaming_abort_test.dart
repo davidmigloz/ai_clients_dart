@@ -483,6 +483,66 @@ void main() {
         client.close();
       });
 
+      test(
+          'early subscription cancellation also cancels underlying source stream',
+          () async {
+        var sourceStreamCancelled = false;
+
+        // Create a source stream controller that tracks cancellation
+        final sourceController = StreamController<List<int>>(
+          onCancel: () {
+            sourceStreamCancelled = true;
+          },
+        );
+
+        final mockStreamClient = MockClient.streaming((request, _) async {
+          return http.StreamedResponse(
+            sourceController.stream,
+            200,
+          );
+        });
+
+        final client = OpenAIClient(
+          config:
+              const OpenAIConfig(authProvider: ApiKeyProvider('sk-test-key')),
+          streamClientFactory: () => mockStreamClient,
+        );
+
+        final neverAbort = Completer<void>().future;
+
+        final response = await client.sendStream(
+          endpoint: '/chat/completions',
+          body: <String, Object>{
+            'model': 'gpt-4',
+            'messages': [],
+            'stream': true,
+          },
+          abortTrigger: neverAbort,
+        );
+
+        // Send some data but don't close the stream
+        sourceController.add(utf8.encode('data: {"choices":[]}\n\n'));
+
+        // Subscribe and then cancel
+        final subscription = response.stream.listen((_) {});
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        await subscription.cancel();
+
+        // Give time for cancellation to propagate
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+
+        // The source stream's onCancel should have been fired
+        expect(
+          sourceStreamCancelled,
+          isTrue,
+          reason: 'Source stream subscription should be cancelled',
+        );
+
+        // Clean up
+        await sourceController.close();
+        client.close();
+      });
+
       test('streaming client closes on stream error', () async {
         var clientClosed = false;
 
@@ -544,6 +604,50 @@ void main() {
         // Client should be closed after error
         expect(clientClosed, isTrue, reason: 'Client should close on error');
         expect(caughtError, isA<Exception>());
+
+        client.close();
+      });
+
+      test('withApiKey factory accepts streamClientFactory', () async {
+        var factoryCalled = false;
+
+        final streamController = StreamController<List<int>>();
+
+        final mockStreamClient = MockClient.streaming((request, _) async {
+          return http.StreamedResponse(
+            streamController.stream,
+            200,
+          );
+        });
+
+        final client = OpenAIClient.withApiKey(
+          'sk-test-key',
+          streamClientFactory: () {
+            factoryCalled = true;
+            return mockStreamClient;
+          },
+        );
+
+        final neverAbort = Completer<void>().future;
+
+        final response = await client.sendStream(
+          endpoint: '/chat/completions',
+          body: <String, Object>{
+            'model': 'gpt-4',
+            'messages': [],
+            'stream': true,
+          },
+          abortTrigger: neverAbort,
+        );
+
+        expect(factoryCalled, isTrue, reason: 'Factory should be called');
+
+        // Complete stream
+        streamController
+          ..add(utf8.encode('data: {"choices":[]}\n\n'))
+          ..add(utf8.encode('data: [DONE]\n\n'));
+        await streamController.close();
+        await response.stream.drain<void>();
 
         client.close();
       });
