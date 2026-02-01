@@ -10,8 +10,9 @@ import 'config.dart';
 /// Wraps HTTP transport execution with retry logic.
 ///
 /// This implements exponential backoff with jitter for retrying failed requests.
-/// The retry wrapper operates at the transport layer, separate from the
-/// interceptor chain.
+/// In the OpenAI client integration, this wrapper is applied by the interceptor
+/// chain only for regular `http.Request` instances. Multipart and streamed
+/// requests are not retried to avoid issues with request body re-consumption.
 ///
 /// ## Retry Conditions
 ///

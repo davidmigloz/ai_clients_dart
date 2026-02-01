@@ -118,10 +118,12 @@ class OpenAIConfig {
   /// Defaults to 1 second. Uses exponential backoff with jitter.
   final Duration retryDelay;
 
-  /// The maximum delay between retry attempts.
+  /// The maximum delay between retry attempts for client-side backoff.
   ///
-  /// Defaults to 30 seconds. The retry delay will not exceed this value
-  /// even with exponential backoff.
+  /// Defaults to 30 seconds. Exponential backoff with jitter will not exceed
+  /// this value. When honoring a server-provided `Retry-After` header, the
+  /// effective delay may be longer (up to 2× this value) to respect server
+  /// rate-limit guidance.
   final Duration maxRetryDelay;
 
   /// The logging level for the client.
