@@ -122,6 +122,16 @@ class RetryWrapper {
         await _delayWithAbortCheck(delay, abortTrigger, correlationId);
         attempt++;
         delay = _exponentialBackoff(delay);
+      } on RequestTimeoutException {
+        // Retry on request timeout for idempotent methods only
+        // (RequestTimeoutException is thrown by InterceptorChain.timeout)
+        if (!_isIdempotent(request.method) || attempt >= config.maxRetries) {
+          rethrow;
+        }
+
+        await _delayWithAbortCheck(delay, abortTrigger, correlationId);
+        attempt++;
+        delay = _exponentialBackoff(delay);
       } on http.ClientException {
         // Retry on HTTP client errors for idempotent methods only.
         // This also handles SocketException on IO platforms (wrapped by http package)

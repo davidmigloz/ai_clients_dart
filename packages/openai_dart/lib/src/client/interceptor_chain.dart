@@ -87,12 +87,23 @@ class InterceptorChain {
     // Extract correlation ID upfront for tracing (used in retries and abort).
     // Priority: metadata > request header > generate new.
     // Always ensure X-Request-ID header is present for server-side tracing.
-    final metadataCorrelationId = context.metadata['correlationId'] as String?;
-    final headerCorrelationId = context.request.headers['X-Request-ID'];
+    // Treat empty/whitespace IDs as missing.
+    final rawMetadataCorrelationId =
+        context.metadata['correlationId'] as String?;
+    final rawHeaderCorrelationId = context.request.headers['X-Request-ID'];
+    final metadataCorrelationId =
+        (rawMetadataCorrelationId?.trim().isNotEmpty ?? false)
+        ? rawMetadataCorrelationId!.trim()
+        : null;
+    final headerCorrelationId =
+        (rawHeaderCorrelationId?.trim().isNotEmpty ?? false)
+        ? rawHeaderCorrelationId!.trim()
+        : null;
     final correlationId =
         metadataCorrelationId ?? headerCorrelationId ?? generateRequestId();
-    // Add header if not already present (even if metadata had the ID)
-    final needsCorrelationIdHeader = headerCorrelationId == null;
+    // Add/overwrite header if it was missing or blank
+    final needsCorrelationIdHeader =
+        rawHeaderCorrelationId == null || rawHeaderCorrelationId.trim().isEmpty;
 
     // Persist to metadata for downstream interceptors and logging
     context.metadata['correlationId'] = correlationId;
@@ -130,65 +141,66 @@ class InterceptorChain {
       return originalRequest;
     }
 
-    // Transport execution function
-    Future<http.Response> executeTransport() async {
+    // Transport execution function (single attempt)
+    Future<http.Response> executeTransport() {
       final requestToSend = createRequest();
 
-      if (context.abortTrigger != null) {
-        // Wrap request to enable http client's native abort support
-        final abortableRequest = _AbortableRequestWrapper(
-          requestToSend,
-          context.abortTrigger,
-        );
-
-        try {
-          final streamedResponse = await httpClient.send(abortableRequest);
-          return http.Response.fromStream(streamedResponse);
-        } on http.RequestAbortedException catch (e) {
-          // Convert http package's abort exception to our AbortedException
-          throw AbortedException(
-            message: 'Request aborted by user',
-            cause: e,
-            stage: AbortionStage.duringRequest,
-            correlationId: correlationId,
+      Future<http.Response> sendRequest() async {
+        if (context.abortTrigger != null) {
+          // Wrap request to enable http client's native abort support
+          final abortableRequest = _AbortableRequestWrapper(
+            requestToSend,
+            context.abortTrigger,
           );
+
+          try {
+            final streamedResponse = await httpClient.send(abortableRequest);
+            return http.Response.fromStream(streamedResponse);
+          } on http.RequestAbortedException catch (e) {
+            // Convert http package's abort exception to our AbortedException
+            throw AbortedException(
+              message: 'Request aborted by user',
+              cause: e,
+              stage: AbortionStage.duringRequest,
+              correlationId: correlationId,
+            );
+          }
+        } else {
+          // No abort trigger - normal execution
+          final streamedResponse = await httpClient.send(requestToSend);
+          return http.Response.fromStream(streamedResponse);
         }
-      } else {
-        // No abort trigger - normal execution
-        final streamedResponse = await httpClient.send(requestToSend);
-        return http.Response.fromStream(streamedResponse);
       }
+
+      // Apply timeout per-attempt so that timeouts can be retried
+      if (timeout case final timeoutDuration?) {
+        return sendRequest().timeout(
+          timeoutDuration,
+          onTimeout: () {
+            throw RequestTimeoutException(
+              message: 'Request timed out after ${timeoutDuration.inSeconds}s',
+              timeout: timeoutDuration,
+            );
+          },
+        );
+      }
+
+      return sendRequest();
     }
 
     // Execute with or without retry wrapper
     // Note: Retries are only supported for http.Request types because other
     // request types (MultipartRequest, StreamedRequest) cannot be safely cloned.
-    Future<http.Response> result;
     if (retryWrapper case final wrapper? when originalRequest is http.Request) {
-      result = wrapper.executeWithRetry(
+      return wrapper.executeWithRetry(
         originalRequest,
         executeTransport,
         context.abortTrigger,
         correlationId,
       );
-    } else {
-      result = executeTransport();
     }
 
-    // Apply timeout if configured
-    if (timeout case final timeoutDuration?) {
-      return result.timeout(
-        timeoutDuration,
-        onTimeout: () {
-          throw RequestTimeoutException(
-            message: 'Request timed out after ${timeoutDuration.inSeconds}s',
-            timeout: timeoutDuration,
-          );
-        },
-      );
-    }
-
-    return result;
+    return executeTransport();
   }
 }
 
