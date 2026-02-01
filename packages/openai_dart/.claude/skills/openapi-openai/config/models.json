@@ -1,0 +1,251 @@
+{
+  "critical_models": [
+    {
+      "name": "ChatCompletionCreateRequest",
+      "file": "lib/src/models/chat/chat_completion_request.dart",
+      "spec_schema": "CreateChatCompletionRequest"
+    },
+    {
+      "name": "ChatCompletion",
+      "file": "lib/src/models/chat/chat_completion.dart",
+      "spec_schema": "CreateChatCompletionResponse"
+    },
+    {
+      "name": "ChatMessage",
+      "file": "lib/src/models/chat/chat_message.dart",
+      "spec_schema": "ChatCompletionRequestMessage"
+    },
+    {
+      "name": "EmbeddingRequest",
+      "file": "lib/src/models/embeddings/embedding_request.dart",
+      "spec_schema": "CreateEmbeddingRequest"
+    },
+    {
+      "name": "EmbeddingResponse",
+      "file": "lib/src/models/embeddings/embedding_response.dart",
+      "spec_schema": "CreateEmbeddingResponse"
+    },
+    {
+      "name": "ImageGenerateRequest",
+      "file": "lib/src/models/images/image_request.dart",
+      "spec_schema": "CreateImageRequest"
+    },
+    {
+      "name": "SpeechRequest",
+      "file": "lib/src/models/audio/speech_request.dart",
+      "spec_schema": "CreateSpeechRequest"
+    },
+    {
+      "name": "TranscriptionRequest",
+      "file": "lib/src/models/audio/transcription.dart",
+      "spec_schema": "CreateTranscriptionRequest"
+    },
+    {
+      "name": "Assistant",
+      "file": "lib/src/models/assistants/assistant.dart",
+      "spec_schema": "AssistantObject"
+    },
+    {
+      "name": "Thread",
+      "file": "lib/src/models/threads/thread.dart",
+      "spec_schema": "ThreadObject"
+    },
+    {
+      "name": "Run",
+      "file": "lib/src/models/runs/run.dart",
+      "spec_schema": "RunObject"
+    }
+  ],
+  "nested_schemas": [
+    {
+      "name": "Usage",
+      "file": "lib/src/models/common/usage.dart",
+      "spec_schema": "CompletionUsage"
+    },
+    {
+      "name": "Tool",
+      "file": "lib/src/models/tools/tool.dart",
+      "spec_schema": "ChatCompletionTool"
+    },
+    {
+      "name": "Function",
+      "file": "lib/src/models/tools/function.dart",
+      "spec_schema": "FunctionObject"
+    }
+  ],
+  "sealed_classes": [
+    {
+      "name": "ChatMessage",
+      "file": "lib/src/models/chat/chat_message.dart",
+      "discriminator": "role",
+      "variants": [
+        {"dart_class": "SystemMessage", "spec_schema": "ChatCompletionRequestSystemMessage", "discriminator_value": "system"},
+        {"dart_class": "UserMessage", "spec_schema": "ChatCompletionRequestUserMessage", "discriminator_value": "user"},
+        {"dart_class": "AssistantMessage", "spec_schema": "ChatCompletionRequestAssistantMessage", "discriminator_value": "assistant"},
+        {"dart_class": "ToolMessage", "spec_schema": "ChatCompletionRequestToolMessage", "discriminator_value": "tool"},
+        {"dart_class": "DeveloperMessage", "spec_schema": "ChatCompletionRequestDeveloperMessage", "discriminator_value": "developer"}
+      ]
+    },
+    {
+      "name": "ContentPart",
+      "file": "lib/src/models/chat/content_part.dart",
+      "discriminator": "type",
+      "variants": [
+        {"dart_class": "TextContentPart", "spec_schema": "ChatCompletionRequestMessageContentPartText", "discriminator_value": "text"},
+        {"dart_class": "ImageContentPart", "spec_schema": "ChatCompletionRequestMessageContentPartImage", "discriminator_value": "image_url"},
+        {"dart_class": "AudioContentPart", "spec_schema": "ChatCompletionRequestMessageContentPartAudio", "discriminator_value": "input_audio"}
+      ]
+    },
+    {
+      "name": "ChatStreamEvent",
+      "file": "lib/src/models/streaming/chat_stream_event.dart",
+      "discriminator": "object",
+      "variants": [
+        {"dart_class": "ChatStreamChunk", "spec_schema": "CreateChatCompletionStreamResponse", "discriminator_value": "chat.completion.chunk"}
+      ]
+    },
+    {
+      "name": "ResponseFormat",
+      "file": "lib/src/models/common/response_format.dart",
+      "discriminator": "type",
+      "variants": [
+        {"dart_class": "TextResponseFormat", "spec_schema": "ResponseFormatText", "discriminator_value": "text"},
+        {"dart_class": "JsonObjectResponseFormat", "spec_schema": "ResponseFormatJsonObject", "discriminator_value": "json_object"},
+        {"dart_class": "JsonSchemaResponseFormat", "spec_schema": "ResponseFormatJsonSchema", "discriminator_value": "json_schema"}
+      ]
+    },
+    {
+      "name": "ToolChoice",
+      "file": "lib/src/models/tools/tool_choice.dart",
+      "discriminator": null,
+      "note": "Uses string values ('auto', 'none', 'required') or object for function choice",
+      "variants": [
+        {"dart_class": "ToolChoiceAuto", "spec_schema": null, "discriminator_value": "auto"},
+        {"dart_class": "ToolChoiceNone", "spec_schema": null, "discriminator_value": "none"},
+        {"dart_class": "ToolChoiceRequired", "spec_schema": null, "discriminator_value": "required"},
+        {"dart_class": "ToolChoiceFunction", "spec_schema": "ChatCompletionNamedToolChoice", "discriminator_value": "function"}
+      ]
+    },
+    {
+      "name": "AssistantTool",
+      "file": "lib/src/models/assistants/assistant_tool.dart",
+      "discriminator": "type",
+      "variants": [
+        {"dart_class": "CodeInterpreterTool", "spec_schema": "AssistantToolsCode", "discriminator_value": "code_interpreter"},
+        {"dart_class": "FileSearchTool", "spec_schema": "AssistantToolsFileSearch", "discriminator_value": "file_search"},
+        {"dart_class": "FunctionTool", "spec_schema": "AssistantToolsFunction", "discriminator_value": "function"}
+      ]
+    },
+    {
+      "name": "StepDetails",
+      "file": "lib/src/models/runs/run_step.dart",
+      "discriminator": "type",
+      "variants": [
+        {"dart_class": "MessageCreationDetails", "spec_schema": "RunStepDetailsMessageCreationObject", "discriminator_value": "message_creation"},
+        {"dart_class": "ToolCallsDetails", "spec_schema": "RunStepDetailsToolCallsObject", "discriminator_value": "tool_calls"}
+      ]
+    },
+    {
+      "name": "StepToolCall",
+      "file": "lib/src/models/runs/run_step.dart",
+      "discriminator": "type",
+      "variants": [
+        {"dart_class": "CodeInterpreterStepCall", "spec_schema": "RunStepDetailsToolCallsCodeObject", "discriminator_value": "code_interpreter"},
+        {"dart_class": "FileSearchStepCall", "spec_schema": "RunStepDetailsToolCallsFileSearchObject", "discriminator_value": "file_search"},
+        {"dart_class": "FunctionStepCall", "spec_schema": "RunStepDetailsToolCallsFunctionObject", "discriminator_value": "function"}
+      ]
+    },
+    {
+      "name": "CodeInterpreterOutput",
+      "file": "lib/src/models/runs/run_step.dart",
+      "discriminator": "type",
+      "variants": [
+        {"dart_class": "LogsOutput", "spec_schema": "RunStepDetailsToolCallsCodeOutputLogsObject", "discriminator_value": "logs"},
+        {"dart_class": "ImageOutput", "spec_schema": "RunStepDetailsToolCallsCodeOutputImageObject", "discriminator_value": "image"}
+      ]
+    },
+    {
+      "name": "MessageContent",
+      "file": "lib/src/models/threads/message.dart",
+      "discriminator": "type",
+      "note": "Message content for Assistants API threads (not to be confused with chat messages)",
+      "variants": [
+        {"dart_class": "TextMessageContent", "spec_schema": "MessageContentTextObject", "discriminator_value": "text"},
+        {"dart_class": "ImageUrlMessageContent", "spec_schema": "MessageContentImageUrlObject", "discriminator_value": "image_url"},
+        {"dart_class": "ImageFileMessageContent", "spec_schema": "MessageContentImageFileObject", "discriminator_value": "image_file"},
+        {"dart_class": "RefusalMessageContent", "spec_schema": "MessageContentRefusalObject", "discriminator_value": "refusal"}
+      ]
+    },
+    {
+      "name": "TextAnnotation",
+      "file": "lib/src/models/threads/message.dart",
+      "discriminator": "type",
+      "variants": [
+        {"dart_class": "FileCitationAnnotation", "spec_schema": "MessageContentTextAnnotationsFileCitationObject", "discriminator_value": "file_citation"},
+        {"dart_class": "FilePathAnnotation", "spec_schema": "MessageContentTextAnnotationsFilePathObject", "discriminator_value": "file_path"}
+      ]
+    }
+  ],
+  "type_mappings": {
+    "string": "String",
+    "integer": "int",
+    "number": "double",
+    "boolean": "bool",
+    "array": "List",
+    "object": "Map"
+  },
+  "excluded_properties": {
+    "global": []
+  },
+  "expected_properties": {
+    "ChatCompletionCreateRequest": [
+      "model",
+      "messages",
+      "temperature",
+      "topP",
+      "n",
+      "stop",
+      "maxTokens",
+      "maxCompletionTokens",
+      "presencePenalty",
+      "frequencyPenalty",
+      "logitBias",
+      "user",
+      "tools",
+      "toolChoice",
+      "responseFormat",
+      "seed",
+      "logprobs",
+      "topLogprobs",
+      "parallelToolCalls",
+      "streamOptions",
+      "serviceTier",
+      "metadata",
+      "store",
+      "reasoningEffort"
+    ],
+    "ChatCompletion": [
+      "id",
+      "object",
+      "created",
+      "model",
+      "choices",
+      "usage",
+      "systemFingerprint",
+      "serviceTier"
+    ],
+    "EmbeddingRequest": [
+      "model",
+      "input",
+      "encodingFormat",
+      "dimensions",
+      "user"
+    ],
+    "EmbeddingResponse": [
+      "object",
+      "data",
+      "model",
+      "usage"
+    ]
+  }
+}

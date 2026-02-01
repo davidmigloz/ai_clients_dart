@@ -1,0 +1,16 @@
+{
+  "specs": {
+    "main": {
+      "name": "OpenAI API",
+      "url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/openai%2Fopenai-9442fa9212dd61aac2bb0edd19744bee381e75888712f9098bc6ebb92c52b557.yml",
+      "local_file": "openapi.json",
+      "requires_auth": false,
+      "auth_env_vars": ["OPENAI_API_KEY"],
+      "description": "OpenAI API for GPT, DALL-E, Whisper, and more"
+    }
+  },
+  "specs_dir": "packages/openai_dart/specs",
+  "output_dir": "/tmp/openapi-openai-dart",
+  "discovery_patterns": [],
+  "discovery_names": []
+}

@@ -49,10 +49,7 @@ class MessageStartEvent extends MessageStreamEvent {
   }
 
   @override
-  Map<String, dynamic> toJson() => {
-    'type': type,
-    'message': message.toJson(),
-  };
+  Map<String, dynamic> toJson() => {'type': type, 'message': message.toJson()};
 
   @override
   bool operator ==(Object other) =>
@@ -256,10 +253,7 @@ class ContentBlockStopEvent extends MessageStreamEvent {
   }
 
   @override
-  Map<String, dynamic> toJson() => {
-    'type': type,
-    'index': index,
-  };
+  Map<String, dynamic> toJson() => {'type': type, 'index': index};
 
   @override
   bool operator ==(Object other) =>

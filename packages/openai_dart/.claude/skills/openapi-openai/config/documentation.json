@@ -1,0 +1,57 @@
+{
+  "removed_apis": [],
+  "tool_properties": {
+    "function_calling": {
+      "description": "Function/tool calling support",
+      "search_terms": ["function calling", "tools", "tool_choice"]
+    },
+    "streaming": {
+      "description": "Streaming responses",
+      "search_terms": ["stream", "streaming", "createStream"]
+    },
+    "vision": {
+      "description": "Vision/image input support",
+      "search_terms": ["vision", "image", "multimodal"]
+    },
+    "audio": {
+      "description": "Audio input/output support",
+      "search_terms": ["audio", "speech", "whisper", "transcription"]
+    }
+  },
+  "excluded_resources": ["base_resource"],
+  "resource_to_example": {
+    "chat": "chat_example",
+    "embeddings": "embeddings_example",
+    "audio": "audio_example",
+    "images": "images_example",
+    "files": "files_example",
+    "assistants": "assistants_example",
+    "threads": "threads_example",
+    "batches": "batches_example",
+    "fine_tuning": "fine_tuning_example",
+    "realtime": "realtime_example"
+  },
+  "excluded_from_examples": [],
+  "drift_patterns": [
+    {
+      "pattern": "ChatCompletionModel\\.model\\(",
+      "message": "Use string model IDs directly instead of ChatCompletionModel.model()",
+      "severity": "warning"
+    },
+    {
+      "pattern": "CreateChatCompletionRequest",
+      "message": "Use ChatCompletionCreateRequest instead of CreateChatCompletionRequest",
+      "severity": "warning"
+    },
+    {
+      "pattern": "CreateChatCompletionResponse",
+      "message": "Use ChatCompletion instead of CreateChatCompletionResponse",
+      "severity": "warning"
+    },
+    {
+      "pattern": "assistants=v1",
+      "message": "Assistants API v1 is deprecated, use v2",
+      "severity": "error"
+    }
+  ]
+}

@@ -1,93 +1,92 @@
 // ignore_for_file: avoid_print
-import 'dart:async';
+/// Main example file for openai_dart package.
+///
+/// This example demonstrates the core functionality of the OpenAI Dart client.
+///
+/// Run with: dart run example/openai_dart_example.dart
+library;
+
 import 'dart:io';
 
 import 'package:openai_dart/openai_dart.dart';
 
 Future<void> main() async {
-  final client = OpenAIClient(apiKey: Platform.environment['OPENAI_API_KEY']);
+  // Create a client (uses OPENAI_API_KEY environment variable)
+  final client = OpenAIClient.fromEnvironment();
 
-  await _chatCompletions(client);
-  await _completions(client);
-  await _embeddings(client);
-  await _fineTuning(client);
-  await _images(client);
-  await _models(client);
-  await _moderations(client);
+  try {
+    // 1. Simple chat completion
+    print('=== Chat Completion ===\n');
 
-  client.endSession();
-}
+    final response = await client.chat.completions.create(
+      ChatCompletionCreateRequest(
+        model: 'gpt-4.1',
+        messages: [
+          ChatMessage.system('You are a helpful assistant.'),
+          ChatMessage.user('What is Dart programming language?'),
+        ],
+        maxTokens: 150,
+      ),
+    );
 
-Future<void> _chatCompletions(final OpenAIClient client) async {
-  final res = await client.createChatCompletion(
-    request: const CreateChatCompletionRequest(
-      model: ChatCompletionModel.modelId('gpt-4'),
-      messages: [
-        ChatCompletionMessage.system(content: 'You are a helpful assistant.'),
-        ChatCompletionMessage.user(
-          content: ChatCompletionUserMessageContent.string('Hello!'),
-        ),
-      ],
-      temperature: 0,
-    ),
-  );
-  print(res.choices.first.message.content);
-}
+    print('Response: ${response.text}\n');
 
-Future<void> _completions(final OpenAIClient client) async {
-  final res = await client.createCompletion(
-    request: const CreateCompletionRequest(
-      model: CompletionModel.modelId('gpt-3.5-turbo-instruct'),
-      prompt: CompletionPrompt.string('Say this is a test'),
-      maxTokens: 7,
-      temperature: 0,
-    ),
-  );
-  print(res.choices.first.text);
-}
+    // 2. Streaming
+    print('=== Streaming ===\n');
 
-Future<void> _embeddings(final OpenAIClient client) async {
-  final res = await client.createEmbedding(
-    request: const CreateEmbeddingRequest(
-      model: EmbeddingModel.modelId('text-embedding-3-small'),
-      input: EmbeddingInput.string('The food was delicious and the waiter...'),
-    ),
-  );
-  print(res.data.first.embeddingVector);
-}
+    final stream = client.chat.completions.createStream(
+      ChatCompletionCreateRequest(
+        model: 'gpt-4.1',
+        messages: [ChatMessage.user('Count from 1 to 5')],
+        maxTokens: 50,
+      ),
+    );
 
-Future<void> _fineTuning(final OpenAIClient client) async {
-  final res = await client.listPaginatedFineTuningJobs();
-  print(res.data.first.id);
-}
+    stdout.write('Streaming: ');
+    await for (final event in stream) {
+      stdout.write(event.textDelta ?? '');
+    }
+    print('\n');
 
-Future<void> _images(final OpenAIClient client) async {
-  final res = await client.createImage(
-    request: const CreateImageRequest(
-      model: CreateImageRequestModel.model(ImageModels.dallE3),
-      prompt: 'A cute baby sea otter',
-      quality: ImageQuality.hd,
-      size: ImageSize.v1024x1792,
-      style: ImageStyle.natural,
-    ),
-  );
-  print(res.data.first.url);
-}
+    // 3. Embeddings
+    print('=== Embeddings ===\n');
 
-Future<void> _models(final OpenAIClient client) async {
-  final res1 = await client.listModels();
-  print(res1.data.first.id);
-  final res2 = await client.retrieveModel(model: 'gpt-4');
-  print(res2.ownedBy);
-}
+    final embeddings = await client.embeddings.create(
+      EmbeddingRequest(
+        model: 'text-embedding-3-small',
+        input: EmbeddingInput.text('Hello, world!'),
+      ),
+    );
 
-Future<void> _moderations(final OpenAIClient client) async {
-  final res = await client.createModeration(
-    request: const CreateModerationRequest(
-      model: ModerationModel.model(ModerationModels.omniModerationLatest),
-      input: ModerationInput.string('I want to kill them.'),
-    ),
-  );
-  print(res.results.first.categories.violence);
-  print(res.results.first.categoryScores.violence);
+    print('Embedding dimensions: ${embeddings.firstEmbedding.length}');
+    print('First 3 values: ${embeddings.firstEmbedding.take(3).toList()}\n');
+
+    // 4. List models
+    print('=== Available Models ===\n');
+
+    final models = await client.models.list();
+    final gptModels = models.data
+        .where((m) => m.id.startsWith('gpt'))
+        .take(5)
+        .toList();
+
+    print('Some GPT models:');
+    for (final model in gptModels) {
+      print('  - ${model.id}');
+    }
+    print('');
+
+    // 5. Moderation
+    print('=== Content Moderation ===\n');
+
+    final moderation = await client.moderations.create(
+      ModerationRequest(
+        input: ModerationInput.text('Hello, how are you today?'),
+      ),
+    );
+
+    print('Content flagged: ${moderation.results.first.flagged}');
+  } finally {
+    client.close();
+  }
 }

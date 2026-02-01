@@ -1,0 +1,5 @@
+tags:
+  integration:
+    description: >
+      Register the integration tag to suppress warnings. Integration tests
+      require API keys. Run with: dart test --tags integration

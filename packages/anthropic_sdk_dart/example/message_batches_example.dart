@@ -15,8 +15,7 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 void main() async {
   final client = AnthropicClient(
     config: const AnthropicConfig(
-      authProvider:
-          ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
+      authProvider: ApiKeyProvider(String.fromEnvironment('ANTHROPIC_API_KEY')),
     ),
   );
 

@@ -1,0 +1,90 @@
+{
+  "categories": {
+    "chat": {
+      "patterns": ["chat", "completion", "message"],
+      "directory": "chat"
+    },
+    "completions": {
+      "patterns": ["completion"],
+      "directory": "completions"
+    },
+    "embeddings": {
+      "patterns": ["embed"],
+      "directory": "embeddings"
+    },
+    "audio": {
+      "patterns": ["audio", "speech", "transcription", "translation", "whisper"],
+      "directory": "audio"
+    },
+    "images": {
+      "patterns": ["image", "dall"],
+      "directory": "images"
+    },
+    "files": {
+      "patterns": ["file"],
+      "directory": "files"
+    },
+    "uploads": {
+      "patterns": ["upload"],
+      "directory": "uploads"
+    },
+    "batches": {
+      "patterns": ["batch"],
+      "directory": "batches"
+    },
+    "models": {
+      "patterns": ["model"],
+      "directory": "models"
+    },
+    "moderations": {
+      "patterns": ["moderation"],
+      "directory": "moderations"
+    },
+    "assistants": {
+      "patterns": ["assistant"],
+      "directory": "assistants"
+    },
+    "threads": {
+      "patterns": ["thread"],
+      "directory": "threads"
+    },
+    "messages": {
+      "patterns": ["message"],
+      "directory": "messages"
+    },
+    "runs": {
+      "patterns": ["run"],
+      "directory": "runs"
+    },
+    "run_steps": {
+      "patterns": ["step"],
+      "directory": "run_steps"
+    },
+    "vector_stores": {
+      "patterns": ["vector", "store"],
+      "directory": "vector_stores"
+    },
+    "fine_tuning": {
+      "patterns": ["fine", "tuning", "training"],
+      "directory": "fine_tuning"
+    },
+    "tools": {
+      "patterns": ["tool", "function"],
+      "directory": "tools"
+    },
+    "streaming": {
+      "patterns": ["stream", "delta", "chunk"],
+      "directory": "streaming"
+    },
+    "realtime": {
+      "patterns": ["realtime", "session", "conversation"],
+      "directory": "realtime"
+    }
+  },
+  "default_category": "common",
+  "parent_model_patterns": {
+    "ChatCompletionRequest": [".*Tool$", ".*Message$", ".*Choice$"],
+    "Message": [".*Content$", ".*Part$", ".*Block$"],
+    "Tool": [".*Function$", ".*Call$"]
+  }
+}
