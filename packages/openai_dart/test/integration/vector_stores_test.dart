@@ -172,8 +172,14 @@ void main() {
         );
 
         try {
-          // List with limit 1
-          final page1 = await client!.beta.vectorStores.list(limit: 1);
+          // Wait for stores to appear in list (API eventual consistency)
+          var attempts = 0;
+          VectorStoreList page1;
+          do {
+            await Future<void>.delayed(const Duration(seconds: 1));
+            page1 = await client!.beta.vectorStores.list(limit: 1);
+            attempts++;
+          } while (page1.data.isEmpty && attempts < 30);
 
           expect(page1.data.length, 1);
           // hasMore should be true if there are more stores
@@ -319,10 +325,14 @@ The Assistants API uses vector stores for file_search functionality.
             // Verify chunking strategy is populated after processing
             expect(vsFile.chunkingStrategy, isNotNull);
 
-            // List files and verify file appears
-            final fileList = await client!.beta.vectorStores.files.list(
-              store.id,
-            );
+            // List files and verify file appears (poll for eventual consistency)
+            var listAttempts = 0;
+            VectorStoreFileList fileList;
+            do {
+              await Future<void>.delayed(const Duration(seconds: 1));
+              fileList = await client!.beta.vectorStores.files.list(store.id);
+              listAttempts++;
+            } while (fileList.data.isEmpty && listAttempts < 30);
 
             expect(fileList.data, isNotEmpty);
             expect(
@@ -457,15 +467,23 @@ More text here to make the document large enough for meaningful chunking.
               attempts++;
             }
 
-            // List with completed filter
-            final completedFiles = await client!.beta.vectorStores.files.list(
-              store.id,
-              filter: 'completed',
-            );
-
+            // List with completed filter (poll for eventual consistency)
             if (vsFile.isReady) {
+              var filterAttempts = 0;
+              VectorStoreFileList completedFiles;
+              bool fileFound;
+              do {
+                await Future<void>.delayed(const Duration(seconds: 1));
+                completedFiles = await client!.beta.vectorStores.files.list(
+                  store.id,
+                  filter: 'completed',
+                );
+                fileFound = completedFiles.data.any((f) => f.id == file.id);
+                filterAttempts++;
+              } while (!fileFound && filterAttempts < 30);
+
               expect(
-                completedFiles.data.any((f) => f.id == file.id),
+                fileFound,
                 isTrue,
                 reason: 'Completed file should appear in completed filter',
               );
