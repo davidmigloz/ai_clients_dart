@@ -1,4 +1,5 @@
-import 'dart:async' show Completer, Stream, StreamController, runZonedGuarded;
+import 'dart:async'
+    show Completer, Stream, StreamController, runZonedGuarded;
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -366,5 +367,270 @@ void main() {
 
       client.close();
     });
+
+    group('with streamClientFactory', () {
+      test('uses injected factory for streaming with abortTrigger', () async {
+        var factoryCalled = false;
+        var clientClosed = false;
+
+        final streamController = StreamController<List<int>>();
+
+        final mockStreamClient = MockClient.streaming((request, _) async {
+          return http.StreamedResponse(
+            streamController.stream,
+            200,
+          );
+        });
+
+        // Create a wrapper that tracks close() calls
+        final trackingClient = _TrackingClient(
+          mockStreamClient,
+          onClose: () => clientClosed = true,
+        );
+
+        final client = OpenAIClient(
+          config:
+              const OpenAIConfig(authProvider: ApiKeyProvider('sk-test-key')),
+          streamClientFactory: () {
+            factoryCalled = true;
+            return trackingClient;
+          },
+        );
+
+        final neverAbort = Completer<void>().future;
+
+        final response = await client.sendStream(
+          endpoint: '/chat/completions',
+          body: <String, Object>{
+            'model': 'gpt-4',
+            'messages': [],
+            'stream': true,
+          },
+          abortTrigger: neverAbort,
+        );
+
+        expect(factoryCalled, isTrue, reason: 'Factory should be called');
+
+        // Send data and close the source stream
+        streamController
+          ..add(utf8.encode('data: {"choices":[]}\n\n'))
+          ..add(utf8.encode('data: [DONE]\n\n'));
+        await streamController.close();
+
+        // Consume the stream
+        await response.stream.drain<void>();
+
+        // Client should be closed after stream completes
+        expect(clientClosed, isTrue, reason: 'Client should close on done');
+
+        client.close();
+      });
+
+      test('streaming client closes on early subscription cancellation',
+          () async {
+        var clientClosed = false;
+
+        // Create a stream that never ends - it will be cancelled early
+        final streamController = StreamController<List<int>>();
+
+        final mockStreamClient = MockClient.streaming((request, _) async {
+          return http.StreamedResponse(
+            streamController.stream,
+            200,
+          );
+        });
+
+        final trackingClient = _TrackingClient(
+          mockStreamClient,
+          onClose: () => clientClosed = true,
+        );
+
+        final client = OpenAIClient(
+          config:
+              const OpenAIConfig(authProvider: ApiKeyProvider('sk-test-key')),
+          streamClientFactory: () => trackingClient,
+        );
+
+        final neverAbort = Completer<void>().future;
+
+        final response = await client.sendStream(
+          endpoint: '/chat/completions',
+          body: <String, Object>{
+            'model': 'gpt-4',
+            'messages': [],
+            'stream': true,
+          },
+          abortTrigger: neverAbort,
+        );
+
+        // Send some data but don't close the stream
+        streamController.add(utf8.encode('data: {"choices":[]}\n\n'));
+
+        // Subscribe and immediately cancel
+        final subscription = response.stream.listen((_) {});
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        await subscription.cancel();
+
+        // Client should be closed due to onCancel callback
+        expect(
+          clientClosed,
+          isTrue,
+          reason: 'Client should close on subscription cancel',
+        );
+
+        // Clean up
+        await streamController.close();
+        client.close();
+      });
+
+      test('streaming client closes on stream error', () async {
+        var clientClosed = false;
+
+        final streamController = StreamController<List<int>>();
+
+        final mockStreamClient = MockClient.streaming((request, _) async {
+          return http.StreamedResponse(
+            streamController.stream,
+            200,
+          );
+        });
+
+        final trackingClient = _TrackingClient(
+          mockStreamClient,
+          onClose: () => clientClosed = true,
+        );
+
+        final client = OpenAIClient(
+          config:
+              const OpenAIConfig(authProvider: ApiKeyProvider('sk-test-key')),
+          streamClientFactory: () => trackingClient,
+        );
+
+        final neverAbort = Completer<void>().future;
+
+        final response = await client.sendStream(
+          endpoint: '/chat/completions',
+          body: <String, Object>{
+            'model': 'gpt-4',
+            'messages': [],
+            'stream': true,
+          },
+          abortTrigger: neverAbort,
+        );
+
+        // Send some data then error
+        streamController
+          ..add(utf8.encode('data: {"choices":[]}\n\n'))
+          ..addError(Exception('Stream error'));
+
+        // Consume stream, expecting error
+        final events = <List<int>>[];
+        Object? caughtError;
+        final completer = Completer<void>();
+
+        response.stream.listen(
+          events.add,
+          onError: (Object e) {
+            caughtError = e;
+          },
+          onDone: completer.complete,
+          cancelOnError: false,
+        );
+
+        // Wait for stream to process the error and complete
+        await streamController.close();
+        await completer.future;
+
+        // Client should be closed after error
+        expect(clientClosed, isTrue, reason: 'Client should close on error');
+        expect(caughtError, isA<Exception>());
+
+        client.close();
+      });
+
+      test('abortTrigger completion closes client before stream done',
+          () async {
+        var clientClosed = false;
+        var abortTriggered = false;
+
+        final streamController = StreamController<List<int>>();
+
+        final mockStreamClient = MockClient.streaming((request, _) async {
+          return http.StreamedResponse(
+            streamController.stream,
+            200,
+          );
+        });
+
+        final trackingClient = _TrackingClient(
+          mockStreamClient,
+          onClose: () => clientClosed = true,
+        );
+
+        final abortCompleter = Completer<void>();
+
+        final client = OpenAIClient(
+          config:
+              const OpenAIConfig(authProvider: ApiKeyProvider('sk-test-key')),
+          streamClientFactory: () => trackingClient,
+        );
+
+        final response = await client.sendStream(
+          endpoint: '/chat/completions',
+          body: <String, Object>{
+            'model': 'gpt-4',
+            'messages': [],
+            'stream': true,
+          },
+          abortTrigger: abortCompleter.future,
+        );
+
+        // Send some data
+        streamController.add(utf8.encode('data: {"choices":[]}\n\n'));
+
+        // Start consuming stream
+        final subscription = response.stream.listen((_) {});
+
+        // Wait a bit then trigger abort
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        abortCompleter.complete();
+        abortTriggered = true;
+
+        // Give abort handler time to run
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+
+        // Client should be closed due to abort trigger
+        expect(
+          clientClosed,
+          isTrue,
+          reason: 'Client should close when abort is triggered',
+        );
+        expect(abortTriggered, isTrue);
+
+        // Clean up
+        await subscription.cancel();
+        await streamController.close();
+        client.close();
+      });
+    });
   });
+}
+
+/// A wrapper around an HTTP client that tracks close() calls.
+class _TrackingClient extends http.BaseClient {
+  _TrackingClient(this._inner, {required this.onClose});
+
+  final http.Client _inner;
+  final void Function() onClose;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) {
+    return _inner.send(request);
+  }
+
+  @override
+  void close() {
+    onClose();
+    _inner.close();
+  }
 }
