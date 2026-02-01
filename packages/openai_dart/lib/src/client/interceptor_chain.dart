@@ -77,11 +77,17 @@ class InterceptorChain {
   Future<http.Response> _executeTransport(RequestContext context) {
     final originalRequest = context.request;
 
-    // Extract correlation ID upfront for tracing (used in retries and abort)
-    final correlationId =
+    // Extract correlation ID upfront for tracing (used in retries and abort).
+    // If neither metadata nor request headers contain an ID, generate one
+    // and ensure it's included in the outgoing request for server-side tracing.
+    final existingCorrelationId =
         context.metadata['correlationId'] as String? ??
-        context.request.headers['X-Request-ID'] ??
-        generateRequestId();
+        context.request.headers['X-Request-ID'];
+    final correlationId = existingCorrelationId ?? generateRequestId();
+    final needsCorrelationIdHeader = existingCorrelationId == null;
+
+    // Persist to metadata for downstream interceptors and logging
+    context.metadata['correlationId'] = correlationId;
 
     // For retries, we need to clone the request since http.BaseRequest
     // can only be finalized once. Capture body bytes upfront.
@@ -98,6 +104,10 @@ class InterceptorChain {
           ..followRedirects = originalRequest.followRedirects
           ..maxRedirects = originalRequest.maxRedirects
           ..persistentConnection = originalRequest.persistentConnection;
+        // Add correlation ID header if it was generated (not already present)
+        if (needsCorrelationIdHeader) {
+          request.headers['X-Request-ID'] = correlationId;
+        }
         if (bodyBytes != null && bodyBytes.isNotEmpty) {
           request.bodyBytes = bodyBytes;
         }
