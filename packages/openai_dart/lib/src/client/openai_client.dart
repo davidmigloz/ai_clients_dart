@@ -1,4 +1,4 @@
-import 'dart:async' show StreamTransformer, unawaited;
+import 'dart:async' show StreamController, unawaited;
 import 'dart:convert' show jsonEncode;
 
 import 'package:http/http.dart' as http;
@@ -114,10 +114,18 @@ class OpenAIClient {
   ///
   /// If [httpClient] is provided, it will be used for HTTP requests.
   /// Otherwise, a default client will be created.
-  OpenAIClient({OpenAIConfig? config, http.Client? httpClient})
-    : _config = config ?? const OpenAIConfig(),
-      _httpClient = httpClient ?? http.Client(),
-      _ownsHttpClient = httpClient == null {
+  ///
+  /// The optional [streamClientFactory] is used to create HTTP clients for
+  /// streaming requests with abort support. This is primarily useful for
+  /// testing, allowing mock clients to be injected for the abort path.
+  OpenAIClient({
+    OpenAIConfig? config,
+    http.Client? httpClient,
+    http.Client Function()? streamClientFactory,
+  }) : _config = config ?? const OpenAIConfig(),
+       _httpClient = httpClient ?? http.Client(),
+       _streamClientFactory = streamClientFactory ?? http.Client.new,
+       _ownsHttpClient = httpClient == null {
     // Initialize logging first so LoggingInterceptor uses the configured level
     _initializeLogging();
     _initializeInterceptorChain();
@@ -171,6 +179,7 @@ class OpenAIClient {
 
   final OpenAIConfig _config;
   final http.Client _httpClient;
+  final http.Client Function() _streamClientFactory;
   final bool _ownsHttpClient;
   bool _closed = false;
   Logger? _logger;
@@ -335,7 +344,11 @@ class OpenAIClient {
       if (queryParametersAll != null) ...queryParametersAll,
     };
 
-    // Use Uri constructor to properly build the URI with queryParametersAll
+    // Build the URI with queryParametersAll.
+    // Note: Dart's Uri constructor accepts Map<String, List<String>> for the
+    // queryParameters parameter, treating each list as repeated query parameters
+    // (e.g., include[]=a&include[]=b). This behavior is documented in the Dart
+    // SDK and is used here to support OpenAI's array query parameter format.
     return Uri(
       scheme: baseUri.scheme,
       host: baseUri.host,
@@ -409,7 +422,7 @@ class OpenAIClient {
     // When abortTrigger completes, we close the client which cancels
     // the in-flight request and terminates the stream.
     if (abortTrigger != null) {
-      final streamClient = http.Client();
+      final streamClient = _streamClientFactory();
       var aborted = false;
       var clientClosed = false;
 
@@ -437,24 +450,32 @@ class OpenAIClient {
       try {
         final response = await streamClient.send(request);
 
-        // Wrap stream to ensure client cleanup on completion.
-        // This handles normal completion, errors, and stream cancellation.
-        final wrappedStream = response.stream.transform(
-          StreamTransformer<List<int>, List<int>>.fromHandlers(
-            handleData: (data, sink) => sink.add(data),
-            handleError: (error, stackTrace, sink) {
-              closeClientOnce();
-              sink.addError(error, stackTrace);
-            },
-            handleDone: (sink) {
-              closeClientOnce();
-              sink.close();
-            },
-          ),
+        // Use StreamController to ensure client cleanup on ALL termination paths:
+        // - Normal completion (onDone)
+        // - Errors (onError)
+        // - Early subscription cancellation (onCancel)
+        //
+        // StreamTransformer.fromHandlers does NOT handle subscription
+        // cancellation, which would leak the client.
+        final controller = StreamController<List<int>>(
+          onCancel: closeClientOnce,
+        );
+
+        response.stream.listen(
+          controller.add,
+          onError: (Object e, StackTrace st) {
+            closeClientOnce();
+            controller.addError(e, st);
+          },
+          onDone: () {
+            closeClientOnce();
+            unawaited(controller.close());
+          },
+          cancelOnError: false,
         );
 
         return http.StreamedResponse(
-          wrappedStream,
+          controller.stream,
           response.statusCode,
           contentLength: response.contentLength,
           request: response.request,
