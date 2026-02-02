@@ -481,6 +481,7 @@ final response = await client.models.generateContent(
 ```
 
 **Supported aspect ratios:** 1:1, 2:3, 3:2, 3:4, 4:3, 9:16, 16:9, 21:9
+
 **Supported sizes:** 1K, 2K, 4K
 
 See [image_generation_example.dart](example/image_generation_example.dart) for a complete example including image editing with multi-turn conversations.
