@@ -50,6 +50,7 @@ Unofficial Dart client for the **[Google AI Gemini Developer API](https://ai.goo
   - Google Maps (geospatial context)
   - MCP servers (Model Context Protocol)
 - ✅ Safety settings support
+- ✅ Native image generation (`responseModalities: ['IMAGE']` with `imageConfig`)
 
 #### Embeddings
 
@@ -415,6 +416,74 @@ await for (final chunk in client.models.streamGenerateContent(
   if (text != null) print(text);
 }
 ```
+
+</details>
+
+### Image Generation
+
+<details>
+<summary><b>Basic Image Generation</b></summary>
+
+Generate images using Gemini's multimodal image models:
+
+```dart
+import 'dart:convert';
+import 'dart:io';
+import 'package:googleai_dart/googleai_dart.dart';
+
+// Assumes you have a configured client instance
+// Generate an image (model returns both text description and image)
+final response = await client.models.generateContent(
+  model: 'gemini-2.5-flash-image',
+  request: GenerateContentRequest(
+    contents: [Content.text('A sunset over mountains')],
+    generationConfig: const GenerationConfig(
+      responseModalities: ['TEXT', 'IMAGE'],
+    ),
+  ),
+);
+
+// Get the text description
+print(response.text);
+
+// Access the base64-encoded image using the .data extension
+final imageBase64 = response.data;
+if (imageBase64 != null) {
+  // Save to file
+  final bytes = base64Decode(imageBase64);
+  await File('generated.png').writeAsBytes(bytes);
+}
+```
+
+**Supported models:** `gemini-2.5-flash-image`, `gemini-3-pro-image-preview`
+
+</details>
+
+<details>
+<summary><b>Custom Image Configuration</b></summary>
+
+Configure aspect ratio and resolution:
+
+```dart
+final response = await client.models.generateContent(
+  model: 'gemini-2.5-flash-image',
+  request: GenerateContentRequest(
+    contents: [Content.text('A futuristic cityscape')],
+    generationConfig: const GenerationConfig(
+      responseModalities: ['TEXT', 'IMAGE'],
+      imageConfig: ImageConfig(
+        aspectRatio: '16:9',  // 1:1, 2:3, 3:2, 3:4, 4:3, 9:16, 16:9, 21:9
+        imageSize: '2K',      // 1K, 2K, 4K
+      ),
+    ),
+  ),
+);
+```
+
+**Supported aspect ratios:** 1:1, 2:3, 3:2, 3:4, 4:3, 9:16, 16:9, 21:9
+**Supported sizes:** 1K, 2K, 4K
+
+See [image_generation_example.dart](example/image_generation_example.dart) for a complete example including image editing with multi-turn conversations.
 
 </details>
 
@@ -1497,6 +1566,7 @@ See the [`example/`](example/) directory for comprehensive examples:
 23. **[google_maps_example.dart](example/google_maps_example.dart)** - Google Maps grounding for geospatial context
 24. **[file_search_example.dart](example/file_search_example.dart)** - File Search with FileSearchStores for semantic retrieval (RAG)
 25. **[live_example.dart](example/live_example.dart)** - Live API for real-time WebSocket streaming (audio/text)
+26. **[image_generation_example.dart](example/image_generation_example.dart)** - Native image generation with Gemini multimodal models
 
 ## API Coverage
 
