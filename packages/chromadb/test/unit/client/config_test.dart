@@ -80,16 +80,16 @@ void main() {
   group('ChromaClient.local()', () {
     test('accepts defaultHeaders parameter', () {
       final client = ChromaClient.local(defaultHeaders: {'X-Custom': 'value'});
+      addTearDown(client.close);
 
       expect(client.config.defaultHeaders, {'X-Custom': 'value'});
-      client.close();
     });
 
     test('uses empty headers by default', () {
       final client = ChromaClient.local();
+      addTearDown(client.close);
 
       expect(client.config.defaultHeaders, isEmpty);
-      client.close();
     });
   });
 
@@ -99,17 +99,17 @@ void main() {
         'test-api-key',
         defaultHeaders: {'X-Custom': 'value'},
       );
+      addTearDown(client.close);
 
       expect(client.config.defaultHeaders, {'X-Custom': 'value'});
       expect(client.config.authProvider, isA<ApiKeyProvider>());
-      client.close();
     });
 
     test('uses empty headers by default', () {
       final client = ChromaClient.withApiKey('test-api-key');
+      addTearDown(client.close);
 
       expect(client.config.defaultHeaders, isEmpty);
-      client.close();
     });
 
     test('combines custom headers with api key authentication', () {
@@ -120,13 +120,13 @@ void main() {
         database: 'my-database',
         defaultHeaders: {'X-Request-Source': 'my-app'},
       );
+      addTearDown(client.close);
 
       expect(client.config.baseUrl, 'https://api.trychroma.com');
       expect(client.config.tenant, 'my-tenant');
       expect(client.config.database, 'my-database');
       expect(client.config.defaultHeaders, {'X-Request-Source': 'my-app'});
       expect(client.config.authProvider, isA<ApiKeyProvider>());
-      client.close();
     });
   });
 }
