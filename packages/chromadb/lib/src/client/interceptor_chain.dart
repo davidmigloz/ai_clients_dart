@@ -82,7 +82,8 @@ class InterceptorChain {
         request.body = body;
       } else {
         request.body = jsonEncode(body);
-        request.headers['Content-Type'] = 'application/json';
+        // Only set Content-Type if not already provided by headers
+        request.headers.putIfAbsent('Content-Type', () => 'application/json');
       }
     }
 
