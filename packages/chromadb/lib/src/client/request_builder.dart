@@ -9,7 +9,7 @@
 /// ```dart
 /// final builder = RequestBuilder(
 ///   baseUrl: 'http://localhost:8000',
-///   defaultHeaders: {'User-Agent': 'chromadb-dart/0.3.0'},
+///   defaultHeaders: {'User-Agent': 'chromadb-dart'},
 /// );
 ///
 /// final url = builder.buildUrl('/api/v2/collections');

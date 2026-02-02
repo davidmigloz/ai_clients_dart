@@ -16,7 +16,6 @@ import '../resources/functions_resource.dart';
 import '../resources/health_resource.dart';
 import '../resources/records_resource.dart';
 import '../resources/tenants_resource.dart';
-import '../utils/version.dart';
 import '../wrappers/chroma_collection.dart';
 import 'config.dart';
 import 'interceptor_chain.dart';
@@ -151,7 +150,7 @@ class ChromaClient {
       baseUrl: config.baseUrl,
       defaultHeaders: {
         'Accept': 'application/json',
-        'User-Agent': 'chromadb-dart/$packageVersion',
+        'User-Agent': 'chromadb-dart',
         ...config.defaultHeaders, // User headers can override built-in
       },
     );
