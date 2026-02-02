@@ -223,4 +223,33 @@ void main() {
       expect(message.isEndTurn, isFalse);
     });
   });
+
+  group('MessageRole', () {
+    test('fromJson converts known values', () {
+      expect(MessageRole.fromJson('user'), MessageRole.user);
+      expect(MessageRole.fromJson('assistant'), MessageRole.assistant);
+    });
+
+    test('fromJson throws for unknown values', () {
+      expect(() => MessageRole.fromJson('invalid'), throwsFormatException);
+      expect(() => MessageRole.fromJson('admin'), throwsFormatException);
+      expect(() => MessageRole.fromJson(''), throwsFormatException);
+    });
+
+    test('toJson returns correct values', () {
+      expect(MessageRole.user.toJson(), 'user');
+      expect(MessageRole.assistant.toJson(), 'assistant');
+    });
+
+    test('round-trip preserves value', () {
+      for (final value in MessageRole.values) {
+        expect(MessageRole.fromJson(value.toJson()), value);
+      }
+    });
+
+    test('value property returns correct string', () {
+      expect(MessageRole.user.value, 'user');
+      expect(MessageRole.assistant.value, 'assistant');
+    });
+  });
 }

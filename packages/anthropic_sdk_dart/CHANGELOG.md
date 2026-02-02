@@ -66,6 +66,9 @@
   - `Skill.source`: `String` → `SkillSource` enum (`SkillSource.custom`, `SkillSource.anthropic`)
   - `Message.role`: `String` → `MessageRole` enum (`MessageRole.assistant`)
   - `SkillsResource.list()` `source` parameter: `String?` → `SkillSource?`
+- **Tooling API changes** for improved type safety:
+  - `tools` parameter: `List<Map<String, dynamic>>` → `List<ToolDefinition>`
+  - `toolChoice` parameter: `Map<String, dynamic>` → `ToolChoice`
 - **Session cleanup**: `endSession()` → `close()`.
 - **Dependencies**: Removed `freezed`, `json_serializable`; now minimal (`http`, `logging`, `meta`).
 
