@@ -61,12 +61,23 @@ class ChromaConfig {
 
   /// Custom headers to include in all requests.
   ///
-  /// These headers are merged with built-in headers (Accept, User-Agent).
-  /// Request-specific headers override these if they have the same key.
+  /// These headers are merged with built-in headers (such as `Accept` and
+  /// `User-Agent`). When keys conflict, [defaultHeaders] override the
+  /// built-in headers.
   ///
-  /// **Note on header precedence:** Headers from [authProvider] (e.g., the
-  /// `x-chroma-token` header from [ApiKeyProvider]) are added by interceptors
-  /// and will override any matching key in [defaultHeaders].
+  /// Request-specific headers (those passed per call) override both
+  /// built-in headers and [defaultHeaders] when they use the same key.
+  ///
+  /// Headers from [authProvider] (e.g., the `x-chroma-token` header from
+  /// [ApiKeyProvider]) are added by interceptors and will override any
+  /// matching key from built-in headers, [defaultHeaders], and
+  /// request-specific headers.
+  ///
+  /// **Effective precedence (lowest to highest):**
+  /// 1. Built-in headers (e.g., `Accept`, `User-Agent`)
+  /// 2. [defaultHeaders]
+  /// 3. Request-specific headers
+  /// 4. Headers added by [authProvider] interceptors
   ///
   /// **Immutability expectation:** This map is intended to be treated as
   /// immutable after a [ChromaConfig] instance is created. Mutating the map
