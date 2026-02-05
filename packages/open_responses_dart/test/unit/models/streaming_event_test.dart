@@ -268,6 +268,25 @@ void main() {
 
         expect(event.textDelta, isNull);
       });
+
+      test('equality considers rawJson', () {
+        const event1 = UnknownEvent(
+          rawType: 'response.new',
+          rawJson: {'type': 'response.new', 'data': 'A'},
+        );
+        const event2 = UnknownEvent(
+          rawType: 'response.new',
+          rawJson: {'type': 'response.new', 'data': 'B'},
+        );
+        const event3 = UnknownEvent(
+          rawType: 'response.new',
+          rawJson: {'type': 'response.new', 'data': 'A'},
+        );
+
+        expect(event1, isNot(equals(event2)));
+        expect(event1, equals(event3));
+        expect(event1.hashCode, equals(event3.hashCode));
+      });
     });
   });
 }
