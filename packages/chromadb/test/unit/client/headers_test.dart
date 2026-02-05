@@ -106,34 +106,36 @@ void main() {
       expect(capturedRequest!.headers['x-chroma-token'], 'test-api-key');
     });
 
-    test('auth interceptor overrides x-chroma-token from defaultHeaders',
-        () async {
-      http.Request? capturedRequest;
-      when(() => mockHttpClient.send(any())).thenAnswer((invocation) async {
-        capturedRequest = invocation.positionalArguments[0] as http.Request;
-        return http.StreamedResponse(
-          Stream.value('{"nanosecond heartbeat": 123456}'.codeUnits),
-          200,
-          headers: {'content-type': 'application/json'},
+    test(
+      'auth interceptor overrides x-chroma-token from defaultHeaders',
+      () async {
+        http.Request? capturedRequest;
+        when(() => mockHttpClient.send(any())).thenAnswer((invocation) async {
+          capturedRequest = invocation.positionalArguments[0] as http.Request;
+          return http.StreamedResponse(
+            Stream.value('{"nanosecond heartbeat": 123456}'.codeUnits),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        });
+
+        final client = ChromaClient(
+          config: const ChromaConfig(
+            authProvider: ApiKeyProvider('auth-key'),
+            // This should be overridden by the auth interceptor
+            defaultHeaders: {'x-chroma-token': 'default-key'},
+          ),
+          httpClient: mockHttpClient,
         );
-      });
+        addTearDown(client.close);
 
-      final client = ChromaClient(
-        config: const ChromaConfig(
-          authProvider: ApiKeyProvider('auth-key'),
-          // This should be overridden by the auth interceptor
-          defaultHeaders: {'x-chroma-token': 'default-key'},
-        ),
-        httpClient: mockHttpClient,
-      );
-      addTearDown(client.close);
+        await client.health.heartbeat();
 
-      await client.health.heartbeat();
-
-      expect(capturedRequest, isNotNull);
-      // Auth interceptor should win
-      expect(capturedRequest!.headers['x-chroma-token'], 'auth-key');
-    });
+        expect(capturedRequest, isNotNull);
+        // Auth interceptor should win
+        expect(capturedRequest!.headers['x-chroma-token'], 'auth-key');
+      },
+    );
 
     test('built-in headers are present by default', () async {
       http.Request? capturedRequest;

@@ -137,10 +137,7 @@ void main() {
     });
 
     test('embedding getter returns null when embeddings is empty', () {
-      const response = EmbedResponse(
-        model: 'nomic-embed-text',
-        embeddings: [],
-      );
+      const response = EmbedResponse(model: 'nomic-embed-text', embeddings: []);
 
       expect(response.embedding, isNull);
     });

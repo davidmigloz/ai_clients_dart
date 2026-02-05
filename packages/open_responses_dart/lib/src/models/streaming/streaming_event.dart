@@ -4,6 +4,7 @@ import '../common/equality_helpers.dart';
 import '../content/annotation.dart';
 import '../content/logprob.dart';
 import '../content/output_content.dart';
+import '../content/reasoning_summary_content.dart';
 import '../items/output_item.dart';
 import '../response/error_payload.dart';
 import '../response/response_resource.dart';
@@ -52,26 +53,30 @@ sealed class StreamingEvent {
       // Reasoning events
       'response.reasoning.delta' => ReasoningDeltaEvent.fromJson(json),
       'response.reasoning.done' => ReasoningDoneEvent.fromJson(json),
+      // OpenAI/LM Studio reasoning text events (maps to Open Responses events)
+      'response.reasoning_text.delta' => ReasoningDeltaEvent.fromJson(json),
+      'response.reasoning_text.done' => ReasoningDoneEvent.fromJson(json),
       'response.reasoning_summary_part.added' =>
         ReasoningSummaryPartAddedEvent.fromJson(json),
       'response.reasoning_summary_part.done' =>
         ReasoningSummaryPartDoneEvent.fromJson(json),
+      // Canonical reasoning summary text events
+      'response.reasoning_summary_text.delta' =>
+        ReasoningSummaryDeltaEvent.fromJson(json),
+      'response.reasoning_summary_text.done' =>
+        ReasoningSummaryDoneEvent.fromJson(json),
+      // Provider alias (without _text suffix)
       'response.reasoning_summary.delta' => ReasoningSummaryDeltaEvent.fromJson(
         json,
       ),
       'response.reasoning_summary.done' => ReasoningSummaryDoneEvent.fromJson(
         json,
       ),
-      // Ollama-specific reasoning events (maps to standard events)
-      'response.reasoning_summary_text.delta' =>
-        ReasoningSummaryDeltaEvent.fromJson(json),
-      'response.reasoning_summary_text.done' =>
-        ReasoningSummaryDoneEvent.fromJson(json),
 
       // Error event
       'error' => ErrorEvent.fromJson(json),
 
-      _ => throw FormatException('Unknown StreamingEvent type: $type'),
+      _ => UnknownEvent(rawType: type, rawJson: json),
     };
   }
 
@@ -1737,4 +1742,44 @@ class ErrorEvent extends StreamingEvent {
   @override
   String toString() =>
       'ErrorEvent(sequenceNumber: $sequenceNumber, error: $error)';
+}
+
+// ============================================================================
+// Unknown event
+// ============================================================================
+
+/// An unrecognized streaming event type.
+///
+/// This is returned for event types not yet supported by this library,
+/// allowing streams to continue processing without throwing. The raw JSON
+/// is preserved for inspection.
+@immutable
+class UnknownEvent extends StreamingEvent {
+  /// The event type string as received.
+  String get type => rawType;
+
+  /// The raw event type string.
+  final String rawType;
+
+  /// The raw JSON payload.
+  final Map<String, dynamic> rawJson;
+
+  /// Creates an [UnknownEvent].
+  const UnknownEvent({required this.rawType, required this.rawJson});
+
+  @override
+  Map<String, dynamic> toJson() => rawJson;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnknownEvent &&
+          runtimeType == other.runtimeType &&
+          rawType == other.rawType;
+
+  @override
+  int get hashCode => rawType.hashCode;
+
+  @override
+  String toString() => 'UnknownEvent(rawType: $rawType)';
 }

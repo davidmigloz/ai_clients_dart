@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../common/equality_helpers.dart';
 import '../content/input_content.dart';
+import '../content/reasoning_summary_content.dart';
 import '../metadata/function_call_status.dart';
 import '../metadata/item_status.dart';
 import '../metadata/message_role.dart';
@@ -20,6 +21,7 @@ sealed class Item {
       'message' => MessageItem.fromJson(json),
       'function_call' => FunctionCallItem.fromJson(json),
       'function_call_output' => FunctionCallOutputItem.fromJson(json),
+      'reasoning' => ReasoningInputItem.fromJson(json),
       'item_reference' => ItemReference.fromJson(json),
       _ => throw FormatException('Unknown Item type: $type'),
     };
@@ -386,4 +388,65 @@ class ItemReference extends Item {
 
   @override
   String toString() => 'ItemReference(id: $id)';
+}
+
+/// A reasoning item used as input for multi-turn conversations.
+///
+/// This allows passing reasoning output back as input to maintain
+/// reasoning context across turns.
+@immutable
+class ReasoningInputItem extends Item {
+  /// Unique identifier.
+  final String? id;
+
+  /// The reasoning summary content.
+  final List<ReasoningSummaryContent> summary;
+
+  /// Encrypted reasoning content for opaque context passing.
+  final String? encryptedContent;
+
+  /// Creates a [ReasoningInputItem].
+  const ReasoningInputItem({
+    this.id,
+    required this.summary,
+    this.encryptedContent,
+  });
+
+  /// Creates a [ReasoningInputItem] from JSON.
+  factory ReasoningInputItem.fromJson(Map<String, dynamic> json) {
+    return ReasoningInputItem(
+      id: json['id'] as String?,
+      summary: (json['summary'] as List)
+          .map(
+            (e) => ReasoningSummaryContent.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(),
+      encryptedContent: json['encrypted_content'] as String?,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'reasoning',
+    if (id != null) 'id': id,
+    'summary': summary.map((e) => e.toJson()).toList(),
+    if (encryptedContent != null) 'encrypted_content': encryptedContent,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ReasoningInputItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          listsEqual(summary, other.summary) &&
+          encryptedContent == other.encryptedContent;
+
+  @override
+  int get hashCode =>
+      Object.hash(id, Object.hashAll(summary), encryptedContent);
+
+  @override
+  String toString() =>
+      'ReasoningInputItem(id: $id, summary: $summary, encryptedContent: $encryptedContent)';
 }

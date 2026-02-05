@@ -178,5 +178,96 @@ void main() {
 
       expect(event.isFinal, isFalse);
     });
+
+    group('reasoning_text aliases', () {
+      test('response.reasoning_text.delta parses to ReasoningDeltaEvent', () {
+        final json = {
+          'type': 'response.reasoning_text.delta',
+          'sequence_number': 1,
+          'item_id': 'rs_001',
+          'output_index': 0,
+          'content_index': 0,
+          'delta': 'thinking...',
+        };
+
+        final event = StreamingEvent.fromJson(json);
+
+        expect(event, isA<ReasoningDeltaEvent>());
+        expect((event as ReasoningDeltaEvent).delta, 'thinking...');
+        expect(event.itemId, 'rs_001');
+      });
+
+      test('response.reasoning_text.done parses to ReasoningDoneEvent', () {
+        final json = {
+          'type': 'response.reasoning_text.done',
+          'sequence_number': 2,
+          'item_id': 'rs_001',
+          'output_index': 0,
+          'content_index': 0,
+          'text': 'full reasoning text',
+        };
+
+        final event = StreamingEvent.fromJson(json);
+
+        expect(event, isA<ReasoningDoneEvent>());
+        expect((event as ReasoningDoneEvent).text, 'full reasoning text');
+      });
+    });
+
+    group('UnknownEvent', () {
+      test('unknown event type returns UnknownEvent instead of throwing', () {
+        final json = {
+          'type': 'response.some_future_event',
+          'sequence_number': 99,
+          'data': 'hello',
+        };
+
+        final event = StreamingEvent.fromJson(json);
+
+        expect(event, isA<UnknownEvent>());
+      });
+
+      test('rawType and rawJson are preserved', () {
+        final json = {
+          'type': 'response.new_feature.delta',
+          'sequence_number': 1,
+          'custom_field': 42,
+        };
+
+        final event = StreamingEvent.fromJson(json) as UnknownEvent;
+
+        expect(event.rawType, 'response.new_feature.delta');
+        expect(event.type, 'response.new_feature.delta');
+        expect(event.rawJson, json);
+      });
+
+      test('toJson returns the raw JSON', () {
+        final json = {
+          'type': 'response.unknown_type',
+          'sequence_number': 5,
+          'payload': 'test',
+        };
+
+        final event = StreamingEvent.fromJson(json) as UnknownEvent;
+
+        expect(event.toJson(), json);
+      });
+
+      test('isFinal returns false for UnknownEvent', () {
+        final json = {'type': 'response.unknown', 'sequence_number': 0};
+
+        final event = StreamingEvent.fromJson(json);
+
+        expect(event.isFinal, isFalse);
+      });
+
+      test('textDelta returns null for UnknownEvent', () {
+        final json = {'type': 'response.unknown', 'sequence_number': 0};
+
+        final event = StreamingEvent.fromJson(json);
+
+        expect(event.textDelta, isNull);
+      });
+    });
   });
 }

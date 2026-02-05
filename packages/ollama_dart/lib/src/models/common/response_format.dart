@@ -14,8 +14,7 @@ sealed class ResponseFormat {
   /// Creates a [ResponseFormat] with a specific JSON schema.
   ///
   /// The schema map is copied and stored as unmodifiable to ensure immutability.
-  factory ResponseFormat.schema(Map<String, dynamic> schema) =
-      SchemaFormat;
+  factory ResponseFormat.schema(Map<String, dynamic> schema) = SchemaFormat;
 
   /// Creates a [ResponseFormat] from a JSON value.
   ///
@@ -65,7 +64,7 @@ class SchemaFormat extends ResponseFormat {
   ///
   /// The schema map is deeply copied and stored as unmodifiable.
   SchemaFormat(Map<String, dynamic> schema)
-      : schema = _deepUnmodifiable(schema);
+    : schema = _deepUnmodifiable(schema);
 
   @override
   Object toJson() => schema;
@@ -125,7 +124,8 @@ bool _deepEquals(Object? a, Object? b) {
 int _deepHashCode(Object? value) {
   if (value is Map) {
     // Sort keys for consistent hashing
-    final sortedKeys = value.keys.toList()..sort((a, b) => '$a'.compareTo('$b'));
+    final sortedKeys = value.keys.toList()
+      ..sort((a, b) => '$a'.compareTo('$b'));
     return Object.hashAll(
       sortedKeys.expand((k) => [k, _deepHashCode(value[k])]),
     );

@@ -22,13 +22,15 @@ void main() {
       expect(messageRoleFromNullableString('tool'), MessageRole.tool);
     });
 
-    test('messageRoleFromNullableString returns null for unknown or null values',
-        () {
-      expect(messageRoleFromNullableString('unknown'), isNull);
-      expect(messageRoleFromNullableString(null), isNull);
-      expect(messageRoleFromNullableString(''), isNull);
-      expect(messageRoleFromNullableString('SYSTEM'), isNull);
-    });
+    test(
+      'messageRoleFromNullableString returns null for unknown or null values',
+      () {
+        expect(messageRoleFromNullableString('unknown'), isNull);
+        expect(messageRoleFromNullableString(null), isNull);
+        expect(messageRoleFromNullableString(''), isNull);
+        expect(messageRoleFromNullableString('SYSTEM'), isNull);
+      },
+    );
 
     test('messageRoleToString returns correct string values', () {
       expect(messageRoleToString(MessageRole.system), 'system');
