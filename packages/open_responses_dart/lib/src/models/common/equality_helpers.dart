@@ -53,13 +53,15 @@ bool mapsDeepEqual(Map<String, dynamic>? a, Map<String, dynamic>? b) {
 }
 
 /// Computes a deep hash code for a map (handles nested maps and lists).
+///
+/// Uses sorted keys with Object.hashAll for consistent, order-independent
+/// hashing without XOR collision issues.
 int mapDeepHashCode(Map<String, dynamic>? map) {
   if (map == null) return 0;
-  var hash = 0;
-  for (final entry in map.entries) {
-    hash = hash ^ Object.hash(entry.key, _valueDeepHashCode(entry.value));
-  }
-  return hash;
+  final sortedKeys = map.keys.toList()..sort();
+  return Object.hashAll(
+    sortedKeys.map((k) => Object.hash(k, _valueDeepHashCode(map[k]))),
+  );
 }
 
 bool _valuesDeepEqual(dynamic a, dynamic b) {

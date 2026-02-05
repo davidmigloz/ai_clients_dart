@@ -238,6 +238,48 @@ class ModelName {
 }
 ```
 
+### Equality and HashCode
+
+**Always use `Object.hash` or `Object.hashAll` for hashCode computation. Never use XOR-based combining.**
+
+```dart
+// Simple fields - use Object.hash
+int get hashCode => Object.hash(field1, field2, field3);
+
+// Lists - use Object.hashAll
+int get hashCode => Object.hashAll(items);
+
+// Mixed fields with lists
+int get hashCode => Object.hash(
+  field1,
+  Object.hashAll(listField),
+  field2,
+);
+```
+
+**Deep equality for nested structures** (maps/lists with arbitrary nesting):
+
+```dart
+// For Map<String, dynamic> with nested structures
+bool mapsDeepEqual(Map<String, dynamic>? a, Map<String, dynamic>? b) { ... }
+int mapDeepHashCode(Map<String, dynamic>? map) {
+  if (map == null) return 0;
+  final sortedKeys = map.keys.toList()..sort();
+  return Object.hashAll(
+    sortedKeys.map((k) => Object.hash(k, _valueDeepHashCode(map[k]))),
+  );
+}
+
+// For List<Map<String, dynamic>>
+bool listOfMapsEqual(List<Map<String, dynamic>>? a, List<Map<String, dynamic>>? b) { ... }
+int listOfMapsHashCode(List<Map<String, dynamic>>? list) {
+  if (list == null) return 0;
+  return Object.hashAll(list.map(mapDeepHashCode));
+}
+```
+
+**Why no XOR**: XOR-based combining (`hash = hash ^ value.hashCode`) has collision issues where `a ^ a = 0`. Using `Object.hashAll` with sorted keys provides consistent, order-independent hashing for maps.
+
 ### Sealed Classes for Polymorphism
 
 Use sealed classes for types with mutually exclusive variants:
