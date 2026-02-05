@@ -132,6 +132,13 @@ python3 ../../.claude/shared/openapi-toolkit/scripts/verify_coverage.py \
   --config-dir .claude/skills/openapi-openai/config
 ```
 
+**Expected success output:**
+- Coverage: `✓ Full API coverage achieved!`
+- Exports: `✓ All model files are exported.`
+- Properties: `✓ All critical models have complete properties.`
+
+If all checks pass and no spec changes were found, the package is up-to-date.
+
 ## Configuration Files
 
 - `config/specs.json` - Spec URLs and output paths

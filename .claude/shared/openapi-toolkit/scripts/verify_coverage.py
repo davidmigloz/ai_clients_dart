@@ -34,7 +34,9 @@ class EndpointInfo:
     @property
     def resource_name(self) -> str:
         """Extract resource name from path (e.g., /v1/responses -> responses, /api/v2/chat -> chat)."""
-        parts = self.path.strip('/').split('/')
+        # Strip query parameters first (e.g., /v1/files?beta=true -> /v1/files)
+        path_without_query = self.path.split('?')[0]
+        parts = path_without_query.strip('/').split('/')
         idx = 0
         # Skip leading "api" prefix if present (e.g., /api/..., /api/v2/...)
         if idx < len(parts) and parts[idx] == 'api':

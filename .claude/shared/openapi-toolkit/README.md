@@ -93,12 +93,15 @@ Create these in your extension skill's `config/` directory:
   "resources_dir": "lib/src/resources",
   "tests_dir": "test/unit/models",
   "examples_dir": "example",
-  "skip_files": ["copy_with_sentinel.dart"],
+  "skip_files": ["copy_with_sentinel.dart", "equality_helpers.dart"],
   "internal_barrel_files": [],
   "pr_title_prefix": "feat(your_package_dart)",
   "changelog_title": "Your Package Changelog"
 }
 ```
+
+**Field descriptions:**
+- `skip_files`: List of filenames to exclude from export verification. Use this for internal utility files that shouldn't be publicly exported (e.g., `copy_with_sentinel.dart`, `equality_helpers.dart`, `common.dart`). When `verify_exports.py` flags internal files as unexported, add them here rather than exporting them.
 
 ### `specs.json` - API Specifications
 
@@ -224,6 +227,28 @@ python3 .claude/shared/openapi-toolkit/scripts/analyze_changes.py \
 
 **Note:** The script auto-locates the old spec from `specs_dir` and the new spec from `output_dir` in specs.json. You can still provide explicit paths if needed.
 
+#### If No Changes Found
+
+If the analysis shows all zeros (no new/modified/removed endpoints or schemas):
+
+1. The spec is unchanged - no implementation work needed
+2. Still run verification (Step 3-4) to ensure the package is in sync
+3. If verification passes, the package is up-to-date
+
+**Example output when no changes:**
+```
+==================================================
+Analysis Summary
+==================================================
+  New Endpoints: 0
+  Modified Endpoints: 0
+  Removed Endpoints: 0
+  New Schemas: 0
+  Modified Schemas: 0
+  Removed Schemas: 0
+  Breaking Changes: 0
+```
+
 ### 3. Check Coverage (CRITICAL - from PACKAGE ROOT)
 **Always run coverage check.** This catches APIs that exist in the spec but were never implemented. **Spec is auto-located** if not provided:
 
@@ -250,6 +275,21 @@ python3 ../../.claude/shared/openapi-toolkit/scripts/verify_exports.py \
 python3 ../../.claude/shared/openapi-toolkit/scripts/verify_coverage.py \
   --config-dir .claude/skills/openapi-{shortname}/config
 ```
+
+**Success output:**
+- Coverage: `✓ Full API coverage achieved!`
+- Exports: `✓ All model files are exported.`
+
+### When Complete
+
+The package is fully up-to-date when all of the following are true:
+
+1. `analyze_changes.py` shows no changes (or all changes have been implemented)
+2. `verify_coverage.py` shows 100% coverage
+3. `verify_exports.py` shows all model files exported
+4. `verify_model_properties.py` shows all critical models complete
+
+At this point, no further implementation work is needed.
 
 ## Script Usage
 

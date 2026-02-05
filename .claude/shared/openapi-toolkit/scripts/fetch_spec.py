@@ -22,7 +22,7 @@ import argparse
 import json
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from urllib.request import urlopen, Request
 from urllib.error import URLError, HTTPError
@@ -177,7 +177,7 @@ def save_spec_metadata(specs_dir: Path, spec_name: str, spec: dict, url: str) ->
     metadata["specs"][spec_name] = {
         "title": info.get("title", "Unknown"),
         "current_version": current_version,
-        "last_fetched": datetime.utcnow().isoformat() + "Z",
+        "last_fetched": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "source_url": url,
         "version_history": history
     }

@@ -106,6 +106,12 @@ if any expected properties are missing from the implementation.
 This serves as a regression prevention mechanism: if a future OpenAPI spec update
 inadvertently removes a property that should exist, the verification will catch it.
 
+## Troubleshooting
+
+- **No changes detected**: Analysis shows all zeros - package is up-to-date, no action needed
+- **Unexported files warning**: Add internal utility files to `skip_files` in `config/package.json`
+- **Coverage < 100%**: Missing APIs need implementation before other updates
+
 ## Package-Specific References
 
 - [Package Guide](references/package-guide.md)
