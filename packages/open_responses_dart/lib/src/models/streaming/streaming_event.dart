@@ -1776,13 +1776,10 @@ class UnknownEvent extends StreamingEvent {
       other is UnknownEvent &&
           runtimeType == other.runtimeType &&
           rawType == other.rawType &&
-          mapsEqual(rawJson, other.rawJson);
+          mapsDeepEqual(rawJson, other.rawJson);
 
   @override
-  int get hashCode => Object.hash(
-    rawType,
-    Object.hashAll(rawJson.entries.map((e) => Object.hash(e.key, e.value))),
-  );
+  int get hashCode => Object.hash(rawType, mapDeepHashCode(rawJson));
 
   @override
   String toString() => 'UnknownEvent(rawType: $rawType)';

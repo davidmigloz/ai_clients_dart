@@ -287,6 +287,62 @@ void main() {
         expect(event1, equals(event3));
         expect(event1.hashCode, equals(event3.hashCode));
       });
+
+      test('equality handles nested structures in rawJson', () {
+        // Two events with identical nested content but different instances
+        const event1 = UnknownEvent(
+          rawType: 'response.custom',
+          rawJson: {
+            'type': 'response.custom',
+            'response': {
+              'id': '123',
+              'nested': {'key': 'value'},
+            },
+            'items': [
+              1,
+              2,
+              {'a': 'b'},
+            ],
+          },
+        );
+        const event2 = UnknownEvent(
+          rawType: 'response.custom',
+          rawJson: {
+            'type': 'response.custom',
+            'response': {
+              'id': '123',
+              'nested': {'key': 'value'},
+            },
+            'items': [
+              1,
+              2,
+              {'a': 'b'},
+            ],
+          },
+        );
+        const event3 = UnknownEvent(
+          rawType: 'response.custom',
+          rawJson: {
+            'type': 'response.custom',
+            'response': {
+              'id': '123',
+              'nested': {'key': 'different'},
+            },
+            'items': [
+              1,
+              2,
+              {'a': 'b'},
+            ],
+          },
+        );
+
+        // Same nested content should be equal
+        expect(event1, equals(event2));
+        expect(event1.hashCode, equals(event2.hashCode));
+
+        // Different nested content should not be equal
+        expect(event1, isNot(equals(event3)));
+      });
     });
   });
 }

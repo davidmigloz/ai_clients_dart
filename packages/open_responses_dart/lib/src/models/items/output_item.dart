@@ -234,7 +234,12 @@ class ReasoningItem extends OutputItem {
           encryptedContent == other.encryptedContent;
 
   @override
-  int get hashCode => Object.hash(id, content, summary, encryptedContent);
+  int get hashCode => Object.hash(
+    id,
+    listOfMapsHashCode(content),
+    Object.hashAll(summary),
+    encryptedContent,
+  );
 
   @override
   String toString() =>
