@@ -229,11 +229,12 @@ class ReasoningItem extends OutputItem {
       other is ReasoningItem &&
           runtimeType == other.runtimeType &&
           id == other.id &&
+          listOfMapsEqual(content, other.content) &&
           listsEqual(summary, other.summary) &&
           encryptedContent == other.encryptedContent;
 
   @override
-  int get hashCode => Object.hash(id, summary, encryptedContent);
+  int get hashCode => Object.hash(id, content, summary, encryptedContent);
 
   @override
   String toString() =>
