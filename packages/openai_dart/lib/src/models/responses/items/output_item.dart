@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:meta/meta.dart';
 
 import '../common/equality_helpers.dart';
@@ -122,6 +124,12 @@ class FunctionCallOutputItemResponse extends OutputItem {
 
   /// The function arguments as JSON string.
   final String arguments;
+
+  /// The arguments parsed as a JSON map.
+  ///
+  /// Throws [FormatException] if [arguments] is not valid JSON.
+  Map<String, dynamic> get argumentsMap =>
+      (jsonDecode(arguments) as Map).cast<String, dynamic>();
 
   /// Item status.
   final ItemStatus? status;

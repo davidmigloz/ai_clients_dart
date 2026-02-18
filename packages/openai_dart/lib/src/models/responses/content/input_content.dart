@@ -8,16 +8,46 @@ import '../../chat/content_part.dart' show ImageDetail;
 ///
 /// ## User/System/Developer Messages
 ///
-/// Use [InputTextContent], [InputImageContent], [InputFileContent], or
-/// [InputVideoContent] for user, system, and developer messages.
+/// Use [InputContent.text], [InputContent.imageUrl], [InputContent.imageFile],
+/// [InputContent.fileUrl], [InputContent.fileId], [InputContent.fileData], or
+/// [InputContent.video] for user, system, and developer messages.
 ///
 /// ## Assistant Messages
 ///
-/// Use [AssistantTextContent] for assistant message content, as the API
+/// Use [InputContent.assistantText] for assistant message content, as the API
 /// expects `output_text` type for assistant messages rather than `input_text`.
 sealed class InputContent {
   /// Creates an [InputContent].
   const InputContent();
+
+  /// Creates an [InputTextContent] with the given [text].
+  const factory InputContent.text(String text) = InputTextContent;
+
+  /// Creates an [AssistantTextContent] with the given [text].
+  const factory InputContent.assistantText(String text) = AssistantTextContent;
+
+  /// Creates an [InputVideoContent] with the given [videoUrl].
+  const factory InputContent.video(String videoUrl) = InputVideoContent;
+
+  /// Creates an [InputImageContent] from a URL.
+  const factory InputContent.imageUrl(String url, {ImageDetail? detail}) =
+      InputImageContent.url;
+
+  /// Creates an [InputImageContent] from a file ID.
+  const factory InputContent.imageFile(String id, {ImageDetail? detail}) =
+      InputImageContent.file;
+
+  /// Creates an [InputFileContent] from a URL.
+  const factory InputContent.fileUrl(String url, {String? filename}) =
+      InputFileContent.url;
+
+  /// Creates an [InputFileContent] from a file ID.
+  const factory InputContent.fileId(String id, {String? filename}) =
+      InputFileContent.file;
+
+  /// Creates an [InputFileContent] from base64-encoded data.
+  const factory InputContent.fileData(String data, {String? filename}) =
+      InputFileContent.data;
 
   /// Creates an [InputContent] from JSON.
   factory InputContent.fromJson(Map<String, dynamic> json) {
@@ -46,11 +76,11 @@ class InputTextContent extends InputContent {
   final String text;
 
   /// Creates an [InputTextContent].
-  const InputTextContent({required this.text});
+  const InputTextContent(this.text);
 
   /// Creates an [InputTextContent] from JSON.
   factory InputTextContent.fromJson(Map<String, dynamic> json) {
-    return InputTextContent(text: json['text'] as String);
+    return InputTextContent(json['text'] as String);
   }
 
   @override
@@ -83,11 +113,11 @@ class AssistantTextContent extends InputContent {
   final String text;
 
   /// Creates an [AssistantTextContent].
-  const AssistantTextContent({required this.text});
+  const AssistantTextContent(this.text);
 
   /// Creates an [AssistantTextContent] from JSON.
   factory AssistantTextContent.fromJson(Map<String, dynamic> json) {
-    return AssistantTextContent(text: json['text'] as String);
+    return AssistantTextContent(json['text'] as String);
   }
 
   @override
@@ -257,11 +287,11 @@ class InputVideoContent extends InputContent {
   final String videoUrl;
 
   /// Creates an [InputVideoContent].
-  const InputVideoContent({required this.videoUrl});
+  const InputVideoContent(this.videoUrl);
 
   /// Creates an [InputVideoContent] from JSON.
   factory InputVideoContent.fromJson(Map<String, dynamic> json) {
-    return InputVideoContent(videoUrl: json['video_url'] as String);
+    return InputVideoContent(json['video_url'] as String);
   }
 
   @override

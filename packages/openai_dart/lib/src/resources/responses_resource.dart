@@ -23,7 +23,7 @@ import 'input_tokens_resource.dart';
 /// final response = await client.responses.create(
 ///   CreateResponseRequest(
 ///     model: 'gpt-4o',
-///     input: 'Hello, how are you?',
+///     input: ResponseInput.text('Hello, how are you?'),
 ///   ),
 /// );
 /// print(response.outputText);
@@ -32,7 +32,7 @@ import 'input_tokens_resource.dart';
 /// final stream = client.responses.createStream(
 ///   CreateResponseRequest(
 ///     model: 'gpt-4o',
-///     input: 'Tell me a story',
+///     input: ResponseInput.text('Tell me a story'),
 ///   ),
 /// );
 ///
@@ -46,7 +46,7 @@ import 'input_tokens_resource.dart';
 /// final response = await client.responses.create(
 ///   CreateResponseRequest(
 ///     model: 'gpt-4o',
-///     input: 'What is the weather in Paris?',
+///     input: ResponseInput.text('What is the weather in Paris?'),
 ///     tools: [
 ///       ResponseTool.function(
 ///         name: 'get_weather',
@@ -109,7 +109,7 @@ class ResponsesResource extends BaseResource {
   /// final response = await client.responses.create(
   ///   CreateResponseRequest(
   ///     model: 'gpt-4o',
-  ///     input: 'Explain quantum computing in simple terms.',
+  ///     input: ResponseInput.text('Explain quantum computing in simple terms.'),
   ///   ),
   /// );
   /// print(response.outputText);
@@ -147,7 +147,7 @@ class ResponsesResource extends BaseResource {
   /// final stream = client.responses.createStream(
   ///   CreateResponseRequest(
   ///     model: 'gpt-4o',
-  ///     input: 'Write a poem about the ocean.',
+  ///     input: ResponseInput.text('Write a poem about the ocean.'),
   ///   ),
   /// );
   ///
@@ -212,7 +212,7 @@ class ResponsesResource extends BaseResource {
   /// final stream = client.responses.createStreamWithAccumulator(
   ///   CreateResponseRequest(
   ///     model: 'gpt-4o',
-  ///     input: 'Hello!',
+  ///     input: ResponseInput.text('Hello!'),
   ///   ),
   /// );
   ///
@@ -364,7 +364,7 @@ class ResponsesResource extends BaseResource {
   /// final response = await client.responses.create(
   ///   CreateResponseRequest(
   ///     model: 'gpt-4o',
-  ///     input: 'Write a very long essay...',
+  ///     input: ResponseInput.text('Write a very long essay...'),
   ///     background: true,
   ///   ),
   /// );

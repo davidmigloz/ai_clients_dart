@@ -167,7 +167,10 @@ void main() {
 
       await responsesClient.responses
           .createStream(
-            const CreateResponseRequest(model: 'gpt-4', input: 'Hello'),
+            const CreateResponseRequest(
+              model: 'gpt-4',
+              input: ResponseInput.text('Hello'),
+            ),
           )
           .drain<void>();
 
@@ -215,7 +218,10 @@ void main() {
         );
 
         c.responses.createStream(
-          const CreateResponseRequest(model: 'gpt-4', input: 'Hello'),
+          const CreateResponseRequest(
+            model: 'gpt-4',
+            input: ResponseInput.text('Hello'),
+          ),
           abortTrigger: abortTrigger,
         );
 

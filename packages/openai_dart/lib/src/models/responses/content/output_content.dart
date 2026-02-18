@@ -10,6 +10,22 @@ sealed class OutputContent {
   /// Creates an [OutputContent].
   const OutputContent();
 
+  /// Creates an [OutputTextContent].
+  const factory OutputContent.text({
+    required String text,
+    List<Annotation>? annotations,
+    List<LogProb>? logprobs,
+  }) = OutputTextContent;
+
+  /// Creates a [ReasoningTextContent] with the given [text].
+  const factory OutputContent.reasoning(String text) = ReasoningTextContent;
+
+  /// Creates a [SummaryTextContent] with the given [text].
+  const factory OutputContent.summary(String text) = SummaryTextContent;
+
+  /// Creates a [RefusalContent] with the given [refusal] message.
+  const factory OutputContent.refusal(String refusal) = RefusalContent;
+
   /// Creates an [OutputContent] from JSON.
   factory OutputContent.fromJson(Map<String, dynamic> json) {
     final type = json['type'] as String;
@@ -108,11 +124,11 @@ class ReasoningTextContent extends OutputContent {
   final String text;
 
   /// Creates a [ReasoningTextContent].
-  const ReasoningTextContent({required this.text});
+  const ReasoningTextContent(this.text);
 
   /// Creates a [ReasoningTextContent] from JSON.
   factory ReasoningTextContent.fromJson(Map<String, dynamic> json) {
-    return ReasoningTextContent(text: json['text'] as String);
+    return ReasoningTextContent(json['text'] as String);
   }
 
   @override
@@ -139,11 +155,11 @@ class SummaryTextContent extends OutputContent {
   final String text;
 
   /// Creates a [SummaryTextContent].
-  const SummaryTextContent({required this.text});
+  const SummaryTextContent(this.text);
 
   /// Creates a [SummaryTextContent] from JSON.
   factory SummaryTextContent.fromJson(Map<String, dynamic> json) {
-    return SummaryTextContent(text: json['text'] as String);
+    return SummaryTextContent(json['text'] as String);
   }
 
   @override
@@ -170,11 +186,11 @@ class RefusalContent extends OutputContent {
   final String refusal;
 
   /// Creates a [RefusalContent].
-  const RefusalContent({required this.refusal});
+  const RefusalContent(this.refusal);
 
   /// Creates a [RefusalContent] from JSON.
   factory RefusalContent.fromJson(Map<String, dynamic> json) {
-    return RefusalContent(refusal: json['refusal'] as String);
+    return RefusalContent(json['refusal'] as String);
   }
 
   @override

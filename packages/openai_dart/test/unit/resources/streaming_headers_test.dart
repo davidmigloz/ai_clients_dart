@@ -101,7 +101,10 @@ void main() {
       // Consume the stream to trigger the request
       await client.responses
           .createStream(
-            const CreateResponseRequest(model: 'gpt-4', input: 'Hello'),
+            const CreateResponseRequest(
+              model: 'gpt-4',
+              input: ResponseInput.text('Hello'),
+            ),
           )
           .drain<void>();
 

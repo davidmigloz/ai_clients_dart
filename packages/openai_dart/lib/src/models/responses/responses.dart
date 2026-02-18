@@ -42,7 +42,7 @@
 /// final response = await client.responses.create(
 ///   CreateResponseRequest(
 ///     model: 'gpt-4o',
-///     input: 'Hello, how are you?',
+///     input: ResponseInput.text('Hello, how are you?'),
 ///   ),
 /// );
 /// print(response.outputText);
@@ -51,7 +51,7 @@
 /// final stream = client.responses.createStream(
 ///   CreateResponseRequest(
 ///     model: 'gpt-4o',
-///     input: 'Tell me a story',
+///     input: ResponseInput.text('Tell me a story'),
 ///   ),
 /// );
 ///
@@ -71,6 +71,7 @@ export 'input_token_count.dart';
 export 'items/items.dart';
 export 'response.dart';
 export 'response_error.dart';
+export 'response_input.dart';
 export 'response_usage.dart';
 export 'streaming/streaming.dart';
 export 'tools/tools.dart';

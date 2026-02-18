@@ -44,7 +44,9 @@ void main() {
         final response = await client!.responses.create(
           const CreateResponseRequest(
             model: 'gpt-4o-mini',
-            input: 'What is 2 + 2? Reply with just the number.',
+            input: ResponseInput.text(
+              'What is 2 + 2? Reply with just the number.',
+            ),
           ),
         );
 
@@ -69,7 +71,7 @@ void main() {
         final response = await client!.responses.create(
           const CreateResponseRequest(
             model: 'gpt-4o-mini',
-            input: 'Hello',
+            input: ResponseInput.text('Hello'),
             instructions: 'Always respond in uppercase.',
           ),
         );
@@ -94,7 +96,7 @@ void main() {
         final response1 = await client!.responses.create(
           const CreateResponseRequest(
             model: 'gpt-4o-mini',
-            input: 'My name is Alice.',
+            input: ResponseInput.text('My name is Alice.'),
             store: true, // Required for previousResponseId
           ),
         );
@@ -105,7 +107,7 @@ void main() {
         final response2 = await client!.responses.create(
           CreateResponseRequest(
             model: 'gpt-4o-mini',
-            input: 'What is my name?',
+            input: const ResponseInput.text('What is my name?'),
             previousResponseId: response1.id,
           ),
         );
@@ -131,7 +133,9 @@ void main() {
         final response = await client!.responses.create(
           const CreateResponseRequest(
             model: 'gpt-4o-mini',
-            input: 'Tell me a very long story about a dragon.',
+            input: ResponseInput.text(
+              'Tell me a very long story about a dragon.',
+            ),
             maxOutputTokens: 16, // Minimum allowed value
           ),
         );
@@ -156,18 +160,16 @@ void main() {
         final response = await client!.responses.create(
           const CreateResponseRequest(
             model: 'gpt-4o-mini',
-            input: [
+            input: ResponseInput.items([
               MessageItem(
                 role: MessageRole.user,
-                content: [InputTextContent(text: 'My favorite number is 7.')],
+                content: [InputContent.text('My favorite number is 7.')],
               ),
               MessageItem(
                 role: MessageRole.user,
-                content: [
-                  InputTextContent(text: 'What is my favorite number?'),
-                ],
+                content: [InputContent.text('What is my favorite number?')],
               ),
-            ],
+            ]),
           ),
         );
 
@@ -194,7 +196,7 @@ void main() {
         final stream = client!.responses.createStream(
           const CreateResponseRequest(
             model: 'gpt-4o-mini',
-            input: 'Count from 1 to 5.',
+            input: ResponseInput.text('Count from 1 to 5.'),
           ),
         );
 
@@ -227,7 +229,7 @@ void main() {
         final stream = client!.responses.createStream(
           const CreateResponseRequest(
             model: 'gpt-4o-mini',
-            input: 'Say hello.',
+            input: ResponseInput.text('Say hello.'),
           ),
         );
 
@@ -256,7 +258,7 @@ void main() {
         final stream = client!.responses.createStreamWithAccumulator(
           const CreateResponseRequest(
             model: 'gpt-4o-mini',
-            input: 'Say hello.',
+            input: ResponseInput.text('Say hello.'),
           ),
         );
 
@@ -285,7 +287,7 @@ void main() {
         final stream = client!.responses.createStreamWithAccumulator(
           const CreateResponseRequest(
             model: 'gpt-4o-mini',
-            input: 'Count 1, 2, 3.',
+            input: ResponseInput.text('Count 1, 2, 3.'),
           ),
         );
 
@@ -332,7 +334,7 @@ void main() {
         final response = await client!.responses.create(
           CreateResponseRequest(
             model: 'gpt-4o-mini',
-            input: "What's the weather in Tokyo?",
+            input: const ResponseInput.text("What's the weather in Tokyo?"),
             tools: [
               ResponseTool.function(
                 name: 'get_weather',
@@ -376,7 +378,9 @@ void main() {
         final response1 = await client!.responses.create(
           CreateResponseRequest(
             model: 'gpt-4o-mini',
-            input: 'What is 5 + 3? Use the add_numbers function.',
+            input: const ResponseInput.text(
+              'What is 5 + 3? Use the add_numbers function.',
+            ),
             tools: [
               ResponseTool.function(
                 name: 'add_numbers',
@@ -409,12 +413,12 @@ void main() {
           CreateResponseRequest(
             model: 'gpt-4o-mini',
             previousResponseId: response1.id,
-            input: [
+            input: ResponseInput.items([
               FunctionCallOutputItem.string(
                 callId: funcCall.callId,
                 output: result.toString(),
               ),
-            ],
+            ]),
           ),
         );
 
@@ -439,7 +443,9 @@ void main() {
         final stream = client!.responses.createStreamWithAccumulator(
           CreateResponseRequest(
             model: 'gpt-4o-mini',
-            input: 'What is 7 * 6? Use the multiply function.',
+            input: const ResponseInput.text(
+              'What is 7 * 6? Use the multiply function.',
+            ),
             tools: [
               ResponseTool.function(
                 name: 'multiply',
@@ -484,12 +490,12 @@ void main() {
           CreateResponseRequest(
             model: 'gpt-4o-mini',
             previousResponseId: response1.id,
-            input: [
+            input: ResponseInput.items([
               FunctionCallOutputItem.string(
                 callId: funcCall.callId,
                 output: result.toString(),
               ),
-            ],
+            ]),
           ),
         );
 
@@ -513,7 +519,7 @@ void main() {
         final response1 = await client!.responses.create(
           CreateResponseRequest(
             model: 'gpt-4o-mini',
-            input: 'Get info about item A.',
+            input: const ResponseInput.text('Get info about item A.'),
             tools: [
               ResponseTool.function(
                 name: 'get_item_info',
@@ -539,14 +545,14 @@ void main() {
           CreateResponseRequest(
             model: 'gpt-4o-mini',
             previousResponseId: response1.id,
-            input: [
+            input: ResponseInput.items([
               FunctionCallOutputItem(
                 callId: funcCall.callId,
                 output: const FunctionCallOutputContent([
-                  InputTextContent(text: r'Item A: Premium Widget - $99.99'),
+                  InputContent.text(r'Item A: Premium Widget - $99.99'),
                 ]),
               ),
-            ],
+            ]),
           ),
         );
 
@@ -576,7 +582,9 @@ void main() {
         final stream = client!.responses.createStream(
           CreateResponseRequest(
             model: 'gpt-4o-mini',
-            input: 'What is the latest news about AI? Search the web.',
+            input: const ResponseInput.text(
+              'What is the latest news about AI? Search the web.',
+            ),
             tools: [ResponseTool.webSearch()],
           ),
         );
@@ -613,7 +621,9 @@ void main() {
         final stream = client!.responses.createStream(
           CreateResponseRequest(
             model: 'gpt-4o-mini',
-            input: 'Write Python code to calculate 2^20.',
+            input: const ResponseInput.text(
+              'Write Python code to calculate 2^20.',
+            ),
             tools: [ResponseTool.codeInterpreter(container: 'cntr_...')],
           ),
         );
@@ -653,7 +663,7 @@ void main() {
         final response = await client!.responses.create(
           const CreateResponseRequest(
             model: 'gpt-4o-mini',
-            input: 'Extract info: John is 30 years old.',
+            input: ResponseInput.text('Extract info: John is 30 years old.'),
             text: TextConfig(
               format: JsonSchemaFormat(
                 name: 'person',
@@ -692,7 +702,7 @@ void main() {
         final response = await client!.responses.create(
           const CreateResponseRequest(
             model: 'o4-mini',
-            input: 'What is 15 * 17?',
+            input: ResponseInput.text('What is 15 * 17?'),
             reasoning: ReasoningConfig(
               effort: ReasoningEffort.medium,
               summary: ReasoningSummary.auto,
@@ -718,7 +728,7 @@ void main() {
         final stream = client!.responses.createStreamWithAccumulator(
           const CreateResponseRequest(
             model: 'o4-mini',
-            input: 'What is 123 + 456?',
+            input: ResponseInput.text('What is 123 + 456?'),
             reasoning: ReasoningConfig(
               effort: ReasoningEffort.low,
               summary: ReasoningSummary.auto,
@@ -778,7 +788,7 @@ void main() {
         final created = await client!.responses.create(
           const CreateResponseRequest(
             model: 'gpt-4o-mini',
-            input: 'Say hello',
+            input: ResponseInput.text('Say hello'),
             store: true,
           ),
         );
@@ -809,7 +819,7 @@ void main() {
         final response = await client!.responses.create(
           const CreateResponseRequest(
             model: 'gpt-4o-mini',
-            input: 'Hello for list test',
+            input: ResponseInput.text('Hello for list test'),
             store: true,
           ),
         );
@@ -840,7 +850,7 @@ void main() {
         final created = await client!.responses.create(
           const CreateResponseRequest(
             model: 'gpt-4o-mini',
-            input: 'Hello for delete test',
+            input: ResponseInput.text('Hello for delete test'),
             store: true,
           ),
         );
@@ -874,7 +884,9 @@ void main() {
         final created = await client!.responses.create(
           const CreateResponseRequest(
             model: 'gpt-4o-mini',
-            input: 'Write a very long essay about the history of computing.',
+            input: ResponseInput.text(
+              'Write a very long essay about the history of computing.',
+            ),
             background: true,
           ),
         );
@@ -916,12 +928,12 @@ void main() {
         final response = await client!.responses.create(
           CreateResponseRequest(
             model: 'gpt-4o',
-            input: [
+            input: ResponseInput.items([
               MessageItem.user(const [
-                InputTextContent(text: 'What color is this image?'),
+                InputContent.text('What color is this image?'),
                 InputImageContent.url('data:image/png;base64,$base64Image'),
               ]),
-            ],
+            ]),
           ),
         );
 
@@ -942,8 +954,9 @@ void main() {
         final response = await client!.responses.create(
           CreateResponseRequest(
             model: 'gpt-4o',
-            input:
-                'Generate a simple image of a red circle on white background.',
+            input: const ResponseInput.text(
+              'Generate a simple image of a red circle on white background.',
+            ),
             tools: [
               ResponseTool.imageGeneration(quality: 'low', size: '1024x1024'),
             ],

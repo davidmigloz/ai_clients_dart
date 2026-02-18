@@ -4,6 +4,7 @@ import '../chat/chat_completion_request.dart' show StreamOptions;
 import 'common/equality_helpers.dart';
 import 'config/config.dart';
 import 'items/item.dart';
+import 'response_input.dart';
 import 'tools/tools.dart';
 
 /// Request to create a response.
@@ -17,17 +18,17 @@ import 'tools/tools.dart';
 /// // Simple text request
 /// final request = CreateResponseRequest(
 ///   model: 'gpt-4o',
-///   input: 'Hello, how are you?',
+///   input: ResponseInput.text('Hello, how are you?'),
 /// );
 ///
 /// // Multi-turn conversation with items
 /// final request = CreateResponseRequest(
 ///   model: 'gpt-4o',
-///   input: [
+///   input: ResponseInput.items([
 ///     MessageItem.userText('What is 2+2?'),
 ///     MessageItem.assistantText('4'),
 ///     MessageItem.userText('What is 3+3?'),
-///   ],
+///   ]),
 /// );
 /// ```
 @immutable
@@ -37,9 +38,9 @@ class CreateResponseRequest {
 
   /// The input to the model.
   ///
-  /// Can be a simple string or a list of [Item] objects for multi-turn
-  /// conversations.
-  final Object input;
+  /// Can be a [ResponseInputText] for simple text or [ResponseInputItems]
+  /// for multi-turn conversations with [Item] objects.
+  final ResponseInput input;
 
   /// System instructions for the model.
   ///
@@ -99,7 +100,10 @@ class CreateResponseRequest {
   final ServiceTier? serviceTier;
 
   /// Custom metadata for the request.
-  final Map<String, String>? metadata;
+  ///
+  /// Values can be of any type and will be automatically converted to strings
+  /// when serialized to JSON, as the API requires string values.
+  final Map<String, dynamic>? metadata;
 
   /// Additional data to include in the response.
   final List<Include>? include;
@@ -163,28 +167,16 @@ class CreateResponseRequest {
   }) {
     return CreateResponseRequest(
       model: model,
-      input: text,
+      input: ResponseInput.text(text),
       instructions: instructions,
     );
   }
 
   /// Creates a [CreateResponseRequest] from JSON.
   factory CreateResponseRequest.fromJson(Map<String, dynamic> json) {
-    final inputJson = json['input'];
-    final Object input;
-    if (inputJson is String) {
-      input = inputJson;
-    } else if (inputJson is List) {
-      input = inputJson
-          .map((e) => Item.fromJson(e as Map<String, dynamic>))
-          .toList();
-    } else {
-      throw FormatException('Invalid input format: $inputJson');
-    }
-
     return CreateResponseRequest(
       model: json['model'] as String,
-      input: input,
+      input: ResponseInput.fromJson(json['input']),
       instructions: json['instructions'] as String?,
       tools: (json['tools'] as List?)
           ?.map((e) => ResponseTool.fromJson(e as Map<String, dynamic>))
@@ -217,7 +209,7 @@ class CreateResponseRequest {
       serviceTier: json['service_tier'] != null
           ? ServiceTier.fromJson(json['service_tier'] as String)
           : null,
-      metadata: (json['metadata'] as Map?)?.cast<String, String>(),
+      metadata: (json['metadata'] as Map?)?.cast<String, dynamic>(),
       include: (json['include'] as List?)
           ?.map((e) => Include.fromJson(e as String))
           .toList(),
@@ -232,18 +224,9 @@ class CreateResponseRequest {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() {
-    final Object inputJson;
-    if (input is String) {
-      inputJson = input;
-    } else if (input is List<Item>) {
-      inputJson = (input as List<Item>).map((e) => e.toJson()).toList();
-    } else {
-      throw ArgumentError('Invalid input type: ${input.runtimeType}');
-    }
-
     return {
       'model': model,
-      'input': inputJson,
+      'input': input.toJson(),
       if (instructions != null) 'instructions': instructions,
       if (tools != null) 'tools': tools!.map((e) => e.toJson()).toList(),
       if (toolChoice != null) 'tool_choice': toolChoice!.toJson(),
@@ -261,7 +244,8 @@ class CreateResponseRequest {
       if (truncation != null) 'truncation': truncation!.toJson(),
       if (parallelToolCalls != null) 'parallel_tool_calls': parallelToolCalls,
       if (serviceTier != null) 'service_tier': serviceTier!.toJson(),
-      if (metadata != null) 'metadata': metadata,
+      if (metadata != null)
+        'metadata': metadata!.map((k, v) => MapEntry(k, v.toString())),
       if (include != null) 'include': include!.map((e) => e.toJson()).toList(),
       if (store != null) 'store': store,
       if (background != null) 'background': background,
@@ -275,7 +259,7 @@ class CreateResponseRequest {
   /// Creates a copy with replaced values.
   CreateResponseRequest copyWith({
     String? model,
-    Object? input,
+    ResponseInput? input,
     String? instructions,
     List<ResponseTool>? tools,
     ResponseToolChoice? toolChoice,
@@ -292,7 +276,7 @@ class CreateResponseRequest {
     Truncation? truncation,
     bool? parallelToolCalls,
     ServiceTier? serviceTier,
-    Map<String, String>? metadata,
+    Map<String, dynamic>? metadata,
     List<Include>? include,
     bool? store,
     bool? background,
@@ -336,19 +320,9 @@ class CreateResponseRequest {
     if (identical(this, other)) return true;
     if (other is! CreateResponseRequest) return false;
 
-    // Compare input
-    bool inputEqual;
-    if (input is String && other.input is String) {
-      inputEqual = input == other.input;
-    } else if (input is List<Item> && other.input is List<Item>) {
-      inputEqual = listsEqual(input as List<Item>, other.input as List<Item>);
-    } else {
-      inputEqual = false;
-    }
-
     return runtimeType == other.runtimeType &&
         model == other.model &&
-        inputEqual &&
+        input == other.input &&
         instructions == other.instructions &&
         listsEqual(tools, other.tools) &&
         toolChoice == other.toolChoice &&

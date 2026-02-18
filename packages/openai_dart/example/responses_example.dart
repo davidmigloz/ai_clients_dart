@@ -24,7 +24,10 @@ Future<void> simpleResponse(OpenAIClient client) async {
   print('--- Simple Response ---');
 
   final response = await client.responses.create(
-    const CreateResponseRequest(model: 'gpt-4o', input: 'What is 2 + 2?'),
+    const CreateResponseRequest(
+      model: 'gpt-4o',
+      input: ResponseInput.text('What is 2 + 2?'),
+    ),
   );
 
   print('Response: ${response.outputText}');
@@ -39,7 +42,7 @@ Future<void> streamingResponse(OpenAIClient client) async {
   final stream = client.responses.createStream(
     const CreateResponseRequest(
       model: 'gpt-4o',
-      input: 'Tell me a very short joke.',
+      input: ResponseInput.text('Tell me a very short joke.'),
     ),
   );
 
@@ -74,7 +77,7 @@ Future<void> responseWithTools(OpenAIClient client) async {
   final response = await client.responses.create(
     CreateResponseRequest(
       model: 'gpt-4o',
-      input: 'What is the weather in San Francisco?',
+      input: const ResponseInput.text('What is the weather in San Francisco?'),
       tools: [weatherTool],
     ),
   );
@@ -95,7 +98,7 @@ Future<void> responseWithWebSearch(OpenAIClient client) async {
   final response = await client.responses.create(
     CreateResponseRequest(
       model: 'gpt-4o',
-      input: 'What are the latest news about AI?',
+      input: const ResponseInput.text('What are the latest news about AI?'),
       tools: [ResponseTool.webSearch()],
     ),
   );
@@ -110,7 +113,10 @@ Future<void> multiTurnConversation(OpenAIClient client) async {
 
   // First turn
   final response1 = await client.responses.create(
-    const CreateResponseRequest(model: 'gpt-4o', input: 'My name is Alice.'),
+    const CreateResponseRequest(
+      model: 'gpt-4o',
+      input: ResponseInput.text('My name is Alice.'),
+    ),
   );
   print('User: My name is Alice.');
   print('Assistant: ${response1.outputText}');
@@ -119,12 +125,12 @@ Future<void> multiTurnConversation(OpenAIClient client) async {
   final response2 = await client.responses.create(
     CreateResponseRequest(
       model: 'gpt-4o',
-      input: const [
+      input: const ResponseInput.items([
         MessageItem(
           role: MessageRole.user,
-          content: [InputTextContent(text: 'What is my name?')],
+          content: [InputContent.text('What is my name?')],
         ),
-      ],
+      ]),
       previousResponseId: response1.id,
     ),
   );

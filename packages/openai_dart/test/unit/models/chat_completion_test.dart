@@ -143,6 +143,71 @@ void main() {
     });
   });
 
+  group('ToolCall', () {
+    test('functionCall() factory sets type to function', () {
+      const call = FunctionCall(
+        name: 'get_weather',
+        arguments: '{"location":"Boston"}',
+      );
+      final toolCall = ToolCall.functionCall(id: 'call_123', call: call);
+
+      expect(toolCall.id, equals('call_123'));
+      expect(toolCall.type, equals('function'));
+      expect(toolCall.function.name, equals('get_weather'));
+
+      final json = toolCall.toJson();
+      expect(json['type'], equals('function'));
+    });
+
+    test('functionCall() factory with FunctionCall.fromMap', () {
+      final call = FunctionCall.fromMap(
+        name: 'get_weather',
+        arguments: const {'location': 'Boston', 'unit': 'celsius'},
+      );
+      final toolCall = ToolCall.functionCall(id: 'call_123', call: call);
+
+      expect(toolCall.function.argumentsMap['location'], equals('Boston'));
+      expect(toolCall.function.argumentsMap['unit'], equals('celsius'));
+    });
+  });
+
+  group('FunctionCall', () {
+    test('argumentsMap parses JSON arguments', () {
+      const call = FunctionCall(
+        name: 'get_weather',
+        arguments: '{"location":"Boston","unit":"celsius"}',
+      );
+
+      final argsMap = call.argumentsMap;
+
+      expect(argsMap['location'], equals('Boston'));
+      expect(argsMap['unit'], equals('celsius'));
+    });
+
+    test('argumentsMap throws on invalid JSON', () {
+      const call = FunctionCall(name: 'test', arguments: 'not valid json');
+
+      expect(() => call.argumentsMap, throwsFormatException);
+    });
+
+    test('fromMap encodes arguments as JSON', () {
+      final call = FunctionCall.fromMap(
+        name: 'get_weather',
+        arguments: const {'location': 'Boston', 'unit': 'celsius'},
+      );
+
+      expect(call.name, equals('get_weather'));
+      expect(call.arguments, equals('{"location":"Boston","unit":"celsius"}'));
+    });
+
+    test('fromMap round-trip with argumentsMap', () {
+      final original = {'location': 'Boston', 'count': 5};
+      final call = FunctionCall.fromMap(name: 'test', arguments: original);
+
+      expect(call.argumentsMap, equals(original));
+    });
+  });
+
   group('ChatMessage', () {
     test('system message creates correctly', () {
       final message = ChatMessage.system('You are a helpful assistant.');
@@ -330,6 +395,35 @@ void main() {
       expect(updated.reasoningEffort, ReasoningEffort.low);
       expect(updated.modalities, [ChatModality.text]);
       expect(updated.model, 'gpt-4o'); // unchanged
+    });
+
+    test('metadata accepts Map<String, dynamic>', () {
+      final request = ChatCompletionCreateRequest(
+        model: 'gpt-4o',
+        messages: [ChatMessage.user('Hello!')],
+        metadata: const {'key': 'value', 'count': 42, 'flag': true},
+      );
+
+      final json = request.toJson();
+      final metadata = json['metadata'] as Map<String, dynamic>;
+
+      // All values are stringified in JSON output
+      expect(metadata['key'], equals('value'));
+      expect(metadata['count'], equals('42'));
+      expect(metadata['flag'], equals('true'));
+    });
+
+    test('metadata round-trip preserves string values', () {
+      final request = ChatCompletionCreateRequest(
+        model: 'gpt-4o',
+        messages: [ChatMessage.user('Hello!')],
+        metadata: const {'key': 'value'},
+      );
+
+      final json = request.toJson();
+      final restored = ChatCompletionCreateRequest.fromJson(json);
+
+      expect(restored.metadata, equals({'key': 'value'}));
     });
   });
 

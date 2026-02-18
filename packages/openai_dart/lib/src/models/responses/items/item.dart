@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:meta/meta.dart';
 
 import '../common/equality_helpers.dart';
@@ -57,20 +59,16 @@ class MessageItem extends Item {
       MessageItem(role: MessageRole.user, content: content);
 
   /// Creates a user message with simple text.
-  factory MessageItem.userText(String text) => MessageItem(
-    role: MessageRole.user,
-    content: [InputTextContent(text: text)],
-  );
+  factory MessageItem.userText(String text) =>
+      MessageItem(role: MessageRole.user, content: [InputContent.text(text)]);
 
   /// Creates a system message.
   factory MessageItem.system(List<InputContent> content) =>
       MessageItem(role: MessageRole.system, content: content);
 
   /// Creates a system message with simple text.
-  factory MessageItem.systemText(String text) => MessageItem(
-    role: MessageRole.system,
-    content: [InputTextContent(text: text)],
-  );
+  factory MessageItem.systemText(String text) =>
+      MessageItem(role: MessageRole.system, content: [InputContent.text(text)]);
 
   /// Creates a developer message.
   factory MessageItem.developer(List<InputContent> content) =>
@@ -79,7 +77,7 @@ class MessageItem extends Item {
   /// Creates a developer message with simple text.
   factory MessageItem.developerText(String text) => MessageItem(
     role: MessageRole.developer,
-    content: [InputTextContent(text: text)],
+    content: [InputContent.text(text)],
   );
 
   /// Creates an assistant message.
@@ -92,7 +90,7 @@ class MessageItem extends Item {
   /// as required by the API for assistant messages in multi-turn conversations.
   factory MessageItem.assistantText(String text) => MessageItem(
     role: MessageRole.assistant,
-    content: [AssistantTextContent(text: text)],
+    content: [InputContent.assistantText(text)],
   );
 
   /// Creates a [MessageItem] from JSON.
@@ -150,6 +148,12 @@ class FunctionCallItem extends Item {
 
   /// The function arguments as JSON string.
   final String arguments;
+
+  /// The arguments parsed as a JSON map.
+  ///
+  /// Throws [FormatException] if [arguments] is not valid JSON.
+  Map<String, dynamic> get argumentsMap =>
+      (jsonDecode(arguments) as Map).cast<String, dynamic>();
 
   /// Item status (for output items).
   final ItemStatus? status;

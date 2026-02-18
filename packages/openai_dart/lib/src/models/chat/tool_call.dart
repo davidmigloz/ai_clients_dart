@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:meta/meta.dart';
 
 /// A tool call made by the model.
@@ -31,6 +33,12 @@ class ToolCall {
     required this.type,
     required this.function,
   });
+
+  /// Creates a function [ToolCall] with [type] set to `'function'`.
+  factory ToolCall.functionCall({
+    required String id,
+    required FunctionCall call,
+  }) => ToolCall(id: id, type: 'function', function: call);
 
   /// Creates a [ToolCall] from JSON.
   factory ToolCall.fromJson(Map<String, dynamic> json) {
@@ -79,6 +87,12 @@ class FunctionCall {
   /// Creates a [FunctionCall].
   const FunctionCall({required this.name, required this.arguments});
 
+  /// Creates a [FunctionCall] with arguments encoded from a map.
+  factory FunctionCall.fromMap({
+    required String name,
+    required Map<String, dynamic> arguments,
+  }) => FunctionCall(name: name, arguments: jsonEncode(arguments));
+
   /// Creates a [FunctionCall] from JSON.
   factory FunctionCall.fromJson(Map<String, dynamic> json) {
     return FunctionCall(
@@ -92,6 +106,12 @@ class FunctionCall {
 
   /// The arguments to pass to the function, as a JSON string.
   final String arguments;
+
+  /// The arguments parsed as a JSON map.
+  ///
+  /// Throws [FormatException] if [arguments] is not valid JSON.
+  Map<String, dynamic> get argumentsMap =>
+      (jsonDecode(arguments) as Map).cast<String, dynamic>();
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {'name': name, 'arguments': arguments};

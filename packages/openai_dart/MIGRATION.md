@@ -565,7 +565,7 @@ The Responses API is OpenAI's modern, unified API that combines the best of Chat
 final response = await client.responses.create(
   CreateResponseRequest(
     model: 'gpt-4o',
-    input: 'Hello!',
+    input: ResponseInput.text('Hello!'),
   ),
 );
 
@@ -576,7 +576,7 @@ print(response.outputText);
 final stream = client.responses.createStream(
   CreateResponseRequest(
     model: 'gpt-4o',
-    input: 'Tell me a story',
+    input: ResponseInput.text('Tell me a story'),
   ),
 );
 

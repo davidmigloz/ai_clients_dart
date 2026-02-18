@@ -22,7 +22,9 @@ Future<void> main() async {
     final response = await client.responses.create(
       CreateResponseRequest(
         model: 'gpt-4o',
-        input: 'What are the latest developments in AI as of today?',
+        input: const ResponseInput.text(
+          'What are the latest developments in AI as of today?',
+        ),
         tools: [ResponseTool.webSearch()],
       ),
     );
@@ -35,7 +37,9 @@ Future<void> main() async {
     final stream = client.responses.createStream(
       CreateResponseRequest(
         model: 'gpt-4o',
-        input: 'What is the current weather forecast for San Francisco?',
+        input: const ResponseInput.text(
+          'What is the current weather forecast for San Francisco?',
+        ),
         tools: [ResponseTool.webSearch()],
       ),
     );
@@ -53,14 +57,14 @@ Future<void> main() async {
     final locationResponse = await client.responses.create(
       CreateResponseRequest(
         model: 'gpt-4o',
-        input: const [
+        input: const ResponseInput.items([
           MessageItem(
             role: MessageRole.user,
             content: [
-              InputTextContent(text: 'What are popular restaurants near me?'),
+              InputContent.text('What are popular restaurants near me?'),
             ],
           ),
-        ],
+        ]),
         tools: [
           // Web search will use context when available
           ResponseTool.webSearch(),
@@ -77,9 +81,10 @@ Future<void> main() async {
     final combinedResponse = await client.responses.create(
       CreateResponseRequest(
         model: 'gpt-4o',
-        input:
-            'Find the latest stock price for Apple and calculate '
-            r'how many shares I can buy with $10,000.',
+        input: const ResponseInput.text(
+          'Find the latest stock price for Apple and calculate '
+          r'how many shares I can buy with $10,000.',
+        ),
         tools: [
           // Web search for current stock price
           ResponseTool.webSearch(),
@@ -124,7 +129,9 @@ Future<void> main() async {
     final turn1 = await client.responses.create(
       CreateResponseRequest(
         model: 'gpt-4o',
-        input: 'What are the top 3 news stories today?',
+        input: const ResponseInput.text(
+          'What are the top 3 news stories today?',
+        ),
         tools: [ResponseTool.webSearch()],
       ),
     );
@@ -135,14 +142,12 @@ Future<void> main() async {
     final turn2 = await client.responses.create(
       CreateResponseRequest(
         model: 'gpt-4o',
-        input: const [
+        input: const ResponseInput.items([
           MessageItem(
             role: MessageRole.user,
-            content: [
-              InputTextContent(text: 'Tell me more about the first story.'),
-            ],
+            content: [InputContent.text('Tell me more about the first story.')],
           ),
-        ],
+        ]),
         previousResponseId: turn1.id,
         tools: [ResponseTool.webSearch()],
       ),

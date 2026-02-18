@@ -109,7 +109,7 @@ class ChatCompletionCreateRequest {
           : null,
       parallelToolCalls: json['parallel_tool_calls'] as bool?,
       user: json['user'] as String?,
-      metadata: json['metadata'] as Map<String, String>?,
+      metadata: (json['metadata'] as Map?)?.cast<String, dynamic>(),
       store: json['store'] as bool?,
       streamOptions: json['stream_options'] != null
           ? StreamOptions.fromJson(
@@ -262,7 +262,10 @@ class ChatCompletionCreateRequest {
   final String? user;
 
   /// Custom metadata to attach to the request.
-  final Map<String, String>? metadata;
+  ///
+  /// Values can be of any type and will be automatically converted to strings
+  /// when serialized to JSON, as the API requires string values.
+  final Map<String, dynamic>? metadata;
 
   /// Whether to store this completion for model improvements.
   final bool? store;
@@ -385,7 +388,8 @@ class ChatCompletionCreateRequest {
     if (toolChoice != null) 'tool_choice': toolChoice!.toJson(),
     if (parallelToolCalls != null) 'parallel_tool_calls': parallelToolCalls,
     if (user != null) 'user': user,
-    if (metadata != null) 'metadata': metadata,
+    if (metadata != null)
+      'metadata': metadata!.map((k, v) => MapEntry(k, v.toString())),
     if (store != null) 'store': store,
     if (streamOptions != null) 'stream_options': streamOptions!.toJson(),
     if (reasoningEffort != null) 'reasoning_effort': reasoningEffort!.toJson(),
@@ -494,7 +498,7 @@ class ChatCompletionCreateRequest {
       user: user == unsetCopyWithValue ? this.user : user as String?,
       metadata: metadata == unsetCopyWithValue
           ? this.metadata
-          : metadata as Map<String, String>?,
+          : metadata as Map<String, dynamic>?,
       store: store == unsetCopyWithValue ? this.store : store as bool?,
       streamOptions: streamOptions == unsetCopyWithValue
           ? this.streamOptions

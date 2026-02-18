@@ -1,12 +1,94 @@
+import 'dart:convert';
+
 import 'package:openai_dart/src/models/responses/responses.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('ResponseInput', () {
+    test('creates text input', () {
+      const input = ResponseInput.text('Hello!');
+
+      expect(input, isA<ResponseInputText>());
+      expect((input as ResponseInputText).text, equals('Hello!'));
+      expect(input.toJson(), equals('Hello!'));
+    });
+
+    test('creates items input', () {
+      final input = ResponseInput.items([MessageItem.userText('What is 2+2?')]);
+
+      expect(input, isA<ResponseInputItems>());
+      expect((input as ResponseInputItems).items.length, equals(1));
+      expect(input.toJson(), isList);
+    });
+
+    test('const text input works', () {
+      const input = ResponseInputText('hello');
+
+      expect(input.text, equals('hello'));
+    });
+
+    test('fromJson parses string', () {
+      final input = ResponseInput.fromJson('Hello!');
+
+      expect(input, isA<ResponseInputText>());
+      expect((input as ResponseInputText).text, equals('Hello!'));
+    });
+
+    test('fromJson parses list', () {
+      final input = ResponseInput.fromJson(const [
+        {
+          'type': 'message',
+          'role': 'user',
+          'content': [
+            {'type': 'input_text', 'text': 'Hello!'},
+          ],
+        },
+      ]);
+
+      expect(input, isA<ResponseInputItems>());
+      expect((input as ResponseInputItems).items.length, equals(1));
+    });
+
+    test('fromJson throws on invalid input', () {
+      expect(() => ResponseInput.fromJson(42), throwsFormatException);
+    });
+
+    test('equality for text input', () {
+      const a = ResponseInputText('hello');
+      const b = ResponseInputText('hello');
+      const c = ResponseInputText('world');
+
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+      expect(a, isNot(equals(c)));
+    });
+
+    test('equality for items input', () {
+      final a = ResponseInputItems([MessageItem.userText('Hello!')]);
+      final b = ResponseInputItems([MessageItem.userText('Hello!')]);
+      final c = ResponseInputItems([MessageItem.userText('Bye!')]);
+
+      expect(a, equals(b));
+      expect(a, isNot(equals(c)));
+    });
+
+    test('switch exhaustiveness works', () {
+      const ResponseInput input = ResponseInputText('hello');
+
+      final result = switch (input) {
+        ResponseInputText(:final text) => 'text: $text',
+        ResponseInputItems(:final items) => 'items: ${items.length}',
+      };
+
+      expect(result, equals('text: hello'));
+    });
+  });
+
   group('CreateResponseRequest', () {
-    test('creates with string input', () {
+    test('creates with text input', () {
       const request = CreateResponseRequest(
         model: 'gpt-4o',
-        input: 'Hello, world!',
+        input: ResponseInput.text('Hello, world!'),
       );
 
       expect(request.model, equals('gpt-4o'));
@@ -17,12 +99,12 @@ void main() {
     test('creates with item input', () {
       const request = CreateResponseRequest(
         model: 'gpt-4o',
-        input: [
+        input: ResponseInput.items([
           MessageItem(
             role: MessageRole.user,
-            content: [InputTextContent(text: 'Hello!')],
+            content: [InputContent.text('Hello!')],
           ),
-        ],
+        ]),
       );
 
       expect(request.model, equals('gpt-4o'));
@@ -33,7 +115,7 @@ void main() {
     test('serializes to JSON', () {
       const request = CreateResponseRequest(
         model: 'gpt-4o',
-        input: 'Hello!',
+        input: ResponseInput.text('Hello!'),
         temperature: 0.7,
         maxOutputTokens: 100,
       );
@@ -57,8 +139,78 @@ void main() {
       final request = CreateResponseRequest.fromJson(json);
 
       expect(request.model, equals('gpt-4o'));
+      expect(request.input, isA<ResponseInputText>());
       expect(request.temperature, equals(0.5));
       expect(request.topP, equals(0.9));
+    });
+
+    test('text factory creates ResponseInputText', () {
+      final request = CreateResponseRequest.text(
+        model: 'gpt-4o',
+        text: 'Hello!',
+      );
+
+      expect(request.input, isA<ResponseInputText>());
+      expect((request.input as ResponseInputText).text, equals('Hello!'));
+    });
+
+    test('JSON round-trip with text input produces identical JSON', () {
+      const request = CreateResponseRequest(
+        model: 'gpt-4o',
+        input: ResponseInput.text('Hello!'),
+      );
+
+      final json = request.toJson();
+      final restored = CreateResponseRequest.fromJson(json);
+      final json2 = restored.toJson();
+
+      expect(json2, equals(json));
+    });
+
+    test('JSON round-trip with items input produces identical JSON', () {
+      final request = CreateResponseRequest(
+        model: 'gpt-4o',
+        input: ResponseInput.items([
+          MessageItem.userText('Question?'),
+          MessageItem.assistantText('Answer.'),
+        ]),
+      );
+
+      final json = request.toJson();
+      final restored = CreateResponseRequest.fromJson(json);
+      final json2 = restored.toJson();
+
+      // Compare JSON strings to ensure exact match
+      expect(jsonEncode(json2), equals(jsonEncode(json)));
+    });
+
+    test('metadata accepts Map<String, dynamic>', () {
+      const request = CreateResponseRequest(
+        model: 'gpt-4o',
+        input: ResponseInput.text('Hello!'),
+        metadata: {'key': 'value', 'count': 42, 'flag': true},
+      );
+
+      final json = request.toJson();
+      final metadata = json['metadata'] as Map<String, dynamic>;
+
+      // All values are stringified in JSON output
+      expect(metadata['key'], equals('value'));
+      expect(metadata['count'], equals('42'));
+      expect(metadata['flag'], equals('true'));
+    });
+
+    test('metadata round-trip preserves string values', () {
+      const request = CreateResponseRequest(
+        model: 'gpt-4o',
+        input: ResponseInput.text('Hello!'),
+        metadata: {'key': 'value'},
+      );
+
+      final json = request.toJson();
+      final restored = CreateResponseRequest.fromJson(json);
+
+      expect(restored.metadata, equals({'key': 'value'}));
     });
   });
 
@@ -107,7 +259,7 @@ void main() {
             id: 'msg_123',
             role: MessageRole.assistant,
             status: ItemStatus.completed,
-            content: [OutputTextContent(text: 'Hello!')],
+            content: [OutputContent.text(text: 'Hello!')],
           ),
         ],
         usage: ResponseUsage(inputTokens: 10, outputTokens: 5, totalTokens: 15),
@@ -226,7 +378,7 @@ void main() {
     test('creates message item', () {
       const item = MessageItem(
         role: MessageRole.user,
-        content: [InputTextContent(text: 'Hello!')],
+        content: [InputContent.text('Hello!')],
       );
 
       expect(item.role, equals(MessageRole.user));
@@ -253,37 +405,121 @@ void main() {
 
       expect(item.id, equals('item_123'));
     });
+
+    test('FunctionCallItem.argumentsMap parses JSON arguments', () {
+      const item = FunctionCallItem(
+        callId: 'call_123',
+        name: 'get_weather',
+        arguments: '{"location":"Boston","unit":"celsius"}',
+      );
+
+      final argsMap = item.argumentsMap;
+
+      expect(argsMap['location'], equals('Boston'));
+      expect(argsMap['unit'], equals('celsius'));
+    });
+
+    test(
+      'FunctionCallOutputItemResponse.argumentsMap parses JSON arguments',
+      () {
+        const item = FunctionCallOutputItemResponse(
+          id: 'fc_123',
+          callId: 'call_123',
+          name: 'get_weather',
+          arguments: '{"location":"Paris"}',
+        );
+
+        final argsMap = item.argumentsMap;
+
+        expect(argsMap['location'], equals('Paris'));
+      },
+    );
   });
 
   group('InputContent', () {
     test('creates text content', () {
-      const content = InputTextContent(text: 'Hello!');
+      const content = InputContent.text('Hello!');
+
+      expect(content, isA<InputTextContent>());
+      expect((content as InputTextContent).text, equals('Hello!'));
+      expect(content.toJson()['type'], equals('input_text'));
+    });
+
+    test('creates text content with positional parameter', () {
+      const content = InputTextContent('Hello!');
 
       expect(content.text, equals('Hello!'));
       expect(content.toJson()['type'], equals('input_text'));
     });
 
     test('creates image content from URL', () {
-      const content = InputImageContent.url('https://example.com/img.png');
+      const content = InputContent.imageUrl('https://example.com/img.png');
 
-      expect(content.imageUrl, equals('https://example.com/img.png'));
+      expect(content, isA<InputImageContent>());
+      expect(
+        (content as InputImageContent).imageUrl,
+        equals('https://example.com/img.png'),
+      );
     });
 
     test('creates image content from file ID', () {
-      const content = InputImageContent.file('file_123');
+      const content = InputContent.imageFile('file_123');
 
-      expect(content.fileId, equals('file_123'));
+      expect(content, isA<InputImageContent>());
+      expect((content as InputImageContent).fileId, equals('file_123'));
+    });
+
+    test('creates video content', () {
+      const content = InputContent.video('https://example.com/video.mp4');
+
+      expect(content, isA<InputVideoContent>());
+      expect(
+        (content as InputVideoContent).videoUrl,
+        equals('https://example.com/video.mp4'),
+      );
+    });
+
+    test('creates file content from URL', () {
+      const content = InputContent.fileUrl('https://example.com/file.pdf');
+
+      expect(content, isA<InputFileContent>());
+      expect(
+        (content as InputFileContent).fileUrl,
+        equals('https://example.com/file.pdf'),
+      );
+    });
+
+    test('creates file content from file ID', () {
+      const content = InputContent.fileId('file_456');
+
+      expect(content, isA<InputFileContent>());
+      expect((content as InputFileContent).fileId, equals('file_456'));
+    });
+
+    test('creates file content from base64 data', () {
+      const content = InputContent.fileData('base64data==');
+
+      expect(content, isA<InputFileContent>());
+      expect((content as InputFileContent).fileData, equals('base64data=='));
     });
   });
 
   group('AssistantTextContent', () {
     test('serializes as output_text', () {
-      const content = AssistantTextContent(text: 'Hello!');
+      const content = InputContent.assistantText('Hello!');
 
+      expect(content, isA<AssistantTextContent>());
       final json = content.toJson();
 
       expect(json['type'], equals('output_text'));
       expect(json['text'], equals('Hello!'));
+    });
+
+    test('creates with positional parameter', () {
+      const content = AssistantTextContent('Hello!');
+
+      expect(content.text, equals('Hello!'));
+      expect(content.toJson()['type'], equals('output_text'));
     });
 
     test('deserializes from JSON', () {
@@ -308,9 +544,9 @@ void main() {
     });
 
     test('equality', () {
-      const content1 = AssistantTextContent(text: 'Hello!');
-      const content2 = AssistantTextContent(text: 'Hello!');
-      const content3 = AssistantTextContent(text: 'Hi!');
+      const content1 = AssistantTextContent('Hello!');
+      const content2 = AssistantTextContent('Hello!');
+      const content3 = AssistantTextContent('Hi!');
 
       expect(content1, equals(content2));
       expect(content1, isNot(equals(content3)));
@@ -318,14 +554,36 @@ void main() {
   });
 
   group('OutputContent', () {
-    test('creates text content', () {
-      const content = OutputTextContent(text: 'Response text');
+    test('creates text content via factory', () {
+      const content = OutputContent.text(text: 'Response text');
 
-      expect(content.text, equals('Response text'));
+      expect(content, isA<OutputTextContent>());
+      expect((content as OutputTextContent).text, equals('Response text'));
     });
 
-    test('creates refusal content', () {
-      const content = RefusalContent(refusal: 'Cannot comply');
+    test('creates reasoning content via factory', () {
+      const content = OutputContent.reasoning('Thinking...');
+
+      expect(content, isA<ReasoningTextContent>());
+      expect((content as ReasoningTextContent).text, equals('Thinking...'));
+    });
+
+    test('creates summary content via factory', () {
+      const content = OutputContent.summary('Summary here');
+
+      expect(content, isA<SummaryTextContent>());
+      expect((content as SummaryTextContent).text, equals('Summary here'));
+    });
+
+    test('creates refusal content via factory', () {
+      const content = OutputContent.refusal('Cannot comply');
+
+      expect(content, isA<RefusalContent>());
+      expect((content as RefusalContent).refusal, equals('Cannot comply'));
+    });
+
+    test('creates refusal content with positional parameter', () {
+      const content = RefusalContent('Cannot comply');
 
       expect(content.refusal, equals('Cannot comply'));
     });
@@ -548,7 +806,7 @@ void main() {
           MessageOutputItem(
             id: 'msg_123',
             role: MessageRole.assistant,
-            content: [OutputTextContent(text: 'Found it!')],
+            content: [OutputContent.text(text: 'Found it!')],
           ),
           WebSearchCallOutputItem(id: 'ws_1', status: ItemStatus.completed),
           WebSearchCallOutputItem(id: 'ws_2', status: ItemStatus.completed),

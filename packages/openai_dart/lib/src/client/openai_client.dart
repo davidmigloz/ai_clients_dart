@@ -900,7 +900,7 @@ class OpenAIClient {
   /// final response = await client.responses.create(
   ///   CreateResponseRequest(
   ///     model: 'gpt-4o',
-  ///     input: 'Hello, how are you?',
+  ///     input: ResponseInput.text('Hello, how are you?'),
   ///   ),
   /// );
   /// print(response.outputText);
@@ -909,7 +909,7 @@ class OpenAIClient {
   /// final stream = client.responses.createStream(
   ///   CreateResponseRequest(
   ///     model: 'gpt-4o',
-  ///     input: 'Tell me a story',
+  ///     input: ResponseInput.text('Tell me a story'),
   ///   ),
   /// );
   ///
@@ -944,7 +944,7 @@ class OpenAIClient {
   /// final response = await client.responses.create(
   ///   CreateResponseRequest(
   ///     model: 'gpt-4o',
-  ///     input: 'Continue our conversation',
+  ///     input: ResponseInput.text('Continue our conversation'),
   ///     conversation: ResponseConversation.id(conversation.id),
   ///   ),
   /// );
