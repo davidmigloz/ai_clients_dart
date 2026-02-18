@@ -200,6 +200,18 @@ void main() {
       expect(metadata['flag'], equals('true'));
     });
 
+    test('metadata omits null values', () {
+      const request = CreateResponseRequest(
+        model: 'gpt-4o',
+        input: ResponseInput.text('Hello!'),
+        metadata: {'key': 'value', 'empty': null},
+      );
+      final json = request.toJson();
+      final metadata = json['metadata'] as Map<String, dynamic>;
+      expect(metadata, equals({'key': 'value'}));
+      expect(metadata.containsKey('empty'), isFalse);
+    });
+
     test('metadata round-trip preserves string values', () {
       const request = CreateResponseRequest(
         model: 'gpt-4o',

@@ -264,7 +264,9 @@ class ChatCompletionCreateRequest {
   /// Custom metadata to attach to the request.
   ///
   /// Values can be of any type and will be automatically converted to strings
-  /// when serialized to JSON, as the API requires string values.
+  /// when serialized to JSON, as the API requires string values. Null values
+  /// are omitted. After a JSON round-trip (`toJson()` then `fromJson()`), all
+  /// metadata values will be strings.
   final Map<String, dynamic>? metadata;
 
   /// Whether to store this completion for model improvements.
@@ -389,7 +391,10 @@ class ChatCompletionCreateRequest {
     if (parallelToolCalls != null) 'parallel_tool_calls': parallelToolCalls,
     if (user != null) 'user': user,
     if (metadata != null)
-      'metadata': metadata!.map((k, v) => MapEntry(k, v.toString())),
+      'metadata': {
+        for (final MapEntry(:key, :value) in metadata!.entries)
+          if (value != null) key: value.toString(),
+      },
     if (store != null) 'store': store,
     if (streamOptions != null) 'stream_options': streamOptions!.toJson(),
     if (reasoningEffort != null) 'reasoning_effort': reasoningEffort!.toJson(),

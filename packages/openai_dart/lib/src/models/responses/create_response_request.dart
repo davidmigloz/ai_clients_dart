@@ -102,7 +102,9 @@ class CreateResponseRequest {
   /// Custom metadata for the request.
   ///
   /// Values can be of any type and will be automatically converted to strings
-  /// when serialized to JSON, as the API requires string values.
+  /// when serialized to JSON, as the API requires string values. Null values
+  /// are omitted. After a JSON round-trip (`toJson()` then `fromJson()`), all
+  /// metadata values will be strings.
   final Map<String, dynamic>? metadata;
 
   /// Additional data to include in the response.
@@ -245,7 +247,10 @@ class CreateResponseRequest {
       if (parallelToolCalls != null) 'parallel_tool_calls': parallelToolCalls,
       if (serviceTier != null) 'service_tier': serviceTier!.toJson(),
       if (metadata != null)
-        'metadata': metadata!.map((k, v) => MapEntry(k, v.toString())),
+        'metadata': {
+          for (final MapEntry(:key, :value) in metadata!.entries)
+            if (value != null) key: value.toString(),
+        },
       if (include != null) 'include': include!.map((e) => e.toJson()).toList(),
       if (store != null) 'store': store,
       if (background != null) 'background': background,
