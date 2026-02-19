@@ -100,6 +100,22 @@ void main() {
         expect(modified.id, 'tu_1'); // Unchanged
         expect(modified.input, {'key': 'value'}); // Unchanged
       });
+
+      test('parses caller metadata when present', () {
+        final json = {
+          'type': 'tool_use',
+          'id': 'tu_1',
+          'name': 'search',
+          'input': {'q': 'hello'},
+          'caller': {
+            'type': 'code_execution_20260120',
+            'tool_id': 'srvtoolu_1',
+          },
+        };
+
+        final block = ContentBlock.fromJson(json) as ToolUseBlock;
+        expect(block.caller, isA<ServerToolCaller>());
+      });
     });
 
     group('ServerToolUseBlock', () {
@@ -147,6 +163,36 @@ void main() {
         expect(content.results, hasLength(1));
         expect(content.results.first.url, 'https://example.com');
         expect(content.results.first.title, 'Example');
+      });
+    });
+
+    group('Additional tool result blocks', () {
+      test('parses web fetch tool result block', () {
+        final json = {
+          'type': 'web_fetch_tool_result',
+          'tool_use_id': 'tu_wf_1',
+          'caller': {'type': 'direct'},
+          'content': {
+            'type': 'web_fetch_result',
+            'url': 'https://example.com',
+            'content': 'Example text',
+          },
+        };
+
+        final block = ContentBlock.fromJson(json);
+        expect(block, isA<WebFetchToolResultBlock>());
+        final result = block as WebFetchToolResultBlock;
+        expect(result.toolUseId, 'tu_wf_1');
+        expect(result.caller, isA<DirectToolCaller>());
+      });
+
+      test('parses compaction block', () {
+        final json = {'type': 'compaction', 'content': 'Conversation summary'};
+
+        final block = ContentBlock.fromJson(json);
+        expect(block, isA<CompactionBlock>());
+        final compaction = block as CompactionBlock;
+        expect(compaction.content, 'Conversation summary');
       });
     });
   });
@@ -235,6 +281,20 @@ void main() {
         final json = block.toJson();
 
         expect(json['is_error'], isTrue);
+      });
+    });
+
+    group('CompactionInputBlock', () {
+      test('round-trips compaction content', () {
+        const block = CompactionInputBlock(content: 'Compacted summary');
+        final json = block.toJson();
+
+        expect(json['type'], 'compaction');
+        expect(json['content'], 'Compacted summary');
+
+        final parsed = InputContentBlock.fromJson(json);
+        expect(parsed, isA<CompactionInputBlock>());
+        expect((parsed as CompactionInputBlock).content, 'Compacted summary');
       });
     });
   });

@@ -49,6 +49,27 @@ void main() {
       expect(request.headers['content-type'], 'application/json');
     });
 
+    test('create sets anthropic-beta header when betas are provided', () async {
+      mockHttpClient.queueJsonResponse(
+        MockResponses.message(id: 'msg_test', text: 'Hello from Claude!'),
+      );
+
+      await client.messages.create(
+        MessageCreateRequest(
+          model: 'claude-sonnet-4-20250514',
+          maxTokens: 256,
+          messages: [InputMessage.user('Hello!')],
+        ),
+        betas: const ['fast-mode-2026-02-07', 'compaction-2026-01-12'],
+      );
+
+      final request = mockHttpClient.lastRequest!;
+      expect(
+        request.headers['anthropic-beta'],
+        'fast-mode-2026-02-07,compaction-2026-01-12',
+      );
+    });
+
     test('create handles tool use response', () async {
       mockHttpClient.queueJsonResponse({
         'id': 'msg_tools',

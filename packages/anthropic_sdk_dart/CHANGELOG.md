@@ -2,7 +2,7 @@
 
 > Note: This release has breaking changes.
 
-**TL;DR**: Complete reimplementation with a new architecture, minimal dependencies, resource-based API, and improved developer experience. Hand-crafted models (no code generation), interceptor-driven architecture, comprehensive error handling, and full Anthropic API coverage.
+**TL;DR**: Complete reimplementation with a new architecture, minimal dependencies, resource-based API, and improved developer experience. Hand-crafted models (no code generation), interceptor-driven architecture, comprehensive error handling, full Anthropic API coverage, and alignment with the latest Anthropic OpenAPI (2026-02-19).
 
 ### What's new
 

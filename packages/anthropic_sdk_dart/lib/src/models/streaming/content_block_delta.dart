@@ -21,6 +21,9 @@ sealed class ContentBlockDelta {
   /// Creates a citations delta.
   factory ContentBlockDelta.citations(Citation citation) = CitationsDelta;
 
+  /// Creates a compaction delta.
+  factory ContentBlockDelta.compaction(String? content) = CompactionDelta;
+
   /// Creates a [ContentBlockDelta] from JSON.
   factory ContentBlockDelta.fromJson(Map<String, dynamic> json) {
     final type = json['type'] as String;
@@ -30,6 +33,7 @@ sealed class ContentBlockDelta {
       'thinking_delta' => ThinkingDelta.fromJson(json),
       'signature_delta' => SignatureDelta.fromJson(json),
       'citations_delta' => CitationsDelta.fromJson(json),
+      'compaction_delta' => CompactionDelta.fromJson(json),
       _ => throw FormatException('Unknown ContentBlockDelta type: $type'),
     };
   }
@@ -136,6 +140,40 @@ class ThinkingDelta extends ContentBlockDelta {
 
   @override
   String toString() => 'ThinkingDelta(thinking: [${thinking.length} chars])';
+}
+
+/// Delta for compaction content updates (beta).
+@immutable
+class CompactionDelta extends ContentBlockDelta {
+  /// The partial or final compaction summary content.
+  final String? content;
+
+  /// Creates a [CompactionDelta].
+  const CompactionDelta(this.content);
+
+  /// Creates a [CompactionDelta] from JSON.
+  factory CompactionDelta.fromJson(Map<String, dynamic> json) {
+    return CompactionDelta(json['content'] as String?);
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'compaction_delta',
+    'content': content,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CompactionDelta &&
+          runtimeType == other.runtimeType &&
+          content == other.content;
+
+  @override
+  int get hashCode => content.hashCode;
+
+  @override
+  String toString() => 'CompactionDelta(content: $content)';
 }
 
 /// Delta for signature content updates (extended thinking verification).

@@ -24,6 +24,19 @@ void main() {
           },
         ],
         'thinking': {'type': 'disabled'},
+        'output_config': {
+          'effort': 'high',
+          'format': {
+            'type': 'json_schema',
+            'schema': {
+              'type': 'object',
+              'properties': {
+                'answer': {'type': 'string'},
+              },
+            },
+          },
+        },
+        'speed': 'fast',
       };
 
       final request = TokenCountRequest.fromJson(json);
@@ -34,6 +47,9 @@ void main() {
       expect(request.toolChoice, isNotNull);
       expect(request.tools, hasLength(1));
       expect(request.thinking, isA<ThinkingDisabled>());
+      expect(request.outputConfig, isNotNull);
+      expect(request.outputConfig!.effort, EffortLevel.high);
+      expect(request.speed, Speed.fast);
     });
 
     test('fromJson deserializes with required fields only', () {

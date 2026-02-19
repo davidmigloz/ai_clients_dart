@@ -1,9 +1,12 @@
 import 'package:meta/meta.dart';
 
+import '../beta/config/output_config.dart';
 import '../common/copy_with_sentinel.dart';
+import '../common/equality.dart';
 import '../metadata/cache_control.dart';
 import '../metadata/metadata.dart';
 import '../metadata/service_tier.dart';
+import '../metadata/speed.dart';
 import '../tools/tool_choice.dart';
 import '../tools/tool_definition.dart';
 import 'input_message.dart';
@@ -84,7 +87,7 @@ class BlocksSystemPrompt extends SystemPrompt {
       identical(this, other) ||
       other is BlocksSystemPrompt &&
           runtimeType == other.runtimeType &&
-          _listsEqual(blocks, other.blocks);
+          listsEqual(blocks, other.blocks);
 
   @override
   int get hashCode => blocks.hashCode;
@@ -191,6 +194,18 @@ class MessageCreateRequest {
   /// Top-K sampling parameter.
   final int? topK;
 
+  /// Inference region to execute the request in.
+  final String? inferenceGeo;
+
+  /// Output behavior configuration (effort, structured output).
+  final OutputConfig? outputConfig;
+
+  /// Optional reusable container identifier for code execution.
+  final String? container;
+
+  /// Inference speed mode.
+  final Speed? speed;
+
   /// Creates a [MessageCreateRequest].
   const MessageCreateRequest({
     required this.model,
@@ -207,6 +222,10 @@ class MessageCreateRequest {
     this.tools,
     this.topP,
     this.topK,
+    this.inferenceGeo,
+    this.outputConfig,
+    this.container,
+    this.speed,
   });
 
   /// Creates a [MessageCreateRequest] from JSON.
@@ -240,6 +259,14 @@ class MessageCreateRequest {
           .toList(),
       topP: (json['top_p'] as num?)?.toDouble(),
       topK: json['top_k'] as int?,
+      inferenceGeo: json['inference_geo'] as String?,
+      outputConfig: json['output_config'] != null
+          ? OutputConfig.fromJson(json['output_config'] as Map<String, dynamic>)
+          : null,
+      container: json['container'] as String?,
+      speed: json['speed'] != null
+          ? Speed.fromJson(json['speed'] as String)
+          : null,
     );
   }
 
@@ -259,6 +286,10 @@ class MessageCreateRequest {
     if (tools != null) 'tools': tools!.map((e) => e.toJson()).toList(),
     if (topP != null) 'top_p': topP,
     if (topK != null) 'top_k': topK,
+    if (inferenceGeo != null) 'inference_geo': inferenceGeo,
+    if (outputConfig != null) 'output_config': outputConfig!.toJson(),
+    if (container != null) 'container': container,
+    if (speed != null) 'speed': speed!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -277,6 +308,10 @@ class MessageCreateRequest {
     Object? tools = unsetCopyWithValue,
     Object? topP = unsetCopyWithValue,
     Object? topK = unsetCopyWithValue,
+    Object? inferenceGeo = unsetCopyWithValue,
+    Object? outputConfig = unsetCopyWithValue,
+    Object? container = unsetCopyWithValue,
+    Object? speed = unsetCopyWithValue,
   }) {
     return MessageCreateRequest(
       model: model ?? this.model,
@@ -309,6 +344,16 @@ class MessageCreateRequest {
           : tools as List<ToolDefinition>?,
       topP: topP == unsetCopyWithValue ? this.topP : topP as double?,
       topK: topK == unsetCopyWithValue ? this.topK : topK as int?,
+      inferenceGeo: inferenceGeo == unsetCopyWithValue
+          ? this.inferenceGeo
+          : inferenceGeo as String?,
+      outputConfig: outputConfig == unsetCopyWithValue
+          ? this.outputConfig
+          : outputConfig as OutputConfig?,
+      container: container == unsetCopyWithValue
+          ? this.container
+          : container as String?,
+      speed: speed == unsetCopyWithValue ? this.speed : speed as Speed?,
     );
   }
 
@@ -318,19 +363,23 @@ class MessageCreateRequest {
       other is MessageCreateRequest &&
           runtimeType == other.runtimeType &&
           model == other.model &&
-          _listsEqual(messages, other.messages) &&
+          listsEqual(messages, other.messages) &&
           maxTokens == other.maxTokens &&
           system == other.system &&
           metadata == other.metadata &&
           serviceTier == other.serviceTier &&
-          _listsEqual(stopSequences, other.stopSequences) &&
+          listsEqual(stopSequences, other.stopSequences) &&
           stream == other.stream &&
           temperature == other.temperature &&
           thinking == other.thinking &&
           toolChoice == other.toolChoice &&
-          _listsEqual(tools, other.tools) &&
+          listsEqual(tools, other.tools) &&
           topP == other.topP &&
-          topK == other.topK;
+          topK == other.topK &&
+          inferenceGeo == other.inferenceGeo &&
+          outputConfig == other.outputConfig &&
+          container == other.container &&
+          speed == other.speed;
 
   @override
   int get hashCode => Object.hash(
@@ -348,6 +397,10 @@ class MessageCreateRequest {
     tools,
     topP,
     topK,
+    inferenceGeo,
+    outputConfig,
+    container,
+    speed,
   );
 
   @override
@@ -356,15 +409,7 @@ class MessageCreateRequest {
       'maxTokens: $maxTokens, system: $system, metadata: $metadata, '
       'serviceTier: $serviceTier, stopSequences: $stopSequences, '
       'stream: $stream, temperature: $temperature, thinking: $thinking, '
-      'toolChoice: $toolChoice, tools: $tools, topP: $topP, topK: $topK)';
-}
-
-bool _listsEqual<T>(List<T>? a, List<T>? b) {
-  if (a == null && b == null) return true;
-  if (a == null || b == null) return false;
-  if (a.length != b.length) return false;
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] != b[i]) return false;
-  }
-  return true;
+      'toolChoice: $toolChoice, tools: $tools, topP: $topP, topK: $topK, '
+      'inferenceGeo: $inferenceGeo, outputConfig: $outputConfig, '
+      'container: $container, speed: $speed)';
 }

@@ -20,6 +20,14 @@ void main() {
       });
     });
 
+    group('adaptive factory', () {
+      test('creates ThinkingAdaptive', () {
+        final config = ThinkingConfig.adaptive();
+
+        expect(config, isA<ThinkingAdaptive>());
+      });
+    });
+
     group('fromJson', () {
       test('parses enabled config', () {
         final json = {'type': 'enabled', 'budget_tokens': 3000};
@@ -36,6 +44,14 @@ void main() {
         final config = ThinkingConfig.fromJson(json);
 
         expect(config, isA<ThinkingDisabled>());
+      });
+
+      test('parses adaptive config', () {
+        final json = {'type': 'adaptive'};
+
+        final config = ThinkingConfig.fromJson(json);
+
+        expect(config, isA<ThinkingAdaptive>());
       });
 
       test('throws on unknown type', () {
@@ -143,6 +159,31 @@ void main() {
       const enabled = ThinkingEnabled(budgetTokens: 5000);
 
       expect(disabled, isNot(equals(enabled)));
+    });
+  });
+
+  group('ThinkingAdaptive', () {
+    test('can be created', () {
+      const adaptive = ThinkingAdaptive();
+
+      expect(adaptive, isA<ThinkingConfig>());
+    });
+
+    test('fromJson creates instance', () {
+      final json = {'type': 'adaptive'};
+
+      final adaptive = ThinkingAdaptive.fromJson(json);
+
+      expect(adaptive, isA<ThinkingAdaptive>());
+    });
+
+    test('toJson serializes correctly', () {
+      const adaptive = ThinkingAdaptive();
+
+      final json = adaptive.toJson();
+
+      expect(json['type'], 'adaptive');
+      expect(json.length, 1);
     });
   });
 }

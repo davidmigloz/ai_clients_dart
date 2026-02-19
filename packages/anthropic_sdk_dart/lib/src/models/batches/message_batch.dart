@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality.dart';
 import '../messages/message.dart';
 import '../metadata/processing_status.dart';
 
@@ -282,7 +283,7 @@ class MessageBatchListResponse {
       identical(this, other) ||
       other is MessageBatchListResponse &&
           runtimeType == other.runtimeType &&
-          _listsEqual(data, other.data) &&
+          listsEqual(data, other.data) &&
           hasMore == other.hasMore &&
           firstId == other.firstId &&
           lastId == other.lastId;
@@ -556,12 +557,4 @@ class BatchIndividualResponse {
   @override
   String toString() =>
       'BatchIndividualResponse(customId: $customId, result: $result)';
-}
-
-bool _listsEqual<T>(List<T> a, List<T> b) {
-  if (a.length != b.length) return false;
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] != b[i]) return false;
-  }
-  return true;
 }

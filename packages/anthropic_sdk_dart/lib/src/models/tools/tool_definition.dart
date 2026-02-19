@@ -58,6 +58,9 @@ sealed class ToolDefinition {
     return type.startsWith('bash_') ||
         type.startsWith('text_editor_') ||
         type.startsWith('web_search_') ||
+        type.startsWith('web_fetch_') ||
+        type.startsWith('memory_') ||
+        type.startsWith('tool_search_tool_') ||
         type.startsWith('computer_') ||
         type.startsWith('code_execution_') ||
         type.startsWith('mcp_');

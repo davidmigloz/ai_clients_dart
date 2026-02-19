@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality.dart';
 
 /// JSON Schema for tool input.
 ///
@@ -59,8 +60,8 @@ class InputSchema {
       other is InputSchema &&
           runtimeType == other.runtimeType &&
           type == other.type &&
-          _mapsEqual(properties, other.properties) &&
-          _listsEqual(required, other.required);
+          mapsEqual(properties, other.properties) &&
+          listsEqual(required, other.required);
 
   @override
   int get hashCode => Object.hash(type, properties, required);
@@ -68,24 +69,4 @@ class InputSchema {
   @override
   String toString() =>
       'InputSchema(type: $type, properties: $properties, required: $required)';
-}
-
-bool _listsEqual<T>(List<T>? a, List<T>? b) {
-  if (a == null && b == null) return true;
-  if (a == null || b == null) return false;
-  if (a.length != b.length) return false;
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] != b[i]) return false;
-  }
-  return true;
-}
-
-bool _mapsEqual<K, V>(Map<K, V>? a, Map<K, V>? b) {
-  if (a == null && b == null) return true;
-  if (a == null || b == null) return false;
-  if (a.length != b.length) return false;
-  for (final key in a.keys) {
-    if (!b.containsKey(key) || a[key] != b[key]) return false;
-  }
-  return true;
 }

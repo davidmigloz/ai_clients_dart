@@ -1,6 +1,8 @@
 import 'package:meta/meta.dart';
 
+import '../beta/config/container.dart';
 import '../common/copy_with_sentinel.dart';
+import '../common/equality.dart';
 import '../content/content_block.dart';
 import '../metadata/stop_reason.dart';
 import '../metadata/usage.dart';
@@ -33,6 +35,9 @@ class Message {
   /// Token usage statistics.
   final Usage usage;
 
+  /// Container metadata when server-side code execution was used.
+  final Container? container;
+
   /// Creates a [Message].
   const Message({
     required this.id,
@@ -43,6 +48,7 @@ class Message {
     this.stopReason,
     this.stopSequence,
     required this.usage,
+    this.container,
   });
 
   /// Creates a [Message] from JSON.
@@ -62,6 +68,9 @@ class Message {
           : null,
       stopSequence: json['stop_sequence'] as String?,
       usage: Usage.fromJson(json['usage'] as Map<String, dynamic>),
+      container: json['container'] != null
+          ? Container.fromJson(json['container'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -75,6 +84,7 @@ class Message {
     if (stopReason != null) 'stop_reason': stopReason!.toJson(),
     if (stopSequence != null) 'stop_sequence': stopSequence,
     'usage': usage.toJson(),
+    if (container != null) 'container': container!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -87,6 +97,7 @@ class Message {
     Object? stopReason = unsetCopyWithValue,
     Object? stopSequence = unsetCopyWithValue,
     Usage? usage,
+    Object? container = unsetCopyWithValue,
   }) {
     return Message(
       id: id ?? this.id,
@@ -101,6 +112,9 @@ class Message {
           ? this.stopSequence
           : stopSequence as String?,
       usage: usage ?? this.usage,
+      container: container == unsetCopyWithValue
+          ? this.container
+          : container as Container?,
     );
   }
 
@@ -112,11 +126,12 @@ class Message {
           id == other.id &&
           type == other.type &&
           role == other.role &&
-          _listsEqual(content, other.content) &&
+          listsEqual(content, other.content) &&
           model == other.model &&
           stopReason == other.stopReason &&
           stopSequence == other.stopSequence &&
-          usage == other.usage;
+          usage == other.usage &&
+          container == other.container;
 
   @override
   int get hashCode => Object.hash(
@@ -128,21 +143,12 @@ class Message {
     stopReason,
     stopSequence,
     usage,
+    container,
   );
 
   @override
   String toString() =>
       'Message(id: $id, type: $type, role: $role, '
       'content: $content, model: $model, stopReason: $stopReason, '
-      'stopSequence: $stopSequence, usage: $usage)';
-}
-
-bool _listsEqual<T>(List<T>? a, List<T>? b) {
-  if (a == null && b == null) return true;
-  if (a == null || b == null) return false;
-  if (a.length != b.length) return false;
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] != b[i]) return false;
-  }
-  return true;
+      'stopSequence: $stopSequence, usage: $usage, container: $container)';
 }

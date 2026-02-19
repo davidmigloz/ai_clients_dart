@@ -94,6 +94,7 @@ export 'src/models/metadata/cache_control.dart';
 export 'src/models/metadata/metadata.dart';
 export 'src/models/metadata/processing_status.dart';
 export 'src/models/metadata/service_tier.dart';
+export 'src/models/metadata/speed.dart';
 export 'src/models/metadata/stop_reason.dart';
 export 'src/models/metadata/usage.dart';
 
@@ -122,6 +123,7 @@ export 'src/models/tokens/token_count.dart';
 export 'src/models/tools/built_in_tools.dart';
 export 'src/models/tools/input_schema.dart';
 export 'src/models/tools/tool.dart';
+export 'src/models/tools/tool_caller.dart';
 export 'src/models/tools/tool_choice.dart';
 export 'src/models/tools/tool_definition.dart';
 

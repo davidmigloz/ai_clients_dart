@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality.dart';
+
 import '../messages/message_create_request.dart';
 
 /// Individual request item for batch creation.
@@ -75,19 +77,11 @@ class MessageBatchCreateRequest {
       identical(this, other) ||
       other is MessageBatchCreateRequest &&
           runtimeType == other.runtimeType &&
-          _listsEqual(requests, other.requests);
+          listsEqual(requests, other.requests);
 
   @override
   int get hashCode => requests.hashCode;
 
   @override
   String toString() => 'MessageBatchCreateRequest(requests: $requests)';
-}
-
-bool _listsEqual<T>(List<T> a, List<T> b) {
-  if (a.length != b.length) return false;
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] != b[i]) return false;
-  }
-  return true;
 }

@@ -1,6 +1,8 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality.dart';
+import '../tools/tool_caller.dart';
 
 /// Content block in a response message.
 ///
@@ -19,6 +21,17 @@ sealed class ContentBlock {
       'tool_use' => ToolUseBlock.fromJson(json),
       'server_tool_use' => ServerToolUseBlock.fromJson(json),
       'web_search_tool_result' => WebSearchToolResultBlock.fromJson(json),
+      'web_fetch_tool_result' => WebFetchToolResultBlock.fromJson(json),
+      'code_execution_tool_result' => CodeExecutionToolResultBlock.fromJson(
+        json,
+      ),
+      'bash_code_execution_tool_result' =>
+        BashCodeExecutionToolResultBlock.fromJson(json),
+      'text_editor_code_execution_tool_result' =>
+        TextEditorCodeExecutionToolResultBlock.fromJson(json),
+      'tool_search_tool_result' => ToolSearchToolResultBlock.fromJson(json),
+      'container_upload' => ContainerUploadBlock.fromJson(json),
+      'compaction' => CompactionBlock.fromJson(json),
       _ => throw FormatException('Unknown ContentBlock type: $type'),
     };
   }
@@ -73,7 +86,7 @@ class TextBlock extends ContentBlock {
       other is TextBlock &&
           runtimeType == other.runtimeType &&
           text == other.text &&
-          _listsEqual(citations, other.citations);
+          listsEqual(citations, other.citations);
 
   @override
   int get hashCode => Object.hash(text, citations);
@@ -183,11 +196,15 @@ class ToolUseBlock extends ContentBlock {
   /// Input parameters for the tool.
   final Map<String, dynamic> input;
 
+  /// Caller metadata for this tool invocation.
+  final ToolCaller? caller;
+
   /// Creates a [ToolUseBlock].
   const ToolUseBlock({
     required this.id,
     required this.name,
     required this.input,
+    this.caller,
   });
 
   /// Creates a [ToolUseBlock] from JSON.
@@ -196,6 +213,9 @@ class ToolUseBlock extends ContentBlock {
       id: json['id'] as String,
       name: json['name'] as String,
       input: json['input'] as Map<String, dynamic>,
+      caller: json['caller'] != null
+          ? ToolCaller.fromJson(json['caller'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -205,6 +225,7 @@ class ToolUseBlock extends ContentBlock {
     'id': id,
     'name': name,
     'input': input,
+    if (caller != null) 'caller': caller!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -212,11 +233,15 @@ class ToolUseBlock extends ContentBlock {
     String? id,
     String? name,
     Map<String, dynamic>? input,
+    Object? caller = unsetCopyWithValue,
   }) {
     return ToolUseBlock(
       id: id ?? this.id,
       name: name ?? this.name,
       input: input ?? this.input,
+      caller: caller == unsetCopyWithValue
+          ? this.caller
+          : caller as ToolCaller?,
     );
   }
 
@@ -227,13 +252,15 @@ class ToolUseBlock extends ContentBlock {
           runtimeType == other.runtimeType &&
           id == other.id &&
           name == other.name &&
-          _mapsEqual(input, other.input);
+          mapsEqual(input, other.input) &&
+          caller == other.caller;
 
   @override
-  int get hashCode => Object.hash(id, name, input);
+  int get hashCode => Object.hash(id, name, input, caller);
 
   @override
-  String toString() => 'ToolUseBlock(id: $id, name: $name, input: $input)';
+  String toString() =>
+      'ToolUseBlock(id: $id, name: $name, input: $input, caller: $caller)';
 }
 
 /// Server-side tool use block (e.g., web search).
@@ -248,11 +275,15 @@ class ServerToolUseBlock extends ContentBlock {
   /// Input parameters for the tool.
   final Map<String, dynamic> input;
 
+  /// Caller metadata for this tool invocation.
+  final ToolCaller? caller;
+
   /// Creates a [ServerToolUseBlock].
   const ServerToolUseBlock({
     required this.id,
     required this.name,
     required this.input,
+    this.caller,
   });
 
   /// Creates a [ServerToolUseBlock] from JSON.
@@ -261,6 +292,9 @@ class ServerToolUseBlock extends ContentBlock {
       id: json['id'] as String,
       name: json['name'] as String,
       input: json['input'] as Map<String, dynamic>,
+      caller: json['caller'] != null
+          ? ToolCaller.fromJson(json['caller'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -270,6 +304,7 @@ class ServerToolUseBlock extends ContentBlock {
     'id': id,
     'name': name,
     'input': input,
+    if (caller != null) 'caller': caller!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -277,11 +312,15 @@ class ServerToolUseBlock extends ContentBlock {
     String? id,
     String? name,
     Map<String, dynamic>? input,
+    Object? caller = unsetCopyWithValue,
   }) {
     return ServerToolUseBlock(
       id: id ?? this.id,
       name: name ?? this.name,
       input: input ?? this.input,
+      caller: caller == unsetCopyWithValue
+          ? this.caller
+          : caller as ToolCaller?,
     );
   }
 
@@ -292,14 +331,16 @@ class ServerToolUseBlock extends ContentBlock {
           runtimeType == other.runtimeType &&
           id == other.id &&
           name == other.name &&
-          _mapsEqual(input, other.input);
+          mapsEqual(input, other.input) &&
+          caller == other.caller;
 
   @override
-  int get hashCode => Object.hash(id, name, input);
+  int get hashCode => Object.hash(id, name, input, caller);
 
   @override
   String toString() =>
-      'ServerToolUseBlock(id: $id, name: $name, input: $input)';
+      'ServerToolUseBlock(id: $id, name: $name, input: $input, '
+      'caller: $caller)';
 }
 
 /// Web search tool result block.
@@ -311,10 +352,14 @@ class WebSearchToolResultBlock extends ContentBlock {
   /// The search results content.
   final WebSearchResult content;
 
+  /// Caller metadata for this tool result.
+  final ToolCaller? caller;
+
   /// Creates a [WebSearchToolResultBlock].
   const WebSearchToolResultBlock({
     required this.toolUseId,
     required this.content,
+    this.caller,
   });
 
   /// Creates a [WebSearchToolResultBlock] from JSON.
@@ -324,6 +369,9 @@ class WebSearchToolResultBlock extends ContentBlock {
       content: WebSearchResult.fromJson(
         json['content'] as Map<String, dynamic>,
       ),
+      caller: json['caller'] != null
+          ? ToolCaller.fromJson(json['caller'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -332,16 +380,21 @@ class WebSearchToolResultBlock extends ContentBlock {
     'type': 'web_search_tool_result',
     'tool_use_id': toolUseId,
     'content': content.toJson(),
+    if (caller != null) 'caller': caller!.toJson(),
   };
 
   /// Creates a copy with replaced values.
   WebSearchToolResultBlock copyWith({
     String? toolUseId,
     WebSearchResult? content,
+    Object? caller = unsetCopyWithValue,
   }) {
     return WebSearchToolResultBlock(
       toolUseId: toolUseId ?? this.toolUseId,
       content: content ?? this.content,
+      caller: caller == unsetCopyWithValue
+          ? this.caller
+          : caller as ToolCaller?,
     );
   }
 
@@ -351,14 +404,247 @@ class WebSearchToolResultBlock extends ContentBlock {
       other is WebSearchToolResultBlock &&
           runtimeType == other.runtimeType &&
           toolUseId == other.toolUseId &&
-          content == other.content;
+          content == other.content &&
+          caller == other.caller;
 
   @override
-  int get hashCode => Object.hash(toolUseId, content);
+  int get hashCode => Object.hash(toolUseId, content, caller);
 
   @override
   String toString() =>
-      'WebSearchToolResultBlock(toolUseId: $toolUseId, content: $content)';
+      'WebSearchToolResultBlock(toolUseId: $toolUseId, content: $content, '
+      'caller: $caller)';
+}
+
+/// Web fetch tool result block.
+@immutable
+class WebFetchToolResultBlock extends ContentBlock {
+  /// The tool use ID this result corresponds to.
+  final String toolUseId;
+
+  /// Caller metadata for this tool result.
+  final ToolCaller? caller;
+
+  /// Tool result content payload.
+  final Map<String, dynamic> content;
+
+  /// Creates a [WebFetchToolResultBlock].
+  const WebFetchToolResultBlock({
+    required this.toolUseId,
+    required this.content,
+    this.caller,
+  });
+
+  /// Creates a [WebFetchToolResultBlock] from JSON.
+  factory WebFetchToolResultBlock.fromJson(Map<String, dynamic> json) {
+    return WebFetchToolResultBlock(
+      toolUseId: json['tool_use_id'] as String,
+      content: (json['content'] as Map).cast<String, dynamic>(),
+      caller: json['caller'] != null
+          ? ToolCaller.fromJson(json['caller'] as Map<String, dynamic>)
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'web_fetch_tool_result',
+    'tool_use_id': toolUseId,
+    'content': content,
+    if (caller != null) 'caller': caller!.toJson(),
+  };
+}
+
+/// Code execution tool result block.
+@immutable
+class CodeExecutionToolResultBlock extends ContentBlock {
+  /// The tool use ID this result corresponds to.
+  final String toolUseId;
+
+  /// Tool result content payload.
+  final Map<String, dynamic> content;
+
+  /// Creates a [CodeExecutionToolResultBlock].
+  const CodeExecutionToolResultBlock({
+    required this.toolUseId,
+    required this.content,
+  });
+
+  /// Creates a [CodeExecutionToolResultBlock] from JSON.
+  factory CodeExecutionToolResultBlock.fromJson(Map<String, dynamic> json) {
+    return CodeExecutionToolResultBlock(
+      toolUseId: json['tool_use_id'] as String,
+      content: (json['content'] as Map).cast<String, dynamic>(),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'code_execution_tool_result',
+    'tool_use_id': toolUseId,
+    'content': content,
+  };
+}
+
+/// Bash code execution tool result block.
+@immutable
+class BashCodeExecutionToolResultBlock extends ContentBlock {
+  /// The tool use ID this result corresponds to.
+  final String toolUseId;
+
+  /// Tool result content payload.
+  final Map<String, dynamic> content;
+
+  /// Creates a [BashCodeExecutionToolResultBlock].
+  const BashCodeExecutionToolResultBlock({
+    required this.toolUseId,
+    required this.content,
+  });
+
+  /// Creates a [BashCodeExecutionToolResultBlock] from JSON.
+  factory BashCodeExecutionToolResultBlock.fromJson(Map<String, dynamic> json) {
+    return BashCodeExecutionToolResultBlock(
+      toolUseId: json['tool_use_id'] as String,
+      content: (json['content'] as Map).cast<String, dynamic>(),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'bash_code_execution_tool_result',
+    'tool_use_id': toolUseId,
+    'content': content,
+  };
+}
+
+/// Text editor code execution tool result block.
+@immutable
+class TextEditorCodeExecutionToolResultBlock extends ContentBlock {
+  /// The tool use ID this result corresponds to.
+  final String toolUseId;
+
+  /// Tool result content payload.
+  final Map<String, dynamic> content;
+
+  /// Creates a [TextEditorCodeExecutionToolResultBlock].
+  const TextEditorCodeExecutionToolResultBlock({
+    required this.toolUseId,
+    required this.content,
+  });
+
+  /// Creates a [TextEditorCodeExecutionToolResultBlock] from JSON.
+  factory TextEditorCodeExecutionToolResultBlock.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return TextEditorCodeExecutionToolResultBlock(
+      toolUseId: json['tool_use_id'] as String,
+      content: (json['content'] as Map).cast<String, dynamic>(),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'text_editor_code_execution_tool_result',
+    'tool_use_id': toolUseId,
+    'content': content,
+  };
+}
+
+/// Tool search tool result block.
+@immutable
+class ToolSearchToolResultBlock extends ContentBlock {
+  /// The tool use ID this result corresponds to.
+  final String toolUseId;
+
+  /// Tool result content payload.
+  final Map<String, dynamic> content;
+
+  /// Creates a [ToolSearchToolResultBlock].
+  const ToolSearchToolResultBlock({
+    required this.toolUseId,
+    required this.content,
+  });
+
+  /// Creates a [ToolSearchToolResultBlock] from JSON.
+  factory ToolSearchToolResultBlock.fromJson(Map<String, dynamic> json) {
+    return ToolSearchToolResultBlock(
+      toolUseId: json['tool_use_id'] as String,
+      content: (json['content'] as Map).cast<String, dynamic>(),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'tool_search_tool_result',
+    'tool_use_id': toolUseId,
+    'content': content,
+  };
+}
+
+/// Container upload content block.
+@immutable
+class ContainerUploadBlock extends ContentBlock {
+  /// Uploaded file ID.
+  final String fileId;
+
+  /// Creates a [ContainerUploadBlock].
+  const ContainerUploadBlock({required this.fileId});
+
+  /// Creates a [ContainerUploadBlock] from JSON.
+  factory ContainerUploadBlock.fromJson(Map<String, dynamic> json) {
+    return ContainerUploadBlock(fileId: json['file_id'] as String);
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'container_upload',
+    'file_id': fileId,
+  };
+}
+
+/// Compaction content block (beta).
+///
+/// Returned when server-side compaction is triggered. Can be round-tripped
+/// back to subsequent requests to preserve compacted context.
+@immutable
+class CompactionBlock extends ContentBlock {
+  /// Summary content for compacted context.
+  ///
+  /// When `null`, compaction failed and the block is a no-op if round-tripped.
+  final String? content;
+
+  /// Creates a [CompactionBlock].
+  const CompactionBlock({required this.content});
+
+  /// Creates a [CompactionBlock] from JSON.
+  factory CompactionBlock.fromJson(Map<String, dynamic> json) {
+    return CompactionBlock(content: json['content'] as String?);
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': 'compaction', 'content': content};
+
+  /// Creates a copy with replaced values.
+  CompactionBlock copyWith({Object? content = unsetCopyWithValue}) {
+    return CompactionBlock(
+      content: content == unsetCopyWithValue
+          ? this.content
+          : content as String?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CompactionBlock &&
+          runtimeType == other.runtimeType &&
+          content == other.content;
+
+  @override
+  int get hashCode => content.hashCode;
+
+  @override
+  String toString() => 'CompactionBlock(content: $content)';
 }
 
 /// Web search result content.
@@ -408,7 +694,7 @@ class WebSearchResultSuccess extends WebSearchResult {
       identical(this, other) ||
       other is WebSearchResultSuccess &&
           runtimeType == other.runtimeType &&
-          _listsEqual(results, other.results);
+          listsEqual(results, other.results);
 
   @override
   int get hashCode => results.hashCode;
@@ -828,24 +1114,4 @@ class WebSearchResultLocationCitation extends Citation {
       'WebSearchResultLocationCitation(citedText: [${citedText.length} chars], '
       'encryptedIndex: [${encryptedIndex.length} chars], '
       'title: $title, url: $url)';
-}
-
-bool _listsEqual<T>(List<T>? a, List<T>? b) {
-  if (a == null && b == null) return true;
-  if (a == null || b == null) return false;
-  if (a.length != b.length) return false;
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] != b[i]) return false;
-  }
-  return true;
-}
-
-bool _mapsEqual<K, V>(Map<K, V>? a, Map<K, V>? b) {
-  if (a == null && b == null) return true;
-  if (a == null || b == null) return false;
-  if (a.length != b.length) return false;
-  for (final key in a.keys) {
-    if (!b.containsKey(key) || a[key] != b[key]) return false;
-  }
-  return true;
 }

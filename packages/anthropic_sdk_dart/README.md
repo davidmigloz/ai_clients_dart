@@ -31,21 +31,27 @@ Unofficial Dart client for the **[Anthropic API](https://docs.anthropic.com/en/a
 - ✅ Streaming support (`messages.createStream`) with SSE
 - ✅ Request cancellation (via `abortTrigger`)
 - ✅ Token counting (`messages.countTokens`)
+- ✅ Advanced request controls (`outputConfig`, `inferenceGeo`, `container`, `speed`)
 
 ### Tool Use
 
 - ✅ Custom function/tool calling
 - ✅ Tool choice modes (auto, any, tool, none)
+- ✅ Tool governance metadata (`allowedCallers`, `deferLoading`, `strict`, `inputExamples`, `eagerInputStreaming`)
 - ✅ Built-in tools:
   - Web search (`WebSearchTool`)
+  - Web fetch (`WebFetchTool`)
   - Text editor (`TextEditorTool`)
   - Bash (`BashTool`)
   - Computer use (`ComputerUseTool`)
   - Code execution (`CodeExecutionTool`)
+  - Memory (`MemoryTool`)
+  - Tool search (`ToolSearchToolBm25`, `ToolSearchToolRegex`)
 
 ### Extended Thinking
 
 - ✅ Extended thinking mode (`ThinkingEnabled`)
+- ✅ Adaptive thinking mode (`ThinkingAdaptive`)
 - ✅ Thinking budget control
 - ✅ Streaming thinking blocks
 

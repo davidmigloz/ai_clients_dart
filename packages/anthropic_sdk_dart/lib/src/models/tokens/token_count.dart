@@ -1,9 +1,12 @@
 import 'package:meta/meta.dart';
 
+import '../beta/config/output_config.dart';
 import '../common/copy_with_sentinel.dart';
+import '../common/equality.dart';
 import '../messages/input_message.dart';
 import '../messages/message_create_request.dart';
 import '../messages/thinking_config.dart';
+import '../metadata/speed.dart';
 import '../tools/tool_choice.dart';
 import '../tools/tool_definition.dart';
 
@@ -34,6 +37,12 @@ class TokenCountRequest {
   /// ([ToolDefinition.builtIn]).
   final List<ToolDefinition>? tools;
 
+  /// Output behavior configuration (effort, structured output).
+  final OutputConfig? outputConfig;
+
+  /// Inference speed mode.
+  final Speed? speed;
+
   /// Creates a [TokenCountRequest].
   const TokenCountRequest({
     required this.model,
@@ -42,6 +51,8 @@ class TokenCountRequest {
     this.thinking,
     this.toolChoice,
     this.tools,
+    this.outputConfig,
+    this.speed,
   });
 
   /// Creates a [TokenCountRequest] from JSON.
@@ -63,6 +74,12 @@ class TokenCountRequest {
       tools: (json['tools'] as List?)
           ?.map((e) => ToolDefinition.fromJson(e as Map<String, dynamic>))
           .toList(),
+      outputConfig: json['output_config'] != null
+          ? OutputConfig.fromJson(json['output_config'] as Map<String, dynamic>)
+          : null,
+      speed: json['speed'] != null
+          ? Speed.fromJson(json['speed'] as String)
+          : null,
     );
   }
 
@@ -74,6 +91,8 @@ class TokenCountRequest {
     if (thinking != null) 'thinking': thinking!.toJson(),
     if (toolChoice != null) 'tool_choice': toolChoice!.toJson(),
     if (tools != null) 'tools': tools!.map((e) => e.toJson()).toList(),
+    if (outputConfig != null) 'output_config': outputConfig!.toJson(),
+    if (speed != null) 'speed': speed!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -84,6 +103,8 @@ class TokenCountRequest {
     Object? thinking = unsetCopyWithValue,
     Object? toolChoice = unsetCopyWithValue,
     Object? tools = unsetCopyWithValue,
+    Object? outputConfig = unsetCopyWithValue,
+    Object? speed = unsetCopyWithValue,
   }) {
     return TokenCountRequest(
       model: model ?? this.model,
@@ -100,6 +121,10 @@ class TokenCountRequest {
       tools: tools == unsetCopyWithValue
           ? this.tools
           : tools as List<ToolDefinition>?,
+      outputConfig: outputConfig == unsetCopyWithValue
+          ? this.outputConfig
+          : outputConfig as OutputConfig?,
+      speed: speed == unsetCopyWithValue ? this.speed : speed as Speed?,
     );
   }
 
@@ -109,20 +134,31 @@ class TokenCountRequest {
       other is TokenCountRequest &&
           runtimeType == other.runtimeType &&
           model == other.model &&
-          _listsEqual(messages, other.messages) &&
+          listsEqual(messages, other.messages) &&
           system == other.system &&
           thinking == other.thinking &&
           toolChoice == other.toolChoice &&
-          _listsEqual(tools, other.tools);
+          listsEqual(tools, other.tools) &&
+          outputConfig == other.outputConfig &&
+          speed == other.speed;
 
   @override
-  int get hashCode =>
-      Object.hash(model, messages, system, thinking, toolChoice, tools);
+  int get hashCode => Object.hash(
+    model,
+    messages,
+    system,
+    thinking,
+    toolChoice,
+    tools,
+    outputConfig,
+    speed,
+  );
 
   @override
   String toString() =>
       'TokenCountRequest(model: $model, messages: $messages, system: $system, '
-      'thinking: $thinking, toolChoice: $toolChoice, tools: $tools)';
+      'thinking: $thinking, toolChoice: $toolChoice, tools: $tools, '
+      'outputConfig: $outputConfig, speed: $speed)';
 }
 
 /// Response for token counting.
@@ -159,14 +195,4 @@ class TokenCountResponse {
 
   @override
   String toString() => 'TokenCountResponse(inputTokens: $inputTokens)';
-}
-
-bool _listsEqual<T>(List<T>? a, List<T>? b) {
-  if (a == null && b == null) return true;
-  if (a == null || b == null) return false;
-  if (a.length != b.length) return false;
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] != b[i]) return false;
-  }
-  return true;
 }

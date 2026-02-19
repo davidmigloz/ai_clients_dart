@@ -15,6 +15,12 @@ enum StopReason {
   /// The model paused mid-turn for continuation.
   pauseTurn('pause_turn'),
 
+  /// The model compacted prior context (beta compaction flows).
+  compaction('compaction'),
+
+  /// The model exceeded the context window.
+  modelContextWindowExceeded('model_context_window_exceeded'),
+
   /// The model refused to generate content.
   refusal('refusal');
 
@@ -30,6 +36,8 @@ enum StopReason {
     'stop_sequence' => StopReason.stopSequence,
     'tool_use' => StopReason.toolUse,
     'pause_turn' => StopReason.pauseTurn,
+    'compaction' => StopReason.compaction,
+    'model_context_window_exceeded' => StopReason.modelContextWindowExceeded,
     'refusal' => StopReason.refusal,
     _ => throw FormatException('Unknown StopReason: $value'),
   };

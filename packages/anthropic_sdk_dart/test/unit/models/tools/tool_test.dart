@@ -67,6 +67,13 @@ void main() {
             },
           },
           'cache_control': {'type': 'ephemeral'},
+          'allowed_callers': ['direct', 'code_execution_20260120'],
+          'defer_loading': true,
+          'strict': true,
+          'input_examples': [
+            {'query': 'hello'},
+          ],
+          'eager_input_streaming': true,
         };
 
         final tool = Tool.fromJson(json);
@@ -75,6 +82,13 @@ void main() {
         expect(tool.name, 'search');
         expect(tool.description, 'Search the web');
         expect(tool.cacheControl, isNotNull);
+        expect(tool.allowedCallers, ['direct', 'code_execution_20260120']);
+        expect(tool.deferLoading, isTrue);
+        expect(tool.strict, isTrue);
+        expect(tool.inputExamples, [
+          {'query': 'hello'},
+        ]);
+        expect(tool.eagerInputStreaming, isTrue);
       });
     });
 

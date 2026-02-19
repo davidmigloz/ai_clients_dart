@@ -168,6 +168,20 @@ void main() {
       expect(deltaEvent.delta.stopReason, StopReason.toolUse);
     });
 
+    test('parses message_delta event with compaction stop reason', () {
+      final json = {
+        'type': 'message_delta',
+        'delta': {'stop_reason': 'compaction', 'stop_sequence': null},
+        'usage': {'output_tokens': 50},
+      };
+
+      final event = MessageStreamEvent.fromJson(json);
+
+      expect(event, isA<MessageDeltaEvent>());
+      final deltaEvent = event as MessageDeltaEvent;
+      expect(deltaEvent.delta.stopReason, StopReason.compaction);
+    });
+
     test('parses message_stop event', () {
       final json = {'type': 'message_stop'};
 
@@ -250,6 +264,18 @@ void main() {
 
       expect(delta, isA<ThinkingDelta>());
       expect((delta as ThinkingDelta).thinking, 'I need to analyze...');
+    });
+
+    test('compaction_delta deserializes correctly', () {
+      final json = {
+        'type': 'compaction_delta',
+        'content': 'Compacted context summary',
+      };
+
+      final delta = ContentBlockDelta.fromJson(json);
+
+      expect(delta, isA<CompactionDelta>());
+      expect((delta as CompactionDelta).content, 'Compacted context summary');
     });
   });
 

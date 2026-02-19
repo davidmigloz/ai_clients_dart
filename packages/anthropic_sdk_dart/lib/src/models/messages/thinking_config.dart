@@ -13,12 +13,18 @@ sealed class ThinkingConfig {
   /// Disables extended thinking.
   factory ThinkingConfig.disabled() = ThinkingDisabled;
 
+  /// Enables adaptive thinking mode.
+  ///
+  /// In adaptive mode, the model automatically determines the thinking budget.
+  factory ThinkingConfig.adaptive() = ThinkingAdaptive;
+
   /// Creates a [ThinkingConfig] from JSON.
   factory ThinkingConfig.fromJson(Map<String, dynamic> json) {
     final type = json['type'] as String;
     return switch (type) {
       'enabled' => ThinkingEnabled.fromJson(json),
       'disabled' => ThinkingDisabled.fromJson(json),
+      'adaptive' => ThinkingAdaptive.fromJson(json),
       _ => throw FormatException('Unknown ThinkingConfig type: $type'),
     };
   }
@@ -92,4 +98,30 @@ class ThinkingDisabled extends ThinkingConfig {
 
   @override
   String toString() => 'ThinkingDisabled()';
+}
+
+/// Enables adaptive thinking where budget is determined by the model.
+@immutable
+class ThinkingAdaptive extends ThinkingConfig {
+  /// Creates a [ThinkingAdaptive].
+  const ThinkingAdaptive();
+
+  /// Creates a [ThinkingAdaptive] from JSON.
+  factory ThinkingAdaptive.fromJson(Map<String, dynamic> _) {
+    return const ThinkingAdaptive();
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': 'adaptive'};
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ThinkingAdaptive && runtimeType == other.runtimeType;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  String toString() => 'ThinkingAdaptive()';
 }

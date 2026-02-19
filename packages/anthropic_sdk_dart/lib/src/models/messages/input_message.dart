@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality.dart';
+
 import '../content/input_content_block.dart';
 import 'message_role.dart';
 
@@ -78,7 +80,7 @@ class BlocksMessageContent extends MessageContent {
       identical(this, other) ||
       other is BlocksMessageContent &&
           runtimeType == other.runtimeType &&
-          _listsEqual(blocks, other.blocks);
+          listsEqual(blocks, other.blocks);
 
   @override
   int get hashCode => blocks.hashCode;
@@ -158,14 +160,4 @@ class InputMessage {
 
   @override
   String toString() => 'InputMessage(role: $role, content: $content)';
-}
-
-bool _listsEqual<T>(List<T>? a, List<T>? b) {
-  if (a == null && b == null) return true;
-  if (a == null || b == null) return false;
-  if (a.length != b.length) return false;
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] != b[i]) return false;
-  }
-  return true;
 }

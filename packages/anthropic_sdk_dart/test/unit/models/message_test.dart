@@ -14,7 +14,15 @@ void main() {
         ],
         'stop_reason': 'end_turn',
         'stop_sequence': null,
-        'usage': {'input_tokens': 10, 'output_tokens': 5},
+        'usage': {
+          'input_tokens': 10,
+          'output_tokens': 5,
+          'inference_geo': 'us',
+        },
+        'container': {
+          'id': 'container_123',
+          'expires_at': '2026-02-20T00:00:00Z',
+        },
       };
 
       final message = Message.fromJson(json);
@@ -30,6 +38,9 @@ void main() {
       expect(message.stopSequence, isNull);
       expect(message.usage.inputTokens, 10);
       expect(message.usage.outputTokens, 5);
+      expect(message.usage.inferenceGeo, 'us');
+      expect(message.container, isNotNull);
+      expect(message.container!.id, 'container_123');
     });
 
     test('fromJson parses message with tool use', () {
@@ -93,6 +104,24 @@ void main() {
       final thinking = message.content[0] as ThinkingBlock;
       expect(thinking.thinking, 'Let me think about this...');
       expect(thinking.signature, 'sig123');
+    });
+
+    test('fromJson parses model_context_window_exceeded stop reason', () {
+      final json = {
+        'id': 'msg_ctx',
+        'type': 'message',
+        'role': 'assistant',
+        'model': 'claude-opus-4-6-20260205',
+        'content': [
+          {'type': 'text', 'text': 'Response truncated by context window.'},
+        ],
+        'stop_reason': 'model_context_window_exceeded',
+        'stop_sequence': null,
+        'usage': {'input_tokens': 220000, 'output_tokens': 10},
+      };
+
+      final message = Message.fromJson(json);
+      expect(message.stopReason, StopReason.modelContextWindowExceeded);
     });
 
     test('toJson produces valid JSON', () {

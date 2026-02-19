@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality.dart';
+
 import 'skill.dart';
 import 'skill_version.dart';
 
@@ -64,7 +66,7 @@ class SkillListResponse {
       identical(this, other) ||
       other is SkillListResponse &&
           runtimeType == other.runtimeType &&
-          _listsEqual(data, other.data) &&
+          listsEqual(data, other.data) &&
           hasMore == other.hasMore &&
           nextPage == other.nextPage;
 
@@ -134,7 +136,7 @@ class SkillVersionListResponse {
       identical(this, other) ||
       other is SkillVersionListResponse &&
           runtimeType == other.runtimeType &&
-          _listsEqual(data, other.data) &&
+          listsEqual(data, other.data) &&
           hasMore == other.hasMore &&
           nextPage == other.nextPage;
 
@@ -147,12 +149,4 @@ class SkillVersionListResponse {
       'data: $data, '
       'hasMore: $hasMore, '
       'nextPage: $nextPage)';
-}
-
-bool _listsEqual<T>(List<T> a, List<T> b) {
-  if (a.length != b.length) return false;
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] != b[i]) return false;
-  }
-  return true;
 }

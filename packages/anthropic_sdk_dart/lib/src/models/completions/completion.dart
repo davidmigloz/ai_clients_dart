@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality.dart';
 import '../metadata/metadata.dart';
 import '../metadata/stop_reason.dart';
 
@@ -121,7 +122,7 @@ class CompletionRequest {
           model == other.model &&
           prompt == other.prompt &&
           maxTokensToSample == other.maxTokensToSample &&
-          _listsEqual(stopSequences, other.stopSequences) &&
+          listsEqual(stopSequences, other.stopSequences) &&
           stream == other.stream &&
           temperature == other.temperature &&
           topP == other.topP &&
@@ -241,14 +242,4 @@ class CompletionResponse {
       'CompletionResponse(id: $id, type: $type, '
       'completion: [${completion.length} chars], '
       'stopReason: $stopReason, model: $model)';
-}
-
-bool _listsEqual<T>(List<T>? a, List<T>? b) {
-  if (a == null && b == null) return true;
-  if (a == null || b == null) return false;
-  if (a.length != b.length) return false;
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] != b[i]) return false;
-  }
-  return true;
 }

@@ -129,6 +129,60 @@ void main() {
         expect(webSearch.allowedDomains, ['example.com']);
       });
 
+      test('parses web_fetch built-in tool', () {
+        final json = {
+          'type': 'web_fetch_20260209',
+          'name': 'web_fetch',
+          'max_uses': 2,
+          'max_content_tokens': 2048,
+        };
+
+        final definition = ToolDefinition.fromJson(json);
+
+        expect(definition, isA<BuiltInToolDefinition>());
+        final builtIn = (definition as BuiltInToolDefinition).tool;
+        expect(builtIn, isA<WebFetchTool>());
+        final webFetch = builtIn as WebFetchTool;
+        expect(webFetch.maxUses, 2);
+        expect(webFetch.maxContentTokens, 2048);
+      });
+
+      test('parses memory built-in tool', () {
+        final json = {'type': 'memory_20250818', 'name': 'memory'};
+
+        final definition = ToolDefinition.fromJson(json);
+
+        expect(definition, isA<BuiltInToolDefinition>());
+        final builtIn = (definition as BuiltInToolDefinition).tool;
+        expect(builtIn, isA<MemoryTool>());
+      });
+
+      test('parses tool search built-in tool', () {
+        final json = {
+          'type': 'tool_search_tool_bm25_20251119',
+          'name': 'tool_search_tool_bm25',
+        };
+
+        final definition = ToolDefinition.fromJson(json);
+
+        expect(definition, isA<BuiltInToolDefinition>());
+        final builtIn = (definition as BuiltInToolDefinition).tool;
+        expect(builtIn, isA<ToolSearchToolBm25>());
+      });
+
+      test('parses code execution built-in tool', () {
+        final json = {
+          'type': 'code_execution_20260120',
+          'name': 'code_execution',
+        };
+
+        final definition = ToolDefinition.fromJson(json);
+
+        expect(definition, isA<BuiltInToolDefinition>());
+        final builtIn = (definition as BuiltInToolDefinition).tool;
+        expect(builtIn, isA<CodeExecutionBuiltInTool>());
+      });
+
       test('parses computer_use built-in tool', () {
         final json = {
           'type': 'computer_20250124',
@@ -225,6 +279,18 @@ void main() {
         expect(json['type'], 'web_search_20250305');
         expect(json['name'], 'web_search');
         expect(json['max_uses'], 10);
+      });
+
+      test('serializes BuiltInToolDefinition (WebFetchTool)', () {
+        const builtIn = WebFetchTool(maxUses: 1, maxContentTokens: 4096);
+        final definition = ToolDefinition.builtIn(builtIn);
+
+        final json = definition.toJson();
+
+        expect(json['type'], 'web_fetch_20260209');
+        expect(json['name'], 'web_fetch');
+        expect(json['max_uses'], 1);
+        expect(json['max_content_tokens'], 4096);
       });
     });
 
