@@ -29,7 +29,6 @@
 ///   CreateResponseRequest(
 ///     model: 'gpt-4o',
 ///     input: ResponseInput.text('Continue our conversation'),
-///     conversation: ResponseConversation.id(conversation.id),
 ///   ),
 /// );
 ///

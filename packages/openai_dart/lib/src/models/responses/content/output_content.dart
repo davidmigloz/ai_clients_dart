@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import '../common/copy_with_sentinel.dart';
+import '../../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import 'annotation.dart';
 import 'logprob.dart';

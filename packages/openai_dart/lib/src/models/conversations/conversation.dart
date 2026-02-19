@@ -22,7 +22,6 @@ import '../responses/common/equality_helpers.dart';
 ///   CreateResponseRequest(
 ///     model: 'gpt-4o',
 ///     input: 'Hello!',
-///     conversation: ResponseConversation.id(conversation.id),
 ///   ),
 /// );
 /// ```
