@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../chat/chat_completion_request.dart' show StreamOptions;
+import 'common/copy_with_sentinel.dart';
 import 'common/equality_helpers.dart';
 import 'config/config.dart';
 import 'items/item.dart';
@@ -262,61 +263,104 @@ class CreateResponseRequest {
   }
 
   /// Creates a copy with replaced values.
+  ///
+  /// Nullable fields can be explicitly set to `null` to clear them.
+  /// Omitted fields retain their current values.
   CreateResponseRequest copyWith({
     String? model,
     ResponseInput? input,
-    String? instructions,
-    List<ResponseTool>? tools,
-    ResponseToolChoice? toolChoice,
-    String? previousResponseId,
-    int? maxOutputTokens,
-    double? temperature,
-    double? topP,
-    double? presencePenalty,
-    double? frequencyPenalty,
-    bool? stream,
-    StreamOptions? streamOptions,
-    ReasoningConfig? reasoning,
-    TextConfig? text,
-    Truncation? truncation,
-    bool? parallelToolCalls,
-    ServiceTier? serviceTier,
-    Map<String, dynamic>? metadata,
-    List<Include>? include,
-    bool? store,
-    bool? background,
-    int? maxToolCalls,
-    String? safetyIdentifier,
-    String? promptCacheKey,
-    int? topLogprobs,
+    Object? instructions = unsetCopyWithValue,
+    Object? tools = unsetCopyWithValue,
+    Object? toolChoice = unsetCopyWithValue,
+    Object? previousResponseId = unsetCopyWithValue,
+    Object? maxOutputTokens = unsetCopyWithValue,
+    Object? temperature = unsetCopyWithValue,
+    Object? topP = unsetCopyWithValue,
+    Object? presencePenalty = unsetCopyWithValue,
+    Object? frequencyPenalty = unsetCopyWithValue,
+    Object? stream = unsetCopyWithValue,
+    Object? streamOptions = unsetCopyWithValue,
+    Object? reasoning = unsetCopyWithValue,
+    Object? text = unsetCopyWithValue,
+    Object? truncation = unsetCopyWithValue,
+    Object? parallelToolCalls = unsetCopyWithValue,
+    Object? serviceTier = unsetCopyWithValue,
+    Object? metadata = unsetCopyWithValue,
+    Object? include = unsetCopyWithValue,
+    Object? store = unsetCopyWithValue,
+    Object? background = unsetCopyWithValue,
+    Object? maxToolCalls = unsetCopyWithValue,
+    Object? safetyIdentifier = unsetCopyWithValue,
+    Object? promptCacheKey = unsetCopyWithValue,
+    Object? topLogprobs = unsetCopyWithValue,
   }) {
     return CreateResponseRequest(
       model: model ?? this.model,
       input: input ?? this.input,
-      instructions: instructions ?? this.instructions,
-      tools: tools ?? this.tools,
-      toolChoice: toolChoice ?? this.toolChoice,
-      previousResponseId: previousResponseId ?? this.previousResponseId,
-      maxOutputTokens: maxOutputTokens ?? this.maxOutputTokens,
-      temperature: temperature ?? this.temperature,
-      topP: topP ?? this.topP,
-      presencePenalty: presencePenalty ?? this.presencePenalty,
-      frequencyPenalty: frequencyPenalty ?? this.frequencyPenalty,
-      stream: stream ?? this.stream,
-      streamOptions: streamOptions ?? this.streamOptions,
-      reasoning: reasoning ?? this.reasoning,
-      text: text ?? this.text,
-      truncation: truncation ?? this.truncation,
-      parallelToolCalls: parallelToolCalls ?? this.parallelToolCalls,
-      serviceTier: serviceTier ?? this.serviceTier,
-      metadata: metadata ?? this.metadata,
-      include: include ?? this.include,
-      store: store ?? this.store,
-      background: background ?? this.background,
-      maxToolCalls: maxToolCalls ?? this.maxToolCalls,
-      safetyIdentifier: safetyIdentifier ?? this.safetyIdentifier,
-      promptCacheKey: promptCacheKey ?? this.promptCacheKey,
-      topLogprobs: topLogprobs ?? this.topLogprobs,
+      instructions: instructions == unsetCopyWithValue
+          ? this.instructions
+          : instructions as String?,
+      tools: tools == unsetCopyWithValue
+          ? this.tools
+          : tools as List<ResponseTool>?,
+      toolChoice: toolChoice == unsetCopyWithValue
+          ? this.toolChoice
+          : toolChoice as ResponseToolChoice?,
+      previousResponseId: previousResponseId == unsetCopyWithValue
+          ? this.previousResponseId
+          : previousResponseId as String?,
+      maxOutputTokens: maxOutputTokens == unsetCopyWithValue
+          ? this.maxOutputTokens
+          : maxOutputTokens as int?,
+      temperature: temperature == unsetCopyWithValue
+          ? this.temperature
+          : temperature as double?,
+      topP: topP == unsetCopyWithValue ? this.topP : topP as double?,
+      presencePenalty: presencePenalty == unsetCopyWithValue
+          ? this.presencePenalty
+          : presencePenalty as double?,
+      frequencyPenalty: frequencyPenalty == unsetCopyWithValue
+          ? this.frequencyPenalty
+          : frequencyPenalty as double?,
+      stream: stream == unsetCopyWithValue ? this.stream : stream as bool?,
+      streamOptions: streamOptions == unsetCopyWithValue
+          ? this.streamOptions
+          : streamOptions as StreamOptions?,
+      reasoning: reasoning == unsetCopyWithValue
+          ? this.reasoning
+          : reasoning as ReasoningConfig?,
+      text: text == unsetCopyWithValue ? this.text : text as TextConfig?,
+      truncation: truncation == unsetCopyWithValue
+          ? this.truncation
+          : truncation as Truncation?,
+      parallelToolCalls: parallelToolCalls == unsetCopyWithValue
+          ? this.parallelToolCalls
+          : parallelToolCalls as bool?,
+      serviceTier: serviceTier == unsetCopyWithValue
+          ? this.serviceTier
+          : serviceTier as ServiceTier?,
+      metadata: metadata == unsetCopyWithValue
+          ? this.metadata
+          : metadata as Map<String, dynamic>?,
+      include: include == unsetCopyWithValue
+          ? this.include
+          : include as List<Include>?,
+      store: store == unsetCopyWithValue ? this.store : store as bool?,
+      background: background == unsetCopyWithValue
+          ? this.background
+          : background as bool?,
+      maxToolCalls: maxToolCalls == unsetCopyWithValue
+          ? this.maxToolCalls
+          : maxToolCalls as int?,
+      safetyIdentifier: safetyIdentifier == unsetCopyWithValue
+          ? this.safetyIdentifier
+          : safetyIdentifier as String?,
+      promptCacheKey: promptCacheKey == unsetCopyWithValue
+          ? this.promptCacheKey
+          : promptCacheKey as String?,
+      topLogprobs: topLogprobs == unsetCopyWithValue
+          ? this.topLogprobs
+          : topLogprobs as int?,
     );
   }
 

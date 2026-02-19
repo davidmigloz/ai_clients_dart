@@ -761,7 +761,7 @@ void main() {
 
         final tokenCount = await client!.responses.inputTokens.count(
           model: 'gpt-4o-mini',
-          input: 'Hello, how are you today?',
+          input: const ResponseInput.text('Hello, how are you today?'),
         );
 
         expect(tokenCount.inputTokens, greaterThan(0));

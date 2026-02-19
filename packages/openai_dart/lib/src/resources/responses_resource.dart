@@ -85,7 +85,7 @@ class ResponsesResource extends BaseResource {
   /// ```dart
   /// final tokenCount = await client.responses.inputTokens.count(
   ///   model: 'gpt-4o',
-  ///   input: 'Hello, how are you?',
+  ///   input: ResponseInput.text('Hello, how are you?'),
   /// );
   /// print('Input tokens: ${tokenCount.inputTokens}');
   /// ```

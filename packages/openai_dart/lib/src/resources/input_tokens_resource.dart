@@ -1,4 +1,5 @@
 import '../models/responses/input_token_count.dart';
+import '../models/responses/response_input.dart';
 import '../models/responses/tools/response_tool.dart';
 import 'base_resource.dart';
 
@@ -12,7 +13,7 @@ import 'base_resource.dart';
 /// ```dart
 /// final tokenCount = await client.responses.inputTokens.count(
 ///   model: 'gpt-4o',
-///   input: 'Hello, how are you?',
+///   input: ResponseInput.text('Hello, how are you?'),
 /// );
 /// print('Input tokens: ${tokenCount.inputTokens}');
 /// ```
@@ -27,8 +28,8 @@ class InputTokensResource extends BaseResource {
   /// ## Parameters
   ///
   /// - [model] - The model to use for token counting.
-  /// - [input] - The input to count tokens for. Can be a String or a List
-  ///   of response input items.
+  /// - [input] - The input to count tokens for. Use [ResponseInput.text] for
+  ///   a simple string or [ResponseInput.items] for a list of items.
   /// - [instructions] - System instructions to include in the count.
   /// - [tools] - Tools that would be available in the request.
   /// - [previousResponseId] - ID of a previous response to continue from.
@@ -50,14 +51,14 @@ class InputTokensResource extends BaseResource {
   /// // Simple text input
   /// final tokenCount = await client.responses.inputTokens.count(
   ///   model: 'gpt-4o',
-  ///   input: 'Hello, how are you?',
+  ///   input: ResponseInput.text('Hello, how are you?'),
   /// );
   /// print('Input tokens: ${tokenCount.inputTokens}');
   ///
   /// // With tools
   /// final countWithTools = await client.responses.inputTokens.count(
   ///   model: 'gpt-4o',
-  ///   input: 'What is the weather in Paris?',
+  ///   input: ResponseInput.text('What is the weather in Paris?'),
   ///   tools: [
   ///     ResponseTool.function(
   ///       name: 'get_weather',
@@ -69,7 +70,7 @@ class InputTokensResource extends BaseResource {
   /// ```
   Future<InputTokenCountResponse> count({
     String? model,
-    Object? input,
+    ResponseInput? input,
     String? instructions,
     List<ResponseTool>? tools,
     String? previousResponseId,
@@ -84,26 +85,7 @@ class InputTokensResource extends BaseResource {
     final body = <String, dynamic>{};
 
     if (model != null) body['model'] = model;
-
-    // Handle input (can be String or List)
-    if (input != null) {
-      if (input is String) {
-        body['input'] = input;
-      } else if (input is List) {
-        body['input'] = input.map((item) {
-          if (item is Map<String, dynamic>) return item;
-          // Handle items with toJson method
-          try {
-            // ignore: avoid_dynamic_calls
-            return (item as dynamic).toJson() as Map<String, dynamic>;
-          } catch (_) {
-            return item;
-          }
-        }).toList();
-      } else {
-        body['input'] = input;
-      }
-    }
+    if (input != null) body['input'] = input.toJson();
 
     if (instructions != null) body['instructions'] = instructions;
 

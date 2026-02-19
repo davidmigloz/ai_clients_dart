@@ -231,6 +231,27 @@ void main() {
 
       expect(restored.metadata, equals({'key': 'value'}));
     });
+
+    test('copyWith can reset nullable fields to null', () {
+      const request = CreateResponseRequest(
+        model: 'gpt-4o',
+        input: ResponseInput.text('Hello!'),
+        instructions: 'Be helpful',
+        temperature: 0.7,
+        metadata: {'key': 'value'},
+      );
+
+      final cleared = request.copyWith(
+        instructions: null,
+        temperature: null,
+        metadata: null,
+      );
+
+      expect(cleared.model, equals('gpt-4o'));
+      expect(cleared.instructions, isNull);
+      expect(cleared.temperature, isNull);
+      expect(cleared.metadata, isNull);
+    });
   });
 
   group('Response', () {
