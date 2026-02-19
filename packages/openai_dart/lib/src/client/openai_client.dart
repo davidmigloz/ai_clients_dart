@@ -29,6 +29,7 @@ import '../resources/moderations_resource.dart';
 import '../resources/realtime_resource.dart';
 import '../resources/realtime_sessions_resource.dart';
 import '../resources/responses_resource.dart';
+import '../resources/skills_resource.dart';
 import '../resources/uploads_resource.dart';
 import '../resources/videos_resource.dart';
 import '../utils/request_id.dart';
@@ -77,6 +78,7 @@ import 'retry_wrapper.dart';
 /// - [models] - Model information
 /// - [moderations] - Content moderation
 /// - [fineTuning] - Fine-tuning jobs
+/// - [skills] - Skills API for skill bundles and versions
 /// - [beta] - Beta features (Assistants, Threads, etc.)
 /// - [realtime] - Real-time API (WebSocket)
 ///
@@ -920,6 +922,13 @@ class OpenAIClient {
   /// }
   /// ```
   ResponsesResource get responses => _responses ??= ResponsesResource(this);
+
+  SkillsResource? _skills;
+
+  /// Skills API resource.
+  ///
+  /// Use this to create, list, retrieve, version, and delete skill bundles.
+  SkillsResource get skills => _skills ??= SkillsResource(this);
 
   ConversationsResource? _conversations;
 

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
@@ -262,6 +263,48 @@ void main() {
 
       // Verify X-Request-ID is present
       expect(request.headers['X-Request-ID'], isNotNull);
+
+      client.close();
+    });
+
+    test('image editJson sends application/json payload', () async {
+      final requestCompleter = Completer<http.BaseRequest>();
+
+      final mockClient = MockClient((request) async {
+        requestCompleter.complete(request);
+        return http.Response(
+          '{"created":1234567890,"data":[{"b64_json":"abc"}]}',
+          200,
+        );
+      });
+
+      final client = OpenAIClient(
+        config: const OpenAIConfig(
+          authProvider: ApiKeyProvider('sk-test-key'),
+          organization: 'test-org',
+          project: 'test-project',
+        ),
+        httpClient: mockClient,
+      );
+
+      await client.images.editJson(
+        const ImageEditJsonRequest(
+          images: [ImageReference.file('file_123')],
+          prompt: 'Add a hat',
+        ),
+      );
+
+      final request = await requestCompleter.future as http.Request;
+      final body = jsonDecode(request.body) as Map<String, dynamic>;
+      final images = body['images'] as List<dynamic>;
+      final firstImage = images.first as Map<String, dynamic>;
+
+      expect(request.method, equals('POST'));
+      expect(request.url.path, endsWith('/images/edits'));
+      expect(request.headers['Content-Type'], equals('application/json'));
+      expect(firstImage['file_id'], equals('file_123'));
+      expect(body['prompt'], equals('Add a hat'));
+      expect(request.headers['Authorization'], equals('Bearer sk-test-key'));
 
       client.close();
     });

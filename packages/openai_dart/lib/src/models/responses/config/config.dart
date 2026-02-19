@@ -1,6 +1,7 @@
 /// Configuration models for the Responses API.
 library;
 
+export 'context_management.dart';
 export 'function_call_status.dart';
 export 'include.dart';
 export 'item_status.dart';

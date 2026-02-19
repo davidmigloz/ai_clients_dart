@@ -24,6 +24,7 @@ export 'realtime_resource.dart';
 export 'realtime_sessions_resource.dart';
 export 'responses_resource.dart';
 export 'runs_resource.dart';
+export 'skills_resource.dart';
 export 'threads_resource.dart';
 export 'uploads_resource.dart';
 export 'vector_stores_resource.dart';

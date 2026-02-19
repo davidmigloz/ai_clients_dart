@@ -14,12 +14,16 @@ sealed class ResponseTool {
     final type = json['type'] as String;
     return switch (type) {
       'function' => FunctionTool.fromJson(json),
-      'web_search_preview' || 'web_search' => WebSearchTool.fromJson(json),
+      'web_search_preview' ||
+      'web_search' ||
+      'web_search_preview_2025_03_11' => WebSearchTool.fromJson(json),
       'file_search' => FileSearchTool.fromJson(json),
       'code_interpreter' => CodeInterpreterTool.fromJson(json),
       'computer_use_preview' => ComputerUseTool.fromJson(json),
       'image_generation' => ImageGenerationTool.fromJson(json),
       'mcp' => McpTool.fromJson(json),
+      'shell' => ShellTool.fromJson(json),
+      'local_shell' => LocalShellTool.fromJson(json),
       _ => throw FormatException('Unknown ResponseTool type: $type'),
     };
   }
@@ -109,6 +113,12 @@ sealed class ResponseTool {
     allowedTools: allowedTools,
     requireApproval: requireApproval,
   );
+
+  /// Creates a hosted shell tool.
+  static ShellTool shell() => const ShellTool();
+
+  /// Creates a local shell tool.
+  static LocalShellTool localShell() => const LocalShellTool();
 
   /// Converts to JSON.
   Map<String, dynamic> toJson();
@@ -590,4 +600,60 @@ class McpTool extends ResponseTool {
   @override
   String toString() =>
       'McpTool(serverLabel: $serverLabel, serverUrl: $serverUrl, allowedTools: $allowedTools, requireApproval: $requireApproval)';
+}
+
+/// Hosted shell tool for command execution.
+@immutable
+class ShellTool extends ResponseTool {
+  /// Creates a [ShellTool].
+  const ShellTool();
+
+  /// Creates a [ShellTool] from JSON.
+  factory ShellTool.fromJson(Map<String, dynamic> json) {
+    if ((json['type'] as String?) != 'shell') {
+      throw const FormatException('Invalid type for ShellTool');
+    }
+    return const ShellTool();
+  }
+
+  @override
+  Map<String, dynamic> toJson() => const {'type': 'shell'};
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || other is ShellTool;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  String toString() => 'ShellTool()';
+}
+
+/// Local shell tool for command execution in a local environment.
+@immutable
+class LocalShellTool extends ResponseTool {
+  /// Creates a [LocalShellTool].
+  const LocalShellTool();
+
+  /// Creates a [LocalShellTool] from JSON.
+  factory LocalShellTool.fromJson(Map<String, dynamic> json) {
+    if ((json['type'] as String?) != 'local_shell') {
+      throw const FormatException('Invalid type for LocalShellTool');
+    }
+    return const LocalShellTool();
+  }
+
+  @override
+  Map<String, dynamic> toJson() => const {'type': 'local_shell'};
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || other is LocalShellTool;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  String toString() => 'LocalShellTool()';
 }

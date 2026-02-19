@@ -250,6 +250,7 @@ void main() {
 
   group('BatchEndpoint', () {
     test('fromJson parses all values', () {
+      expect(BatchEndpoint.fromJson('/v1/responses'), BatchEndpoint.responses);
       expect(
         BatchEndpoint.fromJson('/v1/chat/completions'),
         BatchEndpoint.chatCompletions,
@@ -262,11 +263,30 @@ void main() {
         BatchEndpoint.fromJson('/v1/completions'),
         BatchEndpoint.completions,
       );
+      expect(
+        BatchEndpoint.fromJson('/v1/moderations'),
+        BatchEndpoint.moderations,
+      );
+      expect(
+        BatchEndpoint.fromJson('/v1/images/generations'),
+        BatchEndpoint.imagesGenerations,
+      );
+      expect(
+        BatchEndpoint.fromJson('/v1/images/edits'),
+        BatchEndpoint.imagesEdits,
+      );
     });
 
     test('toJson returns correct string', () {
+      expect(BatchEndpoint.responses.toJson(), '/v1/responses');
       expect(BatchEndpoint.chatCompletions.toJson(), '/v1/chat/completions');
       expect(BatchEndpoint.embeddings.toJson(), '/v1/embeddings');
+      expect(BatchEndpoint.moderations.toJson(), '/v1/moderations');
+      expect(
+        BatchEndpoint.imagesGenerations.toJson(),
+        '/v1/images/generations',
+      );
+      expect(BatchEndpoint.imagesEdits.toJson(), '/v1/images/edits');
     });
   });
 

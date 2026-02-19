@@ -94,6 +94,9 @@ class CreateResponseRequest {
   /// Truncation strategy for long inputs.
   final Truncation? truncation;
 
+  /// Context management configuration for long-running conversations.
+  final List<ContextManagement>? contextManagement;
+
   /// Whether to allow parallel tool calls.
   final bool? parallelToolCalls;
 
@@ -150,6 +153,7 @@ class CreateResponseRequest {
     this.reasoning,
     this.text,
     this.truncation,
+    this.contextManagement,
     this.parallelToolCalls,
     this.serviceTier,
     this.metadata,
@@ -208,6 +212,9 @@ class CreateResponseRequest {
       truncation: json['truncation'] != null
           ? Truncation.fromJson(json['truncation'] as String)
           : null,
+      contextManagement: (json['context_management'] as List?)
+          ?.map((e) => ContextManagement.fromJson(e as Map<String, dynamic>))
+          .toList(),
       parallelToolCalls: json['parallel_tool_calls'] as bool?,
       serviceTier: json['service_tier'] != null
           ? ServiceTier.fromJson(json['service_tier'] as String)
@@ -245,6 +252,10 @@ class CreateResponseRequest {
       if (reasoning != null) 'reasoning': reasoning!.toJson(),
       if (text != null) 'text': text!.toJson(),
       if (truncation != null) 'truncation': truncation!.toJson(),
+      if (contextManagement != null)
+        'context_management': contextManagement!
+            .map((e) => e.toJson())
+            .toList(),
       if (parallelToolCalls != null) 'parallel_tool_calls': parallelToolCalls,
       if (serviceTier != null) 'service_tier': serviceTier!.toJson(),
       if (metadata case final metadata?
@@ -284,6 +295,7 @@ class CreateResponseRequest {
     Object? reasoning = unsetCopyWithValue,
     Object? text = unsetCopyWithValue,
     Object? truncation = unsetCopyWithValue,
+    Object? contextManagement = unsetCopyWithValue,
     Object? parallelToolCalls = unsetCopyWithValue,
     Object? serviceTier = unsetCopyWithValue,
     Object? metadata = unsetCopyWithValue,
@@ -334,6 +346,9 @@ class CreateResponseRequest {
       truncation: truncation == unsetCopyWithValue
           ? this.truncation
           : truncation as Truncation?,
+      contextManagement: contextManagement == unsetCopyWithValue
+          ? this.contextManagement
+          : contextManagement as List<ContextManagement>?,
       parallelToolCalls: parallelToolCalls == unsetCopyWithValue
           ? this.parallelToolCalls
           : parallelToolCalls as bool?,
@@ -387,6 +402,7 @@ class CreateResponseRequest {
         reasoning == other.reasoning &&
         text == other.text &&
         truncation == other.truncation &&
+        listsEqual(contextManagement, other.contextManagement) &&
         parallelToolCalls == other.parallelToolCalls &&
         serviceTier == other.serviceTier &&
         mapsEqual(metadata, other.metadata) &&
@@ -417,6 +433,7 @@ class CreateResponseRequest {
     reasoning,
     text,
     truncation,
+    contextManagement,
     parallelToolCalls,
     serviceTier,
     metadata,

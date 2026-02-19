@@ -122,6 +122,44 @@ void main() {
     });
   });
 
+  group('ImageEditJsonRequest', () {
+    test('serializes JSON edit payload', () {
+      const request = ImageEditJsonRequest(
+        model: 'gpt-image-1.5',
+        images: [ImageReference.url('https://example.com/source.png')],
+        prompt: 'Add a watercolor effect',
+        quality: ImageEditJsonQuality.high,
+        size: ImageEditJsonSize.size1024x1024,
+        outputFormat: ImageOutputFormat.png,
+      );
+
+      final json = request.toJson();
+      final images = json['images'] as List<dynamic>;
+      final firstImage = images.first as Map<String, dynamic>;
+
+      expect(json['model'], equals('gpt-image-1.5'));
+      expect(firstImage['image_url'], isNotNull);
+      expect(json['prompt'], equals('Add a watercolor effect'));
+      expect(json['quality'], equals('high'));
+      expect(json['size'], equals('1024x1024'));
+      expect(json['output_format'], equals('png'));
+    });
+
+    test('deserializes JSON edit payload', () {
+      final request = ImageEditJsonRequest.fromJson(const {
+        'images': [
+          {'file_id': 'file_123'},
+        ],
+        'prompt': 'Edit this image',
+        'background': 'transparent',
+      });
+
+      expect(request.images.first.fileId, equals('file_123'));
+      expect(request.prompt, equals('Edit this image'));
+      expect(request.background, equals(ImageBackground.transparent));
+    });
+  });
+
   group('GeneratedImage', () {
     test('parses URL response', () {
       final json = {'url': 'https://example.com/image.png'};

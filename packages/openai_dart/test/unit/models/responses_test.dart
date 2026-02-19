@@ -262,6 +262,93 @@ void main() {
       expect(cleared.temperature, isNull);
       expect(cleared.metadata, isNull);
     });
+
+    test('serializes context_management entries', () {
+      const request = CreateResponseRequest(
+        model: 'gpt-4o',
+        input: ResponseInput.text('Hello!'),
+        contextManagement: [
+          ContextManagement.compaction(compactThreshold: 8000),
+        ],
+      );
+
+      final json = request.toJson();
+      final context = json['context_management'] as List<dynamic>;
+      final entry = context.first as Map<String, dynamic>;
+
+      expect(entry['type'], equals('compaction'));
+      expect(entry['compact_threshold'], equals(8000));
+    });
+
+    test('deserializes context_management entries', () {
+      final request = CreateResponseRequest.fromJson(const {
+        'model': 'gpt-4o',
+        'input': 'Hello!',
+        'context_management': [
+          {'type': 'compaction', 'compact_threshold': 5000},
+        ],
+      });
+
+      expect(request.contextManagement, isNotNull);
+      expect(request.contextManagement, hasLength(1));
+      expect(request.contextManagement!.first.type, equals('compaction'));
+      expect(request.contextManagement!.first.compactThreshold, equals(5000));
+    });
+  });
+
+  group('CompactResponseRequest', () {
+    test('serializes to JSON', () {
+      const request = CompactResponseRequest(
+        model: 'gpt-5.1-codex-max',
+        input: ResponseInput.text('Summarize this conversation'),
+        previousResponseId: 'resp_123',
+        instructions: 'Keep important decisions only.',
+      );
+
+      final json = request.toJson();
+
+      expect(json['model'], equals('gpt-5.1-codex-max'));
+      expect(json['input'], equals('Summarize this conversation'));
+      expect(json['previous_response_id'], equals('resp_123'));
+      expect(json['instructions'], equals('Keep important decisions only.'));
+    });
+
+    test('deserializes from JSON', () {
+      final request = CompactResponseRequest.fromJson(const {
+        'model': 'gpt-5.1-codex-max',
+        'input': 'Summarize this conversation',
+      });
+
+      expect(request.model, equals('gpt-5.1-codex-max'));
+      expect(request.input, isA<ResponseInputText>());
+    });
+  });
+
+  group('ResponseCompaction', () {
+    test('deserializes compact response payload', () {
+      final compaction = ResponseCompaction.fromJson(const {
+        'id': 'cmp_123',
+        'object': 'response.compaction',
+        'created_at': 1234567890,
+        'output': [
+          {
+            'type': 'compaction',
+            'id': 'cmp_item_1',
+            'encrypted_content': 'abc123',
+          },
+        ],
+        'usage': {
+          'input_tokens': 100,
+          'output_tokens': 10,
+          'total_tokens': 110,
+        },
+      });
+
+      expect(compaction.id, equals('cmp_123'));
+      expect(compaction.object, equals('response.compaction'));
+      expect(compaction.output.first, isA<CompactionOutputItem>());
+      expect(compaction.usage.totalTokens, equals(110));
+    });
   });
 
   group('Response', () {
@@ -371,6 +458,11 @@ void main() {
       expect(tool, isA<ImageGenerationTool>());
     });
 
+    test('creates shell tools', () {
+      expect(ResponseTool.shell(), isA<ShellTool>());
+      expect(ResponseTool.localShell(), isA<LocalShellTool>());
+    });
+
     test('deserializes function tool from JSON', () {
       final json = {
         'type': 'function',
@@ -394,6 +486,14 @@ void main() {
       final tool = ResponseTool.fromJson(json);
 
       expect(tool, isA<WebSearchTool>());
+    });
+
+    test('deserializes shell tools from JSON', () {
+      expect(ResponseTool.fromJson({'type': 'shell'}), isA<ShellTool>());
+      expect(
+        ResponseTool.fromJson({'type': 'local_shell'}),
+        isA<LocalShellTool>(),
+      );
     });
   });
 
@@ -673,6 +773,17 @@ void main() {
   });
 
   group('OutputItem built-in tool types', () {
+    test('deserializes CompactionOutputItem', () {
+      final item = OutputItem.fromJson({
+        'type': 'compaction',
+        'id': 'cmp_123',
+        'encrypted_content': 'ciphertext',
+      });
+
+      expect(item, isA<CompactionOutputItem>());
+      expect((item as CompactionOutputItem).encryptedContent, 'ciphertext');
+    });
+
     test('deserializes WebSearchCallOutputItem', () {
       final json = {
         'type': 'web_search_call',
@@ -808,6 +919,80 @@ void main() {
       expect(json['prompt'], equals('A dog'));
     });
 
+    test('deserializes LocalShellCallOutputItem', () {
+      final item = OutputItem.fromJson({
+        'type': 'local_shell_call',
+        'id': 'lsc_1',
+        'call_id': 'call_local_1',
+        'action': {'command': 'ls'},
+        'status': 'completed',
+      });
+
+      expect(item, isA<LocalShellCallOutputItem>());
+      final shellItem = item as LocalShellCallOutputItem;
+      expect(shellItem.callId, equals('call_local_1'));
+      expect(shellItem.status, equals(ItemStatus.completed));
+    });
+
+    test('deserializes ShellCallOutputItem', () {
+      final item = OutputItem.fromJson({
+        'type': 'shell_call',
+        'id': 'sh_1',
+        'call_id': 'call_shell_1',
+        'action': {
+          'commands': ['pwd'],
+          'timeout_ms': 5000,
+          'max_output_length': 1000,
+        },
+        'status': 'in_progress',
+      });
+
+      expect(item, isA<ShellCallOutputItem>());
+      final shellItem = item as ShellCallOutputItem;
+      expect(shellItem.action.commands, equals(['pwd']));
+      expect(shellItem.status, equals(ItemStatus.inProgress));
+    });
+
+    test('deserializes ShellCallOutputResultItem', () {
+      final item = OutputItem.fromJson({
+        'type': 'shell_call_output',
+        'id': 'sho_1',
+        'call_id': 'call_shell_1',
+        'status': 'completed',
+        'output': [
+          {
+            'stdout': 'hello',
+            'stderr': '',
+            'outcome': {'type': 'exit', 'exit_code': 0},
+          },
+        ],
+        'max_output_length': 2000,
+      });
+
+      expect(item, isA<ShellCallOutputResultItem>());
+      final shellOutput = item as ShellCallOutputResultItem;
+      expect(shellOutput.output, hasLength(1));
+      expect(shellOutput.output.first.outcome, isA<ShellCallExitOutcome>());
+      expect(shellOutput.status, equals(ItemStatus.completed));
+      expect(shellOutput.maxOutputLength, equals(2000));
+    });
+
+    test('deserializes LocalShellCallOutputResultItem', () {
+      final item = OutputItem.fromJson({
+        'type': 'local_shell_call_output',
+        'id': 'lso_1',
+        'call_id': 'call_local_1',
+        'output': '{"stdout":"ok"}',
+        'status': 'completed',
+      });
+
+      expect(item, isA<LocalShellCallOutputResultItem>());
+      final localOutput = item as LocalShellCallOutputResultItem;
+      expect(localOutput.callId, equals('call_local_1'));
+      expect(localOutput.output, equals('{"stdout":"ok"}'));
+      expect(localOutput.status, equals(ItemStatus.completed));
+    });
+
     test('deserializes McpCallOutputItem', () {
       final json = {
         'type': 'mcp_call',
@@ -908,6 +1093,27 @@ void main() {
 
       expect(response.codeInterpreterCalls.length, equals(1));
       expect(response.codeInterpreterCalls.first.code, equals('print(42)'));
+    });
+
+    test('shellCalls and compactionItems return matching items', () {
+      const response = Response(
+        id: 'resp_123',
+        object: 'response',
+        createdAt: 1234567890,
+        status: ResponseStatus.completed,
+        output: [
+          ShellCallOutputItem(
+            id: 'sh_1',
+            callId: 'call_1',
+            action: ShellCallAction(commands: ['pwd']),
+            status: ItemStatus.completed,
+          ),
+          CompactionOutputItem(id: 'cmp_1', encryptedContent: 'abc'),
+        ],
+      );
+
+      expect(response.shellCalls.length, equals(1));
+      expect(response.compactionItems.length, equals(1));
     });
   });
 

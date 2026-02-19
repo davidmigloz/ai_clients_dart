@@ -106,6 +106,15 @@ class ImagesResource extends BaseResource {
     return ImageResponse.fromJson(json);
   }
 
+  /// Creates edited images using JSON payload references.
+  ///
+  /// This method sends `application/json` and is intended for GPT image
+  /// editing workflows where images are referenced by URL or File ID.
+  Future<ImageResponse> editJson(ImageEditJsonRequest request) async {
+    final json = await postJson(_editEndpoint, body: request.toJson());
+    return ImageResponse.fromJson(json);
+  }
+
   /// Creates variations of an existing image.
   ///
   /// Generates images that are similar in style and content to

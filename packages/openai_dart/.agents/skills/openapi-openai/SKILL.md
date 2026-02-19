@@ -1,7 +1,7 @@
 ---
 name: openapi-openai
 description: >-
-  Update openai_dart from OpenAI OpenAPI changes. Fetch and compare specs, generate changelogs and prioritized implementation plans, and guide endpoint/model synchronization. Use for update api, sync openapi, compare spec changes, new endpoints, or implementation plan requests.
+Update openai_dart from OpenAI OpenAPI changes. Fetch and compare specs, generate changelogs and prioritized implementation plans, and guide endpoint/model synchronization. Use for update api, sync openapi, compare spec changes, new endpoints, or implementation plan requests.
 ---
 
 
@@ -15,6 +15,17 @@ Uses shared scripts from [openapi-toolkit](../../../../../.agents/shared/openapi
 - Python 3.9+ with `pyyaml` installed
   - **Important**: Install for your active Python version: `python3 -m pip install pyyaml --user`
   - Verify: `python3 -c "import yaml; print(yaml.__version__)"`
+
+## Preflight (1 command)
+
+Run this first to check pinned-vs-latest spec drift before fetching:
+
+```bash
+cd "$(git rev-parse --show-toplevel)" && \
+python3 .agents/shared/openapi-toolkit/scripts/fetch_spec.py \
+  --config-dir packages/openai_dart/.agents/skills/openapi-openai/config \
+  --preflight-only
+```
 
 ## ⚠️ CRITICAL: Working Directory Requirements
 
@@ -112,6 +123,15 @@ python3 ../../.agents/shared/openapi-toolkit/scripts/verify_coverage.py \
   --config-dir .agents/skills/openapi-openai/config --verbose
 ```
 
+If auto-location fails, provide the spec explicitly:
+
+```bash
+cd "$(git rev-parse --show-toplevel)/packages/openai_dart" && \
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_coverage.py \
+  --config-dir .agents/skills/openapi-openai/config \
+  --spec specs/openapi.json --verbose
+```
+
 If missing resources are found, prioritize implementing them before other updates.
 
 ### Step 4: Implement & Verify
@@ -140,6 +160,28 @@ python3 ../../.agents/shared/openapi-toolkit/scripts/verify_coverage.py \
 - Properties: `✓ All critical models have complete properties.`
 
 If all checks pass and no spec changes were found, the package is up-to-date.
+
+## Large Spec Inspection (jq-first)
+
+Use `jq` first for structured inspection, then `rg` for targeted text searches:
+
+```bash
+# List top-level paths quickly
+cd "$(git rev-parse --show-toplevel)/packages/openai_dart" && \
+jq -r '.paths | keys[]' specs/openapi.json | head -120
+
+# Inspect a specific endpoint request/response schemas
+cd "$(git rev-parse --show-toplevel)/packages/openai_dart" && \
+jq '.paths["/responses/compact"].post' specs/openapi.json
+
+# Inspect one schema deeply
+cd "$(git rev-parse --show-toplevel)/packages/openai_dart" && \
+jq '.components.schemas.CompactResponseMethodPublicBody' specs/openapi.json
+
+# Then narrow text search to exact new fields/types
+cd "$(git rev-parse --show-toplevel)/packages/openai_dart" && \
+rg -n 'context_management|compact_threshold|shell_call|skill|local_shell' specs/openapi.json
+```
 
 ## Configuration Files
 

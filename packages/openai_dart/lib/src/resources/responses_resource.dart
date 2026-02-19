@@ -68,6 +68,7 @@ class ResponsesResource extends BaseResource {
   ResponsesResource(super.client);
 
   static const _endpoint = '/responses';
+  static const _compactEndpoint = '/responses/compact';
 
   ResponseInputItemsResource? _inputItems;
   InputTokensResource? _inputTokens;
@@ -124,6 +125,22 @@ class ResponsesResource extends BaseResource {
       abortTrigger: abortTrigger,
     );
     return Response.fromJson(json);
+  }
+
+  /// Compacts response conversation state.
+  ///
+  /// Use this to reduce context length for long-running conversations while
+  /// preserving enough state for follow-up turns.
+  Future<ResponseCompaction> compact(
+    CompactResponseRequest request, {
+    Future<void>? abortTrigger,
+  }) async {
+    final json = await postJson(
+      _compactEndpoint,
+      body: request.toJson(),
+      abortTrigger: abortTrigger,
+    );
+    return ResponseCompaction.fromJson(json);
   }
 
   /// Creates a streaming response.

@@ -205,7 +205,8 @@ class ImageEditRequest {
 
   /// The model to use.
   ///
-  /// Only `dall-e-2` is supported.
+  /// For multipart edits this can be `dall-e-2` or GPT image models
+  /// (for example `gpt-image-1.5`).
   final String? model;
 
   /// The number of images to generate.

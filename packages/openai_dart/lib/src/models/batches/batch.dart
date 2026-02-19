@@ -518,6 +518,9 @@ enum BatchStatus {
 
 /// Batch endpoint options.
 enum BatchEndpoint {
+  /// Responses endpoint.
+  responses._('/v1/responses'),
+
   /// Chat completions endpoint.
   chatCompletions._('/v1/chat/completions'),
 
@@ -525,7 +528,16 @@ enum BatchEndpoint {
   embeddings._('/v1/embeddings'),
 
   /// Completions endpoint (legacy).
-  completions._('/v1/completions');
+  completions._('/v1/completions'),
+
+  /// Moderations endpoint.
+  moderations._('/v1/moderations'),
+
+  /// Image generations endpoint.
+  imagesGenerations._('/v1/images/generations'),
+
+  /// Image edits endpoint.
+  imagesEdits._('/v1/images/edits');
 
   const BatchEndpoint._(this._value);
 

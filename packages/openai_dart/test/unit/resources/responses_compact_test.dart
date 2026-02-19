@@ -1,0 +1,63 @@
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:openai_dart/openai_dart.dart';
+import 'package:test/test.dart';
+
+void main() {
+  group('Responses.compact', () {
+    test('POST /responses/compact with expected payload', () async {
+      final requestCompleter = Completer<http.BaseRequest>();
+
+      final mockClient = MockClient((request) async {
+        requestCompleter.complete(request);
+        return http.Response(
+          jsonEncode({
+            'id': 'cmp_123',
+            'object': 'response.compaction',
+            'created_at': 1234567890,
+            'output': [
+              {
+                'type': 'compaction',
+                'id': 'cmp_item_1',
+                'encrypted_content': 'ciphertext',
+              },
+            ],
+            'usage': {
+              'input_tokens': 10,
+              'output_tokens': 2,
+              'total_tokens': 12,
+            },
+          }),
+          200,
+        );
+      });
+
+      final client = OpenAIClient(
+        config: const OpenAIConfig(authProvider: ApiKeyProvider('sk-test-key')),
+        httpClient: mockClient,
+      );
+
+      final response = await client.responses.compact(
+        const CompactResponseRequest(
+          model: 'gpt-5.1-codex-max',
+          input: ResponseInput.text('compact this'),
+          previousResponseId: 'resp_123',
+        ),
+      );
+
+      final request = await requestCompleter.future as http.Request;
+      final body = jsonDecode(request.body) as Map<String, dynamic>;
+
+      expect(request.method, equals('POST'));
+      expect(request.url.path, endsWith('/responses/compact'));
+      expect(body['model'], equals('gpt-5.1-codex-max'));
+      expect(body['input'], equals('compact this'));
+      expect(body['previous_response_id'], equals('resp_123'));
+      expect(response.object, equals('response.compaction'));
+      expect(response.output.first, isA<CompactionOutputItem>());
+    });
+  });
+}

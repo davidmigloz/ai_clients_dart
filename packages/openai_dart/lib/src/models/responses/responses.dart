@@ -63,6 +63,7 @@
 /// ```
 library;
 
+export 'compact_response_request.dart';
 export 'config/config.dart';
 export 'content/content.dart';
 export 'create_response_request.dart';
@@ -70,6 +71,7 @@ export 'incomplete_details.dart';
 export 'input_token_count.dart';
 export 'items/items.dart';
 export 'response.dart';
+export 'response_compaction.dart';
 export 'response_error.dart';
 export 'response_input.dart';
 export 'response_usage.dart';

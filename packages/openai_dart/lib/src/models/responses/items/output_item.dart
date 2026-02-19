@@ -33,10 +33,17 @@ sealed class OutputItem {
       'message' => MessageOutputItem.fromJson(json),
       'function_call' => FunctionCallOutputItemResponse.fromJson(json),
       'reasoning' => ReasoningItem.fromJson(json),
+      'compaction' => CompactionOutputItem.fromJson(json),
       'web_search_call' => WebSearchCallOutputItem.fromJson(json),
       'file_search_call' => FileSearchCallOutputItem.fromJson(json),
       'code_interpreter_call' => CodeInterpreterCallOutputItem.fromJson(json),
       'image_generation_call' => ImageGenerationCallOutputItem.fromJson(json),
+      'local_shell_call' => LocalShellCallOutputItem.fromJson(json),
+      'local_shell_call_output' => LocalShellCallOutputResultItem.fromJson(
+        json,
+      ),
+      'shell_call' => ShellCallOutputItem.fromJson(json),
+      'shell_call_output' => ShellCallOutputResultItem.fromJson(json),
       'mcp_call' => McpCallOutputItem.fromJson(json),
       _ => throw FormatException('Unknown OutputItem type: $type'),
     };
@@ -300,6 +307,52 @@ class ReasoningSummaryContent {
   String toString() => 'ReasoningSummaryContent(text: $text)';
 }
 
+/// A compaction item emitted by `responses.compact`.
+@immutable
+class CompactionOutputItem extends OutputItem {
+  /// Unique identifier.
+  final String id;
+
+  /// Encrypted compaction payload.
+  final String encryptedContent;
+
+  /// Creates a [CompactionOutputItem].
+  const CompactionOutputItem({
+    required this.id,
+    required this.encryptedContent,
+  });
+
+  /// Creates a [CompactionOutputItem] from JSON.
+  factory CompactionOutputItem.fromJson(Map<String, dynamic> json) {
+    return CompactionOutputItem(
+      id: json['id'] as String,
+      encryptedContent: json['encrypted_content'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'compaction',
+    'id': id,
+    'encrypted_content': encryptedContent,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CompactionOutputItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          encryptedContent == other.encryptedContent;
+
+  @override
+  int get hashCode => Object.hash(id, encryptedContent);
+
+  @override
+  String toString() =>
+      'CompactionOutputItem(id: $id, encryptedContent: ${encryptedContent.length} chars)';
+}
+
 // ============================================================
 // Built-in Tool Output Items
 // ============================================================
@@ -558,6 +611,445 @@ class ImageGenerationCallOutputItem extends OutputItem {
   @override
   String toString() =>
       'ImageGenerationCallOutputItem(id: $id, prompt: $prompt, revisedPrompt: $revisedPrompt, result: ${result != null ? "[${result!.length} chars]" : null}, status: $status)';
+}
+
+/// A local shell call output item.
+@immutable
+class LocalShellCallOutputItem extends OutputItem {
+  /// Unique identifier.
+  final String id;
+
+  /// The local shell call ID.
+  final String callId;
+
+  /// Action payload to execute locally.
+  final Map<String, dynamic> action;
+
+  /// Item status.
+  final ItemStatus status;
+
+  /// Creates a [LocalShellCallOutputItem].
+  const LocalShellCallOutputItem({
+    required this.id,
+    required this.callId,
+    required this.action,
+    required this.status,
+  });
+
+  /// Creates a [LocalShellCallOutputItem] from JSON.
+  factory LocalShellCallOutputItem.fromJson(Map<String, dynamic> json) {
+    return LocalShellCallOutputItem(
+      id: json['id'] as String,
+      callId: json['call_id'] as String,
+      action: (json['action'] as Map<String, dynamic>?) ?? const {},
+      status: ItemStatus.fromJson(json['status'] as String),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'local_shell_call',
+    'id': id,
+    'call_id': callId,
+    'action': action,
+    'status': status.toJson(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is LocalShellCallOutputItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          callId == other.callId &&
+          mapsEqual(action, other.action) &&
+          status == other.status;
+
+  @override
+  int get hashCode => Object.hash(id, callId, action, status);
+
+  @override
+  String toString() =>
+      'LocalShellCallOutputItem(id: $id, callId: $callId, status: $status)';
+}
+
+/// A shell call output item.
+@immutable
+class ShellCallOutputItem extends OutputItem {
+  /// Unique identifier.
+  final String id;
+
+  /// The shell call ID.
+  final String callId;
+
+  /// Commands and execution options for this call.
+  final ShellCallAction action;
+
+  /// Item status.
+  final ItemStatus status;
+
+  /// Creates a [ShellCallOutputItem].
+  const ShellCallOutputItem({
+    required this.id,
+    required this.callId,
+    required this.action,
+    required this.status,
+  });
+
+  /// Creates a [ShellCallOutputItem] from JSON.
+  factory ShellCallOutputItem.fromJson(Map<String, dynamic> json) {
+    return ShellCallOutputItem(
+      id: json['id'] as String,
+      callId: json['call_id'] as String,
+      action: ShellCallAction.fromJson(json['action'] as Map<String, dynamic>),
+      status: ItemStatus.fromJson(json['status'] as String),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'shell_call',
+    'id': id,
+    'call_id': callId,
+    'action': action.toJson(),
+    'status': status.toJson(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ShellCallOutputItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          callId == other.callId &&
+          action == other.action &&
+          status == other.status;
+
+  @override
+  int get hashCode => Object.hash(id, callId, action, status);
+
+  @override
+  String toString() =>
+      'ShellCallOutputItem(id: $id, callId: $callId, status: $status)';
+}
+
+/// Shell call action payload.
+@immutable
+class ShellCallAction {
+  /// Commands to execute.
+  final List<String> commands;
+
+  /// Optional timeout in milliseconds.
+  final int? timeoutMs;
+
+  /// Optional max output length.
+  final int? maxOutputLength;
+
+  /// Creates a [ShellCallAction].
+  const ShellCallAction({
+    required this.commands,
+    this.timeoutMs,
+    this.maxOutputLength,
+  });
+
+  /// Creates a [ShellCallAction] from JSON.
+  factory ShellCallAction.fromJson(Map<String, dynamic> json) {
+    return ShellCallAction(
+      commands: (json['commands'] as List<dynamic>).cast<String>(),
+      timeoutMs: json['timeout_ms'] as int?,
+      maxOutputLength: json['max_output_length'] as int?,
+    );
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    'commands': commands,
+    'timeout_ms': timeoutMs,
+    'max_output_length': maxOutputLength,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ShellCallAction &&
+          runtimeType == other.runtimeType &&
+          listsEqual(commands, other.commands) &&
+          timeoutMs == other.timeoutMs &&
+          maxOutputLength == other.maxOutputLength;
+
+  @override
+  int get hashCode => Object.hash(commands, timeoutMs, maxOutputLength);
+
+  @override
+  String toString() =>
+      'ShellCallAction(commands: $commands, timeoutMs: $timeoutMs, maxOutputLength: $maxOutputLength)';
+}
+
+/// A shell call output result item.
+@immutable
+class ShellCallOutputResultItem extends OutputItem {
+  /// Unique identifier.
+  final String id;
+
+  /// The shell call ID.
+  final String callId;
+
+  /// The status of the shell call output.
+  final ItemStatus? status;
+
+  /// Structured output chunks from the call.
+  final List<ShellCallOutputContent> output;
+
+  /// The max output length to preserve for follow-up turns.
+  final int? maxOutputLength;
+
+  /// Creates a [ShellCallOutputResultItem].
+  const ShellCallOutputResultItem({
+    required this.id,
+    required this.callId,
+    this.status,
+    required this.output,
+    required this.maxOutputLength,
+  });
+
+  /// Creates a [ShellCallOutputResultItem] from JSON.
+  factory ShellCallOutputResultItem.fromJson(Map<String, dynamic> json) {
+    return ShellCallOutputResultItem(
+      id: json['id'] as String,
+      callId: json['call_id'] as String,
+      status: json['status'] != null
+          ? ItemStatus.fromJson(json['status'] as String)
+          : null,
+      output: (json['output'] as List<dynamic>)
+          .map(
+            (e) => ShellCallOutputContent.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(),
+      maxOutputLength: json['max_output_length'] as int?,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'shell_call_output',
+    'id': id,
+    'call_id': callId,
+    if (status != null) 'status': status!.toJson(),
+    'output': output.map((e) => e.toJson()).toList(),
+    'max_output_length': maxOutputLength,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ShellCallOutputResultItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          callId == other.callId &&
+          status == other.status &&
+          listsEqual(output, other.output) &&
+          maxOutputLength == other.maxOutputLength;
+
+  @override
+  int get hashCode => Object.hash(id, callId, status, output, maxOutputLength);
+
+  @override
+  String toString() =>
+      'ShellCallOutputResultItem(id: $id, callId: $callId, status: $status, output: ${output.length} chunks)';
+}
+
+/// A single shell output chunk.
+@immutable
+class ShellCallOutputContent {
+  /// Captured stdout.
+  final String stdout;
+
+  /// Captured stderr.
+  final String stderr;
+
+  /// Execution outcome for this chunk.
+  final ShellCallOutcome outcome;
+
+  /// Creates a [ShellCallOutputContent].
+  const ShellCallOutputContent({
+    required this.stdout,
+    required this.stderr,
+    required this.outcome,
+  });
+
+  /// Creates a [ShellCallOutputContent] from JSON.
+  factory ShellCallOutputContent.fromJson(Map<String, dynamic> json) {
+    return ShellCallOutputContent(
+      stdout: json['stdout'] as String,
+      stderr: json['stderr'] as String,
+      outcome: ShellCallOutcome.fromJson(
+        json['outcome'] as Map<String, dynamic>,
+      ),
+    );
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    'stdout': stdout,
+    'stderr': stderr,
+    'outcome': outcome.toJson(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ShellCallOutputContent &&
+          runtimeType == other.runtimeType &&
+          stdout == other.stdout &&
+          stderr == other.stderr &&
+          outcome == other.outcome;
+
+  @override
+  int get hashCode => Object.hash(stdout, stderr, outcome);
+
+  @override
+  String toString() =>
+      'ShellCallOutputContent(stdout: ${stdout.length} chars, stderr: ${stderr.length} chars, outcome: $outcome)';
+}
+
+/// Execution outcome for a shell call output chunk.
+sealed class ShellCallOutcome {
+  /// Creates a [ShellCallOutcome].
+  const ShellCallOutcome();
+
+  /// Creates a [ShellCallOutcome] from JSON.
+  factory ShellCallOutcome.fromJson(Map<String, dynamic> json) {
+    final type = json['type'] as String;
+    return switch (type) {
+      'exit' => ShellCallExitOutcome.fromJson(json),
+      'timeout' => ShellCallTimeoutOutcome.fromJson(json),
+      _ => throw FormatException('Unknown ShellCallOutcome type: $type'),
+    };
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson();
+}
+
+/// Normal shell call completion with an exit code.
+@immutable
+class ShellCallExitOutcome extends ShellCallOutcome {
+  /// Exit code of the command.
+  final int exitCode;
+
+  /// Creates a [ShellCallExitOutcome].
+  const ShellCallExitOutcome({required this.exitCode});
+
+  /// Creates a [ShellCallExitOutcome] from JSON.
+  factory ShellCallExitOutcome.fromJson(Map<String, dynamic> json) {
+    return ShellCallExitOutcome(exitCode: json['exit_code'] as int);
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': 'exit', 'exit_code': exitCode};
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ShellCallExitOutcome &&
+          runtimeType == other.runtimeType &&
+          exitCode == other.exitCode;
+
+  @override
+  int get hashCode => exitCode.hashCode;
+
+  @override
+  String toString() => 'ShellCallExitOutcome(exitCode: $exitCode)';
+}
+
+/// Shell call timeout outcome.
+@immutable
+class ShellCallTimeoutOutcome extends ShellCallOutcome {
+  /// Creates a [ShellCallTimeoutOutcome].
+  const ShellCallTimeoutOutcome();
+
+  /// Creates a [ShellCallTimeoutOutcome] from JSON.
+  factory ShellCallTimeoutOutcome.fromJson(Map<String, dynamic> json) {
+    if ((json['type'] as String?) != 'timeout') {
+      throw const FormatException('Invalid type for ShellCallTimeoutOutcome');
+    }
+    return const ShellCallTimeoutOutcome();
+  }
+
+  @override
+  Map<String, dynamic> toJson() => const {'type': 'timeout'};
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || other is ShellCallTimeoutOutcome;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  String toString() => 'ShellCallTimeoutOutcome()';
+}
+
+/// A local shell call output result item.
+@immutable
+class LocalShellCallOutputResultItem extends OutputItem {
+  /// Unique identifier.
+  final String id;
+
+  /// The local shell call ID.
+  final String? callId;
+
+  /// The serialized local shell output payload.
+  final String output;
+
+  /// The status of the local shell call output.
+  final ItemStatus? status;
+
+  /// Creates a [LocalShellCallOutputResultItem].
+  const LocalShellCallOutputResultItem({
+    required this.id,
+    required this.output,
+    this.callId,
+    this.status,
+  });
+
+  /// Creates a [LocalShellCallOutputResultItem] from JSON.
+  factory LocalShellCallOutputResultItem.fromJson(Map<String, dynamic> json) {
+    return LocalShellCallOutputResultItem(
+      id: json['id'] as String,
+      callId: json['call_id'] as String?,
+      output: json['output'] as String,
+      status: json['status'] != null
+          ? ItemStatus.fromJson(json['status'] as String)
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'local_shell_call_output',
+    'id': id,
+    if (callId != null) 'call_id': callId,
+    'output': output,
+    if (status != null) 'status': status!.toJson(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is LocalShellCallOutputResultItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          callId == other.callId &&
+          output == other.output &&
+          status == other.status;
+
+  @override
+  int get hashCode => Object.hash(id, callId, output, status);
+
+  @override
+  String toString() =>
+      'LocalShellCallOutputResultItem(id: $id, callId: $callId, status: $status)';
 }
 
 /// An MCP (Model Context Protocol) call output item.
