@@ -35,7 +35,12 @@ sealed class ResponseInput {
     }
     if (json is List) {
       return ResponseInputItems(
-        json.cast<Map<String, dynamic>>().map(Item.fromJson).toList(),
+        json.map((e) {
+          if (e is! Map<String, dynamic>) {
+            throw FormatException('Invalid response input list element: $e');
+          }
+          return Item.fromJson(e);
+        }).toList(),
       );
     }
     throw FormatException('Invalid response input: $json');

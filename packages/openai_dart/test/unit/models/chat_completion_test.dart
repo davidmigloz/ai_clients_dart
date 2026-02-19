@@ -190,6 +190,12 @@ void main() {
       expect(() => call.argumentsMap, throwsFormatException);
     });
 
+    test('argumentsMap throws on non-object JSON', () {
+      const call = FunctionCall(name: 'test', arguments: '[]');
+
+      expect(() => call.argumentsMap, throwsFormatException);
+    });
+
     test('fromMap encodes arguments as JSON', () {
       final call = FunctionCall.fromMap(
         name: 'get_weather',

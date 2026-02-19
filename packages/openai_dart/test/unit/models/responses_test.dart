@@ -53,6 +53,13 @@ void main() {
       expect(() => ResponseInput.fromJson(42), throwsFormatException);
     });
 
+    test('fromJson throws on invalid list element', () {
+      expect(
+        () => ResponseInput.fromJson(const ['not a map']),
+        throwsFormatException,
+      );
+    });
+
     test('equality for text input', () {
       const a = ResponseInputText('hello');
       const b = ResponseInputText('hello');
@@ -431,6 +438,16 @@ void main() {
       expect(argsMap['unit'], equals('celsius'));
     });
 
+    test('FunctionCallItem.argumentsMap throws on non-object JSON', () {
+      const item = FunctionCallItem(
+        callId: 'call_123',
+        name: 'test',
+        arguments: '[]',
+      );
+
+      expect(() => item.argumentsMap, throwsFormatException);
+    });
+
     test(
       'FunctionCallOutputItemResponse.argumentsMap parses JSON arguments',
       () {
@@ -444,6 +461,20 @@ void main() {
         final argsMap = item.argumentsMap;
 
         expect(argsMap['location'], equals('Paris'));
+      },
+    );
+
+    test(
+      'FunctionCallOutputItemResponse.argumentsMap throws on non-object JSON',
+      () {
+        const item = FunctionCallOutputItemResponse(
+          id: 'fc_123',
+          callId: 'call_123',
+          name: 'test',
+          arguments: '"string"',
+        );
+
+        expect(() => item.argumentsMap, throwsFormatException);
       },
     );
   });
