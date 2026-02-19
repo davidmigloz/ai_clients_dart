@@ -15,7 +15,9 @@ void main() {
         requestCompleter.complete(request);
         return http.StreamedResponse(
           Stream.fromIterable([
-            utf8.encode('data: {"choices":[{"text":"Hello"}]}\n\n'),
+            utf8.encode(
+              'data: {"id":"cmpl-test","object":"text_completion","created":1234567890,"model":"gpt-3.5-turbo-instruct","choices":[{"text":"Hello","index":0,"logprobs":null,"finish_reason":"stop"}]}\n\n',
+            ),
             utf8.encode('data: [DONE]\n\n'),
           ]),
           200,
@@ -78,7 +80,9 @@ void main() {
         requestCompleter.complete(request);
         return http.StreamedResponse(
           Stream.fromIterable([
-            utf8.encode('data: {"choices":[{"text":"Hello"}]}\n\n'),
+            utf8.encode(
+              'data: {"id":"cmpl-test","object":"text_completion","created":1234567890,"model":"gpt-3.5-turbo-instruct","choices":[{"text":"Hello","index":0,"logprobs":null,"finish_reason":"stop"}]}\n\n',
+            ),
             utf8.encode('data: [DONE]\n\n'),
           ]),
           200,
@@ -116,7 +120,9 @@ void main() {
           requestCompleter.complete(request);
           return http.StreamedResponse(
             Stream.fromIterable([
-              utf8.encode('data: {"choices":[{"text":"Hello"}]}\n\n'),
+              utf8.encode(
+                'data: {"id":"cmpl-test","object":"text_completion","created":1234567890,"model":"gpt-3.5-turbo-instruct","choices":[{"text":"Hello","index":0,"logprobs":null,"finish_reason":"stop"}]}\n\n',
+              ),
               utf8.encode('data: [DONE]\n\n'),
             ]),
             200,
@@ -172,7 +178,9 @@ void main() {
       final mockClient = MockClient.streaming((request, _) async {
         return http.StreamedResponse(
           Stream.fromIterable([
-            utf8.encode('data: {"choices":[{"text":"Hello"}]}\n\n'),
+            utf8.encode(
+              'data: {"id":"cmpl-test","object":"text_completion","created":1234567890,"model":"gpt-3.5-turbo-instruct","choices":[{"text":"Hello","index":0,"logprobs":null,"finish_reason":"stop"}]}\n\n',
+            ),
             utf8.encode('data: [DONE]\n\n'),
           ]),
           200,

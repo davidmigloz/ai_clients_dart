@@ -247,9 +247,10 @@ class CreateResponseRequest {
       if (truncation != null) 'truncation': truncation!.toJson(),
       if (parallelToolCalls != null) 'parallel_tool_calls': parallelToolCalls,
       if (serviceTier != null) 'service_tier': serviceTier!.toJson(),
-      if (metadata != null)
+      if (metadata case final metadata?
+          when metadata.values.any((v) => v != null))
         'metadata': {
-          for (final MapEntry(:key, :value) in metadata!.entries)
+          for (final MapEntry(:key, :value) in metadata.entries)
             if (value != null) key: value.toString(),
         },
       if (include != null) 'include': include!.map((e) => e.toJson()).toList(),

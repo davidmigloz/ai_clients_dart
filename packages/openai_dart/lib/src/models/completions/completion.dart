@@ -174,7 +174,7 @@ class Completion {
     required this.created,
     required this.model,
     required this.choices,
-    required this.usage,
+    this.usage,
     this.systemFingerprint,
   });
 
@@ -188,7 +188,9 @@ class Completion {
       choices: (json['choices'] as List<dynamic>)
           .map((e) => CompletionChoice.fromJson(e as Map<String, dynamic>))
           .toList(),
-      usage: Usage.fromJson(json['usage'] as Map<String, dynamic>),
+      usage: json['usage'] != null
+          ? Usage.fromJson(json['usage'] as Map<String, dynamic>)
+          : null,
       systemFingerprint: json['system_fingerprint'] as String?,
     );
   }
@@ -209,7 +211,10 @@ class Completion {
   final List<CompletionChoice> choices;
 
   /// Token usage statistics.
-  final Usage usage;
+  ///
+  /// This is `null` for streaming chunks (only present in the final response
+  /// or when `stream_options.include_usage` is set).
+  final Usage? usage;
 
   /// The system fingerprint.
   final String? systemFingerprint;
@@ -224,7 +229,7 @@ class Completion {
     'created': created,
     'model': model,
     'choices': choices.map((c) => c.toJson()).toList(),
-    'usage': usage.toJson(),
+    if (usage != null) 'usage': usage!.toJson(),
     if (systemFingerprint != null) 'system_fingerprint': systemFingerprint,
   };
 

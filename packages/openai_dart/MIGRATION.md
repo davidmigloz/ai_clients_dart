@@ -590,6 +590,97 @@ await for (final event in stream) {
 }
 ```
 
+#### Responses API Content & Item Types
+
+The Responses API uses a rich type system for inputs and outputs. Here's how to
+work with the various content and item types.
+
+**ResponseInput** — the sealed type for response input:
+
+```dart
+// Simple text input
+input: ResponseInput.text('Hello!')
+
+// Multi-turn conversation
+input: ResponseInput.items([
+  MessageItem.userText('What is 2+2?'),
+  MessageItem.assistantText('4'),
+  MessageItem.userText('What is 3+3?'),
+])
+```
+
+**Image/file content — factory constructors** — replaced generic constructors
+with named factories:
+
+```dart
+// Before (v0.x)
+InputImageContent(imageUrl: url, detail: detail)
+InputFileContent(fileData: data, filename: name)
+
+// After (v1.0.0)
+InputImageContent.url(url, detail: detail)
+InputImageContent.file(fileId)
+InputFileContent.url(url, filename: name)
+InputFileContent.file(fileId, filename: name)
+InputFileContent.data(data, filename: name)
+```
+
+**InputContent convenience factories** — the sealed class provides factories as
+the recommended way to create input content:
+
+```dart
+InputContent.text('Hello')
+InputContent.assistantText('Hello')
+InputContent.imageUrl(url, detail: detail)
+InputContent.imageFile(fileId)
+InputContent.fileUrl(url, filename: name)
+InputContent.fileId(fileId)
+InputContent.fileData(data, filename: name)
+InputContent.video(videoUrl)
+```
+
+**OutputContent** — content types for model output:
+
+```dart
+OutputContent.text(text: 'Hello')
+OutputContent.reasoning('Thinking...')
+OutputContent.summary('Summary here')
+OutputContent.refusal('Cannot comply')
+```
+
+**Item types** — use item constructors for multi-turn conversations:
+
+```dart
+// Message items
+MessageItem.userText('Hello')
+MessageItem.assistantText('Response')
+MessageItem.systemText('Instructions')
+MessageItem.developerText('Dev instructions')
+
+// Rich content messages
+MessageItem.user([
+  InputContent.text('Describe this image'),
+  InputContent.imageUrl('https://...'),
+])
+
+// Function call items
+const item = FunctionCallItem(
+  callId: 'call_123',
+  name: 'get_weather',
+  arguments: '{"location":"Paris"}',
+);
+item.argumentsMap // Parses JSON, throws FormatException if invalid
+
+// Function call output
+FunctionCallOutputItem.string(
+  callId: 'call_123',
+  output: '{"temp": 20}',
+)
+
+// Item reference (for continuing conversations)
+ItemReference(id: 'item_abc')
+```
+
 ### Conversations API
 
 For multi-turn conversations with automatic history management:
@@ -603,6 +694,54 @@ final conversation = await client.conversations.create(
   ),
 );
 ```
+
+### Realtime API
+
+`openai_dart` now includes built-in Realtime API support via WebSockets. This
+provides a low-level, strongly typed interface for real-time audio conversations.
+
+> **Note:** The separate `openai_realtime_dart` package provides a higher-level
+> abstraction with conversation state management, tool handling, and utility
+> events. If you need those features, you can continue using it alongside
+> `openai_dart`.
+
+```dart
+import 'package:openai_dart/openai_dart_realtime.dart' as realtime;
+
+// Connect to a realtime session
+final session = await client.realtime.connect(
+  model: 'gpt-4o-realtime-preview',
+  config: realtime.SessionUpdateConfig(
+    voice: 'alloy',
+    instructions: 'You are a helpful assistant.',
+  ),
+);
+
+// Listen for events
+session.events.listen((event) {
+  switch (event) {
+    case realtime.SessionCreatedEvent(:final session):
+      print('Session created: ${session.id}');
+    case realtime.ResponseTextDeltaEvent(:final delta):
+      stdout.write(delta);
+    case realtime.ErrorEvent(:final error):
+      print('Error: ${error.message}');
+    default:
+      break;
+  }
+});
+
+// Send audio, create responses, etc.
+session.appendAudio(audioBase64);
+session.createResponse();
+
+// Close when done
+await session.close();
+```
+
+The Realtime API is imported from a separate entry point
+(`openai_dart_realtime.dart`) to avoid type conflicts with the Responses API.
+See [Import Structure Changes](#import-structure-changes) for details.
 
 ### Videos API (Sora)
 

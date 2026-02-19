@@ -403,6 +403,16 @@ void main() {
       expect(updated.model, 'gpt-4o'); // unchanged
     });
 
+    test('metadata omitted when all values are null', () {
+      final request = ChatCompletionCreateRequest(
+        model: 'gpt-4o',
+        messages: [ChatMessage.user('Hello!')],
+        metadata: const {'key1': null, 'key2': null},
+      );
+      final json = request.toJson();
+      expect(json.containsKey('metadata'), isFalse);
+    });
+
     test('metadata accepts Map<String, dynamic>', () {
       final request = ChatCompletionCreateRequest(
         model: 'gpt-4o',

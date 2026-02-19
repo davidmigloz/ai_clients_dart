@@ -76,7 +76,7 @@ class CompletionsResource extends BaseResource {
   ///
   /// ## Returns
   ///
-  /// A stream of completion chunks as JSON maps.
+  /// A stream of [Completion] chunks.
   ///
   /// ## Example
   ///
@@ -89,12 +89,11 @@ class CompletionsResource extends BaseResource {
   ///   ),
   /// );
   ///
-  /// await for (final chunk in stream) {
-  ///   final text = chunk['choices'][0]['text'];
-  ///   stdout.write(text);
+  /// await for (final completion in stream) {
+  ///   stdout.write(completion.text);
   /// }
   /// ```
-  Stream<Map<String, dynamic>> createStream(
+  Stream<Completion> createStream(
     CompletionRequest request, {
     Future<void>? abortTrigger,
   }) async* {
@@ -122,7 +121,7 @@ class CompletionsResource extends BaseResource {
 
       const parser = SseParser();
       await for (final json in parser.parse(response.stream)) {
-        yield json;
+        yield Completion.fromJson(json);
       }
     } on AbortedException {
       rethrow;

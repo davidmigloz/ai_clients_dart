@@ -131,8 +131,7 @@ class ImageGenerationRequest {
           ? this.responseFormat
           : responseFormat as ImageResponseFormat?,
       size: size == unsetCopyWithValue ? this.size : size as ImageSize?,
-      style:
-          style == unsetCopyWithValue ? this.style : style as ImageStyle?,
+      style: style == unsetCopyWithValue ? this.style : style as ImageStyle?,
       user: user == unsetCopyWithValue ? this.user : user as String?,
     );
   }

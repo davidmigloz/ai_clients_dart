@@ -207,6 +207,16 @@ void main() {
       expect(metadata['flag'], equals('true'));
     });
 
+    test('metadata omitted when all values are null', () {
+      const request = CreateResponseRequest(
+        model: 'gpt-4o',
+        input: ResponseInput.text('Hello!'),
+        metadata: {'key1': null, 'key2': null},
+      );
+      final json = request.toJson();
+      expect(json.containsKey('metadata'), isFalse);
+    });
+
     test('metadata omits null values', () {
       const request = CreateResponseRequest(
         model: 'gpt-4o',
@@ -509,7 +519,7 @@ void main() {
       expect(content.toJson()['type'], equals('input_text'));
     });
 
-    test('creates text content with positional parameter', () {
+    test('creates text content with direct constructor', () {
       const content = InputTextContent('Hello!');
 
       expect(content.text, equals('Hello!'));
@@ -579,7 +589,7 @@ void main() {
       expect(json['text'], equals('Hello!'));
     });
 
-    test('creates with positional parameter', () {
+    test('creates with direct constructor', () {
       const content = AssistantTextContent('Hello!');
 
       expect(content.text, equals('Hello!'));
@@ -646,7 +656,7 @@ void main() {
       expect((content as RefusalContent).refusal, equals('Cannot comply'));
     });
 
-    test('creates refusal content with positional parameter', () {
+    test('creates refusal content with direct constructor', () {
       const content = RefusalContent('Cannot comply');
 
       expect(content.refusal, equals('Cannot comply'));

@@ -390,9 +390,10 @@ class ChatCompletionCreateRequest {
     if (toolChoice != null) 'tool_choice': toolChoice!.toJson(),
     if (parallelToolCalls != null) 'parallel_tool_calls': parallelToolCalls,
     if (user != null) 'user': user,
-    if (metadata != null)
+    if (metadata case final metadata?
+        when metadata.values.any((v) => v != null))
       'metadata': {
-        for (final MapEntry(:key, :value) in metadata!.entries)
+        for (final MapEntry(:key, :value) in metadata.entries)
           if (value != null) key: value.toString(),
       },
     if (store != null) 'store': store,

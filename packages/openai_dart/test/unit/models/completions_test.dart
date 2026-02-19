@@ -231,6 +231,23 @@ void main() {
       expect(completion.text, 'Hello, world!');
     });
 
+    test('fromJson handles missing usage (streaming chunks)', () {
+      final json = {
+        'id': 'cmpl-abc123',
+        'object': 'text_completion',
+        'created': 1699472000,
+        'model': 'gpt-3.5-turbo-instruct',
+        'choices': [
+          {'index': 0, 'text': 'Hello', 'finish_reason': null},
+        ],
+      };
+
+      final completion = Completion.fromJson(json);
+
+      expect(completion.usage, isNull);
+      expect(completion.text, 'Hello');
+    });
+
     test('toJson serializes correctly', () {
       const completion = Completion(
         id: 'cmpl-abc123',
@@ -251,6 +268,20 @@ void main() {
 
       expect(json['id'], 'cmpl-abc123');
       expect(((json['choices'] as List)[0] as Map)['text'], 'Hello');
+    });
+
+    test('toJson omits null usage', () {
+      const completion = Completion(
+        id: 'cmpl-abc123',
+        object: 'text_completion',
+        created: 1699472000,
+        model: 'gpt-3.5-turbo-instruct',
+        choices: [CompletionChoice(index: 0, text: 'Hello')],
+      );
+
+      final json = completion.toJson();
+
+      expect(json.containsKey('usage'), isFalse);
     });
   });
 

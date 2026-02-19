@@ -53,9 +53,9 @@ void main() {
         expect(response.choices, isNotEmpty);
         expect(response.choices.first.text, isNotEmpty);
         expect(response.choices.first.index, equals(0));
-        expect(response.usage.promptTokens, greaterThan(0));
-        expect(response.usage.completionTokens, greaterThan(0));
-        expect(response.usage.totalTokens, greaterThan(0));
+        expect(response.usage!.promptTokens, greaterThan(0));
+        expect(response.usage!.completionTokens, greaterThan(0));
+        expect(response.usage!.totalTokens, greaterThan(0));
       },
     );
 
@@ -79,7 +79,7 @@ void main() {
         );
 
         expect(response.choices.first.finishReason, FinishReason.length);
-        expect(response.usage.completionTokens, lessThanOrEqualTo(10));
+        expect(response.usage!.completionTokens, lessThanOrEqualTo(10));
       },
     );
 
@@ -186,17 +186,10 @@ void main() {
         // Collect all text from the stream
         final buffer = StringBuffer();
         for (final chunk in chunks) {
-          final choices = chunk['choices'] as List<dynamic>?;
-          if (choices != null && choices.isNotEmpty) {
-            final text = (choices.first as Map<String, dynamic>)['text'];
-            if (text is String) {
-              buffer.write(text);
-            }
-          }
+          buffer.write(chunk.text);
         }
 
-        final fullText = buffer.toString();
-        expect(fullText, isNotEmpty);
+        expect(buffer.toString(), isNotEmpty);
       },
     );
 
@@ -217,13 +210,13 @@ void main() {
           ),
         );
 
-        expect(response.usage.promptTokens, greaterThan(0));
-        expect(response.usage.completionTokens, isNotNull);
-        expect(response.usage.completionTokens, greaterThan(0));
+        expect(response.usage!.promptTokens, greaterThan(0));
+        expect(response.usage!.completionTokens, isNotNull);
+        expect(response.usage!.completionTokens, greaterThan(0));
         expect(
-          response.usage.totalTokens,
+          response.usage!.totalTokens,
           equals(
-            response.usage.promptTokens + response.usage.completionTokens!,
+            response.usage!.promptTokens + response.usage!.completionTokens!,
           ),
         );
       },
