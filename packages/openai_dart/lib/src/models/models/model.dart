@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../responses/common/equality_helpers.dart';
+
 /// Information about an OpenAI model.
 ///
 /// Models represent the available language models and their capabilities.
@@ -19,8 +21,8 @@ class Model {
   const Model({
     required this.id,
     required this.object,
-    required this.created,
-    required this.ownedBy,
+    this.created,
+    this.ownedBy,
   });
 
   /// Creates a [Model] from JSON.
@@ -28,8 +30,8 @@ class Model {
     return Model(
       id: json['id'] as String,
       object: json['object'] as String,
-      created: json['created'] as int,
-      ownedBy: json['owned_by'] as String,
+      created: json['created'] as int?,
+      ownedBy: json['owned_by'] as String?,
     );
   }
 
@@ -43,16 +45,23 @@ class Model {
   final String object;
 
   /// The Unix timestamp when the model was created.
-  final int created;
+  ///
+  /// May be null with some OpenAI-compatible providers (e.g., Cohere
+  /// doesn't return `created`).
+  final int? created;
 
   /// The organization that owns the model.
   ///
   /// For OpenAI models, this is typically "openai" or "system".
   /// For fine-tuned models, this is the organization ID.
-  final String ownedBy;
+  ///
+  /// May be null with some OpenAI-compatible providers.
+  final String? ownedBy;
 
-  /// The creation time as a DateTime.
-  DateTime get createdAt => DateTime.fromMillisecondsSinceEpoch(created * 1000);
+  /// The creation time as a [DateTime], or null if [created] is null.
+  DateTime? get createdAt => created != null
+      ? DateTime.fromMillisecondsSinceEpoch(created! * 1000)
+      : null;
 
   /// Whether this is a GPT-4 model.
   bool get isGpt4 => id.startsWith('gpt-4');
@@ -79,8 +88,8 @@ class Model {
   Map<String, dynamic> toJson() => {
     'id': id,
     'object': object,
-    'created': created,
-    'owned_by': ownedBy,
+    if (created != null) 'created': created,
+    if (ownedBy != null) 'owned_by': ownedBy,
   };
 
   @override
@@ -147,10 +156,11 @@ class ModelList {
       identical(this, other) ||
       other is ModelList &&
           runtimeType == other.runtimeType &&
-          data.length == other.data.length;
+          object == other.object &&
+          listsEqual(data, other.data);
 
   @override
-  int get hashCode => data.length.hashCode;
+  int get hashCode => Object.hash(object, data.length);
 
   @override
   String toString() => 'ModelList(${data.length} models)';

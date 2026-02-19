@@ -532,6 +532,61 @@ void main() {
       );
     });
 
+    group('ChatCompletion nullable created', () {
+      test('handles missing created (provider compatibility)', () {
+        final json = {
+          'id': 'chatcmpl-123',
+          'object': 'chat.completion',
+          // No 'created' field
+          'model': 'command-r-plus',
+          'choices': [
+            {
+              'index': 0,
+              'message': {'role': 'assistant', 'content': 'Hello!'},
+              'finish_reason': 'stop',
+            },
+          ],
+        };
+
+        final completion = ChatCompletion.fromJson(json);
+
+        expect(completion.created, isNull);
+        expect(completion.createdAt, isNull);
+        expect(completion.model, 'command-r-plus');
+        expect(completion.text, 'Hello!');
+      });
+
+      test('toJson omits created when null', () {
+        const completion = ChatCompletion(
+          id: 'chatcmpl-123',
+          object: 'chat.completion',
+          model: 'gpt-4o',
+          choices: [
+            ChatChoice(
+              index: 0,
+              message: AssistantMessage(content: 'Hello!'),
+              finishReason: FinishReason.stop,
+            ),
+          ],
+        );
+
+        final json = completion.toJson();
+
+        expect(json.containsKey('created'), isFalse);
+      });
+
+      test('createdAt returns DateTime when created is present', () {
+        const completion = ChatCompletion(
+          object: 'chat.completion',
+          created: 1677652288,
+          model: 'gpt-4o',
+          choices: [],
+        );
+
+        expect(completion.createdAt, isA<DateTime>());
+      });
+    });
+
     group('ChatChoice nullable index', () {
       test('handles missing index (OpenRouter compatibility)', () {
         final json = {

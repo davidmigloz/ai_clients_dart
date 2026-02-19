@@ -31,7 +31,7 @@ class ChatCompletion {
   const ChatCompletion({
     this.id,
     required this.object,
-    required this.created,
+    this.created,
     required this.model,
     required this.choices,
     this.usage,
@@ -45,7 +45,7 @@ class ChatCompletion {
     return ChatCompletion(
       id: json['id'] as String?,
       object: json['object'] as String,
-      created: json['created'] as int,
+      created: json['created'] as int?,
       model: json['model'] as String,
       choices: (json['choices'] as List<dynamic>)
           .map((e) => ChatChoice.fromJson(e as Map<String, dynamic>))
@@ -69,7 +69,9 @@ class ChatCompletion {
   final String object;
 
   /// The Unix timestamp when this completion was created.
-  final int created;
+  ///
+  /// May be null with some OpenAI-compatible providers.
+  final int? created;
 
   /// The model used for this completion.
   final String model;
@@ -103,14 +105,16 @@ class ChatCompletion {
   /// Gets the first choice.
   ChatChoice? get firstChoice => choices.firstOrNull;
 
-  /// Gets the creation time as a [DateTime].
-  DateTime get createdAt => DateTime.fromMillisecondsSinceEpoch(created * 1000);
+  /// Gets the creation time as a [DateTime], or null if [created] is null.
+  DateTime? get createdAt => created != null
+      ? DateTime.fromMillisecondsSinceEpoch(created! * 1000)
+      : null;
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (id != null) 'id': id,
     'object': object,
-    'created': created,
+    if (created != null) 'created': created,
     'model': model,
     'choices': choices.map((c) => c.toJson()).toList(),
     if (usage != null) 'usage': usage!.toJson(),

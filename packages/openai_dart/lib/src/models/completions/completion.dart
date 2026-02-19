@@ -171,7 +171,7 @@ class Completion {
   const Completion({
     required this.id,
     required this.object,
-    required this.created,
+    this.created,
     required this.model,
     required this.choices,
     this.usage,
@@ -183,7 +183,7 @@ class Completion {
     return Completion(
       id: json['id'] as String,
       object: json['object'] as String,
-      created: json['created'] as int,
+      created: json['created'] as int?,
       model: json['model'] as String,
       choices: (json['choices'] as List<dynamic>)
           .map((e) => CompletionChoice.fromJson(e as Map<String, dynamic>))
@@ -202,7 +202,9 @@ class Completion {
   final String object;
 
   /// The Unix timestamp.
-  final int created;
+  ///
+  /// May be null with some OpenAI-compatible providers.
+  final int? created;
 
   /// The model used.
   final String model;
@@ -219,14 +221,14 @@ class Completion {
   /// The system fingerprint.
   final String? systemFingerprint;
 
-  /// Gets the text of the first choice.
-  String get text => choices.first.text;
+  /// Gets the text of the first choice, or null if there are no choices.
+  String? get text => choices.firstOrNull?.text;
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'id': id,
     'object': object,
-    'created': created,
+    if (created != null) 'created': created,
     'model': model,
     'choices': choices.map((c) => c.toJson()).toList(),
     if (usage != null) 'usage': usage!.toJson(),

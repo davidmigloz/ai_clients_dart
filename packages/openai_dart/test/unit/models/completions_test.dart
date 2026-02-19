@@ -270,6 +270,48 @@ void main() {
       expect(((json['choices'] as List)[0] as Map)['text'], 'Hello');
     });
 
+    test('fromJson handles missing created (provider compatibility)', () {
+      final json = {
+        'id': 'cmpl-abc123',
+        'object': 'text_completion',
+        // No 'created' field
+        'model': 'gpt-3.5-turbo-instruct',
+        'choices': [
+          {'index': 0, 'text': 'Hello', 'finish_reason': 'stop'},
+        ],
+      };
+
+      final completion = Completion.fromJson(json);
+
+      expect(completion.created, isNull);
+      expect(completion.text, 'Hello');
+    });
+
+    test('toJson omits created when null', () {
+      const completion = Completion(
+        id: 'cmpl-abc123',
+        object: 'text_completion',
+        model: 'gpt-3.5-turbo-instruct',
+        choices: [CompletionChoice(index: 0, text: 'Hello')],
+      );
+
+      final json = completion.toJson();
+
+      expect(json.containsKey('created'), isFalse);
+      expect(json['id'], 'cmpl-abc123');
+    });
+
+    test('text returns null for empty choices list', () {
+      const completion = Completion(
+        id: 'cmpl-abc123',
+        object: 'text_completion',
+        model: 'gpt-3.5-turbo-instruct',
+        choices: [],
+      );
+
+      expect(completion.text, isNull);
+    });
+
     test('toJson omits null usage', () {
       const completion = Completion(
         id: 'cmpl-abc123',

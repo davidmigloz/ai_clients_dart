@@ -986,6 +986,34 @@ await for (final event in stream) {
 }
 ```
 
+## Nullable `created` and `ownedBy` Fields
+
+The following fields are now nullable to improve compatibility with OpenAI-compatible
+providers (e.g., Cohere, which doesn't return `created` in its models endpoint):
+
+| Class | Field | Old Type | New Type |
+|-------|-------|----------|----------|
+| `Model` | `created` | `int` | `int?` |
+| `Model` | `ownedBy` | `String` | `String?` |
+| `Model` | `createdAt` | `DateTime` | `DateTime?` |
+| `ChatCompletion` | `created` | `int` | `int?` |
+| `ChatCompletion` | `createdAt` | `DateTime` | `DateTime?` |
+| `Completion` | `created` | `int` | `int?` |
+
+If your code accesses these fields, add null checks:
+
+```dart
+// Before
+final timestamp = model.created;
+final date = model.createdAt;
+final owner = model.ownedBy;
+
+// After
+final timestamp = model.created; // int? now
+final date = model.createdAt;    // DateTime? now
+final owner = model.ownedBy;     // String? now
+```
+
 ## OpenAI-Compatible APIs
 
 The v1.0.0 client includes improved compatibility with OpenAI-compatible APIs (OpenRouter, Groq, FastChat, TogetherAI, Anyscale, DeepSeek, and more).

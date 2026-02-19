@@ -75,7 +75,8 @@ Future<void> main() async {
 
     final modelsByOwner = <String, List<Model>>{};
     for (final model in models.data) {
-      modelsByOwner.putIfAbsent(model.ownedBy, () => []).add(model);
+      final owner = model.ownedBy ?? 'unknown';
+      modelsByOwner.putIfAbsent(owner, () => []).add(model);
     }
 
     for (final entry in modelsByOwner.entries) {
