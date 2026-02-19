@@ -1,5 +1,7 @@
 import 'package:http/http.dart' as http;
 
+import '../models/common/copy_with_sentinel.dart';
+
 /// Context for an HTTP request/response.
 ///
 /// This class encapsulates all the information needed to process
@@ -35,17 +37,23 @@ class RequestContext {
   final Future<void>? abortTrigger;
 
   /// Creates a copy with updated values.
+  ///
+  /// Nullable fields can be explicitly set to `null` to clear them.
   RequestContext copyWith({
     http.BaseRequest? request,
-    http.Response? response,
+    Object? response = unsetCopyWithValue,
     Map<String, dynamic>? metadata,
-    Future<void>? abortTrigger,
+    Object? abortTrigger = unsetCopyWithValue,
   }) {
     return RequestContext(
       request: request ?? this.request,
-      response: response ?? this.response,
+      response: response == unsetCopyWithValue
+          ? this.response
+          : response as http.Response?,
       metadata: metadata ?? this.metadata,
-      abortTrigger: abortTrigger ?? this.abortTrigger,
+      abortTrigger: abortTrigger == unsetCopyWithValue
+          ? this.abortTrigger
+          : abortTrigger as Future<void>?,
     );
   }
 }

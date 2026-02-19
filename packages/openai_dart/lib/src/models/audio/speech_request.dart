@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
+
 /// A request to generate speech from text.
 ///
 /// Uses the text-to-speech API to convert text into spoken audio.
@@ -72,19 +74,23 @@ class SpeechRequest {
   };
 
   /// Creates a copy with the given fields replaced.
+  ///
+  /// Nullable fields can be explicitly set to `null` to clear them.
   SpeechRequest copyWith({
     String? model,
     String? input,
     SpeechVoice? voice,
-    SpeechResponseFormat? responseFormat,
-    double? speed,
+    Object? responseFormat = unsetCopyWithValue,
+    Object? speed = unsetCopyWithValue,
   }) {
     return SpeechRequest(
       model: model ?? this.model,
       input: input ?? this.input,
       voice: voice ?? this.voice,
-      responseFormat: responseFormat ?? this.responseFormat,
-      speed: speed ?? this.speed,
+      responseFormat: responseFormat == unsetCopyWithValue
+          ? this.responseFormat
+          : responseFormat as SpeechResponseFormat?,
+      speed: speed == unsetCopyWithValue ? this.speed : speed as double?,
     );
   }
 

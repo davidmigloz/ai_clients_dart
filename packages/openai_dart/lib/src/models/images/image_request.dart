@@ -2,6 +2,8 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
+
 /// A request to generate images from a text prompt.
 ///
 /// Uses DALL-E models to create images from textual descriptions.
@@ -106,25 +108,32 @@ class ImageGenerationRequest {
   };
 
   /// Creates a copy with the given fields replaced.
+  ///
+  /// Nullable fields can be explicitly set to `null` to clear them.
   ImageGenerationRequest copyWith({
     String? prompt,
-    String? model,
-    int? n,
-    ImageQuality? quality,
-    ImageResponseFormat? responseFormat,
-    ImageSize? size,
-    ImageStyle? style,
-    String? user,
+    Object? model = unsetCopyWithValue,
+    Object? n = unsetCopyWithValue,
+    Object? quality = unsetCopyWithValue,
+    Object? responseFormat = unsetCopyWithValue,
+    Object? size = unsetCopyWithValue,
+    Object? style = unsetCopyWithValue,
+    Object? user = unsetCopyWithValue,
   }) {
     return ImageGenerationRequest(
       prompt: prompt ?? this.prompt,
-      model: model ?? this.model,
-      n: n ?? this.n,
-      quality: quality ?? this.quality,
-      responseFormat: responseFormat ?? this.responseFormat,
-      size: size ?? this.size,
-      style: style ?? this.style,
-      user: user ?? this.user,
+      model: model == unsetCopyWithValue ? this.model : model as String?,
+      n: n == unsetCopyWithValue ? this.n : n as int?,
+      quality: quality == unsetCopyWithValue
+          ? this.quality
+          : quality as ImageQuality?,
+      responseFormat: responseFormat == unsetCopyWithValue
+          ? this.responseFormat
+          : responseFormat as ImageResponseFormat?,
+      size: size == unsetCopyWithValue ? this.size : size as ImageSize?,
+      style:
+          style == unsetCopyWithValue ? this.style : style as ImageStyle?,
+      user: user == unsetCopyWithValue ? this.user : user as String?,
     );
   }
 

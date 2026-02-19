@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../config/function_call_status.dart';
 import '../config/item_status.dart';
@@ -355,17 +356,21 @@ class FunctionCallOutputItem extends Item {
   };
 
   /// Creates a copy with updated fields.
+  ///
+  /// Nullable fields can be explicitly set to `null` to clear them.
   FunctionCallOutputItem copyWith({
-    String? id,
+    Object? id = unsetCopyWithValue,
     String? callId,
     FunctionCallOutput? output,
-    FunctionCallStatus? status,
+    Object? status = unsetCopyWithValue,
   }) {
     return FunctionCallOutputItem(
-      id: id ?? this.id,
+      id: id == unsetCopyWithValue ? this.id : id as String?,
       callId: callId ?? this.callId,
       output: output ?? this.output,
-      status: status ?? this.status,
+      status: status == unsetCopyWithValue
+          ? this.status
+          : status as FunctionCallStatus?,
     );
   }
 

@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
+
 /// A request to generate embeddings for input text.
 ///
 /// Embeddings are numerical representations of text that capture semantic
@@ -77,19 +79,25 @@ class EmbeddingRequest {
   };
 
   /// Creates a copy with the given fields replaced.
+  ///
+  /// Nullable fields can be explicitly set to `null` to clear them.
   EmbeddingRequest copyWith({
     String? model,
     EmbeddingInput? input,
-    EmbeddingEncodingFormat? encodingFormat,
-    int? dimensions,
-    String? user,
+    Object? encodingFormat = unsetCopyWithValue,
+    Object? dimensions = unsetCopyWithValue,
+    Object? user = unsetCopyWithValue,
   }) {
     return EmbeddingRequest(
       model: model ?? this.model,
       input: input ?? this.input,
-      encodingFormat: encodingFormat ?? this.encodingFormat,
-      dimensions: dimensions ?? this.dimensions,
-      user: user ?? this.user,
+      encodingFormat: encodingFormat == unsetCopyWithValue
+          ? this.encodingFormat
+          : encodingFormat as EmbeddingEncodingFormat?,
+      dimensions: dimensions == unsetCopyWithValue
+          ? this.dimensions
+          : dimensions as int?,
+      user: user == unsetCopyWithValue ? this.user : user as String?,
     );
   }
 
