@@ -51,6 +51,7 @@ class SchemaInfo:
     properties: dict = field(default_factory=dict)
     required: list = field(default_factory=list)
     enum_values: list = field(default_factory=list)
+    union_members: list = field(default_factory=list)
 
 
 @dataclass
@@ -212,17 +213,97 @@ def extract_endpoints(spec: dict) -> dict[str, EndpointInfo]:
     return endpoints
 
 
+def _ref_name(ref: str) -> str:
+    """Extract schema name from a JSON ref path."""
+    return ref.split('/')[-1]
+
+
+def _resolve_schema_details(
+    schema: dict[str, Any],
+    all_schemas: dict[str, Any],
+    seen_refs: set[str] | None = None,
+) -> dict[str, Any]:
+    """Resolve schema details with support for allOf + refs.
+
+    This flattens composed schemas for property/required/enum diffing and tracks
+    oneOf/anyOf union members for variant diffing.
+    """
+    if seen_refs is None:
+        seen_refs = set()
+
+    result = {
+        'type': schema.get('type', 'object'),
+        'description': schema.get('description', '')[:100],
+        'properties': {},
+        'required': set(),
+        'enum_values': set(),
+        'union_members': set(),
+    }
+
+    ref = schema.get('$ref')
+    if isinstance(ref, str):
+        ref_schema_name = _ref_name(ref)
+        if ref_schema_name not in seen_refs:
+            seen_refs.add(ref_schema_name)
+            ref_schema = all_schemas.get(ref_schema_name, {})
+            resolved_ref = _resolve_schema_details(ref_schema, all_schemas, seen_refs)
+            if resolved_ref.get('type'):
+                result['type'] = resolved_ref['type']
+            if resolved_ref.get('description'):
+                result['description'] = resolved_ref['description']
+            result['properties'].update(resolved_ref.get('properties', {}))
+            result['required'].update(resolved_ref.get('required', set()))
+            result['enum_values'].update(resolved_ref.get('enum_values', set()))
+            result['union_members'].update(resolved_ref.get('union_members', set()))
+
+    # Flatten allOf branches (critical for composed schemas)
+    for item in schema.get('allOf', []):
+        resolved = _resolve_schema_details(item, all_schemas, seen_refs.copy())
+        if resolved.get('type') and result['type'] == 'object':
+            result['type'] = resolved['type']
+        if resolved.get('description') and not result['description']:
+            result['description'] = resolved['description']
+        result['properties'].update(resolved.get('properties', {}))
+        result['required'].update(resolved.get('required', set()))
+        result['enum_values'].update(resolved.get('enum_values', set()))
+        result['union_members'].update(resolved.get('union_members', set()))
+
+    # Local schema body
+    result['properties'].update(schema.get('properties', {}))
+    result['required'].update(schema.get('required', []))
+    result['enum_values'].update(schema.get('enum', []))
+    if schema.get('type'):
+        result['type'] = schema['type']
+    if schema.get('description'):
+        result['description'] = schema.get('description', '')[:100]
+
+    # Track discriminated variants
+    for union_key in ('oneOf', 'anyOf'):
+        for member in schema.get(union_key, []):
+            if isinstance(member, dict) and '$ref' in member:
+                result['union_members'].add(_ref_name(member['$ref']))
+            elif isinstance(member, dict):
+                inline_name = member.get('title') or member.get('type')
+                if inline_name:
+                    result['union_members'].add(f"{union_key}:{inline_name}")
+
+    return result
+
+
 def extract_schemas(spec: dict) -> dict[str, SchemaInfo]:
     """Extract all schemas from spec."""
     schemas = {}
-    for name, schema in spec.get('components', {}).get('schemas', {}).items():
+    all_schemas = spec.get('components', {}).get('schemas', {})
+    for name, schema in all_schemas.items():
+        resolved = _resolve_schema_details(schema, all_schemas)
         schemas[name] = SchemaInfo(
             name=name,
-            type=schema.get('type', 'object'),
-            description=schema.get('description', '')[:100],
-            properties=schema.get('properties', {}),
-            required=schema.get('required', []),
-            enum_values=schema.get('enum', []),
+            type=resolved.get('type', 'object'),
+            description=resolved.get('description', ''),
+            properties=resolved.get('properties', {}),
+            required=sorted(resolved.get('required', set())),
+            enum_values=sorted(resolved.get('enum_values', set())),
+            union_members=sorted(resolved.get('union_members', set())),
         )
     return schemas
 
@@ -317,6 +398,18 @@ def compare_schemas(old_schemas: dict, new_schemas: dict) -> tuple:
                 changes.append({'type': 'enum_value_added', 'value': value})
             for value in old_enums - new_enums:
                 changes.append({'type': 'enum_value_removed', 'value': value, 'breaking': True})
+
+        # Check union member changes (oneOf/anyOf variants)
+        old_members = set(old_schema.union_members)
+        new_members = set(new_schema.union_members)
+        for member in new_members - old_members:
+            changes.append({'type': 'union_member_added', 'member': member})
+        for member in old_members - new_members:
+            changes.append({
+                'type': 'union_member_removed',
+                'member': member,
+                'breaking': True,
+            })
 
         if changes:
             modified.append({'schema': new_schema, 'changes': changes})
@@ -497,7 +590,14 @@ def generate_changelog(analysis: dict, config: Config) -> str:
             lines.append("")
             for change in mod['changes']:
                 breaking = " **[BREAKING]**" if change.get('breaking') else ""
-                lines.append(f"- {change['type']}: `{change.get('name', change.get('property', ''))}`{breaking}")
+                label = (
+                    change.get('name')
+                    or change.get('property')
+                    or change.get('value')
+                    or change.get('member')
+                    or ''
+                )
+                lines.append(f"- {change['type']}: `{label}`{breaking}")
             lines.append("")
 
     # Modified schemas
@@ -509,7 +609,12 @@ def generate_changelog(analysis: dict, config: Config) -> str:
             lines.append("")
             for change in mod['changes']:
                 breaking = " **[BREAKING]**" if change.get('breaking') else ""
-                prop = change.get('property', change.get('value', ''))
+                prop = (
+                    change.get('property')
+                    or change.get('value')
+                    or change.get('member')
+                    or ''
+                )
                 lines.append(f"- {change['type']}: `{prop}`{breaking}")
             lines.append("")
 
@@ -641,7 +746,13 @@ def generate_plan(analysis: dict, config: Config) -> str:
                 "**Changes**:",
             ])
             for change in mod['changes']:
-                lines.append(f"- {change['type']}: `{change.get('property', change.get('value', ''))}`")
+                label = (
+                    change.get('property')
+                    or change.get('value')
+                    or change.get('member')
+                    or ''
+                )
+                lines.append(f"- {change['type']}: `{label}`")
             lines.append("")
 
     # Checklist
@@ -697,7 +808,10 @@ def generate_plan(analysis: dict, config: Config) -> str:
         lines.append("### Modified Schemas")
         for mod in analysis['schemas']['modified']:
             sc = mod['schema']
-            changes = [c.get('property', c.get('value', '')) for c in mod['changes']]
+            changes = [
+                c.get('property') or c.get('value') or c.get('member') or ''
+                for c in mod['changes']
+            ]
             lines.append(f"- [ ] `{sc['name']}` - verify: {', '.join(changes)}")
         lines.append("")
 

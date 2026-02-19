@@ -115,6 +115,7 @@ def auto_locate_spec(config_dir: Path) -> Path | None:
 
     Returns the path to the latest fetched spec, or None if not found.
     """
+    config_dir = config_dir.resolve()
     specs_config = config_dir / 'specs.json'
     if not specs_config.exists():
         return None
@@ -125,12 +126,52 @@ def auto_locate_spec(config_dir: Path) -> Path | None:
     except (json.JSONDecodeError, IOError):
         return None
 
-    output_dir = Path(cfg.get('output_dir', '/tmp'))
+    def _path_candidates(path_str: str) -> list[Path]:
+        raw = Path(path_str)
+        candidates = [raw]
+        if not raw.is_absolute():
+            candidates.append((Path.cwd() / raw).resolve())
+            candidates.append((config_dir / raw).resolve())
+            for parent in config_dir.parents:
+                candidates.append((parent / raw).resolve())
+        deduped = []
+        seen = set()
+        for candidate in candidates:
+            key = str(candidate)
+            if key not in seen:
+                seen.add(key)
+                deduped.append(candidate)
+        return deduped
 
-    for spec_name in cfg.get('specs', {}).keys():
-        candidate = output_dir / f"latest-{spec_name}.json"
-        if candidate.exists():
-            return candidate
+    output_dir_cfg = cfg.get('output_dir', '/tmp')
+    specs_dir_cfg = cfg.get('specs_dir')
+    specs_map = cfg.get('specs', {})
+
+    for spec_name, spec_info in specs_map.items():
+        # 1) Prefer latest fetched snapshot in output_dir
+        for output_dir in _path_candidates(output_dir_cfg):
+            candidate = output_dir / f"latest-{spec_name}.json"
+            if candidate.exists():
+                return candidate
+
+        # 2) Fallback to package local spec from specs_dir + local_file
+        local_file = spec_info.get('local_file', 'openapi.json')
+        local_path = Path(local_file)
+        if local_path.is_absolute() and local_path.exists():
+            return local_path
+
+        if specs_dir_cfg:
+            base_name = local_path.stem
+            for specs_dir in _path_candidates(specs_dir_cfg):
+                exact_candidate = specs_dir / local_file
+                if exact_candidate.exists():
+                    return exact_candidate
+
+                for ext in ['.json', '.yaml', '.yml']:
+                    candidate = specs_dir / f"{base_name}{ext}"
+                    if candidate.exists():
+                        return candidate
+
         break  # Use first spec
 
     return None
@@ -394,7 +435,7 @@ def main():
             print(f"Auto-located spec: {spec_path}", file=sys.stderr)
         else:
             print("ERROR: Could not auto-locate spec file.", file=sys.stderr)
-            print("       Run fetch_spec.py first, or provide --spec path.", file=sys.stderr)
+            print("       Run fetch_spec.py first, verify specs_dir/local_file config, or provide --spec path.", file=sys.stderr)
             sys.exit(2)
 
     if not spec_path.exists():
