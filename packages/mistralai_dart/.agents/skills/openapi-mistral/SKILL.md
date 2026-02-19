@@ -1,11 +1,13 @@
 ---
 name: openapi-mistral
-description: Automates updating mistralai_dart when Mistral AI OpenAPI spec changes. Fetches latest spec, compares against current, generates changelogs and prioritized implementation plans. Use for: (1) Checking for API updates, (2) Generating implementation plans for spec changes, (3) Creating new models/endpoints from spec, (4) Syncing local spec with upstream. Triggers: "update api", "sync openapi", "new endpoints", "api changes", "check for updates", "update spec", "api version", "fetch spec", "compare spec", "what changed in the api", "implementation plan".
+description: >-
+  Update mistralai_dart from Mistral OpenAPI changes. Fetch and compare specs, generate changelogs and prioritized implementation plans, and guide endpoint/model synchronization. Use for update api, sync openapi, compare spec changes, new endpoints, or implementation plan requests.
 ---
+
 
 # OpenAPI Toolkit (mistralai_dart)
 
-Uses shared scripts from [openapi-toolkit](../../../../../.claude/shared/openapi-toolkit/README.md).
+Uses shared scripts from [openapi-toolkit](../../../../../.agents/shared/openapi-toolkit/README.md).
 
 ## Prerequisites
 
@@ -16,7 +18,7 @@ Uses shared scripts from [openapi-toolkit](../../../../../.claude/shared/openapi
 
 ## Working Directory Requirements
 
-Different scripts require different working directories. See the [shared README](../../../../../.claude/shared/openapi-toolkit/README.md#working-directory-requirements) for details.
+Different scripts require different working directories. See the [shared README](../../../../../.agents/shared/openapi-toolkit/README.md#working-directory-requirements) for details.
 
 | Script | Working Directory |
 |--------|-------------------|
@@ -30,36 +32,36 @@ Different scripts require different working directories. See the [shared README]
 
 # Fetch latest spec
 cd "$(git rev-parse --show-toplevel)" && \
-python3 .claude/shared/openapi-toolkit/scripts/fetch_spec.py \
-  --config-dir packages/mistralai_dart/.claude/skills/openapi-mistral/config
+python3 .agents/shared/openapi-toolkit/scripts/fetch_spec.py \
+  --config-dir packages/mistralai_dart/.agents/skills/openapi-mistral/config
 
 # Analyze changes (specs auto-located from config)
 cd "$(git rev-parse --show-toplevel)" && \
-python3 .claude/shared/openapi-toolkit/scripts/analyze_changes.py \
-  --config-dir packages/mistralai_dart/.claude/skills/openapi-mistral/config \
+python3 .agents/shared/openapi-toolkit/scripts/analyze_changes.py \
+  --config-dir packages/mistralai_dart/.agents/skills/openapi-mistral/config \
   --format all
 
 # === FROM PACKAGE ROOT ===
 
 # IMPORTANT: Check API coverage (spec auto-located)
 cd "$(git rev-parse --show-toplevel)/packages/mistralai_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_coverage.py \
-  --config-dir .claude/skills/openapi-mistral/config --verbose
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_coverage.py \
+  --config-dir .agents/skills/openapi-mistral/config --verbose
 
 # Verify implementation (barrel files auto-discovered)
 cd "$(git rev-parse --show-toplevel)/packages/mistralai_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_exports.py \
-  --config-dir .claude/skills/openapi-mistral/config
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_exports.py \
+  --config-dir .agents/skills/openapi-mistral/config
 
 cd "$(git rev-parse --show-toplevel)/packages/mistralai_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_model_properties.py \
-  --config-dir .claude/skills/openapi-mistral/config \
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_model_properties.py \
+  --config-dir .agents/skills/openapi-mistral/config \
   --spec specs/openapi.json
 
 # Re-run coverage to confirm full implementation
 cd "$(git rev-parse --show-toplevel)/packages/mistralai_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_coverage.py \
-  --config-dir .claude/skills/openapi-mistral/config
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_coverage.py \
+  --config-dir .agents/skills/openapi-mistral/config
 ```
 
 ## Troubleshooting

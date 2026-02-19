@@ -1,5 +1,18 @@
 # anthropic_sdk_dart Package Guide
 
+
+## Contents
+
+- [Package Configuration](#package-configuration)
+- [Directory Structure](#directory-structure)
+- [File Path Patterns](#file-path-patterns)
+- [API Resources](#api-resources)
+- [Required Headers](#required-headers)
+- [Exception Types](#exception-types)
+- [Testing](#testing)
+  - [Unit Tests](#unit-tests)
+  - [Integration Tests](#integration-tests)
+
 ## Package Configuration
 
 | Setting | Value |

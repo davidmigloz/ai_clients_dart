@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpenAPI OpenResponses"
+  short_description: "Manage OpenResponses spec updates"
+  default_prompt: "Use $openapi-open-responses to review API spec changes, generate a changelog, and produce an implementation plan for this package."

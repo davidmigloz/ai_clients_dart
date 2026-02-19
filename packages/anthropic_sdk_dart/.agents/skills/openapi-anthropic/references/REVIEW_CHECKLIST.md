@@ -1,17 +1,38 @@
 # Review Checklist (anthropic_sdk_dart)
 
-Extends [REVIEW_CHECKLIST-core.md](../../../../../../.claude/shared/openapi-toolkit/references/REVIEW_CHECKLIST-core.md).
+
+## Contents
+
+- [Pre-Review Setup](#pre-review-setup)
+- [Review Passes](#review-passes)
+  - [Pass 1: Implementation Verification](#pass-1-implementation-verification)
+  - [Pass 2: Anthropic-Specific Checks](#pass-2-anthropic-specific-checks)
+  - [Pass 2b: Resources Using Direct httpClient.send()](#pass-2b-resources-using-direct-httpclientsend)
+  - [Pass 3: Barrel File Verification](#pass-3-barrel-file-verification)
+  - [Pass 4: Documentation](#pass-4-documentation)
+  - [Pass 5: Quality Gates](#pass-5-quality-gates)
+- [Common Gaps](#common-gaps)
+  - [Model Issues](#model-issues)
+  - [Beta API Issues](#beta-api-issues)
+  - [Authentication Issues (Direct HTTP Requests)](#authentication-issues-direct-http-requests)
+  - [Integration Test Issues](#integration-test-issues)
+- [Anthropic-Specific Patterns](#anthropic-specific-patterns)
+  - [Content Block Types](#content-block-types)
+  - [Stop Reasons](#stop-reasons)
+  - [Stream Event Types](#stream-event-types)
+
+Extends [REVIEW_CHECKLIST-core.md](../../../../../../.agents/shared/openapi-toolkit/references/REVIEW_CHECKLIST-core.md).
 
 ## Pre-Review Setup
 
 ```bash
 # Fetch latest spec
-python3 .claude/shared/openapi-toolkit/scripts/fetch_spec.py \
-  --config-dir packages/anthropic_sdk_dart/.claude/skills/openapi/config
+python3 .agents/shared/openapi-toolkit/scripts/fetch_spec.py \
+  --config-dir packages/anthropic_sdk_dart/.agents/skills/openapi-anthropic/config
 
 # Analyze changes
-python3 .claude/shared/openapi-toolkit/scripts/analyze_changes.py \
-  --config-dir packages/anthropic_sdk_dart/.claude/skills/openapi/config \
+python3 .agents/shared/openapi-toolkit/scripts/analyze_changes.py \
+  --config-dir packages/anthropic_sdk_dart/.agents/skills/openapi-anthropic/config \
   packages/anthropic_sdk_dart/specs/openapi.yaml \
   /tmp/openapi-anthropic-dart/latest-main.yaml \
   --format all
@@ -50,8 +71,8 @@ For streaming and multipart resources:
 ### Pass 3: Barrel File Verification
 
 ```bash
-python3 .claude/shared/openapi-toolkit/scripts/verify_exports.py \
-  --config-dir packages/anthropic_sdk_dart/.claude/skills/openapi/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_exports.py \
+  --config-dir packages/anthropic_sdk_dart/.agents/skills/openapi-anthropic/config
 ```
 
 - [ ] All public types exported
@@ -79,8 +100,8 @@ mcp__dart__run_tests()
 - [ ] Model properties match spec
 
 ```bash
-python3 .claude/shared/openapi-toolkit/scripts/verify_model_properties.py \
-  --config-dir packages/anthropic_sdk_dart/.claude/skills/openapi/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_model_properties.py \
+  --config-dir packages/anthropic_sdk_dart/.agents/skills/openapi-anthropic/config
 ```
 
 ## Common Gaps

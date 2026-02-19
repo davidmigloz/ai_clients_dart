@@ -1,0 +1,4 @@
+interface:
+  display_name: "WebSocket GoogleAI"
+  short_description: "Manage GoogleAI Live API updates"
+  default_prompt: "Use $websocket-googleai to review API spec changes, generate a changelog, and produce an implementation plan for this package."

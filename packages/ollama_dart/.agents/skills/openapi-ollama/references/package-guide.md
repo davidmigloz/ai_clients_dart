@@ -1,5 +1,25 @@
 # ollama_dart Package Guide
 
+
+## Contents
+
+- [Package Configuration](#package-configuration)
+- [Directory Structure](#directory-structure)
+- [File Path Patterns](#file-path-patterns)
+- [Naming Conventions](#naming-conventions)
+  - [Model Classes (v1.0.0 Simplified Names)](#model-classes-v100-simplified-names)
+  - [Enums](#enums)
+  - [Resources](#resources)
+- [API Resources](#api-resources)
+- [API Endpoints](#api-endpoints)
+- [Critical Models](#critical-models)
+- [Exception Types](#exception-types)
+- [Testing](#testing)
+  - [Running Tests](#running-tests)
+  - [Test Tags](#test-tags)
+- [Verification Scripts](#verification-scripts)
+- [Related Documentation](#related-documentation)
+
 This guide provides package-specific details for implementing and updating the `ollama_dart` package.
 
 ---
@@ -215,20 +235,20 @@ dart test
 
 ## Verification Scripts
 
-All verification scripts are in `.claude/shared/openapi-toolkit/scripts/` and require `--config-dir packages/ollama_dart/.claude/skills/openapi/config`:
+All verification scripts are in `.agents/shared/openapi-toolkit/scripts/` and require `--config-dir packages/ollama_dart/.agents/skills/openapi-ollama/config`:
 
 ```bash
 # Verify barrel file exports
-python3 .claude/shared/openapi-toolkit/scripts/verify_exports.py \
-  --config-dir packages/ollama_dart/.claude/skills/openapi/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_exports.py \
+  --config-dir packages/ollama_dart/.agents/skills/openapi-ollama/config
 
 # Verify README completeness
-python3 .claude/shared/openapi-toolkit/scripts/verify_readme.py \
-  --config-dir packages/ollama_dart/.claude/skills/openapi/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_readme.py \
+  --config-dir packages/ollama_dart/.agents/skills/openapi-ollama/config
 
 # Verify model properties match spec
-python3 .claude/shared/openapi-toolkit/scripts/verify_model_properties.py \
-  --config-dir packages/ollama_dart/.claude/skills/openapi/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_model_properties.py \
+  --config-dir packages/ollama_dart/.agents/skills/openapi-ollama/config
 ```
 
 ---

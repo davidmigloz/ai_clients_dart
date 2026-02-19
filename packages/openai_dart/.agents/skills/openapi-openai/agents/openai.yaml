@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpenAPI OpenAI"
+  short_description: "Manage OpenAI OpenAPI updates"
+  default_prompt: "Use $openapi-openai to review API spec changes, generate a changelog, and produce an implementation plan for this package."

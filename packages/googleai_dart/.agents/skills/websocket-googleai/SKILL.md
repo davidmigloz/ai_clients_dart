@@ -1,13 +1,15 @@
 ---
 name: websocket-googleai
-description: Automates updating googleai_dart when Gemini Live API WebSocket schema changes. Fetches latest schema, compares against current, generates changelogs and prioritized implementation plans. Use for: (1) Checking for Live API updates, (2) Generating implementation plans for WebSocket changes, (3) Creating new message types from schema, (4) Syncing local schema with upstream. Triggers: "update live api", "sync websocket", "new messages", "live api changes", "check for live updates", "update live schema", "websocket version", "fetch live schema", "compare live schema", "what changed in live api", "live implementation plan".
+description: >-
+  Update googleai_dart from Gemini Live WebSocket schema changes. Fetch and compare schemas, generate changelogs and prioritized implementation plans, and guide message/model synchronization. Use for update live api, sync websocket schema, compare schema changes, new messages, or implementation plan requests.
 ---
+
 
 # WebSocket Toolkit (googleai_dart)
 
-Uses shared scripts from [websocket-toolkit](../../../../../.claude/shared/websocket-toolkit/README.md) with googleai_dart-specific configuration.
+Uses shared scripts from [websocket-toolkit](../../../../../.agents/shared/websocket-toolkit/README.md) with googleai_dart-specific configuration.
 
-Uses verification scripts from [openapi-toolkit](../../../../../.claude/shared/openapi-toolkit/README.md).
+Uses verification scripts from [openapi-toolkit](../../../../../.agents/shared/openapi-toolkit/README.md).
 
 ## Prerequisites
 
@@ -27,8 +29,8 @@ Uses verification scripts from [openapi-toolkit](../../../../../.claude/shared/o
 
 ```bash
 cd "$(git rev-parse --show-toplevel)" && \
-python3 .claude/shared/websocket-toolkit/scripts/fetch_schema.py \
-  --config-dir packages/googleai_dart/.claude/skills/websocket-googleai/config
+python3 .agents/shared/websocket-toolkit/scripts/fetch_schema.py \
+  --config-dir packages/googleai_dart/.agents/skills/websocket-googleai/config
 ```
 
 Output: `/tmp/websocket-googleai-dart/latest-live.json`
@@ -37,8 +39,8 @@ Output: `/tmp/websocket-googleai-dart/latest-live.json`
 
 ```bash
 cd "$(git rev-parse --show-toplevel)" && \
-python3 .claude/shared/websocket-toolkit/scripts/analyze_changes.py \
-  --config-dir packages/googleai_dart/.claude/skills/websocket-googleai/config \
+python3 .agents/shared/websocket-toolkit/scripts/analyze_changes.py \
+  --config-dir packages/googleai_dart/.agents/skills/websocket-googleai/config \
   packages/googleai_dart/specs/live-api-schema.json /tmp/websocket-googleai-dart/latest-live.json \
   --format all \
   --changelog-out /tmp/websocket-googleai-dart/changelog-live.md \
@@ -74,26 +76,26 @@ Before running the review checklist:
 ```bash
 # Pass 2: Barrel file verification (from shared/openapi-toolkit)
 cd "$(git rev-parse --show-toplevel)/packages/googleai_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_exports.py \
-  --config-dir .claude/skills/websocket-googleai/config
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_exports.py \
+  --config-dir .agents/skills/websocket-googleai/config
 
 # Pass 3: Documentation completeness
 cd "$(git rev-parse --show-toplevel)/packages/googleai_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_readme.py \
-  --config-dir .claude/skills/websocket-googleai/config
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_readme.py \
+  --config-dir .agents/skills/websocket-googleai/config
 
 cd "$(git rev-parse --show-toplevel)/packages/googleai_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_examples.py \
-  --config-dir .claude/skills/websocket-googleai/config
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_examples.py \
+  --config-dir .agents/skills/websocket-googleai/config
 
 cd "$(git rev-parse --show-toplevel)/packages/googleai_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_readme_code.py \
-  --config-dir .claude/skills/websocket-googleai/config
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_readme_code.py \
+  --config-dir .agents/skills/websocket-googleai/config
 
 # Pass 4: Property-level verification
 cd "$(git rev-parse --show-toplevel)/packages/googleai_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_model_properties.py \
-  --config-dir .claude/skills/websocket-googleai/config
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_model_properties.py \
+  --config-dir .agents/skills/websocket-googleai/config
 
 # Dart quality checks
 cd "$(git rev-parse --show-toplevel)/packages/googleai_dart" && \

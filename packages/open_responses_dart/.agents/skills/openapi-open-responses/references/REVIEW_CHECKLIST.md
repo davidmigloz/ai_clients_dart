@@ -1,6 +1,6 @@
 # Review Checklist (open_responses_dart)
 
-Extends [REVIEW_CHECKLIST-core.md](../../../../../../.claude/shared/openapi-toolkit/references/REVIEW_CHECKLIST-core.md).
+Extends [REVIEW_CHECKLIST-core.md](../../../../../../.agents/shared/openapi-toolkit/references/REVIEW_CHECKLIST-core.md).
 
 ## Contents
 
@@ -21,8 +21,8 @@ Extends [REVIEW_CHECKLIST-core.md](../../../../../../.claude/shared/openapi-tool
 Re-run the analysis to get a fresh spec comparison:
 
 ```bash
-python3 .claude/shared/openapi-toolkit/scripts/analyze_changes.py \
-  --config-dir packages/open_responses_dart/.claude/skills/openapi/config \
+python3 .agents/shared/openapi-toolkit/scripts/analyze_changes.py \
+  --config-dir packages/open_responses_dart/.agents/skills/openapi-open-responses/config \
   packages/open_responses_dart/specs/openapi.json \
   /tmp/openapi-open-responses-dart/latest-main.json \
   --format all
@@ -94,8 +94,8 @@ python3 .claude/shared/openapi-toolkit/scripts/analyze_changes.py \
 ## Pass 3: Barrel File Verification
 
 ```bash
-python3 .claude/shared/openapi-toolkit/scripts/verify_exports.py \
-  --config-dir packages/open_responses_dart/.claude/skills/openapi/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_exports.py \
+  --config-dir packages/open_responses_dart/.agents/skills/openapi-open-responses/config
 ```
 
 - [ ] All public types exported
@@ -107,10 +107,10 @@ python3 .claude/shared/openapi-toolkit/scripts/verify_exports.py \
 ## Pass 4: Documentation Completeness
 
 ```bash
-python3 .claude/shared/openapi-toolkit/scripts/verify_readme.py \
-  --config-dir packages/open_responses_dart/.claude/skills/openapi/config
-python3 .claude/shared/openapi-toolkit/scripts/verify_examples.py \
-  --config-dir packages/open_responses_dart/.claude/skills/openapi/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_readme.py \
+  --config-dir packages/open_responses_dart/.agents/skills/openapi-open-responses/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_examples.py \
+  --config-dir packages/open_responses_dart/.agents/skills/openapi-open-responses/config
 ```
 
 - [ ] README.md updated with new features
@@ -123,8 +123,8 @@ python3 .claude/shared/openapi-toolkit/scripts/verify_examples.py \
 ## Pass 5: Property-Level Verification
 
 ```bash
-python3 .claude/shared/openapi-toolkit/scripts/verify_model_properties.py \
-  --config-dir packages/open_responses_dart/.claude/skills/openapi/config \
+python3 .agents/shared/openapi-toolkit/scripts/verify_model_properties.py \
+  --config-dir packages/open_responses_dart/.agents/skills/openapi-open-responses/config \
   --spec packages/open_responses_dart/specs/openapi.json
 ```
 

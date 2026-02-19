@@ -1,6 +1,35 @@
 # Review Checklist (ollama_dart)
 
-Extends [REVIEW_CHECKLIST-core.md](../../../../../../.claude/shared/openapi-toolkit/references/REVIEW_CHECKLIST-core.md).
+
+## Contents
+
+- [Pre-Review](#pre-review)
+- [PASS 1: Implementation Verification](#pass-1-implementation-verification)
+  - [P0: Breaking Changes](#p0-breaking-changes)
+  - [P1: New Endpoints](#p1-new-endpoints)
+  - [P2: New Schemas](#p2-new-schemas)
+  - [P3: Modified Schemas](#p3-modified-schemas)
+- [PASS 2: Ollama-Specific Checks](#pass-2-ollama-specific-checks)
+  - [Streaming](#streaming)
+  - [Tool Calling](#tool-calling)
+  - [Thinking Mode](#thinking-mode)
+  - [Context Memory](#context-memory)
+  - [Model Options](#model-options)
+- [PASS 3: Barrel File Completeness](#pass-3-barrel-file-completeness)
+- [PASS 4: Documentation Completeness](#pass-4-documentation-completeness)
+  - [README.md](#readmemd)
+  - [CHANGELOG.md](#changelogmd)
+  - [Examples](#examples)
+- [PASS 5: Quality Gates](#pass-5-quality-gates)
+- [Common Gaps to Check](#common-gaps-to-check)
+- [Review Output Template](#review-output-template)
+- [Review Summary](#review-summary)
+  - [Changes Verified](#changes-verified)
+  - [Quality Checks](#quality-checks)
+  - [Issues Found](#issues-found)
+  - [Recommendations](#recommendations)
+
+Extends [REVIEW_CHECKLIST-core.md](../../../../../../.agents/shared/openapi-toolkit/references/REVIEW_CHECKLIST-core.md).
 
 ---
 
@@ -10,12 +39,12 @@ Before reviewing changes, refresh the analysis:
 
 ```bash
 # Fetch latest spec
-python3 .claude/shared/openapi-toolkit/scripts/fetch_spec.py \
-  --config-dir packages/ollama_dart/.claude/skills/openapi/config
+python3 .agents/shared/openapi-toolkit/scripts/fetch_spec.py \
+  --config-dir packages/ollama_dart/.agents/skills/openapi-ollama/config
 
 # Generate fresh analysis
-python3 .claude/shared/openapi-toolkit/scripts/analyze_changes.py \
-  --config-dir packages/ollama_dart/.claude/skills/openapi/config \
+python3 .agents/shared/openapi-toolkit/scripts/analyze_changes.py \
+  --config-dir packages/ollama_dart/.agents/skills/openapi-ollama/config \
   packages/ollama_dart/specs/openapi.json /tmp/openapi-ollama-dart/latest-main.json \
   --format all
 ```
@@ -100,8 +129,8 @@ For each modified schema:
 ## PASS 3: Barrel File Completeness
 
 ```bash
-python3 .claude/shared/openapi-toolkit/scripts/verify_exports.py \
-  --config-dir packages/ollama_dart/.claude/skills/openapi/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_exports.py \
+  --config-dir packages/ollama_dart/.agents/skills/openapi-ollama/config
 ```
 
 - [ ] All new models exported
@@ -145,11 +174,11 @@ mcp__dart__dart_format()
 mcp__dart__run_tests()
 
 # Verification
-python3 .claude/shared/openapi-toolkit/scripts/verify_exports.py \
-  --config-dir packages/ollama_dart/.claude/skills/openapi/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_exports.py \
+  --config-dir packages/ollama_dart/.agents/skills/openapi-ollama/config
 
-python3 .claude/shared/openapi-toolkit/scripts/verify_model_properties.py \
-  --config-dir packages/ollama_dart/.claude/skills/openapi/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_model_properties.py \
+  --config-dir packages/ollama_dart/.agents/skills/openapi-ollama/config
 ```
 
 All must pass:

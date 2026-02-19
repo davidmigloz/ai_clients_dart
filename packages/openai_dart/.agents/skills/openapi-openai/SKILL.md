@@ -1,11 +1,13 @@
 ---
 name: openapi-openai
-description: Automates updating openai_dart when OpenAI OpenAPI spec changes. Fetches latest spec, compares against current, generates changelogs and prioritized implementation plans. Use for: (1) Checking for API updates, (2) Generating implementation plans for spec changes, (3) Creating new models/endpoints from spec, (4) Syncing local spec with upstream. Triggers: "update api", "sync openapi", "new endpoints", "api changes", "check for updates", "update spec", "api version", "fetch spec", "compare spec", "what changed in the api", "implementation plan".
+description: >-
+  Update openai_dart from OpenAI OpenAPI changes. Fetch and compare specs, generate changelogs and prioritized implementation plans, and guide endpoint/model synchronization. Use for update api, sync openapi, compare spec changes, new endpoints, or implementation plan requests.
 ---
+
 
 # OpenAPI Toolkit (openai_dart)
 
-Uses shared scripts from [openapi-toolkit](../../../../../.claude/shared/openapi-toolkit/README.md).
+Uses shared scripts from [openapi-toolkit](../../../../../.agents/shared/openapi-toolkit/README.md).
 
 ## Prerequisites
 
@@ -20,30 +22,30 @@ Uses shared scripts from [openapi-toolkit](../../../../../.claude/shared/openapi
 
 | Script | Run From | Command Prefix |
 |--------|----------|----------------|
-| `fetch_spec.py` | **REPO ROOT** | `python3 .claude/shared/...` |
-| `analyze_changes.py` | **REPO ROOT** | `python3 .claude/shared/...` |
-| `verify_*.py` | **PACKAGE ROOT** | `cd packages/openai_dart && python3 ../../.claude/shared/...` |
-| `generate_*.py` | **PACKAGE ROOT** | `cd packages/openai_dart && python3 ../../.claude/shared/...` |
+| `fetch_spec.py` | **REPO ROOT** | `python3 .agents/shared/...` |
+| `analyze_changes.py` | **REPO ROOT** | `python3 .agents/shared/...` |
+| `verify_*.py` | **PACKAGE ROOT** | `cd packages/openai_dart && python3 ../../.agents/shared/...` |
+| `generate_*.py` | **PACKAGE ROOT** | `cd packages/openai_dart && python3 ../../.agents/shared/...` |
 
 **Key paths:**
 - Repository root: `$(git rev-parse --show-toplevel)`
 - Package root: `$(git rev-parse --show-toplevel)/packages/openai_dart`
-- Scripts dir: `.claude/shared/openapi-toolkit/scripts/`
-- Config dir: `packages/openai_dart/.claude/skills/openapi-openai/config` (from repo root) or `.claude/skills/openapi-openai/config` (from package)
+- Scripts dir: `.agents/shared/openapi-toolkit/scripts/`
+- Config dir: `packages/openai_dart/.agents/skills/openapi-openai/config` (from repo root) or `.agents/skills/openapi-openai/config` (from package)
 
 ### Common Mistake
 
 ❌ **WRONG** - Running fetch_spec.py with package-relative path:
 ```bash
 cd packages/openai_dart
-python3 ../../.claude/shared/openapi-toolkit/scripts/fetch_spec.py  # FAILS!
+python3 ../../.agents/shared/openapi-toolkit/scripts/fetch_spec.py  # FAILS!
 ```
 
 ✅ **CORRECT** - Running fetch_spec.py from repo root:
 ```bash
 cd "$(git rev-parse --show-toplevel)" && \
-python3 .claude/shared/openapi-toolkit/scripts/fetch_spec.py \
-  --config-dir packages/openai_dart/.claude/skills/openapi-openai/config
+python3 .agents/shared/openapi-toolkit/scripts/fetch_spec.py \
+  --config-dir packages/openai_dart/.agents/skills/openapi-openai/config
 ```
 
 ## Quick Start
@@ -54,30 +56,30 @@ All commands below use explicit directory changes to work from anywhere:
 # === REPO ROOT COMMANDS ===
 # Fetch latest spec
 cd "$(git rev-parse --show-toplevel)" && \
-python3 .claude/shared/openapi-toolkit/scripts/fetch_spec.py \
-  --config-dir packages/openai_dart/.claude/skills/openapi-openai/config
+python3 .agents/shared/openapi-toolkit/scripts/fetch_spec.py \
+  --config-dir packages/openai_dart/.agents/skills/openapi-openai/config
 
 # Analyze changes (specs auto-located from config)
 cd "$(git rev-parse --show-toplevel)" && \
-python3 .claude/shared/openapi-toolkit/scripts/analyze_changes.py \
-  --config-dir packages/openai_dart/.claude/skills/openapi-openai/config \
+python3 .agents/shared/openapi-toolkit/scripts/analyze_changes.py \
+  --config-dir packages/openai_dart/.agents/skills/openapi-openai/config \
   --format all
 
 # === PACKAGE ROOT COMMANDS ===
 # Check API coverage (spec auto-located)
 cd "$(git rev-parse --show-toplevel)/packages/openai_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_coverage.py \
-  --config-dir .claude/skills/openapi-openai/config --verbose
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_coverage.py \
+  --config-dir .agents/skills/openapi-openai/config --verbose
 
 # Verify all models are exported (auto-discovers all 3 barrel files)
 cd "$(git rev-parse --show-toplevel)/packages/openai_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_exports.py \
-  --config-dir .claude/skills/openapi-openai/config
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_exports.py \
+  --config-dir .agents/skills/openapi-openai/config
 
 # Verify model properties match spec
 cd "$(git rev-parse --show-toplevel)/packages/openai_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_model_properties.py \
-  --config-dir .claude/skills/openapi-openai/config
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_model_properties.py \
+  --config-dir .agents/skills/openapi-openai/config
 ```
 
 ## Update Workflow (Recommended)
@@ -87,8 +89,8 @@ When updating the client to a new API version, follow this workflow to avoid mis
 ### Step 1: Fetch Latest Spec
 ```bash
 cd "$(git rev-parse --show-toplevel)" && \
-python3 .claude/shared/openapi-toolkit/scripts/fetch_spec.py \
-  --config-dir packages/openai_dart/.claude/skills/openapi-openai/config
+python3 .agents/shared/openapi-toolkit/scripts/fetch_spec.py \
+  --config-dir packages/openai_dart/.agents/skills/openapi-openai/config
 ```
 
 ### Step 2: Analyze Changes
@@ -96,8 +98,8 @@ Compare old spec vs new spec to find what changed. Specs are auto-located from c
 
 ```bash
 cd "$(git rev-parse --show-toplevel)" && \
-python3 .claude/shared/openapi-toolkit/scripts/analyze_changes.py \
-  --config-dir packages/openai_dart/.claude/skills/openapi-openai/config \
+python3 .agents/shared/openapi-toolkit/scripts/analyze_changes.py \
+  --config-dir packages/openai_dart/.agents/skills/openapi-openai/config \
   --format all
 ```
 
@@ -106,8 +108,8 @@ python3 .claude/shared/openapi-toolkit/scripts/analyze_changes.py \
 
 ```bash
 cd "$(git rev-parse --show-toplevel)/packages/openai_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_coverage.py \
-  --config-dir .claude/skills/openapi-openai/config --verbose
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_coverage.py \
+  --config-dir .agents/skills/openapi-openai/config --verbose
 ```
 
 If missing resources are found, prioritize implementing them before other updates.
@@ -118,18 +120,18 @@ After implementation, verify completeness. Barrel files are auto-discovered:
 ```bash
 # Check all models are exported (auto-discovers all 3 barrel files)
 cd "$(git rev-parse --show-toplevel)/packages/openai_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_exports.py \
-  --config-dir .claude/skills/openapi-openai/config
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_exports.py \
+  --config-dir .agents/skills/openapi-openai/config
 
 # Check model properties match spec
 cd "$(git rev-parse --show-toplevel)/packages/openai_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_model_properties.py \
-  --config-dir .claude/skills/openapi-openai/config
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_model_properties.py \
+  --config-dir .agents/skills/openapi-openai/config
 
 # Re-run coverage to confirm
 cd "$(git rev-parse --show-toplevel)/packages/openai_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_coverage.py \
-  --config-dir .claude/skills/openapi-openai/config
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_coverage.py \
+  --config-dir .agents/skills/openapi-openai/config
 ```
 
 **Expected success output:**

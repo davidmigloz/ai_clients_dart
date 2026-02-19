@@ -1,11 +1,13 @@
 ---
 name: openapi-open-responses
-description: Automates updating open_responses_dart when OpenResponses OpenAPI spec changes. Fetches latest spec, compares against current, generates changelogs and prioritized implementation plans. Use for: (1) Checking for API updates, (2) Generating implementation plans for spec changes, (3) Creating new models/endpoints from spec, (4) Syncing local spec with upstream. Triggers: "update api", "sync openapi", "new endpoints", "api changes", "check for updates", "update spec", "api version", "fetch spec", "compare spec", "what changed in the api", "implementation plan".
+description: >-
+  Update open_responses_dart from OpenResponses OpenAPI changes. Fetch and compare specs, generate changelogs and prioritized implementation plans, and guide endpoint/model synchronization. Use for update api, sync openapi, compare spec changes, new endpoints, or implementation plan requests.
 ---
+
 
 # OpenAPI Toolkit (open_responses_dart)
 
-Uses shared scripts from [openapi-toolkit](../../../../../.claude/shared/openapi-toolkit/README.md) with open_responses_dart-specific configuration.
+Uses shared scripts from [openapi-toolkit](../../../../../.agents/shared/openapi-toolkit/README.md) with open_responses_dart-specific configuration.
 
 ## Prerequisites
 
@@ -17,7 +19,7 @@ Uses shared scripts from [openapi-toolkit](../../../../../.claude/shared/openapi
 
 ## Working Directory Requirements
 
-Different scripts require different working directories. See the [shared README](../../../../../.claude/shared/openapi-toolkit/README.md#working-directory-requirements) for details.
+Different scripts require different working directories. See the [shared README](../../../../../.agents/shared/openapi-toolkit/README.md#working-directory-requirements) for details.
 
 | Script | Working Directory |
 |--------|-------------------|
@@ -36,8 +38,8 @@ Different scripts require different working directories. See the [shared README]
 
 ```bash
 cd "$(git rev-parse --show-toplevel)" && \
-python3 .claude/shared/openapi-toolkit/scripts/fetch_spec.py \
-  --config-dir packages/open_responses_dart/.claude/skills/openapi-open-responses/config
+python3 .agents/shared/openapi-toolkit/scripts/fetch_spec.py \
+  --config-dir packages/open_responses_dart/.agents/skills/openapi-open-responses/config
 ```
 
 Output: `/tmp/openapi-open-responses-dart/latest-main.json`
@@ -48,8 +50,8 @@ Compare old spec vs new spec to find what changed. **Specs are auto-located** fr
 
 ```bash
 cd "$(git rev-parse --show-toplevel)" && \
-python3 .claude/shared/openapi-toolkit/scripts/analyze_changes.py \
-  --config-dir packages/open_responses_dart/.claude/skills/openapi-open-responses/config \
+python3 .agents/shared/openapi-toolkit/scripts/analyze_changes.py \
+  --config-dir packages/open_responses_dart/.agents/skills/openapi-open-responses/config \
   --format all
 ```
 
@@ -59,8 +61,8 @@ python3 .claude/shared/openapi-toolkit/scripts/analyze_changes.py \
 
 ```bash
 cd "$(git rev-parse --show-toplevel)/packages/open_responses_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_coverage.py \
-  --config-dir .claude/skills/openapi-open-responses/config --verbose
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_coverage.py \
+  --config-dir .agents/skills/openapi-open-responses/config --verbose
 ```
 
 If missing resources are found, prioritize implementing them before other updates.
@@ -90,22 +92,22 @@ Perform the multi-pass review documented in `references/REVIEW_CHECKLIST.md`:
 ```bash
 # Pass 2: Barrel file verification
 cd "$(git rev-parse --show-toplevel)/packages/open_responses_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_exports.py \
-  --config-dir .claude/skills/openapi-open-responses/config
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_exports.py \
+  --config-dir .agents/skills/openapi-open-responses/config
 
 # Pass 3: Documentation completeness
 cd "$(git rev-parse --show-toplevel)/packages/open_responses_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_readme.py \
-  --config-dir .claude/skills/openapi-open-responses/config
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_readme.py \
+  --config-dir .agents/skills/openapi-open-responses/config
 
 cd "$(git rev-parse --show-toplevel)/packages/open_responses_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_examples.py \
-  --config-dir .claude/skills/openapi-open-responses/config
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_examples.py \
+  --config-dir .agents/skills/openapi-open-responses/config
 
 # Pass 4: Property-level verification
 cd "$(git rev-parse --show-toplevel)/packages/open_responses_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_model_properties.py \
-  --config-dir .claude/skills/openapi-open-responses/config \
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_model_properties.py \
+  --config-dir .agents/skills/openapi-open-responses/config \
   --spec specs/openapi.json
 
 # Dart quality checks

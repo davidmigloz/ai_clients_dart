@@ -1,5 +1,14 @@
 # openai_dart Package Guide
 
+
+## Contents
+
+- [Package Configuration](#package-configuration)
+- [Directory Structure](#directory-structure)
+- [File Path Patterns](#file-path-patterns)
+- [Naming Conventions](#naming-conventions)
+- [Resource Hierarchy](#resource-hierarchy)
+
 ## Package Configuration
 
 | Setting | Value |

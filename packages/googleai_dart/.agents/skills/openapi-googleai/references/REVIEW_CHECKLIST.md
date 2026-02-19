@@ -22,8 +22,8 @@ Systematic verification after implementing OpenAPI changes.
 
 Re-run the analysis to get a fresh spec comparison (from repository root):
 ```bash
-python3 .claude/shared/openapi-toolkit/scripts/analyze_changes.py \
-  --config-dir packages/googleai_dart/.claude/skills/openapi/config \
+python3 .agents/shared/openapi-toolkit/scripts/analyze_changes.py \
+  --config-dir packages/googleai_dart/.agents/skills/openapi-googleai/config \
   packages/googleai_dart/specs/openapi.json /tmp/openapi-googleai-dart/latest.json --format all \
   --changelog-out /tmp/openapi-googleai-dart/review-changelog.md \
   --plan-out /tmp/openapi-googleai-dart/review-plan.md
@@ -90,8 +90,8 @@ Check these sealed classes handle all their variants:
 
 Run the property verification script to detect missing properties:
 ```bash
-python3 .claude/shared/openapi-toolkit/scripts/verify_model_properties.py \
-  --config-dir packages/googleai_dart/.claude/skills/openapi/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_model_properties.py \
+  --config-dir packages/googleai_dart/.agents/skills/openapi-googleai/config
 ```
 
 The script checks these critical models automatically:
@@ -128,8 +128,8 @@ These are frequently missed - explicitly check:
 **This is the most commonly missed check.** Run the verification script:
 
 ```bash
-python3 .claude/shared/openapi-toolkit/scripts/verify_exports.py \
-  --config-dir packages/googleai_dart/.claude/skills/openapi/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_exports.py \
+  --config-dir packages/googleai_dart/.agents/skills/openapi-googleai/config
 ```
 
 The script will:
@@ -182,12 +182,12 @@ For EACH new resource:
 
 ```bash
 # README validation
-python3 .claude/shared/openapi-toolkit/scripts/verify_readme.py \
-  --config-dir packages/googleai_dart/.claude/skills/openapi/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_readme.py \
+  --config-dir packages/googleai_dart/.agents/skills/openapi-googleai/config
 
 # Example completeness
-python3 .claude/shared/openapi-toolkit/scripts/verify_examples.py \
-  --config-dir packages/googleai_dart/.claude/skills/openapi/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_examples.py \
+  --config-dir packages/googleai_dart/.agents/skills/openapi-googleai/config
 ```
 
 **verify_readme.py** validates:
@@ -211,8 +211,8 @@ python3 .claude/shared/openapi-toolkit/scripts/verify_examples.py \
 Verify README code examples match actual Dart API:
 
 ```bash
-python3 .claude/shared/openapi-toolkit/scripts/verify_readme_code.py \
-  --config-dir packages/googleai_dart/.claude/skills/openapi/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_readme_code.py \
+  --config-dir packages/googleai_dart/.agents/skills/openapi-googleai/config
 ```
 
 This catches common documentation drift patterns:
@@ -279,8 +279,8 @@ that should reference it (e.g., `Tool`) is not updated to include the new proper
 ### 4a. Run Property Verification Script
 
 ```bash
-python3 .claude/shared/openapi-toolkit/scripts/verify_model_properties.py \
-  --config-dir packages/googleai_dart/.claude/skills/openapi/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_model_properties.py \
+  --config-dir packages/googleai_dart/.agents/skills/openapi-googleai/config
 ```
 
 The script compares Dart model classes against the OpenAPI spec and reports:
@@ -354,22 +354,22 @@ cd packages/googleai_dart && dart format --set-exit-if-changed .
 cd packages/googleai_dart && dart test test/unit/
 
 # Barrel file verification (CRITICAL)
-python3 .claude/shared/openapi-toolkit/scripts/verify_exports.py \
-  --config-dir packages/googleai_dart/.claude/skills/openapi/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_exports.py \
+  --config-dir packages/googleai_dart/.agents/skills/openapi-googleai/config
 
 # Documentation verification (CRITICAL - often missed!)
-python3 .claude/shared/openapi-toolkit/scripts/verify_readme.py \
-  --config-dir packages/googleai_dart/.claude/skills/openapi/config
-python3 .claude/shared/openapi-toolkit/scripts/verify_examples.py \
-  --config-dir packages/googleai_dart/.claude/skills/openapi/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_readme.py \
+  --config-dir packages/googleai_dart/.agents/skills/openapi-googleai/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_examples.py \
+  --config-dir packages/googleai_dart/.agents/skills/openapi-googleai/config
 
 # Property-level verification (CRITICAL - catches parent model gaps!)
-python3 .claude/shared/openapi-toolkit/scripts/verify_model_properties.py \
-  --config-dir packages/googleai_dart/.claude/skills/openapi/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_model_properties.py \
+  --config-dir packages/googleai_dart/.agents/skills/openapi-googleai/config
 
 # README code validation (catches documentation drift)
-python3 .claude/shared/openapi-toolkit/scripts/verify_readme_code.py \
-  --config-dir packages/googleai_dart/.claude/skills/openapi/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_readme_code.py \
+  --config-dir packages/googleai_dart/.agents/skills/openapi-googleai/config
 ```
 
 ---

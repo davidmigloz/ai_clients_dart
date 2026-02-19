@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpenAPI Ollama"
+  short_description: "Manage Ollama OpenAPI updates"
+  default_prompt: "Use $openapi-ollama to review API spec changes, generate a changelog, and produce an implementation plan for this package."

@@ -1,5 +1,24 @@
 # Implementation Patterns (openai_dart)
 
+
+## Contents
+
+- [API-Specific Patterns](#api-specific-patterns)
+  - [Authentication](#authentication)
+  - [Streaming](#streaming)
+  - [Tool Calling](#tool-calling)
+  - [Multimodal Content](#multimodal-content)
+  - [Response Format / Structured Output](#response-format-structured-output)
+  - [Assistants API (Beta)](#assistants-api-beta)
+  - [File Uploads](#file-uploads)
+  - [Error Handling](#error-handling)
+  - [Rate Limiting](#rate-limiting)
+  - [Real-time API](#real-time-api)
+- [Model Pattern Examples](#model-pattern-examples)
+  - [Request Model](#request-model)
+  - [Sealed Class for Variants](#sealed-class-for-variants)
+  - [Enum with JSON Serialization](#enum-with-json-serialization)
+
 Extends [implementation-patterns-core.md](../../../shared/openapi-toolkit/references/implementation-patterns-core.md).
 
 ## API-Specific Patterns

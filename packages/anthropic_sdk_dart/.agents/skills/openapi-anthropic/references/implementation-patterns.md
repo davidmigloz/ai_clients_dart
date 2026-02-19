@@ -1,5 +1,19 @@
 # Implementation Patterns (anthropic_sdk_dart)
 
+
+## Contents
+
+- [Anthropic-Specific Patterns](#anthropic-specific-patterns)
+  - [Authentication](#authentication)
+  - [API Version Header](#api-version-header)
+  - [Beta Features](#beta-features)
+  - [Beta Header Values](#beta-header-values)
+  - [Streaming (SSE)](#streaming-sse)
+  - [Content Blocks (Sealed Class)](#content-blocks-sealed-class)
+  - [Nested Resources](#nested-resources)
+  - [Request/Response Pattern](#requestresponse-pattern)
+  - [Extension Methods](#extension-methods)
+
 Extends [implementation-patterns-core.md](../../../shared/openapi-toolkit/references/implementation-patterns-core.md).
 
 ## Anthropic-Specific Patterns

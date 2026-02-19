@@ -1,5 +1,19 @@
 # open_responses_dart Package Guide
 
+
+## Contents
+
+- [Package Configuration](#package-configuration)
+- [Directory Structure](#directory-structure)
+- [File Path Patterns](#file-path-patterns)
+- [API Resources](#api-resources)
+- [Required Headers](#required-headers)
+- [Exception Types](#exception-types)
+- [Critical Models](#critical-models)
+- [Testing](#testing)
+  - [Running Tests](#running-tests)
+  - [Test Tags](#test-tags)
+
 ## Package Configuration
 
 | Setting | Value |

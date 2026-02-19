@@ -23,8 +23,8 @@ Systematic verification after implementing WebSocket/Live API changes.
 
 Re-run the analysis to get a fresh spec comparison (from repository root):
 ```bash
-python3 .claude/shared/websocket-toolkit/scripts/analyze_changes.py \
-  --config-dir packages/googleai_dart/.claude/skills/websocket/config \
+python3 .agents/shared/websocket-toolkit/scripts/analyze_changes.py \
+  --config-dir packages/googleai_dart/.agents/skills/websocket-googleai/config \
   packages/googleai_dart/specs/live-api-schema.json /tmp/websocket-googleai-dart/latest-live.json --format all \
   --changelog-out /tmp/websocket-googleai-dart/review-changelog.md \
   --plan-out /tmp/websocket-googleai-dart/review-plan.md
@@ -91,8 +91,8 @@ Check these sealed classes handle all their variants:
 
 Run the property verification script to detect missing properties:
 ```bash
-python3 .claude/shared/openapi-toolkit/scripts/verify_model_properties.py \
-  --config-dir packages/googleai_dart/.claude/skills/websocket/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_model_properties.py \
+  --config-dir packages/googleai_dart/.agents/skills/websocket-googleai/config
 ```
 
 The script checks these critical models automatically:
@@ -121,8 +121,8 @@ These are frequently missed - explicitly check:
 **This is the most commonly missed check.** Run the verification script:
 
 ```bash
-python3 .claude/shared/openapi-toolkit/scripts/verify_exports.py \
-  --config-dir packages/googleai_dart/.claude/skills/websocket/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_exports.py \
+  --config-dir packages/googleai_dart/.agents/skills/websocket-googleai/config
 ```
 
 The script will:
@@ -154,10 +154,10 @@ For Live API implementation:
 ### 3c. Run Verification Scripts
 
 ```bash
-python3 .claude/shared/openapi-toolkit/scripts/verify_readme.py \
-  --config-dir packages/googleai_dart/.claude/skills/websocket/config
-python3 .claude/shared/openapi-toolkit/scripts/verify_examples.py \
-  --config-dir packages/googleai_dart/.claude/skills/websocket/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_readme.py \
+  --config-dir packages/googleai_dart/.agents/skills/websocket-googleai/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_examples.py \
+  --config-dir packages/googleai_dart/.agents/skills/websocket-googleai/config
 ```
 
 ### 3d. CHANGELOG
@@ -175,8 +175,8 @@ python3 .claude/shared/openapi-toolkit/scripts/verify_examples.py \
 ### 4a. Run Property Verification Script
 
 ```bash
-python3 .claude/shared/openapi-toolkit/scripts/verify_model_properties.py \
-  --config-dir packages/googleai_dart/.claude/skills/websocket/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_model_properties.py \
+  --config-dir packages/googleai_dart/.agents/skills/websocket-googleai/config
 ```
 
 The script compares Dart model classes against the schema and reports:
@@ -186,8 +186,8 @@ The script compares Dart model classes against the schema and reports:
 ### 4b. README Code Validation
 
 ```bash
-python3 .claude/shared/openapi-toolkit/scripts/verify_readme_code.py \
-  --config-dir packages/googleai_dart/.claude/skills/websocket/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_readme_code.py \
+  --config-dir packages/googleai_dart/.agents/skills/websocket-googleai/config
 ```
 
 This catches documentation drift patterns:
@@ -265,22 +265,22 @@ cd packages/googleai_dart && dart format --set-exit-if-changed .
 cd packages/googleai_dart && dart test test/unit/
 
 # Barrel file verification (CRITICAL)
-python3 .claude/shared/openapi-toolkit/scripts/verify_exports.py \
-  --config-dir packages/googleai_dart/.claude/skills/websocket/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_exports.py \
+  --config-dir packages/googleai_dart/.agents/skills/websocket-googleai/config
 
 # Documentation verification (CRITICAL)
-python3 .claude/shared/openapi-toolkit/scripts/verify_readme.py \
-  --config-dir packages/googleai_dart/.claude/skills/websocket/config
-python3 .claude/shared/openapi-toolkit/scripts/verify_examples.py \
-  --config-dir packages/googleai_dart/.claude/skills/websocket/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_readme.py \
+  --config-dir packages/googleai_dart/.agents/skills/websocket-googleai/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_examples.py \
+  --config-dir packages/googleai_dart/.agents/skills/websocket-googleai/config
 
 # Property-level verification (CRITICAL)
-python3 .claude/shared/openapi-toolkit/scripts/verify_model_properties.py \
-  --config-dir packages/googleai_dart/.claude/skills/websocket/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_model_properties.py \
+  --config-dir packages/googleai_dart/.agents/skills/websocket-googleai/config
 
 # README code validation
-python3 .claude/shared/openapi-toolkit/scripts/verify_readme_code.py \
-  --config-dir packages/googleai_dart/.claude/skills/websocket/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_readme_code.py \
+  --config-dir packages/googleai_dart/.agents/skills/websocket-googleai/config
 ```
 
 ---

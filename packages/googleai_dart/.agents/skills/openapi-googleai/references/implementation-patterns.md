@@ -744,12 +744,12 @@ Run these scripts to validate documentation completeness (from repository root):
 
 ```bash
 # Verify README mentions all resources
-python3 .claude/shared/openapi-toolkit/scripts/verify_readme.py \
-  --config-dir packages/googleai_dart/.claude/skills/openapi/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_readme.py \
+  --config-dir packages/googleai_dart/.agents/skills/openapi-googleai/config
 
 # Verify all resources have examples
-python3 .claude/shared/openapi-toolkit/scripts/verify_examples.py \
-  --config-dir packages/googleai_dart/.claude/skills/openapi/config
+python3 .agents/shared/openapi-toolkit/scripts/verify_examples.py \
+  --config-dir packages/googleai_dart/.agents/skills/openapi-googleai/config
 ```
 
 ---

@@ -1,11 +1,13 @@
 ---
 name: openapi-googleai
-description: Automates updating googleai_dart when Google AI OpenAPI spec changes. Fetches latest spec, compares against current, generates changelogs and prioritized implementation plans. Use for: (1) Checking for API updates, (2) Generating implementation plans for spec changes, (3) Creating new models/endpoints from spec, (4) Syncing local spec with upstream. Triggers: "update api", "sync openapi", "new endpoints", "api changes", "check for updates", "update spec", "api version", "fetch spec", "compare spec", "what changed in the api", "implementation plan".
+description: >-
+  Update googleai_dart from Google AI OpenAPI changes. Fetch and compare specs, generate changelogs and prioritized implementation plans, and guide endpoint/model synchronization. Use for update api, sync openapi, compare spec changes, new endpoints, or implementation plan requests.
 ---
+
 
 # OpenAPI Toolkit (googleai_dart)
 
-Uses shared scripts from [openapi-toolkit](../../../../../.claude/shared/openapi-toolkit/README.md) with googleai_dart-specific configuration.
+Uses shared scripts from [openapi-toolkit](../../../../../.agents/shared/openapi-toolkit/README.md) with googleai_dart-specific configuration.
 
 ## Prerequisites
 
@@ -16,7 +18,7 @@ Uses shared scripts from [openapi-toolkit](../../../../../.claude/shared/openapi
 
 ## Working Directory Requirements
 
-Different scripts require different working directories. See the [shared README](../../../../../.claude/shared/openapi-toolkit/README.md#working-directory-requirements) for details.
+Different scripts require different working directories. See the [shared README](../../../../../.agents/shared/openapi-toolkit/README.md#working-directory-requirements) for details.
 
 | Script | Working Directory |
 |--------|-------------------|
@@ -38,13 +40,13 @@ Different scripts require different working directories. See the [shared README]
 # From repository root
 # Fetch all specs + auto-discover new ones
 cd "$(git rev-parse --show-toplevel)" && \
-python3 .claude/shared/openapi-toolkit/scripts/fetch_spec.py \
-  --config-dir packages/googleai_dart/.claude/skills/openapi-googleai/config
+python3 .agents/shared/openapi-toolkit/scripts/fetch_spec.py \
+  --config-dir packages/googleai_dart/.agents/skills/openapi-googleai/config
 
 # Fetch specific spec only
 cd "$(git rev-parse --show-toplevel)" && \
-python3 .claude/shared/openapi-toolkit/scripts/fetch_spec.py \
-  --config-dir packages/googleai_dart/.claude/skills/openapi-googleai/config --spec main
+python3 .agents/shared/openapi-toolkit/scripts/fetch_spec.py \
+  --config-dir packages/googleai_dart/.agents/skills/openapi-googleai/config --spec main
 ```
 
 Output: `/tmp/openapi-googleai-dart/latest-main.json`, `/tmp/openapi-googleai-dart/latest-interactions.json`
@@ -56,8 +58,8 @@ Compare old spec vs new spec to find what changed. **Specs are auto-located** fr
 ```bash
 # From repository root - specs auto-located
 cd "$(git rev-parse --show-toplevel)" && \
-python3 .claude/shared/openapi-toolkit/scripts/analyze_changes.py \
-  --config-dir packages/googleai_dart/.claude/skills/openapi-googleai/config \
+python3 .agents/shared/openapi-toolkit/scripts/analyze_changes.py \
+  --config-dir packages/googleai_dart/.agents/skills/openapi-googleai/config \
   --format all
 ```
 
@@ -68,8 +70,8 @@ python3 .claude/shared/openapi-toolkit/scripts/analyze_changes.py \
 ```bash
 # From package root
 cd "$(git rev-parse --show-toplevel)/packages/googleai_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_coverage.py \
-  --config-dir .claude/skills/openapi-googleai/config --verbose
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_coverage.py \
+  --config-dir .agents/skills/openapi-googleai/config --verbose
 ```
 
 If missing resources are found, prioritize implementing them before other updates.
@@ -109,26 +111,26 @@ Perform the four-pass review documented in `references/REVIEW_CHECKLIST.md`:
 ```bash
 # Pass 2: Barrel file verification
 cd "$(git rev-parse --show-toplevel)/packages/googleai_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_exports.py \
-  --config-dir .claude/skills/openapi-googleai/config
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_exports.py \
+  --config-dir .agents/skills/openapi-googleai/config
 
 # Pass 3: Documentation completeness
 cd "$(git rev-parse --show-toplevel)/packages/googleai_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_readme.py \
-  --config-dir .claude/skills/openapi-googleai/config
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_readme.py \
+  --config-dir .agents/skills/openapi-googleai/config
 
 cd "$(git rev-parse --show-toplevel)/packages/googleai_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_examples.py \
-  --config-dir .claude/skills/openapi-googleai/config
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_examples.py \
+  --config-dir .agents/skills/openapi-googleai/config
 
 cd "$(git rev-parse --show-toplevel)/packages/googleai_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_readme_code.py \
-  --config-dir .claude/skills/openapi-googleai/config
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_readme_code.py \
+  --config-dir .agents/skills/openapi-googleai/config
 
 # Pass 4: Property-level verification
 cd "$(git rev-parse --show-toplevel)/packages/googleai_dart" && \
-python3 ../../.claude/shared/openapi-toolkit/scripts/verify_model_properties.py \
-  --config-dir .claude/skills/openapi-googleai/config \
+python3 ../../.agents/shared/openapi-toolkit/scripts/verify_model_properties.py \
+  --config-dir .agents/skills/openapi-googleai/config \
   --spec specs/openapi.json
 
 # Dart quality checks

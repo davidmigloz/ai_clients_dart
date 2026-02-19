@@ -1,5 +1,30 @@
 # Review Checklist (openai_dart)
 
+
+## Contents
+
+- [API-Specific Checks](#api-specific-checks)
+  - [Authentication](#authentication)
+  - [Chat Completions](#chat-completions)
+  - [Assistants API (Beta)](#assistants-api-beta)
+  - [File Operations](#file-operations)
+  - [Audio](#audio)
+  - [Images](#images)
+  - [Realtime API](#realtime-api)
+  - [Error Handling](#error-handling)
+  - [Rate Limiting](#rate-limiting)
+- [Model Verification](#model-verification)
+  - [Critical Models](#critical-models)
+  - [Streaming Models](#streaming-models)
+  - [Tool Models](#tool-models)
+- [Integration Test Coverage](#integration-test-coverage)
+  - [Required Tests](#required-tests)
+  - [Edge Cases](#edge-cases)
+- [Documentation](#documentation)
+  - [README Sections](#readme-sections)
+  - [Example Files](#example-files)
+  - [Migration Guide](#migration-guide)
+
 Extends [REVIEW_CHECKLIST_CORE.md](../../../shared/openapi-toolkit/references/REVIEW_CHECKLIST_CORE.md).
 
 ## API-Specific Checks
