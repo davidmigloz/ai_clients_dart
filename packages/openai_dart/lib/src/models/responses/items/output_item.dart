@@ -798,7 +798,7 @@ class ShellCallOutputItem extends OutputItem {
     'call_id': callId,
     'action': action.toJson(),
     'status': status.toJson(),
-    'environment': environment?.toJson(),
+    if (environment != null) 'environment': environment!.toJson(),
   };
 
   @override
