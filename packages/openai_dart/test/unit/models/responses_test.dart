@@ -1091,12 +1091,12 @@ void main() {
       expect(json.containsKey('user'), isFalse);
     });
 
-    test('LocalShellExecAction handles missing fields gracefully', () {
-      final action = LocalShellExecAction.fromJson(const {'type': 'exec'});
-
-      expect(action.command, isEmpty);
-      expect(action.env, isEmpty);
-      expect(action.timeoutMs, isNull);
+    test('LocalShellExecAction requires command and env fields', () {
+      // command and env are required per the OpenAI spec
+      expect(
+        () => LocalShellExecAction.fromJson(const {'type': 'exec'}),
+        throwsA(isA<TypeError>()),
+      );
     });
 
     test('deserializes ShellCallOutputItem', () {

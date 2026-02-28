@@ -642,7 +642,7 @@ class LocalShellCallOutputItem extends OutputItem {
       id: json['id'] as String,
       callId: json['call_id'] as String,
       action: LocalShellExecAction.fromJson(
-        (json['action'] as Map<String, dynamic>?) ?? const {},
+        json['action'] as Map<String, dynamic>,
       ),
       status: ItemStatus.fromJson(json['status'] as String),
     );
@@ -708,10 +708,8 @@ class LocalShellExecAction {
   /// Creates a [LocalShellExecAction] from JSON.
   factory LocalShellExecAction.fromJson(Map<String, dynamic> json) {
     return LocalShellExecAction(
-      command: (json['command'] as List<dynamic>?)?.cast<String>() ?? const [],
-      env:
-          (json['env'] as Map<String, dynamic>?)?.cast<String, String>() ??
-          const {},
+      command: (json['command'] as List<dynamic>).cast<String>(),
+      env: (json['env'] as Map<String, dynamic>).cast<String, String>(),
       timeoutMs: json['timeout_ms'] as int?,
       workingDirectory: json['working_directory'] as String?,
       user: json['user'] as String?,
