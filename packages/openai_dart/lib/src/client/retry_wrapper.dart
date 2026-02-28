@@ -78,9 +78,9 @@ class RetryWrapper {
     String correlationId,
   ) async {
     var attempt = 0;
-    var delay = config.retryDelay;
+    var delay = config.retryPolicy.initialDelay;
 
-    while (attempt <= config.maxRetries) {
+    while (attempt <= config.retryPolicy.maxRetries) {
       try {
         final response = await execute();
 
@@ -91,13 +91,13 @@ class RetryWrapper {
             // Clamp server-provided Retry-After to a reasonable maximum to avoid
             // excessively long sleeps that bypass our configured retry policy.
             final maxServerDelay =
-                config.maxRetryDelay * _serverRetryAfterMultiplier;
+                config.retryPolicy.maxDelay * _serverRetryAfterMultiplier;
             delay = retryAfter <= maxServerDelay ? retryAfter : maxServerDelay;
           }
 
           // Enforce minimum delay to prevent tight retry loops (e.g., Retry-After: 0)
-          final effectiveDelay = delay < config.retryDelay
-              ? config.retryDelay
+          final effectiveDelay = delay < config.retryPolicy.initialDelay
+              ? config.retryPolicy.initialDelay
               : delay;
           await _delayWithAbortCheck(
             effectiveDelay,
@@ -115,7 +115,8 @@ class RetryWrapper {
         rethrow;
       } on TimeoutException {
         // Retry on timeout for idempotent methods only
-        if (!_isIdempotent(request.method) || attempt >= config.maxRetries) {
+        if (!_isIdempotent(request.method) ||
+            attempt >= config.retryPolicy.maxRetries) {
           rethrow;
         }
 
@@ -125,7 +126,8 @@ class RetryWrapper {
       } on RequestTimeoutException {
         // Retry on request timeout for idempotent methods only
         // (RequestTimeoutException is thrown by InterceptorChain.timeout)
-        if (!_isIdempotent(request.method) || attempt >= config.maxRetries) {
+        if (!_isIdempotent(request.method) ||
+            attempt >= config.retryPolicy.maxRetries) {
           rethrow;
         }
 
@@ -136,7 +138,8 @@ class RetryWrapper {
         // Retry on HTTP client errors for idempotent methods only.
         // This also handles SocketException on IO platforms (wrapped by http package)
         // and network errors on web platforms.
-        if (!_isIdempotent(request.method) || attempt >= config.maxRetries) {
+        if (!_isIdempotent(request.method) ||
+            attempt >= config.retryPolicy.maxRetries) {
           rethrow;
         }
 
@@ -146,7 +149,8 @@ class RetryWrapper {
       } catch (e) {
         // Handle SocketException on IO platforms (when not wrapped by http package)
         if (isSocketException(e)) {
-          if (!_isIdempotent(request.method) || attempt >= config.maxRetries) {
+          if (!_isIdempotent(request.method) ||
+              attempt >= config.retryPolicy.maxRetries) {
             rethrow;
           }
 
@@ -165,7 +169,7 @@ class RetryWrapper {
 
   /// Determines if a response should be retried based on status code.
   bool _shouldRetry(int statusCode, String method, int attempt) {
-    if (attempt >= config.maxRetries) {
+    if (attempt >= config.retryPolicy.maxRetries) {
       return false;
     }
 
@@ -200,15 +204,17 @@ class RetryWrapper {
   ///   don't decrease the delay on subsequent attempts
   Duration _exponentialBackoff(Duration currentDelay) {
     // Enforce minimum delay to prevent tight retry loops
-    if (currentDelay < config.retryDelay) {
-      return config.retryDelay;
+    if (currentDelay < config.retryPolicy.initialDelay) {
+      return config.retryPolicy.initialDelay;
     }
     // If current delay already meets or exceeds max, keep it (monotonic)
-    if (currentDelay >= config.maxRetryDelay) {
+    if (currentDelay >= config.retryPolicy.maxDelay) {
       return currentDelay;
     }
     final nextDelay = currentDelay * 2;
-    return nextDelay > config.maxRetryDelay ? config.maxRetryDelay : nextDelay;
+    return nextDelay > config.retryPolicy.maxDelay
+        ? config.retryPolicy.maxDelay
+        : nextDelay;
   }
 
   /// Parses the Retry-After header value.
@@ -266,9 +272,9 @@ class RetryWrapper {
   /// (e.g., from a server-provided Retry-After header), it is returned
   /// unchanged to preserve the server's requested delay.
   Duration _computeJitteredDelay(Duration delay) {
-    const jitterFactor = 0.25;
+    final jitterFactor = config.retryPolicy.jitter;
     final baseMs = delay.inMilliseconds;
-    final maxMs = config.maxRetryDelay.inMilliseconds;
+    final maxMs = config.retryPolicy.maxDelay.inMilliseconds;
 
     // If the base delay is already at or above the max, don't add jitter.
     // This preserves server-provided Retry-After values that may exceed

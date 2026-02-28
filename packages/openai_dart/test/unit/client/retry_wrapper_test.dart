@@ -13,9 +13,11 @@ void main() {
     setUp(() {
       wrapper = RetryWrapper(
         config: const OpenAIConfig(
-          maxRetries: 3,
-          retryDelay: Duration(milliseconds: 10),
-          maxRetryDelay: Duration(milliseconds: 100),
+          retryPolicy: RetryPolicy(
+            maxRetries: 3,
+            initialDelay: Duration(milliseconds: 10),
+            maxDelay: Duration(milliseconds: 100),
+          ),
         ),
       );
     });
@@ -311,9 +313,11 @@ void main() {
         // Create a wrapper with longer delay to ensure abort fires during delay
         final slowWrapper = RetryWrapper(
           config: const OpenAIConfig(
-            maxRetries: 3,
-            retryDelay: Duration(seconds: 10),
-            maxRetryDelay: Duration(seconds: 30),
+            retryPolicy: RetryPolicy(
+              maxRetries: 3,
+              initialDelay: Duration(seconds: 10),
+              maxDelay: Duration(seconds: 30),
+            ),
           ),
         );
 

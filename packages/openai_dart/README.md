@@ -266,7 +266,7 @@ final client = OpenAIClient(
     authProvider: ApiKeyProvider('YOUR_API_KEY'),
     baseUrl: 'https://api.openai.com/v1', // Default
     timeout: Duration(minutes: 10),
-    maxRetries: 2,
+    retryPolicy: RetryPolicy(maxRetries: 3),
     organization: 'org-xxx', // Optional
     project: 'proj-xxx', // Optional
   ),

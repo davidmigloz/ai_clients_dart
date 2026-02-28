@@ -15,6 +15,46 @@ class _Unset {
 /// Sentinel value for copyWith to distinguish "not provided" from "set to null".
 const Object _unset = _Unset();
 
+/// Retry policy configuration.
+@immutable
+class RetryPolicy {
+  /// Maximum number of retry attempts.
+  final int maxRetries;
+
+  /// Initial delay before first retry.
+  final Duration initialDelay;
+
+  /// Maximum delay between retries.
+  final Duration maxDelay;
+
+  /// Jitter factor (0.0 - 1.0).
+  final double jitter;
+
+  /// Creates a [RetryPolicy].
+  const RetryPolicy({
+    this.maxRetries = 3,
+    this.initialDelay = const Duration(seconds: 1),
+    this.maxDelay = const Duration(seconds: 60),
+    this.jitter = 0.1,
+  });
+
+  /// Default retry policy (3 retries, 1s initial delay).
+  static const defaultPolicy = RetryPolicy();
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is RetryPolicy &&
+        other.maxRetries == maxRetries &&
+        other.initialDelay == initialDelay &&
+        other.maxDelay == maxDelay &&
+        other.jitter == jitter;
+  }
+
+  @override
+  int get hashCode => Object.hash(maxRetries, initialDelay, maxDelay, jitter);
+}
+
 /// Configuration for the OpenAI client.
 ///
 /// This class provides a centralized way to configure all aspects of the
@@ -27,7 +67,7 @@ const Object _unset = _Unset();
 /// final config = OpenAIConfig(
 ///   authProvider: ApiKeyProvider('sk-...'),
 ///   timeout: Duration(seconds: 60),
-///   maxRetries: 3,
+///   retryPolicy: RetryPolicy(maxRetries: 3),
 ///   logLevel: Level.INFO,
 /// );
 ///
@@ -41,9 +81,7 @@ class OpenAIConfig {
     this.baseUrl = 'https://api.openai.com/v1',
     this.timeout = const Duration(minutes: 10),
     this.connectTimeout = const Duration(seconds: 30),
-    this.maxRetries = 2,
-    this.retryDelay = const Duration(seconds: 1),
-    this.maxRetryDelay = const Duration(seconds: 30),
+    this.retryPolicy = RetryPolicy.defaultPolicy,
     this.logLevel,
     this.defaultHeaders = const {},
     this.apiVersion,
@@ -124,28 +162,8 @@ class OpenAIConfig {
   /// ```
   final Duration connectTimeout;
 
-  /// The maximum number of retry attempts for failed requests.
-  ///
-  /// Defaults to 2. Set to 0 to disable retries.
-  ///
-  /// Retries are attempted for:
-  /// - Network errors (connection failures, timeouts)
-  /// - 429 (rate limit) responses
-  /// - 5xx (server error) responses
-  final int maxRetries;
-
-  /// The initial delay between retry attempts.
-  ///
-  /// Defaults to 1 second. Uses exponential backoff with jitter.
-  final Duration retryDelay;
-
-  /// The maximum delay between retry attempts for client-side backoff.
-  ///
-  /// Defaults to 30 seconds. Exponential backoff with jitter will not exceed
-  /// this value. When honoring a server-provided `Retry-After` header, the
-  /// effective delay may be longer (up to 2× this value) to respect server
-  /// rate-limit guidance.
-  final Duration maxRetryDelay;
+  /// Retry policy.
+  final RetryPolicy retryPolicy;
 
   /// The logging level for the client.
   ///
@@ -187,9 +205,7 @@ class OpenAIConfig {
     String? baseUrl,
     Duration? timeout,
     Duration? connectTimeout,
-    int? maxRetries,
-    Duration? retryDelay,
-    Duration? maxRetryDelay,
+    RetryPolicy? retryPolicy,
     Object? logLevel = _unset,
     Map<String, String>? defaultHeaders,
     Object? apiVersion = _unset,
@@ -205,9 +221,7 @@ class OpenAIConfig {
       baseUrl: baseUrl ?? this.baseUrl,
       timeout: timeout ?? this.timeout,
       connectTimeout: connectTimeout ?? this.connectTimeout,
-      maxRetries: maxRetries ?? this.maxRetries,
-      retryDelay: retryDelay ?? this.retryDelay,
-      maxRetryDelay: maxRetryDelay ?? this.maxRetryDelay,
+      retryPolicy: retryPolicy ?? this.retryPolicy,
       logLevel: _resolveField<Level>(logLevel, 'logLevel', this.logLevel),
       defaultHeaders: defaultHeaders ?? this.defaultHeaders,
       apiVersion: _resolveField<String>(
@@ -251,9 +265,7 @@ class OpenAIConfig {
         other.baseUrl == baseUrl &&
         other.timeout == timeout &&
         other.connectTimeout == connectTimeout &&
-        other.maxRetries == maxRetries &&
-        other.retryDelay == retryDelay &&
-        other.maxRetryDelay == maxRetryDelay &&
+        other.retryPolicy == retryPolicy &&
         other.logLevel == logLevel &&
         _mapEquals(other.defaultHeaders, defaultHeaders) &&
         other.apiVersion == apiVersion &&
@@ -267,9 +279,7 @@ class OpenAIConfig {
     baseUrl,
     timeout,
     connectTimeout,
-    maxRetries,
-    retryDelay,
-    maxRetryDelay,
+    retryPolicy,
     logLevel,
     // Use order-insensitive hash to match order-insensitive equality
     Object.hashAllUnordered(

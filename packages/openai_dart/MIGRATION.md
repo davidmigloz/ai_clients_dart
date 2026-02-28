@@ -92,12 +92,11 @@ The configuration options have changed significantly:
 
 | v0.x | v1.0.0 | Notes |
 |------|--------|-------|
-| `retries: 3` | `maxRetries: 2` | Different default value |
+| `retries: 3` | `retryPolicy: RetryPolicy(maxRetries: 3)` | Replaces scalar fields |
 | `beta: 'assistants=v2'` | *(removed)* | Handled internally |
 | *(not available)* | `timeout` | Request timeout duration |
 | *(not available)* | `connectTimeout` | Connection timeout duration |
-| *(not available)* | `retryDelay` | Initial retry delay |
-| *(not available)* | `maxRetryDelay` | Maximum retry delay |
+| *(not available)* | `retryPolicy` | Retry policy (replaces maxRetries, retryDelay, maxRetryDelay) |
 | *(not available)* | `logLevel` | Logging verbosity |
 | *(not available)* | `apiVersion` | API version header |
 | *(not available)* | `project` | OpenAI project ID |
@@ -114,9 +113,11 @@ final client = OpenAIClient(
 final client = OpenAIClient(
   config: OpenAIConfig(
     authProvider: ApiKeyProvider('sk-...'),
-    maxRetries: 2,
     timeout: Duration(seconds: 60),
-    retryDelay: Duration(milliseconds: 500),
+    retryPolicy: RetryPolicy(
+      maxRetries: 2,
+      initialDelay: Duration(milliseconds: 500),
+    ),
     logLevel: HttpLogLevel.basic,
     project: 'proj_...',
   ),

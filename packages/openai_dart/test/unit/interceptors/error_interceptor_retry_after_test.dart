@@ -17,7 +17,7 @@ void main() {
       final client = OpenAIClient(
         config: const OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test-key'),
-          maxRetries: 0,
+          retryPolicy: RetryPolicy(maxRetries: 0),
         ),
         httpClient: mockClient,
       );
@@ -53,7 +53,7 @@ void main() {
       final client = OpenAIClient(
         config: const OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test-key'),
-          maxRetries: 0,
+          retryPolicy: RetryPolicy(maxRetries: 0),
         ),
         httpClient: mockClient,
       );
@@ -88,7 +88,7 @@ void main() {
       final client = OpenAIClient(
         config: const OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test-key'),
-          maxRetries: 0,
+          retryPolicy: RetryPolicy(maxRetries: 0),
         ),
         httpClient: mockClient,
       );
@@ -120,7 +120,7 @@ void main() {
       final client = OpenAIClient(
         config: const OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test-key'),
-          maxRetries: 0,
+          retryPolicy: RetryPolicy(maxRetries: 0),
         ),
         httpClient: mockClient,
       );
@@ -151,7 +151,7 @@ void main() {
       final client = OpenAIClient(
         config: const OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test-key'),
-          maxRetries: 0,
+          retryPolicy: RetryPolicy(maxRetries: 0),
         ),
         httpClient: mockClient,
       );
@@ -183,7 +183,7 @@ void main() {
       final client = OpenAIClient(
         config: const OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test-key'),
-          maxRetries: 0,
+          retryPolicy: RetryPolicy(maxRetries: 0),
         ),
         httpClient: mockClient,
       );
@@ -221,7 +221,7 @@ void main() {
       final client = OpenAIClient(
         config: const OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test-key'),
-          maxRetries: 0,
+          retryPolicy: RetryPolicy(maxRetries: 0),
         ),
         httpClient: mockClient,
       );
@@ -254,7 +254,7 @@ void main() {
       final client = OpenAIClient(
         config: const OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test-key'),
-          maxRetries: 0,
+          retryPolicy: RetryPolicy(maxRetries: 0),
         ),
         httpClient: mockClient,
       );

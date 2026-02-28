@@ -18,7 +18,9 @@ void main() {
         config: const OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test-key'),
           timeout: Duration(milliseconds: 100),
-          maxRetries: 0, // Disable retries for this test
+          retryPolicy: RetryPolicy(
+            maxRetries: 0,
+          ), // Disable retries for this test
         ),
         httpClient: mockClient,
       );
@@ -46,7 +48,7 @@ void main() {
         config: const OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test-key'),
           timeout: Duration(milliseconds: 50),
-          maxRetries: 0,
+          retryPolicy: RetryPolicy(maxRetries: 0),
         ),
         httpClient: mockClient,
       );
@@ -84,7 +86,7 @@ void main() {
         config: const OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test-key'),
           timeout: Duration(seconds: 30),
-          maxRetries: 0,
+          retryPolicy: RetryPolicy(maxRetries: 0),
         ),
         httpClient: mockClient,
       );
@@ -121,7 +123,7 @@ void main() {
         config: const OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test-key'),
           timeout: Duration(milliseconds: 100),
-          maxRetries: 0,
+          retryPolicy: RetryPolicy(maxRetries: 0),
         ),
         httpClient: mockClient,
       );

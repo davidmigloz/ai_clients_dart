@@ -89,7 +89,7 @@ import 'retry_wrapper.dart';
 ///   config: OpenAIConfig(
 ///     authProvider: ApiKeyProvider('sk-...'),
 ///     timeout: Duration(seconds: 60),
-///     maxRetries: 3,
+///     retryPolicy: RetryPolicy(maxRetries: 3),
 ///     logLevel: Level.INFO,
 ///   ),
 /// );
@@ -244,7 +244,7 @@ class OpenAIClient {
     interceptors.add(const ErrorInterceptor());
 
     // Create retry wrapper
-    final retryWrapper = _config.maxRetries > 0
+    final retryWrapper = _config.retryPolicy.maxRetries > 0
         ? RetryWrapper(config: _config)
         : null;
 
