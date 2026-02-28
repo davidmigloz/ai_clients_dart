@@ -8,6 +8,8 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// - Event handling for different message events
 /// - Accumulating text from content block deltas
 /// - Usage information from stream events
+/// - Stream extension methods (collectText, textDeltas)
+/// - MessageStreamAccumulator for building complete Messages
 void main() async {
   final client = AnthropicClient(
     config: const AnthropicConfig(
@@ -129,6 +131,57 @@ void main() async {
     }
 
     print('Token usage - Input: $inputTokens, Output: $outputTokens');
+
+    // Example 5: Using stream extensions
+    print('\n=== Stream Extensions ===');
+
+    // collectText() - simplest way to get full text
+    final fullText = await client.messages
+        .createStream(
+          MessageCreateRequest(
+            model: 'claude-sonnet-4-20250514',
+            maxTokens: 1024,
+            messages: [InputMessage.user('What is 2+2?')],
+          ),
+        )
+        .collectText();
+    print('Full response: $fullText');
+
+    // textDeltas() - stream individual text chunks
+    print('Streaming deltas: ');
+    await client.messages
+        .createStream(
+          MessageCreateRequest(
+            model: 'claude-sonnet-4-20250514',
+            maxTokens: 1024,
+            messages: [InputMessage.user('Say hello!')],
+          ),
+        )
+        .textDeltas()
+        .forEach(print);
+
+    // Example 6: Using MessageStreamAccumulator
+    print('\n=== Message Stream Accumulator ===');
+    final accumulatorStream = client.messages.createStream(
+      MessageCreateRequest(
+        model: 'claude-sonnet-4-20250514',
+        maxTokens: 1024,
+        messages: [InputMessage.user('Tell me a fun fact.')],
+      ),
+    );
+
+    final accumulator = MessageStreamAccumulator();
+    await accumulatorStream.forEach(accumulator.add);
+
+    // Build a complete Message from accumulated stream data
+    final message = accumulator.toMessage();
+    print('Model: ${message.model}');
+    print('Text: ${message.text}');
+    print('Stop reason: ${message.stopReason}');
+    print(
+      'Usage: ${message.usage.inputTokens} input, '
+      '${message.usage.outputTokens} output',
+    );
   } finally {
     client.close();
   }

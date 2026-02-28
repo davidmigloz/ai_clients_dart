@@ -285,6 +285,46 @@ await for (final event in stream) {
 
 </details>
 
+<details>
+<summary><b>Streaming with Extensions</b></summary>
+
+```dart
+import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
+
+final stream = client.messages.createStream(
+  MessageCreateRequest(
+    model: 'claude-sonnet-4-20250514',
+    maxTokens: 256,
+    messages: [
+      InputMessage.user('Count from 1 to 10 slowly.'),
+    ],
+  ),
+);
+
+// Collect all text into a single string
+final text = await stream.collectText();
+
+// Or iterate text deltas as they arrive
+await for (final delta in stream.textDeltas()) {
+  stdout.write(delta);
+}
+
+// Accumulate streaming chunks into a complete Message
+await for (final accumulator in stream.accumulate()) {
+  print('Content so far: ${accumulator.text}');
+}
+
+// Or use MessageStreamAccumulator directly for full control
+final accumulator = MessageStreamAccumulator();
+await for (final event in stream) {
+  accumulator.add(event);
+}
+final message = accumulator.toMessage();
+print(message.text);
+```
+
+</details>
+
 ### Tool Calling
 
 <details>
@@ -609,6 +649,60 @@ try {
 
 </details>
 
+## Extension Methods
+
+The package provides convenient extension methods for common operations:
+
+### Stream Extensions
+
+```dart
+// Collect all text from a streaming response
+final text = await stream.collectText();
+
+// Iterate only text deltas
+await for (final delta in stream.textDeltas()) {
+  stdout.write(delta);
+}
+
+// Iterate thinking deltas (extended thinking)
+await for (final thinking in stream.thinkingDeltas()) {
+  print(thinking);
+}
+
+// Accumulate streaming chunks into a complete response
+await for (final accumulator in stream.accumulate()) {
+  print('Content so far: ${accumulator.text}');
+}
+
+// Or use MessageStreamAccumulator directly for full control
+final accumulator = MessageStreamAccumulator();
+await for (final event in stream) {
+  accumulator.add(event);
+}
+// Build a Message from the accumulated stream data
+final message = accumulator.toMessage();
+print(message.text);
+```
+
+### Message Extensions
+
+```dart
+// Access text content
+final text = message.text;
+
+// Check for tool use
+if (message.hasToolUse) {
+  for (final toolUse in message.toolUseBlocks) {
+    print('Tool: ${toolUse.name}');
+  }
+}
+
+// Access thinking content
+if (message.hasThinking) {
+  print(message.thinking);
+}
+```
+
 ## Examples
 
 See the [`example/`](example/) directory for comprehensive examples:
@@ -617,7 +711,7 @@ See the [`example/`](example/) directory for comprehensive examples:
 |---------|-------------|
 | [anthropic_sdk_dart_example.dart](example/anthropic_sdk_dart_example.dart) | Quick start example |
 | [messages_example.dart](example/messages_example.dart) | Basic message creation |
-| [streaming_example.dart](example/streaming_example.dart) | SSE streaming |
+| [streaming_example.dart](example/streaming_example.dart) | SSE streaming with accumulator |
 | [tool_calling_example.dart](example/tool_calling_example.dart) | Function/tool use |
 | [vision_example.dart](example/vision_example.dart) | Image analysis |
 | [document_example.dart](example/document_example.dart) | PDF document processing |

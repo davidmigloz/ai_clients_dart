@@ -56,6 +56,7 @@ export 'src/errors/exceptions.dart'
 
 // Extensions
 export 'src/extensions/message_extensions.dart';
+export 'src/extensions/stream_extensions.dart';
 
 // Models - Batches
 export 'src/models/batches/batch_request.dart';
@@ -114,6 +115,7 @@ export 'src/models/sources/image_source.dart';
 // Models - Streaming
 export 'src/models/streaming/content_block_delta.dart';
 export 'src/models/streaming/message_delta.dart';
+export 'src/models/streaming/message_stream_accumulator.dart';
 export 'src/models/streaming/message_stream_event.dart';
 
 // Models - Token Counting
