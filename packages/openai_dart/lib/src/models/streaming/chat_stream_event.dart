@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../chat/chat_completion.dart';
+import '../chat/chat_message.dart';
 import '../chat/reasoning_detail.dart';
 import '../chat/tool_call.dart';
 import '../common/finish_reason.dart';
@@ -436,6 +438,8 @@ class ChatStreamAccumulator {
   String? _model;
   int? _created;
   String? _systemFingerprint;
+  String? _serviceTier;
+  String? _provider;
   final StringBuffer _content = StringBuffer();
   final StringBuffer _refusal = StringBuffer();
   final StringBuffer _reasoningContent = StringBuffer();
@@ -451,6 +455,8 @@ class ChatStreamAccumulator {
     _model ??= event.model;
     _created ??= event.created;
     _systemFingerprint ??= event.systemFingerprint;
+    _serviceTier ??= event.serviceTier;
+    _provider ??= event.provider;
     _usage ??= event.usage;
 
     // Handle nullable choices for compatibility with providers like Groq
@@ -510,6 +516,12 @@ class ChatStreamAccumulator {
   /// The model used.
   String? get model => _model;
 
+  /// The service tier used (if applicable).
+  String? get serviceTier => _serviceTier;
+
+  /// **OpenRouter only.** The provider that served the request.
+  String? get provider => _provider;
+
   /// The accumulated text content.
   String get content => _content.toString();
 
@@ -557,12 +569,60 @@ class ChatStreamAccumulator {
   /// Whether there are any tool calls.
   bool get hasToolCalls => _toolCalls.any((tc) => tc.id != null);
 
+  /// Builds a [ChatCompletion] from the accumulated stream data.
+  ///
+  /// This assembles the accumulated content, tool calls, reasoning, and
+  /// metadata into a complete [ChatCompletion] object — the same type
+  /// returned by the non-streaming chat completions endpoint.
+  ///
+  /// Throws [StateError] if no model was received in the stream (required
+  /// by [ChatCompletion]).
+  ChatCompletion toChatCompletion() {
+    final model = _model;
+    if (model == null) {
+      throw StateError(
+        'Cannot build ChatCompletion: no model received in stream',
+      );
+    }
+    final contentStr = content;
+    final refusalStr = refusal;
+    final reasoningContentStr = reasoningContent;
+    final reasoningStr = reasoning;
+    final tcs = toolCalls;
+    return ChatCompletion(
+      id: _id,
+      object: 'chat.completion',
+      created: _created,
+      model: model,
+      choices: [
+        ChatChoice(
+          index: 0,
+          finishReason: _finishReason,
+          message: AssistantMessage(
+            content: contentStr.isNotEmpty ? contentStr : null,
+            refusal: refusalStr.isNotEmpty ? refusalStr : null,
+            toolCalls: tcs.isNotEmpty ? tcs : null,
+            reasoningContent:
+                reasoningContentStr.isNotEmpty ? reasoningContentStr : null,
+            reasoning: reasoningStr.isNotEmpty ? reasoningStr : null,
+          ),
+        ),
+      ],
+      usage: _usage,
+      systemFingerprint: _systemFingerprint,
+      serviceTier: _serviceTier,
+      provider: _provider,
+    );
+  }
+
   /// Resets the accumulator for reuse.
   void reset() {
     _id = null;
     _model = null;
     _created = null;
     _systemFingerprint = null;
+    _serviceTier = null;
+    _provider = null;
     _content.clear();
     _refusal.clear();
     _reasoningContent.clear();

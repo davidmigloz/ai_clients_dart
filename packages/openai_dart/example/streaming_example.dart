@@ -64,6 +64,11 @@ Future<void> main() async {
     print('\n');
     print('Final content: ${accumulator.content}');
     print('Finish reason: ${accumulator.finishReason}');
+
+    // Convert accumulated stream to a ChatCompletion object
+    final completion = accumulator.toChatCompletion();
+    print('Model: ${completion.model}');
+    print('Text: ${completion.text}');
   } finally {
     client.close();
   }

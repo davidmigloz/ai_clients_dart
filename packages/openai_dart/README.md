@@ -550,6 +550,15 @@ await for (final delta in stream.textDeltas()) {
 await for (final accumulated in stream.accumulate()) {
   print('Content so far: ${accumulated.content}');
 }
+
+// Or use ChatStreamAccumulator directly for full control
+final accumulator = ChatStreamAccumulator();
+await for (final event in stream) {
+  accumulator.add(event);
+}
+// Build a ChatCompletion from the accumulated stream data
+final completion = accumulator.toChatCompletion();
+print(completion.text);
 ```
 
 ### Message List Extensions

@@ -1186,6 +1186,11 @@ await for (final event in stream) {
 // After streaming, access accumulated reasoning
 print('Full reasoning: ${accumulator.reasoningContent}');
 print('Full content: ${accumulator.content}');
+
+// Build a ChatCompletion from the accumulated stream data
+final completion = accumulator.toChatCompletion();
+print('Model: ${completion.model}');
+print('Text: ${completion.text}');
 ```
 
 ### Sending Messages Back to API

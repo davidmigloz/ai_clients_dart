@@ -315,6 +315,192 @@ void main() {
       expect(accumulator.content, '');
       expect(accumulator.id, isNull);
       expect(accumulator.model, isNull);
+      expect(accumulator.serviceTier, isNull);
+      expect(accumulator.provider, isNull);
+    });
+
+    test('toChatCompletion() builds ChatCompletion from accumulated text', () {
+      final accumulator = ChatStreamAccumulator()
+        ..add(
+          ChatStreamEvent.fromJson(
+            jsonDecode_('''
+          {
+            "id": "chatcmpl-123",
+            "object": "chat.completion.chunk",
+            "created": 1677652288,
+            "model": "gpt-4o",
+            "system_fingerprint": "fp_abc",
+            "service_tier": "default",
+            "choices": [
+              {
+                "index": 0,
+                "delta": {"role": "assistant", "content": "Hello"},
+                "finish_reason": null
+              }
+            ]
+          }
+        '''),
+          ),
+        )
+        ..add(
+          ChatStreamEvent.fromJson(
+            jsonDecode_('''
+          {
+            "id": "chatcmpl-123",
+            "model": "gpt-4o",
+            "choices": [
+              {
+                "index": 0,
+                "delta": {"content": " World"},
+                "finish_reason": null
+              }
+            ]
+          }
+        '''),
+          ),
+        )
+        ..add(
+          ChatStreamEvent.fromJson(
+            jsonDecode_('''
+          {
+            "id": "chatcmpl-123",
+            "model": "gpt-4o",
+            "choices": [
+              {
+                "index": 0,
+                "delta": {},
+                "finish_reason": "stop"
+              }
+            ],
+            "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15}
+          }
+        '''),
+          ),
+        );
+
+      final completion = accumulator.toChatCompletion();
+
+      expect(completion.id, equals('chatcmpl-123'));
+      expect(completion.object, equals('chat.completion'));
+      expect(completion.created, equals(1677652288));
+      expect(completion.model, equals('gpt-4o'));
+      expect(completion.systemFingerprint, equals('fp_abc'));
+      expect(completion.serviceTier, equals('default'));
+      expect(completion.usage?.totalTokens, equals(15));
+      expect(completion.choices, hasLength(1));
+      expect(completion.choices.first.index, equals(0));
+      expect(completion.choices.first.finishReason, equals(FinishReason.stop));
+      expect(completion.choices.first.message.content, equals('Hello World'));
+      expect(completion.choices.first.message.toolCalls, isNull);
+      expect(completion.text, equals('Hello World'));
+    });
+
+    test('toChatCompletion() builds ChatCompletion with tool calls', () {
+      final accumulator = ChatStreamAccumulator()
+        ..add(
+          ChatStreamEvent.fromJson(
+            jsonDecode_(r'''
+          {
+            "id": "chatcmpl-456",
+            "model": "gpt-4o",
+            "choices": [
+              {
+                "index": 0,
+                "delta": {
+                  "role": "assistant",
+                  "tool_calls": [
+                    {
+                      "index": 0,
+                      "id": "call_abc",
+                      "type": "function",
+                      "function": {"name": "get_weather", "arguments": "{\"location"}
+                    }
+                  ]
+                },
+                "finish_reason": null
+              }
+            ]
+          }
+        '''),
+          ),
+        )
+        ..add(
+          ChatStreamEvent.fromJson(
+            jsonDecode_(r'''
+          {
+            "id": "chatcmpl-456",
+            "model": "gpt-4o",
+            "choices": [
+              {
+                "index": 0,
+                "delta": {
+                  "tool_calls": [
+                    {
+                      "index": 0,
+                      "function": {"arguments": "\":\"Boston\"}"}
+                    }
+                  ]
+                },
+                "finish_reason": "tool_calls"
+              }
+            ]
+          }
+        '''),
+          ),
+        );
+
+      final completion = accumulator.toChatCompletion();
+
+      expect(completion.choices.first.message.content, isNull);
+      expect(completion.choices.first.message.toolCalls, hasLength(1));
+      expect(
+        completion.choices.first.message.toolCalls!.first.function.name,
+        equals('get_weather'),
+      );
+      expect(
+        completion.choices.first.message.toolCalls!.first.function.arguments,
+        equals('{"location":"Boston"}'),
+      );
+      expect(
+        completion.choices.first.finishReason,
+        equals(FinishReason.toolCalls),
+      );
+    });
+
+    test('toChatCompletion() throws StateError when model is missing', () {
+      final accumulator = ChatStreamAccumulator();
+
+      expect(accumulator.toChatCompletion, throwsStateError);
+    });
+
+    test('toChatCompletion() captures serviceTier and provider', () {
+      final accumulator = ChatStreamAccumulator()
+        ..add(
+          ChatStreamEvent.fromJson(
+            jsonDecode_('''
+          {
+            "id": "chatcmpl-789",
+            "model": "gpt-4o",
+            "service_tier": "scale",
+            "provider": "openai",
+            "choices": [
+              {
+                "index": 0,
+                "delta": {"role": "assistant", "content": "Hi"},
+                "finish_reason": "stop"
+              }
+            ]
+          }
+        '''),
+          ),
+        );
+
+      expect(accumulator.serviceTier, equals('scale'));
+      expect(accumulator.provider, equals('openai'));
+
+      final completion = accumulator.toChatCompletion();
+      expect(completion.serviceTier, equals('scale'));
+      expect(completion.provider, equals('openai'));
     });
   });
 
