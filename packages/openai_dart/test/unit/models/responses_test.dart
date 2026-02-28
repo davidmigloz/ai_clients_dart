@@ -1116,6 +1116,68 @@ void main() {
       final shellItem = item as ShellCallOutputItem;
       expect(shellItem.action.commands, equals(['pwd']));
       expect(shellItem.status, equals(ItemStatus.inProgress));
+      expect(shellItem.environment, isNull);
+    });
+
+    test('deserializes ShellCallOutputItem with local environment', () {
+      final item = OutputItem.fromJson({
+        'type': 'shell_call',
+        'id': 'sh_2',
+        'call_id': 'call_shell_2',
+        'action': {
+          'commands': ['ls'],
+        },
+        'status': 'completed',
+        'environment': {'type': 'local'},
+      });
+
+      expect(item, isA<ShellCallOutputItem>());
+      final shellItem = item as ShellCallOutputItem;
+      expect(shellItem.environment, isA<LocalShellEnvironment>());
+
+      // Round-trip
+      final json = shellItem.toJson();
+      expect(json['environment'], equals({'type': 'local'}));
+      final restored = OutputItem.fromJson(json) as ShellCallOutputItem;
+      expect(restored, equals(shellItem));
+    });
+
+    test('deserializes ShellCallOutputItem with container_reference environment', () {
+      final item = OutputItem.fromJson({
+        'type': 'shell_call',
+        'id': 'sh_3',
+        'call_id': 'call_shell_3',
+        'action': {
+          'commands': ['echo', 'hello'],
+        },
+        'status': 'in_progress',
+        'environment': {
+          'type': 'container_reference',
+          'container_id': 'cntr_abc123',
+        },
+      });
+
+      expect(item, isA<ShellCallOutputItem>());
+      final shellItem = item as ShellCallOutputItem;
+      expect(shellItem.environment, isA<ContainerReferenceEnvironment>());
+      final env = shellItem.environment! as ContainerReferenceEnvironment;
+      expect(env.containerId, equals('cntr_abc123'));
+
+      // Round-trip
+      final json = shellItem.toJson();
+      expect(json['environment'], equals({
+        'type': 'container_reference',
+        'container_id': 'cntr_abc123',
+      }));
+      final restored = OutputItem.fromJson(json) as ShellCallOutputItem;
+      expect(restored, equals(shellItem));
+    });
+
+    test('ShellEnvironment.fromJson throws on unknown type', () {
+      expect(
+        () => ShellEnvironment.fromJson({'type': 'unknown'}),
+        throwsFormatException,
+      );
     });
 
     test('deserializes ShellCallOutputResultItem', () {

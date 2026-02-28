@@ -761,12 +761,19 @@ class ShellCallOutputItem extends OutputItem {
   /// Item status.
   final ItemStatus status;
 
+  /// The environment in which the shell call was executed.
+  ///
+  /// Can be a [LocalShellEnvironment], [ContainerReferenceEnvironment],
+  /// or `null`.
+  final ShellEnvironment? environment;
+
   /// Creates a [ShellCallOutputItem].
   const ShellCallOutputItem({
     required this.id,
     required this.callId,
     required this.action,
     required this.status,
+    this.environment,
   });
 
   /// Creates a [ShellCallOutputItem] from JSON.
@@ -776,6 +783,11 @@ class ShellCallOutputItem extends OutputItem {
       callId: json['call_id'] as String,
       action: ShellCallAction.fromJson(json['action'] as Map<String, dynamic>),
       status: ItemStatus.fromJson(json['status'] as String),
+      environment: json['environment'] != null
+          ? ShellEnvironment.fromJson(
+              json['environment'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
@@ -786,6 +798,7 @@ class ShellCallOutputItem extends OutputItem {
     'call_id': callId,
     'action': action.toJson(),
     'status': status.toJson(),
+    'environment': environment?.toJson(),
   };
 
   @override
@@ -796,14 +809,15 @@ class ShellCallOutputItem extends OutputItem {
           id == other.id &&
           callId == other.callId &&
           action == other.action &&
-          status == other.status;
+          status == other.status &&
+          environment == other.environment;
 
   @override
-  int get hashCode => Object.hash(id, callId, action, status);
+  int get hashCode => Object.hash(id, callId, action, status, environment);
 
   @override
   String toString() =>
-      'ShellCallOutputItem(id: $id, callId: $callId, status: $status)';
+      'ShellCallOutputItem(id: $id, callId: $callId, status: $status, environment: $environment)';
 }
 
 /// Shell call action payload.
@@ -856,6 +870,88 @@ class ShellCallAction {
   @override
   String toString() =>
       'ShellCallAction(commands: $commands, timeoutMs: $timeoutMs, maxOutputLength: $maxOutputLength)';
+}
+
+/// The execution environment for a shell call.
+///
+/// See [LocalShellEnvironment] and [ContainerReferenceEnvironment].
+sealed class ShellEnvironment {
+  /// Creates a [ShellEnvironment].
+  const ShellEnvironment();
+
+  /// Creates a [ShellEnvironment] from JSON.
+  factory ShellEnvironment.fromJson(Map<String, dynamic> json) {
+    return switch (json['type'] as String) {
+      'local' => const LocalShellEnvironment(),
+      'container_reference' => ContainerReferenceEnvironment.fromJson(json),
+      final type => throw FormatException('Unknown ShellEnvironment type: $type'),
+    };
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson();
+}
+
+/// A local environment for shell execution.
+@immutable
+class LocalShellEnvironment extends ShellEnvironment {
+  /// Creates a [LocalShellEnvironment].
+  const LocalShellEnvironment();
+
+  /// Creates a [LocalShellEnvironment] from JSON.
+  // ignore: avoid_unused_constructor_parameters
+  factory LocalShellEnvironment.fromJson(Map<String, dynamic> json) =>
+      const LocalShellEnvironment();
+
+  @override
+  Map<String, dynamic> toJson() => const {'type': 'local'};
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || other is LocalShellEnvironment;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  String toString() => 'LocalShellEnvironment()';
+}
+
+/// A container reference environment for shell execution.
+@immutable
+class ContainerReferenceEnvironment extends ShellEnvironment {
+  /// The container ID.
+  final String containerId;
+
+  /// Creates a [ContainerReferenceEnvironment].
+  const ContainerReferenceEnvironment({required this.containerId});
+
+  /// Creates a [ContainerReferenceEnvironment] from JSON.
+  factory ContainerReferenceEnvironment.fromJson(Map<String, dynamic> json) {
+    return ContainerReferenceEnvironment(
+      containerId: json['container_id'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'container_reference',
+    'container_id': containerId,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ContainerReferenceEnvironment &&
+          runtimeType == other.runtimeType &&
+          containerId == other.containerId;
+
+  @override
+  int get hashCode => containerId.hashCode;
+
+  @override
+  String toString() =>
+      'ContainerReferenceEnvironment(containerId: $containerId)';
 }
 
 /// A shell call output result item.
