@@ -453,6 +453,38 @@ class WebFetchToolResultBlock extends ContentBlock {
     'content': content,
     if (caller != null) 'caller': caller!.toJson(),
   };
+
+  /// Creates a copy with replaced values.
+  WebFetchToolResultBlock copyWith({
+    String? toolUseId,
+    Map<String, dynamic>? content,
+    Object? caller = unsetCopyWithValue,
+  }) {
+    return WebFetchToolResultBlock(
+      toolUseId: toolUseId ?? this.toolUseId,
+      content: content ?? this.content,
+      caller: caller == unsetCopyWithValue
+          ? this.caller
+          : caller as ToolCaller?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WebFetchToolResultBlock &&
+          runtimeType == other.runtimeType &&
+          toolUseId == other.toolUseId &&
+          mapsEqual(content, other.content) &&
+          caller == other.caller;
+
+  @override
+  int get hashCode => Object.hash(toolUseId, content, caller);
+
+  @override
+  String toString() =>
+      'WebFetchToolResultBlock(toolUseId: $toolUseId, content: $content, '
+      'caller: $caller)';
 }
 
 /// Code execution tool result block.
@@ -484,6 +516,32 @@ class CodeExecutionToolResultBlock extends ContentBlock {
     'tool_use_id': toolUseId,
     'content': content,
   };
+
+  /// Creates a copy with replaced values.
+  CodeExecutionToolResultBlock copyWith({
+    String? toolUseId,
+    Map<String, dynamic>? content,
+  }) {
+    return CodeExecutionToolResultBlock(
+      toolUseId: toolUseId ?? this.toolUseId,
+      content: content ?? this.content,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CodeExecutionToolResultBlock &&
+          runtimeType == other.runtimeType &&
+          toolUseId == other.toolUseId &&
+          mapsEqual(content, other.content);
+
+  @override
+  int get hashCode => Object.hash(toolUseId, content);
+
+  @override
+  String toString() =>
+      'CodeExecutionToolResultBlock(toolUseId: $toolUseId, content: $content)';
 }
 
 /// Bash code execution tool result block.
@@ -515,6 +573,33 @@ class BashCodeExecutionToolResultBlock extends ContentBlock {
     'tool_use_id': toolUseId,
     'content': content,
   };
+
+  /// Creates a copy with replaced values.
+  BashCodeExecutionToolResultBlock copyWith({
+    String? toolUseId,
+    Map<String, dynamic>? content,
+  }) {
+    return BashCodeExecutionToolResultBlock(
+      toolUseId: toolUseId ?? this.toolUseId,
+      content: content ?? this.content,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BashCodeExecutionToolResultBlock &&
+          runtimeType == other.runtimeType &&
+          toolUseId == other.toolUseId &&
+          mapsEqual(content, other.content);
+
+  @override
+  int get hashCode => Object.hash(toolUseId, content);
+
+  @override
+  String toString() =>
+      'BashCodeExecutionToolResultBlock(toolUseId: $toolUseId, '
+      'content: $content)';
 }
 
 /// Text editor code execution tool result block.
@@ -548,6 +633,33 @@ class TextEditorCodeExecutionToolResultBlock extends ContentBlock {
     'tool_use_id': toolUseId,
     'content': content,
   };
+
+  /// Creates a copy with replaced values.
+  TextEditorCodeExecutionToolResultBlock copyWith({
+    String? toolUseId,
+    Map<String, dynamic>? content,
+  }) {
+    return TextEditorCodeExecutionToolResultBlock(
+      toolUseId: toolUseId ?? this.toolUseId,
+      content: content ?? this.content,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TextEditorCodeExecutionToolResultBlock &&
+          runtimeType == other.runtimeType &&
+          toolUseId == other.toolUseId &&
+          mapsEqual(content, other.content);
+
+  @override
+  int get hashCode => Object.hash(toolUseId, content);
+
+  @override
+  String toString() =>
+      'TextEditorCodeExecutionToolResultBlock(toolUseId: $toolUseId, '
+      'content: $content)';
 }
 
 /// Tool search tool result block.
@@ -579,6 +691,32 @@ class ToolSearchToolResultBlock extends ContentBlock {
     'tool_use_id': toolUseId,
     'content': content,
   };
+
+  /// Creates a copy with replaced values.
+  ToolSearchToolResultBlock copyWith({
+    String? toolUseId,
+    Map<String, dynamic>? content,
+  }) {
+    return ToolSearchToolResultBlock(
+      toolUseId: toolUseId ?? this.toolUseId,
+      content: content ?? this.content,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ToolSearchToolResultBlock &&
+          runtimeType == other.runtimeType &&
+          toolUseId == other.toolUseId &&
+          mapsEqual(content, other.content);
+
+  @override
+  int get hashCode => Object.hash(toolUseId, content);
+
+  @override
+  String toString() =>
+      'ToolSearchToolResultBlock(toolUseId: $toolUseId, content: $content)';
 }
 
 /// Container upload content block.
@@ -600,6 +738,24 @@ class ContainerUploadBlock extends ContentBlock {
     'type': 'container_upload',
     'file_id': fileId,
   };
+
+  /// Creates a copy with replaced values.
+  ContainerUploadBlock copyWith({String? fileId}) {
+    return ContainerUploadBlock(fileId: fileId ?? this.fileId);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ContainerUploadBlock &&
+          runtimeType == other.runtimeType &&
+          fileId == other.fileId;
+
+  @override
+  int get hashCode => fileId.hashCode;
+
+  @override
+  String toString() => 'ContainerUploadBlock(fileId: $fileId)';
 }
 
 /// Compaction content block (beta).

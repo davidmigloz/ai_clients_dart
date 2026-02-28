@@ -19,7 +19,7 @@ sealed class ToolCaller {
     }
     return ServerToolCaller(
       type: type,
-      toolId: json['tool_id'] as String? ?? '',
+      toolId: json['tool_id'] as String,
     );
   }
 
