@@ -130,7 +130,7 @@ class ModelListResponse {
           lastId == other.lastId;
 
   @override
-  int get hashCode => Object.hash(data, hasMore, firstId, lastId);
+  int get hashCode => Object.hash(listHash(data), hasMore, firstId, lastId);
 
   @override
   String toString() =>

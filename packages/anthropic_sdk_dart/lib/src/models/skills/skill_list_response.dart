@@ -71,7 +71,7 @@ class SkillListResponse {
           nextPage == other.nextPage;
 
   @override
-  int get hashCode => Object.hash(Object.hashAll(data), hasMore, nextPage);
+  int get hashCode => Object.hash(listHash(data), hasMore, nextPage);
 
   @override
   String toString() =>
@@ -141,7 +141,7 @@ class SkillVersionListResponse {
           nextPage == other.nextPage;
 
   @override
-  int get hashCode => Object.hash(Object.hashAll(data), hasMore, nextPage);
+  int get hashCode => Object.hash(listHash(data), hasMore, nextPage);
 
   @override
   String toString() =>

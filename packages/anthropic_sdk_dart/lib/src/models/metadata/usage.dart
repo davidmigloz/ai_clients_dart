@@ -487,7 +487,7 @@ class Usage {
     serverToolUse,
     serviceTier,
     inferenceGeo,
-    iterations,
+    listHash(iterations),
     speed,
   );
 

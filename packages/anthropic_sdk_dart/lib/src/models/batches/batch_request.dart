@@ -80,7 +80,7 @@ class MessageBatchCreateRequest {
           listsEqual(requests, other.requests);
 
   @override
-  int get hashCode => requests.hashCode;
+  int get hashCode => listHash(requests);
 
   @override
   String toString() => 'MessageBatchCreateRequest(requests: $requests)';

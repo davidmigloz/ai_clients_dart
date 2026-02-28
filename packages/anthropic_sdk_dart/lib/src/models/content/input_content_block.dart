@@ -399,7 +399,8 @@ class ToolUseInputBlock extends InputContentBlock {
           cacheControl == other.cacheControl;
 
   @override
-  int get hashCode => Object.hash(id, name, input, caller, cacheControl);
+  int get hashCode =>
+      Object.hash(id, name, mapHash(input), caller, cacheControl);
 
   @override
   String toString() =>
@@ -573,7 +574,8 @@ class ToolResultInputBlock extends InputContentBlock {
           cacheControl == other.cacheControl;
 
   @override
-  int get hashCode => Object.hash(toolUseId, content, isError, cacheControl);
+  int get hashCode =>
+      Object.hash(toolUseId, listHash(content), isError, cacheControl);
 
   @override
   String toString() =>
@@ -668,7 +670,8 @@ class ServerToolUseInputBlock extends InputContentBlock {
           cacheControl == other.cacheControl;
 
   @override
-  int get hashCode => Object.hash(id, name, input, caller, cacheControl);
+  int get hashCode =>
+      Object.hash(id, name, mapHash(input), caller, cacheControl);
 
   @override
   String toString() =>
@@ -754,7 +757,8 @@ class WebSearchToolResultInputBlock extends InputContentBlock {
           cacheControl == other.cacheControl;
 
   @override
-  int get hashCode => Object.hash(toolUseId, content, caller, cacheControl);
+  int get hashCode =>
+      Object.hash(toolUseId, mapHash(content), caller, cacheControl);
 
   @override
   String toString() =>
@@ -840,7 +844,8 @@ class WebFetchToolResultInputBlock extends InputContentBlock {
           cacheControl == other.cacheControl;
 
   @override
-  int get hashCode => Object.hash(toolUseId, content, caller, cacheControl);
+  int get hashCode =>
+      Object.hash(toolUseId, mapHash(content), caller, cacheControl);
 
   @override
   String toString() =>
@@ -915,7 +920,7 @@ class CodeExecutionToolResultInputBlock extends InputContentBlock {
           cacheControl == other.cacheControl;
 
   @override
-  int get hashCode => Object.hash(toolUseId, content, cacheControl);
+  int get hashCode => Object.hash(toolUseId, mapHash(content), cacheControl);
 
   @override
   String toString() =>
@@ -990,7 +995,7 @@ class BashCodeExecutionToolResultInputBlock extends InputContentBlock {
           cacheControl == other.cacheControl;
 
   @override
-  int get hashCode => Object.hash(toolUseId, content, cacheControl);
+  int get hashCode => Object.hash(toolUseId, mapHash(content), cacheControl);
 
   @override
   String toString() =>
@@ -1065,7 +1070,7 @@ class TextEditorCodeExecutionToolResultInputBlock extends InputContentBlock {
           cacheControl == other.cacheControl;
 
   @override
-  int get hashCode => Object.hash(toolUseId, content, cacheControl);
+  int get hashCode => Object.hash(toolUseId, mapHash(content), cacheControl);
 
   @override
   String toString() =>
@@ -1138,7 +1143,7 @@ class ToolSearchToolResultInputBlock extends InputContentBlock {
           cacheControl == other.cacheControl;
 
   @override
-  int get hashCode => Object.hash(toolUseId, content, cacheControl);
+  int get hashCode => Object.hash(toolUseId, mapHash(content), cacheControl);
 
   @override
   String toString() =>

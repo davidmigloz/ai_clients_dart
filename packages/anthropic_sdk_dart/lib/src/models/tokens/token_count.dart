@@ -145,11 +145,11 @@ class TokenCountRequest {
   @override
   int get hashCode => Object.hash(
     model,
-    messages,
+    listHash(messages),
     system,
     thinking,
     toolChoice,
-    tools,
+    listHash(tools),
     outputConfig,
     speed,
   );

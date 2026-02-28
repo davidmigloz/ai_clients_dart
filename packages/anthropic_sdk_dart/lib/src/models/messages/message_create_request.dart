@@ -90,7 +90,7 @@ class BlocksSystemPrompt extends SystemPrompt {
           listsEqual(blocks, other.blocks);
 
   @override
-  int get hashCode => blocks.hashCode;
+  int get hashCode => listHash(blocks);
 
   @override
   String toString() => 'BlocksSystemPrompt(blocks: $blocks)';
@@ -384,17 +384,17 @@ class MessageCreateRequest {
   @override
   int get hashCode => Object.hash(
     model,
-    messages,
+    listHash(messages),
     maxTokens,
     system,
     metadata,
     serviceTier,
-    stopSequences,
+    listHash(stopSequences),
     stream,
     temperature,
     thinking,
     toolChoice,
-    tools,
+    listHash(tools),
     topP,
     topK,
     inferenceGeo,

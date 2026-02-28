@@ -89,7 +89,7 @@ class TextBlock extends ContentBlock {
           listsEqual(citations, other.citations);
 
   @override
-  int get hashCode => Object.hash(text, citations);
+  int get hashCode => Object.hash(text, listHash(citations));
 
   @override
   String toString() =>
@@ -256,7 +256,7 @@ class ToolUseBlock extends ContentBlock {
           caller == other.caller;
 
   @override
-  int get hashCode => Object.hash(id, name, input, caller);
+  int get hashCode => Object.hash(id, name, mapHash(input), caller);
 
   @override
   String toString() =>
@@ -335,7 +335,7 @@ class ServerToolUseBlock extends ContentBlock {
           caller == other.caller;
 
   @override
-  int get hashCode => Object.hash(id, name, input, caller);
+  int get hashCode => Object.hash(id, name, mapHash(input), caller);
 
   @override
   String toString() =>
@@ -479,7 +479,7 @@ class WebFetchToolResultBlock extends ContentBlock {
           caller == other.caller;
 
   @override
-  int get hashCode => Object.hash(toolUseId, content, caller);
+  int get hashCode => Object.hash(toolUseId, mapHash(content), caller);
 
   @override
   String toString() =>
@@ -537,7 +537,7 @@ class CodeExecutionToolResultBlock extends ContentBlock {
           mapsEqual(content, other.content);
 
   @override
-  int get hashCode => Object.hash(toolUseId, content);
+  int get hashCode => Object.hash(toolUseId, mapHash(content));
 
   @override
   String toString() =>
@@ -594,7 +594,7 @@ class BashCodeExecutionToolResultBlock extends ContentBlock {
           mapsEqual(content, other.content);
 
   @override
-  int get hashCode => Object.hash(toolUseId, content);
+  int get hashCode => Object.hash(toolUseId, mapHash(content));
 
   @override
   String toString() =>
@@ -654,7 +654,7 @@ class TextEditorCodeExecutionToolResultBlock extends ContentBlock {
           mapsEqual(content, other.content);
 
   @override
-  int get hashCode => Object.hash(toolUseId, content);
+  int get hashCode => Object.hash(toolUseId, mapHash(content));
 
   @override
   String toString() =>
@@ -712,7 +712,7 @@ class ToolSearchToolResultBlock extends ContentBlock {
           mapsEqual(content, other.content);
 
   @override
-  int get hashCode => Object.hash(toolUseId, content);
+  int get hashCode => Object.hash(toolUseId, mapHash(content));
 
   @override
   String toString() =>
@@ -853,7 +853,7 @@ class WebSearchResultSuccess extends WebSearchResult {
           listsEqual(results, other.results);
 
   @override
-  int get hashCode => results.hashCode;
+  int get hashCode => listHash(results);
 
   @override
   String toString() => 'WebSearchResultSuccess(results: $results)';

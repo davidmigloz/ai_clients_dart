@@ -138,7 +138,7 @@ class Message {
     id,
     type,
     role,
-    content,
+    listHash(content),
     model,
     stopReason,
     stopSequence,

@@ -185,23 +185,13 @@ class McpToolConfig {
       identical(this, other) ||
       other is McpToolConfig &&
           runtimeType == other.runtimeType &&
-          _mcpListsEqual(allowedTools, other.allowedTools) &&
+          listsEqual(allowedTools, other.allowedTools) &&
           enabled == other.enabled;
 
   @override
-  int get hashCode => Object.hash(allowedTools, enabled);
+  int get hashCode => Object.hash(listHash(allowedTools), enabled);
 
   @override
   String toString() =>
       'McpToolConfig(allowedTools: $allowedTools, enabled: $enabled)';
-}
-
-bool _mcpListsEqual<T>(List<T>? a, List<T>? b) {
-  if (a == null && b == null) return true;
-  if (a == null || b == null) return false;
-  if (a.length != b.length) return false;
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] != b[i]) return false;
-  }
-  return true;
 }

@@ -143,7 +143,7 @@ class CodeExecutionTool {
     type,
     cacheControl,
     container,
-    allowedCallers,
+    listHash(allowedCallers),
     deferLoading,
     strict,
   );

@@ -64,7 +64,8 @@ class InputSchema {
           listsEqual(required, other.required);
 
   @override
-  int get hashCode => Object.hash(type, properties, required);
+  int get hashCode =>
+      Object.hash(type, mapHash(properties), listHash(required));
 
   @override
   String toString() =>

@@ -83,7 +83,7 @@ class BlocksMessageContent extends MessageContent {
           listsEqual(blocks, other.blocks);
 
   @override
-  int get hashCode => blocks.hashCode;
+  int get hashCode => listHash(blocks);
 
   @override
   String toString() => 'BlocksMessageContent(blocks: $blocks)';
@@ -124,6 +124,15 @@ class InputMessage {
         role: MessageRole.assistant,
         content: MessageContent.blocks(blocks),
       );
+
+  /// Returns the content as a list of [InputContentBlock]s.
+  ///
+  /// For [TextMessageContent], wraps the text in a single [TextInputBlock].
+  /// For [BlocksMessageContent], returns the blocks directly.
+  List<InputContentBlock> get blocks => switch (content) {
+    TextMessageContent(:final text) => [TextInputBlock(text)],
+    BlocksMessageContent(:final blocks) => blocks,
+  };
 
   /// Creates an [InputMessage] from JSON.
   factory InputMessage.fromJson(Map<String, dynamic> json) {

@@ -17,10 +17,7 @@ sealed class ToolCaller {
     if (type == 'direct') {
       return const DirectToolCaller();
     }
-    return ServerToolCaller(
-      type: type,
-      toolId: json['tool_id'] as String,
-    );
+    return ServerToolCaller(type: type, toolId: json['tool_id'] as String);
   }
 
   /// Converts this caller to JSON.

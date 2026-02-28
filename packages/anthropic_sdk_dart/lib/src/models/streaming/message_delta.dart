@@ -202,7 +202,7 @@ class MessageDeltaUsage {
     cacheCreationInputTokens,
     cacheReadInputTokens,
     serverToolUse,
-    iterations,
+    listHash(iterations),
     speed,
   );
 

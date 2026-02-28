@@ -339,10 +339,10 @@ class BashTool extends BuiltInTool {
   int get hashCode => Object.hash(
     type,
     cacheControl,
-    allowedCallers,
+    listHash(allowedCallers),
     deferLoading,
     strict,
-    inputExamples,
+    listOfMapsHash(inputExamples),
   );
 
   @override
@@ -466,10 +466,10 @@ class TextEditorTool20250124 extends TextEditorToolBase {
   int get hashCode => Object.hash(
     type,
     cacheControl,
-    allowedCallers,
+    listHash(allowedCallers),
     deferLoading,
     strict,
-    inputExamples,
+    listOfMapsHash(inputExamples),
   );
 
   @override
@@ -582,10 +582,10 @@ class TextEditorTool20250429 extends TextEditorToolBase {
   int get hashCode => Object.hash(
     type,
     cacheControl,
-    allowedCallers,
+    listHash(allowedCallers),
     deferLoading,
     strict,
-    inputExamples,
+    listOfMapsHash(inputExamples),
   );
 
   @override
@@ -714,10 +714,10 @@ class TextEditorTool extends TextEditorToolBase {
     type,
     cacheControl,
     maxCharacters,
-    allowedCallers,
+    listHash(allowedCallers),
     deferLoading,
     strict,
-    inputExamples,
+    listOfMapsHash(inputExamples),
   );
 
   @override
@@ -871,12 +871,12 @@ class WebSearchTool extends BuiltInTool {
   @override
   int get hashCode => Object.hash(
     type,
-    allowedDomains,
-    blockedDomains,
+    listHash(allowedDomains),
+    listHash(blockedDomains),
     cacheControl,
     maxUses,
     userLocation,
-    allowedCallers,
+    listHash(allowedCallers),
     deferLoading,
     strict,
   );
@@ -1023,16 +1023,57 @@ class WebFetchTool extends BuiltInTool {
           deferLoading == other.deferLoading &&
           strict == other.strict;
 
+  /// Creates a copy with replaced values.
+  WebFetchTool copyWith({
+    String? type,
+    Object? allowedDomains = unsetCopyWithValue,
+    Object? blockedDomains = unsetCopyWithValue,
+    Object? cacheControl = unsetCopyWithValue,
+    Object? maxUses = unsetCopyWithValue,
+    Object? maxContentTokens = unsetCopyWithValue,
+    Object? citations = unsetCopyWithValue,
+    Object? allowedCallers = unsetCopyWithValue,
+    Object? deferLoading = unsetCopyWithValue,
+    Object? strict = unsetCopyWithValue,
+  }) {
+    return WebFetchTool(
+      type: type ?? this.type,
+      allowedDomains: allowedDomains == unsetCopyWithValue
+          ? this.allowedDomains
+          : allowedDomains as List<String>?,
+      blockedDomains: blockedDomains == unsetCopyWithValue
+          ? this.blockedDomains
+          : blockedDomains as List<String>?,
+      cacheControl: cacheControl == unsetCopyWithValue
+          ? this.cacheControl
+          : cacheControl as CacheControlEphemeral?,
+      maxUses: maxUses == unsetCopyWithValue ? this.maxUses : maxUses as int?,
+      maxContentTokens: maxContentTokens == unsetCopyWithValue
+          ? this.maxContentTokens
+          : maxContentTokens as int?,
+      citations: citations == unsetCopyWithValue
+          ? this.citations
+          : citations as RequestCitationsConfig?,
+      allowedCallers: allowedCallers == unsetCopyWithValue
+          ? this.allowedCallers
+          : allowedCallers as List<String>?,
+      deferLoading: deferLoading == unsetCopyWithValue
+          ? this.deferLoading
+          : deferLoading as bool?,
+      strict: strict == unsetCopyWithValue ? this.strict : strict as bool?,
+    );
+  }
+
   @override
   int get hashCode => Object.hash(
     type,
-    allowedDomains,
-    blockedDomains,
+    listHash(allowedDomains),
+    listHash(blockedDomains),
     cacheControl,
     maxUses,
     maxContentTokens,
     citations,
-    allowedCallers,
+    listHash(allowedCallers),
     deferLoading,
     strict,
   );
@@ -1118,14 +1159,41 @@ class MemoryTool extends BuiltInTool {
           strict == other.strict &&
           listOfMapsEqual(inputExamples, other.inputExamples);
 
+  /// Creates a copy with replaced values.
+  MemoryTool copyWith({
+    String? type,
+    Object? cacheControl = unsetCopyWithValue,
+    Object? allowedCallers = unsetCopyWithValue,
+    Object? deferLoading = unsetCopyWithValue,
+    Object? strict = unsetCopyWithValue,
+    Object? inputExamples = unsetCopyWithValue,
+  }) {
+    return MemoryTool(
+      type: type ?? this.type,
+      cacheControl: cacheControl == unsetCopyWithValue
+          ? this.cacheControl
+          : cacheControl as CacheControlEphemeral?,
+      allowedCallers: allowedCallers == unsetCopyWithValue
+          ? this.allowedCallers
+          : allowedCallers as List<String>?,
+      deferLoading: deferLoading == unsetCopyWithValue
+          ? this.deferLoading
+          : deferLoading as bool?,
+      strict: strict == unsetCopyWithValue ? this.strict : strict as bool?,
+      inputExamples: inputExamples == unsetCopyWithValue
+          ? this.inputExamples
+          : inputExamples as List<Map<String, dynamic>>?,
+    );
+  }
+
   @override
   int get hashCode => Object.hash(
     type,
     cacheControl,
-    allowedCallers,
+    listHash(allowedCallers),
     deferLoading,
     strict,
-    inputExamples,
+    listOfMapsHash(inputExamples),
   );
 
   @override
@@ -1203,9 +1271,37 @@ class ToolSearchToolBm25 extends ToolSearchTool {
           deferLoading == other.deferLoading &&
           strict == other.strict;
 
+  /// Creates a copy with replaced values.
+  ToolSearchToolBm25 copyWith({
+    String? type,
+    Object? cacheControl = unsetCopyWithValue,
+    Object? allowedCallers = unsetCopyWithValue,
+    Object? deferLoading = unsetCopyWithValue,
+    Object? strict = unsetCopyWithValue,
+  }) {
+    return ToolSearchToolBm25(
+      type: type ?? this.type,
+      cacheControl: cacheControl == unsetCopyWithValue
+          ? this.cacheControl
+          : cacheControl as CacheControlEphemeral?,
+      allowedCallers: allowedCallers == unsetCopyWithValue
+          ? this.allowedCallers
+          : allowedCallers as List<String>?,
+      deferLoading: deferLoading == unsetCopyWithValue
+          ? this.deferLoading
+          : deferLoading as bool?,
+      strict: strict == unsetCopyWithValue ? this.strict : strict as bool?,
+    );
+  }
+
   @override
-  int get hashCode =>
-      Object.hash(type, cacheControl, allowedCallers, deferLoading, strict);
+  int get hashCode => Object.hash(
+    type,
+    cacheControl,
+    listHash(allowedCallers),
+    deferLoading,
+    strict,
+  );
 
   @override
   String toString() =>
@@ -1277,9 +1373,37 @@ class ToolSearchToolRegex extends ToolSearchTool {
           deferLoading == other.deferLoading &&
           strict == other.strict;
 
+  /// Creates a copy with replaced values.
+  ToolSearchToolRegex copyWith({
+    String? type,
+    Object? cacheControl = unsetCopyWithValue,
+    Object? allowedCallers = unsetCopyWithValue,
+    Object? deferLoading = unsetCopyWithValue,
+    Object? strict = unsetCopyWithValue,
+  }) {
+    return ToolSearchToolRegex(
+      type: type ?? this.type,
+      cacheControl: cacheControl == unsetCopyWithValue
+          ? this.cacheControl
+          : cacheControl as CacheControlEphemeral?,
+      allowedCallers: allowedCallers == unsetCopyWithValue
+          ? this.allowedCallers
+          : allowedCallers as List<String>?,
+      deferLoading: deferLoading == unsetCopyWithValue
+          ? this.deferLoading
+          : deferLoading as bool?,
+      strict: strict == unsetCopyWithValue ? this.strict : strict as bool?,
+    );
+  }
+
   @override
-  int get hashCode =>
-      Object.hash(type, cacheControl, allowedCallers, deferLoading, strict);
+  int get hashCode => Object.hash(
+    type,
+    cacheControl,
+    listHash(allowedCallers),
+    deferLoading,
+    strict,
+  );
 
   @override
   String toString() =>
@@ -1351,9 +1475,37 @@ class CodeExecutionBuiltInTool extends BuiltInTool {
           deferLoading == other.deferLoading &&
           strict == other.strict;
 
+  /// Creates a copy with replaced values.
+  CodeExecutionBuiltInTool copyWith({
+    String? type,
+    Object? cacheControl = unsetCopyWithValue,
+    Object? allowedCallers = unsetCopyWithValue,
+    Object? deferLoading = unsetCopyWithValue,
+    Object? strict = unsetCopyWithValue,
+  }) {
+    return CodeExecutionBuiltInTool(
+      type: type ?? this.type,
+      cacheControl: cacheControl == unsetCopyWithValue
+          ? this.cacheControl
+          : cacheControl as CacheControlEphemeral?,
+      allowedCallers: allowedCallers == unsetCopyWithValue
+          ? this.allowedCallers
+          : allowedCallers as List<String>?,
+      deferLoading: deferLoading == unsetCopyWithValue
+          ? this.deferLoading
+          : deferLoading as bool?,
+      strict: strict == unsetCopyWithValue ? this.strict : strict as bool?,
+    );
+  }
+
   @override
-  int get hashCode =>
-      Object.hash(type, cacheControl, allowedCallers, deferLoading, strict);
+  int get hashCode => Object.hash(
+    type,
+    cacheControl,
+    listHash(allowedCallers),
+    deferLoading,
+    strict,
+  );
 
   @override
   String toString() =>

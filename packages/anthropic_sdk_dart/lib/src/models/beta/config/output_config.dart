@@ -135,7 +135,7 @@ class JsonOutputFormat {
           mapsEqual(schema, other.schema);
 
   @override
-  int get hashCode => Object.hash(type, schema);
+  int get hashCode => Object.hash(type, mapHash(schema));
 
   @override
   String toString() => 'JsonOutputFormat(type: $type, schema: $schema)';
