@@ -73,8 +73,8 @@ class MessageStreamAccumulator {
       case ContentBlockStopEvent():
         break;
       case MessageDeltaEvent(:final delta, :final usage):
-        _stopReason = delta.stopReason;
-        _stopSequence = delta.stopSequence;
+        _stopReason = delta.stopReason ?? _stopReason;
+        _stopSequence = delta.stopSequence ?? _stopSequence;
         _container = delta.container ?? _container;
         _mergeUsage(usage);
       case MessageStopEvent():
@@ -109,6 +109,11 @@ class MessageStreamAccumulator {
       _usage = Usage(
         inputTokens: delta.inputTokens ?? 0,
         outputTokens: delta.outputTokens,
+        cacheCreationInputTokens: delta.cacheCreationInputTokens,
+        cacheReadInputTokens: delta.cacheReadInputTokens,
+        serverToolUse: delta.serverToolUse,
+        iterations: delta.iterations,
+        speed: delta.speed,
       );
       return;
     }

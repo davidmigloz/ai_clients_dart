@@ -288,35 +288,35 @@ await for (final event in stream) {
 <details>
 <summary><b>Streaming with Extensions</b></summary>
 
+Each extension method consumes the stream, so use one per `createStream()` call:
+
 ```dart
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 
-final stream = client.messages.createStream(
+Stream<MessageStreamEvent> createStream() => client.messages.createStream(
   MessageCreateRequest(
     model: 'claude-sonnet-4-20250514',
     maxTokens: 256,
-    messages: [
-      InputMessage.user('Count from 1 to 10 slowly.'),
-    ],
+    messages: [InputMessage.user('Count from 1 to 10 slowly.')],
   ),
 );
 
-// Collect all text into a single string
-final text = await stream.collectText();
+// Option 1: Collect all text into a single string
+final text = await createStream().collectText();
 
-// Or iterate text deltas as they arrive
-await for (final delta in stream.textDeltas()) {
+// Option 2: Iterate text deltas as they arrive
+await for (final delta in createStream().textDeltas()) {
   stdout.write(delta);
 }
 
-// Accumulate streaming chunks into a complete Message
-await for (final accumulator in stream.accumulate()) {
+// Option 3: Accumulate streaming chunks into a complete Message
+await for (final accumulator in createStream().accumulate()) {
   print('Content so far: ${accumulator.text}');
 }
 
-// Or use MessageStreamAccumulator directly for full control
+// Option 4: Use MessageStreamAccumulator directly for full control
 final accumulator = MessageStreamAccumulator();
-await for (final event in stream) {
+await for (final event in createStream()) {
   accumulator.add(event);
 }
 final message = accumulator.toMessage();
@@ -655,31 +655,32 @@ The package provides convenient extension methods for common operations:
 
 ### Stream Extensions
 
+Each extension method consumes the stream, so use one per `createStream()` call:
+
 ```dart
 // Collect all text from a streaming response
 final text = await stream.collectText();
 
-// Iterate only text deltas
+// Iterate only text deltas (requires a new stream)
 await for (final delta in stream.textDeltas()) {
   stdout.write(delta);
 }
 
-// Iterate thinking deltas (extended thinking)
+// Iterate thinking deltas (requires a new stream)
 await for (final thinking in stream.thinkingDeltas()) {
   print(thinking);
 }
 
-// Accumulate streaming chunks into a complete response
+// Accumulate streaming chunks into a complete response (requires a new stream)
 await for (final accumulator in stream.accumulate()) {
   print('Content so far: ${accumulator.text}');
 }
 
-// Or use MessageStreamAccumulator directly for full control
+// Or use MessageStreamAccumulator directly for full control (requires a new stream)
 final accumulator = MessageStreamAccumulator();
 await for (final event in stream) {
   accumulator.add(event);
 }
-// Build a Message from the accumulated stream data
 final message = accumulator.toMessage();
 print(message.text);
 ```

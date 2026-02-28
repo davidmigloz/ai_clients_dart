@@ -427,6 +427,40 @@ void main() {
         expect(usage.serverToolUse!.webSearchRequests, 1);
       });
 
+      test('usage from delta without prior message_start preserves all fields',
+          () {
+        // Directly feed a message_delta without message_start to exercise
+        // the _mergeUsage null-base fallback path.
+        final acc = MessageStreamAccumulator()
+          ..add(
+            _event(
+              _messageDeltaJson(
+                stopReason: 'end_turn',
+                outputTokens: 42,
+                usageExtra: {
+                  'input_tokens': 10,
+                  'cache_creation_input_tokens': 5,
+                  'cache_read_input_tokens': 3,
+                  'server_tool_use': {
+                    'web_search_requests': 2,
+                    'web_fetch_requests': 1,
+                  },
+                  'speed': 'fast',
+                },
+              ),
+            ),
+          );
+
+        final usage = acc.usage!;
+        expect(usage.inputTokens, 10);
+        expect(usage.outputTokens, 42);
+        expect(usage.cacheCreationInputTokens, 5);
+        expect(usage.cacheReadInputTokens, 3);
+        expect(usage.serverToolUse, isNotNull);
+        expect(usage.serverToolUse!.webSearchRequests, 2);
+        expect(usage.speed, Speed.fast);
+      });
+
       test('stop reason and stop sequence', () {
         final acc = _accumulate([
           _messageStartJson(),
@@ -442,6 +476,28 @@ void main() {
         ]);
 
         expect(acc.stopReason, StopReason.stopSequence);
+        expect(acc.stopSequence, '###');
+      });
+
+      test('stopReason/stopSequence preserved when later delta has null', () {
+        final acc = _accumulate([
+          _messageStartJson(),
+          _contentBlockStartJson(0, _textBlockJson()),
+          _contentBlockDeltaJson(0, _textDeltaJson('Hi')),
+          _contentBlockStopJson(0),
+          // First message_delta sets stop reason and sequence.
+          _messageDeltaJson(
+            stopReason: 'end_turn',
+            stopSequence: '###',
+            outputTokens: 10,
+          ),
+          // Second message_delta with null stop reason/sequence.
+          _messageDeltaJson(outputTokens: 20),
+          _messageStopJson,
+        ]);
+
+        // The earlier non-null values should be preserved (null-coalescing).
+        expect(acc.stopReason, StopReason.endTurn);
         expect(acc.stopSequence, '###');
       });
 
