@@ -44,6 +44,9 @@ class SkillsResource extends BaseResource {
     List<SkillUploadFile> files, {
     Future<void>? abortTrigger,
   }) async {
+    if (files.isEmpty) {
+      throw ArgumentError('At least one file is required to create a skill');
+    }
     final request = http.MultipartRequest('POST', client.buildUrl(_endpoint));
     for (final file in files) {
       request.files.add(
@@ -144,6 +147,11 @@ class SkillVersionsResource extends BaseResource {
     bool? isDefault,
     Future<void>? abortTrigger,
   }) async {
+    if (files.isEmpty) {
+      throw ArgumentError(
+        'At least one file is required to create a skill version',
+      );
+    }
     final request = http.MultipartRequest(
       'POST',
       client.buildUrl('/skills/$skillId/versions'),

@@ -184,5 +184,27 @@ void main() {
       expect(request.url.path, endsWith('/skills/skill_123/content'));
       expect(bytes, equals([80, 75, 3, 4]));
     });
+
+    test('create throws ArgumentError for empty files list', () {
+      final client = OpenAIClient(
+        config: const OpenAIConfig(authProvider: ApiKeyProvider('sk-test-key')),
+      );
+
+      expect(
+        () => client.skills.create([]),
+        throwsArgumentError,
+      );
+    });
+
+    test('versions.create throws ArgumentError for empty files list', () {
+      final client = OpenAIClient(
+        config: const OpenAIConfig(authProvider: ApiKeyProvider('sk-test-key')),
+      );
+
+      expect(
+        () => client.skills.versions.create('skill_123', []),
+        throwsArgumentError,
+      );
+    });
   });
 }
