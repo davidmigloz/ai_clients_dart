@@ -213,6 +213,16 @@ class Response {
     return output.whereType<ShellCallOutputResultItem>().toList();
   }
 
+  /// Returns all local shell call items from the output.
+  List<LocalShellCallOutputItem> get localShellCalls {
+    return output.whereType<LocalShellCallOutputItem>().toList();
+  }
+
+  /// Returns all local shell call output items from the output.
+  List<LocalShellCallOutputResultItem> get localShellCallOutputs {
+    return output.whereType<LocalShellCallOutputResultItem>().toList();
+  }
+
   /// Returns all compaction items from the output.
   List<CompactionOutputItem> get compactionItems {
     return output.whereType<CompactionOutputItem>().toList();

@@ -764,8 +764,8 @@ class ShellCallAction {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'commands': commands,
-    'timeout_ms': timeoutMs,
-    'max_output_length': maxOutputLength,
+    if (timeoutMs != null) 'timeout_ms': timeoutMs,
+    if (maxOutputLength != null) 'max_output_length': maxOutputLength,
   };
 
   @override
@@ -836,7 +836,7 @@ class ShellCallOutputResultItem extends OutputItem {
     'call_id': callId,
     if (status != null) 'status': status!.toJson(),
     'output': output.map((e) => e.toJson()).toList(),
-    'max_output_length': maxOutputLength,
+    if (maxOutputLength != null) 'max_output_length': maxOutputLength,
   };
 
   @override

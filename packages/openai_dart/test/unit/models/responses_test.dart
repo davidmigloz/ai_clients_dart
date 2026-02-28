@@ -993,6 +993,39 @@ void main() {
       expect(localOutput.status, equals(ItemStatus.completed));
     });
 
+    test('ShellCallAction.toJson omits null nullable fields', () {
+      const action = ShellCallAction(commands: ['pwd']);
+      final json = action.toJson();
+
+      expect(json, equals({'commands': ['pwd']}));
+      expect(json.containsKey('timeout_ms'), isFalse);
+      expect(json.containsKey('max_output_length'), isFalse);
+    });
+
+    test('ShellCallAction.toJson includes non-null nullable fields', () {
+      const action = ShellCallAction(
+        commands: ['pwd'],
+        timeoutMs: 5000,
+        maxOutputLength: 1000,
+      );
+      final json = action.toJson();
+
+      expect(json['timeout_ms'], equals(5000));
+      expect(json['max_output_length'], equals(1000));
+    });
+
+    test('ShellCallOutputResultItem.toJson omits null maxOutputLength', () {
+      const item = ShellCallOutputResultItem(
+        id: 'sho_1',
+        callId: 'call_1',
+        output: [],
+        maxOutputLength: null,
+      );
+      final json = item.toJson();
+
+      expect(json.containsKey('max_output_length'), isFalse);
+    });
+
     test('deserializes McpCallOutputItem', () {
       final json = {
         'type': 'mcp_call',
@@ -1114,6 +1147,33 @@ void main() {
 
       expect(response.shellCalls.length, equals(1));
       expect(response.compactionItems.length, equals(1));
+    });
+
+    test('localShellCalls and localShellCallOutputs return matching items',
+        () {
+      const response = Response(
+        id: 'resp_123',
+        object: 'response',
+        createdAt: 1234567890,
+        status: ResponseStatus.completed,
+        output: [
+          LocalShellCallOutputItem(
+            id: 'ls_1',
+            callId: 'call_1',
+            action: <String, dynamic>{'command': ['ls', '-la']},
+            status: ItemStatus.completed,
+          ),
+          LocalShellCallOutputResultItem(
+            id: 'lso_1',
+            callId: 'call_1',
+            output: '{"stdout":"ok"}',
+            status: ItemStatus.completed,
+          ),
+        ],
+      );
+
+      expect(response.localShellCalls.length, equals(1));
+      expect(response.localShellCallOutputs.length, equals(1));
     });
   });
 

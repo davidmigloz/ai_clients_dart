@@ -129,7 +129,7 @@ class FineTuningJob {
     'object': object,
     'created_at': createdAt,
     if (error != null) 'error': error!.toJson(),
-    'fine_tuned_model': fineTunedModel,
+    if (fineTunedModel != null) 'fine_tuned_model': fineTunedModel,
     if (finishedAt != null) 'finished_at': finishedAt,
     'hyperparameters': hyperparameters.toJson(),
     'model': model,

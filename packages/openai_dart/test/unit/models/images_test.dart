@@ -122,6 +122,39 @@ void main() {
     });
   });
 
+  group('ImageReference', () {
+    test('fromJson throws when both imageUrl and fileId are present', () {
+      expect(
+        () => ImageReference.fromJson(const {
+          'image_url': 'https://example.com/img.png',
+          'file_id': 'file_123',
+        }),
+        throwsFormatException,
+      );
+    });
+
+    test('fromJson throws when neither imageUrl nor fileId is present', () {
+      expect(
+        () => ImageReference.fromJson(const {}),
+        throwsFormatException,
+      );
+    });
+
+    test('fromJson parses imageUrl correctly', () {
+      final ref = ImageReference.fromJson(const {
+        'image_url': 'https://example.com/img.png',
+      });
+      expect(ref.imageUrl, equals('https://example.com/img.png'));
+      expect(ref.fileId, isNull);
+    });
+
+    test('fromJson parses fileId correctly', () {
+      final ref = ImageReference.fromJson(const {'file_id': 'file_123'});
+      expect(ref.fileId, equals('file_123'));
+      expect(ref.imageUrl, isNull);
+    });
+  });
+
   group('ImageEditJsonRequest', () {
     test('serializes JSON edit payload', () {
       const request = ImageEditJsonRequest(

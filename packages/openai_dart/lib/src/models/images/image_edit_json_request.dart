@@ -24,10 +24,14 @@ class ImageReference {
 
   /// Creates an [ImageReference] from JSON.
   factory ImageReference.fromJson(Map<String, dynamic> json) {
-    return ImageReference(
-      imageUrl: json['image_url'] as String?,
-      fileId: json['file_id'] as String?,
-    );
+    final imageUrl = json['image_url'] as String?;
+    final fileId = json['file_id'] as String?;
+    if ((imageUrl == null) == (fileId == null)) {
+      throw const FormatException(
+        'ImageReference must have exactly one of imageUrl or fileId',
+      );
+    }
+    return ImageReference(imageUrl: imageUrl, fileId: fileId);
   }
 
   /// Converts to JSON.
