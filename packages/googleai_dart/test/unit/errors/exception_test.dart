@@ -13,7 +13,10 @@ void main() {
     });
 
     test('toString includes code and message', () {
-      const exception = ApiException(statusCode: 500, message: 'Internal error');
+      const exception = ApiException(
+        statusCode: 500,
+        message: 'Internal error',
+      );
 
       expect(exception.toString(), 'ApiException(500): Internal error');
     });

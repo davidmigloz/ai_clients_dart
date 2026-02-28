@@ -11,7 +11,10 @@ void main() {
     });
 
     test('toString includes code and message', () {
-      const exception = ApiException(statusCode: 500, message: 'Internal error');
+      const exception = ApiException(
+        statusCode: 500,
+        message: 'Internal error',
+      );
 
       final str = exception.toString();
 
@@ -88,7 +91,10 @@ void main() {
     });
 
     test('is an ApiException', () {
-      const exception = RateLimitException(statusCode: 429, message: 'Rate limited');
+      const exception = RateLimitException(
+        statusCode: 429,
+        message: 'Rate limited',
+      );
 
       expect(exception, isA<ApiException>());
     });

@@ -73,7 +73,11 @@ void main() {
             ),
           ),
           throwsA(
-            isA<ApiException>().having((e) => e.statusCode, 'statusCode', equals(404)),
+            isA<ApiException>().having(
+              (e) => e.statusCode,
+              'statusCode',
+              equals(404),
+            ),
           ),
         );
       });

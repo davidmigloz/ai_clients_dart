@@ -108,7 +108,11 @@ mixin StreamingResource {
       );
     }
 
-    return ApiException(statusCode: statusCode, message: message, details: details);
+    return ApiException(
+      statusCode: statusCode,
+      message: message,
+      details: details,
+    );
   }
 
   /// Parses error message and details from response body.

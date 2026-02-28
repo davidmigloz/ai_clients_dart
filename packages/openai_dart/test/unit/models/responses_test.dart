@@ -95,7 +95,12 @@ void main() {
   group('ResponseInputRawJson', () {
     test('creates from output items', () {
       const input = ResponseInput.fromOutputItems([
-        {'type': 'message', 'id': 'msg_1', 'role': 'user', 'content': <dynamic>[]},
+        {
+          'type': 'message',
+          'id': 'msg_1',
+          'role': 'user',
+          'content': <dynamic>[],
+        },
       ]);
 
       expect(input, isA<ResponseInputRawJson>());
@@ -105,7 +110,12 @@ void main() {
     test('toJson returns raw items list', () {
       final items = [
         {'type': 'compaction', 'id': 'cmp_1', 'encrypted_content': 'abc'},
-        {'type': 'message', 'id': 'msg_1', 'role': 'user', 'content': <dynamic>[]},
+        {
+          'type': 'message',
+          'id': 'msg_1',
+          'role': 'user',
+          'content': <dynamic>[],
+        },
       ];
       final input = ResponseInputRawJson(items);
 
@@ -120,7 +130,12 @@ void main() {
         {'type': 'compaction', 'id': 'cmp_1', 'encrypted_content': 'abc'},
       ]);
       const c = ResponseInputRawJson([
-        {'type': 'message', 'id': 'msg_1', 'role': 'user', 'content': <dynamic>[]},
+        {
+          'type': 'message',
+          'id': 'msg_1',
+          'role': 'user',
+          'content': <dynamic>[],
+        },
       ]);
 
       expect(a, equals(b));

@@ -44,7 +44,10 @@ void main() {
         Future<http.Response> mockNext(RequestContext context) async {
           callCount++;
           if (callCount < 2) {
-            throw const ApiException(statusCode: 500, message: 'Internal error');
+            throw const ApiException(
+              statusCode: 500,
+              message: 'Internal error',
+            );
           }
           return createSuccessResponse(body: {'result': 'ok'});
         }
@@ -71,7 +74,10 @@ void main() {
         Future<http.Response> mockNext(RequestContext context) async {
           callCount++;
           if (callCount < 3) {
-            throw const ApiException(statusCode: 503, message: 'Service unavailable');
+            throw const ApiException(
+              statusCode: 503,
+              message: 'Service unavailable',
+            );
           }
           return createSuccessResponse(body: {'result': 'ok'});
         }
@@ -97,7 +103,10 @@ void main() {
         var callCount = 0;
         Future<http.Response> mockNext(RequestContext context) {
           callCount++;
-          throw const ApiException(statusCode: 500, message: 'Persistent error');
+          throw const ApiException(
+            statusCode: 500,
+            message: 'Persistent error',
+          );
         }
 
         final request = http.Request('POST', Uri.parse('https://example.com'));

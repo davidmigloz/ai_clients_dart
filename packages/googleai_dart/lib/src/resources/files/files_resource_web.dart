@@ -338,6 +338,10 @@ class FilesResource extends ResourceBase {
       );
     }
 
-    return ApiException(statusCode: statusCode, message: message, details: details);
+    return ApiException(
+      statusCode: statusCode,
+      message: message,
+      details: details,
+    );
   }
 }

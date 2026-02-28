@@ -325,7 +325,11 @@ mixin StreamingResource on ResourceBase {
       );
     }
 
-    return ApiException(statusCode: statusCode, message: message, details: details);
+    return ApiException(
+      statusCode: statusCode,
+      message: message,
+      details: details,
+    );
   }
 
   /// Logs streaming errors.

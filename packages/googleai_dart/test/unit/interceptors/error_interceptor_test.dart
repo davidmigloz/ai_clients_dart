@@ -312,7 +312,11 @@ void main() {
         expect(
           () => interceptor.intercept(context, mockNext),
           throwsA(
-            isA<ApiException>().having((e) => e.statusCode, 'statusCode', equals(500)),
+            isA<ApiException>().having(
+              (e) => e.statusCode,
+              'statusCode',
+              equals(500),
+            ),
           ),
         );
       });

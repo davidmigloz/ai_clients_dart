@@ -281,7 +281,10 @@ class FilesResource extends ResourceBase {
       case 401:
         throw AuthenticationException(message: message);
       case 429:
-        throw RateLimitException(statusCode: response.statusCode, message: message);
+        throw RateLimitException(
+          statusCode: response.statusCode,
+          message: message,
+        );
       case 400:
         throw ValidationException(message: message, fieldErrors: const {});
       default:

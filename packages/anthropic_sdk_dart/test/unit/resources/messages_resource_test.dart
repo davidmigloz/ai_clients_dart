@@ -70,48 +70,52 @@ void main() {
       );
     });
 
-    test('createStream sets anthropic-beta header when betas are provided',
-        () async {
-      mockHttpClient.queueStreamingResponse(
-        MockResponses.streamingEvents(text: 'Hi!'),
-      );
+    test(
+      'createStream sets anthropic-beta header when betas are provided',
+      () async {
+        mockHttpClient.queueStreamingResponse(
+          MockResponses.streamingEvents(text: 'Hi!'),
+        );
 
-      final stream = client.messages.createStream(
-        MessageCreateRequest(
-          model: 'claude-sonnet-4-20250514',
-          maxTokens: 256,
-          messages: [InputMessage.user('Hello!')],
-        ),
-        betas: const ['fast-mode-2026-02-07', 'compaction-2026-01-12'],
-      );
+        final stream = client.messages.createStream(
+          MessageCreateRequest(
+            model: 'claude-sonnet-4-20250514',
+            maxTokens: 256,
+            messages: [InputMessage.user('Hello!')],
+          ),
+          betas: const ['fast-mode-2026-02-07', 'compaction-2026-01-12'],
+        );
 
-      // Consume the stream so the request is actually sent.
-      await stream.toList();
+        // Consume the stream so the request is actually sent.
+        await stream.toList();
 
-      final request = mockHttpClient.lastRequest!;
-      expect(
-        request.headers['anthropic-beta'],
-        'fast-mode-2026-02-07,compaction-2026-01-12',
-      );
-    });
+        final request = mockHttpClient.lastRequest!;
+        expect(
+          request.headers['anthropic-beta'],
+          'fast-mode-2026-02-07,compaction-2026-01-12',
+        );
+      },
+    );
 
-    test('countTokens sets anthropic-beta header when betas are provided',
-        () async {
-      mockHttpClient.queueJsonResponse(
-        MockResponses.tokenCount(inputTokens: 42),
-      );
+    test(
+      'countTokens sets anthropic-beta header when betas are provided',
+      () async {
+        mockHttpClient.queueJsonResponse(
+          MockResponses.tokenCount(inputTokens: 42),
+        );
 
-      await client.messages.countTokens(
-        TokenCountRequest(
-          model: 'claude-sonnet-4-20250514',
-          messages: [InputMessage.user('Count my tokens!')],
-        ),
-        betas: const ['fast-mode-2026-02-07'],
-      );
+        await client.messages.countTokens(
+          TokenCountRequest(
+            model: 'claude-sonnet-4-20250514',
+            messages: [InputMessage.user('Count my tokens!')],
+          ),
+          betas: const ['fast-mode-2026-02-07'],
+        );
 
-      final request = mockHttpClient.lastRequest!;
-      expect(request.headers['anthropic-beta'], 'fast-mode-2026-02-07');
-    });
+        final request = mockHttpClient.lastRequest!;
+        expect(request.headers['anthropic-beta'], 'fast-mode-2026-02-07');
+      },
+    );
 
     test('create handles tool use response', () async {
       mockHttpClient.queueJsonResponse({
