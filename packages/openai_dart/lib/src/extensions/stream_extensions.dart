@@ -48,11 +48,8 @@ extension ChatStreamExtension on Stream<ChatStreamEvent> {
   /// final stream = client.chat.completions.createStream(request);
   ///
   /// await for (final accumulator in stream.accumulate()) {
-  ///   // Print the delta
-  ///   print(accumulator.lastDelta?.content);
-  ///
   ///   // Check accumulated state
-  ///   print('Total text so far: ${accumulator.text}');
+  ///   print('Total content so far: ${accumulator.content}');
   /// }
   /// ```
   Stream<ChatStreamAccumulator> accumulate() async* {
