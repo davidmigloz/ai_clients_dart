@@ -94,8 +94,8 @@ void main() {
 
   group('ResponseInputRawJson', () {
     test('creates from output items', () {
-      final input = ResponseInput.fromOutputItems([
-        {'type': 'message', 'id': 'msg_1', 'role': 'user', 'content': []},
+      const input = ResponseInput.fromOutputItems([
+        {'type': 'message', 'id': 'msg_1', 'role': 'user', 'content': <dynamic>[]},
       ]);
 
       expect(input, isA<ResponseInputRawJson>());
@@ -105,7 +105,7 @@ void main() {
     test('toJson returns raw items list', () {
       final items = [
         {'type': 'compaction', 'id': 'cmp_1', 'encrypted_content': 'abc'},
-        {'type': 'message', 'id': 'msg_1', 'role': 'user', 'content': []},
+        {'type': 'message', 'id': 'msg_1', 'role': 'user', 'content': <dynamic>[]},
       ];
       final input = ResponseInputRawJson(items);
 
@@ -113,14 +113,14 @@ void main() {
     });
 
     test('equality', () {
-      final a = ResponseInputRawJson([
+      const a = ResponseInputRawJson([
         {'type': 'compaction', 'id': 'cmp_1', 'encrypted_content': 'abc'},
       ]);
-      final b = ResponseInputRawJson([
+      const b = ResponseInputRawJson([
         {'type': 'compaction', 'id': 'cmp_1', 'encrypted_content': 'abc'},
       ]);
-      final c = ResponseInputRawJson([
-        {'type': 'message', 'id': 'msg_1', 'role': 'user', 'content': []},
+      const c = ResponseInputRawJson([
+        {'type': 'message', 'id': 'msg_1', 'role': 'user', 'content': <dynamic>[]},
       ]);
 
       expect(a, equals(b));
@@ -1142,36 +1142,42 @@ void main() {
       expect(restored, equals(shellItem));
     });
 
-    test('deserializes ShellCallOutputItem with container_reference environment', () {
-      final item = OutputItem.fromJson({
-        'type': 'shell_call',
-        'id': 'sh_3',
-        'call_id': 'call_shell_3',
-        'action': {
-          'commands': ['echo', 'hello'],
-        },
-        'status': 'in_progress',
-        'environment': {
-          'type': 'container_reference',
-          'container_id': 'cntr_abc123',
-        },
-      });
+    test(
+      'deserializes ShellCallOutputItem with container_reference environment',
+      () {
+        final item = OutputItem.fromJson({
+          'type': 'shell_call',
+          'id': 'sh_3',
+          'call_id': 'call_shell_3',
+          'action': {
+            'commands': ['echo', 'hello'],
+          },
+          'status': 'in_progress',
+          'environment': {
+            'type': 'container_reference',
+            'container_id': 'cntr_abc123',
+          },
+        });
 
-      expect(item, isA<ShellCallOutputItem>());
-      final shellItem = item as ShellCallOutputItem;
-      expect(shellItem.environment, isA<ContainerReferenceEnvironment>());
-      final env = shellItem.environment! as ContainerReferenceEnvironment;
-      expect(env.containerId, equals('cntr_abc123'));
+        expect(item, isA<ShellCallOutputItem>());
+        final shellItem = item as ShellCallOutputItem;
+        expect(shellItem.environment, isA<ContainerReferenceEnvironment>());
+        final env = shellItem.environment! as ContainerReferenceEnvironment;
+        expect(env.containerId, equals('cntr_abc123'));
 
-      // Round-trip
-      final json = shellItem.toJson();
-      expect(json['environment'], equals({
-        'type': 'container_reference',
-        'container_id': 'cntr_abc123',
-      }));
-      final restored = OutputItem.fromJson(json) as ShellCallOutputItem;
-      expect(restored, equals(shellItem));
-    });
+        // Round-trip
+        final json = shellItem.toJson();
+        expect(
+          json['environment'],
+          equals({
+            'type': 'container_reference',
+            'container_id': 'cntr_abc123',
+          }),
+        );
+        final restored = OutputItem.fromJson(json) as ShellCallOutputItem;
+        expect(restored, equals(shellItem));
+      },
+    );
 
     test('ShellEnvironment.fromJson throws on unknown type', () {
       expect(
