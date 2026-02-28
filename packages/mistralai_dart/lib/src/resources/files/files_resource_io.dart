@@ -260,9 +260,9 @@ class FilesResource extends ResourceBase {
     }
 
     if (statusCode == 429) {
-      return RateLimitException(code: statusCode, message: message);
+      return RateLimitException(statusCode: statusCode, message: message);
     }
 
-    return ApiException(code: statusCode, message: message);
+    return ApiException(statusCode: statusCode, message: message);
   }
 }

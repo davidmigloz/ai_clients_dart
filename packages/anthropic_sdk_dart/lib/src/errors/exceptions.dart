@@ -72,8 +72,8 @@ sealed class AnthropicException implements Exception {
 
 /// Exception for HTTP/API errors.
 class ApiException extends AnthropicException {
-  /// HTTP status code.
-  final int code;
+  /// The HTTP status code returned by the API.
+  final int statusCode;
 
   @override
   final String message;
@@ -95,7 +95,7 @@ class ApiException extends AnthropicException {
 
   /// Creates an [ApiException].
   const ApiException({
-    required this.code,
+    required this.statusCode,
     required this.message,
     this.details = const [],
     this.stackTrace,
@@ -106,7 +106,7 @@ class ApiException extends AnthropicException {
 
   @override
   String toString() {
-    final buffer = StringBuffer('ApiException($code): $message');
+    final buffer = StringBuffer('ApiException($statusCode): $message');
     if (requestMetadata != null) {
       buffer
         ..write(
@@ -189,7 +189,7 @@ class RateLimitException extends ApiException {
 
   /// Creates a [RateLimitException].
   const RateLimitException({
-    required super.code,
+    required super.statusCode,
     required super.message,
     super.details,
     super.stackTrace,
@@ -201,7 +201,7 @@ class RateLimitException extends ApiException {
 
   @override
   String toString() {
-    final buffer = StringBuffer('RateLimitException($code): $message');
+    final buffer = StringBuffer('RateLimitException($statusCode): $message');
     if (retryAfter != null) {
       buffer.write(' (retry after: $retryAfter)');
     }

@@ -385,7 +385,7 @@ void main() {
         expect(e.message, isNotEmpty);
       } on ApiException catch (e) {
         // May also throw ApiException with 401 status
-        expect(e.code, anyOf(401, 403));
+        expect(e.statusCode, anyOf(401, 403));
       } finally {
         badClient.close();
       }
@@ -405,7 +405,7 @@ void main() {
         expect(e.message, isNotEmpty);
       } on ApiException catch (e) {
         // May also throw ApiException for 404
-        expect(e.code, anyOf(400, 404));
+        expect(e.statusCode, anyOf(400, 404));
         expect(e.message, isNotEmpty);
       }
     });
@@ -425,7 +425,7 @@ void main() {
         expect(e.message, isNotEmpty);
       } on ApiException catch (e) {
         // Fall back to ApiException if not 400
-        expect(e.code, greaterThanOrEqualTo(400));
+        expect(e.statusCode, greaterThanOrEqualTo(400));
       }
     });
 
@@ -447,7 +447,7 @@ void main() {
       } on AuthenticationException catch (e) {
         expect(e.message, isNotEmpty);
       } on ApiException catch (e) {
-        expect(e.code, anyOf(401, 403));
+        expect(e.statusCode, anyOf(401, 403));
       } finally {
         badClient.close();
       }
@@ -458,10 +458,10 @@ void main() {
       // but we can't easily trigger it without making many requests
       // Just verify the exception type exists and can be constructed
       const rateLimitException = RateLimitException(
-        code: 429,
+        statusCode: 429,
         message: 'Rate limit exceeded',
       );
-      expect(rateLimitException.code, 429);
+      expect(rateLimitException.statusCode, 429);
       expect(rateLimitException.message, contains('Rate limit'));
     });
   });

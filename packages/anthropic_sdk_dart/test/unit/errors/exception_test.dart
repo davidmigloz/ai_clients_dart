@@ -4,14 +4,14 @@ import 'package:test/test.dart';
 void main() {
   group('ApiException', () {
     test('stores code and message', () {
-      const exception = ApiException(code: 400, message: 'Bad request');
+      const exception = ApiException(statusCode: 400, message: 'Bad request');
 
-      expect(exception.code, 400);
+      expect(exception.statusCode, 400);
       expect(exception.message, 'Bad request');
     });
 
     test('toString includes code and message', () {
-      const exception = ApiException(code: 500, message: 'Internal error');
+      const exception = ApiException(statusCode: 500, message: 'Internal error');
 
       final str = exception.toString();
 
@@ -21,7 +21,7 @@ void main() {
 
     test('can include details', () {
       const exception = ApiException(
-        code: 400,
+        statusCode: 400,
         message: 'Error',
         details: ['detail1', 'detail2'],
       );
@@ -31,7 +31,7 @@ void main() {
 
     test('can include request/response metadata', () {
       final exception = ApiException(
-        code: 400,
+        statusCode: 400,
         message: 'Error',
         requestMetadata: RequestMetadata(
           method: 'POST',
@@ -77,25 +77,25 @@ void main() {
     test('stores code, message, and optional retryAfter', () {
       final retryTime = DateTime.now().add(const Duration(seconds: 60));
       final exception = RateLimitException(
-        code: 429,
+        statusCode: 429,
         message: 'Too many requests',
         retryAfter: retryTime,
       );
 
-      expect(exception.code, 429);
+      expect(exception.statusCode, 429);
       expect(exception.message, 'Too many requests');
       expect(exception.retryAfter, retryTime);
     });
 
     test('is an ApiException', () {
-      const exception = RateLimitException(code: 429, message: 'Rate limited');
+      const exception = RateLimitException(statusCode: 429, message: 'Rate limited');
 
       expect(exception, isA<ApiException>());
     });
 
     test('toString includes retry info when present', () {
       final exception = RateLimitException(
-        code: 429,
+        statusCode: 429,
         message: 'Too many requests',
         retryAfter: DateTime(2025, 1, 1, 12, 0, 0),
       );

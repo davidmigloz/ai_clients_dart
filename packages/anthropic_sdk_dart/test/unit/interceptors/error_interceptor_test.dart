@@ -78,7 +78,7 @@ void main() {
         throwsA(
           isA<RateLimitException>()
               .having((e) => e.message, 'message', 'Too many requests')
-              .having((e) => e.code, 'code', 429)
+              .having((e) => e.statusCode, 'statusCode', 429)
               .having((e) => e.retryAfter, 'retryAfter', isNotNull),
         ),
       );
@@ -105,7 +105,7 @@ void main() {
         throwsA(
           isA<ApiException>()
               .having((e) => e.message, 'message', 'Invalid model specified')
-              .having((e) => e.code, 'code', 400),
+              .having((e) => e.statusCode, 'statusCode', 400),
         ),
       );
     });
@@ -128,7 +128,7 @@ void main() {
         throwsA(
           isA<ApiException>()
               .having((e) => e.message, 'message', 'Internal server error')
-              .having((e) => e.code, 'code', 500),
+              .having((e) => e.statusCode, 'statusCode', 500),
         ),
       );
     });

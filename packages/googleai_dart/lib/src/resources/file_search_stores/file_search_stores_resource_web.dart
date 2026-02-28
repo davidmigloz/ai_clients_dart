@@ -298,7 +298,7 @@ class FileSearchStoresResource extends ResourceBase {
     final uploadUrlHeader = initResponse.headers['x-goog-upload-url'];
     if (uploadUrlHeader == null) {
       throw const ApiException(
-        code: 500,
+        statusCode: 500,
         message: 'Upload URL not returned in initiation response',
       );
     }
@@ -436,13 +436,13 @@ class FileSearchStoresResource extends ResourceBase {
       }
 
       return RateLimitException(
-        code: statusCode,
+        statusCode: statusCode,
         message: message,
         details: details,
         retryAfter: retryAfter,
       );
     }
 
-    return ApiException(code: statusCode, message: message, details: details);
+    return ApiException(statusCode: statusCode, message: message, details: details);
   }
 }

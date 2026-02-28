@@ -356,7 +356,7 @@ class ModelsResource extends ResourceBase with StreamingResource {
     // Transform response: predictions[0].embeddings.values -> embedding.values
     if (predictResponse.predictions.isEmpty) {
       throw const ApiException(
-        code: 500,
+        statusCode: 500,
         message: 'No predictions returned from Vertex AI embedding endpoint',
       );
     }
@@ -393,7 +393,7 @@ class ModelsResource extends ResourceBase with StreamingResource {
     // Throw ApiException so the fallback in langchain_google can catch it
     if (config.apiMode == ApiMode.vertexAI) {
       throw const ApiException(
-        code: 400,
+        statusCode: 400,
         message:
             'model is not specified', // Trigger fallback in langchain_google
       );

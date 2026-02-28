@@ -33,7 +33,7 @@ class ErrorInterceptor implements Interceptor {
     } catch (error, stackTrace) {
       // Wrap unknown errors
       throw ApiException(
-        code: 0,
+        statusCode: 0,
         message: 'Unexpected error: $error',
         stackTrace: stackTrace,
       );
@@ -126,7 +126,7 @@ class ErrorInterceptor implements Interceptor {
       }
 
       return RateLimitException(
-        code: statusCode,
+        statusCode: statusCode,
         message: message,
         details: details,
         retryAfter: retryAfter,
@@ -137,7 +137,7 @@ class ErrorInterceptor implements Interceptor {
 
     // Generic API exception
     return ApiException(
-      code: statusCode,
+      statusCode: statusCode,
       message: message,
       details: details,
       requestMetadata: requestMetadata,

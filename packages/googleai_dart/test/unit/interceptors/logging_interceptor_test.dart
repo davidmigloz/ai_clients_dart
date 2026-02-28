@@ -127,7 +127,7 @@ void main() {
         final interceptor = LoggingInterceptor(config: config);
 
         Future<http.Response> mockNext(RequestContext context) {
-          throw const ApiException(code: 500, message: 'Server error');
+          throw const ApiException(statusCode: 500, message: 'Server error');
         }
 
         final request = http.Request('POST', Uri.parse('https://example.com'));

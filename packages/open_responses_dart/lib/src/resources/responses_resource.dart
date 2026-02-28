@@ -124,9 +124,9 @@ class ResponsesResource extends ResourceBase {
       case 401:
         return AuthenticationException(message: message);
       case 429:
-        return RateLimitException(code: statusCode, message: message);
+        return RateLimitException(statusCode: statusCode, message: message);
       default:
-        return ApiException(code: statusCode, message: message);
+        return ApiException(statusCode: statusCode, message: message);
     }
   }
 

@@ -60,7 +60,7 @@ class LROPoller<T> {
         if (operation.error != null) {
           // Operation failed
           throw ApiException(
-            code: operation.error!.code,
+            statusCode: operation.error!.code,
             message: operation.error!.message,
             details: operation.error!.details?.cast<Object>() ?? [],
           );
@@ -69,7 +69,7 @@ class LROPoller<T> {
         // Operation succeeded
         if (operation.response == null) {
           throw const ApiException(
-            code: 500,
+            statusCode: 500,
             message: 'Operation completed but response is null',
           );
         }

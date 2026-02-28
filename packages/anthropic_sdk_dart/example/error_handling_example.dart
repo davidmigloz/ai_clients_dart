@@ -45,7 +45,7 @@ void main() async {
         ),
       );
     } on ApiException catch (e) {
-      print('API error (${e.code}): ${e.message}');
+      print('API error (${e.statusCode}): ${e.message}');
     }
 
     // Example 3: Rate limiting
@@ -81,7 +81,7 @@ void main() async {
     } on RateLimitException catch (e) {
       print('Rate limited - try again after ${e.message}');
     } on ApiException catch (e) {
-      print('API error ${e.code}: ${e.message}');
+      print('API error ${e.statusCode}: ${e.message}');
     } on AnthropicException catch (e) {
       print('Anthropic error: ${e.message}');
     } catch (e) {

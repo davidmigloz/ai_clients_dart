@@ -347,7 +347,7 @@ void main() {
         );
         fail('Expected ApiException to be thrown');
       } on ApiException catch (e) {
-        expect(e.code, anyOf(equals(401), equals(403)));
+        expect(e.statusCode, anyOf(equals(401), equals(403)));
       } finally {
         badClient.close();
       }

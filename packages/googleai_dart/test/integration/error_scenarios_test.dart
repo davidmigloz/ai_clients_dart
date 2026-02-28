@@ -54,7 +54,7 @@ void main() {
           ),
           throwsA(
             isA<ApiException>()
-                .having((e) => e.code, 'code', equals(400))
+                .having((e) => e.statusCode, 'statusCode', equals(400))
                 .having((e) => e.message, 'message', contains('API key')),
           ),
         );
@@ -73,7 +73,7 @@ void main() {
             ),
           ),
           throwsA(
-            isA<ApiException>().having((e) => e.code, 'code', equals(404)),
+            isA<ApiException>().having((e) => e.statusCode, 'statusCode', equals(404)),
           ),
         );
       });
@@ -375,7 +375,7 @@ void main() {
 
           // Verify we got the exception
           expect(e, isA<ApiException>());
-          expect(e.code, equals(400));
+          expect(e.statusCode, equals(400));
         }
       });
     });

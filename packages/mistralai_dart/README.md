@@ -702,7 +702,7 @@ try {
 } on AuthenticationException catch (e) {
   print('Auth failed: ${e.message}');
 } on ApiException catch (e) {
-  print('API error ${e.code}: ${e.message}');
+  print('API error ${e.statusCode}: ${e.message}');
 } on NetworkException catch (e) {
   print('Network error: ${e.message}');
 } on MistralException catch (e) {

@@ -42,7 +42,7 @@ void main() {
           () => interceptor.intercept(context, mockNext),
           throwsA(
             isA<ApiException>()
-                .having((e) => e.code, 'code', equals(400))
+                .having((e) => e.statusCode, 'statusCode', equals(400))
                 .having(
                   (e) => e.message,
                   'message',
@@ -67,7 +67,7 @@ void main() {
           () => interceptor.intercept(context, mockNext),
           throwsA(
             isA<ApiException>()
-                .having((e) => e.code, 'code', equals(401))
+                .having((e) => e.statusCode, 'statusCode', equals(401))
                 .having(
                   (e) => e.message,
                   'message',
@@ -92,7 +92,7 @@ void main() {
           () => interceptor.intercept(context, mockNext),
           throwsA(
             isA<ApiException>()
-                .having((e) => e.code, 'code', equals(403))
+                .having((e) => e.statusCode, 'statusCode', equals(403))
                 .having(
                   (e) => e.message,
                   'message',
@@ -117,7 +117,7 @@ void main() {
           () => interceptor.intercept(context, mockNext),
           throwsA(
             isA<ApiException>()
-                .having((e) => e.code, 'code', equals(404))
+                .having((e) => e.statusCode, 'statusCode', equals(404))
                 .having(
                   (e) => e.message,
                   'message',
@@ -142,7 +142,7 @@ void main() {
           () => interceptor.intercept(context, mockNext),
           throwsA(
             isA<ApiException>()
-                .having((e) => e.code, 'code', equals(500))
+                .having((e) => e.statusCode, 'statusCode', equals(500))
                 .having(
                   (e) => e.message,
                   'message',
@@ -167,7 +167,7 @@ void main() {
           () => interceptor.intercept(context, mockNext),
           throwsA(
             isA<ApiException>()
-                .having((e) => e.code, 'code', equals(503))
+                .having((e) => e.statusCode, 'statusCode', equals(503))
                 .having(
                   (e) => e.message,
                   'message',
@@ -191,7 +191,7 @@ void main() {
           () => interceptor.intercept(context, mockNext),
           throwsA(
             isA<RateLimitException>()
-                .having((e) => e.code, 'code', equals(429))
+                .having((e) => e.statusCode, 'statusCode', equals(429))
                 .having(
                   (e) => e.message,
                   'message',
@@ -216,7 +216,7 @@ void main() {
           await interceptor.intercept(context, mockNext);
           fail('Should have thrown RateLimitException');
         } on RateLimitException catch (e) {
-          expect(e.code, equals(429));
+          expect(e.statusCode, equals(429));
           expect(e.retryAfter, isNotNull);
           // retryAfter should be approximately 60 seconds from now
           final difference = e.retryAfter!.difference(DateTime.now());
@@ -237,7 +237,7 @@ void main() {
           await interceptor.intercept(context, mockNext);
           fail('Should have thrown RateLimitException');
         } on RateLimitException catch (e) {
-          expect(e.code, equals(429));
+          expect(e.statusCode, equals(429));
           expect(e.retryAfter, isNull);
         }
       });
@@ -270,7 +270,7 @@ void main() {
           await interceptor.intercept(context, mockNext);
           fail('Should have thrown ApiException');
         } on ApiException catch (e) {
-          expect(e.code, equals(400));
+          expect(e.statusCode, equals(400));
           expect(e.message, equals('Validation failed'));
           expect(e.details, hasLength(2));
         }
@@ -292,7 +292,7 @@ void main() {
           await interceptor.intercept(context, mockNext);
           fail('Should have thrown ApiException');
         } on ApiException catch (e) {
-          expect(e.code, equals(500));
+          expect(e.statusCode, equals(500));
           expect(e.message, contains('Plain text error message'));
         }
       });
@@ -312,7 +312,7 @@ void main() {
         expect(
           () => interceptor.intercept(context, mockNext),
           throwsA(
-            isA<ApiException>().having((e) => e.code, 'code', equals(500)),
+            isA<ApiException>().having((e) => e.statusCode, 'statusCode', equals(500)),
           ),
         );
       });
@@ -334,7 +334,7 @@ void main() {
           () => interceptor.intercept(context, mockNext),
           throwsA(
             isA<ApiException>()
-                .having((e) => e.code, 'code', equals(500))
+                .having((e) => e.statusCode, 'statusCode', equals(500))
                 .having(
                   (e) => e.message,
                   'message',
@@ -348,7 +348,7 @@ void main() {
     group('Exception Preservation', () {
       test('re-throws GoogleAIException without wrapping', () async {
         const originalException = ApiException(
-          code: 999,
+          statusCode: 999,
           message: 'Custom error',
         );
 
@@ -379,7 +379,7 @@ void main() {
           () => interceptor.intercept(context, mockNext),
           throwsA(
             isA<ApiException>()
-                .having((e) => e.code, 'code', equals(0))
+                .having((e) => e.statusCode, 'statusCode', equals(0))
                 .having(
                   (e) => e.message,
                   'message',

@@ -80,7 +80,7 @@ class FineTuningJobPoller {
 
         // Job failed
         throw ApiException(
-          code: 400,
+          statusCode: 400,
           message: 'Fine-tuning job failed with status: ${job.status}',
           details: [
             if (job.metadata != null)
@@ -163,7 +163,7 @@ class BatchJobPoller {
 
         // Job failed
         throw ApiException(
-          code: 400,
+          statusCode: 400,
           message: 'Batch job failed with status: ${job.status}',
           details: [for (final error in job.errors) ?error.message],
         );

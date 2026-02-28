@@ -318,14 +318,14 @@ mixin StreamingResource on ResourceBase {
       }
 
       return RateLimitException(
-        code: statusCode,
+        statusCode: statusCode,
         message: message,
         details: details,
         retryAfter: retryAfter,
       );
     }
 
-    return ApiException(code: statusCode, message: message, details: details);
+    return ApiException(statusCode: statusCode, message: message, details: details);
   }
 
   /// Logs streaming errors.

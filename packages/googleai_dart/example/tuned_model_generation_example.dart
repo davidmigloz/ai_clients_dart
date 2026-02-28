@@ -112,7 +112,7 @@ void main() async {
       );
     } on ApiException catch (e) {
       print('Caught expected error:');
-      print('  Code: ${e.code}');
+      print('  Code: ${e.statusCode}');
       print('  Message: ${e.message}');
     }
 

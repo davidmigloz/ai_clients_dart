@@ -73,7 +73,7 @@ void main() {
 
         expect(exception, isA<ApiException>());
         final apiException = exception as ApiException;
-        expect(apiException.code, 500);
+        expect(apiException.statusCode, 500);
         expect(apiException.message, contains('500'));
       });
 
@@ -85,7 +85,7 @@ void main() {
 
         expect(exception, isA<ApiException>());
         final apiException = exception as ApiException;
-        expect(apiException.code, 404);
+        expect(apiException.statusCode, 404);
         expect(apiException.message, 'Model not found');
       });
 
@@ -107,7 +107,7 @@ void main() {
 
         expect(exception, isA<RateLimitException>());
         final rateLimitException = exception as RateLimitException;
-        expect(rateLimitException.code, 429);
+        expect(rateLimitException.statusCode, 429);
       });
 
       test('parses retry-after header into DateTime', () {

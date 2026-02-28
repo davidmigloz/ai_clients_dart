@@ -102,13 +102,13 @@ mixin StreamingResource {
 
     if (statusCode == 429) {
       return RateLimitException(
-        code: statusCode,
+        statusCode: statusCode,
         message: message,
         details: details,
       );
     }
 
-    return ApiException(code: statusCode, message: message, details: details);
+    return ApiException(statusCode: statusCode, message: message, details: details);
   }
 
   /// Parses error message and details from response body.

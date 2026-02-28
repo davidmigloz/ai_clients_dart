@@ -57,7 +57,7 @@ class RetryInterceptor implements Interceptor {
         delay = _exponentialBackoff(delay);
       } on ApiException catch (e) {
         // Retry on 5xx server errors (transient failures)
-        if (e.code >= 500 && e.code < 600) {
+        if (e.statusCode >= 500 && e.statusCode < 600) {
           if (attempt >= config.retryPolicy.maxRetries) {
             rethrow;
           }
@@ -83,7 +83,7 @@ class RetryInterceptor implements Interceptor {
 
     // Should never reach here, but throw if we somehow do
     throw ApiException(
-      code: 0,
+      statusCode: 0,
       message: 'Max retries (${config.retryPolicy.maxRetries}) exceeded',
     );
   }

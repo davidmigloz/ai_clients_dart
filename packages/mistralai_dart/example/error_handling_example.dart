@@ -43,7 +43,7 @@ Future<void> handleApiErrors(MistralClient client) async {
     );
   } on ApiException catch (e) {
     print('API Error: ${e.message}');
-    print('Status code: ${e.code}');
+    print('Status code: ${e.statusCode}');
     print('');
   }
 
@@ -86,7 +86,7 @@ Future<void> retryWithBackoff(MistralClient client) async {
       retryCount++;
 
       // Check if it's a retryable error (rate limit, server error)
-      final code = e.code;
+      final code = e.statusCode;
       final isRetryable = code == 429 || (code >= 500 && code < 600);
 
       if (!isRetryable || retryCount >= maxRetries) {

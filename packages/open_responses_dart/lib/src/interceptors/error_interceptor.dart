@@ -76,7 +76,7 @@ class ErrorInterceptor implements Interceptor {
     // Handle rate limiting
     if (response.statusCode == 429) {
       return RateLimitException(
-        code: response.statusCode,
+        statusCode: response.statusCode,
         message: message,
         details: details,
         requestMetadata: requestMetadata,
@@ -87,7 +87,7 @@ class ErrorInterceptor implements Interceptor {
 
     // General API error
     return ApiException(
-      code: response.statusCode,
+      statusCode: response.statusCode,
       message: message,
       details: details,
       requestMetadata: requestMetadata,

@@ -255,7 +255,7 @@ void main() {
         fail('Should have thrown exception for deleted cached content');
       } on ApiException catch (e) {
         // Expected - should get a 404 or similar error
-        expect(e.code, greaterThanOrEqualTo(400));
+        expect(e.statusCode, greaterThanOrEqualTo(400));
       }
     });
 

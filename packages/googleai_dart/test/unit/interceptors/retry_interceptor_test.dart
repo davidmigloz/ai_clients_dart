@@ -44,7 +44,7 @@ void main() {
         Future<http.Response> mockNext(RequestContext context) async {
           callCount++;
           if (callCount < 2) {
-            throw const ApiException(code: 500, message: 'Internal error');
+            throw const ApiException(statusCode: 500, message: 'Internal error');
           }
           return createSuccessResponse(body: {'result': 'ok'});
         }
@@ -71,7 +71,7 @@ void main() {
         Future<http.Response> mockNext(RequestContext context) async {
           callCount++;
           if (callCount < 3) {
-            throw const ApiException(code: 503, message: 'Service unavailable');
+            throw const ApiException(statusCode: 503, message: 'Service unavailable');
           }
           return createSuccessResponse(body: {'result': 'ok'});
         }
@@ -97,7 +97,7 @@ void main() {
         var callCount = 0;
         Future<http.Response> mockNext(RequestContext context) {
           callCount++;
-          throw const ApiException(code: 500, message: 'Persistent error');
+          throw const ApiException(statusCode: 500, message: 'Persistent error');
         }
 
         final request = http.Request('POST', Uri.parse('https://example.com'));
@@ -121,7 +121,7 @@ void main() {
         var callCount = 0;
         Future<http.Response> mockNext(RequestContext context) {
           callCount++;
-          throw const ApiException(code: 400, message: 'Bad request');
+          throw const ApiException(statusCode: 400, message: 'Bad request');
         }
 
         final request = http.Request('POST', Uri.parse('https://example.com'));
@@ -142,7 +142,7 @@ void main() {
         var callCount = 0;
         Future<http.Response> mockNext(RequestContext context) {
           callCount++;
-          throw const ApiException(code: 401, message: 'Unauthorized');
+          throw const ApiException(statusCode: 401, message: 'Unauthorized');
         }
 
         final request = http.Request('POST', Uri.parse('https://example.com'));
@@ -163,7 +163,7 @@ void main() {
         var callCount = 0;
         Future<http.Response> mockNext(RequestContext context) {
           callCount++;
-          throw const ApiException(code: 404, message: 'Not found');
+          throw const ApiException(statusCode: 404, message: 'Not found');
         }
 
         final request = http.Request('POST', Uri.parse('https://example.com'));
@@ -193,7 +193,7 @@ void main() {
           callCount++;
           if (callCount < 2) {
             throw const RateLimitException(
-              code: 429,
+              statusCode: 429,
               message: 'Rate limit exceeded',
             );
           }
@@ -227,7 +227,7 @@ void main() {
           callCount++;
           if (callCount < 2) {
             throw RateLimitException(
-              code: 429,
+              statusCode: 429,
               message: 'Rate limit exceeded',
               retryAfter: retryAfter,
             );
@@ -261,7 +261,7 @@ void main() {
         Future<http.Response> mockNext(RequestContext context) {
           callCount++;
           throw const RateLimitException(
-            code: 429,
+            statusCode: 429,
             message: 'Rate limit exceeded',
           );
         }
@@ -340,7 +340,7 @@ void main() {
           }
 
           if (callCount < 4) {
-            throw const ApiException(code: 500, message: 'Error');
+            throw const ApiException(statusCode: 500, message: 'Error');
           }
           return createSuccessResponse(body: {'result': 'ok'});
         }
@@ -378,7 +378,7 @@ void main() {
           attempts.add(context.metadata['attemptNumber'] as int);
 
           if (callCount < 2) {
-            throw const ApiException(code: 500, message: 'Error');
+            throw const ApiException(statusCode: 500, message: 'Error');
           }
           return createSuccessResponse(body: {'result': 'ok'});
         }

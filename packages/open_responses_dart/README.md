@@ -384,7 +384,7 @@ try {
 } on ValidationException catch (e) {
   print('Invalid request: ${e.message}');
 } on ApiException catch (e) {
-  print('API error: ${e.code} - ${e.message}');
+  print('API error: ${e.statusCode} - ${e.message}');
 }
 ```
 

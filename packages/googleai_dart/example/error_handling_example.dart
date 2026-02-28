@@ -33,7 +33,7 @@ void main() async {
     }
   } on ApiException catch (e) {
     // Handle API errors (400, 401, 403, 404, etc.)
-    print('API error ${e.code}: ${e.message}');
+    print('API error ${e.statusCode}: ${e.message}');
 
     // Access error details
     if (e.requestMetadata != null) {
@@ -44,7 +44,7 @@ void main() async {
     print('Error details: ${e.details}');
 
     // Handle specific error codes
-    switch (e.code) {
+    switch (e.statusCode) {
       case 401:
         print('Authentication failed - check your API key');
       case 403:

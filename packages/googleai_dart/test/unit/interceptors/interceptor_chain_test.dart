@@ -122,7 +122,7 @@ void main() {
       final interceptor2 = MockInterceptor();
       when(
         () => interceptor2.intercept(any(), any()),
-      ).thenThrow(const ApiException(code: 500, message: 'Internal error'));
+      ).thenThrow(const ApiException(statusCode: 500, message: 'Internal error'));
 
       final chain = InterceptorChain(
         interceptors: [interceptor1, interceptor2],
