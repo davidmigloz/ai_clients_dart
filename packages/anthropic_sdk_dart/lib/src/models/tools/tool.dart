@@ -158,10 +158,10 @@ class Tool {
     description,
     inputSchema,
     cacheControl,
-    allowedCallers,
+    listHash(allowedCallers),
     deferLoading,
     strict,
-    inputExamples,
+    listOfMapsHash(inputExamples),
     eagerInputStreaming,
   );
 

@@ -32,7 +32,7 @@ bool listOfMapsEqual<K, V>(List<Map<K, V>>? a, List<Map<K, V>>? b) {
 }
 
 // ============================================================================
-// Hash helpers 
+// Hash helpers
 // ============================================================================
 
 /// Content-based hash code for a nullable list.
