@@ -26,6 +26,11 @@ sealed class OutputContent {
   /// Creates a [RefusalContent] with the given [refusal] message.
   const factory OutputContent.refusal(String refusal) = RefusalContent;
 
+  /// Creates an [InputTextOutputContent] with the given [text].
+  ///
+  /// This type appears in compact output when user messages are preserved.
+  const factory OutputContent.inputText(String text) = InputTextOutputContent;
+
   /// Creates an [OutputContent] from JSON.
   factory OutputContent.fromJson(Map<String, dynamic> json) {
     final type = json['type'] as String;
@@ -34,6 +39,7 @@ sealed class OutputContent {
       'reasoning_text' => ReasoningTextContent.fromJson(json),
       'summary_text' => SummaryTextContent.fromJson(json),
       'refusal' => RefusalContent.fromJson(json),
+      'input_text' => InputTextOutputContent.fromJson(json),
       _ => throw FormatException('Unknown OutputContent type: $type'),
     };
   }
@@ -208,4 +214,39 @@ class RefusalContent extends OutputContent {
 
   @override
   String toString() => 'RefusalContent(refusal: $refusal)';
+}
+
+/// Input text content preserved in compact output.
+///
+/// When a response is compacted via `responses.compact`, user messages
+/// may appear in the output with `input_text` type content. This class
+/// preserves that type so it round-trips correctly when fed back as input.
+@immutable
+class InputTextOutputContent extends OutputContent {
+  /// The text content.
+  final String text;
+
+  /// Creates an [InputTextOutputContent].
+  const InputTextOutputContent(this.text);
+
+  /// Creates an [InputTextOutputContent] from JSON.
+  factory InputTextOutputContent.fromJson(Map<String, dynamic> json) {
+    return InputTextOutputContent(json['text'] as String);
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': 'input_text', 'text': text};
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is InputTextOutputContent &&
+          runtimeType == other.runtimeType &&
+          text == other.text;
+
+  @override
+  int get hashCode => text.hashCode;
+
+  @override
+  String toString() => 'InputTextOutputContent(text: $text)';
 }

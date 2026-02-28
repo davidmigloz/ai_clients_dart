@@ -85,9 +85,46 @@ void main() {
       final result = switch (input) {
         ResponseInputText(:final text) => 'text: $text',
         ResponseInputItems(:final items) => 'items: ${items.length}',
+        ResponseInputRawJson(:final items) => 'raw: ${items.length}',
       };
 
       expect(result, equals('text: hello'));
+    });
+  });
+
+  group('ResponseInputRawJson', () {
+    test('creates from output items', () {
+      final input = ResponseInput.fromOutputItems([
+        {'type': 'message', 'id': 'msg_1', 'role': 'user', 'content': []},
+      ]);
+
+      expect(input, isA<ResponseInputRawJson>());
+      expect((input as ResponseInputRawJson).items, hasLength(1));
+    });
+
+    test('toJson returns raw items list', () {
+      final items = [
+        {'type': 'compaction', 'id': 'cmp_1', 'encrypted_content': 'abc'},
+        {'type': 'message', 'id': 'msg_1', 'role': 'user', 'content': []},
+      ];
+      final input = ResponseInputRawJson(items);
+
+      expect(input.toJson(), equals(items));
+    });
+
+    test('equality', () {
+      final a = ResponseInputRawJson([
+        {'type': 'compaction', 'id': 'cmp_1', 'encrypted_content': 'abc'},
+      ]);
+      final b = ResponseInputRawJson([
+        {'type': 'compaction', 'id': 'cmp_1', 'encrypted_content': 'abc'},
+      ]);
+      final c = ResponseInputRawJson([
+        {'type': 'message', 'id': 'msg_1', 'role': 'user', 'content': []},
+      ]);
+
+      expect(a, equals(b));
+      expect(a, isNot(equals(c)));
     });
   });
 
@@ -348,6 +385,44 @@ void main() {
       expect(compaction.object, equals('response.compaction'));
       expect(compaction.output.first, isA<CompactionOutputItem>());
       expect(compaction.usage.totalTokens, equals(110));
+    });
+
+    test('toInput() produces ResponseInputRawJson from output items', () {
+      const compaction = ResponseCompaction(
+        id: 'cmp_123',
+        object: 'response.compaction',
+        output: [
+          CompactionOutputItem(id: 'cmp_1', encryptedContent: 'abc123'),
+          MessageOutputItem(
+            id: 'msg_1',
+            role: MessageRole.user,
+            content: [OutputContent.inputText('Hello')],
+          ),
+        ],
+        createdAt: 1234567890,
+        usage: ResponseUsage(
+          inputTokens: 100,
+          outputTokens: 10,
+          totalTokens: 110,
+        ),
+      );
+
+      final input = compaction.toInput();
+      expect(input, isA<ResponseInputRawJson>());
+
+      final json = input.toJson() as List;
+      expect(json, hasLength(2));
+
+      final first = json[0] as Map<String, dynamic>;
+      expect(first['type'], equals('compaction'));
+      expect(first['encrypted_content'], equals('abc123'));
+
+      final second = json[1] as Map<String, dynamic>;
+      expect(second['type'], equals('message'));
+      expect(second['role'], equals('user'));
+      final content = (second['content'] as List).first as Map<String, dynamic>;
+      expect(content['type'], equals('input_text'));
+      expect(content['text'], equals('Hello'));
     });
   });
 
@@ -727,6 +802,46 @@ void main() {
     });
   });
 
+  group('InputTextOutputContent', () {
+    test('creates via factory', () {
+      const content = OutputContent.inputText('User said hello');
+
+      expect(content, isA<InputTextOutputContent>());
+      expect((content as InputTextOutputContent).text, 'User said hello');
+    });
+
+    test('round-trips through JSON', () {
+      const content = InputTextOutputContent('Hello from user');
+      final json = content.toJson();
+
+      expect(json['type'], equals('input_text'));
+      expect(json['text'], equals('Hello from user'));
+
+      final restored = InputTextOutputContent.fromJson(json);
+      expect(restored, equals(content));
+    });
+
+    test('OutputContent.fromJson handles input_text type', () {
+      final content = OutputContent.fromJson({
+        'type': 'input_text',
+        'text': 'A user message',
+      });
+
+      expect(content, isA<InputTextOutputContent>());
+      expect((content as InputTextOutputContent).text, 'A user message');
+    });
+
+    test('equality', () {
+      const a = InputTextOutputContent('hello');
+      const b = InputTextOutputContent('hello');
+      const c = InputTextOutputContent('world');
+
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+      expect(a, isNot(equals(c)));
+    });
+  });
+
   group('OutputContent', () {
     test('creates text content via factory', () {
       const content = OutputContent.text(text: 'Response text');
@@ -919,12 +1034,19 @@ void main() {
       expect(json['prompt'], equals('A dog'));
     });
 
-    test('deserializes LocalShellCallOutputItem', () {
+    test('deserializes LocalShellCallOutputItem with typed action', () {
       final item = OutputItem.fromJson({
         'type': 'local_shell_call',
         'id': 'lsc_1',
         'call_id': 'call_local_1',
-        'action': {'command': 'ls'},
+        'action': {
+          'type': 'exec',
+          'command': ['ls', '-la'],
+          'env': {'HOME': '/home/user'},
+          'timeout_ms': 30000,
+          'working_directory': '/tmp',
+          'user': 'root',
+        },
         'status': 'completed',
       });
 
@@ -932,6 +1054,49 @@ void main() {
       final shellItem = item as LocalShellCallOutputItem;
       expect(shellItem.callId, equals('call_local_1'));
       expect(shellItem.status, equals(ItemStatus.completed));
+      expect(shellItem.action.command, equals(['ls', '-la']));
+      expect(shellItem.action.env, equals({'HOME': '/home/user'}));
+      expect(shellItem.action.timeoutMs, equals(30000));
+      expect(shellItem.action.workingDirectory, equals('/tmp'));
+      expect(shellItem.action.user, equals('root'));
+    });
+
+    test('LocalShellExecAction round-trips through JSON', () {
+      const action = LocalShellExecAction(
+        command: ['echo', 'hello'],
+        env: {'PATH': '/usr/bin'},
+        timeoutMs: 5000,
+        workingDirectory: '/home',
+        user: 'testuser',
+      );
+
+      final json = action.toJson();
+      expect(json['type'], equals('exec'));
+      expect(json['command'], equals(['echo', 'hello']));
+      expect(json['env'], equals({'PATH': '/usr/bin'}));
+      expect(json['timeout_ms'], equals(5000));
+      expect(json['working_directory'], equals('/home'));
+      expect(json['user'], equals('testuser'));
+
+      final restored = LocalShellExecAction.fromJson(json);
+      expect(restored, equals(action));
+    });
+
+    test('LocalShellExecAction omits null optional fields', () {
+      const action = LocalShellExecAction(command: ['pwd']);
+      final json = action.toJson();
+
+      expect(json.containsKey('timeout_ms'), isFalse);
+      expect(json.containsKey('working_directory'), isFalse);
+      expect(json.containsKey('user'), isFalse);
+    });
+
+    test('LocalShellExecAction handles missing fields gracefully', () {
+      final action = LocalShellExecAction.fromJson(const {'type': 'exec'});
+
+      expect(action.command, isEmpty);
+      expect(action.env, isEmpty);
+      expect(action.timeoutMs, isNull);
     });
 
     test('deserializes ShellCallOutputItem', () {
@@ -997,7 +1162,12 @@ void main() {
       const action = ShellCallAction(commands: ['pwd']);
       final json = action.toJson();
 
-      expect(json, equals({'commands': ['pwd']}));
+      expect(
+        json,
+        equals({
+          'commands': ['pwd'],
+        }),
+      );
       expect(json.containsKey('timeout_ms'), isFalse);
       expect(json.containsKey('max_output_length'), isFalse);
     });
@@ -1149,8 +1319,7 @@ void main() {
       expect(response.compactionItems.length, equals(1));
     });
 
-    test('localShellCalls and localShellCallOutputs return matching items',
-        () {
+    test('localShellCalls and localShellCallOutputs return matching items', () {
       const response = Response(
         id: 'resp_123',
         object: 'response',
@@ -1160,7 +1329,7 @@ void main() {
           LocalShellCallOutputItem(
             id: 'ls_1',
             callId: 'call_1',
-            action: <String, dynamic>{'command': ['ls', '-la']},
+            action: LocalShellExecAction(command: ['ls', '-la']),
             status: ItemStatus.completed,
           ),
           LocalShellCallOutputResultItem(

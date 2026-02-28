@@ -622,8 +622,8 @@ class LocalShellCallOutputItem extends OutputItem {
   /// The local shell call ID.
   final String callId;
 
-  /// Action payload to execute locally.
-  final Map<String, dynamic> action;
+  /// Typed action payload to execute locally.
+  final LocalShellExecAction action;
 
   /// Item status.
   final ItemStatus status;
@@ -641,7 +641,9 @@ class LocalShellCallOutputItem extends OutputItem {
     return LocalShellCallOutputItem(
       id: json['id'] as String,
       callId: json['call_id'] as String,
-      action: (json['action'] as Map<String, dynamic>?) ?? const {},
+      action: LocalShellExecAction.fromJson(
+        (json['action'] as Map<String, dynamic>?) ?? const {},
+      ),
       status: ItemStatus.fromJson(json['status'] as String),
     );
   }
@@ -651,7 +653,7 @@ class LocalShellCallOutputItem extends OutputItem {
     'type': 'local_shell_call',
     'id': id,
     'call_id': callId,
-    'action': action,
+    'action': action.toJson(),
     'status': status.toJson(),
   };
 
@@ -662,7 +664,7 @@ class LocalShellCallOutputItem extends OutputItem {
           runtimeType == other.runtimeType &&
           id == other.id &&
           callId == other.callId &&
-          mapsEqual(action, other.action) &&
+          action == other.action &&
           status == other.status;
 
   @override
@@ -671,6 +673,79 @@ class LocalShellCallOutputItem extends OutputItem {
   @override
   String toString() =>
       'LocalShellCallOutputItem(id: $id, callId: $callId, status: $status)';
+}
+
+/// Typed action for a local shell call.
+///
+/// Matches the OpenAPI `LocalShellExecAction` schema and the Python SDK's
+/// `LocalShellCallAction`.
+@immutable
+class LocalShellExecAction {
+  /// Commands to execute.
+  final List<String> command;
+
+  /// Environment variables for the command.
+  final Map<String, String> env;
+
+  /// Optional timeout in milliseconds.
+  final int? timeoutMs;
+
+  /// Optional working directory.
+  final String? workingDirectory;
+
+  /// Optional user to execute as.
+  final String? user;
+
+  /// Creates a [LocalShellExecAction].
+  const LocalShellExecAction({
+    required this.command,
+    this.env = const {},
+    this.timeoutMs,
+    this.workingDirectory,
+    this.user,
+  });
+
+  /// Creates a [LocalShellExecAction] from JSON.
+  factory LocalShellExecAction.fromJson(Map<String, dynamic> json) {
+    return LocalShellExecAction(
+      command: (json['command'] as List<dynamic>?)?.cast<String>() ?? const [],
+      env:
+          (json['env'] as Map<String, dynamic>?)?.cast<String, String>() ??
+          const {},
+      timeoutMs: json['timeout_ms'] as int?,
+      workingDirectory: json['working_directory'] as String?,
+      user: json['user'] as String?,
+    );
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    'type': 'exec',
+    'command': command,
+    'env': env,
+    if (timeoutMs != null) 'timeout_ms': timeoutMs,
+    if (workingDirectory != null) 'working_directory': workingDirectory,
+    if (user != null) 'user': user,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is LocalShellExecAction &&
+          runtimeType == other.runtimeType &&
+          listsEqual(command, other.command) &&
+          mapsEqual(env, other.env) &&
+          timeoutMs == other.timeoutMs &&
+          workingDirectory == other.workingDirectory &&
+          user == other.user;
+
+  @override
+  int get hashCode =>
+      Object.hash(command, env, timeoutMs, workingDirectory, user);
+
+  @override
+  String toString() =>
+      'LocalShellExecAction(command: $command, env: $env, timeoutMs: $timeoutMs, workingDirectory: $workingDirectory, user: $user)';
 }
 
 /// A shell call output item.

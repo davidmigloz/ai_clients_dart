@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import 'common/equality_helpers.dart';
 import 'items/output_item.dart';
+import 'response_input.dart';
 import 'response_usage.dart';
 
 /// A compacted response object returned by `responses.compact`.
@@ -43,6 +44,15 @@ class ResponseCompaction {
       usage: ResponseUsage.fromJson(json['usage'] as Map<String, dynamic>),
     );
   }
+
+  /// Converts the compact output to [ResponseInput] for the next API call.
+  ///
+  /// This serializes each [OutputItem] to JSON and wraps them as
+  /// [ResponseInputRawJson], which passes the JSON through directly.
+  /// The compact output item JSON is valid API input, so no conversion
+  /// is needed.
+  ResponseInput toInput() =>
+      ResponseInput.fromOutputItems(output.map((e) => e.toJson()).toList());
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
