@@ -412,10 +412,70 @@ class FunctionCallDelta {
   }
 }
 
+/// A read-only snapshot of a single accumulated choice's state.
+///
+/// Each instance corresponds to one of the `n` choices in the request.
+/// For standard requests (`n=1`), there is a single [AccumulatedChoice].
+///
+/// Use [ChatStreamAccumulator.choices] to access per-choice state.
+@immutable
+class AccumulatedChoice {
+  const AccumulatedChoice._({
+    required this.index,
+    required this.content,
+    required this.refusal,
+    required this.role,
+    required this.finishReason,
+    required this.toolCalls,
+    required this.reasoningContent,
+    required this.reasoning,
+    required this.reasoningDetails,
+    required this.logprobs,
+  });
+
+  /// The index of this choice.
+  final int index;
+
+  /// The accumulated text content.
+  final String content;
+
+  /// The accumulated refusal content.
+  final String refusal;
+
+  /// The message role.
+  final String? role;
+
+  /// The finish reason.
+  final FinishReason? finishReason;
+
+  /// The accumulated tool calls.
+  final List<ToolCall> toolCalls;
+
+  /// **DeepSeek R1 / vLLM only.** The accumulated reasoning content.
+  final String reasoningContent;
+
+  /// **OpenRouter only.** The accumulated reasoning summary.
+  final String reasoning;
+
+  /// **OpenRouter only.** The accumulated reasoning details.
+  final List<ReasoningDetail> reasoningDetails;
+
+  /// Log probability information.
+  final Logprobs? logprobs;
+
+  /// Whether there are any tool calls.
+  bool get hasToolCalls => toolCalls.isNotEmpty;
+
+  /// Whether there is any reasoning content.
+  bool get hasReasoningContent =>
+      reasoningContent.isNotEmpty || reasoning.isNotEmpty;
+}
+
 /// Helper class for accumulating streaming chunks into a complete response.
 ///
 /// Use this to merge all streaming deltas into a final [ChatCompletion]-like
-/// object.
+/// object. Supports multi-choice streams (`n > 1`) with independent
+/// per-choice accumulation.
 ///
 /// ## Example
 ///
@@ -429,6 +489,11 @@ class FunctionCallDelta {
 ///
 /// final fullContent = accumulator.content;
 /// final toolCalls = accumulator.toolCalls;
+///
+/// // For multi-choice streams, access per-choice state:
+/// for (final choice in accumulator.choices) {
+///   print('Choice ${choice.index}: ${choice.content}');
+/// }
 /// ```
 class ChatStreamAccumulator {
   /// Creates a [ChatStreamAccumulator].
@@ -440,14 +505,15 @@ class ChatStreamAccumulator {
   String? _systemFingerprint;
   String? _serviceTier;
   String? _provider;
-  final StringBuffer _content = StringBuffer();
-  final StringBuffer _refusal = StringBuffer();
-  final StringBuffer _reasoningContent = StringBuffer();
-  final StringBuffer _reasoning = StringBuffer();
-  String? _role;
-  FinishReason? _finishReason;
   Usage? _usage;
-  final List<_AccumulatedToolCall> _toolCalls = [];
+  final List<_AccumulatedChoice> _choices = [];
+
+  _AccumulatedChoice _getOrCreateChoice(int index) {
+    while (_choices.length <= index) {
+      _choices.add(_AccumulatedChoice());
+    }
+    return _choices[index];
+  }
 
   /// Adds a streaming event to the accumulator.
   void add(ChatStreamEvent event) {
@@ -457,48 +523,68 @@ class ChatStreamAccumulator {
     _systemFingerprint ??= event.systemFingerprint;
     _serviceTier ??= event.serviceTier;
     _provider ??= event.provider;
-    _usage ??= event.usage;
+    if (event.usage != null) _usage = event.usage;
 
     // Handle nullable choices for compatibility with providers like Groq
     final choices = event.choices;
     if (choices == null) return;
 
     for (final choice in choices) {
+      final choiceIndex = choice.index ?? 0;
+      final accumulated = _getOrCreateChoice(choiceIndex);
       final delta = choice.delta;
 
-      _role ??= delta.role;
-      _finishReason ??= choice.finishReason;
+      accumulated.role ??= delta.role;
+      accumulated.finishReason ??= choice.finishReason;
 
       if (delta.content != null) {
-        _content.write(delta.content);
+        accumulated.content.write(delta.content);
       }
 
       if (delta.refusal != null) {
-        _refusal.write(delta.refusal);
+        accumulated.refusal.write(delta.refusal);
       }
 
       // Accumulate reasoning content for OpenRouter/DeepSeek compatibility
       if (delta.reasoningContent != null) {
-        _reasoningContent.write(delta.reasoningContent);
+        accumulated.reasoningContent.write(delta.reasoningContent);
       }
 
       if (delta.reasoning != null) {
-        _reasoning.write(delta.reasoning);
+        accumulated.reasoning.write(delta.reasoning);
+      }
+
+      if (delta.reasoningDetails != null) {
+        accumulated.reasoningDetails.addAll(delta.reasoningDetails!);
       }
 
       if (delta.toolCalls != null) {
-        delta.toolCalls!.forEach(_accumulateToolCall);
+        for (final tc in delta.toolCalls!) {
+          _accumulateToolCall(accumulated, tc);
+        }
+      }
+
+      if (choice.logprobs != null) {
+        if (choice.logprobs!.content != null) {
+          accumulated.logprobsContent.addAll(choice.logprobs!.content!);
+        }
+        if (choice.logprobs!.refusal != null) {
+          accumulated.logprobsRefusal.addAll(choice.logprobs!.refusal!);
+        }
       }
     }
   }
 
-  void _accumulateToolCall(ToolCallDelta delta) {
+  void _accumulateToolCall(
+    _AccumulatedChoice choice,
+    ToolCallDelta delta,
+  ) {
     // Find or create the tool call at this index
-    while (_toolCalls.length <= delta.index) {
-      _toolCalls.add(_AccumulatedToolCall());
+    while (choice.toolCalls.length <= delta.index) {
+      choice.toolCalls.add(_AccumulatedToolCall());
     }
 
-    final accumulated = _toolCalls[delta.index]
+    final accumulated = choice.toolCalls[delta.index]
       ..id ??= delta.id
       ..type ??= delta.type;
 
@@ -508,6 +594,34 @@ class ChatStreamAccumulator {
         accumulated.arguments.write(args);
       }
     }
+  }
+
+  List<ToolCall> _buildToolCalls(_AccumulatedChoice choice) {
+    return choice.toolCalls
+        .where((tc) => tc.id != null && tc.functionName != null)
+        .map(
+          (tc) => ToolCall(
+            id: tc.id!,
+            type: tc.type ?? 'function',
+            function: FunctionCall(
+              name: tc.functionName!,
+              arguments: tc.arguments.toString(),
+            ),
+          ),
+        )
+        .toList();
+  }
+
+  Logprobs? _buildLogprobs(_AccumulatedChoice choice) {
+    if (choice.logprobsContent.isEmpty && choice.logprobsRefusal.isEmpty) {
+      return null;
+    }
+    return Logprobs(
+      content:
+          choice.logprobsContent.isNotEmpty ? choice.logprobsContent : null,
+      refusal:
+          choice.logprobsRefusal.isNotEmpty ? choice.logprobsRefusal : null,
+    );
   }
 
   /// The completion ID.
@@ -523,57 +637,97 @@ class ChatStreamAccumulator {
   String? get provider => _provider;
 
   /// The accumulated text content.
-  String get content => _content.toString();
+  ///
+  /// For multi-choice streams, returns choice 0's content.
+  String get content =>
+      _choices.isEmpty ? '' : _choices[0].content.toString();
 
   /// The accumulated refusal content.
-  String get refusal => _refusal.toString();
+  ///
+  /// For multi-choice streams, returns choice 0's refusal.
+  String get refusal =>
+      _choices.isEmpty ? '' : _choices[0].refusal.toString();
 
   /// **DeepSeek R1 / vLLM only.** The accumulated reasoning content.
   ///
   /// Not part of the official OpenAI API.
-  String get reasoningContent => _reasoningContent.toString();
+  /// For multi-choice streams, returns choice 0's reasoning content.
+  String get reasoningContent =>
+      _choices.isEmpty ? '' : _choices[0].reasoningContent.toString();
 
   /// **OpenRouter only.** The accumulated reasoning summary.
   ///
   /// Not part of the official OpenAI API.
-  String get reasoning => _reasoning.toString();
+  /// For multi-choice streams, returns choice 0's reasoning.
+  String get reasoning =>
+      _choices.isEmpty ? '' : _choices[0].reasoning.toString();
 
   /// Whether there is any reasoning content.
+  ///
+  /// For multi-choice streams, checks choice 0.
   bool get hasReasoningContent =>
-      _reasoningContent.isNotEmpty || _reasoning.isNotEmpty;
+      _choices.isNotEmpty &&
+      (_choices[0].reasoningContent.isNotEmpty ||
+          _choices[0].reasoning.isNotEmpty);
 
   /// The message role.
-  String? get role => _role;
+  ///
+  /// For multi-choice streams, returns choice 0's role.
+  String? get role => _choices.isEmpty ? null : _choices[0].role;
 
   /// The finish reason.
-  FinishReason? get finishReason => _finishReason;
+  ///
+  /// For multi-choice streams, returns choice 0's finish reason.
+  FinishReason? get finishReason =>
+      _choices.isEmpty ? null : _choices[0].finishReason;
 
   /// Token usage statistics.
   Usage? get usage => _usage;
 
   /// The accumulated tool calls.
-  List<ToolCall> get toolCalls => _toolCalls
-      .where((tc) => tc.id != null && tc.functionName != null)
-      .map(
-        (tc) => ToolCall(
-          id: tc.id!,
-          type: tc.type ?? 'function',
-          function: FunctionCall(
-            name: tc.functionName!,
-            arguments: tc.arguments.toString(),
-          ),
-        ),
-      )
-      .toList();
+  ///
+  /// For multi-choice streams, returns choice 0's tool calls.
+  List<ToolCall> get toolCalls =>
+      _choices.isEmpty ? const [] : _buildToolCalls(_choices[0]);
 
   /// Whether there are any tool calls.
-  bool get hasToolCalls => _toolCalls.any((tc) => tc.id != null);
+  ///
+  /// For multi-choice streams, checks choice 0.
+  bool get hasToolCalls =>
+      _choices.isNotEmpty && _choices[0].toolCalls.any((tc) => tc.id != null);
+
+  /// Returns a read-only view of all accumulated choices.
+  ///
+  /// Each element corresponds to one of the `n` choices in the request.
+  /// For standard requests (`n=1`), this list has a single element.
+  ///
+  /// Note: Each call creates fresh snapshot objects. For hot-path access
+  /// during streaming, prefer the flat getters (`content`, `toolCalls`, etc.)
+  /// which delegate to choice 0 without allocation.
+  List<AccumulatedChoice> get choices => [
+    for (var i = 0; i < _choices.length; i++)
+      AccumulatedChoice._(
+        index: i,
+        content: _choices[i].content.toString(),
+        refusal: _choices[i].refusal.toString(),
+        role: _choices[i].role,
+        finishReason: _choices[i].finishReason,
+        toolCalls: _buildToolCalls(_choices[i]),
+        reasoningContent: _choices[i].reasoningContent.toString(),
+        reasoning: _choices[i].reasoning.toString(),
+        reasoningDetails: List.unmodifiable(_choices[i].reasoningDetails),
+        logprobs: _buildLogprobs(_choices[i]),
+      ),
+  ];
 
   /// Builds a [ChatCompletion] from the accumulated stream data.
   ///
   /// This assembles the accumulated content, tool calls, reasoning, and
   /// metadata into a complete [ChatCompletion] object — the same type
   /// returned by the non-streaming chat completions endpoint.
+  ///
+  /// For multi-choice streams, produces one [ChatChoice] per accumulated
+  /// choice with independent content, tool calls, and finish reasons.
   ///
   /// Throws [StateError] if no model was received in the stream (required
   /// by [ChatCompletion]).
@@ -584,34 +738,54 @@ class ChatStreamAccumulator {
         'Cannot build ChatCompletion: no model received in stream',
       );
     }
-    final contentStr = content;
-    final refusalStr = refusal;
-    final reasoningContentStr = reasoningContent;
-    final reasoningStr = reasoning;
-    final tcs = toolCalls;
+
+    final chatChoices = _choices.isEmpty
+        ? [
+            const ChatChoice(
+              index: 0,
+              message: AssistantMessage(),
+            ),
+          ]
+        : [
+            for (var i = 0; i < _choices.length; i++)
+              _buildChatChoice(i, _choices[i]),
+          ];
+
     return ChatCompletion(
       id: _id,
       object: 'chat.completion',
       created: _created,
       model: model,
-      choices: [
-        ChatChoice(
-          index: 0,
-          finishReason: _finishReason,
-          message: AssistantMessage(
-            content: contentStr.isNotEmpty ? contentStr : null,
-            refusal: refusalStr.isNotEmpty ? refusalStr : null,
-            toolCalls: tcs.isNotEmpty ? tcs : null,
-            reasoningContent:
-                reasoningContentStr.isNotEmpty ? reasoningContentStr : null,
-            reasoning: reasoningStr.isNotEmpty ? reasoningStr : null,
-          ),
-        ),
-      ],
+      choices: chatChoices,
       usage: _usage,
       systemFingerprint: _systemFingerprint,
       serviceTier: _serviceTier,
       provider: _provider,
+    );
+  }
+
+  ChatChoice _buildChatChoice(int index, _AccumulatedChoice choice) {
+    final contentStr = choice.content.toString();
+    final refusalStr = choice.refusal.toString();
+    final reasoningContentStr = choice.reasoningContent.toString();
+    final reasoningStr = choice.reasoning.toString();
+    final tcs = _buildToolCalls(choice);
+    final lp = _buildLogprobs(choice);
+    final rds = choice.reasoningDetails;
+
+    return ChatChoice(
+      index: index,
+      finishReason: choice.finishReason,
+      logprobs: lp,
+      message: AssistantMessage(
+        content: contentStr.isNotEmpty ? contentStr : null,
+        refusal: refusalStr.isNotEmpty ? refusalStr : null,
+        toolCalls: tcs.isNotEmpty ? tcs : null,
+        reasoningContent:
+            reasoningContentStr.isNotEmpty ? reasoningContentStr : null,
+        reasoning: reasoningStr.isNotEmpty ? reasoningStr : null,
+        reasoningDetails: rds.isNotEmpty ? List.unmodifiable(rds) : null,
+      ),
     );
   }
 
@@ -623,15 +797,23 @@ class ChatStreamAccumulator {
     _systemFingerprint = null;
     _serviceTier = null;
     _provider = null;
-    _content.clear();
-    _refusal.clear();
-    _reasoningContent.clear();
-    _reasoning.clear();
-    _role = null;
-    _finishReason = null;
     _usage = null;
-    _toolCalls.clear();
+    _choices.clear();
   }
+}
+
+/// Internal helper for accumulating per-choice state.
+class _AccumulatedChoice {
+  String? role;
+  FinishReason? finishReason;
+  final StringBuffer content = StringBuffer();
+  final StringBuffer refusal = StringBuffer();
+  final StringBuffer reasoningContent = StringBuffer();
+  final StringBuffer reasoning = StringBuffer();
+  final List<ReasoningDetail> reasoningDetails = [];
+  final List<_AccumulatedToolCall> toolCalls = [];
+  final List<TokenLogprob> logprobsContent = [];
+  final List<TokenLogprob> logprobsRefusal = [];
 }
 
 /// Internal helper for accumulating tool call data.

@@ -502,6 +502,689 @@ void main() {
       expect(completion.serviceTier, equals('scale'));
       expect(completion.provider, equals('openai'));
     });
+
+    group('multi-choice accumulation', () {
+      test('interleaved multi-choice accumulation', () {
+        final accumulator = ChatStreamAccumulator()
+          // Choice 0 content
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-mc",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "index": 0,
+                    "delta": {"role": "assistant", "content": "Hello"},
+                    "finish_reason": null
+                  }
+                ]
+              }
+            '''),
+            ),
+          )
+          // Choice 1 content
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-mc",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "index": 1,
+                    "delta": {"role": "assistant", "content": "Bonjour"},
+                    "finish_reason": null
+                  }
+                ]
+              }
+            '''),
+            ),
+          )
+          // More choice 0 content
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-mc",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "index": 0,
+                    "delta": {"content": " World"},
+                    "finish_reason": null
+                  }
+                ]
+              }
+            '''),
+            ),
+          )
+          // More choice 1 content
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-mc",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "index": 1,
+                    "delta": {"content": " le monde"},
+                    "finish_reason": null
+                  }
+                ]
+              }
+            '''),
+            ),
+          );
+
+        final choices = accumulator.choices;
+        expect(choices, hasLength(2));
+        expect(choices[0].content, equals('Hello World'));
+        expect(choices[1].content, equals('Bonjour le monde'));
+      });
+
+      test('backward-compat getters return choice 0 data', () {
+        final accumulator = ChatStreamAccumulator()
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-mc",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "index": 0,
+                    "delta": {"role": "assistant", "content": "Choice zero"},
+                    "finish_reason": "stop"
+                  }
+                ]
+              }
+            '''),
+            ),
+          )
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-mc",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "index": 1,
+                    "delta": {"role": "assistant", "content": "Choice one"},
+                    "finish_reason": "length"
+                  }
+                ]
+              }
+            '''),
+            ),
+          );
+
+        // Flat getters should return choice 0's data
+        expect(accumulator.content, equals('Choice zero'));
+        expect(accumulator.finishReason, equals(FinishReason.stop));
+        expect(accumulator.role, equals('assistant'));
+      });
+
+      test('toChatCompletion() builds all choices', () {
+        final accumulator = ChatStreamAccumulator()
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-mc",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "index": 0,
+                    "delta": {"role": "assistant", "content": "Alpha"},
+                    "finish_reason": "stop"
+                  }
+                ]
+              }
+            '''),
+            ),
+          )
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-mc",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "index": 1,
+                    "delta": {"role": "assistant", "content": "Beta"},
+                    "finish_reason": "length"
+                  }
+                ]
+              }
+            '''),
+            ),
+          );
+
+        final completion = accumulator.toChatCompletion();
+        expect(completion.choices, hasLength(2));
+        expect(completion.choices[0].index, equals(0));
+        expect(completion.choices[0].message.content, equals('Alpha'));
+        expect(completion.choices[0].finishReason, equals(FinishReason.stop));
+        expect(completion.choices[1].index, equals(1));
+        expect(completion.choices[1].message.content, equals('Beta'));
+        expect(
+          completion.choices[1].finishReason,
+          equals(FinishReason.length),
+        );
+      });
+
+      test('per-choice tool calls are independent', () {
+        final accumulator = ChatStreamAccumulator()
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_(r'''
+              {
+                "id": "chatcmpl-mc",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "index": 0,
+                    "delta": {
+                      "role": "assistant",
+                      "tool_calls": [
+                        {
+                          "index": 0,
+                          "id": "call_A",
+                          "type": "function",
+                          "function": {"name": "func_a", "arguments": "{\"x\":1}"}
+                        }
+                      ]
+                    },
+                    "finish_reason": null
+                  }
+                ]
+              }
+            '''),
+            ),
+          )
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_(r'''
+              {
+                "id": "chatcmpl-mc",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "index": 1,
+                    "delta": {
+                      "role": "assistant",
+                      "tool_calls": [
+                        {
+                          "index": 0,
+                          "id": "call_B",
+                          "type": "function",
+                          "function": {"name": "func_b", "arguments": "{\"y\":2}"}
+                        }
+                      ]
+                    },
+                    "finish_reason": null
+                  }
+                ]
+              }
+            '''),
+            ),
+          );
+
+        final choices = accumulator.choices;
+        expect(choices[0].toolCalls, hasLength(1));
+        expect(choices[0].toolCalls.first.id, equals('call_A'));
+        expect(choices[0].toolCalls.first.function.name, equals('func_a'));
+        expect(choices[1].toolCalls, hasLength(1));
+        expect(choices[1].toolCalls.first.id, equals('call_B'));
+        expect(choices[1].toolCalls.first.function.name, equals('func_b'));
+
+        // Flat getter returns choice 0
+        expect(accumulator.toolCalls.first.id, equals('call_A'));
+      });
+
+      test('per-choice finish reasons', () {
+        final accumulator = ChatStreamAccumulator()
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-mc",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "index": 0,
+                    "delta": {"content": "A"},
+                    "finish_reason": "stop"
+                  }
+                ]
+              }
+            '''),
+            ),
+          )
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-mc",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "index": 1,
+                    "delta": {"content": "B"},
+                    "finish_reason": "length"
+                  }
+                ]
+              }
+            '''),
+            ),
+          );
+
+        final choices = accumulator.choices;
+        expect(choices[0].finishReason, equals(FinishReason.stop));
+        expect(choices[1].finishReason, equals(FinishReason.length));
+      });
+
+      test('per-choice refusal', () {
+        final accumulator = ChatStreamAccumulator()
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-mc",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "index": 0,
+                    "delta": {"refusal": "I cannot help with that"},
+                    "finish_reason": null
+                  }
+                ]
+              }
+            '''),
+            ),
+          )
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-mc",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "index": 1,
+                    "delta": {"refusal": "Policy violation"},
+                    "finish_reason": null
+                  }
+                ]
+              }
+            '''),
+            ),
+          );
+
+        final choices = accumulator.choices;
+        expect(choices[0].refusal, equals('I cannot help with that'));
+        expect(choices[1].refusal, equals('Policy violation'));
+      });
+    });
+
+    group('logprobs and reasoningDetails accumulation', () {
+      test('logprobs accumulated per-choice', () {
+        final accumulator = ChatStreamAccumulator()
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-lp",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "index": 0,
+                    "delta": {"content": "Hello"},
+                    "logprobs": {
+                      "content": [
+                        {"token": "Hello", "logprob": -0.5, "bytes": [72, 101, 108, 108, 111]}
+                      ]
+                    },
+                    "finish_reason": null
+                  }
+                ]
+              }
+            '''),
+            ),
+          )
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-lp",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "index": 0,
+                    "delta": {"content": " World"},
+                    "logprobs": {
+                      "content": [
+                        {"token": " World", "logprob": -1.2, "bytes": [32, 87, 111, 114, 108, 100]}
+                      ]
+                    },
+                    "finish_reason": null
+                  }
+                ]
+              }
+            '''),
+            ),
+          );
+
+        final choices = accumulator.choices;
+        expect(choices[0].logprobs, isNotNull);
+        expect(choices[0].logprobs!.content, hasLength(2));
+        expect(choices[0].logprobs!.content![0].token, equals('Hello'));
+        expect(choices[0].logprobs!.content![1].token, equals(' World'));
+      });
+
+      test('reasoningDetails accumulated', () {
+        final accumulator = ChatStreamAccumulator()
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-rd",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "index": 0,
+                    "delta": {
+                      "reasoning_details": [
+                        {"type": "reasoning.summary", "text": "Step 1"}
+                      ]
+                    },
+                    "finish_reason": null
+                  }
+                ]
+              }
+            '''),
+            ),
+          )
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-rd",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "index": 0,
+                    "delta": {
+                      "reasoning_details": [
+                        {"type": "reasoning.text", "text": "Step 2 details"}
+                      ]
+                    },
+                    "finish_reason": null
+                  }
+                ]
+              }
+            '''),
+            ),
+          );
+
+        final choices = accumulator.choices;
+        expect(choices[0].reasoningDetails, hasLength(2));
+        expect(choices[0].reasoningDetails[0].type, equals('reasoning.summary'));
+        expect(choices[0].reasoningDetails[0].text, equals('Step 1'));
+        expect(choices[0].reasoningDetails[1].type, equals('reasoning.text'));
+        expect(choices[0].reasoningDetails[1].text, equals('Step 2 details'));
+      });
+
+      test('logprobs and reasoningDetails in toChatCompletion()', () {
+        final accumulator = ChatStreamAccumulator()
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-both",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "index": 0,
+                    "delta": {
+                      "content": "Hi",
+                      "reasoning_details": [
+                        {"type": "reasoning.summary", "text": "Thinking"}
+                      ]
+                    },
+                    "logprobs": {
+                      "content": [
+                        {"token": "Hi", "logprob": -0.3}
+                      ]
+                    },
+                    "finish_reason": "stop"
+                  }
+                ]
+              }
+            '''),
+            ),
+          );
+
+        final completion = accumulator.toChatCompletion();
+        expect(completion.choices.first.logprobs, isNotNull);
+        expect(completion.choices.first.logprobs!.content, hasLength(1));
+        expect(
+          completion.choices.first.logprobs!.content!.first.token,
+          equals('Hi'),
+        );
+        expect(
+          completion.choices.first.message.reasoningDetails,
+          hasLength(1),
+        );
+        expect(
+          completion.choices.first.message.reasoningDetails!.first.text,
+          equals('Thinking'),
+        );
+      });
+    });
+
+    group('behavioral fixes', () {
+      test('usage overwrite semantics', () {
+        final accumulator = ChatStreamAccumulator()
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-u",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "index": 0,
+                    "delta": {"content": "Hi"},
+                    "finish_reason": null
+                  }
+                ],
+                "usage": {"prompt_tokens": 5, "completion_tokens": 1, "total_tokens": 6}
+              }
+            '''),
+            ),
+          )
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-u",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "index": 0,
+                    "delta": {},
+                    "finish_reason": "stop"
+                  }
+                ],
+                "usage": {"prompt_tokens": 5, "completion_tokens": 10, "total_tokens": 15}
+              }
+            '''),
+            ),
+          );
+
+        // The last usage should win (overwrite semantics)
+        expect(accumulator.usage!.completionTokens, equals(10));
+        expect(accumulator.usage!.totalTokens, equals(15));
+      });
+
+      test('null choice index defaults to 0', () {
+        final accumulator = ChatStreamAccumulator()
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-ni",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "delta": {"content": "No index"},
+                    "finish_reason": null
+                  }
+                ]
+              }
+            '''),
+            ),
+          );
+
+        expect(accumulator.content, equals('No index'));
+        expect(accumulator.choices, hasLength(1));
+        expect(accumulator.choices[0].index, equals(0));
+      });
+    });
+
+    group('edge cases', () {
+      test('empty choices list does not crash', () {
+        final accumulator = ChatStreamAccumulator()
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-ec",
+                "model": "gpt-4o",
+                "choices": []
+              }
+            '''),
+            ),
+          );
+
+        expect(accumulator.choices, isEmpty);
+        expect(accumulator.content, equals(''));
+        expect(accumulator.hasToolCalls, isFalse);
+        expect(accumulator.hasReasoningContent, isFalse);
+      });
+
+      test('reset clears per-choice state', () {
+        final accumulator = ChatStreamAccumulator()
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-r",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "index": 0,
+                    "delta": {"content": "A"},
+                    "finish_reason": "stop"
+                  }
+                ]
+              }
+            '''),
+            ),
+          )
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-r",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "index": 1,
+                    "delta": {"content": "B"},
+                    "finish_reason": "length"
+                  }
+                ]
+              }
+            '''),
+            ),
+          )
+          ..reset()
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-r2",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "index": 0,
+                    "delta": {"content": "Fresh"},
+                    "finish_reason": "stop"
+                  }
+                ]
+              }
+            '''),
+            ),
+          );
+
+        expect(accumulator.choices, hasLength(1));
+        expect(accumulator.content, equals('Fresh'));
+        expect(accumulator.id, equals('chatcmpl-r2'));
+      });
+
+      test('out-of-order choice indices', () {
+        final accumulator = ChatStreamAccumulator()
+          // Send index 2 first
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-oo",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "index": 2,
+                    "delta": {"content": "Third"},
+                    "finish_reason": null
+                  }
+                ]
+              }
+            '''),
+            ),
+          )
+          // Then send index 1
+          ..add(
+            ChatStreamEvent.fromJson(
+              jsonDecode_('''
+              {
+                "id": "chatcmpl-oo",
+                "model": "gpt-4o",
+                "choices": [
+                  {
+                    "index": 1,
+                    "delta": {"content": "Second"},
+                    "finish_reason": null
+                  }
+                ]
+              }
+            '''),
+            ),
+          );
+
+        // Should have 3 choices: 0 (empty), 1, 2
+        expect(accumulator.choices, hasLength(3));
+        expect(accumulator.choices[0].content, equals(''));
+        expect(accumulator.choices[1].content, equals('Second'));
+        expect(accumulator.choices[2].content, equals('Third'));
+      });
+    });
   });
 
   group('ToolCallDelta', () {

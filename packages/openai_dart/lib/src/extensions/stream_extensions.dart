@@ -35,6 +35,9 @@ extension ChatStreamExtension on Stream<ChatStreamEvent> {
   /// Yields the accumulator after each event, allowing you to
   /// access both deltas and the accumulated state.
   ///
+  /// For multi-choice streams (`n > 1`), use `.choices[i]` on the
+  /// accumulator to access per-choice content.
+  ///
   /// **Note:** This method consumes the entire stream. The same mutable
   /// accumulator instance is yielded after each event, so each yield
   /// reflects the current accumulated state (not a snapshot).
