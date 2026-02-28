@@ -152,25 +152,25 @@ def auto_locate_spec(config_dir: Path) -> Path | None:
         for output_dir in _path_candidates(output_dir_cfg):
             candidate = output_dir / f"latest-{spec_name}.json"
             if candidate.exists():
-                return candidate
+                return candidate.resolve()
 
         # 2) Fallback to package local spec from specs_dir + local_file
         local_file = spec_info.get('local_file', 'openapi.json')
         local_path = Path(local_file)
         if local_path.is_absolute() and local_path.exists():
-            return local_path
+            return local_path.resolve()
 
         if specs_dir_cfg:
             base_name = local_path.stem
             for specs_dir in _path_candidates(specs_dir_cfg):
                 exact_candidate = specs_dir / local_file
                 if exact_candidate.exists():
-                    return exact_candidate
+                    return exact_candidate.resolve()
 
                 for ext in ['.json', '.yaml', '.yml']:
                     candidate = specs_dir / f"{base_name}{ext}"
                     if candidate.exists():
-                        return candidate
+                        return candidate.resolve()
 
         break  # Use first spec
 

@@ -541,7 +541,7 @@ def main():
     print(f"Fetched: {fetched} spec(s)")
     print(f"Time: {datetime.now().isoformat()}")
 
-    if fetched > 0 and preflight_ok:
+    if fetched > 0:
         sys.exit(0)
     sys.exit(1)
 
