@@ -17,10 +17,15 @@ import 'item.dart';
 /// - [MessageOutputItem] - Text messages from the assistant
 /// - [FunctionCallOutputItemResponse] - Custom function calls
 /// - [ReasoningItem] - Reasoning content from reasoning models
+/// - [CompactionOutputItem] - Compacted conversation history
 /// - [WebSearchCallOutputItem] - Web search tool calls
 /// - [FileSearchCallOutputItem] - File search tool calls
 /// - [CodeInterpreterCallOutputItem] - Code interpreter tool calls
 /// - [ImageGenerationCallOutputItem] - Image generation tool calls
+/// - [LocalShellCallOutputItem] - Local shell tool calls
+/// - [LocalShellCallOutputResultItem] - Local shell tool call results
+/// - [ShellCallOutputItem] - Shell tool calls
+/// - [ShellCallOutputResultItem] - Shell tool call results
 /// - [McpCallOutputItem] - MCP (Model Context Protocol) tool calls
 sealed class OutputItem {
   /// Creates an [OutputItem].
@@ -884,7 +889,9 @@ sealed class ShellEnvironment {
     return switch (json['type'] as String) {
       'local' => const LocalShellEnvironment(),
       'container_reference' => ContainerReferenceEnvironment.fromJson(json),
-      final type => throw FormatException('Unknown ShellEnvironment type: $type'),
+      final type => throw FormatException(
+        'Unknown ShellEnvironment type: $type',
+      ),
     };
   }
 
