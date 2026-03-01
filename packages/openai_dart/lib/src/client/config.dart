@@ -32,7 +32,10 @@ class RetryPolicy {
 
   /// Creates a [RetryPolicy].
   ///
-  /// Throws [AssertionError] if any parameter is out of valid range.
+  /// [maxRetries] must be >= 0 and [jitter] must be between 0.0 and 1.0.
+  /// [initialDelay] should be positive and [maxDelay] should be >=
+  /// [initialDelay] (not enforced via asserts to preserve const
+  /// constructability, since [Duration] operations are not const-evaluable).
   const RetryPolicy({
     this.maxRetries = 3,
     this.initialDelay = const Duration(seconds: 1),

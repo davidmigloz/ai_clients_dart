@@ -198,9 +198,9 @@ class RetryWrapper {
   /// Applies exponential backoff to the current delay.
   ///
   /// Ensures:
-  /// - Minimum delay of config.retryDelay to avoid tight retry loops when
-  ///   Retry-After is 0 or resolves to a past/now HTTP-date
-  /// - Monotonic backoff: once we reach or exceed maxRetryDelay, we
+  /// - Minimum delay of [RetryPolicy.initialDelay] to avoid tight retry loops
+  ///   when Retry-After is 0 or resolves to a past/now HTTP-date
+  /// - Monotonic backoff: once we reach or exceed [RetryPolicy.maxDelay], we
   ///   don't decrease the delay on subsequent attempts
   Duration _exponentialBackoff(Duration currentDelay) {
     // Enforce minimum delay to prevent tight retry loops

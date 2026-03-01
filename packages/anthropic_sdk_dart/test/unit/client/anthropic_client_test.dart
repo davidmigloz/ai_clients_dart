@@ -135,7 +135,7 @@ void main() {
 
     group('fromEnvironment', () {
       test('throws StateError when ANTHROPIC_API_KEY is not set', () {
-        if (Platform.environment.containsKey('ANTHROPIC_API_KEY')) {
+        if (Platform.environment['ANTHROPIC_API_KEY']?.isNotEmpty == true) {
           markTestSkipped('ANTHROPIC_API_KEY is set');
           return;
         }
