@@ -92,7 +92,7 @@ The configuration options have changed significantly:
 
 | v0.x | v1.0.0 | Notes |
 |------|--------|-------|
-| `retries: 3` | `retryPolicy: RetryPolicy(maxRetries: 3)` | Replaces scalar fields |
+| `retries: 3` | `retryPolicy: RetryPolicy(maxRetries: 3)` | Default: 2 retries, 1s initial, 30s max |
 | `beta: 'assistants=v2'` | *(removed)* | Handled internally |
 | *(not available)* | `timeout` | Request timeout duration |
 | *(not available)* | `connectTimeout` | Connection timeout duration |

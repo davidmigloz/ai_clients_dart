@@ -13,9 +13,12 @@ void main() {
         expect(client.close, returnsNormally);
       });
 
-      test('throws StateError when used after close', () {
+      test('throws StateError when used after close', () async {
         final client = MistralClient()..close();
-        expect(() => client.models.list(), throwsA(isA<StateError>()));
+        await expectLater(
+          client.models.list(),
+          throwsA(isA<StateError>()),
+        );
       });
 
       test('does not close custom httpClient', () {

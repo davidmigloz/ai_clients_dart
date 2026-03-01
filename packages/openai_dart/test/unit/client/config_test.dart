@@ -6,14 +6,14 @@ void main() {
   group('RetryPolicy', () {
     test('has sensible defaults', () {
       const policy = RetryPolicy.defaultPolicy;
-      expect(policy.maxRetries, 3);
+      expect(policy.maxRetries, 2);
       expect(policy.initialDelay, const Duration(seconds: 1));
-      expect(policy.maxDelay, const Duration(seconds: 60));
-      expect(policy.jitter, 0.1);
+      expect(policy.maxDelay, const Duration(seconds: 30));
+      expect(policy.jitter, 0.25);
     });
 
     test('defaultPolicy uses defaults', () {
-      expect(RetryPolicy.defaultPolicy.maxRetries, 3);
+      expect(RetryPolicy.defaultPolicy.maxRetries, 2);
     });
 
     test('accepts custom values', () {
@@ -45,10 +45,10 @@ void main() {
       expect(config.baseUrl, 'https://api.openai.com/v1');
       expect(config.timeout, const Duration(minutes: 10));
       expect(config.connectTimeout, const Duration(seconds: 30));
-      expect(config.retryPolicy.maxRetries, 3);
+      expect(config.retryPolicy.maxRetries, 2);
       expect(config.retryPolicy.initialDelay, const Duration(seconds: 1));
-      expect(config.retryPolicy.maxDelay, const Duration(seconds: 60));
-      expect(config.retryPolicy.jitter, 0.1);
+      expect(config.retryPolicy.maxDelay, const Duration(seconds: 30));
+      expect(config.retryPolicy.jitter, 0.25);
       expect(config.authProvider, isNull);
       expect(config.logLevel, isNull);
       expect(config.defaultHeaders, isEmpty);
@@ -98,7 +98,7 @@ void main() {
 
       expect(copy.baseUrl, 'https://new.api.com');
       expect(copy.timeout, const Duration(seconds: 30));
-      expect(copy.retryPolicy.maxRetries, 3); // Preserved from original
+      expect(copy.retryPolicy.maxRetries, 2); // Preserved from original
     });
 
     test('copyWith replaces retryPolicy', () {

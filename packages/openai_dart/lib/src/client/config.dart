@@ -37,14 +37,14 @@ class RetryPolicy {
   /// [initialDelay] (not enforced via asserts to preserve const
   /// constructability, since [Duration] operations are not const-evaluable).
   const RetryPolicy({
-    this.maxRetries = 3,
+    this.maxRetries = 2,
     this.initialDelay = const Duration(seconds: 1),
-    this.maxDelay = const Duration(seconds: 60),
-    this.jitter = 0.1,
+    this.maxDelay = const Duration(seconds: 30),
+    this.jitter = 0.25,
   })  : assert(maxRetries >= 0, 'maxRetries must be >= 0'),
         assert(jitter >= 0.0 && jitter <= 1.0, 'jitter must be 0.0 - 1.0');
 
-  /// Default retry policy (3 retries, 1s initial delay).
+  /// Default retry policy (2 retries, 1s initial delay, 30s max delay).
   static const defaultPolicy = RetryPolicy();
 
   @override

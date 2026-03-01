@@ -13,10 +13,10 @@ void main() {
         expect(client.close, returnsNormally);
       });
 
-      test('throws StateError when used after close', () {
+      test('throws StateError when used after close', () async {
         final client = OpenResponsesClient()..close();
-        expect(
-          () => client.responses.create(
+        await expectLater(
+          client.responses.create(
             const CreateResponseRequest(model: 'gpt-4o', input: 'Hello'),
           ),
           throwsA(isA<StateError>()),

@@ -113,10 +113,10 @@ void main() {
       expect(client.close, returnsNormally);
     });
 
-    test('throws StateError when used after close', () {
+    test('throws StateError when used after close', () async {
       final client = AnthropicClient()..close();
-      expect(
-        () => client.messages.create(
+      await expectLater(
+        client.messages.create(
           MessageCreateRequest(
             model: 'claude-sonnet-4-20250514',
             maxTokens: 100,
