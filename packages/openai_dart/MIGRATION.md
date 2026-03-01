@@ -115,7 +115,7 @@ final client = OpenAIClient(
     authProvider: ApiKeyProvider('sk-...'),
     timeout: Duration(seconds: 60),
     retryPolicy: RetryPolicy(
-      maxRetries: 2,
+      maxRetries: 3,
       initialDelay: Duration(milliseconds: 500),
     ),
     logLevel: HttpLogLevel.basic,

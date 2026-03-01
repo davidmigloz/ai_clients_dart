@@ -128,10 +128,9 @@ void main() {
     });
 
     test('does not close custom httpClient', () {
-      final httpClient = http.Client();
+      final httpClient = _SpyHttpClient();
       final client = AnthropicClient(httpClient: httpClient)..close();
-      // httpClient should still be usable after client.close()
-      expect(client.close, returnsNormally);
+      expect(httpClient.closeCalled, isFalse);
     });
 
     group('fromEnvironment', () {
@@ -144,4 +143,18 @@ void main() {
       });
     });
   });
+}
+
+class _SpyHttpClient extends http.BaseClient {
+  bool closeCalled = false;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) {
+    throw UnimplementedError();
+  }
+
+  @override
+  void close() {
+    closeCalled = true;
+  }
 }
