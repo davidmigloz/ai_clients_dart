@@ -86,9 +86,7 @@ class VideosResource extends ResourceBase {
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
     final response = await interceptorChain.execute(httpRequest);
-    return Video.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Video.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Retrieves a video generation job.
@@ -98,9 +96,7 @@ class VideosResource extends ResourceBase {
     final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
-    return Video.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Video.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Deletes a video.
@@ -156,8 +152,6 @@ class VideosResource extends ResourceBase {
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
     final response = await interceptorChain.execute(httpRequest);
-    return Video.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Video.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 }

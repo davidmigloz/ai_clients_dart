@@ -41,22 +41,19 @@ class VectorStoresResource extends ResourceBase {
   VectorStoreFilesResource? _files;
 
   /// Access to vector store file operations.
-  VectorStoreFilesResource get files =>
-      _files ??= VectorStoreFilesResource(
-        config: config,
-        httpClient: httpClient,
-        interceptorChain: interceptorChain,
-        requestBuilder: requestBuilder,
-        ensureNotClosed: ensureNotClosed,
-      );
+  VectorStoreFilesResource get files => _files ??= VectorStoreFilesResource(
+    config: config,
+    httpClient: httpClient,
+    interceptorChain: interceptorChain,
+    requestBuilder: requestBuilder,
+    ensureNotClosed: ensureNotClosed,
+  );
 
   /// Creates a new vector store.
   Future<VectorStore> create(CreateVectorStoreRequest request) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(_endpoint);
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
@@ -84,9 +81,7 @@ class VectorStoresResource extends ResourceBase {
       _endpoint,
       queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
     return VectorStoreList.fromJson(
@@ -98,9 +93,7 @@ class VectorStoresResource extends ResourceBase {
   Future<VectorStore> retrieve(String vectorStoreId) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('$_endpoint/$vectorStoreId');
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
     return VectorStore.fromJson(
@@ -115,9 +108,7 @@ class VectorStoresResource extends ResourceBase {
   ) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('$_endpoint/$vectorStoreId');
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
@@ -131,9 +122,7 @@ class VectorStoresResource extends ResourceBase {
   Future<DeleteVectorStoreResponse> delete(String vectorStoreId) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('$_endpoint/$vectorStoreId');
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
     return DeleteVectorStoreResponse.fromJson(
@@ -165,9 +154,7 @@ class VectorStoreFilesResource extends ResourceBase {
   ) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(_endpoint(vectorStoreId));
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
@@ -198,9 +185,7 @@ class VectorStoreFilesResource extends ResourceBase {
       _endpoint(vectorStoreId),
       queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
     return VectorStoreFileList.fromJson(
@@ -211,12 +196,8 @@ class VectorStoreFilesResource extends ResourceBase {
   /// Retrieves a vector store file.
   Future<VectorStoreFile> retrieve(String vectorStoreId, String fileId) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl(
-      '${_endpoint(vectorStoreId)}/$fileId',
-    );
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final url = requestBuilder.buildUrl('${_endpoint(vectorStoreId)}/$fileId');
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
     return VectorStoreFile.fromJson(
@@ -230,12 +211,8 @@ class VectorStoreFilesResource extends ResourceBase {
     String fileId,
   ) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl(
-      '${_endpoint(vectorStoreId)}/$fileId',
-    );
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final url = requestBuilder.buildUrl('${_endpoint(vectorStoreId)}/$fileId');
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
     return DeleteVectorStoreFileResponse.fromJson(

@@ -81,9 +81,7 @@ class FilesResource extends ResourceBase {
     final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
-    return FileList.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return FileList.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Uploads a file to OpenAI.

@@ -306,10 +306,7 @@ class RealtimeCallsResource extends ResourceBase {
   ///   RealtimeCallReferRequest(targetUri: 'tel:+14155550123'),
   /// );
   /// ```
-  Future<void> refer(
-    String callId,
-    RealtimeCallReferRequest request,
-  ) async {
+  Future<void> refer(String callId, RealtimeCallReferRequest request) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('$_callsEndpoint/$callId/refer');
     final headers = requestBuilder.buildHeaders();

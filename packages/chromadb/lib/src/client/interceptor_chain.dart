@@ -71,7 +71,7 @@ class InterceptorChain {
             } on http.RequestAbortedException catch (e) {
               throw AbortedException(
                 message: 'Request aborted by user',
-                cause: e is Exception ? e : null,
+                cause: e,
               );
             }
           } else {

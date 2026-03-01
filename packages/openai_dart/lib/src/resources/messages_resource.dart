@@ -68,16 +68,12 @@ class MessagesResource extends ResourceBase {
   Future<Message> create(String threadId, CreateMessageRequest request) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(_endpoint(threadId));
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
     final response = await interceptorChain.execute(httpRequest);
-    return Message.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Message.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Lists messages in a thread.
@@ -127,9 +123,7 @@ class MessagesResource extends ResourceBase {
       _endpoint(threadId),
       queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
     return MessageList.fromJson(
@@ -160,14 +154,10 @@ class MessagesResource extends ResourceBase {
   Future<Message> retrieve(String threadId, String messageId) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('${_endpoint(threadId)}/$messageId');
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
-    return Message.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Message.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Modifies a message.
@@ -200,16 +190,12 @@ class MessagesResource extends ResourceBase {
   ) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('${_endpoint(threadId)}/$messageId');
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
     final response = await interceptorChain.execute(httpRequest);
-    return Message.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Message.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Deletes a message.
@@ -238,9 +224,7 @@ class MessagesResource extends ResourceBase {
   ) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('${_endpoint(threadId)}/$messageId');
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
     return DeleteMessageResponse.fromJson(

@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:chromadb/src/client/interceptor_chain.dart';
 import 'package:chromadb/src/interceptors/interceptor.dart';
 import 'package:http/http.dart' as http;
@@ -64,7 +66,7 @@ void main() {
           Uri.parse('https://example.com/test'),
         );
 
-        chain.execute(request);
+        unawaited(chain.execute(request));
 
         expect(ensureNotClosedCalled, isTrue);
       });
@@ -120,7 +122,7 @@ class _OrderTrackingInterceptor implements Interceptor {
   Future<http.Response> intercept(
     RequestContext context,
     InterceptorNext next,
-  ) async {
+  ) {
     callOrder.add(name);
     return next(context);
   }
@@ -136,7 +138,7 @@ class _ContextCapturingInterceptor implements Interceptor {
   Future<http.Response> intercept(
     RequestContext context,
     InterceptorNext next,
-  ) async {
+  ) {
     onCapture(context);
     return next(context);
   }

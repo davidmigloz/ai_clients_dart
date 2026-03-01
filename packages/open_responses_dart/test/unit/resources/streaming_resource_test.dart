@@ -22,8 +22,11 @@ class _TestStreamingResource extends ResourceBase with StreamingResource {
 class _MockHttpClient extends http.BaseClient {
   final List<http.StreamedResponse> _responses = [];
 
-  void queueResponse(int statusCode, String body,
-      {Map<String, String> headers = const {}}) {
+  void queueResponse(
+    int statusCode,
+    String body, {
+    Map<String, String> headers = const {},
+  }) {
     _responses.add(
       http.StreamedResponse(
         Stream.value(utf8.encode(body)),
@@ -72,8 +75,10 @@ void main() {
 
     group('prepareStreamingRequest', () {
       test('applies BearerToken auth', () async {
-        final request =
-            http.Request('POST', Uri.parse('https://api.example.com/v1/test'));
+        final request = http.Request(
+          'POST',
+          Uri.parse('https://api.example.com/v1/test'),
+        );
 
         final prepared = await resource.prepareStreamingRequest(request);
 
@@ -82,8 +87,10 @@ void main() {
 
       test('applies no auth when NoAuthCredentials', () async {
         resource = createResource(authProvider: const NoAuthProvider());
-        final request =
-            http.Request('POST', Uri.parse('https://api.example.com/v1/test'));
+        final request = http.Request(
+          'POST',
+          Uri.parse('https://api.example.com/v1/test'),
+        );
 
         final prepared = await resource.prepareStreamingRequest(request);
 
@@ -92,8 +99,10 @@ void main() {
 
       test('applies no auth when authProvider is null', () async {
         resource = createResource();
-        final request =
-            http.Request('POST', Uri.parse('https://api.example.com/v1/test'));
+        final request = http.Request(
+          'POST',
+          Uri.parse('https://api.example.com/v1/test'),
+        );
 
         final prepared = await resource.prepareStreamingRequest(request);
 
@@ -101,9 +110,10 @@ void main() {
       });
 
       test('does not overwrite existing Authorization header', () async {
-        final request =
-            http.Request('POST', Uri.parse('https://api.example.com/v1/test'))
-              ..headers['Authorization'] = 'Bearer existing-key';
+        final request = http.Request(
+          'POST',
+          Uri.parse('https://api.example.com/v1/test'),
+        )..headers['Authorization'] = 'Bearer existing-key';
 
         final prepared = await resource.prepareStreamingRequest(request);
 
@@ -114,8 +124,10 @@ void main() {
     group('sendStreamingRequest', () {
       test('returns StreamedResponse for success', () async {
         mockClient.queueResponse(200, '{"ok": true}');
-        final request =
-            http.Request('POST', Uri.parse('https://api.example.com/v1/test'));
+        final request = http.Request(
+          'POST',
+          Uri.parse('https://api.example.com/v1/test'),
+        );
 
         final response = await resource.sendStreamingRequest(request);
 
@@ -129,8 +141,10 @@ void main() {
             'error': {'message': 'Invalid API key'},
           }),
         );
-        final request =
-            http.Request('POST', Uri.parse('https://api.example.com/v1/test'));
+        final request = http.Request(
+          'POST',
+          Uri.parse('https://api.example.com/v1/test'),
+        );
 
         await expectLater(
           () => resource.sendStreamingRequest(request),
@@ -145,8 +159,10 @@ void main() {
             'error': {'message': 'Rate limit exceeded'},
           }),
         );
-        final request =
-            http.Request('POST', Uri.parse('https://api.example.com/v1/test'));
+        final request = http.Request(
+          'POST',
+          Uri.parse('https://api.example.com/v1/test'),
+        );
 
         await expectLater(
           () => resource.sendStreamingRequest(request),
@@ -158,14 +174,13 @@ void main() {
         mockClient.queueResponse(
           400,
           jsonEncode({
-            'error': {
-              'message': 'Invalid model',
-              'param': 'model',
-            },
+            'error': {'message': 'Invalid model', 'param': 'model'},
           }),
         );
-        final request =
-            http.Request('POST', Uri.parse('https://api.example.com/v1/test'));
+        final request = http.Request(
+          'POST',
+          Uri.parse('https://api.example.com/v1/test'),
+        );
 
         await expectLater(
           () => resource.sendStreamingRequest(request),
@@ -180,8 +195,10 @@ void main() {
             'error': {'message': 'Internal server error'},
           }),
         );
-        final request =
-            http.Request('POST', Uri.parse('https://api.example.com/v1/test'));
+        final request = http.Request(
+          'POST',
+          Uri.parse('https://api.example.com/v1/test'),
+        );
 
         await expectLater(
           () => resource.sendStreamingRequest(request),
@@ -210,8 +227,10 @@ void main() {
       });
 
       test('handles non-JSON body', () {
-        final exception =
-            resource.mapHttpErrorForStreaming(500, 'plain text error');
+        final exception = resource.mapHttpErrorForStreaming(
+          500,
+          'plain text error',
+        );
 
         expect(exception, isA<ApiException>());
         expect(exception.message, 'plain text error');
@@ -219,10 +238,7 @@ void main() {
 
       test('parses field errors for 400', () {
         final body = jsonEncode({
-          'error': {
-            'message': 'Invalid param',
-            'param': 'temperature',
-          },
+          'error': {'message': 'Invalid param', 'param': 'temperature'},
         });
 
         final exception = resource.mapHttpErrorForStreaming(400, body);

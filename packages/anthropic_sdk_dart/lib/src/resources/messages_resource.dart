@@ -63,9 +63,7 @@ class MessagesResource extends ResourceBase with StreamingResource {
       abortTrigger: abortTrigger,
     );
 
-    return Message.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Message.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Creates a streaming message.

@@ -123,9 +123,7 @@ class MessageBatchesResource extends ResourceBase {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl(
-      '/v1/messages/batches/$batchId/cancel',
-    );
+    final url = requestBuilder.buildUrl('/v1/messages/batches/$batchId/cancel');
     final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)

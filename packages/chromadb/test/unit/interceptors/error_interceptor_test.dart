@@ -8,6 +8,9 @@ void main() {
   group('ErrorInterceptor', () {
     const interceptor = ErrorInterceptor();
 
+    InterceptorNext nextReturning(http.Response response) =>
+        (_) => Future.value(response);
+
     test('builds RequestMetadata from context.request', () async {
       final request = http.Request(
         'POST',
@@ -23,7 +26,7 @@ void main() {
       try {
         await interceptor.intercept(
           context,
-          (ctx) async => http.Response('{"error": "not found"}', 404),
+          nextReturning(http.Response('{"error": "not found"}', 404)),
         );
         fail('Should have thrown');
       } on NotFoundException catch (e) {
@@ -49,7 +52,7 @@ void main() {
       try {
         await interceptor.intercept(
           context,
-          (ctx) async => http.Response('server error', 500),
+          nextReturning(http.Response('server error', 500)),
         );
         fail('Should have thrown');
       } on ServerException catch (e) {
@@ -70,7 +73,7 @@ void main() {
       try {
         await interceptor.intercept(
           context,
-          (ctx) async => http.Response('server error', 500),
+          nextReturning(http.Response('server error', 500)),
         );
         fail('Should have thrown');
       } on ServerException catch (e) {
@@ -78,7 +81,7 @@ void main() {
       }
     });
 
-    test('throws ValidationException for 400', () async {
+    test('throws ValidationException for 400', () {
       final request = http.Request(
         'POST',
         Uri.parse('https://example.com/test'),
@@ -88,13 +91,13 @@ void main() {
       expect(
         interceptor.intercept(
           context,
-          (ctx) async => http.Response('{"message": "invalid input"}', 400),
+          nextReturning(http.Response('{"message": "invalid input"}', 400)),
         ),
         throwsA(isA<ValidationException>()),
       );
     });
 
-    test('throws AuthenticationException for 401', () async {
+    test('throws AuthenticationException for 401', () {
       final request = http.Request(
         'GET',
         Uri.parse('https://example.com/test'),
@@ -104,13 +107,13 @@ void main() {
       expect(
         interceptor.intercept(
           context,
-          (ctx) async => http.Response('{"message": "unauthorized"}', 401),
+          nextReturning(http.Response('{"message": "unauthorized"}', 401)),
         ),
         throwsA(isA<AuthenticationException>()),
       );
     });
 
-    test('throws AuthenticationException for 403', () async {
+    test('throws AuthenticationException for 403', () {
       final request = http.Request(
         'GET',
         Uri.parse('https://example.com/test'),
@@ -120,13 +123,13 @@ void main() {
       expect(
         interceptor.intercept(
           context,
-          (ctx) async => http.Response('{"message": "forbidden"}', 403),
+          nextReturning(http.Response('{"message": "forbidden"}', 403)),
         ),
         throwsA(isA<AuthenticationException>()),
       );
     });
 
-    test('throws NotFoundException for 404', () async {
+    test('throws NotFoundException for 404', () {
       final request = http.Request(
         'GET',
         Uri.parse('https://example.com/test'),
@@ -136,13 +139,13 @@ void main() {
       expect(
         interceptor.intercept(
           context,
-          (ctx) async => http.Response('{"message": "not found"}', 404),
+          nextReturning(http.Response('{"message": "not found"}', 404)),
         ),
         throwsA(isA<NotFoundException>()),
       );
     });
 
-    test('throws ConflictException for 409', () async {
+    test('throws ConflictException for 409', () {
       final request = http.Request(
         'POST',
         Uri.parse('https://example.com/test'),
@@ -152,13 +155,13 @@ void main() {
       expect(
         interceptor.intercept(
           context,
-          (ctx) async => http.Response('{"message": "already exists"}', 409),
+          nextReturning(http.Response('{"message": "already exists"}', 409)),
         ),
         throwsA(isA<ConflictException>()),
       );
     });
 
-    test('throws RateLimitException for 429', () async {
+    test('throws RateLimitException for 429', () {
       final request = http.Request(
         'GET',
         Uri.parse('https://example.com/test'),
@@ -168,13 +171,13 @@ void main() {
       expect(
         interceptor.intercept(
           context,
-          (ctx) async => http.Response('{"message": "too many requests"}', 429),
+          nextReturning(http.Response('{"message": "too many requests"}', 429)),
         ),
         throwsA(isA<RateLimitException>()),
       );
     });
 
-    test('throws ServerException for 500', () async {
+    test('throws ServerException for 500', () {
       final request = http.Request(
         'GET',
         Uri.parse('https://example.com/test'),
@@ -184,7 +187,7 @@ void main() {
       expect(
         interceptor.intercept(
           context,
-          (ctx) async => http.Response('{"message": "internal error"}', 500),
+          nextReturning(http.Response('{"message": "internal error"}', 500)),
         ),
         throwsA(isA<ServerException>()),
       );
@@ -199,7 +202,7 @@ void main() {
 
       final response = await interceptor.intercept(
         context,
-        (ctx) async => http.Response('{"ok": true}', 200),
+        nextReturning(http.Response('{"ok": true}', 200)),
       );
 
       expect(response.statusCode, 200);
@@ -216,7 +219,7 @@ void main() {
       try {
         await interceptor.intercept(
           context,
-          (ctx) async => http.Response('error', 500),
+          nextReturning(http.Response('error', 500)),
         );
         fail('Should have thrown');
       } on ServerException catch (e) {

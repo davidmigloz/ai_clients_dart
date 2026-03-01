@@ -31,8 +31,9 @@ class ResponsesResource extends ResourceBase with StreamingResource {
     ensureNotClosed?.call();
 
     // Ensure stream is false
-    final requestToSend =
-        (request.stream ?? false) ? request.copyWith(stream: false) : request;
+    final requestToSend = (request.stream ?? false)
+        ? request.copyWith(stream: false)
+        : request;
 
     final url = requestBuilder.buildUrl('/responses');
     final headers = requestBuilder.buildHeaders();

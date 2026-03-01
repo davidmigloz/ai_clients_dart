@@ -59,14 +59,13 @@ class ConversationsResource extends ResourceBase {
   ConversationItemsResource? _items;
 
   /// Access to conversation items operations.
-  ConversationItemsResource get items =>
-      _items ??= ConversationItemsResource(
-        config: config,
-        httpClient: httpClient,
-        interceptorChain: interceptorChain,
-        requestBuilder: requestBuilder,
-        ensureNotClosed: ensureNotClosed,
-      );
+  ConversationItemsResource get items => _items ??= ConversationItemsResource(
+    config: config,
+    httpClient: httpClient,
+    interceptorChain: interceptorChain,
+    requestBuilder: requestBuilder,
+    ensureNotClosed: ensureNotClosed,
+  );
 
   /// Creates a new conversation.
   Future<Conversation> create(
@@ -164,9 +163,7 @@ class ConversationItemsResource extends ResourceBase {
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl(
-      '/conversations/$conversationId/items',
-    );
+    final url = requestBuilder.buildUrl('/conversations/$conversationId/items');
     final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)

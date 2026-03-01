@@ -147,9 +147,7 @@ class SkillsResource extends ResourceBase {
 
     final response = await interceptorChain.execute(httpRequest);
 
-    return Skill.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Skill.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Deletes a skill.

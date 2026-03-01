@@ -74,7 +74,7 @@ client.corpora.documents(corpus).chunks(doc).list()  // Nested sub-resources
 ### Resource Organization
 
 All resources extend `ResourceBase` which provides shared infrastructure:
-- `config`, `httpClient`, `interceptorChain`, `requestBuilder`
+- `config`, `httpClient`, `interceptorChain`, `requestBuilder`, `ensureNotClosed`
 
 Resources delegate HTTP execution to the interceptor chain for consistent auth, retry, logging, and error handling.
 
@@ -94,6 +94,25 @@ abstract interface class Interceptor {
 }
 
 typedef InterceptorNext = Future<http.Response> Function(RequestContext context);
+```
+
+### RequestContext
+
+Interceptors receive a `RequestContext` containing:
+- `request`: The `http.BaseRequest` being processed
+- `response`: The `http.Response` (populated by transport, `null` during request phase)
+- `metadata`: A `Map<String, dynamic>` for cross-cutting data (e.g., `timestamp`, `attemptNumber`)
+- `abortTrigger`: An optional `Future<void>` that completes to abort the request
+
+### InterceptorChain
+
+The chain's entry point:
+```dart
+Future<http.Response> execute(
+  http.BaseRequest request, {
+  Future<void>? abortTrigger,
+  bool isIdempotent = false,
+});
 ```
 
 **Capabilities**:
@@ -121,7 +140,7 @@ Retry is attempted for:
 - Server errors (5xx)
 - Timeouts
 
-**Idempotency check**: Only idempotent methods are retried: `GET`, `HEAD`, `OPTIONS`, `PUT`, `DELETE`. Non-idempotent methods (`POST`, `PATCH`) are NOT retried to avoid duplicate operations.
+**Idempotency check**: Only idempotent methods are retried: `GET`, `HEAD`, `OPTIONS`, `PUT`, `DELETE`. Non-idempotent methods (`POST`, `PATCH`) are NOT retried by default. Resources may override this by passing `isIdempotent: true` to `InterceptorChain.execute()` for POST endpoints that are semantically idempotent (e.g., read-only query endpoints that use POST for body size).
 
 ### Request/Response Pipeline
 
@@ -136,6 +155,8 @@ Retry is attempted for:
 Streaming responses (SSE) cannot pass through the full interceptor chain since `StreamedResponse` is consumed incrementally.
 
 **Pattern**: Auth, logging, and error mapping applied manually before/during streaming.
+
+**Implementation**: Packages extract this pattern into a `mixin StreamingResource on ResourceBase` that provides `prepareStreamingRequest()` and `sendStreamingRequest()` helpers for auth application and error mapping on streaming requests.
 
 This is an acceptable tradeoff for real-time streaming while maintaining security.
 
@@ -559,7 +580,7 @@ Future<ResponseType> methodName({required String param}) async {
 5. **DO NOT** add mutable fields
 6. **DO NOT** use `dynamic` outside JSON parsing
 7. **DO NOT** skip analyzer checks
-8. **DO NOT** retry non-idempotent methods (POST, PATCH)
+8. **DO NOT** retry non-idempotent methods (POST, PATCH) unless explicitly marked `isIdempotent: true` on the `execute()` call
 
 ---
 

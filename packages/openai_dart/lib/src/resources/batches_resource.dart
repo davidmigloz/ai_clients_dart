@@ -72,9 +72,7 @@ class BatchesResource extends ResourceBase {
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
     final response = await interceptorChain.execute(httpRequest);
-    return Batch.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Batch.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Lists batches for the organization.
@@ -140,9 +138,7 @@ class BatchesResource extends ResourceBase {
     final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
-    return Batch.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Batch.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Cancels a batch.
@@ -172,8 +168,6 @@ class BatchesResource extends ResourceBase {
       ..headers.addAll(headers)
       ..body = jsonEncode(<String, dynamic>{});
     final response = await interceptorChain.execute(httpRequest);
-    return Batch.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Batch.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 }

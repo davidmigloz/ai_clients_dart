@@ -5,8 +5,8 @@ import 'package:test/test.dart';
 void main() {
   group('Realtime URL', () {
     test('buildUrl creates correct WebSocket URL from HTTPS base', () {
-      final builder = RequestBuilder(
-        config: const OpenAIConfig(
+      const builder = RequestBuilder(
+        config: OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test'),
           baseUrl: 'https://api.openai.com/v1',
         ),
@@ -37,8 +37,8 @@ void main() {
     });
 
     test('buildUrl handles HTTP base URL (converts to WS)', () {
-      final builder = RequestBuilder(
-        config: const OpenAIConfig(
+      const builder = RequestBuilder(
+        config: OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test'),
           baseUrl: 'http://localhost:8080/v1',
         ),
@@ -60,8 +60,8 @@ void main() {
     });
 
     test('buildUrl handles Azure-style base URL for realtime', () {
-      final builder = RequestBuilder(
-        config: const OpenAIConfig(
+      const builder = RequestBuilder(
+        config: OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test'),
           baseUrl:
               'https://example.openai.azure.com/openai/deployments/my-deploy?api-version=2024-10-01',

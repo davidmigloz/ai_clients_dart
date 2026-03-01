@@ -67,16 +67,12 @@ class RunsResource extends ResourceBase with StreamingResource {
   Future<Run> create(String threadId, CreateRunRequest request) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(_endpoint(threadId));
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
     final response = await interceptorChain.execute(httpRequest);
-    return Run.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Run.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Creates a run with streaming.
@@ -163,14 +159,10 @@ class RunsResource extends ResourceBase with StreamingResource {
       _endpoint(threadId),
       queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
-    return RunList.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return RunList.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Retrieves a run by ID.
@@ -196,14 +188,10 @@ class RunsResource extends ResourceBase with StreamingResource {
   Future<Run> retrieve(String threadId, String runId) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('${_endpoint(threadId)}/$runId');
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
-    return Run.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Run.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Modifies a run.
@@ -226,16 +214,12 @@ class RunsResource extends ResourceBase with StreamingResource {
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('${_endpoint(threadId)}/$runId');
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode({'metadata': metadata});
     final response = await interceptorChain.execute(httpRequest);
-    return Run.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Run.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Cancels a run.
@@ -260,19 +244,13 @@ class RunsResource extends ResourceBase with StreamingResource {
   /// ```
   Future<Run> cancel(String threadId, String runId) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl(
-      '${_endpoint(threadId)}/$runId/cancel',
-    );
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final url = requestBuilder.buildUrl('${_endpoint(threadId)}/$runId/cancel');
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(<String, dynamic>{});
     final response = await interceptorChain.execute(httpRequest);
-    return Run.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Run.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Submits tool outputs for a run.
@@ -314,16 +292,12 @@ class RunsResource extends ResourceBase with StreamingResource {
     final url = requestBuilder.buildUrl(
       '${_endpoint(threadId)}/$runId/submit_tool_outputs',
     );
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
     final response = await interceptorChain.execute(httpRequest);
-    return Run.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Run.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Lists run steps.
@@ -359,9 +333,7 @@ class RunsResource extends ResourceBase with StreamingResource {
       '${_endpoint(threadId)}/$runId/steps',
       queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
     return RunStepList.fromJson(
@@ -389,13 +361,9 @@ class RunsResource extends ResourceBase with StreamingResource {
     final url = requestBuilder.buildUrl(
       '${_endpoint(threadId)}/$runId/steps/$stepId',
     );
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
-    return RunStep.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return RunStep.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 }

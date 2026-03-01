@@ -289,15 +289,14 @@ class OpenAIClient {
   /// );
   /// print(completion.text);
   /// ```
-  CompletionsResource get completions =>
-      _completions ??= CompletionsResource(
-        config: config,
-        httpClient: _httpClient,
-        interceptorChain: _interceptorChain,
-        requestBuilder: _requestBuilder,
-        ensureNotClosed: _ensureNotClosed,
-        streamClientFactory: _streamClientFactory,
-      );
+  CompletionsResource get completions => _completions ??= CompletionsResource(
+    config: config,
+    httpClient: _httpClient,
+    interceptorChain: _interceptorChain,
+    requestBuilder: _requestBuilder,
+    ensureNotClosed: _ensureNotClosed,
+    streamClientFactory: _streamClientFactory,
+  );
 
   EmbeddingsResource? _embeddings;
 
@@ -498,14 +497,13 @@ class OpenAIClient {
   /// );
   /// print('Flagged: ${result.results.first.flagged}');
   /// ```
-  ModerationsResource get moderations =>
-      _moderations ??= ModerationsResource(
-        config: config,
-        httpClient: _httpClient,
-        interceptorChain: _interceptorChain,
-        requestBuilder: _requestBuilder,
-        ensureNotClosed: _ensureNotClosed,
-      );
+  ModerationsResource get moderations => _moderations ??= ModerationsResource(
+    config: config,
+    httpClient: _httpClient,
+    interceptorChain: _interceptorChain,
+    requestBuilder: _requestBuilder,
+    ensureNotClosed: _ensureNotClosed,
+  );
 
   FineTuningResource? _fineTuning;
 

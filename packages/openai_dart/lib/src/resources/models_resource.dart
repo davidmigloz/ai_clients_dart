@@ -94,9 +94,7 @@ class ModelsResource extends ResourceBase {
       httpRequest,
       abortTrigger: abortTrigger,
     );
-    return Model.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Model.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Deletes a fine-tuned model.

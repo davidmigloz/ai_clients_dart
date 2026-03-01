@@ -103,14 +103,13 @@ class ResponsesResource extends ResourceBase with StreamingResource {
   /// );
   /// print('Input tokens: ${tokenCount.inputTokens}');
   /// ```
-  InputTokensResource get inputTokens =>
-      _inputTokens ??= InputTokensResource(
-        config: config,
-        httpClient: httpClient,
-        interceptorChain: interceptorChain,
-        requestBuilder: requestBuilder,
-        ensureNotClosed: ensureNotClosed,
-      );
+  InputTokensResource get inputTokens => _inputTokens ??= InputTokensResource(
+    config: config,
+    httpClient: httpClient,
+    interceptorChain: interceptorChain,
+    requestBuilder: requestBuilder,
+    ensureNotClosed: ensureNotClosed,
+  );
 
   /// Creates a response.
   ///
@@ -148,9 +147,7 @@ class ResponsesResource extends ResourceBase with StreamingResource {
       httpRequest,
       abortTrigger: abortTrigger,
     );
-    return Response.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Response.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Compacts response conversation state.
@@ -222,7 +219,7 @@ class ResponsesResource extends ResourceBase with StreamingResource {
       endpoint: _endpoint,
       body: requestBody,
       abortTrigger: abortTrigger,
-    ).map((json) => ResponseStreamEvent.fromJson(json));
+    ).map(ResponseStreamEvent.fromJson);
   }
 
   /// Creates a streaming response with accumulated events.
@@ -295,9 +292,7 @@ class ResponsesResource extends ResourceBase with StreamingResource {
       httpRequest,
       abortTrigger: abortTrigger,
     );
-    return Response.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Response.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Converts include values to repeated query parameters format.
@@ -439,9 +434,7 @@ class ResponsesResource extends ResourceBase with StreamingResource {
       httpRequest,
       abortTrigger: abortTrigger,
     );
-    return Response.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Response.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 }
 

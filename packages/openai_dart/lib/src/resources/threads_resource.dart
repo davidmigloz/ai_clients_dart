@@ -93,16 +93,12 @@ class ThreadsResource extends ResourceBase {
   Future<Thread> create([CreateThreadRequest? request]) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(_endpoint);
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(request?.toJson() ?? {});
     final response = await interceptorChain.execute(httpRequest);
-    return Thread.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Thread.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Retrieves a thread by ID.
@@ -124,14 +120,10 @@ class ThreadsResource extends ResourceBase {
   Future<Thread> retrieve(String threadId) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('$_endpoint/$threadId');
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
-    return Thread.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Thread.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Modifies a thread.
@@ -158,16 +150,12 @@ class ThreadsResource extends ResourceBase {
   Future<Thread> update(String threadId, ModifyThreadRequest request) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('$_endpoint/$threadId');
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
     final response = await interceptorChain.execute(httpRequest);
-    return Thread.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Thread.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Deletes a thread.
@@ -189,9 +177,7 @@ class ThreadsResource extends ResourceBase {
   Future<DeleteThreadResponse> delete(String threadId) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('$_endpoint/$threadId');
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
     return DeleteThreadResponse.fromJson(

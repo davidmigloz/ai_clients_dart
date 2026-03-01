@@ -98,9 +98,7 @@ class SkillsResource extends ResourceBase {
       httpRequest,
       abortTrigger: abortTrigger,
     );
-    return Skill.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Skill.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Updates the default version pointer for a skill.
@@ -119,9 +117,7 @@ class SkillsResource extends ResourceBase {
       httpRequest,
       abortTrigger: abortTrigger,
     );
-    return Skill.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Skill.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Deletes a skill.

@@ -80,9 +80,7 @@ class UploadsResource extends ResourceBase {
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
     final response = await interceptorChain.execute(httpRequest);
-    return Upload.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Upload.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Adds a part to an upload.
@@ -161,9 +159,7 @@ class UploadsResource extends ResourceBase {
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
     final response = await interceptorChain.execute(httpRequest);
-    return Upload.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Upload.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Cancels an upload.
@@ -193,8 +189,6 @@ class UploadsResource extends ResourceBase {
       ..headers.addAll(headers)
       ..body = jsonEncode(<String, dynamic>{});
     final response = await interceptorChain.execute(httpRequest);
-    return Upload.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Upload.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 }

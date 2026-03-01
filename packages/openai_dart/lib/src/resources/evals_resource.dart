@@ -82,9 +82,7 @@ class EvalsResource extends ResourceBase {
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
     final response = await interceptorChain.execute(httpRequest);
-    return Eval.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Eval.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Lists all evaluations.
@@ -108,9 +106,7 @@ class EvalsResource extends ResourceBase {
     final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
-    return EvalList.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return EvalList.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Retrieves an evaluation by ID.
@@ -120,9 +116,7 @@ class EvalsResource extends ResourceBase {
     final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
-    return Eval.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Eval.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Updates an evaluation.
@@ -134,9 +128,7 @@ class EvalsResource extends ResourceBase {
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
     final response = await interceptorChain.execute(httpRequest);
-    return Eval.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return Eval.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Deletes an evaluation.
@@ -184,9 +176,7 @@ class EvalRunsResource extends ResourceBase {
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
     final response = await interceptorChain.execute(httpRequest);
-    return EvalRun.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return EvalRun.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Lists runs for an evaluation.
@@ -223,9 +213,7 @@ class EvalRunsResource extends ResourceBase {
     final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
-    return EvalRun.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return EvalRun.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   /// Deletes a run.
@@ -249,9 +237,7 @@ class EvalRunsResource extends ResourceBase {
       ..headers.addAll(headers)
       ..body = jsonEncode(<String, dynamic>{});
     final response = await interceptorChain.execute(httpRequest);
-    return EvalRun.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    return EvalRun.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 }
 

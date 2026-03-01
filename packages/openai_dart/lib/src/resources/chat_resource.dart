@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 
 import '../models/chat/chat.dart';
 import '../models/streaming/streaming.dart';
-import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
 import 'streaming_resource.dart';
 
@@ -181,7 +180,7 @@ class ChatCompletionsResource extends ResourceBase with StreamingResource {
       endpoint: _endpoint,
       body: requestBody,
       abortTrigger: abortTrigger,
-    ).map((json) => ChatStreamEvent.fromJson(json));
+    ).map(ChatStreamEvent.fromJson);
   }
 
   /// Creates a streaming chat completion with accumulated events.

@@ -7,8 +7,8 @@ import 'package:test/test.dart';
 void main() {
   group('AuthInterceptor', () {
     test('adds x-chroma-token via context.request.headers', () async {
-      final interceptor = AuthInterceptor(
-        authProvider: const ApiKeyProvider('test-key'),
+      const interceptor = AuthInterceptor(
+        authProvider: ApiKeyProvider('test-key'),
       );
 
       final request = http.Request(
@@ -24,8 +24,8 @@ void main() {
     });
 
     test('adds Bearer token via context.request.headers', () async {
-      final interceptor = AuthInterceptor(
-        authProvider: const BearerTokenProvider('my-token'),
+      const interceptor = AuthInterceptor(
+        authProvider: BearerTokenProvider('my-token'),
       );
 
       final request = http.Request(
@@ -41,7 +41,7 @@ void main() {
     });
 
     test('does not add headers for NoAuthProvider', () async {
-      final interceptor = AuthInterceptor(authProvider: const NoAuthProvider());
+      const interceptor = AuthInterceptor(authProvider: NoAuthProvider());
 
       final request = http.Request(
         'GET',

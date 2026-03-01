@@ -53,40 +53,39 @@ void main() {
       expect(request.method, 'POST');
     });
 
-    test('prepareStreamingRequest applies auth from config.authProvider',
-        () async {
-      mockHttpClient.queueStreamingResponse(
-        MockResponses.streamingEvents(text: 'Authenticated!'),
-      );
+    test(
+      'prepareStreamingRequest applies auth from config.authProvider',
+      () async {
+        mockHttpClient.queueStreamingResponse(
+          MockResponses.streamingEvents(text: 'Authenticated!'),
+        );
 
-      await client.messages
-          .createStream(
-            MessageCreateRequest(
-              model: 'claude-sonnet-4-20250514',
-              maxTokens: 256,
-              messages: [InputMessage.user('Hi!')],
-            ),
-          )
-          .toList();
+        await client.messages
+            .createStream(
+              MessageCreateRequest(
+                model: 'claude-sonnet-4-20250514',
+                maxTokens: 256,
+                messages: [InputMessage.user('Hi!')],
+              ),
+            )
+            .toList();
 
-      // Verify auth header was applied via config.authProvider
-      final request = mockHttpClient.lastRequest!;
-      expect(request.headers['x-api-key'], 'test-api-key');
-    });
+        // Verify auth header was applied via config.authProvider
+        final request = mockHttpClient.lastRequest!;
+        expect(request.headers['x-api-key'], 'test-api-key');
+      },
+    );
 
     test('postStream throws exception for 400+ status', () async {
-      mockHttpClient.queueStreamingResponse(
-        [
-          {
-            'type': 'error',
-            'error': {
-              'type': 'invalid_request_error',
-              'message': 'Invalid model',
-            },
+      mockHttpClient.queueStreamingResponse([
+        {
+          'type': 'error',
+          'error': {
+            'type': 'invalid_request_error',
+            'message': 'Invalid model',
           },
-        ],
-        statusCode: 400,
-      );
+        },
+      ], statusCode: 400);
 
       await expectLater(
         client.messages

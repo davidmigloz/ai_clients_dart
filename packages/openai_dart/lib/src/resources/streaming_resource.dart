@@ -1,4 +1,4 @@
-import 'dart:async' show Completer, StreamController, StreamSubscription, unawaited;
+import 'dart:async' show StreamController, StreamSubscription, unawaited;
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -41,8 +41,7 @@ mixin StreamingResource on ResourceBase {
     request.headers.addAll(streamHeaders);
 
     // Log request if logging is enabled
-    final logger = Logger('OpenAIClient');
-    logger.fine('Streaming ${request.method} ${request.url}');
+    Logger('OpenAIClient').fine('Streaming ${request.method} ${request.url}');
 
     // For abort support, create a dedicated HTTP client for this stream.
     // When abortTrigger completes, we close the client which cancels
@@ -151,11 +150,7 @@ mixin StreamingResource on ResourceBase {
   }
 
   /// Parses an error response from a streaming request.
-  ApiException parseStreamError(
-    int statusCode,
-    String body,
-    String requestId,
-  ) {
+  ApiException parseStreamError(int statusCode, String body, String requestId) {
     try {
       final json = jsonDecode(body) as Map<String, dynamic>;
       final error = json['error'] as Map<String, dynamic>?;
@@ -185,10 +180,9 @@ mixin StreamingResource on ResourceBase {
     required Map<String, dynamic> body,
     Map<String, String>? additionalHeaders,
     Future<void>? abortTrigger,
-  }) async {
+  }) {
     final url = requestBuilder.buildUrl(endpoint);
-    final request = http.Request('POST', url);
-    request.body = jsonEncode(body);
+    final request = http.Request('POST', url)..body = jsonEncode(body);
 
     return sendStream(
       request: request,

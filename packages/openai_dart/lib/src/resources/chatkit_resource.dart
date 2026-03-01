@@ -45,14 +45,13 @@ class ChatkitResource extends ResourceBase {
   ChatkitSessionsResource? _sessions;
 
   /// ChatKit sessions sub-resource.
-  ChatkitSessionsResource get sessions =>
-      _sessions ??= ChatkitSessionsResource(
-        config: config,
-        httpClient: httpClient,
-        interceptorChain: interceptorChain,
-        requestBuilder: requestBuilder,
-        ensureNotClosed: ensureNotClosed,
-      );
+  ChatkitSessionsResource get sessions => _sessions ??= ChatkitSessionsResource(
+    config: config,
+    httpClient: httpClient,
+    interceptorChain: interceptorChain,
+    requestBuilder: requestBuilder,
+    ensureNotClosed: ensureNotClosed,
+  );
 
   ChatkitThreadsResource? _threads;
 
@@ -110,9 +109,7 @@ class ChatkitSessionsResource extends ResourceBase {
   Future<ChatSession> create(CreateChatSessionRequest request) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(_endpoint);
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
@@ -141,9 +138,7 @@ class ChatkitSessionsResource extends ResourceBase {
   Future<ChatSession> cancel(String sessionId) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('$_endpoint/$sessionId/cancel');
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(<String, dynamic>{});
@@ -173,14 +168,13 @@ class ChatkitThreadsResource extends ResourceBase {
   ChatkitThreadItemsResource? _items;
 
   /// Thread items sub-resource.
-  ChatkitThreadItemsResource get items =>
-      _items ??= ChatkitThreadItemsResource(
-        config: config,
-        httpClient: httpClient,
-        interceptorChain: interceptorChain,
-        requestBuilder: requestBuilder,
-        ensureNotClosed: ensureNotClosed,
-      );
+  ChatkitThreadItemsResource get items => _items ??= ChatkitThreadItemsResource(
+    config: config,
+    httpClient: httpClient,
+    interceptorChain: interceptorChain,
+    requestBuilder: requestBuilder,
+    ensureNotClosed: ensureNotClosed,
+  );
 
   /// Lists ChatKit threads.
   ///
@@ -221,9 +215,7 @@ class ChatkitThreadsResource extends ResourceBase {
       _endpoint,
       queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
     return ChatkitThreadList.fromJson(
@@ -251,9 +243,7 @@ class ChatkitThreadsResource extends ResourceBase {
   Future<ChatkitThread> retrieve(String threadId) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('$_endpoint/$threadId');
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
     return ChatkitThread.fromJson(
@@ -280,9 +270,7 @@ class ChatkitThreadsResource extends ResourceBase {
   Future<DeleteChatkitThreadResponse> delete(String threadId) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('$_endpoint/$threadId');
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
     return DeleteChatkitThreadResponse.fromJson(
@@ -350,9 +338,7 @@ class ChatkitThreadItemsResource extends ResourceBase {
       '/chatkit/threads/$threadId/items',
       queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
     return ThreadItemList.fromJson(

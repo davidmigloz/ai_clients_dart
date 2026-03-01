@@ -69,9 +69,7 @@ class AssistantsResource extends ResourceBase {
   Future<Assistant> create(CreateAssistantRequest request) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(_endpoint);
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
@@ -120,9 +118,7 @@ class AssistantsResource extends ResourceBase {
       _endpoint,
       queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
     return AssistantList.fromJson(
@@ -150,9 +146,7 @@ class AssistantsResource extends ResourceBase {
   Future<Assistant> retrieve(String assistantId) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('$_endpoint/$assistantId');
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
     return Assistant.fromJson(
@@ -188,9 +182,7 @@ class AssistantsResource extends ResourceBase {
   ) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('$_endpoint/$assistantId');
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
@@ -219,9 +211,7 @@ class AssistantsResource extends ResourceBase {
   Future<DeleteAssistantResponse> delete(String assistantId) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('$_endpoint/$assistantId');
-    final headers = requestBuilder.buildBetaHeaders(
-      betaFeature: _betaFeature,
-    );
+    final headers = requestBuilder.buildBetaHeaders(betaFeature: _betaFeature);
     final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
     return DeleteAssistantResponse.fromJson(

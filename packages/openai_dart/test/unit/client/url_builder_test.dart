@@ -5,8 +5,8 @@ import 'package:test/test.dart';
 void main() {
   group('URL Builder', () {
     test('builds URL with simple base URL', () {
-      final builder = RequestBuilder(
-        config: const OpenAIConfig(
+      const builder = RequestBuilder(
+        config: OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test'),
           baseUrl: 'https://api.openai.com/v1',
         ),
@@ -21,8 +21,8 @@ void main() {
     });
 
     test('normalizes double slashes', () {
-      final builder = RequestBuilder(
-        config: const OpenAIConfig(
+      const builder = RequestBuilder(
+        config: OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test'),
           baseUrl: 'https://api.openai.com/v1/',
         ),
@@ -35,8 +35,8 @@ void main() {
     });
 
     test('handles endpoint without leading slash', () {
-      final builder = RequestBuilder(
-        config: const OpenAIConfig(
+      const builder = RequestBuilder(
+        config: OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test'),
           baseUrl: 'https://api.openai.com/v1',
         ),
@@ -48,8 +48,8 @@ void main() {
     });
 
     test('builds URL with Azure-style base URL including query params', () {
-      final builder = RequestBuilder(
-        config: const OpenAIConfig(
+      const builder = RequestBuilder(
+        config: OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test'),
           baseUrl:
               'https://example.openai.azure.com/openai/deployments/my-deploy?api-version=2024-10-01',
@@ -68,8 +68,8 @@ void main() {
     });
 
     test('merges request query params with base URL params', () {
-      final builder = RequestBuilder(
-        config: const OpenAIConfig(
+      const builder = RequestBuilder(
+        config: OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test'),
           baseUrl:
               'https://example.openai.azure.com/openai?api-version=2024-10-01',
@@ -86,8 +86,8 @@ void main() {
     });
 
     test('request query params override base URL params on conflict', () {
-      final builder = RequestBuilder(
-        config: const OpenAIConfig(
+      const builder = RequestBuilder(
+        config: OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test'),
           baseUrl:
               'https://example.openai.azure.com/openai?api-version=2024-10-01',
@@ -103,8 +103,8 @@ void main() {
     });
 
     test('handles base URL with multiple path segments', () {
-      final builder = RequestBuilder(
-        config: const OpenAIConfig(
+      const builder = RequestBuilder(
+        config: OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test'),
           baseUrl: 'https://proxy.example.com/api/v1/openai',
         ),
@@ -116,8 +116,8 @@ void main() {
     });
 
     test('handles localhost base URL', () {
-      final builder = RequestBuilder(
-        config: const OpenAIConfig(
+      const builder = RequestBuilder(
+        config: OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test'),
           baseUrl: 'http://localhost:8080/v1',
         ),
@@ -132,8 +132,8 @@ void main() {
     });
 
     test('handles base URL with no path', () {
-      final builder = RequestBuilder(
-        config: const OpenAIConfig(
+      const builder = RequestBuilder(
+        config: OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test'),
           baseUrl: 'https://api.openai.com',
         ),
@@ -145,8 +145,8 @@ void main() {
     });
 
     test('handles complex Azure URL with deployment and version', () {
-      final builder = RequestBuilder(
-        config: const OpenAIConfig(
+      const builder = RequestBuilder(
+        config: OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test'),
           baseUrl:
               'https://my-resource.openai.azure.com/openai/deployments/gpt-4o-mini?api-version=2024-08-01-preview',
@@ -166,8 +166,8 @@ void main() {
 
   group('buildUrlWithQueryAll', () {
     test('preserves userInfo from base URL', () {
-      final builder = RequestBuilder(
-        config: const OpenAIConfig(
+      const builder = RequestBuilder(
+        config: OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test'),
           baseUrl: 'https://user:pass@api.example.com/v1',
         ),
@@ -181,8 +181,8 @@ void main() {
     });
 
     test('preserves fragment from base URL', () {
-      final builder = RequestBuilder(
-        config: const OpenAIConfig(
+      const builder = RequestBuilder(
+        config: OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test'),
           baseUrl: 'https://api.example.com/v1#section',
         ),
@@ -195,8 +195,8 @@ void main() {
     });
 
     test('preserves explicit port 443 when specified', () {
-      final builder = RequestBuilder(
-        config: const OpenAIConfig(
+      const builder = RequestBuilder(
+        config: OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test'),
           baseUrl: 'https://api.example.com:443/v1',
         ),
@@ -209,8 +209,8 @@ void main() {
     });
 
     test('preserves explicit port 80 when specified', () {
-      final builder = RequestBuilder(
-        config: const OpenAIConfig(
+      const builder = RequestBuilder(
+        config: OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test'),
           baseUrl: 'http://api.example.com:80/v1',
         ),
@@ -223,8 +223,8 @@ void main() {
     });
 
     test('preserves non-standard port', () {
-      final builder = RequestBuilder(
-        config: const OpenAIConfig(
+      const builder = RequestBuilder(
+        config: OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test'),
           baseUrl: 'https://api.example.com:8443/v1',
         ),
@@ -236,8 +236,8 @@ void main() {
     });
 
     test('preserves all URI components together', () {
-      final builder = RequestBuilder(
-        config: const OpenAIConfig(
+      const builder = RequestBuilder(
+        config: OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test'),
           baseUrl:
               'https://user:pass@api.example.com:443/v1?api-version=1#frag',
@@ -265,8 +265,8 @@ void main() {
     });
 
     test('handles repeated query parameters', () {
-      final builder = RequestBuilder(
-        config: const OpenAIConfig(
+      const builder = RequestBuilder(
+        config: OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test'),
           baseUrl: 'https://api.openai.com/v1',
         ),
@@ -287,8 +287,8 @@ void main() {
     });
 
     test('merges single-value and repeated params with base URL params', () {
-      final builder = RequestBuilder(
-        config: const OpenAIConfig(
+      const builder = RequestBuilder(
+        config: OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test'),
           baseUrl: 'https://api.example.com/v1?api-version=2024',
         ),

@@ -120,6 +120,6 @@ class CompletionsResource extends ResourceBase with StreamingResource {
       endpoint: _endpoint,
       body: requestBody,
       abortTrigger: abortTrigger,
-    ).map((json) => Completion.fromJson(json));
+    ).map(Completion.fromJson);
   }
 }
