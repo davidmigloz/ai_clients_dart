@@ -149,6 +149,10 @@ mixin StreamingResource on ResourceBase {
       }
     }
 
+    if (statusCode == 401) {
+      return AuthenticationException(message: message);
+    }
+
     if (statusCode == 429) {
       DateTime? retryAfter;
       final retryHeader = response.headers['retry-after'];
