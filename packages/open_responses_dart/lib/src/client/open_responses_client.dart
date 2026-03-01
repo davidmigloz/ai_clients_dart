@@ -63,6 +63,9 @@ class OpenResponsesClient {
   /// Whether this client owns the HTTP client (and should close it).
   final bool _ownsHttpClient;
 
+  /// Whether the client has been closed.
+  bool _closed = false;
+
   /// Interceptor chain for request processing.
   late final InterceptorChain _chain;
 
@@ -123,6 +126,7 @@ class OpenResponsesClient {
       interceptors: interceptors,
       httpClient: _httpClient,
       retryWrapper: retryWrapper,
+      ensureNotClosed: _ensureNotClosed,
     );
 
     // Initialize resources
@@ -131,15 +135,30 @@ class OpenResponsesClient {
       requestBuilder: _requestBuilder,
       httpClient: _httpClient,
       authProvider: config.authProvider,
+      ensureNotClosed: _ensureNotClosed,
     );
   }
 
   /// Closes the client and releases resources.
   ///
-  /// After calling this method, the client should not be used.
+  /// After calling this method, any subsequent requests will throw
+  /// [StateError]. This method is idempotent and can be called multiple
+  /// times safely.
+  ///
+  /// If a custom [http.Client] was provided to the constructor,
+  /// it will not be closed by this method.
   void close() {
+    if (_closed) return;
+    _closed = true;
     if (_ownsHttpClient) {
       _httpClient.close();
+    }
+  }
+
+  /// Throws [StateError] if the client has been closed.
+  void _ensureNotClosed() {
+    if (_closed) {
+      throw StateError('Client has been closed');
     }
   }
 

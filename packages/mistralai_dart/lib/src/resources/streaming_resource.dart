@@ -69,6 +69,7 @@ mixin StreamingResource on ResourceBase {
   Future<http.StreamedResponse> sendStreamingRequest(
     http.Request request,
   ) async {
+    ensureNotClosed?.call();
     http.StreamedResponse streamedResponse;
     try {
       streamedResponse = await httpClient.send(request);

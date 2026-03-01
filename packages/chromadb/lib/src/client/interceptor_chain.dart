@@ -34,11 +34,15 @@ class InterceptorChain {
   /// When triggered, any pending requests will throw an [AbortedException].
   Completer<void>? abortTrigger;
 
+  /// Callback that throws if the client has been closed.
+  void Function()? ensureNotClosed;
+
   /// Creates an interceptor chain.
   InterceptorChain({
     required List<Interceptor> interceptors,
     required http.Client httpClient,
     required RequestBuilder requestBuilder,
+    this.ensureNotClosed,
   }) : _interceptors = interceptors,
        _httpClient = httpClient,
        _requestBuilder = requestBuilder;
@@ -49,6 +53,7 @@ class InterceptorChain {
   /// HTTP request is made. Responses pass back through the interceptors
   /// in reverse order.
   Future<http.Response> send(RequestContext context) {
+    ensureNotClosed?.call();
     return _buildChain(0)(context);
   }
 

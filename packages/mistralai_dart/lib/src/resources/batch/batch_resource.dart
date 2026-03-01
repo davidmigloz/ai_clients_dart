@@ -56,6 +56,9 @@ class BatchResource {
   /// Request builder.
   final RequestBuilder requestBuilder;
 
+  /// Callback to check if the client has been closed.
+  final void Function()? ensureNotClosed;
+
   /// Sub-resource for batch jobs.
   late final BatchJobsResource jobs;
 
@@ -65,12 +68,14 @@ class BatchResource {
     required this.httpClient,
     required this.interceptorChain,
     required this.requestBuilder,
+    this.ensureNotClosed,
   }) {
     jobs = BatchJobsResource(
       config: config,
       httpClient: httpClient,
       interceptorChain: interceptorChain,
       requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
     );
   }
 }

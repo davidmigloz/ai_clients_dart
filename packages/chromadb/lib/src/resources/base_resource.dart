@@ -31,6 +31,9 @@ abstract class ResourceBase {
   /// The retry wrapper for automatic retries.
   final RetryWrapper retryWrapper;
 
+  /// Callback that throws if the client has been closed.
+  final void Function()? ensureNotClosed;
+
   /// Creates a resource with the given infrastructure.
   ResourceBase({
     required this.config,
@@ -38,6 +41,7 @@ abstract class ResourceBase {
     required this.interceptorChain,
     required this.requestBuilder,
     required this.retryWrapper,
+    this.ensureNotClosed,
   });
 
   // ===========================================================================
@@ -162,6 +166,8 @@ abstract class ResourceBase {
     Map<String, String>? headers,
     required bool isIdempotent,
   }) {
+    ensureNotClosed?.call();
+
     // Build full URL for metadata tracking
     final fullUrl = requestBuilder.buildUrl(
       path,

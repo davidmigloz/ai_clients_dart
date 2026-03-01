@@ -35,6 +35,7 @@ class BatchJobsResource extends ResourceBase {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
+    super.ensureNotClosed,
   });
 
   /// Lists all batch jobs.

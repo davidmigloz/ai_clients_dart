@@ -50,6 +50,9 @@ class AudioResource {
   /// Request builder.
   final RequestBuilder requestBuilder;
 
+  /// Callback to check if the client has been closed.
+  final void Function()? ensureNotClosed;
+
   /// Sub-resource for audio transcriptions.
   late final TranscriptionsResource transcriptions;
 
@@ -59,12 +62,14 @@ class AudioResource {
     required this.httpClient,
     required this.interceptorChain,
     required this.requestBuilder,
+    this.ensureNotClosed,
   }) {
     transcriptions = TranscriptionsResource(
       config: config,
       httpClient: httpClient,
       interceptorChain: interceptorChain,
       requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
     );
   }
 }

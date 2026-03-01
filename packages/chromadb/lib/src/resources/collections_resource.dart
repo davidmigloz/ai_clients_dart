@@ -27,6 +27,7 @@ class CollectionsResource extends ResourceBase {
     required super.interceptorChain,
     required super.requestBuilder,
     required super.retryWrapper,
+    super.ensureNotClosed,
   });
 
   /// Builds the base path for collection endpoints.

@@ -24,6 +24,7 @@ class CorporaResource extends ResourceBase {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
+    super.ensureNotClosed,
   });
 
   /// Validates that the Corpora API is only used with Google AI.
@@ -139,6 +140,7 @@ class CorporaResource extends ResourceBase {
       httpClient: httpClient,
       interceptorChain: interceptorChain,
       requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
     );
   }
 
@@ -150,6 +152,7 @@ class CorporaResource extends ResourceBase {
       httpClient: httpClient,
       interceptorChain: interceptorChain,
       requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
     );
   }
 }

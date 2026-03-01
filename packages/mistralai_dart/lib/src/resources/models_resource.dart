@@ -29,6 +29,7 @@ class ModelsResource extends ResourceBase {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
+    super.ensureNotClosed,
   });
 
   /// Lists all available models.

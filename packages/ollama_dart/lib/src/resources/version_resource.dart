@@ -15,6 +15,7 @@ class VersionResource extends ResourceBase {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
+    super.ensureNotClosed,
   });
 
   /// Gets the Ollama server version.

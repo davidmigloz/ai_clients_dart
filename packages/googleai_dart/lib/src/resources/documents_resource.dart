@@ -20,6 +20,7 @@ class DocumentsResource extends ResourceBase {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
+    super.ensureNotClosed,
   });
 
   /// Creates a new [Document] in a corpus.

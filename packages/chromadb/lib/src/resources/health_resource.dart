@@ -27,6 +27,7 @@ class HealthResource extends ResourceBase {
     required super.interceptorChain,
     required super.requestBuilder,
     required super.retryWrapper,
+    super.ensureNotClosed,
   });
 
   /// Checks if the server is alive.

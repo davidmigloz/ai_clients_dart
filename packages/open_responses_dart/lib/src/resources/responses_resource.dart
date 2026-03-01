@@ -25,6 +25,7 @@ class ResponsesResource extends ResourceBase {
     required super.requestBuilder,
     required http.Client httpClient,
     AuthProvider? authProvider,
+    super.ensureNotClosed,
   }) : _httpClient = httpClient,
        _authProvider = authProvider;
 
@@ -57,6 +58,7 @@ class ResponsesResource extends ResourceBase {
     CreateResponseRequest request, {
     Future<void>? abortTrigger,
   }) async* {
+    ensureNotClosed?.call();
     // Ensure stream is true
     final requestToSend = request.stream != true
         ? request.copyWith(stream: true)

@@ -23,11 +23,15 @@ abstract class ResourceBase {
   /// Request builder for constructing HTTP requests.
   final RequestBuilder requestBuilder;
 
+  /// Callback to check if the client has been closed.
+  final void Function()? ensureNotClosed;
+
   /// Creates a [ResourceBase].
   ResourceBase({
     required this.config,
     required this.httpClient,
     required this.interceptorChain,
     required this.requestBuilder,
+    this.ensureNotClosed,
   });
 }

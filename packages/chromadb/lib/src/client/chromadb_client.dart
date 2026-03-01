@@ -71,6 +71,7 @@ class ChromaClient {
 
   final http.Client _httpClient;
   final bool _ownsHttpClient;
+  bool _closed = false;
 
   late final RequestBuilder _requestBuilder;
   late final InterceptorChain _interceptorChain;
@@ -139,6 +140,12 @@ class ChromaClient {
     );
   }
 
+  void _ensureNotClosed() {
+    if (_closed) {
+      throw StateError('Client has been closed');
+    }
+  }
+
   void _initialize() {
     // Configure logging
     if (config.logLevel != Level.OFF) {
@@ -166,6 +173,7 @@ class ChromaClient {
       interceptors: interceptors,
       httpClient: _httpClient,
       requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
     );
 
     // Build retry wrapper
@@ -181,6 +189,7 @@ class ChromaClient {
       interceptorChain: _interceptorChain,
       requestBuilder: _requestBuilder,
       retryWrapper: _retryWrapper,
+      ensureNotClosed: _ensureNotClosed,
     );
 
     collections = CollectionsResource(
@@ -189,6 +198,7 @@ class ChromaClient {
       interceptorChain: _interceptorChain,
       requestBuilder: _requestBuilder,
       retryWrapper: _retryWrapper,
+      ensureNotClosed: _ensureNotClosed,
     );
 
     databases = DatabasesResource(
@@ -197,6 +207,7 @@ class ChromaClient {
       interceptorChain: _interceptorChain,
       requestBuilder: _requestBuilder,
       retryWrapper: _retryWrapper,
+      ensureNotClosed: _ensureNotClosed,
     );
 
     health = HealthResource(
@@ -205,6 +216,7 @@ class ChromaClient {
       interceptorChain: _interceptorChain,
       requestBuilder: _requestBuilder,
       retryWrapper: _retryWrapper,
+      ensureNotClosed: _ensureNotClosed,
     );
 
     tenants = TenantsResource(
@@ -213,6 +225,7 @@ class ChromaClient {
       interceptorChain: _interceptorChain,
       requestBuilder: _requestBuilder,
       retryWrapper: _retryWrapper,
+      ensureNotClosed: _ensureNotClosed,
     );
   }
 
@@ -234,6 +247,7 @@ class ChromaClient {
     String? tenant,
     String? database,
   }) {
+    _ensureNotClosed();
     return RecordsResource(
       collectionId: collectionId,
       tenant: tenant,
@@ -243,6 +257,7 @@ class ChromaClient {
       interceptorChain: _interceptorChain,
       requestBuilder: _requestBuilder,
       retryWrapper: _retryWrapper,
+      ensureNotClosed: _ensureNotClosed,
     );
   }
 
@@ -268,6 +283,7 @@ class ChromaClient {
     String? tenant,
     String? database,
   }) {
+    _ensureNotClosed();
     return FunctionsResource(
       collectionId: collectionId,
       tenant: tenant,
@@ -277,6 +293,7 @@ class ChromaClient {
       interceptorChain: _interceptorChain,
       requestBuilder: _requestBuilder,
       retryWrapper: _retryWrapper,
+      ensureNotClosed: _ensureNotClosed,
     );
   }
 
@@ -445,9 +462,15 @@ class ChromaClient {
 
   /// Closes the client and releases resources.
   ///
-  /// If the client owns its HTTP client (i.e., one was not provided
-  /// in the constructor), it will be closed as well.
+  /// After calling this method, any subsequent requests will throw
+  /// [StateError]. This method is idempotent and can be called multiple
+  /// times safely.
+  ///
+  /// If a custom [http.Client] was provided to the constructor,
+  /// it will not be closed by this method.
   void close() {
+    if (_closed) return;
+    _closed = true;
     if (_ownsHttpClient) {
       _httpClient.close();
     }

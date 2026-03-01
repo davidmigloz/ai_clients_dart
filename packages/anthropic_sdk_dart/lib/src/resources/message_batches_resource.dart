@@ -21,6 +21,7 @@ class MessageBatchesResource extends ResourceBase {
     required super.chain,
     required super.requestBuilder,
     required http.Client httpClient,
+    super.ensureNotClosed,
   }) : _httpClient = httpClient;
 
   /// Creates a message batch.

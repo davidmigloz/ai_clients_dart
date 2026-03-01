@@ -113,6 +113,27 @@ void main() {
       expect(client.close, returnsNormally);
     });
 
+    test('throws StateError when used after close', () {
+      final client = AnthropicClient()..close();
+      expect(
+        () => client.messages.create(
+          MessageCreateRequest(
+            model: 'claude-sonnet-4-20250514',
+            maxTokens: 100,
+            messages: [InputMessage.user('Hi')],
+          ),
+        ),
+        throwsA(isA<StateError>()),
+      );
+    });
+
+    test('does not close custom httpClient', () {
+      final httpClient = http.Client();
+      final client = AnthropicClient(httpClient: httpClient)..close();
+      // httpClient should still be usable after client.close()
+      expect(client.close, returnsNormally);
+    });
+
     group('fromEnvironment', () {
       test('throws StateError when ANTHROPIC_API_KEY is not set', () {
         if (Platform.environment.containsKey('ANTHROPIC_API_KEY')) {

@@ -27,6 +27,7 @@ class ClassificationsResource extends ResourceBase {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
+    super.ensureNotClosed,
   });
 
   /// Classifies text content.

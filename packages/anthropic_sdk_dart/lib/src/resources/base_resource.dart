@@ -16,10 +16,14 @@ abstract class ResourceBase {
   /// The request builder for constructing URLs and headers.
   final RequestBuilder requestBuilder;
 
+  /// Callback to check if the client has been closed.
+  final void Function()? ensureNotClosed;
+
   /// Creates a [ResourceBase].
-  const ResourceBase({
+  ResourceBase({
     required InterceptorChain chain,
     required this.requestBuilder,
+    this.ensureNotClosed,
   }) : _chain = chain;
 
   /// Protected access to the interceptor chain for subclasses.

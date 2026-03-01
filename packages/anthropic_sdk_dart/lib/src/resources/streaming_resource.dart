@@ -24,6 +24,9 @@ mixin StreamingResource {
   /// Returns null if no authentication is configured.
   AuthProvider? get authProvider;
 
+  /// Callback to check if the client has been closed.
+  void Function()? get ensureNotClosed;
+
   /// Makes a streaming POST request.
   ///
   /// Returns a stream of parsed SSE events as JSON maps.
@@ -35,6 +38,7 @@ mixin StreamingResource {
     Map<String, String>? headers,
     Future<void>? abortTrigger,
   }) async* {
+    ensureNotClosed?.call();
     final uri = requestBuilder.buildUrl(path, queryParams: queryParams);
     final request = http.Request('POST', uri)
       ..headers.addAll(requestBuilder.buildHeaders(additionalHeaders: headers))

@@ -24,6 +24,7 @@ class AuthResource extends ResourceBase {
     required super.interceptorChain,
     required super.requestBuilder,
     required super.retryWrapper,
+    super.ensureNotClosed,
   });
 
   /// Gets the current user's identity.

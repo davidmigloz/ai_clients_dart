@@ -20,6 +20,7 @@ class FilesResource extends ResourceBase {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
+    super.ensureNotClosed,
   });
 
   /// Uploads a file for use in fine-tuning or batch jobs.

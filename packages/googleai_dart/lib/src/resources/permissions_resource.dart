@@ -21,6 +21,7 @@ class PermissionsResource extends ResourceBase {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
+    super.ensureNotClosed,
   });
 
   /// Creates a permission for a resource (tuned model or corpus).

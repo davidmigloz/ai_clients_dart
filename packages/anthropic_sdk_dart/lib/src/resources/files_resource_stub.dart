@@ -18,6 +18,7 @@ class FilesResource {
     required Object chain,
     required Object requestBuilder,
     required http.Client httpClient,
+    void Function()? ensureNotClosed,
   });
 
   /// Uploads a file.

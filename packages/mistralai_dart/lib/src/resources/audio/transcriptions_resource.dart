@@ -30,6 +30,7 @@ class TranscriptionsResource extends ResourceBase with StreamingResource {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
+    super.ensureNotClosed,
   });
 
   /// Creates an audio transcription.

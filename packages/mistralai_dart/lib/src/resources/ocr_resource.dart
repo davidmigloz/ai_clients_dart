@@ -35,6 +35,7 @@ class OcrResource extends ResourceBase {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
+    super.ensureNotClosed,
   });
 
   /// Processes a document with OCR.

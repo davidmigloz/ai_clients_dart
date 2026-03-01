@@ -33,6 +33,7 @@ class FileSearchStoresResource extends ResourceBase {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
+    super.ensureNotClosed,
   });
 
   /// Validates that the FileSearchStores API is only used with Google AI.

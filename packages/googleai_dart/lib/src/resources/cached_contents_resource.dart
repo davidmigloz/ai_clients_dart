@@ -16,6 +16,7 @@ class CachedContentsResource extends ResourceBase {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
+    super.ensureNotClosed,
   });
 
   /// Creates cached content.

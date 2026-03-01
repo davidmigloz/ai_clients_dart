@@ -26,11 +26,13 @@ class MessagesResource extends ResourceBase with StreamingResource {
     required super.chain,
     required super.requestBuilder,
     required http.Client httpClient,
+    super.ensureNotClosed,
   }) : _httpClient = httpClient {
     batches = MessageBatchesResource(
       chain: chain,
       requestBuilder: requestBuilder,
       httpClient: _httpClient,
+      ensureNotClosed: ensureNotClosed,
     );
   }
 

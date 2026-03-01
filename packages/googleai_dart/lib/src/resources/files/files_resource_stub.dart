@@ -23,6 +23,7 @@ class FilesResource extends ResourceBase {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
+    super.ensureNotClosed,
   });
 
   /// Validates that the Files API is only used with Google AI.

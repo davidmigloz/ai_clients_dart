@@ -48,6 +48,9 @@ class AnthropicClient {
   /// Whether this client owns the HTTP client (and should close it).
   final bool _ownsHttpClient;
 
+  /// Whether the client has been closed.
+  bool _closed = false;
+
   /// Interceptor chain for request processing.
   late final InterceptorChain _chain;
 
@@ -75,8 +78,9 @@ class AnthropicClient {
 
   /// Creates an [AnthropicClient].
   ///
-  /// If [httpClient] is not provided, a new client is created and will be
-  /// closed when [close] is called.
+  /// Optionally accepts a custom [httpClient] for testing or advanced use
+  /// cases. If not provided, a new client is created and will be closed when
+  /// [close] is called. If provided, you are responsible for closing it.
   AnthropicClient({AnthropicConfig? config, http.Client? httpClient})
     : config = config ?? const AnthropicConfig(),
       _httpClient = httpClient ?? http.Client(),
@@ -125,6 +129,7 @@ class AnthropicClient {
       interceptors: interceptors,
       httpClient: _httpClient,
       retryWrapper: retryWrapper,
+      ensureNotClosed: _ensureNotClosed,
     );
 
     // Initialize resources
@@ -132,27 +137,48 @@ class AnthropicClient {
       chain: _chain,
       requestBuilder: _requestBuilder,
       httpClient: _httpClient,
+      ensureNotClosed: _ensureNotClosed,
     );
-    models = ModelsResource(chain: _chain, requestBuilder: _requestBuilder);
+    models = ModelsResource(
+      chain: _chain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
     // Note: batches is now accessible via messages.batches (nested resource)
     files = FilesResource(
       chain: _chain,
       requestBuilder: _requestBuilder,
       httpClient: _httpClient,
+      ensureNotClosed: _ensureNotClosed,
     );
     skills = SkillsResource(
       chain: _chain,
       requestBuilder: _requestBuilder,
       httpClient: _httpClient,
+      ensureNotClosed: _ensureNotClosed,
     );
   }
 
   /// Closes the client and releases resources.
   ///
-  /// After calling this method, the client should not be used.
+  /// After calling this method, any subsequent requests will throw
+  /// [StateError]. This method is idempotent and can be called multiple
+  /// times safely.
+  ///
+  /// If a custom [http.Client] was provided to the constructor,
+  /// it will not be closed by this method.
   void close() {
+    if (_closed) return;
+    _closed = true;
     if (_ownsHttpClient) {
       _httpClient.close();
+    }
+  }
+
+  /// Throws a [StateError] if the client has been closed.
+  void _ensureNotClosed() {
+    if (_closed) {
+      throw StateError('Client has been closed');
     }
   }
 

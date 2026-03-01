@@ -108,6 +108,9 @@ class MistralClient {
   /// Whether we created the HTTP client internally.
   final bool _ownsHttpClient;
 
+  /// Whether the client has been closed.
+  bool _closed = false;
+
   /// Request builder.
   late final RequestBuilder _requestBuilder;
 
@@ -197,6 +200,7 @@ class MistralClient {
       httpClient: _httpClient,
       interceptors: interceptors,
       retryWrapper: RetryWrapper(config: this.config),
+      ensureNotClosed: _ensureNotClosed,
     );
 
     // Initialize all API resources
@@ -205,6 +209,7 @@ class MistralClient {
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,
       requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
     );
 
     embeddings = EmbeddingsResource(
@@ -212,6 +217,7 @@ class MistralClient {
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,
       requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
     );
 
     models = ModelsResource(
@@ -219,6 +225,7 @@ class MistralClient {
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,
       requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
     );
 
     fim = FimResource(
@@ -226,6 +233,7 @@ class MistralClient {
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,
       requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
     );
 
     files = FilesResource(
@@ -233,6 +241,7 @@ class MistralClient {
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,
       requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
     );
 
     moderations = ModerationsResource(
@@ -240,6 +249,7 @@ class MistralClient {
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,
       requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
     );
 
     classifications = ClassificationsResource(
@@ -247,6 +257,7 @@ class MistralClient {
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,
       requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
     );
 
     fineTuning = FineTuningResource(
@@ -254,6 +265,7 @@ class MistralClient {
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,
       requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
     );
 
     batch = BatchResource(
@@ -261,6 +273,7 @@ class MistralClient {
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,
       requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
     );
 
     ocr = OcrResource(
@@ -268,6 +281,7 @@ class MistralClient {
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,
       requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
     );
 
     audio = AudioResource(
@@ -275,6 +289,7 @@ class MistralClient {
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,
       requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
     );
 
     agents = AgentsResource(
@@ -282,6 +297,7 @@ class MistralClient {
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,
       requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
     );
 
     conversations = ConversationsResource(
@@ -289,6 +305,7 @@ class MistralClient {
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,
       requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
     );
 
     libraries = LibrariesResource(
@@ -296,6 +313,7 @@ class MistralClient {
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,
       requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
     );
   }
 
@@ -348,13 +366,26 @@ class MistralClient {
     );
   }
 
-  /// Closes the HTTP client and releases resources.
+  /// Closes the client and releases resources.
   ///
-  /// Only closes the HTTP client if it was created internally.
-  /// If you passed a custom HTTP client, you're responsible for closing it.
+  /// After calling this method, any subsequent requests will throw
+  /// [StateError]. This method is idempotent and can be called multiple
+  /// times safely.
+  ///
+  /// If a custom [http.Client] was provided to the constructor,
+  /// it will not be closed by this method.
   void close() {
+    if (_closed) return;
+    _closed = true;
     if (_ownsHttpClient) {
       _httpClient.close();
+    }
+  }
+
+  /// Throws [StateError] if the client has been closed.
+  void _ensureNotClosed() {
+    if (_closed) {
+      throw StateError('Client has been closed');
     }
   }
 }

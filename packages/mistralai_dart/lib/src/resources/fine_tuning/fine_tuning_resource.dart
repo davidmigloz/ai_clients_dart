@@ -49,6 +49,9 @@ class FineTuningResource {
   /// Request builder.
   final RequestBuilder requestBuilder;
 
+  /// Callback to check if the client has been closed.
+  final void Function()? ensureNotClosed;
+
   /// Sub-resource for fine-tuning jobs.
   late final FineTuningJobsResource jobs;
 
@@ -61,18 +64,21 @@ class FineTuningResource {
     required this.httpClient,
     required this.interceptorChain,
     required this.requestBuilder,
+    this.ensureNotClosed,
   }) {
     jobs = FineTuningJobsResource(
       config: config,
       httpClient: httpClient,
       interceptorChain: interceptorChain,
       requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
     );
     models = FineTuningModelsResource(
       config: config,
       httpClient: httpClient,
       interceptorChain: interceptorChain,
       requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
     );
   }
 }

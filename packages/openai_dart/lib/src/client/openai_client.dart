@@ -1163,7 +1163,10 @@ class OpenAIClient {
 
   /// Closes the client and releases resources.
   ///
-  /// After calling this method, any subsequent requests will fail.
+  /// After calling this method, any subsequent requests will throw
+  /// [StateError]. This method is idempotent and can be called multiple
+  /// times safely.
+  ///
   /// If a custom [http.Client] was provided to the constructor,
   /// it will not be closed by this method.
   void close() {

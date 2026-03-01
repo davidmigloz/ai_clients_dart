@@ -25,6 +25,7 @@ class FineTuningJobsResource extends ResourceBase {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
+    super.ensureNotClosed,
   });
 
   /// Lists all fine-tuning jobs.

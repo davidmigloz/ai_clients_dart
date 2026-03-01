@@ -27,6 +27,7 @@ class DatabasesResource extends ResourceBase {
     required super.interceptorChain,
     required super.requestBuilder,
     required super.retryWrapper,
+    super.ensureNotClosed,
   });
 
   /// Lists all databases in a tenant.

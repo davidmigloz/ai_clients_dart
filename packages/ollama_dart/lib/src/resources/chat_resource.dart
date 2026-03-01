@@ -19,6 +19,7 @@ class ChatResource extends ResourceBase with StreamingResource {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
+    super.ensureNotClosed,
   });
 
   /// Generates a chat response.

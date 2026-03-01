@@ -16,11 +16,15 @@ class InterceptorChain {
   /// Retry wrapper for transport execution.
   final RetryWrapper? retryWrapper;
 
+  /// Callback to check if the client has been closed.
+  final void Function()? ensureNotClosed;
+
   /// Creates an [InterceptorChain].
-  const InterceptorChain({
+  InterceptorChain({
     required this.interceptors,
     required this.httpClient,
     this.retryWrapper,
+    this.ensureNotClosed,
   });
 
   /// Executes the interceptor chain for a request.
@@ -32,6 +36,7 @@ class InterceptorChain {
     http.BaseRequest request, {
     Future<void>? abortTrigger,
   }) {
+    ensureNotClosed?.call();
     final context = RequestContext(
       request: request,
       metadata: {},

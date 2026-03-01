@@ -29,6 +29,7 @@ class FilesResource extends ResourceBase {
     required super.chain,
     required super.requestBuilder,
     required http.Client httpClient,
+    super.ensureNotClosed,
   }) : _httpClient = httpClient;
 
   /// Uploads a file from a file path.

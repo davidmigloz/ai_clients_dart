@@ -7,7 +7,11 @@ import 'base_resource.dart';
 /// about available Claude models.
 class ModelsResource extends ResourceBase {
   /// Creates a [ModelsResource].
-  ModelsResource({required super.chain, required super.requestBuilder});
+  ModelsResource({
+    required super.chain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   /// Lists available models.
   ///

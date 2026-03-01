@@ -37,6 +37,7 @@ class FineTuningModelsResource extends ResourceBase {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
+    super.ensureNotClosed,
   });
 
   /// Updates a fine-tuned model's metadata.

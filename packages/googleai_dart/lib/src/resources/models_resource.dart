@@ -42,6 +42,7 @@ class ModelsResource extends ResourceBase with StreamingResource {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
+    super.ensureNotClosed,
   });
 
   /// Generates content using the specified model.
@@ -669,6 +670,7 @@ class ModelsResource extends ResourceBase with StreamingResource {
       httpClient: httpClient,
       interceptorChain: interceptorChain,
       requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
     );
   }
 }

@@ -29,6 +29,7 @@ class EmbeddingsResource extends ResourceBase {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
+    super.ensureNotClosed,
   });
 
   /// Generates embeddings for the given input.

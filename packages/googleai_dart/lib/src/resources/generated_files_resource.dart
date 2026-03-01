@@ -17,6 +17,7 @@ class GeneratedFilesResource extends ResourceBase {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
+    super.ensureNotClosed,
   });
 
   /// Lists the generated files owned by the requesting project.
@@ -80,6 +81,7 @@ class GeneratedFilesResource extends ResourceBase {
       httpClient: httpClient,
       interceptorChain: interceptorChain,
       requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
     );
   }
 }

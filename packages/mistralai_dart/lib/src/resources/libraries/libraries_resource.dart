@@ -46,11 +46,13 @@ class LibrariesResource extends ResourceBase {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
+    super.ensureNotClosed,
   }) : documents = LibraryDocumentsResource(
          config: config,
          httpClient: httpClient,
          interceptorChain: interceptorChain,
          requestBuilder: requestBuilder,
+         ensureNotClosed: ensureNotClosed,
        );
 
   /// Sub-resource for managing documents within libraries.
@@ -236,6 +238,7 @@ class LibraryDocumentsResource extends ResourceBase {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
+    super.ensureNotClosed,
   });
 
   /// Adds a document to a library.

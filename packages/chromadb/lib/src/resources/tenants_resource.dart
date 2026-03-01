@@ -26,6 +26,7 @@ class TenantsResource extends ResourceBase {
     required super.interceptorChain,
     required super.requestBuilder,
     required super.retryWrapper,
+    super.ensureNotClosed,
   });
 
   /// Creates a new tenant.

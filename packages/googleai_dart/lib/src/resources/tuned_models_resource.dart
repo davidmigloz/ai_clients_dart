@@ -33,6 +33,7 @@ class TunedModelsResource extends ResourceBase with StreamingResource {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
+    super.ensureNotClosed,
   });
 
   /// Validates that the Tuned Models API is only used with Google AI.
@@ -363,6 +364,7 @@ class TunedModelsResource extends ResourceBase with StreamingResource {
       httpClient: httpClient,
       interceptorChain: interceptorChain,
       requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
     );
   }
 
@@ -374,6 +376,7 @@ class TunedModelsResource extends ResourceBase with StreamingResource {
       httpClient: httpClient,
       interceptorChain: interceptorChain,
       requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
     );
   }
 }
