@@ -57,22 +57,28 @@ void main() {
   });
 
   group('AuthenticationException', () {
-    test('stores message', () {
+    test('has status code 401', () {
       const exception = AuthenticationException(message: 'Invalid API key');
 
-      expect(exception.message, 'Invalid API key');
+      expect(exception.statusCode, 401);
     });
 
-    test('toString includes message', () {
+    test('is an ApiException', () {
       const exception = AuthenticationException(message: 'Unauthorized');
 
-      expect(exception.toString(), contains('Unauthorized'));
+      expect(exception, isA<ApiException>());
     });
 
     test('is an AnthropicException', () {
       const exception = AuthenticationException(message: 'Error');
 
       expect(exception, isA<AnthropicException>());
+    });
+
+    test('toString includes message', () {
+      const exception = AuthenticationException(message: 'Invalid API key');
+
+      expect(exception.toString(), 'AuthenticationException: Invalid API key');
     });
   });
 

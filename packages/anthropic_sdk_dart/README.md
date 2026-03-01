@@ -601,8 +601,9 @@ try {
   - `ApiException` - API errors with status codes
     - `AuthenticationException` - 401 errors
     - `RateLimitException` - 429 errors
-    - `OverloadedException` - 529 errors
-  - `AbortedException` - Request was cancelled
+  - `ValidationException` - Client-side validation errors
+  - `TimeoutException` - Request timeouts
+  - `AbortedException` - Request cancellation
 
 </details>
 

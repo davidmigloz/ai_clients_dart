@@ -58,6 +58,7 @@ class ErrorInterceptor implements Interceptor {
     if (response.statusCode == 401) {
       return AuthenticationException(
         message: message,
+        details: details,
         requestMetadata: requestMetadata,
         responseMetadata: responseMetadata,
       );

@@ -22,6 +22,32 @@ void main() {
     });
   });
 
+  group('AuthenticationException', () {
+    test('has status code 401', () {
+      const exception = AuthenticationException(message: 'Invalid API key');
+
+      expect(exception.statusCode, 401);
+    });
+
+    test('is an ApiException', () {
+      const exception = AuthenticationException(message: 'Unauthorized');
+
+      expect(exception, isA<ApiException>());
+    });
+
+    test('is a GoogleAIException', () {
+      const exception = AuthenticationException(message: 'Error');
+
+      expect(exception, isA<GoogleAIException>());
+    });
+
+    test('toString includes message', () {
+      const exception = AuthenticationException(message: 'Invalid API key');
+
+      expect(exception.toString(), 'AuthenticationException: Invalid API key');
+    });
+  });
+
   group('ValidationException', () {
     test('creates with field errors', () {
       const exception = ValidationException(

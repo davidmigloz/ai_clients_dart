@@ -53,6 +53,13 @@ class ResponseMetadata {
 }
 
 /// Base sealed class for all OpenResponses exceptions.
+///
+/// Subtypes:
+/// - [ApiException] — HTTP/API errors (includes [AuthenticationException],
+///   [RateLimitException])
+/// - [ValidationException] — Client-side validation errors
+/// - [TimeoutException] — Request timeouts
+/// - [AbortedException] — Request cancellation
 sealed class OpenResponsesException implements Exception {
   /// Creates an [OpenResponsesException].
   const OpenResponsesException();
@@ -126,31 +133,20 @@ class ApiException extends OpenResponsesException {
   }
 }
 
-/// Exception for authentication errors (401).
-class AuthenticationException extends OpenResponsesException {
-  @override
-  final String message;
-
-  @override
-  final StackTrace? stackTrace;
-
-  @override
-  final Exception? cause;
-
-  /// Request metadata (for debugging).
-  final RequestMetadata? requestMetadata;
-
-  /// Response metadata (for debugging).
-  final ResponseMetadata? responseMetadata;
-
+/// Exception for authentication errors (HTTP 401).
+///
+/// Thrown when the API returns a 401 status code, typically indicating
+/// an invalid or expired API key.
+class AuthenticationException extends ApiException {
   /// Creates an [AuthenticationException].
   const AuthenticationException({
-    required this.message,
-    this.stackTrace,
-    this.cause,
-    this.requestMetadata,
-    this.responseMetadata,
-  }) : super();
+    required super.message,
+    super.details,
+    super.stackTrace,
+    super.requestMetadata,
+    super.responseMetadata,
+    super.cause,
+  }) : super(statusCode: 401);
 
   @override
   String toString() => 'AuthenticationException: $message';

@@ -66,6 +66,7 @@ export 'src/errors/exceptions.dart'
     show
         AbortedException,
         ApiException,
+        AuthenticationException,
         OllamaException,
         RateLimitException,
         TimeoutException,

@@ -47,11 +47,33 @@ void main() {
       await expectLater(
         interceptor.intercept(context, next),
         throwsA(
-          isA<AuthenticationException>().having(
-            (e) => e.message,
-            'message',
-            'Invalid API key',
-          ),
+          isA<AuthenticationException>()
+              .having((e) => e.message, 'message', 'Invalid API key')
+              .having((e) => e.statusCode, 'statusCode', 401),
+        ),
+      );
+    });
+
+    test('AuthenticationException is catchable as ApiException', () async {
+      final context = RequestContext(request: createRequest());
+
+      Future<http.Response> next(RequestContext ctx) async {
+        return http.Response(
+          jsonEncode({
+            'type': 'error',
+            'error': {
+              'type': 'authentication_error',
+              'message': 'Invalid API key',
+            },
+          }),
+          401,
+        );
+      }
+
+      await expectLater(
+        interceptor.intercept(context, next),
+        throwsA(
+          isA<ApiException>().having((e) => e.statusCode, 'statusCode', 401),
         ),
       );
     });

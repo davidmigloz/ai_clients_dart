@@ -53,6 +53,18 @@ class ResponseMetadata {
 }
 
 /// Base sealed class for all GoogleAI exceptions.
+///
+/// Subtypes:
+/// - [ApiException] — HTTP/API errors (includes [AuthenticationException],
+///   [RateLimitException])
+/// - [ValidationException] — Client-side validation errors
+/// - [TimeoutException] — Request timeouts
+/// - [AbortedException] — Request cancellation
+/// - [LiveSessionClosedException] — Live session closed
+/// - [LiveSessionSetupException] — Live session setup failure
+/// - [LiveSessionException] — General Live session errors
+/// - [LiveSessionResumptionException] — Live session resumption failure
+/// - [LiveConnectionException] — WebSocket connection failure
 sealed class GoogleAIException implements Exception {
   /// Creates a [GoogleAIException].
   const GoogleAIException();
@@ -125,6 +137,25 @@ class ApiException extends GoogleAIException {
     }
     return buffer.toString();
   }
+}
+
+/// Exception for authentication errors (HTTP 401).
+///
+/// Thrown when the API returns a 401 status code, typically indicating
+/// an invalid or expired API key.
+class AuthenticationException extends ApiException {
+  /// Creates an [AuthenticationException].
+  const AuthenticationException({
+    required super.message,
+    super.details,
+    super.stackTrace,
+    super.requestMetadata,
+    super.responseMetadata,
+    super.cause,
+  }) : super(statusCode: 401);
+
+  @override
+  String toString() => 'AuthenticationException: $message';
 }
 
 /// Exception for client-side validation errors.

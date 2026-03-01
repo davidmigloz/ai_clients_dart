@@ -114,6 +114,16 @@ class ErrorInterceptor implements Interceptor {
     );
 
     // Map to specific exception types
+    if (statusCode == 401) {
+      // Authentication error
+      return AuthenticationException(
+        message: message,
+        details: details,
+        requestMetadata: requestMetadata,
+        responseMetadata: responseMetadata,
+      );
+    }
+
     if (statusCode == 429) {
       // Rate limit error
       DateTime? retryAfter;

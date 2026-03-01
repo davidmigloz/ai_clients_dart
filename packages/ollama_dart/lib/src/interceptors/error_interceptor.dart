@@ -54,6 +54,16 @@ class ErrorInterceptor implements Interceptor {
     // Parse error message from response body
     final (message, details) = _parseErrorBody(response.body);
 
+    // Handle authentication errors
+    if (response.statusCode == 401) {
+      return AuthenticationException(
+        message: message,
+        details: details,
+        requestMetadata: requestMetadata,
+        responseMetadata: responseMetadata,
+      );
+    }
+
     // Handle rate limiting
     if (response.statusCode == 429) {
       return RateLimitException(
