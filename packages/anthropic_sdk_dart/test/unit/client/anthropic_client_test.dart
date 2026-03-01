@@ -129,6 +129,8 @@ void main() {
 
     test('does not close custom httpClient', () {
       final httpClient = _SpyHttpClient();
+      // ignore: unused_local_variable
+      final client = AnthropicClient(httpClient: httpClient)..close();
       expect(httpClient.closeCalled, isFalse);
     });
 
