@@ -8,9 +8,6 @@ DateTime parseHttpDate(String value) {
   );
 }
 
-/// Stub implementation - should never be called.
-bool isSocketException(Object error) {
-  throw UnsupportedError(
-    'Socket exception checking is not supported on this platform.',
-  );
-}
+/// Stub implementation - returns false since socket exceptions
+/// don't exist on platforms without dart:io.
+bool isSocketException(Object error) => false;

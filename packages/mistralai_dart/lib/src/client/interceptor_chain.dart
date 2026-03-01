@@ -164,6 +164,7 @@ class _AbortableRequestWrapper extends http.BaseRequest
     followRedirects = _inner.followRedirects;
     maxRedirects = _inner.maxRedirects;
     persistentConnection = _inner.persistentConnection;
+    contentLength = _inner.contentLength;
   }
 
   @override

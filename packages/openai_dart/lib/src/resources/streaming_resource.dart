@@ -29,6 +29,7 @@ mixin StreamingResource on ResourceBase {
   /// access to the response stream.
   Future<http.StreamedResponse> sendStream({
     required http.Request request,
+    String? jsonBody,
     Map<String, String>? additionalHeaders,
     Future<void>? abortTrigger,
   }) async {
@@ -39,6 +40,12 @@ mixin StreamingResource on ResourceBase {
       additionalHeaders: additionalHeaders,
     );
     request.headers.addAll(streamHeaders);
+
+    // Set body AFTER headers so body setter adds charset to Content-Type
+    // (e.g., application/json → application/json; charset=utf-8)
+    if (jsonBody != null) {
+      request.body = jsonBody;
+    }
 
     // Log request if logging is enabled
     Logger('OpenAIClient').fine('Streaming ${request.method} ${request.url}');
@@ -182,10 +189,11 @@ mixin StreamingResource on ResourceBase {
     Future<void>? abortTrigger,
   }) {
     final url = requestBuilder.buildUrl(endpoint);
-    final request = http.Request('POST', url)..body = jsonEncode(body);
+    final request = http.Request('POST', url);
 
     return sendStream(
       request: request,
+      jsonBody: jsonEncode(body),
       additionalHeaders: additionalHeaders,
       abortTrigger: abortTrigger,
     );

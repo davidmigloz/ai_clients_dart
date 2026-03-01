@@ -169,8 +169,10 @@ class ChromaClient {
       const ErrorInterceptor(),
     ];
 
-    // Build retry wrapper
-    final retryWrapper = RetryWrapper(config: config);
+    // Build retry wrapper if retries are enabled
+    final retryWrapper = config.retryPolicy.maxRetries > 0
+        ? RetryWrapper(config: config)
+        : null;
 
     _interceptorChain = InterceptorChain(
       interceptors: interceptors,
