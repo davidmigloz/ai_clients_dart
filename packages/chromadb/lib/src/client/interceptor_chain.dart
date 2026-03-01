@@ -35,7 +35,7 @@ class InterceptorChain {
   Completer<void>? abortTrigger;
 
   /// Callback that throws if the client has been closed.
-  void Function()? ensureNotClosed;
+  final void Function()? ensureNotClosed;
 
   /// Creates an interceptor chain.
   InterceptorChain({

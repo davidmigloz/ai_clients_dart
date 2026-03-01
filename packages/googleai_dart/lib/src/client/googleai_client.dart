@@ -337,6 +337,7 @@ class GoogleAIClient {
   /// await liveClient.close();
   /// ```
   LiveClient createLiveClient() {
+    _ensureNotClosed();
     return LiveClient(config: config);
   }
 
