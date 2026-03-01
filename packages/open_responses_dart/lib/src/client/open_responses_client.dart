@@ -67,7 +67,7 @@ class OpenResponsesClient {
   bool _closed = false;
 
   /// Interceptor chain for request processing.
-  late final InterceptorChain _chain;
+  late final InterceptorChain _interceptorChain;
 
   /// Request builder for URL and header construction.
   late final RequestBuilder _requestBuilder;
@@ -122,7 +122,7 @@ class OpenResponsesClient {
         : null;
 
     // Build interceptor chain
-    _chain = InterceptorChain(
+    _interceptorChain = InterceptorChain(
       interceptors: interceptors,
       httpClient: _httpClient,
       retryWrapper: retryWrapper,
@@ -131,10 +131,10 @@ class OpenResponsesClient {
 
     // Initialize resources
     responses = ResponsesResource(
-      chain: _chain,
-      requestBuilder: _requestBuilder,
+      config: config,
       httpClient: _httpClient,
-      authProvider: config.authProvider,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
       ensureNotClosed: _ensureNotClosed,
     );
   }
@@ -165,7 +165,7 @@ class OpenResponsesClient {
   /// Gets the interceptor chain for advanced usage.
   ///
   /// This is primarily for internal use by resources.
-  InterceptorChain get chain => _chain;
+  InterceptorChain get interceptorChain => _interceptorChain;
 
   /// Gets the request builder for advanced usage.
   ///

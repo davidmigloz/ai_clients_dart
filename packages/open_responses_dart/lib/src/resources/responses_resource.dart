@@ -2,32 +2,24 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../auth/auth_provider.dart';
 import '../client/response_stream.dart';
-import '../errors/exceptions.dart';
 import '../models/request/create_response_request.dart';
 import '../models/response/response_resource.dart';
 import '../models/streaming/streaming_event.dart';
 import '../utils/sse_parser.dart';
 import 'base_resource.dart';
+import 'streaming_resource.dart';
 
 /// Resource for the Responses API.
-class ResponsesResource extends ResourceBase {
-  /// HTTP client for streaming requests.
-  final http.Client _httpClient;
-
-  /// Authentication provider for streaming requests.
-  final AuthProvider? _authProvider;
-
+class ResponsesResource extends ResourceBase with StreamingResource {
   /// Creates a [ResponsesResource].
   ResponsesResource({
-    required super.chain,
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
     required super.requestBuilder,
-    required http.Client httpClient,
-    AuthProvider? authProvider,
     super.ensureNotClosed,
-  }) : _httpClient = httpClient,
-       _authProvider = authProvider;
+  });
 
   /// Creates a response (non-streaming).
   ///
@@ -36,18 +28,25 @@ class ResponsesResource extends ResourceBase {
     CreateResponseRequest request, {
     Future<void>? abortTrigger,
   }) async {
-    // Ensure stream is false
-    final requestToSend = (request.stream ?? false)
-        ? request.copyWith(stream: false)
-        : request;
+    ensureNotClosed?.call();
 
-    final json = await post(
-      '/responses',
-      body: requestToSend.toJson(),
+    // Ensure stream is false
+    final requestToSend =
+        (request.stream ?? false) ? request.copyWith(stream: false) : request;
+
+    final url = requestBuilder.buildUrl('/responses');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(requestToSend.toJson());
+
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
-
-    return ResponseResource.fromJson(json);
+    return ResponseResource.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Creates a streaming response.
@@ -69,17 +68,9 @@ class ResponsesResource extends ResourceBase {
       ..headers.addAll(requestBuilder.buildHeaders())
       ..body = jsonEncode(requestToSend.toJson());
 
-    // Apply authentication directly (single request for streaming)
-    await _applyAuthentication(httpRequest);
-
-    // Send single request for streaming
-    final streamedResponse = await _httpClient.send(httpRequest);
-
-    // Handle HTTP errors (since we bypass error interceptor)
-    if (streamedResponse.statusCode >= 400) {
-      final body = await streamedResponse.stream.bytesToString();
-      throw _createExceptionFromResponse(streamedResponse.statusCode, body);
-    }
+    // Apply authentication and send streaming request
+    await prepareStreamingRequest(httpRequest);
+    final streamedResponse = await sendStreamingRequest(httpRequest);
 
     final parser = SseParser();
     await for (final json in parser.parse(streamedResponse.stream)) {
@@ -91,83 +82,6 @@ class ResponsesResource extends ResourceBase {
       }
       yield StreamingEvent.fromJson(cleaned);
     }
-  }
-
-  /// Applies authentication to a request.
-  Future<void> _applyAuthentication(http.BaseRequest request) async {
-    if (_authProvider == null) return;
-
-    final credentials = await _authProvider.getCredentials();
-    switch (credentials) {
-      case BearerTokenCredentials(:final token):
-        if (!request.headers.containsKey('authorization') &&
-            !request.headers.containsKey('Authorization')) {
-          request.headers['Authorization'] = 'Bearer $token';
-        }
-      case NoAuthCredentials():
-        // No authentication needed
-        break;
-    }
-  }
-
-  /// Creates an exception from an HTTP error response.
-  OpenResponsesException _createExceptionFromResponse(
-    int statusCode,
-    String body,
-  ) {
-    final message = _parseErrorMessage(body);
-
-    switch (statusCode) {
-      case 400:
-        return ValidationException(
-          message: message,
-          fieldErrors: _parseFieldErrors(body),
-        );
-      case 401:
-        return AuthenticationException(message: message);
-      case 429:
-        return RateLimitException(statusCode: statusCode, message: message);
-      default:
-        return ApiException(statusCode: statusCode, message: message);
-    }
-  }
-
-  /// Parses error message from response body.
-  String _parseErrorMessage(String body) {
-    if (body.isEmpty) return 'Unknown error';
-    try {
-      final json = jsonDecode(body);
-      if (json is Map<String, dynamic>) {
-        final error = json['error'];
-        if (error is Map<String, dynamic>) {
-          return error['message'] as String? ?? 'Unknown error';
-        }
-        return json['message'] as String? ?? body;
-      }
-      return body;
-    } catch (_) {
-      return body;
-    }
-  }
-
-  /// Parses field-specific errors from response body.
-  Map<String, List<String>> _parseFieldErrors(String body) {
-    try {
-      final json = jsonDecode(body);
-      if (json is Map<String, dynamic>) {
-        final error = json['error'];
-        if (error is Map<String, dynamic>) {
-          final param = error['param'] as String?;
-          final message = error['message'] as String?;
-          if (param != null && message != null) {
-            return {
-              param: [message],
-            };
-          }
-        }
-      }
-    } catch (_) {}
-    return {};
   }
 
   /// Creates a streaming response with builder pattern.
