@@ -240,6 +240,7 @@ class OpenAIClient {
       httpClient: _httpClient,
       retryWrapper: retryWrapper,
       timeout: _config.timeout,
+      ensureNotClosed: _ensureNotClosed,
     );
   }
 

@@ -24,11 +24,12 @@ import 'retry_wrapper.dart';
 /// they process the response.
 class InterceptorChain {
   /// Creates an [InterceptorChain].
-  const InterceptorChain({
+  InterceptorChain({
     required this.interceptors,
     required this.httpClient,
     this.retryWrapper,
     this.timeout,
+    this.ensureNotClosed,
   });
 
   /// The list of interceptors to execute in order.
@@ -46,6 +47,13 @@ class InterceptorChain {
   /// this duration.
   final Duration? timeout;
 
+  /// Optional callback to verify the client hasn't been closed.
+  ///
+  /// When provided, this is called at the start of [execute] to fail fast
+  /// if the client has been closed, rather than proceeding with a request
+  /// that would fail later.
+  final void Function()? ensureNotClosed;
+
   /// Executes the interceptor chain for a request.
   ///
   /// The optional [abortTrigger] allows canceling the request before completion.
@@ -56,6 +64,8 @@ class InterceptorChain {
     http.BaseRequest request, {
     Future<void>? abortTrigger,
   }) {
+    ensureNotClosed?.call();
+
     final context = RequestContext(
       request: request,
       metadata: {},
