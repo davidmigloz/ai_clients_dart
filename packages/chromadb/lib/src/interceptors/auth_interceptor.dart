@@ -31,9 +31,9 @@ class AuthInterceptor implements Interceptor {
         // No auth header needed
         break;
       case ApiKeyCredentials(:final apiKey):
-        context.headers['x-chroma-token'] = apiKey;
+        context.request.headers['x-chroma-token'] = apiKey;
       case BearerTokenCredentials(:final token):
-        context.headers['Authorization'] = 'Bearer $token';
+        context.request.headers['Authorization'] = 'Bearer $token';
     }
 
     return next(context);

@@ -1,153 +1,134 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
 import '../errors/exceptions.dart';
 import '../interceptors/interceptor.dart';
-import 'request_builder.dart';
+import '../utils/request_id.dart';
+import 'retry_wrapper.dart';
 
-/// A chain of interceptors that process requests before they are sent.
-///
-/// The chain builds a pipeline where each interceptor can:
-/// - Modify the request context (headers, query params, etc.)
-/// - Short-circuit the chain by returning a response directly
-/// - Process the response before returning it
-///
-/// Example:
-/// ```dart
-/// final chain = InterceptorChain(
-///   interceptors: [AuthInterceptor(), LoggingInterceptor()],
-///   httpClient: http.Client(),
-///   requestBuilder: RequestBuilder(baseUrl: 'http://localhost:8000'),
-/// );
-///
-/// final response = await chain.send(context);
-/// ```
+/// Builds and executes an interceptor chain.
 class InterceptorChain {
-  final List<Interceptor> _interceptors;
-  final http.Client _httpClient;
-  final RequestBuilder _requestBuilder;
+  /// List of interceptors to execute in order.
+  final List<Interceptor> interceptors;
 
-  /// A trigger that can be used to abort in-flight requests.
-  ///
-  /// When triggered, any pending requests will throw an [AbortedException].
-  Completer<void>? abortTrigger;
+  /// HTTP client for transport layer.
+  final http.Client httpClient;
 
-  /// Callback that throws if the client has been closed.
+  /// Retry wrapper for transport execution.
+  final RetryWrapper? retryWrapper;
+
+  /// Callback to check if the client has been closed.
   final void Function()? ensureNotClosed;
 
-  /// Creates an interceptor chain.
+  /// Creates an [InterceptorChain].
   InterceptorChain({
-    required List<Interceptor> interceptors,
-    required http.Client httpClient,
-    required RequestBuilder requestBuilder,
+    required this.interceptors,
+    required this.httpClient,
+    this.retryWrapper,
     this.ensureNotClosed,
-  }) : _interceptors = interceptors,
-       _httpClient = httpClient,
-       _requestBuilder = requestBuilder;
+  });
 
-  /// Sends a request through the interceptor chain.
+  /// Executes the interceptor chain for a request.
   ///
-  /// The request passes through each interceptor in order, then the final
-  /// HTTP request is made. Responses pass back through the interceptors
-  /// in reverse order.
-  Future<http.Response> send(RequestContext context) {
+  /// The optional [abortTrigger] allows canceling the request before completion.
+  /// When [isIdempotent] is true, POST requests are treated as idempotent
+  /// for retry purposes.
+  Future<http.Response> execute(
+    http.BaseRequest request, {
+    Future<void>? abortTrigger,
+    bool isIdempotent = false,
+  }) {
     ensureNotClosed?.call();
-    return _buildChain(0)(context);
+
+    final context = RequestContext(
+      request: request,
+      metadata: {'timestamp': DateTime.now()},
+      abortTrigger: abortTrigger,
+    );
+
+    return _buildChain(0, isIdempotent: isIdempotent)(context);
   }
 
   /// Builds the interceptor chain recursively.
-  InterceptorNext _buildChain(int index) {
-    if (index >= _interceptors.length) {
-      // End of chain - make the actual HTTP request
-      return _makeRequest;
+  InterceptorNext _buildChain(int index, {bool isIdempotent = false}) {
+    if (index >= interceptors.length) {
+      // Terminal: execute the actual HTTP request
+      return (context) {
+        final requestToSend = context.request;
+
+        // Transport execution function
+        Future<http.Response> executeTransport() async {
+          if (context.abortTrigger != null) {
+            final abortableRequest = _AbortableRequestWrapper(
+              requestToSend,
+              context.abortTrigger,
+            );
+
+            try {
+              final streamedResponse = await httpClient.send(abortableRequest);
+              return await http.Response.fromStream(streamedResponse);
+            } on http.RequestAbortedException catch (e) {
+              throw AbortedException(
+                message: 'Request aborted by user',
+                cause: e is Exception ? e : null,
+              );
+            }
+          } else {
+            final streamedResponse = await httpClient.send(requestToSend);
+            return http.Response.fromStream(streamedResponse);
+          }
+        }
+
+        // Execute with or without retry wrapper
+        if (retryWrapper != null) {
+          final correlationId =
+              context.metadata['correlationId'] as String? ??
+              context.request.headers['X-Request-ID'] ??
+              generateRequestId();
+
+          return retryWrapper!.executeWithRetry(
+            requestToSend,
+            executeTransport,
+            context.abortTrigger,
+            correlationId,
+            isIdempotent: isIdempotent,
+          );
+        } else {
+          return executeTransport();
+        }
+      };
     }
 
-    final interceptor = _interceptors[index];
-    final next = _buildChain(index + 1);
+    // Recursive: call current interceptor with next in chain
+    return (context) {
+      final interceptor = interceptors[index];
+      final next = _buildChain(index + 1, isIdempotent: isIdempotent);
 
-    return (context) => interceptor.intercept(context, next);
-  }
-
-  /// Makes the actual HTTP request.
-  Future<http.Response> _makeRequest(RequestContext context) async {
-    final url = _requestBuilder.buildUrl(
-      context.path,
-      queryParameters: context.queryParameters,
-    );
-
-    final headers = _requestBuilder.buildHeaders(context.headers);
-
-    final request = http.Request(context.method, url)..headers.addAll(headers);
-
-    final body = context.body;
-    if (body != null) {
-      if (body is String) {
-        request.body = body;
-      } else {
-        request.body = jsonEncode(body);
-        // Only set Content-Type if not already provided by headers
-        request.headers.putIfAbsent('Content-Type', () => 'application/json');
-      }
-    }
-
-    // Wrap in abortable request if we have a trigger
-    final trigger = abortTrigger;
-    if (trigger != null) {
-      return _AbortableRequestWrapper(
-        httpClient: _httpClient,
-        abortTrigger: trigger,
-      ).send(request);
-    }
-
-    final streamedResponse = await _httpClient.send(request);
-    return http.Response.fromStream(streamedResponse);
+      return interceptor.intercept(context, next);
+    };
   }
 }
 
-/// Wrapper that makes HTTP requests abortable.
-class _AbortableRequestWrapper {
-  final http.Client _httpClient;
-  final Completer<void> _abortTrigger;
+/// Wrapper to make a BaseRequest abortable by implementing Abortable mixin.
+class _AbortableRequestWrapper extends http.BaseRequest
+    implements http.Abortable {
+  final http.BaseRequest _inner;
 
-  _AbortableRequestWrapper({
-    required http.Client httpClient,
-    required Completer<void> abortTrigger,
-  }) : _httpClient = httpClient,
-       _abortTrigger = abortTrigger;
+  @override
+  final Future<void>? abortTrigger;
 
-  Future<http.Response> send(http.Request request) {
-    final responseCompleter = Completer<http.Response>();
+  _AbortableRequestWrapper(this._inner, this.abortTrigger)
+    : super(_inner.method, _inner.url) {
+    headers.addAll(_inner.headers);
+    followRedirects = _inner.followRedirects;
+    maxRedirects = _inner.maxRedirects;
+    persistentConnection = _inner.persistentConnection;
+  }
 
-    // Start the actual request
-    unawaited(
-      _httpClient
-          .send(request)
-          .then((streamedResponse) async {
-            if (!responseCompleter.isCompleted) {
-              final response = await http.Response.fromStream(streamedResponse);
-              responseCompleter.complete(response);
-            }
-          })
-          .catchError((Object error) {
-            if (!responseCompleter.isCompleted) {
-              responseCompleter.completeError(error);
-            }
-          }),
-    );
-
-    // Race against abort trigger
-    unawaited(
-      _abortTrigger.future.then((_) {
-        if (!responseCompleter.isCompleted) {
-          responseCompleter.completeError(
-            AbortedException(message: 'Request was aborted'),
-          );
-        }
-      }),
-    );
-
-    return responseCompleter.future;
+  @override
+  http.ByteStream finalize() {
+    super.finalize();
+    return _inner.finalize();
   }
 }

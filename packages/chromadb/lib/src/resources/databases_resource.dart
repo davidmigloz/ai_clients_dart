@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
 import '../models/databases/database.dart';
 import 'base_resource.dart';
 
@@ -26,7 +30,6 @@ class DatabasesResource extends ResourceBase {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
-    required super.retryWrapper,
     super.ensureNotClosed,
   });
 
@@ -39,10 +42,14 @@ class DatabasesResource extends ResourceBase {
   ///
   /// Endpoint: `GET /api/v2/tenants/{tenant}/databases`
   Future<List<Database>> list({String? tenant}) async {
+    ensureNotClosed?.call();
     final t = tenant ?? config.tenant;
-    final response = await get(
+    final url = requestBuilder.buildUrl(
       '/api/v2/tenants/${Uri.encodeComponent(t)}/databases',
     );
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
     return parseJsonList(response).map(Database.fromJson).toList();
   }
 
@@ -56,11 +63,16 @@ class DatabasesResource extends ResourceBase {
   ///
   /// Endpoint: `POST /api/v2/tenants/{tenant}/databases`
   Future<Database> create({required String name, String? tenant}) async {
+    ensureNotClosed?.call();
     final t = tenant ?? config.tenant;
-    await post(
+    final url = requestBuilder.buildUrl(
       '/api/v2/tenants/${Uri.encodeComponent(t)}/databases',
-      body: {'name': name},
     );
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode({'name': name});
+    await interceptorChain.execute(httpRequest);
 
     // Re-fetch the database since the create response may be incomplete
     return getByName(name: name, tenant: t);
@@ -78,10 +90,14 @@ class DatabasesResource extends ResourceBase {
   ///
   /// Endpoint: `GET /api/v2/tenants/{tenant}/databases/{database}`
   Future<Database> getByName({required String name, String? tenant}) async {
+    ensureNotClosed?.call();
     final t = tenant ?? config.tenant;
-    final response = await get(
+    final url = requestBuilder.buildUrl(
       '/api/v2/tenants/${Uri.encodeComponent(t)}/databases/${Uri.encodeComponent(name)}',
     );
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
     return Database.fromJson(parseJson(response));
   }
 
@@ -95,9 +111,13 @@ class DatabasesResource extends ResourceBase {
   ///
   /// Endpoint: `DELETE /api/v2/tenants/{tenant}/databases/{database}`
   Future<void> deleteByName({required String name, String? tenant}) async {
+    ensureNotClosed?.call();
     final t = tenant ?? config.tenant;
-    await delete(
+    final url = requestBuilder.buildUrl(
       '/api/v2/tenants/${Uri.encodeComponent(t)}/databases/${Uri.encodeComponent(name)}',
     );
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
+    await interceptorChain.execute(httpRequest);
   }
 }

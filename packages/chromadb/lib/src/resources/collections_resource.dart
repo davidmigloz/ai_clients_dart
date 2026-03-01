@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
 import '../models/collections/collection.dart';
 import 'base_resource.dart';
 
@@ -26,7 +30,6 @@ class CollectionsResource extends ResourceBase {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
-    required super.retryWrapper,
     super.ensureNotClosed,
   });
 
@@ -56,14 +59,18 @@ class CollectionsResource extends ResourceBase {
     int? limit,
     int? offset,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{};
     if (limit != null) queryParams['limit'] = limit.toString();
     if (offset != null) queryParams['offset'] = offset.toString();
 
-    final response = await get(
+    final url = requestBuilder.buildUrl(
       _basePath(tenant: tenant, database: database),
       queryParameters: queryParams.isEmpty ? null : queryParams,
     );
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
     return parseJsonList(response).map(Collection.fromJson).toList();
   }
 
@@ -86,16 +93,21 @@ class CollectionsResource extends ResourceBase {
     String? tenant,
     String? database,
   }) async {
+    ensureNotClosed?.call();
     final body = <String, dynamic>{
       'name': name,
       'metadata': ?metadata,
       if (getOrCreate) 'get_or_create': getOrCreate,
     };
 
-    final response = await post(
+    final url = requestBuilder.buildUrl(
       _basePath(tenant: tenant, database: database),
-      body: body,
     );
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(body);
+    final response = await interceptorChain.execute(httpRequest);
     return Collection.fromJson(parseJson(response));
   }
 
@@ -115,9 +127,13 @@ class CollectionsResource extends ResourceBase {
     String? tenant,
     String? database,
   }) async {
-    final response = await get(
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(
       '${_basePath(tenant: tenant, database: database)}/${Uri.encodeComponent(name)}',
     );
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
     return Collection.fromJson(parseJson(response));
   }
 
@@ -129,9 +145,13 @@ class CollectionsResource extends ResourceBase {
   ///
   /// Endpoint: `GET /api/v2/collections/{crn}`
   Future<Collection> getByCrn({required String crn}) async {
-    final response = await get(
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(
       '/api/v2/collections/${Uri.encodeComponent(crn)}',
     );
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
     return Collection.fromJson(parseJson(response));
   }
 
@@ -153,6 +173,7 @@ class CollectionsResource extends ResourceBase {
     String? tenant,
     String? database,
   }) async {
+    ensureNotClosed?.call();
     // First get the collection to obtain its UUID for the PUT request
     final current = await getByName(
       name: name,
@@ -165,10 +186,14 @@ class CollectionsResource extends ResourceBase {
       'new_metadata': ?newMetadata,
     };
 
-    await put(
+    final url = requestBuilder.buildUrl(
       '${_basePath(tenant: tenant, database: database)}/${Uri.encodeComponent(current.id)}',
-      body: body,
     );
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('PUT', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(body);
+    await interceptorChain.execute(httpRequest);
 
     // Re-fetch using the new name if provided, otherwise original name
     return getByName(name: newName ?? name, tenant: tenant, database: database);
@@ -188,9 +213,13 @@ class CollectionsResource extends ResourceBase {
     String? tenant,
     String? database,
   }) async {
-    await delete(
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(
       '${_basePath(tenant: tenant, database: database)}/${Uri.encodeComponent(name)}',
     );
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
+    await interceptorChain.execute(httpRequest);
   }
 
   /// Counts the number of collections in a database.
@@ -202,12 +231,16 @@ class CollectionsResource extends ResourceBase {
   ///
   /// Endpoint: `GET /api/v2/tenants/{tenant}/databases/{database}/collections_count`
   Future<int> count({String? tenant, String? database}) async {
+    ensureNotClosed?.call();
     final t = tenant ?? config.tenant;
     final d = database ?? config.database;
-    final response = await get(
+    final url = requestBuilder.buildUrl(
       '/api/v2/tenants/${Uri.encodeComponent(t)}'
       '/databases/${Uri.encodeComponent(d)}/collections_count',
     );
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
     return parseInt(response);
   }
 
@@ -227,10 +260,15 @@ class CollectionsResource extends ResourceBase {
     String? tenant,
     String? database,
   }) async {
-    final response = await post(
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(
       '${_basePath(tenant: tenant, database: database)}/${Uri.encodeComponent(collectionId)}/fork',
-      body: {'new_name': newName},
     );
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode({'new_name': newName});
+    final response = await interceptorChain.execute(httpRequest);
     return Collection.fromJson(parseJson(response));
   }
 }

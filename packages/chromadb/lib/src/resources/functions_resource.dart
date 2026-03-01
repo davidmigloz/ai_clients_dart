@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
 import '../models/functions/attach_function_request.dart';
 import '../models/functions/attach_function_response.dart';
 import '../models/functions/detach_function_request.dart';
@@ -49,7 +53,6 @@ class FunctionsResource extends ResourceBase {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
-    required super.retryWrapper,
     super.ensureNotClosed,
   }) : _tenant = tenant,
        _database = database;
@@ -80,6 +83,7 @@ class FunctionsResource extends ResourceBase {
     required String outputCollection,
     Map<String, dynamic>? params,
   }) async {
+    ensureNotClosed?.call();
     final request = AttachFunctionRequest(
       name: name,
       functionId: functionId,
@@ -87,10 +91,12 @@ class FunctionsResource extends ResourceBase {
       params: params,
     );
 
-    final response = await post(
-      '$_basePath/functions/attach',
-      body: request.toJson(),
-    );
+    final url = requestBuilder.buildUrl('$_basePath/functions/attach');
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(httpRequest);
     return AttachFunctionResponse.fromJson(parseJson(response));
   }
 
@@ -104,9 +110,13 @@ class FunctionsResource extends ResourceBase {
   Future<GetAttachedFunctionResponse> getFunction({
     required String name,
   }) async {
-    final response = await get(
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(
       '$_basePath/functions/${Uri.encodeComponent(name)}',
     );
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
     return GetAttachedFunctionResponse.fromJson(parseJson(response));
   }
 
@@ -122,12 +132,17 @@ class FunctionsResource extends ResourceBase {
     required String name,
     bool? deleteOutput,
   }) async {
+    ensureNotClosed?.call();
     final request = DetachFunctionRequest(deleteOutput: deleteOutput);
 
-    final response = await post(
+    final url = requestBuilder.buildUrl(
       '$_basePath/attached_functions/${Uri.encodeComponent(name)}/detach',
-      body: request.toJson(),
     );
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(httpRequest);
     return DetachFunctionResponse.fromJson(parseJson(response));
   }
 }

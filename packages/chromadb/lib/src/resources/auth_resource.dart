@@ -1,3 +1,5 @@
+import 'package:http/http.dart' as http;
+
 import '../models/auth/user_identity.dart';
 import 'base_resource.dart';
 
@@ -23,7 +25,6 @@ class AuthResource extends ResourceBase {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
-    required super.retryWrapper,
     super.ensureNotClosed,
   });
 
@@ -36,7 +37,11 @@ class AuthResource extends ResourceBase {
   ///
   /// Endpoint: `GET /api/v2/auth/identity`
   Future<UserIdentity> identity() async {
-    final response = await get('/api/v2/auth/identity');
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('/api/v2/auth/identity');
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
     return UserIdentity.fromJson(parseJson(response));
   }
 }

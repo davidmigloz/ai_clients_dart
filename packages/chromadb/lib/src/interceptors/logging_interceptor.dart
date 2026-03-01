@@ -35,9 +35,10 @@ class LoggingInterceptor implements Interceptor {
     InterceptorNext next,
   ) async {
     // Use existing X-Request-ID if present, otherwise generate one
-    final requestId = context.headers['X-Request-ID'] ?? generateRequestId();
-    if (!context.headers.containsKey('X-Request-ID')) {
-      context.headers['X-Request-ID'] = requestId;
+    final requestId =
+        context.request.headers['X-Request-ID'] ?? generateRequestId();
+    if (!context.request.headers.containsKey('X-Request-ID')) {
+      context.request.headers['X-Request-ID'] = requestId;
     }
 
     final stopwatch = Stopwatch()..start();
@@ -57,14 +58,16 @@ class LoggingInterceptor implements Interceptor {
   }
 
   void _logRequest(String requestId, RequestContext context) {
-    _log.fine('[$requestId] → ${context.method} ${context.path}');
+    _log.fine(
+      '[$requestId] → ${context.request.method} ${context.request.url.path}',
+    );
 
-    if (context.queryParameters.isNotEmpty) {
-      _log.finer('[$requestId] Query: ${context.queryParameters}');
+    if (context.request.url.queryParameters.isNotEmpty) {
+      _log.finer('[$requestId] Query: ${context.request.url.queryParameters}');
     }
 
-    if (context.headers.isNotEmpty) {
-      final redacted = _redactHeaders(context.headers);
+    if (context.request.headers.isNotEmpty) {
+      final redacted = _redactHeaders(context.request.headers);
       _log.finer('[$requestId] Headers: $redacted');
     }
   }

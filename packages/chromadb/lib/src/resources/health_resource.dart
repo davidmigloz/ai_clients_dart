@@ -1,3 +1,5 @@
+import 'package:http/http.dart' as http;
+
 import '../models/metadata/heartbeat_response.dart';
 import '../models/metadata/version_response.dart';
 import 'base_resource.dart';
@@ -26,7 +28,6 @@ class HealthResource extends ResourceBase {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
-    required super.retryWrapper,
     super.ensureNotClosed,
   });
 
@@ -36,7 +37,11 @@ class HealthResource extends ResourceBase {
   ///
   /// Endpoint: `GET /api/v2/heartbeat`
   Future<HeartbeatResponse> heartbeat() async {
-    final response = await get('/api/v2/heartbeat');
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('/api/v2/heartbeat');
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
     return HeartbeatResponse.fromJson(parseJson(response));
   }
 
@@ -46,7 +51,11 @@ class HealthResource extends ResourceBase {
   ///
   /// Endpoint: `GET /api/v2/version`
   Future<VersionResponse> version() async {
-    final response = await get('/api/v2/version');
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('/api/v2/version');
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
     // The version endpoint returns a plain string, not JSON
     return VersionResponse(version: response.body.replaceAll('"', ''));
   }
@@ -58,7 +67,11 @@ class HealthResource extends ResourceBase {
   ///
   /// Endpoint: `GET /api/v2/pre-flight-checks`
   Future<Map<String, dynamic>> preFlightChecks() async {
-    final response = await get('/api/v2/pre-flight-checks');
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('/api/v2/pre-flight-checks');
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
     return parseJson(response);
   }
 
@@ -69,7 +82,11 @@ class HealthResource extends ResourceBase {
   ///
   /// Endpoint: `GET /api/v2/healthcheck`
   Future<Map<String, dynamic>> healthcheck() async {
-    final response = await get('/api/v2/healthcheck');
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('/api/v2/healthcheck');
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
     return parseJson(response);
   }
 
@@ -82,7 +99,14 @@ class HealthResource extends ResourceBase {
   ///
   /// Endpoint: `POST /api/v2/reset`
   Future<bool> reset() async {
-    final response = await post('/api/v2/reset', isIdempotent: true);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('/api/v2/reset');
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('POST', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(
+      httpRequest,
+      isIdempotent: true,
+    );
     return response.statusCode == 200;
   }
 }

@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
 import '../models/tenants/tenant.dart';
 import 'base_resource.dart';
 
@@ -25,7 +29,6 @@ class TenantsResource extends ResourceBase {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
-    required super.retryWrapper,
     super.ensureNotClosed,
   });
 
@@ -37,7 +40,13 @@ class TenantsResource extends ResourceBase {
   ///
   /// Endpoint: `POST /api/v2/tenants`
   Future<Tenant> create({required String name}) async {
-    final response = await post('/api/v2/tenants', body: {'name': name});
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('/api/v2/tenants');
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode({'name': name});
+    final response = await interceptorChain.execute(httpRequest);
     return Tenant.fromJson(parseJson(response));
   }
 
@@ -51,7 +60,13 @@ class TenantsResource extends ResourceBase {
   ///
   /// Endpoint: `GET /api/v2/tenants/{tenant_name}`
   Future<Tenant> getByName({required String name}) async {
-    final response = await get('/api/v2/tenants/${Uri.encodeComponent(name)}');
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(
+      '/api/v2/tenants/${Uri.encodeComponent(name)}',
+    );
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
     return Tenant.fromJson(parseJson(response));
   }
 
@@ -64,15 +79,20 @@ class TenantsResource extends ResourceBase {
   ///
   /// Endpoint: `PATCH /api/v2/tenants/{tenant_name}`
   Future<Tenant> update({required String name, String? newName}) async {
+    ensureNotClosed?.call();
     final body = <String, dynamic>{};
     if (newName != null) {
       body['new_name'] = newName;
     }
 
-    final response = await patch(
+    final url = requestBuilder.buildUrl(
       '/api/v2/tenants/${Uri.encodeComponent(name)}',
-      body: body,
     );
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('PATCH', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(body);
+    final response = await interceptorChain.execute(httpRequest);
     return Tenant.fromJson(parseJson(response));
   }
 }

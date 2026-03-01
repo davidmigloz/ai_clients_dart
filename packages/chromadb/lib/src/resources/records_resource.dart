@@ -53,7 +53,6 @@ class RecordsResource extends ResourceBase {
     required super.httpClient,
     required super.interceptorChain,
     required super.requestBuilder,
-    required super.retryWrapper,
     super.ensureNotClosed,
   }) : _tenant = tenant,
        _database = database;
@@ -85,6 +84,7 @@ class RecordsResource extends ResourceBase {
     List<Map<String, dynamic>>? metadatas,
     List<String>? uris,
   }) async {
+    ensureNotClosed?.call();
     final body = <String, dynamic>{
       'ids': ids,
       'embeddings': ?embeddings,
@@ -93,7 +93,12 @@ class RecordsResource extends ResourceBase {
       'uris': ?uris,
     };
 
-    await post('$_basePath/add', body: body);
+    final url = requestBuilder.buildUrl('$_basePath/add');
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(body);
+    await interceptorChain.execute(httpRequest);
   }
 
   /// Updates existing records in the collection.
@@ -114,6 +119,7 @@ class RecordsResource extends ResourceBase {
     List<Map<String, dynamic>>? metadatas,
     List<String>? uris,
   }) async {
+    ensureNotClosed?.call();
     final body = <String, dynamic>{
       'ids': ids,
       'embeddings': ?embeddings,
@@ -122,7 +128,12 @@ class RecordsResource extends ResourceBase {
       'uris': ?uris,
     };
 
-    await post('$_basePath/update', body: body);
+    final url = requestBuilder.buildUrl('$_basePath/update');
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(body);
+    await interceptorChain.execute(httpRequest);
   }
 
   /// Upserts records (insert or update).
@@ -144,6 +155,7 @@ class RecordsResource extends ResourceBase {
     List<Map<String, dynamic>>? metadatas,
     List<String>? uris,
   }) async {
+    ensureNotClosed?.call();
     final body = <String, dynamic>{
       'ids': ids,
       'embeddings': ?embeddings,
@@ -152,7 +164,12 @@ class RecordsResource extends ResourceBase {
       'uris': ?uris,
     };
 
-    await post('$_basePath/upsert', body: body);
+    final url = requestBuilder.buildUrl('$_basePath/upsert');
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(body);
+    await interceptorChain.execute(httpRequest);
   }
 
   /// Gets records from the collection.
@@ -173,6 +190,7 @@ class RecordsResource extends ResourceBase {
     int? offset,
     List<Include> include = const [Include.documents, Include.metadatas],
   }) async {
+    ensureNotClosed?.call();
     final body = <String, dynamic>{
       'ids': ?ids,
       'where': ?where,
@@ -182,9 +200,13 @@ class RecordsResource extends ResourceBase {
       'include': Include.toApiList(include),
     };
 
-    final response = await post(
-      '$_basePath/get',
-      body: body,
+    final url = requestBuilder.buildUrl('$_basePath/get');
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(body);
+    final response = await interceptorChain.execute(
+      httpRequest,
       isIdempotent: true,
     );
     return GetResponse.fromJson(parseJson(response));
@@ -212,6 +234,7 @@ class RecordsResource extends ResourceBase {
       Include.distances,
     ],
   }) async {
+    ensureNotClosed?.call();
     final body = <String, dynamic>{
       'query_embeddings': queryEmbeddings,
       'n_results': nResults,
@@ -220,9 +243,13 @@ class RecordsResource extends ResourceBase {
       'include': Include.toApiList(include),
     };
 
-    final response = await post(
-      '$_basePath/query',
-      body: body,
+    final url = requestBuilder.buildUrl('$_basePath/query');
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(body);
+    final response = await interceptorChain.execute(
+      httpRequest,
       isIdempotent: true,
     );
     return QueryResponse.fromJson(parseJson(response));
@@ -243,13 +270,18 @@ class RecordsResource extends ResourceBase {
   ///
   /// Endpoint: `POST /api/v2/.../collections/{id}/search`
   Future<SearchResponse> search({required List<SearchPayload> searches}) async {
+    ensureNotClosed?.call();
     final body = <String, dynamic>{
       'searches': searches.map((s) => s.toJson()).toList(),
     };
 
-    final response = await post(
-      '$_basePath/search',
-      body: body,
+    final url = requestBuilder.buildUrl('$_basePath/search');
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(body);
+    final response = await interceptorChain.execute(
+      httpRequest,
       isIdempotent: true,
     );
     return SearchResponse.fromJson(parseJson(response));
@@ -271,13 +303,19 @@ class RecordsResource extends ResourceBase {
     Map<String, dynamic>? where,
     Map<String, dynamic>? whereDocument,
   }) async {
+    ensureNotClosed?.call();
     final body = <String, dynamic>{
       'ids': ?ids,
       'where': ?where,
       'where_document': ?whereDocument,
     };
 
-    final response = await post('$_basePath/delete', body: body);
+    final url = requestBuilder.buildUrl('$_basePath/delete');
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(body);
+    final response = await interceptorChain.execute(httpRequest);
     return _parseDeleteResponse(response);
   }
 
@@ -311,7 +349,11 @@ class RecordsResource extends ResourceBase {
   ///
   /// Endpoint: `GET /api/v2/.../collections/{id}/count`
   Future<int> count() async {
-    final response = await get('$_basePath/count');
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_basePath/count');
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
     return parseInt(response);
   }
 }
