@@ -1,6 +1,5 @@
 import 'package:http/http.dart' as http;
 
-import '../auth/auth_provider.dart';
 import '../interceptors/auth_interceptor.dart';
 import '../interceptors/error_interceptor.dart';
 import '../interceptors/interceptor.dart';
@@ -87,17 +86,14 @@ class AnthropicClient {
 
   /// Creates an [AnthropicClient] from environment variables.
   ///
-  /// Reads `ANTHROPIC_API_KEY` from environment.
+  /// Reads `ANTHROPIC_API_KEY` for the API key (required).
   /// Optionally reads `ANTHROPIC_BASE_URL` for custom API endpoints.
+  ///
+  /// Throws [StateError] if `ANTHROPIC_API_KEY` is not set.
+  /// Throws [UnsupportedError] on web platforms.
   factory AnthropicClient.fromEnvironment({http.Client? httpClient}) {
-    const apiKey = String.fromEnvironment('ANTHROPIC_API_KEY');
-    const baseUrl = String.fromEnvironment('ANTHROPIC_BASE_URL');
-
     return AnthropicClient(
-      config: AnthropicConfig(
-        authProvider: apiKey.isNotEmpty ? const ApiKeyProvider(apiKey) : null,
-        baseUrl: baseUrl.isNotEmpty ? baseUrl : 'https://api.anthropic.com',
-      ),
+      config: AnthropicConfig.fromEnvironment(),
       httpClient: httpClient,
     );
   }

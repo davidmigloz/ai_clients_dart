@@ -1,5 +1,6 @@
 import 'package:logging/logging.dart';
 import '../auth/auth_provider.dart';
+import '../platform/environment.dart';
 
 /// API version for the GoogleAI and Vertex AI APIs.
 /// https://ai.google.dev/gemini-api/docs/api-versions
@@ -225,6 +226,34 @@ class GoogleAIConfig {
          logLevel: logLevel,
          redactionList: redactionList,
        );
+
+  /// Creates a [GoogleAIConfig] using runtime environment variables.
+  ///
+  /// Reads the environment variable specified by [envVarName] for the API key
+  /// (required). Defaults to `GOOGLE_GENAI_API_KEY`.
+  ///
+  /// Throws [StateError] if the environment variable is not set.
+  /// Throws [UnsupportedError] on web platforms.
+  factory GoogleAIConfig.fromEnvironment({
+    String envVarName = 'GOOGLE_GENAI_API_KEY',
+    ApiVersion apiVersion = ApiVersion.v1beta,
+    Duration timeout = const Duration(minutes: 2),
+    RetryPolicy retryPolicy = RetryPolicy.defaultPolicy,
+  }) {
+    final apiKey = getEnvironmentVariable(envVarName);
+    if (apiKey == null || apiKey.isEmpty) {
+      throw StateError(
+        'Environment variable $envVarName is not set. '
+        'Set it to your Google AI API key.',
+      );
+    }
+    return GoogleAIConfig(
+      authProvider: ApiKeyProvider(apiKey),
+      apiVersion: apiVersion,
+      timeout: timeout,
+      retryPolicy: retryPolicy,
+    );
+  }
 
   /// Creates a copy with overridden values.
   GoogleAIConfig copyWith({

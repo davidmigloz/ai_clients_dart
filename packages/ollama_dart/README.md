@@ -101,7 +101,11 @@ dependencies:
 ```dart
 import 'package:ollama_dart/ollama_dart.dart';
 
-final client = OllamaClient(
+// From environment variables (reads OLLAMA_HOST, defaults to localhost:11434)
+final client = OllamaClient.fromEnvironment();
+
+// Or with explicit configuration
+final clientWithConfig = OllamaClient(
   config: OllamaConfig(
     baseUrl: 'http://localhost:11434',  // Default Ollama server
     timeout: Duration(minutes: 5),

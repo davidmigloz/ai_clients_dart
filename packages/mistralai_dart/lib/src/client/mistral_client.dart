@@ -334,6 +334,20 @@ class MistralClient {
     );
   }
 
+  /// Creates a [MistralClient] from environment variables.
+  ///
+  /// Reads `MISTRAL_API_KEY` for the API key (required).
+  /// Optionally reads `MISTRAL_BASE_URL` for custom API endpoints.
+  ///
+  /// Throws [StateError] if `MISTRAL_API_KEY` is not set.
+  /// Throws [UnsupportedError] on web platforms.
+  factory MistralClient.fromEnvironment({http.Client? httpClient}) {
+    return MistralClient(
+      config: MistralConfig.fromEnvironment(),
+      httpClient: httpClient,
+    );
+  }
+
   /// Closes the HTTP client and releases resources.
   ///
   /// Only closes the HTTP client if it was created internally.

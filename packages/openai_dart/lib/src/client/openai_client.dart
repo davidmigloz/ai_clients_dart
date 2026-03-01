@@ -10,7 +10,6 @@ import '../interceptors/auth_interceptor.dart';
 import '../interceptors/error_interceptor.dart';
 import '../interceptors/interceptor.dart';
 import '../interceptors/logging_interceptor.dart';
-import '../platform/environment.dart';
 import '../resources/audio_resource.dart';
 import '../resources/batches_resource.dart';
 import '../resources/beta_resource.dart';
@@ -135,10 +134,8 @@ class OpenAIClient {
 
   /// Creates a new [OpenAIClient] using environment variables.
   ///
-  /// Reads `OPENAI_API_KEY` for authentication.
-  /// Optionally reads `OPENAI_BASE_URL`, `OPENAI_ORG_ID`, `OPENAI_PROJECT_ID`.
-  ///
-  /// Empty environment variable values are treated the same as unset.
+  /// Delegates to [OpenAIConfig.fromEnvironment] for configuration.
+  /// See that method for details on which environment variables are read.
   ///
   /// The optional [streamClientFactory] is used to create HTTP clients for
   /// streaming requests with abort support. This is primarily useful for
@@ -150,19 +147,8 @@ class OpenAIClient {
     http.Client? httpClient,
     http.Client Function()? streamClientFactory,
   }) {
-    final baseUrl = getEnvironmentVariable('OPENAI_BASE_URL');
-    final orgId = getEnvironmentVariable('OPENAI_ORG_ID');
-    final projectId = getEnvironmentVariable('OPENAI_PROJECT_ID');
-
     return OpenAIClient(
-      config: OpenAIConfig(
-        authProvider: ApiKeyProvider.fromEnvironment(),
-        organization: (orgId != null && orgId.isNotEmpty) ? orgId : null,
-        project: (projectId != null && projectId.isNotEmpty) ? projectId : null,
-        baseUrl: (baseUrl != null && baseUrl.isNotEmpty)
-            ? baseUrl
-            : 'https://api.openai.com/v1',
-      ),
+      config: OpenAIConfig.fromEnvironment(),
       httpClient: httpClient,
       streamClientFactory: streamClientFactory,
     );

@@ -79,6 +79,9 @@ void main() async {
 // Simple API key authentication
 final client = MistralClient.withApiKey('your-api-key');
 
+// From environment variables (reads MISTRAL_API_KEY and optional MISTRAL_BASE_URL)
+final client = MistralClient.fromEnvironment();
+
 // Custom base URL (for proxies or self-hosted)
 final client = MistralClient.withBaseUrl(
   apiKey: 'your-api-key',

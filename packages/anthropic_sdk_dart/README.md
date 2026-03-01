@@ -105,13 +105,7 @@ Unofficial Dart client for the **[Anthropic API](https://docs.anthropic.com/en/a
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 
 void main() async {
-  final client = AnthropicClient(
-    config: const AnthropicConfig(
-      authProvider: ApiKeyProvider(
-        String.fromEnvironment('ANTHROPIC_API_KEY'),
-      ),
-    ),
-  );
+  final client = AnthropicClient.fromEnvironment();
 
   final response = await client.messages.create(
     MessageCreateRequest(
@@ -180,13 +174,7 @@ final client = AnthropicClient(
 ```dart
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 
-final client = AnthropicClient(
-  config: const AnthropicConfig(
-    authProvider: ApiKeyProvider(
-      String.fromEnvironment('ANTHROPIC_API_KEY'),
-    ),
-  ),
-);
+final client = AnthropicClient.fromEnvironment();
 
 final response = await client.messages.create(
   MessageCreateRequest(

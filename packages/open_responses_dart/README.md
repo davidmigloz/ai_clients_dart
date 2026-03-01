@@ -106,6 +106,13 @@ void main() async {
 }
 ```
 
+Or use environment variables (`OPENAI_API_KEY` and optionally `OPENAI_BASE_URL`):
+
+```dart
+// From environment variables (reads OPENAI_API_KEY and OPENAI_BASE_URL)
+final client = OpenResponsesClient.fromEnvironment();
+```
+
 ## Usage
 
 ### Basic Usage

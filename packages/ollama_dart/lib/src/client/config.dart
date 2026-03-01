@@ -1,6 +1,7 @@
 import 'package:logging/logging.dart';
 
 import '../auth/auth_provider.dart';
+import '../platform/environment.dart';
 
 /// Retry policy configuration.
 class RetryPolicy {
@@ -84,6 +85,21 @@ class OllamaConfig {
       'bearer',
     ],
   });
+
+  /// Creates an [OllamaConfig] using runtime environment variables.
+  ///
+  /// Optionally reads `OLLAMA_HOST` for a custom base URL.
+  /// Defaults to `http://localhost:11434` if not set.
+  ///
+  /// Throws [UnsupportedError] on web platforms.
+  factory OllamaConfig.fromEnvironment() {
+    final host = getEnvironmentVariable('OLLAMA_HOST');
+    return OllamaConfig(
+      baseUrl: (host != null && host.isNotEmpty)
+          ? host
+          : 'http://localhost:11434',
+    );
+  }
 
   /// Creates a copy with overridden values.
   OllamaConfig copyWith({

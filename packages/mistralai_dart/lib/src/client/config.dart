@@ -1,6 +1,7 @@
 import 'package:logging/logging.dart';
 
 import '../auth/auth_provider.dart';
+import '../platform/environment.dart';
 
 /// Retry policy configuration.
 class RetryPolicy {
@@ -85,6 +86,30 @@ class MistralConfig {
       'apikey',
     ],
   });
+
+  /// Creates a [MistralConfig] using runtime environment variables.
+  ///
+  /// Reads `MISTRAL_API_KEY` for the API key (required).
+  /// Optionally reads `MISTRAL_BASE_URL` for a custom base URL.
+  ///
+  /// Throws [StateError] if `MISTRAL_API_KEY` is not set.
+  /// Throws [UnsupportedError] on web platforms.
+  factory MistralConfig.fromEnvironment() {
+    final apiKey = getEnvironmentVariable('MISTRAL_API_KEY');
+    if (apiKey == null || apiKey.isEmpty) {
+      throw StateError(
+        'Environment variable MISTRAL_API_KEY is not set. '
+        'Set it to your Mistral API key.',
+      );
+    }
+    final baseUrl = getEnvironmentVariable('MISTRAL_BASE_URL');
+    return MistralConfig(
+      authProvider: ApiKeyProvider(apiKey),
+      baseUrl: (baseUrl != null && baseUrl.isNotEmpty)
+          ? baseUrl
+          : 'https://api.mistral.ai',
+    );
+  }
 
   /// Creates a copy with overridden values.
   MistralConfig copyWith({

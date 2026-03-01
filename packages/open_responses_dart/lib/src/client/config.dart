@@ -1,6 +1,7 @@
 import 'package:logging/logging.dart';
 
 import '../auth/auth_provider.dart';
+import '../platform/environment.dart';
 
 /// Retry policy configuration.
 class RetryPolicy {
@@ -90,6 +91,28 @@ class OpenResponsesConfig {
       'apikey',
     ],
   });
+
+  /// Creates an [OpenResponsesConfig] using runtime environment variables.
+  ///
+  /// Reads `OPENAI_API_KEY` for the API key (optional).
+  /// Optionally reads `OPENAI_BASE_URL` for a custom base URL.
+  ///
+  /// The API key is optional because OpenResponses supports local providers
+  /// like Ollama that don't require authentication.
+  ///
+  /// Throws [UnsupportedError] on web platforms.
+  factory OpenResponsesConfig.fromEnvironment() {
+    final apiKey = getEnvironmentVariable('OPENAI_API_KEY');
+    final baseUrl = getEnvironmentVariable('OPENAI_BASE_URL');
+    return OpenResponsesConfig(
+      authProvider: (apiKey != null && apiKey.isNotEmpty)
+          ? BearerTokenProvider(apiKey)
+          : null,
+      baseUrl: (baseUrl != null && baseUrl.isNotEmpty)
+          ? baseUrl
+          : 'https://api.openai.com/v1',
+    );
+  }
 
   /// Creates a copy with overridden values.
   OpenResponsesConfig copyWith({

@@ -1,9 +1,7 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
-import '../auth/auth_provider.dart';
 import '../interceptors/auth_interceptor.dart';
 import '../interceptors/error_interceptor.dart';
 import '../interceptors/logging_interceptor.dart';
@@ -228,6 +226,7 @@ class GoogleAIClient {
   /// By default, uses `GOOGLE_GENAI_API_KEY` (matching the official js-genai SDK).
   ///
   /// Throws a [StateError] if the environment variable is not set or empty.
+  /// Throws [UnsupportedError] on web platforms.
   ///
   /// Example:
   /// ```dart
@@ -244,16 +243,9 @@ class GoogleAIClient {
     RetryPolicy retryPolicy = RetryPolicy.defaultPolicy,
     http.Client? httpClient,
   }) {
-    final apiKey = Platform.environment[envVarName];
-    if (apiKey == null || apiKey.isEmpty) {
-      throw StateError(
-        'Environment variable $envVarName is not set. '
-        'Set it to your Google AI API key.',
-      );
-    }
     return GoogleAIClient(
-      config: GoogleAIConfig(
-        authProvider: ApiKeyProvider(apiKey),
+      config: GoogleAIConfig.fromEnvironment(
+        envVarName: envVarName,
         apiVersion: apiVersion,
         timeout: timeout,
         retryPolicy: retryPolicy,

@@ -1,3 +1,8 @@
+@TestOn('vm')
+library;
+
+import 'dart:io';
+
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 import 'package:http/http.dart' as http;
 import 'package:test/test.dart';
@@ -109,15 +114,12 @@ void main() {
     });
 
     group('fromEnvironment', () {
-      test('creates client from environment', () {
-        // Note: This test relies on compile-time constants
-        // In actual use, environment variables would be set
-        final client = AnthropicClient.fromEnvironment();
-
-        expect(client, isNotNull);
-        expect(client.config, isNotNull);
-
-        client.close();
+      test('throws StateError when ANTHROPIC_API_KEY is not set', () {
+        if (Platform.environment.containsKey('ANTHROPIC_API_KEY')) {
+          markTestSkipped('ANTHROPIC_API_KEY is set');
+          return;
+        }
+        expect(AnthropicClient.fromEnvironment, throwsA(isA<StateError>()));
       });
     });
   });

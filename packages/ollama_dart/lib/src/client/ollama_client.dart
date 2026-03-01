@@ -181,6 +181,19 @@ class OllamaClient {
     return OllamaClient(config: OllamaConfig(baseUrl: baseUrl));
   }
 
+  /// Creates an [OllamaClient] from environment variables.
+  ///
+  /// Optionally reads `OLLAMA_HOST` for a custom base URL.
+  /// Defaults to `http://localhost:11434` if not set.
+  ///
+  /// Throws [UnsupportedError] on web platforms.
+  factory OllamaClient.fromEnvironment({http.Client? httpClient}) {
+    return OllamaClient(
+      config: OllamaConfig.fromEnvironment(),
+      httpClient: httpClient,
+    );
+  }
+
   /// Closes the HTTP client and releases resources.
   ///
   /// Only closes the HTTP client if it was created internally.

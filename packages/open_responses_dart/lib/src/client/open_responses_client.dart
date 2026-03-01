@@ -1,8 +1,5 @@
-import 'dart:io';
-
 import 'package:http/http.dart' as http;
 
-import '../auth/auth_provider.dart';
 import '../interceptors/auth_interceptor.dart';
 import '../interceptors/error_interceptor.dart';
 import '../interceptors/interceptor.dart';
@@ -88,19 +85,13 @@ class OpenResponsesClient {
 
   /// Creates an [OpenResponsesClient] from environment variables.
   ///
-  /// Reads `OPENAI_API_KEY` from environment.
+  /// Reads `OPENAI_API_KEY` from environment (optional).
   /// Optionally reads `OPENAI_BASE_URL` for custom API endpoints.
+  ///
+  /// Throws [UnsupportedError] on web platforms.
   factory OpenResponsesClient.fromEnvironment({http.Client? httpClient}) {
-    final apiKey = Platform.environment['OPENAI_API_KEY'];
-    final baseUrl = Platform.environment['OPENAI_BASE_URL'];
-
     return OpenResponsesClient(
-      config: OpenResponsesConfig(
-        authProvider: apiKey != null && apiKey.isNotEmpty
-            ? BearerTokenProvider(apiKey)
-            : null,
-        baseUrl: baseUrl ?? 'https://api.openai.com/v1',
-      ),
+      config: OpenResponsesConfig.fromEnvironment(),
       httpClient: httpClient,
     );
   }
