@@ -19,15 +19,14 @@ const _betaHeader = 'skills-2025-10-02';
 /// Skills are reusable components that extend Claude's capabilities.
 /// This is a beta feature and requires the `anthropic-beta` header.
 class SkillsResource extends ResourceBase {
-  final http.Client _httpClient;
-
   /// Creates a [SkillsResource].
   SkillsResource({
-    required super.chain,
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
     required super.requestBuilder,
-    required http.Client httpClient,
     super.ensureNotClosed,
-  }) : _httpClient = httpClient;
+  });
 
   /// Creates a new skill.
   ///
@@ -72,7 +71,7 @@ class SkillsResource extends ResourceBase {
     // Add authentication header
     await _applyAuthentication(request);
 
-    final streamedResponse = await _httpClient.send(request);
+    final streamedResponse = await httpClient.send(request);
     final response = await http.Response.fromStream(streamedResponse);
 
     if (response.statusCode >= 400) {
@@ -104,19 +103,27 @@ class SkillsResource extends ResourceBase {
     String? page,
     SkillSource? source,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, dynamic>{
       'limit': ?limit?.toString(),
       'page': ?page,
       'source': ?source?.toJson(),
     };
 
-    final json = await get(
+    final url = requestBuilder.buildUrl(
       '/v1/skills',
       queryParams: queryParams.isEmpty ? null : queryParams,
-      headers: {'anthropic-beta': _betaHeader},
     );
+    final headers = requestBuilder.buildHeaders(
+      additionalHeaders: {'anthropic-beta': _betaHeader},
+    );
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
-    return SkillListResponse.fromJson(json);
+    final response = await interceptorChain.execute(httpRequest);
+
+    return SkillListResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Gets a specific skill.
@@ -131,12 +138,18 @@ class SkillsResource extends ResourceBase {
   /// print('Skill: ${skill.displayTitle}');
   /// ```
   Future<Skill> retrieve({required String skillId}) async {
-    final json = await get(
-      '/v1/skills/$skillId',
-      headers: {'anthropic-beta': _betaHeader},
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('/v1/skills/$skillId');
+    final headers = requestBuilder.buildHeaders(
+      additionalHeaders: {'anthropic-beta': _betaHeader},
     );
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
-    return Skill.fromJson(json);
+    final response = await interceptorChain.execute(httpRequest);
+
+    return Skill.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Deletes a skill.
@@ -149,10 +162,14 @@ class SkillsResource extends ResourceBase {
   /// print('Skill deleted');
   /// ```
   Future<void> deleteSkill({required String skillId}) async {
-    await delete(
-      '/v1/skills/$skillId',
-      headers: {'anthropic-beta': _betaHeader},
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('/v1/skills/$skillId');
+    final headers = requestBuilder.buildHeaders(
+      additionalHeaders: {'anthropic-beta': _betaHeader},
     );
+    final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
+
+    await interceptorChain.execute(httpRequest);
   }
 
   /// Creates a new version of a skill.
@@ -195,7 +212,7 @@ class SkillsResource extends ResourceBase {
     // Add authentication header
     await _applyAuthentication(request);
 
-    final streamedResponse = await _httpClient.send(request);
+    final streamedResponse = await httpClient.send(request);
     final response = await http.Response.fromStream(streamedResponse);
 
     if (response.statusCode >= 400) {
@@ -228,18 +245,26 @@ class SkillsResource extends ResourceBase {
     int? limit,
     String? page,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, dynamic>{
       'limit': ?limit?.toString(),
       'page': ?page,
     };
 
-    final json = await get(
+    final url = requestBuilder.buildUrl(
       '/v1/skills/$skillId/versions',
       queryParams: queryParams.isEmpty ? null : queryParams,
-      headers: {'anthropic-beta': _betaHeader},
     );
+    final headers = requestBuilder.buildHeaders(
+      additionalHeaders: {'anthropic-beta': _betaHeader},
+    );
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
-    return SkillVersionListResponse.fromJson(json);
+    final response = await interceptorChain.execute(httpRequest);
+
+    return SkillVersionListResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Gets a specific version of a skill.
@@ -261,12 +286,20 @@ class SkillsResource extends ResourceBase {
     required String skillId,
     required String version,
   }) async {
-    final json = await get(
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(
       '/v1/skills/$skillId/versions/$version',
-      headers: {'anthropic-beta': _betaHeader},
     );
+    final headers = requestBuilder.buildHeaders(
+      additionalHeaders: {'anthropic-beta': _betaHeader},
+    );
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
-    return SkillVersion.fromJson(json);
+    final response = await interceptorChain.execute(httpRequest);
+
+    return SkillVersion.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Deletes a specific version of a skill.
@@ -286,10 +319,16 @@ class SkillsResource extends ResourceBase {
     required String skillId,
     required String version,
   }) async {
-    await delete(
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(
       '/v1/skills/$skillId/versions/$version',
-      headers: {'anthropic-beta': _betaHeader},
     );
+    final headers = requestBuilder.buildHeaders(
+      additionalHeaders: {'anthropic-beta': _betaHeader},
+    );
+    final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
+
+    await interceptorChain.execute(httpRequest);
   }
 
   /// Throws an appropriate error from an HTTP response.
@@ -320,7 +359,7 @@ class SkillsResource extends ResourceBase {
 
   /// Applies authentication to a request.
   Future<void> _applyAuthentication(http.BaseRequest request) async {
-    final authProvider = requestBuilder.config.authProvider;
+    final authProvider = config.authProvider;
     if (authProvider == null) return;
 
     final credentials = await authProvider.getCredentials();

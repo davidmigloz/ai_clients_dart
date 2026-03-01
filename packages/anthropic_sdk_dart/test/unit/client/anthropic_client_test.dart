@@ -82,10 +82,10 @@ void main() {
       client.close();
     });
 
-    test('exposes chain for advanced usage', () {
+    test('exposes interceptorChain for advanced usage', () {
       final client = AnthropicClient();
 
-      expect(client.chain, isNotNull);
+      expect(client.interceptorChain, isNotNull);
 
       client.close();
     });

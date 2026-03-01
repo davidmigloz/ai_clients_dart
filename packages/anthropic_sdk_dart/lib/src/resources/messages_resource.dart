@@ -1,6 +1,7 @@
+import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 
-import '../auth/auth_provider.dart';
 import '../models/messages/message.dart';
 import '../models/messages/message_create_request.dart';
 import '../models/streaming/message_stream_event.dart';
@@ -14,8 +15,6 @@ import 'streaming_resource.dart';
 /// The Messages API is the primary way to interact with Claude.
 /// It supports multi-turn conversations, tool use, vision, and more.
 class MessagesResource extends ResourceBase with StreamingResource {
-  final http.Client _httpClient;
-
   /// Resource for the Message Batches API.
   ///
   /// Access via `client.messages.batches`.
@@ -23,24 +22,20 @@ class MessagesResource extends ResourceBase with StreamingResource {
 
   /// Creates a [MessagesResource].
   MessagesResource({
-    required super.chain,
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
     required super.requestBuilder,
-    required http.Client httpClient,
     super.ensureNotClosed,
-  }) : _httpClient = httpClient {
+  }) {
     batches = MessageBatchesResource(
-      chain: chain,
+      config: config,
+      httpClient: httpClient,
+      interceptorChain: interceptorChain,
       requestBuilder: requestBuilder,
-      httpClient: _httpClient,
       ensureNotClosed: ensureNotClosed,
     );
   }
-
-  @override
-  http.Client get httpClient => _httpClient;
-
-  @override
-  AuthProvider? get authProvider => requestBuilder.config.authProvider;
 
   /// Creates a message.
   ///
@@ -53,16 +48,24 @@ class MessagesResource extends ResourceBase with StreamingResource {
     Future<void>? abortTrigger,
     List<String> betas = const [],
   }) async {
+    ensureNotClosed?.call();
     final body = request.toJson()..remove('stream'); // Ensure non-streaming
+    final url = requestBuilder.buildUrl('/v1/messages');
+    final headers = requestBuilder.buildHeaders(
+      additionalHeaders: _betaHeaders(betas),
+    );
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(body);
 
-    final response = await post(
-      '/v1/messages',
-      body: body,
-      headers: _betaHeaders(betas),
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
 
-    return Message.fromJson(response);
+    return Message.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Creates a streaming message.
@@ -100,14 +103,23 @@ class MessagesResource extends ResourceBase with StreamingResource {
     Future<void>? abortTrigger,
     List<String> betas = const [],
   }) async {
-    final response = await post(
-      '/v1/messages/count_tokens',
-      body: request.toJson(),
-      headers: _betaHeaders(betas),
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('/v1/messages/count_tokens');
+    final headers = requestBuilder.buildHeaders(
+      additionalHeaders: _betaHeaders(betas),
+    );
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
 
-    return TokenCountResponse.fromJson(response);
+    return TokenCountResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Builds the `anthropic-beta` header map from a list of beta feature names.

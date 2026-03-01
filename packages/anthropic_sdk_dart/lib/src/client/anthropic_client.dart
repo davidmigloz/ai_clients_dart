@@ -52,7 +52,7 @@ class AnthropicClient {
   bool _closed = false;
 
   /// Interceptor chain for request processing.
-  late final InterceptorChain _chain;
+  late final InterceptorChain _interceptorChain;
 
   /// Request builder for URL and header construction.
   late final RequestBuilder _requestBuilder;
@@ -125,7 +125,7 @@ class AnthropicClient {
         : null;
 
     // Build interceptor chain
-    _chain = InterceptorChain(
+    _interceptorChain = InterceptorChain(
       interceptors: interceptors,
       httpClient: _httpClient,
       retryWrapper: retryWrapper,
@@ -134,27 +134,32 @@ class AnthropicClient {
 
     // Initialize resources
     messages = MessagesResource(
-      chain: _chain,
-      requestBuilder: _requestBuilder,
+      config: config,
       httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
       ensureNotClosed: _ensureNotClosed,
     );
     models = ModelsResource(
-      chain: _chain,
+      config: config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
       requestBuilder: _requestBuilder,
       ensureNotClosed: _ensureNotClosed,
     );
     // Note: batches is now accessible via messages.batches (nested resource)
     files = FilesResource(
-      chain: _chain,
-      requestBuilder: _requestBuilder,
+      config: config,
       httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
       ensureNotClosed: _ensureNotClosed,
     );
     skills = SkillsResource(
-      chain: _chain,
-      requestBuilder: _requestBuilder,
+      config: config,
       httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
       ensureNotClosed: _ensureNotClosed,
     );
   }
@@ -185,7 +190,7 @@ class AnthropicClient {
   /// Gets the interceptor chain for advanced usage.
   ///
   /// This is primarily for internal use by resources.
-  InterceptorChain get chain => _chain;
+  InterceptorChain get interceptorChain => _interceptorChain;
 
   /// Gets the request builder for advanced usage.
   ///

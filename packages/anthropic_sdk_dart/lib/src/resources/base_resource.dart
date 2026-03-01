@@ -1,19 +1,26 @@
-import 'dart:convert';
-
 import 'package:http/http.dart' as http;
 
+import '../client/config.dart';
 import '../client/interceptor_chain.dart';
 import '../client/request_builder.dart';
 
-/// Base class for API resources.
+/// Base class for all API resources.
 ///
-/// Provides common functionality for making HTTP requests
-/// through the interceptor chain.
+/// Provides shared infrastructure (config, HTTP client, interceptors, request
+/// builder) to all resource implementations. Resources delegate actual
+/// HTTP execution to the interceptor chain to maintain consistent auth, retry,
+/// logging, and error handling behavior.
 abstract class ResourceBase {
-  /// The interceptor chain for executing requests.
-  final InterceptorChain _chain;
+  /// Client configuration.
+  final AnthropicConfig config;
 
-  /// The request builder for constructing URLs and headers.
+  /// HTTP client for making requests.
+  final http.Client httpClient;
+
+  /// Interceptor chain for request/response processing.
+  final InterceptorChain interceptorChain;
+
+  /// Request builder for constructing HTTP requests.
   final RequestBuilder requestBuilder;
 
   /// Callback to check if the client has been closed.
@@ -21,72 +28,10 @@ abstract class ResourceBase {
 
   /// Creates a [ResourceBase].
   ResourceBase({
-    required InterceptorChain chain,
+    required this.config,
+    required this.httpClient,
+    required this.interceptorChain,
     required this.requestBuilder,
     this.ensureNotClosed,
-  }) : _chain = chain;
-
-  /// Protected access to the interceptor chain for subclasses.
-  InterceptorChain get chain => _chain;
-
-  /// Makes a GET request.
-  ///
-  /// The optional [abortTrigger] allows canceling the request.
-  Future<Map<String, dynamic>> get(
-    String path, {
-    Map<String, dynamic>? queryParams,
-    Map<String, String>? headers,
-    Future<void>? abortTrigger,
-  }) async {
-    final uri = requestBuilder.buildUrl(path, queryParams: queryParams);
-    final request = http.Request('GET', uri)
-      ..headers.addAll(requestBuilder.buildHeaders(additionalHeaders: headers));
-
-    final response = await _chain.execute(request, abortTrigger: abortTrigger);
-    return _parseResponse(response);
-  }
-
-  /// Makes a POST request with JSON body.
-  ///
-  /// The optional [abortTrigger] allows canceling the request.
-  Future<Map<String, dynamic>> post(
-    String path, {
-    required Map<String, dynamic> body,
-    Map<String, dynamic>? queryParams,
-    Map<String, String>? headers,
-    Future<void>? abortTrigger,
-  }) async {
-    final uri = requestBuilder.buildUrl(path, queryParams: queryParams);
-    final request = http.Request('POST', uri)
-      ..headers.addAll(requestBuilder.buildHeaders(additionalHeaders: headers))
-      ..body = jsonEncode(body);
-
-    final response = await _chain.execute(request, abortTrigger: abortTrigger);
-    return _parseResponse(response);
-  }
-
-  /// Makes a DELETE request.
-  ///
-  /// The optional [abortTrigger] allows canceling the request.
-  Future<Map<String, dynamic>> delete(
-    String path, {
-    Map<String, dynamic>? queryParams,
-    Map<String, String>? headers,
-    Future<void>? abortTrigger,
-  }) async {
-    final uri = requestBuilder.buildUrl(path, queryParams: queryParams);
-    final request = http.Request('DELETE', uri)
-      ..headers.addAll(requestBuilder.buildHeaders(additionalHeaders: headers));
-
-    final response = await _chain.execute(request, abortTrigger: abortTrigger);
-    return _parseResponse(response);
-  }
-
-  /// Parses the HTTP response body as JSON.
-  Map<String, dynamic> _parseResponse(http.Response response) {
-    if (response.body.isEmpty) {
-      return <String, dynamic>{};
-    }
-    return jsonDecode(response.body) as Map<String, dynamic>;
-  }
+  });
 }

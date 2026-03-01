@@ -14,15 +14,14 @@ import 'base_resource.dart';
 /// The Message Batches API allows you to process large volumes of
 /// Messages requests asynchronously.
 class MessageBatchesResource extends ResourceBase {
-  final http.Client _httpClient;
-
   /// Creates a [MessageBatchesResource].
   MessageBatchesResource({
-    required super.chain,
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
     required super.requestBuilder,
-    required http.Client httpClient,
     super.ensureNotClosed,
-  }) : _httpClient = httpClient;
+  });
 
   /// Creates a message batch.
   ///
@@ -33,13 +32,21 @@ class MessageBatchesResource extends ResourceBase {
     MessageBatchCreateRequest request, {
     Future<void>? abortTrigger,
   }) async {
-    final response = await post(
-      '/v1/messages/batches',
-      body: request.toJson(),
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('/v1/messages/batches');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
 
-    return MessageBatch.fromJson(response);
+    return MessageBatch.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Lists message batches.
@@ -57,18 +64,27 @@ class MessageBatchesResource extends ResourceBase {
     int? limit,
     Future<void>? abortTrigger,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, dynamic>{};
     if (beforeId != null) queryParams['before_id'] = beforeId;
     if (afterId != null) queryParams['after_id'] = afterId;
     if (limit != null) queryParams['limit'] = limit.toString();
 
-    final response = await get(
+    final url = requestBuilder.buildUrl(
       '/v1/messages/batches',
       queryParams: queryParams.isNotEmpty ? queryParams : null,
+    );
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
 
-    return MessageBatchListResponse.fromJson(response);
+    return MessageBatchListResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Retrieves a specific message batch.
@@ -80,12 +96,19 @@ class MessageBatchesResource extends ResourceBase {
     String batchId, {
     Future<void>? abortTrigger,
   }) async {
-    final response = await get(
-      '/v1/messages/batches/$batchId',
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('/v1/messages/batches/$batchId');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
 
-    return MessageBatch.fromJson(response);
+    return MessageBatch.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Cancels a message batch.
@@ -99,13 +122,23 @@ class MessageBatchesResource extends ResourceBase {
     String batchId, {
     Future<void>? abortTrigger,
   }) async {
-    final response = await post(
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(
       '/v1/messages/batches/$batchId/cancel',
-      body: <String, dynamic>{},
+    );
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(<String, dynamic>{});
+
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
 
-    return MessageBatch.fromJson(response);
+    return MessageBatch.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Deletes a message batch.
@@ -119,12 +152,19 @@ class MessageBatchesResource extends ResourceBase {
     String batchId, {
     Future<void>? abortTrigger,
   }) async {
-    final response = await delete(
-      '/v1/messages/batches/$batchId',
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('/v1/messages/batches/$batchId');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
+
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
 
-    return DeletedMessageBatch.fromJson(response);
+    return DeletedMessageBatch.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Streams batch results.
@@ -143,7 +183,7 @@ class MessageBatchesResource extends ResourceBase {
     // Apply authentication before sending (bypasses interceptor chain)
     await _applyAuthentication(request);
 
-    final response = await _httpClient.send(request);
+    final response = await httpClient.send(request);
 
     if (response.statusCode >= 400) {
       final body = await response.stream.bytesToString();
@@ -185,7 +225,7 @@ class MessageBatchesResource extends ResourceBase {
 
   /// Applies authentication to a request.
   Future<void> _applyAuthentication(http.BaseRequest request) async {
-    final authProvider = requestBuilder.config.authProvider;
+    final authProvider = config.authProvider;
     if (authProvider == null) return;
 
     final credentials = await authProvider.getCredentials();

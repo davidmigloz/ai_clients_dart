@@ -4,29 +4,15 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../auth/auth_provider.dart';
-import '../client/request_builder.dart';
 import '../errors/exceptions.dart';
 import '../utils/request_id.dart';
 import '../utils/streaming_parser.dart';
+import 'base_resource.dart';
 
 /// Mixin that provides streaming capabilities for resources.
 ///
 /// Handles SSE (Server-Sent Events) streaming for Anthropic API responses.
-mixin StreamingResource {
-  /// The HTTP client for streaming requests.
-  http.Client get httpClient;
-
-  /// The request builder for constructing URLs and headers.
-  RequestBuilder get requestBuilder;
-
-  /// The authentication provider for streaming requests.
-  ///
-  /// Returns null if no authentication is configured.
-  AuthProvider? get authProvider;
-
-  /// Callback to check if the client has been closed.
-  void Function()? get ensureNotClosed;
-
+mixin StreamingResource on ResourceBase {
   /// Makes a streaming POST request.
   ///
   /// Returns a stream of parsed SSE events as JSON maps.
@@ -153,7 +139,7 @@ mixin StreamingResource {
 
   /// Applies authentication to a request.
   Future<void> _applyAuthentication(http.Request request) async {
-    final provider = authProvider;
+    final provider = config.authProvider;
     if (provider == null) return;
 
     final credentials = await provider.getCredentials();

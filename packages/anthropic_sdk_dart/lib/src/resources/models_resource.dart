@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
 import '../models/models/model_info.dart';
 import 'base_resource.dart';
 
@@ -8,7 +12,9 @@ import 'base_resource.dart';
 class ModelsResource extends ResourceBase {
   /// Creates a [ModelsResource].
   ModelsResource({
-    required super.chain,
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
     required super.requestBuilder,
     super.ensureNotClosed,
   });
@@ -28,18 +34,27 @@ class ModelsResource extends ResourceBase {
     int? limit,
     Future<void>? abortTrigger,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, dynamic>{};
     if (beforeId != null) queryParams['before_id'] = beforeId;
     if (afterId != null) queryParams['after_id'] = afterId;
     if (limit != null) queryParams['limit'] = limit.toString();
 
-    final response = await get(
+    final url = requestBuilder.buildUrl(
       '/v1/models',
       queryParams: queryParams.isNotEmpty ? queryParams : null,
+    );
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
 
-    return ModelListResponse.fromJson(response);
+    return ModelListResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Retrieves a specific model.
@@ -53,11 +68,18 @@ class ModelsResource extends ResourceBase {
     String modelId, {
     Future<void>? abortTrigger,
   }) async {
-    final response = await get(
-      '/v1/models/$modelId',
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('/v1/models/$modelId');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
 
-    return ModelInfo.fromJson(response);
+    return ModelInfo.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }

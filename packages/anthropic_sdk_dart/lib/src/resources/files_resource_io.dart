@@ -22,15 +22,14 @@ const _betaHeader = 'files-api-2025-04-14';
 /// Files can be used as part of message content (e.g., for vision or
 /// document understanding).
 class FilesResource extends ResourceBase {
-  final http.Client _httpClient;
-
   /// Creates a [FilesResource].
   FilesResource({
-    required super.chain,
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
     required super.requestBuilder,
-    required http.Client httpClient,
     super.ensureNotClosed,
-  }) : _httpClient = httpClient;
+  });
 
   /// Uploads a file from a file path.
   ///
@@ -113,7 +112,7 @@ class FilesResource extends ResourceBase {
     // Add authentication header
     await _applyAuthentication(request);
 
-    final streamedResponse = await _httpClient.send(request);
+    final streamedResponse = await httpClient.send(request);
     final response = await http.Response.fromStream(streamedResponse);
 
     if (response.statusCode >= 400) {
@@ -145,19 +144,27 @@ class FilesResource extends ResourceBase {
     String? beforeId,
     String? afterId,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, dynamic>{
       'limit': ?limit?.toString(),
       'before_id': ?beforeId,
       'after_id': ?afterId,
     };
 
-    final json = await get(
+    final url = requestBuilder.buildUrl(
       '/v1/files',
       queryParams: queryParams.isEmpty ? null : queryParams,
-      headers: {'anthropic-beta': _betaHeader},
     );
+    final headers = requestBuilder.buildHeaders(
+      additionalHeaders: {'anthropic-beta': _betaHeader},
+    );
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
-    return FileListResponse.fromJson(json);
+    final response = await interceptorChain.execute(httpRequest);
+
+    return FileListResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Gets metadata for a specific file.
@@ -172,12 +179,18 @@ class FilesResource extends ResourceBase {
   /// print('File size: ${file.sizeBytes} bytes');
   /// ```
   Future<FileMetadata> retrieve({required String fileId}) async {
-    final json = await get(
-      '/v1/files/$fileId',
-      headers: {'anthropic-beta': _betaHeader},
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('/v1/files/$fileId');
+    final headers = requestBuilder.buildHeaders(
+      additionalHeaders: {'anthropic-beta': _betaHeader},
     );
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
-    return FileMetadata.fromJson(json);
+    final response = await interceptorChain.execute(httpRequest);
+
+    return FileMetadata.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Deletes a file.
@@ -192,12 +205,18 @@ class FilesResource extends ResourceBase {
   /// print('Deleted: ${response.id}');
   /// ```
   Future<FileDeleteResponse> deleteFile({required String fileId}) async {
-    final json = await delete(
-      '/v1/files/$fileId',
-      headers: {'anthropic-beta': _betaHeader},
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('/v1/files/$fileId');
+    final headers = requestBuilder.buildHeaders(
+      additionalHeaders: {'anthropic-beta': _betaHeader},
     );
+    final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
 
-    return FileDeleteResponse.fromJson(json);
+    final response = await interceptorChain.execute(httpRequest);
+
+    return FileDeleteResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Downloads the content of a file.
@@ -225,7 +244,7 @@ class FilesResource extends ResourceBase {
     // Apply authentication before sending (bypasses interceptor chain)
     await _applyAuthentication(request);
 
-    final streamedResponse = await _httpClient.send(request);
+    final streamedResponse = await httpClient.send(request);
     final response = await http.Response.fromStream(streamedResponse);
 
     if (response.statusCode >= 400) {
@@ -295,7 +314,7 @@ class FilesResource extends ResourceBase {
 
   /// Applies authentication to a request.
   Future<void> _applyAuthentication(http.BaseRequest request) async {
-    final authProvider = requestBuilder.config.authProvider;
+    final authProvider = config.authProvider;
     if (authProvider == null) return;
 
     final credentials = await authProvider.getCredentials();

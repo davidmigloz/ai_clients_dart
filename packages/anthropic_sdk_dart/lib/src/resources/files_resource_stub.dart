@@ -2,8 +2,6 @@
 
 import 'dart:typed_data';
 
-import 'package:http/http.dart' as http;
-
 import '../models/files/file_delete_response.dart';
 import '../models/files/file_list_response.dart';
 import '../models/files/file_metadata.dart';
@@ -15,9 +13,10 @@ import '../models/files/file_metadata.dart';
 class FilesResource {
   /// Creates a [FilesResource].
   FilesResource({
-    required Object chain,
+    required Object config,
+    required Object httpClient,
+    required Object interceptorChain,
     required Object requestBuilder,
-    required http.Client httpClient,
     void Function()? ensureNotClosed,
   });
 
