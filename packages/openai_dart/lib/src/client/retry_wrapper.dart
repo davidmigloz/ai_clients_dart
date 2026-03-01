@@ -58,7 +58,7 @@ class RetryWrapper {
   /// Multiplier for clamping server-provided Retry-After values.
   ///
   /// When a server returns a Retry-After header, we clamp it to
-  /// `maxRetryDelay * _serverRetryAfterMultiplier` to prevent excessively
+  /// `RetryPolicy.maxDelay * _serverRetryAfterMultiplier` to prevent excessively
   /// long delays while still respecting server guidance. The 2x multiplier
   /// balances server intent with configured client policy.
   static const _serverRetryAfterMultiplier = 2;
@@ -279,7 +279,7 @@ class RetryWrapper {
 
     // If the base delay is already at or above the max, don't add jitter.
     // This preserves server-provided Retry-After values that may exceed
-    // maxRetryDelay (up to 2x maxRetryDelay per upstream clamping).
+    // maxDelay (up to 2x maxDelay per upstream clamping).
     if (baseMs >= maxMs) {
       return delay;
     }
