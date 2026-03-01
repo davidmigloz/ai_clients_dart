@@ -15,15 +15,12 @@ void main() {
 
       test('throws StateError when used after close', () async {
         final client = OllamaClient()..close();
-        await expectLater(
-          client.models.list(),
-          throwsA(isA<StateError>()),
-        );
+        await expectLater(client.models.list(), throwsA(isA<StateError>()));
       });
 
       test('does not close custom httpClient', () {
         final httpClient = _SpyHttpClient();
-        final client = OllamaClient(httpClient: httpClient)..close();
+        final _ = OllamaClient(httpClient: httpClient)..close();
         expect(httpClient.closeCalled, isFalse);
       });
     });

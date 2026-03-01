@@ -41,8 +41,8 @@ class RetryPolicy {
     this.initialDelay = const Duration(seconds: 1),
     this.maxDelay = const Duration(seconds: 60),
     this.jitter = 0.1,
-  })  : assert(maxRetries >= 0, 'maxRetries must be >= 0'),
-        assert(jitter >= 0.0 && jitter <= 1.0, 'jitter must be 0.0 - 1.0');
+  }) : assert(maxRetries >= 0, 'maxRetries must be >= 0'),
+       assert(jitter >= 0.0 && jitter <= 1.0, 'jitter must be 0.0 - 1.0');
 
   /// Default retry policy (3 retries, 1s initial delay, 60s max delay).
   static const defaultPolicy = RetryPolicy();

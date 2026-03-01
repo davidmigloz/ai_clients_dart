@@ -11,7 +11,7 @@ void main() {
     test('throws StateError when ANTHROPIC_API_KEY is not set', () {
       // We can't unset env vars, but we can verify the error path
       // by checking if it's set, and skip if so
-      if (Platform.environment['ANTHROPIC_API_KEY']?.isNotEmpty == true) {
+      if (Platform.environment['ANTHROPIC_API_KEY']?.isNotEmpty ?? false) {
         markTestSkipped('ANTHROPIC_API_KEY is set');
         return;
       }
@@ -19,7 +19,7 @@ void main() {
     });
 
     test('error message mentions ANTHROPIC_API_KEY', () {
-      if (Platform.environment['ANTHROPIC_API_KEY']?.isNotEmpty == true) {
+      if (Platform.environment['ANTHROPIC_API_KEY']?.isNotEmpty ?? false) {
         markTestSkipped('ANTHROPIC_API_KEY is set');
         return;
       }
@@ -63,7 +63,7 @@ void main() {
 
   group('AnthropicClient.fromEnvironment', () {
     test('throws StateError when ANTHROPIC_API_KEY is not set', () {
-      if (Platform.environment['ANTHROPIC_API_KEY']?.isNotEmpty == true) {
+      if (Platform.environment['ANTHROPIC_API_KEY']?.isNotEmpty ?? false) {
         markTestSkipped('ANTHROPIC_API_KEY is set');
         return;
       }

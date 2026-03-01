@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 void main() {
   group('OpenResponsesConfig.fromEnvironment', () {
     test('creates config without auth when OPENAI_API_KEY is not set', () {
-      if (Platform.environment['OPENAI_API_KEY']?.isNotEmpty == true) {
+      if (Platform.environment['OPENAI_API_KEY']?.isNotEmpty ?? false) {
         markTestSkipped('OPENAI_API_KEY is set');
         return;
       }
@@ -42,7 +42,7 @@ void main() {
     });
 
     test('authProvider is null when OPENAI_API_KEY is not set', () {
-      if (Platform.environment['OPENAI_API_KEY']?.isNotEmpty == true) {
+      if (Platform.environment['OPENAI_API_KEY']?.isNotEmpty ?? false) {
         markTestSkipped('OPENAI_API_KEY is set');
         return;
       }
@@ -53,7 +53,7 @@ void main() {
 
   group('OpenResponsesClient.fromEnvironment', () {
     test('creates client without auth when no env vars are set', () {
-      if (Platform.environment['OPENAI_API_KEY']?.isNotEmpty == true) {
+      if (Platform.environment['OPENAI_API_KEY']?.isNotEmpty ?? false) {
         markTestSkipped('OPENAI_API_KEY is set');
         return;
       }

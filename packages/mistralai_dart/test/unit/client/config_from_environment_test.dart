@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 void main() {
   group('MistralConfig.fromEnvironment', () {
     test('throws StateError when MISTRAL_API_KEY is not set', () {
-      if (Platform.environment['MISTRAL_API_KEY']?.isNotEmpty == true) {
+      if (Platform.environment['MISTRAL_API_KEY']?.isNotEmpty ?? false) {
         markTestSkipped('MISTRAL_API_KEY is set');
         return;
       }
@@ -17,7 +17,7 @@ void main() {
     });
 
     test('error message mentions MISTRAL_API_KEY', () {
-      if (Platform.environment['MISTRAL_API_KEY']?.isNotEmpty == true) {
+      if (Platform.environment['MISTRAL_API_KEY']?.isNotEmpty ?? false) {
         markTestSkipped('MISTRAL_API_KEY is set');
         return;
       }
@@ -61,7 +61,7 @@ void main() {
 
   group('MistralClient.fromEnvironment', () {
     test('throws StateError when MISTRAL_API_KEY is not set', () {
-      if (Platform.environment['MISTRAL_API_KEY']?.isNotEmpty == true) {
+      if (Platform.environment['MISTRAL_API_KEY']?.isNotEmpty ?? false) {
         markTestSkipped('MISTRAL_API_KEY is set');
         return;
       }

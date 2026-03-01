@@ -14,14 +14,14 @@ void main() {
       expect(
         OpenAIConfig.fromEnvironment,
         // Only throws if OPENAI_API_KEY is not actually set
-        Platform.environment['OPENAI_API_KEY']?.isNotEmpty == true
+        Platform.environment['OPENAI_API_KEY']?.isNotEmpty ?? false
             ? returnsNormally
             : throwsA(isA<StateError>()),
       );
     });
 
     test('error message mentions OPENAI_API_KEY', () {
-      if (Platform.environment['OPENAI_API_KEY']?.isNotEmpty == true) {
+      if (Platform.environment['OPENAI_API_KEY']?.isNotEmpty ?? false) {
         markTestSkipped('OPENAI_API_KEY is set');
         return;
       }
@@ -65,7 +65,7 @@ void main() {
 
   group('OpenAIClient.fromEnvironment', () {
     test('throws StateError when OPENAI_API_KEY is not set', () {
-      if (Platform.environment['OPENAI_API_KEY']?.isNotEmpty == true) {
+      if (Platform.environment['OPENAI_API_KEY']?.isNotEmpty ?? false) {
         markTestSkipped('OPENAI_API_KEY is set');
         return;
       }

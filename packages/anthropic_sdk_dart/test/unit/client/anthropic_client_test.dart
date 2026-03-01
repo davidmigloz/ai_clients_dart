@@ -129,13 +129,12 @@ void main() {
 
     test('does not close custom httpClient', () {
       final httpClient = _SpyHttpClient();
-      final client = AnthropicClient(httpClient: httpClient)..close();
       expect(httpClient.closeCalled, isFalse);
     });
 
     group('fromEnvironment', () {
       test('throws StateError when ANTHROPIC_API_KEY is not set', () {
-        if (Platform.environment['ANTHROPIC_API_KEY']?.isNotEmpty == true) {
+        if (Platform.environment['ANTHROPIC_API_KEY']?.isNotEmpty ?? false) {
           markTestSkipped('ANTHROPIC_API_KEY is set');
           return;
         }

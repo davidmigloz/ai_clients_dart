@@ -427,10 +427,7 @@ class FileSearchStoresResource extends ResourceBase {
 
     // Map to specific exception types
     if (statusCode == 401) {
-      return AuthenticationException(
-        message: message,
-        details: details,
-      );
+      return AuthenticationException(message: message, details: details);
     }
 
     if (statusCode == 429) {
