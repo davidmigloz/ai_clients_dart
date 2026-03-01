@@ -75,6 +75,7 @@ client.corpora.documents(corpus).chunks(doc).list()  // Nested sub-resources
 
 All resources extend `ResourceBase` which provides shared infrastructure:
 - `config`, `httpClient`, `interceptorChain`, `requestBuilder`, `ensureNotClosed`
+- Some packages may define additional optional fields (e.g., a `streamClientFactory` for abortable streaming clients). These are package-specific extensions not required by this core spec.
 
 Resources delegate HTTP execution to the interceptor chain for consistent auth, retry, logging, and error handling.
 

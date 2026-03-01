@@ -88,15 +88,19 @@ class RealtimeSessionsResource extends ResourceBase {
   /// print('Client secret: ${session.clientSecret.value}');
   /// ```
   Future<RealtimeSessionCreateResponse> create(
-    RealtimeSessionCreateRequest request,
-  ) async {
+    RealtimeSessionCreateRequest request, {
+    Future<void>? abortTrigger,
+  }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(_sessionsEndpoint);
     final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
-    final response = await interceptorChain.execute(httpRequest);
+    final response = await interceptorChain.execute(
+      httpRequest,
+      abortTrigger: abortTrigger,
+    );
     return RealtimeSessionCreateResponse.fromJson(
       jsonDecode(response.body) as Map<String, dynamic>,
     );
@@ -132,15 +136,19 @@ class RealtimeSessionsResource extends ResourceBase {
   /// );
   /// ```
   Future<RealtimeTranscriptionSessionCreateResponse> createTranscription(
-    RealtimeTranscriptionSessionCreateRequest request,
-  ) async {
+    RealtimeTranscriptionSessionCreateRequest request, {
+    Future<void>? abortTrigger,
+  }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(_transcriptionEndpoint);
     final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
-    final response = await interceptorChain.execute(httpRequest);
+    final response = await interceptorChain.execute(
+      httpRequest,
+      abortTrigger: abortTrigger,
+    );
     return RealtimeTranscriptionSessionCreateResponse.fromJson(
       jsonDecode(response.body) as Map<String, dynamic>,
     );
@@ -177,15 +185,19 @@ class RealtimeSessionsResource extends ResourceBase {
   /// print('Expires at: ${response.expiresAt}');
   /// ```
   Future<RealtimeClientSecretCreateResponse> createClientSecret(
-    RealtimeClientSecretCreateRequest request,
-  ) async {
+    RealtimeClientSecretCreateRequest request, {
+    Future<void>? abortTrigger,
+  }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(_clientSecretsEndpoint);
     final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
-    final response = await interceptorChain.execute(httpRequest);
+    final response = await interceptorChain.execute(
+      httpRequest,
+      abortTrigger: abortTrigger,
+    );
     return RealtimeClientSecretCreateResponse.fromJson(
       jsonDecode(response.body) as Map<String, dynamic>,
     );
@@ -243,7 +255,10 @@ class RealtimeCallsResource extends ResourceBase {
   ///   RTCSessionDescription(sdpAnswer, 'answer'),
   /// );
   /// ```
-  Future<String> create(RealtimeCallCreateRequest request) async {
+  Future<String> create(
+    RealtimeCallCreateRequest request, {
+    Future<void>? abortTrigger,
+  }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(_callsEndpoint);
     final httpRequest = http.MultipartRequest('POST', url);
@@ -257,7 +272,10 @@ class RealtimeCallsResource extends ResourceBase {
     }
 
     httpRequest.headers.addAll(requestBuilder.buildMultipartHeaders());
-    final response = await interceptorChain.execute(httpRequest);
+    final response = await interceptorChain.execute(
+      httpRequest,
+      abortTrigger: abortTrigger,
+    );
     return response.body;
   }
 
@@ -266,14 +284,14 @@ class RealtimeCallsResource extends ResourceBase {
   /// ## Parameters
   ///
   /// - [callId] - The ID of the call to accept.
-  Future<void> accept(String callId) async {
+  Future<void> accept(String callId, {Future<void>? abortTrigger}) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('$_callsEndpoint/$callId/accept');
     final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(<String, dynamic>{});
-    await interceptorChain.execute(httpRequest);
+    await interceptorChain.execute(httpRequest, abortTrigger: abortTrigger);
   }
 
   /// Hangs up an active call.
@@ -281,14 +299,14 @@ class RealtimeCallsResource extends ResourceBase {
   /// ## Parameters
   ///
   /// - [callId] - The ID of the call to hang up.
-  Future<void> hangup(String callId) async {
+  Future<void> hangup(String callId, {Future<void>? abortTrigger}) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('$_callsEndpoint/$callId/hangup');
     final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(<String, dynamic>{});
-    await interceptorChain.execute(httpRequest);
+    await interceptorChain.execute(httpRequest, abortTrigger: abortTrigger);
   }
 
   /// Transfers a call to another destination.
@@ -306,14 +324,18 @@ class RealtimeCallsResource extends ResourceBase {
   ///   RealtimeCallReferRequest(targetUri: 'tel:+14155550123'),
   /// );
   /// ```
-  Future<void> refer(String callId, RealtimeCallReferRequest request) async {
+  Future<void> refer(
+    String callId,
+    RealtimeCallReferRequest request, {
+    Future<void>? abortTrigger,
+  }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('$_callsEndpoint/$callId/refer');
     final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
-    await interceptorChain.execute(httpRequest);
+    await interceptorChain.execute(httpRequest, abortTrigger: abortTrigger);
   }
 
   /// Rejects an incoming SIP call.
@@ -334,6 +356,7 @@ class RealtimeCallsResource extends ResourceBase {
   Future<void> reject(
     String callId, {
     RealtimeCallRejectRequest? request,
+    Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('$_callsEndpoint/$callId/reject');
@@ -341,6 +364,6 @@ class RealtimeCallsResource extends ResourceBase {
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(request?.toJson() ?? <String, dynamic>{});
-    await interceptorChain.execute(httpRequest);
+    await interceptorChain.execute(httpRequest, abortTrigger: abortTrigger);
   }
 }

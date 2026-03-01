@@ -52,10 +52,33 @@ class InterceptorChain {
       // Terminal: execute the actual HTTP request
       // Per spec, retry wraps the transport execution
       return (context) {
-        final requestToSend = context.request;
+        final originalRequest = context.request;
+
+        // For retries, clone the request since http.BaseRequest can only be
+        // finalized once. Capture body bytes before the first finalize().
+        List<int>? bodyBytes;
+        if (originalRequest is http.Request) {
+          bodyBytes = originalRequest.bodyBytes;
+        }
+
+        // Creates a fresh request for each attempt (required for retries).
+        http.BaseRequest createRequest() {
+          if (originalRequest is http.Request) {
+            return http.Request(originalRequest.method, originalRequest.url)
+              ..headers.addAll(originalRequest.headers)
+              ..followRedirects = originalRequest.followRedirects
+              ..maxRedirects = originalRequest.maxRedirects
+              ..persistentConnection = originalRequest.persistentConnection
+              ..bodyBytes = bodyBytes ?? [];
+          }
+          // Non-cloneable request types (MultipartRequest, etc.) are returned
+          // as-is and will not be retried.
+          return originalRequest;
+        }
 
         // Transport execution function
         Future<http.Response> executeTransport() async {
+          final requestToSend = createRequest();
           if (context.abortTrigger != null) {
             // Wrap request to enable http client's native abort support
             final abortableRequest = _AbortableRequestWrapper(
@@ -93,7 +116,7 @@ class InterceptorChain {
         }
 
         // Execute with or without retry wrapper
-        if (retryWrapper != null) {
+        if (retryWrapper != null && originalRequest is http.Request) {
           // Extract correlation ID for retry wrapper tracing
           final correlationId =
               context.metadata['correlationId'] as String? ??
@@ -102,7 +125,7 @@ class InterceptorChain {
 
           // Per spec: Retry wraps transport execution
           return retryWrapper!.executeWithRetry(
-            requestToSend,
+            originalRequest,
             executeTransport,
             context.abortTrigger,
             correlationId,
