@@ -267,7 +267,7 @@ class RetryWrapper {
   /// Computes a delay with jitter to avoid thundering herd problem.
   ///
   /// Adds random jitter to the base delay based on the configured jitter
-  /// factor (defaults to 25%). The jitter amount is bounded so that it never
+  /// factor (defaults to 10%). The jitter amount is bounded so that it never
   /// pushes the effective delay past the configured maximum retry delay. If
   /// the base delay already exceeds the maximum (e.g., from a server-provided
   /// Retry-After header), it is returned unchanged to preserve the server's
