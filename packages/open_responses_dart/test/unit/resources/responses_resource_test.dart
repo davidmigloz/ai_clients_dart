@@ -14,6 +14,7 @@ void main() {
       client = OpenResponsesClient(
         config: const OpenResponsesConfig(
           baseUrl: 'https://api.example.com/v1',
+          retryPolicy: RetryPolicy(maxRetries: 0),
         ),
         httpClient: mockClient,
       );

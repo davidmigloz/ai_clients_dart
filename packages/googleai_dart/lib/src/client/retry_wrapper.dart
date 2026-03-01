@@ -36,55 +36,31 @@ class RetryWrapper {
     while (attempt <= config.retryPolicy.maxRetries) {
       try {
         final response = await execute();
-        return response;
-      } on AbortedException {
-        // Don't retry after abort - propagate immediately
-        rethrow;
-      } on RateLimitException catch (e) {
-        // Handle rate limiting specially
-        if (attempt >= config.retryPolicy.maxRetries) {
-          rethrow;
-        }
 
-        // Honor retryAfter from server if provided
-        if (e.retryAfter != null) {
-          final serverDelay = e.retryAfter!.difference(DateTime.now());
-          // Use server's suggested delay if it's reasonable (< maxDelay * 2)
-          if (serverDelay.inMilliseconds > 0 &&
-              serverDelay <= config.retryPolicy.maxDelay * 2) {
-            delay = serverDelay;
-          }
-        }
-
-        await _delayWithAbortCheck(delay, abortTrigger, correlationId);
-        attempt++;
-        delay = _exponentialBackoff(delay);
-      } on ApiException catch (e) {
-        // Retry on 5xx server errors (transient failures)
-        if (e.statusCode >= 500 && e.statusCode < 600) {
-          // Check if method is idempotent before retrying
-          if (!_isIdempotent(request.method)) {
-            rethrow; // Don't retry non-idempotent operations
-          }
-
-          if (attempt >= config.retryPolicy.maxRetries) {
-            rethrow;
+        // Check for retryable status codes (429, 5xx)
+        if (_shouldRetry(response.statusCode, request.method, attempt)) {
+          final retryAfter =
+              _parseRetryAfter(response.headers['retry-after']);
+          if (retryAfter != null) {
+            // Clamp server-provided Retry-After to a reasonable maximum
+            final maxServerDelay = config.retryPolicy.maxDelay * 2;
+            delay = retryAfter <= maxServerDelay ? retryAfter : maxServerDelay;
           }
 
           await _delayWithAbortCheck(delay, abortTrigger, correlationId);
           attempt++;
           delay = _exponentialBackoff(delay);
-        } else {
-          // 4xx errors are client errors, don't retry
-          rethrow;
-        }
-      } on TimeoutException {
-        // Retry on timeout for idempotent methods only
-        if (!_isIdempotent(request.method)) {
-          rethrow;
+          continue;
         }
 
-        if (attempt >= config.retryPolicy.maxRetries) {
+        return response;
+      } on AbortedException {
+        // Don't retry after abort - propagate immediately
+        rethrow;
+      } on TimeoutException {
+        // Retry on timeout for idempotent methods only
+        if (!_isIdempotent(request.method) ||
+            attempt >= config.retryPolicy.maxRetries) {
           rethrow;
         }
 
@@ -94,11 +70,8 @@ class RetryWrapper {
       }
     }
 
-    // Should never reach here, but throw if we somehow do
-    throw ApiException(
-      statusCode: 0,
-      message: 'Max retries (${config.retryPolicy.maxRetries}) exceeded',
-    );
+    // Should never reach here; reaching this point indicates a logic error.
+    throw StateError('Unreachable: executeWithRetry fell through retry loop');
   }
 
   /// Checks if an HTTP method is idempotent and safe to retry.
@@ -109,6 +82,27 @@ class RetryWrapper {
   bool _isIdempotent(String method) {
     const idempotentMethods = {'GET', 'HEAD', 'OPTIONS', 'PUT', 'DELETE'};
     return idempotentMethods.contains(method.toUpperCase());
+  }
+
+  /// Determines if a response should be retried based on status code.
+  bool _shouldRetry(int statusCode, String method, int attempt) {
+    if (attempt >= config.retryPolicy.maxRetries) return false;
+
+    // Retry rate limits (429)
+    if (statusCode == 429) return true;
+
+    // Retry 5xx server errors for idempotent methods only
+    if (statusCode >= 500 && statusCode < 600) return _isIdempotent(method);
+
+    return false;
+  }
+
+  /// Parses the Retry-After header value (supports delta-seconds format).
+  Duration? _parseRetryAfter(String? value) {
+    if (value == null) return null;
+    final seconds = int.tryParse(value.trim());
+    if (seconds != null) return Duration(seconds: max(0, seconds));
+    return null;
   }
 
   /// Applies exponential backoff to the current delay.

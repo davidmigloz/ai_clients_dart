@@ -12,6 +12,7 @@ void main() {
     client = AnthropicClient(
       config: const AnthropicConfig(
         authProvider: ApiKeyProvider('test-api-key'),
+        retryPolicy: RetryPolicy(maxRetries: 0),
       ),
       httpClient: mockHttpClient,
     );
