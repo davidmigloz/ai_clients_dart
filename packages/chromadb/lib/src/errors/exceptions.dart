@@ -248,9 +248,6 @@ class RequestMetadata {
   /// The timestamp when the request was initiated.
   final DateTime timestamp;
 
-  /// The attempt number (1-indexed) for retry tracking.
-  final int attemptNumber;
-
   /// Creates request metadata.
   const RequestMetadata({
     required this.method,
@@ -258,11 +255,10 @@ class RequestMetadata {
     required this.headers,
     required this.correlationId,
     required this.timestamp,
-    required this.attemptNumber,
   });
 
   @override
-  String toString() => 'RequestMetadata($method $url, attempt: $attemptNumber)';
+  String toString() => 'RequestMetadata($method $url)';
 }
 
 /// Metadata about an HTTP response.

@@ -60,27 +60,6 @@ void main() {
       }
     });
 
-    test('reads attemptNumber from context.metadata', () async {
-      final request = http.Request(
-        'GET',
-        Uri.parse('https://example.com/test'),
-      );
-      final context = RequestContext(
-        request: request,
-        metadata: {'attemptNumber': 3},
-      );
-
-      try {
-        await interceptor.intercept(
-          context,
-          nextReturning(http.Response('server error', 500)),
-        );
-        fail('Should have thrown');
-      } on ServerException catch (e) {
-        expect(e.request!.attemptNumber, 3);
-      }
-    });
-
     test('throws ValidationException for 400', () {
       final request = http.Request(
         'POST',

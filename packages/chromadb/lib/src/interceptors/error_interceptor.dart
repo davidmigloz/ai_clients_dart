@@ -68,7 +68,6 @@ class ErrorInterceptor implements Interceptor {
       ),
       correlationId: context.request.headers['X-Request-ID'] ?? 'unknown',
       timestamp: context.metadata['timestamp'] as DateTime? ?? DateTime.now(),
-      attemptNumber: context.metadata['attemptNumber'] as int? ?? 1,
     );
 
     final responseMeta = ResponseMetadata(
