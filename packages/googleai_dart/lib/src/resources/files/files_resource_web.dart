@@ -321,6 +321,13 @@ class FilesResource extends ResourceBase {
     }
 
     // Map to specific exception types
+    if (statusCode == 401) {
+      return AuthenticationException(
+        message: message,
+        details: details,
+      );
+    }
+
     if (statusCode == 429) {
       DateTime? retryAfter;
       final retryHeader = response.headers['retry-after'];
