@@ -47,7 +47,16 @@ class RetryWrapper {
             delay = retryAfter <= maxServerDelay ? retryAfter : maxServerDelay;
           }
 
-          await _delayWithAbortCheck(delay, abortTrigger, correlationId);
+          // Enforce minimum delay to prevent tight retry loops
+          // (e.g., Retry-After: 0)
+          final effectiveDelay = delay < config.retryPolicy.initialDelay
+              ? config.retryPolicy.initialDelay
+              : delay;
+          await _delayWithAbortCheck(
+            effectiveDelay,
+            abortTrigger,
+            correlationId,
+          );
           attempt++;
           delay = _exponentialBackoff(delay);
           continue;
