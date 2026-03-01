@@ -88,7 +88,7 @@ void main() {
     test('copyWith replaces specified fields', () {
       const original = OpenAIConfig(
         baseUrl: 'https://original.api.com',
-        retryPolicy: RetryPolicy.defaultPolicy,
+        retryPolicy: RetryPolicy(maxRetries: 5),
       );
 
       final copy = original.copyWith(
@@ -98,7 +98,7 @@ void main() {
 
       expect(copy.baseUrl, 'https://new.api.com');
       expect(copy.timeout, const Duration(seconds: 30));
-      expect(copy.retryPolicy.maxRetries, 3); // Preserved from original
+      expect(copy.retryPolicy.maxRetries, 5); // Preserved from original
     });
 
     test('copyWith replaces retryPolicy', () {
