@@ -1,27 +1,21 @@
-import 'package:http/http.dart' as http;
-import 'package:http/testing.dart';
 import 'package:openai_dart/openai_dart.dart';
+import 'package:openai_dart/src/client/request_builder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('Realtime URL', () {
     test('buildUrl creates correct WebSocket URL from HTTPS base', () {
-      final mockClient = MockClient((request) async {
-        return http.Response('{}', 200);
-      });
-
-      final client = OpenAIClient(
+      final builder = RequestBuilder(
         config: const OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test'),
           baseUrl: 'https://api.openai.com/v1',
         ),
-        httpClient: mockClient,
       );
 
       // Test that buildUrl works correctly for the realtime endpoint
-      final httpUrl = client.buildUrl(
+      final httpUrl = builder.buildUrl(
         '/realtime',
-        queryParameters: {'model': 'gpt-4o-realtime-preview'},
+        queryParams: {'model': 'gpt-4o-realtime-preview'},
       );
 
       expect(httpUrl.scheme, equals('https'));
@@ -40,26 +34,19 @@ void main() {
       expect(wsUrl.host, equals('api.openai.com'));
       expect(wsUrl.path, equals('/v1/realtime'));
       expect(wsUrl.queryParameters['model'], equals('gpt-4o-realtime-preview'));
-
-      client.close();
     });
 
     test('buildUrl handles HTTP base URL (converts to WS)', () {
-      final mockClient = MockClient((request) async {
-        return http.Response('{}', 200);
-      });
-
-      final client = OpenAIClient(
+      final builder = RequestBuilder(
         config: const OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test'),
           baseUrl: 'http://localhost:8080/v1',
         ),
-        httpClient: mockClient,
       );
 
-      final httpUrl = client.buildUrl(
+      final httpUrl = builder.buildUrl(
         '/realtime',
-        queryParameters: {'model': 'gpt-4o-realtime-preview'},
+        queryParams: {'model': 'gpt-4o-realtime-preview'},
       );
 
       // Verify scheme conversion for HTTP -> WS
@@ -70,27 +57,20 @@ void main() {
       expect(wsUrl.host, equals('localhost'));
       expect(wsUrl.port, equals(8080));
       expect(wsUrl.path, equals('/v1/realtime'));
-
-      client.close();
     });
 
     test('buildUrl handles Azure-style base URL for realtime', () {
-      final mockClient = MockClient((request) async {
-        return http.Response('{}', 200);
-      });
-
-      final client = OpenAIClient(
+      final builder = RequestBuilder(
         config: const OpenAIConfig(
           authProvider: ApiKeyProvider('sk-test'),
           baseUrl:
               'https://example.openai.azure.com/openai/deployments/my-deploy?api-version=2024-10-01',
         ),
-        httpClient: mockClient,
       );
 
-      final httpUrl = client.buildUrl(
+      final httpUrl = builder.buildUrl(
         '/realtime',
-        queryParameters: {'model': 'gpt-4o-realtime-preview'},
+        queryParams: {'model': 'gpt-4o-realtime-preview'},
       );
 
       expect(httpUrl.scheme, equals('https'));
@@ -108,8 +88,6 @@ void main() {
         scheme: httpUrl.scheme == 'https' ? 'wss' : 'ws',
       );
       expect(wsUrl.scheme, equals('wss'));
-
-      client.close();
     });
 
     test('config contains all headers needed for realtime', () {

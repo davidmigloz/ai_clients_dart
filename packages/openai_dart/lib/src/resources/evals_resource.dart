@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
 import '../models/evals/evals.dart';
 import 'base_resource.dart';
 
@@ -46,247 +50,146 @@ import 'base_resource.dart';
 ///   ),
 /// );
 /// ```
-class EvalsResource extends BaseResource {
-  /// Creates an [EvalsResource] with the given client.
-  EvalsResource(super.client);
+class EvalsResource extends ResourceBase {
+  /// Creates an [EvalsResource].
+  EvalsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   static const _endpoint = '/evals';
 
   EvalRunsResource? _runs;
 
   /// Access to evaluation run operations.
-  ///
-  /// ## Example
-  ///
-  /// ```dart
-  /// final run = await client.evals.runs.create(
-  ///   evalId,
-  ///   CreateEvalRunRequest(
-  ///     dataSource: EvalRunDataSource.jsonlFile('file-abc123'),
-  ///   ),
-  /// );
-  /// ```
-  EvalRunsResource get runs => _runs ??= EvalRunsResource(client);
+  EvalRunsResource get runs => _runs ??= EvalRunsResource(
+    config: config,
+    httpClient: httpClient,
+    interceptorChain: interceptorChain,
+    requestBuilder: requestBuilder,
+    ensureNotClosed: ensureNotClosed,
+  );
 
   /// Creates a new evaluation.
-  ///
-  /// ## Parameters
-  ///
-  /// - [request] - The evaluation creation request.
-  ///
-  /// ## Returns
-  ///
-  /// The created [Eval] object.
-  ///
-  /// ## Example
-  ///
-  /// ```dart
-  /// final eval = await client.evals.create(
-  ///   CreateEvalRequest(
-  ///     name: 'Sentiment Check',
-  ///     dataSourceConfig: EvalDataSourceConfig.custom(
-  ///       itemSchema: {'type': 'object', 'properties': {'text': {'type': 'string'}}},
-  ///     ),
-  ///     testingCriteria: [
-  ///       EvalGrader.labelModel(
-  ///         name: 'sentiment',
-  ///         model: 'gpt-4o-mini',
-  ///         labels: ['positive', 'negative'],
-  ///         passingLabels: ['positive'],
-  ///         input: [LabelModelInput.user('Classify: {{sample.output_text}}')],
-  ///       ),
-  ///     ],
-  ///   ),
-  /// );
-  /// ```
   Future<Eval> create(CreateEvalRequest request) async {
-    final json = await postJson(_endpoint, body: request.toJson());
-    return Eval.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_endpoint);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(httpRequest);
+    return Eval.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Lists all evaluations.
-  ///
-  /// ## Parameters
-  ///
-  /// - [after] - Cursor for pagination.
-  /// - [limit] - Maximum number to return (1-100, default 20).
-  /// - [order] - Sort order ('asc' or 'desc').
-  /// - [orderBy] - Field to sort by ('created_at' or 'updated_at').
-  ///
-  /// ## Returns
-  ///
-  /// An [EvalList] containing the evaluations.
-  ///
-  /// ## Example
-  ///
-  /// ```dart
-  /// final evals = await client.evals.list(limit: 10);
-  /// for (final eval in evals.data) {
-  ///   print('${eval.id}: ${eval.name}');
-  /// }
-  /// ```
   Future<EvalList> list({
     String? after,
     int? limit,
     String? order,
     String? orderBy,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{};
     if (after != null) queryParams['after'] = after;
     if (limit != null) queryParams['limit'] = limit.toString();
     if (order != null) queryParams['order'] = order;
     if (orderBy != null) queryParams['order_by'] = orderBy;
 
-    final json = await getJson(
+    final url = requestBuilder.buildUrl(
       _endpoint,
-      queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    return EvalList.fromJson(json);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return EvalList.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Retrieves an evaluation by ID.
-  ///
-  /// ## Parameters
-  ///
-  /// - [evalId] - The ID of the evaluation.
-  ///
-  /// ## Returns
-  ///
-  /// The [Eval] object.
-  ///
-  /// ## Example
-  ///
-  /// ```dart
-  /// final eval = await client.evals.retrieve('eval-abc123');
-  /// print('Name: ${eval.name}');
-  /// ```
   Future<Eval> retrieve(String evalId) async {
-    final json = await getJson('$_endpoint/$evalId');
-    return Eval.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$evalId');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return Eval.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Updates an evaluation.
-  ///
-  /// ## Parameters
-  ///
-  /// - [evalId] - The ID of the evaluation to update.
-  /// - [request] - The update request.
-  ///
-  /// ## Returns
-  ///
-  /// The updated [Eval] object.
-  ///
-  /// ## Example
-  ///
-  /// ```dart
-  /// final updated = await client.evals.update(
-  ///   'eval-abc123',
-  ///   UpdateEvalRequest(name: 'New Name'),
-  /// );
-  /// ```
   Future<Eval> update(String evalId, UpdateEvalRequest request) async {
-    final json = await postJson('$_endpoint/$evalId', body: request.toJson());
-    return Eval.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$evalId');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(httpRequest);
+    return Eval.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Deletes an evaluation.
-  ///
-  /// ## Parameters
-  ///
-  /// - [evalId] - The ID of the evaluation to delete.
-  ///
-  /// ## Returns
-  ///
-  /// A [DeleteEvalResponse] confirming the deletion.
-  ///
-  /// ## Example
-  ///
-  /// ```dart
-  /// final response = await client.evals.delete('eval-abc123');
-  /// print('Deleted: ${response.deleted}');
-  /// ```
   Future<DeleteEvalResponse> delete(String evalId) async {
-    final json = await deleteJson('$_endpoint/$evalId');
-    return DeleteEvalResponse.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$evalId');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return DeleteEvalResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }
 
 /// Resource for evaluation run operations.
-///
-/// Runs execute evaluations against specific data sources. Each run
-/// processes the data and evaluates it against the parent evaluation's
-/// graders.
-class EvalRunsResource extends BaseResource {
-  /// Creates an [EvalRunsResource] with the given client.
-  EvalRunsResource(super.client);
+class EvalRunsResource extends ResourceBase {
+  /// Creates an [EvalRunsResource].
+  EvalRunsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   EvalOutputItemsResource? _outputItems;
 
   /// Access to output item operations.
-  ///
-  /// ## Example
-  ///
-  /// ```dart
-  /// final items = await client.evals.runs.outputItems.list(
-  ///   evalId,
-  ///   runId,
-  ///   limit: 10,
-  /// );
-  /// ```
   EvalOutputItemsResource get outputItems =>
-      _outputItems ??= EvalOutputItemsResource(client);
+      _outputItems ??= EvalOutputItemsResource(
+        config: config,
+        httpClient: httpClient,
+        interceptorChain: interceptorChain,
+        requestBuilder: requestBuilder,
+        ensureNotClosed: ensureNotClosed,
+      );
 
   /// Creates a new evaluation run.
-  ///
-  /// ## Parameters
-  ///
-  /// - [evalId] - The ID of the parent evaluation.
-  /// - [request] - The run creation request.
-  ///
-  /// ## Returns
-  ///
-  /// The created [EvalRun] object.
-  ///
-  /// ## Example
-  ///
-  /// ```dart
-  /// final run = await client.evals.runs.create(
-  ///   'eval-abc123',
-  ///   CreateEvalRunRequest(
-  ///     name: 'Test Run',
-  ///     dataSource: EvalRunDataSource.jsonlContent([
-  ///       {'prompt': 'Hello', 'expected': 'Hi'},
-  ///     ]),
-  ///   ),
-  /// );
-  /// ```
   Future<EvalRun> create(String evalId, CreateEvalRunRequest request) async {
-    final json = await postJson('/evals/$evalId/runs', body: request.toJson());
-    return EvalRun.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('/evals/$evalId/runs');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(httpRequest);
+    return EvalRun.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Lists runs for an evaluation.
-  ///
-  /// ## Parameters
-  ///
-  /// - [evalId] - The ID of the evaluation.
-  /// - [after] - Cursor for pagination.
-  /// - [limit] - Maximum number to return (1-100, default 20).
-  /// - [order] - Sort order ('asc' or 'desc').
-  /// - [status] - Filter by status.
-  ///
-  /// ## Returns
-  ///
-  /// An [EvalRunList] containing the runs.
-  ///
-  /// ## Example
-  ///
-  /// ```dart
-  /// final runs = await client.evals.runs.list(
-  ///   'eval-abc123',
-  ///   status: EvalRunStatus.completed,
-  /// );
-  /// ```
   Future<EvalRunList> list(
     String evalId, {
     String? after,
@@ -294,121 +197,76 @@ class EvalRunsResource extends BaseResource {
     String? order,
     EvalRunStatus? status,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{};
     if (after != null) queryParams['after'] = after;
     if (limit != null) queryParams['limit'] = limit.toString();
     if (order != null) queryParams['order'] = order;
     if (status != null) queryParams['status'] = status.toJson();
 
-    final json = await getJson(
+    final url = requestBuilder.buildUrl(
       '/evals/$evalId/runs',
-      queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    return EvalRunList.fromJson(json);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return EvalRunList.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Retrieves a run by ID.
-  ///
-  /// ## Parameters
-  ///
-  /// - [evalId] - The ID of the evaluation.
-  /// - [runId] - The ID of the run.
-  ///
-  /// ## Returns
-  ///
-  /// The [EvalRun] object.
-  ///
-  /// ## Example
-  ///
-  /// ```dart
-  /// final run = await client.evals.runs.retrieve('eval-abc123', 'run-xyz789');
-  /// print('Status: ${run.status}');
-  /// ```
   Future<EvalRun> retrieve(String evalId, String runId) async {
-    final json = await getJson('/evals/$evalId/runs/$runId');
-    return EvalRun.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('/evals/$evalId/runs/$runId');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return EvalRun.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Deletes a run.
-  ///
-  /// ## Parameters
-  ///
-  /// - [evalId] - The ID of the evaluation.
-  /// - [runId] - The ID of the run to delete.
-  ///
-  /// ## Returns
-  ///
-  /// A [DeleteEvalRunResponse] confirming the deletion.
-  ///
-  /// ## Example
-  ///
-  /// ```dart
-  /// final response = await client.evals.runs.delete('eval-abc123', 'run-xyz789');
-  /// print('Deleted: ${response.deleted}');
-  /// ```
   Future<DeleteEvalRunResponse> delete(String evalId, String runId) async {
-    final json = await deleteJson('/evals/$evalId/runs/$runId');
-    return DeleteEvalRunResponse.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('/evals/$evalId/runs/$runId');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return DeleteEvalRunResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Cancels a running evaluation.
-  ///
-  /// ## Parameters
-  ///
-  /// - [evalId] - The ID of the evaluation.
-  /// - [runId] - The ID of the run to cancel.
-  ///
-  /// ## Returns
-  ///
-  /// The canceled [EvalRun] object.
-  ///
-  /// ## Example
-  ///
-  /// ```dart
-  /// final run = await client.evals.runs.cancel('eval-abc123', 'run-xyz789');
-  /// print('Status: ${run.status}'); // canceled
-  /// ```
   Future<EvalRun> cancel(String evalId, String runId) async {
-    final json = await postJson('/evals/$evalId/runs/$runId/cancel', body: {});
-    return EvalRun.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('/evals/$evalId/runs/$runId/cancel');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(<String, dynamic>{});
+    final response = await interceptorChain.execute(httpRequest);
+    return EvalRun.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }
 
 /// Resource for evaluation output item operations.
-///
-/// Output items contain the results of individual evaluations within a run.
-class EvalOutputItemsResource extends BaseResource {
-  /// Creates an [EvalOutputItemsResource] with the given client.
-  EvalOutputItemsResource(super.client);
+class EvalOutputItemsResource extends ResourceBase {
+  /// Creates an [EvalOutputItemsResource].
+  EvalOutputItemsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   /// Lists output items for a run.
-  ///
-  /// ## Parameters
-  ///
-  /// - [evalId] - The ID of the evaluation.
-  /// - [runId] - The ID of the run.
-  /// - [after] - Cursor for pagination.
-  /// - [limit] - Maximum number to return (1-100, default 20).
-  /// - [order] - Sort order ('asc' or 'desc').
-  /// - [status] - Filter by status (pass/fail).
-  ///
-  /// ## Returns
-  ///
-  /// An [EvalOutputItemList] containing the items.
-  ///
-  /// ## Example
-  ///
-  /// ```dart
-  /// // Get all failed items
-  /// final items = await client.evals.runs.outputItems.list(
-  ///   'eval-abc123',
-  ///   'run-xyz789',
-  ///   status: EvalOutputItemStatus.fail,
-  /// );
-  /// for (final item in items.data) {
-  ///   print('Failed: ${item.id}');
-  /// }
-  /// ```
   Future<EvalOutputItemList> list(
     String evalId,
     String runId, {
@@ -417,49 +275,40 @@ class EvalOutputItemsResource extends BaseResource {
     String? order,
     EvalOutputItemStatus? status,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{};
     if (after != null) queryParams['after'] = after;
     if (limit != null) queryParams['limit'] = limit.toString();
     if (order != null) queryParams['order'] = order;
     if (status != null) queryParams['status'] = status.toJson();
 
-    final json = await getJson(
+    final url = requestBuilder.buildUrl(
       '/evals/$evalId/runs/$runId/output_items',
-      queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    return EvalOutputItemList.fromJson(json);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return EvalOutputItemList.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Retrieves an output item by ID.
-  ///
-  /// ## Parameters
-  ///
-  /// - [evalId] - The ID of the evaluation.
-  /// - [runId] - The ID of the run.
-  /// - [outputItemId] - The ID of the output item.
-  ///
-  /// ## Returns
-  ///
-  /// The [EvalOutputItem] object.
-  ///
-  /// ## Example
-  ///
-  /// ```dart
-  /// final item = await client.evals.runs.outputItems.retrieve(
-  ///   'eval-abc123',
-  ///   'run-xyz789',
-  ///   'item-def456',
-  /// );
-  /// print('Sample output: ${item.sample.outputText}');
-  /// ```
   Future<EvalOutputItem> retrieve(
     String evalId,
     String runId,
     String outputItemId,
   ) async {
-    final json = await getJson(
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(
       '/evals/$evalId/runs/$runId/output_items/$outputItemId',
     );
-    return EvalOutputItem.fromJson(json);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return EvalOutputItem.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }

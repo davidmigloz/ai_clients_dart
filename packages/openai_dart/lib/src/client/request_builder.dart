@@ -1,3 +1,4 @@
+import '../utils/request_id.dart';
 import 'config.dart';
 
 /// Builds API request URLs and headers with proper precedence.
@@ -59,6 +60,66 @@ class RequestBuilder {
     return baseUri.replace(
       path: combinedPath,
       queryParameters: mergedQueryParams.isEmpty ? null : mergedQueryParams,
+    );
+  }
+
+  /// Builds a URL for an API endpoint with support for repeated query
+  /// parameters.
+  ///
+  /// This method handles arrays in query parameters using
+  /// `queryParametersAll`, which is necessary for OpenAI's API where array
+  /// params must be sent as repeated keys (e.g., `?include[]=a&include[]=b`).
+  ///
+  /// Use this instead of [buildUrl] when you need to pass array-valued query
+  /// parameters. Single-value params can be passed directly in
+  /// [queryParameters], while repeated params go in [queryParametersAll].
+  Uri buildUrlWithQueryAll(
+    String path, {
+    Map<String, String>? queryParameters,
+    Map<String, List<String>>? queryParametersAll,
+  }) {
+    // Parse baseUrl as a Uri to correctly handle existing paths and query params
+    final baseUri = Uri.parse(config.baseUrl);
+
+    // Normalize base path and requested path to avoid double slashes
+    final basePath = baseUri.path.endsWith('/')
+        ? baseUri.path.substring(0, baseUri.path.length - 1)
+        : baseUri.path;
+    final normalizedPath = path.startsWith('/') ? path : '/$path';
+    final combinedPath = '$basePath$normalizedPath';
+
+    // Merge query params: base URL params + single params + repeated params
+    // Convert everything to List<String> format for queryParametersAll
+    final mergedQueryParamsAll = <String, List<String>>{
+      // Add base URL params
+      for (final entry in baseUri.queryParametersAll.entries)
+        entry.key: entry.value,
+      // Add single-value params (converted to list)
+      if (queryParameters != null)
+        for (final entry in queryParameters.entries) entry.key: [entry.value],
+      // Add repeated params (these override single-value params with same key)
+      if (queryParametersAll != null) ...queryParametersAll,
+    };
+
+    // Build the URI with queryParametersAll.
+    // Note: Dart's Uri constructor accepts Map<String, List<String>> for the
+    // queryParameters parameter, treating each list as repeated query
+    // parameters (e.g., include[]=a&include[]=b).
+    //
+    // We preserve all URI components from the base URL:
+    // - userInfo: credentials in URL (user:pass@host)
+    // - fragment: hash section (#section)
+    // - port: explicit port (even standard ports like 80/443 if specified)
+    return Uri(
+      scheme: baseUri.scheme,
+      userInfo: baseUri.userInfo.isEmpty ? null : baseUri.userInfo,
+      host: baseUri.host,
+      port: baseUri.hasPort ? baseUri.port : null,
+      path: combinedPath,
+      queryParameters: mergedQueryParamsAll.isEmpty
+          ? null
+          : mergedQueryParamsAll,
+      fragment: baseUri.fragment.isEmpty ? null : baseUri.fragment,
     );
   }
 
@@ -125,6 +186,9 @@ class RequestBuilder {
     if (config.apiVersion case final version?) {
       headers['OpenAI-Version'] = version;
     }
+
+    // Add request ID for tracing
+    headers['X-Request-ID'] = generateRequestId();
 
     // Add any additional request-specific headers
     if (additionalHeaders != null) {

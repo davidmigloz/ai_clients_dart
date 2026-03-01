@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 
-import '../errors/exceptions.dart';
 import '../models/responses/responses.dart';
-import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
 import 'input_tokens_resource.dart';
+import 'streaming_resource.dart';
 
 /// Resource for responses operations.
 ///
@@ -63,9 +63,16 @@ import 'input_tokens_resource.dart';
 ///   ),
 /// );
 /// ```
-class ResponsesResource extends BaseResource {
-  /// Creates a [ResponsesResource] with the given client.
-  ResponsesResource(super.client);
+class ResponsesResource extends ResourceBase with StreamingResource {
+  /// Creates a [ResponsesResource].
+  ResponsesResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+    super.streamClientFactory,
+  });
 
   static const _endpoint = '/responses';
   static const _compactEndpoint = '/responses/compact';
@@ -75,7 +82,13 @@ class ResponsesResource extends BaseResource {
 
   /// Access to response input items operations.
   ResponseInputItemsResource get inputItems =>
-      _inputItems ??= ResponseInputItemsResource(client);
+      _inputItems ??= ResponseInputItemsResource(
+        config: config,
+        httpClient: httpClient,
+        interceptorChain: interceptorChain,
+        requestBuilder: requestBuilder,
+        ensureNotClosed: ensureNotClosed,
+      );
 
   /// Access to input tokens counting operations.
   ///
@@ -91,7 +104,13 @@ class ResponsesResource extends BaseResource {
   /// print('Input tokens: ${tokenCount.inputTokens}');
   /// ```
   InputTokensResource get inputTokens =>
-      _inputTokens ??= InputTokensResource(client);
+      _inputTokens ??= InputTokensResource(
+        config: config,
+        httpClient: httpClient,
+        interceptorChain: interceptorChain,
+        requestBuilder: requestBuilder,
+        ensureNotClosed: ensureNotClosed,
+      );
 
   /// Creates a response.
   ///
@@ -119,12 +138,19 @@ class ResponsesResource extends BaseResource {
     CreateResponseRequest request, {
     Future<void>? abortTrigger,
   }) async {
-    final json = await postJson(
-      _endpoint,
-      body: request.toJson(),
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_endpoint);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
-    return Response.fromJson(json);
+    return Response.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Compacts response conversation state.
@@ -135,12 +161,19 @@ class ResponsesResource extends BaseResource {
     CompactResponseRequest request, {
     Future<void>? abortTrigger,
   }) async {
-    final json = await postJson(
-      _compactEndpoint,
-      body: request.toJson(),
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_compactEndpoint);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
-    return ResponseCompaction.fromJson(json);
+    return ResponseCompaction.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Creates a streaming response.
@@ -180,36 +213,16 @@ class ResponsesResource extends BaseResource {
   Stream<ResponseStreamEvent> createStream(
     CreateResponseRequest request, {
     Future<void>? abortTrigger,
-  }) async* {
+  }) {
     // Ensure stream is enabled in the request body
     final requestBody = request.toJson();
     requestBody['stream'] = true;
 
-    final response = await client.sendStream(
+    return streamSseEvents(
       endpoint: _endpoint,
       body: requestBody,
       abortTrigger: abortTrigger,
-    );
-
-    // Extract request ID from response headers for error reporting
-    final requestId =
-        response.headers['x-request-id'] ??
-        response.request?.headers['X-Request-ID'] ??
-        'unknown';
-
-    try {
-      if (response.statusCode >= 400) {
-        final body = await response.stream.bytesToString();
-        throw _parseStreamError(response.statusCode, body, requestId);
-      }
-
-      const parser = SseParser();
-      await for (final json in parser.parse(response.stream)) {
-        yield ResponseStreamEvent.fromJson(json);
-      }
-    } on AbortedException {
-      rethrow;
-    }
+    ).map((json) => ResponseStreamEvent.fromJson(json));
   }
 
   /// Creates a streaming response with accumulated events.
@@ -271,12 +284,20 @@ class ResponsesResource extends BaseResource {
     List<Include>? include,
     Future<void>? abortTrigger,
   }) async {
-    final json = await getJsonWithRepeatedParams(
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrlWithQueryAll(
       '$_endpoint/$responseId',
       queryParametersAll: _buildIncludeParams(include),
+    );
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
-    return Response.fromJson(json);
+    return Response.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Converts include values to repeated query parameters format.
@@ -319,17 +340,25 @@ class ResponsesResource extends BaseResource {
     String? order,
     Future<void>? abortTrigger,
   }) async {
+    ensureNotClosed?.call();
     final queryParameters = <String, String>{};
     if (after != null) queryParameters['after'] = after;
     if (limit != null) queryParameters['limit'] = limit.toString();
     if (order != null) queryParameters['order'] = order;
 
-    final json = await getJson(
+    final url = requestBuilder.buildUrl(
       _endpoint,
-      queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
+      queryParams: queryParameters.isNotEmpty ? queryParameters : null,
+    );
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
-    return ResponseList.fromJson(json);
+    return ResponseList.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Deletes a response.
@@ -353,11 +382,17 @@ class ResponsesResource extends BaseResource {
     String responseId, {
     Future<void>? abortTrigger,
   }) async {
-    final json = await deleteJson(
-      '$_endpoint/$responseId',
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$responseId');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
-    return DeleteResponseResult.fromJson(json);
+    return DeleteResponseResult.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Cancels a background response.
@@ -394,48 +429,34 @@ class ResponsesResource extends BaseResource {
     String responseId, {
     Future<void>? abortTrigger,
   }) async {
-    final json = await postJson(
-      '$_endpoint/$responseId/cancel',
-      body: {},
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$responseId/cancel');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(<String, dynamic>{});
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
-    return Response.fromJson(json);
-  }
-
-  /// Parses an error response from a streaming request.
-  ApiException _parseStreamError(
-    int statusCode,
-    String body,
-    String requestId,
-  ) {
-    try {
-      final json = jsonDecode(body) as Map<String, dynamic>;
-      final error = json['error'] as Map<String, dynamic>?;
-      return createApiException(
-        statusCode: statusCode,
-        message: error?['message'] as String? ?? 'Unknown error',
-        type: error?['type'] as String?,
-        code: error?['code'] as String?,
-        param: error?['param'] as String?,
-        requestId: requestId,
-        body: json,
-      );
-    } catch (_) {
-      return ApiException(
-        message: body.isNotEmpty ? body : 'HTTP $statusCode error',
-        statusCode: statusCode,
-        requestId: requestId,
-      );
-    }
+    return Response.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }
 
 /// Resource for response input items operations.
 ///
 /// Provides access to the input items of a stored response.
-class ResponseInputItemsResource extends BaseResource {
-  /// Creates a [ResponseInputItemsResource] with the given client.
-  ResponseInputItemsResource(super.client);
+class ResponseInputItemsResource extends ResourceBase {
+  /// Creates a [ResponseInputItemsResource].
+  ResponseInputItemsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   /// Lists input items for a response.
   ///
@@ -468,18 +489,26 @@ class ResponseInputItemsResource extends BaseResource {
     String? order,
     Future<void>? abortTrigger,
   }) async {
+    ensureNotClosed?.call();
     final queryParameters = <String, String>{};
     if (after != null) queryParameters['after'] = after;
     if (before != null) queryParameters['before'] = before;
     if (limit != null) queryParameters['limit'] = limit.toString();
     if (order != null) queryParameters['order'] = order;
 
-    final json = await getJson(
+    final url = requestBuilder.buildUrl(
       '/responses/$responseId/input_items',
-      queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
+      queryParams: queryParameters.isNotEmpty ? queryParameters : null,
+    );
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
-    return InputItemList.fromJson(json);
+    return InputItemList.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }
 

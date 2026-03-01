@@ -1,5 +1,9 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
 import '../models/threads/threads.dart';
-import 'beta_base_resource.dart';
+import 'base_resource.dart';
 import 'messages_resource.dart';
 import 'runs_resource.dart';
 
@@ -24,20 +28,41 @@ import 'runs_resource.dart';
 ///   ),
 /// );
 /// ```
-class ThreadsResource extends BetaBaseResource {
-  /// Creates a [ThreadsResource] with the given client.
-  ThreadsResource(super.client);
+class ThreadsResource extends ResourceBase {
+  /// Creates a [ThreadsResource].
+  ThreadsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+    super.streamClientFactory,
+  });
 
   static const _endpoint = '/threads';
+  static const _betaFeature = 'assistants=v2';
 
   MessagesResource? _messages;
   RunsResource? _runs;
 
   /// Access to thread messages.
-  MessagesResource get messages => _messages ??= MessagesResource(client);
+  MessagesResource get messages => _messages ??= MessagesResource(
+    config: config,
+    httpClient: httpClient,
+    interceptorChain: interceptorChain,
+    requestBuilder: requestBuilder,
+    ensureNotClosed: ensureNotClosed,
+  );
 
   /// Access to thread runs.
-  RunsResource get runs => _runs ??= RunsResource(client);
+  RunsResource get runs => _runs ??= RunsResource(
+    config: config,
+    httpClient: httpClient,
+    interceptorChain: interceptorChain,
+    requestBuilder: requestBuilder,
+    ensureNotClosed: ensureNotClosed,
+    streamClientFactory: streamClientFactory,
+  );
 
   /// Creates a new thread.
   ///
@@ -66,8 +91,18 @@ class ThreadsResource extends BetaBaseResource {
   /// );
   /// ```
   Future<Thread> create([CreateThreadRequest? request]) async {
-    final json = await postJson(_endpoint, body: request?.toJson() ?? {});
-    return Thread.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_endpoint);
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request?.toJson() ?? {});
+    final response = await interceptorChain.execute(httpRequest);
+    return Thread.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Retrieves a thread by ID.
@@ -87,8 +122,16 @@ class ThreadsResource extends BetaBaseResource {
   /// print('Created: ${thread.createdAt}');
   /// ```
   Future<Thread> retrieve(String threadId) async {
-    final json = await getJson('$_endpoint/$threadId');
-    return Thread.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$threadId');
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return Thread.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Modifies a thread.
@@ -113,8 +156,18 @@ class ThreadsResource extends BetaBaseResource {
   /// );
   /// ```
   Future<Thread> update(String threadId, ModifyThreadRequest request) async {
-    final json = await postJson('$_endpoint/$threadId', body: request.toJson());
-    return Thread.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$threadId');
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(httpRequest);
+    return Thread.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Deletes a thread.
@@ -134,7 +187,15 @@ class ThreadsResource extends BetaBaseResource {
   /// print('Deleted: ${result.deleted}');
   /// ```
   Future<DeleteThreadResponse> delete(String threadId) async {
-    final json = await deleteJson('$_endpoint/$threadId');
-    return DeleteThreadResponse.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$threadId');
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return DeleteThreadResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }

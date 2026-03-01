@@ -1,9 +1,9 @@
-import '../client/openai_client.dart';
-import '../models/chatkit/chatkit.dart';
-import 'beta_base_resource.dart';
+import 'dart:convert';
 
-/// The beta version header value for ChatKit API.
-const _chatkitBetaVersion = 'chatkit_beta=v1';
+import 'package:http/http.dart' as http;
+
+import '../models/chatkit/chatkit.dart';
+import 'base_resource.dart';
 
 /// Resource for ChatKit operations.
 ///
@@ -32,37 +32,55 @@ const _chatkitBetaVersion = 'chatkit_beta=v1';
 /// // Get thread items
 /// final items = await client.chatkit.threads.items.list(threads.data.first.id);
 /// ```
-class ChatkitResource extends BetaBaseResource {
-  /// Creates a [ChatkitResource] with the given client.
-  ChatkitResource(super.client);
-
-  @override
-  String get betaVersion => _chatkitBetaVersion;
+class ChatkitResource extends ResourceBase {
+  /// Creates a [ChatkitResource].
+  ChatkitResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   ChatkitSessionsResource? _sessions;
 
   /// ChatKit sessions sub-resource.
   ChatkitSessionsResource get sessions =>
-      _sessions ??= ChatkitSessionsResource(client);
+      _sessions ??= ChatkitSessionsResource(
+        config: config,
+        httpClient: httpClient,
+        interceptorChain: interceptorChain,
+        requestBuilder: requestBuilder,
+        ensureNotClosed: ensureNotClosed,
+      );
 
   ChatkitThreadsResource? _threads;
 
   /// ChatKit threads sub-resource.
-  ChatkitThreadsResource get threads =>
-      _threads ??= ChatkitThreadsResource(client);
+  ChatkitThreadsResource get threads => _threads ??= ChatkitThreadsResource(
+    config: config,
+    httpClient: httpClient,
+    interceptorChain: interceptorChain,
+    requestBuilder: requestBuilder,
+    ensureNotClosed: ensureNotClosed,
+  );
 }
 
 /// Resource for ChatKit session operations.
 ///
 /// Sessions provide ephemeral access tokens for ChatKit workflows.
-class ChatkitSessionsResource extends BetaBaseResource {
-  /// Creates a [ChatkitSessionsResource] with the given client.
-  ChatkitSessionsResource(super.client);
-
-  @override
-  String get betaVersion => _chatkitBetaVersion;
+class ChatkitSessionsResource extends ResourceBase {
+  /// Creates a [ChatkitSessionsResource].
+  ChatkitSessionsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   static const _endpoint = '/chatkit/sessions';
+  static const _betaFeature = 'chatkit_beta=v1';
 
   /// Creates a new ChatKit session.
   ///
@@ -90,8 +108,18 @@ class ChatkitSessionsResource extends BetaBaseResource {
   /// print('Expires: ${session.expiresAtDateTime}');
   /// ```
   Future<ChatSession> create(CreateChatSessionRequest request) async {
-    final json = await postJson(_endpoint, body: request.toJson());
-    return ChatSession.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_endpoint);
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(httpRequest);
+    return ChatSession.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Cancels an active ChatKit session.
@@ -111,28 +139,48 @@ class ChatkitSessionsResource extends BetaBaseResource {
   /// print('Status: ${session.status}'); // cancelled
   /// ```
   Future<ChatSession> cancel(String sessionId) async {
-    final json = await postJson('$_endpoint/$sessionId/cancel', body: {});
-    return ChatSession.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$sessionId/cancel');
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(<String, dynamic>{});
+    final response = await interceptorChain.execute(httpRequest);
+    return ChatSession.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }
 
 /// Resource for ChatKit thread operations.
 ///
 /// Threads represent conversation histories within ChatKit.
-class ChatkitThreadsResource extends BetaBaseResource {
-  /// Creates a [ChatkitThreadsResource] with the given client.
-  ChatkitThreadsResource(super.client);
-
-  @override
-  String get betaVersion => _chatkitBetaVersion;
+class ChatkitThreadsResource extends ResourceBase {
+  /// Creates a [ChatkitThreadsResource].
+  ChatkitThreadsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   static const _endpoint = '/chatkit/threads';
+  static const _betaFeature = 'chatkit_beta=v1';
 
   ChatkitThreadItemsResource? _items;
 
   /// Thread items sub-resource.
   ChatkitThreadItemsResource get items =>
-      _items ??= ChatkitThreadItemsResource(client);
+      _items ??= ChatkitThreadItemsResource(
+        config: config,
+        httpClient: httpClient,
+        interceptorChain: interceptorChain,
+        requestBuilder: requestBuilder,
+        ensureNotClosed: ensureNotClosed,
+      );
 
   /// Lists ChatKit threads.
   ///
@@ -162,17 +210,25 @@ class ChatkitThreadsResource extends BetaBaseResource {
     String? after,
     String? before,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{};
     if (limit != null) queryParams['limit'] = limit.toString();
     if (order != null) queryParams['order'] = order;
     if (after != null) queryParams['after'] = after;
     if (before != null) queryParams['before'] = before;
 
-    final json = await getJson(
+    final url = requestBuilder.buildUrl(
       _endpoint,
-      queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    return ChatkitThreadList.fromJson(json);
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return ChatkitThreadList.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Retrieves a ChatKit thread.
@@ -193,8 +249,16 @@ class ChatkitThreadsResource extends BetaBaseResource {
   /// print('User: ${thread.user}');
   /// ```
   Future<ChatkitThread> retrieve(String threadId) async {
-    final json = await getJson('$_endpoint/$threadId');
-    return ChatkitThread.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$threadId');
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return ChatkitThread.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Deletes a ChatKit thread.
@@ -214,20 +278,33 @@ class ChatkitThreadsResource extends BetaBaseResource {
   /// print('Deleted: ${result.deleted}');
   /// ```
   Future<DeleteChatkitThreadResponse> delete(String threadId) async {
-    final json = await deleteJson('$_endpoint/$threadId');
-    return DeleteChatkitThreadResponse.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$threadId');
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return DeleteChatkitThreadResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }
 
 /// Resource for ChatKit thread item operations.
 ///
 /// Thread items represent messages and other content within a thread.
-class ChatkitThreadItemsResource extends BetaBaseResource {
-  /// Creates a [ChatkitThreadItemsResource] with the given client.
-  ChatkitThreadItemsResource(super.client);
+class ChatkitThreadItemsResource extends ResourceBase {
+  /// Creates a [ChatkitThreadItemsResource].
+  ChatkitThreadItemsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
-  @override
-  String get betaVersion => _chatkitBetaVersion;
+  static const _betaFeature = 'chatkit_beta=v1';
 
   /// Lists items in a ChatKit thread.
   ///
@@ -262,16 +339,24 @@ class ChatkitThreadItemsResource extends BetaBaseResource {
     String? after,
     String? before,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{};
     if (limit != null) queryParams['limit'] = limit.toString();
     if (order != null) queryParams['order'] = order;
     if (after != null) queryParams['after'] = after;
     if (before != null) queryParams['before'] = before;
 
-    final json = await getJson(
+    final url = requestBuilder.buildUrl(
       '/chatkit/threads/$threadId/items',
-      queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    return ThreadItemList.fromJson(json);
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return ThreadItemList.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }

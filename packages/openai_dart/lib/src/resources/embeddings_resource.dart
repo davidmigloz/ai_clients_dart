@@ -1,4 +1,7 @@
-import '../client/openai_client.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
 import '../models/embeddings/embeddings.dart';
 import 'base_resource.dart';
 
@@ -22,9 +25,15 @@ import 'base_resource.dart';
 /// final vector = response.data.first.embedding;
 /// print('Dimensions: ${vector.length}');
 /// ```
-class EmbeddingsResource extends BaseResource {
-  /// Creates an [EmbeddingsResource] with the given client.
-  EmbeddingsResource(super.client);
+class EmbeddingsResource extends ResourceBase {
+  /// Creates an [EmbeddingsResource].
+  EmbeddingsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   static const _endpoint = '/embeddings';
 
@@ -70,11 +79,18 @@ class EmbeddingsResource extends BaseResource {
     EmbeddingRequest request, {
     Future<void>? abortTrigger,
   }) async {
-    final json = await postJson(
-      _endpoint,
-      body: request.toJson(),
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_endpoint);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
-    return EmbeddingResponse.fromJson(json);
+    return EmbeddingResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }

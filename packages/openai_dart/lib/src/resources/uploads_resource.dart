@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../client/openai_client.dart';
 import '../models/files/files.dart';
 import 'base_resource.dart';
 
@@ -34,9 +33,15 @@ import 'base_resource.dart';
 /// // Complete the upload
 /// final file = await client.uploads.complete(upload.id);
 /// ```
-class UploadsResource extends BaseResource {
-  /// Creates an [UploadsResource] with the given client.
-  UploadsResource(super.client);
+class UploadsResource extends ResourceBase {
+  /// Creates an [UploadsResource].
+  UploadsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   static const _endpoint = '/uploads';
 
@@ -68,8 +73,16 @@ class UploadsResource extends BaseResource {
   /// print('Upload ID: ${upload.id}');
   /// ```
   Future<Upload> create(CreateUploadRequest request) async {
-    final json = await postJson(_endpoint, body: request.toJson());
-    return Upload.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_endpoint);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(httpRequest);
+    return Upload.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Adds a part to an upload.
@@ -97,14 +110,16 @@ class UploadsResource extends BaseResource {
   /// print('Added part: ${part.id}');
   /// ```
   Future<UploadPart> addPart(String uploadId, {required List<int> data}) async {
-    final url = client.buildUrl('$_endpoint/$uploadId/parts');
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$uploadId/parts');
     final request = http.MultipartRequest('POST', url);
 
     request.files.add(
       http.MultipartFile.fromBytes('data', data, filename: 'part'),
     );
+    request.headers.addAll(requestBuilder.buildMultipartHeaders());
 
-    final response = await client.postMultipart(request: request);
+    final response = await interceptorChain.execute(request);
     final json = jsonDecode(response.body) as Map<String, dynamic>;
     return UploadPart.fromJson(json);
   }
@@ -138,12 +153,17 @@ class UploadsResource extends BaseResource {
     required List<String> partIds,
     String? md5,
   }) async {
+    ensureNotClosed?.call();
     final request = CompleteUploadRequest(partIds: partIds, md5: md5);
-    final json = await postJson(
-      '$_endpoint/$uploadId/complete',
-      body: request.toJson(),
+    final url = requestBuilder.buildUrl('$_endpoint/$uploadId/complete');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(httpRequest);
+    return Upload.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
     );
-    return Upload.fromJson(json);
   }
 
   /// Cancels an upload.
@@ -166,7 +186,15 @@ class UploadsResource extends BaseResource {
   /// print('Status: ${cancelled.status}');
   /// ```
   Future<Upload> cancel(String uploadId) async {
-    final json = await postJson('$_endpoint/$uploadId/cancel', body: {});
-    return Upload.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$uploadId/cancel');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(<String, dynamic>{});
+    final response = await interceptorChain.execute(httpRequest);
+    return Upload.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }

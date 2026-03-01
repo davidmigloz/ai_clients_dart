@@ -3,7 +3,6 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
-import '../client/openai_client.dart';
 import '../models/audio/audio.dart';
 import 'base_resource.dart';
 
@@ -34,32 +33,62 @@ import 'base_resource.dart';
 ///   ),
 /// );
 /// ```
-class AudioResource extends BaseResource {
-  /// Creates an [AudioResource] with the given client.
-  AudioResource(super.client);
+class AudioResource extends ResourceBase {
+  /// Creates an [AudioResource].
+  AudioResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   SpeechResource? _speech;
   TranscriptionsResource? _transcriptions;
   TranslationsResource? _translations;
 
   /// Access to text-to-speech operations.
-  SpeechResource get speech => _speech ??= SpeechResource(client);
+  SpeechResource get speech => _speech ??= SpeechResource(
+    config: config,
+    httpClient: httpClient,
+    interceptorChain: interceptorChain,
+    requestBuilder: requestBuilder,
+    ensureNotClosed: ensureNotClosed,
+  );
 
   /// Access to speech-to-text (transcription) operations.
   TranscriptionsResource get transcriptions =>
-      _transcriptions ??= TranscriptionsResource(client);
+      _transcriptions ??= TranscriptionsResource(
+        config: config,
+        httpClient: httpClient,
+        interceptorChain: interceptorChain,
+        requestBuilder: requestBuilder,
+        ensureNotClosed: ensureNotClosed,
+      );
 
   /// Access to audio translation operations.
   TranslationsResource get translations =>
-      _translations ??= TranslationsResource(client);
+      _translations ??= TranslationsResource(
+        config: config,
+        httpClient: httpClient,
+        interceptorChain: interceptorChain,
+        requestBuilder: requestBuilder,
+        ensureNotClosed: ensureNotClosed,
+      );
 }
 
 /// Resource for text-to-speech operations.
 ///
 /// Converts text into natural-sounding speech audio.
-class SpeechResource extends BaseResource {
-  /// Creates a [SpeechResource] with the given client.
-  SpeechResource(super.client);
+class SpeechResource extends ResourceBase {
+  /// Creates a [SpeechResource].
+  SpeechResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   static const _endpoint = '/audio/speech';
 
@@ -92,11 +121,14 @@ class SpeechResource extends BaseResource {
   /// File('output.mp3').writeAsBytesSync(audioBytes);
   /// ```
   Future<Uint8List> create(SpeechRequest request) async {
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_endpoint);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
     // ErrorInterceptor handles error responses, so we can return bodyBytes directly
-    final response = await client.post(
-      _endpoint,
-      body: jsonEncode(request.toJson()),
-    );
+    final response = await interceptorChain.execute(httpRequest);
     return response.bodyBytes;
   }
 }
@@ -104,9 +136,15 @@ class SpeechResource extends BaseResource {
 /// Resource for transcription (speech-to-text) operations.
 ///
 /// Transcribes audio into text in the original language.
-class TranscriptionsResource extends BaseResource {
-  /// Creates a [TranscriptionsResource] with the given client.
-  TranscriptionsResource(super.client);
+class TranscriptionsResource extends ResourceBase {
+  /// Creates a [TranscriptionsResource].
+  TranscriptionsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   static const _endpoint = '/audio/transcriptions';
 
@@ -140,8 +178,10 @@ class TranscriptionsResource extends BaseResource {
   /// print(response.text);
   /// ```
   Future<TranscriptionResponse> create(TranscriptionRequest request) async {
+    ensureNotClosed?.call();
     final httpRequest = _createMultipartRequest(request);
-    final response = await client.postMultipart(request: httpRequest);
+    httpRequest.headers.addAll(requestBuilder.buildMultipartHeaders());
+    final response = await interceptorChain.execute(httpRequest);
     final json = jsonDecode(response.body) as Map<String, dynamic>;
     return TranscriptionResponse.fromJson(json);
   }
@@ -173,6 +213,7 @@ class TranscriptionsResource extends BaseResource {
   Future<TranscriptionVerboseResponse> createVerbose(
     TranscriptionRequest request,
   ) async {
+    ensureNotClosed?.call();
     // Force verbose_json format
     final verboseRequest = TranscriptionRequest(
       file: request.file,
@@ -186,13 +227,14 @@ class TranscriptionsResource extends BaseResource {
     );
 
     final httpRequest = _createMultipartRequest(verboseRequest);
-    final response = await client.postMultipart(request: httpRequest);
+    httpRequest.headers.addAll(requestBuilder.buildMultipartHeaders());
+    final response = await interceptorChain.execute(httpRequest);
     final json = jsonDecode(response.body) as Map<String, dynamic>;
     return TranscriptionVerboseResponse.fromJson(json);
   }
 
   http.MultipartRequest _createMultipartRequest(TranscriptionRequest request) {
-    final url = client.buildUrl(_endpoint);
+    final url = requestBuilder.buildUrl(_endpoint);
     final httpRequest = http.MultipartRequest('POST', url);
 
     // Add file
@@ -238,9 +280,15 @@ class TranscriptionsResource extends BaseResource {
 /// Resource for audio translation operations.
 ///
 /// Translates audio from any supported language into English text.
-class TranslationsResource extends BaseResource {
-  /// Creates a [TranslationsResource] with the given client.
-  TranslationsResource(super.client);
+class TranslationsResource extends ResourceBase {
+  /// Creates a [TranslationsResource].
+  TranslationsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   static const _endpoint = '/audio/translations';
 
@@ -273,14 +321,16 @@ class TranslationsResource extends BaseResource {
   /// print(response.text); // English translation
   /// ```
   Future<TranslationResponse> create(TranslationRequest request) async {
+    ensureNotClosed?.call();
     final httpRequest = _createMultipartRequest(request);
-    final response = await client.postMultipart(request: httpRequest);
+    httpRequest.headers.addAll(requestBuilder.buildMultipartHeaders());
+    final response = await interceptorChain.execute(httpRequest);
     final json = jsonDecode(response.body) as Map<String, dynamic>;
     return TranslationResponse.fromJson(json);
   }
 
   http.MultipartRequest _createMultipartRequest(TranslationRequest request) {
-    final url = client.buildUrl(_endpoint);
+    final url = requestBuilder.buildUrl(_endpoint);
     final httpRequest = http.MultipartRequest('POST', url);
 
     // Add file

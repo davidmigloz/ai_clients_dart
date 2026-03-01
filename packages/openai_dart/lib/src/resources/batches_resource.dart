@@ -1,4 +1,7 @@
-import '../client/openai_client.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
 import '../models/batches/batches.dart';
 import 'base_resource.dart';
 
@@ -25,9 +28,15 @@ import 'base_resource.dart';
 /// final status = await client.batches.retrieve(batch.id);
 /// print('Status: ${status.status}');
 /// ```
-class BatchesResource extends BaseResource {
-  /// Creates a [BatchesResource] with the given client.
-  BatchesResource(super.client);
+class BatchesResource extends ResourceBase {
+  /// Creates a [BatchesResource].
+  BatchesResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   static const _endpoint = '/batches';
 
@@ -56,8 +65,16 @@ class BatchesResource extends BaseResource {
   /// print('Batch ID: ${batch.id}');
   /// ```
   Future<Batch> create(CreateBatchRequest request) async {
-    final json = await postJson(_endpoint, body: request.toJson());
-    return Batch.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_endpoint);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(httpRequest);
+    return Batch.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Lists batches for the organization.
@@ -81,15 +98,21 @@ class BatchesResource extends BaseResource {
   /// }
   /// ```
   Future<BatchList> list({String? after, int? limit}) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{};
     if (after != null) queryParams['after'] = after;
     if (limit != null) queryParams['limit'] = limit.toString();
 
-    final json = await getJson(
+    final url = requestBuilder.buildUrl(
       _endpoint,
-      queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    return BatchList.fromJson(json);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return BatchList.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Retrieves a batch.
@@ -112,8 +135,14 @@ class BatchesResource extends BaseResource {
   /// }
   /// ```
   Future<Batch> retrieve(String batchId) async {
-    final json = await getJson('$_endpoint/$batchId');
-    return Batch.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$batchId');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return Batch.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Cancels a batch.
@@ -136,7 +165,15 @@ class BatchesResource extends BaseResource {
   /// print('Status: ${cancelled.status}');
   /// ```
   Future<Batch> cancel(String batchId) async {
-    final json = await postJson('$_endpoint/$batchId/cancel', body: {});
-    return Batch.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$batchId/cancel');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(<String, dynamic>{});
+    final response = await interceptorChain.execute(httpRequest);
+    return Batch.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }

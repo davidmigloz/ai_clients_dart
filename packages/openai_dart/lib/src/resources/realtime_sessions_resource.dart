@@ -29,9 +29,15 @@ import 'base_resource.dart';
 ///   headers: {'Authorization': 'Bearer ${session.clientSecret.value}'},
 /// );
 /// ```
-class RealtimeSessionsResource extends BaseResource {
-  /// Creates a [RealtimeSessionsResource] with the given client.
-  RealtimeSessionsResource(super.client);
+class RealtimeSessionsResource extends ResourceBase {
+  /// Creates a [RealtimeSessionsResource].
+  RealtimeSessionsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   static const _sessionsEndpoint = '/realtime/sessions';
   static const _transcriptionEndpoint = '/realtime/transcription_sessions';
@@ -40,7 +46,13 @@ class RealtimeSessionsResource extends BaseResource {
   RealtimeCallsResource? _calls;
 
   /// Access to WebRTC call operations.
-  RealtimeCallsResource get calls => _calls ??= RealtimeCallsResource(client);
+  RealtimeCallsResource get calls => _calls ??= RealtimeCallsResource(
+    config: config,
+    httpClient: httpClient,
+    interceptorChain: interceptorChain,
+    requestBuilder: requestBuilder,
+    ensureNotClosed: ensureNotClosed,
+  );
 
   /// Creates a realtime session with an ephemeral API key.
   ///
@@ -51,7 +63,6 @@ class RealtimeSessionsResource extends BaseResource {
   /// ## Parameters
   ///
   /// - [request] - The session creation request parameters.
-  /// - [abortTrigger] - Optional future that cancels the request when completed.
   ///
   /// ## Returns
   ///
@@ -77,15 +88,18 @@ class RealtimeSessionsResource extends BaseResource {
   /// print('Client secret: ${session.clientSecret.value}');
   /// ```
   Future<RealtimeSessionCreateResponse> create(
-    RealtimeSessionCreateRequest request, {
-    Future<void>? abortTrigger,
-  }) async {
-    final json = await postJson(
-      _sessionsEndpoint,
-      body: request.toJson(),
-      abortTrigger: abortTrigger,
+    RealtimeSessionCreateRequest request,
+  ) async {
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_sessionsEndpoint);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(httpRequest);
+    return RealtimeSessionCreateResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
     );
-    return RealtimeSessionCreateResponse.fromJson(json);
   }
 
   /// Creates a realtime transcription session.
@@ -96,7 +110,6 @@ class RealtimeSessionsResource extends BaseResource {
   /// ## Parameters
   ///
   /// - [request] - The transcription session creation request.
-  /// - [abortTrigger] - Optional future that cancels the request when completed.
   ///
   /// ## Returns
   ///
@@ -119,15 +132,18 @@ class RealtimeSessionsResource extends BaseResource {
   /// );
   /// ```
   Future<RealtimeTranscriptionSessionCreateResponse> createTranscription(
-    RealtimeTranscriptionSessionCreateRequest request, {
-    Future<void>? abortTrigger,
-  }) async {
-    final json = await postJson(
-      _transcriptionEndpoint,
-      body: request.toJson(),
-      abortTrigger: abortTrigger,
+    RealtimeTranscriptionSessionCreateRequest request,
+  ) async {
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_transcriptionEndpoint);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(httpRequest);
+    return RealtimeTranscriptionSessionCreateResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
     );
-    return RealtimeTranscriptionSessionCreateResponse.fromJson(json);
   }
 
   /// Creates a client secret with custom configuration.
@@ -138,7 +154,6 @@ class RealtimeSessionsResource extends BaseResource {
   /// ## Parameters
   ///
   /// - [request] - The client secret creation request.
-  /// - [abortTrigger] - Optional future that cancels the request when completed.
   ///
   /// ## Returns
   ///
@@ -162,15 +177,18 @@ class RealtimeSessionsResource extends BaseResource {
   /// print('Expires at: ${response.expiresAt}');
   /// ```
   Future<RealtimeClientSecretCreateResponse> createClientSecret(
-    RealtimeClientSecretCreateRequest request, {
-    Future<void>? abortTrigger,
-  }) async {
-    final json = await postJson(
-      _clientSecretsEndpoint,
-      body: request.toJson(),
-      abortTrigger: abortTrigger,
+    RealtimeClientSecretCreateRequest request,
+  ) async {
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_clientSecretsEndpoint);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(httpRequest);
+    return RealtimeClientSecretCreateResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
     );
-    return RealtimeClientSecretCreateResponse.fromJson(json);
   }
 }
 
@@ -178,9 +196,15 @@ class RealtimeSessionsResource extends BaseResource {
 ///
 /// Provides access to WebRTC call management including creating,
 /// accepting, hanging up, and transferring calls.
-class RealtimeCallsResource extends BaseResource {
-  /// Creates a [RealtimeCallsResource] with the given client.
-  RealtimeCallsResource(super.client);
+class RealtimeCallsResource extends ResourceBase {
+  /// Creates a [RealtimeCallsResource].
+  RealtimeCallsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   static const _callsEndpoint = '/realtime/calls';
 
@@ -196,7 +220,6 @@ class RealtimeCallsResource extends BaseResource {
   /// ## Parameters
   ///
   /// - [request] - The call creation request with SDP offer.
-  /// - [abortTrigger] - Optional future that cancels the request when completed.
   ///
   /// ## Returns
   ///
@@ -220,28 +243,21 @@ class RealtimeCallsResource extends BaseResource {
   ///   RTCSessionDescription(sdpAnswer, 'answer'),
   /// );
   /// ```
-  Future<String> create(
-    RealtimeCallCreateRequest request, {
-    Future<void>? abortTrigger,
-  }) async {
-    // Create multipart request with properly normalized URL
-    final url = client.buildUrl(_callsEndpoint);
-    final multipartRequest = http.MultipartRequest('POST', url);
+  Future<String> create(RealtimeCallCreateRequest request) async {
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_callsEndpoint);
+    final httpRequest = http.MultipartRequest('POST', url);
 
     // Add SDP as a field
-    multipartRequest.fields['sdp'] = request.sdp;
+    httpRequest.fields['sdp'] = request.sdp;
 
     // Add session as a field if provided
     if (request.session != null) {
-      // Convert session to JSON string for multipart field
-      multipartRequest.fields['session'] = _encodeSession(request.session!);
+      httpRequest.fields['session'] = jsonEncode(request.session!.toJson());
     }
 
-    final response = await client.postMultipart(
-      request: multipartRequest,
-      abortTrigger: abortTrigger,
-    );
-
+    httpRequest.headers.addAll(requestBuilder.buildMultipartHeaders());
+    final response = await interceptorChain.execute(httpRequest);
     return response.body;
   }
 
@@ -250,13 +266,14 @@ class RealtimeCallsResource extends BaseResource {
   /// ## Parameters
   ///
   /// - [callId] - The ID of the call to accept.
-  /// - [abortTrigger] - Optional future that cancels the request when completed.
-  Future<void> accept(String callId, {Future<void>? abortTrigger}) async {
-    await postJson(
-      '$_callsEndpoint/$callId/accept',
-      body: <String, dynamic>{},
-      abortTrigger: abortTrigger,
-    );
+  Future<void> accept(String callId) async {
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_callsEndpoint/$callId/accept');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(<String, dynamic>{});
+    await interceptorChain.execute(httpRequest);
   }
 
   /// Hangs up an active call.
@@ -264,13 +281,14 @@ class RealtimeCallsResource extends BaseResource {
   /// ## Parameters
   ///
   /// - [callId] - The ID of the call to hang up.
-  /// - [abortTrigger] - Optional future that cancels the request when completed.
-  Future<void> hangup(String callId, {Future<void>? abortTrigger}) async {
-    await postJson(
-      '$_callsEndpoint/$callId/hangup',
-      body: <String, dynamic>{},
-      abortTrigger: abortTrigger,
-    );
+  Future<void> hangup(String callId) async {
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_callsEndpoint/$callId/hangup');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(<String, dynamic>{});
+    await interceptorChain.execute(httpRequest);
   }
 
   /// Transfers a call to another destination.
@@ -279,7 +297,6 @@ class RealtimeCallsResource extends BaseResource {
   ///
   /// - [callId] - The ID of the call to transfer.
   /// - [request] - The transfer request with target URI.
-  /// - [abortTrigger] - Optional future that cancels the request when completed.
   ///
   /// ## Example
   ///
@@ -291,14 +308,15 @@ class RealtimeCallsResource extends BaseResource {
   /// ```
   Future<void> refer(
     String callId,
-    RealtimeCallReferRequest request, {
-    Future<void>? abortTrigger,
-  }) async {
-    await postJson(
-      '$_callsEndpoint/$callId/refer',
-      body: request.toJson(),
-      abortTrigger: abortTrigger,
-    );
+    RealtimeCallReferRequest request,
+  ) async {
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_callsEndpoint/$callId/refer');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    await interceptorChain.execute(httpRequest);
   }
 
   /// Rejects an incoming SIP call.
@@ -307,29 +325,25 @@ class RealtimeCallsResource extends BaseResource {
   ///
   /// - [callId] - The ID of the call to reject.
   /// - [request] - Optional rejection request with status code.
-  /// - [abortTrigger] - Optional future that cancels the request when completed.
   ///
   /// ## Example
   ///
   /// ```dart
   /// await client.realtimeSessions.calls.reject(
   ///   callId,
-  ///   RealtimeCallRejectRequest(statusCode: 486), // Busy Here
+  ///   request: RealtimeCallRejectRequest(statusCode: 486), // Busy Here
   /// );
   /// ```
   Future<void> reject(
     String callId, {
     RealtimeCallRejectRequest? request,
-    Future<void>? abortTrigger,
   }) async {
-    await postJson(
-      '$_callsEndpoint/$callId/reject',
-      body: request?.toJson() ?? <String, dynamic>{},
-      abortTrigger: abortTrigger,
-    );
-  }
-
-  String _encodeSession(RealtimeSessionCreateRequest session) {
-    return jsonEncode(session.toJson());
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_callsEndpoint/$callId/reject');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request?.toJson() ?? <String, dynamic>{});
+    await interceptorChain.execute(httpRequest);
   }
 }

@@ -1,11 +1,7 @@
-import 'dart:async' show StreamController, StreamSubscription, unawaited;
-import 'dart:convert' show jsonEncode;
-
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 
 import '../auth/auth_provider.dart';
-import '../errors/exceptions.dart';
 import '../interceptors/auth_interceptor.dart';
 import '../interceptors/error_interceptor.dart';
 import '../interceptors/interceptor.dart';
@@ -31,9 +27,9 @@ import '../resources/responses_resource.dart';
 import '../resources/skills_resource.dart';
 import '../resources/uploads_resource.dart';
 import '../resources/videos_resource.dart';
-import '../utils/request_id.dart';
 import 'config.dart';
 import 'interceptor_chain.dart';
+import 'request_builder.dart';
 import 'retry_wrapper.dart';
 
 /// The main client for interacting with the OpenAI API.
@@ -130,6 +126,7 @@ class OpenAIClient {
     // Initialize logging first so LoggingInterceptor uses the configured level
     _initializeLogging();
     _initializeInterceptorChain();
+    _requestBuilder = RequestBuilder(config: _config);
   }
 
   /// Creates a new [OpenAIClient] using environment variables.
@@ -186,6 +183,7 @@ class OpenAIClient {
   bool _closed = false;
   Logger? _logger;
   late final InterceptorChain _interceptorChain;
+  late final RequestBuilder _requestBuilder;
 
   /// The configuration for this client.
   OpenAIConfig get config => _config;
@@ -244,296 +242,6 @@ class OpenAIClient {
     );
   }
 
-  /// Returns the base headers for API requests.
-  ///
-  /// Note: Auth headers are added by the [AuthInterceptor] in the
-  /// interceptor chain.
-  Map<String, String> get _baseHeaders {
-    final headers = <String, String>{
-      'Content-Type': 'application/json',
-      ..._config.defaultHeaders,
-    };
-
-    // Add API version if configured
-    if (_config.apiVersion case final version?) {
-      headers['OpenAI-Version'] = version;
-    }
-
-    // Add organization/project headers if configured
-    // These are added here (not in AuthInterceptor) so they work regardless
-    // of the auth mechanism (authProvider, defaultHeaders, or custom interceptor)
-    if (_config.organization case final org?) {
-      headers['OpenAI-Organization'] = org;
-    }
-    if (_config.project case final proj?) {
-      headers['OpenAI-Project'] = proj;
-    }
-
-    // Add request ID for tracing
-    headers['X-Request-ID'] = generateRequestId();
-
-    return headers;
-  }
-
-  /// Builds a URL for an API endpoint.
-  ///
-  /// Normalizes the base URL and endpoint to avoid double slashes or
-  /// missing separators. Correctly handles base URLs with existing query
-  /// parameters (e.g., Azure OpenAI endpoints with `api-version`).
-  ///
-  /// This method is exposed for resources that need to build URLs manually
-  /// (e.g., for multipart or streaming requests).
-  Uri buildUrl(String endpoint, {Map<String, String>? queryParameters}) {
-    // Parse baseUrl as a Uri to correctly handle existing paths and query params
-    final baseUri = Uri.parse(_config.baseUrl);
-
-    // Normalize base path and requested path to avoid double slashes
-    final basePath = baseUri.path.endsWith('/')
-        ? baseUri.path.substring(0, baseUri.path.length - 1)
-        : baseUri.path;
-    final normalizedEndpoint = endpoint.startsWith('/')
-        ? endpoint
-        : '/$endpoint';
-    final combinedPath = '$basePath$normalizedEndpoint';
-
-    // Merge query params: base URL params + request params (request wins on conflict)
-    final mergedQueryParams = <String, String>{
-      ...baseUri.queryParameters,
-      if (queryParameters != null) ...queryParameters,
-    };
-
-    return baseUri.replace(
-      path: combinedPath,
-      queryParameters: mergedQueryParams.isEmpty ? null : mergedQueryParams,
-    );
-  }
-
-  /// Builds a URL for an API endpoint with support for repeated query parameters.
-  ///
-  /// This method handles arrays in query parameters using `queryParametersAll`,
-  /// which is necessary for OpenAI's API where array params must be sent as
-  /// repeated keys (e.g., `?include[]=a&include[]=b`).
-  ///
-  /// Use this instead of [buildUrl] when you need to pass array-valued query
-  /// parameters. Single-value params can be passed directly in [queryParameters],
-  /// while repeated params go in [queryParametersAll].
-  Uri buildUrlWithQueryAll(
-    String endpoint, {
-    Map<String, String>? queryParameters,
-    Map<String, List<String>>? queryParametersAll,
-  }) {
-    // Parse baseUrl as a Uri to correctly handle existing paths and query params
-    final baseUri = Uri.parse(_config.baseUrl);
-
-    // Normalize base path and requested path to avoid double slashes
-    final basePath = baseUri.path.endsWith('/')
-        ? baseUri.path.substring(0, baseUri.path.length - 1)
-        : baseUri.path;
-    final normalizedEndpoint = endpoint.startsWith('/')
-        ? endpoint
-        : '/$endpoint';
-    final combinedPath = '$basePath$normalizedEndpoint';
-
-    // Merge query params: base URL params + single params + repeated params
-    // Convert everything to List<String> format for queryParametersAll
-    final mergedQueryParamsAll = <String, List<String>>{
-      // Add base URL params
-      for (final entry in baseUri.queryParametersAll.entries)
-        entry.key: entry.value,
-      // Add single-value params (converted to list)
-      if (queryParameters != null)
-        for (final entry in queryParameters.entries) entry.key: [entry.value],
-      // Add repeated params (these override single-value params with same key)
-      if (queryParametersAll != null) ...queryParametersAll,
-    };
-
-    // Build the URI with queryParametersAll.
-    // Note: Dart's Uri constructor accepts Map<String, List<String>> for the
-    // queryParameters parameter, treating each list as repeated query parameters
-    // (e.g., include[]=a&include[]=b). This behavior is documented in the Dart
-    // SDK and is used here to support OpenAI's array query parameter format.
-    //
-    // We preserve all URI components from the base URL:
-    // - userInfo: credentials in URL (user:pass@host)
-    // - fragment: hash section (#section)
-    // - port: explicit port (even standard ports like 80/443 if specified)
-    return Uri(
-      scheme: baseUri.scheme,
-      userInfo: baseUri.userInfo.isEmpty ? null : baseUri.userInfo,
-      host: baseUri.host,
-      port: baseUri.hasPort ? baseUri.port : null,
-      path: combinedPath,
-      queryParameters: mergedQueryParamsAll.isEmpty
-          ? null
-          : mergedQueryParamsAll,
-      fragment: baseUri.fragment.isEmpty ? null : baseUri.fragment,
-    );
-  }
-
-  /// Returns the base headers for API requests.
-  ///
-  /// These include authentication, organization/project, API version,
-  /// and request ID headers. Exposed for resources that need to build
-  /// requests manually (e.g., streaming or multipart).
-  ///
-  /// Note: Auth headers are added by the [AuthInterceptor] in the
-  /// interceptor chain for regular requests, but streaming requests
-  /// bypass the chain and need these headers directly.
-  Map<String, String> get baseHeaders => _baseHeaders;
-
-  /// Sends a streaming request with proper headers and URL building.
-  ///
-  /// This method is used by streaming resources to ensure they use the
-  /// same headers and URL normalization as regular requests. Returns a
-  /// [http.StreamedResponse] for processing as a stream.
-  ///
-  /// The [abortTrigger] parameter allows canceling the request. When the
-  /// future completes, the underlying HTTP connection is closed, which
-  /// terminates the stream. Downstream stream consumers will receive an
-  /// error or the stream will end.
-  ///
-  /// Note: Streaming requests are NOT retried (non-idempotent, body consumed).
-  /// The interceptor chain is bypassed since streaming requires low-level
-  /// access to the response stream.
-  Future<http.StreamedResponse> sendStream({
-    required String endpoint,
-    required Object body,
-    Map<String, String>? headers,
-    Future<void>? abortTrigger,
-  }) async {
-    _ensureNotClosed();
-
-    final url = buildUrl(endpoint);
-    final request = http.Request('POST', url);
-
-    // Add base headers (org/project, api version, request ID, default headers)
-    request.headers.addAll(_baseHeaders);
-
-    // Add auth headers (normally handled by AuthInterceptor, but streaming
-    // bypasses the interceptor chain)
-    if (_config.authProvider case final authProvider?) {
-      request.headers.addAll(authProvider.getHeaders());
-    }
-
-    // Add streaming-specific header
-    request.headers['Accept'] = 'text/event-stream';
-
-    // Add any additional headers
-    if (headers != null) {
-      request.headers.addAll(headers);
-    }
-
-    // Encode body
-    request.body = jsonEncode(body);
-
-    // Log request if logging is enabled
-    _logger?.fine('Streaming POST $url');
-
-    // For abort support, create a dedicated HTTP client for this stream.
-    // When abortTrigger completes, we close the client which cancels
-    // the in-flight request and terminates the stream.
-    if (abortTrigger != null) {
-      final streamClient = _streamClientFactory();
-      var aborted = false;
-      var clientClosed = false;
-
-      void closeClientOnce() {
-        if (!clientClosed) {
-          clientClosed = true;
-          streamClient.close();
-        }
-      }
-
-      unawaited(
-        abortTrigger.then(
-          (_) {
-            aborted = true;
-            closeClientOnce();
-          },
-          onError: (_) {
-            // Treat any abort trigger error as an abort signal
-            aborted = true;
-            closeClientOnce();
-          },
-        ),
-      );
-
-      try {
-        final response = await streamClient.send(request);
-
-        // Use StreamController to ensure client cleanup on ALL termination paths:
-        // - Normal completion (onDone)
-        // - Errors (onError)
-        // - Early subscription cancellation (onCancel)
-        //
-        // StreamTransformer.fromHandlers does NOT handle subscription
-        // cancellation, which would leak the client.
-        //
-        // IMPORTANT: We capture the subscription and cancel it in onCancel.
-        // Without this, the underlying subscription continues pushing data
-        // into the controller even when there are no listeners, causing a
-        // resource leak.
-        final controller = StreamController<List<int>>();
-        late final StreamSubscription<List<int>> subscription;
-        var controllerClosed = false;
-
-        void closeController() {
-          if (!controllerClosed) {
-            controllerClosed = true;
-            unawaited(controller.close());
-          }
-        }
-
-        subscription = response.stream.listen(
-          controller.add,
-          onError: (Object e, StackTrace st) {
-            closeClientOnce();
-            controller.addError(e, st);
-            unawaited(subscription.cancel());
-            closeController();
-          },
-          onDone: () {
-            closeClientOnce();
-            closeController();
-          },
-          cancelOnError: false,
-        );
-
-        controller.onCancel = () async {
-          closeClientOnce();
-          await subscription.cancel();
-          closeController();
-        };
-
-        return http.StreamedResponse(
-          controller.stream,
-          response.statusCode,
-          contentLength: response.contentLength,
-          request: response.request,
-          headers: response.headers,
-          isRedirect: response.isRedirect,
-          persistentConnection: response.persistentConnection,
-          reasonPhrase: response.reasonPhrase,
-        );
-      } catch (e) {
-        // If we were aborted, convert the exception to AbortedException
-        if (aborted) {
-          throw AbortedException.fromHttpException(
-            e,
-            stage: AbortionStage.duringStream,
-            correlationId: request.headers['X-Request-ID'],
-          );
-        }
-        // Close client on send() error too
-        closeClientOnce();
-        rethrow;
-      }
-    }
-
-    // No abort trigger - use the shared HTTP client
-    return _httpClient.send(request);
-  }
-
   // ============================================================
   // Resources
   // ============================================================
@@ -555,7 +263,14 @@ class OpenAIClient {
   /// );
   /// print(response.text);
   /// ```
-  ChatResource get chat => _chat ??= ChatResource(this);
+  ChatResource get chat => _chat ??= ChatResource(
+    config: config,
+    httpClient: _httpClient,
+    interceptorChain: _interceptorChain,
+    requestBuilder: _requestBuilder,
+    ensureNotClosed: _ensureNotClosed,
+    streamClientFactory: _streamClientFactory,
+  );
 
   CompletionsResource? _completions;
 
@@ -575,7 +290,14 @@ class OpenAIClient {
   /// print(completion.text);
   /// ```
   CompletionsResource get completions =>
-      _completions ??= CompletionsResource(this);
+      _completions ??= CompletionsResource(
+        config: config,
+        httpClient: _httpClient,
+        interceptorChain: _interceptorChain,
+        requestBuilder: _requestBuilder,
+        ensureNotClosed: _ensureNotClosed,
+        streamClientFactory: _streamClientFactory,
+      );
 
   EmbeddingsResource? _embeddings;
 
@@ -595,7 +317,13 @@ class OpenAIClient {
   /// );
   /// print('Dimensions: ${response.data.first.embedding.length}');
   /// ```
-  EmbeddingsResource get embeddings => _embeddings ??= EmbeddingsResource(this);
+  EmbeddingsResource get embeddings => _embeddings ??= EmbeddingsResource(
+    config: config,
+    httpClient: _httpClient,
+    interceptorChain: _interceptorChain,
+    requestBuilder: _requestBuilder,
+    ensureNotClosed: _ensureNotClosed,
+  );
 
   AudioResource? _audio;
 
@@ -624,7 +352,13 @@ class OpenAIClient {
   ///   ),
   /// );
   /// ```
-  AudioResource get audio => _audio ??= AudioResource(this);
+  AudioResource get audio => _audio ??= AudioResource(
+    config: config,
+    httpClient: _httpClient,
+    interceptorChain: _interceptorChain,
+    requestBuilder: _requestBuilder,
+    ensureNotClosed: _ensureNotClosed,
+  );
 
   ImagesResource? _images;
 
@@ -644,7 +378,13 @@ class OpenAIClient {
   /// );
   /// print('Image URL: ${response.data.first.url}');
   /// ```
-  ImagesResource get images => _images ??= ImagesResource(this);
+  ImagesResource get images => _images ??= ImagesResource(
+    config: config,
+    httpClient: _httpClient,
+    interceptorChain: _interceptorChain,
+    requestBuilder: _requestBuilder,
+    ensureNotClosed: _ensureNotClosed,
+  );
 
   FilesResource? _files;
 
@@ -661,7 +401,13 @@ class OpenAIClient {
   ///   purpose: FilePurpose.fineTune,
   /// );
   /// ```
-  FilesResource get files => _files ??= FilesResource(this);
+  FilesResource get files => _files ??= FilesResource(
+    config: config,
+    httpClient: _httpClient,
+    interceptorChain: _interceptorChain,
+    requestBuilder: _requestBuilder,
+    ensureNotClosed: _ensureNotClosed,
+  );
 
   UploadsResource? _uploads;
 
@@ -681,7 +427,13 @@ class OpenAIClient {
   ///   ),
   /// );
   /// ```
-  UploadsResource get uploads => _uploads ??= UploadsResource(this);
+  UploadsResource get uploads => _uploads ??= UploadsResource(
+    config: config,
+    httpClient: _httpClient,
+    interceptorChain: _interceptorChain,
+    requestBuilder: _requestBuilder,
+    ensureNotClosed: _ensureNotClosed,
+  );
 
   BatchesResource? _batches;
 
@@ -700,7 +452,13 @@ class OpenAIClient {
   ///   ),
   /// );
   /// ```
-  BatchesResource get batches => _batches ??= BatchesResource(this);
+  BatchesResource get batches => _batches ??= BatchesResource(
+    config: config,
+    httpClient: _httpClient,
+    interceptorChain: _interceptorChain,
+    requestBuilder: _requestBuilder,
+    ensureNotClosed: _ensureNotClosed,
+  );
 
   ModelsResource? _models;
 
@@ -716,7 +474,13 @@ class OpenAIClient {
   ///   print(model.id);
   /// }
   /// ```
-  ModelsResource get models => _models ??= ModelsResource(this);
+  ModelsResource get models => _models ??= ModelsResource(
+    config: config,
+    httpClient: _httpClient,
+    interceptorChain: _interceptorChain,
+    requestBuilder: _requestBuilder,
+    ensureNotClosed: _ensureNotClosed,
+  );
 
   ModerationsResource? _moderations;
 
@@ -735,7 +499,13 @@ class OpenAIClient {
   /// print('Flagged: ${result.results.first.flagged}');
   /// ```
   ModerationsResource get moderations =>
-      _moderations ??= ModerationsResource(this);
+      _moderations ??= ModerationsResource(
+        config: config,
+        httpClient: _httpClient,
+        interceptorChain: _interceptorChain,
+        requestBuilder: _requestBuilder,
+        ensureNotClosed: _ensureNotClosed,
+      );
 
   FineTuningResource? _fineTuning;
 
@@ -753,7 +523,13 @@ class OpenAIClient {
   ///   ),
   /// );
   /// ```
-  FineTuningResource get fineTuning => _fineTuning ??= FineTuningResource(this);
+  FineTuningResource get fineTuning => _fineTuning ??= FineTuningResource(
+    config: config,
+    httpClient: _httpClient,
+    interceptorChain: _interceptorChain,
+    requestBuilder: _requestBuilder,
+    ensureNotClosed: _ensureNotClosed,
+  );
 
   EvalsResource? _evals;
 
@@ -796,7 +572,13 @@ class OpenAIClient {
   ///   ),
   /// );
   /// ```
-  EvalsResource get evals => _evals ??= EvalsResource(this);
+  EvalsResource get evals => _evals ??= EvalsResource(
+    config: config,
+    httpClient: _httpClient,
+    interceptorChain: _interceptorChain,
+    requestBuilder: _requestBuilder,
+    ensureNotClosed: _ensureNotClosed,
+  );
 
   BetaResource? _beta;
 
@@ -826,7 +608,14 @@ class OpenAIClient {
   ///   CreateRunRequest(assistantId: assistant.id),
   /// );
   /// ```
-  BetaResource get beta => _beta ??= BetaResource(this);
+  BetaResource get beta => _beta ??= BetaResource(
+    config: config,
+    httpClient: _httpClient,
+    interceptorChain: _interceptorChain,
+    requestBuilder: _requestBuilder,
+    ensureNotClosed: _ensureNotClosed,
+    streamClientFactory: _streamClientFactory,
+  );
 
   RealtimeResource? _realtime;
 
@@ -849,7 +638,13 @@ class OpenAIClient {
   ///
   /// session.createResponse();
   /// ```
-  RealtimeResource get realtime => _realtime ??= RealtimeResource(this);
+  RealtimeResource get realtime => _realtime ??= RealtimeResource(
+    config: config,
+    httpClient: _httpClient,
+    interceptorChain: _interceptorChain,
+    requestBuilder: _requestBuilder,
+    ensureNotClosed: _ensureNotClosed,
+  );
 
   RealtimeSessionsResource? _realtimeSessions;
 
@@ -873,7 +668,13 @@ class OpenAIClient {
   /// print('Client secret: ${session.clientSecret.value}');
   /// ```
   RealtimeSessionsResource get realtimeSessions =>
-      _realtimeSessions ??= RealtimeSessionsResource(this);
+      _realtimeSessions ??= RealtimeSessionsResource(
+        config: config,
+        httpClient: _httpClient,
+        interceptorChain: _interceptorChain,
+        requestBuilder: _requestBuilder,
+        ensureNotClosed: _ensureNotClosed,
+      );
 
   ResponsesResource? _responses;
 
@@ -908,14 +709,27 @@ class OpenAIClient {
   ///   }
   /// }
   /// ```
-  ResponsesResource get responses => _responses ??= ResponsesResource(this);
+  ResponsesResource get responses => _responses ??= ResponsesResource(
+    config: config,
+    httpClient: _httpClient,
+    interceptorChain: _interceptorChain,
+    requestBuilder: _requestBuilder,
+    ensureNotClosed: _ensureNotClosed,
+    streamClientFactory: _streamClientFactory,
+  );
 
   SkillsResource? _skills;
 
   /// Skills API resource.
   ///
   /// Use this to create, list, retrieve, version, and delete skill bundles.
-  SkillsResource get skills => _skills ??= SkillsResource(this);
+  SkillsResource get skills => _skills ??= SkillsResource(
+    config: config,
+    httpClient: _httpClient,
+    interceptorChain: _interceptorChain,
+    requestBuilder: _requestBuilder,
+    ensureNotClosed: _ensureNotClosed,
+  );
 
   ConversationsResource? _conversations;
 
@@ -956,7 +770,13 @@ class OpenAIClient {
   /// await client.conversations.delete(conversation.id);
   /// ```
   ConversationsResource get conversations =>
-      _conversations ??= ConversationsResource(this);
+      _conversations ??= ConversationsResource(
+        config: config,
+        httpClient: _httpClient,
+        interceptorChain: _interceptorChain,
+        requestBuilder: _requestBuilder,
+        ensureNotClosed: _ensureNotClosed,
+      );
 
   VideosResource? _videos;
 
@@ -986,7 +806,13 @@ class OpenAIClient {
   ///   File('video.mp4').writeAsBytesSync(content);
   /// }
   /// ```
-  VideosResource get videos => _videos ??= VideosResource(this);
+  VideosResource get videos => _videos ??= VideosResource(
+    config: config,
+    httpClient: _httpClient,
+    interceptorChain: _interceptorChain,
+    requestBuilder: _requestBuilder,
+    ensureNotClosed: _ensureNotClosed,
+  );
 
   ContainersResource? _containers;
 
@@ -1012,7 +838,13 @@ class OpenAIClient {
   /// // Clean up
   /// await client.containers.delete(container.id);
   /// ```
-  ContainersResource get containers => _containers ??= ContainersResource(this);
+  ContainersResource get containers => _containers ??= ContainersResource(
+    config: config,
+    httpClient: _httpClient,
+    interceptorChain: _interceptorChain,
+    requestBuilder: _requestBuilder,
+    ensureNotClosed: _ensureNotClosed,
+  );
 
   ChatkitResource? _chatkit;
 
@@ -1038,123 +870,13 @@ class OpenAIClient {
   /// // List threads
   /// final threads = await client.chatkit.threads.list();
   /// ```
-  ChatkitResource get chatkit => _chatkit ??= ChatkitResource(this);
-
-  // ============================================================
-  // HTTP Methods - internal use
-  // ============================================================
-
-  /// Makes a GET request to the given endpoint.
-  ///
-  /// The optional [abortTrigger] allows canceling the request before completion.
-  Future<http.Response> get(
-    String endpoint, {
-    Map<String, String>? headers,
-    Map<String, String>? queryParameters,
-    Future<void>? abortTrigger,
-  }) {
-    _ensureNotClosed();
-
-    final url = buildUrl(endpoint, queryParameters: queryParameters);
-    final request = http.Request('GET', url)
-      ..headers.addAll({..._baseHeaders, ...?headers});
-
-    return _interceptorChain.execute(request, abortTrigger: abortTrigger);
-  }
-
-  /// Makes a GET request with support for repeated query parameters.
-  ///
-  /// Use this for endpoints that require array parameters like `include[]`.
-  /// The optional [abortTrigger] allows canceling the request before completion.
-  Future<http.Response> getWithRepeatedParams(
-    String endpoint, {
-    Map<String, String>? headers,
-    Map<String, String>? queryParameters,
-    Map<String, List<String>>? queryParametersAll,
-    Future<void>? abortTrigger,
-  }) {
-    _ensureNotClosed();
-
-    final url = buildUrlWithQueryAll(
-      endpoint,
-      queryParameters: queryParameters,
-      queryParametersAll: queryParametersAll,
-    );
-    final request = http.Request('GET', url)
-      ..headers.addAll({..._baseHeaders, ...?headers});
-
-    return _interceptorChain.execute(request, abortTrigger: abortTrigger);
-  }
-
-  /// Makes a POST request to the given endpoint.
-  ///
-  /// The optional [abortTrigger] allows canceling the request before completion.
-  Future<http.Response> post(
-    String endpoint, {
-    Map<String, String>? headers,
-    Object? body,
-    Future<void>? abortTrigger,
-  }) {
-    _ensureNotClosed();
-
-    final url = buildUrl(endpoint);
-    final request = http.Request('POST', url)
-      ..headers.addAll({..._baseHeaders, ...?headers});
-
-    if (body != null) {
-      if (body is String) {
-        request.body = body;
-      } else if (body is List<int>) {
-        request.bodyBytes = body;
-      } else if (body is Map) {
-        request.body = jsonEncode(body);
-      } else {
-        throw ArgumentError(
-          'Unsupported body type: ${body.runtimeType}. '
-          'Supported types are String, List<int>, and Map.',
-        );
-      }
-    }
-
-    return _interceptorChain.execute(request, abortTrigger: abortTrigger);
-  }
-
-  /// Makes a DELETE request to the given endpoint.
-  ///
-  /// The optional [abortTrigger] allows canceling the request before completion.
-  Future<http.Response> delete(
-    String endpoint, {
-    Map<String, String>? headers,
-    Future<void>? abortTrigger,
-  }) {
-    _ensureNotClosed();
-
-    final url = buildUrl(endpoint);
-    final request = http.Request('DELETE', url)
-      ..headers.addAll({..._baseHeaders, ...?headers});
-
-    return _interceptorChain.execute(request, abortTrigger: abortTrigger);
-  }
-
-  /// Makes a multipart POST request.
-  ///
-  /// The [request] should already have its URL set. Used for file uploads
-  /// and other multipart form data.
-  /// The optional [abortTrigger] allows canceling the request before completion.
-  Future<http.Response> postMultipart({
-    required http.MultipartRequest request,
-    Map<String, String>? headers,
-    Future<void>? abortTrigger,
-  }) {
-    _ensureNotClosed();
-
-    // Add base headers (except Content-Type which is set by MultipartRequest)
-    final baseHeaders = Map<String, String>.from(_baseHeaders)
-      ..remove('Content-Type');
-    request.headers.addAll({...baseHeaders, ...?headers});
-
-    return _interceptorChain.execute(request, abortTrigger: abortTrigger);
-  }
+  ChatkitResource get chatkit => _chatkit ??= ChatkitResource(
+    config: config,
+    httpClient: _httpClient,
+    interceptorChain: _interceptorChain,
+    requestBuilder: _requestBuilder,
+    ensureNotClosed: _ensureNotClosed,
+  );
 
   void _ensureNotClosed() {
     if (_closed) {

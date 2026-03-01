@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../client/openai_client.dart';
 import '../models/files/files.dart';
 import 'base_resource.dart';
 
@@ -26,9 +25,15 @@ import 'base_resource.dart';
 /// // List files
 /// final files = await client.files.list();
 /// ```
-class FilesResource extends BaseResource {
-  /// Creates a [FilesResource] with the given client.
-  FilesResource(super.client);
+class FilesResource extends ResourceBase {
+  /// Creates a [FilesResource].
+  FilesResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   static const _endpoint = '/files';
 
@@ -62,17 +67,23 @@ class FilesResource extends BaseResource {
     String? order,
     String? after,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{};
     if (purpose != null) queryParams['purpose'] = purpose.toJson();
     if (limit != null) queryParams['limit'] = limit.toString();
     if (order != null) queryParams['order'] = order;
     if (after != null) queryParams['after'] = after;
 
-    final json = await getJson(
+    final url = requestBuilder.buildUrl(
       _endpoint,
-      queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    return FileList.fromJson(json);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return FileList.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Uploads a file to OpenAI.
@@ -103,15 +114,17 @@ class FilesResource extends BaseResource {
     required String filename,
     required FilePurpose purpose,
   }) async {
-    final url = client.buildUrl(_endpoint);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_endpoint);
     final request = http.MultipartRequest('POST', url);
 
     request.files.add(
       http.MultipartFile.fromBytes('file', bytes, filename: filename),
     );
     request.fields['purpose'] = purpose.toJson();
+    request.headers.addAll(requestBuilder.buildMultipartHeaders());
 
-    final response = await client.postMultipart(request: request);
+    final response = await interceptorChain.execute(request);
     final json = jsonDecode(response.body) as Map<String, dynamic>;
     return FileObject.fromJson(json);
   }
@@ -133,8 +146,14 @@ class FilesResource extends BaseResource {
   /// print('Status: ${file.status}');
   /// ```
   Future<FileObject> retrieve(String fileId) async {
-    final json = await getJson('$_endpoint/$fileId');
-    return FileObject.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$fileId');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return FileObject.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Deletes a file.
@@ -154,8 +173,14 @@ class FilesResource extends BaseResource {
   /// print('Deleted: ${result.deleted}');
   /// ```
   Future<DeleteFileResponse> delete(String fileId) async {
-    final json = await deleteJson('$_endpoint/$fileId');
-    return DeleteFileResponse.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$fileId');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return DeleteFileResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Retrieves the content of a file.
@@ -175,8 +200,12 @@ class FilesResource extends BaseResource {
   /// print(content);
   /// ```
   Future<String> retrieveContent(String fileId) async {
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$fileId/content');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     // ErrorInterceptor handles error responses, so we can return body directly
-    final response = await client.get('$_endpoint/$fileId/content');
+    final response = await interceptorChain.execute(httpRequest);
     return response.body;
   }
 }

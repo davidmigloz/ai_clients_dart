@@ -1,4 +1,7 @@
-import '../client/openai_client.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
 import '../models/moderations/moderations.dart';
 import 'base_resource.dart';
 
@@ -21,9 +24,15 @@ import 'base_resource.dart';
 ///   print('Content was flagged');
 /// }
 /// ```
-class ModerationsResource extends BaseResource {
-  /// Creates a [ModerationsResource] with the given client.
-  ModerationsResource(super.client);
+class ModerationsResource extends ResourceBase {
+  /// Creates a [ModerationsResource].
+  ModerationsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   static const _endpoint = '/moderations';
 
@@ -63,11 +72,18 @@ class ModerationsResource extends BaseResource {
     ModerationRequest request, {
     Future<void>? abortTrigger,
   }) async {
-    final json = await postJson(
-      _endpoint,
-      body: request.toJson(),
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_endpoint);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
-    return ModerationResponse.fromJson(json);
+    return ModerationResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }

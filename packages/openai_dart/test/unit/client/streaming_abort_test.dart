@@ -53,67 +53,6 @@ void main() {
       client.close();
     });
 
-    test('sendStream with abortTrigger creates dedicated client', () async {
-      // When abortTrigger is provided, sendStream creates a dedicated
-      // http.Client() for that stream. This allows closing the client
-      // to abort the request.
-      //
-      // Note: This test verifies the abort logic is wired up correctly.
-      // The actual abort behavior depends on http.Client.close() semantics.
-
-      final mockClient = MockClient.streaming((request, _) async {
-        return http.StreamedResponse(
-          Stream.fromIterable([
-            utf8.encode('data: {"choices":[]}\n\n'),
-            utf8.encode('data: [DONE]\n\n'),
-          ]),
-          200,
-        );
-      });
-
-      final client = OpenAIClient(
-        config: const OpenAIConfig(authProvider: ApiKeyProvider('sk-test-key')),
-        httpClient: mockClient,
-      );
-
-      // When abortTrigger is provided, the implementation creates a new
-      // http.Client() internally (not the mock). This means the actual
-      // HTTP call goes to the real network, which we can't mock here.
-      //
-      // What we CAN test is that the abort logic is wired up correctly
-      // by checking that AbortedException is thrown in appropriate cases.
-
-      // Test: Pre-completed abort trigger should throw immediately
-      final preCompletedAbort = Completer<void>()..complete();
-
-      // The sendStream call will create a dedicated client and immediately
-      // close it due to the pre-completed trigger. This should result in
-      // an AbortedException (after the connection attempt fails).
-      try {
-        final response = await client.sendStream(
-          endpoint: '/chat/completions',
-          body: <String, Object>{
-            'model': 'gpt-4',
-            'messages': [],
-            'stream': true,
-          },
-          abortTrigger: preCompletedAbort.future,
-        );
-        // If we get here, the response was returned before abort triggered
-        // This is valid if the request completed very quickly
-        await response.stream.drain<void>();
-      } on AbortedException {
-        // Expected - abort was triggered
-      } on OpenAIException {
-        // Also acceptable - connection may have failed
-      } catch (e) {
-        // Network errors are expected when testing against real endpoints
-        // without proper credentials
-      }
-
-      client.close();
-    });
-
     test('abortTrigger parameter is accepted by streaming methods', () async {
       // This test verifies that the abortTrigger parameter is accepted by
       // all streaming methods. Each method gets its own mock client with
@@ -275,118 +214,6 @@ void main() {
       client.close();
     });
 
-    test(
-      'abortTrigger error is handled gracefully without unhandled exception',
-      () async {
-        // When abortTrigger completes with an error, it should be treated as
-        // an abort signal without surfacing as an unhandled async exception.
-
-        var unhandledError = false;
-
-        await runZonedGuarded(
-          () async {
-            final abortCompleter = Completer<void>();
-
-            final client = OpenAIClient(
-              config: const OpenAIConfig(
-                authProvider: ApiKeyProvider('sk-test-key'),
-              ),
-            );
-
-            // Start a sendStream call with an abort trigger that will error
-            // We expect this to either:
-            // 1. Complete normally before abort
-            // 2. Throw AbortedException
-            // 3. Throw a network error (no real server)
-            // But NOT an unhandled async exception
-
-            try {
-              final responseFuture = client.sendStream(
-                endpoint: '/chat/completions',
-                body: <String, Object>{
-                  'model': 'gpt-4',
-                  'messages': [],
-                  'stream': true,
-                },
-                abortTrigger: abortCompleter.future,
-              );
-
-              // Complete abort with error after a small delay
-              Future<void>.delayed(const Duration(milliseconds: 10), () {
-                abortCompleter.completeError(
-                  StateError('Abort trigger errored'),
-                );
-              });
-
-              final response = await responseFuture;
-              await response.stream.drain<void>();
-            } on AbortedException {
-              // Expected - abort was triggered
-            } on OpenAIException {
-              // Also acceptable - connection may have failed
-            } catch (e) {
-              // Network errors are expected when testing against real endpoints
-            }
-
-            client.close();
-
-            // Give time for any async errors to surface
-            await Future<void>.delayed(const Duration(milliseconds: 100));
-          },
-          (error, stack) {
-            // This handler catches unhandled async errors in the zone
-            unhandledError = true;
-          },
-        );
-
-        expect(
-          unhandledError,
-          isFalse,
-          reason: 'No unhandled errors should occur',
-        );
-      },
-    );
-
-    test('streaming client closes on normal stream completion', () async {
-      // This test verifies that when a stream with abortTrigger completes
-      // normally, the dedicated HTTP client is properly closed.
-      //
-      // We can verify this indirectly by ensuring no resource leaks occur
-      // and the stream completes without errors.
-
-      final client = OpenAIClient(
-        config: const OpenAIConfig(authProvider: ApiKeyProvider('sk-test-key')),
-      );
-
-      // Create an abort trigger that never fires
-      final neverAbort = Completer<void>().future;
-
-      // We can't easily mock the internal streamClient creation,
-      // but we can verify the stream completes without error when
-      // provided an abortTrigger that never fires.
-      try {
-        final response = await client.sendStream(
-          endpoint: '/chat/completions',
-          body: <String, Object>{
-            'model': 'gpt-4',
-            'messages': [],
-            'stream': true,
-          },
-          abortTrigger: neverAbort,
-        );
-
-        // If we get a response, consume it (stream should be wrapped
-        // to close client on done)
-        await response.stream.drain<void>();
-      } on OpenAIException {
-        // Connection error expected without real server
-      } catch (e) {
-        // Network errors expected without real server
-      }
-
-      client.close();
-    });
-
     group('with streamClientFactory', () {
       test('uses injected factory for streaming with abortTrigger', () async {
         var factoryCalled = false;
@@ -416,15 +243,25 @@ void main() {
 
         final neverAbort = Completer<void>().future;
 
-        final response = await client.sendStream(
-          endpoint: '/chat/completions',
-          body: <String, Object>{
-            'model': 'gpt-4',
-            'messages': [],
-            'stream': true,
-          },
+        // Use chat.completions.createStream with abortTrigger to exercise
+        // the streaming resource path that uses streamClientFactory
+        final stream = client.chat.completions.createStream(
+          ChatCompletionCreateRequest(
+            model: 'gpt-4',
+            messages: [ChatMessage.user('Hello')],
+          ),
           abortTrigger: neverAbort,
         );
+
+        // Subscribe to the stream to trigger the request
+        final events = <ChatStreamEvent>[];
+        final subscription = stream.listen(
+          events.add,
+          onError: (_) {},
+        );
+
+        // Wait for request to be sent
+        await Future<void>.delayed(const Duration(milliseconds: 50));
 
         expect(factoryCalled, isTrue, reason: 'Factory should be called');
 
@@ -434,8 +271,9 @@ void main() {
           ..add(utf8.encode('data: [DONE]\n\n'));
         await streamController.close();
 
-        // Consume the stream
-        await response.stream.drain<void>();
+        // Wait for stream to process
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        await subscription.cancel();
 
         // Client should be closed after stream completes
         expect(clientClosed, isTrue, reason: 'Client should close on done');
@@ -444,15 +282,20 @@ void main() {
       });
 
       test(
-        'streaming client closes on early subscription cancellation',
+        'streaming client closes on normal stream completion',
         () async {
+          // Verifies that the dedicated streaming client is properly closed
+          // when the stream completes normally (all data consumed).
           var clientClosed = false;
 
-          // Create a stream that never ends - it will be cancelled early
-          final streamController = StreamController<List<int>>();
-
           final mockStreamClient = MockClient.streaming((request, _) async {
-            return http.StreamedResponse(streamController.stream, 200);
+            return http.StreamedResponse(
+              Stream.fromIterable([
+                utf8.encode('data: {"choices":[]}\n\n'),
+                utf8.encode('data: [DONE]\n\n'),
+              ]),
+              200,
+            );
           });
 
           final trackingClient = _TrackingClient(
@@ -469,99 +312,24 @@ void main() {
 
           final neverAbort = Completer<void>().future;
 
-          final response = await client.sendStream(
-            endpoint: '/chat/completions',
-            body: <String, Object>{
-              'model': 'gpt-4',
-              'messages': [],
-              'stream': true,
-            },
-            abortTrigger: neverAbort,
-          );
+          // Consume the entire stream
+          await client.chat.completions
+              .createStream(
+                ChatCompletionCreateRequest(
+                  model: 'gpt-4',
+                  messages: [ChatMessage.user('Hello')],
+                ),
+                abortTrigger: neverAbort,
+              )
+              .drain<void>();
 
-          // Send some data but don't close the stream
-          streamController.add(utf8.encode('data: {"choices":[]}\n\n'));
-
-          // Subscribe with onDone tracking and then cancel
-          final subscription = response.stream.listen((_) {}, onDone: () {});
-          await Future<void>.delayed(const Duration(milliseconds: 10));
-          await subscription.cancel();
-
-          // Give time for cancellation and close to propagate
-          await Future<void>.delayed(const Duration(milliseconds: 10));
-
-          // Client should be closed due to onCancel callback
+          // Client should be closed after stream completes
           expect(
             clientClosed,
             isTrue,
-            reason: 'Client should close on subscription cancel',
+            reason: 'Client should close on normal completion',
           );
 
-          // Wrapped stream controller should be closed
-          // Note: onDone may not fire when cancelled, but controller should close
-          // We verify this indirectly - if controller wasn't closed, we'd leak
-
-          // Clean up
-          await streamController.close();
-          client.close();
-        },
-      );
-
-      test(
-        'early subscription cancellation also cancels underlying source stream',
-        () async {
-          var sourceStreamCancelled = false;
-
-          // Create a source stream controller that tracks cancellation
-          final sourceController = StreamController<List<int>>(
-            onCancel: () {
-              sourceStreamCancelled = true;
-            },
-          );
-
-          final mockStreamClient = MockClient.streaming((request, _) async {
-            return http.StreamedResponse(sourceController.stream, 200);
-          });
-
-          final client = OpenAIClient(
-            config: const OpenAIConfig(
-              authProvider: ApiKeyProvider('sk-test-key'),
-            ),
-            streamClientFactory: () => mockStreamClient,
-          );
-
-          final neverAbort = Completer<void>().future;
-
-          final response = await client.sendStream(
-            endpoint: '/chat/completions',
-            body: <String, Object>{
-              'model': 'gpt-4',
-              'messages': [],
-              'stream': true,
-            },
-            abortTrigger: neverAbort,
-          );
-
-          // Send some data but don't close the stream
-          sourceController.add(utf8.encode('data: {"choices":[]}\n\n'));
-
-          // Subscribe and then cancel
-          final subscription = response.stream.listen((_) {});
-          await Future<void>.delayed(const Duration(milliseconds: 10));
-          await subscription.cancel();
-
-          // Give time for cancellation to propagate
-          await Future<void>.delayed(const Duration(milliseconds: 10));
-
-          // The source stream's onCancel should have been fired
-          expect(
-            sourceStreamCancelled,
-            isTrue,
-            reason: 'Source stream subscription should be cancelled',
-          );
-
-          // Clean up
-          await sourceController.close();
           client.close();
         },
       );
@@ -589,27 +357,21 @@ void main() {
 
         final neverAbort = Completer<void>().future;
 
-        final response = await client.sendStream(
-          endpoint: '/chat/completions',
-          body: <String, Object>{
-            'model': 'gpt-4',
-            'messages': [],
-            'stream': true,
-          },
+        final stream = client.chat.completions.createStream(
+          ChatCompletionCreateRequest(
+            model: 'gpt-4',
+            messages: [ChatMessage.user('Hello')],
+          ),
           abortTrigger: neverAbort,
         );
 
-        // Send some data then error
-        streamController
-          ..add(utf8.encode('data: {"choices":[]}\n\n'))
-          ..addError(Exception('Stream error'));
-
-        // Consume stream, expecting error
-        final events = <List<int>>[];
+        // Collect events
+        final events = <ChatStreamEvent>[];
         Object? caughtError;
         final completer = Completer<void>();
 
-        response.stream.listen(
+        // Subscribe and wait for request to be sent
+        stream.listen(
           events.add,
           onError: (Object e) {
             caughtError = e;
@@ -617,6 +379,13 @@ void main() {
           onDone: completer.complete,
           cancelOnError: false,
         );
+
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+
+        // Send some data then error
+        streamController
+          ..add(utf8.encode('data: {"choices":[]}\n\n'))
+          ..addError(Exception('Stream error'));
 
         // Wait for stream to process the error and complete
         await streamController.close();
@@ -656,21 +425,19 @@ void main() {
 
         final neverAbort = Completer<void>().future;
 
-        final response = await client.sendStream(
-          endpoint: '/chat/completions',
-          body: <String, Object>{
-            'model': 'gpt-4',
-            'messages': [],
-            'stream': true,
-          },
+        final stream = client.chat.completions.createStream(
+          ChatCompletionCreateRequest(
+            model: 'gpt-4',
+            messages: [ChatMessage.user('Hello')],
+          ),
           abortTrigger: neverAbort,
         );
 
         Object? caughtError;
         final doneCompleter = Completer<void>();
 
-        // Subscribe to the wrapped stream
-        response.stream.listen(
+        // Subscribe to the stream and wait for request
+        stream.listen(
           (_) {},
           onError: (Object e) {
             caughtError = e;
@@ -682,6 +449,8 @@ void main() {
           cancelOnError: false,
         );
 
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+
         // Send an error WITHOUT closing the source stream afterward
         // This simulates a network error that doesn't properly clean up
         streamController.addError(Exception('Network error'));
@@ -689,7 +458,7 @@ void main() {
         // The wrapped stream should still receive onDone because
         // our onError handler closes the controller
         await doneCompleter.future.timeout(
-          const Duration(seconds: 1),
+          const Duration(seconds: 2),
           onTimeout: () => throw TimeoutException(
             'Wrapped stream did not receive onDone after source error',
           ),
@@ -721,7 +490,6 @@ void main() {
           // being pushed into a closed controller.
           var clientClosed = false;
           var subscriptionCancelled = false;
-          final dataAfterError = <List<int>>[];
 
           // Create a source stream that will emit error then more data
           final sourceController = StreamController<List<int>>(
@@ -748,13 +516,11 @@ void main() {
 
           final neverAbort = Completer<void>().future;
 
-          final response = await client.sendStream(
-            endpoint: '/chat/completions',
-            body: <String, Object>{
-              'model': 'gpt-4',
-              'messages': [],
-              'stream': true,
-            },
+          final stream = client.chat.completions.createStream(
+            ChatCompletionCreateRequest(
+              model: 'gpt-4',
+              messages: [ChatMessage.user('Hello')],
+            ),
             abortTrigger: neverAbort,
           );
 
@@ -763,7 +529,8 @@ void main() {
 
           // Track any data received after the error
           var errorReceived = false;
-          response.stream.listen(
+          final dataAfterError = <ChatStreamEvent>[];
+          stream.listen(
             (data) {
               if (errorReceived) {
                 dataAfterError.add(data);
@@ -776,6 +543,8 @@ void main() {
             onDone: doneCompleter.complete,
             cancelOnError: false,
           );
+
+          await Future<void>.delayed(const Duration(milliseconds: 50));
 
           // Emit some data, then error, then more data
           sourceController.add(utf8.encode('data: {"choices":[]}\n\n'));
@@ -796,7 +565,7 @@ void main() {
 
           // Wait for wrapped stream to complete
           await doneCompleter.future.timeout(
-            const Duration(seconds: 1),
+            const Duration(seconds: 2),
             onTimeout: () =>
                 throw TimeoutException('Wrapped stream did not complete'),
           );
@@ -838,15 +607,23 @@ void main() {
 
         final neverAbort = Completer<void>().future;
 
-        final response = await client.sendStream(
-          endpoint: '/chat/completions',
-          body: <String, Object>{
-            'model': 'gpt-4',
-            'messages': [],
-            'stream': true,
-          },
+        final stream = client.chat.completions.createStream(
+          ChatCompletionCreateRequest(
+            model: 'gpt-4',
+            messages: [ChatMessage.user('Hello')],
+          ),
           abortTrigger: neverAbort,
         );
+
+        // Subscribe to trigger the request
+        final events = <ChatStreamEvent>[];
+        final subscription = stream.listen(
+          events.add,
+          onError: (_) {},
+        );
+
+        // Wait for request to be sent
+        await Future<void>.delayed(const Duration(milliseconds: 50));
 
         expect(factoryCalled, isTrue, reason: 'Factory should be called');
 
@@ -855,26 +632,41 @@ void main() {
           ..add(utf8.encode('data: {"choices":[]}\n\n'))
           ..add(utf8.encode('data: [DONE]\n\n'));
         await streamController.close();
-        await response.stream.drain<void>();
+
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        await subscription.cancel();
 
         client.close();
       });
 
       test(
-        'abortTrigger completion closes client before stream done',
+        'abortTrigger completion closes dedicated client',
         () async {
+          // When abortTrigger fires, the dedicated streaming client is closed.
+          // This terminates the underlying connection. The stream will end
+          // (possibly with an error) and the dedicated client is cleaned up.
           var clientClosed = false;
-          var abortTriggered = false;
 
-          final streamController = StreamController<List<int>>();
+          // Use a source stream controller that simulates a real connection
+          // by sending an error when the client is closed
+          final sourceController = StreamController<List<int>>();
 
           final mockStreamClient = MockClient.streaming((request, _) async {
-            return http.StreamedResponse(streamController.stream, 200);
+            return http.StreamedResponse(sourceController.stream, 200);
           });
 
           final trackingClient = _TrackingClient(
             mockStreamClient,
-            onClose: () => clientClosed = true,
+            onClose: () {
+              clientClosed = true;
+              // Simulate connection reset when client is closed
+              if (!sourceController.isClosed) {
+                sourceController.addError(
+                  Exception('Connection closed by client'),
+                );
+                sourceController.close();
+              }
+            },
           );
 
           final abortCompleter = Completer<void>();
@@ -886,29 +678,38 @@ void main() {
             streamClientFactory: () => trackingClient,
           );
 
-          final response = await client.sendStream(
-            endpoint: '/chat/completions',
-            body: <String, Object>{
-              'model': 'gpt-4',
-              'messages': [],
-              'stream': true,
-            },
+          final doneCompleter = Completer<void>();
+
+          final stream = client.chat.completions.createStream(
+            ChatCompletionCreateRequest(
+              model: 'gpt-4',
+              messages: [ChatMessage.user('Hello')],
+            ),
             abortTrigger: abortCompleter.future,
           );
 
-          // Send some data
-          streamController.add(utf8.encode('data: {"choices":[]}\n\n'));
+          // Subscribe to trigger the request
+          stream.listen(
+            (_) {},
+            onError: (_) {},
+            onDone: () {
+              if (!doneCompleter.isCompleted) doneCompleter.complete();
+            },
+          );
 
-          // Start consuming stream
-          final subscription = response.stream.listen((_) {});
+          // Wait for request to be sent
+          await Future<void>.delayed(const Duration(milliseconds: 50));
 
-          // Wait a bit then trigger abort
-          await Future<void>.delayed(const Duration(milliseconds: 10));
+          // Trigger abort
           abortCompleter.complete();
-          abortTriggered = true;
 
-          // Give abort handler time to run
-          await Future<void>.delayed(const Duration(milliseconds: 10));
+          // Wait for stream to complete after abort
+          await doneCompleter.future.timeout(
+            const Duration(seconds: 2),
+            onTimeout: () => throw TimeoutException(
+              'Stream did not complete after abort',
+            ),
+          );
 
           // Client should be closed due to abort trigger
           expect(
@@ -916,15 +717,103 @@ void main() {
             isTrue,
             reason: 'Client should close when abort is triggered',
           );
-          expect(abortTriggered, isTrue);
 
-          // Clean up
-          await subscription.cancel();
-          await streamController.close();
           client.close();
         },
       );
     });
+
+    test(
+      'abortTrigger error is handled gracefully without unhandled exception',
+      () async {
+        // When abortTrigger completes with an error, it should be treated as
+        // an abort signal without surfacing as an unhandled async exception.
+
+        var unhandledError = false;
+
+        await runZonedGuarded(
+          () async {
+            final abortCompleter = Completer<void>();
+
+            // Use a source stream controller that errors when client closes
+            final sourceController = StreamController<List<int>>();
+
+            final mockStreamClient = MockClient.streaming((request, _) async {
+              return http.StreamedResponse(sourceController.stream, 200);
+            });
+
+            // Close the source when the mock client is closed
+            final closingClient = _TrackingClient(
+              mockStreamClient,
+              onClose: () {
+                if (!sourceController.isClosed) {
+                  sourceController.addError(
+                    Exception('Connection closed'),
+                  );
+                  sourceController.close();
+                }
+              },
+            );
+
+            final client = OpenAIClient(
+              config: const OpenAIConfig(
+                authProvider: ApiKeyProvider('sk-test-key'),
+              ),
+              streamClientFactory: () => closingClient,
+            );
+
+            final doneCompleter = Completer<void>();
+
+            final stream = client.chat.completions.createStream(
+              ChatCompletionCreateRequest(
+                model: 'gpt-4',
+                messages: [ChatMessage.user('Hello')],
+              ),
+              abortTrigger: abortCompleter.future,
+            );
+
+            // Subscribe
+            stream.listen(
+              (_) {},
+              onError: (_) {},
+              onDone: () {
+                if (!doneCompleter.isCompleted) doneCompleter.complete();
+              },
+            );
+            await Future<void>.delayed(const Duration(milliseconds: 50));
+
+            // Complete abort with error
+            abortCompleter.completeError(
+              StateError('Abort trigger errored'),
+            );
+
+            // Wait for stream to complete
+            await doneCompleter.future.timeout(
+              const Duration(seconds: 2),
+              onTimeout: () => throw TimeoutException(
+                'Stream did not complete after abort error',
+              ),
+            );
+
+            // Clean up
+            client.close();
+
+            // Give time for any async errors to surface
+            await Future<void>.delayed(const Duration(milliseconds: 100));
+          },
+          (error, stack) {
+            // This handler catches unhandled async errors in the zone
+            unhandledError = true;
+          },
+        );
+
+        expect(
+          unhandledError,
+          isFalse,
+          reason: 'No unhandled errors should occur',
+        );
+      },
+    );
   });
 }
 

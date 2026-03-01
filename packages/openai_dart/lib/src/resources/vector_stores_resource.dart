@@ -1,5 +1,9 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
 import '../models/vector_stores/vector_stores.dart';
-import 'beta_base_resource.dart';
+import 'base_resource.dart';
 
 /// Resource for Vector Stores API operations (Beta).
 ///
@@ -21,173 +25,159 @@ import 'beta_base_resource.dart';
 ///   CreateVectorStoreFileRequest(fileId: 'file_abc123'),
 /// );
 /// ```
-class VectorStoresResource extends BetaBaseResource {
-  /// Creates a [VectorStoresResource] with the given client.
-  VectorStoresResource(super.client);
+class VectorStoresResource extends ResourceBase {
+  /// Creates a [VectorStoresResource].
+  VectorStoresResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   static const _endpoint = '/vector_stores';
+  static const _betaFeature = 'assistants=v2';
 
   VectorStoreFilesResource? _files;
 
   /// Access to vector store file operations.
   VectorStoreFilesResource get files =>
-      _files ??= VectorStoreFilesResource(client);
+      _files ??= VectorStoreFilesResource(
+        config: config,
+        httpClient: httpClient,
+        interceptorChain: interceptorChain,
+        requestBuilder: requestBuilder,
+        ensureNotClosed: ensureNotClosed,
+      );
 
   /// Creates a new vector store.
-  ///
-  /// ## Parameters
-  ///
-  /// - [request] - The creation request.
-  ///
-  /// ## Returns
-  ///
-  /// A [VectorStore] object.
-  ///
-  /// ## Example
-  ///
-  /// ```dart
-  /// final store = await client.beta.vectorStores.create(
-  ///   CreateVectorStoreRequest(
-  ///     name: 'Product Docs',
-  ///     fileIds: ['file_1', 'file_2'],
-  ///     expiresAfter: ExpirationPolicy(
-  ///       anchor: 'last_active_at',
-  ///       days: 7,
-  ///     ),
-  ///   ),
-  /// );
-  /// ```
   Future<VectorStore> create(CreateVectorStoreRequest request) async {
-    final json = await postJson(_endpoint, body: request.toJson());
-    return VectorStore.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_endpoint);
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(httpRequest);
+    return VectorStore.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Lists vector stores.
-  ///
-  /// ## Parameters
-  ///
-  /// - [limit] - Maximum number to return (1-100, default 20).
-  /// - [order] - Sort order ('asc' or 'desc', default 'desc').
-  /// - [after] - Cursor for pagination.
-  /// - [before] - Cursor for pagination.
-  ///
-  /// ## Returns
-  ///
-  /// A [VectorStoreList] containing the vector stores.
   Future<VectorStoreList> list({
     int? limit,
     String? order,
     String? after,
     String? before,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{};
     if (limit != null) queryParams['limit'] = limit.toString();
     if (order != null) queryParams['order'] = order;
     if (after != null) queryParams['after'] = after;
     if (before != null) queryParams['before'] = before;
 
-    final json = await getJson(
+    final url = requestBuilder.buildUrl(
       _endpoint,
-      queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    return VectorStoreList.fromJson(json);
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return VectorStoreList.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Retrieves a vector store by ID.
-  ///
-  /// ## Parameters
-  ///
-  /// - [vectorStoreId] - The ID of the vector store.
-  ///
-  /// ## Returns
-  ///
-  /// A [VectorStore] with the vector store information.
   Future<VectorStore> retrieve(String vectorStoreId) async {
-    final json = await getJson('$_endpoint/$vectorStoreId');
-    return VectorStore.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$vectorStoreId');
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return VectorStore.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Modifies a vector store.
-  ///
-  /// ## Parameters
-  ///
-  /// - [vectorStoreId] - The ID of the vector store.
-  /// - [request] - The modification request.
-  ///
-  /// ## Returns
-  ///
-  /// A [VectorStore] with the updated information.
   Future<VectorStore> update(
     String vectorStoreId,
     ModifyVectorStoreRequest request,
   ) async {
-    final json = await postJson(
-      '$_endpoint/$vectorStoreId',
-      body: request.toJson(),
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$vectorStoreId');
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
     );
-    return VectorStore.fromJson(json);
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(httpRequest);
+    return VectorStore.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Deletes a vector store.
-  ///
-  /// ## Parameters
-  ///
-  /// - [vectorStoreId] - The ID of the vector store.
-  ///
-  /// ## Returns
-  ///
-  /// A [DeleteVectorStoreResponse] confirming the deletion.
   Future<DeleteVectorStoreResponse> delete(String vectorStoreId) async {
-    final json = await deleteJson('$_endpoint/$vectorStoreId');
-    return DeleteVectorStoreResponse.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$vectorStoreId');
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return DeleteVectorStoreResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }
 
 /// Resource for Vector Store Files operations.
-class VectorStoreFilesResource extends BetaBaseResource {
-  /// Creates a [VectorStoreFilesResource] with the given client.
-  VectorStoreFilesResource(super.client);
+class VectorStoreFilesResource extends ResourceBase {
+  /// Creates a [VectorStoreFilesResource].
+  VectorStoreFilesResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
+
+  static const _betaFeature = 'assistants=v2';
 
   String _endpoint(String vectorStoreId) =>
       '/vector_stores/$vectorStoreId/files';
 
   /// Creates a vector store file.
-  ///
-  /// Attaches a file to a vector store for use with file_search.
-  ///
-  /// ## Parameters
-  ///
-  /// - [vectorStoreId] - The ID of the vector store.
-  /// - [request] - The creation request.
-  ///
-  /// ## Returns
-  ///
-  /// A [VectorStoreFile] object.
   Future<VectorStoreFile> create(
     String vectorStoreId,
     CreateVectorStoreFileRequest request,
   ) async {
-    final json = await postJson(
-      _endpoint(vectorStoreId),
-      body: request.toJson(),
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_endpoint(vectorStoreId));
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
     );
-    return VectorStoreFile.fromJson(json);
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(httpRequest);
+    return VectorStoreFile.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Lists files in a vector store.
-  ///
-  /// ## Parameters
-  ///
-  /// - [vectorStoreId] - The ID of the vector store.
-  /// - [limit] - Maximum number to return (1-100, default 20).
-  /// - [order] - Sort order ('asc' or 'desc', default 'desc').
-  /// - [after] - Cursor for pagination.
-  /// - [before] - Cursor for pagination.
-  /// - [filter] - Filter by status.
-  ///
-  /// ## Returns
-  ///
-  /// A [VectorStoreFileList] containing the files.
   Future<VectorStoreFileList> list(
     String vectorStoreId, {
     int? limit,
@@ -196,6 +186,7 @@ class VectorStoreFilesResource extends BetaBaseResource {
     String? before,
     String? filter,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{};
     if (limit != null) queryParams['limit'] = limit.toString();
     if (order != null) queryParams['order'] = order;
@@ -203,43 +194,52 @@ class VectorStoreFilesResource extends BetaBaseResource {
     if (before != null) queryParams['before'] = before;
     if (filter != null) queryParams['filter'] = filter;
 
-    final json = await getJson(
+    final url = requestBuilder.buildUrl(
       _endpoint(vectorStoreId),
-      queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    return VectorStoreFileList.fromJson(json);
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return VectorStoreFileList.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Retrieves a vector store file.
-  ///
-  /// ## Parameters
-  ///
-  /// - [vectorStoreId] - The ID of the vector store.
-  /// - [fileId] - The ID of the file.
-  ///
-  /// ## Returns
-  ///
-  /// A [VectorStoreFile] with the file information.
   Future<VectorStoreFile> retrieve(String vectorStoreId, String fileId) async {
-    final json = await getJson('${_endpoint(vectorStoreId)}/$fileId');
-    return VectorStoreFile.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(
+      '${_endpoint(vectorStoreId)}/$fileId',
+    );
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return VectorStoreFile.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Deletes a vector store file.
-  ///
-  /// ## Parameters
-  ///
-  /// - [vectorStoreId] - The ID of the vector store.
-  /// - [fileId] - The ID of the file.
-  ///
-  /// ## Returns
-  ///
-  /// A [DeleteVectorStoreFileResponse] confirming the deletion.
   Future<DeleteVectorStoreFileResponse> delete(
     String vectorStoreId,
     String fileId,
   ) async {
-    final json = await deleteJson('${_endpoint(vectorStoreId)}/$fileId');
-    return DeleteVectorStoreFileResponse.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(
+      '${_endpoint(vectorStoreId)}/$fileId',
+    );
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return DeleteVectorStoreFileResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }

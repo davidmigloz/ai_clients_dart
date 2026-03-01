@@ -35,9 +35,15 @@ import 'realtime/websocket_connector.dart';
 /// // Close when done
 /// await session.close();
 /// ```
-class RealtimeResource extends BaseResource {
-  /// Creates a [RealtimeResource] with the given client.
-  RealtimeResource(super.client);
+class RealtimeResource extends ResourceBase {
+  /// Creates a [RealtimeResource].
+  RealtimeResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   /// Connects to a realtime session.
   ///
@@ -72,10 +78,12 @@ class RealtimeResource extends BaseResource {
     required String model,
     SessionUpdateConfig? config,
   }) async {
-    // Build URL with proper normalization using client's URL builder
-    final httpUrl = client.buildUrl(
+    ensureNotClosed?.call();
+
+    // Build URL with proper normalization using the request builder
+    final httpUrl = requestBuilder.buildUrl(
       '/realtime',
-      queryParameters: {'model': model},
+      queryParams: {'model': model},
     );
 
     // Convert to WebSocket scheme
@@ -86,26 +94,26 @@ class RealtimeResource extends BaseResource {
     // Build headers with all config options
     final headers = <String, String>{
       'OpenAI-Beta': 'realtime=v1',
-      ...client.config.defaultHeaders,
+      ...this.config.defaultHeaders,
     };
 
     // Add auth headers
-    if (client.config.authProvider case final authProvider?) {
+    if (this.config.authProvider case final authProvider?) {
       headers.addAll(authProvider.getHeaders());
     }
 
     // Add organization header if configured
-    if (client.config.organization case final org?) {
+    if (this.config.organization case final org?) {
       headers['OpenAI-Organization'] = org;
     }
 
     // Add project header if configured
-    if (client.config.project case final proj?) {
+    if (this.config.project case final proj?) {
       headers['OpenAI-Project'] = proj;
     }
 
     // Add API version if configured
-    if (client.config.apiVersion case final version?) {
+    if (this.config.apiVersion case final version?) {
       headers['OpenAI-Version'] = version;
     }
 

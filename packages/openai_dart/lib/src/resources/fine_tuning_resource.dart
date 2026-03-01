@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
 import '../models/fine_tuning/fine_tuning.dart';
 import 'base_resource.dart';
 
@@ -26,9 +30,15 @@ import 'base_resource.dart';
 ///
 /// print('Fine-tuned model: ${job.fineTunedModel}');
 /// ```
-class FineTuningResource extends BaseResource {
-  /// Creates a [FineTuningResource] with the given client.
-  FineTuningResource(super.client);
+class FineTuningResource extends ResourceBase {
+  /// Creates a [FineTuningResource].
+  FineTuningResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   FineTuningJobsResource? _jobs;
 
@@ -44,13 +54,25 @@ class FineTuningResource extends BaseResource {
   ///   ),
   /// );
   /// ```
-  FineTuningJobsResource get jobs => _jobs ??= FineTuningJobsResource(client);
+  FineTuningJobsResource get jobs => _jobs ??= FineTuningJobsResource(
+    config: config,
+    httpClient: httpClient,
+    interceptorChain: interceptorChain,
+    requestBuilder: requestBuilder,
+    ensureNotClosed: ensureNotClosed,
+  );
 }
 
 /// Resource for fine-tuning job operations.
-class FineTuningJobsResource extends BaseResource {
-  /// Creates a [FineTuningJobsResource] with the given client.
-  FineTuningJobsResource(super.client);
+class FineTuningJobsResource extends ResourceBase {
+  /// Creates a [FineTuningJobsResource].
+  FineTuningJobsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   static const _endpoint = '/fine_tuning/jobs';
 
@@ -76,8 +98,16 @@ class FineTuningJobsResource extends BaseResource {
   /// );
   /// ```
   Future<FineTuningJob> create(CreateFineTuningJobRequest request) async {
-    final json = await postJson(_endpoint, body: request.toJson());
-    return FineTuningJob.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_endpoint);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(httpRequest);
+    return FineTuningJob.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Lists fine-tuning jobs.
@@ -100,130 +130,92 @@ class FineTuningJobsResource extends BaseResource {
   /// }
   /// ```
   Future<FineTuningJobList> list({String? after, int? limit}) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{};
     if (after != null) queryParams['after'] = after;
     if (limit != null) queryParams['limit'] = limit.toString();
 
-    final json = await getJson(
+    final url = requestBuilder.buildUrl(
       _endpoint,
-      queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    return FineTuningJobList.fromJson(json);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return FineTuningJobList.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Retrieves a fine-tuning job by ID.
-  ///
-  /// ## Parameters
-  ///
-  /// - [fineTuningJobId] - The ID of the fine-tuning job.
-  ///
-  /// ## Returns
-  ///
-  /// A [FineTuningJob] with the job information.
-  ///
-  /// ## Example
-  ///
-  /// ```dart
-  /// final job = await client.fineTuning.jobs.retrieve('ftjob-abc123');
-  /// print('Status: ${job.status}');
-  /// ```
   Future<FineTuningJob> retrieve(String fineTuningJobId) async {
-    final json = await getJson('$_endpoint/$fineTuningJobId');
-    return FineTuningJob.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$fineTuningJobId');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return FineTuningJob.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Cancels a fine-tuning job.
-  ///
-  /// ## Parameters
-  ///
-  /// - [fineTuningJobId] - The ID of the job to cancel.
-  ///
-  /// ## Returns
-  ///
-  /// A [FineTuningJob] with the updated status.
-  ///
-  /// ## Example
-  ///
-  /// ```dart
-  /// final cancelled = await client.fineTuning.jobs.cancel('ftjob-abc123');
-  /// print('Status: ${cancelled.status}');
-  /// ```
   Future<FineTuningJob> cancel(String fineTuningJobId) async {
-    final json = await postJson('$_endpoint/$fineTuningJobId/cancel', body: {});
-    return FineTuningJob.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$fineTuningJobId/cancel');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(<String, dynamic>{});
+    final response = await interceptorChain.execute(httpRequest);
+    return FineTuningJob.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Lists events for a fine-tuning job.
-  ///
-  /// ## Parameters
-  ///
-  /// - [fineTuningJobId] - The ID of the fine-tuning job.
-  /// - [after] - Cursor for pagination.
-  /// - [limit] - Maximum number to return (1-100, default 20).
-  ///
-  /// ## Returns
-  ///
-  /// A [FineTuningEventList] containing the events.
-  ///
-  /// ## Example
-  ///
-  /// ```dart
-  /// final events = await client.fineTuning.jobs.listEvents('ftjob-abc123');
-  /// for (final event in events.data) {
-  ///   print('${event.level}: ${event.message}');
-  /// }
-  /// ```
   Future<FineTuningEventList> listEvents(
     String fineTuningJobId, {
     String? after,
     int? limit,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{};
     if (after != null) queryParams['after'] = after;
     if (limit != null) queryParams['limit'] = limit.toString();
 
-    final json = await getJson(
+    final url = requestBuilder.buildUrl(
       '$_endpoint/$fineTuningJobId/events',
-      queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    return FineTuningEventList.fromJson(json);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return FineTuningEventList.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Lists checkpoints for a fine-tuning job.
-  ///
-  /// ## Parameters
-  ///
-  /// - [fineTuningJobId] - The ID of the fine-tuning job.
-  /// - [after] - Cursor for pagination.
-  /// - [limit] - Maximum number to return (1-100, default 10).
-  ///
-  /// ## Returns
-  ///
-  /// A [FineTuningCheckpointList] containing the checkpoints.
-  ///
-  /// ## Example
-  ///
-  /// ```dart
-  /// final checkpoints = await client.fineTuning.jobs.listCheckpoints(
-  ///   'ftjob-abc123',
-  /// );
-  /// for (final checkpoint in checkpoints.data) {
-  ///   print('Step ${checkpoint.stepNumber}: ${checkpoint.fineTunedModelCheckpoint}');
-  /// }
-  /// ```
   Future<FineTuningCheckpointList> listCheckpoints(
     String fineTuningJobId, {
     String? after,
     int? limit,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{};
     if (after != null) queryParams['after'] = after;
     if (limit != null) queryParams['limit'] = limit.toString();
 
-    final json = await getJson(
+    final url = requestBuilder.buildUrl(
       '$_endpoint/$fineTuningJobId/checkpoints',
-      queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    return FineTuningCheckpointList.fromJson(json);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return FineTuningCheckpointList.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }

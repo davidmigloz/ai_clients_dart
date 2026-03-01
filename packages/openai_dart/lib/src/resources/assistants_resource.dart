@@ -1,5 +1,9 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
 import '../models/assistants/assistants.dart';
-import 'beta_base_resource.dart';
+import 'base_resource.dart';
 
 /// Resource for Assistants API operations (Beta).
 ///
@@ -24,11 +28,18 @@ import 'beta_base_resource.dart';
 /// // List assistants
 /// final assistants = await client.beta.assistants.list();
 /// ```
-class AssistantsResource extends BetaBaseResource {
-  /// Creates an [AssistantsResource] with the given client.
-  AssistantsResource(super.client);
+class AssistantsResource extends ResourceBase {
+  /// Creates an [AssistantsResource].
+  AssistantsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   static const _endpoint = '/assistants';
+  static const _betaFeature = 'assistants=v2';
 
   /// Creates a new assistant.
   ///
@@ -56,8 +67,18 @@ class AssistantsResource extends BetaBaseResource {
   /// );
   /// ```
   Future<Assistant> create(CreateAssistantRequest request) async {
-    final json = await postJson(_endpoint, body: request.toJson());
-    return Assistant.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_endpoint);
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(httpRequest);
+    return Assistant.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Lists all assistants.
@@ -88,17 +109,25 @@ class AssistantsResource extends BetaBaseResource {
     String? after,
     String? before,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{};
     if (limit != null) queryParams['limit'] = limit.toString();
     if (order != null) queryParams['order'] = order;
     if (after != null) queryParams['after'] = after;
     if (before != null) queryParams['before'] = before;
 
-    final json = await getJson(
+    final url = requestBuilder.buildUrl(
       _endpoint,
-      queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    return AssistantList.fromJson(json);
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return AssistantList.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Retrieves an assistant by ID.
@@ -119,8 +148,16 @@ class AssistantsResource extends BetaBaseResource {
   /// print('Model: ${assistant.model}');
   /// ```
   Future<Assistant> retrieve(String assistantId) async {
-    final json = await getJson('$_endpoint/$assistantId');
-    return Assistant.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$assistantId');
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return Assistant.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Modifies an assistant.
@@ -149,11 +186,18 @@ class AssistantsResource extends BetaBaseResource {
     String assistantId,
     ModifyAssistantRequest request,
   ) async {
-    final json = await postJson(
-      '$_endpoint/$assistantId',
-      body: request.toJson(),
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$assistantId');
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
     );
-    return Assistant.fromJson(json);
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(httpRequest);
+    return Assistant.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Deletes an assistant.
@@ -173,7 +217,15 @@ class AssistantsResource extends BetaBaseResource {
   /// print('Deleted: ${result.deleted}');
   /// ```
   Future<DeleteAssistantResponse> delete(String assistantId) async {
-    final json = await deleteJson('$_endpoint/$assistantId');
-    return DeleteAssistantResponse.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$assistantId');
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return DeleteAssistantResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }

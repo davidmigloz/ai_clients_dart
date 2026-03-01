@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 
-import '../errors/exceptions.dart';
+import 'package:http/http.dart' as http;
+
 import '../models/chat/chat.dart';
 import '../models/streaming/streaming.dart';
 import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
+import 'streaming_resource.dart';
 
 /// Resource for chat-related operations.
 ///
@@ -22,15 +24,29 @@ import 'base_resource.dart';
 /// );
 /// print(response.text);
 /// ```
-class ChatResource extends BaseResource {
-  /// Creates a [ChatResource] with the given client.
-  ChatResource(super.client);
+class ChatResource extends ResourceBase {
+  /// Creates a [ChatResource].
+  ChatResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+    super.streamClientFactory,
+  });
 
   ChatCompletionsResource? _completions;
 
   /// Access to chat completions operations.
   ChatCompletionsResource get completions =>
-      _completions ??= ChatCompletionsResource(client);
+      _completions ??= ChatCompletionsResource(
+        config: config,
+        httpClient: httpClient,
+        interceptorChain: interceptorChain,
+        requestBuilder: requestBuilder,
+        ensureNotClosed: ensureNotClosed,
+        streamClientFactory: streamClientFactory,
+      );
 }
 
 /// Resource for chat completions operations.
@@ -60,9 +76,16 @@ class ChatResource extends BaseResource {
 ///   print(event.choices.first.delta.content);
 /// }
 /// ```
-class ChatCompletionsResource extends BaseResource {
-  /// Creates a [ChatCompletionsResource] with the given client.
-  ChatCompletionsResource(super.client);
+class ChatCompletionsResource extends ResourceBase with StreamingResource {
+  /// Creates a [ChatCompletionsResource].
+  ChatCompletionsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+    super.streamClientFactory,
+  });
 
   static const _endpoint = '/chat/completions';
 
@@ -99,12 +122,19 @@ class ChatCompletionsResource extends BaseResource {
     ChatCompletionCreateRequest request, {
     Future<void>? abortTrigger,
   }) async {
-    final json = await postJson(
-      _endpoint,
-      body: request.toJson(),
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_endpoint);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
-    return ChatCompletion.fromJson(json);
+    return ChatCompletion.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Creates a streaming chat completion.
@@ -142,37 +172,16 @@ class ChatCompletionsResource extends BaseResource {
   Stream<ChatStreamEvent> createStream(
     ChatCompletionCreateRequest request, {
     Future<void>? abortTrigger,
-  }) async* {
+  }) {
     // Ensure stream is enabled in the request body
     final requestBody = request.toJson();
     requestBody['stream'] = true;
 
-    final response = await client.sendStream(
+    return streamSseEvents(
       endpoint: _endpoint,
       body: requestBody,
       abortTrigger: abortTrigger,
-    );
-
-    // Extract request ID from response headers for error reporting
-    final requestId =
-        response.headers['x-request-id'] ??
-        response.request?.headers['X-Request-ID'] ??
-        'unknown';
-
-    try {
-      if (response.statusCode >= 400) {
-        final body = await response.stream.bytesToString();
-        throw _parseStreamError(response.statusCode, body, requestId);
-      }
-
-      const parser = SseParser();
-      await for (final json in parser.parse(response.stream)) {
-        yield ChatStreamEvent.fromJson(json);
-      }
-    } on AbortedException {
-      // Abort is expected, just re-throw
-      rethrow;
-    }
+    ).map((json) => ChatStreamEvent.fromJson(json));
   }
 
   /// Creates a streaming chat completion with accumulated events.
@@ -211,32 +220,5 @@ class ChatCompletionsResource extends BaseResource {
       accumulator.add(event);
       return accumulator;
     });
-  }
-
-  /// Parses an error response from a streaming request.
-  ApiException _parseStreamError(
-    int statusCode,
-    String body,
-    String requestId,
-  ) {
-    try {
-      final json = jsonDecode(body) as Map<String, dynamic>;
-      final error = json['error'] as Map<String, dynamic>?;
-      return createApiException(
-        statusCode: statusCode,
-        message: error?['message'] as String? ?? 'Unknown error',
-        type: error?['type'] as String?,
-        code: error?['code'] as String?,
-        param: error?['param'] as String?,
-        requestId: requestId,
-        body: json,
-      );
-    } catch (_) {
-      return ApiException(
-        message: body.isNotEmpty ? body : 'HTTP $statusCode error',
-        statusCode: statusCode,
-        requestId: requestId,
-      );
-    }
   }
 }

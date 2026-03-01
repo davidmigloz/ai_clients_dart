@@ -1,9 +1,10 @@
 import 'dart:convert';
 
-import '../errors/exceptions.dart';
+import 'package:http/http.dart' as http;
+
 import '../models/runs/runs.dart';
-import '../utils/streaming_parser.dart';
-import 'beta_base_resource.dart';
+import 'base_resource.dart';
+import 'streaming_resource.dart';
 
 /// Resource for Runs API operations (Beta).
 ///
@@ -26,9 +27,18 @@ import 'beta_base_resource.dart';
 ///   run = await client.beta.threads.runs.retrieve('thread_abc123', run.id);
 /// }
 /// ```
-class RunsResource extends BetaBaseResource {
-  /// Creates a [RunsResource] with the given client.
-  RunsResource(super.client);
+class RunsResource extends ResourceBase with StreamingResource {
+  /// Creates a [RunsResource].
+  RunsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+    super.streamClientFactory,
+  });
+
+  static const _betaFeature = 'assistants=v2';
 
   String _endpoint(String threadId) => '/threads/$threadId/runs';
 
@@ -55,8 +65,18 @@ class RunsResource extends BetaBaseResource {
   /// );
   /// ```
   Future<Run> create(String threadId, CreateRunRequest request) async {
-    final json = await postJson(_endpoint(threadId), body: request.toJson());
-    return Run.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_endpoint(threadId));
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(httpRequest);
+    return Run.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Creates a run with streaming.
@@ -89,37 +109,17 @@ class RunsResource extends BetaBaseResource {
     String threadId,
     CreateRunRequest request, {
     Future<void>? abortTrigger,
-  }) async* {
+  }) {
     // Ensure stream is enabled in the request body
     final requestBody = request.toJson();
     requestBody['stream'] = true;
 
-    final response = await client.sendStream(
+    return streamSseEvents(
       endpoint: _endpoint(threadId),
       body: requestBody,
-      headers: {'OpenAI-Beta': betaVersion},
+      additionalHeaders: {'OpenAI-Beta': _betaFeature},
       abortTrigger: abortTrigger,
     );
-
-    // Extract request ID from response headers for error reporting
-    final requestId =
-        response.headers['x-request-id'] ??
-        response.request?.headers['X-Request-ID'] ??
-        'unknown';
-
-    try {
-      if (response.statusCode >= 400) {
-        final body = await response.stream.bytesToString();
-        throw _parseStreamError(response.statusCode, body, requestId);
-      }
-
-      const parser = SseParser();
-      await for (final json in parser.parse(response.stream)) {
-        yield json;
-      }
-    } on AbortedException {
-      rethrow;
-    }
   }
 
   /// Lists runs in a thread.
@@ -152,17 +152,25 @@ class RunsResource extends BetaBaseResource {
     String? after,
     String? before,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{};
     if (limit != null) queryParams['limit'] = limit.toString();
     if (order != null) queryParams['order'] = order;
     if (after != null) queryParams['after'] = after;
     if (before != null) queryParams['before'] = before;
 
-    final json = await getJson(
+    final url = requestBuilder.buildUrl(
       _endpoint(threadId),
-      queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    return RunList.fromJson(json);
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return RunList.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Retrieves a run by ID.
@@ -186,8 +194,16 @@ class RunsResource extends BetaBaseResource {
   /// print('Status: ${run.status}');
   /// ```
   Future<Run> retrieve(String threadId, String runId) async {
-    final json = await getJson('${_endpoint(threadId)}/$runId');
-    return Run.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('${_endpoint(threadId)}/$runId');
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return Run.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Modifies a run.
@@ -208,11 +224,18 @@ class RunsResource extends BetaBaseResource {
     String runId, {
     required Map<String, String> metadata,
   }) async {
-    final json = await postJson(
-      '${_endpoint(threadId)}/$runId',
-      body: {'metadata': metadata},
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('${_endpoint(threadId)}/$runId');
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
     );
-    return Run.fromJson(json);
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode({'metadata': metadata});
+    final response = await interceptorChain.execute(httpRequest);
+    return Run.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Cancels a run.
@@ -236,11 +259,20 @@ class RunsResource extends BetaBaseResource {
   /// print('Status: ${cancelled.status}');
   /// ```
   Future<Run> cancel(String threadId, String runId) async {
-    final json = await postJson(
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(
       '${_endpoint(threadId)}/$runId/cancel',
-      body: {},
     );
-    return Run.fromJson(json);
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(<String, dynamic>{});
+    final response = await interceptorChain.execute(httpRequest);
+    return Run.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Submits tool outputs for a run.
@@ -278,11 +310,20 @@ class RunsResource extends BetaBaseResource {
     String runId,
     SubmitToolOutputsRequest request,
   ) async {
-    final json = await postJson(
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(
       '${_endpoint(threadId)}/$runId/submit_tool_outputs',
-      body: request.toJson(),
     );
-    return Run.fromJson(json);
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(httpRequest);
+    return Run.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Lists run steps.
@@ -307,17 +348,25 @@ class RunsResource extends BetaBaseResource {
     String? after,
     String? before,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{};
     if (limit != null) queryParams['limit'] = limit.toString();
     if (order != null) queryParams['order'] = order;
     if (after != null) queryParams['after'] = after;
     if (before != null) queryParams['before'] = before;
 
-    final json = await getJson(
+    final url = requestBuilder.buildUrl(
       '${_endpoint(threadId)}/$runId/steps',
-      queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    return RunStepList.fromJson(json);
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return RunStepList.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Retrieves a run step.
@@ -336,33 +385,17 @@ class RunsResource extends BetaBaseResource {
     String runId,
     String stepId,
   ) async {
-    final json = await getJson('${_endpoint(threadId)}/$runId/steps/$stepId');
-    return RunStep.fromJson(json);
-  }
-
-  /// Parses an error response from a streaming request.
-  ApiException _parseStreamError(
-    int statusCode,
-    String body,
-    String requestId,
-  ) {
-    try {
-      final json = jsonDecode(body) as Map<String, dynamic>;
-      final error = json['error'] as Map<String, dynamic>?;
-      return createApiException(
-        statusCode: statusCode,
-        message: error?['message'] as String? ?? 'Unknown error',
-        type: error?['type'] as String?,
-        code: error?['code'] as String?,
-        requestId: requestId,
-        body: json,
-      );
-    } catch (_) {
-      return ApiException(
-        message: body.isNotEmpty ? body : 'HTTP $statusCode error',
-        statusCode: statusCode,
-        requestId: requestId,
-      );
-    }
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(
+      '${_endpoint(threadId)}/$runId/steps/$stepId',
+    );
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return RunStep.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }

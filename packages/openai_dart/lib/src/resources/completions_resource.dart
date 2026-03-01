@@ -1,9 +1,10 @@
 import 'dart:convert';
 
-import '../errors/exceptions.dart';
+import 'package:http/http.dart' as http;
+
 import '../models/completions/completions.dart';
-import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
+import 'streaming_resource.dart';
 
 /// Resource for Completions API operations (Legacy).
 ///
@@ -23,9 +24,16 @@ import 'base_resource.dart';
 /// );
 /// print(completion.text);
 /// ```
-class CompletionsResource extends BaseResource {
-  /// Creates a [CompletionsResource] with the given client.
-  CompletionsResource(super.client);
+class CompletionsResource extends ResourceBase with StreamingResource {
+  /// Creates a [CompletionsResource].
+  CompletionsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+    super.streamClientFactory,
+  });
 
   static const _endpoint = '/completions';
 
@@ -57,12 +65,19 @@ class CompletionsResource extends BaseResource {
     CompletionRequest request, {
     Future<void>? abortTrigger,
   }) async {
-    final json = await postJson(
-      _endpoint,
-      body: request.toJson(),
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_endpoint);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
-    return Completion.fromJson(json);
+    return Completion.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Creates a streaming completion (legacy).
@@ -96,61 +111,15 @@ class CompletionsResource extends BaseResource {
   Stream<Completion> createStream(
     CompletionRequest request, {
     Future<void>? abortTrigger,
-  }) async* {
+  }) {
     // Ensure stream is enabled in the request body
     final requestBody = request.toJson();
     requestBody['stream'] = true;
 
-    final response = await client.sendStream(
+    return streamSseEvents(
       endpoint: _endpoint,
       body: requestBody,
       abortTrigger: abortTrigger,
-    );
-
-    // Extract request ID from response headers for error reporting
-    final requestId =
-        response.headers['x-request-id'] ??
-        response.request?.headers['X-Request-ID'] ??
-        'unknown';
-
-    try {
-      if (response.statusCode >= 400) {
-        final body = await response.stream.bytesToString();
-        throw _parseStreamError(response.statusCode, body, requestId);
-      }
-
-      const parser = SseParser();
-      await for (final json in parser.parse(response.stream)) {
-        yield Completion.fromJson(json);
-      }
-    } on AbortedException {
-      rethrow;
-    }
-  }
-
-  /// Parses an error response from a streaming request.
-  ApiException _parseStreamError(
-    int statusCode,
-    String body,
-    String requestId,
-  ) {
-    try {
-      final json = jsonDecode(body) as Map<String, dynamic>;
-      final error = json['error'] as Map<String, dynamic>?;
-      return createApiException(
-        statusCode: statusCode,
-        message: error?['message'] as String? ?? 'Unknown error',
-        type: error?['type'] as String?,
-        code: error?['code'] as String?,
-        requestId: requestId,
-        body: json,
-      );
-    } catch (_) {
-      return ApiException(
-        message: body.isNotEmpty ? body : 'HTTP $statusCode error',
-        statusCode: statusCode,
-        requestId: requestId,
-      );
-    }
+    ).map((json) => Completion.fromJson(json));
   }
 }

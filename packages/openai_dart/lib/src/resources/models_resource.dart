@@ -1,4 +1,7 @@
-import '../client/openai_client.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
 import '../models/models/models.dart';
 import 'base_resource.dart';
 
@@ -20,9 +23,15 @@ import 'base_resource.dart';
 /// // Get a specific model
 /// final gpt4 = await client.models.retrieve('gpt-4o');
 /// ```
-class ModelsResource extends BaseResource {
-  /// Creates a [ModelsResource] with the given client.
-  ModelsResource(super.client);
+class ModelsResource extends ResourceBase {
+  /// Creates a [ModelsResource].
+  ModelsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   static const _endpoint = '/models';
 
@@ -46,8 +55,17 @@ class ModelsResource extends BaseResource {
   /// }
   /// ```
   Future<ModelList> list({Future<void>? abortTrigger}) async {
-    final json = await getJson(_endpoint, abortTrigger: abortTrigger);
-    return ModelList.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_endpoint);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(
+      httpRequest,
+      abortTrigger: abortTrigger,
+    );
+    return ModelList.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Retrieves a model by ID.
@@ -68,8 +86,17 @@ class ModelsResource extends BaseResource {
   /// print('Owned by: ${model.ownedBy}');
   /// ```
   Future<Model> retrieve(String model, {Future<void>? abortTrigger}) async {
-    final json = await getJson('$_endpoint/$model', abortTrigger: abortTrigger);
-    return Model.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$model');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(
+      httpRequest,
+      abortTrigger: abortTrigger,
+    );
+    return Model.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Deletes a fine-tuned model.
@@ -94,10 +121,16 @@ class ModelsResource extends BaseResource {
     String model, {
     Future<void>? abortTrigger,
   }) async {
-    final json = await deleteJson(
-      '$_endpoint/$model',
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$model');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
-    return DeleteModelResponse.fromJson(json);
+    return DeleteModelResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }

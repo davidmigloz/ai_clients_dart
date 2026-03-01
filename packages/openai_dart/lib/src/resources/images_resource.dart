@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../client/openai_client.dart';
 import '../models/images/images.dart';
 import 'base_resource.dart';
 
@@ -27,9 +26,15 @@ import 'base_resource.dart';
 ///
 /// final imageUrl = response.data.first.url;
 /// ```
-class ImagesResource extends BaseResource {
-  /// Creates an [ImagesResource] with the given client.
-  ImagesResource(super.client);
+class ImagesResource extends ResourceBase {
+  /// Creates an [ImagesResource].
+  ImagesResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   static const _generateEndpoint = '/images/generations';
   static const _editEndpoint = '/images/edits';
@@ -65,8 +70,16 @@ class ImagesResource extends BaseResource {
   /// }
   /// ```
   Future<ImageResponse> generate(ImageGenerationRequest request) async {
-    final json = await postJson(_generateEndpoint, body: request.toJson());
-    return ImageResponse.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_generateEndpoint);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(httpRequest);
+    return ImageResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Creates edited or extended images.
@@ -100,8 +113,10 @@ class ImagesResource extends BaseResource {
   /// );
   /// ```
   Future<ImageResponse> edit(ImageEditRequest request) async {
+    ensureNotClosed?.call();
     final httpRequest = _createEditMultipartRequest(request);
-    final response = await client.postMultipart(request: httpRequest);
+    httpRequest.headers.addAll(requestBuilder.buildMultipartHeaders());
+    final response = await interceptorChain.execute(httpRequest);
     final json = jsonDecode(response.body) as Map<String, dynamic>;
     return ImageResponse.fromJson(json);
   }
@@ -111,8 +126,16 @@ class ImagesResource extends BaseResource {
   /// This method sends `application/json` and is intended for GPT image
   /// editing workflows where images are referenced by URL or File ID.
   Future<ImageResponse> editJson(ImageEditJsonRequest request) async {
-    final json = await postJson(_editEndpoint, body: request.toJson());
-    return ImageResponse.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_editEndpoint);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(httpRequest);
+    return ImageResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Creates variations of an existing image.
@@ -143,14 +166,16 @@ class ImagesResource extends BaseResource {
   /// );
   /// ```
   Future<ImageResponse> createVariation(ImageVariationRequest request) async {
+    ensureNotClosed?.call();
     final httpRequest = _createVariationMultipartRequest(request);
-    final response = await client.postMultipart(request: httpRequest);
+    httpRequest.headers.addAll(requestBuilder.buildMultipartHeaders());
+    final response = await interceptorChain.execute(httpRequest);
     final json = jsonDecode(response.body) as Map<String, dynamic>;
     return ImageResponse.fromJson(json);
   }
 
   http.MultipartRequest _createEditMultipartRequest(ImageEditRequest request) {
-    final url = client.buildUrl(_editEndpoint);
+    final url = requestBuilder.buildUrl(_editEndpoint);
     final httpRequest = http.MultipartRequest('POST', url);
 
     // Add image file
@@ -199,7 +224,7 @@ class ImagesResource extends BaseResource {
   http.MultipartRequest _createVariationMultipartRequest(
     ImageVariationRequest request,
   ) {
-    final url = client.buildUrl(_variationEndpoint);
+    final url = requestBuilder.buildUrl(_variationEndpoint);
     final httpRequest = http.MultipartRequest('POST', url);
 
     // Add image file

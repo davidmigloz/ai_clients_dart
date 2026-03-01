@@ -1,5 +1,9 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
 import '../models/threads/threads.dart';
-import 'beta_base_resource.dart';
+import 'base_resource.dart';
 
 /// Resource for Messages API operations (Beta).
 ///
@@ -22,9 +26,17 @@ import 'beta_base_resource.dart';
 /// // List messages
 /// final messages = await client.beta.threads.messages.list('thread_abc123');
 /// ```
-class MessagesResource extends BetaBaseResource {
-  /// Creates a [MessagesResource] with the given client.
-  MessagesResource(super.client);
+class MessagesResource extends ResourceBase {
+  /// Creates a [MessagesResource].
+  MessagesResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
+
+  static const _betaFeature = 'assistants=v2';
 
   String _endpoint(String threadId) => '/threads/$threadId/messages';
 
@@ -54,8 +66,18 @@ class MessagesResource extends BetaBaseResource {
   /// );
   /// ```
   Future<Message> create(String threadId, CreateMessageRequest request) async {
-    final json = await postJson(_endpoint(threadId), body: request.toJson());
-    return Message.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_endpoint(threadId));
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(httpRequest);
+    return Message.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Lists messages in a thread.
@@ -93,6 +115,7 @@ class MessagesResource extends BetaBaseResource {
     String? before,
     String? runId,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{};
     if (limit != null) queryParams['limit'] = limit.toString();
     if (order != null) queryParams['order'] = order;
@@ -100,11 +123,18 @@ class MessagesResource extends BetaBaseResource {
     if (before != null) queryParams['before'] = before;
     if (runId != null) queryParams['run_id'] = runId;
 
-    final json = await getJson(
+    final url = requestBuilder.buildUrl(
       _endpoint(threadId),
-      queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    return MessageList.fromJson(json);
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return MessageList.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Retrieves a message by ID.
@@ -128,8 +158,16 @@ class MessagesResource extends BetaBaseResource {
   /// print('Content: ${message.content}');
   /// ```
   Future<Message> retrieve(String threadId, String messageId) async {
-    final json = await getJson('${_endpoint(threadId)}/$messageId');
-    return Message.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('${_endpoint(threadId)}/$messageId');
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return Message.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Modifies a message.
@@ -160,11 +198,18 @@ class MessagesResource extends BetaBaseResource {
     String messageId,
     ModifyMessageRequest request,
   ) async {
-    final json = await postJson(
-      '${_endpoint(threadId)}/$messageId',
-      body: request.toJson(),
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('${_endpoint(threadId)}/$messageId');
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
     );
-    return Message.fromJson(json);
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(httpRequest);
+    return Message.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Deletes a message.
@@ -191,7 +236,15 @@ class MessagesResource extends BetaBaseResource {
     String threadId,
     String messageId,
   ) async {
-    final json = await deleteJson('${_endpoint(threadId)}/$messageId');
-    return DeleteMessageResponse.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('${_endpoint(threadId)}/$messageId');
+    final headers = requestBuilder.buildBetaHeaders(
+      betaFeature: _betaFeature,
+    );
+    final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return DeleteMessageResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }

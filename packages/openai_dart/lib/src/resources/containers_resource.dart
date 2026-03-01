@@ -3,7 +3,6 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
-import '../client/openai_client.dart';
 import '../models/containers/containers.dart';
 import 'base_resource.dart';
 
@@ -31,16 +30,28 @@ import 'base_resource.dart';
 /// // Clean up
 /// await client.containers.delete(container.id);
 /// ```
-class ContainersResource extends BaseResource {
-  /// Creates a [ContainersResource] with the given client.
-  ContainersResource(super.client);
+class ContainersResource extends ResourceBase {
+  /// Creates a [ContainersResource].
+  ContainersResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   static const _endpoint = '/containers';
 
   ContainerFilesResource? _files;
 
   /// Container files sub-resource.
-  ContainerFilesResource get files => _files ??= ContainerFilesResource(client);
+  ContainerFilesResource get files => _files ??= ContainerFilesResource(
+    config: config,
+    httpClient: httpClient,
+    interceptorChain: interceptorChain,
+    requestBuilder: requestBuilder,
+    ensureNotClosed: ensureNotClosed,
+  );
 
   /// Lists all containers.
   ///
@@ -70,17 +81,23 @@ class ContainersResource extends BaseResource {
     String? after,
     String? before,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{};
     if (limit != null) queryParams['limit'] = limit.toString();
     if (order != null) queryParams['order'] = order;
     if (after != null) queryParams['after'] = after;
     if (before != null) queryParams['before'] = before;
 
-    final json = await getJson(
+    final url = requestBuilder.buildUrl(
       _endpoint,
-      queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    return ContainerList.fromJson(json);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return ContainerList.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Creates a new container.
@@ -110,8 +127,16 @@ class ContainersResource extends BaseResource {
   /// print('Created container: ${container.id}');
   /// ```
   Future<Container> create(CreateContainerRequest request) async {
-    final json = await postJson(_endpoint, body: request.toJson());
-    return Container.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_endpoint);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(httpRequest);
+    return Container.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Retrieves a container.
@@ -132,8 +157,14 @@ class ContainersResource extends BaseResource {
   /// print('Status: ${container.status}');
   /// ```
   Future<Container> retrieve(String containerId) async {
-    final json = await getJson('$_endpoint/$containerId');
-    return Container.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$containerId');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return Container.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Deletes a container.
@@ -153,8 +184,14 @@ class ContainersResource extends BaseResource {
   /// print('Deleted: ${result.deleted}');
   /// ```
   Future<DeleteContainerResponse> delete(String containerId) async {
-    final json = await deleteJson('$_endpoint/$containerId');
-    return DeleteContainerResponse.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$containerId');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return DeleteContainerResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }
 
@@ -162,9 +199,15 @@ class ContainersResource extends BaseResource {
 ///
 /// Container files are files that have been added to a container
 /// for use in isolated execution environments.
-class ContainerFilesResource extends BaseResource {
-  /// Creates a [ContainerFilesResource] with the given client.
-  ContainerFilesResource(super.client);
+class ContainerFilesResource extends ResourceBase {
+  /// Creates a [ContainerFilesResource].
+  ContainerFilesResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   /// Lists files in a container.
   ///
@@ -196,17 +239,23 @@ class ContainerFilesResource extends BaseResource {
     String? after,
     String? before,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{};
     if (limit != null) queryParams['limit'] = limit.toString();
     if (order != null) queryParams['order'] = order;
     if (after != null) queryParams['after'] = after;
     if (before != null) queryParams['before'] = before;
 
-    final json = await getJson(
+    final url = requestBuilder.buildUrl(
       '/containers/$containerId/files',
-      queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
-    return ContainerFileList.fromJson(json);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return ContainerFileList.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Creates a file in a container.
@@ -244,7 +293,8 @@ class ContainerFilesResource extends BaseResource {
     String? filename,
     String? fileId,
   }) async {
-    final url = client.buildUrl('/containers/$containerId/files');
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('/containers/$containerId/files');
     final httpRequest = http.MultipartRequest('POST', url);
 
     if (bytes != null && filename != null) {
@@ -255,8 +305,9 @@ class ContainerFilesResource extends BaseResource {
     if (fileId != null) {
       httpRequest.fields['file_id'] = fileId;
     }
+    httpRequest.headers.addAll(requestBuilder.buildMultipartHeaders());
 
-    final response = await client.postMultipart(request: httpRequest);
+    final response = await interceptorChain.execute(httpRequest);
     final json = jsonDecode(response.body) as Map<String, dynamic>;
     return ContainerFile.fromJson(json);
   }
@@ -282,8 +333,16 @@ class ContainerFilesResource extends BaseResource {
   /// print('Path: ${file.path}');
   /// ```
   Future<ContainerFile> retrieve(String containerId, String fileId) async {
-    final json = await getJson('/containers/$containerId/files/$fileId');
-    return ContainerFile.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(
+      '/containers/$containerId/files/$fileId',
+    );
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return ContainerFile.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Deletes a file from a container.
@@ -310,8 +369,16 @@ class ContainerFilesResource extends BaseResource {
     String containerId,
     String fileId,
   ) async {
-    final json = await deleteJson('/containers/$containerId/files/$fileId');
-    return DeleteContainerFileResponse.fromJson(json);
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(
+      '/containers/$containerId/files/$fileId',
+    );
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return DeleteContainerFileResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Retrieves the content of a file from a container.
@@ -335,10 +402,14 @@ class ContainerFilesResource extends BaseResource {
   /// File('output.txt').writeAsBytesSync(content);
   /// ```
   Future<Uint8List> retrieveContent(String containerId, String fileId) async {
-    // ErrorInterceptor handles error responses, so we can return bodyBytes directly
-    final response = await client.get(
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(
       '/containers/$containerId/files/$fileId/content',
     );
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    // ErrorInterceptor handles error responses, so we can return bodyBytes directly
+    final response = await interceptorChain.execute(httpRequest);
     return response.bodyBytes;
   }
 }

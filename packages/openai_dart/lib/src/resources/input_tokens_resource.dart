@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
 import '../models/responses/input_token_count.dart';
 import '../models/responses/response_input.dart';
 import '../models/responses/tools/response_tool.dart';
@@ -17,9 +21,15 @@ import 'base_resource.dart';
 /// );
 /// print('Input tokens: ${tokenCount.inputTokens}');
 /// ```
-class InputTokensResource extends BaseResource {
-  /// Creates an [InputTokensResource] with the given client.
-  InputTokensResource(super.client);
+class InputTokensResource extends ResourceBase {
+  /// Creates an [InputTokensResource].
+  InputTokensResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   /// Gets input token counts for a potential response request.
   ///
@@ -82,6 +92,7 @@ class InputTokensResource extends BaseResource {
     String? truncation,
     Future<void>? abortTrigger,
   }) async {
+    ensureNotClosed?.call();
     final body = <String, dynamic>{};
 
     if (model != null) body['model'] = model;
@@ -122,11 +133,17 @@ class InputTokensResource extends BaseResource {
 
     if (truncation != null) body['truncation'] = truncation;
 
-    final json = await postJson(
-      '/responses/input_tokens',
-      body: body,
+    final url = requestBuilder.buildUrl('/responses/input_tokens');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(body);
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
-    return InputTokenCountResponse.fromJson(json);
+    return InputTokenCountResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }

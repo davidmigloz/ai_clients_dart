@@ -1,4 +1,3 @@
-import '../client/openai_client.dart';
 import 'assistants_resource.dart';
 import 'base_resource.dart';
 import 'threads_resource.dart';
@@ -37,9 +36,16 @@ import 'vector_stores_resource.dart';
 ///   CreateRunRequest(assistantId: assistant.id),
 /// );
 /// ```
-class BetaResource extends BaseResource {
-  /// Creates a [BetaResource] with the given client.
-  BetaResource(super.client);
+class BetaResource extends ResourceBase {
+  /// Creates a [BetaResource].
+  BetaResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+    super.streamClientFactory,
+  });
 
   AssistantsResource? _assistants;
   ThreadsResource? _threads;
@@ -57,8 +63,13 @@ class BetaResource extends BaseResource {
   ///   ),
   /// );
   /// ```
-  AssistantsResource get assistants =>
-      _assistants ??= AssistantsResource(client);
+  AssistantsResource get assistants => _assistants ??= AssistantsResource(
+    config: config,
+    httpClient: httpClient,
+    interceptorChain: interceptorChain,
+    requestBuilder: requestBuilder,
+    ensureNotClosed: ensureNotClosed,
+  );
 
   /// Access to Threads API.
   ///
@@ -67,7 +78,14 @@ class BetaResource extends BaseResource {
   /// ```dart
   /// final thread = await client.beta.threads.create();
   /// ```
-  ThreadsResource get threads => _threads ??= ThreadsResource(client);
+  ThreadsResource get threads => _threads ??= ThreadsResource(
+    config: config,
+    httpClient: httpClient,
+    interceptorChain: interceptorChain,
+    requestBuilder: requestBuilder,
+    ensureNotClosed: ensureNotClosed,
+    streamClientFactory: streamClientFactory,
+  );
 
   /// Access to Vector Stores API.
   ///
@@ -79,5 +97,11 @@ class BetaResource extends BaseResource {
   /// );
   /// ```
   VectorStoresResource get vectorStores =>
-      _vectorStores ??= VectorStoresResource(client);
+      _vectorStores ??= VectorStoresResource(
+        config: config,
+        httpClient: httpClient,
+        interceptorChain: interceptorChain,
+        requestBuilder: requestBuilder,
+        ensureNotClosed: ensureNotClosed,
+      );
 }

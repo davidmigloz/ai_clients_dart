@@ -7,17 +7,28 @@ import '../models/skills/skills.dart';
 import 'base_resource.dart';
 
 /// Resource for Skills API operations.
-class SkillsResource extends BaseResource {
-  /// Creates a [SkillsResource] with the given client.
-  SkillsResource(super.client);
+class SkillsResource extends ResourceBase {
+  /// Creates a [SkillsResource].
+  SkillsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   static const _endpoint = '/skills';
 
   SkillVersionsResource? _versions;
 
   /// Access to skill versions operations.
-  SkillVersionsResource get versions =>
-      _versions ??= SkillVersionsResource(client);
+  SkillVersionsResource get versions => _versions ??= SkillVersionsResource(
+    config: config,
+    httpClient: httpClient,
+    interceptorChain: interceptorChain,
+    requestBuilder: requestBuilder,
+    ensureNotClosed: ensureNotClosed,
+  );
 
   /// Lists skills.
   Future<SkillList> list({
@@ -26,17 +37,25 @@ class SkillsResource extends BaseResource {
     String? after,
     Future<void>? abortTrigger,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{};
     if (limit != null) queryParams['limit'] = limit.toString();
     if (order != null) queryParams['order'] = order;
     if (after != null) queryParams['after'] = after;
 
-    final json = await getJson(
+    final url = requestBuilder.buildUrl(
       _endpoint,
-      queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
+    );
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
-    return SkillList.fromJson(json);
+    return SkillList.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Creates a skill using multipart file upload.
@@ -44,10 +63,12 @@ class SkillsResource extends BaseResource {
     List<SkillUploadFile> files, {
     Future<void>? abortTrigger,
   }) async {
+    ensureNotClosed?.call();
     if (files.isEmpty) {
       throw ArgumentError('At least one file is required to create a skill');
     }
-    final request = http.MultipartRequest('POST', client.buildUrl(_endpoint));
+    final url = requestBuilder.buildUrl(_endpoint);
+    final request = http.MultipartRequest('POST', url);
     for (final file in files) {
       request.files.add(
         http.MultipartFile.fromBytes(
@@ -57,9 +78,10 @@ class SkillsResource extends BaseResource {
         ),
       );
     }
+    request.headers.addAll(requestBuilder.buildMultipartHeaders());
 
-    final response = await client.postMultipart(
-      request: request,
+    final response = await interceptorChain.execute(
+      request,
       abortTrigger: abortTrigger,
     );
     final json = jsonDecode(response.body) as Map<String, dynamic>;
@@ -68,11 +90,17 @@ class SkillsResource extends BaseResource {
 
   /// Retrieves a skill by ID.
   Future<Skill> retrieve(String skillId, {Future<void>? abortTrigger}) async {
-    final json = await getJson(
-      '$_endpoint/$skillId',
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$skillId');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
-    return Skill.fromJson(json);
+    return Skill.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Updates the default version pointer for a skill.
@@ -81,12 +109,19 @@ class SkillsResource extends BaseResource {
     SetDefaultSkillVersionRequest request, {
     Future<void>? abortTrigger,
   }) async {
-    final json = await postJson(
-      '$_endpoint/$skillId',
-      body: request.toJson(),
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$skillId');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
-    return Skill.fromJson(json);
+    return Skill.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Deletes a skill.
@@ -94,11 +129,17 @@ class SkillsResource extends BaseResource {
     String skillId, {
     Future<void>? abortTrigger,
   }) async {
-    final json = await deleteJson(
-      '$_endpoint/$skillId',
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$skillId');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
-    return DeletedSkill.fromJson(json);
+    return DeletedSkill.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Retrieves the zipped content for a skill.
@@ -106,8 +147,12 @@ class SkillsResource extends BaseResource {
     String skillId, {
     Future<void>? abortTrigger,
   }) async {
-    final response = await client.get(
-      '$_endpoint/$skillId/content',
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_endpoint/$skillId/content');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
     return response.bodyBytes;
@@ -115,9 +160,15 @@ class SkillsResource extends BaseResource {
 }
 
 /// Resource for skill versions operations.
-class SkillVersionsResource extends BaseResource {
-  /// Creates a [SkillVersionsResource] with the given client.
-  SkillVersionsResource(super.client);
+class SkillVersionsResource extends ResourceBase {
+  /// Creates a [SkillVersionsResource].
+  SkillVersionsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
 
   /// Lists versions for a skill.
   Future<SkillVersionList> list(
@@ -127,17 +178,25 @@ class SkillVersionsResource extends BaseResource {
     String? after,
     Future<void>? abortTrigger,
   }) async {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{};
     if (limit != null) queryParams['limit'] = limit.toString();
     if (order != null) queryParams['order'] = order;
     if (after != null) queryParams['after'] = after;
 
-    final json = await getJson(
+    final url = requestBuilder.buildUrl(
       '/skills/$skillId/versions',
-      queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
+    );
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
-    return SkillVersionList.fromJson(json);
+    return SkillVersionList.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Creates a new skill version using multipart file upload.
@@ -147,15 +206,14 @@ class SkillVersionsResource extends BaseResource {
     bool? isDefault,
     Future<void>? abortTrigger,
   }) async {
+    ensureNotClosed?.call();
     if (files.isEmpty) {
       throw ArgumentError(
         'At least one file is required to create a skill version',
       );
     }
-    final request = http.MultipartRequest(
-      'POST',
-      client.buildUrl('/skills/$skillId/versions'),
-    );
+    final url = requestBuilder.buildUrl('/skills/$skillId/versions');
+    final request = http.MultipartRequest('POST', url);
     for (final file in files) {
       request.files.add(
         http.MultipartFile.fromBytes(
@@ -168,9 +226,10 @@ class SkillVersionsResource extends BaseResource {
     if (isDefault != null) {
       request.fields['default'] = isDefault.toString();
     }
+    request.headers.addAll(requestBuilder.buildMultipartHeaders());
 
-    final response = await client.postMultipart(
-      request: request,
+    final response = await interceptorChain.execute(
+      request,
       abortTrigger: abortTrigger,
     );
     final json = jsonDecode(response.body) as Map<String, dynamic>;
@@ -183,11 +242,17 @@ class SkillVersionsResource extends BaseResource {
     String version, {
     Future<void>? abortTrigger,
   }) async {
-    final json = await getJson(
-      '/skills/$skillId/versions/$version',
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('/skills/$skillId/versions/$version');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
-    return SkillVersion.fromJson(json);
+    return SkillVersion.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Deletes a specific skill version.
@@ -196,11 +261,17 @@ class SkillVersionsResource extends BaseResource {
     String version, {
     Future<void>? abortTrigger,
   }) async {
-    final json = await deleteJson(
-      '/skills/$skillId/versions/$version',
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('/skills/$skillId/versions/$version');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
-    return DeletedSkillVersion.fromJson(json);
+    return DeletedSkillVersion.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Retrieves zipped content for a skill version.
@@ -209,8 +280,14 @@ class SkillVersionsResource extends BaseResource {
     String version, {
     Future<void>? abortTrigger,
   }) async {
-    final response = await client.get(
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(
       '/skills/$skillId/versions/$version/content',
+    );
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(
+      httpRequest,
       abortTrigger: abortTrigger,
     );
     return response.bodyBytes;
