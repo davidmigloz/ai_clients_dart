@@ -47,6 +47,10 @@ sealed class Part {
 
   /// Creates a function call part.
   ///
+  /// Note: This factory does not include `thoughtSignature`. When echoing
+  /// model responses back, use the already-parsed [FunctionCallPart] objects
+  /// rather than reconstructing via this factory.
+  ///
   /// Example:
   /// ```dart
   /// final part = Part.functionCall('get_weather', args: {'city': 'SF'});
@@ -93,6 +97,9 @@ sealed class Part {
             : null,
       );
     }
+    // `functionCall` must be checked before the standalone `thoughtSignature`
+    // key (below), because a JSON object can contain both keys — the signature
+    // belongs to the function call in that case.
     if (json.containsKey('functionCall')) {
       return FunctionCallPart(
         FunctionCall.fromJson(json['functionCall'] as Map<String, dynamic>),
@@ -125,8 +132,16 @@ sealed class Part {
         VideoMetadata.fromJson(json['videoMetadata'] as Map<String, dynamic>),
       );
     }
+    // `thought` must be checked before the standalone `thoughtSignature` key
+    // (below), because a JSON object can contain both — the signature belongs
+    // to the thought part in that case.
     if (json.containsKey('thought')) {
-      return ThoughtPart(thought: json['thought'] as bool);
+      return ThoughtPart(
+        thought: json['thought'] as bool,
+        thoughtSignature: json['thoughtSignature'] != null
+            ? base64Decode(json['thoughtSignature'] as String)
+            : null,
+      );
     }
     if (json.containsKey('thoughtSignature')) {
       return ThoughtSignaturePart(
@@ -358,16 +373,32 @@ class ThoughtPart extends Part {
   /// Whether this is a thought/reasoning step.
   final bool thought;
 
+  /// Optional opaque thought signature bytes.
+  ///
+  /// The API may return this alongside the thought flag; it must be preserved
+  /// and sent back unchanged when echoing the conversation history.
+  final List<int>? thoughtSignature;
+
   /// Creates a [ThoughtPart].
-  const ThoughtPart({required this.thought});
+  const ThoughtPart({required this.thought, this.thoughtSignature});
 
   @override
-  Map<String, dynamic> toJson() => {'thought': thought};
+  Map<String, dynamic> toJson() => {
+    'thought': thought,
+    if (thoughtSignature != null)
+      'thoughtSignature': base64Encode(thoughtSignature!),
+  };
 
   /// Creates a copy with replaced values.
-  ThoughtPart copyWith({Object? thought = unsetCopyWithValue}) {
+  ThoughtPart copyWith({
+    Object? thought = unsetCopyWithValue,
+    Object? thoughtSignature = unsetCopyWithValue,
+  }) {
     return ThoughtPart(
       thought: thought == unsetCopyWithValue ? this.thought : thought! as bool,
+      thoughtSignature: thoughtSignature == unsetCopyWithValue
+          ? this.thoughtSignature
+          : thoughtSignature as List<int>?,
     );
   }
 }

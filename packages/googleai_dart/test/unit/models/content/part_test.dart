@@ -622,6 +622,78 @@ void main() {
         expect(deserialized, isA<ThoughtPart>());
         expect((deserialized as ThoughtPart).thought, equals(original.thought));
       });
+
+      group('with thoughtSignature', () {
+        test('deserializes thoughtSignature from JSON', () {
+          final json = {
+            'thought': true,
+            'thoughtSignature': base64.encode([10, 20, 30]),
+          };
+          final part = Part.fromJson(json);
+          expect(part, isA<ThoughtPart>());
+          final thoughtPart = part as ThoughtPart;
+          expect(thoughtPart.thought, isTrue);
+          expect(thoughtPart.thoughtSignature, equals([10, 20, 30]));
+        });
+
+        test('serializes thoughtSignature to JSON when present', () {
+          const part = ThoughtPart(
+            thought: true,
+            thoughtSignature: [65, 66, 67],
+          );
+          final json = part.toJson();
+          expect(json.containsKey('thoughtSignature'), isTrue);
+          expect(
+            json['thoughtSignature'],
+            equals(base64.encode([65, 66, 67])),
+          );
+        });
+
+        test('omits thoughtSignature when null', () {
+          const part = ThoughtPart(thought: true);
+          final json = part.toJson();
+          expect(json.containsKey('thoughtSignature'), isFalse);
+        });
+
+        test('roundtrip preserves thoughtSignature', () {
+          const original = ThoughtPart(
+            thought: true,
+            thoughtSignature: [100, 200, 50],
+          );
+          final json = original.toJson();
+          final deserialized = Part.fromJson(json) as ThoughtPart;
+          expect(
+            deserialized.thoughtSignature,
+            equals(original.thoughtSignature),
+          );
+          expect(deserialized.thought, isTrue);
+        });
+
+        test('copyWith can set thoughtSignature', () {
+          const original = ThoughtPart(thought: true);
+          final copy = original.copyWith(thoughtSignature: [1, 2, 3]);
+          expect(copy.thoughtSignature, equals([1, 2, 3]));
+          expect(copy.thought, isTrue);
+        });
+
+        test('copyWith can clear thoughtSignature', () {
+          const original = ThoughtPart(
+            thought: true,
+            thoughtSignature: [1, 2, 3],
+          );
+          final copy = original.copyWith(thoughtSignature: null);
+          expect(copy.thoughtSignature, isNull);
+        });
+
+        test('copyWith preserves thoughtSignature by default', () {
+          const original = ThoughtPart(
+            thought: true,
+            thoughtSignature: [9, 8, 7],
+          );
+          final copy = original.copyWith();
+          expect(copy.thoughtSignature, equals([9, 8, 7]));
+        });
+      });
     });
 
     group('ThoughtSignaturePart', () {
