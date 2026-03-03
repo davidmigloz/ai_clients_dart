@@ -493,7 +493,6 @@ final client = OllamaClient(
       maxRetries: 3,
       initialDelay: Duration(seconds: 1),
       maxDelay: Duration(seconds: 30),
-      backoffMultiplier: 2.0,
     ),
   ),
 );
@@ -513,8 +512,8 @@ final client = OllamaClient(
 // Custom auth provider
 class CustomAuthProvider implements AuthProvider {
   @override
-  Future<Map<String, String>> getHeaders() async {
-    return {'X-Custom-Auth': 'my-token'};
+  Future<AuthCredentials> getCredentials() async {
+    return BearerTokenCredentials('my-token');
   }
 }
 ```
@@ -553,13 +552,13 @@ print('Vector dimensions: ${vector?.length}');
 | `ModelsResponse` | `ListResponse` |
 | `ProcessResponse` | `PsResponse` |
 | `PullModelRequest` | `PullRequest` |
-| `PullModelResponse` | `PullResponse` |
+| `PullModelResponse` | `StatusResponse` / `StatusEvent` |
 | `PushModelRequest` | `PushRequest` |
-| `PushModelResponse` | `PushResponse` |
+| `PushModelResponse` | `StatusResponse` / `StatusEvent` |
 | `CopyModelRequest` | `CopyRequest` |
 | `DeleteModelRequest` | `DeleteRequest` |
 | `CreateModelRequest` | `CreateRequest` |
-| `CreateModelResponse` | `CreateResponse` |
+| `CreateModelResponse` | `StatusResponse` / `StatusEvent` |
 | `Tool` | `ToolDefinition` |
 | `RequestOptions` | `ModelOptions` |
 

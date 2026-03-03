@@ -90,7 +90,7 @@ void main() async {
 
 ```yaml
 dependencies:
-  ollama_dart: ^1.0.0
+  ollama_dart: ^x.y.z
 ```
 
 ## Configuration
@@ -311,7 +311,7 @@ print(info.license);
 // List running models
 final running = await client.models.ps();
 for (final model in running.models ?? []) {
-  print('Running: ${model.name}');
+  print('Running: ${model.model}');
 }
 
 // Get server version
