@@ -77,9 +77,9 @@ Read the `workspace` list from the root `pubspec.yaml` (the source of truth). Ea
 
 3. **No previous tag** (first release): use all commits touching `packages/{pkg}/`.
 
-4. **No commits since tag**: skip this package — no release needed.
+4. **No commits since tag**: provisionally note this package for skipping — but **always continue to Step 5** to check for unreleased version bumps before finalizing the skip decision.
 
-5. **Detect unreleased version bumps**: After checking commits, compare the `version:` field in `packages/{pkg}/pubspec.yaml` against the version extracted from the latest tag:
+5. **Detect unreleased version bumps**: Compare the `version:` field in `packages/{pkg}/pubspec.yaml` against the version extracted from the latest tag:
    ```bash
    # Extract version from latest tag (e.g., "foo_dart-v1.0.0" → "1.0.0")
    tag_version=$(echo "$latest_tag" | sed "s/^${pkg}-v//")
