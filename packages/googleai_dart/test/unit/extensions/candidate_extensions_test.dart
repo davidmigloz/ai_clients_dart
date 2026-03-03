@@ -90,9 +90,7 @@ void main() {
 
       test('returns false when only thought text parts', () {
         const candidate = Candidate(
-          content: Content(
-            parts: [TextPart('reasoning...', thought: true)],
-          ),
+          content: Content(parts: [TextPart('reasoning...', thought: true)]),
         );
         expect(candidate.hasText, isFalse);
       });

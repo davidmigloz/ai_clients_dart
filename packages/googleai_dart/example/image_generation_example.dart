@@ -6,7 +6,7 @@
 /// - Configure aspect ratio and image size
 /// - Handle the response (text description + base64 image data)
 ///
-/// Supported models: gemini-2.5-flash-image, gemini-3-pro-image-preview
+/// Supported models: gemini-2.5-flash-image, gemini-3.1-pro-image-preview
 ///
 /// Note: The model always returns both text and images when using
 /// `responseModalities: ['TEXT', 'IMAGE']`.

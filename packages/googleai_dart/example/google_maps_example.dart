@@ -35,7 +35,7 @@ Future<void> main() async {
 /// Basic Google Maps grounding without location context.
 Future<void> basicMapsGrounding(GoogleAIClient client) async {
   final response = await client.models.generateContent(
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-3.1-flash-preview',
     request: GenerateContentRequest(
       contents: [
         Content.text('What are the best pizza places in New York City?'),
@@ -58,7 +58,7 @@ Future<void> basicMapsGrounding(GoogleAIClient client) async {
 /// Google Maps grounding with user location context.
 Future<void> mapsWithLocationContext(GoogleAIClient client) async {
   final response = await client.models.generateContent(
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-3.1-flash-preview',
     request: GenerateContentRequest(
       contents: [Content.text('Find Italian restaurants near me')],
       // Enable Google Maps grounding
@@ -89,7 +89,7 @@ Future<void> mapsWithLocationContext(GoogleAIClient client) async {
 /// Google Maps grounding with widget token for rendering.
 Future<void> mapsWithWidgetToken(GoogleAIClient client) async {
   final response = await client.models.generateContent(
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-3.1-flash-preview',
     request: GenerateContentRequest(
       contents: [
         Content.text(

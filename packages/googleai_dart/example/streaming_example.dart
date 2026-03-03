@@ -13,7 +13,7 @@ void main() async {
 
     // Stream content generation - receives chunks as they're generated
     await for (final chunk in client.models.streamGenerateContent(
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-3.1-flash-preview',
       request: GenerateContentRequest(
         contents: [
           Content.text('Write a short poem about artificial intelligence'),

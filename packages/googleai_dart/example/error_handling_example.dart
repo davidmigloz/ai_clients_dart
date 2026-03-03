@@ -12,7 +12,7 @@ void main() async {
   try {
     // Make a request that might fail
     final response = await client.models.generateContent(
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-3.1-flash-preview',
       request: GenerateContentRequest(contents: [Content.text('Hello!')]),
     );
 

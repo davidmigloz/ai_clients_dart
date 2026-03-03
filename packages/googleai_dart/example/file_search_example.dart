@@ -112,7 +112,7 @@ To get started with Dart, install the Dart SDK from dart.dev.
     // Use the store for generation
     print('\nQuerying the knowledge base...');
     final response = await client.models.generateContent(
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-3.1-flash-preview',
       request: GenerateContentRequest(
         contents: [Content.text('What are the key features of Dart?')],
         tools: [
@@ -159,7 +159,7 @@ Future<void> fileSearchWithGenerateContent(GoogleAIClient client) async {
   print(r'''
 // Filter documents by metadata
 final response = await client.models.generateContent(
-  model: 'gemini-3-flash-preview',
+  model: 'gemini-3.1-flash-preview',
   request: GenerateContentRequest(
     contents: [...],
     tools: [
@@ -188,7 +188,7 @@ Future<void> fileSearchWithInteractions(GoogleAIClient client) async {
   print(r'''
 // Stream responses with file search
 await for (final event in client.interactions.createStream(
-  model: 'gemini-3-flash-preview',
+  model: 'gemini-3.1-flash-preview',
   input: 'Summarize the key points from my documents',
   tools: [
     FileSearchTool(

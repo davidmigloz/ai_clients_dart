@@ -16,7 +16,7 @@ void main() async {
     // 1. Create a batch for content generation
     print('1. Creating batch for content generation...');
     final generateBatch = await client.models.batchGenerateContent(
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-3.1-flash-preview',
       batch: GenerateContentBatch(
         displayName: 'Math Questions Batch',
         // model is auto-populated from the method parameter

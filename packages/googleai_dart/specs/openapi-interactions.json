@@ -2583,12 +2583,12 @@
           },
           {
             "description": "Our most intelligent model with SOTA reasoning and multimodal understanding, and powerful agentic and vibe coding capabilities.",
-            "const": "gemini-3-pro-preview",
+            "const": "gemini-3.1-pro-preview",
             "x-stainless-nominal": false
           },
           {
             "description": "Our most intelligent model built for speed, combining frontier intelligence with superior search and grounding.",
-            "const": "gemini-3-flash-preview",
+            "const": "gemini-3.1-flash-preview",
             "x-stainless-nominal": false
           }
         ]

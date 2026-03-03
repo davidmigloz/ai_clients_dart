@@ -163,7 +163,7 @@ import 'package:googleai_dart/googleai_dart.dart';
 final client = GoogleAIClient.fromEnvironment();
 
 final response = await client.models.generateContent(
-  model: 'gemini-3-flash-preview',
+  model: 'gemini-3.1-flash-preview',
   request: GenerateContentRequest(
     contents: [Content.text('Hello Gemini!')],  // Convenience factory
   ),
@@ -268,7 +268,7 @@ final vertexClient = GoogleAIClient(
 
 // Use the same API as Google AI
 final response = await vertexClient.models.generateContent(
-  model: 'gemini-3-flash-preview',
+  model: 'gemini-3.1-flash-preview',
   request: GenerateContentRequest(
     contents: [
       Content(
@@ -383,7 +383,7 @@ import 'package:googleai_dart/googleai_dart.dart';
 final client = GoogleAIClient.fromEnvironment();
 
 final response = await client.models.generateContent(
-  model: 'gemini-3-flash-preview',
+  model: 'gemini-3.1-flash-preview',
   request: GenerateContentRequest(
     contents: [Content.text('Explain quantum computing')],
   ),
@@ -406,7 +406,7 @@ import 'package:googleai_dart/googleai_dart.dart';
 
 // Assumes you have a configured client instance
 await for (final chunk in client.models.streamGenerateContent(
-  model: 'gemini-3-flash-preview',
+  model: 'gemini-3.1-flash-preview',
   request: GenerateContentRequest(
     contents: [Content.text('Write a poem about AI')],
   ),
@@ -455,7 +455,7 @@ if (imageBase64 != null) {
 }
 ```
 
-**Supported models:** `gemini-2.5-flash-image`, `gemini-3-pro-image-preview`
+**Supported models:** `gemini-2.5-flash-image`, `gemini-3.1-pro-image-preview`
 
 </details>
 
@@ -504,7 +504,7 @@ final abortController = Completer<void>();
 
 // Start request with abort capability
 final requestFuture = client.models.generateContent(
-  model: 'gemini-3-flash-preview',
+  model: 'gemini-3.1-flash-preview',
   request: request,
   abortTrigger: abortController.future,
 );
@@ -525,7 +525,7 @@ This works for both regular and streaming requests. You can also use it with tim
 ```dart
 // Auto-cancel after 30 seconds
 final response = await client.models.generateContent(
-  model: 'gemini-3-flash-preview',
+  model: 'gemini-3.1-flash-preview',
   request: request,
   abortTrigger: Future.delayed(Duration(seconds: 30)),
 );
@@ -561,7 +561,7 @@ final tools = [
 ];
 
 final response = await client.models.generateContent(
-  model: 'gemini-3-flash-preview',
+  model: 'gemini-3.1-flash-preview',
   request: GenerateContentRequest(
     contents: [/* ... */],
     tools: tools,
@@ -582,7 +582,7 @@ Ground responses with real-time web information:
 
 ```dart
 final response = await client.models.generateContent(
-  model: 'gemini-3-flash-preview',
+  model: 'gemini-3.1-flash-preview',
   request: GenerateContentRequest(
     contents: [Content.text('Who won Euro 2024?')],
     // Enable Google Search grounding with an empty map
@@ -617,7 +617,7 @@ Or use the Interactions API for streaming:
 
 ```dart
 await for (final event in client.interactions.createStream(
-  model: 'gemini-3-flash-preview',
+  model: 'gemini-3.1-flash-preview',
   input: 'What are today\'s top technology news?',
   tools: [GoogleSearchTool()],
 )) {
@@ -642,7 +642,7 @@ Fetch and analyze content from specific URLs (up to 20 URLs, max 34MB per URL):
 
 ```dart
 final response = await client.models.generateContent(
-  model: 'gemini-3-flash-preview',
+  model: 'gemini-3.1-flash-preview',
   request: GenerateContentRequest(
     contents: [
       Content.text('Summarize the main points from: https://dart.dev/overview'),
@@ -660,7 +660,7 @@ Or with the Interactions API:
 
 ```dart
 await for (final event in client.interactions.createStream(
-  model: 'gemini-3-flash-preview',
+  model: 'gemini-3.1-flash-preview',
   input: 'Summarize https://pub.dev/packages/googleai_dart',
   tools: [UrlContextTool()],
 )) {
@@ -685,7 +685,7 @@ Add geospatial context for location-based queries:
 
 ```dart
 final response = await client.models.generateContent(
-  model: 'gemini-3-flash-preview',
+  model: 'gemini-3.1-flash-preview',
   request: GenerateContentRequest(
     contents: [Content.text('Find Italian restaurants nearby')],
     // Enable Google Maps with widget support
@@ -754,7 +754,7 @@ final uploadResponse = await client.fileSearchStores.upload(
 
 // Use FileSearch in generation with optional metadata filter
 final response = await client.models.generateContent(
-  model: 'gemini-3-flash-preview',
+  model: 'gemini-3.1-flash-preview',
   request: GenerateContentRequest(
     contents: [
       Content.text('What does the documentation say about X?'),
@@ -842,7 +842,7 @@ while (file.state == FileState.processing) {
 
 // Use the file in a prompt
 final response = await client.models.generateContent(
-  model: 'gemini-3-flash-preview',
+  model: 'gemini-3.1-flash-preview',
   request: GenerateContentRequest(
     contents: [
       Content(
@@ -892,7 +892,7 @@ import 'package:googleai_dart/googleai_dart.dart';
 // Create cached content with system instructions
 final cachedContent = await client.cachedContents.create(
   cachedContent: const CachedContent(
-    model: 'models/gemini-3-flash-preview',
+    model: 'models/gemini-3.1-flash-preview',
     displayName: 'Math Expert Cache',
     systemInstruction: Content(
       parts: [TextPart('You are an expert mathematician...')],
@@ -903,7 +903,7 @@ final cachedContent = await client.cachedContents.create(
 
 // Use cached content in requests (saves tokens!)
 final response = await client.models.generateContent(
-  model: 'gemini-3-flash',
+  model: 'gemini-3.1-flash',
   request: GenerateContentRequest(
     cachedContent: cachedContent.name,
     contents: [Content.text('Explain the Pythagorean theorem')],
@@ -914,7 +914,7 @@ final response = await client.models.generateContent(
 await client.cachedContents.update(
   name: cachedContent.name!,
   cachedContent: const CachedContent(
-    model: 'models/gemini-3-flash-preview',
+    model: 'models/gemini-3.1-flash-preview',
     ttl: '7200s', // Extend to 2 hours
   ),
   updateMask: 'ttl',
@@ -1019,7 +1019,7 @@ import 'package:googleai_dart/googleai_dart.dart';
 // Create a batch for processing multiple requests
 // The model in the batch is auto-populated from the method parameter
 final batch = await client.models.batchGenerateContent(
-  model: 'gemini-3-flash-preview',
+  model: 'gemini-3.1-flash-preview',
   batch: const GenerateContentBatch(
     displayName: 'My Batch Job',
     inputConfig: InputConfig(

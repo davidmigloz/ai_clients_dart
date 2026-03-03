@@ -78,7 +78,7 @@ void main() async {
     print('   Use FileSearch tool with your store:');
     print('   ```dart');
     print('   final response = await client.models.generateContent(');
-    print('     model: "gemini-3-flash-preview",');
+    print('     model: "gemini-3.1-flash-preview",');
     print('     request: GenerateContentRequest(');
     print('       contents: [Content.text("What does the doc say?")],');
     print('       tools: [');

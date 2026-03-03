@@ -25,7 +25,7 @@ void main() async {
       print('\n   To create a batch, use:');
       print('   ```dart');
       print('   final batch = await client.models.batchGenerateContent(');
-      print('     model: "gemini-3-flash-preview",');
+      print('     model: "gemini-3.1-flash-preview",');
       print('     batch: GenerateContentBatch(');
       print('       displayName: "My Batch",');
       print('       inputConfig: InputConfig(');

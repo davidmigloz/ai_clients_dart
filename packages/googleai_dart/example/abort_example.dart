@@ -20,7 +20,7 @@ void main() async {
 
     // Start a long-running request
     final requestFuture = client.models.generateContent(
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-3.1-flash-preview',
       request: GenerateContentRequest(
         contents: [
           Content.text(
@@ -80,7 +80,7 @@ void main() async {
 
     // Start streaming
     await for (final chunk in streamingClient.models.streamGenerateContent(
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-3.1-flash-preview',
       request: GenerateContentRequest(
         contents: [Content.text('Write a long story about space exploration')],
       ),

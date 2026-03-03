@@ -22,7 +22,7 @@ void main() async {
 
     final cached = await client.cachedContents.create(
       cachedContent: const CachedContent(
-        model: 'models/gemini-3-flash-preview',
+        model: 'models/gemini-3.1-flash-preview',
         displayName: 'Math Expert Cache',
         systemInstruction: Content(
           parts: [TextPart('You are an expert mathematician.')],
@@ -72,7 +72,7 @@ void main() async {
       final updated = await client.cachedContents.update(
         name: cachedContentName,
         cachedContent: const CachedContent(
-          model: 'models/gemini-3-flash-preview',
+          model: 'models/gemini-3.1-flash-preview',
           ttl: '7200s', // Extend to 2 hours
         ),
         updateMask: 'ttl',
@@ -88,7 +88,7 @@ void main() async {
     print('   Use cached content in requests to save tokens:');
     print('   ```dart');
     print('   final response = await client.models.generateContent(');
-    print('     model: "gemini-3-flash-preview",');
+    print('     model: "gemini-3.1-flash-preview",');
     print('     request: GenerateContentRequest(');
     print('       cachedContent: "$cachedContentName",');
     print(

@@ -68,7 +68,7 @@ Future<void> usingV1(String apiKey) async {
     print('Generating content with v1 API...');
 
     final response = await client.models.generateContent(
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-3.1-flash-preview',
       request: GenerateContentRequest(
         contents: [Content.text('What is the meaning of life?')],
       ),
@@ -105,7 +105,7 @@ Future<void> usingV1Beta(String apiKey) async {
     print('Generating content with v1beta API...');
 
     final response = await client.models.generateContent(
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-3.1-flash-preview',
       request: GenerateContentRequest(
         contents: [Content.text('Explain quantum entanglement.')],
       ),
@@ -140,7 +140,7 @@ Future<void> usingDefault(String apiKey) async {
     print('Generating content with default config (v1beta)...');
 
     final response = await client.models.generateContent(
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-3.1-flash-preview',
       request: GenerateContentRequest(
         contents: [Content.text('What is machine learning?')],
       ),

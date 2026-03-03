@@ -126,7 +126,7 @@ final client = GoogleAIClient(
 
 // Use the same API as Google AI!
 final response = await client.models.generateContent(
-  model: 'gemini-3-flash-preview',
+  model: 'gemini-3.1-flash-preview',
   request: GenerateContentRequest(
     contents: [
       Content(

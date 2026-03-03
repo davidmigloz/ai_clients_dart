@@ -113,7 +113,7 @@ void main() async {
     // In production with real OAuth tokens, this would succeed.
     try {
       await client.models.generateContent(
-        model: 'gemini-3-flash',
+        model: 'gemini-3.1-flash',
         request: GenerateContentRequest(contents: [Content.text('Say hello')]),
       );
     } catch (e) {
@@ -135,7 +135,7 @@ void main() async {
 
     try {
       await client.models.generateContent(
-        model: 'gemini-3-flash',
+        model: 'gemini-3.1-flash',
         request: GenerateContentRequest(
           contents: [Content.text('Say hello again')],
         ),

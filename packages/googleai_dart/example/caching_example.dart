@@ -39,7 +39,7 @@ Future<void> demonstrateCaching(GoogleAIClient client) async {
   print('1. Creating cached content with system instructions...');
   final cachedContent = await client.cachedContents.create(
     cachedContent: const CachedContent(
-      model: 'models/gemini-3-flash-preview',
+      model: 'models/gemini-3.1-flash-preview',
       displayName: 'Math Expert Cache',
       systemInstruction: Content(
         parts: [
@@ -69,7 +69,7 @@ Future<void> demonstrateCaching(GoogleAIClient client) async {
   // 2. Use cached content in a request
   print('2. Using cached content in generation...');
   final response = await client.models.generateContent(
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-3.1-flash-preview',
     request: GenerateContentRequest(
       cachedContent: cachedContent.name,
       contents: [
@@ -107,7 +107,7 @@ Future<void> demonstrateCaching(GoogleAIClient client) async {
   final updated = await client.cachedContents.update(
     name: cachedContent.name!,
     cachedContent: const CachedContent(
-      model: 'models/gemini-3-flash-preview',
+      model: 'models/gemini-3.1-flash-preview',
       ttl: '7200s', // Extend to 2 hours
     ),
     updateMask: 'ttl',
@@ -121,7 +121,7 @@ Future<void> demonstrateCaching(GoogleAIClient client) async {
   // final updatedWithExpireTime = await client.cachedContents.update(
   //   name: cachedContent.name!,
   //   cachedContent: CachedContent(
-  //     model: 'models/gemini-3-flash-preview',
+  //     model: 'models/gemini-3.1-flash-preview',
   //     expireTime: absoluteExpiry,
   //   ),
   //   updateMask: 'expireTime',
