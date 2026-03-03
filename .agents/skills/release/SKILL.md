@@ -90,14 +90,15 @@ Format: `type(scope)!: description`
 | `feat` | minor |
 | `fix` | patch |
 | `refactor` | patch |
+| `perf` | patch |
 | `docs` | patch |
 
-> Note: `docs` as a patch bump is intentional and matches this repo's historical convention, even though some tools treat it as non-release.
+> Note: `docs` and `perf` as patch bumps are intentional and match this repo's conventions, even though some tools treat them as non-release.
 
 **Non-release types** (include in changelog notes but do NOT trigger a version bump):
 | Type |
 |------|
-| `test`, `chore`, `build`, `style`, `ci`, `perf` |
+| `test`, `chore`, `build`, `style`, `ci` |
 
 **Breaking change override**: If a commit has a breaking change (`!` suffix OR `BREAKING CHANGE:` in body), it **always triggers a release** regardless of type — override bump to **major**. This applies to non-release types too (e.g., `build!: Require Dart >=3.8.0` triggers a major bump). Historically this repo has `**BREAKING** **BUILD**:` entries that triggered releases.
 
@@ -171,8 +172,8 @@ For each released package, **prepend** a new section to `packages/{pkg}/CHANGELO
    - If no issue number found, omit the issue link portion entirely
 5. **Ordering within the changelog section**:
    - BREAKING entries first (any type with breaking change)
-   - Then release-triggering types: FEAT, FIX, REFACTOR, DOCS
-   - Then non-release types (if included): BUILD, PERF, STYLE, CI, TEST, CHORE
+   - Then release-triggering types: FEAT, FIX, REFACTOR, PERF, DOCS
+   - Then non-release types (if included): BUILD, STYLE, CI, TEST, CHORE
    - Within each type group, sort by **commit date descending** (newest first)
 6. **All links in new changelog entries** must point to `https://github.com/davidmigloz/ai_clients_dart` (older historical entries may still reference `davidmigloz/langchain_dart` — leave those as-is)
 7. **Standard markdown list**: `- **TYPE**: ...` (no leading space)
