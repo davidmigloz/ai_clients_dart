@@ -335,6 +335,80 @@ void main() {
           equals(original.functionCall.name),
         );
       });
+
+      group('with thoughtSignature', () {
+        test('deserializes thoughtSignature from JSON', () {
+          final json = {
+            'functionCall': {
+              'name': 'get_weather',
+              'args': {'city': 'SF'},
+            },
+            'thoughtSignature': base64.encode([10, 20, 30, 40]),
+          };
+          final part = Part.fromJson(json);
+          expect(part, isA<FunctionCallPart>());
+          final callPart = part as FunctionCallPart;
+          expect(callPart.functionCall.name, equals('get_weather'));
+          expect(callPart.thoughtSignature, equals([10, 20, 30, 40]));
+        });
+
+        test('serializes thoughtSignature to JSON when present', () {
+          const part = FunctionCallPart(
+            FunctionCall(name: 'search', args: {'q': 'test'}),
+            thoughtSignature: [65, 66, 67],
+          );
+          final json = part.toJson();
+          expect(json.containsKey('thoughtSignature'), isTrue);
+          expect(json['thoughtSignature'], equals(base64.encode([65, 66, 67])));
+        });
+
+        test('omits thoughtSignature when null', () {
+          const part = FunctionCallPart(
+            FunctionCall(name: 'search', args: {'q': 'test'}),
+          );
+          final json = part.toJson();
+          expect(json.containsKey('thoughtSignature'), isFalse);
+        });
+
+        test('roundtrip preserves thoughtSignature', () {
+          const original = FunctionCallPart(
+            FunctionCall(name: 'calc', args: {'x': 5}),
+            thoughtSignature: [100, 200, 50],
+          );
+          final json = original.toJson();
+          final deserialized = Part.fromJson(json) as FunctionCallPart;
+          expect(
+            deserialized.thoughtSignature,
+            equals(original.thoughtSignature),
+          );
+          expect(deserialized.functionCall.name, equals('calc'));
+        });
+
+        test('copyWith can set thoughtSignature', () {
+          const original = FunctionCallPart(FunctionCall(name: 'fn'));
+          final copy = original.copyWith(thoughtSignature: [1, 2, 3]);
+          expect(copy.thoughtSignature, equals([1, 2, 3]));
+          expect(copy.functionCall.name, equals('fn'));
+        });
+
+        test('copyWith can clear thoughtSignature', () {
+          const original = FunctionCallPart(
+            FunctionCall(name: 'fn'),
+            thoughtSignature: [1, 2, 3],
+          );
+          final copy = original.copyWith(thoughtSignature: null);
+          expect(copy.thoughtSignature, isNull);
+        });
+
+        test('copyWith preserves thoughtSignature by default', () {
+          const original = FunctionCallPart(
+            FunctionCall(name: 'fn'),
+            thoughtSignature: [9, 8, 7],
+          );
+          final copy = original.copyWith();
+          expect(copy.thoughtSignature, equals([9, 8, 7]));
+        });
+      });
     });
 
     group('FunctionResponsePart', () {
