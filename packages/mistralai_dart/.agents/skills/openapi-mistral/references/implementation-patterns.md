@@ -214,8 +214,8 @@ sealed class ContentPart {
   Map<String, dynamic> toJson();
 
   // Convenience constructors
-  factory ContentPart.text(String text) => TextContentPart(text: text);
-  factory ContentPart.imageUrl(String url) => ImageUrlContentPart(url: url);
+  factory ContentPart.text(String text) => TextContentPart(text);
+  factory ContentPart.imageUrl(String url) => ImageUrlContentPart(url);
 }
 
 /// Text content part.
@@ -225,10 +225,10 @@ class TextContentPart extends ContentPart {
 
   final String text;
 
-  const TextContentPart({required this.text});
+  const TextContentPart(this.text);
 
   factory TextContentPart.fromJson(Map<String, dynamic> json) =>
-      TextContentPart(text: json['text'] as String);
+      TextContentPart(json['text'] as String);
 
   @override
   Map<String, dynamic> toJson() => {'type': type, 'text': text};
@@ -241,10 +241,10 @@ class ImageUrlContentPart extends ContentPart {
 
   final String url;
 
-  const ImageUrlContentPart({required this.url});
+  const ImageUrlContentPart(this.url);
 
   factory ImageUrlContentPart.fromJson(Map<String, dynamic> json) =>
-      ImageUrlContentPart(url: json['image_url'] as String);
+      ImageUrlContentPart(json['image_url'] as String);
 
   @override
   Map<String, dynamic> toJson() => {'type': type, 'image_url': url};

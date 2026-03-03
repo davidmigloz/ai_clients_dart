@@ -353,9 +353,9 @@ void main() {
     });
 
     test('isMultimodal returns true for list content', () {
-      final multiMsg = UserMessage.multimodal(const [
-        TextContentPart(text: 'What is this?'),
-        ImageUrlContentPart(url: 'https://example.com/image.jpg'),
+      final multiMsg = UserMessage.multimodal([
+        ContentPart.text('What is this?'),
+        ContentPart.imageUrl('https://example.com/image.jpg'),
       ]);
       expect(multiMsg.isMultimodal, isTrue);
       expect(multiMsg.isTextOnly, isFalse);

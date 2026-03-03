@@ -22,10 +22,10 @@ sealed class ContentPart {
   Map<String, dynamic> toJson();
 
   /// Creates a text content part.
-  factory ContentPart.text(String text) => TextContentPart(text: text);
+  factory ContentPart.text(String text) => TextContentPart(text);
 
   /// Creates an image URL content part.
-  factory ContentPart.imageUrl(String url) => ImageUrlContentPart(url: url);
+  factory ContentPart.imageUrl(String url) => ImageUrlContentPart(url);
 }
 
 /// Text content part.
@@ -38,11 +38,11 @@ class TextContentPart extends ContentPart {
   final String text;
 
   /// Creates a [TextContentPart].
-  const TextContentPart({required this.text});
+  const TextContentPart(this.text);
 
   /// Creates a [TextContentPart] from JSON.
   factory TextContentPart.fromJson(Map<String, dynamic> json) =>
-      TextContentPart(text: json['text'] as String? ?? '');
+      TextContentPart(json['text'] as String? ?? '');
 
   @override
   Map<String, dynamic> toJson() => {'type': type, 'text': text};
@@ -74,17 +74,17 @@ class ImageUrlContentPart extends ContentPart {
   final String url;
 
   /// Creates an [ImageUrlContentPart].
-  const ImageUrlContentPart({required this.url});
+  const ImageUrlContentPart(this.url);
 
   /// Creates an [ImageUrlContentPart] from JSON.
   factory ImageUrlContentPart.fromJson(Map<String, dynamic> json) {
     // Handle nested format: {"image_url": {"url": "..."}}
     final imageUrl = json['image_url'];
     if (imageUrl is Map<String, dynamic>) {
-      return ImageUrlContentPart(url: imageUrl['url'] as String? ?? '');
+      return ImageUrlContentPart(imageUrl['url'] as String? ?? '');
     }
     // Handle flat format: {"image_url": "..."}
-    return ImageUrlContentPart(url: imageUrl as String? ?? '');
+    return ImageUrlContentPart(imageUrl as String? ?? '');
   }
 
   @override
