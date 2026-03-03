@@ -524,7 +524,10 @@ try {
 } on RateLimitException catch (e) {
   print('Rate limited: ${e.message}');
   if (e.retryAfter != null) {
-    await Future.delayed(e.retryAfter!.difference(DateTime.now()));
+    final delay = e.retryAfter!.difference(DateTime.now());
+    if (!delay.isNegative) {
+      await Future.delayed(delay);
+    }
     // Retry request
   }
 } on ValidationException catch (e) {

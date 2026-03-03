@@ -127,7 +127,7 @@ void main() async {
 
 ```yaml
 dependencies:
-  anthropic_sdk_dart: ^x.y.z
+  anthropic_sdk_dart: ^0.3.1
 ```
 
 ## Configuration
