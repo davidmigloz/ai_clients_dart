@@ -1,6 +1,118 @@
 # Migration Guide
 
-This guide helps you migrate from the old `googleai_dart` client (v0.1.x) to the new **v1.0.0** (complete rewrite with resource-based organization and comprehensive API coverage).
+## Migrating from v2.x to v3.0.0
+
+v3.0.0 introduces strongly-typed lists, updated Gemini 3.1 defaults, convenience helpers, and automatic batch model population.
+
+### 1) `List<dynamic>` → Strongly-Typed Lists
+
+All list fields that previously used `List<dynamic>` are now strongly typed. This is a **breaking change** if your code relied on the dynamic types.
+
+**Affected fields include:**
+
+| Class                | Field                   | Old Type        | New Type        |
+| -------------------- | ----------------------- | --------------- | --------------- |
+| `ContentEmbedding`   | `values`                | `List<dynamic>` | `List<double>`  |
+| `ContentEmbedding`   | `shape`                 | `List<dynamic>` | `List<int>`     |
+| `GroundingSupport`   | `groundingChunkIndices` | `List<dynamic>` | `List<int>`     |
+| `GroundingSupport`   | `confidenceScores`      | `List<dynamic>` | `List<double>`  |
+| `GenerationConfig`   | `stopSequences`         | `List<dynamic>` | `List<String>`  |
+| `GenerationConfig`   | `responseModalities`    | `List<dynamic>` | `List<String>`  |
+| `Schema`             | `enumValues`            | `List<dynamic>` | `List<String>`  |
+| `Schema`             | `required`              | `List<dynamic>` | `List<String>`  |
+| `GroundingMetadata`  | `webSearchQueries`      | `List<dynamic>` | `List<String>`  |
+
+**Migration:** If you were casting elements manually (e.g., `embedding.values.cast<double>()`), you can remove those casts. If you were passing `List<dynamic>` literals, update them to the correct typed list.
+
+```dart
+// Before (v2.x) — manual casts needed
+final values = embedding.values.cast<double>();
+
+// After (v3.0.0) — already typed
+final values = embedding.values; // List<double>
+```
+
+### 2) Gemini 3.1 Model Defaults
+
+Documentation examples and defaults now reference the **Gemini 3.1** model family (e.g., `gemini-3.1-flash-preview`) instead of Gemini 2 models.
+
+**Migration:** Update any hardcoded model strings in your code:
+
+```dart
+// Before
+model: 'gemini-2.5-flash-preview-05-20'
+
+// After
+model: 'gemini-3.1-flash-preview'
+```
+
+### 3) Convenience Helpers
+
+New extension methods provide quick access to common response data without manual traversal of candidates and parts:
+
+**`GenerateContentResponse` extensions:**
+- `.text` — concatenated text from all candidates
+- `.functionCalls` — all function calls from all candidates
+- `.executableCode` — code execution output from the first candidate
+- `.codeExecutionResult` — code execution result from the first candidate
+- `.data` — inline data (base64) from the first candidate
+- `.hasContent` — whether the response has valid content
+- `.allParts` — all parts from all candidates
+
+**`Candidate` extensions:**
+- `.text`, `.functionCalls`, `.parts`, `.hasText`, `.hasFunctionCalls`
+
+**`Content` extensions:**
+- `.text` — concatenated text (excludes thought parts)
+- `.functionCalls`, `.textParts`, `.inlineDataParts`, `.fileDataParts`
+- `.functionCallParts`, `.functionResponseParts`
+- `.executableCodeParts`, `.codeExecutionResultParts`
+
+**`Interaction` extensions:**
+- `.text`, `.textOutputs`, `.functionCallOutputs`, `.thoughtOutputs`
+- `.imageOutputs`, `.audioOutputs`, `.hasTextOutput`, `.hasFunctionCalls`
+
+```dart
+// Before — manual traversal
+final candidate = response.candidates?.firstOrNull;
+final text = candidate?.content?.parts
+    .whereType<TextPart>()
+    .map((p) => p.text)
+    .join();
+
+// After — convenience getter
+final text = response.text;
+```
+
+### 4) Auto-Populate `batch.model`
+
+The `batchGenerateContent` and `asyncBatchEmbedContent` methods on `client.models` (and `client.tunedModels`) now **auto-populate** `batch.model` from the `model` method parameter if it is not already set. You no longer need to specify the model in both places.
+
+```dart
+// Before (v2.x) — model specified twice
+final batch = await client.models.batchGenerateContent(
+  model: 'gemini-3.1-flash-preview',
+  batch: GenerateContentBatch(
+    model: 'models/gemini-3.1-flash-preview', // redundant
+    // ...
+  ),
+);
+
+// After (v3.0.0) — model auto-populated from parameter
+final batch = await client.models.batchGenerateContent(
+  model: 'gemini-3.1-flash-preview',
+  batch: GenerateContentBatch(
+    // model is auto-populated — no need to set it
+    // ...
+  ),
+);
+```
+
+---
+
+## Migrating from v0.1.x to v1.0.0
+
+This section helps you migrate from the old `googleai_dart` client (v0.1.x) to the new **v1.0.0** (complete rewrite with resource-based organization and comprehensive API coverage).
 
 ## Overview of Changes
 
@@ -77,7 +189,7 @@ import 'package:googleai_dart/googleai_dart.dart';
 
 // Before
 final r1 = await old.generateContent(
-  modelId: 'gemini-3-flash-preview',
+  modelId: 'gemini-3.1-flash-preview',
   request: GenerateContentRequest(
     contents: [Content(parts: [TextPart('Hello')], role: 'user')],
   ),
@@ -85,7 +197,7 @@ final r1 = await old.generateContent(
 
 // After
 final r2 = await client.models.generateContent(
-  model: 'gemini-3-flash-preview',
+  model: 'gemini-3.1-flash-preview',
   request: GenerateContentRequest(
     contents: [Content(parts: [TextPart('Hello')], role: 'user')],
   ),
@@ -102,13 +214,13 @@ final r2 = await client.models.generateContent(
 ```dart
 // Before
 await for (final chunk in old.streamGenerateContent(
-  modelId: 'gemini-3-flash-preview',
+  modelId: 'gemini-3.1-flash-preview',
   request: request,
 )) { /* ... */ }
 
 // After
 await for (final chunk in client.models.streamGenerateContent(
-  model: 'gemini-3-flash-preview',
+  model: 'gemini-3.1-flash-preview',
   request: request,
 )) { /* ... */ }
 ```
@@ -145,7 +257,7 @@ final batch = await client.models.batchEmbedContents(
 ```dart
 // Before
 final t1 = await old.countTokens(
-  modelId: 'gemini-3-flash-preview',
+  modelId: 'gemini-3.1-flash-preview',
   request: CountTokensRequest(
     contents: [Content(parts: [TextPart('Hello')], role: 'user')],
   ),
@@ -153,7 +265,7 @@ final t1 = await old.countTokens(
 
 // After
 final t2 = await client.models.countTokens(
-  model: 'gemini-3-flash-preview',
+  model: 'gemini-3.1-flash-preview',
   request: CountTokensRequest(
     contents: [Content(parts: [TextPart('Hello')], role: 'user')],
   ),
@@ -165,11 +277,11 @@ final t2 = await client.models.countTokens(
 ```dart
 // Before
 final list1 = await old.listModels();
-final m1 = await old.getModel(modelId: 'gemini-3-flash-preview');
+final m1 = await old.getModel(modelId: 'gemini-3.1-flash-preview');
 
 // After
 final list2 = await client.models.list();
-final m2 = await client.models.get(model: 'gemini-3-flash-preview');
+final m2 = await client.models.get(model: 'gemini-3.1-flash-preview');
 ```
 
 ## 7) Files API (New, Google AI only)
@@ -202,7 +314,7 @@ await client.files.delete(name: file.name);
 // Create cached content with system instructions
 final cached = await client.cachedContents.create(
   cachedContent: CachedContent(
-    model: 'models/gemini-3-flash-preview',
+    model: 'models/gemini-3.1-flash-preview',
     systemInstruction: Content(
       parts: [TextPart('You are a helpful assistant.')],
     ),
@@ -212,7 +324,7 @@ final cached = await client.cachedContents.create(
 
 // Use cached content in generation
 final res = await client.models.generateContent(
-  model: 'gemini-3-flash-preview',
+  model: 'gemini-3.1-flash-preview',
   request: GenerateContentRequest(
     cachedContent: cached.name,
     contents: [Content(parts: [TextPart('Explain Pythagoras')], role: 'user')],
@@ -232,10 +344,10 @@ await client.cachedContents.delete(name: cached.name!);
 
 ```dart
 final batch = await client.models.batchGenerateContent(
-  model: 'gemini-3-flash-preview',
+  model: 'gemini-3.1-flash-preview',
   batch: GenerateContentBatch(
     displayName: 'My Batch',
-    model: 'models/gemini-3-flash-preview',
+    model: 'models/gemini-3.1-flash-preview',
     inputConfig: InputConfig(
       requests: InlinedRequests(
         requests: [
