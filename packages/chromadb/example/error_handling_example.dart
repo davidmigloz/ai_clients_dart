@@ -103,7 +103,7 @@ final client = ChromaClient(
       maxRetries: 3,
       initialDelay: Duration(milliseconds: 500),
       maxDelay: Duration(seconds: 30),
-      multiplier: 2.0,
+      jitter: 0.1,
     ),
   ),
 );

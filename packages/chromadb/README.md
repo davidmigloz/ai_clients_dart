@@ -123,7 +123,7 @@ void main() async {
 
 ```yaml
 dependencies:
-  chromadb: ^0.1.0
+  chromadb: ^x.y.z
 ```
 
 ## Configuration

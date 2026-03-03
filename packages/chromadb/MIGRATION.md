@@ -441,10 +441,10 @@ class CustomEmbedder implements EmbeddingFunction {
     // Generate embeddings using your service
     return inputs.map((input) {
       switch (input) {
-        case EmbeddableDocument(:final text):
-          return _embedText(text);
-        case EmbeddableImage(:final base64):
-          return _embedImage(base64);
+        case EmbeddableDocument(:final document):
+          return _embedText(document);
+        case EmbeddableImage(:final image):
+          return _embedImage(image);
       }
     }).toList();
   }
@@ -627,8 +627,7 @@ final client = ChromaClient(
       maxRetries: 5,
       initialDelay: Duration(seconds: 1),
       maxDelay: Duration(minutes: 1),
-      backoffMultiplier: 2.0,
-      jitterFactor: 0.2,
+      jitter: 0.2,
     ),
     logLevel: Level.FINE,
   ),
@@ -657,7 +656,7 @@ final response = await collection.attachFunction(
   outputCollection: 'processed-data',
   params: {'key': 'value'},
 );
-print('Created: ${response.justCreated}');
+print('Created: ${response.created}');
 
 // Get attached function details
 final func = await collection.getFunction(name: 'processor');
