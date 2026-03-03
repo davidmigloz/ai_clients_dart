@@ -50,7 +50,8 @@ class FimCompletionRequest {
 
   /// Stop sequences to stop generation.
   ///
-  /// Can be a single string or a list of strings.
+  /// Use [StopSequence.single] for a single stop string or
+  /// [StopSequence.multiple] for multiple stop strings.
   final StopSequence? stop;
 
   /// Random seed for deterministic generation.
