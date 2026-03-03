@@ -17,7 +17,7 @@
 ///     request: ChatRequest(
 ///       model: 'gpt-oss',
 ///       messages: [
-///         ChatMessage.user(content: 'Hello!'),
+///         ChatMessage.user('Hello!'),
 ///       ],
 ///     ),
 ///   );
@@ -28,7 +28,7 @@
 ///     request: ChatRequest(
 ///       model: 'gpt-oss',
 ///       messages: [
-///         ChatMessage.user(content: 'Tell me a story'),
+///         ChatMessage.user('Tell me a story'),
 ///       ],
 ///     ),
 ///   )) {
