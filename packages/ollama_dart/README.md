@@ -90,7 +90,7 @@ void main() async {
 
 ```yaml
 dependencies:
-  ollama_dart: ^x.y.z
+  ollama_dart: ^0.3.0
 ```
 
 ## Configuration
