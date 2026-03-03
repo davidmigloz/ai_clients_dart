@@ -108,7 +108,7 @@ User messages can contain multiple content parts:
 final message = ChatMessage.user([
   ContentPart.text('What is in this image?'),
   ContentPart.imageUrl(
-    url: 'https://example.com/image.jpg',
+    'https://example.com/image.jpg',
     detail: ImageDetail.high,
   ),
 ]);

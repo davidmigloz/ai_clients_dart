@@ -11,7 +11,7 @@ import 'package:meta/meta.dart';
 /// final parts = [
 ///   ContentPart.text('What is in this image?'),
 ///   ContentPart.imageUrl(
-///     url: 'https://example.com/image.jpg',
+///     'https://example.com/image.jpg',
 ///     detail: ImageDetail.high,
 ///   ),
 /// ];
@@ -37,7 +37,7 @@ sealed class ContentPart {
   static ContentPart text(String text) => TextContentPart(text: text);
 
   /// Creates an image URL content part.
-  static ContentPart imageUrl({required String url, ImageDetail? detail}) =>
+  static ContentPart imageUrl(String url, {ImageDetail? detail}) =>
       ImageContentPart(url: url, detail: detail);
 
   /// Creates an image content part from base64-encoded data.
