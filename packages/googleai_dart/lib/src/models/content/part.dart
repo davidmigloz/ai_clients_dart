@@ -96,6 +96,9 @@ sealed class Part {
     if (json.containsKey('functionCall')) {
       return FunctionCallPart(
         FunctionCall.fromJson(json['functionCall'] as Map<String, dynamic>),
+        thoughtSignature: json['thoughtSignature'] != null
+            ? base64Decode(json['thoughtSignature'] as String)
+            : null,
       );
     }
     if (json.containsKey('functionResponse')) {
@@ -224,18 +227,36 @@ class FunctionCallPart extends Part {
   /// Function call.
   final FunctionCall functionCall;
 
+  /// Optional opaque thought signature bytes.
+  ///
+  /// Required by new Gemini models when echoing function calls
+  /// back in the chat history. The API returns this as a base64-encoded
+  /// string alongside the function call; it must be preserved and sent
+  /// back unchanged.
+  final List<int>? thoughtSignature;
+
   /// Creates a [FunctionCallPart].
-  const FunctionCallPart(this.functionCall);
+  const FunctionCallPart(this.functionCall, {this.thoughtSignature});
 
   @override
-  Map<String, dynamic> toJson() => {'functionCall': functionCall.toJson()};
+  Map<String, dynamic> toJson() => {
+    'functionCall': functionCall.toJson(),
+    if (thoughtSignature != null)
+      'thoughtSignature': base64Encode(thoughtSignature!),
+  };
 
   /// Creates a copy with replaced values.
-  FunctionCallPart copyWith({Object? functionCall = unsetCopyWithValue}) {
+  FunctionCallPart copyWith({
+    Object? functionCall = unsetCopyWithValue,
+    Object? thoughtSignature = unsetCopyWithValue,
+  }) {
     return FunctionCallPart(
       functionCall == unsetCopyWithValue
           ? this.functionCall
           : functionCall! as FunctionCall,
+      thoughtSignature: thoughtSignature == unsetCopyWithValue
+          ? this.thoughtSignature
+          : thoughtSignature as List<int>?,
     );
   }
 }
