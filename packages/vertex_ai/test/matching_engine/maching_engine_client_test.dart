@@ -1,4 +1,5 @@
 // ignore_for_file: avoid_print
+@Tags(['integration'])
 @TestOn('vm')
 library; // Uses dart:io
 

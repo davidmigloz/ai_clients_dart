@@ -1,4 +1,6 @@
 // ignore_for_file: unnecessary_null_checks
+@Tags(['integration'])
+library;
 
 import 'dart:convert';
 import 'dart:io';

@@ -1,4 +1,6 @@
 // ignore_for_file: avoid_print, prefer_foreach
+@Tags(['integration'])
+library;
 
 import 'dart:async';
 import 'dart:io';

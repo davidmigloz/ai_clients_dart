@@ -1,0 +1,8 @@
+# Test configuration for openai_realtime_dart
+#
+# Integration tests require OPENAI_API_KEY environment variable.
+# Run with: dart test --tags=integration
+
+tags:
+  integration:
+    # Register the integration tag to suppress warnings

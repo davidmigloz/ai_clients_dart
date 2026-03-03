@@ -1,4 +1,6 @@
 // ignore_for_file: avoid_print
+@Tags(['integration'])
+library;
 
 import 'dart:io';
 import 'package:mistralai_dart/mistralai_dart.dart';

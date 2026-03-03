@@ -1,0 +1,8 @@
+# Test configuration for ollama_dart
+#
+# Integration tests require a running Ollama instance.
+# Run with: dart test --tags=integration
+
+tags:
+  integration:
+    # Register the integration tag to suppress warnings

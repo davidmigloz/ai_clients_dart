@@ -1,3 +1,4 @@
+@Tags(['integration'])
 @TestOn('vm')
 library; // Uses dart:io
 

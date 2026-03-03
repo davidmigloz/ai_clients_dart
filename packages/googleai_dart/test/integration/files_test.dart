@@ -1,4 +1,6 @@
 // ignore_for_file: avoid_print
+@Tags(['integration'])
+library;
 
 import 'dart:io' as io;
 import 'package:googleai_dart/googleai_dart.dart';
