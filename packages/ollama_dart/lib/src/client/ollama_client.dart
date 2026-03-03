@@ -206,7 +206,7 @@ class OllamaClient {
     return OllamaClient(
       config: OllamaConfig(
         authProvider: BearerTokenProvider(apiKey),
-        baseUrl: baseUrl ?? 'http://localhost:11434',
+        baseUrl: baseUrl,
       ),
       httpClient: httpClient,
     );

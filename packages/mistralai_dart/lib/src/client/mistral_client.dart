@@ -324,9 +324,10 @@ class MistralClient {
   /// ```dart
   /// final client = MistralClient.withApiKey('your-api-key');
   /// ```
-  factory MistralClient.withApiKey(String apiKey) {
+  factory MistralClient.withApiKey(String apiKey, {http.Client? httpClient}) {
     return MistralClient(
       config: MistralConfig(authProvider: ApiKeyProvider(apiKey)),
+      httpClient: httpClient,
     );
   }
 
