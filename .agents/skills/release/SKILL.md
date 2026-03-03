@@ -14,7 +14,7 @@ This skill handles the full release lifecycle for the ai_clients_dart monorepo.
 It supports three execution modes controlled via `$ARGUMENTS`:
 
 - **`/release --plan`** — Plan-only mode: detects changes, computes bumps, shows release plan. No file edits, no publish, no tags. Safe to run on any branch.
-- **`/release --dry-run`** — Dry-release mode: does everything including file edits and `dart pub publish --dry-run`, but stops before actual publishing/tagging/committing. Always reverts all file edits before exit (on both success and failure) via `git checkout HEAD -- packages/`.
+- **`/release --dry-run`** — Dry-release mode: does everything including file edits and `dart pub publish --dry-run`, but stops before actual publishing/tagging/committing. Always restores the working tree before exit (on both success and failure).
 - **`/release`** — Full release mode: the complete workflow.
 
 Parse `$ARGUMENTS` to determine the mode. If `$ARGUMENTS` contains `--plan`, run in plan-only mode. If it contains `--dry-run`, run in dry-run mode. Otherwise, run in full release mode.
@@ -37,7 +37,7 @@ Perform all applicable checks before proceeding. Fail fast with an actionable er
 3. **Up-to-date with remote** (full release mode only):
    ```bash
    git fetch origin main
-   git diff HEAD origin/main --quiet  # must not differ
+   test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"  # HEAD must equal origin/main
    ```
    In `--plan` and `--dry-run` modes, skip this check.
 4. **CLI availability**: `dart` and `gh` must be on PATH.
@@ -198,15 +198,17 @@ cd packages/{pkg} && dart pub publish --dry-run
 Present the results and **ask user to confirm** before actual publishing.
 
 If there are **errors** (not warnings):
-- Stop and **revert all local file changes**:
+- Stop and **restore the working tree** (revert tracked changes and remove generated artifacts):
   ```bash
   git checkout HEAD -- packages/
+  git clean -fdX packages/    # remove ignored/generated files (e.g., .dart_tool/, build outputs)
   ```
 - Report which packages had errors and what the errors were.
 
-**If `--dry-run` mode**: After showing the dry-run results, **revert all file edits** and STOP:
+**If `--dry-run` mode**: After showing the dry-run results, **restore the working tree** and STOP:
 ```bash
 git checkout HEAD -- packages/
+git clean -fdX packages/
 ```
 
 ---
