@@ -210,8 +210,11 @@ void main() {
 
       final json = request.toJson();
       expect(json['stream'], isTrue);
-      expect(json['stream_options'], isA<Map>());
-      expect((json['stream_options'] as Map)['include_usage'], isTrue);
+      expect(json['stream_options'], isA<Map<String, dynamic>>());
+      expect(
+        (json['stream_options'] as Map<String, dynamic>)['include_usage'],
+        isTrue,
+      );
     });
 
     test('streamOptions fromJson parses typed StreamOptions', () {

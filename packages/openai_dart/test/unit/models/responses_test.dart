@@ -645,16 +645,22 @@ void main() {
       final json = tool.toJson();
       expect(json['type'], equals('web_search_preview'));
       expect(json['search_context_size'], equals('high'));
-      expect(json['user_location'], isA<Map>());
-      expect((json['user_location'] as Map)['type'], equals('approximate'));
-      expect((json['user_location'] as Map)['country'], equals('US'));
+      expect(json['user_location'], isA<Map<String, dynamic>>());
+      expect(
+        (json['user_location'] as Map<String, dynamic>)['type'],
+        equals('approximate'),
+      );
+      expect(
+        (json['user_location'] as Map<String, dynamic>)['country'],
+        equals('US'),
+      );
 
       final restored = WebSearchTool.fromJson(json);
       expect(restored, equals(tool));
     });
 
     test('WebSearchTool fromJson parses nested user_location object', () {
-      final tool = WebSearchTool.fromJson({
+      final tool = WebSearchTool.fromJson(const {
         'type': 'web_search_preview',
         'user_location': {
           'type': 'approximate',
@@ -738,8 +744,8 @@ void main() {
 
       final json = tool.toJson();
       expect(json['type'], equals('file_search'));
-      expect(json['filters'], isA<Map>());
-      expect((json['filters'] as Map)['type'], equals('eq'));
+      expect(json['filters'], isA<Map<String, dynamic>>());
+      expect((json['filters'] as Map<String, dynamic>)['type'], equals('eq'));
 
       final restored = FileSearchTool.fromJson(json);
       expect(restored.filters, isA<ComparisonFilter>());
