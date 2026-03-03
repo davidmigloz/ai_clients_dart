@@ -146,6 +146,7 @@ export 'src/models/metadata/finish_reason.dart';
 export 'src/models/metadata/prediction.dart';
 export 'src/models/metadata/prompt_mode.dart';
 export 'src/models/metadata/response_format.dart';
+export 'src/models/metadata/stop_sequence.dart';
 export 'src/models/metadata/usage_info.dart';
 // --- Models: Models API ---
 export 'src/models/models/model.dart';

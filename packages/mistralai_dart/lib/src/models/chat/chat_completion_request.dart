@@ -5,6 +5,7 @@ import '../common/copy_with_sentinel.dart';
 import '../metadata/prediction.dart';
 import '../metadata/prompt_mode.dart';
 import '../metadata/response_format.dart';
+import '../metadata/stop_sequence.dart';
 import '../tools/tool.dart';
 import '../tools/tool_choice.dart';
 import 'chat_message.dart';
@@ -37,7 +38,7 @@ class ChatCompletionRequest {
   /// Stop sequences to stop generation.
   ///
   /// Can be a single string or a list of strings.
-  final Object? stop;
+  final StopSequence? stop;
 
   /// Random seed for deterministic generation.
   final int? randomSeed;
@@ -129,7 +130,9 @@ class ChatCompletionRequest {
         topP: (json['top_p'] as num?)?.toDouble(),
         maxTokens: json['max_tokens'] as int?,
         stream: json['stream'] as bool?,
-        stop: json['stop'],
+        stop: json['stop'] != null
+            ? StopSequence.fromJson(json['stop'] as Object)
+            : null,
         randomSeed: json['random_seed'] as int?,
         responseFormat: json['response_format'] != null
             ? ResponseFormat.fromJson(
@@ -164,7 +167,7 @@ class ChatCompletionRequest {
     if (topP != null) 'top_p': topP,
     if (maxTokens != null) 'max_tokens': maxTokens,
     if (stream != null) 'stream': stream,
-    if (stop != null) 'stop': stop,
+    if (stop != null) 'stop': stop!.toJson(),
     if (randomSeed != null) 'random_seed': randomSeed,
     if (responseFormat != null) 'response_format': responseFormat!.toJson(),
     if (tools != null) 'tools': tools!.map((e) => e.toJson()).toList(),
@@ -212,7 +215,7 @@ class ChatCompletionRequest {
           ? this.maxTokens
           : maxTokens as int?,
       stream: stream == unsetCopyWithValue ? this.stream : stream as bool?,
-      stop: stop == unsetCopyWithValue ? this.stop : stop,
+      stop: stop == unsetCopyWithValue ? this.stop : stop as StopSequence?,
       randomSeed: randomSeed == unsetCopyWithValue
           ? this.randomSeed
           : randomSeed as int?,

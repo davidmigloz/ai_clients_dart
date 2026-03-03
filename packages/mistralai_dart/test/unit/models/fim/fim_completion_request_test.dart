@@ -30,7 +30,7 @@ void main() {
         maxTokens: 1000,
         topP: 0.9,
         minTokens: 10,
-        stop: [r'\n\n'],
+        stop: StopSequence.multiple([r'\n\n']),
         randomSeed: 42,
         stream: true,
       );
@@ -42,7 +42,7 @@ void main() {
       expect(request.maxTokens, 1000);
       expect(request.topP, 0.9);
       expect(request.minTokens, 10);
-      expect(request.stop, [r'\n\n']);
+      expect(request.stop, const StopSequence.multiple([r'\n\n']));
       expect(request.randomSeed, 42);
       expect(request.stream, true);
     });
@@ -71,7 +71,7 @@ void main() {
         maxTokens: 500,
         topP: 0.95,
         minTokens: 5,
-        stop: [r'\n'],
+        stop: StopSequence.multiple([r'\n']),
         randomSeed: 123,
         stream: false,
       );
@@ -85,7 +85,7 @@ void main() {
       expect(json['max_tokens'], 500);
       expect(json['top_p'], 0.95);
       expect(json['min_tokens'], 5);
-      expect(json['stop'], [r'\n']);
+      expect(json['stop'], <dynamic>[r'\n']);
       expect(json['random_seed'], 123);
       expect(json['stream'], false);
     });
@@ -123,7 +123,7 @@ void main() {
       expect(request.maxTokens, 200);
       expect(request.topP, 0.85);
       expect(request.minTokens, 1);
-      expect(request.stop, [r'\n', ';']);
+      expect(request.stop, const StopSequence.multiple([r'\n', ';']));
       expect(request.randomSeed, 999);
       expect(request.stream, true);
     });
