@@ -148,7 +148,7 @@ For each released package, **prepend** a new section to `packages/{pkg}/CHANGELO
 ```markdown
 ## {new_version}
 
-[> Note: This release has breaking changes.]
+> Note: This release has breaking changes.          ← only if breaking
 
 {AI-written summary of main changes, 1-3 sentences}
 
@@ -163,14 +163,15 @@ For each released package, **prepend** a new section to `packages/{pkg}/CHANGELO
 2. **Short hash** in display = first **8 characters** of the commit hash
 3. **Full 40-char hash** in the commit URL
 4. **Extract issue numbers** from:
-   - `(#N)` in the commit subject
+   - `(#N)` in the commit subject — there may be **multiple** references (e.g., `(#913) (#914)`); collect all of them
    - `Closes #N`, `Fixes #N`, `Resolves #N` in the commit body
+   - Render all collected issue numbers in the order they appear: `([#913](...)) ([#914](...))`
    - If no issue number found, omit the issue link portion entirely
 5. **Ordering within the changelog section**:
    - BREAKING entries first
    - Then by type: FEAT, FIX, REFACTOR, DOCS
    - Within each type group, sort by **commit date descending** (newest first)
-6. **All links** must point to `https://github.com/davidmigloz/ai_clients_dart` (NOT `langchain_dart`)
+6. **All links in new changelog entries** must point to `https://github.com/davidmigloz/ai_clients_dart` (older historical entries may still reference `davidmigloz/langchain_dart` — leave those as-is)
 7. **Standard markdown list**: `- **TYPE**: ...` (no leading space)
 8. **Breaking note**: Only include `> Note: This release has breaking changes.` if there are breaking changes
 9. **AI summary**: Write 1-3 sentences summarizing the main changes in plain English. Place it between the breaking note (if any) and the entry list.
