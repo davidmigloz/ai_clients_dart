@@ -31,6 +31,27 @@ void main() {
         );
         expect(content.text, 'Hello World');
       });
+
+      test('skips thought text parts', () {
+        const content = Content(
+          parts: [
+            TextPart('visible'),
+            TextPart('reasoning...', thought: true),
+            TextPart(' more visible'),
+          ],
+        );
+        expect(content.text, 'visible more visible');
+      });
+
+      test('returns null when only thought text parts exist', () {
+        const content = Content(
+          parts: [
+            TextPart('thought 1', thought: true),
+            TextPart('thought 2', thought: true),
+          ],
+        );
+        expect(content.text, isNull);
+      });
     });
 
     group('functionCalls', () {
@@ -74,6 +95,16 @@ void main() {
           ],
         );
         expect(content.textParts, hasLength(2));
+      });
+
+      test('includes thought text parts', () {
+        const content = Content(
+          parts: [TextPart('visible'), TextPart('reasoning...', thought: true)],
+        );
+        final parts = content.textParts;
+        expect(parts, hasLength(2));
+        expect(parts[0].thought, isNull);
+        expect(parts[1].thought, isTrue);
       });
     });
 

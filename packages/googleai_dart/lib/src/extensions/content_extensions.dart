@@ -4,14 +4,17 @@ import '../models/tools/function_call.dart';
 
 /// Convenience extensions for [Content].
 extension ContentExtensions on Content {
-  /// Concatenated text from all text parts.
+  /// Concatenated text from all non-thought text parts.
   ///
-  /// Returns null if no text parts exist.
+  /// Text parts flagged as thoughts (`thought == true`) are excluded.
+  /// Use [textParts] to access all text parts including thoughts.
+  ///
+  /// Returns null if no non-thought text parts exist.
   String? get text {
     final buffer = StringBuffer();
     var hasText = false;
     for (final part in parts) {
-      if (part is TextPart) {
+      if (part is TextPart && part.thought != true) {
         buffer.write(part.text);
         hasText = true;
       }

@@ -33,6 +33,105 @@ void main() {
         expect(deserialized, isA<TextPart>());
         expect((deserialized as TextPart).text, equals(original.text));
       });
+
+      group('with thought', () {
+        test('deserializes thought flag from JSON', () {
+          final json = {'text': 'reasoning...', 'thought': true};
+          final part = Part.fromJson(json);
+          expect(part, isA<TextPart>());
+          final textPart = part as TextPart;
+          expect(textPart.text, equals('reasoning...'));
+          expect(textPart.thought, isTrue);
+          expect(textPart.thoughtSignature, isNull);
+        });
+
+        test('deserializes thought and thoughtSignature from JSON', () {
+          final json = {
+            'text': 'reasoning...',
+            'thought': true,
+            'thoughtSignature': base64.encode([10, 20, 30]),
+          };
+          final part = Part.fromJson(json);
+          expect(part, isA<TextPart>());
+          final textPart = part as TextPart;
+          expect(textPart.text, equals('reasoning...'));
+          expect(textPart.thought, isTrue);
+          expect(textPart.thoughtSignature, equals([10, 20, 30]));
+        });
+
+        test(
+          'serializes thought and thoughtSignature to JSON when present',
+          () {
+            const part = TextPart(
+              'reasoning...',
+              thought: true,
+              thoughtSignature: [65, 66, 67],
+            );
+            final json = part.toJson();
+            expect(json['text'], equals('reasoning...'));
+            expect(json['thought'], isTrue);
+            expect(
+              json['thoughtSignature'],
+              equals(base64.encode([65, 66, 67])),
+            );
+          },
+        );
+
+        test('omits thought and thoughtSignature when null', () {
+          const part = TextPart('plain text');
+          final json = part.toJson();
+          expect(json, equals({'text': 'plain text'}));
+          expect(json.containsKey('thought'), isFalse);
+          expect(json.containsKey('thoughtSignature'), isFalse);
+        });
+
+        test('roundtrip preserves all fields', () {
+          const original = TextPart(
+            'deep thought',
+            thought: true,
+            thoughtSignature: [100, 200, 50],
+          );
+          final json = original.toJson();
+          final deserialized = Part.fromJson(json) as TextPart;
+          expect(deserialized.text, equals('deep thought'));
+          expect(deserialized.thought, isTrue);
+          expect(deserialized.thoughtSignature, equals([100, 200, 50]));
+        });
+
+        test('copyWith can set thought and thoughtSignature', () {
+          const original = TextPart('text');
+          final copy = original.copyWith(
+            thought: true,
+            thoughtSignature: [1, 2, 3],
+          );
+          expect(copy.text, equals('text'));
+          expect(copy.thought, isTrue);
+          expect(copy.thoughtSignature, equals([1, 2, 3]));
+        });
+
+        test('copyWith can clear thought and thoughtSignature', () {
+          const original = TextPart(
+            'text',
+            thought: true,
+            thoughtSignature: [1, 2, 3],
+          );
+          final copy = original.copyWith(thought: null, thoughtSignature: null);
+          expect(copy.thought, isNull);
+          expect(copy.thoughtSignature, isNull);
+        });
+
+        test('copyWith preserves thought and thoughtSignature by default', () {
+          const original = TextPart(
+            'text',
+            thought: true,
+            thoughtSignature: [9, 8, 7],
+          );
+          final copy = original.copyWith();
+          expect(copy.text, equals('text'));
+          expect(copy.thought, isTrue);
+          expect(copy.thoughtSignature, equals([9, 8, 7]));
+        });
+      });
     });
 
     group('InlineDataPart', () {
@@ -643,10 +742,7 @@ void main() {
           );
           final json = part.toJson();
           expect(json.containsKey('thoughtSignature'), isTrue);
-          expect(
-            json['thoughtSignature'],
-            equals(base64.encode([65, 66, 67])),
-          );
+          expect(json['thoughtSignature'], equals(base64.encode([65, 66, 67])));
         });
 
         test('omits thoughtSignature when null', () {
