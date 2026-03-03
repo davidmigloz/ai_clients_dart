@@ -13,7 +13,7 @@ disable-model-invocation: true
 This skill handles the full release lifecycle for the ai_clients_dart monorepo.
 It supports three execution modes controlled via `$ARGUMENTS`:
 
-- **`/release --plan`** — Plan-only mode: detects changes, computes bumps, shows release plan. No file edits, no publish, no tags. Safe to run anytime.
+- **`/release --plan`** — Plan-only mode: detects changes, computes bumps, shows release plan. No file edits, no publish, no tags. Safe to run on any branch.
 - **`/release --dry-run`** — Dry-release mode: does everything including file edits and `dart pub publish --dry-run`, but stops before actual publishing/tagging/committing. Always reverts all file edits before exit (on both success and failure) via `git checkout HEAD -- packages/`.
 - **`/release`** — Full release mode: the complete workflow.
 
@@ -23,21 +23,23 @@ Parse `$ARGUMENTS` to determine the mode. If `$ARGUMENTS` contains `--plan`, run
 
 ## Step 1: Validate Environment
 
-Perform all of these checks before proceeding. Fail fast with an actionable error message if any check fails.
+Perform all applicable checks before proceeding. Fail fast with an actionable error message if any check fails.
 
-1. **Branch check**: Must be on `main` branch.
+1. **Branch check** (full release mode only):
+   Must be on `main` branch. In `--plan` and `--dry-run` modes, any branch is allowed (but warn the user that results may differ from main).
    ```bash
-   git branch --show-current  # must output "main"
+   git branch --show-current  # must output "main" in full release mode
    ```
 2. **Clean working tree**: No uncommitted changes.
    ```bash
    git status --porcelain  # must be empty
    ```
-3. **Up-to-date with remote**:
+3. **Up-to-date with remote** (full release mode only):
    ```bash
    git fetch origin main
    git diff HEAD origin/main --quiet  # must not differ
    ```
+   In `--plan` and `--dry-run` modes, skip this check.
 4. **CLI availability**: `dart` and `gh` must be on PATH.
 5. **Auth preflight** (skip in `--plan` mode):
    - `gh auth status` — must show authenticated. If not, tell user to run `gh auth login`.
@@ -61,9 +63,9 @@ Read the `workspace` list from the root `pubspec.yaml` (the source of truth). Ea
 
 2. **Get commits since that tag**:
    ```bash
-   git log --format="%H%x00%s%x00%b" {tag}..HEAD -- packages/{pkg}/
+   git log --format="%H%x1f%s%x1f%b%x1e" {tag}..HEAD -- packages/{pkg}/
    ```
-   Use null-byte delimiters (`%x00`) to capture the full commit hash, subject, AND body. The body is needed to detect `BREAKING CHANGE:` footers.
+   Use ASCII Unit Separator (`%x1f`) between fields and ASCII Record Separator (`%x1e`) after each commit. **Parse by splitting on `\x1e` first** (to get individual commit records), then split each record on `\x1f` (to get hash, subject, body). This is critical because commit bodies can contain blank lines that would otherwise make commit boundaries ambiguous.
 
 3. **No previous tag** (first release): use all commits touching `packages/{pkg}/`.
 
@@ -257,11 +259,20 @@ chore(release): publish packages
    git tag -a "{pkg}-v{version}" -m "{pkg} v{version}"
    ```
 
-2. **Aggregate release tag**:
+2. **Aggregate release tag** — compute once and reuse in Step 11:
    ```bash
-   git tag -a "release-YYYY-MM-DD" -m "Release YYYY-MM-DD"
+   # Determine the aggregate tag name
+   aggregate_tag="release-$(date +%Y-%m-%d)"
+   if git rev-parse "$aggregate_tag" >/dev/null 2>&1; then
+     counter=2
+     while git rev-parse "${aggregate_tag}.${counter}" >/dev/null 2>&1; do
+       counter=$((counter + 1))
+     done
+     aggregate_tag="${aggregate_tag}.${counter}"
+   fi
+   git tag -a "$aggregate_tag" -m "Release ${aggregate_tag#release-}"
    ```
-   If a tag with that name already exists, append a counter: `release-YYYY-MM-DD.2`, `.3`, etc.
+   Store `$aggregate_tag` for use in Step 11.
 
 3. **Push**:
    ```bash
@@ -274,10 +285,10 @@ chore(release): publish packages
 
 **Only in full release mode.**
 
-Create one combined GitHub release using the `gh` CLI:
+Create one combined GitHub release using the `gh` CLI. Use the **exact `$aggregate_tag` value** computed in Step 10 (which may include a `.N` counter suffix for same-day re-releases).
 
-- **Tag**: the aggregate `release-YYYY-MM-DD` tag
-- **Title**: `YYYY-MM-DD`
+- **Tag**: `$aggregate_tag` (from Step 10)
+- **Title**: the date portion of the tag (e.g., `2026-03-03`)
 - **Body**: summary table of all packages + full changelog sections per package
 
 Body format:
@@ -304,8 +315,8 @@ Body format:
 
 Create the release:
 ```bash
-gh release create "release-YYYY-MM-DD" \
-  --title "YYYY-MM-DD" \
+gh release create "$aggregate_tag" \
+  --title "${aggregate_tag#release-}" \
   --notes "$(cat <<'EOF'
 {body content}
 EOF
