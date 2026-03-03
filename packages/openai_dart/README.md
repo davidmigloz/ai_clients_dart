@@ -192,7 +192,7 @@ void main() async {
 
 ```yaml
 dependencies:
-  openai_dart: ^1.0.0
+  openai_dart: ^x.y.z
 ```
 
 ## Platform Support
@@ -347,10 +347,6 @@ final stream = client.chat.completions.createStream(
 await for (final event in stream) {
   stdout.write(event.textDelta ?? '');
 }
-
-// Or use the extension method:
-final text = await stream.collectText();
-print(text);
 ```
 
 </details>

@@ -118,7 +118,7 @@ final client = OpenAIClient(
       maxRetries: 3,
       initialDelay: Duration(milliseconds: 500),
     ),
-    logLevel: HttpLogLevel.basic,
+    logLevel: Level.FINE,
     project: 'proj_...',
   ),
 );
@@ -487,29 +487,22 @@ v1.0.0 uses a composable interceptor pattern:
 // - LoggingInterceptor: Request/response logging (based on logLevel)
 
 // Custom interceptor example:
-class CustomHeaderInterceptor extends HttpInterceptor {
+class CustomHeaderInterceptor implements Interceptor {
   @override
-  Future<HttpRequest> onRequest(HttpRequest request) async {
-    return request.copyWith(
-      headers: {...request.headers, 'X-Custom-Header': 'value'},
+  Future<http.Response> intercept(
+    RequestContext context,
+    InterceptorNext next,
+  ) async {
+    // Modify request before passing it down the chain
+    final modifiedRequest = (context.request as http.Request).copyWith(
+      headers: {...context.request.headers, 'X-Custom-Header': 'value'},
     );
-  }
+    final modifiedContext = context.copyWith(request: modifiedRequest);
 
-  @override
-  Future<HttpResponse> onResponse(HttpResponse response) async {
-    // Process response
-    return response;
+    // Call next interceptor
+    return next(modifiedContext);
   }
 }
-
-// Use with custom HTTP client (advanced)
-final httpClient = InterceptedHttpClient(
-  baseClient: http.Client(),
-  interceptors: [
-    CustomHeaderInterceptor(),
-    // ... other interceptors
-  ],
-);
 ```
 
 ## API Resource Access
@@ -583,7 +576,7 @@ final stream = client.responses.createStream(
 
 await for (final event in stream) {
   switch (event) {
-    case ResponseTextDeltaEvent(:final delta):
+    case OutputTextDeltaEvent(:final delta):
       stdout.write(delta);
     default:
       break;
@@ -690,7 +683,7 @@ For multi-turn conversations with automatic history management:
 final conversation = await client.conversations.create(
   ConversationCreateRequest(
     items: [
-      ConversationItem.userMessage('Hello!'),
+      MessageItem.userText('Hello!'),
     ],
   ),
 );
@@ -804,7 +797,11 @@ Create and manage code execution containers:
 final container = await client.containers.create(
   CreateContainerRequest(
     name: 'my-container',
-    image: 'python:3.11',
+    fileIds: ['file-abc123'],
+    expiresAfter: ContainerExpiration(
+      anchor: 'last_active_at',
+      minutes: 60,
+    ),
   ),
 );
 ```
@@ -976,14 +973,17 @@ try {
 ### Streaming Type Checking
 
 ```dart
-// Use pattern matching for stream events
+// Use convenience getters for stream events
 await for (final event in stream) {
-  switch (event) {
-    case ChatStreamDelta(:final textDelta):
-      stdout.write(textDelta ?? '');
-    default:
-      break;
+  final content = event.firstChoice?.delta.content;
+  if (content != null) {
+    stdout.write(content);
   }
+}
+
+// Or use the convenience getter:
+await for (final event in stream) {
+  stdout.write(event.textDelta ?? '');
 }
 ```
 

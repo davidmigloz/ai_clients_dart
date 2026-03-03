@@ -35,7 +35,7 @@
   - Central `OpenAIConfig` (timeouts, retry policy, log level, baseUrl, auth).
 - **Hand-crafted models**:
   - No code generation dependencies (no freezed, json_serializable).
-  - Minimal runtime dependencies (`http`, `logging`, `meta`, `web_socket_channel` only).
+  - Minimal runtime dependencies (`http`, `logging`, `meta`, `web_socket` only).
   - Immutable models with `copyWith` using sentinel pattern.
   - Full type safety with sealed exception hierarchy.
 - **Improved DX**:
@@ -90,7 +90,7 @@
   - `.map()` callbacks → Dart 3 switch expressions or `is` type checks.
 - **Nullable fields**: `Model.created`, `Model.ownedBy`, `ChatCompletion.created` are now nullable for OpenAI-compatible provider support.
 - **Session cleanup**: `endSession()` → `close()`.
-- **Dependencies**: Removed `freezed`, `json_serializable`; now minimal (`http`, `logging`, `meta`, `web_socket_channel`).
+- **Dependencies**: Removed `freezed`, `json_serializable`; now minimal (`http`, `logging`, `meta`, `web_socket`).
 
 See **[MIGRATION.md](MIGRATION.md)** for step-by-step examples and mapping tables.
 
