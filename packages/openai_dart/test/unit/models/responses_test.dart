@@ -696,6 +696,28 @@ void main() {
       expect(restored, equals(filter));
     });
 
+    test('ComparisonFilter equality works with list values (in/nin)', () {
+      const a = ComparisonFilter(
+        type: 'in',
+        key: 'status',
+        value: ['active', 'pending'],
+      );
+      const b = ComparisonFilter(
+        type: 'in',
+        key: 'status',
+        value: ['active', 'pending'],
+      );
+      const c = ComparisonFilter(
+        type: 'in',
+        key: 'status',
+        value: ['active', 'closed'],
+      );
+
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+      expect(a, isNot(equals(c)));
+    });
+
     test('CompoundFilter construction and toJson', () {
       const filter = CompoundFilter(
         type: 'and',

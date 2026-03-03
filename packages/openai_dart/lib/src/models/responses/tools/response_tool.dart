@@ -373,10 +373,17 @@ class ComparisonFilter extends FileSearchFilter {
           runtimeType == other.runtimeType &&
           type == other.type &&
           key == other.key &&
-          value == other.value;
+          _valuesEqual(value, other.value);
 
   @override
-  int get hashCode => Object.hash(type, key, value);
+  int get hashCode => Object.hash(
+    type,
+    key,
+    value is List ? Object.hashAll(value as List) : value,
+  );
+
+  static bool _valuesEqual(Object a, Object b) =>
+      (a is List && b is List) ? listsEqual(a, b) : a == b;
 
   @override
   String toString() =>
