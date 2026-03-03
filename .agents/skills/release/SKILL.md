@@ -92,18 +92,20 @@ Format: `type(scope)!: description`
 | `refactor` | patch |
 | `docs` | patch |
 
+> Note: `docs` as a patch bump is intentional and matches this repo's historical convention, even though some tools treat it as non-release.
+
 **Non-release types** (include in changelog notes but do NOT trigger a version bump):
 | Type |
 |------|
 | `test`, `chore`, `build`, `style`, `ci`, `perf` |
 
-If a commit has a **breaking change** (`!` suffix OR `BREAKING CHANGE:` in body) → override to **major**.
+**Breaking change override**: If a commit has a breaking change (`!` suffix OR `BREAKING CHANGE:` in body), it **always triggers a release** regardless of type — override bump to **major**. This applies to non-release types too (e.g., `build!: Require Dart >=3.8.0` triggers a major bump). Historically this repo has `**BREAKING** **BUILD**:` entries that triggered releases.
 
 ### Determine version bump per package
 
-Take the **highest** bump across all release-triggering commits for each package:
+Take the **highest** bump across all commits that trigger a release for each package:
 - major > minor > patch
-- If the package has ONLY non-release commits (test, chore, etc.) → skip the package (no release).
+- If the package has ONLY non-release commits **with no breaking changes** (test, chore, etc.) → skip the package (no release).
 
 ### Pre-1.0 packages (current major version is 0)
 
@@ -168,8 +170,9 @@ For each released package, **prepend** a new section to `packages/{pkg}/CHANGELO
    - Render all collected issue numbers in the order they appear: `([#913](...)) ([#914](...))`
    - If no issue number found, omit the issue link portion entirely
 5. **Ordering within the changelog section**:
-   - BREAKING entries first
-   - Then by type: FEAT, FIX, REFACTOR, DOCS
+   - BREAKING entries first (any type with breaking change)
+   - Then release-triggering types: FEAT, FIX, REFACTOR, DOCS
+   - Then non-release types (if included): BUILD, PERF, STYLE, CI, TEST, CHORE
    - Within each type group, sort by **commit date descending** (newest first)
 6. **All links in new changelog entries** must point to `https://github.com/davidmigloz/ai_clients_dart` (older historical entries may still reference `davidmigloz/langchain_dart` — leave those as-is)
 7. **Standard markdown list**: `- **TYPE**: ...` (no leading space)
@@ -211,7 +214,8 @@ git checkout HEAD -- packages/
 
 **Only in full release mode.**
 
-Run `dart pub publish --force` for each package, **one at a time**:
+Publish packages **one at a time**, in workspace order (as listed in root `pubspec.yaml`). Currently no packages depend on each other, but if inter-package dependencies are added in the future, dependencies must be published before their dependents.
+
 ```bash
 cd packages/{pkg} && dart pub publish --force
 ```
@@ -224,6 +228,8 @@ If any package **fails** to publish:
    git checkout HEAD -- packages/{pkg}/pubspec.yaml packages/{pkg}/CHANGELOG.md
    ```
 4. Only packages that were **successfully published** proceed to the commit/tag steps
+
+> **Warning**: Published packages cannot be unpublished from pub.dev. If a partial failure occurs, the already-published packages will be live on pub.dev but the repo won't yet have the corresponding commit/tags. The operator **must** continue with Steps 9-11 for the successfully published packages to bring the repo into a consistent state. Do not abandon the process after a partial publish.
 
 ---
 
@@ -263,13 +269,14 @@ chore(release): publish packages
 2. **Aggregate release tag** — compute once and reuse in Step 11:
    ```bash
    # Determine the aggregate tag name
-   aggregate_tag="release-$(date +%Y-%m-%d)"
+   base_tag="release-$(date +%Y-%m-%d)"
+   aggregate_tag="$base_tag"
    if git rev-parse "$aggregate_tag" >/dev/null 2>&1; then
-     counter=2
-     while git rev-parse "${aggregate_tag}.${counter}" >/dev/null 2>&1; do
+     counter=1
+     while git rev-parse "${base_tag}.${counter}" >/dev/null 2>&1; do
        counter=$((counter + 1))
      done
-     aggregate_tag="${aggregate_tag}.${counter}"
+     aggregate_tag="${base_tag}.${counter}"
    fi
    git tag -a "$aggregate_tag" -m "Release ${aggregate_tag#release-}"
    ```
@@ -337,4 +344,4 @@ EOF
 7. **Pre-1.0 packages** → breaking bumps minor, feat bumps patch (confirm with user if they want to promote to 1.0.0)
 8. **Partial publish failure** → report status, revert unpublished packages, only commit/tag published ones
 9. **Cross-package commits** → file-path detection handles correctly (same commit may appear in multiple packages)
-10. **Aggregate tag collision** → append counter suffix (`.2`, `.3`, etc.)
+10. **Aggregate tag collision** → append counter suffix (`.1`, `.2`, etc.)
