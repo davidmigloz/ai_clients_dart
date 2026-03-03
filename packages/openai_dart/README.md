@@ -192,7 +192,7 @@ void main() async {
 
 ```yaml
 dependencies:
-  openai_dart: ^x.y.z
+  openai_dart: ^1.0.0
 ```
 
 ## Platform Support

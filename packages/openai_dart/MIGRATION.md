@@ -494,13 +494,10 @@ class CustomHeaderInterceptor implements Interceptor {
     InterceptorNext next,
   ) async {
     // Modify request before passing it down the chain
-    final modifiedRequest = (context.request as http.Request).copyWith(
-      headers: {...context.request.headers, 'X-Custom-Header': 'value'},
-    );
-    final modifiedContext = context.copyWith(request: modifiedRequest);
+    context.request.headers['X-Custom-Header'] = 'value';
 
     // Call next interceptor
-    return next(modifiedContext);
+    return next(context);
   }
 }
 ```
@@ -980,8 +977,11 @@ await for (final event in stream) {
     stdout.write(content);
   }
 }
+```
 
-// Or use the convenience getter:
+Or, more concisely, use the convenience getter:
+
+```dart
 await for (final event in stream) {
   stdout.write(event.textDelta ?? '');
 }
