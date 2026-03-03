@@ -94,9 +94,12 @@ This repository uses [Conventional Commits](https://www.conventionalcommits.org/
 
 ### Releasing
 
-```bash
-melos version    # Bump versions based on conventional commits, update changelogs
-melos publish    # Publish packages to pub.dev
+Use the `/release` skill to publish packages. It handles the full lifecycle: detecting changes, computing semver bumps, writing changelogs, publishing to pub.dev, creating git tags, and creating a GitHub release.
+
+```
+/release --plan      # Preview release plan (no changes)
+/release --dry-run   # Full workflow except actual publish/tag/commit
+/release             # Full release
 ```
 
 ## GitHub
