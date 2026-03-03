@@ -127,7 +127,7 @@ void main() async {
 
 ```yaml
 dependencies:
-  anthropic_sdk_dart: ^0.1.0
+  anthropic_sdk_dart: ^x.y.z
 ```
 
 ## Configuration
@@ -347,7 +347,7 @@ final response = await client.messages.create(
   MessageCreateRequest(
     model: 'claude-sonnet-4-20250514',
     maxTokens: 1024,
-    tools: [weatherTool.toJson()],
+    tools: [ToolDefinition.custom(weatherTool)],
     messages: [
       InputMessage.user('What is the weather in San Francisco?'),
     ],
@@ -456,7 +456,7 @@ final response = await client.messages.create(
       InputMessage.userBlocks([
         const TextInputBlock('Summarize this PDF document.'),
         const DocumentInputBlock(
-          UrlDocumentSource('https://example.com/document.pdf'),
+          UrlPdfSource('https://example.com/document.pdf'),
         ),
       ]),
     ],
@@ -473,10 +473,7 @@ final response2 = await client.messages.create(
       InputMessage.userBlocks([
         const TextInputBlock('What are the key points in this document?'),
         DocumentInputBlock(
-          Base64DocumentSource(
-            mediaType: DocumentMediaType.pdf,
-            data: base64Pdf,
-          ),
+          Base64PdfSource(base64Pdf),
         ),
       ]),
     ],
@@ -732,7 +729,7 @@ This client implements **100% of the Anthropic REST API**:
 - **list** - List all batches
 - **retrieve** - Get batch status
 - **cancel** - Cancel a batch
-- **delete** - Delete a batch
+- **deleteBatch** - Delete a batch
 - **results** - Stream batch results (JSONL)
 
 ### Models Resource (`client.models`)

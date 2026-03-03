@@ -398,8 +398,10 @@ final response = await client.messages.create(
 );
 
 // Access the thinking process
-if (response.thinkingBlock != null) {
-  print('Thinking: ${response.thinkingBlock!.thinking}');
+if (response.hasThinking) {
+  for (final block in response.thinkingBlocks) {
+    print('Thinking: ${block.thinking}');
+  }
 }
 print('Answer: ${response.text}');
 
@@ -522,14 +524,14 @@ try {
 } on RateLimitException catch (e) {
   print('Rate limited: ${e.message}');
   if (e.retryAfter != null) {
-    await Future.delayed(e.retryAfter!);
+    await Future.delayed(e.retryAfter!.difference(DateTime.now()));
     // Retry request
   }
 } on ValidationException catch (e) {
   print('Validation error: ${e.message}');
   // Fix request parameters
 } on ApiException catch (e) {
-  print('API error (${e.code}): ${e.message}');
+  print('API error (${e.statusCode}): ${e.message}');
   // Handle server errors
 } on TimeoutException catch (e) {
   print('Request timed out after ${e.timeout}');
@@ -590,7 +592,7 @@ if (message.role == MessageRole.assistant) { ... }
 
 * **Model IDs**: Now strings (`'claude-sonnet-4-20250514'`), not enum constants
 * **Session cleanup**: `endSession()` → `close()`
-* **Response helpers**: Use `.text`, `.hasToolUse`, `.toolUseBlocks`, `.thinkingBlock`
+* **Response helpers**: Use `.text`, `.hasToolUse`, `.toolUseBlocks`, `.thinkingBlocks`
 * **Streaming**: Pattern matching with `switch/case` instead of `.map()`
 * **Beta features**: Files and Skills APIs require specific beta headers (handled automatically)
 * **Nested resources**: Batches are now at `client.messages.batches`, not `client.batches`

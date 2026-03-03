@@ -12,7 +12,6 @@
   - `client.models` — Model listing and retrieval
   - `client.files` — File upload/management
   - `client.skills` — Custom skills management
-  - `client.completions` — Legacy text completions
 - **Architecture**:
   - Interceptor chain (Auth → Logging → Error → Transport with Retry wrapper).
   - **Authentication**: API key or custom via `AuthProvider` interface.
@@ -28,7 +27,7 @@
 - **Improved DX**:
   - Simplified message creation (e.g., `InputMessage.user()`, `InputMessage.assistant()`).
   - Explicit streaming methods (`createStream()` vs `create()`).
-  - Response helpers (`.text`, `.hasToolUse`, `.toolUseBlocks`, `.thinkingBlock`).
+  - Response helpers (`.text`, `.hasToolUse`, `.toolUseBlocks`, `.thinkingBlocks`).
   - Rich logging with field redaction for sensitive data.
 - **Full API coverage**:
   - Messages with tool calling, vision, documents, and citations.
