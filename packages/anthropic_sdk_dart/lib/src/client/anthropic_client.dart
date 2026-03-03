@@ -1,5 +1,6 @@
 import 'package:http/http.dart' as http;
 
+import '../auth/auth_provider.dart';
 import '../interceptors/auth_interceptor.dart';
 import '../interceptors/error_interceptor.dart';
 import '../interceptors/interceptor.dart';
@@ -98,6 +99,16 @@ class AnthropicClient {
   factory AnthropicClient.fromEnvironment({http.Client? httpClient}) {
     return AnthropicClient(
       config: AnthropicConfig.fromEnvironment(),
+      httpClient: httpClient,
+    );
+  }
+
+  /// Creates an [AnthropicClient] with the given API key.
+  ///
+  /// This is a convenience constructor for simple use cases.
+  factory AnthropicClient.withApiKey(String apiKey, {http.Client? httpClient}) {
+    return AnthropicClient(
+      config: AnthropicConfig(authProvider: ApiKeyProvider(apiKey)),
       httpClient: httpClient,
     );
   }

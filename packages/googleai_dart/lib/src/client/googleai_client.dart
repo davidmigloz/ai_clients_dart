@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../auth/auth_provider.dart';
 import '../interceptors/auth_interceptor.dart';
 import '../interceptors/error_interceptor.dart';
 import '../interceptors/logging_interceptor.dart';
@@ -271,6 +272,16 @@ class GoogleAIClient {
         timeout: timeout,
         retryPolicy: retryPolicy,
       ),
+      httpClient: httpClient,
+    );
+  }
+
+  /// Creates a [GoogleAIClient] with the given API key.
+  ///
+  /// This is a convenience constructor for simple use cases.
+  factory GoogleAIClient.withApiKey(String apiKey, {http.Client? httpClient}) {
+    return GoogleAIClient(
+      config: GoogleAIConfig(authProvider: ApiKeyProvider(apiKey)),
       httpClient: httpClient,
     );
   }

@@ -1,5 +1,6 @@
 import 'package:http/http.dart' as http;
 
+import '../auth/auth_provider.dart';
 import '../interceptors/auth_interceptor.dart';
 import '../interceptors/error_interceptor.dart';
 import '../interceptors/interceptor.dart';
@@ -188,6 +189,27 @@ class OllamaClient {
   /// This is a convenience factory for common use cases.
   factory OllamaClient.withBaseUrl(String baseUrl) {
     return OllamaClient(config: OllamaConfig(baseUrl: baseUrl));
+  }
+
+  /// Creates an [OllamaClient] with the given API key.
+  ///
+  /// This is a convenience constructor for remote Ollama servers
+  /// that require authentication (e.g., behind a reverse proxy).
+  ///
+  /// Optionally accepts a [baseUrl] to override the default
+  /// `http://localhost:11434`.
+  factory OllamaClient.withApiKey(
+    String apiKey, {
+    String? baseUrl,
+    http.Client? httpClient,
+  }) {
+    return OllamaClient(
+      config: OllamaConfig(
+        authProvider: BearerTokenProvider(apiKey),
+        baseUrl: baseUrl ?? 'http://localhost:11434',
+      ),
+      httpClient: httpClient,
+    );
   }
 
   /// Creates an [OllamaClient] from environment variables.
