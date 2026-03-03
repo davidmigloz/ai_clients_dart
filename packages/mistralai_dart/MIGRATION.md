@@ -212,6 +212,20 @@ final message = ChatMessage.userMultimodal([
 ]);
 ```
 
+> **Breaking change**: `TextContentPart` and `ImageUrlContentPart` constructors
+> changed from **named** parameters to **positional** parameters:
+> ```dart
+> // Before (v0.x)
+> TextContentPart(text: 'Hello')
+> ImageUrlContentPart(url: 'https://example.com/image.jpg')
+>
+> // After (v1.0.0)
+> TextContentPart('Hello')
+> ImageUrlContentPart('https://example.com/image.jpg')
+> ```
+> If you use `ContentPart.text(...)` / `ContentPart.imageUrl(...)` factory
+> constructors, no changes are needed.
+
 ### Tool Messages
 
 ```dart

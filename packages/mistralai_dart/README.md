@@ -41,7 +41,7 @@ Add `mistralai_dart` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  mistralai_dart: ^x.y.z
+  mistralai_dart: ^1.0.0
 ```
 
 ## Quick Start
@@ -136,7 +136,9 @@ final stream = client.chat.createStream(
 );
 
 await for (final chunk in stream) {
-  stdout.write(chunk.text); // Extension method
+  if (chunk.text != null) {
+    stdout.write(chunk.text); // Extension method
+  }
 }
 ```
 
@@ -321,7 +323,7 @@ final stream = client.fim.createStream(
 
 ### Files API
 
-> **Note**: The Files API is only available on native platforms (not web).
+> **Note**: File-path based uploads (`filePath`) are only available on native platforms. On web, use byte-based uploads (`bytes`) instead. Other file operations (list, retrieve, download, delete) are supported on all platforms.
 
 ```dart
 // Upload a file
@@ -708,10 +710,10 @@ See the [Mistral AI documentation](https://docs.mistral.ai/getting-started/model
 | Chat | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Streaming | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Embeddings | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Files API | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Files API | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ |
 | Audio | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
 
-> **Note**: File upload and audio APIs require native platform support and are not available on web.
+> **Note**: On web, file uploads only support byte-based uploads (`bytes` parameter); file-path uploads are native-only. Other file operations (list, retrieve, download, delete) work on all platforms. Audio APIs require native platform support and are not available on web.
 
 ## Examples
 
