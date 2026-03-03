@@ -65,7 +65,7 @@ void main() {
           return;
         }
 
-        const modelId = 'claude-3-5-haiku-20241022';
+        const modelId = 'claude-haiku-4-5-20251001';
         final response = await client!.models.retrieve(modelId);
 
         expect(response.id, modelId);

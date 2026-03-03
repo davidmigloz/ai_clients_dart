@@ -39,7 +39,7 @@ void main() {
 
         final stream = client!.messages.createStream(
           MessageCreateRequest(
-            model: 'claude-3-5-haiku-20241022',
+            model: 'claude-haiku-4-5-20251001',
             maxTokens: 100,
             messages: [
               InputMessage.user('Count from 1 to 5, one number per line.'),
@@ -105,7 +105,7 @@ void main() {
 
         final stream = client!.messages.createStream(
           MessageCreateRequest(
-            model: 'claude-3-5-haiku-20241022',
+            model: 'claude-haiku-4-5-20251001',
             maxTokens: 200,
             tools: [ToolDefinition.custom(calculatorTool)],
             toolChoice: ToolChoice.tool('calculator'),
@@ -156,7 +156,7 @@ void main() {
         try {
           final stream = client!.messages.createStream(
             MessageCreateRequest(
-              model: 'claude-3-5-haiku-20241022',
+              model: 'claude-haiku-4-5-20251001',
               maxTokens: 1000,
               messages: [
                 InputMessage.user('Write a very long essay about philosophy.'),

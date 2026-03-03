@@ -43,7 +43,7 @@ void main() {
               BatchRequestItem(
                 customId: 'test-request-1',
                 params: MessageCreateRequest(
-                  model: 'claude-3-5-haiku-20241022',
+                  model: 'claude-haiku-4-5-20251001',
                   maxTokens: 50,
                   messages: [InputMessage.user('What is 1+1?')],
                 ),
@@ -127,7 +127,7 @@ void main() {
               BatchRequestItem(
                 customId: 'math-1',
                 params: MessageCreateRequest(
-                  model: 'claude-3-5-haiku-20241022',
+                  model: 'claude-haiku-4-5-20251001',
                   maxTokens: 50,
                   messages: [InputMessage.user('What is 2+2?')],
                 ),
@@ -135,7 +135,7 @@ void main() {
               BatchRequestItem(
                 customId: 'math-2',
                 params: MessageCreateRequest(
-                  model: 'claude-3-5-haiku-20241022',
+                  model: 'claude-haiku-4-5-20251001',
                   maxTokens: 50,
                   messages: [InputMessage.user('What is 3+3?')],
                 ),
@@ -143,7 +143,7 @@ void main() {
               BatchRequestItem(
                 customId: 'math-3',
                 params: MessageCreateRequest(
-                  model: 'claude-3-5-haiku-20241022',
+                  model: 'claude-haiku-4-5-20251001',
                   maxTokens: 50,
                   messages: [InputMessage.user('What is 4+4?')],
                 ),

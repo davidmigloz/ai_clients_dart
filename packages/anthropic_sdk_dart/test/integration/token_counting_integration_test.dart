@@ -38,7 +38,7 @@ void main() {
 
         final response = await client!.messages.countTokens(
           TokenCountRequest(
-            model: 'claude-3-5-haiku-20241022',
+            model: 'claude-haiku-4-5-20251001',
             messages: [InputMessage.user('Hello, how are you?')],
           ),
         );
@@ -61,7 +61,7 @@ void main() {
         // First count without system prompt
         final withoutSystem = await client!.messages.countTokens(
           TokenCountRequest(
-            model: 'claude-3-5-haiku-20241022',
+            model: 'claude-haiku-4-5-20251001',
             messages: [InputMessage.user('Hello')],
           ),
         );
@@ -69,7 +69,7 @@ void main() {
         // Then count with system prompt
         final withSystem = await client!.messages.countTokens(
           TokenCountRequest(
-            model: 'claude-3-5-haiku-20241022',
+            model: 'claude-haiku-4-5-20251001',
             system: SystemPrompt.text(
               'You are a helpful assistant that specializes in technical support.',
             ),
@@ -93,14 +93,14 @@ void main() {
 
         final singleTurn = await client!.messages.countTokens(
           TokenCountRequest(
-            model: 'claude-3-5-haiku-20241022',
+            model: 'claude-haiku-4-5-20251001',
             messages: [InputMessage.user('What is machine learning?')],
           ),
         );
 
         final multiTurn = await client!.messages.countTokens(
           TokenCountRequest(
-            model: 'claude-3-5-haiku-20241022',
+            model: 'claude-haiku-4-5-20251001',
             messages: [
               InputMessage.user('What is machine learning?'),
               InputMessage.assistant(
@@ -128,7 +128,7 @@ void main() {
 
         final withoutTools = await client!.messages.countTokens(
           TokenCountRequest(
-            model: 'claude-3-5-haiku-20241022',
+            model: 'claude-haiku-4-5-20251001',
             messages: [InputMessage.user("What's the weather?")],
           ),
         );
@@ -149,7 +149,7 @@ void main() {
 
         final withTools = await client!.messages.countTokens(
           TokenCountRequest(
-            model: 'claude-3-5-haiku-20241022',
+            model: 'claude-haiku-4-5-20251001',
             tools: [ToolDefinition.custom(weatherTool)],
             messages: [InputMessage.user("What's the weather?")],
           ),

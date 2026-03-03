@@ -38,7 +38,7 @@ void main() {
 
         final response = await client!.messages.create(
           MessageCreateRequest(
-            model: 'claude-3-5-haiku-20241022',
+            model: 'claude-haiku-4-5-20251001',
             maxTokens: 100,
             messages: [
               InputMessage.user('What is 2 + 2? Reply with just the number.'),
@@ -67,7 +67,7 @@ void main() {
 
         final response = await client!.messages.create(
           MessageCreateRequest(
-            model: 'claude-3-5-haiku-20241022',
+            model: 'claude-haiku-4-5-20251001',
             maxTokens: 100,
             system: SystemPrompt.text(
               'You are a helpful assistant that always responds in uppercase.',
@@ -93,7 +93,7 @@ void main() {
 
         final response = await client!.messages.create(
           MessageCreateRequest(
-            model: 'claude-3-5-haiku-20241022',
+            model: 'claude-haiku-4-5-20251001',
             maxTokens: 100,
             messages: [
               InputMessage.user('My name is Alice.'),
@@ -119,7 +119,7 @@ void main() {
 
         final response = await client!.messages.create(
           MessageCreateRequest(
-            model: 'claude-3-5-haiku-20241022',
+            model: 'claude-haiku-4-5-20251001',
             maxTokens: 5,
             messages: [
               InputMessage.user('Tell me a long story about a dragon.'),
@@ -154,7 +154,7 @@ void main() {
 
         final response = await client!.messages.create(
           MessageCreateRequest(
-            model: 'claude-3-5-haiku-20241022',
+            model: 'claude-haiku-4-5-20251001',
             maxTokens: 200,
             tools: [ToolDefinition.custom(weatherTool)],
             toolChoice: ToolChoice.tool('get_weather'),
