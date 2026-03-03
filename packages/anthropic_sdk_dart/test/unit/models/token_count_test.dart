@@ -147,7 +147,7 @@ void main() {
     });
   });
 
-  group('MessageCreateRequest.toTokenCountRequest', () {
+  group('TokenCountRequest.fromMessageCreateRequest', () {
     test('copies shared fields', () {
       final request = MessageCreateRequest(
         model: 'claude-sonnet-4-20250514',
@@ -165,10 +165,11 @@ void main() {
             ),
           ),
         ],
+        outputConfig: const OutputConfig(effort: EffortLevel.high),
         speed: Speed.fast,
       );
 
-      final tokenRequest = request.toTokenCountRequest();
+      final tokenRequest = TokenCountRequest.fromMessageCreateRequest(request);
 
       expect(tokenRequest.model, request.model);
       expect(tokenRequest.messages, request.messages);
@@ -176,6 +177,7 @@ void main() {
       expect(tokenRequest.thinking, request.thinking);
       expect(tokenRequest.toolChoice, request.toolChoice);
       expect(tokenRequest.tools, request.tools);
+      expect(tokenRequest.outputConfig, request.outputConfig);
       expect(tokenRequest.speed, request.speed);
     });
 
@@ -192,7 +194,7 @@ void main() {
         stream: true,
       );
 
-      final tokenRequest = request.toTokenCountRequest();
+      final tokenRequest = TokenCountRequest.fromMessageCreateRequest(request);
 
       expect(tokenRequest.model, request.model);
       expect(tokenRequest.messages, request.messages);
@@ -200,6 +202,7 @@ void main() {
       expect(tokenRequest.thinking, isNull);
       expect(tokenRequest.toolChoice, isNull);
       expect(tokenRequest.tools, isNull);
+      expect(tokenRequest.outputConfig, isNull);
       expect(tokenRequest.speed, isNull);
     });
 
@@ -210,7 +213,7 @@ void main() {
         maxTokens: 100,
       );
 
-      final tokenRequest = request.toTokenCountRequest();
+      final tokenRequest = TokenCountRequest.fromMessageCreateRequest(request);
 
       expect(tokenRequest.model, 'claude-sonnet-4-20250514');
       expect(tokenRequest.messages, hasLength(1));

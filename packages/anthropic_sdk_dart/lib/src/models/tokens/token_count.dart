@@ -55,6 +55,25 @@ class TokenCountRequest {
     this.speed,
   });
 
+  /// Creates a [TokenCountRequest] from a [MessageCreateRequest].
+  ///
+  /// Copies the fields relevant to token counting: model, messages,
+  /// system, thinking, toolChoice, tools, outputConfig, and speed.
+  factory TokenCountRequest.fromMessageCreateRequest(
+    MessageCreateRequest request,
+  ) {
+    return TokenCountRequest(
+      model: request.model,
+      messages: request.messages,
+      system: request.system,
+      thinking: request.thinking,
+      toolChoice: request.toolChoice,
+      tools: request.tools,
+      outputConfig: request.outputConfig,
+      speed: request.speed,
+    );
+  }
+
   /// Creates a [TokenCountRequest] from JSON.
   factory TokenCountRequest.fromJson(Map<String, dynamic> json) {
     return TokenCountRequest(
