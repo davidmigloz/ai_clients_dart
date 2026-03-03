@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: pub
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      dart_dep:
+        update-types:
+          - "major"
+          - "minor"
+          - "patch"
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions_dep:
+        update-types:
+          - "major"
+          - "minor"
+          - "patch"

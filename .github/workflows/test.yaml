@@ -1,0 +1,71 @@
+name: tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
+
+jobs:
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: dart-lang/setup-dart@e51d8e571e22473a2ddebf0ef8a2123f0ab2c02c # v1.7.1
+        with:
+          sdk: stable
+      - run: dart pub get
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: dart-lang/setup-dart@e51d8e571e22473a2ddebf0ef8a2123f0ab2c02c # v1.7.1
+        with:
+          sdk: stable
+      - run: dart pub get
+      - name: Analyze project
+        run: dart analyze --fatal-infos
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: dart-lang/setup-dart@e51d8e571e22473a2ddebf0ef8a2123f0ab2c02c # v1.7.1
+        with:
+          sdk: stable
+      - run: dart pub get
+      - name: Run unit tests
+        run: |
+          exit_code=0
+          for pkg in packages/*/; do
+            if [ -d "$pkg/test" ]; then
+              echo "::group::Testing $pkg"
+              output=$(dart test "$pkg/test" --exclude-tags integration 2>&1) && true
+              pkg_exit=$?
+              echo "$output"
+              if [ $pkg_exit -ne 0 ]; then
+                if echo "$output" | grep -q "No tests ran"; then
+                  echo "No unit tests in $pkg (skipped)"
+                else
+                  exit_code=1
+                fi
+              fi
+              echo "::endgroup::"
+            fi
+          done
+          exit $exit_code
