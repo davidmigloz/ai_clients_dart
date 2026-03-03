@@ -16,8 +16,8 @@ extension CandidateExtensions on Candidate {
   /// All parts from this candidate's content.
   List<Part> get parts => content?.parts ?? [];
 
-  /// True if this candidate has text content.
-  bool get hasText => parts.any((p) => p is TextPart);
+  /// True if this candidate has non-thought text content.
+  bool get hasText => parts.any((p) => p is TextPart && p.thought != true);
 
   /// True if this candidate has function calls.
   bool get hasFunctionCalls => parts.any((p) => p is FunctionCallPart);

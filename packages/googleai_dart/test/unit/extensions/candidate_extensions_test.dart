@@ -87,6 +87,27 @@ void main() {
         const candidate = Candidate();
         expect(candidate.hasText, isFalse);
       });
+
+      test('returns false when only thought text parts', () {
+        const candidate = Candidate(
+          content: Content(
+            parts: [TextPart('reasoning...', thought: true)],
+          ),
+        );
+        expect(candidate.hasText, isFalse);
+      });
+
+      test('returns true when mixed thought and non-thought text parts', () {
+        const candidate = Candidate(
+          content: Content(
+            parts: [
+              TextPart('reasoning...', thought: true),
+              TextPart('visible'),
+            ],
+          ),
+        );
+        expect(candidate.hasText, isTrue);
+      });
     });
 
     group('hasFunctionCalls', () {
