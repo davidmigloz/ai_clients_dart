@@ -41,7 +41,7 @@ Add `mistralai_dart` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  mistralai_dart: ^1.0.0
+  mistralai_dart: ^x.y.z
 ```
 
 ## Quick Start
