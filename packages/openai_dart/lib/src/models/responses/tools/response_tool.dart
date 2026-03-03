@@ -427,7 +427,7 @@ class CompoundFilter extends FileSearchFilter {
           listsEqual(filters, other.filters);
 
   @override
-  int get hashCode => Object.hash(type, filters);
+  int get hashCode => Object.hash(type, Object.hashAll(filters));
 
   @override
   String toString() => 'CompoundFilter(type: $type, filters: $filters)';

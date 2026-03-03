@@ -733,6 +733,33 @@ void main() {
       expect((json['filters'] as List).length, equals(2));
     });
 
+    test('CompoundFilter equality and hashCode', () {
+      final a = CompoundFilter(
+        type: 'and',
+        filters: [
+          const ComparisonFilter(type: 'eq', key: 'status', value: 'active'),
+          const ComparisonFilter(type: 'gt', key: 'score', value: 0.5),
+        ],
+      );
+      final b = CompoundFilter(
+        type: 'and',
+        filters: [
+          const ComparisonFilter(type: 'eq', key: 'status', value: 'active'),
+          const ComparisonFilter(type: 'gt', key: 'score', value: 0.5),
+        ],
+      );
+      final c = CompoundFilter(
+        type: 'or',
+        filters: [
+          const ComparisonFilter(type: 'eq', key: 'status', value: 'active'),
+        ],
+      );
+
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+      expect(a, isNot(equals(c)));
+    });
+
     test('nested CompoundFilter round-trips through JSON', () {
       const filter = CompoundFilter(
         type: 'or',
