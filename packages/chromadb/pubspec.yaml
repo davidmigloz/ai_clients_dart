@@ -6,7 +6,7 @@ issue_tracker: https://github.com/davidmigloz/ai_clients_dart/issues?q=label:p:c
 homepage: https://github.com/davidmigloz/ai_clients_dart
 
 environment:
-  sdk: ">=3.8.0 <4.0.0"
+  sdk: ">=3.9.0 <4.0.0"
 resolution: workspace
 
 dependencies:

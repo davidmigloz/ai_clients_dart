@@ -3,7 +3,7 @@ description: A collection of Dart client libraries for popular AI APIs. Provides
 publish_to: none
 
 environment:
-  sdk: ^3.8.0
+  sdk: ^3.9.0
 
 dev_dependencies:
   melos: ^7.3.0
@@ -36,7 +36,7 @@ melos:
             no-private: true
     bootstrap:
       environment:
-        sdk: ">=3.8.0 <4.0.0"
+        sdk: ">=3.9.0 <4.0.0"
       dependencies:
         http: ^1.6.0
         logging: ^1.3.0
