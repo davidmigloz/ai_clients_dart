@@ -59,7 +59,7 @@ jobs:
               pkg_exit=$?
               echo "$output"
               if [ $pkg_exit -ne 0 ]; then
-                if echo "$output" | grep -q "No tests ran"; then
+                if echo "$output" | grep -qE "No tests (ran|match)"; then
                   echo "No unit tests in $pkg (skipped)"
                 else
                   exit_code=1
