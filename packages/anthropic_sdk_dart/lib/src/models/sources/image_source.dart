@@ -28,6 +28,14 @@ enum ImageMediaType {
     _ => throw FormatException('Unknown ImageMediaType: $value'),
   };
 
+  /// Creates an [ImageMediaType] from a MIME type string.
+  ///
+  /// Supported values: `'image/jpeg'`, `'image/png'`, `'image/gif'`,
+  /// `'image/webp'`.
+  ///
+  /// Throws [FormatException] if the value is not recognized.
+  static ImageMediaType fromMimeType(String mimeType) => fromJson(mimeType);
+
   /// Converts to JSON string.
   String toJson() => value;
 }

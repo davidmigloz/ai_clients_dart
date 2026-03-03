@@ -147,6 +147,77 @@ void main() {
     });
   });
 
+  group('MessageCreateRequest.toTokenCountRequest', () {
+    test('copies shared fields', () {
+      final request = MessageCreateRequest(
+        model: 'claude-sonnet-4-20250514',
+        messages: [InputMessage.user('Hello')],
+        maxTokens: 1024,
+        system: SystemPrompt.text('Be helpful'),
+        thinking: const ThinkingDisabled(),
+        toolChoice: ToolChoice.auto(),
+        tools: [
+          ToolDefinition.custom(
+            const Tool(
+              name: 'get_weather',
+              description: 'Get weather',
+              inputSchema: InputSchema(),
+            ),
+          ),
+        ],
+        speed: Speed.fast,
+      );
+
+      final tokenRequest = request.toTokenCountRequest();
+
+      expect(tokenRequest.model, request.model);
+      expect(tokenRequest.messages, request.messages);
+      expect(tokenRequest.system, request.system);
+      expect(tokenRequest.thinking, request.thinking);
+      expect(tokenRequest.toolChoice, request.toolChoice);
+      expect(tokenRequest.tools, request.tools);
+      expect(tokenRequest.speed, request.speed);
+    });
+
+    test('omits fields not in TokenCountRequest', () {
+      final request = MessageCreateRequest(
+        model: 'claude-sonnet-4-20250514',
+        messages: [InputMessage.user('Hello')],
+        maxTokens: 1024,
+        metadata: const Metadata(userId: 'user-123'),
+        temperature: 0.7,
+        topP: 0.9,
+        topK: 40,
+        stopSequences: const ['END'],
+        stream: true,
+      );
+
+      final tokenRequest = request.toTokenCountRequest();
+
+      expect(tokenRequest.model, request.model);
+      expect(tokenRequest.messages, request.messages);
+      expect(tokenRequest.system, isNull);
+      expect(tokenRequest.thinking, isNull);
+      expect(tokenRequest.toolChoice, isNull);
+      expect(tokenRequest.tools, isNull);
+      expect(tokenRequest.speed, isNull);
+    });
+
+    test('handles minimal request', () {
+      final request = MessageCreateRequest(
+        model: 'claude-sonnet-4-20250514',
+        messages: [InputMessage.user('Hi')],
+        maxTokens: 100,
+      );
+
+      final tokenRequest = request.toTokenCountRequest();
+
+      expect(tokenRequest.model, 'claude-sonnet-4-20250514');
+      expect(tokenRequest.messages, hasLength(1));
+      expect(tokenRequest.system, isNull);
+    });
+  });
+
   group('TokenCountResponse', () {
     test('fromJson deserializes correctly', () {
       final json = {'input_tokens': 150};

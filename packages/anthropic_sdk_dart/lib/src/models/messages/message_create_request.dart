@@ -7,6 +7,7 @@ import '../metadata/cache_control.dart';
 import '../metadata/metadata.dart';
 import '../metadata/service_tier.dart';
 import '../metadata/speed.dart';
+import '../tokens/token_count.dart';
 import '../tools/tool_choice.dart';
 import '../tools/tool_definition.dart';
 import 'input_message.dart';
@@ -227,6 +228,23 @@ class MessageCreateRequest {
     this.container,
     this.speed,
   });
+
+  /// Creates a [TokenCountRequest] from this request.
+  ///
+  /// Copies the fields relevant to token counting: [model], [messages],
+  /// [system], [thinking], [toolChoice], [tools], [outputConfig], and [speed].
+  TokenCountRequest toTokenCountRequest() {
+    return TokenCountRequest(
+      model: model,
+      messages: messages,
+      system: system,
+      thinking: thinking,
+      toolChoice: toolChoice,
+      tools: tools,
+      outputConfig: outputConfig,
+      speed: speed,
+    );
+  }
 
   /// Creates a [MessageCreateRequest] from JSON.
   factory MessageCreateRequest.fromJson(Map<String, dynamic> json) {

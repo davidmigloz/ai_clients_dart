@@ -272,6 +272,66 @@ void main() {
         );
       });
 
+      test('text factory creates single text result', () {
+        final block = ToolResultInputBlock.text(
+          toolUseId: 'tu_789',
+          text: 'Sunny, 22°C',
+        );
+
+        expect(block.toolUseId, 'tu_789');
+        expect(block.content, hasLength(1));
+        expect(block.content!.first, isA<ToolResultTextContent>());
+        expect(
+          (block.content!.first as ToolResultTextContent).text,
+          'Sunny, 22°C',
+        );
+        expect(block.isError, isNull);
+        expect(block.cacheControl, isNull);
+      });
+
+      test('text factory supports isError and cacheControl', () {
+        final block = ToolResultInputBlock.text(
+          toolUseId: 'tu_err',
+          text: 'Error: not found',
+          isError: true,
+          cacheControl: const CacheControlEphemeral(),
+        );
+
+        expect(block.isError, isTrue);
+        expect(block.cacheControl, isNotNull);
+      });
+
+      test('InputContentBlock.toolResultText factory works', () {
+        final block = InputContentBlock.toolResultText(
+          toolUseId: 'tu_abc',
+          text: 'Result text',
+        );
+
+        expect(block, isA<ToolResultInputBlock>());
+        final toolResult = block as ToolResultInputBlock;
+        expect(toolResult.toolUseId, 'tu_abc');
+        expect(toolResult.content, hasLength(1));
+        expect(
+          (toolResult.content!.first as ToolResultTextContent).text,
+          'Result text',
+        );
+      });
+
+      test('text factory toJson produces valid JSON', () {
+        final block = ToolResultInputBlock.text(
+          toolUseId: 'tu_json',
+          text: 'Some result',
+        );
+        final json = block.toJson();
+
+        expect(json['type'], 'tool_result');
+        expect(json['tool_use_id'], 'tu_json');
+        expect(json['content'], hasLength(1));
+        final content = (json['content'] as List)[0] as Map<String, dynamic>;
+        expect(content['type'], 'text');
+        expect(content['text'], 'Some result');
+      });
+
       test('creates error tool result', () {
         const block = ToolResultInputBlock(
           toolUseId: 'tu_456',
@@ -313,6 +373,20 @@ void main() {
       final b64 = restored as Base64ImageSource;
       expect(b64.data, 'abc123');
       expect(b64.mediaType, ImageMediaType.jpeg);
+    });
+
+    test('ImageMediaType.fromMimeType returns correct type', () {
+      expect(ImageMediaType.fromMimeType('image/jpeg'), ImageMediaType.jpeg);
+      expect(ImageMediaType.fromMimeType('image/png'), ImageMediaType.png);
+      expect(ImageMediaType.fromMimeType('image/gif'), ImageMediaType.gif);
+      expect(ImageMediaType.fromMimeType('image/webp'), ImageMediaType.webp);
+    });
+
+    test('ImageMediaType.fromMimeType throws on unknown type', () {
+      expect(
+        () => ImageMediaType.fromMimeType('image/bmp'),
+        throwsFormatException,
+      );
     });
 
     test('UrlImageSource roundtrips through JSON', () {

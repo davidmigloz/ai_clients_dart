@@ -48,6 +48,14 @@ sealed class InputContentBlock {
     CacheControlEphemeral? cacheControl,
   }) = ToolResultInputBlock;
 
+  /// Creates a tool result block with a single text result.
+  factory InputContentBlock.toolResultText({
+    required String toolUseId,
+    required String text,
+    bool? isError,
+    CacheControlEphemeral? cacheControl,
+  }) = ToolResultInputBlock.text;
+
   /// Creates a server tool use block (for assistant messages).
   factory InputContentBlock.serverToolUse({
     required String id,
@@ -518,6 +526,21 @@ class ToolResultInputBlock extends InputContentBlock {
     this.isError,
     this.cacheControl,
   });
+
+  /// Creates a [ToolResultInputBlock] with a single text result.
+  factory ToolResultInputBlock.text({
+    required String toolUseId,
+    required String text,
+    bool? isError,
+    CacheControlEphemeral? cacheControl,
+  }) {
+    return ToolResultInputBlock(
+      toolUseId: toolUseId,
+      content: [ToolResultContent.text(text)],
+      isError: isError,
+      cacheControl: cacheControl,
+    );
+  }
 
   /// Creates a [ToolResultInputBlock] from JSON.
   factory ToolResultInputBlock.fromJson(Map<String, dynamic> json) {
