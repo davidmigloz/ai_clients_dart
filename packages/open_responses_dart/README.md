@@ -71,7 +71,7 @@ Add `open_responses_dart` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  open_responses_dart: ^x.y.z
+  open_responses_dart: ^0.0.1
 ```
 
 Then run:
