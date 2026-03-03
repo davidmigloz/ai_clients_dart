@@ -734,26 +734,28 @@ void main() {
     });
 
     test('CompoundFilter equality and hashCode', () {
-      final a = CompoundFilter(
-        type: 'and',
-        filters: [
-          const ComparisonFilter(type: 'eq', key: 'status', value: 'active'),
-          const ComparisonFilter(type: 'gt', key: 'score', value: 0.5),
+      // Use fromJson to create non-const instances, ensuring == tests
+      // content-based equality (not identity from const canonicalization).
+      final a = CompoundFilter.fromJson(const {
+        'type': 'and',
+        'filters': [
+          {'type': 'eq', 'key': 'status', 'value': 'active'},
+          {'type': 'gt', 'key': 'score', 'value': 0.5},
         ],
-      );
-      final b = CompoundFilter(
-        type: 'and',
-        filters: [
-          const ComparisonFilter(type: 'eq', key: 'status', value: 'active'),
-          const ComparisonFilter(type: 'gt', key: 'score', value: 0.5),
+      });
+      final b = CompoundFilter.fromJson(const {
+        'type': 'and',
+        'filters': [
+          {'type': 'eq', 'key': 'status', 'value': 'active'},
+          {'type': 'gt', 'key': 'score', 'value': 0.5},
         ],
-      );
-      final c = CompoundFilter(
-        type: 'or',
-        filters: [
-          const ComparisonFilter(type: 'eq', key: 'status', value: 'active'),
+      });
+      final c = CompoundFilter.fromJson(const {
+        'type': 'or',
+        'filters': [
+          {'type': 'eq', 'key': 'status', 'value': 'active'},
         ],
-      );
+      });
 
       expect(a, equals(b));
       expect(a.hashCode, equals(b.hashCode));
