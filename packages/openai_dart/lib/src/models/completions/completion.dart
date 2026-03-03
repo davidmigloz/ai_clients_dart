@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../chat/chat_completion_request.dart';
 import '../common/finish_reason.dart';
 import '../common/logprobs.dart';
 import '../common/usage.dart';
@@ -64,7 +65,11 @@ class CompletionRequest {
           ? StopSequence.fromJson(json['stop'] as Object)
           : null,
       stream: json['stream'] as bool?,
-      streamOptions: json['stream_options'] as Map<String, dynamic>?,
+      streamOptions: json['stream_options'] != null
+          ? StreamOptions.fromJson(
+              json['stream_options'] as Map<String, dynamic>,
+            )
+          : null,
       suffix: json['suffix'] as String?,
       temperature: (json['temperature'] as num?)?.toDouble(),
       topP: (json['top_p'] as num?)?.toDouble(),
@@ -114,7 +119,7 @@ class CompletionRequest {
   final bool? stream;
 
   /// Stream options.
-  final Map<String, dynamic>? streamOptions;
+  final StreamOptions? streamOptions;
 
   /// The suffix after the completion.
   final String? suffix;
@@ -143,7 +148,7 @@ class CompletionRequest {
     if (seed != null) 'seed': seed,
     if (stop != null) 'stop': stop!.toJson(),
     if (stream != null) 'stream': stream,
-    if (streamOptions != null) 'stream_options': streamOptions,
+    if (streamOptions != null) 'stream_options': streamOptions!.toJson(),
     if (suffix != null) 'suffix': suffix,
     if (temperature != null) 'temperature': temperature,
     if (topP != null) 'top_p': topP,

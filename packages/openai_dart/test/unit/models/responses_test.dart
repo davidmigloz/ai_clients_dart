@@ -585,6 +585,166 @@ void main() {
         isA<LocalShellTool>(),
       );
     });
+
+    test('ApproximateLocation construction and toJson', () {
+      const loc = ApproximateLocation(
+        country: 'US',
+        region: 'California',
+        city: 'San Francisco',
+        timezone: 'America/Los_Angeles',
+      );
+
+      final json = loc.toJson();
+      expect(json['type'], equals('approximate'));
+      expect(json['country'], equals('US'));
+      expect(json['region'], equals('California'));
+      expect(json['city'], equals('San Francisco'));
+      expect(json['timezone'], equals('America/Los_Angeles'));
+    });
+
+    test('ApproximateLocation toJson omits null fields', () {
+      const loc = ApproximateLocation(country: 'US');
+
+      final json = loc.toJson();
+      expect(json['type'], equals('approximate'));
+      expect(json['country'], equals('US'));
+      expect(json.containsKey('region'), isFalse);
+      expect(json.containsKey('city'), isFalse);
+      expect(json.containsKey('timezone'), isFalse);
+    });
+
+    test('ApproximateLocation round-trips through JSON', () {
+      const loc = ApproximateLocation(
+        country: 'US',
+        region: 'New York',
+        city: 'NYC',
+        timezone: 'America/New_York',
+      );
+
+      final json = loc.toJson();
+      final restored = ApproximateLocation.fromJson(json);
+      expect(restored, equals(loc));
+    });
+
+    test('ApproximateLocation equality', () {
+      const a = ApproximateLocation(country: 'US', city: 'NYC');
+      const b = ApproximateLocation(country: 'US', city: 'NYC');
+      const c = ApproximateLocation(country: 'UK', city: 'London');
+
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+      expect(a, isNot(equals(c)));
+    });
+
+    test('WebSearchTool with userLocation round-trips through JSON', () {
+      const tool = WebSearchTool(
+        searchContextSize: 'high',
+        userLocation: ApproximateLocation(country: 'US', city: 'New York City'),
+      );
+
+      final json = tool.toJson();
+      expect(json['type'], equals('web_search_preview'));
+      expect(json['search_context_size'], equals('high'));
+      expect(json['user_location'], isA<Map>());
+      expect((json['user_location'] as Map)['type'], equals('approximate'));
+      expect((json['user_location'] as Map)['country'], equals('US'));
+
+      final restored = WebSearchTool.fromJson(json);
+      expect(restored, equals(tool));
+    });
+
+    test('WebSearchTool fromJson parses nested user_location object', () {
+      final tool = WebSearchTool.fromJson({
+        'type': 'web_search_preview',
+        'user_location': {
+          'type': 'approximate',
+          'country': 'DE',
+          'city': 'Berlin',
+        },
+      });
+
+      expect(tool.userLocation, isNotNull);
+      expect(tool.userLocation!.country, equals('DE'));
+      expect(tool.userLocation!.city, equals('Berlin'));
+    });
+
+    test('ComparisonFilter construction and toJson', () {
+      const filter = ComparisonFilter(
+        type: 'eq',
+        key: 'status',
+        value: 'active',
+      );
+
+      final json = filter.toJson();
+      expect(json['type'], equals('eq'));
+      expect(json['key'], equals('status'));
+      expect(json['value'], equals('active'));
+    });
+
+    test('ComparisonFilter round-trips through JSON', () {
+      const filter = ComparisonFilter(type: 'gte', key: 'score', value: 0.8);
+
+      final json = filter.toJson();
+      final restored = FileSearchFilter.fromJson(json);
+      expect(restored, isA<ComparisonFilter>());
+      expect(restored, equals(filter));
+    });
+
+    test('CompoundFilter construction and toJson', () {
+      const filter = CompoundFilter(
+        type: 'and',
+        filters: [
+          ComparisonFilter(type: 'eq', key: 'status', value: 'active'),
+          ComparisonFilter(type: 'gt', key: 'score', value: 0.5),
+        ],
+      );
+
+      final json = filter.toJson();
+      expect(json['type'], equals('and'));
+      expect(json['filters'], isList);
+      expect((json['filters'] as List).length, equals(2));
+    });
+
+    test('nested CompoundFilter round-trips through JSON', () {
+      const filter = CompoundFilter(
+        type: 'or',
+        filters: [
+          ComparisonFilter(type: 'eq', key: 'type', value: 'report'),
+          CompoundFilter(
+            type: 'and',
+            filters: [
+              ComparisonFilter(type: 'eq', key: 'status', value: 'active'),
+              ComparisonFilter(type: 'gte', key: 'version', value: 2),
+            ],
+          ),
+        ],
+      );
+
+      final json = filter.toJson();
+      final restored = FileSearchFilter.fromJson(json);
+      expect(restored, isA<CompoundFilter>());
+      final compound = restored as CompoundFilter;
+      expect(compound.type, equals('or'));
+      expect(compound.filters.length, equals(2));
+      expect(compound.filters[0], isA<ComparisonFilter>());
+      expect(compound.filters[1], isA<CompoundFilter>());
+    });
+
+    test('FileSearchTool with filters round-trips through JSON', () {
+      const tool = FileSearchTool(
+        vectorStoreIds: ['vs_123'],
+        filters: ComparisonFilter(type: 'eq', key: 'category', value: 'docs'),
+      );
+
+      final json = tool.toJson();
+      expect(json['type'], equals('file_search'));
+      expect(json['filters'], isA<Map>());
+      expect((json['filters'] as Map)['type'], equals('eq'));
+
+      final restored = FileSearchTool.fromJson(json);
+      expect(restored.filters, isA<ComparisonFilter>());
+      expect((restored.filters! as ComparisonFilter).key, equals('category'));
+    });
   });
 
   group('ResponseToolChoice', () {
@@ -976,14 +1136,14 @@ void main() {
       expect(json['queries'], equals(['test query']));
     });
 
-    test('deserializes CodeInterpreterCallOutputItem', () {
+    test('deserializes CodeInterpreterCallOutputItem with typed outputs', () {
       final json = {
         'type': 'code_interpreter_call',
         'id': 'ci_123',
         'code': 'print("hello")',
         'language': 'python',
         'outputs': [
-          {'type': 'text', 'text': 'hello'},
+          {'type': 'logs', 'logs': 'hello'},
         ],
         'status': 'completed',
       };
@@ -996,6 +1156,12 @@ void main() {
       expect(ciItem.code, equals('print("hello")'));
       expect(ciItem.language, equals('python'));
       expect(ciItem.outputs, isNotNull);
+      expect(ciItem.outputs!.length, equals(1));
+      expect(ciItem.outputs!.first, isA<CodeInterpreterLogsOutput>());
+      expect(
+        (ciItem.outputs!.first as CodeInterpreterLogsOutput).logs,
+        equals('hello'),
+      );
       expect(ciItem.status, equals(ItemStatus.completed));
     });
 
@@ -1012,6 +1178,57 @@ void main() {
       expect(json['type'], equals('code_interpreter_call'));
       expect(json['code'], equals('x = 1 + 1'));
       expect(json['language'], equals('python'));
+    });
+
+    test('CodeInterpreterLogsOutput round-trips through JSON', () {
+      const output = CodeInterpreterLogsOutput(logs: 'Hello, world!');
+
+      final json = output.toJson();
+      expect(json['type'], equals('logs'));
+      expect(json['logs'], equals('Hello, world!'));
+
+      final restored = CodeInterpreterOutput.fromJson(json);
+      expect(restored, isA<CodeInterpreterLogsOutput>());
+      expect(restored, equals(output));
+    });
+
+    test('CodeInterpreterImageOutput round-trips through JSON', () {
+      const output = CodeInterpreterImageOutput(
+        url: 'https://example.com/image.png',
+      );
+
+      final json = output.toJson();
+      expect(json['type'], equals('image'));
+      expect(json['url'], equals('https://example.com/image.png'));
+
+      final restored = CodeInterpreterOutput.fromJson(json);
+      expect(restored, isA<CodeInterpreterImageOutput>());
+      expect(restored, equals(output));
+    });
+
+    test('CodeInterpreterCallOutputItem with typed outputs round-trips', () {
+      const item = CodeInterpreterCallOutputItem(
+        id: 'ci_456',
+        code: 'import matplotlib',
+        language: 'python',
+        outputs: [
+          CodeInterpreterLogsOutput(logs: 'Processing...'),
+          CodeInterpreterImageOutput(url: 'https://example.com/plot.png'),
+        ],
+        status: ItemStatus.completed,
+      );
+
+      final json = item.toJson();
+      final outputs = json['outputs'] as List;
+      expect(outputs.length, equals(2));
+      expect((outputs[0] as Map)['type'], equals('logs'));
+      expect((outputs[1] as Map)['type'], equals('image'));
+
+      final restored = CodeInterpreterCallOutputItem.fromJson(json);
+      expect(restored.id, equals('ci_456'));
+      expect(restored.outputs!.length, equals(2));
+      expect(restored.outputs![0], isA<CodeInterpreterLogsOutput>());
+      expect(restored.outputs![1], isA<CodeInterpreterImageOutput>());
     });
 
     test('deserializes ImageGenerationCallOutputItem', () {

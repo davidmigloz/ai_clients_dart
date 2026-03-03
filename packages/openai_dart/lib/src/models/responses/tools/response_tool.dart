@@ -44,7 +44,7 @@ sealed class ResponseTool {
   /// Creates a web search tool.
   static WebSearchTool webSearch({
     String? searchContextSize,
-    String? userLocation,
+    ApproximateLocation? userLocation,
   }) => WebSearchTool(
     searchContextSize: searchContextSize,
     userLocation: userLocation,
@@ -55,10 +55,12 @@ sealed class ResponseTool {
     List<String>? vectorStoreIds,
     int? maxNumResults,
     FileSearchRankingOptions? rankingOptions,
+    FileSearchFilter? filters,
   }) => FileSearchTool(
     vectorStoreIds: vectorStoreIds,
     maxNumResults: maxNumResults,
     rankingOptions: rankingOptions,
+    filters: filters,
   );
 
   /// Creates a code interpreter tool.
@@ -184,6 +186,66 @@ class FunctionTool extends ResponseTool {
       'FunctionTool(name: $name, description: $description, parameters: $parameters, strict: $strict)';
 }
 
+/// Approximate user location for localized web search results.
+@immutable
+class ApproximateLocation {
+  /// The two-letter country code (e.g. 'US').
+  final String? country;
+
+  /// The region or state (e.g. 'New York').
+  final String? region;
+
+  /// The city name (e.g. 'New York City').
+  final String? city;
+
+  /// The IANA timezone (e.g. 'America/New_York').
+  final String? timezone;
+
+  /// Creates an [ApproximateLocation].
+  const ApproximateLocation({
+    this.country,
+    this.region,
+    this.city,
+    this.timezone,
+  });
+
+  /// Creates an [ApproximateLocation] from JSON.
+  factory ApproximateLocation.fromJson(Map<String, dynamic> json) {
+    return ApproximateLocation(
+      country: json['country'] as String?,
+      region: json['region'] as String?,
+      city: json['city'] as String?,
+      timezone: json['timezone'] as String?,
+    );
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    'type': 'approximate',
+    if (country != null) 'country': country,
+    if (region != null) 'region': region,
+    if (city != null) 'city': city,
+    if (timezone != null) 'timezone': timezone,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ApproximateLocation &&
+          runtimeType == other.runtimeType &&
+          country == other.country &&
+          region == other.region &&
+          city == other.city &&
+          timezone == other.timezone;
+
+  @override
+  int get hashCode => Object.hash(country, region, city, timezone);
+
+  @override
+  String toString() =>
+      'ApproximateLocation(country: $country, region: $region, city: $city, timezone: $timezone)';
+}
+
 /// Web search tool for searching the web.
 @immutable
 class WebSearchTool extends ResponseTool {
@@ -195,8 +257,8 @@ class WebSearchTool extends ResponseTool {
   /// Can be 'low', 'medium', or 'high'.
   final String? searchContextSize;
 
-  /// The user's location for localized search results.
-  final String? userLocation;
+  /// The user's approximate location for localized search results.
+  final ApproximateLocation? userLocation;
 
   /// Creates a [WebSearchTool].
   const WebSearchTool({
@@ -210,7 +272,11 @@ class WebSearchTool extends ResponseTool {
     return WebSearchTool(
       type: json['type'] as String? ?? 'web_search_preview',
       searchContextSize: json['search_context_size'] as String?,
-      userLocation: json['user_location'] as String?,
+      userLocation: json['user_location'] != null
+          ? ApproximateLocation.fromJson(
+              json['user_location'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
@@ -218,7 +284,7 @@ class WebSearchTool extends ResponseTool {
   Map<String, dynamic> toJson() => {
     'type': type,
     if (searchContextSize != null) 'search_context_size': searchContextSize,
-    if (userLocation != null) 'user_location': userLocation,
+    if (userLocation != null) 'user_location': userLocation!.toJson(),
   };
 
   @override
@@ -238,6 +304,128 @@ class WebSearchTool extends ResponseTool {
       'WebSearchTool(type: $type, searchContextSize: $searchContextSize, userLocation: $userLocation)';
 }
 
+/// A filter for file search metadata.
+///
+/// See [ComparisonFilter] and [CompoundFilter].
+sealed class FileSearchFilter {
+  /// Creates a [FileSearchFilter].
+  const FileSearchFilter();
+
+  /// Creates a [FileSearchFilter] from JSON.
+  factory FileSearchFilter.fromJson(Map<String, dynamic> json) {
+    final type = json['type'] as String;
+    return switch (type) {
+      'eq' ||
+      'ne' ||
+      'gt' ||
+      'gte' ||
+      'lt' ||
+      'lte' ||
+      'in' ||
+      'nin' => ComparisonFilter.fromJson(json),
+      'and' || 'or' => CompoundFilter.fromJson(json),
+      _ => throw FormatException('Unknown FileSearchFilter type: $type'),
+    };
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson();
+}
+
+/// A comparison filter for file search metadata.
+@immutable
+class ComparisonFilter extends FileSearchFilter {
+  /// The comparison operator (e.g. 'eq', 'ne', 'gt', 'gte', 'lt', 'lte',
+  /// 'in', 'nin').
+  final String type;
+
+  /// The metadata attribute key to filter on.
+  final String key;
+
+  /// The value to compare against.
+  ///
+  /// Can be a [String], [num], [bool], or [List] of those types.
+  final Object value;
+
+  /// Creates a [ComparisonFilter].
+  const ComparisonFilter({
+    required this.type,
+    required this.key,
+    required this.value,
+  });
+
+  /// Creates a [ComparisonFilter] from JSON.
+  factory ComparisonFilter.fromJson(Map<String, dynamic> json) {
+    return ComparisonFilter(
+      type: json['type'] as String,
+      key: json['key'] as String,
+      value: json['value'] as Object,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': type, 'key': key, 'value': value};
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ComparisonFilter &&
+          runtimeType == other.runtimeType &&
+          type == other.type &&
+          key == other.key &&
+          value == other.value;
+
+  @override
+  int get hashCode => Object.hash(type, key, value);
+
+  @override
+  String toString() =>
+      'ComparisonFilter(type: $type, key: $key, value: $value)';
+}
+
+/// A compound filter that combines multiple filters with a logical operator.
+@immutable
+class CompoundFilter extends FileSearchFilter {
+  /// The logical operator ('and' or 'or').
+  final String type;
+
+  /// The list of filters to combine.
+  final List<FileSearchFilter> filters;
+
+  /// Creates a [CompoundFilter].
+  const CompoundFilter({required this.type, required this.filters});
+
+  /// Creates a [CompoundFilter] from JSON.
+  factory CompoundFilter.fromJson(Map<String, dynamic> json) {
+    return CompoundFilter(
+      type: json['type'] as String,
+      filters: (json['filters'] as List)
+          .map((e) => FileSearchFilter.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'filters': filters.map((f) => f.toJson()).toList(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CompoundFilter &&
+          runtimeType == other.runtimeType &&
+          type == other.type &&
+          listsEqual(filters, other.filters);
+
+  @override
+  int get hashCode => Object.hash(type, filters);
+
+  @override
+  String toString() => 'CompoundFilter(type: $type, filters: $filters)';
+}
+
 /// File search tool for searching vector stores.
 @immutable
 class FileSearchTool extends ResponseTool {
@@ -250,11 +438,15 @@ class FileSearchTool extends ResponseTool {
   /// Ranking options for search results.
   final FileSearchRankingOptions? rankingOptions;
 
+  /// A filter to apply based on file metadata.
+  final FileSearchFilter? filters;
+
   /// Creates a [FileSearchTool].
   const FileSearchTool({
     this.vectorStoreIds,
     this.maxNumResults,
     this.rankingOptions,
+    this.filters,
   });
 
   /// Creates a [FileSearchTool] from JSON.
@@ -267,6 +459,9 @@ class FileSearchTool extends ResponseTool {
               json['ranking_options'] as Map<String, dynamic>,
             )
           : null,
+      filters: json['filters'] != null
+          ? FileSearchFilter.fromJson(json['filters'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -276,6 +471,7 @@ class FileSearchTool extends ResponseTool {
     if (vectorStoreIds != null) 'vector_store_ids': vectorStoreIds,
     if (maxNumResults != null) 'max_num_results': maxNumResults,
     if (rankingOptions != null) 'ranking_options': rankingOptions!.toJson(),
+    if (filters != null) 'filters': filters!.toJson(),
   };
 
   @override
@@ -285,15 +481,16 @@ class FileSearchTool extends ResponseTool {
           runtimeType == other.runtimeType &&
           listsEqual(vectorStoreIds, other.vectorStoreIds) &&
           maxNumResults == other.maxNumResults &&
-          rankingOptions == other.rankingOptions;
+          rankingOptions == other.rankingOptions &&
+          filters == other.filters;
 
   @override
   int get hashCode =>
-      Object.hash(vectorStoreIds, maxNumResults, rankingOptions);
+      Object.hash(vectorStoreIds, maxNumResults, rankingOptions, filters);
 
   @override
   String toString() =>
-      'FileSearchTool(vectorStoreIds: $vectorStoreIds, maxNumResults: $maxNumResults, rankingOptions: $rankingOptions)';
+      'FileSearchTool(vectorStoreIds: $vectorStoreIds, maxNumResults: $maxNumResults, rankingOptions: $rankingOptions, filters: $filters)';
 }
 
 /// Ranking options for file search.

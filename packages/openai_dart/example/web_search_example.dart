@@ -66,10 +66,15 @@ Future<void> main() async {
           ),
         ]),
         tools: [
-          // Web search will use context when available
-          ResponseTool.webSearch(),
+          ResponseTool.webSearch(
+            userLocation: const ApproximateLocation(
+              country: 'US',
+              region: 'New York',
+              city: 'New York City',
+              timezone: 'America/New_York',
+            ),
+          ),
         ],
-        instructions: 'The user is located in New York City.',
       ),
     );
 

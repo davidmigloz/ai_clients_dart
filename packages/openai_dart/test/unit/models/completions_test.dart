@@ -200,6 +200,46 @@ void main() {
       expect(json.containsKey('stop'), isFalse);
       expect(json.containsKey('max_tokens'), isFalse);
     });
+
+    test('streamOptions uses typed StreamOptions', () {
+      const request = CompletionRequest(
+        model: 'gpt-3.5-turbo-instruct',
+        stream: true,
+        streamOptions: StreamOptions(includeUsage: true),
+      );
+
+      final json = request.toJson();
+      expect(json['stream'], isTrue);
+      expect(json['stream_options'], isA<Map>());
+      expect((json['stream_options'] as Map)['include_usage'], isTrue);
+    });
+
+    test('streamOptions fromJson parses typed StreamOptions', () {
+      final json = {
+        'model': 'gpt-3.5-turbo-instruct',
+        'stream': true,
+        'stream_options': {'include_usage': true},
+      };
+
+      final request = CompletionRequest.fromJson(json);
+
+      expect(request.streamOptions, isNotNull);
+      expect(request.streamOptions!.includeUsage, isTrue);
+    });
+
+    test('streamOptions round-trips through JSON', () {
+      const request = CompletionRequest(
+        model: 'gpt-3.5-turbo-instruct',
+        stream: true,
+        streamOptions: StreamOptions(includeUsage: true),
+      );
+
+      final json = request.toJson();
+      final restored = CompletionRequest.fromJson(json);
+
+      expect(restored.streamOptions, isNotNull);
+      expect(restored.streamOptions!.includeUsage, isTrue);
+    });
   });
 
   group('Completion', () {

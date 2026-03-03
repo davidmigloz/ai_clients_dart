@@ -474,6 +474,89 @@ class FileSearchCallOutputItem extends OutputItem {
       'FileSearchCallOutputItem(id: $id, queries: $queries, results: $results, status: $status)';
 }
 
+/// Output from a code interpreter execution.
+///
+/// See [CodeInterpreterLogsOutput] and [CodeInterpreterImageOutput].
+sealed class CodeInterpreterOutput {
+  /// Creates a [CodeInterpreterOutput].
+  const CodeInterpreterOutput();
+
+  /// Creates a [CodeInterpreterOutput] from JSON.
+  factory CodeInterpreterOutput.fromJson(Map<String, dynamic> json) {
+    final type = json['type'] as String;
+    return switch (type) {
+      'logs' => CodeInterpreterLogsOutput.fromJson(json),
+      'image' => CodeInterpreterImageOutput.fromJson(json),
+      _ => throw FormatException('Unknown CodeInterpreterOutput type: $type'),
+    };
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson();
+}
+
+/// Log output from code interpreter execution.
+@immutable
+class CodeInterpreterLogsOutput extends CodeInterpreterOutput {
+  /// The log text output.
+  final String logs;
+
+  /// Creates a [CodeInterpreterLogsOutput].
+  const CodeInterpreterLogsOutput({required this.logs});
+
+  /// Creates a [CodeInterpreterLogsOutput] from JSON.
+  factory CodeInterpreterLogsOutput.fromJson(Map<String, dynamic> json) {
+    return CodeInterpreterLogsOutput(logs: json['logs'] as String);
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': 'logs', 'logs': logs};
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CodeInterpreterLogsOutput &&
+          runtimeType == other.runtimeType &&
+          logs == other.logs;
+
+  @override
+  int get hashCode => logs.hashCode;
+
+  @override
+  String toString() => 'CodeInterpreterLogsOutput(logs: $logs)';
+}
+
+/// Image output from code interpreter execution.
+@immutable
+class CodeInterpreterImageOutput extends CodeInterpreterOutput {
+  /// The URL of the generated image.
+  final String url;
+
+  /// Creates a [CodeInterpreterImageOutput].
+  const CodeInterpreterImageOutput({required this.url});
+
+  /// Creates a [CodeInterpreterImageOutput] from JSON.
+  factory CodeInterpreterImageOutput.fromJson(Map<String, dynamic> json) {
+    return CodeInterpreterImageOutput(url: json['url'] as String);
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': 'image', 'url': url};
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CodeInterpreterImageOutput &&
+          runtimeType == other.runtimeType &&
+          url == other.url;
+
+  @override
+  int get hashCode => url.hashCode;
+
+  @override
+  String toString() => 'CodeInterpreterImageOutput(url: $url)';
+}
+
 /// A code interpreter call output item.
 ///
 /// Returned when the model uses the [CodeInterpreterTool].
@@ -489,7 +572,7 @@ class CodeInterpreterCallOutputItem extends OutputItem {
   final String? language;
 
   /// The execution outputs.
-  final List<Map<String, dynamic>>? outputs;
+  final List<CodeInterpreterOutput>? outputs;
 
   /// Item status.
   final ItemStatus? status;
@@ -510,7 +593,9 @@ class CodeInterpreterCallOutputItem extends OutputItem {
       code: json['code'] as String?,
       language: json['language'] as String?,
       outputs: (json['outputs'] as List?)
-          ?.map((e) => e as Map<String, dynamic>)
+          ?.map(
+            (e) => CodeInterpreterOutput.fromJson(e as Map<String, dynamic>),
+          )
           .toList(),
       status: json['status'] != null
           ? ItemStatus.fromJson(json['status'] as String)
@@ -524,7 +609,7 @@ class CodeInterpreterCallOutputItem extends OutputItem {
     'id': id,
     if (code != null) 'code': code,
     if (language != null) 'language': language,
-    if (outputs != null) 'outputs': outputs,
+    if (outputs != null) 'outputs': outputs!.map((e) => e.toJson()).toList(),
     if (status != null) 'status': status!.toJson(),
   };
 
