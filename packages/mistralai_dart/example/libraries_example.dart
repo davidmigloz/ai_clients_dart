@@ -18,7 +18,7 @@ import 'package:mistralai_dart/mistralai_dart.dart';
 /// 2. Set environment variable: export MISTRAL_API_KEY=your_api_key
 void main() async {
   // Initialize client
-  final client = MistralClient();
+  final client = MistralClient.fromEnvironment();
 
   try {
     // Example: Basic library operations

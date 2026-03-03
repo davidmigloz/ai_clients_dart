@@ -41,7 +41,7 @@ Add `mistralai_dart` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  mistralai_dart: ^1.0.0
+  mistralai_dart: ^x.y.z
 ```
 
 ## Quick Start
@@ -136,7 +136,7 @@ final stream = client.chat.createStream(
 );
 
 await for (final chunk in stream) {
-  stdout.write(chunk.textDelta); // Extension method
+  stdout.write(chunk.text); // Extension method
 }
 ```
 
@@ -150,8 +150,8 @@ final response = await client.chat.create(
       ChatMessage.userMultimodal([
         ContentPart.text('Describe this image'),
         ContentPart.imageUrl('https://example.com/image.jpg'),
-        // Or use base64
-        // ContentPart.imageBase64(base64Data, mediaType: 'image/png'),
+        // Or use base64 via data URL
+        // ContentPart.imageUrl('data:image/png;base64,$base64Data'),
       ]),
     ],
   ),
@@ -307,7 +307,7 @@ final response = await client.fim.create(
   ),
 );
 
-print(response.choices.first.message.content);
+print(response.choices.first.message);
 
 // Streaming FIM
 final stream = client.fim.createStream(
@@ -324,11 +324,9 @@ final stream = client.fim.createStream(
 > **Note**: The Files API is only available on native platforms (not web).
 
 ```dart
-import 'dart:io';
-
 // Upload a file
 final file = await client.files.upload(
-  file: File('training_data.jsonl'),
+  filePath: 'training_data.jsonl',
   purpose: FilePurpose.fineTune,
 );
 
@@ -336,17 +334,17 @@ final file = await client.files.upload(
 final files = await client.files.list();
 
 // Download file content
-final content = await client.files.downloadContent(file.id);
+final content = await client.files.download(fileId: file.id);
 
 // Delete file
-await client.files.delete(file.id);
+await client.files.delete(fileId: file.id);
 ```
 
 ### Fine-tuning
 
 ```dart
 // Create a fine-tuning job
-final job = await client.fineTuning.create(
+final job = await client.fineTuning.jobs.create(
   request: CreateFineTuningJobRequest(
     model: 'mistral-small-latest',
     trainingFiles: [TrainingFile(fileId: 'file-abc123')],
@@ -358,17 +356,17 @@ final job = await client.fineTuning.create(
 );
 
 // Poll for completion
-final poller = FineTuningJobPoller(client);
-final completedJob = await poller.poll(
-  job.id,
+final poller = FineTuningJobPoller(
+  client: client,
+  jobId: job.id,
   pollInterval: Duration(seconds: 30),
   timeout: Duration(hours: 2),
-  onStatusChange: (status) => print('Status: $status'),
 );
+final completedJob = await poller.poll();
 
 // List jobs with pagination
 final paginator = Paginator<FineTuningJob, FineTuningJobList>(
-  fetcher: (page, size) => client.fineTuning.list(page: page, pageSize: size),
+  fetcher: (page, size) => client.fineTuning.jobs.list(page: page, pageSize: size),
   getItems: (response) => response.data,
 );
 
@@ -381,20 +379,20 @@ await for (final job in paginator.items()) {
 
 ```dart
 // Create batch job
-final job = await client.batch.create(
+final job = await client.batch.jobs.create(
   request: CreateBatchJobRequest(
-    inputFiles: ['file-abc123'],
+    inputFileId: 'file-abc123',
     endpoint: '/v1/chat/completions',
     model: 'mistral-small-latest',
   ),
 );
 
 // Poll for completion
-final poller = BatchJobPoller(client);
-final completed = await poller.poll(job.id);
+final poller = BatchJobPoller(client: client, jobId: job.id);
+final completed = await poller.poll();
 
 // Download results
-final results = await client.files.downloadContent(completed.outputFile!);
+final results = await client.files.download(fileId: completed.outputFile!);
 ```
 
 ### Moderations
@@ -410,7 +408,7 @@ final result = await client.moderations.create(
 
 for (final item in result.results) {
   if (item.flagged) {
-    print('Content flagged for: ${item.flaggedCategories}');
+    print('Content flagged: ${item.categories}');
   }
 }
 
@@ -468,36 +466,23 @@ final result = await client.ocr.process(
 ### Audio Transcription
 
 ```dart
-import 'dart:io';
+// Upload audio file first, then transcribe using file ID
 
 // Basic transcription
-final result = await client.audio.transcribe(
+final result = await client.audio.transcriptions.create(
   request: TranscriptionRequest(
     model: 'mistral-stt-latest',
-    file: File('audio.mp3'),
+    file: audioFileId, // ID from client.files.upload()
   ),
 );
 
 print('Transcription: ${result.text}');
 
-// With word timestamps
-final result = await client.audio.transcribe(
-  request: TranscriptionRequest(
-    model: 'mistral-stt-latest',
-    file: File('audio.mp3'),
-    timestampGranularities: ['word'],
-  ),
-);
-
-for (final word in result.words ?? []) {
-  print('${word.word} [${word.start} - ${word.end}]');
-}
-
 // Streaming transcription
-final stream = client.audio.transcribeStream(
+final stream = client.audio.transcriptions.createStream(
   request: TranscriptionRequest(
     model: 'mistral-stt-latest',
-    file: File('audio.mp3'),
+    file: audioFileId,
   ),
 );
 
@@ -521,8 +506,8 @@ final agent = await client.agents.create(
 
 // Chat with agent
 final response = await client.agents.complete(
-  agentId: agent.id,
   request: AgentCompletionRequest(
+    agentId: agent.id,
     messages: [ChatMessage.user('Search for latest AI papers')],
   ),
 );
@@ -537,7 +522,7 @@ await client.agents.update(
 );
 
 // Delete agent
-await client.agents.delete(agent.id);
+await client.agents.delete(agentId: agent.id);
 ```
 
 ### Conversations (Beta)
@@ -545,37 +530,24 @@ await client.agents.delete(agent.id);
 ```dart
 // Start a conversation
 final conversation = await client.conversations.start(
-  request: ConversationRequest(
+  request: StartConversationRequest(
     agentId: 'agent-123',
-    inputs: ChatMessage.user('Hello!'),
+    inputs: [MessageInputEntry(content: 'Hello!')],
   ),
 );
 
-print('Assistant: ${conversation.outputs.text}');
+print('Assistant: ${conversation.text}');
 
 // Continue the conversation
-final response = await client.conversations.append(
+final response = await client.conversations.sendMessage(
   conversationId: conversation.conversationId,
-  request: ConversationRequest(
-    agentId: 'agent-123',
-    inputs: ChatMessage.user('Tell me more'),
-  ),
+  message: 'Tell me more',
 );
 
-// Stream conversation
-final stream = client.conversations.startStream(
-  request: ConversationRequest(
-    agentId: 'agent-123',
-    inputs: ChatMessage.user('Write a poem'),
-  ),
+// Get conversation details
+final details = await client.conversations.retrieve(
+  conversationId: conversation.conversationId,
 );
-
-await for (final chunk in stream) {
-  stdout.write(chunk.outputs.textDelta);
-}
-
-// Get conversation history
-final history = await client.conversations.get(conversationId);
 ```
 
 ### Libraries (Beta)
@@ -584,18 +556,16 @@ final history = await client.conversations.get(conversationId);
 // Create a library
 final library = await client.libraries.create(
   name: 'Research Papers',
-  chunkingStrategy: ChunkingStrategy.semantic,
 );
 
-// Upload documents
-final doc = await client.libraries.uploadDocument(
+// Add a document (file must be uploaded first via client.files.upload())
+final doc = await client.libraries.documents.create(
   libraryId: library.id,
-  file: File('paper.pdf'),
-  filename: 'research_paper.pdf',
+  fileId: fileId, // ID from client.files.upload()
 );
 
 // List documents
-final docs = await client.libraries.listDocuments(library.id);
+final docs = await client.libraries.documents.list(libraryId: library.id);
 
 // Use library with chat
 final response = await client.chat.create(
@@ -607,7 +577,7 @@ final response = await client.chat.create(
 );
 
 // Delete library
-await client.libraries.delete(library.id);
+await client.libraries.delete(libraryId: library.id);
 ```
 
 ### Models
@@ -641,14 +611,13 @@ response.hasToolCalls   // Check if tool calls present
 response.toolCalls      // Get tool calls list
 
 // ChatCompletionStreamResponse extensions
-chunk.textDelta         // Delta content from streaming
+chunk.text              // Delta content from streaming
 
 // AgentCompletionResponse extensions
 agentResponse.text      // Output text content
 
 // ConversationResponse extensions
 conversation.text       // Output message content
-conversation.textDelta  // Delta for streaming
 ```
 
 ## Utility Classes
@@ -679,17 +648,17 @@ For polling long-running jobs:
 
 ```dart
 // Fine-tuning
-final poller = FineTuningJobPoller(client);
-final job = await poller.poll(
-  jobId,
+final poller = FineTuningJobPoller(
+  client: client,
+  jobId: jobId,
   pollInterval: Duration(seconds: 30),
   timeout: Duration(hours: 2),
-  onStatusChange: (status) => print('Status: $status'),
 );
+final job = await poller.poll();
 
 // Batch
-final batchPoller = BatchJobPoller(client);
-final batchJob = await batchPoller.poll(jobId);
+final batchPoller = BatchJobPoller(client: client, jobId: jobId);
+final batchJob = await batchPoller.poll();
 ```
 
 ## Error Handling
@@ -706,8 +675,10 @@ try {
   print('Auth failed: ${e.message}');
 } on ApiException catch (e) {
   print('API error ${e.statusCode}: ${e.message}');
-} on NetworkException catch (e) {
-  print('Network error: ${e.message}');
+} on TimeoutException catch (e) {
+  print('Timeout: ${e.message}');
+} on AbortedException catch (e) {
+  print('Aborted: ${e.message}');
 } on MistralException catch (e) {
   print('General error: $e');
 }
@@ -802,7 +773,7 @@ This client implements the Mistral AI REST API:
 - **list** - List files
 - **retrieve** - Get file metadata
 - **delete** - Delete a file
-- **downloadContent** - Download file content
+- **download** - Download file content
 
 ### FineTuning Resource (`client.fineTuning`)
 

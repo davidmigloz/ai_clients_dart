@@ -207,11 +207,8 @@ final assistantMessage = ChatMessage.assistant('How can I help?');
 ```dart
 // After (new feature)
 final message = ChatMessage.userMultimodal([
-  TextContentPart('What is in this image?'),
-  ImageUrlContentPart(
-    url: 'https://example.com/image.jpg',
-    detail: 'auto',
-  ),
+  ContentPart.text('What is in this image?'),
+  ContentPart.imageUrl('https://example.com/image.jpg'),
 ]);
 ```
 
@@ -498,9 +495,9 @@ await client.fineTuning.models.unarchive(modelId: 'ft:model-123');
 ### Batch Processing
 
 ```dart
-final job = await client.batch.create(
+final job = await client.batch.jobs.create(
   request: CreateBatchJobRequest(
-    inputFiles: ['file-123'],
+    inputFileId: 'file-123',
     model: 'mistral-small-latest',
     endpoint: '/v1/chat/completions',
   ),
@@ -521,10 +518,10 @@ final response = await client.ocr.process(
 ### Audio Transcription
 
 ```dart
-final response = await client.audio.transcribe(
+final response = await client.audio.transcriptions.create(
   request: TranscriptionRequest(
     model: 'mistral-audio-latest',
-    file: TranscriptionFile.fromPath('/path/to/audio.mp3'),
+    file: audioFileId, // ID from client.files.upload()
   ),
 );
 ```
@@ -533,8 +530,8 @@ final response = await client.audio.transcribe(
 
 ```dart
 final response = await client.agents.complete(
-  agentId: 'agent-123',
   request: AgentCompletionRequest(
+    agentId: 'agent-123',
     messages: [ChatMessage.user('Hello!')],
   ),
 );
@@ -546,10 +543,10 @@ final response = await client.agents.complete(
 // Create a document library
 final library = await client.libraries.create(name: 'My Knowledge Base');
 
-// Upload a document
-final doc = await client.libraries.documents.upload(
+// Add a document (file must be uploaded first via client.files.upload())
+final doc = await client.libraries.documents.create(
   libraryId: library.id,
-  filePath: '/path/to/document.pdf',
+  fileId: fileId, // ID from client.files.upload()
 );
 
 // Use in chat with document_library tool
@@ -619,7 +616,7 @@ final response = await client.chat.create(
 | `AssistantMessageRole` | Removed (assistant message has role built-in) |
 | `ChatCompletionFinishReason` | `FinishReason` |
 | `ChatCompletionStreamResponse` | `ChatCompletionStreamResponse` |
-| `ChatCompletionStreamDelta` | `DeltaMessage` |
+| `ChatCompletionStreamDelta` | `DeltaContent` |
 
 ## Getting Help
 
