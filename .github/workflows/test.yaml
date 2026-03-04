@@ -62,6 +62,7 @@ jobs:
           # Check for root-level changes that should trigger all packages
           ROOT_CHANGED=false
           while IFS= read -r file; do
+            [ -z "$file" ] && continue
             # Files directly in root (not under packages/ or hidden dirs like .github/)
             case "$file" in
               packages/*|.github/*) ;;
