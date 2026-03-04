@@ -117,7 +117,7 @@ jobs:
       - name: Run unit tests
         run: |
           echo "Testing packages/${{ matrix.package }}"
-          output=$(dart test "packages/${{ matrix.package }}/test" --exclude-tags integration 2>&1) && true
+          output=$(dart test "packages/${{ matrix.package }}/test" --exclude-tags integration --reporter failures-only 2>&1) && true
           exit_code=$?
           echo "$output"
           if [ $exit_code -ne 0 ]; then
@@ -163,7 +163,7 @@ jobs:
           for pkg in packages/*/; do
             if [ -d "$pkg/test" ]; then
               echo "::group::Testing $pkg"
-              output=$(dart test "$pkg/test" --exclude-tags integration 2>&1) && true
+              output=$(dart test "$pkg/test" --exclude-tags integration --reporter failures-only 2>&1) && true
               pkg_exit=$?
               echo "$output"
               if [ $pkg_exit -ne 0 ]; then
