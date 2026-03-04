@@ -938,9 +938,7 @@ class WebSearchResultError extends WebSearchResult {
 
   /// Creates a [WebSearchResultError] from JSON.
   factory WebSearchResultError.fromJson(Map<String, dynamic> json) {
-    return WebSearchResultError(
-      errorCode: json['error_code'] as String,
-    );
+    return WebSearchResultError(errorCode: json['error_code'] as String);
   }
 
   @override

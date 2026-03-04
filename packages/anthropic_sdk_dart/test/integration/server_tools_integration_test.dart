@@ -95,10 +95,7 @@ void main() {
           if (event case ContentBlockStartEvent(:final contentBlock)) {
             if (contentBlock is WebSearchToolResultBlock) {
               hasWebSearchResult = true;
-              expect(
-                contentBlock.content,
-                isA<WebSearchResultSuccess>(),
-              );
+              expect(contentBlock.content, isA<WebSearchResultSuccess>());
             }
           }
         }

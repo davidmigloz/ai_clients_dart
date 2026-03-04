@@ -781,8 +781,7 @@ class WebSearchToolResultInputBlock extends InputContentBlock {
           cacheControl == other.cacheControl;
 
   @override
-  int get hashCode =>
-      Object.hash(toolUseId, content, caller, cacheControl);
+  int get hashCode => Object.hash(toolUseId, content, caller, cacheControl);
 
   @override
   String toString() =>
