@@ -140,8 +140,13 @@ class EmbeddingRequest {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(model, input, encodingFormat, outputDimension, outputDtype);
+  int get hashCode => Object.hash(
+    model,
+    input is List ? listHash(input as List) : input,
+    encodingFormat,
+    outputDimension,
+    outputDtype,
+  );
 
   @override
   String toString() =>

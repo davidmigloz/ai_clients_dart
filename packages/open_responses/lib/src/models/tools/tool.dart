@@ -141,8 +141,12 @@ class McpTool extends Tool {
           requireApproval == other.requireApproval;
 
   @override
-  int get hashCode =>
-      Object.hash(serverLabel, serverUrl, allowedTools, requireApproval);
+  int get hashCode => Object.hash(
+    serverLabel,
+    serverUrl,
+    listHash(allowedTools),
+    requireApproval,
+  );
 
   @override
   String toString() =>
