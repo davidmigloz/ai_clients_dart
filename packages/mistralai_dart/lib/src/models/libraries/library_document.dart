@@ -290,7 +290,7 @@ class LibraryDocumentContent {
           listsEqual(signedUrls, other.signedUrls);
 
   @override
-  int get hashCode => Object.hash(text, Object.hashAll(signedUrls ?? []));
+  int get hashCode => Object.hash(text, listHash(signedUrls));
 
   @override
   String toString() => 'LibraryDocumentContent(text: ${text.length} chars)';
