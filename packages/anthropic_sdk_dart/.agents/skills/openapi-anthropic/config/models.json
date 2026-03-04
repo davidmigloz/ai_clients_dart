@@ -49,7 +49,14 @@
         {"dart_class": "RedactedThinkingBlock", "spec_schema": "RedactedThinkingBlock", "discriminator_value": "redacted_thinking"},
         {"dart_class": "ToolUseBlock", "spec_schema": "ToolUseBlock", "discriminator_value": "tool_use"},
         {"dart_class": "ServerToolUseBlock", "spec_schema": "ServerToolUseBlock", "discriminator_value": "server_tool_use"},
-        {"dart_class": "WebSearchToolResultBlock", "spec_schema": "WebSearchToolResultBlock", "discriminator_value": "web_search_tool_result"}
+        {"dart_class": "WebSearchToolResultBlock", "spec_schema": "ResponseWebSearchToolResultBlock", "discriminator_value": "web_search_tool_result"},
+        {"dart_class": "WebFetchToolResultBlock", "spec_schema": "ResponseWebFetchToolResultBlock", "discriminator_value": "web_fetch_tool_result"},
+        {"dart_class": "CodeExecutionToolResultBlock", "spec_schema": "ResponseCodeExecutionToolResultBlock", "discriminator_value": "code_execution_tool_result"},
+        {"dart_class": "BashCodeExecutionToolResultBlock", "spec_schema": "ResponseBashCodeExecutionToolResultBlock", "discriminator_value": "bash_code_execution_tool_result"},
+        {"dart_class": "TextEditorCodeExecutionToolResultBlock", "spec_schema": "ResponseTextEditorCodeExecutionToolResultBlock", "discriminator_value": "text_editor_code_execution_tool_result"},
+        {"dart_class": "ToolSearchToolResultBlock", "spec_schema": "ResponseToolSearchToolResultBlock", "discriminator_value": "tool_search_tool_result"},
+        {"dart_class": "ContainerUploadBlock", "spec_schema": "ResponseContainerUploadBlock", "discriminator_value": "container_upload"},
+        {"dart_class": "CompactionBlock", "spec_schema": "ResponseCompactionBlock", "discriminator_value": "compaction"}
       ]
     },
     {
@@ -61,7 +68,17 @@
         {"dart_class": "ImageInputBlock", "spec_schema": "ImageBlockParam", "discriminator_value": "image"},
         {"dart_class": "DocumentInputBlock", "spec_schema": "DocumentBlockParam", "discriminator_value": "document"},
         {"dart_class": "ToolUseInputBlock", "spec_schema": "ToolUseBlockParam", "discriminator_value": "tool_use"},
-        {"dart_class": "ToolResultInputBlock", "spec_schema": "ToolResultBlockParam", "discriminator_value": "tool_result"}
+        {"dart_class": "ToolResultInputBlock", "spec_schema": "ToolResultBlockParam", "discriminator_value": "tool_result"},
+        {"dart_class": "ServerToolUseInputBlock", "spec_schema": "ServerToolUseBlockParam", "discriminator_value": "server_tool_use"},
+        {"dart_class": "WebSearchToolResultInputBlock", "spec_schema": "RequestWebSearchToolResultBlockParam", "discriminator_value": "web_search_tool_result"},
+        {"dart_class": "WebFetchToolResultInputBlock", "spec_schema": "RequestWebFetchToolResultBlockParam", "discriminator_value": "web_fetch_tool_result"},
+        {"dart_class": "CodeExecutionToolResultInputBlock", "spec_schema": "RequestCodeExecutionToolResultBlockParam", "discriminator_value": "code_execution_tool_result"},
+        {"dart_class": "BashCodeExecutionToolResultInputBlock", "spec_schema": "RequestBashCodeExecutionToolResultBlockParam", "discriminator_value": "bash_code_execution_tool_result"},
+        {"dart_class": "TextEditorCodeExecutionToolResultInputBlock", "spec_schema": "RequestTextEditorCodeExecutionToolResultBlockParam", "discriminator_value": "text_editor_code_execution_tool_result"},
+        {"dart_class": "ToolSearchToolResultInputBlock", "spec_schema": "RequestToolSearchToolResultBlockParam", "discriminator_value": "tool_search_tool_result"},
+        {"dart_class": "ContainerUploadInputBlock", "spec_schema": "RequestContainerUploadBlockParam", "discriminator_value": "container_upload"},
+        {"dart_class": "CompactionInputBlock", "spec_schema": "RequestCompactionBlockParam", "discriminator_value": "compaction"},
+        {"dart_class": "ToolReferenceInputBlock", "spec_schema": "RequestToolReferenceBlockParam", "discriminator_value": "tool_reference"}
       ]
     },
     {
@@ -87,10 +104,11 @@
     {
       "name": "WebSearchResult",
       "file": "packages/anthropic_sdk_dart/lib/src/models/content/content_block.dart",
-      "discriminator": "type",
+      "discriminator": "anyOf_runtime_type",
+      "note": "content is anyOf: List<WebSearchResultItem> (success) or Map with type=web_search_tool_result_error (error). fromJson accepts Object, not Map.",
       "variants": [
-        {"dart_class": "WebSearchResultSuccess", "spec_schema": "WebSearchToolResult", "discriminator_value": "web_search_result"},
-        {"dart_class": "WebSearchResultError", "spec_schema": "WebSearchToolResultError", "discriminator_value": "web_search_result_error"}
+        {"dart_class": "WebSearchResultSuccess", "spec_schema": "array of ResponseWebSearchResultBlock", "discriminator_value": "List"},
+        {"dart_class": "WebSearchResultError", "spec_schema": "ResponseWebSearchToolResultError", "discriminator_value": "web_search_tool_result_error"}
       ]
     },
     {
