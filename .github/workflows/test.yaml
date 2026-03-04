@@ -136,7 +136,7 @@ jobs:
     steps:
       - name: Aggregate test results
         run: |
-          if [ "${{ needs.test.result }}" = "failure" ] || [ "${{ needs.detect-changes.result }}" = "failure" ]; then
+          if [ "${{ needs.test.result }}" = "failure" ] || [ "${{ needs.test.result }}" = "cancelled" ] || [ "${{ needs.detect-changes.result }}" = "failure" ] || [ "${{ needs.detect-changes.result }}" = "cancelled" ]; then
             echo "::error::Tests failed"
             exit 1
           fi
