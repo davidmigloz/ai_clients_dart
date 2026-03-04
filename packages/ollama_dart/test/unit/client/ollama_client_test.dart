@@ -24,6 +24,29 @@ void main() {
         expect(httpClient.closeCalled, isFalse);
       });
     });
+
+    group('withApiKey', () {
+      test('propagates baseUrl and defaultHeaders to config', () {
+        final client = OllamaClient.withApiKey(
+          'test-key',
+          baseUrl: 'https://custom.ollama.com',
+          defaultHeaders: {'X-Custom': 'value'},
+        );
+        addTearDown(client.close);
+
+        expect(client.config.baseUrl, 'https://custom.ollama.com');
+        expect(client.config.defaultHeaders, {'X-Custom': 'value'});
+        expect(client.config.authProvider, isA<BearerTokenProvider>());
+      });
+
+      test('uses defaults when baseUrl and defaultHeaders are omitted', () {
+        final client = OllamaClient.withApiKey('test-key');
+        addTearDown(client.close);
+
+        expect(client.config.baseUrl, 'http://localhost:11434');
+        expect(client.config.defaultHeaders, isEmpty);
+      });
+    });
   });
 }
 

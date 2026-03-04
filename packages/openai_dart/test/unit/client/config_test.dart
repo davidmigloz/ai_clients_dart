@@ -129,4 +129,27 @@ void main() {
       expect(config1, isNot(equals(config3)));
     });
   });
+
+  group('OpenAIClient.withApiKey()', () {
+    test('propagates baseUrl and defaultHeaders to config', () {
+      final client = OpenAIClient.withApiKey(
+        'sk-test',
+        baseUrl: 'https://custom.api.com/v1',
+        defaultHeaders: {'X-Custom': 'value'},
+      );
+      addTearDown(client.close);
+
+      expect(client.config.baseUrl, 'https://custom.api.com/v1');
+      expect(client.config.defaultHeaders, {'X-Custom': 'value'});
+      expect(client.config.authProvider, isA<ApiKeyProvider>());
+    });
+
+    test('uses defaults when baseUrl and defaultHeaders are omitted', () {
+      final client = OpenAIClient.withApiKey('sk-test');
+      addTearDown(client.close);
+
+      expect(client.config.baseUrl, 'https://api.openai.com/v1');
+      expect(client.config.defaultHeaders, isEmpty);
+    });
+  });
 }

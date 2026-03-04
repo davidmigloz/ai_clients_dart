@@ -25,6 +25,29 @@ void main() {
         expect(httpClient.closeCalled, isFalse);
       });
     });
+
+    group('withApiKey', () {
+      test('propagates baseUrl and defaultHeaders to config', () {
+        final client = MistralClient.withApiKey(
+          'test-key',
+          baseUrl: 'https://custom.api.com',
+          defaultHeaders: {'X-Custom': 'value'},
+        );
+        addTearDown(client.close);
+
+        expect(client.config.baseUrl, 'https://custom.api.com');
+        expect(client.config.defaultHeaders, {'X-Custom': 'value'});
+        expect(client.config.authProvider, isA<ApiKeyProvider>());
+      });
+
+      test('uses defaults when baseUrl and defaultHeaders are omitted', () {
+        final client = MistralClient.withApiKey('test-key');
+        addTearDown(client.close);
+
+        expect(client.config.baseUrl, 'https://api.mistral.ai');
+        expect(client.config.defaultHeaders, isEmpty);
+      });
+    });
   });
 }
 

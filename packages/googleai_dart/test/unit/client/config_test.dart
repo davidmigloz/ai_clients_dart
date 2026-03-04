@@ -1,5 +1,4 @@
-import 'package:googleai_dart/src/auth/auth_provider.dart';
-import 'package:googleai_dart/src/client/config.dart';
+import 'package:googleai_dart/googleai_dart.dart';
 import 'package:logging/logging.dart';
 import 'package:test/test.dart';
 
@@ -57,6 +56,32 @@ void main() {
       expect(policy.initialDelay, const Duration(seconds: 1));
       expect(policy.maxDelay, const Duration(seconds: 60));
       expect(policy.jitter, 0.1);
+    });
+  });
+
+  group('GoogleAIClient.withApiKey()', () {
+    test('propagates baseUrl and defaultHeaders to config', () {
+      final client = GoogleAIClient.withApiKey(
+        'test-key',
+        baseUrl: 'https://custom.api.com',
+        defaultHeaders: {'X-Custom': 'value'},
+      );
+      addTearDown(client.close);
+
+      expect(client.config.baseUrl, 'https://custom.api.com');
+      expect(client.config.defaultHeaders, {'X-Custom': 'value'});
+      expect(client.config.authProvider, isA<ApiKeyProvider>());
+    });
+
+    test('uses defaults when baseUrl and defaultHeaders are omitted', () {
+      final client = GoogleAIClient.withApiKey('test-key');
+      addTearDown(client.close);
+
+      expect(
+        client.config.baseUrl,
+        'https://generativelanguage.googleapis.com',
+      );
+      expect(client.config.defaultHeaders, isEmpty);
     });
   });
 }

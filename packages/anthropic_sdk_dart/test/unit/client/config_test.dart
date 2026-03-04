@@ -120,4 +120,27 @@ void main() {
       expect(config.retryPolicy.maxRetries, 5);
     });
   });
+
+  group('AnthropicClient.withApiKey()', () {
+    test('propagates baseUrl and defaultHeaders to config', () {
+      final client = AnthropicClient.withApiKey(
+        'sk-test',
+        baseUrl: 'https://custom.api.com',
+        defaultHeaders: {'X-Custom': 'value'},
+      );
+      addTearDown(client.close);
+
+      expect(client.config.baseUrl, 'https://custom.api.com');
+      expect(client.config.defaultHeaders, {'X-Custom': 'value'});
+      expect(client.config.authProvider, isA<ApiKeyProvider>());
+    });
+
+    test('uses defaults when baseUrl and defaultHeaders are omitted', () {
+      final client = AnthropicClient.withApiKey('sk-test');
+      addTearDown(client.close);
+
+      expect(client.config.baseUrl, 'https://api.anthropic.com');
+      expect(client.config.defaultHeaders, isEmpty);
+    });
+  });
 }
