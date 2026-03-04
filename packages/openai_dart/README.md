@@ -5,7 +5,7 @@
 ![Discord](https://img.shields.io/discord/1123158322812555295?label=discord)
 [![MIT](https://img.shields.io/badge/license-MIT-purple.svg)](https://github.com/davidmigloz/ai_clients_dart/blob/main/LICENSE)
 
-Unofficial Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-reference)** to build with GPT-4o, DALL-E, Sora, Whisper, Embeddings, Responses API, and more.
+Unofficial Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-reference)** to build with GPT-5.2, Responses API, GPT Image 1.5, Sora, Whisper, Embeddings, and more.
 
 <details>
 <summary><b>Table of Contents</b></summary>
@@ -19,12 +19,20 @@ Unofficial Dart client for the **[OpenAI API](https://platform.openai.com/docs/a
 - [Usage](#usage)
 - [Examples](#examples)
 - [API Coverage](#api-coverage)
-- [Development](#development)
 - [License](#license)
 
 </details>
 
 ## Features
+
+### Responses API
+
+- Response creation (`responses.create`)
+- Streaming support (`responses.createStream`) with SSE
+- Built-in tools (web search, file search, code interpreter, computer use)
+- Multi-turn conversations with `previousResponseId`
+- Structured output and JSON schema
+- Background mode and reasoning
 
 ### Chat Completions
 
@@ -43,7 +51,7 @@ Unofficial Dart client for the **[OpenAI API](https://platform.openai.com/docs/a
 
 ### Vision
 
-- Image analysis with GPT-4o
+- Image analysis with vision-capable models
 - Base64 images (PNG, JPEG, GIF, WebP)
 - URL images
 - Multiple images in a single request
@@ -55,9 +63,9 @@ Unofficial Dart client for the **[OpenAI API](https://platform.openai.com/docs/a
 - Audio translation (`audio.translations.create`)
 - Multiple voices and formats
 
-### Images (DALL-E)
+### Images (GPT Image)
 
-- Image generation (`images.generate`)
+- Image generation (`images.generate`) with GPT Image 1.5
 - Image editing with masks (`images.edit`)
 - Image variations (`images.createVariation`)
 - Multiple sizes and formats
@@ -67,24 +75,6 @@ Unofficial Dart client for the **[OpenAI API](https://platform.openai.com/docs/a
 - Embedding creation (`embeddings.create`)
 - Batch embeddings
 - Dimension control (for text-embedding-3 models)
-
-### Assistants API (Deprecated)
-
-> **Deprecated**: Use the Responses API instead. Import from `package:openai_dart/openai_dart_assistants.dart`.
-
-- Assistant creation and management
-- Thread management
-- Messages and runs
-- Streaming run events
-- Tool integration (code interpreter, file search)
-
-### Vector Stores (Deprecated)
-
-> **Deprecated**: Part of Assistants API. Import from `package:openai_dart/openai_dart_assistants.dart`.
-
-- Vector store management
-- File batch processing
-- File search integration
 
 ### Files & Uploads
 
@@ -150,6 +140,24 @@ Unofficial Dart client for the **[OpenAI API](https://platform.openai.com/docs/a
 - Session management with client secrets
 - Thread and item management
 
+### Assistants API (Deprecated)
+
+> **Deprecated**: Use the Responses API instead. Import from `package:openai_dart/openai_dart_assistants.dart`.
+
+- Assistant creation and management
+- Thread management
+- Messages and runs
+- Streaming run events
+- Tool integration (code interpreter, file search)
+
+### Vector Stores (Deprecated)
+
+> **Deprecated**: Part of Assistants API. Import from `package:openai_dart/openai_dart_assistants.dart`.
+
+- Vector store management
+- File batch processing
+- File search integration
+
 ## Why choose this client?
 
 - Type-safe with sealed classes
@@ -167,22 +175,16 @@ Unofficial Dart client for the **[OpenAI API](https://platform.openai.com/docs/a
 import 'package:openai_dart/openai_dart.dart';
 
 void main() async {
-  final client = OpenAIClient(
-    config: OpenAIConfig(
-      authProvider: ApiKeyProvider('YOUR_API_KEY'),
+  final client = OpenAIClient.withApiKey('YOUR_API_KEY');
+
+  final response = await client.responses.create(
+    CreateResponseRequest(
+      model: 'gpt-5.2',
+      input: ResponseInput.text('What is the capital of France?'),
     ),
   );
 
-  final response = await client.chat.completions.create(
-    ChatCompletionCreateRequest(
-      model: 'gpt-4o',
-      messages: [
-        ChatMessage.user('What is the capital of France?'),
-      ],
-    ),
-  );
-
-  print(response.text); // Paris is the capital of France.
+  print(response.outputText); // Paris is the capital of France.
 
   client.close();
 }
@@ -301,6 +303,31 @@ final client = OpenAIClient(
 
 ## Usage
 
+### Responses API
+
+<details>
+<summary><b>Responses API Example</b></summary>
+
+```dart
+import 'package:openai_dart/openai_dart.dart';
+
+final client = OpenAIClient.fromEnvironment();
+
+final response = await client.responses.create(
+  CreateResponseRequest(
+    model: 'gpt-5.2',
+    input: ResponseInput.text('What is the capital of France?'),
+  ),
+);
+
+print('Response: ${response.outputText}');
+print('Usage: ${response.usage}');
+
+client.close();
+```
+
+</details>
+
 ### Basic Chat Completion
 
 <details>
@@ -313,7 +340,7 @@ final client = OpenAIClient.fromEnvironment();
 
 final response = await client.chat.completions.create(
   ChatCompletionCreateRequest(
-    model: 'gpt-4o',
+    model: 'gpt-5.2',
     messages: [
       ChatMessage.system('You are a helpful assistant.'),
       ChatMessage.user('What is the capital of France?'),
@@ -339,7 +366,7 @@ client.close();
 ```dart
 final stream = client.chat.completions.createStream(
   ChatCompletionCreateRequest(
-    model: 'gpt-4o',
+    model: 'gpt-5.2',
     messages: [ChatMessage.user('Tell me a story')],
   ),
 );
@@ -359,7 +386,7 @@ await for (final event in stream) {
 ```dart
 final response = await client.chat.completions.create(
   ChatCompletionCreateRequest(
-    model: 'gpt-4o',
+    model: 'gpt-5.2',
     messages: [
       ChatMessage.user("What's the weather in Tokyo?"),
     ],
@@ -397,7 +424,7 @@ if (response.hasToolCalls) {
 ```dart
 final response = await client.chat.completions.create(
   ChatCompletionCreateRequest(
-    model: 'gpt-4o',
+    model: 'gpt-5.2',
     messages: [
       ChatMessage.user([
         ContentPart.text('What is in this image?'),
@@ -440,7 +467,7 @@ print('Embedding dimensions: ${vector.length}');
 ```dart
 final response = await client.images.generate(
   ImageGenerationRequest(
-    model: 'dall-e-3',
+    model: 'gpt-image-1.5',
     prompt: 'A white cat wearing a top hat',
     size: ImageSize.size1024x1024,
     quality: ImageQuality.hd,
@@ -484,45 +511,6 @@ final response = await client.audio.transcriptions.create(
 );
 
 print('Transcription: ${response.text}');
-```
-
-</details>
-
-### Assistants
-
-<details>
-<summary><b>Assistants Example</b></summary>
-
-```dart
-// Create an assistant
-final assistant = await client.beta.assistants.create(
-  CreateAssistantRequest(
-    model: 'gpt-4o',
-    name: 'Math Tutor',
-    instructions: 'You are a helpful math tutor.',
-  ),
-);
-
-// Create a thread
-final thread = await client.beta.threads.create();
-
-// Add a message
-await client.beta.threads.messages.create(
-  thread.id,
-  CreateMessageRequest(
-    role: 'user',
-    content: 'What is 2 + 2?',
-  ),
-);
-
-// Run the assistant
-final run = await client.beta.threads.runs.create(
-  thread.id,
-  CreateRunRequest(assistantId: assistant.id),
-);
-
-// Poll for completion
-// ...
 ```
 
 </details>
@@ -575,10 +563,10 @@ See the [example/](example/) directory for complete examples:
 | [`chat_example.dart`](example/chat_example.dart) | Basic chat completions with multi-turn conversations |
 | [`streaming_example.dart`](example/streaming_example.dart) | Streaming responses with text deltas |
 | [`tool_calling_example.dart`](example/tool_calling_example.dart) | Function calling with tool definitions |
-| [`vision_example.dart`](example/vision_example.dart) | Image analysis with GPT-4o |
+| [`vision_example.dart`](example/vision_example.dart) | Image analysis with vision models |
 | [`responses_example.dart`](example/responses_example.dart) | Responses API with built-in tools |
 | [`embeddings_example.dart`](example/embeddings_example.dart) | Text embeddings with dimension control |
-| [`images_example.dart`](example/images_example.dart) | DALL-E image generation |
+| [`images_example.dart`](example/images_example.dart) | GPT Image generation |
 | [`videos_example.dart`](example/videos_example.dart) | Sora video generation |
 | [`audio_example.dart`](example/audio_example.dart) | Text-to-speech and transcription |
 | [`files_example.dart`](example/files_example.dart) | File upload and management |
@@ -621,22 +609,6 @@ See the [example/](example/) directory for complete examples:
 | Runs (Deprecated) | ✅ Full (separate import) |
 | Vector Stores (Deprecated) | ✅ Full (separate import) |
 | Completions (Legacy) | ✅ Full |
-
-## Development
-
-```bash
-# Get dependencies
-dart pub get
-
-# Run tests
-dart test
-
-# Run analyzer
-dart analyze
-
-# Format code
-dart format .
-```
 
 ## License
 

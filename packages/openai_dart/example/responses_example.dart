@@ -25,7 +25,7 @@ Future<void> simpleResponse(OpenAIClient client) async {
 
   final response = await client.responses.create(
     const CreateResponseRequest(
-      model: 'gpt-4o',
+      model: 'gpt-5.2',
       input: ResponseInput.text('What is 2 + 2?'),
     ),
   );
@@ -41,7 +41,7 @@ Future<void> streamingResponse(OpenAIClient client) async {
 
   final stream = client.responses.createStream(
     const CreateResponseRequest(
-      model: 'gpt-4o',
+      model: 'gpt-5.2',
       input: ResponseInput.text('Tell me a very short joke.'),
     ),
   );
@@ -76,7 +76,7 @@ Future<void> responseWithTools(OpenAIClient client) async {
 
   final response = await client.responses.create(
     CreateResponseRequest(
-      model: 'gpt-4o',
+      model: 'gpt-5.2',
       input: const ResponseInput.text('What is the weather in San Francisco?'),
       tools: [weatherTool],
     ),
@@ -97,7 +97,7 @@ Future<void> responseWithWebSearch(OpenAIClient client) async {
 
   final response = await client.responses.create(
     CreateResponseRequest(
-      model: 'gpt-4o',
+      model: 'gpt-5.2',
       input: const ResponseInput.text('What are the latest news about AI?'),
       tools: [ResponseTool.webSearch()],
     ),
@@ -114,7 +114,7 @@ Future<void> multiTurnConversation(OpenAIClient client) async {
   // First turn
   final response1 = await client.responses.create(
     const CreateResponseRequest(
-      model: 'gpt-4o',
+      model: 'gpt-5.2',
       input: ResponseInput.text('My name is Alice.'),
     ),
   );
@@ -124,7 +124,7 @@ Future<void> multiTurnConversation(OpenAIClient client) async {
   // Second turn - continue the conversation using previous response ID
   final response2 = await client.responses.create(
     CreateResponseRequest(
-      model: 'gpt-4o',
+      model: 'gpt-5.2',
       input: const ResponseInput.items([
         MessageItem(
           role: MessageRole.user,
