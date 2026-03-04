@@ -160,6 +160,8 @@ class OpenAIClient {
   /// testing, allowing mock clients to be injected for the abort path.
   factory OpenAIClient.withApiKey(
     String apiKey, {
+    String? baseUrl,
+    Map<String, String>? defaultHeaders,
     String? organization,
     String? project,
     http.Client? httpClient,
@@ -168,6 +170,8 @@ class OpenAIClient {
     return OpenAIClient(
       config: OpenAIConfig(
         authProvider: ApiKeyProvider(apiKey),
+        baseUrl: baseUrl ?? 'https://api.openai.com/v1',
+        defaultHeaders: defaultHeaders ?? const {},
         organization: organization,
         project: project,
       ),

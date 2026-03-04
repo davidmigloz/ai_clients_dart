@@ -106,9 +106,18 @@ class AnthropicClient {
   /// Creates an [AnthropicClient] with the given API key.
   ///
   /// This is a convenience constructor for simple use cases.
-  factory AnthropicClient.withApiKey(String apiKey, {http.Client? httpClient}) {
+  factory AnthropicClient.withApiKey(
+    String apiKey, {
+    String? baseUrl,
+    Map<String, String>? defaultHeaders,
+    http.Client? httpClient,
+  }) {
     return AnthropicClient(
-      config: AnthropicConfig(authProvider: ApiKeyProvider(apiKey)),
+      config: AnthropicConfig(
+        authProvider: ApiKeyProvider(apiKey),
+        baseUrl: baseUrl ?? 'https://api.anthropic.com',
+        defaultHeaders: defaultHeaders ?? const {},
+      ),
       httpClient: httpClient,
     );
   }

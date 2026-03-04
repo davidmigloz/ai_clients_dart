@@ -105,10 +105,16 @@ class OpenResponsesClient {
   /// This is a convenience constructor for simple use cases.
   factory OpenResponsesClient.withApiKey(
     String apiKey, {
+    String? baseUrl,
+    Map<String, String>? defaultHeaders,
     http.Client? httpClient,
   }) {
     return OpenResponsesClient(
-      config: OpenResponsesConfig(authProvider: BearerTokenProvider(apiKey)),
+      config: OpenResponsesConfig(
+        authProvider: BearerTokenProvider(apiKey),
+        baseUrl: baseUrl ?? 'https://api.openai.com/v1',
+        defaultHeaders: defaultHeaders ?? const {},
+      ),
       httpClient: httpClient,
     );
   }

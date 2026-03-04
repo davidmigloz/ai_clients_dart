@@ -279,9 +279,18 @@ class GoogleAIClient {
   /// Creates a [GoogleAIClient] with the given API key.
   ///
   /// This is a convenience constructor for simple use cases.
-  factory GoogleAIClient.withApiKey(String apiKey, {http.Client? httpClient}) {
+  factory GoogleAIClient.withApiKey(
+    String apiKey, {
+    String? baseUrl,
+    Map<String, String>? defaultHeaders,
+    http.Client? httpClient,
+  }) {
     return GoogleAIClient(
-      config: GoogleAIConfig(authProvider: ApiKeyProvider(apiKey)),
+      config: GoogleAIConfig(
+        authProvider: ApiKeyProvider(apiKey),
+        baseUrl: baseUrl ?? 'https://generativelanguage.googleapis.com',
+        defaultHeaders: defaultHeaders ?? const {},
+      ),
       httpClient: httpClient,
     );
   }

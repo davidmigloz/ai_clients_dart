@@ -324,9 +324,18 @@ class MistralClient {
   /// ```dart
   /// final client = MistralClient.withApiKey('your-api-key');
   /// ```
-  factory MistralClient.withApiKey(String apiKey, {http.Client? httpClient}) {
+  factory MistralClient.withApiKey(
+    String apiKey, {
+    String? baseUrl,
+    Map<String, String>? defaultHeaders,
+    http.Client? httpClient,
+  }) {
     return MistralClient(
-      config: MistralConfig(authProvider: ApiKeyProvider(apiKey)),
+      config: MistralConfig(
+        authProvider: ApiKeyProvider(apiKey),
+        baseUrl: baseUrl ?? 'https://api.mistral.ai',
+        defaultHeaders: defaultHeaders ?? const {},
+      ),
       httpClient: httpClient,
     );
   }
@@ -335,12 +344,16 @@ class MistralClient {
   ///
   /// This is useful for proxies or self-hosted endpoints.
   ///
+  /// **Deprecated:** Use [MistralClient.withApiKey] with the [baseUrl]
+  /// parameter instead.
+  ///
   /// ```dart
-  /// final client = MistralClient.withBaseUrl(
-  ///   apiKey: 'your-api-key',
+  /// final client = MistralClient.withApiKey(
+  ///   'your-api-key',
   ///   baseUrl: 'https://my-proxy.com',
   /// );
   /// ```
+  @Deprecated('Use MistralClient.withApiKey with the baseUrl parameter instead')
   factory MistralClient.withBaseUrl({
     required String apiKey,
     required String baseUrl,

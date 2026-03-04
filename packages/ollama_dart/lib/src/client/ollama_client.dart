@@ -201,12 +201,14 @@ class OllamaClient {
   factory OllamaClient.withApiKey(
     String apiKey, {
     String? baseUrl,
+    Map<String, String>? defaultHeaders,
     http.Client? httpClient,
   }) {
     return OllamaClient(
       config: OllamaConfig(
         authProvider: BearerTokenProvider(apiKey),
         baseUrl: baseUrl ?? 'http://localhost:11434',
+        defaultHeaders: defaultHeaders ?? const {},
       ),
       httpClient: httpClient,
     );
