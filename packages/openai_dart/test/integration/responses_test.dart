@@ -606,7 +606,7 @@ void main() {
     );
 
     test(
-      'streams code interpreter events',
+      'streams code interpreter events with container ID',
       skip: 'Requires pre-created container (Containers API)',
       timeout: const Timeout(Duration(minutes: 3)),
       () async {
@@ -615,7 +615,7 @@ void main() {
           return;
         }
 
-        // Note: Code interpreter now requires a pre-created container ID.
+        // Note: Code interpreter now requires a container.
         // To run this test, create a container first using the Containers API
         // and pass the container ID (starts with 'cntr_') here.
         final stream = client!.responses.createStream(
@@ -624,7 +624,52 @@ void main() {
             input: const ResponseInput.text(
               'Write Python code to calculate 2^20.',
             ),
-            tools: [ResponseTool.codeInterpreter(container: 'cntr_...')],
+            tools: [
+              ResponseTool.codeInterpreter(
+                container: CodeInterpreterContainer.id('cntr_...'),
+              ),
+            ],
+          ),
+        );
+
+        final events = await stream.toList();
+
+        // Check for code interpreter lifecycle events
+        final codeEvents = events.where(
+          (e) =>
+              e is ResponseCodeInterpreterCallInProgressEvent ||
+              e is ResponseCodeInterpreterCallInterpretingEvent ||
+              e is ResponseCodeInterpreterCallCodeDeltaEvent ||
+              e is ResponseCodeInterpreterCallCompletedEvent,
+        );
+        expect(codeEvents, isNotEmpty);
+
+        // Verify completion
+        expect(events.whereType<ResponseCompletedEvent>(), hasLength(1));
+      },
+    );
+
+    test(
+      'streams code interpreter events with auto container',
+      skip: 'Expensive - run manually',
+      timeout: const Timeout(Duration(minutes: 3)),
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        final stream = client!.responses.createStream(
+          CreateResponseRequest(
+            model: 'gpt-4o-mini',
+            input: const ResponseInput.text(
+              'Write Python code to calculate 2^20.',
+            ),
+            tools: [
+              ResponseTool.codeInterpreter(
+                container: CodeInterpreterContainer.auto(),
+              ),
+            ],
           ),
         );
 
@@ -965,6 +1010,36 @@ void main() {
 
         expect(response.status, ResponseStatus.completed);
         // Image generation should produce some output
+        expect(response.output, isNotEmpty);
+      },
+    );
+
+    test(
+      'generates image with partialImages',
+      timeout: const Timeout(Duration(minutes: 5)),
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        final response = await client!.responses.create(
+          CreateResponseRequest(
+            model: 'gpt-4o',
+            input: const ResponseInput.text(
+              'Generate a simple image of a blue square.',
+            ),
+            tools: [
+              ResponseTool.imageGeneration(
+                quality: 'low',
+                size: '1024x1024',
+                partialImages: 2,
+              ),
+            ],
+          ),
+        );
+
+        expect(response.status, ResponseStatus.completed);
         expect(response.output, isNotEmpty);
       },
     );

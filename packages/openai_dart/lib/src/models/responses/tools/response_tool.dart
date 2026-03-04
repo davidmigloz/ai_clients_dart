@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/equality_helpers.dart';
+import 'code_interpreter_container.dart';
 
 /// Tool definition for the Responses API.
 ///
@@ -65,9 +66,8 @@ sealed class ResponseTool {
 
   /// Creates a code interpreter tool.
   static CodeInterpreterTool codeInterpreter({
-    List<String>? fileIds,
-    String? container,
-  }) => CodeInterpreterTool(fileIds: fileIds, container: container);
+    required CodeInterpreterContainer container,
+  }) => CodeInterpreterTool(container: container);
 
   /// Creates a computer use tool.
   static ComputerUseTool computerUse({
@@ -88,7 +88,7 @@ sealed class ResponseTool {
     bool? moderation,
     String? outputCompression,
     String? outputFormat,
-    bool? partialImages,
+    int? partialImages,
     String? quality,
     String? size,
   }) => ImageGenerationTool(
@@ -545,28 +545,23 @@ class FileSearchRankingOptions {
 /// Code interpreter tool for executing code.
 @immutable
 class CodeInterpreterTool extends ResponseTool {
-  /// The IDs of files to make available to the code interpreter.
-  final List<String>? fileIds;
-
   /// The container to use for code execution.
-  final String? container;
+  final CodeInterpreterContainer container;
 
   /// Creates a [CodeInterpreterTool].
-  const CodeInterpreterTool({this.fileIds, this.container});
+  const CodeInterpreterTool({required this.container});
 
   /// Creates a [CodeInterpreterTool] from JSON.
   factory CodeInterpreterTool.fromJson(Map<String, dynamic> json) {
     return CodeInterpreterTool(
-      fileIds: (json['file_ids'] as List?)?.cast<String>(),
-      container: json['container'] as String?,
+      container: CodeInterpreterContainer.fromJson(json['container'] as Object),
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
     'type': 'code_interpreter',
-    if (fileIds != null) 'file_ids': fileIds,
-    if (container != null) 'container': container,
+    'container': container.toJson(),
   };
 
   @override
@@ -574,15 +569,13 @@ class CodeInterpreterTool extends ResponseTool {
       identical(this, other) ||
       other is CodeInterpreterTool &&
           runtimeType == other.runtimeType &&
-          listsEqual(fileIds, other.fileIds) &&
           container == other.container;
 
   @override
-  int get hashCode => Object.hash(fileIds, container);
+  int get hashCode => container.hashCode;
 
   @override
-  String toString() =>
-      'CodeInterpreterTool(fileIds: $fileIds, container: $container)';
+  String toString() => 'CodeInterpreterTool(container: $container)';
 }
 
 /// Computer use tool for controlling a computer.
@@ -661,8 +654,8 @@ class ImageGenerationTool extends ResponseTool {
   /// The format for output images.
   final String? outputFormat;
 
-  /// Whether to return partial images during generation.
-  final bool? partialImages;
+  /// Number of partial images to return during generation (0–3).
+  final int? partialImages;
 
   /// The quality level for generated images.
   final String? quality;
@@ -692,7 +685,7 @@ class ImageGenerationTool extends ResponseTool {
       moderation: json['moderation'] as bool?,
       outputCompression: json['output_compression'] as String?,
       outputFormat: json['output_format'] as String?,
-      partialImages: json['partial_images'] as bool?,
+      partialImages: json['partial_images'] as int?,
       quality: json['quality'] as String?,
       size: json['size'] as String?,
     );

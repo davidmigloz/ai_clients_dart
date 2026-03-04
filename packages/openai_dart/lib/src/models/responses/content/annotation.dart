@@ -1,6 +1,9 @@
 import 'package:meta/meta.dart';
 
 /// Annotation for output content (citations, etc.).
+///
+/// See [UrlCitation], [FileCitation], [ContainerFileCitation], and
+/// [FilePathAnnotation].
 sealed class Annotation {
   /// Creates an [Annotation].
   const Annotation();
@@ -11,6 +14,7 @@ sealed class Annotation {
     return switch (type) {
       'url_citation' => UrlCitation.fromJson(json),
       'file_citation' => FileCitation.fromJson(json),
+      'container_file_citation' => ContainerFileCitation.fromJson(json),
       'file_path' => FilePathAnnotation.fromJson(json),
       _ => throw FormatException('Unknown Annotation type: $type'),
     };
@@ -83,43 +87,37 @@ class UrlCitation extends Annotation {
 /// File citation annotation.
 @immutable
 class FileCitation extends Annotation {
-  /// The start index in the text.
-  final int startIndex;
-
-  /// The end index in the text.
-  final int endIndex;
+  /// The index in the text where the citation occurs.
+  final int index;
 
   /// The cited file ID.
   final String fileId;
 
   /// The filename.
-  final String? filename;
+  final String filename;
 
   /// Creates a [FileCitation].
   const FileCitation({
-    required this.startIndex,
-    required this.endIndex,
+    required this.index,
     required this.fileId,
-    this.filename,
+    required this.filename,
   });
 
   /// Creates a [FileCitation] from JSON.
   factory FileCitation.fromJson(Map<String, dynamic> json) {
     return FileCitation(
-      startIndex: json['start_index'] as int,
-      endIndex: json['end_index'] as int,
+      index: json['index'] as int,
       fileId: json['file_id'] as String,
-      filename: json['filename'] as String?,
+      filename: json['filename'] as String,
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
     'type': 'file_citation',
-    'start_index': startIndex,
-    'end_index': endIndex,
+    'index': index,
     'file_id': fileId,
-    if (filename != null) 'filename': filename,
+    'filename': filename,
   };
 
   @override
@@ -127,17 +125,84 @@ class FileCitation extends Annotation {
       identical(this, other) ||
       other is FileCitation &&
           runtimeType == other.runtimeType &&
-          startIndex == other.startIndex &&
-          endIndex == other.endIndex &&
+          index == other.index &&
           fileId == other.fileId &&
           filename == other.filename;
 
   @override
-  int get hashCode => Object.hash(startIndex, endIndex, fileId, filename);
+  int get hashCode => Object.hash(index, fileId, filename);
 
   @override
   String toString() =>
-      'FileCitation(startIndex: $startIndex, endIndex: $endIndex, fileId: $fileId, filename: $filename)';
+      'FileCitation(index: $index, fileId: $fileId, filename: $filename)';
+}
+
+/// Container file citation annotation.
+@immutable
+class ContainerFileCitation extends Annotation {
+  /// The container ID.
+  final String containerId;
+
+  /// The cited file ID.
+  final String fileId;
+
+  /// The start index in the text.
+  final int startIndex;
+
+  /// The end index in the text.
+  final int endIndex;
+
+  /// The filename.
+  final String filename;
+
+  /// Creates a [ContainerFileCitation].
+  const ContainerFileCitation({
+    required this.containerId,
+    required this.fileId,
+    required this.startIndex,
+    required this.endIndex,
+    required this.filename,
+  });
+
+  /// Creates a [ContainerFileCitation] from JSON.
+  factory ContainerFileCitation.fromJson(Map<String, dynamic> json) {
+    return ContainerFileCitation(
+      containerId: json['container_id'] as String,
+      fileId: json['file_id'] as String,
+      startIndex: json['start_index'] as int,
+      endIndex: json['end_index'] as int,
+      filename: json['filename'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'container_file_citation',
+    'container_id': containerId,
+    'file_id': fileId,
+    'start_index': startIndex,
+    'end_index': endIndex,
+    'filename': filename,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ContainerFileCitation &&
+          runtimeType == other.runtimeType &&
+          containerId == other.containerId &&
+          fileId == other.fileId &&
+          startIndex == other.startIndex &&
+          endIndex == other.endIndex &&
+          filename == other.filename;
+
+  @override
+  int get hashCode =>
+      Object.hash(containerId, fileId, startIndex, endIndex, filename);
+
+  @override
+  String toString() =>
+      'ContainerFileCitation(containerId: $containerId, fileId: $fileId, startIndex: $startIndex, endIndex: $endIndex, filename: $filename)';
 }
 
 /// File path annotation.

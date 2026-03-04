@@ -525,10 +525,31 @@ void main() {
       expect(tool.vectorStoreIds, contains('vs_123'));
     });
 
-    test('creates code interpreter tool', () {
-      final tool = ResponseTool.codeInterpreter();
+    test('creates code interpreter tool with container ID', () {
+      final tool = ResponseTool.codeInterpreter(
+        container: CodeInterpreterContainer.id('cntr_123'),
+      );
 
       expect(tool, isA<CodeInterpreterTool>());
+      expect(tool.container, isA<CodeInterpreterContainerId>());
+      expect((tool.container as CodeInterpreterContainerId).id, 'cntr_123');
+    });
+
+    test('creates code interpreter tool with auto container', () {
+      final tool = ResponseTool.codeInterpreter(
+        container: CodeInterpreterContainer.auto(
+          fileIds: ['file_1'],
+          memoryLimit: 1024,
+          networkPolicy: ContainerNetworkPolicy.disabled,
+        ),
+      );
+
+      expect(tool, isA<CodeInterpreterTool>());
+      expect(tool.container, isA<CodeInterpreterContainerAuto>());
+      final auto = tool.container as CodeInterpreterContainerAuto;
+      expect(auto.fileIds, ['file_1']);
+      expect(auto.memoryLimit, 1024);
+      expect(auto.networkPolicy, isA<ContainerNetworkPolicyDisabled>());
     });
 
     test('creates computer use tool', () {
@@ -2111,6 +2132,172 @@ void main() {
 
       expect(response1, equals(response2));
       expect(response1, isNot(equals(response3)));
+    });
+  });
+
+  group('CodeInterpreterContainer', () {
+    test('CodeInterpreterContainerId round-trips through JSON', () {
+      const container = CodeInterpreterContainerId('cntr_abc');
+
+      final json = container.toJson();
+      expect(json, equals('cntr_abc'));
+
+      final restored = CodeInterpreterContainer.fromJson(json);
+      expect(restored, isA<CodeInterpreterContainerId>());
+      expect(restored, equals(container));
+    });
+
+    test('CodeInterpreterContainerAuto round-trips through JSON', () {
+      const container = CodeInterpreterContainerAuto(
+        fileIds: ['file_1', 'file_2'],
+        memoryLimit: 2048,
+        networkPolicy: ContainerNetworkPolicyAllowlist(
+          allowedHosts: ['example.com'],
+        ),
+      );
+
+      final json = container.toJson() as Map<String, dynamic>;
+      expect(json['type'], equals('auto'));
+      expect(json['file_ids'], equals(['file_1', 'file_2']));
+      expect(json['memory_limit'], equals(2048));
+      expect((json['network_policy'] as Map)['type'], equals('allowlist'));
+
+      final restored = CodeInterpreterContainer.fromJson(json);
+      expect(restored, isA<CodeInterpreterContainerAuto>());
+      expect(restored, equals(container));
+    });
+
+    test('CodeInterpreterContainerAuto minimal round-trips', () {
+      const container = CodeInterpreterContainerAuto();
+
+      final json = container.toJson() as Map<String, dynamic>;
+      expect(json['type'], equals('auto'));
+      expect(json.containsKey('file_ids'), isFalse);
+
+      final restored = CodeInterpreterContainer.fromJson(json);
+      expect(restored, equals(container));
+    });
+
+    test('ContainerNetworkPolicyDisabled round-trips', () {
+      const policy = ContainerNetworkPolicyDisabled();
+
+      final json = policy.toJson();
+      expect(json['type'], equals('disabled'));
+
+      final restored = ContainerNetworkPolicy.fromJson(json);
+      expect(restored, isA<ContainerNetworkPolicyDisabled>());
+    });
+
+    test('ContainerNetworkPolicyAllowlist round-trips', () {
+      const policy = ContainerNetworkPolicyAllowlist(
+        allowedHosts: ['api.example.com', 'cdn.example.com'],
+      );
+
+      final json = policy.toJson();
+      expect(json['type'], equals('allowlist'));
+      expect(
+        json['allowed_hosts'],
+        equals(['api.example.com', 'cdn.example.com']),
+      );
+
+      final restored = ContainerNetworkPolicy.fromJson(json);
+      expect(restored, isA<ContainerNetworkPolicyAllowlist>());
+      expect(restored, equals(policy));
+    });
+
+    test('CodeInterpreterTool with container ID round-trips', () {
+      final tool = ResponseTool.codeInterpreter(
+        container: CodeInterpreterContainer.id('cntr_xyz'),
+      );
+
+      final json = tool.toJson();
+      expect(json['type'], equals('code_interpreter'));
+      expect(json['container'], equals('cntr_xyz'));
+
+      final restored = ResponseTool.fromJson(json);
+      expect(restored, isA<CodeInterpreterTool>());
+      expect(
+        (restored as CodeInterpreterTool).container,
+        isA<CodeInterpreterContainerId>(),
+      );
+    });
+
+    test('CodeInterpreterTool with auto container round-trips', () {
+      final tool = ResponseTool.codeInterpreter(
+        container: CodeInterpreterContainer.auto(fileIds: ['f1']),
+      );
+
+      final json = tool.toJson();
+      expect(json['type'], equals('code_interpreter'));
+      expect((json['container'] as Map)['type'], equals('auto'));
+
+      final restored = ResponseTool.fromJson(json);
+      expect(restored, isA<CodeInterpreterTool>());
+      final auto =
+          (restored as CodeInterpreterTool).container
+              as CodeInterpreterContainerAuto;
+      expect(auto.fileIds, equals(['f1']));
+    });
+  });
+
+  group('ImageGenerationTool partialImages', () {
+    test('partialImages is int', () {
+      final tool = ResponseTool.imageGeneration(partialImages: 2);
+
+      expect(tool, isA<ImageGenerationTool>());
+      expect(tool.partialImages, equals(2));
+
+      final json = tool.toJson();
+      expect(json['partial_images'], equals(2));
+
+      final restored = ResponseTool.fromJson(json) as ImageGenerationTool;
+      expect(restored.partialImages, equals(2));
+    });
+  });
+
+  group('FileCitation', () {
+    test('FileCitation round-trips through JSON', () {
+      const citation = FileCitation(
+        index: 42,
+        fileId: 'file_abc',
+        filename: 'report.pdf',
+      );
+
+      final json = citation.toJson();
+      expect(json['type'], equals('file_citation'));
+      expect(json['index'], equals(42));
+      expect(json['file_id'], equals('file_abc'));
+      expect(json['filename'], equals('report.pdf'));
+      expect(json.containsKey('start_index'), isFalse);
+      expect(json.containsKey('end_index'), isFalse);
+
+      final restored = Annotation.fromJson(json);
+      expect(restored, isA<FileCitation>());
+      expect(restored, equals(citation));
+    });
+  });
+
+  group('ContainerFileCitation', () {
+    test('ContainerFileCitation round-trips through JSON', () {
+      const citation = ContainerFileCitation(
+        containerId: 'cntr_abc',
+        fileId: 'file_xyz',
+        startIndex: 10,
+        endIndex: 20,
+        filename: 'data.csv',
+      );
+
+      final json = citation.toJson();
+      expect(json['type'], equals('container_file_citation'));
+      expect(json['container_id'], equals('cntr_abc'));
+      expect(json['file_id'], equals('file_xyz'));
+      expect(json['start_index'], equals(10));
+      expect(json['end_index'], equals(20));
+      expect(json['filename'], equals('data.csv'));
+
+      final restored = Annotation.fromJson(json);
+      expect(restored, isA<ContainerFileCitation>());
+      expect(restored, equals(citation));
     });
   });
 }
