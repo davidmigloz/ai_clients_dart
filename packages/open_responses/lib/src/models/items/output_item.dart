@@ -229,7 +229,7 @@ class ReasoningItem extends OutputItem {
       other is ReasoningItem &&
           runtimeType == other.runtimeType &&
           id == other.id &&
-          listOfMapsEqual(content, other.content) &&
+          listOfMapsDeepEqual(content, other.content) &&
           listsEqual(summary, other.summary) &&
           encryptedContent == other.encryptedContent;
 
