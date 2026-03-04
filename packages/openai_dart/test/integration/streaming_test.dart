@@ -252,7 +252,8 @@ void main() {
         expect(toolCalls, isNotEmpty);
         expect(toolCalls!.first.function.name, 'get_weather');
         final args =
-            jsonDecode(toolCalls.first.function.arguments) as Map<String, dynamic>;
+            jsonDecode(toolCalls.first.function.arguments)
+                as Map<String, dynamic>;
         expect(args['city'].toString().toLowerCase(), contains('paris'));
       },
     );

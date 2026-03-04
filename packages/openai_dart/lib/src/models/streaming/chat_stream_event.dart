@@ -227,8 +227,7 @@ class ChatDelta {
       role: json['role'] as String?,
       content: json['content'] as String?,
       refusal: json['refusal'] as String?,
-      toolCalls: (json['tool_calls'] as List<dynamic>?)
-          ?.indexed
+      toolCalls: (json['tool_calls'] as List<dynamic>?)?.indexed
           .map(
             (e) => ToolCallDelta.fromJson(
               e.$2 as Map<String, dynamic>,
