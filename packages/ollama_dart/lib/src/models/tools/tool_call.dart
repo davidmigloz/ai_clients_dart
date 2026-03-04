@@ -63,7 +63,7 @@ class ToolCallFunction {
           _mapsEqual(arguments, other.arguments);
 
   @override
-  int get hashCode => Object.hash(name, description, arguments);
+  int get hashCode => Object.hash(name, description, _mapHashCode(arguments));
 
   @override
   String toString() =>
@@ -115,6 +115,13 @@ class ToolCall {
 
   @override
   String toString() => 'ToolCall(function: $function)';
+}
+
+int _mapHashCode(Map<String, dynamic>? map) {
+  if (map == null) return null.hashCode;
+  return Object.hashAllUnordered(
+    map.entries.map((e) => Object.hash(e.key, e.value)),
+  );
 }
 
 bool _mapsEqual(Map<String, dynamic>? a, Map<String, dynamic>? b) {
