@@ -1206,6 +1206,25 @@ void main() {
       expect(delta.function!.name, 'my_func');
       expect(delta.function!.arguments, '{}');
     });
+
+    test('fromJson defaults index to 0 when null', () {
+      final json = jsonDecode_(r'''
+        {
+          "id": "call_456",
+          "type": "function",
+          "function": {
+            "name": "my_func",
+            "arguments": "{\"key\":\"value\"}"
+          }
+        }
+      ''');
+
+      final delta = ToolCallDelta.fromJson(json);
+
+      expect(delta.index, 0);
+      expect(delta.id, 'call_456');
+      expect(delta.function!.name, 'my_func');
+    });
   });
 
   // OpenAI-Compatible APIs Tests

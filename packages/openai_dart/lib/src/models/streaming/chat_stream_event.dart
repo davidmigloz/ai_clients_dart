@@ -324,7 +324,7 @@ class ToolCallDelta {
   /// Creates a [ToolCallDelta] from JSON.
   factory ToolCallDelta.fromJson(Map<String, dynamic> json) {
     return ToolCallDelta(
-      index: json['index'] as int,
+      index: json['index'] as int? ?? 0,
       id: json['id'] as String?,
       type: json['type'] as String?,
       function: json['function'] != null
