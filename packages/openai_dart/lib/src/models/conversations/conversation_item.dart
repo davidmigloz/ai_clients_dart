@@ -321,13 +321,8 @@ class ConversationReasoningItem extends ConversationItem {
           status == other.status;
 
   @override
-  int get hashCode => Object.hash(
-    id,
-    content != null ? Object.hashAll(content!) : null,
-    Object.hashAll(summary),
-    encryptedContent,
-    status,
-  );
+  int get hashCode =>
+      Object.hash(id, Object.hashAll(summary), encryptedContent, status);
 
   @override
   String toString() => 'ConversationReasoningItem(id: $id, summary: $summary)';

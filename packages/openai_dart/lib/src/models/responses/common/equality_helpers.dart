@@ -19,3 +19,13 @@ bool mapsEqual<K, V>(Map<K, V>? a, Map<K, V>? b) {
   }
   return true;
 }
+
+/// Content-based hash for a map, consistent with [mapsEqual].
+///
+/// Uses [Object.hashAllUnordered] so key-insertion order does not matter.
+int mapHashCode<K, V>(Map<K, V>? map) {
+  if (map == null) return null.hashCode;
+  return Object.hashAllUnordered(
+    map.entries.map((e) => Object.hash(e.key, e.value)),
+  );
+}

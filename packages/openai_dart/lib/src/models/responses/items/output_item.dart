@@ -842,7 +842,7 @@ class LocalShellExecAction {
   @override
   int get hashCode => Object.hash(
     Object.hashAll(command),
-    env,
+    mapHashCode(env),
     timeoutMs,
     workingDirectory,
     user,

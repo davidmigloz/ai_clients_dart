@@ -179,7 +179,8 @@ class FunctionTool extends ResponseTool {
           strict == other.strict;
 
   @override
-  int get hashCode => Object.hash(name, description, parameters, strict);
+  int get hashCode =>
+      Object.hash(name, description, mapHashCode(parameters), strict);
 
   @override
   String toString() =>

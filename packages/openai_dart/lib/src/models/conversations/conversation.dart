@@ -81,7 +81,7 @@ class Conversation {
           mapsEqual(metadata, other.metadata);
 
   @override
-  int get hashCode => Object.hash(id, object, createdAt, metadata);
+  int get hashCode => Object.hash(id, object, createdAt, mapHashCode(metadata));
 
   @override
   String toString() =>

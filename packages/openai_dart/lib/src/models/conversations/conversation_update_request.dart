@@ -47,7 +47,7 @@ class ConversationUpdateRequest {
           mapsEqual(metadata, other.metadata);
 
   @override
-  int get hashCode => metadata.hashCode;
+  int get hashCode => mapHashCode(metadata);
 
   @override
   String toString() => 'ConversationUpdateRequest(metadata: $metadata)';
