@@ -12,12 +12,13 @@ void main() {
   AnthropicClient? client;
 
   setUpAll(() {
-    apiKey = Platform.environment['ANTHROPIC_API_KEY'];
-    if (apiKey == null || apiKey!.isEmpty) {
+    final key = Platform.environment['ANTHROPIC_API_KEY'];
+    if (key == null || key.isEmpty) {
       print('ANTHROPIC_API_KEY not set. Integration tests will be skipped.');
     } else {
+      apiKey = key;
       client = AnthropicClient(
-        config: AnthropicConfig(authProvider: ApiKeyProvider(apiKey!)),
+        config: AnthropicConfig(authProvider: ApiKeyProvider(key)),
       );
     }
   });

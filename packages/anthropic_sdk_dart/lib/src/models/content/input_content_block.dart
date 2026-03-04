@@ -68,7 +68,7 @@ sealed class InputContentBlock {
   /// Creates a web search tool result block.
   factory InputContentBlock.webSearchToolResult({
     required String toolUseId,
-    required Map<String, dynamic> content,
+    required Object content,
     ToolCaller? caller,
     CacheControlEphemeral? cacheControl,
   }) = WebSearchToolResultInputBlock;
@@ -735,7 +735,11 @@ class WebSearchToolResultInputBlock extends InputContentBlock {
     } else if (rawContent is Map) {
       content = rawContent.cast<String, dynamic>();
     } else {
-      content = rawContent as Object;
+      throw FormatException(
+        'Invalid web_search_tool_result.content: expected a List of result '
+        'items or a Map error object, but got '
+        '${rawContent.runtimeType}: $rawContent',
+      );
     }
     return WebSearchToolResultInputBlock(
       toolUseId: json['tool_use_id'] as String,
@@ -785,13 +789,30 @@ class WebSearchToolResultInputBlock extends InputContentBlock {
       other is WebSearchToolResultInputBlock &&
           runtimeType == other.runtimeType &&
           toolUseId == other.toolUseId &&
-          content == other.content &&
+          _contentEquals(content, other.content) &&
           caller == other.caller &&
           cacheControl == other.cacheControl;
 
   @override
   int get hashCode =>
-      Object.hash(toolUseId, content, caller, cacheControl);
+      Object.hash(toolUseId, _contentHash(content), caller, cacheControl);
+
+  static bool _contentEquals(Object a, Object b) {
+    if (a is List && b is List) return listsEqual(a, b);
+    if (a is Map && b is Map) {
+      return mapsEqual(
+        a.cast<String, dynamic>(),
+        b.cast<String, dynamic>(),
+      );
+    }
+    return a == b;
+  }
+
+  static int _contentHash(Object content) {
+    if (content is List) return listHash(content);
+    if (content is Map) return mapHash(content.cast<String, dynamic>());
+    return content.hashCode;
+  }
 
   @override
   String toString() =>
