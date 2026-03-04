@@ -228,7 +228,13 @@ class ChatDelta {
       content: json['content'] as String?,
       refusal: json['refusal'] as String?,
       toolCalls: (json['tool_calls'] as List<dynamic>?)
-          ?.map((e) => ToolCallDelta.fromJson(e as Map<String, dynamic>))
+          ?.indexed
+          .map(
+            (e) => ToolCallDelta.fromJson(
+              e.$2 as Map<String, dynamic>,
+              fallbackIndex: e.$1,
+            ),
+          )
           .toList(),
       // Reasoning fields for OpenRouter/DeepSeek compatibility
       reasoningContent: json['reasoning_content'] as String?,
@@ -322,9 +328,16 @@ class ToolCallDelta {
   const ToolCallDelta({required this.index, this.id, this.type, this.function});
 
   /// Creates a [ToolCallDelta] from JSON.
-  factory ToolCallDelta.fromJson(Map<String, dynamic> json) {
+  ///
+  /// If `index` is missing from [json], [fallbackIndex] is used instead
+  /// (defaults to 0). This handles OpenAI-compatible providers (e.g. Ollama)
+  /// that omit the field.
+  factory ToolCallDelta.fromJson(
+    Map<String, dynamic> json, {
+    int fallbackIndex = 0,
+  }) {
     return ToolCallDelta(
-      index: json['index'] as int? ?? 0,
+      index: json['index'] as int? ?? fallbackIndex,
       id: json['id'] as String?,
       type: json['type'] as String?,
       function: json['function'] != null

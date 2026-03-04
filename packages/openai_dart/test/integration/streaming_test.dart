@@ -2,6 +2,7 @@
 @Tags(['integration'])
 library;
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:openai_dart/openai_dart.dart';
@@ -250,7 +251,9 @@ void main() {
         expect(toolCalls, isNotNull);
         expect(toolCalls, isNotEmpty);
         expect(toolCalls!.first.function.name, 'get_weather');
-        expect(toolCalls.first.function.arguments, contains('Paris'));
+        final args =
+            jsonDecode(toolCalls.first.function.arguments) as Map<String, dynamic>;
+        expect(args['city'].toString().toLowerCase(), contains('paris'));
       },
     );
 

@@ -1207,7 +1207,7 @@ void main() {
       expect(delta.function!.arguments, '{}');
     });
 
-    test('fromJson defaults index to 0 when null', () {
+    test('fromJson defaults index to 0 when field is missing', () {
       final json = jsonDecode_(r'''
         {
           "id": "call_456",
@@ -1224,6 +1224,43 @@ void main() {
       expect(delta.index, 0);
       expect(delta.id, 'call_456');
       expect(delta.function!.name, 'my_func');
+    });
+
+    test('fromJson defaults index to 0 when field is explicit null', () {
+      final json = jsonDecode_(r'''
+        {
+          "index": null,
+          "id": "call_789",
+          "type": "function",
+          "function": {
+            "name": "my_func",
+            "arguments": "{}"
+          }
+        }
+      ''');
+
+      final delta = ToolCallDelta.fromJson(json);
+
+      expect(delta.index, 0);
+      expect(delta.id, 'call_789');
+    });
+
+    test('fromJson uses fallbackIndex when index is missing', () {
+      final json = jsonDecode_(r'''
+        {
+          "id": "call_101",
+          "type": "function",
+          "function": {
+            "name": "second_func",
+            "arguments": "{}"
+          }
+        }
+      ''');
+
+      final delta = ToolCallDelta.fromJson(json, fallbackIndex: 1);
+
+      expect(delta.index, 1);
+      expect(delta.id, 'call_101');
     });
   });
 
