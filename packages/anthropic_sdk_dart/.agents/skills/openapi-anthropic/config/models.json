@@ -23,11 +23,6 @@
       "spec_schema": "Usage"
     },
     {
-      "name": "ThinkingConfig",
-      "file": "packages/anthropic_sdk_dart/lib/src/models/messages/thinking_config.dart",
-      "spec_schema": "ThinkingConfig"
-    },
-    {
       "name": "CacheControlEphemeral",
       "file": "packages/anthropic_sdk_dart/lib/src/models/metadata/cache_control.dart",
       "spec_schema": "CacheControlEphemeral"
@@ -36,6 +31,21 @@
       "name": "InputSchema",
       "file": "packages/anthropic_sdk_dart/lib/src/models/tools/input_schema.dart",
       "spec_schema": "InputSchema"
+    },
+    {
+      "name": "RequestCounts",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/batches/message_batch.dart",
+      "spec_schema": "RequestCounts"
+    },
+    {
+      "name": "BatchIndividualResponse",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/batches/message_batch.dart",
+      "spec_schema": "MessageBatchIndividualResponse"
+    },
+    {
+      "name": "MessageBatch",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/batches/message_batch.dart",
+      "spec_schema": "MessageBatch"
     }
   ],
   "sealed_classes": [
@@ -154,7 +164,100 @@
         {"dart_class": "InputJsonDelta", "spec_schema": "InputJSONDelta", "discriminator_value": "input_json_delta"},
         {"dart_class": "ThinkingDelta", "spec_schema": "ThinkingDelta", "discriminator_value": "thinking_delta"},
         {"dart_class": "SignatureDelta", "spec_schema": "SignatureDelta", "discriminator_value": "signature_delta"},
-        {"dart_class": "CitationsDelta", "spec_schema": "CitationsDelta", "discriminator_value": "citations_delta"}
+        {"dart_class": "CitationsDelta", "spec_schema": "CitationsDelta", "discriminator_value": "citations_delta"},
+        {"dart_class": "CompactionDelta", "spec_schema": "CompactionDelta", "discriminator_value": "compaction_delta"}
+      ]
+    },
+    {
+      "name": "ThinkingConfig",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/messages/thinking_config.dart",
+      "discriminator": "type",
+      "variants": [
+        {"dart_class": "ThinkingEnabled", "spec_schema": "ThinkingConfigEnabled", "discriminator_value": "enabled"},
+        {"dart_class": "ThinkingDisabled", "spec_schema": "ThinkingConfigDisabled", "discriminator_value": "disabled"},
+        {"dart_class": "ThinkingAdaptive", "spec_schema": "ThinkingConfigAdaptive", "discriminator_value": "adaptive"}
+      ]
+    },
+    {
+      "name": "ToolChoice",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/tools/tool_choice.dart",
+      "discriminator": "type",
+      "variants": [
+        {"dart_class": "ToolChoiceAuto", "spec_schema": "ToolChoiceAuto", "discriminator_value": "auto"},
+        {"dart_class": "ToolChoiceAny", "spec_schema": "ToolChoiceAny", "discriminator_value": "any"},
+        {"dart_class": "ToolChoiceTool", "spec_schema": "ToolChoiceTool", "discriminator_value": "tool"},
+        {"dart_class": "ToolChoiceNone", "spec_schema": "ToolChoiceNone", "discriminator_value": "none"}
+      ]
+    },
+    {
+      "name": "ToolCaller",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/tools/tool_caller.dart",
+      "discriminator": "type",
+      "note": "Defaults to 'direct' when type is absent.",
+      "variants": [
+        {"dart_class": "DirectToolCaller", "spec_schema": "DirectToolCaller", "discriminator_value": "direct"},
+        {"dart_class": "ServerToolCaller", "spec_schema": "ServerToolCaller", "discriminator_value": "versioned (e.g. code_execution_20260120)"}
+      ]
+    },
+    {
+      "name": "ToolDefinition",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/tools/tool_definition.dart",
+      "discriminator": "type_prefix",
+      "note": "Detects built-in vs custom by checking if type starts with known prefixes (bash_, web_search_, etc.).",
+      "variants": [
+        {"dart_class": "CustomToolDefinition", "spec_schema": "Tool", "discriminator_value": "custom or absent"},
+        {"dart_class": "BuiltInToolDefinition", "spec_schema": "various built-in tool schemas", "discriminator_value": "versioned prefix"}
+      ]
+    },
+    {
+      "name": "BuiltInTool",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/tools/built_in_tools.dart",
+      "discriminator": "type",
+      "note": "Uses versioned type strings (e.g. bash_20250124). Some types map to the same class. TextEditorToolBase and ToolSearchTool are intermediate sealed subtypes for grouping.",
+      "variants": [
+        {"dart_class": "BashTool", "spec_schema": "BashTool20250124", "discriminator_value": "bash_20250124"},
+        {"dart_class": "TextEditorTool20250124", "spec_schema": "TextEditor20250124", "discriminator_value": "text_editor_20250124"},
+        {"dart_class": "TextEditorTool20250429", "spec_schema": "TextEditor20250429", "discriminator_value": "text_editor_20250429"},
+        {"dart_class": "TextEditorTool", "spec_schema": "TextEditor20250728", "discriminator_value": "text_editor_20250728"},
+        {"dart_class": "WebSearchTool", "spec_schema": "WebSearchTool20250305", "discriminator_value": "web_search_20250305, web_search_20260209"},
+        {"dart_class": "WebFetchTool", "spec_schema": "WebFetchTool20250910", "discriminator_value": "web_fetch_20250910, web_fetch_20260209"},
+        {"dart_class": "MemoryTool", "spec_schema": "MemoryTool20250818", "discriminator_value": "memory_20250818"},
+        {"dart_class": "ToolSearchToolBm25", "spec_schema": "ToolSearchToolBm25", "discriminator_value": "tool_search_tool_bm25, tool_search_tool_bm25_20251119"},
+        {"dart_class": "ToolSearchToolRegex", "spec_schema": "ToolSearchToolRegex", "discriminator_value": "tool_search_tool_regex, tool_search_tool_regex_20251119"},
+        {"dart_class": "CodeExecutionBuiltInTool", "spec_schema": "CodeExecutionTool20250522", "discriminator_value": "code_execution_20250522, code_execution_20250825, code_execution_20260120"},
+        {"dart_class": "ComputerUseTool", "spec_schema": "ComputerUseTool (beta)", "discriminator_value": "computer_* prefix"},
+        {"dart_class": "McpToolset", "spec_schema": "McpToolset (beta)", "discriminator_value": "mcp_* prefix"}
+      ]
+    },
+    {
+      "name": "BatchResult",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/batches/message_batch.dart",
+      "discriminator": "type",
+      "variants": [
+        {"dart_class": "BatchResultSucceeded", "spec_schema": "SucceededResult", "discriminator_value": "succeeded"},
+        {"dart_class": "BatchResultErrored", "spec_schema": "ErroredResult", "discriminator_value": "errored"},
+        {"dart_class": "BatchResultCanceled", "spec_schema": "CanceledResult", "discriminator_value": "canceled"},
+        {"dart_class": "BatchResultExpired", "spec_schema": "ExpiredResult", "discriminator_value": "expired"}
+      ]
+    },
+    {
+      "name": "MessageContent",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/messages/input_message.dart",
+      "discriminator": "runtime_type",
+      "note": "fromJson accepts dynamic: String → TextMessageContent, List → BlocksMessageContent.",
+      "variants": [
+        {"dart_class": "TextMessageContent", "discriminator_value": "String"},
+        {"dart_class": "BlocksMessageContent", "discriminator_value": "List"}
+      ]
+    },
+    {
+      "name": "SystemPrompt",
+      "file": "packages/anthropic_sdk_dart/lib/src/models/messages/message_create_request.dart",
+      "discriminator": "runtime_type",
+      "note": "fromJson accepts dynamic: String → TextSystemPrompt, List → BlocksSystemPrompt.",
+      "variants": [
+        {"dart_class": "TextSystemPrompt", "discriminator_value": "String"},
+        {"dart_class": "BlocksSystemPrompt", "discriminator_value": "List"}
       ]
     }
   ],
