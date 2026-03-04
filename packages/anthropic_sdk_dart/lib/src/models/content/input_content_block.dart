@@ -6,6 +6,7 @@ import '../metadata/cache_control.dart';
 import '../sources/document_source.dart';
 import '../sources/image_source.dart';
 import '../tools/tool_caller.dart';
+import 'content_block.dart';
 
 /// Content block for input messages.
 ///
@@ -68,7 +69,7 @@ sealed class InputContentBlock {
   /// Creates a web search tool result block.
   factory InputContentBlock.webSearchToolResult({
     required String toolUseId,
-    required Object content,
+    required WebSearchResult content,
     ToolCaller? caller,
     CacheControlEphemeral? cacheControl,
   }) = WebSearchToolResultInputBlock;
@@ -708,9 +709,8 @@ class WebSearchToolResultInputBlock extends InputContentBlock {
   /// The ID of the related tool use.
   final String toolUseId;
 
-  /// The result content payload (either a [List] of result items or a [Map]
-  /// error object).
-  final Object content;
+  /// The search results content.
+  final WebSearchResult content;
 
   /// Caller metadata.
   final ToolCaller? caller;
@@ -728,22 +728,9 @@ class WebSearchToolResultInputBlock extends InputContentBlock {
 
   /// Creates a [WebSearchToolResultInputBlock] from JSON.
   factory WebSearchToolResultInputBlock.fromJson(Map<String, dynamic> json) {
-    final rawContent = json['content'];
-    final Object content;
-    if (rawContent is List) {
-      content = rawContent;
-    } else if (rawContent is Map) {
-      content = rawContent.cast<String, dynamic>();
-    } else {
-      throw FormatException(
-        'Invalid web_search_tool_result.content: expected a List of result '
-        'items or a Map error object, but got '
-        '${rawContent.runtimeType}: $rawContent',
-      );
-    }
     return WebSearchToolResultInputBlock(
       toolUseId: json['tool_use_id'] as String,
-      content: content,
+      content: WebSearchResult.fromJson(json['content'] as Object),
       caller: json['caller'] != null
           ? ToolCaller.fromJson(json['caller'] as Map<String, dynamic>)
           : null,
@@ -759,7 +746,7 @@ class WebSearchToolResultInputBlock extends InputContentBlock {
   Map<String, dynamic> toJson() => {
     'type': 'web_search_tool_result',
     'tool_use_id': toolUseId,
-    'content': content,
+    'content': content.toJson(),
     if (caller != null) 'caller': caller!.toJson(),
     if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
   };
@@ -767,7 +754,7 @@ class WebSearchToolResultInputBlock extends InputContentBlock {
   /// Creates a copy with replaced values.
   WebSearchToolResultInputBlock copyWith({
     String? toolUseId,
-    Object? content,
+    WebSearchResult? content,
     Object? caller = unsetCopyWithValue,
     Object? cacheControl = unsetCopyWithValue,
   }) {
@@ -789,30 +776,13 @@ class WebSearchToolResultInputBlock extends InputContentBlock {
       other is WebSearchToolResultInputBlock &&
           runtimeType == other.runtimeType &&
           toolUseId == other.toolUseId &&
-          _contentEquals(content, other.content) &&
+          content == other.content &&
           caller == other.caller &&
           cacheControl == other.cacheControl;
 
   @override
   int get hashCode =>
-      Object.hash(toolUseId, _contentHash(content), caller, cacheControl);
-
-  static bool _contentEquals(Object a, Object b) {
-    if (a is List && b is List) return listsEqual(a, b);
-    if (a is Map && b is Map) {
-      return mapsEqual(
-        a.cast<String, dynamic>(),
-        b.cast<String, dynamic>(),
-      );
-    }
-    return a == b;
-  }
-
-  static int _contentHash(Object content) {
-    if (content is List) return listHash(content);
-    if (content is Map) return mapHash(content.cast<String, dynamic>());
-    return content.hashCode;
-  }
+      Object.hash(toolUseId, content, caller, cacheControl);
 
   @override
   String toString() =>
