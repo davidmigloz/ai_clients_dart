@@ -46,7 +46,7 @@ class FunctionDefinition {
           mapsEqual(parameters, other.parameters);
 
   @override
-  int get hashCode => Object.hash(name, description, parameters);
+  int get hashCode => Object.hash(name, description, mapHash(parameters));
 
   @override
   String toString() =>
