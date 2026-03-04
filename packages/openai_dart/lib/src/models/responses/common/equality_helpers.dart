@@ -31,6 +31,20 @@ bool listOfMapsEqual<K, V>(List<Map<K, V>>? a, List<Map<K, V>>? b) {
   return true;
 }
 
+/// Compares two lists of maps for deep equality (handles nested maps and lists).
+bool listOfMapsDeepEqual(
+  List<Map<String, dynamic>>? a,
+  List<Map<String, dynamic>>? b,
+) {
+  if (identical(a, b)) return true;
+  if (a == null || b == null) return false;
+  if (a.length != b.length) return false;
+  for (var i = 0; i < a.length; i++) {
+    if (!mapsDeepEqual(a[i], b[i])) return false;
+  }
+  return true;
+}
+
 /// Compares two maps for deep equality (handles nested maps and lists).
 bool mapsDeepEqual(Map<String, dynamic>? a, Map<String, dynamic>? b) {
   if (identical(a, b)) return true;
