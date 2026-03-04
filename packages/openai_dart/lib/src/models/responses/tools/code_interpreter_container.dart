@@ -119,7 +119,11 @@ class CodeInterpreterContainerAuto extends CodeInterpreterContainer {
           networkPolicy == other.networkPolicy;
 
   @override
-  int get hashCode => Object.hash(fileIds, memoryLimit, networkPolicy);
+  int get hashCode => Object.hash(
+    fileIds != null ? Object.hashAll(fileIds!) : null,
+    memoryLimit,
+    networkPolicy,
+  );
 
   @override
   String toString() =>
