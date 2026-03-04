@@ -808,18 +808,24 @@ sealed class WebSearchResult {
   /// Creates a [WebSearchResult] from JSON.
   ///
   /// The [json] parameter accepts either a `List` (array of search result
-  /// items for the success case) or a `Map<String, dynamic>` (error object
-  /// with `type: "web_search_tool_result_error"`).
+  /// items for the success case) or a `Map` (error object with
+  /// `type: "web_search_tool_result_error"`).
   factory WebSearchResult.fromJson(Object json) {
     if (json is List) {
       return WebSearchResultSuccess.fromJson(json);
     }
-    if (json is Map<String, dynamic>) {
-      final type = json['type'] as String;
-      if (type == 'web_search_tool_result_error') {
-        return WebSearchResultError.fromJson(json);
+    if (json is Map) {
+      final map = json.cast<String, dynamic>();
+      final type = map['type'];
+      if (type is String) {
+        if (type == 'web_search_tool_result_error') {
+          return WebSearchResultError.fromJson(map);
+        }
+        throw FormatException('Unknown WebSearchResult type: $type');
       }
-      throw FormatException('Unknown WebSearchResult type: $type');
+      throw const FormatException(
+        'Invalid WebSearchResult: "type" must be a string',
+      );
     }
     throw FormatException(
       'Expected List or Map for WebSearchResult, got ${json.runtimeType}',
