@@ -247,10 +247,9 @@ void main() {
         await stream.forEach(accumulator.add);
         final completion = accumulator.toChatCompletion();
 
-        final toolCalls = completion.choices.first.message.toolCalls;
-        expect(toolCalls, isNotNull);
+        final toolCalls = completion.choices.first.message.toolCalls!;
         expect(toolCalls, isNotEmpty);
-        expect(toolCalls!.first.function.name, 'get_weather');
+        expect(toolCalls.first.function.name, 'get_weather');
         final args =
             jsonDecode(toolCalls.first.function.arguments)
                 as Map<String, dynamic>;
