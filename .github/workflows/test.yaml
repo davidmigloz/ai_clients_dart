@@ -39,8 +39,115 @@ jobs:
       - name: Analyze project
         run: dart analyze --fatal-infos
 
+  # ---------------------------------------------------------------------------
+  # PR: detect which packages changed and test only those (parallel matrix)
+  # ---------------------------------------------------------------------------
+  detect-changes:
+    name: Detect changes
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      packages: ${{ steps.changes.outputs.packages }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+      - name: Detect changed packages
+        id: changes
+        run: |
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          CHANGED_FILES=$(git diff --name-only "$BASE_SHA"...HEAD)
+
+          # Check for root-level changes that should trigger all packages
+          ROOT_CHANGED=false
+          while IFS= read -r file; do
+            # Files directly in root (not under packages/ or hidden dirs like .github/)
+            case "$file" in
+              packages/*|.github/*) ;;
+              pubspec.yaml|analysis_options.yaml|melos.yaml) ROOT_CHANGED=true; break ;;
+              */*) ;; # files in other subdirectories
+              *) ROOT_CHANGED=true; break ;; # any other root-level file
+            esac
+          done <<< "$CHANGED_FILES"
+
+          if [ "$ROOT_CHANGED" = true ]; then
+            # Root-level change: test all packages that have tests
+            PACKAGES=$(find packages -mindepth 2 -maxdepth 2 -type d -name test \
+              | sed 's|packages/\(.*\)/test|\1|' | sort)
+          else
+            # Only test packages with changed files
+            PACKAGES=$(echo "$CHANGED_FILES" \
+              | grep '^packages/' \
+              | cut -d/ -f2 \
+              | sort -u)
+
+            # Filter to packages that actually have a test/ directory
+            FILTERED=""
+            for pkg in $PACKAGES; do
+              if [ -d "packages/$pkg/test" ]; then
+                FILTERED="$FILTERED $pkg"
+              fi
+            done
+            PACKAGES=$(echo "$FILTERED" | xargs)
+          fi
+
+          # Convert to JSON array
+          JSON=$(echo "$PACKAGES" | xargs -n1 2>/dev/null | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "packages=$JSON" >> "$GITHUB_OUTPUT"
+          echo "Changed packages: $JSON"
+
   test:
-    name: Test
+    name: Test (${{ matrix.package }})
+    if: github.event_name == 'pull_request' && needs.detect-changes.outputs.packages != '[]'
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJson(needs.detect-changes.outputs.packages) }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: dart-lang/setup-dart@e51d8e571e22473a2ddebf0ef8a2123f0ab2c02c # v1.7.1
+        with:
+          sdk: stable
+      - run: dart pub get
+      - name: Run unit tests
+        run: |
+          echo "Testing packages/${{ matrix.package }}"
+          output=$(dart test "packages/${{ matrix.package }}/test" --exclude-tags integration 2>&1) && true
+          exit_code=$?
+          echo "$output"
+          if [ $exit_code -ne 0 ]; then
+            if echo "$output" | grep -qE "No tests (ran|match)"; then
+              echo "No unit tests in packages/${{ matrix.package }} (skipped)"
+            else
+              exit 1
+            fi
+          fi
+
+  test-result:
+    name: Test result
+    if: always() && github.event_name == 'pull_request'
+    needs: [detect-changes, test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Aggregate test results
+        run: |
+          if [ "${{ needs.test.result }}" = "failure" ] || [ "${{ needs.detect-changes.result }}" = "failure" ]; then
+            echo "::error::Tests failed"
+            exit 1
+          fi
+          echo "Tests passed (result: ${{ needs.test.result }}, detect-changes: ${{ needs.detect-changes.result }})"
+
+  # ---------------------------------------------------------------------------
+  # Push to main: full regression test of all packages (sequential)
+  # ---------------------------------------------------------------------------
+  test-all:
+    name: Test (all)
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
