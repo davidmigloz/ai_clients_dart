@@ -137,21 +137,19 @@ void main() {
     });
 
     group('WebSearchToolResultBlock', () {
-      test('fromJson parses web search result block', () {
+      test('fromJson parses web search result block (success)', () {
         final json = {
           'type': 'web_search_tool_result',
           'tool_use_id': 'tu_ws_123',
-          'content': {
-            'type': 'web_search_result',
-            'results': [
-              {
-                'url': 'https://example.com',
-                'title': 'Example',
-                'encrypted_content_index': 'encrypted...',
-                'page_age': '1 day ago',
-              },
-            ],
-          },
+          'content': <dynamic>[
+            {
+              'type': 'web_search_result',
+              'url': 'https://example.com',
+              'title': 'Example',
+              'encrypted_content': 'encrypted...',
+              'page_age': '1 day ago',
+            },
+          ],
         };
         final block = ContentBlock.fromJson(json);
 
@@ -163,6 +161,82 @@ void main() {
         expect(content.results, hasLength(1));
         expect(content.results.first.url, 'https://example.com');
         expect(content.results.first.title, 'Example');
+        expect(content.results.first.encryptedContent, 'encrypted...');
+        expect(content.results.first.pageAge, '1 day ago');
+      });
+
+      test('fromJson parses web search result block (error)', () {
+        final json = {
+          'type': 'web_search_tool_result',
+          'tool_use_id': 'tu_ws_err',
+          'content': {
+            'type': 'web_search_tool_result_error',
+            'error_code': 'max_results_reached',
+          },
+        };
+        final block = ContentBlock.fromJson(json);
+
+        expect(block, isA<WebSearchToolResultBlock>());
+        final result = block as WebSearchToolResultBlock;
+        expect(result.toolUseId, 'tu_ws_err');
+        expect(result.content, isA<WebSearchResultError>());
+        final error = result.content as WebSearchResultError;
+        expect(error.errorCode, 'max_results_reached');
+      });
+
+      test('roundtrip fromJson → toJson → fromJson (success)', () {
+        final json = {
+          'type': 'web_search_tool_result',
+          'tool_use_id': 'tu_ws_rt',
+          'content': <dynamic>[
+            {
+              'type': 'web_search_result',
+              'url': 'https://example.com',
+              'title': 'Example',
+              'encrypted_content': 'enc_data',
+            },
+            {
+              'type': 'web_search_result',
+              'url': 'https://other.com',
+              'title': 'Other',
+            },
+          ],
+        };
+
+        final block = ContentBlock.fromJson(json) as WebSearchToolResultBlock;
+        final reJson = block.toJson();
+        final block2 =
+            ContentBlock.fromJson(reJson) as WebSearchToolResultBlock;
+
+        expect(block2.toolUseId, block.toolUseId);
+        expect(block2.content, isA<WebSearchResultSuccess>());
+        final results = (block2.content as WebSearchResultSuccess).results;
+        expect(results, hasLength(2));
+        expect(results[0].url, 'https://example.com');
+        expect(results[1].url, 'https://other.com');
+      });
+
+      test('roundtrip fromJson → toJson → fromJson (error)', () {
+        final json = {
+          'type': 'web_search_tool_result',
+          'tool_use_id': 'tu_ws_rt_err',
+          'content': {
+            'type': 'web_search_tool_result_error',
+            'error_code': 'search_unavailable',
+          },
+        };
+
+        final block = ContentBlock.fromJson(json) as WebSearchToolResultBlock;
+        final reJson = block.toJson();
+        final block2 =
+            ContentBlock.fromJson(reJson) as WebSearchToolResultBlock;
+
+        expect(block2.toolUseId, block.toolUseId);
+        expect(block2.content, isA<WebSearchResultError>());
+        expect(
+          (block2.content as WebSearchResultError).errorCode,
+          'search_unavailable',
+        );
       });
     });
 

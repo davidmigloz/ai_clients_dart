@@ -708,8 +708,9 @@ class WebSearchToolResultInputBlock extends InputContentBlock {
   /// The ID of the related tool use.
   final String toolUseId;
 
-  /// The result content payload.
-  final Map<String, dynamic> content;
+  /// The result content payload (either a [List] of result items or a [Map]
+  /// error object).
+  final Object content;
 
   /// Caller metadata.
   final ToolCaller? caller;
@@ -727,9 +728,18 @@ class WebSearchToolResultInputBlock extends InputContentBlock {
 
   /// Creates a [WebSearchToolResultInputBlock] from JSON.
   factory WebSearchToolResultInputBlock.fromJson(Map<String, dynamic> json) {
+    final rawContent = json['content'];
+    final Object content;
+    if (rawContent is List) {
+      content = rawContent;
+    } else if (rawContent is Map) {
+      content = rawContent.cast<String, dynamic>();
+    } else {
+      content = rawContent as Object;
+    }
     return WebSearchToolResultInputBlock(
       toolUseId: json['tool_use_id'] as String,
-      content: (json['content'] as Map).cast<String, dynamic>(),
+      content: content,
       caller: json['caller'] != null
           ? ToolCaller.fromJson(json['caller'] as Map<String, dynamic>)
           : null,
@@ -753,7 +763,7 @@ class WebSearchToolResultInputBlock extends InputContentBlock {
   /// Creates a copy with replaced values.
   WebSearchToolResultInputBlock copyWith({
     String? toolUseId,
-    Map<String, dynamic>? content,
+    Object? content,
     Object? caller = unsetCopyWithValue,
     Object? cacheControl = unsetCopyWithValue,
   }) {
@@ -775,13 +785,13 @@ class WebSearchToolResultInputBlock extends InputContentBlock {
       other is WebSearchToolResultInputBlock &&
           runtimeType == other.runtimeType &&
           toolUseId == other.toolUseId &&
-          mapsEqual(content, other.content) &&
+          content == other.content &&
           caller == other.caller &&
           cacheControl == other.cacheControl;
 
   @override
   int get hashCode =>
-      Object.hash(toolUseId, mapHash(content), caller, cacheControl);
+      Object.hash(toolUseId, content, caller, cacheControl);
 
   @override
   String toString() =>

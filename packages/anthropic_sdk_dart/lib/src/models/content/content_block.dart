@@ -366,9 +366,7 @@ class WebSearchToolResultBlock extends ContentBlock {
   factory WebSearchToolResultBlock.fromJson(Map<String, dynamic> json) {
     return WebSearchToolResultBlock(
       toolUseId: json['tool_use_id'] as String,
-      content: WebSearchResult.fromJson(
-        json['content'] as Map<String, dynamic>,
-      ),
+      content: WebSearchResult.fromJson(json['content'] as Object),
       caller: json['caller'] != null
           ? ToolCaller.fromJson(json['caller'] as Map<String, dynamic>)
           : null,
@@ -808,17 +806,28 @@ sealed class WebSearchResult {
   const WebSearchResult();
 
   /// Creates a [WebSearchResult] from JSON.
-  factory WebSearchResult.fromJson(Map<String, dynamic> json) {
-    final type = json['type'] as String;
-    return switch (type) {
-      'web_search_result' => WebSearchResultSuccess.fromJson(json),
-      'web_search_result_error' => WebSearchResultError.fromJson(json),
-      _ => throw FormatException('Unknown WebSearchResult type: $type'),
-    };
+  ///
+  /// The [json] parameter accepts either a `List` (array of search result
+  /// items for the success case) or a `Map<String, dynamic>` (error object
+  /// with `type: "web_search_tool_result_error"`).
+  factory WebSearchResult.fromJson(Object json) {
+    if (json is List) {
+      return WebSearchResultSuccess.fromJson(json);
+    }
+    if (json is Map<String, dynamic>) {
+      final type = json['type'] as String;
+      if (type == 'web_search_tool_result_error') {
+        return WebSearchResultError.fromJson(json);
+      }
+      throw FormatException('Unknown WebSearchResult type: $type');
+    }
+    throw FormatException(
+      'Expected List or Map for WebSearchResult, got ${json.runtimeType}',
+    );
   }
 
   /// Converts to JSON.
-  Map<String, dynamic> toJson();
+  Object toJson();
 }
 
 /// Successful web search result.
@@ -830,20 +839,18 @@ class WebSearchResultSuccess extends WebSearchResult {
   /// Creates a [WebSearchResultSuccess].
   const WebSearchResultSuccess({required this.results});
 
-  /// Creates a [WebSearchResultSuccess] from JSON.
-  factory WebSearchResultSuccess.fromJson(Map<String, dynamic> json) {
+  /// Creates a [WebSearchResultSuccess] from a JSON array of result items.
+  factory WebSearchResultSuccess.fromJson(List<dynamic> json) {
     return WebSearchResultSuccess(
-      results: (json['results'] as List)
+      results: json
           .map((e) => WebSearchResultItem.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
   }
 
   @override
-  Map<String, dynamic> toJson() => {
-    'type': 'web_search_result',
-    'results': results.map((e) => e.toJson()).toList(),
-  };
+  List<Map<String, dynamic>> toJson() =>
+      results.map((e) => e.toJson()).toList();
 
   @override
   bool operator ==(Object other) =>
@@ -868,8 +875,8 @@ class WebSearchResultItem {
   /// Title of the search result.
   final String title;
 
-  /// Encrypted content index for citations.
-  final String? encryptedContentIndex;
+  /// Encrypted content for citations.
+  final String? encryptedContent;
 
   /// Page age information.
   final String? pageAge;
@@ -878,7 +885,7 @@ class WebSearchResultItem {
   const WebSearchResultItem({
     required this.url,
     required this.title,
-    this.encryptedContentIndex,
+    this.encryptedContent,
     this.pageAge,
   });
 
@@ -887,17 +894,17 @@ class WebSearchResultItem {
     return WebSearchResultItem(
       url: json['url'] as String,
       title: json['title'] as String,
-      encryptedContentIndex: json['encrypted_content_index'] as String?,
+      encryptedContent: json['encrypted_content'] as String?,
       pageAge: json['page_age'] as String?,
     );
   }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    'type': 'web_search_result',
     'url': url,
     'title': title,
-    if (encryptedContentIndex != null)
-      'encrypted_content_index': encryptedContentIndex,
+    if (encryptedContent != null) 'encrypted_content': encryptedContent,
     if (pageAge != null) 'page_age': pageAge,
   };
 
@@ -908,16 +915,16 @@ class WebSearchResultItem {
           runtimeType == other.runtimeType &&
           url == other.url &&
           title == other.title &&
-          encryptedContentIndex == other.encryptedContentIndex &&
+          encryptedContent == other.encryptedContent &&
           pageAge == other.pageAge;
 
   @override
-  int get hashCode => Object.hash(url, title, encryptedContentIndex, pageAge);
+  int get hashCode => Object.hash(url, title, encryptedContent, pageAge);
 
   @override
   String toString() =>
       'WebSearchResultItem(url: $url, title: $title, '
-      'encryptedContentIndex: $encryptedContentIndex, pageAge: $pageAge)';
+      'encryptedContent: $encryptedContent, pageAge: $pageAge)';
 }
 
 /// Web search error result.
@@ -926,25 +933,20 @@ class WebSearchResultError extends WebSearchResult {
   /// Error code.
   final String errorCode;
 
-  /// Error message.
-  final String message;
-
   /// Creates a [WebSearchResultError].
-  const WebSearchResultError({required this.errorCode, required this.message});
+  const WebSearchResultError({required this.errorCode});
 
   /// Creates a [WebSearchResultError] from JSON.
   factory WebSearchResultError.fromJson(Map<String, dynamic> json) {
     return WebSearchResultError(
       errorCode: json['error_code'] as String,
-      message: json['message'] as String,
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
-    'type': 'web_search_result_error',
+    'type': 'web_search_tool_result_error',
     'error_code': errorCode,
-    'message': message,
   };
 
   @override
@@ -952,15 +954,13 @@ class WebSearchResultError extends WebSearchResult {
       identical(this, other) ||
       other is WebSearchResultError &&
           runtimeType == other.runtimeType &&
-          errorCode == other.errorCode &&
-          message == other.message;
+          errorCode == other.errorCode;
 
   @override
-  int get hashCode => Object.hash(errorCode, message);
+  int get hashCode => errorCode.hashCode;
 
   @override
-  String toString() =>
-      'WebSearchResultError(errorCode: $errorCode, message: $message)';
+  String toString() => 'WebSearchResultError(errorCode: $errorCode)';
 }
 
 /// Citation for text content.

@@ -1,0 +1,109 @@
+// ignore_for_file: avoid_print
+@Tags(['integration'])
+library;
+
+import 'dart:io';
+
+import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
+import 'package:test/test.dart';
+
+void main() {
+  String? apiKey;
+  AnthropicClient? client;
+
+  setUpAll(() {
+    apiKey = Platform.environment['ANTHROPIC_API_KEY'];
+    if (apiKey == null || apiKey!.isEmpty) {
+      print('ANTHROPIC_API_KEY not set. Integration tests will be skipped.');
+    } else {
+      client = AnthropicClient(
+        config: AnthropicConfig(authProvider: ApiKeyProvider(apiKey!)),
+      );
+    }
+  });
+
+  tearDownAll(() {
+    client?.close();
+  });
+
+  group('Server Tools - Web Search Integration', () {
+    test(
+      'web search returns results',
+      timeout: const Timeout(Duration(minutes: 2)),
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        final response = await client!.messages.create(
+          MessageCreateRequest(
+            model: 'claude-sonnet-4-20250514',
+            maxTokens: 1024,
+            tools: [ToolDefinition.builtIn(BuiltInTool.webSearch())],
+            messages: [
+              InputMessage.user(
+                'What is the capital of France? Use web search.',
+              ),
+            ],
+          ),
+        );
+
+        expect(response.id, isNotEmpty);
+
+        // Find web search result blocks
+        final webSearchResults = response.content
+            .whereType<WebSearchToolResultBlock>()
+            .toList();
+        expect(webSearchResults, isNotEmpty);
+
+        final result = webSearchResults.first;
+        expect(result.content, isA<WebSearchResultSuccess>());
+        final success = result.content as WebSearchResultSuccess;
+        expect(success.results, isNotEmpty);
+        expect(success.results.first.url, isNotEmpty);
+        expect(success.results.first.title, isNotEmpty);
+      },
+    );
+
+    test(
+      'web search streaming returns results',
+      timeout: const Timeout(Duration(minutes: 2)),
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        final stream = client!.messages.createStream(
+          MessageCreateRequest(
+            model: 'claude-sonnet-4-20250514',
+            maxTokens: 1024,
+            tools: [ToolDefinition.builtIn(BuiltInTool.webSearch())],
+            messages: [
+              InputMessage.user(
+                'What is the capital of France? Use web search.',
+              ),
+            ],
+          ),
+        );
+
+        var hasWebSearchResult = false;
+
+        await for (final event in stream) {
+          if (event case ContentBlockStartEvent(:final contentBlock)) {
+            if (contentBlock is WebSearchToolResultBlock) {
+              hasWebSearchResult = true;
+              expect(
+                contentBlock.content,
+                isA<WebSearchResultSuccess>(),
+              );
+            }
+          }
+        }
+
+        expect(hasWebSearchResult, isTrue);
+      },
+    );
+  });
+}
