@@ -51,7 +51,7 @@ class EmbeddingData {
           listsEqual(embedding, other.embedding);
 
   @override
-  int get hashCode => Object.hash(object, index, embedding);
+  int get hashCode => Object.hash(object, index, listHash(embedding));
 
   @override
   String toString() =>

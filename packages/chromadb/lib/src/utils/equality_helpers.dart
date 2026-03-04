@@ -127,7 +127,9 @@ int _valueDeepHashCode(dynamic value) {
   return value.hashCode;
 }
 
-/// Deep equality check for nested lists and objects.
+/// Deep equality check for nested lists.
+///
+/// Recurses into [List] elements; all other types use `==`.
 bool deepEquals(Object? a, Object? b) {
   if (identical(a, b)) return true;
   if (a == null || b == null) return false;

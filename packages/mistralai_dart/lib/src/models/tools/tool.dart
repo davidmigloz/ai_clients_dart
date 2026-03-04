@@ -244,7 +244,7 @@ class DocumentLibraryTool extends Tool {
           listsEqual(libraryIds, other.libraryIds);
 
   @override
-  int get hashCode => Object.hashAll(libraryIds ?? []);
+  int get hashCode => listHash(libraryIds);
 
   @override
   String toString() => 'DocumentLibraryTool(libraryIds: $libraryIds)';
