@@ -52,11 +52,8 @@ class CollectionConfiguration {
           mapsEqual(embeddingFunction, other.embeddingFunction);
 
   @override
-  int get hashCode => Object.hash(
-    mapHashCode(hnsw),
-    mapHashCode(spann),
-    mapHashCode(embeddingFunction),
-  );
+  int get hashCode =>
+      Object.hash(mapHash(hnsw), mapHash(spann), mapHash(embeddingFunction));
 
   @override
   String toString() =>

@@ -330,13 +330,13 @@ class AppendConversationRequest {
       identical(this, other) ||
       other is AppendConversationRequest &&
           runtimeType == other.runtimeType &&
-          listEquals(inputs, other.inputs) &&
+          listsEqual(inputs, other.inputs) &&
           store == other.store &&
           maxTokens == other.maxTokens &&
-          listEquals(stop, other.stop) &&
+          listsEqual(stop, other.stop) &&
           temperature == other.temperature &&
           topP == other.topP &&
-          listEquals(tools, other.tools) &&
+          listsEqual(tools, other.tools) &&
           toolChoice == other.toolChoice &&
           responseFormat == other.responseFormat &&
           randomSeed == other.randomSeed;

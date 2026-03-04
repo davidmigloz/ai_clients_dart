@@ -59,7 +59,7 @@ class CreateCollectionRequest {
           getOrCreate == other.getOrCreate;
 
   @override
-  int get hashCode => Object.hash(name, mapHashCode(metadata), getOrCreate);
+  int get hashCode => Object.hash(name, mapHash(metadata), getOrCreate);
 
   @override
   String toString() =>

@@ -60,9 +60,9 @@ class CollectionSchema {
 
   @override
   int get hashCode => Object.hash(
-    mapHashCode(defaults),
-    mapHashCode(keys),
-    mapHashCode(cmek),
+    mapHash(defaults),
+    mapHash(keys),
+    mapHash(cmek),
     sourceAttachedFunctionId,
   );
 

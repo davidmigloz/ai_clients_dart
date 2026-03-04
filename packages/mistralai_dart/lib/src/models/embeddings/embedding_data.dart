@@ -48,7 +48,7 @@ class EmbeddingData {
           runtimeType == other.runtimeType &&
           object == other.object &&
           index == other.index &&
-          listEquals(embedding, other.embedding);
+          listsEqual(embedding, other.embedding);
 
   @override
   int get hashCode => Object.hash(object, index, embedding);

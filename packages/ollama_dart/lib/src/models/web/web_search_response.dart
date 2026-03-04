@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 import 'web_search_result.dart';
 
 /// Response from web search.
@@ -39,21 +40,10 @@ class WebSearchResponse {
       identical(this, other) ||
       other is WebSearchResponse &&
           runtimeType == other.runtimeType &&
-          _listsEqual(results, other.results);
-
-  static bool _listsEqual<T>(List<T>? a, List<T>? b) {
-    if (identical(a, b)) return true;
-    if (a == null || b == null) return a == b;
-    if (a.length != b.length) return false;
-    for (var i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
-  }
+          listsEqual(results, other.results);
 
   @override
-  int get hashCode =>
-      results != null ? Object.hashAll(results!) : results.hashCode;
+  int get hashCode => listHash(results);
 
   @override
   String toString() =>

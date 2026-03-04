@@ -59,7 +59,7 @@ class SearchFilter {
   @override
   int get hashCode => Object.hash(
     queryIds == null ? null : Object.hashAll(queryIds!),
-    mapHashCode(whereClause),
+    mapHash(whereClause),
   );
 
   @override
@@ -120,7 +120,7 @@ class SearchGroupBy {
 
   @override
   int get hashCode => Object.hash(
-    mapHashCode(aggregate),
+    mapHash(aggregate),
     keys == null ? null : Object.hashAll(keys!),
   );
 
@@ -327,7 +327,7 @@ class SearchPayload {
 
   @override
   int get hashCode =>
-      Object.hash(filter, groupBy, limit, mapHashCode(rank), select);
+      Object.hash(filter, groupBy, limit, mapHash(rank), select);
 
   @override
   String toString() =>

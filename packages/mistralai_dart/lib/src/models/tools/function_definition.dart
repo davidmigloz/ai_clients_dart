@@ -43,7 +43,7 @@ class FunctionDefinition {
           runtimeType == other.runtimeType &&
           name == other.name &&
           description == other.description &&
-          mapEquals(parameters, other.parameters);
+          mapsEqual(parameters, other.parameters);
 
   @override
   int get hashCode => Object.hash(name, description, parameters);

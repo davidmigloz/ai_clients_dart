@@ -98,7 +98,7 @@ class DeltaContent {
           runtimeType == other.runtimeType &&
           role == other.role &&
           content == other.content &&
-          listEquals(toolCalls, other.toolCalls);
+          listsEqual(toolCalls, other.toolCalls);
 
   @override
   int get hashCode =>

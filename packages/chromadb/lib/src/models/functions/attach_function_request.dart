@@ -70,7 +70,7 @@ class AttachFunctionRequest {
 
   @override
   int get hashCode =>
-      Object.hash(name, functionId, outputCollection, mapHashCode(params));
+      Object.hash(name, functionId, outputCollection, mapHash(params));
 
   @override
   String toString() =>

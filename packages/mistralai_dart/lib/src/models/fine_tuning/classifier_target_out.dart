@@ -51,7 +51,7 @@ class ClassifierTargetOut {
       other is ClassifierTargetOut &&
           runtimeType == other.runtimeType &&
           name == other.name &&
-          listEquals(labels, other.labels) &&
+          listsEqual(labels, other.labels) &&
           weight == other.weight &&
           lossFunction == other.lossFunction;
 

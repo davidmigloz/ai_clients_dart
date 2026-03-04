@@ -202,7 +202,7 @@ class LibraryList {
       other is LibraryList &&
           runtimeType == other.runtimeType &&
           object == other.object &&
-          listEquals(data, other.data) &&
+          listsEqual(data, other.data) &&
           total == other.total &&
           hasMore == other.hasMore;
 

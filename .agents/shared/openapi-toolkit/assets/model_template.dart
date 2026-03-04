@@ -97,7 +97,7 @@ class {ClassName} {
   int get hashCode => Object.hash(
         name,
         displayName,
-        tags != null ? Object.hashAll(tags!) : null,
+        listHash(tags),
         createTime,
         updateTime,
       );

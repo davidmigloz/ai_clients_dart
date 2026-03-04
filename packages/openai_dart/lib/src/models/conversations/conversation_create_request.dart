@@ -69,7 +69,7 @@ class ConversationCreateRequest {
   @override
   int get hashCode => Object.hash(
     items != null ? Object.hashAll(items!) : null,
-    mapHashCode(metadata),
+    mapHash(metadata),
   );
 
   @override

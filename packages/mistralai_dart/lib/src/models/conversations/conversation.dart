@@ -187,7 +187,7 @@ class ConversationList {
       other is ConversationList &&
           runtimeType == other.runtimeType &&
           object == other.object &&
-          listEquals(data, other.data) &&
+          listsEqual(data, other.data) &&
           total == other.total &&
           hasMore == other.hasMore;
 

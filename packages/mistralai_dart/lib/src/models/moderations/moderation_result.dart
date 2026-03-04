@@ -45,7 +45,7 @@ class ModerationResult {
       identical(this, other) ||
       other is ModerationResult &&
           runtimeType == other.runtimeType &&
-          mapEquals(categories, other.categories) &&
+          mapsEqual(categories, other.categories) &&
           categoryScores == other.categoryScores;
 
   @override

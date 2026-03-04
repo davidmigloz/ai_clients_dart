@@ -47,7 +47,7 @@ class UpdateCollectionRequest {
           mapsEqual(newMetadata, other.newMetadata);
 
   @override
-  int get hashCode => Object.hash(newName, mapHashCode(newMetadata));
+  int get hashCode => Object.hash(newName, mapHash(newMetadata));
 
   @override
   String toString() =>

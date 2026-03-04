@@ -259,8 +259,8 @@ class ChatCompletionRequest {
     if (runtimeType != other.runtimeType) return false;
 
     // Compare lists with deep equality
-    if (!listEquals(messages, other.messages)) return false;
-    if (!listEquals(tools, other.tools)) return false;
+    if (!listsEqual(messages, other.messages)) return false;
+    if (!listsEqual(tools, other.tools)) return false;
 
     return model == other.model &&
         temperature == other.temperature &&
@@ -276,7 +276,7 @@ class ChatCompletionRequest {
         n == other.n &&
         parallelToolCalls == other.parallelToolCalls &&
         safePrompt == other.safePrompt &&
-        mapEquals(metadata, other.metadata) &&
+        mapsEqual(metadata, other.metadata) &&
         prediction == other.prediction &&
         promptMode == other.promptMode;
   }

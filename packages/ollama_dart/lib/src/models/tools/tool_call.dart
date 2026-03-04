@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 
 /// A function call requested by the model.
 @immutable
@@ -60,10 +61,10 @@ class ToolCallFunction {
           runtimeType == other.runtimeType &&
           name == other.name &&
           description == other.description &&
-          _mapsEqual(arguments, other.arguments);
+          mapsEqual(arguments, other.arguments);
 
   @override
-  int get hashCode => Object.hash(name, description, _mapHashCode(arguments));
+  int get hashCode => Object.hash(name, description, mapHash(arguments));
 
   @override
   String toString() =>
@@ -115,21 +116,4 @@ class ToolCall {
 
   @override
   String toString() => 'ToolCall(function: $function)';
-}
-
-int _mapHashCode(Map<String, dynamic>? map) {
-  if (map == null) return null.hashCode;
-  return Object.hashAllUnordered(
-    map.entries.map((e) => Object.hash(e.key, e.value)),
-  );
-}
-
-bool _mapsEqual(Map<String, dynamic>? a, Map<String, dynamic>? b) {
-  if (a == null && b == null) return true;
-  if (a == null || b == null) return false;
-  if (a.length != b.length) return false;
-  for (final key in a.keys) {
-    if (!b.containsKey(key) || a[key] != b[key]) return false;
-  }
-  return true;
 }

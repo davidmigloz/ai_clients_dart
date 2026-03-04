@@ -166,7 +166,7 @@ class Collection {
   int get hashCode => Object.hash(
     id,
     name,
-    mapHashCode(metadata),
+    mapHash(metadata),
     tenant,
     database,
     logPosition,

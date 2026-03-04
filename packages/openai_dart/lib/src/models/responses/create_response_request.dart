@@ -436,7 +436,7 @@ class CreateResponseRequest {
     if (contextManagement != null) Object.hashAll(contextManagement!) else null,
     parallelToolCalls,
     serviceTier,
-    mapHashCode(metadata),
+    mapHash(metadata),
     if (include != null) Object.hashAll(include!) else null,
     store,
     background,

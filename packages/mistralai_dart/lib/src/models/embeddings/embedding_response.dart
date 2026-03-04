@@ -64,7 +64,7 @@ class EmbeddingResponse {
           id == other.id &&
           object == other.object &&
           model == other.model &&
-          listEquals(data, other.data) &&
+          listsEqual(data, other.data) &&
           usage == other.usage;
 
   @override

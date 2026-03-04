@@ -54,7 +54,7 @@ class ModerationRequest {
       other is ModerationRequest &&
           runtimeType == other.runtimeType &&
           model == other.model &&
-          listEquals(input, other.input);
+          listsEqual(input, other.input);
 
   @override
   int get hashCode => Object.hash(model, Object.hashAll(input));

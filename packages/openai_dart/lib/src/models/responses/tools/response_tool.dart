@@ -180,7 +180,7 @@ class FunctionTool extends ResponseTool {
 
   @override
   int get hashCode =>
-      Object.hash(name, description, mapHashCode(parameters), strict);
+      Object.hash(name, description, mapHash(parameters), strict);
 
   @override
   String toString() =>

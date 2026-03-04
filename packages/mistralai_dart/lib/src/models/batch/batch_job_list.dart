@@ -42,7 +42,7 @@ class BatchJobList {
       other is BatchJobList &&
           runtimeType == other.runtimeType &&
           object == other.object &&
-          listEquals(data, other.data) &&
+          listsEqual(data, other.data) &&
           total == other.total;
 
   @override

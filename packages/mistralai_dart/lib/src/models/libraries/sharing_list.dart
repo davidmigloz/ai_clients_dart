@@ -29,7 +29,7 @@ class SharingList {
       identical(this, other) ||
       other is SharingList &&
           runtimeType == other.runtimeType &&
-          listEquals(data, other.data);
+          listsEqual(data, other.data);
 
   @override
   int get hashCode => Object.hashAll(data);

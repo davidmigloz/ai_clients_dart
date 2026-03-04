@@ -280,7 +280,7 @@ class Response {
     instructions,
     previousResponseId,
     serviceTier,
-    mapHashCode(metadata),
+    mapHash(metadata),
     maxOutputTokens,
     temperature,
     topP,

@@ -73,7 +73,7 @@ class ChatCompletionStreamResponse {
           object == other.object &&
           created == other.created &&
           model == other.model &&
-          listEquals(choices, other.choices) &&
+          listsEqual(choices, other.choices) &&
           usage == other.usage;
 
   @override

@@ -153,7 +153,7 @@ class ConversationEntriesResponse {
       other is ConversationEntriesResponse &&
           runtimeType == other.runtimeType &&
           object == other.object &&
-          listEquals(data, other.data);
+          listsEqual(data, other.data);
 
   @override
   int get hashCode => Object.hash(object, Object.hashAll(data));

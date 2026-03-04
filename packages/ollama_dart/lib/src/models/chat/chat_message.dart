@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 import '../tools/tool_call.dart';
 
 /// Message role.
@@ -140,16 +141,12 @@ class ChatMessage {
           runtimeType == other.runtimeType &&
           role == other.role &&
           content == other.content &&
-          _listsEqual(images, other.images) &&
-          _listsEqual(toolCalls, other.toolCalls);
+          listsEqual(images, other.images) &&
+          listsEqual(toolCalls, other.toolCalls);
 
   @override
-  int get hashCode => Object.hash(
-    role,
-    content,
-    images != null ? Object.hashAll(images!) : null,
-    toolCalls != null ? Object.hashAll(toolCalls!) : null,
-  );
+  int get hashCode =>
+      Object.hash(role, content, listHash(images), listHash(toolCalls));
 
   @override
   String toString() =>
@@ -158,14 +155,4 @@ class ChatMessage {
       'content: $content, '
       'images: $images, '
       'toolCalls: $toolCalls)';
-}
-
-bool _listsEqual<T>(List<T>? a, List<T>? b) {
-  if (a == null && b == null) return true;
-  if (a == null || b == null) return false;
-  if (a.length != b.length) return false;
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] != b[i]) return false;
-  }
-  return true;
 }

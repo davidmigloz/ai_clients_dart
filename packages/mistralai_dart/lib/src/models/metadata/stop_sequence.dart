@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../../utils/equality_helpers.dart';
+
 /// Stop sequences for completions.
 ///
 /// Can be a single string or a list of strings where the
@@ -82,19 +84,11 @@ class StopSequenceMultiple extends StopSequence {
       identical(this, other) ||
       other is StopSequenceMultiple &&
           runtimeType == other.runtimeType &&
-          _listEquals(stops, other.stops);
+          listsEqual(stops, other.stops);
 
   @override
   int get hashCode => Object.hashAll(stops);
 
   @override
   String toString() => 'StopSequence.multiple($stops)';
-
-  bool _listEquals(List<String> a, List<String> b) {
-    if (a.length != b.length) return false;
-    for (var i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
-  }
 }

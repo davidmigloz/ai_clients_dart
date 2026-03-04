@@ -57,7 +57,7 @@ class ModerationResponse {
           runtimeType == other.runtimeType &&
           id == other.id &&
           model == other.model &&
-          listEquals(results, other.results);
+          listsEqual(results, other.results);
 
   @override
   int get hashCode => Object.hash(id, model, Object.hashAll(results));
