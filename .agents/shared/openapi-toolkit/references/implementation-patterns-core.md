@@ -56,6 +56,27 @@ class ModelName {
 }
 ```
 
+### HashCode with List Fields
+
+When a model has `List` fields, use `Object.hashAll()` instead of passing the list directly to `Object.hash()`. `Object.hash()` uses identity-based hashing for objects, so two distinct lists with the same contents would produce different hash codes.
+
+```dart
+// For nullable list fields, guard with a null check:
+@override
+bool operator ==(Object other) =>
+    identical(this, other) ||
+    other is ModelName &&
+        runtimeType == other.runtimeType &&
+        fieldName == other.fieldName &&
+        const ListEquality<String>().equals(tags, other.tags);
+
+@override
+int get hashCode => Object.hash(
+      fieldName,
+      tags != null ? Object.hashAll(tags!) : null,
+    );
+```
+
 ### Type Mappings
 
 | OpenAPI Type | Dart Type |

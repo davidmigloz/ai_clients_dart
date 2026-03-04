@@ -27,6 +27,8 @@ For each new schema, verify the model file has:
 - [ ] `toJson` includes all fields with null checks
 - [ ] `copyWith` uses sentinel pattern for all fields
 - [ ] `toString` includes all fields
+- [ ] `hashCode` uses `Object.hashAll()` for list fields (never `Object.hash(list)`)
+- [ ] `operator==` and `hashCode` are consistent (both content-based for lists)
 - [ ] Exported in barrel file
 - [ ] Unit test with round-trip serialization test
 

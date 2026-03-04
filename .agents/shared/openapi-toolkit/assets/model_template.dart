@@ -9,6 +9,7 @@
 // See references/implementation-patterns.md for detailed conventions
 
 import '../copy_with_sentinel.dart';
+import '../equality_helpers.dart';
 
 /// {description}.
 class {ClassName} {
@@ -17,6 +18,9 @@ class {ClassName} {
 
   /// Display name.
   final String? displayName;
+
+  /// Tags associated with this resource.
+  final List<String>? tags;
 
   /// Creation timestamp (ISO 8601).
   final String? createTime;
@@ -28,6 +32,7 @@ class {ClassName} {
   const {ClassName}({
     this.name,
     this.displayName,
+    this.tags,
     this.createTime,
     this.updateTime,
   });
@@ -36,6 +41,7 @@ class {ClassName} {
   factory {ClassName}.fromJson(Map<String, dynamic> json) => {ClassName}(
         name: json['name'] as String?,
         displayName: json['displayName'] as String?,
+        tags: (json['tags'] as List?)?.cast<String>(),
         createTime: json['createTime'] as String?,
         updateTime: json['updateTime'] as String?,
       );
@@ -44,6 +50,7 @@ class {ClassName} {
   Map<String, dynamic> toJson() => {
         if (name != null) 'name': name,
         if (displayName != null) 'displayName': displayName,
+        if (tags != null) 'tags': tags,
         if (createTime != null) 'createTime': createTime,
         if (updateTime != null) 'updateTime': updateTime,
       };
@@ -52,6 +59,7 @@ class {ClassName} {
   {ClassName} copyWith({
     Object? name = unsetCopyWithValue,
     Object? displayName = unsetCopyWithValue,
+    Object? tags = unsetCopyWithValue,
     Object? createTime = unsetCopyWithValue,
     Object? updateTime = unsetCopyWithValue,
   }) {
@@ -61,6 +69,8 @@ class {ClassName} {
           displayName == unsetCopyWithValue
               ? this.displayName
               : displayName as String?,
+      tags:
+          tags == unsetCopyWithValue ? this.tags : tags as List<String>?,
       createTime:
           createTime == unsetCopyWithValue
               ? this.createTime
@@ -79,16 +89,24 @@ class {ClassName} {
           runtimeType == other.runtimeType &&
           name == other.name &&
           displayName == other.displayName &&
+          listsEqual(tags, other.tags) &&
           createTime == other.createTime &&
           updateTime == other.updateTime;
 
   @override
-  int get hashCode => Object.hash(name, displayName, createTime, updateTime);
+  int get hashCode => Object.hash(
+        name,
+        displayName,
+        tags != null ? Object.hashAll(tags!) : null,
+        createTime,
+        updateTime,
+      );
 
   @override
   String toString() => '{ClassName}('
       'name: $name, '
       'displayName: $displayName, '
+      'tags: $tags, '
       'createTime: $createTime, '
       'updateTime: $updateTime)';
 }

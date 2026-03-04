@@ -277,7 +277,15 @@ int get hashCode => Object.hash(
   Object.hashAll(listField),
   field2,
 );
+
+// Nullable lists
+int get hashCode => Object.hash(
+  field1,
+  listField != null ? Object.hashAll(listField!) : null,
+);
 ```
+
+> **Warning:** Never pass a `List` directly to `Object.hash()` — it uses identity-based hashing. Always wrap with `Object.hashAll()`. Two lists with the same contents will produce different `Object.hash()` values because they are different object instances. This breaks the `operator==`/`hashCode` contract when `operator==` uses content-based list comparison.
 
 **Deep equality for nested structures** (maps/lists with arbitrary nesting):
 

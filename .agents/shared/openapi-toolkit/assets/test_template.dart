@@ -136,13 +136,25 @@ void main() {
 
         expect(a, isNot(b));
       });
+
+      test('instances with equal list contents are equal', () {
+        final a = {ClassName}(
+          name: 'resources/123',
+          tags: List<String>.from(['alpha', 'beta']),
+        );
+        final b = {ClassName}(
+          name: 'resources/123',
+          tags: List<String>.from(['alpha', 'beta']),
+        );
+
+        expect(identical(a.tags, b.tags), isFalse);
+        expect(a, b);
+        expect(a.hashCode, b.hashCode);
+      });
     });
 
     test('toString includes all fields', () {
-      const instance = {ClassName}(
-        name: 'resources/123',
-        displayName: 'Test',
-      );
+      const instance = {ClassName}(name: 'resources/123', displayName: 'Test');
 
       final str = instance.toString();
 
