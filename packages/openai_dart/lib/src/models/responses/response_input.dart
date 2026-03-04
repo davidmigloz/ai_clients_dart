@@ -154,7 +154,7 @@ class ResponseInputRawJson extends ResponseInput {
   }
 
   @override
-  int get hashCode => Object.hashAll(items);
+  int get hashCode => Object.hashAll(items.map(mapHash));
 
   @override
   String toString() => 'ResponseInputRawJson(${items.length} items)';

@@ -70,7 +70,7 @@ class ErrorPayload {
           mapsEqual(headers, other.headers);
 
   @override
-  int get hashCode => Object.hash(type, code, message, param, headers);
+  int get hashCode => Object.hash(type, code, message, param, mapHash(headers));
 
   @override
   String toString() =>

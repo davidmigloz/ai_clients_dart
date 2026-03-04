@@ -163,7 +163,7 @@ class JsonSchemaFormat extends TextFormat {
           strict == other.strict;
 
   @override
-  int get hashCode => Object.hash(name, description, schema, strict);
+  int get hashCode => Object.hash(name, description, mapHash(schema), strict);
 
   @override
   String toString() =>

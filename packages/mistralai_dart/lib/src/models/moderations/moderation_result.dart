@@ -49,7 +49,7 @@ class ModerationResult {
           categoryScores == other.categoryScores;
 
   @override
-  int get hashCode => Object.hash(categories, categoryScores);
+  int get hashCode => Object.hash(mapHash(categories), categoryScores);
 
   @override
   String toString() =>

@@ -418,7 +418,7 @@ class ResponseResource {
     store,
     background,
     serviceTier,
-    metadata,
+    mapHash(metadata),
     safetyIdentifier,
     promptCacheKey,
   ]);
