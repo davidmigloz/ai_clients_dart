@@ -144,7 +144,12 @@ class ChatMessage {
           _listsEqual(toolCalls, other.toolCalls);
 
   @override
-  int get hashCode => Object.hash(role, content, images, toolCalls);
+  int get hashCode => Object.hash(
+    role,
+    content,
+    images != null ? Object.hashAll(images!) : null,
+    toolCalls != null ? Object.hashAll(toolCalls!) : null,
+  );
 
   @override
   String toString() =>

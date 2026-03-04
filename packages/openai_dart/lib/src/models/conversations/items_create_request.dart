@@ -50,7 +50,7 @@ class ItemsCreateRequest {
           listsEqual(items, other.items);
 
   @override
-  int get hashCode => items.hashCode;
+  int get hashCode => Object.hashAll(items);
 
   @override
   String toString() => 'ItemsCreateRequest(items: ${items.length} items)';

@@ -116,7 +116,11 @@ class OutputTextContent extends OutputContent {
           listsEqual(logprobs, other.logprobs);
 
   @override
-  int get hashCode => Object.hash(text, annotations, logprobs);
+  int get hashCode => Object.hash(
+    text,
+    annotations != null ? Object.hashAll(annotations!) : null,
+    logprobs != null ? Object.hashAll(logprobs!) : null,
+  );
 
   @override
   String toString() =>

@@ -134,7 +134,7 @@ class CompletionRequest {
     model,
     prompt,
     maxTokensToSample,
-    stopSequences,
+    stopSequences != null ? Object.hashAll(stopSequences!) : null,
     stream,
     temperature,
     topP,

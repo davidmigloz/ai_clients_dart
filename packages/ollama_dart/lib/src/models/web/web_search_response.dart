@@ -52,7 +52,8 @@ class WebSearchResponse {
   }
 
   @override
-  int get hashCode => results.hashCode;
+  int get hashCode =>
+      results != null ? Object.hashAll(results!) : results.hashCode;
 
   @override
   String toString() =>

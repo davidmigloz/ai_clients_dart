@@ -160,7 +160,7 @@ class ModelList {
           listsEqual(data, other.data);
 
   @override
-  int get hashCode => Object.hash(object, data.length);
+  int get hashCode => Object.hash(object, Object.hashAll(data));
 
   @override
   String toString() => 'ModelList(${data.length} models)';

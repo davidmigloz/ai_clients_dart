@@ -75,7 +75,8 @@ class ResponseCompaction {
           usage == other.usage;
 
   @override
-  int get hashCode => Object.hash(id, object, output, createdAt, usage);
+  int get hashCode =>
+      Object.hash(id, object, Object.hashAll(output), createdAt, usage);
 
   @override
   String toString() =>

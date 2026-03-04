@@ -86,7 +86,8 @@ class ConversationItemList {
           lastId == other.lastId;
 
   @override
-  int get hashCode => Object.hash(data, object, hasMore, firstId, lastId);
+  int get hashCode =>
+      Object.hash(Object.hashAll(data), object, hasMore, firstId, lastId);
 
   @override
   String toString() =>

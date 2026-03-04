@@ -492,8 +492,12 @@ class FileSearchTool extends ResponseTool {
           filters == other.filters;
 
   @override
-  int get hashCode =>
-      Object.hash(vectorStoreIds, maxNumResults, rankingOptions, filters);
+  int get hashCode => Object.hash(
+    vectorStoreIds != null ? Object.hashAll(vectorStoreIds!) : null,
+    maxNumResults,
+    rankingOptions,
+    filters,
+  );
 
   @override
   String toString() =>
@@ -791,8 +795,12 @@ class McpTool extends ResponseTool {
           requireApproval == other.requireApproval;
 
   @override
-  int get hashCode =>
-      Object.hash(serverLabel, serverUrl, allowedTools, requireApproval);
+  int get hashCode => Object.hash(
+    serverLabel,
+    serverUrl,
+    allowedTools != null ? Object.hashAll(allowedTools!) : null,
+    requireApproval,
+  );
 
   @override
   String toString() =>

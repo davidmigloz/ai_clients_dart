@@ -113,7 +113,7 @@ class ConversationMessageItem extends ConversationItem {
           status == other.status;
 
   @override
-  int get hashCode => Object.hash(id, role, content, status);
+  int get hashCode => Object.hash(id, role, Object.hashAll(content), status);
 
   @override
   String toString() =>
@@ -321,8 +321,13 @@ class ConversationReasoningItem extends ConversationItem {
           status == other.status;
 
   @override
-  int get hashCode =>
-      Object.hash(id, content, summary, encryptedContent, status);
+  int get hashCode => Object.hash(
+    id,
+    content != null ? Object.hashAll(content!) : null,
+    Object.hashAll(summary),
+    encryptedContent,
+    status,
+  );
 
   @override
   String toString() => 'ConversationReasoningItem(id: $id, summary: $summary)';

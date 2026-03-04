@@ -67,7 +67,8 @@ class ConversationCreateRequest {
           mapsEqual(metadata, other.metadata);
 
   @override
-  int get hashCode => Object.hash(items, metadata);
+  int get hashCode =>
+      Object.hash(items != null ? Object.hashAll(items!) : null, metadata);
 
   @override
   String toString() =>

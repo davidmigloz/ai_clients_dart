@@ -115,7 +115,7 @@ class MessageOutputItem extends OutputItem {
           status == other.status;
 
   @override
-  int get hashCode => Object.hash(id, role, content, status);
+  int get hashCode => Object.hash(id, role, Object.hashAll(content), status);
 
   @override
   String toString() =>
@@ -274,7 +274,8 @@ class ReasoningItem extends OutputItem {
           encryptedContent == other.encryptedContent;
 
   @override
-  int get hashCode => Object.hash(id, summary, encryptedContent);
+  int get hashCode =>
+      Object.hash(id, Object.hashAll(summary), encryptedContent);
 
   @override
   String toString() =>
@@ -467,7 +468,12 @@ class FileSearchCallOutputItem extends OutputItem {
           status == other.status;
 
   @override
-  int get hashCode => Object.hash(id, queries, results, status);
+  int get hashCode => Object.hash(
+    id,
+    queries != null ? Object.hashAll(queries!) : null,
+    results != null ? Object.hashAll(results!) : null,
+    status,
+  );
 
   @override
   String toString() =>
@@ -625,7 +631,13 @@ class CodeInterpreterCallOutputItem extends OutputItem {
           status == other.status;
 
   @override
-  int get hashCode => Object.hash(id, code, language, outputs, status);
+  int get hashCode => Object.hash(
+    id,
+    code,
+    language,
+    outputs != null ? Object.hashAll(outputs!) : null,
+    status,
+  );
 
   @override
   String toString() =>
@@ -828,8 +840,13 @@ class LocalShellExecAction {
           user == other.user;
 
   @override
-  int get hashCode =>
-      Object.hash(command, env, timeoutMs, workingDirectory, user);
+  int get hashCode => Object.hash(
+    Object.hashAll(command),
+    env,
+    timeoutMs,
+    workingDirectory,
+    user,
+  );
 
   @override
   String toString() =>
@@ -955,7 +972,8 @@ class ShellCallAction {
           maxOutputLength == other.maxOutputLength;
 
   @override
-  int get hashCode => Object.hash(commands, timeoutMs, maxOutputLength);
+  int get hashCode =>
+      Object.hash(Object.hashAll(commands), timeoutMs, maxOutputLength);
 
   @override
   String toString() =>
@@ -1112,7 +1130,8 @@ class ShellCallOutputResultItem extends OutputItem {
           maxOutputLength == other.maxOutputLength;
 
   @override
-  int get hashCode => Object.hash(id, callId, status, output, maxOutputLength);
+  int get hashCode =>
+      Object.hash(id, callId, status, Object.hashAll(output), maxOutputLength);
 
   @override
   String toString() =>

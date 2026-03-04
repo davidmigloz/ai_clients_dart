@@ -57,7 +57,12 @@ class LogProb {
           listsEqual(topLogprobs, other.topLogprobs);
 
   @override
-  int get hashCode => Object.hash(token, logprob, bytes, topLogprobs);
+  int get hashCode => Object.hash(
+    token,
+    logprob,
+    bytes != null ? Object.hashAll(bytes!) : null,
+    topLogprobs != null ? Object.hashAll(topLogprobs!) : null,
+  );
 
   @override
   String toString() =>
@@ -105,7 +110,11 @@ class TopLogProb {
           listsEqual(bytes, other.bytes);
 
   @override
-  int get hashCode => Object.hash(token, logprob, bytes);
+  int get hashCode => Object.hash(
+    token,
+    logprob,
+    bytes != null ? Object.hashAll(bytes!) : null,
+  );
 
   @override
   String toString() =>

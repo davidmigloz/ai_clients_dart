@@ -224,7 +224,8 @@ class SkillList {
           hasMore == other.hasMore;
 
   @override
-  int get hashCode => Object.hash(object, data, firstId, lastId, hasMore);
+  int get hashCode =>
+      Object.hash(object, Object.hashAll(data), firstId, lastId, hasMore);
 }
 
 /// Paginated list of [SkillVersion] resources.
@@ -288,7 +289,8 @@ class SkillVersionList {
           hasMore == other.hasMore;
 
   @override
-  int get hashCode => Object.hash(object, data, firstId, lastId, hasMore);
+  int get hashCode =>
+      Object.hash(object, Object.hashAll(data), firstId, lastId, hasMore);
 }
 
 /// Delete response for a skill.
