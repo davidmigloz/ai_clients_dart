@@ -55,6 +55,8 @@ mcp__dart__pub(command: "upgrade")   # Upgrade dependencies
 mcp__dart__pub(command: "outdated")  # Check outdated dependencies
 ```
 
+**IMPORTANT**: Never run integration tests (which hit live APIs) unless explicitly requested by the user — they are expensive. Only run unit tests by default by targeting `test/unit/` directories (e.g., `mcp__dart__run_tests` with paths `["packages/foo/test/unit"]`).
+
 **Using CLI (Fallback):**
 
 ```bash
