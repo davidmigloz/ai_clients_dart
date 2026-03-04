@@ -299,7 +299,7 @@ class ChatCompletionRequest {
     n,
     parallelToolCalls,
     safePrompt,
-    metadata,
+    mapHash(metadata),
     prediction,
     promptMode,
   );
