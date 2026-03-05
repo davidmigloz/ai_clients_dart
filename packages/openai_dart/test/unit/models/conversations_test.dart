@@ -794,12 +794,29 @@ void main() {
       expect(restored, equals(tso));
     });
 
-    test('equality ignores tools list (id/callId/execution/status compared)', () {
-      // Two instances with different tools list objects but same id/callId/execution/status
-      // must be equal (tools is a weakly-typed blob omitted from ==).
+    test('equality uses deep comparison of tools list', () {
+      final json = {
+        'type': 'tool_search_output',
+        'id': 'tso_3',
+        'call_id': 'call_3',
+        'execution': 'server',
+        'tools': [
+          {'type': 'function', 'name': 'func1'},
+        ],
+        'status': 'completed',
+      };
+      final a =
+          ConversationItem.fromJson(json) as ConversationToolSearchOutputItem;
+      final b =
+          ConversationItem.fromJson(json) as ConversationToolSearchOutputItem;
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+    });
+
+    test('instances with different tools are not equal', () {
       const a = ConversationToolSearchOutputItem(
-        id: 'tso_3',
-        callId: 'call_3',
+        id: 'tso_4',
+        callId: 'call_4',
         execution: 'server',
         tools: [
           {'type': 'function', 'name': 'func1'},
@@ -807,16 +824,15 @@ void main() {
         status: ItemStatus.completed,
       );
       const b = ConversationToolSearchOutputItem(
-        id: 'tso_3',
-        callId: 'call_3',
+        id: 'tso_4',
+        callId: 'call_4',
         execution: 'server',
         tools: [
-          {'type': 'function', 'name': 'func1'},
+          {'type': 'function', 'name': 'func2'},
         ],
         status: ItemStatus.completed,
       );
-      expect(a, equals(b));
-      expect(a.hashCode, equals(b.hashCode));
+      expect(a, isNot(equals(b)));
     });
   });
 }

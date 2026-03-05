@@ -1225,10 +1225,12 @@ class ConversationToolSearchOutputItem extends ConversationItem {
           id == other.id &&
           callId == other.callId &&
           execution == other.execution &&
+          listOfMapsDeepEqual(tools, other.tools) &&
           status == other.status;
 
   @override
-  int get hashCode => Object.hash(id, callId, execution, status);
+  int get hashCode =>
+      Object.hash(id, callId, execution, listOfMapsHashCode(tools), status);
 
   @override
   String toString() =>
