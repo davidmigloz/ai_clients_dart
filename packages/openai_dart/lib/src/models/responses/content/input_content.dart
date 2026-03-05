@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../../chat/content_part.dart' show ImageDetail;
+import '../config/file_input_detail.dart';
 
 /// Input content for messages.
 ///
@@ -41,21 +42,21 @@ sealed class InputContent {
   const factory InputContent.fileUrl(
     String url, {
     String? filename,
-    String? detail,
+    FileInputDetail? detail,
   }) = InputFileContent.url;
 
   /// Creates an [InputFileContent] from a file ID.
   const factory InputContent.fileId(
     String id, {
     String? filename,
-    String? detail,
+    FileInputDetail? detail,
   }) = InputFileContent.file;
 
   /// Creates an [InputFileContent] from base64-encoded data.
   const factory InputContent.fileData(
     String data, {
     String? filename,
-    String? detail,
+    FileInputDetail? detail,
   }) = InputFileContent.data;
 
   /// Creates an [InputContent] from JSON.
@@ -226,8 +227,8 @@ class InputFileContent extends InputContent {
   /// The filename.
   final String? filename;
 
-  /// The detail level for file processing (e.g., 'high', 'low').
-  final String? detail;
+  /// The detail level for file processing.
+  final FileInputDetail? detail;
 
   /// Creates an [InputFileContent].
   const InputFileContent({
@@ -263,7 +264,9 @@ class InputFileContent extends InputContent {
       fileId: json['file_id'] as String?,
       fileData: json['file_data'] as String?,
       filename: json['filename'] as String?,
-      detail: json['detail'] as String?,
+      detail: json['detail'] != null
+          ? FileInputDetail.fromJson(json['detail'] as String)
+          : null,
     );
   }
 
@@ -274,7 +277,7 @@ class InputFileContent extends InputContent {
     if (fileId != null) 'file_id': fileId,
     if (fileData != null) 'file_data': fileData,
     if (filename != null) 'filename': filename,
-    if (detail != null) 'detail': detail,
+    if (detail != null) 'detail': detail!.toJson(),
   };
 
   @override

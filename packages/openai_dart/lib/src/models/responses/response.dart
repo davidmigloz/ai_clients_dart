@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import 'common/equality_helpers.dart';
+import 'config/prompt_cache_retention.dart';
 import 'config/response_status.dart';
 import 'config/service_tier.dart';
 import 'content/output_content.dart';
@@ -72,9 +73,7 @@ class Response {
   final String? promptCacheKey;
 
   /// The prompt cache retention policy.
-  ///
-  /// Can be 'in-memory' or '24h'.
-  final String? promptCacheRetention;
+  final PromptCacheRetention? promptCacheRetention;
 
   /// Creates a [Response].
   const Response({
@@ -134,7 +133,11 @@ class Response {
       background: json['background'] as bool?,
       parallelToolCalls: json['parallel_tool_calls'] as bool?,
       promptCacheKey: json['prompt_cache_key'] as String?,
-      promptCacheRetention: json['prompt_cache_retention'] as String?,
+      promptCacheRetention: json['prompt_cache_retention'] != null
+          ? PromptCacheRetention.fromJson(
+              json['prompt_cache_retention'] as String,
+            )
+          : null,
     );
   }
 
@@ -161,7 +164,7 @@ class Response {
     if (parallelToolCalls != null) 'parallel_tool_calls': parallelToolCalls,
     if (promptCacheKey != null) 'prompt_cache_key': promptCacheKey,
     if (promptCacheRetention != null)
-      'prompt_cache_retention': promptCacheRetention,
+      'prompt_cache_retention': promptCacheRetention!.toJson(),
   };
 
   // ============================================================

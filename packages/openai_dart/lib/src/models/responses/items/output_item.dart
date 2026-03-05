@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:meta/meta.dart';
 
 import '../common/equality_helpers.dart';
+import '../config/function_call_output_status.dart';
 import '../config/item_status.dart';
 import '../config/message_phase.dart';
 import '../config/message_role.dart';
@@ -1561,7 +1562,7 @@ class ToolSearchOutputItem extends OutputItem {
   final List<ResponseTool> tools;
 
   /// Item status.
-  final ItemStatus? status;
+  final FunctionCallOutputStatus? status;
 
   /// Who created this item.
   final String? createdBy;
@@ -1586,7 +1587,7 @@ class ToolSearchOutputItem extends OutputItem {
           .map((e) => ResponseTool.fromJson(e as Map<String, dynamic>))
           .toList(),
       status: json['status'] != null
-          ? ItemStatus.fromJson(json['status'] as String)
+          ? FunctionCallOutputStatus.fromJson(json['status'] as String)
           : null,
       createdBy: json['created_by'] as String?,
     );

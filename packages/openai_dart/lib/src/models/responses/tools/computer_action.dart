@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/equality_helpers.dart';
+import '../config/click_button.dart';
 
 /// An action performed by the computer use tool.
 ///
@@ -44,7 +45,7 @@ sealed class ComputerAction {
 @immutable
 class ClickAction extends ComputerAction {
   /// The mouse button to click.
-  final String button;
+  final ClickButton button;
 
   /// The x coordinate.
   final int x;
@@ -58,7 +59,7 @@ class ClickAction extends ComputerAction {
   /// Creates a [ClickAction] from JSON.
   factory ClickAction.fromJson(Map<String, dynamic> json) {
     return ClickAction(
-      button: json['button'] as String,
+      button: ClickButton.fromJson(json['button'] as String),
       x: json['x'] as int,
       y: json['y'] as int,
     );
@@ -67,7 +68,7 @@ class ClickAction extends ComputerAction {
   @override
   Map<String, dynamic> toJson() => {
     'type': 'click',
-    'button': button,
+    'button': button.toJson(),
     'x': x,
     'y': y,
   };

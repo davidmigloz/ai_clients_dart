@@ -2373,6 +2373,53 @@ void main() {
     });
   });
 
+  group('ClickButton', () {
+    test('round-trip all non-unknown values', () {
+      for (final v in ClickButton.values.where(
+        (v) => v != ClickButton.unknown,
+      )) {
+        expect(ClickButton.fromJson(v.toJson()), v);
+      }
+    });
+
+    test('unknown fallback', () {
+      expect(ClickButton.fromJson('middle'), ClickButton.unknown);
+    });
+  });
+
+  group('FileInputDetail', () {
+    test('round-trip all non-unknown values', () {
+      for (final v in FileInputDetail.values.where(
+        (v) => v != FileInputDetail.unknown,
+      )) {
+        expect(FileInputDetail.fromJson(v.toJson()), v);
+      }
+    });
+
+    test('unknown fallback', () {
+      expect(FileInputDetail.fromJson('auto'), FileInputDetail.unknown);
+    });
+  });
+
+  group('PromptCacheRetention', () {
+    test('round-trip all non-unknown values', () {
+      for (final v in PromptCacheRetention.values.where(
+        (v) => v != PromptCacheRetention.unknown,
+      )) {
+        expect(PromptCacheRetention.fromJson(v.toJson()), v);
+      }
+    });
+
+    test('unknown fallback', () {
+      expect(PromptCacheRetention.fromJson('7d'), PromptCacheRetention.unknown);
+    });
+
+    test('values encode correctly', () {
+      expect(PromptCacheRetention.inMemory.toJson(), 'in-memory');
+      expect(PromptCacheRetention.h24.toJson(), '24h');
+    });
+  });
+
   group('ImageDetail original', () {
     test('fromJson parses original', () {
       expect(ImageDetail.fromJson('original'), ImageDetail.original);
@@ -2419,6 +2466,55 @@ void main() {
       final restored = ResponseTool.fromJson(json);
       expect(restored, isA<NamespaceTool>());
       expect(restored, equals(tool));
+    });
+  });
+
+  group('CustomTool', () {
+    test('round-trip', () {
+      const tool = CustomTool(
+        name: 'my_tool',
+        description: 'desc',
+        deferLoading: true,
+      );
+
+      final json = tool.toJson();
+      expect(json['type'], 'custom');
+      expect(json['name'], 'my_tool');
+      expect(json['description'], 'desc');
+      expect(json['defer_loading'], true);
+      expect(json.containsKey('format'), isFalse);
+
+      final restored = ResponseTool.fromJson(json);
+      expect(restored, isA<CustomTool>());
+      expect(restored, equals(tool));
+    });
+
+    test('omits optional fields when null', () {
+      const tool = CustomTool(name: 'minimal');
+      final json = tool.toJson();
+      expect(json['type'], 'custom');
+      expect(json['name'], 'minimal');
+      expect(json.containsKey('description'), isFalse);
+      expect(json.containsKey('format'), isFalse);
+      expect(json.containsKey('defer_loading'), isFalse);
+    });
+
+    test('in NamespaceTool round-trip', () {
+      const ns = NamespaceTool(
+        name: 'ns',
+        description: 'desc',
+        tools: [
+          FunctionTool(name: 'f1'),
+          CustomTool(name: 'c1'),
+        ],
+      );
+
+      final json = ns.toJson();
+      final restored = ResponseTool.fromJson(json) as NamespaceTool;
+      expect(restored.tools, hasLength(2));
+      expect(restored.tools[0], isA<FunctionTool>());
+      expect(restored.tools[1], isA<CustomTool>());
+      expect(restored, equals(ns));
     });
   });
 
@@ -2512,7 +2608,7 @@ void main() {
 
   group('ComputerAction', () {
     test('ClickAction round-trip', () {
-      const action = ClickAction(button: 'left', x: 100, y: 200);
+      const action = ClickAction(button: ClickButton.left, x: 100, y: 200);
       final json = action.toJson();
       expect(json['type'], 'click');
       expect(json['button'], 'left');
@@ -2742,8 +2838,8 @@ void main() {
         () => ComputerCallOutputItem(
           id: 'cc_bad',
           callId: 'call_bad',
-          action: const ClickAction(button: 'left', x: 0, y: 0),
-          actions: const [ClickAction(button: 'right', x: 1, y: 1)],
+          action: const ClickAction(button: ClickButton.left, x: 0, y: 0),
+          actions: const [ClickAction(button: ClickButton.right, x: 1, y: 1)],
         ),
         throwsA(isA<AssertionError>()),
       );
@@ -2968,14 +3064,14 @@ void main() {
     test('round-trip with detail', () {
       const content = InputFileContent.url(
         'https://example.com/file.pdf',
-        detail: 'high',
+        detail: FileInputDetail.high,
       );
 
       final json = content.toJson();
       expect(json['detail'], 'high');
 
       final restored = InputFileContent.fromJson(json);
-      expect(restored.detail, 'high');
+      expect(restored.detail, FileInputDetail.high);
       expect(restored, equals(content));
     });
 
@@ -3021,7 +3117,7 @@ void main() {
 
       final response = Response.fromJson(json);
       expect(response.promptCacheKey, 'cache_key_1');
-      expect(response.promptCacheRetention, '24h');
+      expect(response.promptCacheRetention, PromptCacheRetention.h24);
     });
 
     test('toJson includes new fields', () {
@@ -3032,7 +3128,7 @@ void main() {
         status: ResponseStatus.completed,
         output: [],
         promptCacheKey: 'key',
-        promptCacheRetention: 'in-memory',
+        promptCacheRetention: PromptCacheRetention.inMemory,
       );
 
       final json = response.toJson();
@@ -3103,7 +3199,7 @@ void main() {
           ComputerCallOutputItem(
             id: 'cc_1',
             callId: 'call_1',
-            action: ClickAction(button: 'left', x: 0, y: 0),
+            action: ClickAction(button: ClickButton.left, x: 0, y: 0),
           ),
         ],
       );

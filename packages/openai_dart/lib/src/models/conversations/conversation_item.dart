@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import '../responses/common/equality_helpers.dart';
 import '../responses/config/function_call_status.dart';
 import '../responses/config/item_status.dart';
+import '../responses/config/tool_search_execution_type.dart';
 import 'conversation_content.dart';
 import 'conversation_message.dart';
 
@@ -1105,7 +1106,7 @@ class ConversationToolSearchCallItem extends ConversationItem {
   final String? callId;
 
   /// The execution type.
-  final String? execution;
+  final ToolSearchExecutionType? execution;
 
   /// The arguments.
   final Map<String, dynamic>? arguments;
@@ -1127,7 +1128,9 @@ class ConversationToolSearchCallItem extends ConversationItem {
     return ConversationToolSearchCallItem(
       id: json['id'] as String,
       callId: json['call_id'] as String?,
-      execution: json['execution'] as String?,
+      execution: json['execution'] != null
+          ? ToolSearchExecutionType.fromJson(json['execution'] as String)
+          : null,
       arguments: json['arguments'] as Map<String, dynamic>?,
       status: json['status'] != null
           ? ItemStatus.fromJson(json['status'] as String)
@@ -1140,7 +1143,7 @@ class ConversationToolSearchCallItem extends ConversationItem {
     'type': 'tool_search_call',
     'id': id,
     if (callId != null) 'call_id': callId,
-    if (execution != null) 'execution': execution,
+    if (execution != null) 'execution': execution!.toJson(),
     if (arguments != null) 'arguments': arguments,
     if (status != null) 'status': status!.toJson(),
   };
@@ -1175,7 +1178,7 @@ class ConversationToolSearchOutputItem extends ConversationItem {
   final String? callId;
 
   /// The execution type.
-  final String? execution;
+  final ToolSearchExecutionType? execution;
 
   /// The discovered tools.
   final List<Map<String, dynamic>>? tools;
@@ -1197,7 +1200,9 @@ class ConversationToolSearchOutputItem extends ConversationItem {
     return ConversationToolSearchOutputItem(
       id: json['id'] as String,
       callId: json['call_id'] as String?,
-      execution: json['execution'] as String?,
+      execution: json['execution'] != null
+          ? ToolSearchExecutionType.fromJson(json['execution'] as String)
+          : null,
       tools: (json['tools'] as List?)
           ?.map((e) => e as Map<String, dynamic>)
           .toList(),
@@ -1212,7 +1217,7 @@ class ConversationToolSearchOutputItem extends ConversationItem {
     'type': 'tool_search_output',
     'id': id,
     if (callId != null) 'call_id': callId,
-    if (execution != null) 'execution': execution,
+    if (execution != null) 'execution': execution!.toJson(),
     if (tools != null) 'tools': tools,
     if (status != null) 'status': status!.toJson(),
   };

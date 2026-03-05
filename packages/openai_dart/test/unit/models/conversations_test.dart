@@ -1,5 +1,6 @@
 import 'package:openai_dart/src/models/conversations/conversations.dart';
 import 'package:openai_dart/src/models/responses/config/item_status.dart';
+import 'package:openai_dart/src/models/responses/config/tool_search_execution_type.dart';
 import 'package:openai_dart/src/models/responses/items/item.dart';
 import 'package:test/test.dart';
 
@@ -709,7 +710,7 @@ void main() {
       final tsc = item as ConversationToolSearchCallItem;
       expect(tsc.id, 'tsc_1');
       expect(tsc.callId, 'call_1');
-      expect(tsc.execution, 'server');
+      expect(tsc.execution, ToolSearchExecutionType.server);
 
       final restored = ConversationItem.fromJson(tsc.toJson());
       expect(restored, equals(tsc));
@@ -817,7 +818,7 @@ void main() {
       const a = ConversationToolSearchOutputItem(
         id: 'tso_4',
         callId: 'call_4',
-        execution: 'server',
+        execution: ToolSearchExecutionType.server,
         tools: [
           {'type': 'function', 'name': 'func1'},
         ],
@@ -826,7 +827,7 @@ void main() {
       const b = ConversationToolSearchOutputItem(
         id: 'tso_4',
         callId: 'call_4',
-        execution: 'server',
+        execution: ToolSearchExecutionType.server,
         tools: [
           {'type': 'function', 'name': 'func2'},
         ],
