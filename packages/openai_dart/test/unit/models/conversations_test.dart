@@ -797,7 +797,7 @@ void main() {
     test('equality ignores tools list (id/callId/execution/status compared)', () {
       // Two instances with different tools list objects but same id/callId/execution/status
       // must be equal (tools is a weakly-typed blob omitted from ==).
-      final a = ConversationToolSearchOutputItem(
+      const a = ConversationToolSearchOutputItem(
         id: 'tso_3',
         callId: 'call_3',
         execution: 'server',
@@ -806,7 +806,7 @@ void main() {
         ],
         status: ItemStatus.completed,
       );
-      final b = ConversationToolSearchOutputItem(
+      const b = ConversationToolSearchOutputItem(
         id: 'tso_3',
         callId: 'call_3',
         execution: 'server',
