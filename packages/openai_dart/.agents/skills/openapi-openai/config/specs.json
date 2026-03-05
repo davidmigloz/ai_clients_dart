@@ -2,7 +2,7 @@
   "specs": {
     "main": {
       "name": "OpenAI API",
-      "url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/openai%2Fopenai-0db5326a0fb6a30ffad9242c72872c3388ef927e8a4549ddd20aec3420541209.yml",
+      "url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/openai%2Fopenai-9c802d45a9bf2a896b5fd22ac22bba185e8a145bd40ed242df9bb87a05e954eb.yml",
       "local_file": "openapi.json",
       "requires_auth": false,
       "auth_env_vars": ["OPENAI_API_KEY"],
