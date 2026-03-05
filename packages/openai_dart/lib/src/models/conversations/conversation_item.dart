@@ -1108,7 +1108,7 @@ class ConversationToolSearchCallItem extends ConversationItem {
   final String? execution;
 
   /// The arguments.
-  final Object? arguments;
+  final Map<String, dynamic>? arguments;
 
   /// Item status.
   final ItemStatus? status;
@@ -1128,7 +1128,7 @@ class ConversationToolSearchCallItem extends ConversationItem {
       id: json['id'] as String,
       callId: json['call_id'] as String?,
       execution: json['execution'] as String?,
-      arguments: json['arguments'],
+      arguments: json['arguments'] as Map<String, dynamic>?,
       status: json['status'] != null
           ? ItemStatus.fromJson(json['status'] as String)
           : null,
@@ -1153,11 +1153,12 @@ class ConversationToolSearchCallItem extends ConversationItem {
           id == other.id &&
           callId == other.callId &&
           execution == other.execution &&
-          arguments == other.arguments &&
+          mapsDeepEqual(arguments, other.arguments) &&
           status == other.status;
 
   @override
-  int get hashCode => Object.hash(id, callId, execution, arguments, status);
+  int get hashCode =>
+      Object.hash(id, callId, execution, mapDeepHashCode(arguments), status);
 
   @override
   String toString() =>
@@ -1224,11 +1225,10 @@ class ConversationToolSearchOutputItem extends ConversationItem {
           id == other.id &&
           callId == other.callId &&
           execution == other.execution &&
-          listsEqual(tools, other.tools) &&
           status == other.status;
 
   @override
-  int get hashCode => Object.hash(id, callId, execution, tools, status);
+  int get hashCode => Object.hash(id, callId, execution, status);
 
   @override
   String toString() =>

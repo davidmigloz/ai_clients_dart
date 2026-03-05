@@ -730,6 +730,26 @@ void main() {
       final restored = ConversationItem.fromJson(tsc.toJson());
       expect(restored, equals(tsc));
     });
+
+    test('equality is deep for arguments map', () {
+      final json = {
+        'type': 'tool_search_call',
+        'id': 'tsc_3',
+        'call_id': 'call_3',
+        'execution': 'client',
+        'arguments': {
+          'query': 'search',
+          'filters': {'lang': 'dart'},
+        },
+        'status': 'completed',
+      };
+      final a =
+          ConversationItem.fromJson(json) as ConversationToolSearchCallItem;
+      final b =
+          ConversationItem.fromJson(json) as ConversationToolSearchCallItem;
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+    });
   });
 
   group('ConversationToolSearchOutputItem', () {
@@ -772,6 +792,31 @@ void main() {
 
       final restored = ConversationItem.fromJson(tso.toJson());
       expect(restored, equals(tso));
+    });
+
+    test('equality ignores tools list (id/callId/execution/status compared)', () {
+      // Two instances with different tools list objects but same id/callId/execution/status
+      // must be equal (tools is a weakly-typed blob omitted from ==).
+      final a = ConversationToolSearchOutputItem(
+        id: 'tso_3',
+        callId: 'call_3',
+        execution: 'server',
+        tools: [
+          {'type': 'function', 'name': 'func1'},
+        ],
+        status: ItemStatus.completed,
+      );
+      final b = ConversationToolSearchOutputItem(
+        id: 'tso_3',
+        callId: 'call_3',
+        execution: 'server',
+        tools: [
+          {'type': 'function', 'name': 'func1'},
+        ],
+        status: ItemStatus.completed,
+      );
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
     });
   });
 }

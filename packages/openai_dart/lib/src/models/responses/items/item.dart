@@ -466,7 +466,7 @@ class ToolSearchCallItemParam extends Item {
   final ToolSearchExecutionType? execution;
 
   /// The arguments for the tool search.
-  final Object? arguments;
+  final Map<String, dynamic>? arguments;
 
   /// Item status.
   final ItemStatus? status;
@@ -488,7 +488,7 @@ class ToolSearchCallItemParam extends Item {
       execution: json['execution'] != null
           ? ToolSearchExecutionType.fromJson(json['execution'] as String)
           : null,
-      arguments: json['arguments'],
+      arguments: json['arguments'] as Map<String, dynamic>?,
       status: json['status'] != null
           ? ItemStatus.fromJson(json['status'] as String)
           : null,
@@ -513,11 +513,12 @@ class ToolSearchCallItemParam extends Item {
           id == other.id &&
           callId == other.callId &&
           execution == other.execution &&
-          arguments == other.arguments &&
+          mapsDeepEqual(arguments, other.arguments) &&
           status == other.status;
 
   @override
-  int get hashCode => Object.hash(id, callId, execution, arguments, status);
+  int get hashCode =>
+      Object.hash(id, callId, execution, mapDeepHashCode(arguments), status);
 
   @override
   String toString() =>

@@ -1475,7 +1475,7 @@ class ToolSearchCallOutputItem extends OutputItem {
   final ToolSearchExecutionType execution;
 
   /// The arguments for the tool search.
-  final Object? arguments;
+  final Map<String, dynamic>? arguments;
 
   /// Item status.
   final ItemStatus? status;
@@ -1499,7 +1499,7 @@ class ToolSearchCallOutputItem extends OutputItem {
       id: json['id'] as String,
       callId: json['call_id'] as String?,
       execution: ToolSearchExecutionType.fromJson(json['execution'] as String),
-      arguments: json['arguments'],
+      arguments: json['arguments'] as Map<String, dynamic>?,
       status: json['status'] != null
           ? ItemStatus.fromJson(json['status'] as String)
           : null,
@@ -1526,13 +1526,19 @@ class ToolSearchCallOutputItem extends OutputItem {
           id == other.id &&
           callId == other.callId &&
           execution == other.execution &&
-          arguments == other.arguments &&
+          mapsDeepEqual(arguments, other.arguments) &&
           status == other.status &&
           createdBy == other.createdBy;
 
   @override
-  int get hashCode =>
-      Object.hash(id, callId, execution, arguments, status, createdBy);
+  int get hashCode => Object.hash(
+    id,
+    callId,
+    execution,
+    mapDeepHashCode(arguments),
+    status,
+    createdBy,
+  );
 
   @override
   String toString() =>
@@ -1653,19 +1659,25 @@ class ComputerCallOutputItem extends OutputItem {
     this.actions,
     this.pendingSafetyChecks,
     this.status,
-  });
+  }) : assert(
+         action == null || actions == null,
+         'Only one of action or actions may be set, not both.',
+       );
 
   /// Creates a [ComputerCallOutputItem] from JSON.
   factory ComputerCallOutputItem.fromJson(Map<String, dynamic> json) {
+    final hasActions = json['actions'] != null;
     return ComputerCallOutputItem(
       id: json['id'] as String,
       callId: json['call_id'] as String,
-      action: json['action'] != null
+      action: !hasActions && json['action'] != null
           ? ComputerAction.fromJson(json['action'] as Map<String, dynamic>)
           : null,
-      actions: (json['actions'] as List?)
-          ?.map((e) => ComputerAction.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      actions: hasActions
+          ? (json['actions'] as List)
+                .map((e) => ComputerAction.fromJson(e as Map<String, dynamic>))
+                .toList()
+          : null,
       pendingSafetyChecks: (json['pending_safety_checks'] as List?)
           ?.map((e) => e as Map<String, dynamic>)
           .toList(),
@@ -1696,7 +1708,7 @@ class ComputerCallOutputItem extends OutputItem {
           callId == other.callId &&
           action == other.action &&
           listsEqual(actions, other.actions) &&
-          listsEqual(pendingSafetyChecks, other.pendingSafetyChecks) &&
+          listOfMapsDeepEqual(pendingSafetyChecks, other.pendingSafetyChecks) &&
           status == other.status;
 
   @override
@@ -1705,7 +1717,7 @@ class ComputerCallOutputItem extends OutputItem {
     callId,
     action,
     actions != null ? Object.hashAll(actions!) : null,
-    pendingSafetyChecks,
+    listOfMapsHashCode(pendingSafetyChecks),
     status,
   );
 

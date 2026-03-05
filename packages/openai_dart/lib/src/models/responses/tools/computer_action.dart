@@ -149,10 +149,10 @@ class DragAction extends ComputerAction {
       identical(this, other) ||
       other is DragAction &&
           runtimeType == other.runtimeType &&
-          listsEqual(path, other.path);
+          listOfMapsDeepEqual(path, other.path);
 
   @override
-  int get hashCode => Object.hashAll(path);
+  int get hashCode => listOfMapsHashCode(path);
 
   @override
   String toString() => 'DragAction(path: $path)';

@@ -2542,6 +2542,20 @@ void main() {
       expect(restored, isA<DragAction>());
     });
 
+    test('DragAction equality is deep (independent parse)', () {
+      final json = {
+        'type': 'drag',
+        'path': [
+          {'x': 0, 'y': 0},
+          {'x': 50, 'y': 50},
+        ],
+      };
+      final a = ComputerAction.fromJson(json);
+      final b = ComputerAction.fromJson(json);
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+    });
+
     test('KeyPressAction round-trip', () {
       const action = KeyPressAction(keys: ['ctrl', 'c']);
       final json = action.toJson();
@@ -2614,6 +2628,21 @@ void main() {
       final restored = OutputItem.fromJson(tsc.toJson());
       expect(restored, equals(tsc));
     });
+
+    test('equality is deep for arguments map', () {
+      final json = {
+        'type': 'tool_search_call',
+        'id': 'tsc_1',
+        'call_id': 'call_1',
+        'execution': 'server',
+        'arguments': {'query': 'weather', 'limit': 5},
+        'status': 'completed',
+      };
+      final a = OutputItem.fromJson(json) as ToolSearchCallOutputItem;
+      final b = OutputItem.fromJson(json) as ToolSearchCallOutputItem;
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+    });
   });
 
   group('ToolSearchOutputItem', () {
@@ -2684,6 +2713,55 @@ void main() {
       expect(cc.actions![1], isA<TypeAction>());
       expect(cc.actions![2], isA<ScreenshotAction>());
       expect(cc.pendingSafetyChecks, hasLength(1));
+
+      final restored = OutputItem.fromJson(cc.toJson());
+      expect(restored, equals(cc));
+      expect(restored.hashCode, equals(cc.hashCode));
+    });
+
+    test('equality is deep for pendingSafetyChecks', () {
+      final json = {
+        'type': 'computer_call',
+        'id': 'cc_3',
+        'call_id': 'call_3',
+        'actions': [
+          {'type': 'screenshot'},
+        ],
+        'pending_safety_checks': [
+          {'check': 'content_moderation', 'level': 'high'},
+        ],
+      };
+      final a = OutputItem.fromJson(json) as ComputerCallOutputItem;
+      final b = OutputItem.fromJson(json) as ComputerCallOutputItem;
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+    });
+
+    test('assert fires when both action and actions are set', () {
+      expect(
+        () => ComputerCallOutputItem(
+          id: 'cc_bad',
+          callId: 'call_bad',
+          action: const ClickAction(button: 'left', x: 0, y: 0),
+          actions: const [ClickAction(button: 'right', x: 1, y: 1)],
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('fromJson prefers actions over action when both are present', () {
+      final json = {
+        'type': 'computer_call',
+        'id': 'cc_4',
+        'call_id': 'call_4',
+        'action': {'type': 'click', 'button': 'left', 'x': 0, 'y': 0},
+        'actions': [
+          {'type': 'screenshot'},
+        ],
+      };
+      final item = OutputItem.fromJson(json) as ComputerCallOutputItem;
+      expect(item.action, isNull);
+      expect(item.actions, hasLength(1));
     });
   });
 
@@ -2829,6 +2907,23 @@ void main() {
 
       final restored = Item.fromJson(tsc.toJson());
       expect(restored, equals(tsc));
+    });
+
+    test('equality is deep for arguments map', () {
+      final json = {
+        'type': 'tool_search_call',
+        'id': 'tsc_3',
+        'call_id': 'call_3',
+        'execution': 'client',
+        'arguments': {
+          'query': 'deep',
+          'nested': {'key': 'value'},
+        },
+      };
+      final a = Item.fromJson(json) as ToolSearchCallItemParam;
+      final b = Item.fromJson(json) as ToolSearchCallItemParam;
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
     });
   });
 
