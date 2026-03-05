@@ -6,12 +6,22 @@ import '../../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../config/function_call_status.dart';
 import '../config/item_status.dart';
+import '../config/message_phase.dart';
 import '../config/message_role.dart';
+import '../config/tool_search_execution_type.dart';
 import '../content/input_content.dart';
+import '../tools/response_tool.dart';
 
 /// Input item for a response request.
 ///
-/// This is a sealed class hierarchy for different input item types.
+/// ## Supported Item Types
+///
+/// - [MessageItem] - A message from a user or assistant
+/// - [FunctionCallItem] - A function call from the model
+/// - [FunctionCallOutputItem] - Output from a function call
+/// - [ItemReference] - A reference to another item
+/// - [ToolSearchCallItemParam] - A tool search call
+/// - [ToolSearchOutputItemParam] - Tool search results
 sealed class Item {
   /// Creates an [Item].
   const Item();
@@ -24,6 +34,8 @@ sealed class Item {
       'function_call' => FunctionCallItem.fromJson(json),
       'function_call_output' => FunctionCallOutputItem.fromJson(json),
       'item_reference' => ItemReference.fromJson(json),
+      'tool_search_call' => ToolSearchCallItemParam.fromJson(json),
+      'tool_search_output' => ToolSearchOutputItemParam.fromJson(json),
       _ => throw FormatException('Unknown Item type: $type'),
     };
   }
@@ -47,12 +59,16 @@ class MessageItem extends Item {
   /// Item status (for output items).
   final ItemStatus? status;
 
+  /// The phase of the message.
+  final MessagePhase? phase;
+
   /// Creates a [MessageItem].
   const MessageItem({
     this.id,
     required this.role,
     required this.content,
     this.status,
+    this.phase,
   });
 
   /// Creates a user message.
@@ -105,6 +121,9 @@ class MessageItem extends Item {
       status: json['status'] != null
           ? ItemStatus.fromJson(json['status'] as String)
           : null,
+      phase: json['phase'] != null
+          ? MessagePhase.fromJson(json['phase'] as String)
+          : null,
     );
   }
 
@@ -115,6 +134,7 @@ class MessageItem extends Item {
     'role': role.toJson(),
     'content': content.map((e) => e.toJson()).toList(),
     if (status != null) 'status': status!.toJson(),
+    if (phase != null) 'phase': phase!.toJson(),
   };
 
   @override
@@ -125,14 +145,16 @@ class MessageItem extends Item {
           id == other.id &&
           role == other.role &&
           listsEqual(content, other.content) &&
-          status == other.status;
+          status == other.status &&
+          phase == other.phase;
 
   @override
-  int get hashCode => Object.hash(id, role, Object.hashAll(content), status);
+  int get hashCode =>
+      Object.hash(id, role, Object.hashAll(content), status, phase);
 
   @override
   String toString() =>
-      'MessageItem(id: $id, role: $role, content: $content, status: $status)';
+      'MessageItem(id: $id, role: $role, content: $content, status: $status, phase: $phase)';
 }
 
 /// A function call item.
@@ -167,6 +189,9 @@ class FunctionCallItem extends Item {
   /// Item status (for output items).
   final ItemStatus? status;
 
+  /// The namespace this function call belongs to.
+  final String? namespace;
+
   /// Creates a [FunctionCallItem].
   const FunctionCallItem({
     this.id,
@@ -174,6 +199,7 @@ class FunctionCallItem extends Item {
     required this.name,
     required this.arguments,
     this.status,
+    this.namespace,
   });
 
   /// Creates a [FunctionCallItem] from JSON.
@@ -186,6 +212,7 @@ class FunctionCallItem extends Item {
       status: json['status'] != null
           ? ItemStatus.fromJson(json['status'] as String)
           : null,
+      namespace: json['namespace'] as String?,
     );
   }
 
@@ -197,6 +224,7 @@ class FunctionCallItem extends Item {
     'name': name,
     'arguments': arguments,
     if (status != null) 'status': status!.toJson(),
+    if (namespace != null) 'namespace': namespace,
   };
 
   @override
@@ -208,14 +236,16 @@ class FunctionCallItem extends Item {
           callId == other.callId &&
           name == other.name &&
           arguments == other.arguments &&
-          status == other.status;
+          status == other.status &&
+          namespace == other.namespace;
 
   @override
-  int get hashCode => Object.hash(id, callId, name, arguments, status);
+  int get hashCode =>
+      Object.hash(id, callId, name, arguments, status, namespace);
 
   @override
   String toString() =>
-      'FunctionCallItem(id: $id, callId: $callId, name: $name, arguments: $arguments, status: $status)';
+      'FunctionCallItem(id: $id, callId: $callId, name: $name, arguments: $arguments, status: $status, namespace: $namespace)';
 }
 
 /// The output of a function call.
@@ -421,4 +451,149 @@ class ItemReference extends Item {
 
   @override
   String toString() => 'ItemReference(id: $id)';
+}
+
+/// A tool search call input item.
+@immutable
+class ToolSearchCallItemParam extends Item {
+  /// Unique identifier.
+  final String? id;
+
+  /// The call ID for this tool search call.
+  final String? callId;
+
+  /// The execution type (server or client).
+  final ToolSearchExecutionType? execution;
+
+  /// The arguments for the tool search.
+  final Object? arguments;
+
+  /// Item status.
+  final ItemStatus? status;
+
+  /// Creates a [ToolSearchCallItemParam].
+  const ToolSearchCallItemParam({
+    this.id,
+    this.callId,
+    this.execution,
+    this.arguments,
+    this.status,
+  });
+
+  /// Creates a [ToolSearchCallItemParam] from JSON.
+  factory ToolSearchCallItemParam.fromJson(Map<String, dynamic> json) {
+    return ToolSearchCallItemParam(
+      id: json['id'] as String?,
+      callId: json['call_id'] as String?,
+      execution: json['execution'] != null
+          ? ToolSearchExecutionType.fromJson(json['execution'] as String)
+          : null,
+      arguments: json['arguments'],
+      status: json['status'] != null
+          ? ItemStatus.fromJson(json['status'] as String)
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'tool_search_call',
+    if (id != null) 'id': id,
+    if (callId != null) 'call_id': callId,
+    if (execution != null) 'execution': execution!.toJson(),
+    if (arguments != null) 'arguments': arguments,
+    if (status != null) 'status': status!.toJson(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ToolSearchCallItemParam &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          callId == other.callId &&
+          execution == other.execution &&
+          arguments == other.arguments &&
+          status == other.status;
+
+  @override
+  int get hashCode => Object.hash(id, callId, execution, arguments, status);
+
+  @override
+  String toString() =>
+      'ToolSearchCallItemParam(id: $id, callId: $callId, execution: $execution, status: $status)';
+}
+
+/// A tool search output input item.
+@immutable
+class ToolSearchOutputItemParam extends Item {
+  /// Unique identifier.
+  final String? id;
+
+  /// The call ID for this tool search output.
+  final String? callId;
+
+  /// The execution type (server or client).
+  final ToolSearchExecutionType? execution;
+
+  /// The tools discovered by the search.
+  final List<ResponseTool> tools;
+
+  /// Item status.
+  final ItemStatus? status;
+
+  /// Creates a [ToolSearchOutputItemParam].
+  const ToolSearchOutputItemParam({
+    this.id,
+    this.callId,
+    this.execution,
+    required this.tools,
+    this.status,
+  });
+
+  /// Creates a [ToolSearchOutputItemParam] from JSON.
+  factory ToolSearchOutputItemParam.fromJson(Map<String, dynamic> json) {
+    return ToolSearchOutputItemParam(
+      id: json['id'] as String?,
+      callId: json['call_id'] as String?,
+      execution: json['execution'] != null
+          ? ToolSearchExecutionType.fromJson(json['execution'] as String)
+          : null,
+      tools: (json['tools'] as List)
+          .map((e) => ResponseTool.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      status: json['status'] != null
+          ? ItemStatus.fromJson(json['status'] as String)
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'tool_search_output',
+    if (id != null) 'id': id,
+    if (callId != null) 'call_id': callId,
+    if (execution != null) 'execution': execution!.toJson(),
+    'tools': tools.map((e) => e.toJson()).toList(),
+    if (status != null) 'status': status!.toJson(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ToolSearchOutputItemParam &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          callId == other.callId &&
+          execution == other.execution &&
+          listsEqual(tools, other.tools) &&
+          status == other.status;
+
+  @override
+  int get hashCode =>
+      Object.hash(id, callId, execution, Object.hashAll(tools), status);
+
+  @override
+  String toString() =>
+      'ToolSearchOutputItemParam(id: $id, callId: $callId, execution: $execution, tools: $tools, status: $status)';
 }

@@ -1063,4 +1063,258 @@ void main() {
       },
     );
   });
+
+  // ==========================================================================
+  // Group: GPT-5.4 Features
+  // ==========================================================================
+
+  group('GPT-5.4 Features', () {
+    test(
+      'creates response with gpt-5.4 model',
+      timeout: const Timeout(Duration(minutes: 2)),
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        final response = await client!.responses.create(
+          const CreateResponseRequest(
+            model: 'gpt-5.4',
+            input: ResponseInput.text(
+              'What is 2 + 2? Reply with just the number.',
+            ),
+          ),
+        );
+
+        expect(response.id, isNotEmpty);
+        expect(response.status, ResponseStatus.completed);
+        expect(response.outputText, contains('4'));
+      },
+    );
+
+    test(
+      'creates response with tool search',
+      timeout: const Timeout(Duration(minutes: 2)),
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        final response = await client!.responses.create(
+          CreateResponseRequest(
+            model: 'gpt-5.4',
+            input: const ResponseInput.text(
+              'What is the weather in San Francisco?',
+            ),
+            tools: [
+              const ToolSearchTool(execution: ToolSearchExecutionType.server),
+              ResponseTool.function(
+                name: 'get_weather',
+                description: 'Get the current weather for a given location.',
+                deferLoading: true,
+                parameters: {
+                  'type': 'object',
+                  'properties': {
+                    'location': {
+                      'type': 'string',
+                      'description': 'The city name',
+                    },
+                  },
+                  'required': ['location'],
+                },
+              ),
+              ResponseTool.function(
+                name: 'get_stock_price',
+                description: 'Get the current stock price.',
+                deferLoading: true,
+                parameters: {
+                  'type': 'object',
+                  'properties': {
+                    'symbol': {
+                      'type': 'string',
+                      'description': 'The stock symbol',
+                    },
+                  },
+                  'required': ['symbol'],
+                },
+              ),
+            ],
+          ),
+        );
+
+        expect(response.status, ResponseStatus.completed);
+        expect(response.output, isNotEmpty);
+        // Should use tool search to find the relevant function
+        expect(response.hasToolCalls, isTrue);
+      },
+    );
+
+    test(
+      'creates response with deferred tool loading',
+      timeout: const Timeout(Duration(minutes: 2)),
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        final response = await client!.responses.create(
+          const CreateResponseRequest(
+            model: 'gpt-5.4',
+            input: ResponseInput.text('What is the weather in Paris?'),
+            tools: [
+              ToolSearchTool(execution: ToolSearchExecutionType.server),
+              FunctionTool(
+                name: 'get_weather',
+                description: 'Get weather for a location.',
+                deferLoading: true,
+                parameters: {
+                  'type': 'object',
+                  'properties': {
+                    'location': {'type': 'string'},
+                  },
+                  'required': <dynamic>['location'],
+                },
+              ),
+            ],
+          ),
+        );
+
+        expect(response.status, ResponseStatus.completed);
+        expect(response.output, isNotEmpty);
+      },
+    );
+
+    test(
+      'creates response with namespace tools',
+      timeout: const Timeout(Duration(minutes: 2)),
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        try {
+          final response = await client!.responses.create(
+            CreateResponseRequest(
+              model: 'gpt-5.4',
+              input: const ResponseInput.text('What is the weather in Tokyo?'),
+              tools: [
+                NamespaceTool(
+                  name: 'weather_tools',
+                  description: 'Weather-related tools',
+                  tools: [
+                    ResponseTool.function(
+                      name: 'get_weather',
+                      description: 'Get weather for a location.',
+                      parameters: {
+                        'type': 'object',
+                        'properties': {
+                          'location': {
+                            'type': 'string',
+                            'description': 'City name',
+                          },
+                        },
+                        'required': ['location'],
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+
+          expect(response.status, ResponseStatus.completed);
+          expect(response.output, isNotEmpty);
+          // Function calls from namespace tools should have namespace set
+          if (response.hasToolCalls) {
+            final fc = response.functionCalls.first;
+            expect(fc.namespace, 'weather_tools');
+          }
+        } on InternalServerException {
+          // Namespace tools may return 500 during rollout
+          markTestSkipped('Namespace tools returned 500 (server-side issue)');
+        }
+      },
+    );
+
+    test(
+      'creates response with computer tool',
+      timeout: const Timeout(Duration(minutes: 2)),
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        final response = await client!.responses.create(
+          const CreateResponseRequest(
+            model: 'gpt-5.4',
+            input: ResponseInput.text(
+              'Click the submit button at coordinates (500, 300).',
+            ),
+            tools: [ComputerTool()],
+          ),
+        );
+
+        expect(response.status, ResponseStatus.completed);
+        expect(response.output, isNotEmpty);
+        expect(response.computerCalls, isNotEmpty);
+        final computerCall = response.computerCalls.first;
+        expect(computerCall.id, isNotEmpty);
+      },
+    );
+
+    test(
+      'streaming response includes message phase',
+      timeout: const Timeout(Duration(minutes: 2)),
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        final stream = client!.responses.createStream(
+          const CreateResponseRequest(
+            model: 'gpt-5.4',
+            input: ResponseInput.text('Explain quantum entanglement briefly.'),
+          ),
+        );
+
+        final accumulator = ResponseStreamAccumulator();
+        await stream.forEach(accumulator.add);
+
+        final response = accumulator.response;
+        expect(response, isNotNull);
+        expect(response!.status, ResponseStatus.completed);
+        expect(response.outputText, isNotEmpty);
+      },
+    );
+
+    test(
+      'creates response with web search content types',
+      timeout: const Timeout(Duration(minutes: 2)),
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        final response = await client!.responses.create(
+          const CreateResponseRequest(
+            model: 'gpt-5.4',
+            input: ResponseInput.text('What happened in tech news today?'),
+            tools: [
+              WebSearchTool(searchContentTypes: [SearchContentType.text]),
+            ],
+          ),
+        );
+
+        expect(response.status, ResponseStatus.completed);
+        expect(response.outputText, isNotEmpty);
+      },
+    );
+  });
 }

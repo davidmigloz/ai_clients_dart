@@ -4,8 +4,12 @@ import 'package:meta/meta.dart';
 
 import '../common/equality_helpers.dart';
 import '../config/item_status.dart';
+import '../config/message_phase.dart';
 import '../config/message_role.dart';
+import '../config/tool_search_execution_type.dart';
 import '../content/output_content.dart';
+import '../tools/computer_action.dart';
+import '../tools/response_tool.dart';
 import 'item.dart';
 
 /// Output item from a response.
@@ -27,6 +31,9 @@ import 'item.dart';
 /// - [ShellCallOutputItem] - Shell tool calls
 /// - [ShellCallOutputResultItem] - Shell tool call results
 /// - [McpCallOutputItem] - MCP (Model Context Protocol) tool calls
+/// - [ToolSearchCallOutputItem] - Tool search calls
+/// - [ToolSearchOutputItem] - Tool search results
+/// - [ComputerCallOutputItem] - Computer use tool calls
 sealed class OutputItem {
   /// Creates an [OutputItem].
   const OutputItem();
@@ -50,6 +57,9 @@ sealed class OutputItem {
       'shell_call' => ShellCallOutputItem.fromJson(json),
       'shell_call_output' => ShellCallOutputResultItem.fromJson(json),
       'mcp_call' => McpCallOutputItem.fromJson(json),
+      'tool_search_call' => ToolSearchCallOutputItem.fromJson(json),
+      'tool_search_output' => ToolSearchOutputItem.fromJson(json),
+      'computer_call' => ComputerCallOutputItem.fromJson(json),
       _ => throw FormatException('Unknown OutputItem type: $type'),
     };
   }
@@ -73,12 +83,16 @@ class MessageOutputItem extends OutputItem {
   /// Item status.
   final ItemStatus? status;
 
+  /// The phase of the message.
+  final MessagePhase? phase;
+
   /// Creates a [MessageOutputItem].
   const MessageOutputItem({
     required this.id,
     required this.role,
     required this.content,
     this.status,
+    this.phase,
   });
 
   /// Creates a [MessageOutputItem] from JSON.
@@ -92,6 +106,9 @@ class MessageOutputItem extends OutputItem {
       status: json['status'] != null
           ? ItemStatus.fromJson(json['status'] as String)
           : null,
+      phase: json['phase'] != null
+          ? MessagePhase.fromJson(json['phase'] as String)
+          : null,
     );
   }
 
@@ -102,6 +119,7 @@ class MessageOutputItem extends OutputItem {
     'role': role.toJson(),
     'content': content.map((e) => e.toJson()).toList(),
     if (status != null) 'status': status!.toJson(),
+    if (phase != null) 'phase': phase!.toJson(),
   };
 
   @override
@@ -112,14 +130,16 @@ class MessageOutputItem extends OutputItem {
           id == other.id &&
           role == other.role &&
           listsEqual(content, other.content) &&
-          status == other.status;
+          status == other.status &&
+          phase == other.phase;
 
   @override
-  int get hashCode => Object.hash(id, role, Object.hashAll(content), status);
+  int get hashCode =>
+      Object.hash(id, role, Object.hashAll(content), status, phase);
 
   @override
   String toString() =>
-      'MessageOutputItem(id: $id, role: $role, content: $content, status: $status)';
+      'MessageOutputItem(id: $id, role: $role, content: $content, status: $status, phase: $phase)';
 }
 
 /// A function call output item in the response.
@@ -154,6 +174,9 @@ class FunctionCallOutputItemResponse extends OutputItem {
   /// Item status.
   final ItemStatus? status;
 
+  /// The namespace this function call belongs to.
+  final String? namespace;
+
   /// Creates a [FunctionCallOutputItemResponse].
   const FunctionCallOutputItemResponse({
     required this.id,
@@ -161,6 +184,7 @@ class FunctionCallOutputItemResponse extends OutputItem {
     required this.name,
     required this.arguments,
     this.status,
+    this.namespace,
   });
 
   /// Creates a [FunctionCallOutputItemResponse] from JSON.
@@ -173,6 +197,7 @@ class FunctionCallOutputItemResponse extends OutputItem {
       status: json['status'] != null
           ? ItemStatus.fromJson(json['status'] as String)
           : null,
+      namespace: json['namespace'] as String?,
     );
   }
 
@@ -184,6 +209,7 @@ class FunctionCallOutputItemResponse extends OutputItem {
     'name': name,
     'arguments': arguments,
     if (status != null) 'status': status!.toJson(),
+    if (namespace != null) 'namespace': namespace,
   };
 
   /// Converts to a [FunctionCallItem] for use as input.
@@ -193,6 +219,7 @@ class FunctionCallOutputItemResponse extends OutputItem {
     name: name,
     arguments: arguments,
     status: status,
+    namespace: namespace,
   );
 
   @override
@@ -204,14 +231,16 @@ class FunctionCallOutputItemResponse extends OutputItem {
           callId == other.callId &&
           name == other.name &&
           arguments == other.arguments &&
-          status == other.status;
+          status == other.status &&
+          namespace == other.namespace;
 
   @override
-  int get hashCode => Object.hash(id, callId, name, arguments, status);
+  int get hashCode =>
+      Object.hash(id, callId, name, arguments, status, namespace);
 
   @override
   String toString() =>
-      'FunctionCallOutputItemResponse(id: $id, callId: $callId, name: $name, arguments: $arguments, status: $status)';
+      'FunctionCallOutputItemResponse(id: $id, callId: $callId, name: $name, arguments: $arguments, status: $status, namespace: $namespace)';
 }
 
 /// A reasoning item from reasoning models.
@@ -1431,4 +1460,256 @@ class McpCallOutputItem extends OutputItem {
   @override
   String toString() =>
       'McpCallOutputItem(id: $id, callId: $callId, serverLabel: $serverLabel, name: $name, arguments: $arguments, output: $output, error: $error, status: $status)';
+}
+
+/// A tool search call output item.
+@immutable
+class ToolSearchCallOutputItem extends OutputItem {
+  /// Unique identifier.
+  final String id;
+
+  /// The call ID for this tool search call.
+  final String? callId;
+
+  /// The execution type (server or client).
+  final ToolSearchExecutionType execution;
+
+  /// The arguments for the tool search.
+  final Object? arguments;
+
+  /// Item status.
+  final ItemStatus? status;
+
+  /// Who created this item.
+  final String? createdBy;
+
+  /// Creates a [ToolSearchCallOutputItem].
+  const ToolSearchCallOutputItem({
+    required this.id,
+    this.callId,
+    required this.execution,
+    this.arguments,
+    this.status,
+    this.createdBy,
+  });
+
+  /// Creates a [ToolSearchCallOutputItem] from JSON.
+  factory ToolSearchCallOutputItem.fromJson(Map<String, dynamic> json) {
+    return ToolSearchCallOutputItem(
+      id: json['id'] as String,
+      callId: json['call_id'] as String?,
+      execution: ToolSearchExecutionType.fromJson(json['execution'] as String),
+      arguments: json['arguments'],
+      status: json['status'] != null
+          ? ItemStatus.fromJson(json['status'] as String)
+          : null,
+      createdBy: json['created_by'] as String?,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'tool_search_call',
+    'id': id,
+    if (callId != null) 'call_id': callId,
+    'execution': execution.toJson(),
+    if (arguments != null) 'arguments': arguments,
+    if (status != null) 'status': status!.toJson(),
+    if (createdBy != null) 'created_by': createdBy,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ToolSearchCallOutputItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          callId == other.callId &&
+          execution == other.execution &&
+          arguments == other.arguments &&
+          status == other.status &&
+          createdBy == other.createdBy;
+
+  @override
+  int get hashCode =>
+      Object.hash(id, callId, execution, arguments, status, createdBy);
+
+  @override
+  String toString() =>
+      'ToolSearchCallOutputItem(id: $id, callId: $callId, execution: $execution, status: $status)';
+}
+
+/// A tool search output item containing discovered tools.
+@immutable
+class ToolSearchOutputItem extends OutputItem {
+  /// Unique identifier.
+  final String id;
+
+  /// The call ID for this tool search output.
+  final String? callId;
+
+  /// The execution type (server or client).
+  final ToolSearchExecutionType execution;
+
+  /// The tools discovered by the search.
+  final List<ResponseTool> tools;
+
+  /// Item status.
+  final ItemStatus? status;
+
+  /// Who created this item.
+  final String? createdBy;
+
+  /// Creates a [ToolSearchOutputItem].
+  const ToolSearchOutputItem({
+    required this.id,
+    this.callId,
+    required this.execution,
+    required this.tools,
+    this.status,
+    this.createdBy,
+  });
+
+  /// Creates a [ToolSearchOutputItem] from JSON.
+  factory ToolSearchOutputItem.fromJson(Map<String, dynamic> json) {
+    return ToolSearchOutputItem(
+      id: json['id'] as String,
+      callId: json['call_id'] as String?,
+      execution: ToolSearchExecutionType.fromJson(json['execution'] as String),
+      tools: (json['tools'] as List)
+          .map((e) => ResponseTool.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      status: json['status'] != null
+          ? ItemStatus.fromJson(json['status'] as String)
+          : null,
+      createdBy: json['created_by'] as String?,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'tool_search_output',
+    'id': id,
+    if (callId != null) 'call_id': callId,
+    'execution': execution.toJson(),
+    'tools': tools.map((e) => e.toJson()).toList(),
+    if (status != null) 'status': status!.toJson(),
+    if (createdBy != null) 'created_by': createdBy,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ToolSearchOutputItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          callId == other.callId &&
+          execution == other.execution &&
+          listsEqual(tools, other.tools) &&
+          status == other.status &&
+          createdBy == other.createdBy;
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    callId,
+    execution,
+    Object.hashAll(tools),
+    status,
+    createdBy,
+  );
+
+  @override
+  String toString() =>
+      'ToolSearchOutputItem(id: $id, callId: $callId, execution: $execution, tools: $tools, status: $status)';
+}
+
+/// A computer use tool call output item.
+@immutable
+class ComputerCallOutputItem extends OutputItem {
+  /// Unique identifier.
+  final String id;
+
+  /// The call ID for this computer call.
+  final String callId;
+
+  /// The action to perform (legacy singular format).
+  final ComputerAction? action;
+
+  /// The actions to perform (batched format).
+  final List<ComputerAction>? actions;
+
+  /// Pending safety checks.
+  final List<Map<String, dynamic>>? pendingSafetyChecks;
+
+  /// Item status.
+  final ItemStatus? status;
+
+  /// Creates a [ComputerCallOutputItem].
+  const ComputerCallOutputItem({
+    required this.id,
+    required this.callId,
+    this.action,
+    this.actions,
+    this.pendingSafetyChecks,
+    this.status,
+  });
+
+  /// Creates a [ComputerCallOutputItem] from JSON.
+  factory ComputerCallOutputItem.fromJson(Map<String, dynamic> json) {
+    return ComputerCallOutputItem(
+      id: json['id'] as String,
+      callId: json['call_id'] as String,
+      action: json['action'] != null
+          ? ComputerAction.fromJson(json['action'] as Map<String, dynamic>)
+          : null,
+      actions: (json['actions'] as List?)
+          ?.map((e) => ComputerAction.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      pendingSafetyChecks: (json['pending_safety_checks'] as List?)
+          ?.map((e) => e as Map<String, dynamic>)
+          .toList(),
+      status: json['status'] != null
+          ? ItemStatus.fromJson(json['status'] as String)
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'computer_call',
+    'id': id,
+    'call_id': callId,
+    if (action != null) 'action': action!.toJson(),
+    if (actions != null) 'actions': actions!.map((e) => e.toJson()).toList(),
+    if (pendingSafetyChecks != null)
+      'pending_safety_checks': pendingSafetyChecks,
+    if (status != null) 'status': status!.toJson(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ComputerCallOutputItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          callId == other.callId &&
+          action == other.action &&
+          listsEqual(actions, other.actions) &&
+          listsEqual(pendingSafetyChecks, other.pendingSafetyChecks) &&
+          status == other.status;
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    callId,
+    action,
+    actions != null ? Object.hashAll(actions!) : null,
+    pendingSafetyChecks,
+    status,
+  );
+
+  @override
+  String toString() =>
+      'ComputerCallOutputItem(id: $id, callId: $callId, action: $action, actions: $actions, status: $status)';
 }

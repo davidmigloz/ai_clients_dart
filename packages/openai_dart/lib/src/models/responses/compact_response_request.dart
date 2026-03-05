@@ -18,12 +18,16 @@ class CompactResponseRequest {
   /// Optional instructions to apply during compaction.
   final String? instructions;
 
+  /// Optional prompt cache key.
+  final String? promptCacheKey;
+
   /// Creates a [CompactResponseRequest].
   const CompactResponseRequest({
     required this.model,
     this.input,
     this.previousResponseId,
     this.instructions,
+    this.promptCacheKey,
   });
 
   /// Creates a [CompactResponseRequest] from JSON.
@@ -35,6 +39,7 @@ class CompactResponseRequest {
           : null,
       previousResponseId: json['previous_response_id'] as String?,
       instructions: json['instructions'] as String?,
+      promptCacheKey: json['prompt_cache_key'] as String?,
     );
   }
 
@@ -44,6 +49,7 @@ class CompactResponseRequest {
     if (input != null) 'input': input!.toJson(),
     if (previousResponseId != null) 'previous_response_id': previousResponseId,
     if (instructions != null) 'instructions': instructions,
+    if (promptCacheKey != null) 'prompt_cache_key': promptCacheKey,
   };
 
   /// Creates a copy with replaced values.
@@ -54,6 +60,7 @@ class CompactResponseRequest {
     Object? input = unsetCopyWithValue,
     Object? previousResponseId = unsetCopyWithValue,
     Object? instructions = unsetCopyWithValue,
+    Object? promptCacheKey = unsetCopyWithValue,
   }) {
     return CompactResponseRequest(
       model: model ?? this.model,
@@ -64,6 +71,9 @@ class CompactResponseRequest {
       instructions: instructions == unsetCopyWithValue
           ? this.instructions
           : instructions as String?,
+      promptCacheKey: promptCacheKey == unsetCopyWithValue
+          ? this.promptCacheKey
+          : promptCacheKey as String?,
     );
   }
 
@@ -75,11 +85,17 @@ class CompactResponseRequest {
           model == other.model &&
           input == other.input &&
           previousResponseId == other.previousResponseId &&
-          instructions == other.instructions;
+          instructions == other.instructions &&
+          promptCacheKey == other.promptCacheKey;
 
   @override
-  int get hashCode =>
-      Object.hash(model, input, previousResponseId, instructions);
+  int get hashCode => Object.hash(
+    model,
+    input,
+    previousResponseId,
+    instructions,
+    promptCacheKey,
+  );
 
   @override
   String toString() =>

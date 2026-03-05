@@ -123,6 +123,7 @@ class ImageContentPart extends ContentPart {
   /// Controls how the model processes the image:
   /// - [ImageDetail.low]: Faster, lower cost, less detail
   /// - [ImageDetail.high]: Slower, higher cost, more detail
+  /// - [ImageDetail.original]: Use the original image without modification
   /// - [ImageDetail.auto]: Let the model decide (default)
   final ImageDetail? detail;
 
@@ -204,7 +205,10 @@ enum ImageDetail {
   low('low'),
 
   /// High detail: more thorough processing, higher cost.
-  high('high');
+  high('high'),
+
+  /// Original detail: use the original image without modification.
+  original('original');
 
   const ImageDetail(this.value);
 
@@ -216,6 +220,7 @@ enum ImageDetail {
     'auto' => ImageDetail.auto,
     'low' => ImageDetail.low,
     'high' => ImageDetail.high,
+    'original' => ImageDetail.original,
     _ => throw FormatException('Unknown ImageDetail: $value'),
   };
 

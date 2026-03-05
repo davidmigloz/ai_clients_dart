@@ -19,9 +19,12 @@
 /// - [WebSearchTool] - Built-in web search
 /// - [FileSearchTool] - Search vector stores
 /// - [CodeInterpreterTool] - Execute code
-/// - [ComputerUseTool] - Control a computer
+/// - [ComputerUseTool] - Control a computer (preview)
+/// - [ComputerTool] - Control a computer (GA)
 /// - [ImageGenerationTool] - Generate images
 /// - [McpTool] - Model Context Protocol tools
+/// - [ToolSearchTool] - Search available tools
+/// - [NamespaceTool] - Group tools under a namespace
 ///
 /// ## Output Item Types
 ///
@@ -34,6 +37,9 @@
 /// - [CodeInterpreterCallOutputItem] - Code interpreter tool calls
 /// - [ImageGenerationCallOutputItem] - Image generation tool calls
 /// - [McpCallOutputItem] - MCP tool calls
+/// - [ToolSearchCallOutputItem] - Tool search calls
+/// - [ToolSearchOutputItem] - Tool search results
+/// - [ComputerCallOutputItem] - Computer use tool calls
 ///
 /// ## Example
 ///

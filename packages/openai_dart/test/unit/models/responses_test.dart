@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:openai_dart/src/models/chat/content_part.dart' show ImageDetail;
 import 'package:openai_dart/src/models/responses/responses.dart';
 import 'package:test/test.dart';
 
@@ -2298,6 +2299,721 @@ void main() {
       final restored = Annotation.fromJson(json);
       expect(restored, isA<ContainerFileCitation>());
       expect(restored, equals(citation));
+    });
+  });
+
+  // ================================================================
+  // GPT-5.4 API Release - New Types
+  // ================================================================
+
+  group('MessagePhase', () {
+    test('fromJson parses commentary', () {
+      expect(MessagePhase.fromJson('commentary'), MessagePhase.commentary);
+    });
+
+    test('fromJson parses final_answer', () {
+      expect(MessagePhase.fromJson('final_answer'), MessagePhase.finalAnswer);
+    });
+
+    test('toJson round-trip', () {
+      for (final phase in MessagePhase.values) {
+        expect(MessagePhase.fromJson(phase.toJson()), phase);
+      }
+    });
+
+    test('fromJson falls back to unknown', () {
+      expect(MessagePhase.fromJson('new_phase'), MessagePhase.unknown);
+    });
+  });
+
+  group('SearchContentType', () {
+    test('round-trip', () {
+      for (final type in SearchContentType.values) {
+        expect(SearchContentType.fromJson(type.toJson()), type);
+      }
+    });
+
+    test('fromJson falls back to unknown', () {
+      expect(SearchContentType.fromJson('video'), SearchContentType.unknown);
+    });
+  });
+
+  group('ToolSearchExecutionType', () {
+    test('round-trip', () {
+      for (final type in ToolSearchExecutionType.values) {
+        expect(ToolSearchExecutionType.fromJson(type.toJson()), type);
+      }
+    });
+
+    test('fromJson falls back to unknown', () {
+      expect(
+        ToolSearchExecutionType.fromJson('hybrid'),
+        ToolSearchExecutionType.unknown,
+      );
+    });
+  });
+
+  group('FunctionCallOutputStatus', () {
+    test('round-trip', () {
+      for (final status in FunctionCallOutputStatus.values) {
+        expect(FunctionCallOutputStatus.fromJson(status.toJson()), status);
+      }
+    });
+
+    test('fromJson falls back to unknown', () {
+      expect(
+        FunctionCallOutputStatus.fromJson('new_status'),
+        FunctionCallOutputStatus.unknown,
+      );
+    });
+
+    test('values are distinct from FunctionCallStatus', () {
+      expect(FunctionCallOutputStatus.inProgress.value, 'in_progress');
+      expect(FunctionCallOutputStatus.incomplete.value, 'incomplete');
+    });
+  });
+
+  group('ImageDetail original', () {
+    test('fromJson parses original', () {
+      expect(ImageDetail.fromJson('original'), ImageDetail.original);
+    });
+
+    test('toJson returns original', () {
+      expect(ImageDetail.original.toJson(), 'original');
+    });
+  });
+
+  group('ComputerTool', () {
+    test('round-trip', () {
+      const tool = ComputerTool();
+      final json = tool.toJson();
+      expect(json['type'], 'computer');
+      final restored = ResponseTool.fromJson(json);
+      expect(restored, isA<ComputerTool>());
+      expect(restored, equals(tool));
+    });
+
+    test('static factory', () {
+      final tool = ResponseTool.computer();
+      expect(tool, isA<ComputerTool>());
+    });
+  });
+
+  group('NamespaceTool', () {
+    test('round-trip', () {
+      const tool = NamespaceTool(
+        name: 'my_namespace',
+        description: 'A test namespace',
+        tools: [
+          FunctionTool(name: 'func1', description: 'First function'),
+          FunctionTool(name: 'func2', description: 'Second function'),
+        ],
+      );
+
+      final json = tool.toJson();
+      expect(json['type'], 'namespace');
+      expect(json['name'], 'my_namespace');
+      expect(json['description'], 'A test namespace');
+      expect(json['tools'], hasLength(2));
+
+      final restored = ResponseTool.fromJson(json);
+      expect(restored, isA<NamespaceTool>());
+      expect(restored, equals(tool));
+    });
+  });
+
+  group('ToolSearchTool', () {
+    test('round-trip', () {
+      const tool = ToolSearchTool(
+        execution: ToolSearchExecutionType.server,
+        description: 'Search for tools',
+        parameters: {'query': 'test'},
+      );
+
+      final json = tool.toJson();
+      expect(json['type'], 'tool_search');
+      expect(json['execution'], 'server');
+
+      final restored = ResponseTool.fromJson(json);
+      expect(restored, isA<ToolSearchTool>());
+      expect(restored, equals(tool));
+    });
+
+    test('client execution', () {
+      const tool = ToolSearchTool(execution: ToolSearchExecutionType.client);
+
+      final json = tool.toJson();
+      expect(json['execution'], 'client');
+      expect(json.containsKey('description'), isFalse);
+      expect(json.containsKey('parameters'), isFalse);
+    });
+  });
+
+  group('FunctionTool deferLoading', () {
+    test('round-trip with deferLoading', () {
+      const tool = FunctionTool(
+        name: 'test',
+        description: 'test func',
+        deferLoading: true,
+      );
+
+      final json = tool.toJson();
+      expect(json['defer_loading'], true);
+
+      final restored = FunctionTool.fromJson(json);
+      expect(restored.deferLoading, true);
+      expect(restored, equals(tool));
+    });
+
+    test('omits deferLoading when null', () {
+      const tool = FunctionTool(name: 'test');
+      final json = tool.toJson();
+      expect(json.containsKey('defer_loading'), isFalse);
+    });
+  });
+
+  group('McpTool deferLoading', () {
+    test('round-trip with deferLoading', () {
+      const tool = McpTool(
+        serverLabel: 'test',
+        serverUrl: 'https://example.com',
+        deferLoading: true,
+      );
+
+      final json = tool.toJson();
+      expect(json['defer_loading'], true);
+
+      final restored = McpTool.fromJson(json);
+      expect(restored.deferLoading, true);
+      expect(restored, equals(tool));
+    });
+  });
+
+  group('WebSearchTool searchContentTypes', () {
+    test('round-trip', () {
+      const tool = WebSearchTool(
+        searchContentTypes: [SearchContentType.text, SearchContentType.image],
+      );
+
+      final json = tool.toJson();
+      expect(json['search_content_types'], ['text', 'image']);
+
+      final restored = WebSearchTool.fromJson(json);
+      expect(restored.searchContentTypes, hasLength(2));
+      expect(restored, equals(tool));
+    });
+
+    test('omits when null', () {
+      const tool = WebSearchTool();
+      final json = tool.toJson();
+      expect(json.containsKey('search_content_types'), isFalse);
+    });
+  });
+
+  group('ComputerAction', () {
+    test('ClickAction round-trip', () {
+      const action = ClickAction(button: 'left', x: 100, y: 200);
+      final json = action.toJson();
+      expect(json['type'], 'click');
+      expect(json['button'], 'left');
+
+      final restored = ComputerAction.fromJson(json);
+      expect(restored, isA<ClickAction>());
+      expect(restored, equals(action));
+    });
+
+    test('DoubleClickAction round-trip', () {
+      const action = DoubleClickAction(x: 50, y: 75);
+      final json = action.toJson();
+      final restored = ComputerAction.fromJson(json);
+      expect(restored, isA<DoubleClickAction>());
+      expect(restored, equals(action));
+    });
+
+    test('DragAction round-trip', () {
+      const action = DragAction(
+        path: [
+          {'x': 0, 'y': 0},
+          {'x': 100, 'y': 100},
+        ],
+      );
+      final json = action.toJson();
+      final restored = ComputerAction.fromJson(json);
+      expect(restored, isA<DragAction>());
+    });
+
+    test('KeyPressAction round-trip', () {
+      const action = KeyPressAction(keys: ['ctrl', 'c']);
+      final json = action.toJson();
+      final restored = ComputerAction.fromJson(json);
+      expect(restored, isA<KeyPressAction>());
+      expect(restored, equals(action));
+    });
+
+    test('MoveAction round-trip', () {
+      const action = MoveAction(x: 10, y: 20);
+      final json = action.toJson();
+      final restored = ComputerAction.fromJson(json);
+      expect(restored, isA<MoveAction>());
+      expect(restored, equals(action));
+    });
+
+    test('ScreenshotAction round-trip', () {
+      const action = ScreenshotAction();
+      final json = action.toJson();
+      final restored = ComputerAction.fromJson(json);
+      expect(restored, isA<ScreenshotAction>());
+      expect(restored, equals(action));
+    });
+
+    test('ScrollAction round-trip', () {
+      const action = ScrollAction(x: 50, y: 50, scrollX: 0, scrollY: -100);
+      final json = action.toJson();
+      final restored = ComputerAction.fromJson(json);
+      expect(restored, isA<ScrollAction>());
+      expect(restored, equals(action));
+    });
+
+    test('TypeAction round-trip', () {
+      const action = TypeAction(text: 'hello world');
+      final json = action.toJson();
+      final restored = ComputerAction.fromJson(json);
+      expect(restored, isA<TypeAction>());
+      expect(restored, equals(action));
+    });
+
+    test('WaitAction round-trip', () {
+      const action = WaitAction();
+      final json = action.toJson();
+      final restored = ComputerAction.fromJson(json);
+      expect(restored, isA<WaitAction>());
+      expect(restored, equals(action));
+    });
+  });
+
+  group('ToolSearchCallOutputItem', () {
+    test('round-trip', () {
+      final json = {
+        'type': 'tool_search_call',
+        'id': 'tsc_1',
+        'call_id': 'call_1',
+        'execution': 'server',
+        'arguments': {'query': 'test'},
+        'status': 'completed',
+        'created_by': 'system',
+      };
+
+      final item = OutputItem.fromJson(json);
+      expect(item, isA<ToolSearchCallOutputItem>());
+      final tsc = item as ToolSearchCallOutputItem;
+      expect(tsc.id, 'tsc_1');
+      expect(tsc.callId, 'call_1');
+      expect(tsc.execution, ToolSearchExecutionType.server);
+      expect(tsc.createdBy, 'system');
+
+      final restored = OutputItem.fromJson(tsc.toJson());
+      expect(restored, equals(tsc));
+    });
+  });
+
+  group('ToolSearchOutputItem', () {
+    test('round-trip', () {
+      final json = {
+        'type': 'tool_search_output',
+        'id': 'tso_1',
+        'call_id': 'call_1',
+        'execution': 'client',
+        'tools': [
+          {'type': 'function', 'name': 'func1'},
+        ],
+        'status': 'completed',
+      };
+
+      final item = OutputItem.fromJson(json);
+      expect(item, isA<ToolSearchOutputItem>());
+      final tso = item as ToolSearchOutputItem;
+      expect(tso.tools, hasLength(1));
+      expect(tso.tools.first, isA<FunctionTool>());
+
+      final restored = OutputItem.fromJson(tso.toJson());
+      expect(restored, equals(tso));
+    });
+  });
+
+  group('ComputerCallOutputItem', () {
+    test('round-trip with singular action', () {
+      final json = {
+        'type': 'computer_call',
+        'id': 'cc_1',
+        'call_id': 'call_1',
+        'action': {'type': 'click', 'button': 'left', 'x': 100, 'y': 200},
+        'status': 'completed',
+      };
+
+      final item = OutputItem.fromJson(json);
+      expect(item, isA<ComputerCallOutputItem>());
+      final cc = item as ComputerCallOutputItem;
+      expect(cc.action, isA<ClickAction>());
+      expect(cc.actions, isNull);
+
+      final restored = OutputItem.fromJson(cc.toJson());
+      expect(restored, equals(cc));
+    });
+
+    test('round-trip with batched actions', () {
+      final json = {
+        'type': 'computer_call',
+        'id': 'cc_2',
+        'call_id': 'call_2',
+        'actions': [
+          {'type': 'click', 'button': 'left', 'x': 10, 'y': 20},
+          {'type': 'type', 'text': 'hello'},
+          {'type': 'screenshot'},
+        ],
+        'pending_safety_checks': [
+          {'check': 'content_moderation'},
+        ],
+      };
+
+      final item = OutputItem.fromJson(json);
+      expect(item, isA<ComputerCallOutputItem>());
+      final cc = item as ComputerCallOutputItem;
+      expect(cc.action, isNull);
+      expect(cc.actions, hasLength(3));
+      expect(cc.actions![0], isA<ClickAction>());
+      expect(cc.actions![1], isA<TypeAction>());
+      expect(cc.actions![2], isA<ScreenshotAction>());
+      expect(cc.pendingSafetyChecks, hasLength(1));
+    });
+  });
+
+  group('MessageOutputItem with phase', () {
+    test('round-trip with phase', () {
+      final json = {
+        'type': 'message',
+        'id': 'msg_1',
+        'role': 'assistant',
+        'content': [
+          {'type': 'output_text', 'text': 'Thinking...'},
+        ],
+        'status': 'completed',
+        'phase': 'commentary',
+      };
+
+      final item = OutputItem.fromJson(json);
+      expect(item, isA<MessageOutputItem>());
+      final msg = item as MessageOutputItem;
+      expect(msg.phase, MessagePhase.commentary);
+
+      final restored = OutputItem.fromJson(msg.toJson());
+      expect(restored, equals(msg));
+    });
+
+    test('phase omitted when null', () {
+      final json = {
+        'type': 'message',
+        'id': 'msg_1',
+        'role': 'assistant',
+        'content': <dynamic>[],
+      };
+
+      final item = OutputItem.fromJson(json) as MessageOutputItem;
+      expect(item.phase, isNull);
+      expect(item.toJson().containsKey('phase'), isFalse);
+    });
+  });
+
+  group('FunctionCallOutputItemResponse with namespace', () {
+    test('round-trip with namespace', () {
+      final json = {
+        'type': 'function_call',
+        'id': 'fc_1',
+        'call_id': 'call_1',
+        'name': 'get_weather',
+        'arguments': '{"city":"NYC"}',
+        'namespace': 'weather_tools',
+      };
+
+      final item = OutputItem.fromJson(json);
+      expect(item, isA<FunctionCallOutputItemResponse>());
+      final fc = item as FunctionCallOutputItemResponse;
+      expect(fc.namespace, 'weather_tools');
+
+      final restored = OutputItem.fromJson(fc.toJson());
+      expect(restored, equals(fc));
+    });
+
+    test('toFunctionCallItem preserves namespace', () {
+      const fc = FunctionCallOutputItemResponse(
+        id: 'fc_1',
+        callId: 'call_1',
+        name: 'test',
+        arguments: '{}',
+        namespace: 'ns',
+      );
+
+      final item = fc.toFunctionCallItem();
+      expect(item.namespace, 'ns');
+    });
+  });
+
+  group('MessageItem with phase', () {
+    test('round-trip', () {
+      final json = {
+        'type': 'message',
+        'role': 'assistant',
+        'content': [
+          {'type': 'input_text', 'text': 'hi'},
+        ],
+        'phase': 'final_answer',
+      };
+
+      final item = Item.fromJson(json) as MessageItem;
+      expect(item.phase, MessagePhase.finalAnswer);
+
+      final restored = Item.fromJson(item.toJson()) as MessageItem;
+      expect(restored.phase, MessagePhase.finalAnswer);
+      expect(restored, equals(item));
+    });
+  });
+
+  group('FunctionCallItem with namespace', () {
+    test('round-trip', () {
+      final json = {
+        'type': 'function_call',
+        'call_id': 'call_1',
+        'name': 'test',
+        'arguments': '{}',
+        'namespace': 'my_ns',
+      };
+
+      final item = Item.fromJson(json) as FunctionCallItem;
+      expect(item.namespace, 'my_ns');
+
+      final restored = Item.fromJson(item.toJson()) as FunctionCallItem;
+      expect(restored.namespace, 'my_ns');
+      expect(restored, equals(item));
+    });
+  });
+
+  group('ToolSearchCallItemParam', () {
+    test('round-trip', () {
+      final json = {
+        'type': 'tool_search_call',
+        'id': 'tsc_1',
+        'call_id': 'call_1',
+        'execution': 'server',
+        'arguments': {'query': 'test'},
+      };
+
+      final item = Item.fromJson(json);
+      expect(item, isA<ToolSearchCallItemParam>());
+      final tsc = item as ToolSearchCallItemParam;
+      expect(tsc.execution, ToolSearchExecutionType.server);
+
+      final restored = Item.fromJson(tsc.toJson());
+      expect(restored, equals(tsc));
+    });
+
+    test('round-trip without execution', () {
+      final json = {
+        'type': 'tool_search_call',
+        'id': 'tsc_2',
+        'arguments': {'query': 'test'},
+      };
+
+      final item = Item.fromJson(json);
+      expect(item, isA<ToolSearchCallItemParam>());
+      final tsc = item as ToolSearchCallItemParam;
+      expect(tsc.execution, isNull);
+
+      final restored = Item.fromJson(tsc.toJson());
+      expect(restored, equals(tsc));
+    });
+  });
+
+  group('ToolSearchOutputItemParam', () {
+    test('round-trip', () {
+      final json = {
+        'type': 'tool_search_output',
+        'execution': 'client',
+        'tools': [
+          {'type': 'function', 'name': 'func1'},
+        ],
+      };
+
+      final item = Item.fromJson(json);
+      expect(item, isA<ToolSearchOutputItemParam>());
+      final tso = item as ToolSearchOutputItemParam;
+      expect(tso.tools, hasLength(1));
+
+      final restored = Item.fromJson(tso.toJson());
+      expect(restored, equals(tso));
+    });
+
+    test('round-trip without execution', () {
+      final json = {
+        'type': 'tool_search_output',
+        'tools': [
+          {'type': 'function', 'name': 'func1'},
+        ],
+      };
+
+      final item = Item.fromJson(json);
+      expect(item, isA<ToolSearchOutputItemParam>());
+      final tso = item as ToolSearchOutputItemParam;
+      expect(tso.execution, isNull);
+
+      final restored = Item.fromJson(tso.toJson());
+      expect(restored, equals(tso));
+    });
+  });
+
+  group('InputFileContent with detail', () {
+    test('round-trip with detail', () {
+      const content = InputFileContent.url(
+        'https://example.com/file.pdf',
+        detail: 'high',
+      );
+
+      final json = content.toJson();
+      expect(json['detail'], 'high');
+
+      final restored = InputFileContent.fromJson(json);
+      expect(restored.detail, 'high');
+      expect(restored, equals(content));
+    });
+
+    test('omits detail when null', () {
+      const content = InputFileContent.url('https://example.com/file.pdf');
+      expect(content.toJson().containsKey('detail'), isFalse);
+    });
+  });
+
+  group('CompactResponseRequest with promptCacheKey', () {
+    test('round-trip', () {
+      const request = CompactResponseRequest(
+        model: 'gpt-4o',
+        promptCacheKey: 'cache_key_1',
+      );
+
+      final json = request.toJson();
+      expect(json['prompt_cache_key'], 'cache_key_1');
+
+      final restored = CompactResponseRequest.fromJson(json);
+      expect(restored.promptCacheKey, 'cache_key_1');
+      expect(restored, equals(request));
+    });
+
+    test('copyWith sets promptCacheKey', () {
+      const request = CompactResponseRequest(model: 'gpt-4o');
+      final updated = request.copyWith(promptCacheKey: 'key');
+      expect(updated.promptCacheKey, 'key');
+    });
+  });
+
+  group('Response with promptCacheKey and promptCacheRetention', () {
+    test('fromJson parses new fields', () {
+      final json = {
+        'id': 'resp_1',
+        'object': 'response',
+        'created_at': 1234567890,
+        'status': 'completed',
+        'output': <dynamic>[],
+        'prompt_cache_key': 'cache_key_1',
+        'prompt_cache_retention': '24h',
+      };
+
+      final response = Response.fromJson(json);
+      expect(response.promptCacheKey, 'cache_key_1');
+      expect(response.promptCacheRetention, '24h');
+    });
+
+    test('toJson includes new fields', () {
+      const response = Response(
+        id: 'resp_1',
+        object: 'response',
+        createdAt: 1234567890,
+        status: ResponseStatus.completed,
+        output: [],
+        promptCacheKey: 'key',
+        promptCacheRetention: 'in-memory',
+      );
+
+      final json = response.toJson();
+      expect(json['prompt_cache_key'], 'key');
+      expect(json['prompt_cache_retention'], 'in-memory');
+    });
+
+    test('omits when null', () {
+      const response = Response(
+        id: 'resp_1',
+        object: 'response',
+        createdAt: 1234567890,
+        status: ResponseStatus.completed,
+        output: [],
+      );
+
+      final json = response.toJson();
+      expect(json.containsKey('prompt_cache_key'), isFalse);
+      expect(json.containsKey('prompt_cache_retention'), isFalse);
+    });
+  });
+
+  group('Response convenience getters for new types', () {
+    test('toolSearchCalls returns ToolSearchCallOutputItems', () {
+      const response = Response(
+        id: 'resp_1',
+        object: 'response',
+        createdAt: 1234567890,
+        status: ResponseStatus.completed,
+        output: [
+          ToolSearchCallOutputItem(
+            id: 'tsc_1',
+            callId: 'call_1',
+            execution: ToolSearchExecutionType.server,
+          ),
+        ],
+      );
+
+      expect(response.toolSearchCalls, hasLength(1));
+    });
+
+    test('toolSearchOutputs returns ToolSearchOutputItems', () {
+      const response = Response(
+        id: 'resp_1',
+        object: 'response',
+        createdAt: 1234567890,
+        status: ResponseStatus.completed,
+        output: [
+          ToolSearchOutputItem(
+            id: 'tso_1',
+            callId: 'call_1',
+            execution: ToolSearchExecutionType.server,
+            tools: <ResponseTool>[],
+          ),
+        ],
+      );
+
+      expect(response.toolSearchOutputs, hasLength(1));
+    });
+
+    test('computerCalls returns ComputerCallOutputItems', () {
+      const response = Response(
+        id: 'resp_1',
+        object: 'response',
+        createdAt: 1234567890,
+        status: ResponseStatus.completed,
+        output: [
+          ComputerCallOutputItem(
+            id: 'cc_1',
+            callId: 'call_1',
+            action: ClickAction(button: 'left', x: 0, y: 0),
+          ),
+        ],
+      );
+
+      expect(response.computerCalls, hasLength(1));
     });
   });
 }

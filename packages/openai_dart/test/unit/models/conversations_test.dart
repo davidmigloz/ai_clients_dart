@@ -692,4 +692,86 @@ void main() {
       expect(item1, isNot(equals(item3)));
     });
   });
+
+  group('ConversationToolSearchCallItem', () {
+    test('round-trip', () {
+      final json = {
+        'type': 'tool_search_call',
+        'id': 'tsc_1',
+        'call_id': 'call_1',
+        'execution': 'server',
+        'arguments': {'query': 'test'},
+        'status': 'completed',
+      };
+
+      final item = ConversationItem.fromJson(json);
+      expect(item, isA<ConversationToolSearchCallItem>());
+      final tsc = item as ConversationToolSearchCallItem;
+      expect(tsc.id, 'tsc_1');
+      expect(tsc.callId, 'call_1');
+      expect(tsc.execution, 'server');
+
+      final restored = ConversationItem.fromJson(tsc.toJson());
+      expect(restored, equals(tsc));
+    });
+
+    test('round-trip with null callId', () {
+      final json = {
+        'type': 'tool_search_call',
+        'id': 'tsc_2',
+        'execution': 'server',
+      };
+
+      final item = ConversationItem.fromJson(json);
+      expect(item, isA<ConversationToolSearchCallItem>());
+      final tsc = item as ConversationToolSearchCallItem;
+      expect(tsc.callId, isNull);
+
+      final restored = ConversationItem.fromJson(tsc.toJson());
+      expect(restored, equals(tsc));
+    });
+  });
+
+  group('ConversationToolSearchOutputItem', () {
+    test('round-trip', () {
+      final json = {
+        'type': 'tool_search_output',
+        'id': 'tso_1',
+        'call_id': 'call_1',
+        'execution': 'client',
+        'tools': [
+          {'type': 'function', 'name': 'func1'},
+        ],
+        'status': 'completed',
+      };
+
+      final item = ConversationItem.fromJson(json);
+      expect(item, isA<ConversationToolSearchOutputItem>());
+      final tso = item as ConversationToolSearchOutputItem;
+      expect(tso.id, 'tso_1');
+      expect(tso.tools, hasLength(1));
+
+      final restored = ConversationItem.fromJson(tso.toJson());
+      expect(restored, equals(tso));
+    });
+
+    test('round-trip with null callId', () {
+      final json = {
+        'type': 'tool_search_output',
+        'id': 'tso_2',
+        'execution': 'client',
+        'tools': [
+          {'type': 'function', 'name': 'func1'},
+        ],
+      };
+
+      final item = ConversationItem.fromJson(json);
+      expect(item, isA<ConversationToolSearchOutputItem>());
+      final tso = item as ConversationToolSearchOutputItem;
+      expect(tso.callId, isNull);
+
+      final restored = ConversationItem.fromJson(tso.toJson());
+      expect(restored, equals(tso));
+    });
+  });
 }
