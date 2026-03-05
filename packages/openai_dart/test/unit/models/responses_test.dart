@@ -2516,6 +2516,25 @@ void main() {
       expect(restored.tools[1], isA<CustomTool>());
       expect(restored, equals(ns));
     });
+
+    test('unknown type in namespace falls back to UnknownNamespaceTool', () {
+      final json = {
+        'type': 'namespace',
+        'name': 'ns',
+        'description': 'desc',
+        'tools': [
+          {'type': 'future_tool', 'name': 'ft'},
+        ],
+      };
+
+      final ns = ResponseTool.fromJson(json) as NamespaceTool;
+      expect(ns.tools, hasLength(1));
+      expect(ns.tools.first, isA<UnknownNamespaceTool>());
+
+      // Round-trips without loss
+      final restored = ResponseTool.fromJson(ns.toJson()) as NamespaceTool;
+      expect(restored, equals(ns));
+    });
   });
 
   group('ToolSearchTool', () {

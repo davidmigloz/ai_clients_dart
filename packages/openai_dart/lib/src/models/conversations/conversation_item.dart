@@ -4,6 +4,7 @@ import '../responses/common/equality_helpers.dart';
 import '../responses/config/function_call_status.dart';
 import '../responses/config/item_status.dart';
 import '../responses/config/tool_search_execution_type.dart';
+import '../responses/tools/response_tool.dart';
 import 'conversation_content.dart';
 import 'conversation_message.dart';
 
@@ -1018,7 +1019,7 @@ class ConversationComputerCallOutputItem extends ConversationItem {
           callId == other.callId;
 
   @override
-  int get hashCode => Object.hash(id, callId, output);
+  int get hashCode => Object.hash(id, callId);
 
   @override
   String toString() =>
@@ -1181,7 +1182,7 @@ class ConversationToolSearchOutputItem extends ConversationItem {
   final ToolSearchExecutionType? execution;
 
   /// The discovered tools.
-  final List<Map<String, dynamic>>? tools;
+  final List<ResponseTool>? tools;
 
   /// Item status.
   final ItemStatus? status;
@@ -1204,7 +1205,7 @@ class ConversationToolSearchOutputItem extends ConversationItem {
           ? ToolSearchExecutionType.fromJson(json['execution'] as String)
           : null,
       tools: (json['tools'] as List?)
-          ?.map((e) => e as Map<String, dynamic>)
+          ?.map((e) => ResponseTool.fromJson(e as Map<String, dynamic>))
           .toList(),
       status: json['status'] != null
           ? ItemStatus.fromJson(json['status'] as String)
@@ -1218,7 +1219,7 @@ class ConversationToolSearchOutputItem extends ConversationItem {
     'id': id,
     if (callId != null) 'call_id': callId,
     if (execution != null) 'execution': execution!.toJson(),
-    if (tools != null) 'tools': tools,
+    if (tools != null) 'tools': tools!.map((e) => e.toJson()).toList(),
     if (status != null) 'status': status!.toJson(),
   };
 
@@ -1230,12 +1231,17 @@ class ConversationToolSearchOutputItem extends ConversationItem {
           id == other.id &&
           callId == other.callId &&
           execution == other.execution &&
-          listOfMapsDeepEqual(tools, other.tools) &&
+          listsEqual(tools, other.tools) &&
           status == other.status;
 
   @override
-  int get hashCode =>
-      Object.hash(id, callId, execution, listOfMapsHashCode(tools), status);
+  int get hashCode => Object.hash(
+    id,
+    callId,
+    execution,
+    tools != null ? Object.hashAll(tools!) : null,
+    status,
+  );
 
   @override
   String toString() =>

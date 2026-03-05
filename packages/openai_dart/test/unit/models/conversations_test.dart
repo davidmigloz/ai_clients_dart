@@ -2,6 +2,7 @@ import 'package:openai_dart/src/models/conversations/conversations.dart';
 import 'package:openai_dart/src/models/responses/config/item_status.dart';
 import 'package:openai_dart/src/models/responses/config/tool_search_execution_type.dart';
 import 'package:openai_dart/src/models/responses/items/item.dart';
+import 'package:openai_dart/src/models/responses/tools/response_tool.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -771,6 +772,7 @@ void main() {
       final tso = item as ConversationToolSearchOutputItem;
       expect(tso.id, 'tso_1');
       expect(tso.tools, hasLength(1));
+      expect(tso.tools!.first, isA<FunctionTool>());
 
       final restored = ConversationItem.fromJson(tso.toJson());
       expect(restored, equals(tso));
@@ -819,18 +821,14 @@ void main() {
         id: 'tso_4',
         callId: 'call_4',
         execution: ToolSearchExecutionType.server,
-        tools: [
-          {'type': 'function', 'name': 'func1'},
-        ],
+        tools: [FunctionTool(name: 'func1')],
         status: ItemStatus.completed,
       );
       const b = ConversationToolSearchOutputItem(
         id: 'tso_4',
         callId: 'call_4',
         execution: ToolSearchExecutionType.server,
-        tools: [
-          {'type': 'function', 'name': 'func2'},
-        ],
+        tools: [FunctionTool(name: 'func2')],
         status: ItemStatus.completed,
       );
       expect(a, isNot(equals(b)));

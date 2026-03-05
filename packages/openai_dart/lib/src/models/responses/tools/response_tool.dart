@@ -979,12 +979,10 @@ class NamespaceTool extends ResponseTool {
       description: json['description'] as String,
       tools: (json['tools'] as List).map<NamespaceAllowedTool>((e) {
         final map = e as Map<String, dynamic>;
-        return switch (map['type'] as String) {
+        return switch (map['type'] as String?) {
           'function' => FunctionTool.fromJson(map),
           'custom' => CustomTool.fromJson(map),
-          final t => throw FormatException(
-            'Unsupported namespace tool type: $t',
-          ),
+          _ => UnknownNamespaceTool(map),
         };
       }).toList(),
     );
@@ -1157,4 +1155,34 @@ class CustomTool extends ResponseTool implements NamespaceAllowedTool {
   @override
   String toString() =>
       'CustomTool(name: $name, description: $description, format: $format, deferLoading: $deferLoading)';
+}
+
+/// An unknown namespace tool for forward compatibility.
+///
+/// Returned by [NamespaceTool.fromJson] when an unrecognized tool type is
+/// encountered inside a namespace. Preserves the raw JSON so the data can
+/// be round-tripped without loss.
+@immutable
+class UnknownNamespaceTool implements NamespaceAllowedTool {
+  /// The raw JSON data for this tool.
+  final Map<String, dynamic> data;
+
+  /// Creates an [UnknownNamespaceTool].
+  const UnknownNamespaceTool(this.data);
+
+  @override
+  Map<String, dynamic> toJson() => data;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnknownNamespaceTool &&
+          runtimeType == other.runtimeType &&
+          mapsEqual(data, other.data);
+
+  @override
+  int get hashCode => mapHash(data);
+
+  @override
+  String toString() => 'UnknownNamespaceTool(data: $data)';
 }
