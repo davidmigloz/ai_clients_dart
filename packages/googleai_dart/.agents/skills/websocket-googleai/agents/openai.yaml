@@ -1,4 +1,4 @@
 interface:
-  display_name: "Googleai WebSocket"
-  short_description: "Manage Googleai websocket workflow"
+  display_name: "Google AI WebSocket"
+  short_description: "Manage Google AI WebSocket workflow"
   default_prompt: "Use $websocket-googleai to review API changes, scaffold updates, and verify this package."

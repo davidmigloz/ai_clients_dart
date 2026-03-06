@@ -129,6 +129,20 @@ class MigratedSkillContractTests(unittest.TestCase):
                         offenders.append(f"{path.relative_to(ROOT)} -> {banned}")
         self.assertEqual(offenders, [])
 
+    def test_googleai_skill_labels_use_consistent_product_capitalization(self) -> None:
+        expected = {
+            ROOT / "packages" / "googleai_dart" / ".agents" / "skills" / "openapi-googleai" / "agents" / "openai.yaml": (
+                '  display_name: "Google AI OpenAPI"\n'
+                '  short_description: "Manage Google AI OpenAPI workflow"\n'
+            ),
+            ROOT / "packages" / "googleai_dart" / ".agents" / "skills" / "websocket-googleai" / "agents" / "openai.yaml": (
+                '  display_name: "Google AI WebSocket"\n'
+                '  short_description: "Manage Google AI WebSocket workflow"\n'
+            ),
+        }
+        for path, snippet in expected.items():
+            self.assertIn(snippet, path.read_text(), msg=f"Unexpected skill label text in {path}")
+
     def test_full_verify_passes_for_all_real_skills(self) -> None:
         for config_dir in CONFIG_DIRS:
             exit_code, payload = command_verify(

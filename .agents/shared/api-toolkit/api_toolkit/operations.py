@@ -940,14 +940,19 @@ def _discover_barrel_files(config: ToolkitConfig) -> list[Path]:
     return [config.resolve_package_path(config.package.barrel_file)]
 
 
-def _parse_exports(path: Path) -> set[Path]:
+def _parse_exports(path: Path, visited: set[Path] | None = None) -> set[Path]:
+    visited = visited or set()
+    resolved_path = path.resolve()
+    if resolved_path in visited:
+        return set()
+    visited.add(resolved_path)
     content = read_text(path)
     exported: set[Path] = set()
     for match in re.finditer(r"export\s+'([^']+\.dart)'", content):
         resolved = (path.parent / match.group(1)).resolve()
         exported.add(resolved)
         if resolved.exists():
-            exported.update(_parse_exports(resolved))
+            exported.update(_parse_exports(resolved, visited))
     return exported
 
 
@@ -1257,7 +1262,7 @@ def _scaffold_enum_source(class_name: str, values: list[str]) -> str:
     unique_members: list[tuple[str, str]] = []
     seen = set()
     for member, raw in members:
-        if member in seen:
+        while member in seen:
             member = f"{member}Value"
         seen.add(member)
         unique_members.append((member, raw))
@@ -1808,6 +1813,7 @@ def command_create(args: Any) -> tuple[int, dict[str, Any]]:
     updated_workspace = _workspace_pubspec_update(root_pubspec, f"packages/{args.package_name}")
     spec_source_path = specs_dir / ("openapi.source.json" if args.spec_file else "openapi.json")
     canonical_spec_path = specs_dir / "openapi.json"
+    license_content = "" if args.dry_run else (repo_root / "LICENSE").read_text()
 
     writes = {
         package_root / "pubspec.yaml": (
@@ -1853,7 +1859,7 @@ def command_create(args: Any) -> tuple[int, dict[str, Any]]:
         ),
         skill_dir / "agents" / "openai.yaml": _default_skill_yaml(skill_name, f"{args.display_name} OpenAPI"),
         creation_plan_path: _creation_plan(args.package_name, args.display_name, shortname, manifest),
-        package_root / "LICENSE": (repo_root / "LICENSE").read_text(),
+        package_root / "LICENSE": license_content,
     }
     if args.spec_file:
         writes[spec_source_path] = json.dumps(spec_payload, indent=2) + "\n"

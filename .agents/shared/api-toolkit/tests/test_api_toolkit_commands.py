@@ -794,6 +794,44 @@ class ApiToolkitCommandTests(unittest.TestCase):
             self.assertFalse((root / "packages" / "new_client_dart").exists())
             self.assertTrue(any(path.endswith("manifest.json") for path in payload["files"]))
 
+    def test_create_dry_run_does_not_require_license_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            spec_file = root / "spec.json"
+            spec_file.write_text(
+                json.dumps(
+                    {
+                        "openapi": "3.1.0",
+                        "info": {"title": "Licenseless API", "version": "1"},
+                        "paths": {},
+                        "components": {"schemas": {}},
+                    }
+                )
+            )
+            previous_cwd = Path.cwd()
+            try:
+                os.chdir(root)
+                exit_code, payload = command_create(
+                    SimpleNamespace(
+                        package_name="licenseless_client_dart",
+                        display_name="Licenseless Client",
+                        spec_url=None,
+                        spec_file=spec_file,
+                        shortname=None,
+                        auth_env_var=[],
+                        repo_root=None,
+                        output_root="packages",
+                        dry_run=True,
+                    )
+                )
+            finally:
+                os.chdir(previous_cwd)
+
+            self.assertEqual(exit_code, 0)
+            self.assertFalse((root / "packages" / "licenseless_client_dart").exists())
+            self.assertTrue(any(path.endswith("LICENSE") for path in payload["files"]))
+
     def test_create_respects_repo_root_outside_repo(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_repo, tempfile.TemporaryDirectory() as tmp_other:
             repo_root = Path(tmp_repo)
@@ -1141,6 +1179,62 @@ class ApiToolkitCommandTests(unittest.TestCase):
             self.assertIn("enum ExampleState", payload["preview"])
             self.assertIn("unknown", payload["preview"])
             self.assertTrue(payload["output"].endswith("example_state.dart"))
+
+    def test_scaffold_enum_preview_deduplicates_three_colliding_members(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            output_dir = root / "tmp" / "sample"
+            (package_root / "specs" / "openapi.json").write_text(
+                json.dumps(
+                    {
+                        "openapi": "3.1.0",
+                        "info": {"title": "Sample", "version": "1"},
+                        "paths": {},
+                        "components": {"schemas": {"ExampleState": {"type": "string", "enum": ["foo", "FOO", "Foo"]}}},
+                    }
+                )
+            )
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample API", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(output_dir),
+                },
+                manifest_payload={
+                    "surface": "openapi",
+                    "type_mappings": {},
+                    "placement": {"categories": {}, "default_category": "common", "parent_model_patterns": {}},
+                    "coverage": {},
+                    "types": {
+                        "ExampleState": {
+                            "spec": "main",
+                            "kind": "enum",
+                            "dart_class": "ExampleState",
+                            "file": "lib/src/models/common/example_state.dart",
+                        }
+                    },
+                },
+            )
+
+            exit_code, payload = command_scaffold(
+                SimpleNamespace(
+                    config_dir=config_dir,
+                    target="enum",
+                    name="ExampleState",
+                    spec_name=None,
+                    output=None,
+                    dry_run=True,
+                )
+            )
+
+            self.assertEqual(exit_code, 0)
+            self.assertIn("  foo,", payload["preview"])
+            self.assertIn("  fooValue,", payload["preview"])
+            self.assertIn("  fooValueValue,", payload["preview"])
 
     def test_scaffold_required_refs_and_numbers_are_non_nullable_when_required(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -1736,6 +1830,44 @@ class ApiToolkitCommandTests(unittest.TestCase):
 
             exit_code, payload = command_verify(
                 SimpleNamespace(config_dir=config_dir, spec_name="live", checks="exports", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["results"]["exports"]["missing_exports"], [])
+
+    def test_verify_exports_handles_circular_barrel_exports(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample API", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(root / "tmp" / "sample"),
+                },
+            )
+            (package_root / "specs" / "openapi.json").write_text(
+                json.dumps({"openapi": "3.1.0", "info": {"title": "Sample", "version": "1"}, "paths": {}, "components": {"schemas": {}}})
+            )
+            (package_root / "lib" / "a.dart").write_text("export 'sample_dart.dart';\n")
+            (package_root / "lib" / "sample_dart.dart").write_text(
+                "export 'src/models/common/example.dart';\n"
+                "export 'a.dart';\n"
+            )
+
+            exit_code, payload = command_verify(
+                SimpleNamespace(
+                    config_dir=config_dir,
+                    spec_name=None,
+                    checks="exports",
+                    scope="all",
+                    type_name=None,
+                    baseline=None,
+                    git_ref=None,
+                )
             )
 
             self.assertEqual(exit_code, 0)

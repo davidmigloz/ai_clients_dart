@@ -1,4 +1,4 @@
 interface:
-  display_name: "Googleai OpenAPI"
-  short_description: "Manage Googleai openapi workflow"
+  display_name: "Google AI OpenAPI"
+  short_description: "Manage Google AI OpenAPI workflow"
   default_prompt: "Use $openapi-googleai to review API changes, scaffold updates, and verify this package."
