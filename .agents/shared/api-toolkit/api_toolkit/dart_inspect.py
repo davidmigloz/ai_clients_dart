@@ -84,9 +84,15 @@ def extract_method_body(content: str, method_pattern: str) -> str:
     brace_index = content.find("{", start)
     if brace_index == -1:
         arrow_index = content.find("=>", start)
+        if arrow_index == -1 and "=>" in match.group(0):
+            arrow_index = content.rfind("=>", match.start(), match.end())
         if arrow_index == -1:
             return ""
         semicolon_index = content.find(";", arrow_index)
+        if semicolon_index == -1:
+            newline_index = content.find("\n", arrow_index)
+            end_index = newline_index if newline_index != -1 else len(content)
+            return content[arrow_index:end_index]
         return content[arrow_index:semicolon_index]
     depth = 0
     for position in range(brace_index, len(content)):
@@ -117,4 +123,3 @@ def snake_case(name: str) -> str:
 def to_pascal_case(name: str) -> str:
     words = re.split(r"[_\s-]+", name)
     return "".join(word[:1].upper() + word[1:] for word in words if word)
-
