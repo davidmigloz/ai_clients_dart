@@ -144,7 +144,7 @@ def main(argv: list[str] | None = None) -> int:
         return exc.exit_code
     except Exception as exc:  # pragma: no cover - safety net
         print(f"ERROR: {exc}", file=sys.stderr)
-        return EXIT_USAGE
+        return EXIT_FAILURE
 
 
 if __name__ == "__main__":  # pragma: no cover
