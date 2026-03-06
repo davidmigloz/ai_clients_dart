@@ -57,6 +57,8 @@ Perform all applicable checks before proceeding. Fail fast with an actionable er
 
 ## Step 2: Detect Changes Per Package
 
+> **IMPORTANT — Working directory**: All `git` and shell commands throughout this skill assume the **repository root** as the working directory. The Bash tool does not persist `cd` between calls, so **always use absolute paths or prefix commands with `cd /path/to/repo &&`** when running shell commands. Never rely on a previous `cd` having set the working directory. This applies to every step, not just this one.
+
 ### Discover packages
 
 Read the `workspace` list from the root `pubspec.yaml` (the source of truth). Each entry is a relative path like `packages/foo`. Extract the package directory name from each path (the last segment). If parsing fails, fall back to `ls packages/`.
@@ -71,9 +73,9 @@ Read the `workspace` list from the root `pubspec.yaml` (the source of truth). Ea
 
 2. **Get commits since that tag**:
    ```bash
-   git log --format="%H%x1f%s%x1f%b%x1e" {tag}..HEAD -- packages/{pkg}/
+   git log --format="%H|||%s|||%b|||END" {tag}..HEAD -- packages/{pkg}/
    ```
-   Use ASCII Unit Separator (`%x1f`) between fields and ASCII Record Separator (`%x1e`) after each commit. **Parse by splitting on `\x1e` first** (to get individual commit records), then split each record on `\x1f` (to get hash, subject, body). This is critical because commit bodies can contain blank lines that would otherwise make commit boundaries ambiguous.
+   Use `|||` as field delimiter and `|||END` as record terminator. **Parse by splitting on `|||END` first** (to get individual commit records), then split each record on `|||` (to get hash, subject, body). Avoid using ASCII control characters (`%x1f`, `%x1e`) as delimiters — they can be silently stripped or mangled by shell processing, leading to empty results.
 
 3. **No previous tag** (first release): use all commits touching `packages/{pkg}/`.
 
