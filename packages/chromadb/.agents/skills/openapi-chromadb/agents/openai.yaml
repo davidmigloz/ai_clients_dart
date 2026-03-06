@@ -1,4 +1,4 @@
 interface:
-  display_name: "Chromadb OpenAPI"
-  short_description: "Manage Chromadb openapi workflow"
+  display_name: "ChromaDB OpenAPI"
+  short_description: "Manage ChromaDB OpenAPI workflow"
   default_prompt: "Use $openapi-chromadb to review API changes, scaffold updates, and verify this package."

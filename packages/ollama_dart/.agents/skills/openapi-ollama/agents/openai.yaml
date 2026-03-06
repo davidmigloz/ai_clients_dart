@@ -1,4 +1,4 @@
 interface:
   display_name: "Ollama OpenAPI"
-  short_description: "Manage Ollama openapi workflow"
+  short_description: "Manage Ollama OpenAPI workflow"
   default_prompt: "Use $openapi-ollama to review API changes, scaffold updates, and verify this package."

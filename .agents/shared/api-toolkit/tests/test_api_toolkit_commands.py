@@ -1039,6 +1039,9 @@ class ApiToolkitCommandTests(unittest.TestCase):
             self.assertEqual(generated_config.package.name, "bootstrap_client_dart")
             self.assertIn("Item", generated_config.manifest.types)
             self.assertIn("ItemState", generated_config.manifest.types)
+            skill_yaml_text = (skill_root / "agents" / "openai.yaml").read_text()
+            self.assertIn('  display_name: "Bootstrap Client OpenAPI"\n', skill_yaml_text)
+            self.assertIn('  short_description: "Manage Bootstrap Client OpenAPI workflow"\n', skill_yaml_text)
             self.assertTrue(generated_config.specs["main"].requires_auth)
             self.assertEqual(
                 generated_config.specs["main"].auth_env_vars,

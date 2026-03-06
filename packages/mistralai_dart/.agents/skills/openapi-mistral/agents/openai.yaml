@@ -1,4 +1,4 @@
 interface:
-  display_name: "Mistral OpenAPI"
-  short_description: "Manage Mistral openapi workflow"
+  display_name: "Mistral AI OpenAPI"
+  short_description: "Manage Mistral AI OpenAPI workflow"
   default_prompt: "Use $openapi-mistral to review API changes, scaffold updates, and verify this package."

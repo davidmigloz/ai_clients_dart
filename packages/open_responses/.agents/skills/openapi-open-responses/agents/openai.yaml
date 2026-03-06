@@ -1,4 +1,4 @@
 interface:
-  display_name: "Open Responses OpenAPI"
-  short_description: "Manage Open Responses openapi workflow"
+  display_name: "OpenResponses OpenAPI"
+  short_description: "Manage OpenResponses OpenAPI workflow"
   default_prompt: "Use $openapi-open-responses to review API changes, scaffold updates, and verify this package."

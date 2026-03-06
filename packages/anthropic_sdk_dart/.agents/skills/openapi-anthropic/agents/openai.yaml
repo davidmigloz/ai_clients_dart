@@ -1,4 +1,4 @@
 interface:
   display_name: "Anthropic OpenAPI"
-  short_description: "Manage Anthropic openapi workflow"
+  short_description: "Manage Anthropic OpenAPI workflow"
   default_prompt: "Use $openapi-anthropic to review API changes, scaffold updates, and verify this package."

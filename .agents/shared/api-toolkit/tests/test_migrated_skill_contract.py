@@ -129,19 +129,16 @@ class MigratedSkillContractTests(unittest.TestCase):
                         offenders.append(f"{path.relative_to(ROOT)} -> {banned}")
         self.assertEqual(offenders, [])
 
-    def test_googleai_skill_labels_use_consistent_product_capitalization(self) -> None:
-        expected = {
-            ROOT / "packages" / "googleai_dart" / ".agents" / "skills" / "openapi-googleai" / "agents" / "openai.yaml": (
-                '  display_name: "Google AI OpenAPI"\n'
-                '  short_description: "Manage Google AI OpenAPI workflow"\n'
-            ),
-            ROOT / "packages" / "googleai_dart" / ".agents" / "skills" / "websocket-googleai" / "agents" / "openai.yaml": (
-                '  display_name: "Google AI WebSocket"\n'
-                '  short_description: "Manage Google AI WebSocket workflow"\n'
-            ),
-        }
-        for path, snippet in expected.items():
-            self.assertIn(snippet, path.read_text(), msg=f"Unexpected skill label text in {path}")
+    def test_real_skill_labels_use_canonical_product_and_surface_names(self) -> None:
+        for config_dir in CONFIG_DIRS:
+            config = load_toolkit_config(config_dir)
+            surface = "WebSocket" if config.manifest.surface == "websocket" else "OpenAPI"
+            expected = (
+                f'  display_name: "{config.package.display_name} {surface}"\n'
+                f'  short_description: "Manage {config.package.display_name} {surface} workflow"\n'
+            )
+            skill_yaml = config_dir.parent / "agents" / "openai.yaml"
+            self.assertIn(expected, skill_yaml.read_text(), msg=f"Unexpected skill label text in {skill_yaml}")
 
     def test_full_verify_passes_for_all_real_skills(self) -> None:
         for config_dir in CONFIG_DIRS:

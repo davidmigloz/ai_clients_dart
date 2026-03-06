@@ -1452,11 +1452,12 @@ def _workspace_pubspec_update(pubspec: Path, package_path: str) -> str:
     return content[: workspace_match.start()] + replacement + content[workspace_match.end() :]
 
 
-def _default_skill_yaml(skill_name: str, display_name: str) -> str:
+def _default_skill_yaml(skill_name: str, product_display_name: str, surface_label: str) -> str:
+    display_name = f"{product_display_name} {surface_label}"
     return (
         "interface:\n"
         f'  display_name: "{display_name}"\n'
-        f'  short_description: "Manage {display_name} API workflow"\n'
+        f'  short_description: "Manage {display_name} workflow"\n'
         f'  default_prompt: "Use ${skill_name} to review API changes, scaffold updates, and verify the client package."\n'
     )
 
@@ -1857,7 +1858,7 @@ def command_create(args: Any) -> tuple[int, dict[str, Any]]:
             f"packages/{args.package_name}/.agents/skills/{skill_name}/config",
             args.package_name,
         ),
-        skill_dir / "agents" / "openai.yaml": _default_skill_yaml(skill_name, f"{args.display_name} OpenAPI"),
+        skill_dir / "agents" / "openai.yaml": _default_skill_yaml(skill_name, args.display_name, "OpenAPI"),
         creation_plan_path: _creation_plan(args.package_name, args.display_name, shortname, manifest),
         package_root / "LICENSE": license_content,
     }

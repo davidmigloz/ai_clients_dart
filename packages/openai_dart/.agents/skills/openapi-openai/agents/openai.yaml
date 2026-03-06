@@ -1,4 +1,4 @@
 interface:
-  display_name: "Openai OpenAPI"
-  short_description: "Manage Openai openapi workflow"
+  display_name: "OpenAI OpenAPI"
+  short_description: "Manage OpenAI OpenAPI workflow"
   default_prompt: "Use $openapi-openai to review API changes, scaffold updates, and verify this package."
