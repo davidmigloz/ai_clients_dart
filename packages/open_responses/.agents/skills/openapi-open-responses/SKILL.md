@@ -17,11 +17,12 @@ description: Update open_responses from OpenResponses OpenAPI changes. Use for s
 ```bash
 python3 .agents/shared/api-toolkit/scripts/api_toolkit.py fetch   --config-dir packages/open_responses/.agents/skills/openapi-open-responses/config
 ```
+Fetch writes the candidate spec to the configured `output_dir` as `latest-<spec>.json`.
 2. Review:
 ```bash
 python3 .agents/shared/api-toolkit/scripts/api_toolkit.py review   --config-dir packages/open_responses/.agents/skills/openapi-open-responses/config
 ```
-3. Implement with `scaffold`, package references, and the reviewed candidate spec.
+3. Implement with `scaffold` plus the package references, then promote the reviewed candidate from `output_dir/latest-<spec>.json` into `packages/open_responses/specs/` before final verification.
 4. Verify:
 ```bash
 python3 .agents/shared/api-toolkit/scripts/api_toolkit.py verify   --config-dir packages/open_responses/.agents/skills/openapi-open-responses/config   --checks all --scope all

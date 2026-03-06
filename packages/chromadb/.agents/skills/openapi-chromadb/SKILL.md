@@ -17,11 +17,12 @@ description: Update chromadb from ChromaDB OpenAPI changes. Use for spec refresh
 ```bash
 python3 .agents/shared/api-toolkit/scripts/api_toolkit.py fetch   --config-dir packages/chromadb/.agents/skills/openapi-chromadb/config
 ```
+Fetch writes the candidate spec to the configured `output_dir` as `latest-<spec>.json`.
 2. Review:
 ```bash
 python3 .agents/shared/api-toolkit/scripts/api_toolkit.py review   --config-dir packages/chromadb/.agents/skills/openapi-chromadb/config
 ```
-3. Implement with `scaffold`, package references, and the reviewed candidate spec.
+3. Implement with `scaffold` plus the package references, then promote the reviewed candidate from `output_dir/latest-<spec>.json` into `packages/chromadb/specs/` before final verification.
 4. Verify:
 ```bash
 python3 .agents/shared/api-toolkit/scripts/api_toolkit.py verify   --config-dir packages/chromadb/.agents/skills/openapi-chromadb/config   --checks all --scope all

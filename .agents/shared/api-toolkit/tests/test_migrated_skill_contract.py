@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sys
 import unittest
 from pathlib import Path
@@ -147,6 +148,24 @@ class MigratedSkillContractTests(unittest.TestCase):
             for entry in config.manifest.types.values():
                 if entry.kind == "skip" and "critical" in entry.tags:
                     offenders.append(f"{config_dir}: {entry.key}")
+        self.assertEqual(offenders, [])
+
+    def test_real_skill_workflows_describe_candidate_spec_promotion(self) -> None:
+        for config_dir in CONFIG_DIRS:
+            text = (config_dir.parent / "SKILL.md").read_text()
+            self.assertIn("latest-<spec>.json", text, msg=f"Missing candidate spec guidance in {config_dir}")
+            self.assertIn("/specs/", text, msg=f"Missing canonical spec guidance in {config_dir}")
+
+    def test_real_local_file_specs_omit_remote_fetch_fields(self) -> None:
+        offenders: list[str] = []
+        for config_dir in CONFIG_DIRS:
+            raw = json.loads((config_dir / "specs.json").read_text())
+            for spec_name, spec in raw["specs"].items():
+                if spec.get("fetch_mode") != "local_file":
+                    continue
+                remote_only = sorted(key for key in ("url", "requires_auth", "auth_env_vars") if key in spec)
+                if remote_only:
+                    offenders.append(f"{config_dir}:{spec_name} -> {', '.join(remote_only)}")
         self.assertEqual(offenders, [])
 
     def test_full_verify_passes_for_all_real_skills(self) -> None:

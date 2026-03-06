@@ -1499,12 +1499,13 @@ description: Update {package_name} from {display_name} {surface} changes. Use fo
 python3 .agents/shared/api-toolkit/scripts/api_toolkit.py fetch \\
   --config-dir packages/{package_name}/.agents/skills/{surface}-{shortname}/config
 ```
+Fetch writes the candidate spec to the configured `output_dir` as `latest-<spec>.json`.
 2. Review:
 ```bash
 python3 .agents/shared/api-toolkit/scripts/api_toolkit.py review \\
   --config-dir packages/{package_name}/.agents/skills/{surface}-{shortname}/config
 ```
-3. Implement with `scaffold` plus the package references, then promote the reviewed spec into `packages/{package_name}/specs/`.
+3. Implement with `scaffold` plus the package references, then promote the reviewed candidate from `output_dir/latest-<spec>.json` into `packages/{package_name}/specs/` before final verification.
 4. Verify:
 ```bash
 python3 .agents/shared/api-toolkit/scripts/api_toolkit.py verify \\
@@ -1626,7 +1627,7 @@ def _creation_plan(package_name: str, display_name: str, shortname: str, manifes
         "- Run `review` after the first fetch to confirm the baseline is stable.",
         "- Use `scaffold --target enum` for enums before object models.",
         "- Fill in resources after core models are in place.",
-        "- Promote the reviewed candidate spec into `specs/openapi.json` before final verification.",
+        "- Promote the reviewed candidate from `output_dir/latest-main.json` into `specs/openapi.json` before final verification.",
         "- If you run commands outside the repo root, use an absolute `--config-dir`.",
         "",
         "## Suggested Scaffold Commands",

@@ -7,7 +7,7 @@ description: Update googleai_dart from Google AI WebSocket schema changes. Use f
 
 ## Prerequisites
 
-- Auth: `GEMINI_API_KEY`, `GOOGLE_AI_API_KEY`
+- Auth: No auth env vars required for fetch/review; runtime WebSocket usage still uses Google AI credentials.
 - CLI: `python3 .agents/shared/api-toolkit/scripts/api_toolkit.py`
 - Use an absolute `--config-dir` when running outside the repo root.
 
@@ -17,11 +17,12 @@ description: Update googleai_dart from Google AI WebSocket schema changes. Use f
 ```bash
 python3 .agents/shared/api-toolkit/scripts/api_toolkit.py fetch   --config-dir packages/googleai_dart/.agents/skills/websocket-googleai/config
 ```
+Fetch writes the candidate spec to the configured `output_dir` as `latest-<spec>.json`.
 2. Review:
 ```bash
 python3 .agents/shared/api-toolkit/scripts/api_toolkit.py review   --config-dir packages/googleai_dart/.agents/skills/websocket-googleai/config
 ```
-3. Implement with `scaffold`, package references, and the reviewed candidate spec.
+3. Implement with `scaffold` plus the package references, then promote the reviewed candidate from `output_dir/latest-<spec>.json` into `packages/googleai_dart/specs/` before final verification.
 4. Verify:
 ```bash
 python3 .agents/shared/api-toolkit/scripts/api_toolkit.py verify   --config-dir packages/googleai_dart/.agents/skills/websocket-googleai/config   --checks all --scope all

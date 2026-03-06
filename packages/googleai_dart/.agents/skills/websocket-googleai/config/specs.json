@@ -2,13 +2,7 @@
   "specs": {
     "live": {
       "name": "Gemini Live API",
-      "url": "https://ai.google.dev/api/live",
       "local_file": "live-api-schema.json",
-      "requires_auth": true,
-      "auth_env_vars": [
-        "GEMINI_API_KEY",
-        "GOOGLE_AI_API_KEY"
-      ],
       "experimental": false,
       "description": "Real-time bidirectional audio/video streaming via WebSocket",
       "websocket_endpoints": {

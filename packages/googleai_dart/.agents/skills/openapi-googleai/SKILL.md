@@ -19,13 +19,14 @@ python3 .agents/shared/api-toolkit/scripts/api_toolkit.py fetch \
   --config-dir packages/googleai_dart/.agents/skills/openapi-googleai/config \
   --spec-name main
 ```
+Fetch writes the candidate spec to the configured `output_dir` as `latest-<spec>.json`.
 2. Review the same spec:
 ```bash
 python3 .agents/shared/api-toolkit/scripts/api_toolkit.py review \
   --config-dir packages/googleai_dart/.agents/skills/openapi-googleai/config \
   --spec-name main
 ```
-3. Implement with `scaffold`, package references, and the reviewed candidate spec.
+3. Implement with `scaffold` plus the package references, then promote the reviewed candidate from `output_dir/latest-<spec>.json` into `packages/googleai_dart/specs/` before final verification.
 4. Verify:
 ```bash
 python3 .agents/shared/api-toolkit/scripts/api_toolkit.py verify \

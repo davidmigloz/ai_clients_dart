@@ -1164,6 +1164,11 @@ class ApiToolkitCommandTests(unittest.TestCase):
             skill_yaml_text = (skill_root / "agents" / "openai.yaml").read_text()
             self.assertIn('  display_name: "Bootstrap Client OpenAPI"\n', skill_yaml_text)
             self.assertIn('  short_description: "Manage Bootstrap Client OpenAPI workflow"\n', skill_yaml_text)
+            skill_markdown = (skill_root / "SKILL.md").read_text()
+            self.assertIn("configured `output_dir` as `latest-<spec>.json`", skill_markdown)
+            self.assertIn("`output_dir/latest-<spec>.json` into `packages/bootstrap_client_dart/specs/`", skill_markdown)
+            creation_plan_text = (skill_root / "creation-plan.md").read_text()
+            self.assertIn("`output_dir/latest-main.json` into `specs/openapi.json`", creation_plan_text)
             self.assertTrue(generated_config.specs["main"].requires_auth)
             self.assertEqual(
                 generated_config.specs["main"].auth_env_vars,
