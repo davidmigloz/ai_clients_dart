@@ -1452,6 +1452,233 @@ class ApiToolkitCommandTests(unittest.TestCase):
                 "optionalNumber: json['optionalNumber'] != null ? (json['optionalNumber'] as num).toDouble() : null,",
                 preview,
             )
+            self.assertIn("'requiredNested': requiredNested.toJson(),", preview)
+            self.assertIn("if (optionalNested != null) 'optionalNested': optionalNested!.toJson(),", preview)
+            self.assertIn("'requiredNumber': requiredNumber,", preview)
+            self.assertIn("if (optionalNumber != null) 'optionalNumber': optionalNumber!,", preview)
+
+    def test_scaffold_preview_serializes_scalar_arrays(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            output_dir = root / "tmp" / "sample"
+            (package_root / "specs" / "openapi.json").write_text(
+                json.dumps(
+                    {
+                        "openapi": "3.1.0",
+                        "info": {"title": "Sample", "version": "1"},
+                        "paths": {},
+                        "components": {
+                            "schemas": {
+                                "Example": {
+                                    "type": "object",
+                                    "properties": {
+                                        "tags": {"type": "array", "items": {"type": "string"}},
+                                        "scores": {"type": "array", "items": {"type": "number"}},
+                                    },
+                                    "required": ["tags", "scores"],
+                                }
+                            }
+                        },
+                    }
+                )
+            )
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample API", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(output_dir),
+                },
+                manifest_payload={
+                    "surface": "openapi",
+                    "type_mappings": {},
+                    "placement": {"categories": {}, "default_category": "common", "parent_model_patterns": {}},
+                    "coverage": {},
+                    "types": {
+                        "Example": {
+                            "spec": "main",
+                            "kind": "object",
+                            "dart_class": "Example",
+                            "file": "lib/src/models/common/example.dart",
+                            "schema": "Example",
+                        }
+                    },
+                },
+            )
+
+            exit_code, payload = command_scaffold(
+                SimpleNamespace(
+                    config_dir=config_dir,
+                    target="schema",
+                    name="Example",
+                    spec_name=None,
+                    output=None,
+                    dry_run=True,
+                )
+            )
+
+            self.assertEqual(exit_code, 0)
+            preview = payload["preview"]
+            self.assertIn("tags: (json['tags'] as List<dynamic>).map((item) => item as String).toList(),", preview)
+            self.assertIn("scores: (json['scores'] as List<dynamic>).map((item) => (item as num).toDouble()).toList(),", preview)
+            self.assertIn("'tags': tags,", preview)
+            self.assertIn("'scores': scores,", preview)
+
+    def test_scaffold_preview_serializes_ref_arrays(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            output_dir = root / "tmp" / "sample"
+            (package_root / "specs" / "openapi.json").write_text(
+                json.dumps(
+                    {
+                        "openapi": "3.1.0",
+                        "info": {"title": "Sample", "version": "1"},
+                        "paths": {},
+                        "components": {
+                            "schemas": {
+                                "Nested": {
+                                    "type": "object",
+                                    "properties": {"id": {"type": "string"}},
+                                },
+                                "Example": {
+                                    "type": "object",
+                                    "properties": {
+                                        "items": {
+                                            "type": "array",
+                                            "items": {"$ref": "#/components/schemas/Nested"},
+                                        }
+                                    },
+                                    "required": ["items"],
+                                },
+                            }
+                        },
+                    }
+                )
+            )
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample API", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(output_dir),
+                },
+                manifest_payload={
+                    "surface": "openapi",
+                    "type_mappings": {},
+                    "placement": {"categories": {}, "default_category": "common", "parent_model_patterns": {}},
+                    "coverage": {},
+                    "types": {
+                        "Example": {
+                            "spec": "main",
+                            "kind": "object",
+                            "dart_class": "Example",
+                            "file": "lib/src/models/common/example.dart",
+                            "schema": "Example",
+                        }
+                    },
+                },
+            )
+
+            exit_code, payload = command_scaffold(
+                SimpleNamespace(
+                    config_dir=config_dir,
+                    target="schema",
+                    name="Example",
+                    spec_name=None,
+                    output=None,
+                    dry_run=True,
+                )
+            )
+
+            self.assertEqual(exit_code, 0)
+            preview = payload["preview"]
+            self.assertIn(
+                "items: (json['items'] as List<dynamic>).map((item) => Nested.fromJson(item as Map<String, dynamic>)).toList(),",
+                preview,
+            )
+            self.assertIn("'items': items.map((item) => item.toJson()).toList(),", preview)
+
+    def test_scaffold_preview_marks_unsupported_array_shapes_with_todo(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            output_dir = root / "tmp" / "sample"
+            (package_root / "specs" / "openapi.json").write_text(
+                json.dumps(
+                    {
+                        "openapi": "3.1.0",
+                        "info": {"title": "Sample", "version": "1"},
+                        "paths": {},
+                        "components": {
+                            "schemas": {
+                                "Example": {
+                                    "type": "object",
+                                    "properties": {
+                                        "items": {
+                                            "type": "array",
+                                            "items": {
+                                                "anyOf": [
+                                                    {"type": "string"},
+                                                    {"$ref": "#/components/schemas/Nested"},
+                                                ]
+                                            },
+                                        }
+                                    },
+                                    "required": ["items"],
+                                },
+                                "Nested": {"type": "object", "properties": {"id": {"type": "string"}}},
+                            }
+                        },
+                    }
+                )
+            )
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample API", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(output_dir),
+                },
+                manifest_payload={
+                    "surface": "openapi",
+                    "type_mappings": {},
+                    "placement": {"categories": {}, "default_category": "common", "parent_model_patterns": {}},
+                    "coverage": {},
+                    "types": {
+                        "Example": {
+                            "spec": "main",
+                            "kind": "object",
+                            "dart_class": "Example",
+                            "file": "lib/src/models/common/example.dart",
+                            "schema": "Example",
+                        }
+                    },
+                },
+            )
+
+            exit_code, payload = command_scaffold(
+                SimpleNamespace(
+                    config_dir=config_dir,
+                    target="schema",
+                    name="Example",
+                    spec_name=None,
+                    output=None,
+                    dry_run=True,
+                )
+            )
+
+            self.assertEqual(exit_code, 0)
+            preview = payload["preview"]
+            self.assertIn("items: TODO(),", preview)
+            self.assertIn("'items': TODO(),", preview)
 
     def test_scaffold_copywith_uses_local_sentinel_and_supports_nullable_fields(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:

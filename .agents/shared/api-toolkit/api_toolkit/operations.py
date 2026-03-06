@@ -1397,6 +1397,63 @@ def _dart_type_from_prop(type_mappings: dict[str, str], prop: dict[str, Any]) ->
     return type_mappings.get(type_name, type_name or "dynamic")
 
 
+def _scaffold_array_from_json(field_name: str, prop: dict[str, Any], type_mappings: dict[str, str]) -> str:
+    items = prop.get("items") or {}
+    value = f"json['{field_name}']"
+    if "$ref" in items:
+        ref_type = items["$ref"].split("/")[-1]
+        expression = (
+            f"({value} as List<dynamic>).map((item) => "
+            f"{ref_type}.fromJson(item as Map<String, dynamic>)).toList()"
+        )
+    else:
+        item_type = items.get("type")
+        if not item_type:
+            return "TODO()"
+        if item_type == "number":
+            expression = f"({value} as List<dynamic>).map((item) => (item as num).toDouble()).toList()"
+        else:
+            dart_item_type = type_mappings.get(item_type, item_type or "dynamic")
+            if dart_item_type == "dynamic":
+                expression = f"({value} as List<dynamic>).toList()"
+            else:
+                expression = f"({value} as List<dynamic>).map((item) => item as {dart_item_type}).toList()"
+    if prop.get("required"):
+        return expression
+    return f"{value} != null ? {expression} : null"
+
+
+def _scaffold_from_json_expression(field_name: str, prop: dict[str, Any], type_mappings: dict[str, str]) -> str:
+    dart_type = _dart_type_from_prop(type_mappings, prop)
+    value = f"json['{field_name}']"
+    if prop.get("type") == "array":
+        return _scaffold_array_from_json(field_name, prop, type_mappings)
+    if prop.get("ref"):
+        if prop.get("required"):
+            return f"{dart_type}.fromJson({value} as Map<String, dynamic>)"
+        return f"{value} != null ? {dart_type}.fromJson({value} as Map<String, dynamic>) : null"
+    if dart_type == "double":
+        if prop.get("required"):
+            return f"({value} as num).toDouble()"
+        return f"{value} != null ? ({value} as num).toDouble() : null"
+    suffix = "" if prop.get("required") else "?"
+    return f"{value} as {dart_type}{suffix}"
+
+
+def _scaffold_to_json_expression(field_name: str, prop: dict[str, Any], type_mappings: dict[str, str]) -> str:
+    field = camel_case(field_name)
+    if prop.get("type") == "array":
+        items = prop.get("items") or {}
+        if "$ref" in items:
+            return f"{field}.map((item) => item.toJson()).toList()"
+        if items.get("type"):
+            return field
+        return "TODO()"
+    if prop.get("ref"):
+        return f"{field}.toJson()"
+    return field
+
+
 def _scaffold_class_source(class_name: str, props: dict[str, dict[str, Any]], type_mappings: dict[str, str]) -> str:
     lines = [
         "const Object _unsetCopyWithValue = _UnsetCopyWithSentinel();",
@@ -1421,33 +1478,20 @@ def _scaffold_class_source(class_name: str, props: dict[str, dict[str, Any]], ty
     lines.append(f"  factory {class_name}.fromJson(Map<String, dynamic> json) {{")
     lines.append(f"    return {class_name}(")
     for name, prop in props.items():
-        dart_type = _dart_type_from_prop(type_mappings, prop)
         field = camel_case(name)
-        if dart_type.startswith("List<") and prop.get("items"):
-            lines.append(f"      {field}: TODO(),")
-        elif prop.get("ref"):
-            if prop.get("required"):
-                lines.append(f"      {field}: {dart_type}.fromJson(json['{name}'] as Map<String, dynamic>),")
-            else:
-                lines.append(f"      {field}: json['{name}'] != null ? {dart_type}.fromJson(json['{name}'] as Map<String, dynamic>) : null,")
-        elif dart_type == "double":
-            if prop.get("required"):
-                lines.append(f"      {field}: (json['{name}'] as num).toDouble(),")
-            else:
-                lines.append(f"      {field}: json['{name}'] != null ? (json['{name}'] as num).toDouble() : null,")
-        else:
-            suffix = "" if prop.get("required") else "?"
-            lines.append(f"      {field}: json['{name}'] as {dart_type}{suffix},")
+        lines.append(f"      {field}: {_scaffold_from_json_expression(name, prop, type_mappings)},")
     lines.append("    );")
     lines.append("  }")
     lines.append("")
     lines.append("  Map<String, dynamic> toJson() => {")
     for name, prop in props.items():
         field = camel_case(name)
+        json_value = _scaffold_to_json_expression(name, prop, type_mappings)
         if prop.get("required"):
-            lines.append(f"    '{name}': {field},")
+            lines.append(f"    '{name}': {json_value},")
         else:
-            lines.append(f"    if ({field} != null) '{name}': {field},")
+            nullable_value = json_value if json_value == "TODO()" else json_value.replace(field, f"{field}!")
+            lines.append(f"    if ({field} != null) '{name}': {nullable_value},")
     lines.append("  };")
     lines.append("")
     lines.append(f"  {class_name} copyWith({{")
