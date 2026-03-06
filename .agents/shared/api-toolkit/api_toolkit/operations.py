@@ -507,7 +507,7 @@ def _compare_websocket(old_spec: dict[str, Any], new_spec: dict[str, Any]) -> di
     }
 
 
-def _coverage_gaps(config: ToolkitConfig, spec: dict[str, Any]) -> list[dict[str, Any]]:
+def _coverage_gaps(config: ToolkitConfig, spec: dict[str, Any], *, resource_filter: set[str] | None = None) -> list[dict[str, Any]]:
     resources_dir = config.package_root / config.package.resources_dir
     if not resources_dir.exists():
         return [{"resource": "*", "reason": f"Missing resources directory: {config.package.resources_dir}"}]
@@ -528,8 +528,9 @@ def _coverage_gaps(config: ToolkitConfig, spec: dict[str, Any]) -> list[dict[str
             operation = path_payload[method]
             if excluded_tags and any(tag in excluded_tags for tag in operation.get("tags", [])):
                 continue
-            parts = _trim_path_prefixes(path.strip("/").split("/"))
-            resource = snake_case(parts[0].replace("-", "_")) if parts else "root"
+            resource = _resource_name_for_path(path)
+            if resource_filter is not None and resource not in resource_filter:
+                continue
             if resource in excluded_resources:
                 continue
             expected_resources[resource].append({"method": method.upper(), "path": path})
@@ -541,6 +542,20 @@ def _coverage_gaps(config: ToolkitConfig, spec: dict[str, Any]) -> list[dict[str
         if not alternatives & implemented:
             gaps.append({"resource": resource, "reason": "No matching resource file", "endpoints": endpoints})
     return gaps
+
+
+def _resource_name_for_path(path: str) -> str:
+    parts = _trim_path_prefixes(path.strip("/").split("/"))
+    return snake_case(parts[0].replace("-", "_")) if parts else "root"
+
+
+def _changed_openapi_resources(diff: dict[str, Any]) -> set[str]:
+    resources: set[str] = set()
+    for endpoint in diff["endpoints"]["added"]:
+        resources.add(_resource_name_for_path(endpoint["path"]))
+    for endpoint in diff["endpoints"]["modified"]:
+        resources.add(_resource_name_for_path(endpoint["endpoint"]["path"]))
+    return resources
 
 
 def _entries_for_spec(config: ToolkitConfig, spec_name: str) -> list[ManifestEntry]:
@@ -885,22 +900,48 @@ def _verify_sealed_parent(config: ToolkitConfig, entry: ManifestEntry, variants:
     return issues
 
 
-def _verify_implementation(config: ToolkitConfig, spec_name: str, scope: str, type_name: str | None, baseline: Path | None, git_ref: str | None) -> tuple[int, dict[str, Any]]:
+def _sealed_parents_to_verify(selected: list[ManifestEntry], entries_for_spec: list[ManifestEntry]) -> list[ManifestEntry]:
+    parents_by_class = {entry.dart_class: entry for entry in entries_for_spec if entry.kind == "sealed_parent"}
+    parents: dict[str, ManifestEntry] = {}
+    for entry in selected:
+        if entry.kind == "sealed_parent":
+            parents[entry.dart_class] = entry
+        elif entry.parent and entry.parent in parents_by_class:
+            parents[entry.parent] = parents_by_class[entry.parent]
+    return list(parents.values())
+
+
+def _verify_implementation(
+    config: ToolkitConfig,
+    spec_name: str,
+    scope: str,
+    type_name: str | None,
+    baseline: Path | None,
+    git_ref: str | None,
+    *,
+    spec_payload: dict[str, Any] | None = None,
+    diff: dict[str, Any] | None = None,
+) -> tuple[int, dict[str, Any]]:
     if scope == "changed":
-        old_spec, new_spec = _load_old_new_payloads(config, spec_name, baseline=baseline, git_ref=git_ref)
-        diff = _compare_openapi(old_spec, new_spec) if config.manifest.surface == "openapi" else _compare_websocket(old_spec, new_spec)
-        spec_payload = new_spec
+        if diff is None or spec_payload is None:
+            old_spec, new_spec = _load_old_new_payloads(config, spec_name, baseline=baseline, git_ref=git_ref)
+            if diff is None:
+                diff = _compare_openapi(old_spec, new_spec) if config.manifest.surface == "openapi" else _compare_websocket(old_spec, new_spec)
+            if spec_payload is None:
+                spec_payload = new_spec
     else:
-        spec_payload = _load_spec_payload(config.canonical_spec_path(spec_name))
+        if spec_payload is None:
+            spec_payload = _load_spec_payload(config.canonical_spec_path(spec_name))
         diff = None
 
     selected, selection_issues = _select_entries(config, spec_name, scope, type_name, diff)
     issues = list(selection_issues)
-
-    parents = [entry for entry in selected if entry.kind == "sealed_parent"]
+    entries_for_spec = _entries_for_spec(config, spec_name)
+    parents = _sealed_parents_to_verify(selected, entries_for_spec)
     by_parent: dict[str, list[ManifestEntry]] = defaultdict(list)
-    for entry in selected:
-        if entry.parent:
+    parent_names = {parent.dart_class for parent in parents}
+    for entry in entries_for_spec:
+        if entry.parent in parent_names:
             by_parent[entry.parent].append(entry)
 
     for entry in selected:
@@ -920,7 +961,8 @@ def _verify_implementation(config: ToolkitConfig, spec_name: str, scope: str, ty
 
     coverage_gaps = []
     if config.manifest.surface == "openapi" and scope in {"changed", "all"}:
-        coverage_gaps = _coverage_gaps(config, spec_payload)
+        resource_filter = _changed_openapi_resources(diff) if scope == "changed" else None
+        coverage_gaps = _coverage_gaps(config, spec_payload, resource_filter=resource_filter)
         for gap in coverage_gaps:
             issues.append(_type_issue("error", gap["resource"], gap["reason"]))
 
@@ -2090,6 +2132,8 @@ def command_review(args: Any) -> tuple[int, dict[str, Any]]:
         None,
         args.baseline,
         args.git_ref,
+        spec_payload=new_payload,
+        diff=diff,
     )
     issues = list(verify_payload["issues"])
     coverage_gaps = verify_payload.get("coverage_gaps", [])

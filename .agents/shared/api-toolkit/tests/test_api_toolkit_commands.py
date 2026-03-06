@@ -682,7 +682,7 @@ class ApiToolkitCommandTests(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["missing_manifest_entries"], ["LoopA", "LoopB"])
 
-    def test_review_reuses_extracted_openapi_schemas_for_missing_enum_entries(self) -> None:
+    def test_review_reuses_loaded_payloads_and_extracted_openapi_schemas_for_missing_enum_entries(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
             self._write_workspace(root)
@@ -726,24 +726,29 @@ class ApiToolkitCommandTests(unittest.TestCase):
             )
 
             with patch(
-                "api_toolkit.operations._extract_openapi_schemas",
-                wraps=toolkit_operations._extract_openapi_schemas,
-            ) as extract_schemas:
-                exit_code, payload = command_review(
-                    SimpleNamespace(
-                        config_dir=config_dir,
-                        spec_name=None,
-                        baseline=None,
-                        git_ref=None,
-                        changelog_out=None,
-                        plan_out=None,
+                "api_toolkit.operations._load_old_new_payloads",
+                wraps=toolkit_operations._load_old_new_payloads,
+            ) as load_payloads:
+                with patch(
+                    "api_toolkit.operations._extract_openapi_schemas",
+                    wraps=toolkit_operations._extract_openapi_schemas,
+                ) as extract_schemas:
+                    exit_code, payload = command_review(
+                        SimpleNamespace(
+                            config_dir=config_dir,
+                            spec_name=None,
+                            baseline=None,
+                            git_ref=None,
+                            changelog_out=None,
+                            plan_out=None,
+                        )
                     )
-                )
 
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["missing_manifest_entries"], ["NewState"])
             self.assertTrue(any("--target enum --name NewState" in action for action in payload["actions"]))
-            self.assertEqual(extract_schemas.call_count, 5)
+            self.assertEqual(load_payloads.call_count, 1)
+            self.assertEqual(extract_schemas.call_count, 3)
 
     def test_review_spec_name_only_checks_selected_spec(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -1799,6 +1804,329 @@ class ApiToolkitCommandTests(unittest.TestCase):
 
             self.assertEqual(exit_code, 1)
             self.assertTrue(payload["results"]["implementation"]["coverage_gaps"])
+
+    def test_verify_scope_all_checks_skipped_sealed_variants(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample API", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(root / "tmp" / "sample"),
+                },
+                manifest_payload={
+                    "surface": "openapi",
+                    "type_mappings": {},
+                    "placement": {"categories": {}, "default_category": "common", "parent_model_patterns": {}},
+                    "coverage": {},
+                    "types": {
+                        "Message": {
+                            "spec": "main",
+                            "kind": "sealed_parent",
+                            "dart_class": "Message",
+                            "file": "lib/src/models/common/message.dart",
+                            "schema": None,
+                            "discriminator": {
+                                "field": "role",
+                                "mapping": {
+                                    "system": "#/components/schemas/SystemMessage",
+                                    "user": "#/components/schemas/UserMessage",
+                                },
+                            },
+                        },
+                        "SystemMessage": {
+                            "spec": "main",
+                            "kind": "skip",
+                            "dart_class": "SystemMessage",
+                            "file": "lib/src/models/common/message.dart",
+                            "schema": "SystemMessage",
+                            "parent": "Message",
+                        },
+                        "UserMessage": {
+                            "spec": "main",
+                            "kind": "skip",
+                            "dart_class": "UserMessage",
+                            "file": "lib/src/models/common/message.dart",
+                            "schema": "UserMessage",
+                            "parent": "Message",
+                        },
+                    },
+                },
+            )
+            (package_root / "specs" / "openapi.json").write_text(
+                json.dumps(
+                    {
+                        "openapi": "3.1.0",
+                        "info": {"title": "Sample", "version": "1"},
+                        "paths": {},
+                        "components": {
+                            "schemas": {
+                                "Message": {
+                                    "oneOf": [
+                                        {"$ref": "#/components/schemas/SystemMessage"},
+                                        {"$ref": "#/components/schemas/UserMessage"},
+                                    ],
+                                    "discriminator": {
+                                        "propertyName": "role",
+                                        "mapping": {
+                                            "system": "#/components/schemas/SystemMessage",
+                                            "user": "#/components/schemas/UserMessage",
+                                        },
+                                    },
+                                },
+                                "SystemMessage": {"type": "object", "properties": {"role": {"type": "string"}}},
+                                "UserMessage": {"type": "object", "properties": {"role": {"type": "string"}}},
+                            }
+                        },
+                    }
+                )
+            )
+            (package_root / "lib" / "src" / "models" / "common" / "message.dart").write_text(
+                "sealed class Message {\n"
+                "  factory Message.fromJson(Map<String, dynamic> json) {\n"
+                "    if (json['role'] == 'system') return SystemMessage.fromJson(json);\n"
+                "    return UserMessage.fromJson(json);\n"
+                "  }\n"
+                "}\n"
+                "\n"
+                "class SystemMessage extends Message {\n"
+                "  factory SystemMessage.fromJson(Map<String, dynamic> json) => SystemMessage();\n"
+                "}\n"
+                "\n"
+                "class UserMessage extends Message {\n"
+                "  factory UserMessage.fromJson(Map<String, dynamic> json) => UserMessage();\n"
+                "}\n"
+            )
+
+            exit_code, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+
+            self.assertEqual(exit_code, 1)
+            self.assertTrue(
+                any("discriminator value 'user'" in issue["message"] for issue in payload["results"]["implementation"]["issues"])
+            )
+
+    def test_verify_changed_scope_checks_parent_for_changed_skipped_variant(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            output_dir = root / "tmp" / "sample"
+            output_dir.mkdir(parents=True)
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample API", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(output_dir),
+                },
+                manifest_payload={
+                    "surface": "openapi",
+                    "type_mappings": {},
+                    "placement": {"categories": {}, "default_category": "common", "parent_model_patterns": {}},
+                    "coverage": {},
+                    "types": {
+                        "Message": {
+                            "spec": "main",
+                            "kind": "sealed_parent",
+                            "dart_class": "Message",
+                            "file": "lib/src/models/common/message.dart",
+                            "schema": None,
+                            "discriminator": {
+                                "field": "role",
+                                "mapping": {
+                                    "system": "#/components/schemas/SystemMessage",
+                                    "user": "#/components/schemas/UserMessage",
+                                },
+                            },
+                        },
+                        "SystemMessage": {
+                            "spec": "main",
+                            "kind": "skip",
+                            "dart_class": "SystemMessage",
+                            "file": "lib/src/models/common/message.dart",
+                            "schema": "SystemMessage",
+                            "parent": "Message",
+                        },
+                        "UserMessage": {
+                            "spec": "main",
+                            "kind": "skip",
+                            "dart_class": "UserMessage",
+                            "file": "lib/src/models/common/message.dart",
+                            "schema": "UserMessage",
+                            "parent": "Message",
+                        },
+                    },
+                },
+            )
+            old_spec = {
+                "openapi": "3.1.0",
+                "info": {"title": "Sample", "version": "1"},
+                "paths": {},
+                "components": {
+                    "schemas": {
+                        "Message": {
+                            "oneOf": [
+                                {"$ref": "#/components/schemas/SystemMessage"},
+                                {"$ref": "#/components/schemas/UserMessage"},
+                            ],
+                            "discriminator": {
+                                "propertyName": "role",
+                                "mapping": {
+                                    "system": "#/components/schemas/SystemMessage",
+                                    "user": "#/components/schemas/UserMessage",
+                                },
+                            },
+                        },
+                        "SystemMessage": {"type": "object", "properties": {"role": {"type": "string"}}},
+                        "UserMessage": {"type": "object", "properties": {"role": {"type": "string"}}},
+                    }
+                },
+            }
+            new_spec = {
+                "openapi": "3.1.0",
+                "info": {"title": "Sample", "version": "2"},
+                "paths": {},
+                "components": {
+                    "schemas": {
+                        "Message": old_spec["components"]["schemas"]["Message"],
+                        "SystemMessage": old_spec["components"]["schemas"]["SystemMessage"],
+                        "UserMessage": {
+                            "type": "object",
+                            "properties": {"role": {"type": "string"}, "id": {"type": "string"}},
+                        },
+                    }
+                },
+            }
+            (package_root / "specs" / "openapi.json").write_text(json.dumps(old_spec))
+            (output_dir / "latest-main.json").write_text(json.dumps(new_spec))
+            (package_root / "lib" / "src" / "models" / "common" / "message.dart").write_text(
+                "sealed class Message {\n"
+                "  factory Message.fromJson(Map<String, dynamic> json) {\n"
+                "    if (json['role'] == 'system') return SystemMessage.fromJson(json);\n"
+                "    return UserMessage.fromJson(json);\n"
+                "  }\n"
+                "}\n"
+                "\n"
+                "class SystemMessage extends Message {\n"
+                "  factory SystemMessage.fromJson(Map<String, dynamic> json) => SystemMessage();\n"
+                "}\n"
+                "\n"
+                "class UserMessage extends Message {\n"
+                "  factory UserMessage.fromJson(Map<String, dynamic> json) => UserMessage();\n"
+                "}\n"
+            )
+
+            exit_code, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="changed", type_name=None, baseline=None, git_ref=None)
+            )
+
+            self.assertEqual(exit_code, 1)
+            self.assertEqual(payload["results"]["implementation"]["selected_types"], ["UserMessage"])
+            self.assertTrue(
+                any("discriminator value 'user'" in issue["message"] for issue in payload["results"]["implementation"]["issues"])
+            )
+
+    def test_verify_changed_scope_ignores_unrelated_coverage_gaps(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            output_dir = root / "tmp" / "sample"
+            output_dir.mkdir(parents=True)
+            old_spec = {
+                "openapi": "3.1.0",
+                "info": {"title": "Sample", "version": "1"},
+                "paths": {
+                    "/v1/widgets": {"get": {"operationId": "listWidgets"}},
+                    "/v1/gadgets": {"get": {"operationId": "listGadgets"}},
+                },
+                "components": {"schemas": {}},
+            }
+            new_spec = {
+                "openapi": "3.1.0",
+                "info": {"title": "Sample", "version": "2"},
+                "paths": {
+                    "/v1/widgets": {
+                        "get": {
+                            "operationId": "listWidgets",
+                            "parameters": [{"name": "verbose", "in": "query", "schema": {"type": "boolean"}}],
+                        }
+                    },
+                    "/v1/gadgets": {"get": {"operationId": "listGadgets"}},
+                },
+                "components": {"schemas": {}},
+            }
+            (package_root / "specs" / "openapi.json").write_text(json.dumps(old_spec))
+            (output_dir / "latest-main.json").write_text(json.dumps(new_spec))
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(output_dir),
+                },
+            )
+            (package_root / "lib" / "src" / "resources" / "widgets_resource.dart").write_text("class WidgetsResource {}\n")
+
+            exit_code, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="changed", type_name=None, baseline=None, git_ref=None)
+            )
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["results"]["implementation"]["coverage_gaps"], [])
+
+    def test_verify_changed_scope_reports_changed_resource_coverage_gap(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            output_dir = root / "tmp" / "sample"
+            output_dir.mkdir(parents=True)
+            old_spec = {
+                "openapi": "3.1.0",
+                "info": {"title": "Sample", "version": "1"},
+                "paths": {"/v1/widgets": {"get": {"operationId": "listWidgets"}}},
+                "components": {"schemas": {}},
+            }
+            new_spec = {
+                "openapi": "3.1.0",
+                "info": {"title": "Sample", "version": "2"},
+                "paths": {
+                    "/v1/widgets": {
+                        "get": {
+                            "operationId": "listWidgets",
+                            "parameters": [{"name": "verbose", "in": "query", "schema": {"type": "boolean"}}],
+                        }
+                    }
+                },
+                "components": {"schemas": {}},
+            }
+            (package_root / "specs" / "openapi.json").write_text(json.dumps(old_spec))
+            (output_dir / "latest-main.json").write_text(json.dumps(new_spec))
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(output_dir),
+                },
+            )
+
+            exit_code, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="changed", type_name=None, baseline=None, git_ref=None)
+            )
+
+            self.assertEqual(exit_code, 1)
+            self.assertEqual([gap["resource"] for gap in payload["results"]["implementation"]["coverage_gaps"]], ["widgets"])
 
     def test_verify_extension_without_schema_only_checks_linkage(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
