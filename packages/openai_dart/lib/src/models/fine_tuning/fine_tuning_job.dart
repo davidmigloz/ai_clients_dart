@@ -1417,18 +1417,25 @@ class FineTuneReinforcementHyperparameters {
   String toString() => 'FineTuneReinforcementHyperparameters(...)';
 }
 
-// Helper for deep map equality.
-bool _mapEquals(Map<String, dynamic> a, Map<String, dynamic> b) {
-  if (a.length != b.length) return false;
-  for (final key in a.keys) {
-    if (!b.containsKey(key)) return false;
-    final aVal = a[key];
-    final bVal = b[key];
-    if (aVal is Map<String, dynamic> && bVal is Map<String, dynamic>) {
-      if (!_mapEquals(aVal, bVal)) return false;
-    } else if (aVal != bVal) {
-      return false;
+// Helper for deep equality of dynamic values (maps, lists, primitives).
+bool _deepEquals(dynamic a, dynamic b) {
+  if (a is Map<String, dynamic> && b is Map<String, dynamic>) {
+    if (a.length != b.length) return false;
+    for (final key in a.keys) {
+      if (!b.containsKey(key)) return false;
+      if (!_deepEquals(a[key], b[key])) return false;
     }
+    return true;
   }
-  return true;
+  if (a is List && b is List) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (!_deepEquals(a[i], b[i])) return false;
+    }
+    return true;
+  }
+  return a == b;
 }
+
+bool _mapEquals(Map<String, dynamic> a, Map<String, dynamic> b) =>
+    _deepEquals(a, b);
