@@ -645,10 +645,13 @@ class CreateFineTuningIntegration {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is CreateFineTuningIntegration && runtimeType == other.runtimeType;
+      other is CreateFineTuningIntegration &&
+          runtimeType == other.runtimeType &&
+          type == other.type &&
+          wandb == other.wandb;
 
   @override
-  int get hashCode => type.hashCode;
+  int get hashCode => Object.hash(type, wandb);
 
   @override
   String toString() => 'CreateFineTuningIntegration(type: $type)';
@@ -964,10 +967,26 @@ class CheckpointMetrics {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is CheckpointMetrics && runtimeType == other.runtimeType;
+      other is CheckpointMetrics &&
+          runtimeType == other.runtimeType &&
+          step == other.step &&
+          trainLoss == other.trainLoss &&
+          trainMeanTokenAccuracy == other.trainMeanTokenAccuracy &&
+          validLoss == other.validLoss &&
+          validMeanTokenAccuracy == other.validMeanTokenAccuracy &&
+          fullValidLoss == other.fullValidLoss &&
+          fullValidMeanTokenAccuracy == other.fullValidMeanTokenAccuracy;
 
   @override
-  int get hashCode => step.hashCode;
+  int get hashCode => Object.hash(
+    step,
+    trainLoss,
+    trainMeanTokenAccuracy,
+    validLoss,
+    validMeanTokenAccuracy,
+    fullValidLoss,
+    fullValidMeanTokenAccuracy,
+  );
 
   @override
   String toString() => 'CheckpointMetrics(step: $step)';
@@ -1308,7 +1327,11 @@ class FineTuneReinforcementMethod {
           hyperparameters == other.hyperparameters;
 
   @override
-  int get hashCode => Object.hash(grader.length, hyperparameters);
+  int get hashCode => Object.hash(
+    Object.hashAll(grader.keys),
+    Object.hashAll(grader.values.whereType<String>()),
+    hyperparameters,
+  );
 
   @override
   String toString() => 'FineTuneReinforcementMethod(...)';
