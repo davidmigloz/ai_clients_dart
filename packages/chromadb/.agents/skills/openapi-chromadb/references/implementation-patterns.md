@@ -1,5 +1,5 @@
 # Implementation Patterns
 
-- Extend the shared core patterns in [implementation-patterns-core.md](../../../../../.agents/shared/api-toolkit/references/implementation-patterns-core.md).
+- Extend the shared core patterns in [implementation-patterns-core.md](../../../../../../.agents/shared/api-toolkit/references/implementation-patterns-core.md).
 - Keep package-specific layering consistent with `packages/chromadb/lib/src/`.
 - Use `describe` before adding new manifest entries or scaffolds.

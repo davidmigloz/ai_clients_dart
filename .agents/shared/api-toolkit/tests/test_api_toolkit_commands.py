@@ -439,6 +439,59 @@ class ApiToolkitCommandTests(unittest.TestCase):
             )
             self.assertFalse((output_dir / "latest-main.json").exists())
 
+    def test_fetch_preflight_stats_request_does_not_require_auth(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            (package_root / "specs" / "spec_metadata.json").write_text(
+                json.dumps(
+                    {
+                        "specs": {
+                            "main": {
+                                "title": "Sample",
+                                "current_version": "1.2.3",
+                                "last_fetched": "2026-03-01T00:00:00Z",
+                                "source_url": "https://storage.example.com/openapi-oldhash123456.json",
+                                "version_history": [],
+                            }
+                        }
+                    }
+                )
+            )
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {
+                        "main": {
+                            "name": "Sample API",
+                            "local_file": "openapi.json",
+                            "fetch_mode": "remote",
+                            "url": "https://storage.example.com/openapi-pinnedabc123456.json",
+                        }
+                    },
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(root / "tmp" / "sample"),
+                    "preflight": {"stats_url": "https://example.com/stats.yml", "stats_field": "openapi_spec_url"},
+                },
+            )
+
+            def fake_fetch(url: str, api_key: str | None, auth: toolkit_config.AuthConfig | None) -> tuple[str | None, str | None]:
+                self.assertEqual(url, "https://example.com/stats.yml")
+                self.assertIsNone(api_key)
+                self.assertIsNone(auth)
+                return ("openapi_spec_url: https://storage.example.com/openapi-latestdef654321.json\n", None)
+
+            with patch("api_toolkit.operations.fetch_remote_document", side_effect=fake_fetch) as fetch_mock:
+                exit_code, payload = command_fetch(
+                    SimpleNamespace(config_dir=config_dir, spec_name=None, dry_run=False, preflight_only=True)
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["preflight"]["status"], "ok")
+            fetch_mock.assert_called_once()
+
     def test_fetch_preflight_offline_is_non_failing(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
@@ -1233,6 +1286,11 @@ class ApiToolkitCommandTests(unittest.TestCase):
             workspace_text = (root / "pubspec.yaml").read_text()
             self.assertIn("  - packages/bootstrap_client_dart\n", workspace_text)
             self.assertIn("creation-plan.md", payload["creation_plan"])
+            impl_patterns_text = (skill_root / "references" / "implementation-patterns.md").read_text()
+            self.assertIn(
+                "[implementation-patterns-core.md](../../../../../../.agents/shared/api-toolkit/references/implementation-patterns-core.md)",
+                impl_patterns_text,
+            )
             generated_config = load_toolkit_config(config_dir)
             self.assertEqual(generated_config.package.name, "bootstrap_client_dart")
             self.assertIn("Item", generated_config.manifest.types)

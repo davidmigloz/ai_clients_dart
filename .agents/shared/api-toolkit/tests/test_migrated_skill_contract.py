@@ -626,6 +626,14 @@ class MigratedSkillContractTests(unittest.TestCase):
             title = guide_path.read_text().splitlines()[0]
             self.assertEqual(title, f"# {config.package.name} {surface} Package Guide", msg=f"Unexpected title in {guide_path}")
 
+    def test_real_implementation_patterns_link_to_shared_core_from_skill_directory(self) -> None:
+        expected_link = "[implementation-patterns-core.md](../../../../../../.agents/shared/api-toolkit/references/implementation-patterns-core.md)"
+        for config_dir in CONFIG_DIRS:
+            patterns_path = config_dir.parent / "references" / "implementation-patterns.md"
+            self.assertTrue(patterns_path.exists(), msg=f"Missing implementation patterns for {config_dir}")
+            text = patterns_path.read_text()
+            self.assertIn(expected_link, text, msg=f"Unexpected shared core link in {patterns_path}")
+
     def test_shared_generic_assets_do_not_hardcode_googleai_package(self) -> None:
         for path in (
             TOOLKIT_ROOT / "assets" / "example_template.dart",

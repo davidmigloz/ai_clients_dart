@@ -1775,7 +1775,7 @@ If you are outside the repo root, pass an absolute `--config-dir`.
 def _render_impl_patterns(package_name: str) -> str:
     return f"""# Implementation Patterns
 
-- Follow the shared core patterns in `.agents/shared/api-toolkit/references/implementation-patterns-core.md`.
+- Extend the shared core patterns in [implementation-patterns-core.md](../../../../../../.agents/shared/api-toolkit/references/implementation-patterns-core.md).
 - Keep model serialization manual and deterministic.
 - Keep package-specific naming and layering consistent with `packages/{package_name}/lib/src/`.
 """
@@ -1912,7 +1912,7 @@ def _preflight_payload(config: ToolkitConfig, spec_name: str, spec: SpecConfig) 
     payload["configured"] = True
     payload["pinned_hash"] = extract_hash_from_url(spec.url)
     stats_field = config.preflight.get("stats_field", "openapi_spec_url")
-    stats_text, error = fetch_remote_document(stats_url, None, False)
+    stats_text, error = fetch_remote_document(stats_url, None, None)
     if stats_text is None:
         payload["status"] = "offline"
         payload["error"] = error
