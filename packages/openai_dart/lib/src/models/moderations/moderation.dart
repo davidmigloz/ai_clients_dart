@@ -394,10 +394,18 @@ class ModerationResult {
       identical(this, other) ||
       other is ModerationResult &&
           runtimeType == other.runtimeType &&
-          flagged == other.flagged;
+          flagged == other.flagged &&
+          categories == other.categories &&
+          categoryScores == other.categoryScores &&
+          categoryAppliedInputTypes == other.categoryAppliedInputTypes;
 
   @override
-  int get hashCode => flagged.hashCode;
+  int get hashCode => Object.hash(
+    flagged,
+    categories,
+    categoryScores,
+    categoryAppliedInputTypes,
+  );
 
   @override
   String toString() => 'ModerationResult(flagged: $flagged)';
