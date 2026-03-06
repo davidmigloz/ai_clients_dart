@@ -196,18 +196,19 @@
     "excluded_properties": {
       "global": []
     },
-    "excluded_resources": [
-      "copy",
-      "create",
-      "delete",
-      "embed",
-      "generate",
-      "ps",
-      "pull",
-      "push",
-      "show",
-      "tags"
-    ]
+    "resource_aliases": {
+      "copy": "models",
+      "create": "models",
+      "delete": "models",
+      "ps": "models",
+      "pull": "models",
+      "push": "models",
+      "show": "models",
+      "tags": "models",
+      "generate": "completions",
+      "embed": "embeddings"
+    },
+    "excluded_resources": []
   },
   "types": {
     "Message": {

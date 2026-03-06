@@ -195,6 +195,52 @@ class MigratedSkillContractTests(unittest.TestCase):
             title = guide_path.read_text().splitlines()[0]
             self.assertEqual(title, f"# {config.package.name} {surface} Package Guide", msg=f"Unexpected title in {guide_path}")
 
+    def test_real_manifest_coverage_aliases_match_audited_grouped_resources(self) -> None:
+        expected = {
+            ROOT / "packages" / "anthropic_sdk_dart" / ".agents" / "skills" / "openapi-anthropic" / "config": {
+                "resource_aliases": {},
+                "excluded_resources": ["complete"],
+            },
+            ROOT / "packages" / "chromadb" / ".agents" / "skills" / "openapi-chromadb" / "config": {
+                "resource_aliases": {
+                    "healthcheck": "health",
+                    "heartbeat": "health",
+                    "pre_flight_checks": "health",
+                    "reset": "health",
+                    "version": "health",
+                },
+                "excluded_resources": [],
+            },
+            ROOT / "packages" / "googleai_dart" / ".agents" / "skills" / "openapi-googleai" / "config": {
+                "resource_aliases": {"dynamic": "models"},
+                "excluded_resources": [],
+            },
+            ROOT / "packages" / "mistralai_dart" / ".agents" / "skills" / "openapi-mistral" / "config": {
+                "resource_aliases": {},
+                "excluded_resources": [],
+            },
+            ROOT / "packages" / "ollama_dart" / ".agents" / "skills" / "openapi-ollama" / "config": {
+                "resource_aliases": {
+                    "copy": "models",
+                    "create": "models",
+                    "delete": "models",
+                    "ps": "models",
+                    "pull": "models",
+                    "push": "models",
+                    "show": "models",
+                    "tags": "models",
+                    "generate": "completions",
+                    "embed": "embeddings",
+                },
+                "excluded_resources": [],
+            },
+        }
+        for config_dir, coverage_expectation in expected.items():
+            raw = json.loads((config_dir / "manifest.json").read_text())
+            coverage = raw["coverage"]
+            self.assertEqual(coverage.get("resource_aliases", {}), coverage_expectation["resource_aliases"], msg=f"Unexpected resource_aliases in {config_dir}")
+            self.assertEqual(coverage.get("excluded_resources", []), coverage_expectation["excluded_resources"], msg=f"Unexpected excluded_resources in {config_dir}")
+
     def test_full_verify_passes_for_all_real_skills(self) -> None:
         for config_dir in CONFIG_DIRS:
             exit_code, payload = command_verify(

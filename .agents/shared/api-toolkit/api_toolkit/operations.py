@@ -127,6 +127,11 @@ def _normalize_resource_name(name: str) -> str:
     return camel_case(name.replace("_resource", "").replace("-", "_"))
 
 
+def _normalize_coverage_resource_name(name: str) -> str:
+    base = re.split(r"[?#]", name, maxsplit=1)[0]
+    return snake_case(base.replace("_resource", "").replace("-", "_")).replace("__", "_")
+
+
 def _normalize_example_name(name: str) -> str:
     return snake_case(name).removesuffix("_example")
 
@@ -515,8 +520,12 @@ def _coverage_gaps(config: ToolkitConfig, spec: dict[str, Any], *, resource_filt
     excluded_paths = config.manifest.coverage.get("excluded_paths", [])
     excluded_tags = set(config.manifest.coverage.get("excluded_tags", []))
     excluded_resources = {
-        snake_case(item).replace("__", "_")
+        _normalize_coverage_resource_name(item)
         for item in config.manifest.coverage.get("excluded_resources", [])
+    }
+    resource_aliases = {
+        _normalize_coverage_resource_name(resource): _normalize_coverage_resource_name(alias)
+        for resource, alias in config.manifest.coverage.get("resource_aliases", {}).items()
     }
     expected_resources: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for path, path_payload in spec.get("paths", {}).items():
@@ -535,10 +544,11 @@ def _coverage_gaps(config: ToolkitConfig, spec: dict[str, Any], *, resource_filt
                 continue
             expected_resources[resource].append({"method": method.upper(), "path": path})
 
-    implemented = {snake_case(path.stem.replace("_resource", "")) for path in resources_dir.glob("**/*_resource.dart")}
+    implemented = {_normalize_coverage_resource_name(path.stem) for path in resources_dir.glob("**/*_resource.dart")}
     gaps = []
     for resource, endpoints in sorted(expected_resources.items()):
-        alternatives = {resource, resource.rstrip("s"), f"{resource}s"}
+        implemented_name = resource_aliases.get(resource, resource)
+        alternatives = {implemented_name, implemented_name.rstrip("s"), f"{implemented_name}s"}
         if not alternatives & implemented:
             gaps.append({"resource": resource, "reason": "No matching resource file", "endpoints": endpoints})
     return gaps
@@ -546,7 +556,7 @@ def _coverage_gaps(config: ToolkitConfig, spec: dict[str, Any], *, resource_filt
 
 def _resource_name_for_path(path: str) -> str:
     parts = _trim_path_prefixes(path.strip("/").split("/"))
-    return snake_case(parts[0].replace("-", "_")) if parts else "root"
+    return _normalize_coverage_resource_name(parts[0]) if parts else "root"
 
 
 def _changed_openapi_resources(diff: dict[str, Any]) -> set[str]:
@@ -787,7 +797,8 @@ def _verify_extension_entry(config: ToolkitConfig, entry: ManifestEntry) -> list
                 file=entry.file,
             )
         )
-    if entry.parent and entry.parent not in content:
+    parent_names = _parent_reference_names(_entries_for_spec(config, entry.spec), entry.parent)
+    if entry.parent and not any(parent_name in content for parent_name in parent_names):
         issues.append(
             _type_issue(
                 "error",
@@ -900,14 +911,36 @@ def _verify_sealed_parent(config: ToolkitConfig, entry: ManifestEntry, variants:
     return issues
 
 
+def _sealed_parent_reference_map(entries_for_spec: list[ManifestEntry]) -> dict[str, ManifestEntry]:
+    references: dict[str, ManifestEntry] = {}
+    for entry in entries_for_spec:
+        if entry.kind != "sealed_parent":
+            continue
+        references[entry.key] = entry
+        references[entry.dart_class] = entry
+    return references
+
+
+def _parent_reference_names(entries_for_spec: list[ManifestEntry], parent_name: str | None) -> set[str]:
+    if not parent_name:
+        return set()
+    names = {parent_name}
+    for candidate in entries_for_spec:
+        if parent_name in {candidate.key, candidate.dart_class}:
+            names.add(candidate.key)
+            names.add(candidate.dart_class)
+    return {name for name in names if name}
+
+
 def _sealed_parents_to_verify(selected: list[ManifestEntry], entries_for_spec: list[ManifestEntry]) -> list[ManifestEntry]:
-    parents_by_class = {entry.dart_class: entry for entry in entries_for_spec if entry.kind == "sealed_parent"}
+    parent_references = _sealed_parent_reference_map(entries_for_spec)
     parents: dict[str, ManifestEntry] = {}
     for entry in selected:
         if entry.kind == "sealed_parent":
-            parents[entry.dart_class] = entry
-        elif entry.parent and entry.parent in parents_by_class:
-            parents[entry.parent] = parents_by_class[entry.parent]
+            parents[entry.key] = entry
+        elif entry.parent and entry.parent in parent_references:
+            parent = parent_references[entry.parent]
+            parents[parent.key] = parent
     return list(parents.values())
 
 
@@ -938,11 +971,15 @@ def _verify_implementation(
     issues = list(selection_issues)
     entries_for_spec = _entries_for_spec(config, spec_name)
     parents = _sealed_parents_to_verify(selected, entries_for_spec)
+    parent_references = _sealed_parent_reference_map(entries_for_spec)
     by_parent: dict[str, list[ManifestEntry]] = defaultdict(list)
-    parent_names = {parent.dart_class for parent in parents}
+    parent_keys = {parent.key for parent in parents}
     for entry in entries_for_spec:
-        if entry.parent in parent_names:
-            by_parent[entry.parent].append(entry)
+        if not entry.parent:
+            continue
+        parent = parent_references.get(entry.parent)
+        if parent and parent.key in parent_keys and entry.key != parent.key:
+            by_parent[parent.key].append(entry)
 
     for entry in selected:
         if entry.kind == "skip":
@@ -957,7 +994,7 @@ def _verify_implementation(
             issues.extend(_verify_object_entry(config, spec_payload, entry))
 
     for parent in parents:
-        issues.extend(_verify_sealed_parent(config, parent, by_parent.get(parent.dart_class, [])))
+        issues.extend(_verify_sealed_parent(config, parent, by_parent.get(parent.key, [])))
 
     coverage_gaps = []
     if config.manifest.surface == "openapi" and scope in {"changed", "all"}:

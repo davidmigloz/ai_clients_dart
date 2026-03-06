@@ -2128,6 +2128,116 @@ class ApiToolkitCommandTests(unittest.TestCase):
             self.assertEqual(exit_code, 1)
             self.assertEqual([gap["resource"] for gap in payload["results"]["implementation"]["coverage_gaps"]], ["widgets"])
 
+    def test_verify_coverage_alias_matches_grouped_resource_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            (package_root / "specs" / "openapi.json").write_text(
+                json.dumps(
+                    {
+                        "openapi": "3.1.0",
+                        "info": {"title": "Sample", "version": "1"},
+                        "paths": {"/v1/copy": {"post": {"operationId": "copyModel"}}},
+                        "components": {"schemas": {}},
+                    }
+                )
+            )
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(root / "tmp" / "sample"),
+                },
+                manifest_payload={
+                    "surface": "openapi",
+                    "type_mappings": {},
+                    "placement": {"categories": {}, "default_category": "common", "parent_model_patterns": {}},
+                    "coverage": {"resource_aliases": {"copy": "models"}},
+                    "types": {},
+                },
+            )
+            (package_root / "lib" / "src" / "resources" / "models_resource.dart").write_text("class ModelsResource {}\n")
+
+            exit_code, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["results"]["implementation"]["coverage_gaps"], [])
+
+    def test_verify_coverage_normalizes_query_suffixes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            (package_root / "specs" / "openapi.json").write_text(
+                json.dumps(
+                    {
+                        "openapi": "3.1.0",
+                        "info": {"title": "Sample", "version": "1"},
+                        "paths": {"/v1/files?beta=true": {"get": {"operationId": "listFiles"}}},
+                        "components": {"schemas": {}},
+                    }
+                )
+            )
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(root / "tmp" / "sample"),
+                },
+            )
+            files_dir = package_root / "lib" / "src" / "resources" / "files"
+            files_dir.mkdir(parents=True, exist_ok=True)
+            (files_dir / "files_resource.dart").write_text("class FilesResource {}\n")
+
+            exit_code, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["results"]["implementation"]["coverage_gaps"], [])
+
+    def test_verify_coverage_normalizes_fragment_suffixes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            (package_root / "specs" / "openapi.json").write_text(
+                json.dumps(
+                    {
+                        "openapi": "3.1.0",
+                        "info": {"title": "Sample", "version": "1"},
+                        "paths": {"/v1/conversations#stream": {"post": {"operationId": "streamConversation"}}},
+                        "components": {"schemas": {}},
+                    }
+                )
+            )
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(root / "tmp" / "sample"),
+                },
+            )
+            conversations_dir = package_root / "lib" / "src" / "resources" / "conversations"
+            conversations_dir.mkdir(parents=True, exist_ok=True)
+            (conversations_dir / "conversations_resource.dart").write_text("class ConversationsResource {}\n")
+
+            exit_code, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["results"]["implementation"]["coverage_gaps"], [])
+
     def test_verify_extension_without_schema_only_checks_linkage(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
@@ -2170,6 +2280,161 @@ class ApiToolkitCommandTests(unittest.TestCase):
 
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["results"]["implementation"]["issues"], [])
+
+    def test_verify_extension_parent_lookup_accepts_manifest_key_alias(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            (package_root / "specs" / "openapi.json").write_text(
+                json.dumps({"openapi": "3.1.0", "info": {"title": "Sample", "version": "1"}, "paths": {}, "components": {"schemas": {}}})
+            )
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(root / "tmp" / "sample"),
+                },
+                manifest_payload={
+                    "surface": "openapi",
+                    "type_mappings": {},
+                    "placement": {"categories": {}, "default_category": "common", "parent_model_patterns": {}},
+                    "coverage": {"excluded_paths": [], "excluded_tags": [".*"]},
+                    "types": {
+                        "ToolChoice": {
+                            "spec": "main",
+                            "kind": "sealed_parent",
+                            "dart_class": "ToolChoiceParent",
+                            "file": "lib/src/models/common/tool_choice.dart",
+                        },
+                        "ToolChoice:Auto": {
+                            "spec": "main",
+                            "kind": "extension",
+                            "dart_class": "ToolChoiceAuto",
+                            "file": "lib/src/models/common/tool_choice.dart",
+                            "parent": "ToolChoice",
+                        },
+                    },
+                },
+            )
+            (package_root / "lib" / "src" / "models" / "common" / "tool_choice.dart").write_text(
+                "class ToolChoiceParent {}\nclass ToolChoiceAuto extends ToolChoiceParent {}\n"
+            )
+
+            exit_code, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["results"]["implementation"]["issues"], [])
+
+    def test_verify_sealed_parent_lookup_accepts_manifest_key_alias(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample API", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(root / "tmp" / "sample"),
+                },
+                manifest_payload={
+                    "surface": "openapi",
+                    "type_mappings": {},
+                    "placement": {"categories": {}, "default_category": "common", "parent_model_patterns": {}},
+                    "coverage": {},
+                    "types": {
+                        "Message": {
+                            "spec": "main",
+                            "kind": "sealed_parent",
+                            "dart_class": "MessageEnvelope",
+                            "file": "lib/src/models/common/message.dart",
+                            "schema": None,
+                            "discriminator": {
+                                "field": "role",
+                                "mapping": {
+                                    "system": "#/components/schemas/SystemMessage",
+                                    "user": "#/components/schemas/UserMessage",
+                                },
+                            },
+                        },
+                        "SystemMessage": {
+                            "spec": "main",
+                            "kind": "skip",
+                            "dart_class": "SystemMessage",
+                            "file": "lib/src/models/common/message.dart",
+                            "schema": "SystemMessage",
+                            "parent": "Message",
+                        },
+                        "UserMessage": {
+                            "spec": "main",
+                            "kind": "skip",
+                            "dart_class": "UserMessage",
+                            "file": "lib/src/models/common/message.dart",
+                            "schema": "UserMessage",
+                            "parent": "Message",
+                        },
+                    },
+                },
+            )
+            (package_root / "specs" / "openapi.json").write_text(
+                json.dumps(
+                    {
+                        "openapi": "3.1.0",
+                        "info": {"title": "Sample", "version": "1"},
+                        "paths": {},
+                        "components": {
+                            "schemas": {
+                                "Message": {
+                                    "oneOf": [
+                                        {"$ref": "#/components/schemas/SystemMessage"},
+                                        {"$ref": "#/components/schemas/UserMessage"},
+                                    ],
+                                    "discriminator": {
+                                        "propertyName": "role",
+                                        "mapping": {
+                                            "system": "#/components/schemas/SystemMessage",
+                                            "user": "#/components/schemas/UserMessage",
+                                        },
+                                    },
+                                },
+                                "SystemMessage": {"type": "object", "properties": {"role": {"type": "string"}}},
+                                "UserMessage": {"type": "object", "properties": {"role": {"type": "string"}}},
+                            }
+                        },
+                    }
+                )
+            )
+            (package_root / "lib" / "src" / "models" / "common" / "message.dart").write_text(
+                "sealed class MessageEnvelope {\n"
+                "  factory MessageEnvelope.fromJson(Map<String, dynamic> json) {\n"
+                "    if (json['role'] == 'system') return SystemMessage.fromJson(json);\n"
+                "    return UserMessage.fromJson(json);\n"
+                "  }\n"
+                "}\n"
+                "\n"
+                "class SystemMessage extends MessageEnvelope {\n"
+                "  factory SystemMessage.fromJson(Map<String, dynamic> json) => SystemMessage();\n"
+                "}\n"
+                "\n"
+                "class UserMessage extends MessageEnvelope {\n"
+                "  factory UserMessage.fromJson(Map<String, dynamic> json) => UserMessage();\n"
+                "}\n"
+            )
+
+            exit_code, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+
+            self.assertEqual(exit_code, 1)
+            self.assertTrue(
+                any("discriminator value 'user'" in issue["message"] for issue in payload["results"]["implementation"]["issues"])
+            )
 
     def test_verify_exports_detects_missing_export(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:

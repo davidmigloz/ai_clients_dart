@@ -121,9 +121,10 @@
     "excluded_properties": {
       "global": []
     },
-    "excluded_resources": [
-      "dynamic"
-    ]
+    "resource_aliases": {
+      "dynamic": "models"
+    },
+    "excluded_resources": []
   },
   "types": {
     "Tool": {

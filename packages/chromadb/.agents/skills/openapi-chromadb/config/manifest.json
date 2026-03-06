@@ -83,13 +83,14 @@
     "excluded_properties": {
       "global": []
     },
-    "excluded_resources": [
-      "healthcheck",
-      "heartbeat",
-      "pre_flight_checks",
-      "reset",
-      "version"
-    ]
+    "resource_aliases": {
+      "healthcheck": "health",
+      "heartbeat": "health",
+      "pre_flight_checks": "health",
+      "reset": "health",
+      "version": "health"
+    },
+    "excluded_resources": []
   },
   "types": {
     "Collection": {

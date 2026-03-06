@@ -72,13 +72,8 @@
     "excluded_properties": {
       "global": []
     },
-    "excluded_resources": [
-      "complete",
-      "files?beta=true",
-      "messages?beta=true",
-      "models?beta=true",
-      "skills?beta=true"
-    ]
+    "resource_aliases": {},
+    "excluded_resources": ["complete"]
   },
   "types": {
     "Message": {

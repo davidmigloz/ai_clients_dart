@@ -98,9 +98,8 @@
     "excluded_properties": {
       "global": []
     },
-    "excluded_resources": [
-      "conversations#stream"
-    ]
+    "resource_aliases": {},
+    "excluded_resources": []
   },
   "types": {
     "ChatCompletionRequest": {
