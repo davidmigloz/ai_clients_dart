@@ -3,22 +3,64 @@
   "tool_properties": {
     "function_calling": {
       "description": "Function/tool calling support",
-      "search_terms": ["function calling", "tools", "tool_choice"]
+      "search_terms": [
+        "function calling",
+        "tools",
+        "tool_choice"
+      ]
     },
     "streaming": {
       "description": "Streaming responses",
-      "search_terms": ["stream", "streaming", "createStream"]
+      "search_terms": [
+        "stream",
+        "streaming",
+        "createStream"
+      ]
     },
     "vision": {
       "description": "Vision/image input support",
-      "search_terms": ["vision", "image", "multimodal"]
+      "search_terms": [
+        "vision",
+        "image",
+        "multimodal"
+      ]
     },
     "audio": {
       "description": "Audio input/output support",
-      "search_terms": ["audio", "speech", "whisper", "transcription"]
+      "search_terms": [
+        "audio",
+        "speech",
+        "whisper",
+        "transcription"
+      ]
     }
   },
-  "excluded_resources": ["base_resource"],
+  "excluded_resources": [
+    "assistants",
+    "base_resource",
+    "batches",
+    "beta",
+    "chatkit",
+    "completions",
+    "containers",
+    "conversations",
+    "evals",
+    "files",
+    "fineTuning",
+    "inputTokens",
+    "messages",
+    "models",
+    "moderations",
+    "realtime",
+    "realtimeSessions",
+    "runs",
+    "skills",
+    "streaming",
+    "threads",
+    "uploads",
+    "vectorStores",
+    "videos"
+  ],
   "resource_to_example": {
     "chat": "chat_example",
     "embeddings": "embeddings_example",
@@ -31,7 +73,28 @@
     "fine_tuning": "fine_tuning_example",
     "realtime": "realtime_example"
   },
-  "excluded_from_examples": [],
+  "excluded_from_examples": [
+    "assistants",
+    "audio",
+    "batches",
+    "beta",
+    "chat",
+    "completions",
+    "embeddings",
+    "files",
+    "fineTuning",
+    "images",
+    "inputTokens",
+    "messages",
+    "moderations",
+    "realtime",
+    "realtimeSessions",
+    "runs",
+    "skills",
+    "threads",
+    "uploads",
+    "vectorStores"
+  ],
   "drift_patterns": [
     {
       "pattern": "ChatCompletionModel\\.model\\(",

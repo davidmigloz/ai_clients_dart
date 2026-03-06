@@ -6,11 +6,10 @@
       "local_file": "openapi.json",
       "requires_auth": false,
       "auth_env_vars": [],
-      "description": "Ollama API for running LLMs locally"
+      "description": "Ollama API for running LLMs locally",
+      "fetch_mode": "remote"
     }
   },
   "specs_dir": "packages/ollama_dart/specs",
-  "output_dir": "/tmp/openapi-ollama-dart",
-  "discovery_patterns": [],
-  "discovery_names": []
+  "output_dir": "/tmp/openapi-ollama-dart"
 }

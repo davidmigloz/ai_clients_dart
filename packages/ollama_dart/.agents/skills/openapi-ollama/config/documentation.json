@@ -3,10 +3,17 @@
   "tool_properties": {
     "function": {
       "description": "Function/tool calling support",
-      "search_terms": ["function calling", "tools", "tool_calls"]
+      "search_terms": [
+        "function calling",
+        "tools",
+        "tool_calls"
+      ]
     }
   },
-  "excluded_resources": ["base_resource"],
+  "excluded_resources": [
+    "base_resource",
+    "streaming"
+  ],
   "resource_to_example": {
     "chat": "chat",
     "completions": "completions",

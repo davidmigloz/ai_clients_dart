@@ -1,0 +1,986 @@
+{
+  "surface": "openapi",
+  "type_mappings": {
+    "string": "String",
+    "integer": "int",
+    "number": "double",
+    "boolean": "bool",
+    "array": "List",
+    "object": "Map"
+  },
+  "placement": {
+    "categories": {
+      "embeddings": {
+        "patterns": [
+          "embed"
+        ],
+        "directory": "embeddings"
+      },
+      "corpus": {
+        "patterns": [
+          "corpus",
+          "document",
+          "chunk"
+        ],
+        "directory": "corpus"
+      },
+      "caching": {
+        "patterns": [
+          "cache"
+        ],
+        "directory": "caching"
+      },
+      "batch": {
+        "patterns": [
+          "batch"
+        ],
+        "directory": "batch"
+      },
+      "files": {
+        "patterns": [
+          "file"
+        ],
+        "directory": "files"
+      },
+      "models": {
+        "patterns": [
+          "model",
+          "tuned"
+        ],
+        "directory": "models"
+      },
+      "permissions": {
+        "patterns": [
+          "permission"
+        ],
+        "directory": "permissions"
+      },
+      "safety": {
+        "patterns": [
+          "harm",
+          "safety"
+        ],
+        "directory": "safety"
+      },
+      "tools": {
+        "patterns": [
+          "tool",
+          "function"
+        ],
+        "directory": "tools"
+      },
+      "generation": {
+        "patterns": [
+          "generate",
+          "content"
+        ],
+        "directory": "generation"
+      }
+    },
+    "default_category": "common",
+    "parent_model_patterns": {
+      "Tool": [
+        ".*Search$",
+        ".*Execution$",
+        ".*Context$",
+        ".*Maps$",
+        "Mcp.*",
+        ".*Grounding$",
+        ".*Retrieval$"
+      ],
+      "Candidate": [
+        ".*Metadata$",
+        ".*Feedback$",
+        ".*Attribution$"
+      ],
+      "Content": [
+        ".*Part$",
+        ".*Content$"
+      ],
+      "Part": [
+        ".*Part$"
+      ],
+      "GroundingChunk": [
+        ".*Chunk$",
+        "GroundingChunk.*"
+      ]
+    }
+  },
+  "coverage": {
+    "excluded_paths": [],
+    "excluded_tags": [],
+    "priority_resources": [
+      "models",
+      "cachedContents",
+      "corpora",
+      "files",
+      "tunedModels"
+    ],
+    "notes": {},
+    "expected_properties": {},
+    "excluded_properties": {
+      "global": []
+    },
+    "excluded_resources": [
+      "dynamic"
+    ]
+  },
+  "types": {
+    "Tool": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Tool",
+      "file": "lib/src/models/tools/tool.dart",
+      "schema": "Tool",
+      "tags": [
+        "critical"
+      ],
+      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+    },
+    "Candidate": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Candidate",
+      "file": "lib/src/models/content/candidate.dart",
+      "schema": "Candidate",
+      "tags": [
+        "critical"
+      ],
+      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+    },
+    "Content": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Content",
+      "file": "lib/src/models/content/content.dart",
+      "schema": "Content",
+      "tags": [
+        "critical"
+      ]
+    },
+    "GenerationConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "GenerationConfig",
+      "file": "lib/src/models/generation/generation_config.dart",
+      "schema": "GenerationConfig",
+      "tags": [
+        "critical"
+      ],
+      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+    },
+    "ToolConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolConfig",
+      "file": "lib/src/models/tools/tool_config.dart",
+      "schema": "ToolConfig",
+      "tags": [
+        "critical"
+      ],
+      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+    },
+    "GroundingMetadata": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "GroundingMetadata",
+      "file": "lib/src/models/metadata/grounding_metadata.dart",
+      "schema": "GroundingMetadata",
+      "tags": [
+        "critical"
+      ],
+      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+    },
+    "FunctionCall": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "FunctionCall",
+      "file": "lib/src/models/tools/function_call.dart",
+      "schema": "FunctionCall",
+      "tags": [
+        "critical"
+      ]
+    },
+    "FunctionResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "FunctionResponse",
+      "file": "lib/src/models/tools/function_response.dart",
+      "schema": "FunctionResponse",
+      "tags": [
+        "critical"
+      ],
+      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+    },
+    "GroundingChunk": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "GroundingChunk",
+      "file": "lib/src/models/metadata/grounding_chunk.dart",
+      "schema": "GroundingChunk",
+      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+    },
+    "Blob": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Blob",
+      "file": "lib/src/models/content/blob.dart",
+      "schema": "Blob",
+      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+    },
+    "FileData": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "FileData",
+      "file": "lib/src/models/content/file_data.dart",
+      "schema": "FileData",
+      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+    },
+    "ExecutableCode": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ExecutableCode",
+      "file": "lib/src/models/tools/executable_code.dart",
+      "schema": "ExecutableCode"
+    },
+    "CodeExecutionResult": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CodeExecutionResult",
+      "file": "lib/src/models/tools/code_execution_result.dart",
+      "schema": "CodeExecutionResult"
+    },
+    "Part": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PartMetadataPart",
+      "file": "lib/src/models/content/part.dart",
+      "schema": "Part",
+      "parent": "Part",
+      "note": "Uses field presence for discrimination, not a 'type' field. Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+    },
+    "AgentOption": {
+      "spec": "interactions",
+      "schema": "AgentOption",
+      "dart_class": "AgentOption",
+      "file": "lib/src/models/interactions/common/agent_option.dart",
+      "kind": "skip",
+      "note": "No direct one-to-one Dart model is currently tracked for this schema. Review manually when the schema changes."
+    },
+    "AllowedTools": {
+      "spec": "interactions",
+      "schema": "AllowedTools",
+      "dart_class": "AllowedTools",
+      "file": "lib/src/models/interactions/allowed_tools.dart",
+      "kind": "object"
+    },
+    "Annotation": {
+      "spec": "interactions",
+      "schema": "Annotation",
+      "parent": "InteractionContent",
+      "kind": "object",
+      "dart_class": "Annotation",
+      "file": "lib/src/models/interactions/content/annotation.dart"
+    },
+    "AudioContent": {
+      "spec": "interactions",
+      "schema": "AudioContent",
+      "parent": "InteractionContent",
+      "kind": "object",
+      "dart_class": "AudioContent",
+      "file": "lib/src/models/interactions/content/audio_content.dart"
+    },
+    "AudioDelta": {
+      "spec": "interactions",
+      "schema": "AudioDelta",
+      "dart_class": "AudioDelta",
+      "file": "lib/src/models/interactions/deltas/audio_delta.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "AudioMimeTypeOption": {
+      "spec": "interactions",
+      "schema": "AudioMimeTypeOption",
+      "dart_class": "AudioMimeTypeOption",
+      "file": "lib/src/models/interactions/common/audio_mime_type_option.dart",
+      "kind": "skip",
+      "note": "No direct one-to-one Dart model is currently tracked for this schema. Review manually when the schema changes."
+    },
+    "interactions:CodeExecution": {
+      "spec": "interactions",
+      "schema": "CodeExecution",
+      "dart_class": "CodeExecutionTool",
+      "file": "lib/src/models/interactions/tools/code_execution_tool.dart",
+      "kind": "skip",
+      "parent": "InteractionTool",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "CodeExecutionCallArguments": {
+      "spec": "interactions",
+      "schema": "CodeExecutionCallArguments",
+      "kind": "skip",
+      "file": "lib/src/models/interactions/content/code_execution_call_content.dart",
+      "dart_class": "CodeExecutionCallArguments",
+      "note": "This arguments shape is flattened into the enclosing content model rather than represented as a standalone Dart type."
+    },
+    "CodeExecutionCallContent": {
+      "spec": "interactions",
+      "schema": "CodeExecutionCallContent",
+      "parent": "InteractionContent",
+      "kind": "skip",
+      "dart_class": "CodeExecutionCallContent",
+      "file": "lib/src/models/interactions/content/code_execution_call_content.dart",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "CodeExecutionCallDelta": {
+      "spec": "interactions",
+      "schema": "CodeExecutionCallDelta",
+      "dart_class": "CodeExecutionCallDelta",
+      "file": "lib/src/models/interactions/deltas/code_execution_call_delta.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "CodeExecutionResultContent": {
+      "spec": "interactions",
+      "schema": "CodeExecutionResultContent",
+      "parent": "InteractionContent",
+      "kind": "object",
+      "dart_class": "CodeExecutionResultContent",
+      "file": "lib/src/models/interactions/content/code_execution_result_content.dart"
+    },
+    "CodeExecutionResultDelta": {
+      "spec": "interactions",
+      "schema": "CodeExecutionResultDelta",
+      "dart_class": "CodeExecutionResultDelta",
+      "file": "lib/src/models/interactions/deltas/code_execution_result_delta.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "interactions:ComputerUse": {
+      "spec": "interactions",
+      "schema": "ComputerUse",
+      "dart_class": "ComputerUseTool",
+      "file": "lib/src/models/interactions/tools/computer_use_tool.dart",
+      "kind": "skip",
+      "parent": "InteractionTool",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "interactions:Content": {
+      "spec": "interactions",
+      "schema": "Content",
+      "dart_class": "InteractionContent",
+      "file": "lib/src/models/interactions/content/content.dart",
+      "kind": "skip",
+      "tags": [
+        "critical"
+      ],
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "text": "#/components/schemas/TextContent",
+          "image": "#/components/schemas/ImageContent",
+          "audio": "#/components/schemas/AudioContent",
+          "document": "#/components/schemas/DocumentContent",
+          "video": "#/components/schemas/VideoContent",
+          "thought": "#/components/schemas/ThoughtContent",
+          "function_call": "#/components/schemas/FunctionCallContent",
+          "function_result": "#/components/schemas/FunctionResultContent",
+          "code_execution_call": "#/components/schemas/CodeExecutionCallContent",
+          "code_execution_result": "#/components/schemas/CodeExecutionResultContent",
+          "url_context_call": "#/components/schemas/UrlContextCallContent",
+          "url_context_result": "#/components/schemas/UrlContextResultContent",
+          "google_search_call": "#/components/schemas/GoogleSearchCallContent",
+          "google_search_result": "#/components/schemas/GoogleSearchResultContent",
+          "mcp_server_tool_call": "#/components/schemas/McpServerToolCallContent",
+          "mcp_server_tool_result": "#/components/schemas/McpServerToolResultContent",
+          "file_search_result": "#/components/schemas/FileSearchResultContent"
+        }
+      },
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "ContentDelta": {
+      "spec": "interactions",
+      "schema": "ContentDelta",
+      "dart_class": "ContentDeltaEvent",
+      "file": "lib/src/models/interactions/events/content_delta_event.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "ContentStart": {
+      "spec": "interactions",
+      "schema": "ContentStart",
+      "dart_class": "ContentStartEvent",
+      "file": "lib/src/models/interactions/events/content_start_event.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "ContentStop": {
+      "spec": "interactions",
+      "schema": "ContentStop",
+      "dart_class": "ContentStopEvent",
+      "file": "lib/src/models/interactions/events/content_stop_event.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "CreateAgentInteractionParams": {
+      "spec": "interactions",
+      "schema": "CreateAgentInteractionParams",
+      "dart_class": "CreateAgentInteractionParams",
+      "file": "lib/src/models/interactions/interaction.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "CreateModelInteractionParams": {
+      "spec": "interactions",
+      "schema": "CreateModelInteractionParams",
+      "dart_class": "CreateModelInteractionParams",
+      "file": "lib/src/models/interactions/interaction.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "DeepResearchAgentConfig": {
+      "spec": "interactions",
+      "schema": "DeepResearchAgentConfig",
+      "dart_class": "DeepResearchAgentConfig",
+      "file": "lib/src/models/interactions/agent_config.dart",
+      "kind": "object"
+    },
+    "DocumentContent": {
+      "spec": "interactions",
+      "schema": "DocumentContent",
+      "parent": "InteractionContent",
+      "kind": "object",
+      "dart_class": "DocumentContent",
+      "file": "lib/src/models/interactions/content/document_content.dart"
+    },
+    "DocumentDelta": {
+      "spec": "interactions",
+      "schema": "DocumentDelta",
+      "dart_class": "DocumentDelta",
+      "file": "lib/src/models/interactions/deltas/document_delta.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "DocumentMimeTypeOption": {
+      "spec": "interactions",
+      "schema": "DocumentMimeTypeOption",
+      "dart_class": "DocumentMimeTypeOption",
+      "file": "lib/src/models/interactions/common/document_mime_type_option.dart",
+      "kind": "skip",
+      "note": "No direct one-to-one Dart model is currently tracked for this schema. Review manually when the schema changes."
+    },
+    "DynamicAgentConfig": {
+      "spec": "interactions",
+      "schema": "DynamicAgentConfig",
+      "dart_class": "DynamicAgentConfig",
+      "file": "lib/src/models/interactions/agent_config.dart",
+      "kind": "object"
+    },
+    "Error": {
+      "spec": "interactions",
+      "schema": "Error",
+      "dart_class": "InteractionError",
+      "file": "lib/src/models/interactions/events/interaction_error.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "ErrorEvent": {
+      "spec": "interactions",
+      "schema": "ErrorEvent",
+      "dart_class": "ErrorEvent",
+      "file": "lib/src/models/interactions/events/error_event.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "interactions:FileSearch": {
+      "spec": "interactions",
+      "schema": "FileSearch",
+      "dart_class": "FileSearchTool",
+      "file": "lib/src/models/interactions/tools/file_search_tool.dart",
+      "kind": "skip",
+      "parent": "InteractionTool",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "FileSearchResult": {
+      "spec": "interactions",
+      "schema": "FileSearchResult",
+      "parent": "InteractionContent",
+      "kind": "object",
+      "dart_class": "FileSearchResult",
+      "file": "lib/src/models/interactions/content/file_search_result_content.dart"
+    },
+    "FileSearchResultContent": {
+      "spec": "interactions",
+      "schema": "FileSearchResultContent",
+      "parent": "InteractionContent",
+      "kind": "object",
+      "dart_class": "FileSearchResultContent",
+      "file": "lib/src/models/interactions/content/file_search_result_content.dart"
+    },
+    "FileSearchResultDelta": {
+      "spec": "interactions",
+      "schema": "FileSearchResultDelta",
+      "dart_class": "FileSearchResultDelta",
+      "file": "lib/src/models/interactions/deltas/file_search_result_delta.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "Function": {
+      "spec": "interactions",
+      "schema": "Function",
+      "dart_class": "FunctionTool",
+      "file": "lib/src/models/interactions/tools/function_tool.dart",
+      "kind": "skip",
+      "parent": "InteractionTool",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "FunctionCallContent": {
+      "spec": "interactions",
+      "schema": "FunctionCallContent",
+      "parent": "InteractionContent",
+      "kind": "object",
+      "dart_class": "FunctionCallContent",
+      "file": "lib/src/models/interactions/content/function_call_content.dart"
+    },
+    "FunctionCallDelta": {
+      "spec": "interactions",
+      "schema": "FunctionCallDelta",
+      "dart_class": "FunctionCallDelta",
+      "file": "lib/src/models/interactions/deltas/function_call_delta.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "FunctionResultContent": {
+      "spec": "interactions",
+      "schema": "FunctionResultContent",
+      "parent": "InteractionContent",
+      "kind": "object",
+      "dart_class": "FunctionResultContent",
+      "file": "lib/src/models/interactions/content/function_result_content.dart"
+    },
+    "FunctionResultDelta": {
+      "spec": "interactions",
+      "schema": "FunctionResultDelta",
+      "dart_class": "FunctionResultDelta",
+      "file": "lib/src/models/interactions/deltas/function_result_delta.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "interactions:GenerationConfig": {
+      "spec": "interactions",
+      "schema": "GenerationConfig",
+      "dart_class": "InteractionGenerationConfig",
+      "file": "lib/src/models/interactions/generation_config.dart",
+      "kind": "object",
+      "tags": [
+        "critical"
+      ]
+    },
+    "interactions:GoogleSearch": {
+      "spec": "interactions",
+      "schema": "GoogleSearch",
+      "dart_class": "GoogleSearchTool",
+      "file": "lib/src/models/interactions/tools/google_search_tool.dart",
+      "kind": "skip",
+      "parent": "InteractionTool",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "GoogleSearchCallArguments": {
+      "spec": "interactions",
+      "schema": "GoogleSearchCallArguments",
+      "kind": "skip",
+      "file": "lib/src/models/interactions/content/google_search_call_content.dart",
+      "dart_class": "GoogleSearchCallArguments",
+      "note": "This arguments shape is flattened into the enclosing content model rather than represented as a standalone Dart type."
+    },
+    "GoogleSearchCallContent": {
+      "spec": "interactions",
+      "schema": "GoogleSearchCallContent",
+      "parent": "InteractionContent",
+      "kind": "skip",
+      "dart_class": "GoogleSearchCallContent",
+      "file": "lib/src/models/interactions/content/google_search_call_content.dart",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "GoogleSearchCallDelta": {
+      "spec": "interactions",
+      "schema": "GoogleSearchCallDelta",
+      "dart_class": "GoogleSearchCallDelta",
+      "file": "lib/src/models/interactions/deltas/google_search_call_delta.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "GoogleSearchResult": {
+      "spec": "interactions",
+      "schema": "GoogleSearchResult",
+      "parent": "InteractionContent",
+      "kind": "skip",
+      "dart_class": "GoogleSearchResult",
+      "file": "lib/src/models/interactions/content/google_search_result_content.dart",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "GoogleSearchResultContent": {
+      "spec": "interactions",
+      "schema": "GoogleSearchResultContent",
+      "parent": "InteractionContent",
+      "kind": "object",
+      "dart_class": "GoogleSearchResultContent",
+      "file": "lib/src/models/interactions/content/google_search_result_content.dart"
+    },
+    "GoogleSearchResultDelta": {
+      "spec": "interactions",
+      "schema": "GoogleSearchResultDelta",
+      "dart_class": "GoogleSearchResultDelta",
+      "file": "lib/src/models/interactions/deltas/google_search_result_delta.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "ImageContent": {
+      "spec": "interactions",
+      "schema": "ImageContent",
+      "parent": "InteractionContent",
+      "kind": "object",
+      "dart_class": "ImageContent",
+      "file": "lib/src/models/interactions/content/image_content.dart"
+    },
+    "ImageDelta": {
+      "spec": "interactions",
+      "schema": "ImageDelta",
+      "dart_class": "ImageDelta",
+      "file": "lib/src/models/interactions/deltas/image_delta.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "ImageMimeTypeOption": {
+      "spec": "interactions",
+      "schema": "ImageMimeTypeOption",
+      "dart_class": "ImageMimeTypeOption",
+      "file": "lib/src/models/interactions/common/image_mime_type_option.dart",
+      "kind": "skip",
+      "note": "No direct one-to-one Dart model is currently tracked for this schema. Review manually when the schema changes."
+    },
+    "Interaction": {
+      "spec": "interactions",
+      "schema": "Interaction",
+      "dart_class": "Interaction",
+      "file": "lib/src/models/interactions/interaction.dart",
+      "kind": "skip",
+      "tags": [
+        "critical"
+      ],
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "InteractionEvent": {
+      "spec": "interactions",
+      "schema": "InteractionEvent",
+      "dart_class": "InteractionEvent",
+      "file": "lib/src/models/interactions/events/events.dart",
+      "kind": "skip",
+      "note": "interaction.start and interaction.complete share the spec schema but are represented by dedicated subclasses."
+    },
+    "InteractionSseEvent": {
+      "spec": "interactions",
+      "schema": "InteractionSseEvent",
+      "dart_class": "InteractionEvent",
+      "file": "lib/src/models/interactions/events/events.dart",
+      "kind": "skip",
+      "note": "Stream event union is represented by InteractionEvent subclasses rather than a direct InteractionSseEvent model."
+    },
+    "InteractionStatusUpdate": {
+      "spec": "interactions",
+      "schema": "InteractionStatusUpdate",
+      "dart_class": "InteractionStatusUpdateEvent",
+      "file": "lib/src/models/interactions/events/interaction_status_update_event.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "interactions:McpServer": {
+      "spec": "interactions",
+      "schema": "McpServer",
+      "dart_class": "McpServerTool",
+      "file": "lib/src/models/interactions/tools/mcp_server_tool.dart",
+      "kind": "skip",
+      "parent": "InteractionTool",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "McpServerToolCallContent": {
+      "spec": "interactions",
+      "schema": "McpServerToolCallContent",
+      "parent": "InteractionContent",
+      "kind": "object",
+      "dart_class": "McpServerToolCallContent",
+      "file": "lib/src/models/interactions/content/mcp_server_tool_call_content.dart"
+    },
+    "McpServerToolCallDelta": {
+      "spec": "interactions",
+      "schema": "McpServerToolCallDelta",
+      "dart_class": "McpServerToolCallDelta",
+      "file": "lib/src/models/interactions/deltas/mcp_server_tool_call_delta.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "McpServerToolResultContent": {
+      "spec": "interactions",
+      "schema": "McpServerToolResultContent",
+      "parent": "InteractionContent",
+      "kind": "skip",
+      "dart_class": "McpServerToolResultContent",
+      "file": "lib/src/models/interactions/content/mcp_server_tool_result_content.dart",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "McpServerToolResultDelta": {
+      "spec": "interactions",
+      "schema": "McpServerToolResultDelta",
+      "dart_class": "McpServerToolResultDelta",
+      "file": "lib/src/models/interactions/deltas/mcp_server_tool_result_delta.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "interactions:MediaResolution": {
+      "spec": "interactions",
+      "schema": "MediaResolution",
+      "dart_class": "MediaResolution",
+      "file": "lib/src/models/content/media_resolution.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "ModalityTokens": {
+      "spec": "interactions",
+      "schema": "ModalityTokens",
+      "dart_class": "ModalityTokens",
+      "file": "lib/src/models/interactions/modality_tokens.dart",
+      "kind": "object"
+    },
+    "ModelOption": {
+      "spec": "interactions",
+      "schema": "ModelOption",
+      "dart_class": "ModelOption",
+      "file": "lib/src/models/interactions/common/model_option.dart",
+      "kind": "skip",
+      "note": "No direct one-to-one Dart model is currently tracked for this schema. Review manually when the schema changes."
+    },
+    "ResponseModality": {
+      "spec": "interactions",
+      "schema": "ResponseModality",
+      "dart_class": "InteractionResponseModality",
+      "file": "lib/src/models/interactions/response_modality.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "interactions:SpeechConfig": {
+      "spec": "interactions",
+      "schema": "SpeechConfig",
+      "dart_class": "InteractionSpeechConfig",
+      "file": "lib/src/models/interactions/speech_config.dart",
+      "kind": "object"
+    },
+    "TextContent": {
+      "spec": "interactions",
+      "schema": "TextContent",
+      "parent": "InteractionContent",
+      "kind": "object",
+      "dart_class": "TextContent",
+      "file": "lib/src/models/interactions/content/text_content.dart"
+    },
+    "TextDelta": {
+      "spec": "interactions",
+      "schema": "TextDelta",
+      "dart_class": "TextDelta",
+      "file": "lib/src/models/interactions/deltas/text_delta.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "ThinkingLevel": {
+      "spec": "interactions",
+      "schema": "ThinkingLevel",
+      "dart_class": "InteractionThinkingLevel",
+      "file": "lib/src/models/interactions/thinking_level.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "ThinkingSummaries": {
+      "spec": "interactions",
+      "schema": "ThinkingSummaries",
+      "dart_class": "InteractionThinkingSummaries",
+      "file": "lib/src/models/interactions/thinking_summaries.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "ThoughtContent": {
+      "spec": "interactions",
+      "schema": "ThoughtContent",
+      "parent": "InteractionContent",
+      "kind": "object",
+      "dart_class": "ThoughtContent",
+      "file": "lib/src/models/interactions/content/thought_content.dart"
+    },
+    "ThoughtSignatureDelta": {
+      "spec": "interactions",
+      "schema": "ThoughtSignatureDelta",
+      "dart_class": "ThoughtSignatureDelta",
+      "file": "lib/src/models/interactions/deltas/thought_signature_delta.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "ThoughtSummary": {
+      "spec": "interactions",
+      "schema": "ThoughtSummary",
+      "dart_class": "ThoughtSummary",
+      "file": "lib/src/models/interactions/common/thought_summary.dart",
+      "kind": "skip",
+      "note": "No direct one-to-one Dart model is currently tracked for this schema. Review manually when the schema changes."
+    },
+    "ThoughtSummaryDelta": {
+      "spec": "interactions",
+      "schema": "ThoughtSummaryDelta",
+      "dart_class": "ThoughtSummaryDelta",
+      "file": "lib/src/models/interactions/deltas/thought_summary_delta.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "interactions:Tool": {
+      "spec": "interactions",
+      "schema": "Tool",
+      "dart_class": "InteractionTool",
+      "file": "lib/src/models/interactions/tools/tools.dart",
+      "kind": "sealed_parent",
+      "tags": [
+        "critical"
+      ],
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "function": "#/components/schemas/Function",
+          "google_search": "#/components/schemas/GoogleSearch",
+          "code_execution": "#/components/schemas/CodeExecution",
+          "url_context": "#/components/schemas/UrlContext",
+          "computer_use": "#/components/schemas/ComputerUse",
+          "mcp_server": "#/components/schemas/McpServer",
+          "file_search": "#/components/schemas/FileSearch"
+        }
+      }
+    },
+    "ToolChoice": {
+      "spec": "interactions",
+      "schema": "ToolChoice",
+      "dart_class": "InteractionToolChoice",
+      "file": "lib/src/models/interactions/tool_choice.dart",
+      "kind": "skip",
+      "note": "Union wrapper represented by InteractionToolChoice plus AllowedTools rather than a direct generated sealed hierarchy."
+    },
+    "ToolChoiceConfig": {
+      "spec": "interactions",
+      "schema": "ToolChoiceConfig",
+      "dart_class": "AllowedTools",
+      "file": "lib/src/models/interactions/allowed_tools.dart",
+      "kind": "skip",
+      "parent": "InteractionToolChoice",
+      "note": "ToolChoiceConfig is represented as AllowedTools inside InteractionToolChoice. Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "ToolChoiceType": {
+      "spec": "interactions",
+      "schema": "ToolChoiceType",
+      "dart_class": "InteractionToolChoiceType",
+      "file": "lib/src/models/interactions/tool_choice_type.dart",
+      "kind": "skip",
+      "parent": "InteractionToolChoice",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "Turn": {
+      "spec": "interactions",
+      "schema": "Turn",
+      "dart_class": "Turn",
+      "file": "lib/src/models/interactions/turn.dart",
+      "kind": "object"
+    },
+    "interactions:UrlContext": {
+      "spec": "interactions",
+      "schema": "UrlContext",
+      "dart_class": "UrlContextTool",
+      "file": "lib/src/models/interactions/tools/url_context_tool.dart",
+      "kind": "skip",
+      "parent": "InteractionTool",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "UrlContextCallArguments": {
+      "spec": "interactions",
+      "schema": "UrlContextCallArguments",
+      "kind": "skip",
+      "file": "lib/src/models/interactions/content/url_context_call_content.dart",
+      "dart_class": "UrlContextCallArguments",
+      "note": "This arguments shape is flattened into the enclosing content model rather than represented as a standalone Dart type."
+    },
+    "UrlContextCallContent": {
+      "spec": "interactions",
+      "schema": "UrlContextCallContent",
+      "parent": "InteractionContent",
+      "kind": "skip",
+      "dart_class": "UrlContextCallContent",
+      "file": "lib/src/models/interactions/content/url_context_call_content.dart",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "UrlContextCallDelta": {
+      "spec": "interactions",
+      "schema": "UrlContextCallDelta",
+      "dart_class": "UrlContextCallDelta",
+      "file": "lib/src/models/interactions/deltas/url_context_call_delta.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "UrlContextResult": {
+      "spec": "interactions",
+      "schema": "UrlContextResult",
+      "parent": "InteractionContent",
+      "kind": "object",
+      "dart_class": "UrlContextResult",
+      "file": "lib/src/models/interactions/content/url_context_result_content.dart"
+    },
+    "UrlContextResultContent": {
+      "spec": "interactions",
+      "schema": "UrlContextResultContent",
+      "parent": "InteractionContent",
+      "kind": "object",
+      "dart_class": "UrlContextResultContent",
+      "file": "lib/src/models/interactions/content/url_context_result_content.dart"
+    },
+    "UrlContextResultDelta": {
+      "spec": "interactions",
+      "schema": "UrlContextResultDelta",
+      "dart_class": "UrlContextResultDelta",
+      "file": "lib/src/models/interactions/deltas/url_context_result_delta.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "Usage": {
+      "spec": "interactions",
+      "schema": "Usage",
+      "dart_class": "InteractionUsage",
+      "file": "lib/src/models/interactions/usage.dart",
+      "kind": "object"
+    },
+    "VideoContent": {
+      "spec": "interactions",
+      "schema": "VideoContent",
+      "parent": "InteractionContent",
+      "kind": "object",
+      "dart_class": "VideoContent",
+      "file": "lib/src/models/interactions/content/video_content.dart"
+    },
+    "VideoDelta": {
+      "spec": "interactions",
+      "schema": "VideoDelta",
+      "dart_class": "VideoDelta",
+      "file": "lib/src/models/interactions/deltas/video_delta.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "VideoMimeTypeOption": {
+      "spec": "interactions",
+      "schema": "VideoMimeTypeOption",
+      "dart_class": "VideoMimeTypeOption",
+      "file": "lib/src/models/interactions/common/video_mime_type_option.dart",
+      "kind": "skip",
+      "note": "No direct one-to-one Dart model is currently tracked for this schema. Review manually when the schema changes."
+    }
+  }
+}

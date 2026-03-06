@@ -6,11 +6,10 @@
       "local_file": "openapi.json",
       "requires_auth": false,
       "auth_env_vars": [],
-      "description": "ChromaDB vector database API"
+      "description": "ChromaDB vector database API",
+      "fetch_mode": "remote"
     }
   },
   "specs_dir": "packages/chromadb/specs",
-  "output_dir": "/tmp/openapi-chromadb-dart",
-  "discovery_patterns": [],
-  "discovery_names": []
+  "output_dir": "/tmp/openapi-chromadb-dart"
 }

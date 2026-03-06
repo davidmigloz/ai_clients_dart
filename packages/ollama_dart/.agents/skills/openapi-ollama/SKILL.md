@@ -1,127 +1,49 @@
 ---
 name: openapi-ollama
-description: >-
-  Update ollama_dart from Ollama OpenAPI changes. Fetch and compare specs, generate changelogs and prioritized implementation plans, and guide endpoint/model synchronization. Use for update api, sync openapi, compare spec changes, new endpoints, or implementation plan requests.
+description: Update ollama_dart from Ollama OpenAPI changes. Use for spec refresh, change review, scaffolding, and verification.
 ---
 
-
-# OpenAPI Toolkit (ollama_dart)
-
-Uses shared scripts from [openapi-toolkit](../../../../../.agents/shared/openapi-toolkit/README.md).
+# Ollama OpenAPI Workflow
 
 ## Prerequisites
 
-- Python 3.9+ with `pyyaml` installed
-  - **Important**: Install for your active Python version: `python3 -m pip install pyyaml --user`
-  - Verify: `python3 -c "import yaml; print(yaml.__version__)"`
+- Auth: No auth env vars required.
+- CLI: `python3 .agents/shared/api-toolkit/scripts/api_toolkit.py`
+- Commands work from any directory. Use `--config-dir` to resolve the package and repo roots.
 
-## Working Directory Requirements
+## Workflow
 
-Different scripts require different working directories. See the [shared README](../../../../../.agents/shared/openapi-toolkit/README.md#working-directory-requirements) for details.
-
-| Script | Working Directory |
-|--------|-------------------|
-| `fetch_spec.py`, `analyze_changes.py` | Repository root |
-| `verify_*.py`, `generate_*.py` | **Package root** (`packages/ollama_dart`) |
-
-## Quick Start
-
+1. Fetch:
 ```bash
-# === FROM REPOSITORY ROOT ===
-
-# Fetch latest spec
-cd "$(git rev-parse --show-toplevel)" && \
-python3 .agents/shared/openapi-toolkit/scripts/fetch_spec.py \
-  --config-dir packages/ollama_dart/.agents/skills/openapi-ollama/config
-
-# Analyze changes (specs auto-located from config)
-cd "$(git rev-parse --show-toplevel)" && \
-python3 .agents/shared/openapi-toolkit/scripts/analyze_changes.py \
-  --config-dir packages/ollama_dart/.agents/skills/openapi-ollama/config \
-  --format all
-
-# === FROM PACKAGE ROOT ===
-
-# IMPORTANT: Check API coverage (spec auto-located)
-cd "$(git rev-parse --show-toplevel)/packages/ollama_dart" && \
-python3 ../../.agents/shared/openapi-toolkit/scripts/verify_coverage.py \
-  --config-dir .agents/skills/openapi-ollama/config --verbose
-
-# Verify implementation (barrel files auto-discovered)
-cd "$(git rev-parse --show-toplevel)/packages/ollama_dart" && \
-python3 ../../.agents/shared/openapi-toolkit/scripts/verify_exports.py \
-  --config-dir .agents/skills/openapi-ollama/config
-
-cd "$(git rev-parse --show-toplevel)/packages/ollama_dart" && \
-python3 ../../.agents/shared/openapi-toolkit/scripts/verify_model_properties.py \
-  --config-dir .agents/skills/openapi-ollama/config \
-  --spec specs/openapi.json
-
-# Re-run coverage to confirm full implementation
-cd "$(git rev-parse --show-toplevel)/packages/ollama_dart" && \
-python3 ../../.agents/shared/openapi-toolkit/scripts/verify_coverage.py \
-  --config-dir .agents/skills/openapi-ollama/config
+python3 .agents/shared/api-toolkit/scripts/api_toolkit.py fetch   --config-dir packages/ollama_dart/.agents/skills/openapi-ollama/config
+```
+2. Review:
+```bash
+python3 .agents/shared/api-toolkit/scripts/api_toolkit.py review   --config-dir packages/ollama_dart/.agents/skills/openapi-ollama/config
+```
+3. Implement with `scaffold`, package references, and the reviewed candidate spec.
+4. Verify:
+```bash
+python3 .agents/shared/api-toolkit/scripts/api_toolkit.py verify   --config-dir packages/ollama_dart/.agents/skills/openapi-ollama/config   --checks all --scope all
 ```
 
-## IMPORTANT: Verify Against Official Sources
+## Specs
 
-The Ollama OpenAPI spec may be incomplete or lag behind the actual implementation.
-**Always cross-reference with these official sources before finalizing implementation:**
+| Spec | Description |
+| --- | --- |
+| `main` | Ollama API for running LLMs locally |
 
-### Primary Sources (Source of Truth)
+## Package References
 
-1. **Ollama Go Types** (definitive API contract):
-   https://github.com/ollama/ollama/blob/main/api/types.go
+- [references/package-guide.md](references/package-guide.md)
+- [references/implementation-patterns.md](references/implementation-patterns.md)
+- [references/REVIEW_CHECKLIST.md](references/REVIEW_CHECKLIST.md)
 
-2. **Ollama JS Client** (reference implementation):
-   https://github.com/ollama/ollama-js/blob/main/src/interfaces.ts
+## Separate Dart Quality Steps
 
-### Verification Workflow
-
-When updating or creating models:
-
-1. Fetch the OpenAPI spec as usual
-2. **Cross-reference each model** with the Go types and JS interfaces
-3. If the official sources have parameters not in the OpenAPI spec, add them
-4. Update `expected_properties` in `config/models.json` with any new parameters found
-
-### Critical Models to Verify
-
-These models are most likely to have parameters missing from the OpenAPI spec:
-
-| Go Type | JS Type | Dart Class |
-|---------|---------|------------|
-| `Options` | `Options` | `ModelOptions` |
-| `GenerateRequest` | `GenerateRequest` | `GenerateRequest` |
-| `GenerateResponse` | `GenerateResponse` | `GenerateResponse` |
-| `ChatRequest` | `ChatRequest` | `ChatRequest` |
-| `ChatResponse` | `ChatResponse` | `ChatResponse` |
-| `EmbedRequest` | `EmbeddingsRequest` | `EmbedRequest` |
-| `EmbedResponse` | `EmbeddingsResponse` | `EmbedResponse` |
-
-### Expected Properties Validation
-
-The `config/models.json` file contains an `expected_properties` section that lists
-all expected properties for critical models. The verification script will warn
-if any expected properties are missing from the implementation.
-
-This serves as a regression prevention mechanism: if a future OpenAPI spec update
-inadvertently removes a property that should exist, the verification will catch it.
-
-## Troubleshooting
-
-- **No changes detected**: Analysis shows all zeros - package is up-to-date, no action needed
-- **Unexported files warning**: Add internal utility files to `skip_files` in `config/package.json`
-- **Coverage < 100%**: Missing APIs need implementation before other updates
-
-## Package-Specific References
-
-- [Package Guide](references/package-guide.md)
-- [Implementation Patterns](references/implementation-patterns.md)
-- [Review Checklist](references/REVIEW_CHECKLIST.md)
-
-## External References
-
-- [Official Ollama API Documentation](https://github.com/ollama/ollama/blob/main/docs/api.md)
-- [Official Ollama JS Client](https://github.com/ollama/ollama-js)
-- [Ollama OpenAPI Spec](https://raw.githubusercontent.com/ollama/ollama/refs/heads/main/docs/openapi.yaml)
+```bash
+cd packages/ollama_dart
+dart analyze --fatal-infos
+dart format --set-exit-if-changed .
+dart test test/unit/
+```

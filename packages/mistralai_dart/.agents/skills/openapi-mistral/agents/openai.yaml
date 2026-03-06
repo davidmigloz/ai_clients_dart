@@ -1,4 +1,4 @@
 interface:
-  display_name: "OpenAPI Mistral"
-  short_description: "Manage Mistral OpenAPI updates"
-  default_prompt: "Use $openapi-mistral to review API spec changes, generate a changelog, and produce an implementation plan for this package."
+  display_name: "Mistral OpenAPI"
+  short_description: "Manage Mistral openapi workflow"
+  default_prompt: "Use $openapi-mistral to review API changes, scaffold updates, and verify this package."

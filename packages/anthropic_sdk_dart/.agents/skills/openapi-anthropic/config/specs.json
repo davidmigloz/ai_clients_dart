@@ -5,8 +5,11 @@
       "url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/anthropic%2Fanthropic-5387c517ad6a3b9790063962c2956476b24a17d163c68c8d091367f6db8cf4ed.yml",
       "local_file": "openapi.yaml",
       "requires_auth": false,
-      "auth_env_vars": ["ANTHROPIC_API_KEY"],
-      "description": "Anthropic API for Claude models"
+      "auth_env_vars": [
+        "ANTHROPIC_API_KEY"
+      ],
+      "description": "Anthropic API for Claude models",
+      "fetch_mode": "remote"
     }
   },
   "preflight": {
@@ -14,7 +17,5 @@
     "stats_field": "openapi_spec_url"
   },
   "specs_dir": "packages/anthropic_sdk_dart/specs",
-  "output_dir": "/tmp/openapi-anthropic-dart",
-  "discovery_patterns": [],
-  "discovery_names": []
+  "output_dir": "/tmp/openapi-anthropic-dart"
 }

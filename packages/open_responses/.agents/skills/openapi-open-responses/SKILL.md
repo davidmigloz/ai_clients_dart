@@ -1,155 +1,49 @@
 ---
 name: openapi-open-responses
-description: >-
-  Update open_responses from OpenResponses OpenAPI changes. Fetch and compare specs, generate changelogs and prioritized implementation plans, and guide endpoint/model synchronization. Use for update api, sync openapi, compare spec changes, new endpoints, or implementation plan requests.
+description: Update open_responses from OpenResponses OpenAPI changes. Use for spec refresh, change review, scaffolding, and verification.
 ---
 
-
-# OpenAPI Toolkit (open_responses)
-
-Uses shared scripts from [openapi-toolkit](../../../../../.agents/shared/openapi-toolkit/README.md) with open_responses-specific configuration.
+# OpenResponses OpenAPI Workflow
 
 ## Prerequisites
 
-- Python 3.9+ with `pyyaml` installed
-  - **Important**: Install for your active Python version: `python3 -m pip install pyyaml --user`
-  - Verify: `python3 -c "import yaml; print(yaml.__version__)"`
-- No API key required to fetch spec (it's public)
-- For integration tests: `OPENAI_API_KEY` environment variable
-
-## Working Directory Requirements
-
-Different scripts require different working directories. See the [shared README](../../../../../.agents/shared/openapi-toolkit/README.md#working-directory-requirements) for details.
-
-| Script | Working Directory |
-|--------|-------------------|
-| `fetch_spec.py`, `analyze_changes.py` | Repository root |
-| `verify_*.py`, `generate_*.py` | **Package root** (`packages/open_responses`) |
-
-## Spec Registry
-
-| Spec | Description | Auth Required |
-|------|-------------|---------------|
-| `main` | OpenResponses unified LLM API | No |
+- Auth: No auth env vars required.
+- CLI: `python3 .agents/shared/api-toolkit/scripts/api_toolkit.py`
+- Commands work from any directory. Use `--config-dir` to resolve the package and repo roots.
 
 ## Workflow
 
-### 1. Fetch Latest Spec (REPO ROOT)
-
+1. Fetch:
 ```bash
-cd "$(git rev-parse --show-toplevel)" && \
-python3 .agents/shared/openapi-toolkit/scripts/fetch_spec.py \
-  --config-dir packages/open_responses/.agents/skills/openapi-open-responses/config
+python3 .agents/shared/api-toolkit/scripts/api_toolkit.py fetch   --config-dir packages/open_responses/.agents/skills/openapi-open-responses/config
+```
+2. Review:
+```bash
+python3 .agents/shared/api-toolkit/scripts/api_toolkit.py review   --config-dir packages/open_responses/.agents/skills/openapi-open-responses/config
+```
+3. Implement with `scaffold`, package references, and the reviewed candidate spec.
+4. Verify:
+```bash
+python3 .agents/shared/api-toolkit/scripts/api_toolkit.py verify   --config-dir packages/open_responses/.agents/skills/openapi-open-responses/config   --checks all --scope all
 ```
 
-Output: `/tmp/openapi-open-responses-dart/latest-main.json`
+## Specs
 
-### 1.5. Analyze Changes (REPO ROOT)
+| Spec | Description |
+| --- | --- |
+| `main` | OpenResponses unified LLM API specification |
 
-Compare old spec vs new spec to find what changed. **Specs are auto-located** from config:
+## Package References
 
-```bash
-cd "$(git rev-parse --show-toplevel)" && \
-python3 .agents/shared/openapi-toolkit/scripts/analyze_changes.py \
-  --config-dir packages/open_responses/.agents/skills/openapi-open-responses/config \
-  --format all
-```
+- [references/package-guide.md](references/package-guide.md)
+- [references/implementation-patterns.md](references/implementation-patterns.md)
+- [references/REVIEW_CHECKLIST.md](references/REVIEW_CHECKLIST.md)
 
-### 2. Check API Coverage (CRITICAL - PACKAGE ROOT)
-
-**Always run coverage check.** This catches APIs that exist in the spec but were never implemented. **Spec is auto-located**:
+## Separate Dart Quality Steps
 
 ```bash
-cd "$(git rev-parse --show-toplevel)/packages/open_responses" && \
-python3 ../../.agents/shared/openapi-toolkit/scripts/verify_coverage.py \
-  --config-dir .agents/skills/openapi-open-responses/config --verbose
+cd packages/open_responses
+dart analyze --fatal-infos
+dart format --set-exit-if-changed .
+dart test test/unit/
 ```
-
-If missing resources are found, prioritize implementing them before other updates.
-
-### 3. Implement Changes
-
-Before implementing, read `references/implementation-patterns.md` for:
-- Model class structure and conventions
-- Sealed class patterns for polymorphic types
-- Streaming event handling
-- JSON serialization patterns
-
-Use templates from `../../shared/openapi-toolkit/assets/`.
-
-### 3.5 Update Documentation (MANDATORY)
-
-Before running the review checklist, update all documentation:
-
-1. **README.md** - Add/update new features
-2. **example/** - Create/update example files
-3. **CHANGELOG.md** - Add entry for new features/changes
-
-### 4. Review & Validate (MANDATORY - PACKAGE ROOT)
-
-Perform the multi-pass review documented in `references/REVIEW_CHECKLIST.md`:
-
-```bash
-# Pass 2: Barrel file verification
-cd "$(git rev-parse --show-toplevel)/packages/open_responses" && \
-python3 ../../.agents/shared/openapi-toolkit/scripts/verify_exports.py \
-  --config-dir .agents/skills/openapi-open-responses/config
-
-# Pass 3: Documentation completeness
-cd "$(git rev-parse --show-toplevel)/packages/open_responses" && \
-python3 ../../.agents/shared/openapi-toolkit/scripts/verify_readme.py \
-  --config-dir .agents/skills/openapi-open-responses/config
-
-cd "$(git rev-parse --show-toplevel)/packages/open_responses" && \
-python3 ../../.agents/shared/openapi-toolkit/scripts/verify_examples.py \
-  --config-dir .agents/skills/openapi-open-responses/config
-
-# Pass 4: Property-level verification
-cd "$(git rev-parse --show-toplevel)/packages/open_responses" && \
-python3 ../../.agents/shared/openapi-toolkit/scripts/verify_model_properties.py \
-  --config-dir .agents/skills/openapi-open-responses/config \
-  --spec specs/openapi.json
-
-# Dart quality checks
-cd "$(git rev-parse --show-toplevel)/packages/open_responses" && \
-dart analyze --fatal-infos && dart format --set-exit-if-changed . && dart test
-```
-
-### 5. Finalize (REPO ROOT)
-
-```bash
-cd "$(git rev-parse --show-toplevel)" && \
-cp /tmp/openapi-open-responses-dart/latest-main.json packages/open_responses/specs/openapi.json
-```
-
-## Package-Specific References
-
-- [Package Guide](references/package-guide.md) - Package structure, naming conventions
-- [Implementation Patterns](references/implementation-patterns.md) - Model conventions, serialization patterns
-- [Review Checklist](references/REVIEW_CHECKLIST.md) - Multi-pass validation process
-
-## External References
-
-### Specification
-- [OpenResponses Home](https://www.openresponses.org/)
-- [OpenResponses Specification](https://www.openresponses.org/specification)
-- [OpenResponses Changelog](https://www.openresponses.org/changelog)
-- [OpenResponses OpenAPI Spec](https://www.openresponses.org/openapi/openapi.json)
-
-### Provider Documentation
-- [OpenAI Responses API](https://platform.openai.com/docs/api-reference/responses)
-- [Vercel AI Gateway](https://vercel.com/docs/ai-gateway/openresponses)
-- [vLLM OpenResponses](https://docs.vllm.ai/en/latest/examples/online_serving/openai_responses_client/)
-- [vLLM MCP Tools](https://docs.vllm.ai/en/latest/examples/online_serving/openai_responses_client_with_mcp_tools/)
-- [OpenRouter Responses](https://openrouter.ai/docs/api/reference/responses/overview)
-- [OpenRouter Reasoning](https://openrouter.ai/docs/api/reference/responses/reasoning)
-- [OpenRouter Tool Calling](https://openrouter.ai/docs/api/reference/responses/tool-calling)
-- [HuggingFace Responses](https://huggingface.co/docs/inference-providers/guides/responses-api)
-- [Ollama Compatibility](https://docs.ollama.com/api/openai-compatibility)
-- [LM Studio](https://lmstudio.ai/blog/lmstudio-v0.3.29)
-
-## Troubleshooting
-
-- **Network errors**: Check connectivity; retry after a few seconds
-- **No changes detected**: Summary shows all zeros; no action needed
-- **Integration test failures**: Set `OPENAI_API_KEY` environment variable

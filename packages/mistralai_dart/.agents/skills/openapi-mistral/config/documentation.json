@@ -3,16 +3,31 @@
   "tool_properties": {
     "function": {
       "description": "Function/tool calling support",
-      "search_terms": ["function calling", "tools", "tool_calls"]
+      "search_terms": [
+        "function calling",
+        "tools",
+        "tool_calls"
+      ]
     }
   },
-  "excluded_resources": ["base_resource", "streaming_resource"],
+  "excluded_resources": [
+    "base_resource",
+    "fineTuningModels",
+    "streaming_resource",
+    "transcriptions"
+  ],
   "resource_to_example": {
     "chat": "chat",
     "embeddings": "embeddings",
     "models": "models",
     "fim": "fim"
   },
-  "excluded_from_examples": ["files"],
+  "excluded_from_examples": [
+    "classifications",
+    "files",
+    "fineTuningModels",
+    "moderations",
+    "transcriptions"
+  ],
   "drift_patterns": []
 }

@@ -5,8 +5,12 @@
       "url": "https://generativelanguage.googleapis.com/$discovery/OPENAPI3_0?version=v1beta",
       "local_file": "openapi.json",
       "requires_auth": true,
-      "auth_env_vars": ["GEMINI_API_KEY", "GOOGLE_AI_API_KEY"],
-      "description": "Core Gemini API - generation, embeddings, files, models, etc."
+      "auth_env_vars": [
+        "GEMINI_API_KEY",
+        "GOOGLE_AI_API_KEY"
+      ],
+      "description": "Core Gemini API - generation, embeddings, files, models, etc.",
+      "fetch_mode": "remote"
     },
     "interactions": {
       "name": "Interactions API",
@@ -15,26 +19,10 @@
       "requires_auth": false,
       "auth_env_vars": [],
       "experimental": true,
-      "description": "Server-side state, agents, background execution"
+      "description": "Server-side state, agents, background execution",
+      "fetch_mode": "remote"
     }
   },
   "specs_dir": "packages/googleai_dart/specs",
-  "output_dir": "/tmp/openapi-googleai-dart",
-  "discovery_patterns": [
-    "https://ai.google.dev/static/api/{name}.openapi.json"
-  ],
-  "discovery_names": [
-    "interactions",
-    "live",
-    "live-api",
-    "bidi",
-    "music",
-    "live-music",
-    "agents",
-    "adk",
-    "imagen",
-    "veo",
-    "file-search",
-    "grounding"
-  ]
+  "output_dir": "/tmp/openapi-googleai-dart"
 }

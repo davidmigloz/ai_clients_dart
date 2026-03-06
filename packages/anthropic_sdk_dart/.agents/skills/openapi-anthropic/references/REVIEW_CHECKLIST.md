@@ -1,153 +1,18 @@
-# Review Checklist (anthropic_sdk_dart)
+# Review Checklist
 
-
-## Contents
-
-- [Pre-Review Setup](#pre-review-setup)
-- [Review Passes](#review-passes)
-  - [Pass 1: Implementation Verification](#pass-1-implementation-verification)
-  - [Pass 2: Anthropic-Specific Checks](#pass-2-anthropic-specific-checks)
-  - [Pass 2b: Resources Using Direct httpClient.send()](#pass-2b-resources-using-direct-httpclientsend)
-  - [Pass 3: Barrel File Verification](#pass-3-barrel-file-verification)
-  - [Pass 4: Documentation](#pass-4-documentation)
-  - [Pass 5: Quality Gates](#pass-5-quality-gates)
-- [Common Gaps](#common-gaps)
-  - [Model Issues](#model-issues)
-  - [Beta API Issues](#beta-api-issues)
-  - [Authentication Issues (Direct HTTP Requests)](#authentication-issues-direct-http-requests)
-  - [Integration Test Issues](#integration-test-issues)
-- [Anthropic-Specific Patterns](#anthropic-specific-patterns)
-  - [Content Block Types](#content-block-types)
-  - [Stop Reasons](#stop-reasons)
-  - [Stream Event Types](#stream-event-types)
-
-Extends [REVIEW_CHECKLIST-core.md](../../../../../../.agents/shared/openapi-toolkit/references/REVIEW_CHECKLIST-core.md).
-
-## Pre-Review Setup
+## Toolkit Workflow
 
 ```bash
-# Fetch latest spec
-python3 .agents/shared/openapi-toolkit/scripts/fetch_spec.py \
-  --config-dir packages/anthropic_sdk_dart/.agents/skills/openapi-anthropic/config
-
-# Analyze changes
-python3 .agents/shared/openapi-toolkit/scripts/analyze_changes.py \
-  --config-dir packages/anthropic_sdk_dart/.agents/skills/openapi-anthropic/config \
-  packages/anthropic_sdk_dart/specs/openapi.yaml \
-  /tmp/openapi-anthropic-dart/latest-main.yaml \
-  --format all
+python3 .agents/shared/api-toolkit/scripts/api_toolkit.py fetch --config-dir packages/anthropic_sdk_dart/.agents/skills/openapi-anthropic/config
+python3 .agents/shared/api-toolkit/scripts/api_toolkit.py review --config-dir packages/anthropic_sdk_dart/.agents/skills/openapi-anthropic/config
+python3 .agents/shared/api-toolkit/scripts/api_toolkit.py verify --config-dir packages/anthropic_sdk_dart/.agents/skills/openapi-anthropic/config --checks all --scope all
 ```
 
-## Review Passes
-
-### Pass 1: Implementation Verification
-
-- [ ] Breaking changes identified and documented
-- [ ] New endpoints implemented with correct HTTP methods
-- [ ] New schemas implemented with all properties
-- [ ] Modified schemas updated with new/changed properties
-- [ ] Removed APIs properly deprecated or removed
-
-### Pass 2: Anthropic-Specific Checks
-
-- [ ] `x-api-key` header used (not Bearer token)
-- [ ] `anthropic-version` header set on all requests
-- [ ] `anthropic-beta` header used for beta features
-- [ ] **Beta header values verified from TypeScript SDK** (see table in implementation-patterns.md)
-- [ ] SSE streaming implemented correctly
-- [ ] Content blocks use sealed class pattern
-- [ ] Tool use/result blocks handle all variants
-- [ ] Nested resources work (`messages.batches`)
-- [ ] Stop reasons mapped correctly
-
-### Pass 2b: Resources Using Direct httpClient.send()
-
-For streaming and multipart resources:
-- [ ] `_applyAuthentication()` helper exists
-- [ ] Auth applied before `httpClient.send()` call
-- [ ] Error handling maps HTTP errors to typed exceptions
-- [ ] `content-type` header removed for multipart (boundary set automatically)
-
-### Pass 3: Barrel File Verification
+## Package Quality
 
 ```bash
-python3 .agents/shared/openapi-toolkit/scripts/verify_exports.py \
-  --config-dir packages/anthropic_sdk_dart/.agents/skills/openapi-anthropic/config
-```
-
-- [ ] All public types exported
-- [ ] No internal types exposed
-- [ ] Exports organized by feature area
-
-### Pass 4: Documentation
-
-- [ ] README.md updated with new features
-- [ ] CHANGELOG.md updated
-- [ ] Example files work and demonstrate new features
-- [ ] API documentation comments complete
-
-### Pass 5: Quality Gates
-
-```bash
+cd packages/anthropic_sdk_dart
 dart analyze --fatal-infos
 dart format --set-exit-if-changed .
-mcp__dart__run_tests()
+dart test test/unit/
 ```
-
-- [ ] Zero analyzer warnings
-- [ ] Code formatted
-- [ ] All tests pass
-- [ ] Model properties match spec
-
-```bash
-python3 .agents/shared/openapi-toolkit/scripts/verify_model_properties.py \
-  --config-dir packages/anthropic_sdk_dart/.agents/skills/openapi-anthropic/config
-```
-
-## Common Gaps
-
-### Model Issues
-- [ ] Missing `copyWith` on models with nullable fields
-- [ ] Missing enum fallback values
-- [ ] Missing `==` and `hashCode` implementations
-- [ ] Missing `@immutable` annotations
-- [ ] Streaming events not handling all types
-
-### Beta API Issues
-- [ ] Beta header not passed for beta features
-- [ ] **Wrong beta header value** (verify from TypeScript SDK!)
-- [ ] Beta header using outdated date format
-
-### Authentication Issues (Direct HTTP Requests)
-- [ ] Streaming resource missing `_applyAuthentication()` call
-- [ ] Multipart upload missing `_applyAuthentication()` call
-- [ ] Auth applied after headers (should be before `send()`)
-
-### Integration Test Issues
-- [ ] Invalid inline test data (e.g., tiny base64 images)
-- [ ] Missing graceful skip for unavailable dependencies
-- [ ] Hard-coded values that change (use env vars or fetch)
-
-## Anthropic-Specific Patterns
-
-### Content Block Types
-- `text` - Text content
-- `image` - Base64 or URL image
-- `tool_use` - Tool invocation
-- `tool_result` - Tool result
-
-### Stop Reasons
-- `end_turn` - Natural end
-- `max_tokens` - Token limit reached
-- `stop_sequence` - Stop sequence hit
-- `tool_use` - Tool use requested
-
-### Stream Event Types
-- `message_start`
-- `content_block_start`
-- `content_block_delta`
-- `content_block_stop`
-- `message_delta`
-- `message_stop`
-- `ping`
-- `error`

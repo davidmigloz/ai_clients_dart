@@ -5,8 +5,11 @@
       "url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/openai%2Fopenai-9c802d45a9bf2a896b5fd22ac22bba185e8a145bd40ed242df9bb87a05e954eb.yml",
       "local_file": "openapi.json",
       "requires_auth": false,
-      "auth_env_vars": ["OPENAI_API_KEY"],
-      "description": "OpenAI API for GPT, DALL-E, Whisper, and more"
+      "auth_env_vars": [
+        "OPENAI_API_KEY"
+      ],
+      "description": "OpenAI API for GPT, DALL-E, Whisper, and more",
+      "fetch_mode": "remote"
     }
   },
   "preflight": {
@@ -14,7 +17,5 @@
     "stats_field": "openapi_spec_url"
   },
   "specs_dir": "packages/openai_dart/specs",
-  "output_dir": "/tmp/openapi-openai-dart",
-  "discovery_patterns": [],
-  "discovery_names": []
+  "output_dir": "/tmp/openapi-openai-dart"
 }

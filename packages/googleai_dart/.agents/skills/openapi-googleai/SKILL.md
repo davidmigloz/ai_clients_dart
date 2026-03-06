@@ -1,169 +1,59 @@
 ---
 name: openapi-googleai
-description: >-
-  Update googleai_dart from Google AI OpenAPI changes. Fetch and compare specs, generate changelogs and prioritized implementation plans, and guide endpoint/model synchronization. Use for update api, sync openapi, compare spec changes, new endpoints, or implementation plan requests.
+description: Update googleai_dart from Google AI OpenAPI changes. Use for spec refresh, change review, scaffolding, and verification.
 ---
 
-
-# OpenAPI Toolkit (googleai_dart)
-
-Uses shared scripts from [openapi-toolkit](../../../../../.agents/shared/openapi-toolkit/README.md) with googleai_dart-specific configuration.
+# Google AI OpenAPI Workflow
 
 ## Prerequisites
 
-- `GEMINI_API_KEY` or `GOOGLE_AI_API_KEY` environment variable set
-- Python 3.9+ with `pyyaml` installed
-  - **Important**: Install for your active Python version: `python3 -m pip install pyyaml --user`
-  - Verify: `python3 -c "import yaml; print(yaml.__version__)"`
-
-## Working Directory Requirements
-
-Different scripts require different working directories. See the [shared README](../../../../../.agents/shared/openapi-toolkit/README.md#working-directory-requirements) for details.
-
-| Script | Working Directory |
-|--------|-------------------|
-| `fetch_spec.py`, `analyze_changes.py` | Repository root |
-| `verify_*.py`, `generate_*.py` | **Package root** (`packages/googleai_dart`) |
-
-## Spec Registry
-
-| Spec | Description | Auth Required |
-|------|-------------|---------------|
-| `main` | Core Gemini API (generation, embeddings, files, models, etc.) | Yes |
-| `interactions` | Experimental Interactions API (server-side state, agents) | No |
+- Auth: `GEMINI_API_KEY`, `GOOGLE_AI_API_KEY`
+- CLI: `python3 .agents/shared/api-toolkit/scripts/api_toolkit.py`
+- Use an absolute `--config-dir` when running outside the repo root.
 
 ## Workflow
 
-### 1. Fetch Latest Specs (REPO ROOT)
-
+1. Fetch the spec you are updating:
 ```bash
-# From repository root
-# Fetch all specs + auto-discover new ones
-cd "$(git rev-parse --show-toplevel)" && \
-python3 .agents/shared/openapi-toolkit/scripts/fetch_spec.py \
-  --config-dir packages/googleai_dart/.agents/skills/openapi-googleai/config
-
-# Fetch specific spec only
-cd "$(git rev-parse --show-toplevel)" && \
-python3 .agents/shared/openapi-toolkit/scripts/fetch_spec.py \
-  --config-dir packages/googleai_dart/.agents/skills/openapi-googleai/config --spec main
-```
-
-Output: `/tmp/openapi-googleai-dart/latest-main.json`, `/tmp/openapi-googleai-dart/latest-interactions.json`
-
-### 1.5. Analyze Changes (REPO ROOT)
-
-Compare old spec vs new spec to find what changed. **Specs are auto-located** from config:
-
-```bash
-# From repository root - specs auto-located
-cd "$(git rev-parse --show-toplevel)" && \
-python3 .agents/shared/openapi-toolkit/scripts/analyze_changes.py \
+python3 .agents/shared/api-toolkit/scripts/api_toolkit.py fetch \
   --config-dir packages/googleai_dart/.agents/skills/openapi-googleai/config \
-  --format all
+  --spec-name main
+```
+2. Review the same spec:
+```bash
+python3 .agents/shared/api-toolkit/scripts/api_toolkit.py review \
+  --config-dir packages/googleai_dart/.agents/skills/openapi-googleai/config \
+  --spec-name main
+```
+3. Implement with `scaffold`, package references, and the reviewed candidate spec.
+4. Verify:
+```bash
+python3 .agents/shared/api-toolkit/scripts/api_toolkit.py verify \
+  --config-dir packages/googleai_dart/.agents/skills/openapi-googleai/config \
+  --spec-name main \
+  --checks all --scope all
 ```
 
-### 2. Check API Coverage (CRITICAL - PACKAGE ROOT)
+## Specs
 
-**Always run coverage check.** This catches APIs that exist in the spec but were never implemented. **Spec is auto-located**:
+| Spec | Description |
+| --- | --- |
+| `main` | Core Gemini API - generation, embeddings, files, models, etc. |
+| `interactions` | Server-side state, agents, background execution |
+
+Use `--spec-name interactions` when reviewing or verifying the interactions spec.
+
+## Package References
+
+- [references/package-guide.md](references/package-guide.md)
+- [references/implementation-patterns.md](references/implementation-patterns.md)
+- [references/REVIEW_CHECKLIST.md](references/REVIEW_CHECKLIST.md)
+
+## Separate Dart Quality Steps
 
 ```bash
-# From package root
-cd "$(git rev-parse --show-toplevel)/packages/googleai_dart" && \
-python3 ../../.agents/shared/openapi-toolkit/scripts/verify_coverage.py \
-  --config-dir .agents/skills/openapi-googleai/config --verbose
+cd packages/googleai_dart
+dart analyze --fatal-infos
+dart format --set-exit-if-changed .
+dart test test/unit/
 ```
-
-If missing resources are found, prioritize implementing them before other updates.
-
-### 3. Implement Changes
-
-Before implementing, read `references/implementation-patterns.md` for:
-- Model class structure and conventions
-- Enum naming patterns
-- JSON serialization patterns
-- Test patterns and PR templates
-
-Use templates from `../../shared/openapi-toolkit/assets/`:
-- `model_template.dart` - Model class structure
-- `enum_template.dart` - Enum type structure
-- `test_template.dart` - Unit test structure
-- `example_template.dart` - Example file structure
-
-### 3.5 Update Documentation (MANDATORY)
-
-Before running the review checklist, update all documentation:
-
-1. **README.md** - Add/update:
-   - New resources to Features section
-   - New resources to API Coverage section
-   - New example references in Examples section
-
-2. **example/** - Create/update:
-   - `{feature}_example.dart` for each new resource
-
-3. **CHANGELOG.md** - Add entry for new features/changes
-
-### 4. Review & Validate (MANDATORY - PACKAGE ROOT)
-
-Perform the four-pass review documented in `references/REVIEW_CHECKLIST.md`:
-
-```bash
-# Pass 2: Barrel file verification
-cd "$(git rev-parse --show-toplevel)/packages/googleai_dart" && \
-python3 ../../.agents/shared/openapi-toolkit/scripts/verify_exports.py \
-  --config-dir .agents/skills/openapi-googleai/config
-
-# Pass 3: Documentation completeness
-cd "$(git rev-parse --show-toplevel)/packages/googleai_dart" && \
-python3 ../../.agents/shared/openapi-toolkit/scripts/verify_readme.py \
-  --config-dir .agents/skills/openapi-googleai/config
-
-cd "$(git rev-parse --show-toplevel)/packages/googleai_dart" && \
-python3 ../../.agents/shared/openapi-toolkit/scripts/verify_examples.py \
-  --config-dir .agents/skills/openapi-googleai/config
-
-cd "$(git rev-parse --show-toplevel)/packages/googleai_dart" && \
-python3 ../../.agents/shared/openapi-toolkit/scripts/verify_readme_code.py \
-  --config-dir .agents/skills/openapi-googleai/config
-
-# Pass 4: Property-level verification
-cd "$(git rev-parse --show-toplevel)/packages/googleai_dart" && \
-python3 ../../.agents/shared/openapi-toolkit/scripts/verify_model_properties.py \
-  --config-dir .agents/skills/openapi-googleai/config \
-  --spec specs/openapi.json
-
-# Dart quality checks
-cd "$(git rev-parse --show-toplevel)/packages/googleai_dart" && \
-dart analyze --fatal-infos && dart format --set-exit-if-changed . && dart test test/unit/
-```
-
-**Pass 4 is critical** - catches missing properties in parent models (e.g., `Tool`, `Candidate`).
-
-### 5. Finalize (REPO ROOT)
-
-```bash
-# Copy fetched specs to persisted locations
-cd "$(git rev-parse --show-toplevel)" && \
-cp /tmp/openapi-googleai-dart/latest-main.json packages/googleai_dart/specs/openapi.json
-
-cd "$(git rev-parse --show-toplevel)" && \
-cp /tmp/openapi-googleai-dart/latest-interactions.json packages/googleai_dart/specs/openapi-interactions.json
-
-# Run quality checks
-cd "$(git rev-parse --show-toplevel)/packages/googleai_dart" && \
-dart test && dart analyze && dart format --set-exit-if-changed .
-```
-
-## Package-Specific References
-
-- [Package Guide](references/package-guide.md) - Package structure, naming conventions
-- [Implementation Patterns](references/implementation-patterns.md) - Model conventions, serialization patterns
-- [Review Checklist](references/REVIEW_CHECKLIST.md) - Four-pass validation process
-
-## Troubleshooting
-
-- **API key error**: Export `GEMINI_API_KEY` or `GOOGLE_AI_API_KEY`
-- **Network errors**: Check connectivity; retry after a few seconds
-- **No changes detected**: Summary shows all zeros; no action needed
-- **New specs discovered**: Add them to `config/specs.json` and re-run

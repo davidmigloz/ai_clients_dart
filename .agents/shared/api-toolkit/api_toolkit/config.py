@@ -1,0 +1,439 @@
+from __future__ import annotations
+
+import json
+import os
+import re
+import sys
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
+from urllib.error import HTTPError, URLError
+from urllib.parse import unquote
+from urllib.request import Request, urlopen
+
+try:
+    import yaml
+
+    HAS_YAML = True
+except ImportError:  # pragma: no cover - depends on environment
+    yaml = None
+    HAS_YAML = False
+
+
+EXIT_SUCCESS = 0
+EXIT_FAILURE = 1
+EXIT_USAGE = 2
+
+ALLOWED_FORMATS = {"json", "text"}
+
+DEFAULT_TYPE_MAPPINGS = {
+    "string": "String",
+    "integer": "int",
+    "number": "double",
+    "boolean": "bool",
+    "array": "List",
+    "object": "Map<String, dynamic>",
+}
+
+
+class ToolkitError(RuntimeError):
+    """Base error for toolkit failures."""
+
+    def __init__(self, message: str, *, exit_code: int = EXIT_USAGE) -> None:
+        super().__init__(message)
+        self.exit_code = exit_code
+
+
+@dataclass(slots=True)
+class PackageConfig:
+    name: str
+    display_name: str
+    barrel_file: str
+    barrel_files: list[str]
+    models_dir: str
+    live_models_dir: str | None
+    resources_dir: str
+    tests_dir: str
+    examples_dir: str
+    skip_files: list[str]
+    internal_barrel_files: list[str]
+    pr_title_prefix: str
+    changelog_title: str
+
+
+@dataclass(slots=True)
+class SpecConfig:
+    name: str
+    local_file: str
+    fetch_mode: str
+    url: str | None = None
+    fallback_urls: list[str] = field(default_factory=list)
+    requires_auth: bool = False
+    auth_env_vars: list[str] = field(default_factory=list)
+    description: str = ""
+    source_file: str | None = None
+    experimental: bool = False
+    websocket_endpoints: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(slots=True)
+class ManifestEntry:
+    key: str
+    spec: str
+    kind: str
+    dart_class: str
+    file: str
+    schema: str | None = None
+    parent: str | None = None
+    discriminator: dict[str, Any] | None = None
+    tags: list[str] = field(default_factory=list)
+    excluded_properties: list[str] = field(default_factory=list)
+    note: str | None = None
+
+    @property
+    def schema_name(self) -> str:
+        return self.schema or self.key
+
+
+@dataclass(slots=True)
+class ManifestConfig:
+    surface: str
+    type_mappings: dict[str, str]
+    placement: dict[str, Any]
+    coverage: dict[str, Any]
+    types: dict[str, ManifestEntry]
+
+
+@dataclass(slots=True)
+class DocumentationConfig:
+    removed_apis: list[dict[str, Any]]
+    tool_properties: dict[str, Any]
+    excluded_resources: list[str]
+    resource_to_example: dict[str, str]
+    excluded_from_examples: list[str]
+    drift_patterns: list[dict[str, Any]]
+    live_features: dict[str, Any]
+
+
+@dataclass(slots=True)
+class ToolkitConfig:
+    config_dir: Path
+    repo_root: Path
+    package_root: Path
+    package: PackageConfig
+    specs_dir: Path
+    output_dir: Path
+    specs: dict[str, SpecConfig]
+    preflight: dict[str, Any]
+    manifest: ManifestConfig
+    documentation: DocumentationConfig
+
+    def get_spec(self, spec_name: str | None) -> tuple[str, SpecConfig]:
+        if spec_name:
+            if spec_name not in self.specs:
+                raise ToolkitError(
+                    f"Unknown spec '{spec_name}'. Available: {', '.join(sorted(self.specs))}",
+                )
+            return spec_name, self.specs[spec_name]
+        if not self.specs:
+            raise ToolkitError("No specs configured")
+        first = next(iter(self.specs.items()))
+        return first
+
+    def canonical_spec_path(self, spec_name: str) -> Path:
+        spec = self.specs[spec_name]
+        return (self.specs_dir / spec.local_file).resolve()
+
+    def fetched_spec_path(self, spec_name: str) -> Path:
+        return (self.output_dir / f"latest-{spec_name}.json").resolve()
+
+    def resolve_package_path(self, relative_path: str) -> Path:
+        return ensure_within_root(
+            (self.package_root / relative_path).resolve(),
+            self.package_root,
+        )
+
+    def allowed_output_roots(self) -> list[Path]:
+        roots = [self.repo_root, self.package_root, self.output_dir, self.specs_dir]
+        deduped: list[Path] = []
+        for root in roots:
+            if root not in deduped:
+                deduped.append(root)
+        return deduped
+
+
+def stderr(message: str) -> None:
+    print(message, file=sys.stderr)
+
+
+def is_tty_stdout() -> bool:
+    return sys.stdout.isatty()
+
+
+def choose_format(explicit_format: str | None) -> str:
+    if explicit_format:
+        if explicit_format not in ALLOWED_FORMATS:
+            raise ToolkitError(
+                f"Unsupported --format '{explicit_format}'. Expected one of: {', '.join(sorted(ALLOWED_FORMATS))}"
+            )
+        return explicit_format
+    return "text" if is_tty_stdout() else "json"
+
+
+def validate_identifier(value: str, label: str) -> str:
+    if not value:
+        raise ToolkitError(f"{label} must not be empty")
+    if any(ord(char) < 32 for char in value):
+        raise ToolkitError(f"{label} contains control characters")
+    lowered = value.lower()
+    if ".." in value or "/" in value or "\\" in value:
+        raise ToolkitError(f"{label} must not contain path separators or traversal")
+    if "?" in value or "#" in value or "&" in value:
+        raise ToolkitError(f"{label} must not contain URL/query fragments")
+    if "%2e" in lowered or "%2f" in lowered or "%5c" in lowered:
+        raise ToolkitError(f"{label} must not contain encoded traversal sequences")
+    return value
+
+
+def ensure_within_root(path: Path, root: Path) -> Path:
+    try:
+        path.relative_to(root.resolve())
+    except ValueError as exc:  # pragma: no cover - trivial
+        raise ToolkitError(f"Path '{path}' escapes allowed root '{root}'") from exc
+    return path
+
+
+def validate_output_path(path: Path, allowed_roots: list[Path]) -> Path:
+    resolved = path.resolve()
+    for root in allowed_roots:
+        try:
+            resolved.relative_to(root.resolve())
+            return resolved
+        except ValueError:
+            continue
+    raise ToolkitError(
+        f"Refusing to write outside allowed roots: {resolved}",
+    )
+
+
+def repo_root_from_path(path: Path) -> Path:
+    current = path.resolve()
+    for candidate in [current, *current.parents]:
+        pubspec = candidate / "pubspec.yaml"
+        if pubspec.exists():
+            try:
+                content = pubspec.read_text()
+            except OSError:
+                continue
+            if "workspace:" in content or candidate == current:
+                return candidate
+    raise ToolkitError(f"Could not locate repo root from {path}")
+
+
+def package_root_from_config_dir(config_dir: Path) -> Path:
+    current = config_dir.resolve()
+    for candidate in current.parents:
+        if (candidate / "pubspec.yaml").exists():
+            return candidate
+    raise ToolkitError(f"Could not locate package root from {config_dir}")
+
+
+def read_json_file(path: Path, default: Any | None = None) -> Any:
+    if not path.exists():
+        return default
+    try:
+        return json.loads(path.read_text())
+    except json.JSONDecodeError as exc:
+        raise ToolkitError(f"Invalid JSON in {path}: {exc}") from exc
+
+
+def read_structured_file(path: Path) -> Any:
+    content = path.read_text()
+    return read_structured_text(content, source=path)
+
+
+def read_structured_text(content: str, *, source: str | Path = "<input>") -> Any:
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError:
+        pass
+    if HAS_YAML:
+        try:
+            return yaml.safe_load(content)
+        except Exception as exc:
+            raise ToolkitError(f"Failed to parse {source}: {exc}") from exc
+    raise ToolkitError(
+        f"Failed to parse {source}. Install PyYAML with `{sys.executable} -m pip install pyyaml --user`"
+    )
+
+
+def write_json(path: Path, payload: Any) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(f"{json.dumps(payload, indent=2, sort_keys=True)}\n")
+
+
+def load_toolkit_config(config_dir: Path) -> ToolkitConfig:
+    config_dir = config_dir.resolve()
+    if not config_dir.exists():
+        raise ToolkitError(f"Config directory not found: {config_dir}")
+
+    repo_root = repo_root_from_path(config_dir)
+    package_root = package_root_from_config_dir(config_dir)
+
+    package_json = read_json_file(config_dir / "package.json", {})
+    package = PackageConfig(
+        name=package_json.get("name", package_root.name),
+        display_name=package_json.get("display_name", package_root.name),
+        barrel_file=package_json.get("barrel_file", f"lib/{package_root.name}.dart"),
+        barrel_files=package_json.get("barrel_files", []),
+        models_dir=package_json.get("models_dir", "lib/src/models"),
+        live_models_dir=package_json.get("live_models_dir"),
+        resources_dir=package_json.get("resources_dir", "lib/src/resources"),
+        tests_dir=package_json.get("tests_dir", "test/unit/models"),
+        examples_dir=package_json.get("examples_dir", "example"),
+        skip_files=package_json.get("skip_files", ["copy_with_sentinel.dart"]),
+        internal_barrel_files=package_json.get("internal_barrel_files", []),
+        pr_title_prefix=package_json.get("pr_title_prefix", f"feat({package_root.name})"),
+        changelog_title=package_json.get("changelog_title", f"{package_root.name} API Changelog"),
+    )
+
+    specs_json = read_json_file(config_dir / "specs.json", {})
+    specs_dir_raw = specs_json.get("specs_dir", f"packages/{package_root.name}/specs")
+    specs_dir = ensure_within_root(
+        (repo_root / specs_dir_raw if not Path(specs_dir_raw).is_absolute() else Path(specs_dir_raw)).resolve(),
+        repo_root,
+    )
+    output_dir_raw = specs_json.get("output_dir", f"/tmp/{package_root.name}-api-toolkit")
+    output_dir = Path(output_dir_raw).resolve()
+    preflight = specs_json.get("preflight", {})
+    specs: dict[str, SpecConfig] = {}
+    for name, raw in specs_json.get("specs", {}).items():
+        validate_identifier(name, "spec name")
+        specs[name] = SpecConfig(
+            name=raw.get("name", name),
+            local_file=raw.get("local_file", "openapi.json"),
+            fetch_mode=raw.get("fetch_mode", "remote"),
+            url=raw.get("url"),
+            fallback_urls=raw.get("fallback_urls", []),
+            requires_auth=raw.get("requires_auth", False),
+            auth_env_vars=raw.get("auth_env_vars", []),
+            description=raw.get("description", ""),
+            source_file=raw.get("source_file"),
+            experimental=raw.get("experimental", False),
+            websocket_endpoints=raw.get("websocket_endpoints", {}),
+        )
+
+    manifest_json = read_json_file(config_dir / "manifest.json", {})
+    manifest_surface = manifest_json.get("surface", "openapi")
+    manifest_types: dict[str, ManifestEntry] = {}
+    for key, raw in manifest_json.get("types", {}).items():
+        manifest_types[key] = ManifestEntry(
+            key=key,
+            spec=raw.get("spec", next(iter(specs.keys()), "main")),
+            kind=raw.get("kind", "object"),
+            dart_class=raw.get("dart_class", key),
+            file=raw.get("file", ""),
+            schema=raw.get("schema"),
+            parent=raw.get("parent"),
+            discriminator=raw.get("discriminator"),
+            tags=raw.get("tags", []),
+            excluded_properties=raw.get("excluded_properties", []),
+            note=raw.get("note"),
+        )
+
+    manifest = ManifestConfig(
+        surface=manifest_surface,
+        type_mappings={**DEFAULT_TYPE_MAPPINGS, **manifest_json.get("type_mappings", {})},
+        placement=manifest_json.get("placement", {}),
+        coverage=manifest_json.get("coverage", {}),
+        types=manifest_types,
+    )
+
+    documentation_json = read_json_file(config_dir / "documentation.json", {})
+    documentation = DocumentationConfig(
+        removed_apis=documentation_json.get("removed_apis", []),
+        tool_properties=documentation_json.get("tool_properties", {}),
+        excluded_resources=documentation_json.get("excluded_resources", []),
+        resource_to_example=documentation_json.get("resource_to_example", {}),
+        excluded_from_examples=documentation_json.get("excluded_from_examples", []),
+        drift_patterns=documentation_json.get("drift_patterns", []),
+        live_features=documentation_json.get("live_features", {}),
+    )
+
+    return ToolkitConfig(
+        config_dir=config_dir,
+        repo_root=repo_root,
+        package_root=package_root,
+        package=package,
+        specs_dir=specs_dir,
+        output_dir=output_dir,
+        specs=specs,
+        preflight=preflight,
+        manifest=manifest,
+        documentation=documentation,
+    )
+
+
+def dump_manifest(config: ToolkitConfig) -> dict[str, Any]:
+    payload: dict[str, Any] = {
+        "surface": config.manifest.surface,
+        "type_mappings": config.manifest.type_mappings,
+        "placement": config.manifest.placement,
+        "coverage": config.manifest.coverage,
+        "types": {},
+    }
+    for key, entry in sorted(config.manifest.types.items()):
+        payload["types"][key] = {
+            "spec": entry.spec,
+            "kind": entry.kind,
+            "dart_class": entry.dart_class,
+            "file": entry.file,
+        }
+        if entry.schema:
+            payload["types"][key]["schema"] = entry.schema
+        if entry.parent:
+            payload["types"][key]["parent"] = entry.parent
+        if entry.discriminator:
+            payload["types"][key]["discriminator"] = entry.discriminator
+        if entry.tags:
+            payload["types"][key]["tags"] = entry.tags
+        if entry.excluded_properties:
+            payload["types"][key]["excluded_properties"] = entry.excluded_properties
+        if entry.note:
+            payload["types"][key]["note"] = entry.note
+    return payload
+
+
+def get_api_key(spec: SpecConfig) -> str | None:
+    for env_var in spec.auth_env_vars:
+        value = os.environ.get(env_var)
+        if value:
+            return value
+    return None
+
+
+def fetch_remote_document(url: str, api_key: str | None, requires_auth: bool) -> tuple[str | None, str | None]:
+    target_url = url
+    if requires_auth:
+        if not api_key:
+            return None, "API key required but not configured"
+        target_url = f"{url}&key={api_key}" if "?" in url else f"{url}?key={api_key}"
+
+    try:
+        request = Request(target_url, headers={"User-Agent": "api-toolkit/1.0"})
+        with urlopen(request, timeout=30) as response:
+            return response.read().decode("utf-8"), None
+    except HTTPError as exc:  # pragma: no cover - network dependent
+        return None, f"HTTP {exc.code}: {exc.reason}"
+    except URLError as exc:  # pragma: no cover - network dependent
+        return None, f"Network error: {exc.reason}"
+
+
+def extract_hash_from_url(url: str | None) -> str | None:
+    if not url:
+        return None
+    decoded = unquote(url)
+    match = re.search(r"([a-f0-9]{10,})\.(?:json|ya?ml)", decoded)
+    if match:
+        return match.group(1)
+    return None
