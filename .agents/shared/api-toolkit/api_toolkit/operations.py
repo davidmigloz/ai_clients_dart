@@ -1346,6 +1346,18 @@ def _emit_review_plan(config: ToolkitConfig, actions: list[str], issues: list[di
     return "\n".join(lines)
 
 
+def _scaffold_enum_fallback_member(seen: set[str]) -> str:
+    if "unknown" not in seen:
+        candidate = "unknown"
+    elif "unspecified" not in seen:
+        candidate = "unspecified"
+    else:
+        candidate = "unknownValue"
+    while candidate in seen:
+        candidate = f"{candidate}Value"
+    return candidate
+
+
 def _scaffold_enum_source(class_name: str, values: list[str]) -> str:
     members = []
     for value in values:
@@ -1359,7 +1371,7 @@ def _scaffold_enum_source(class_name: str, values: list[str]) -> str:
             member = f"{member}Value"
         seen.add(member)
         unique_members.append((member, raw))
-    fallback_member = "unknown" if "unknown" not in seen else "unspecified"
+    fallback_member = _scaffold_enum_fallback_member(seen)
     lines = [f"enum {class_name} {{"]
     for member, _ in unique_members:
         lines.append(f"  {member},")
