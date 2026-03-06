@@ -13,6 +13,7 @@ if str(ROOT) not in os.sys.path:
     os.sys.path.insert(0, str(ROOT))
 
 import api_toolkit.config as toolkit_config
+import api_toolkit.operations as toolkit_operations
 from api_toolkit.config import ToolkitError, load_toolkit_config
 from api_toolkit.operations import (
     _verify_sealed_parent,
@@ -622,6 +623,127 @@ class ApiToolkitCommandTests(unittest.TestCase):
             )
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["missing_manifest_entries"], ["NewType"])
+
+    def test_review_handles_circular_top_level_refs(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            specs_dir = package_root / "specs"
+            output_dir = root / "tmp" / "sample"
+            output_dir.mkdir(parents=True)
+            old_spec = {
+                "openapi": "3.1.0",
+                "info": {"title": "Sample", "version": "1"},
+                "paths": {},
+                "components": {"schemas": {}},
+            }
+            new_spec = {
+                "openapi": "3.1.0",
+                "info": {"title": "Sample", "version": "2"},
+                "paths": {},
+                "components": {
+                    "schemas": {
+                        "LoopA": {"allOf": [{"$ref": "#/components/schemas/LoopB"}]},
+                        "LoopB": {"allOf": [{"$ref": "#/components/schemas/LoopA"}]},
+                    }
+                },
+            }
+            (specs_dir / "openapi.json").write_text(json.dumps(old_spec))
+            (output_dir / "latest-main.json").write_text(json.dumps(new_spec))
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {
+                        "main": {
+                            "name": "Sample API",
+                            "local_file": "openapi.json",
+                            "fetch_mode": "local_file",
+                            "source_file": "specs/openapi.json",
+                        }
+                    },
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(output_dir),
+                },
+            )
+
+            exit_code, payload = command_review(
+                SimpleNamespace(
+                    config_dir=config_dir,
+                    spec_name=None,
+                    baseline=None,
+                    git_ref=None,
+                    changelog_out=None,
+                    plan_out=None,
+                )
+            )
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["missing_manifest_entries"], ["LoopA", "LoopB"])
+
+    def test_review_reuses_extracted_openapi_schemas_for_missing_enum_entries(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            specs_dir = package_root / "specs"
+            output_dir = root / "tmp" / "sample"
+            output_dir.mkdir(parents=True)
+            old_spec = {
+                "openapi": "3.1.0",
+                "info": {"title": "Sample", "version": "1"},
+                "paths": {},
+                "components": {"schemas": {}},
+            }
+            new_spec = {
+                "openapi": "3.1.0",
+                "info": {"title": "Sample", "version": "2"},
+                "paths": {},
+                "components": {
+                    "schemas": {
+                        "NewState": {"type": "string", "enum": ["active", "paused"]},
+                    }
+                },
+            }
+            (specs_dir / "openapi.json").write_text(json.dumps(old_spec))
+            (output_dir / "latest-main.json").write_text(json.dumps(new_spec))
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {
+                        "main": {
+                            "name": "Sample API",
+                            "local_file": "openapi.json",
+                            "fetch_mode": "local_file",
+                            "source_file": "specs/openapi.json",
+                        }
+                    },
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(output_dir),
+                },
+            )
+
+            with patch(
+                "api_toolkit.operations._extract_openapi_schemas",
+                wraps=toolkit_operations._extract_openapi_schemas,
+            ) as extract_schemas:
+                exit_code, payload = command_review(
+                    SimpleNamespace(
+                        config_dir=config_dir,
+                        spec_name=None,
+                        baseline=None,
+                        git_ref=None,
+                        changelog_out=None,
+                        plan_out=None,
+                    )
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["missing_manifest_entries"], ["NewState"])
+            self.assertTrue(any("--target enum --name NewState" in action for action in payload["actions"]))
+            self.assertEqual(extract_schemas.call_count, 5)
 
     def test_review_spec_name_only_checks_selected_spec(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:

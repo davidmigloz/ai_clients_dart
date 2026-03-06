@@ -314,7 +314,18 @@ def _extract_response_schema(responses: dict[str, Any]) -> str | None:
     return None
 
 
-def _flatten_schema(schema: dict[str, Any], all_schemas: dict[str, Any]) -> dict[str, Any]:
+def _empty_flattened_schema() -> dict[str, Any]:
+    return {
+        "type": "object",
+        "properties": {},
+        "required": set(),
+        "enum_values": set(),
+        "union_members": set(),
+        "description": "",
+    }
+
+
+def _flatten_schema(schema: dict[str, Any], all_schemas: dict[str, Any], resolving_refs: tuple[str, ...] = ()) -> dict[str, Any]:
     result = {
         "type": schema.get("type", "object"),
         "properties": {},
@@ -325,11 +336,14 @@ def _flatten_schema(schema: dict[str, Any], all_schemas: dict[str, Any]) -> dict
     }
 
     if "$ref" in schema:
-        ref_schema = all_schemas.get(schema["$ref"].split("/")[-1], {})
-        return _flatten_schema(ref_schema, all_schemas)
+        ref_name = schema["$ref"].split("/")[-1]
+        if ref_name in resolving_refs:
+            return _empty_flattened_schema()
+        ref_schema = all_schemas.get(ref_name, {})
+        return _flatten_schema(ref_schema, all_schemas, (*resolving_refs, ref_name))
 
     for item in schema.get("allOf", []):
-        flattened = _flatten_schema(item, all_schemas)
+        flattened = _flatten_schema(item, all_schemas, resolving_refs)
         result["properties"].update(flattened["properties"])
         result["required"].update(flattened["required"])
         result["enum_values"].update(flattened["enum_values"])
@@ -2045,19 +2059,18 @@ def command_review(args: Any) -> tuple[int, dict[str, Any]]:
     config = load_toolkit_config(args.config_dir)
     spec_name, _ = config.get_spec(args.spec_name)
     old_payload, new_payload = _load_old_new_payloads(config, spec_name, baseline=args.baseline, git_ref=args.git_ref)
+    new_schemas: dict[str, dict[str, Any]] = {}
     if config.manifest.surface == "openapi":
         diff = _compare_openapi(old_payload, new_payload)
+        new_schemas = _extract_openapi_schemas(new_payload)
     else:
         diff = _compare_websocket(old_payload, new_payload)
     changed_names = _changed_type_names(config, diff)
     missing_manifest = [name for name in changed_names if not _manifest_keys_for_schema(config, name, spec_name)]
     actions = []
     for name in missing_manifest:
-        target = "enum" if (
-            config.manifest.surface == "openapi"
-            and name in _extract_openapi_schemas(new_payload)
-            and _extract_openapi_schemas(new_payload)[name]["enum_values"]
-        ) else "schema"
+        schema_info = new_schemas.get(name)
+        target = "enum" if (config.manifest.surface == "openapi" and schema_info and schema_info["enum_values"]) else "schema"
         if config.manifest.surface == "websocket":
             if name in new_payload.get("enums", {}):
                 target = "enum"
