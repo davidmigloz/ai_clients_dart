@@ -1299,10 +1299,12 @@ class FineTuneReinforcementMethod {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is FineTuneReinforcementMethod && runtimeType == other.runtimeType;
+      other is FineTuneReinforcementMethod &&
+          runtimeType == other.runtimeType &&
+          hyperparameters == other.hyperparameters;
 
   @override
-  int get hashCode => grader.hashCode;
+  int get hashCode => hyperparameters.hashCode;
 
   @override
   String toString() => 'FineTuneReinforcementMethod(...)';
@@ -1387,7 +1389,10 @@ class FineTuneReinforcementHyperparameters {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is FineTuneReinforcementHyperparameters &&
-          runtimeType == other.runtimeType;
+          runtimeType == other.runtimeType &&
+          batchSize == other.batchSize &&
+          nEpochs == other.nEpochs &&
+          reasoningEffort == other.reasoningEffort;
 
   @override
   int get hashCode => Object.hash(batchSize, nEpochs, reasoningEffort);

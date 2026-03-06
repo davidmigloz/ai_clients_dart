@@ -114,8 +114,13 @@ void main() {
           result.categoryScores.harassmentThreatening,
           greaterThanOrEqualTo(0.0),
         );
-        expect(result.categoryScores.illicit, greaterThanOrEqualTo(0.0));
-        expect(result.categoryScores.illicitViolent, greaterThanOrEqualTo(0.0));
+        // illicit scores may be null for legacy text-moderation models
+        if (result.categoryScores.illicit != null) {
+          expect(result.categoryScores.illicit, greaterThanOrEqualTo(0.0));
+        }
+        if (result.categoryScores.illicitViolent != null) {
+          expect(result.categoryScores.illicitViolent, greaterThanOrEqualTo(0.0));
+        }
         expect(result.categoryScores.selfHarm, greaterThanOrEqualTo(0.0));
         expect(result.categoryScores.selfHarmIntent, greaterThanOrEqualTo(0.0));
         expect(

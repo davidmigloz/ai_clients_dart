@@ -303,11 +303,12 @@ void main() {
         expect(result.categoryScores.illicit, closeTo(0.030, 0.001));
         expect(result.categoryScores.illicitViolent, closeTo(0.008, 0.001));
 
-        // category_applied_input_types (required)
-        expect(result.categoryAppliedInputTypes.hate, ['text']);
-        expect(result.categoryAppliedInputTypes.selfHarm, ['text', 'image']);
-        expect(result.categoryAppliedInputTypes.sexual, ['text', 'image']);
-        expect(result.categoryAppliedInputTypes.violence, ['text', 'image']);
+        // category_applied_input_types
+        expect(result.categoryAppliedInputTypes, isNotNull);
+        expect(result.categoryAppliedInputTypes!.hate, ['text']);
+        expect(result.categoryAppliedInputTypes!.selfHarm, ['text', 'image']);
+        expect(result.categoryAppliedInputTypes!.sexual, ['text', 'image']);
+        expect(result.categoryAppliedInputTypes!.violence, ['text', 'image']);
       },
     );
 
@@ -326,9 +327,59 @@ void main() {
       // illicit category flags can be null
       expect(result.categories.illicit, isNull);
       expect(result.categories.illicitViolent, isNull);
-      // but scores are always present
+      // scores are still present (omni-moderation response)
       expect(result.categoryScores.illicit, isA<double>());
       expect(result.categoryScores.illicitViolent, isA<double>());
+    });
+
+    test('fromJson parses legacy text-moderation response', () {
+      // text-moderation models don't return illicit scores or
+      // category_applied_input_types
+      final json = {
+        'id': 'modr-legacy',
+        'model': 'text-moderation-007',
+        'results': [
+          {
+            'flagged': false,
+            'categories': {
+              'hate': false,
+              'hate/threatening': false,
+              'harassment': false,
+              'harassment/threatening': false,
+              'self-harm': false,
+              'self-harm/intent': false,
+              'self-harm/instructions': false,
+              'sexual': false,
+              'sexual/minors': false,
+              'violence': false,
+              'violence/graphic': false,
+            },
+            'category_scores': {
+              'hate': 0.001,
+              'hate/threatening': 0.0001,
+              'harassment': 0.01,
+              'harassment/threatening': 0.01,
+              'self-harm': 0.0001,
+              'self-harm/intent': 0.0001,
+              'self-harm/instructions': 0.0001,
+              'sexual': 0.001,
+              'sexual/minors': 0.0001,
+              'violence': 0.01,
+              'violence/graphic': 0.001,
+            },
+          },
+        ],
+      };
+
+      final response = ModerationResponse.fromJson(json);
+      final result = response.results[0];
+
+      expect(result.flagged, isFalse);
+      expect(result.categories.illicit, isNull);
+      expect(result.categories.illicitViolent, isNull);
+      expect(result.categoryScores.illicit, isNull);
+      expect(result.categoryScores.illicitViolent, isNull);
+      expect(result.categoryAppliedInputTypes, isNull);
     });
 
     test('anyFlagged returns true when any result is flagged', () {

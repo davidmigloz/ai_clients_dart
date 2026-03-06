@@ -343,7 +343,7 @@ class ModerationResult {
     required this.flagged,
     required this.categories,
     required this.categoryScores,
-    required this.categoryAppliedInputTypes,
+    this.categoryAppliedInputTypes,
   });
 
   /// Creates a [ModerationResult] from JSON.
@@ -356,9 +356,12 @@ class ModerationResult {
       categoryScores: ModerationCategoryScores.fromJson(
         json['category_scores'] as Map<String, dynamic>,
       ),
-      categoryAppliedInputTypes: ModerationCategoryAppliedInputTypes.fromJson(
-        json['category_applied_input_types'] as Map<String, dynamic>,
-      ),
+      categoryAppliedInputTypes:
+          json['category_applied_input_types'] != null
+              ? ModerationCategoryAppliedInputTypes.fromJson(
+                  json['category_applied_input_types'] as Map<String, dynamic>,
+                )
+              : null,
     );
   }
 
@@ -372,14 +375,18 @@ class ModerationResult {
   final ModerationCategoryScores categoryScores;
 
   /// The input type(s) that each category score applies to.
-  final ModerationCategoryAppliedInputTypes categoryAppliedInputTypes;
+  ///
+  /// Only returned by omni-moderation models. Will be `null` for legacy
+  /// text-moderation models.
+  final ModerationCategoryAppliedInputTypes? categoryAppliedInputTypes;
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'flagged': flagged,
     'categories': categories.toJson(),
     'category_scores': categoryScores.toJson(),
-    'category_applied_input_types': categoryAppliedInputTypes.toJson(),
+    if (categoryAppliedInputTypes != null)
+      'category_applied_input_types': categoryAppliedInputTypes!.toJson(),
   };
 
   @override
@@ -520,8 +527,8 @@ class ModerationCategoryScores {
     required this.hateThreatening,
     required this.harassment,
     required this.harassmentThreatening,
-    required this.illicit,
-    required this.illicitViolent,
+    this.illicit,
+    this.illicitViolent,
     required this.selfHarm,
     required this.selfHarmIntent,
     required this.selfHarmInstructions,
@@ -538,8 +545,8 @@ class ModerationCategoryScores {
       hateThreatening: (json['hate/threatening'] as num).toDouble(),
       harassment: (json['harassment'] as num).toDouble(),
       harassmentThreatening: (json['harassment/threatening'] as num).toDouble(),
-      illicit: (json['illicit'] as num).toDouble(),
-      illicitViolent: (json['illicit/violent'] as num).toDouble(),
+      illicit: (json['illicit'] as num?)?.toDouble(),
+      illicitViolent: (json['illicit/violent'] as num?)?.toDouble(),
       selfHarm: (json['self-harm'] as num).toDouble(),
       selfHarmIntent: (json['self-harm/intent'] as num).toDouble(),
       selfHarmInstructions: (json['self-harm/instructions'] as num).toDouble(),
@@ -563,10 +570,14 @@ class ModerationCategoryScores {
   final double harassmentThreatening;
 
   /// Illicit content score.
-  final double illicit;
+  ///
+  /// Only present when using omni-moderation models.
+  final double? illicit;
 
   /// Illicit/violent content score.
-  final double illicitViolent;
+  ///
+  /// Only present when using omni-moderation models.
+  final double? illicitViolent;
 
   /// Self-harm score.
   final double selfHarm;
@@ -595,8 +606,8 @@ class ModerationCategoryScores {
     'hate/threatening': hateThreatening,
     'harassment': harassment,
     'harassment/threatening': harassmentThreatening,
-    'illicit': illicit,
-    'illicit/violent': illicitViolent,
+    if (illicit != null) 'illicit': illicit,
+    if (illicitViolent != null) 'illicit/violent': illicitViolent,
     'self-harm': selfHarm,
     'self-harm/intent': selfHarmIntent,
     'self-harm/instructions': selfHarmInstructions,
@@ -609,7 +620,11 @@ class ModerationCategoryScores {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ModerationCategoryScores && runtimeType == other.runtimeType;
+      other is ModerationCategoryScores &&
+          runtimeType == other.runtimeType &&
+          hate == other.hate &&
+          sexual == other.sexual &&
+          violence == other.violence;
 
   @override
   int get hashCode => Object.hash(hate, sexual, violence);
@@ -727,10 +742,17 @@ class ModerationCategoryAppliedInputTypes {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ModerationCategoryAppliedInputTypes &&
-          runtimeType == other.runtimeType;
+          runtimeType == other.runtimeType &&
+          _listEquals(hate, other.hate) &&
+          _listEquals(sexual, other.sexual) &&
+          _listEquals(violence, other.violence);
 
   @override
-  int get hashCode => Object.hash(hate, sexual, violence);
+  int get hashCode => Object.hash(
+    Object.hashAll(hate),
+    Object.hashAll(sexual),
+    Object.hashAll(violence),
+  );
 
   @override
   String toString() => 'ModerationCategoryAppliedInputTypes(...)';
