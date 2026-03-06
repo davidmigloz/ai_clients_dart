@@ -3,7 +3,8 @@ import 'package:meta/meta.dart';
 /// A request to check content for harmful material.
 ///
 /// The moderation API classifies content into categories like hate speech,
-/// self-harm, violence, and more.
+/// self-harm, violence, and more. Use `omni-moderation-latest` for
+/// multi-modal input (text and images).
 ///
 /// ## Example
 ///
@@ -31,15 +32,17 @@ class ModerationRequest {
     );
   }
 
-  /// The input text to moderate.
+  /// The input to moderate.
   ///
-  /// Can be a single string or a list of strings.
+  /// Can be a single string, a list of strings, or a list of multi-modal
+  /// input objects (for use with omni-moderation models).
   final ModerationInput input;
 
   /// The moderation model to use.
   ///
-  /// Defaults to `text-moderation-latest`. Use `text-moderation-stable`
-  /// for consistent behavior across model updates.
+  /// Defaults to `omni-moderation-latest`. Use `text-moderation-stable`
+  /// for consistent behavior across model updates, or
+  /// `omni-moderation-latest` for multi-modal (text + image) moderation.
   final String? model;
 
   /// Converts to JSON.
@@ -64,13 +67,30 @@ class ModerationRequest {
 }
 
 /// Input for moderation.
+///
+/// Supports three formats:
+/// - [ModerationInputText]: A single text string.
+/// - [ModerationInputTextList]: An array of text strings.
+/// - [ModerationInputMultiModal]: An array of multi-modal input objects
+///   (text and/or image URLs), for use with omni-moderation models.
 sealed class ModerationInput {
   /// Creates a [ModerationInput] from JSON.
   factory ModerationInput.fromJson(Object json) {
     if (json is String) {
       return ModerationInputText(json);
     } else if (json is List) {
-      return ModerationInputTextList(json.cast<String>());
+      if (json.isEmpty) {
+        return const ModerationInputTextList([]);
+      }
+      if (json.first is String) {
+        return ModerationInputTextList(json.cast<String>());
+      }
+      return ModerationInputMultiModal(
+        json
+            .cast<Map<String, dynamic>>()
+            .map(ModerationInputItem.fromJson)
+            .toList(),
+      );
     }
     throw FormatException('Unknown moderation input format: $json');
   }
@@ -81,6 +101,12 @@ sealed class ModerationInput {
   /// Creates input from multiple text strings.
   static ModerationInput textList(List<String> texts) =>
       ModerationInputTextList(texts);
+
+  /// Creates multi-modal input from a list of input items.
+  ///
+  /// Use this with omni-moderation models to moderate text and images.
+  static ModerationInput multiModal(List<ModerationInputItem> items) =>
+      ModerationInputMultiModal(items);
 
   /// Converts to JSON.
   Object toJson();
@@ -136,6 +162,118 @@ class ModerationInputTextList implements ModerationInput {
 
   @override
   String toString() => 'ModerationInputTextList(${texts.length} texts)';
+}
+
+/// Multi-modal input for moderation (text and/or images).
+///
+/// Use with omni-moderation models like `omni-moderation-latest`.
+@immutable
+class ModerationInputMultiModal implements ModerationInput {
+  /// Creates a [ModerationInputMultiModal].
+  const ModerationInputMultiModal(this.items);
+
+  /// The list of multi-modal input items.
+  final List<ModerationInputItem> items;
+
+  @override
+  Object toJson() => items.map((e) => e.toJson()).toList();
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ModerationInputMultiModal &&
+          runtimeType == other.runtimeType &&
+          _listEquals(items, other.items);
+
+  @override
+  int get hashCode => Object.hashAll(items);
+
+  @override
+  String toString() => 'ModerationInputMultiModal(${items.length} items)';
+}
+
+/// A single item in a multi-modal moderation input.
+///
+/// Either a [ModerationInputItemText] or a [ModerationInputItemImageUrl].
+sealed class ModerationInputItem {
+  /// Creates a [ModerationInputItem] from JSON.
+  factory ModerationInputItem.fromJson(Map<String, dynamic> json) {
+    final type = json['type'] as String;
+    return switch (type) {
+      'text' => ModerationInputItemText(json['text'] as String),
+      'image_url' => ModerationInputItemImageUrl(
+        url: (json['image_url'] as Map<String, dynamic>)['url'] as String,
+      ),
+      _ => throw FormatException('Unknown moderation input item type: $type'),
+    };
+  }
+
+  /// Creates a text input item.
+  static ModerationInputItem text(String text) => ModerationInputItemText(text);
+
+  /// Creates an image URL input item.
+  static ModerationInputItem imageUrl(String url) =>
+      ModerationInputItemImageUrl(url: url);
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson();
+}
+
+/// A text input item for multi-modal moderation.
+@immutable
+class ModerationInputItemText implements ModerationInputItem {
+  /// Creates a [ModerationInputItemText].
+  const ModerationInputItemText(this.text);
+
+  /// The text to classify.
+  final String text;
+
+  @override
+  Map<String, dynamic> toJson() => {'type': 'text', 'text': text};
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ModerationInputItemText &&
+          runtimeType == other.runtimeType &&
+          text == other.text;
+
+  @override
+  int get hashCode => text.hashCode;
+
+  @override
+  String toString() => 'ModerationInputItemText(${text.length} chars)';
+}
+
+/// An image URL input item for multi-modal moderation.
+///
+/// Contains either a URL or a base64 data URL for the image.
+@immutable
+class ModerationInputItemImageUrl implements ModerationInputItem {
+  /// Creates a [ModerationInputItemImageUrl].
+  const ModerationInputItemImageUrl({required this.url});
+
+  /// Either a URL of the image or the base64 encoded image data.
+  final String url;
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'image_url',
+    'image_url': {'url': url},
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ModerationInputItemImageUrl &&
+          runtimeType == other.runtimeType &&
+          url == other.url;
+
+  @override
+  int get hashCode => url.hashCode;
+
+  @override
+  String toString() => 'ModerationInputItemImageUrl($url)';
 }
 
 /// A moderation response.
@@ -205,6 +343,7 @@ class ModerationResult {
     required this.flagged,
     required this.categories,
     required this.categoryScores,
+    required this.categoryAppliedInputTypes,
   });
 
   /// Creates a [ModerationResult] from JSON.
@@ -216,6 +355,9 @@ class ModerationResult {
       ),
       categoryScores: ModerationCategoryScores.fromJson(
         json['category_scores'] as Map<String, dynamic>,
+      ),
+      categoryAppliedInputTypes: ModerationCategoryAppliedInputTypes.fromJson(
+        json['category_applied_input_types'] as Map<String, dynamic>,
       ),
     );
   }
@@ -229,11 +371,15 @@ class ModerationResult {
   /// The category confidence scores.
   final ModerationCategoryScores categoryScores;
 
+  /// The input type(s) that each category score applies to.
+  final ModerationCategoryAppliedInputTypes categoryAppliedInputTypes;
+
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'flagged': flagged,
     'categories': categories.toJson(),
     'category_scores': categoryScores.toJson(),
+    'category_applied_input_types': categoryAppliedInputTypes.toJson(),
   };
 
   @override
@@ -259,6 +405,8 @@ class ModerationCategories {
     required this.hateThreatening,
     required this.harassment,
     required this.harassmentThreatening,
+    this.illicit,
+    this.illicitViolent,
     required this.selfHarm,
     required this.selfHarmIntent,
     required this.selfHarmInstructions,
@@ -275,6 +423,8 @@ class ModerationCategories {
       hateThreatening: json['hate/threatening'] as bool,
       harassment: json['harassment'] as bool,
       harassmentThreatening: json['harassment/threatening'] as bool,
+      illicit: json['illicit'] as bool?,
+      illicitViolent: json['illicit/violent'] as bool?,
       selfHarm: json['self-harm'] as bool,
       selfHarmIntent: json['self-harm/intent'] as bool,
       selfHarmInstructions: json['self-harm/instructions'] as bool,
@@ -296,6 +446,16 @@ class ModerationCategories {
 
   /// Harassment with threatening language.
   final bool harassmentThreatening;
+
+  /// Illicit content such as instructions for wrongdoing.
+  ///
+  /// Only present when using omni-moderation models.
+  final bool? illicit;
+
+  /// Illicit content that also includes violence.
+  ///
+  /// Only present when using omni-moderation models.
+  final bool? illicitViolent;
 
   /// Self-harm content.
   final bool selfHarm;
@@ -324,6 +484,8 @@ class ModerationCategories {
     'hate/threatening': hateThreatening,
     'harassment': harassment,
     'harassment/threatening': harassmentThreatening,
+    if (illicit != null) 'illicit': illicit,
+    if (illicitViolent != null) 'illicit/violent': illicitViolent,
     'self-harm': selfHarm,
     'self-harm/intent': selfHarmIntent,
     'self-harm/instructions': selfHarmInstructions,
@@ -358,6 +520,8 @@ class ModerationCategoryScores {
     required this.hateThreatening,
     required this.harassment,
     required this.harassmentThreatening,
+    required this.illicit,
+    required this.illicitViolent,
     required this.selfHarm,
     required this.selfHarmIntent,
     required this.selfHarmInstructions,
@@ -374,6 +538,8 @@ class ModerationCategoryScores {
       hateThreatening: (json['hate/threatening'] as num).toDouble(),
       harassment: (json['harassment'] as num).toDouble(),
       harassmentThreatening: (json['harassment/threatening'] as num).toDouble(),
+      illicit: (json['illicit'] as num).toDouble(),
+      illicitViolent: (json['illicit/violent'] as num).toDouble(),
       selfHarm: (json['self-harm'] as num).toDouble(),
       selfHarmIntent: (json['self-harm/intent'] as num).toDouble(),
       selfHarmInstructions: (json['self-harm/instructions'] as num).toDouble(),
@@ -395,6 +561,12 @@ class ModerationCategoryScores {
 
   /// Harassment/threatening score.
   final double harassmentThreatening;
+
+  /// Illicit content score.
+  final double illicit;
+
+  /// Illicit/violent content score.
+  final double illicitViolent;
 
   /// Self-harm score.
   final double selfHarm;
@@ -423,6 +595,8 @@ class ModerationCategoryScores {
     'hate/threatening': hateThreatening,
     'harassment': harassment,
     'harassment/threatening': harassmentThreatening,
+    'illicit': illicit,
+    'illicit/violent': illicitViolent,
     'self-harm': selfHarm,
     'self-harm/intent': selfHarmIntent,
     'self-harm/instructions': selfHarmInstructions,
@@ -442,6 +616,124 @@ class ModerationCategoryScores {
 
   @override
   String toString() => 'ModerationCategoryScores(...)';
+}
+
+/// The input type(s) that each category score applies to.
+///
+/// Only returned by omni-moderation models. Each category lists the input
+/// types (e.g., `['text']` or `['text', 'image']`) it was evaluated against.
+@immutable
+class ModerationCategoryAppliedInputTypes {
+  /// Creates a [ModerationCategoryAppliedInputTypes].
+  const ModerationCategoryAppliedInputTypes({
+    required this.hate,
+    required this.hateThreatening,
+    required this.harassment,
+    required this.harassmentThreatening,
+    required this.illicit,
+    required this.illicitViolent,
+    required this.selfHarm,
+    required this.selfHarmIntent,
+    required this.selfHarmInstructions,
+    required this.sexual,
+    required this.sexualMinors,
+    required this.violence,
+    required this.violenceGraphic,
+  });
+
+  /// Creates a [ModerationCategoryAppliedInputTypes] from JSON.
+  factory ModerationCategoryAppliedInputTypes.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return ModerationCategoryAppliedInputTypes(
+      hate: (json['hate'] as List<dynamic>).cast<String>(),
+      hateThreatening: (json['hate/threatening'] as List<dynamic>)
+          .cast<String>(),
+      harassment: (json['harassment'] as List<dynamic>).cast<String>(),
+      harassmentThreatening: (json['harassment/threatening'] as List<dynamic>)
+          .cast<String>(),
+      illicit: (json['illicit'] as List<dynamic>).cast<String>(),
+      illicitViolent: (json['illicit/violent'] as List<dynamic>).cast<String>(),
+      selfHarm: (json['self-harm'] as List<dynamic>).cast<String>(),
+      selfHarmIntent: (json['self-harm/intent'] as List<dynamic>)
+          .cast<String>(),
+      selfHarmInstructions: (json['self-harm/instructions'] as List<dynamic>)
+          .cast<String>(),
+      sexual: (json['sexual'] as List<dynamic>).cast<String>(),
+      sexualMinors: (json['sexual/minors'] as List<dynamic>).cast<String>(),
+      violence: (json['violence'] as List<dynamic>).cast<String>(),
+      violenceGraphic: (json['violence/graphic'] as List<dynamic>)
+          .cast<String>(),
+    );
+  }
+
+  /// Applied input types for the 'hate' category.
+  final List<String> hate;
+
+  /// Applied input types for the 'hate/threatening' category.
+  final List<String> hateThreatening;
+
+  /// Applied input types for the 'harassment' category.
+  final List<String> harassment;
+
+  /// Applied input types for the 'harassment/threatening' category.
+  final List<String> harassmentThreatening;
+
+  /// Applied input types for the 'illicit' category.
+  final List<String> illicit;
+
+  /// Applied input types for the 'illicit/violent' category.
+  final List<String> illicitViolent;
+
+  /// Applied input types for the 'self-harm' category.
+  final List<String> selfHarm;
+
+  /// Applied input types for the 'self-harm/intent' category.
+  final List<String> selfHarmIntent;
+
+  /// Applied input types for the 'self-harm/instructions' category.
+  final List<String> selfHarmInstructions;
+
+  /// Applied input types for the 'sexual' category.
+  final List<String> sexual;
+
+  /// Applied input types for the 'sexual/minors' category.
+  final List<String> sexualMinors;
+
+  /// Applied input types for the 'violence' category.
+  final List<String> violence;
+
+  /// Applied input types for the 'violence/graphic' category.
+  final List<String> violenceGraphic;
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    'hate': hate,
+    'hate/threatening': hateThreatening,
+    'harassment': harassment,
+    'harassment/threatening': harassmentThreatening,
+    'illicit': illicit,
+    'illicit/violent': illicitViolent,
+    'self-harm': selfHarm,
+    'self-harm/intent': selfHarmIntent,
+    'self-harm/instructions': selfHarmInstructions,
+    'sexual': sexual,
+    'sexual/minors': sexualMinors,
+    'violence': violence,
+    'violence/graphic': violenceGraphic,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ModerationCategoryAppliedInputTypes &&
+          runtimeType == other.runtimeType;
+
+  @override
+  int get hashCode => Object.hash(hate, sexual, violence);
+
+  @override
+  String toString() => 'ModerationCategoryAppliedInputTypes(...)';
 }
 
 // Helper for list equality
