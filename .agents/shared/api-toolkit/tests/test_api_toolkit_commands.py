@@ -745,8 +745,10 @@ class ApiToolkitCommandTests(unittest.TestCase):
                     plan_out=None,
                 )
             )
-            self.assertEqual(exit_code, 0)
+            self.assertEqual(exit_code, toolkit_config.EXIT_FAILURE)
             self.assertEqual(payload["missing_manifest_entries"], ["NewType"])
+            self.assertGreaterEqual(payload["summary"]["error_count"], 1)
+            self.assertTrue(any(issue["level"] == "error" for issue in payload["issues"]))
 
     def test_review_handles_circular_top_level_refs(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -803,7 +805,7 @@ class ApiToolkitCommandTests(unittest.TestCase):
                 )
             )
 
-            self.assertEqual(exit_code, 0)
+            self.assertEqual(exit_code, toolkit_config.EXIT_FAILURE)
             self.assertEqual(payload["missing_manifest_entries"], ["LoopA", "LoopB"])
 
     def test_review_reuses_loaded_payloads_and_extracted_openapi_schemas_for_missing_enum_entries(self) -> None:
@@ -868,7 +870,7 @@ class ApiToolkitCommandTests(unittest.TestCase):
                         )
                     )
 
-            self.assertEqual(exit_code, 0)
+            self.assertEqual(exit_code, toolkit_config.EXIT_FAILURE)
             self.assertEqual(payload["missing_manifest_entries"], ["NewState"])
             self.assertTrue(any("--target enum --name NewState" in action for action in payload["actions"]))
             self.assertEqual(load_payloads.call_count, 1)
@@ -914,7 +916,7 @@ class ApiToolkitCommandTests(unittest.TestCase):
                 )
             )
 
-            self.assertEqual(exit_code, 0)
+            self.assertEqual(exit_code, toolkit_config.EXIT_FAILURE)
             self.assertEqual(payload["spec_name"], "interactions")
             self.assertTrue(
                 all("--spec-name interactions" in action for action in payload["actions"] if "scaffold" in action)
@@ -3136,6 +3138,123 @@ class ApiToolkitCommandTests(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["summary"]["warning_count"], 3)
             self.assertTrue(any(issue["level"] == "warning" for issue in payload["issues"]))
+
+    def test_review_returns_failure_for_changed_implementation_errors(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            specs_dir = package_root / "specs"
+            output_dir = root / "tmp" / "sample"
+            output_dir.mkdir(parents=True)
+            old_spec = {
+                "openapi": "3.1.0",
+                "info": {"title": "Sample", "version": "1"},
+                "paths": {},
+                "components": {
+                    "schemas": {
+                        "Existing": {
+                            "type": "object",
+                            "properties": {"id": {"type": "string"}},
+                            "required": ["id"],
+                        }
+                    }
+                },
+            }
+            new_spec = {
+                "openapi": "3.1.0",
+                "info": {"title": "Sample", "version": "2"},
+                "paths": {},
+                "components": {
+                    "schemas": {
+                        "Existing": {
+                            "type": "object",
+                            "properties": {
+                                "id": {"type": "string"},
+                                "name": {"type": "string"},
+                            },
+                            "required": ["id", "name"],
+                        }
+                    }
+                },
+            }
+            (specs_dir / "openapi.json").write_text(json.dumps(old_spec))
+            (output_dir / "latest-main.json").write_text(json.dumps(new_spec))
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {
+                        "main": {
+                            "name": "Sample API",
+                            "local_file": "openapi.json",
+                            "fetch_mode": "local_file",
+                            "source_file": "specs/openapi.json",
+                        }
+                    },
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(output_dir),
+                },
+                manifest_payload={
+                    "surface": "openapi",
+                    "type_mappings": {},
+                    "placement": {"categories": {}, "default_category": "common", "parent_model_patterns": {}},
+                    "coverage": {},
+                    "types": {
+                        "Existing": {
+                            "spec": "main",
+                            "kind": "object",
+                            "dart_class": "Existing",
+                            "file": "lib/src/models/common/existing.dart",
+                            "schema": "Existing",
+                        }
+                    },
+                },
+            )
+            (package_root / "lib" / "src" / "models" / "common" / "existing.dart").write_text(
+                "class Existing {\n"
+                "  final String id;\n"
+                "\n"
+                "  const Existing({required this.id});\n"
+                "\n"
+                "  factory Existing.fromJson(Map<String, dynamic> json) => Existing(\n"
+                "    id: json['id'] as String,\n"
+                "  );\n"
+                "\n"
+                "  Map<String, dynamic> toJson() => {\n"
+                "    'id': id,\n"
+                "  };\n"
+                "\n"
+                "  Existing copyWith({String? id}) => Existing(\n"
+                "    id: id ?? this.id,\n"
+                "  );\n"
+                "\n"
+                "  @override\n"
+                "  bool operator ==(Object other) => identical(this, other) || (other is Existing && other.id == id);\n"
+                "\n"
+                "  @override\n"
+                "  int get hashCode => Object.hash(id);\n"
+                "\n"
+                "  @override\n"
+                "  String toString() => 'Existing(id: $id)';\n"
+                "}\n"
+            )
+
+            exit_code, payload = command_review(
+                SimpleNamespace(
+                    config_dir=config_dir,
+                    spec_name=None,
+                    baseline=None,
+                    git_ref=None,
+                    changelog_out=None,
+                    plan_out=None,
+                )
+            )
+
+            self.assertEqual(exit_code, toolkit_config.EXIT_FAILURE)
+            self.assertEqual(payload["missing_manifest_entries"], [])
+            self.assertGreater(payload["summary"]["error_count"], 0)
+            self.assertTrue(any(issue["level"] == "error" for issue in payload["issues"]))
 
     def test_verify_coverage_normalizes_query_suffixes(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:

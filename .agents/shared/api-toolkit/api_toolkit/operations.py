@@ -2336,7 +2336,8 @@ def command_review(args: Any) -> tuple[int, dict[str, Any]]:
             "warning_count": sum(1 for issue in issues if issue["level"] == "warning"),
         },
     }
-    return EXIT_SUCCESS, payload
+    exit_code = EXIT_FAILURE if any(issue["level"] == "error" for issue in issues) else EXIT_SUCCESS
+    return exit_code, payload
 
 
 def command_scaffold(args: Any) -> tuple[int, dict[str, Any]]:
