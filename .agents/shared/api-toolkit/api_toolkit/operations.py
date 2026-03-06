@@ -1359,17 +1359,18 @@ def _scaffold_enum_source(class_name: str, values: list[str]) -> str:
             member = f"{member}Value"
         seen.add(member)
         unique_members.append((member, raw))
+    fallback_member = "unknown" if "unknown" not in seen else "unspecified"
     lines = [f"enum {class_name} {{"]
     for member, _ in unique_members:
         lines.append(f"  {member},")
-    lines.append("  unknown,")
+    lines.append(f"  {fallback_member},")
     lines.append("}")
     lines.append("")
     lines.append(f"{class_name} {camel_case(class_name)}FromString(String? value) {{")
     lines.append("  return switch (value) {")
     for member, raw in unique_members:
         lines.append(f"    '{raw}' => {class_name}.{member},")
-    lines.append(f"    _ => {class_name}.unknown,")
+    lines.append(f"    _ => {class_name}.{fallback_member},")
     lines.append("  };")
     lines.append("}")
     lines.append("")
@@ -1377,7 +1378,7 @@ def _scaffold_enum_source(class_name: str, values: list[str]) -> str:
     lines.append("  return switch (value) {")
     for member, raw in unique_members:
         lines.append(f"    {class_name}.{member} => '{raw}',")
-    lines.append(f"    {class_name}.unknown => 'unknown',")
+    lines.append(f"    {class_name}.{fallback_member} => 'unknown',")
     lines.append("  };")
     lines.append("}")
     return "\n".join(lines) + "\n"
