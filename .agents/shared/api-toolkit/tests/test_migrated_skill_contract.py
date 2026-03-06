@@ -45,6 +45,425 @@ DEAD_SPEC_KEYS = {
 }
 
 
+EXPECTED_SKIP_KEYS = {
+    "anthropic_sdk_dart/openapi-anthropic": [
+        "Base64ImageSource",
+        "Base64PDFSource",
+        "BashTool20250124",
+        "BuiltInTool",
+        "CacheControlEphemeral",
+        "CanceledResult",
+        "CitationCharLocation",
+        "CitationContentBlockLocation",
+        "CitationPageLocation",
+        "CitationWebSearchResultLocation",
+        "CitationsDelta",
+        "CodeExecutionTool20250522",
+        "CompactionDelta",
+        "ComputerUseTool (beta)",
+        "ContentBlockDeltaEvent",
+        "ContentBlockStartEvent",
+        "ContentBlockStopEvent",
+        "CreateMessageRequest",
+        "DirectToolCaller",
+        "DocumentBlockParam",
+        "ErrorEvent",
+        "ErroredResult",
+        "ExpiredResult",
+        "ImageBlockParam",
+        "InputJSONDelta",
+        "McpToolset (beta)",
+        "MemoryTool20250818",
+        "MessageBatchIndividualResponse",
+        "MessageDeltaEvent",
+        "MessageStartEvent",
+        "MessageStopEvent",
+        "PingEvent",
+        "PlainTextSource",
+        "RedactedThinkingBlock",
+        "RequestBashCodeExecutionToolResultBlockParam",
+        "RequestCodeExecutionToolResultBlockParam",
+        "RequestCompactionBlockParam",
+        "RequestContainerUploadBlockParam",
+        "RequestCounts",
+        "RequestTextEditorCodeExecutionToolResultBlockParam",
+        "RequestToolReferenceBlockParam",
+        "RequestToolSearchToolResultBlockParam",
+        "RequestWebFetchToolResultBlockParam",
+        "RequestWebSearchToolResultBlockParam",
+        "ResponseBashCodeExecutionToolResultBlock",
+        "ResponseCodeExecutionToolResultBlock",
+        "ResponseCompactionBlock",
+        "ResponseContainerUploadBlock",
+        "ResponseTextEditorCodeExecutionToolResultBlock",
+        "ResponseToolSearchToolResultBlock",
+        "ResponseWebFetchToolResultBlock",
+        "ResponseWebSearchToolResultBlock",
+        "ResponseWebSearchToolResultError",
+        "ServerToolUseBlock",
+        "ServerToolUseBlockParam",
+        "SignatureDelta",
+        "SucceededResult",
+        "TextBlock",
+        "TextBlockParam",
+        "TextDelta",
+        "TextEditor20250124",
+        "TextEditor20250429",
+        "TextEditor20250728",
+        "ThinkingBlock",
+        "ThinkingConfigAdaptive",
+        "ThinkingConfigDisabled",
+        "ThinkingConfigEnabled",
+        "ThinkingDelta",
+        "Tool",
+        "ToolCaller",
+        "ToolChoiceAny",
+        "ToolChoiceAuto",
+        "ToolChoiceNone",
+        "ToolChoiceTool",
+        "ToolDefinition",
+        "ToolResultBlockParam",
+        "ToolResultBlockParamContentVariant0",
+        "ToolResultBlockParamContentVariant1",
+        "ToolSearchToolBm25",
+        "ToolSearchToolRegex",
+        "ToolUseBlock",
+        "ToolUseBlockParam",
+        "URLImageSource",
+        "URLPDFSource",
+        "WebFetchTool20250910",
+        "WebSearchTool20250305",
+        "array of ResponseWebSearchResultBlock",
+        "various built-in tool schemas",
+    ],
+    "chromadb/openapi-chromadb": [
+        "Collection",
+        "GetResponse",
+        "QueryResponse",
+    ],
+    "googleai_dart/openapi-googleai": [
+        "AgentOption",
+        "AudioDelta",
+        "AudioMimeTypeOption",
+        "Blob",
+        "Candidate",
+        "CodeExecutionCallArguments",
+        "CodeExecutionCallContent",
+        "CodeExecutionCallDelta",
+        "CodeExecutionResultDelta",
+        "ContentDelta",
+        "ContentStart",
+        "ContentStop",
+        "CreateAgentInteractionParams",
+        "CreateModelInteractionParams",
+        "DocumentDelta",
+        "DocumentMimeTypeOption",
+        "Error",
+        "ErrorEvent",
+        "FileData",
+        "FileSearchResultDelta",
+        "Function",
+        "FunctionCallDelta",
+        "FunctionResponse",
+        "FunctionResultDelta",
+        "GenerationConfig",
+        "GoogleSearchCallArguments",
+        "GoogleSearchCallContent",
+        "GoogleSearchCallDelta",
+        "GoogleSearchResult",
+        "GoogleSearchResultDelta",
+        "GroundingChunk",
+        "GroundingMetadata",
+        "ImageDelta",
+        "ImageMimeTypeOption",
+        "Interaction",
+        "InteractionEvent",
+        "InteractionSseEvent",
+        "InteractionStatusUpdate",
+        "McpServerToolCallDelta",
+        "McpServerToolResultContent",
+        "McpServerToolResultDelta",
+        "ModelOption",
+        "Part",
+        "ResponseModality",
+        "TextDelta",
+        "ThinkingLevel",
+        "ThinkingSummaries",
+        "ThoughtSignatureDelta",
+        "ThoughtSummary",
+        "ThoughtSummaryDelta",
+        "Tool",
+        "ToolChoice",
+        "ToolChoiceConfig",
+        "ToolChoiceType",
+        "ToolConfig",
+        "UrlContextCallArguments",
+        "UrlContextCallContent",
+        "UrlContextCallDelta",
+        "UrlContextResultDelta",
+        "VideoDelta",
+        "VideoMimeTypeOption",
+        "interactions:CodeExecution",
+        "interactions:ComputerUse",
+        "interactions:Content",
+        "interactions:FileSearch",
+        "interactions:GoogleSearch",
+        "interactions:McpServer",
+        "interactions:MediaResolution",
+        "interactions:UrlContext",
+    ],
+    "googleai_dart/websocket-googleai": [
+        "ActivityHandling",
+        "AutomaticActivityDetection",
+        "BidiGenerateContentClientContent",
+        "BidiGenerateContentRealtimeInput",
+        "BidiGenerateContentServerContent",
+        "BidiGenerateContentSetup",
+        "BidiGenerateContentSetupComplete",
+        "BidiGenerateContentToolCall",
+        "BidiGenerateContentToolCallCancellation",
+        "BidiGenerateContentToolResponse",
+        "ContextWindowCompressionConfig",
+        "EndSensitivity",
+        "GoAway",
+        "LiveConfig",
+        "LiveGenerationConfig",
+        "PrebuiltVoiceConfig",
+        "ProactivityConfig",
+        "RealtimeInputConfig",
+        "SessionResumptionUpdate",
+        "SlidingWindow",
+        "SpeechConfig",
+        "StartSensitivity",
+        "Transcription",
+        "TurnCoverage",
+        "VoiceConfig",
+    ],
+    "mistralai_dart/openapi-mistral": [
+        "AssistantMessage",
+        "ChatCompletionResponse",
+        "EmbeddingResponse",
+        "FunctionName",
+        "FunctionTool",
+        "ImageURLChunk",
+        "ModelCard",
+        "ResponseFormat",
+        "SystemMessage",
+        "TextChunk",
+        "ToolMessage",
+        "UserMessage",
+    ],
+    "ollama_dart/openapi-ollama": [
+        "GenerateChatCompletionRequest",
+        "GenerateChatCompletionResponse",
+        "GenerateCompletionRequest",
+        "GenerateCompletionResponse",
+        "GenerateEmbeddingRequest",
+        "GenerateEmbeddingResponse",
+        "Message",
+        "Model",
+        "ModelInfo",
+        "RequestOptions",
+        "Tool",
+    ],
+    "open_responses/openapi-open-responses": [
+        "AllowedToolsParam",
+        "ErrorPayload",
+        "ErrorStreamingEvent",
+        "FunctionCallItemParam",
+        "FunctionCallOutputItemParam",
+        "FunctionToolParam",
+        "InputFileContentParam",
+        "InputImageContentParam",
+        "InputTextContentParam",
+        "InputVideoContentParam",
+        "ItemReferenceParam",
+        "LogProb",
+        "MessageItemParam",
+        "OutputTextContent",
+        "ReasoningParam",
+        "RefusalContent",
+        "ResponseCompletedStreamingEvent",
+        "ResponseContentPartAddedStreamingEvent",
+        "ResponseContentPartDoneStreamingEvent",
+        "ResponseCreatedStreamingEvent",
+        "ResponseFailedStreamingEvent",
+        "ResponseFunctionCallArgumentsDeltaStreamingEvent",
+        "ResponseFunctionCallArgumentsDoneStreamingEvent",
+        "ResponseInProgressStreamingEvent",
+        "ResponseIncompleteStreamingEvent",
+        "ResponseOutputItemAddedStreamingEvent",
+        "ResponseOutputItemDoneStreamingEvent",
+        "ResponseOutputTextAnnotationAddedStreamingEvent",
+        "ResponseOutputTextDeltaStreamingEvent",
+        "ResponseOutputTextDoneStreamingEvent",
+        "ResponseQueuedStreamingEvent",
+        "ResponseReasoningDeltaStreamingEvent",
+        "ResponseReasoningDoneStreamingEvent",
+        "ResponseReasoningSummaryDeltaStreamingEvent",
+        "ResponseReasoningSummaryDoneStreamingEvent",
+        "ResponseReasoningSummaryPartAddedStreamingEvent",
+        "ResponseReasoningSummaryPartDoneStreamingEvent",
+        "ResponseRefusalDeltaStreamingEvent",
+        "ResponseRefusalDoneStreamingEvent",
+        "ResponseResource",
+        "SpecificFunctionParam",
+        "TextParam",
+        "TopLogProb",
+        "UrlCitationAnnotation",
+    ],
+    "openai_dart/openapi-openai": [
+        "AssistantObject",
+        "AssistantToolsCode",
+        "AssistantToolsFileSearch",
+        "AssistantToolsFunction",
+        "ChatCompletionNamedToolChoice",
+        "ChatCompletionRequestAssistantMessage",
+        "ChatCompletionRequestDeveloperMessage",
+        "ChatCompletionRequestMessage",
+        "ChatCompletionRequestMessageContentPartAudio",
+        "ChatCompletionRequestMessageContentPartImage",
+        "ChatCompletionRequestMessageContentPartText",
+        "ChatCompletionRequestSystemMessage",
+        "ChatCompletionRequestToolMessage",
+        "ChatCompletionRequestUserMessage",
+        "ChatCompletionTool",
+        "ChatStreamEvent",
+        "CompletionUsage",
+        "CreateChatCompletionRequest",
+        "CreateChatCompletionResponse",
+        "CreateChatCompletionStreamResponse",
+        "CreateEmbeddingResponse",
+        "CreateImageRequest",
+        "CreateSpeechRequest",
+        "CreateTranscriptionRequest",
+        "FunctionObject",
+        "MessageContentImageFileObject",
+        "MessageContentImageUrlObject",
+        "MessageContentRefusalObject",
+        "MessageContentTextAnnotationsFileCitationObject",
+        "MessageContentTextAnnotationsFilePathObject",
+        "MessageContentTextObject",
+        "ResponseFormatJsonObject",
+        "ResponseFormatJsonSchema",
+        "ResponseFormatText",
+        "RunObject",
+        "RunStepDetailsMessageCreationObject",
+        "RunStepDetailsToolCallsCodeObject",
+        "RunStepDetailsToolCallsCodeOutputImageObject",
+        "RunStepDetailsToolCallsCodeOutputLogsObject",
+        "RunStepDetailsToolCallsFileSearchObject",
+        "RunStepDetailsToolCallsFunctionObject",
+        "RunStepDetailsToolCallsObject",
+        "ThreadObject",
+    ],
+}
+
+
+EXPECTED_DOC_EXCLUSIONS = {
+    "anthropic_sdk_dart/openapi-anthropic": {
+        "excluded_resources": ["base_resource", "message_batches_resource", "streaming_resource"],
+        "excluded_from_examples": [],
+    },
+    "chromadb/openapi-chromadb": {
+        "excluded_resources": ["base_resource"],
+        "excluded_from_examples": [],
+    },
+    "googleai_dart/openapi-googleai": {
+        "excluded_resources": [
+            "base_resource",
+            "documents_resource",
+            "generated_files_resource",
+            "operations_resource",
+            "permissions_resource",
+            "resource_base",
+            "streaming",
+        ],
+        "excluded_from_examples": [
+            "authTokens",
+            "corpora",
+            "documents",
+            "fileSearchStores",
+            "generatedFiles",
+            "operations",
+            "permissions",
+            "tunedModels",
+        ],
+    },
+    "googleai_dart/websocket-googleai": {
+        "excluded_resources": ["base_resource", "resource_base"],
+        "excluded_from_examples": [],
+    },
+    "mistralai_dart/openapi-mistral": {
+        "excluded_resources": ["base_resource", "fineTuningModels", "streaming_resource", "transcriptions"],
+        "excluded_from_examples": ["classifications", "files", "fineTuningModels", "moderations", "transcriptions"],
+    },
+    "ollama_dart/openapi-ollama": {
+        "excluded_resources": ["base_resource", "streaming"],
+        "excluded_from_examples": [],
+    },
+    "open_responses/openapi-open-responses": {
+        "excluded_resources": ["base_resource", "streaming"],
+        "excluded_from_examples": ["responses"],
+    },
+    "openai_dart/openapi-openai": {
+        "excluded_resources": [
+            "assistants",
+            "base_resource",
+            "batches",
+            "beta",
+            "chatkit",
+            "completions",
+            "containers",
+            "conversations",
+            "evals",
+            "files",
+            "fineTuning",
+            "inputTokens",
+            "messages",
+            "models",
+            "moderations",
+            "realtime",
+            "realtimeSessions",
+            "runs",
+            "skills",
+            "streaming",
+            "threads",
+            "uploads",
+            "vectorStores",
+            "videos",
+        ],
+        "excluded_from_examples": [
+            "assistants",
+            "audio",
+            "batches",
+            "beta",
+            "chat",
+            "completions",
+            "embeddings",
+            "files",
+            "fineTuning",
+            "images",
+            "inputTokens",
+            "messages",
+            "moderations",
+            "realtime",
+            "realtimeSessions",
+            "runs",
+            "skills",
+            "threads",
+            "uploads",
+            "vectorStores",
+        ],
+    },
+}
+
+
+def _config_label(config_dir: Path) -> str:
+    rel = config_dir.relative_to(ROOT / "packages")
+    return f"{rel.parts[0]}/{rel.parts[3]}"
+
+
 class MigratedSkillContractTests(unittest.TestCase):
     def test_migrated_configs_use_four_file_contract(self) -> None:
         expected = {"documentation.json", "manifest.json", "package.json", "specs.json"}
@@ -240,6 +659,86 @@ class MigratedSkillContractTests(unittest.TestCase):
             coverage = raw["coverage"]
             self.assertEqual(coverage.get("resource_aliases", {}), coverage_expectation["resource_aliases"], msg=f"Unexpected resource_aliases in {config_dir}")
             self.assertEqual(coverage.get("excluded_resources", []), coverage_expectation["excluded_resources"], msg=f"Unexpected excluded_resources in {config_dir}")
+
+    def test_real_manifest_skip_keys_match_audited_snapshot(self) -> None:
+        actual = {}
+        for config_dir in CONFIG_DIRS:
+            config = load_toolkit_config(config_dir)
+            skipped = sorted(entry.key for entry in config.manifest.types.values() if entry.kind == "skip")
+            if skipped:
+                actual[_config_label(config_dir)] = skipped
+        self.assertEqual(actual, EXPECTED_SKIP_KEYS)
+
+    def test_real_documentation_exclusions_match_audited_snapshot(self) -> None:
+        actual = {}
+        for config_dir in CONFIG_DIRS:
+            raw = json.loads((config_dir / "documentation.json").read_text())
+            excluded_resources = sorted(raw.get("excluded_resources", []))
+            excluded_from_examples = sorted(raw.get("excluded_from_examples", []))
+            if excluded_resources or excluded_from_examples:
+                actual[_config_label(config_dir)] = {
+                    "excluded_resources": excluded_resources,
+                    "excluded_from_examples": excluded_from_examples,
+                }
+        self.assertEqual(actual, EXPECTED_DOC_EXCLUSIONS)
+
+    def test_real_implementation_verify_reports_skip_summary(self) -> None:
+        for config_dir in CONFIG_DIRS:
+            label = _config_label(config_dir)
+            exit_code, payload = command_verify(
+                type(
+                    "Args",
+                    (),
+                    {
+                        "config_dir": config_dir,
+                        "spec_name": None,
+                        "checks": "implementation",
+                        "scope": "all",
+                        "type_name": None,
+                        "baseline": None,
+                        "git_ref": None,
+                    },
+                )()
+            )
+            self.assertEqual(exit_code, 0, msg=f"{config_dir}: {payload['summary']}")
+            result = payload["results"]["implementation"]
+            config = load_toolkit_config(config_dir)
+            selected_spec = config.get_spec(None)[0]
+            expected_skipped = sorted(
+                entry.key
+                for entry in config.manifest.types.values()
+                if entry.spec == selected_spec and entry.kind == "skip"
+            )
+            self.assertTrue(result["coverage_summary"]["partial_coverage"], msg=f"{config_dir}: expected partial implementation coverage")
+            self.assertEqual(result["coverage_summary"]["skipped_entry_count"], len(expected_skipped))
+            self.assertEqual(result["coverage_summary"]["skipped_keys"], expected_skipped)
+            self.assertIn("implementation", payload["summary"]["warning_checks"], msg=f"{config_dir}: missing implementation warning summary")
+
+    def test_real_docs_verify_reports_exclusion_summary(self) -> None:
+        for config_dir in CONFIG_DIRS:
+            label = _config_label(config_dir)
+            exit_code, payload = command_verify(
+                type(
+                    "Args",
+                    (),
+                    {
+                        "config_dir": config_dir,
+                        "spec_name": None,
+                        "checks": "docs",
+                        "scope": "all",
+                        "type_name": None,
+                        "baseline": None,
+                        "git_ref": None,
+                    },
+                )()
+            )
+            self.assertEqual(exit_code, 0, msg=f"{config_dir}: {payload['summary']}")
+            result = payload["results"]["docs"]
+            expected_exclusions = EXPECTED_DOC_EXCLUSIONS[label]
+            self.assertTrue(result["coverage_summary"]["partial_coverage"], msg=f"{config_dir}: expected partial docs coverage")
+            self.assertEqual(result["coverage_summary"]["excluded_resources"], expected_exclusions["excluded_resources"])
+            self.assertEqual(result["coverage_summary"]["excluded_from_examples"], expected_exclusions["excluded_from_examples"])
+            self.assertIn("docs", payload["summary"]["warning_checks"], msg=f"{config_dir}: missing docs warning summary")
 
     def test_full_verify_passes_for_all_real_skills(self) -> None:
         for config_dir in CONFIG_DIRS:

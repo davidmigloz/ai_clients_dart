@@ -944,6 +944,17 @@ def _sealed_parents_to_verify(selected: list[ManifestEntry], entries_for_spec: l
     return list(parents.values())
 
 
+def _implementation_coverage_summary(entries_for_spec: list[ManifestEntry], selected: list[ManifestEntry]) -> dict[str, Any]:
+    skipped_keys = sorted(entry.key for entry in entries_for_spec if entry.kind == "skip")
+    return {
+        "partial_coverage": bool(skipped_keys),
+        "manifest_entry_count": len(entries_for_spec),
+        "selected_entry_count": len(selected),
+        "skipped_entry_count": len(skipped_keys),
+        "skipped_keys": skipped_keys,
+    }
+
+
 def _verify_implementation(
     config: ToolkitConfig,
     spec_name: str,
@@ -970,6 +981,15 @@ def _verify_implementation(
     selected, selection_issues = _select_entries(config, spec_name, scope, type_name, diff)
     issues = list(selection_issues)
     entries_for_spec = _entries_for_spec(config, spec_name)
+    coverage_summary = _implementation_coverage_summary(entries_for_spec, selected)
+    if scope == "all" and coverage_summary["partial_coverage"]:
+        issues.append(
+            _type_issue(
+                "warning",
+                "implementation",
+                f"Strict implementation verification is partial because {coverage_summary['skipped_entry_count']} manifest entries are marked as kind='skip'",
+            )
+        )
     parents = _sealed_parents_to_verify(selected, entries_for_spec)
     parent_references = _sealed_parent_reference_map(entries_for_spec)
     by_parent: dict[str, list[ManifestEntry]] = defaultdict(list)
@@ -1013,6 +1033,7 @@ def _verify_implementation(
         "scope": scope,
         "selected_types": [entry.key for entry in selected],
         "coverage_gaps": coverage_gaps,
+        "coverage_summary": coverage_summary,
         "issues": issues,
         "summary": {
             "errors": sum(1 for issue in issues if issue["level"] == "error"),
@@ -1178,6 +1199,23 @@ def _verify_tool_properties(config: ToolkitConfig, readme: str) -> list[dict[str
     return issues
 
 
+def _docs_coverage_summary(config: ToolkitConfig) -> dict[str, Any]:
+    discovered_resources = _discover_openapi_doc_resources(config)
+    excluded_resources = sorted(set(config.documentation.excluded_resources))
+    excluded_from_examples = sorted(set(config.documentation.excluded_from_examples))
+    normalized_excluded_resources = {_normalize_resource_name(item) for item in excluded_resources}
+    verified_resources = [
+        resource for resource in discovered_resources if resource.resource_key not in normalized_excluded_resources
+    ]
+    return {
+        "partial_coverage": bool(excluded_resources or excluded_from_examples),
+        "discovered_resource_count": len(discovered_resources),
+        "verified_resource_count": len(verified_resources),
+        "excluded_resources": excluded_resources,
+        "excluded_from_examples": excluded_from_examples,
+    }
+
+
 def _verify_openapi_docs(config: ToolkitConfig, readme: str) -> list[dict[str, Any]]:
     issues = _verify_tool_properties(config, readme)
     discovered_resources = _discover_openapi_doc_resources(config)
@@ -1282,10 +1320,19 @@ def _verify_docs(config: ToolkitConfig) -> tuple[int, dict[str, Any]]:
     if not readme_path.exists():
         raise ToolkitError(f"README.md not found in {config.package_root}")
     readme = read_text(readme_path)
+    coverage_summary = _docs_coverage_summary(config)
     if config.manifest.surface == "websocket":
         issues.extend(_verify_websocket_docs(config, readme))
     else:
         issues.extend(_verify_openapi_docs(config, readme))
+    if coverage_summary["partial_coverage"]:
+        issues.append(
+            _type_issue(
+                "warning",
+                "documentation",
+                "Documentation verification is partial because documentation.json excludes resources or example checks",
+            )
+        )
 
     _append_removed_api_issues(issues, readme, "README", config.documentation.removed_apis)
     _append_drift_pattern_issues(issues, readme, "README", config.documentation.drift_patterns, code_blocks_only=True)
@@ -1300,6 +1347,7 @@ def _verify_docs(config: ToolkitConfig) -> tuple[int, dict[str, Any]]:
     return exit_code, {
         "command": "verify",
         "check": "docs",
+        "coverage_summary": coverage_summary,
         "issues": issues,
         "summary": {
             "errors": sum(1 for issue in issues if issue["level"] == "error"),
@@ -2273,6 +2321,7 @@ def command_review(args: Any) -> tuple[int, dict[str, Any]]:
             "changed_type_count": len(changed_names),
             "missing_manifest_count": len(missing_manifest),
             "error_count": sum(1 for issue in issues if issue["level"] == "error"),
+            "warning_count": sum(1 for issue in issues if issue["level"] == "warning"),
         },
     }
     return EXIT_SUCCESS, payload
@@ -2349,6 +2398,11 @@ def command_verify(args: Any) -> tuple[int, dict[str, Any]]:
         "scope": args.scope,
         "results": results,
         "summary": {
+            "warning_checks": [
+                name
+                for name, result in results.items()
+                if any(issue.get("level") == "warning" for issue in result.get("issues", []))
+            ],
             "failing_checks": [
                 name
                 for name, result in results.items()
