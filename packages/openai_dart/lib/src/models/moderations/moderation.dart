@@ -356,12 +356,11 @@ class ModerationResult {
       categoryScores: ModerationCategoryScores.fromJson(
         json['category_scores'] as Map<String, dynamic>,
       ),
-      categoryAppliedInputTypes:
-          json['category_applied_input_types'] != null
-              ? ModerationCategoryAppliedInputTypes.fromJson(
-                  json['category_applied_input_types'] as Map<String, dynamic>,
-                )
-              : null,
+      categoryAppliedInputTypes: json['category_applied_input_types'] != null
+          ? ModerationCategoryAppliedInputTypes.fromJson(
+              json['category_applied_input_types'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
