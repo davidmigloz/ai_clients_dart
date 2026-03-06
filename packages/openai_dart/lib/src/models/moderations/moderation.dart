@@ -507,11 +507,35 @@ class ModerationCategories {
       other is ModerationCategories &&
           runtimeType == other.runtimeType &&
           hate == other.hate &&
+          hateThreatening == other.hateThreatening &&
+          harassment == other.harassment &&
+          harassmentThreatening == other.harassmentThreatening &&
+          illicit == other.illicit &&
+          illicitViolent == other.illicitViolent &&
+          selfHarm == other.selfHarm &&
+          selfHarmIntent == other.selfHarmIntent &&
+          selfHarmInstructions == other.selfHarmInstructions &&
           sexual == other.sexual &&
-          violence == other.violence;
+          sexualMinors == other.sexualMinors &&
+          violence == other.violence &&
+          violenceGraphic == other.violenceGraphic;
 
   @override
-  int get hashCode => Object.hash(hate, sexual, violence);
+  int get hashCode => Object.hash(
+    hate,
+    hateThreatening,
+    harassment,
+    harassmentThreatening,
+    illicit,
+    illicitViolent,
+    selfHarm,
+    selfHarmIntent,
+    selfHarmInstructions,
+    sexual,
+    sexualMinors,
+    violence,
+    violenceGraphic,
+  );
 
   @override
   String toString() => 'ModerationCategories(...)';
@@ -622,11 +646,35 @@ class ModerationCategoryScores {
       other is ModerationCategoryScores &&
           runtimeType == other.runtimeType &&
           hate == other.hate &&
+          hateThreatening == other.hateThreatening &&
+          harassment == other.harassment &&
+          harassmentThreatening == other.harassmentThreatening &&
+          illicit == other.illicit &&
+          illicitViolent == other.illicitViolent &&
+          selfHarm == other.selfHarm &&
+          selfHarmIntent == other.selfHarmIntent &&
+          selfHarmInstructions == other.selfHarmInstructions &&
           sexual == other.sexual &&
-          violence == other.violence;
+          sexualMinors == other.sexualMinors &&
+          violence == other.violence &&
+          violenceGraphic == other.violenceGraphic;
 
   @override
-  int get hashCode => Object.hash(hate, sexual, violence);
+  int get hashCode => Object.hash(
+    hate,
+    hateThreatening,
+    harassment,
+    harassmentThreatening,
+    illicit,
+    illicitViolent,
+    selfHarm,
+    selfHarmIntent,
+    selfHarmInstructions,
+    sexual,
+    sexualMinors,
+    violence,
+    violenceGraphic,
+  );
 
   @override
   String toString() => 'ModerationCategoryScores(...)';
@@ -743,14 +791,34 @@ class ModerationCategoryAppliedInputTypes {
       other is ModerationCategoryAppliedInputTypes &&
           runtimeType == other.runtimeType &&
           _listEquals(hate, other.hate) &&
+          _listEquals(hateThreatening, other.hateThreatening) &&
+          _listEquals(harassment, other.harassment) &&
+          _listEquals(harassmentThreatening, other.harassmentThreatening) &&
+          _listEquals(illicit, other.illicit) &&
+          _listEquals(illicitViolent, other.illicitViolent) &&
+          _listEquals(selfHarm, other.selfHarm) &&
+          _listEquals(selfHarmIntent, other.selfHarmIntent) &&
+          _listEquals(selfHarmInstructions, other.selfHarmInstructions) &&
           _listEquals(sexual, other.sexual) &&
-          _listEquals(violence, other.violence);
+          _listEquals(sexualMinors, other.sexualMinors) &&
+          _listEquals(violence, other.violence) &&
+          _listEquals(violenceGraphic, other.violenceGraphic);
 
   @override
   int get hashCode => Object.hash(
     Object.hashAll(hate),
+    Object.hashAll(hateThreatening),
+    Object.hashAll(harassment),
+    Object.hashAll(harassmentThreatening),
+    Object.hashAll(illicit),
+    Object.hashAll(illicitViolent),
+    Object.hashAll(selfHarm),
+    Object.hashAll(selfHarmIntent),
+    Object.hashAll(selfHarmInstructions),
     Object.hashAll(sexual),
+    Object.hashAll(sexualMinors),
     Object.hashAll(violence),
+    Object.hashAll(violenceGraphic),
   );
 
   @override

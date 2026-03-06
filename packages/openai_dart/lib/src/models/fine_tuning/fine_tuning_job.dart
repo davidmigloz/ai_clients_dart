@@ -1127,10 +1127,13 @@ class FineTuneMethod {
       identical(this, other) ||
       other is FineTuneMethod &&
           runtimeType == other.runtimeType &&
-          type == other.type;
+          type == other.type &&
+          supervised == other.supervised &&
+          dpo == other.dpo &&
+          reinforcement == other.reinforcement;
 
   @override
-  int get hashCode => type.hashCode;
+  int get hashCode => Object.hash(type, supervised, dpo, reinforcement);
 
   @override
   String toString() => 'FineTuneMethod(type: $type)';
