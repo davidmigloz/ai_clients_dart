@@ -79,9 +79,17 @@ Read the `workspace` list from the root `pubspec.yaml` (the source of truth). Ea
 
 3. **No previous tag** (first release): use all commits touching `packages/{pkg}/`.
 
-4. **No commits since tag**: provisionally note this package for skipping — but **always continue to Step 5** to check for unreleased version bumps before finalizing the skip decision.
+4. **Filter out non-publishable changes**: If `packages/{pkg}/.pubignore` exists, read the ignore patterns from it (one per line, typically directory names like `.agents/`, `.claude/`, `specs/`). For each commit found in step 2, check which files it actually changed within the package:
+   ```bash
+   git diff-tree --no-commit-id --name-only -r {hash} -- packages/{pkg}/
+   ```
+   If **every** changed file falls under a `.pubignore`-listed directory (e.g., all paths start with `packages/{pkg}/.agents/` or `packages/{pkg}/specs/`), **exclude that commit** — it has no effect on the published package. Only retain commits that touch at least one file outside the ignored directories.
 
-5. **Detect unreleased version bumps**: Compare the `version:` field in `packages/{pkg}/pubspec.yaml` against the version extracted from the latest tag:
+   > This prevents internal tooling changes (AI agent configs, spec files, etc.) from triggering unnecessary releases. The commit is still recorded in git history but is not considered for version bumps or changelog entries.
+
+5. **No commits since tag** (after filtering): provisionally note this package for skipping — but **always continue to Step 6** to check for unreleased version bumps before finalizing the skip decision.
+
+6. **Detect unreleased version bumps**: Compare the `version:` field in `packages/{pkg}/pubspec.yaml` against the version extracted from the latest tag:
    ```bash
    # Extract version from latest tag (e.g., "foo_dart-v1.0.0" → "1.0.0")
    tag_version=$(echo "$latest_tag" | sed "s/^${pkg}-v//")
@@ -142,7 +150,7 @@ If the current version has `+N` build metadata (e.g., `0.3.0+1`), strip the `+N`
 
 ### Pre-applied version bumps
 
-If Step 2.5 detected that a package's pubspec version is ahead of its latest tag version:
+If Step 2.6 detected that a package's pubspec version is ahead of its latest tag version:
 
 1. **Pubspec version >= computed bump version**: Use the pubspec version as-is. The version was intentionally set (e.g., a 1.0.0 rewrite) and should be respected.
 2. **Computed bump would be higher than pubspec version**: Warn the user and ask which version to use. This is unusual and may indicate a mistake (e.g., someone set a patch bump manually but breaking changes were added later).
