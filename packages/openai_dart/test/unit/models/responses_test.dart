@@ -2006,6 +2006,50 @@ void main() {
       expect(funcEvent.arguments, equals('{"location": "Paris"}'));
     });
 
+    test('deserializes keepalive event as UnknownEvent', () {
+      final json = {'type': 'keepalive'};
+
+      final event = ResponseStreamEvent.fromJson(json);
+
+      expect(event, isA<UnknownEvent>());
+      expect(event.type, equals('keepalive'));
+      expect(event.sequenceNumber, isNull);
+      expect(event.isFinal, isFalse);
+    });
+
+    test('deserializes unknown event types without throwing', () {
+      final json = {
+        'type': 'some.future.event',
+        'sequence_number': 42,
+        'foo': 'bar',
+      };
+
+      final event = ResponseStreamEvent.fromJson(json);
+
+      expect(event, isA<UnknownEvent>());
+      expect(event.type, equals('some.future.event'));
+      expect(event.sequenceNumber, equals(42));
+      expect((event as UnknownEvent).rawJson, equals(json));
+    });
+
+    test('UnknownEvent roundtrips through toJson', () {
+      final json = {'type': 'keepalive', 'sequence_number': 5};
+
+      final event = ResponseStreamEvent.fromJson(json);
+      expect(event.toJson(), equals(json));
+    });
+
+    test('accumulator handles UnknownEvent gracefully', () {
+      final accumulator = ResponseStreamAccumulator()
+        // Should not throw
+        ..add(
+          const UnknownEvent(type: 'keepalive', rawJson: {'type': 'keepalive'}),
+        );
+
+      expect(accumulator.text, isEmpty);
+      expect(accumulator.isComplete, isFalse);
+    });
+
     test('isFinal returns true for completed events', () {
       const completedEvent = ResponseCompletedEvent(
         response: Response(

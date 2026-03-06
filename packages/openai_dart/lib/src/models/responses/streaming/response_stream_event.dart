@@ -26,6 +26,7 @@ import '../response.dart';
 /// - **MCP events**: call events, list tools events, arguments events
 /// - **Custom tool events**: input delta, input done
 /// - **Error events**: error details
+/// - **Unknown events**: any unrecognized event type (e.g. `keepalive`)
 sealed class ResponseStreamEvent {
   /// Creates a [ResponseStreamEvent].
   const ResponseStreamEvent();
@@ -153,7 +154,7 @@ sealed class ResponseStreamEvent {
       // Error events
       'error' => ErrorEvent.fromJson(json),
 
-      _ => throw FormatException('Unknown ResponseStreamEvent type: $type'),
+      _ => UnknownEvent.fromJson(json),
     };
   }
 
@@ -3431,6 +3432,60 @@ class ErrorEvent extends ResponseStreamEvent {
 
   @override
   String toString() => 'ErrorEvent(code: $code, message: $message)';
+}
+
+// ============================================================
+// Unknown / Unrecognized Events
+// ============================================================
+
+/// An event with an unrecognized [type].
+///
+/// This is returned for any event type that the library does not yet handle
+/// (e.g. `keepalive` events emitted during long-running streaming operations).
+/// It preserves the raw JSON so callers can inspect it if needed.
+@immutable
+class UnknownEvent extends ResponseStreamEvent {
+  @override
+  final String type;
+
+  @override
+  final int? sequenceNumber;
+
+  /// The raw JSON of the unrecognized event.
+  final Map<String, dynamic> rawJson;
+
+  /// Creates an [UnknownEvent].
+  const UnknownEvent({
+    required this.type,
+    required this.rawJson,
+    this.sequenceNumber,
+  });
+
+  /// Creates an [UnknownEvent] from JSON.
+  factory UnknownEvent.fromJson(Map<String, dynamic> json) {
+    return UnknownEvent(
+      type: json['type'] as String,
+      rawJson: json,
+      sequenceNumber: json['sequence_number'] as int?,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => Map<String, dynamic>.from(rawJson);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnknownEvent &&
+          runtimeType == other.runtimeType &&
+          type == other.type &&
+          sequenceNumber == other.sequenceNumber;
+
+  @override
+  int get hashCode => Object.hash(type, sequenceNumber);
+
+  @override
+  String toString() => 'UnknownEvent(type: $type)';
 }
 
 // ============================================================
