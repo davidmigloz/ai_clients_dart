@@ -57,7 +57,7 @@ Perform all applicable checks before proceeding. Fail fast with an actionable er
 
 ## Step 2: Detect Changes Per Package
 
-> **IMPORTANT — Working directory**: All `git` and shell commands throughout this skill assume the **repository root** as the working directory. The Bash tool does not persist `cd` between calls, so **always use absolute paths or prefix commands with `cd /path/to/repo &&`** when running shell commands. Never rely on a previous `cd` having set the working directory. This applies to every step, not just this one.
+> **IMPORTANT — Working directory**: All `git` and shell commands throughout this skill assume the **repository root** as the working directory. The Bash tool does not persist `cd` between calls, so **always use absolute paths or prefix commands with a quoted repo path, for example `REPO_ROOT="/path/to/repo"` then `cd "$REPO_ROOT" && ...`, when running shell commands**. Never rely on a previous `cd` having set the working directory. This applies to every step, not just this one.
 
 ### Discover packages
 
@@ -75,7 +75,7 @@ Read the `workspace` list from the root `pubspec.yaml` (the source of truth). Ea
    ```bash
    git log --format="%H|||%s|||%b|||END" {tag}..HEAD -- packages/{pkg}/
    ```
-   Use `|||` as field delimiter and `|||END` as record terminator. **Parse by splitting on `|||END` first** (to get individual commit records), then split each record on `|||` (to get hash, subject, body). Avoid using ASCII control characters (`%x1f`, `%x1e`) as delimiters — they can be silently stripped or mangled by shell processing, leading to empty results.
+   Use `|||` as field delimiter and `|||END` as record terminator. **Parse by splitting on `|||END` first** (to get individual commit records), then discard any empty records from the result (the final terminator produces a trailing empty element). After filtering, split each remaining record on `|||` **into at most three parts** (hash, subject, body) so any additional `|||` sequences in the subject or body remain inside the body field. Do not blindly split on every occurrence of `|||`. Avoid using ASCII control characters (`%x1f`, `%x1e`) as delimiters — they can be silently stripped or mangled by shell processing, leading to empty results.
 
 3. **No previous tag** (first release): use all commits touching `packages/{pkg}/`.
 
