@@ -575,6 +575,13 @@ class MigratedSkillContractTests(unittest.TestCase):
             self.assertIn("latest-<spec>.json", text, msg=f"Missing candidate spec guidance in {config_dir}")
             self.assertIn("/specs/", text, msg=f"Missing canonical spec guidance in {config_dir}")
 
+    def test_real_skill_docs_describe_repo_root_command_usage(self) -> None:
+        expected = "run the repo-relative examples from the repository root"
+        for config_dir in CONFIG_DIRS:
+            text = (config_dir.parent / "SKILL.md").read_text()
+            self.assertIn(expected, text, msg=f"Missing repo-root guidance in {config_dir}")
+            self.assertNotIn("Commands work from any directory", text, msg=f"Stale command guidance in {config_dir}")
+
     def test_real_local_file_specs_omit_remote_fetch_fields(self) -> None:
         offenders: list[str] = []
         for config_dir in CONFIG_DIRS:

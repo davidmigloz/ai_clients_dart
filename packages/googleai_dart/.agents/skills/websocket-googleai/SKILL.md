@@ -9,7 +9,7 @@ description: Update googleai_dart from Google AI WebSocket schema changes. Use f
 
 - Auth: No auth env vars required for fetch/review; runtime WebSocket usage still uses Google AI credentials.
 - CLI: `python3 .agents/shared/api-toolkit/scripts/api_toolkit.py`
-- Use an absolute `--config-dir` when running outside the repo root.
+- Existing-package commands: run the repo-relative examples from the repository root. If you run them elsewhere, invoke the script via an absolute path and pass an absolute `--config-dir`.
 
 ## Workflow
 

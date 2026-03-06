@@ -959,6 +959,77 @@ class ApiToolkitCommandTests(unittest.TestCase):
             self.assertIn("class Tool", payload["preview"])
             self.assertTrue(payload["output"].endswith("lib/src/models/common/tool.dart"))
 
+    def test_scaffold_uses_manifest_schema_name_when_lookup_happens_by_dart_class(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            (package_root / "specs" / "openapi.json").write_text(
+                json.dumps(
+                    {
+                        "openapi": "3.1.0",
+                        "info": {"title": "Sample", "version": "1"},
+                        "paths": {},
+                        "components": {
+                            "schemas": {
+                                "SchemaKey": {
+                                    "type": "object",
+                                    "properties": {"id": {"type": "string"}},
+                                    "required": ["id"],
+                                }
+                            }
+                        },
+                    }
+                )
+            )
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {
+                        "main": {
+                            "name": "Sample API",
+                            "local_file": "openapi.json",
+                            "fetch_mode": "local_file",
+                            "source_file": "specs/openapi.json",
+                        }
+                    },
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(root / "tmp" / "sample"),
+                },
+                manifest_payload={
+                    "surface": "openapi",
+                    "type_mappings": {},
+                    "placement": {"categories": {}, "default_category": "common", "parent_model_patterns": {}},
+                    "coverage": {},
+                    "types": {
+                        "SchemaKey": {
+                            "spec": "main",
+                            "kind": "object",
+                            "dart_class": "SchemaWrapper",
+                            "file": "lib/src/models/common/schema_wrapper.dart",
+                            "schema": None,
+                        }
+                    },
+                },
+            )
+
+            exit_code, payload = command_scaffold(
+                SimpleNamespace(
+                    config_dir=config_dir,
+                    target="schema",
+                    name="SchemaWrapper",
+                    spec_name=None,
+                    output=None,
+                    dry_run=True,
+                )
+            )
+
+            self.assertEqual(exit_code, 0)
+            self.assertIn("class SchemaWrapper", payload["preview"])
+            self.assertIn("final String id;", payload["preview"])
+            self.assertTrue(payload["output"].endswith("lib/src/models/common/schema_wrapper.dart"))
+
     def test_scaffold_multi_spec_uses_selected_spec(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
@@ -1288,6 +1359,18 @@ class ApiToolkitCommandTests(unittest.TestCase):
             workspace_text = (root / "pubspec.yaml").read_text()
             self.assertIn("  - packages/bootstrap_client_dart\n", workspace_text)
             self.assertIn("creation-plan.md", payload["creation_plan"])
+            skill_text = (skill_root / "SKILL.md").read_text()
+            self.assertIn("run the repo-relative examples from the repository root", skill_text)
+            guide_text = (skill_root / "references" / "package-guide.md").read_text()
+            self.assertIn(
+                "invoke the script via an absolute path and pass an absolute `--config-dir`",
+                guide_text,
+            )
+            creation_plan_text = Path(payload["creation_plan"]).read_text()
+            self.assertIn(
+                "invoke the script via an absolute path and pass an absolute `--config-dir`",
+                creation_plan_text,
+            )
             impl_patterns_text = (skill_root / "references" / "implementation-patterns.md").read_text()
             self.assertIn(
                 "[implementation-patterns-core.md](../../../../../../.agents/shared/api-toolkit/references/implementation-patterns-core.md)",

@@ -1601,7 +1601,7 @@ def _render_scaffold(config: ToolkitConfig, target: str, spec_name: str, name: s
         entry = _resolve_entry(config, name, spec_name)
     except ToolkitError:
         entry = None
-    schema_name = entry.schema_name if entry and entry.schema else name
+    schema_name = entry.schema_name if entry else name
     if config.manifest.surface == "openapi":
         schema = spec_payload.get("components", {}).get("schemas", {}).get(schema_name)
         if target == "enum":
@@ -1687,7 +1687,7 @@ description: Update {package_name} from {display_name} {surface} changes. Use fo
 ## Prerequisites
 
 - Auth: {auth_line}
-- Existing-package commands: use an absolute `--config-dir` or run from the repo root with repo-relative paths.
+- Existing-package commands: run the repo-relative examples from the repository root. If you run them elsewhere, invoke the script via an absolute path and pass an absolute `--config-dir`.
 
 ## Workflow
 
@@ -1768,7 +1768,7 @@ python3 .agents/shared/api-toolkit/scripts/api_toolkit.py scaffold --config-dir 
 python3 .agents/shared/api-toolkit/scripts/api_toolkit.py verify --config-dir {config_dir} --checks exports --scope all
 ```
 
-If you are outside the repo root, pass an absolute `--config-dir`.
+Run the repo-relative examples from the repository root. If you run them elsewhere, invoke the script via an absolute path and pass an absolute `--config-dir`.
 """
 
 
@@ -1825,7 +1825,7 @@ def _creation_plan(package_name: str, display_name: str, shortname: str, manifes
         "- Use `scaffold --target enum` for enums before object models.",
         "- Fill in resources after core models are in place.",
         "- Promote the reviewed candidate from `output_dir/latest-main.json` into `specs/openapi.json` before final verification.",
-        "- If you run commands outside the repo root, use an absolute `--config-dir`.",
+        "- Run the repo-relative examples from the repository root. If you run them elsewhere, invoke the script via an absolute path and pass an absolute `--config-dir`.",
         "",
         "## Suggested Scaffold Commands",
         "",

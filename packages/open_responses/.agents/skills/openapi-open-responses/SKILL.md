@@ -9,7 +9,7 @@ description: Update open_responses from OpenResponses OpenAPI changes. Use for s
 
 - Auth: No auth env vars required.
 - CLI: `python3 .agents/shared/api-toolkit/scripts/api_toolkit.py`
-- Commands work from any directory. Use `--config-dir` to resolve the package and repo roots.
+- Existing-package commands: run the repo-relative examples from the repository root. If you run them elsewhere, invoke the script via an absolute path and pass an absolute `--config-dir`.
 
 ## Workflow
 
