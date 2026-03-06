@@ -1330,11 +1330,7 @@ class FineTuneReinforcementMethod {
           hyperparameters == other.hyperparameters;
 
   @override
-  int get hashCode => Object.hash(
-    Object.hashAllUnordered(grader.keys),
-    Object.hashAllUnordered(grader.values.whereType<String>()),
-    hyperparameters,
-  );
+  int get hashCode => Object.hash(_deepHashCode(grader), hyperparameters);
 
   @override
   String toString() => 'FineTuneReinforcementMethod(...)';
@@ -1465,3 +1461,19 @@ bool _deepEquals(dynamic a, dynamic b) {
 
 bool _mapEquals(Map<String, dynamic> a, Map<String, dynamic> b) =>
     _deepEquals(a, b);
+
+// Order-independent deep hash for dynamic values (maps, lists, primitives).
+int _deepHashCode(dynamic value) {
+  if (value is Map<String, dynamic>) {
+    var hash = 0;
+    for (final entry in value.entries) {
+      // XOR is order-independent
+      hash ^= Object.hash(entry.key, _deepHashCode(entry.value));
+    }
+    return hash;
+  }
+  if (value is List) {
+    return Object.hashAll(value.map(_deepHashCode));
+  }
+  return value.hashCode;
+}
