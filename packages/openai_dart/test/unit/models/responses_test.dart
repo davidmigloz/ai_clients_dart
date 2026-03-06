@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:openai_dart/src/models/chat/content_part.dart' show ImageDetail;
+import 'package:openai_dart/src/models/containers/containers.dart';
 import 'package:openai_dart/src/models/responses/responses.dart';
 import 'package:test/test.dart';
 
@@ -1233,6 +1234,7 @@ void main() {
       expect(item, isA<CodeInterpreterCallOutputItem>());
       final ciItem = item as CodeInterpreterCallOutputItem;
       expect(ciItem.id, equals('ci_123'));
+      expect(ciItem.containerId, equals('cntr_abc'));
       expect(ciItem.code, equals('print("hello")'));
       expect(ciItem.language, equals('python'));
       expect(ciItem.outputs, isNotNull);
@@ -1257,6 +1259,7 @@ void main() {
       final json = item.toJson();
 
       expect(json['type'], equals('code_interpreter_call'));
+      expect(json['container_id'], equals('cntr_abc'));
       expect(json['code'], equals('x = 1 + 1'));
       expect(json['language'], equals('python'));
     });
@@ -2366,6 +2369,25 @@ void main() {
       final restored = Annotation.fromJson(json);
       expect(restored, isA<ContainerFileCitation>());
       expect(restored, equals(citation));
+    });
+  });
+
+  group('ContainerFile', () {
+    test('fromJson handles null bytes without crashing', () {
+      final json = {
+        'id': 'cfile_123',
+        'object': 'container.file',
+        'container_id': 'cntr_abc',
+        'created_at': 1747848842,
+        'bytes': null,
+        'path': '/mnt/data/file.txt',
+        'source': 'user',
+      };
+
+      final file = ContainerFile.fromJson(json);
+      expect(file.id, equals('cfile_123'));
+      expect(file.bytes, isNull);
+      expect(file.path, equals('/mnt/data/file.txt'));
     });
   });
 
