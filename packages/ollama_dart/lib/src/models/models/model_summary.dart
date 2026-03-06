@@ -9,6 +9,15 @@ class ModelSummary {
   /// Model name.
   final String? name;
 
+  /// Model identifier.
+  final String? model;
+
+  /// Remote model name, if using a remote/proxy model.
+  final String? remoteModel;
+
+  /// Remote host, if using a remote/proxy model.
+  final String? remoteHost;
+
   /// Last modified timestamp in ISO 8601 format.
   final String? modifiedAt;
 
@@ -24,6 +33,9 @@ class ModelSummary {
   /// Creates a [ModelSummary].
   const ModelSummary({
     this.name,
+    this.model,
+    this.remoteModel,
+    this.remoteHost,
     this.modifiedAt,
     this.size,
     this.digest,
@@ -33,6 +45,9 @@ class ModelSummary {
   /// Creates a [ModelSummary] from JSON.
   factory ModelSummary.fromJson(Map<String, dynamic> json) => ModelSummary(
     name: json['name'] as String?,
+    model: json['model'] as String?,
+    remoteModel: json['remote_model'] as String?,
+    remoteHost: json['remote_host'] as String?,
     modifiedAt: json['modified_at'] as String?,
     size: json['size'] as int?,
     digest: json['digest'] as String?,
@@ -44,6 +59,9 @@ class ModelSummary {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (name != null) 'name': name,
+    if (model != null) 'model': model,
+    if (remoteModel != null) 'remote_model': remoteModel,
+    if (remoteHost != null) 'remote_host': remoteHost,
     if (modifiedAt != null) 'modified_at': modifiedAt,
     if (size != null) 'size': size,
     if (digest != null) 'digest': digest,
@@ -53,6 +71,9 @@ class ModelSummary {
   /// Creates a copy with replaced values.
   ModelSummary copyWith({
     Object? name = unsetCopyWithValue,
+    Object? model = unsetCopyWithValue,
+    Object? remoteModel = unsetCopyWithValue,
+    Object? remoteHost = unsetCopyWithValue,
     Object? modifiedAt = unsetCopyWithValue,
     Object? size = unsetCopyWithValue,
     Object? digest = unsetCopyWithValue,
@@ -60,6 +81,13 @@ class ModelSummary {
   }) {
     return ModelSummary(
       name: name == unsetCopyWithValue ? this.name : name as String?,
+      model: model == unsetCopyWithValue ? this.model : model as String?,
+      remoteModel: remoteModel == unsetCopyWithValue
+          ? this.remoteModel
+          : remoteModel as String?,
+      remoteHost: remoteHost == unsetCopyWithValue
+          ? this.remoteHost
+          : remoteHost as String?,
       modifiedAt: modifiedAt == unsetCopyWithValue
           ? this.modifiedAt
           : modifiedAt as String?,

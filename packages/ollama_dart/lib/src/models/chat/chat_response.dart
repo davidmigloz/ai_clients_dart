@@ -81,6 +81,12 @@ class ChatResponse {
   /// Model name used to generate this message.
   final String? model;
 
+  /// Remote model name, if using a remote/proxy model.
+  final String? remoteModel;
+
+  /// Remote host, if using a remote/proxy model.
+  final String? remoteHost;
+
   /// Timestamp of response creation (ISO 8601).
   final String? createdAt;
 
@@ -117,6 +123,8 @@ class ChatResponse {
   /// Creates a [ChatResponse].
   const ChatResponse({
     this.model,
+    this.remoteModel,
+    this.remoteHost,
     this.createdAt,
     this.message,
     this.done,
@@ -133,6 +141,8 @@ class ChatResponse {
   /// Creates a [ChatResponse] from JSON.
   factory ChatResponse.fromJson(Map<String, dynamic> json) => ChatResponse(
     model: json['model'] as String?,
+    remoteModel: json['remote_model'] as String?,
+    remoteHost: json['remote_host'] as String?,
     createdAt: json['created_at'] as String?,
     message: json['message'] != null
         ? ChatResponseMessage.fromJson(json['message'] as Map<String, dynamic>)
@@ -153,6 +163,8 @@ class ChatResponse {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (model != null) 'model': model,
+    if (remoteModel != null) 'remote_model': remoteModel,
+    if (remoteHost != null) 'remote_host': remoteHost,
     if (createdAt != null) 'created_at': createdAt,
     if (message != null) 'message': message!.toJson(),
     if (done != null) 'done': done,
@@ -169,6 +181,8 @@ class ChatResponse {
   /// Creates a copy with replaced values.
   ChatResponse copyWith({
     Object? model = unsetCopyWithValue,
+    Object? remoteModel = unsetCopyWithValue,
+    Object? remoteHost = unsetCopyWithValue,
     Object? createdAt = unsetCopyWithValue,
     Object? message = unsetCopyWithValue,
     Object? done = unsetCopyWithValue,
@@ -183,6 +197,12 @@ class ChatResponse {
   }) {
     return ChatResponse(
       model: model == unsetCopyWithValue ? this.model : model as String?,
+      remoteModel: remoteModel == unsetCopyWithValue
+          ? this.remoteModel
+          : remoteModel as String?,
+      remoteHost: remoteHost == unsetCopyWithValue
+          ? this.remoteHost
+          : remoteHost as String?,
       createdAt: createdAt == unsetCopyWithValue
           ? this.createdAt
           : createdAt as String?,
