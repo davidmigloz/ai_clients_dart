@@ -79,11 +79,13 @@ Read the `workspace` list from the root `pubspec.yaml` (the source of truth). Ea
 
 3. **No previous tag** (first release): use all commits touching `packages/{pkg}/`.
 
-4. **Filter out non-publishable changes**: If `packages/{pkg}/.pubignore` exists, read the ignore patterns from it (one per line, typically directory names like `.agents/`, `.claude/`, `specs/`). For each commit found in step 2, check which files it actually changed within the package:
+4. **Filter out non-publishable changes**: If `packages/{pkg}/.pubignore` exists, read its lines as ignore entries. `.pubignore` supports gitignore-style syntax, but **for this release filtering step, only treat entries that are simple directory names** (with or without trailing `/`, no wildcards, `!` negation, or additional `/` path separators) as ignore directories relative to `packages/{pkg}/` (typically names like `.agents`, `.claude`, `specs`). Skip blank lines and lines starting with `#` (comments). Any more complex patterns in `.pubignore` should be ignored for this filtering logic and must not cause a commit to be misclassified as non-publishable.
+
+   For each commit found in step 2 (or step 3 for first releases), check which files it actually changed within the package:
    ```bash
-   git diff-tree --no-commit-id --name-only -r {hash} -- packages/{pkg}/
+   git show --pretty="" --name-only {hash} -- packages/{pkg}/
    ```
-   If **every** changed file falls under a `.pubignore`-listed directory (e.g., all paths start with `packages/{pkg}/.agents/` or `packages/{pkg}/specs/`), **exclude that commit** — it has no effect on the published package. Only retain commits that touch at least one file outside the ignored directories.
+   If **every** changed file falls under one of the supported `.pubignore` directory-name entries (i.e., for some listed directory `DIR`, the path starts with `packages/{pkg}/DIR/`, such as `packages/{pkg}/.agents/` or `packages/{pkg}/specs/`), **exclude that commit** — it has no effect on the published package. Only retain commits that touch at least one file outside these ignored directories.
 
    > This prevents internal tooling changes (AI agent configs, spec files, etc.) from triggering unnecessary releases. The commit is still recorded in git history but is not considered for version bumps or changelog entries.
 
@@ -96,7 +98,7 @@ Read the `workspace` list from the root `pubspec.yaml` (the source of truth). Ea
    # Read pubspec version
    pubspec_version=$(grep '^version:' packages/${pkg}/pubspec.yaml | awk '{print $2}')
    ```
-   - If `pubspec_version` > `tag_version`, this package has a **pre-applied version bump** — someone manually set the version in the pubspec but never published it. Flag this package for release even if Step 4 found "no commits since tag" would normally skip it.
+   - If `pubspec_version` > `tag_version`, this package has a **pre-applied version bump** — someone manually set the version in the pubspec but never published it. Flag this package for release even if Step 5 found "no commits since tag" would normally skip it.
    - If `pubspec_version` == `tag_version` and there are no new commits, skip as normal.
 
    > **Caution**: The git tag is the definitive indicator of whether a version has been published, not the pubspec. A pubspec may show `version: 1.0.0` while no `{pkg}-v1.0.0` tag exists — this means 1.0.0 was never actually released. Always check tags to determine published state.
