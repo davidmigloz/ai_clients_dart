@@ -1328,8 +1328,8 @@ class FineTuneReinforcementMethod {
 
   @override
   int get hashCode => Object.hash(
-    Object.hashAll(grader.keys),
-    Object.hashAll(grader.values.whereType<String>()),
+    Object.hashAllUnordered(grader.keys),
+    Object.hashAllUnordered(grader.values.whereType<String>()),
     hyperparameters,
   );
 
