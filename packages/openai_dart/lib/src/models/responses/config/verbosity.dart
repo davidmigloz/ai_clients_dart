@@ -1,16 +1,20 @@
 /// Verbosity level for output.
+///
+/// Constrains the verbosity of the model's response. Lower values will result
+/// in more concise responses, while higher values will result in more verbose
+/// responses.
 enum Verbosity {
   /// Unknown verbosity (fallback for unrecognized values).
   unknown('unknown'),
 
-  /// Auto verbosity.
-  auto('auto'),
+  /// Low verbosity — more concise responses.
+  low('low'),
 
-  /// Concise output.
-  concise('concise'),
+  /// Medium verbosity (default).
+  medium('medium'),
 
-  /// Verbose output.
-  verbose('verbose');
+  /// High verbosity — more detailed responses.
+  high('high');
 
   /// The JSON value for this verbosity.
   final String value;
