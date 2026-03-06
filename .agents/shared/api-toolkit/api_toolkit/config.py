@@ -4,11 +4,12 @@ import json
 import os
 import re
 import sys
+import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
-from urllib.parse import unquote
+from urllib.parse import parse_qsl, unquote, urlencode, urlsplit, urlunsplit
 from urllib.request import Request, urlopen
 
 try:
@@ -25,6 +26,8 @@ EXIT_FAILURE = 1
 EXIT_USAGE = 2
 
 ALLOWED_FORMATS = {"json", "text"}
+AUTH_LOCATIONS = {"header", "query"}
+HASHED_SPEC_URL_RE = re.compile(r"([a-f0-9]{10,})\.(?:json|ya?ml)")
 
 DEFAULT_TYPE_MAPPINGS = {
     "string": "String",
@@ -70,10 +73,24 @@ class SpecConfig:
     fallback_urls: list[str] = field(default_factory=list)
     requires_auth: bool = False
     auth_env_vars: list[str] = field(default_factory=list)
+    auth: "AuthConfig | None" = None
     description: str = ""
     source_file: str | None = None
     experimental: bool = False
     websocket_endpoints: dict[str, Any] = field(default_factory=dict)
+
+    @property
+    def resolved_auth(self) -> "AuthConfig | None":
+        if not self.requires_auth:
+            return None
+        return self.auth or AuthConfig(location="query", name="key", prefix="")
+
+
+@dataclass(slots=True, frozen=True)
+class AuthConfig:
+    location: str
+    name: str
+    prefix: str = ""
 
 
 @dataclass(slots=True)
@@ -260,7 +277,7 @@ def read_structured_text(content: str, *, source: str | Path = "<input>") -> Any
     if HAS_YAML:
         try:
             return yaml.safe_load(content)
-        except Exception as exc:
+        except yaml.YAMLError as exc:
             raise ToolkitError(f"Failed to parse {source}: {exc}") from exc
     raise ToolkitError(
         f"Failed to parse {source}. Install PyYAML with `{sys.executable} -m pip install pyyaml --user`"
@@ -270,6 +287,28 @@ def read_structured_text(content: str, *, source: str | Path = "<input>") -> Any
 def write_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(f"{json.dumps(payload, indent=2, sort_keys=True)}\n")
+
+
+def default_output_dir(package_name: str) -> Path:
+    return (Path(tempfile.gettempdir()) / f"{package_name}-api-toolkit").resolve()
+
+
+def _parse_auth_config(raw: Any, *, source: str) -> AuthConfig | None:
+    if raw is None:
+        return None
+    if not isinstance(raw, dict):
+        raise ToolkitError(f"{source} auth config must be an object")
+    location = raw.get("location", "query")
+    if location not in AUTH_LOCATIONS:
+        raise ToolkitError(f"{source} auth location must be one of: {', '.join(sorted(AUTH_LOCATIONS))}")
+    default_name = "Authorization" if location == "header" else "key"
+    name = raw.get("name", default_name)
+    if not isinstance(name, str) or not name:
+        raise ToolkitError(f"{source} auth name must be a non-empty string")
+    prefix = raw.get("prefix", "")
+    if not isinstance(prefix, str):
+        raise ToolkitError(f"{source} auth prefix must be a string")
+    return AuthConfig(location=location, name=name, prefix=prefix)
 
 
 def load_toolkit_config(config_dir: Path) -> ToolkitConfig:
@@ -303,7 +342,7 @@ def load_toolkit_config(config_dir: Path) -> ToolkitConfig:
         (repo_root / specs_dir_raw if not Path(specs_dir_raw).is_absolute() else Path(specs_dir_raw)).resolve(),
         repo_root,
     )
-    output_dir_raw = specs_json.get("output_dir", f"/tmp/{package_root.name}-api-toolkit")
+    output_dir_raw = specs_json.get("output_dir", str(default_output_dir(package_root.name)))
     output_dir = Path(output_dir_raw).resolve()
     preflight = specs_json.get("preflight", {})
     specs: dict[str, SpecConfig] = {}
@@ -317,6 +356,7 @@ def load_toolkit_config(config_dir: Path) -> ToolkitConfig:
             fallback_urls=raw.get("fallback_urls", []),
             requires_auth=raw.get("requires_auth", False),
             auth_env_vars=raw.get("auth_env_vars", []),
+            auth=_parse_auth_config(raw.get("auth"), source=f"specs.{name}"),
             description=raw.get("description", ""),
             source_file=raw.get("source_file"),
             experimental=raw.get("experimental", False),
@@ -412,17 +452,28 @@ def get_api_key(spec: SpecConfig) -> str | None:
     return None
 
 
-def fetch_remote_document(url: str, api_key: str | None, requires_auth: bool) -> tuple[str | None, str | None]:
-    target_url = url
-    if requires_auth:
-        if not api_key:
-            return None, "API key required but not configured"
-        target_url = f"{url}&key={api_key}" if "?" in url else f"{url}?key={api_key}"
+def _authenticated_request(url: str, api_key: str | None, auth: AuthConfig | None) -> Request:
+    if auth is None:
+        return Request(url, headers={"User-Agent": "api-toolkit/1.0"})
+    if not api_key:
+        raise ToolkitError("API key required but not configured")
+    value = f"{auth.prefix}{api_key}"
+    if auth.location == "header":
+        return Request(url, headers={"User-Agent": "api-toolkit/1.0", auth.name: value})
+    split = urlsplit(url)
+    query = parse_qsl(split.query, keep_blank_values=True)
+    query.append((auth.name, value))
+    target_url = urlunsplit((split.scheme, split.netloc, split.path, urlencode(query), split.fragment))
+    return Request(target_url, headers={"User-Agent": "api-toolkit/1.0"})
 
+
+def fetch_remote_document(url: str, api_key: str | None, auth: AuthConfig | None = None) -> tuple[str | None, str | None]:
     try:
-        request = Request(target_url, headers={"User-Agent": "api-toolkit/1.0"})
+        request = _authenticated_request(url, api_key, auth)
         with urlopen(request, timeout=30) as response:
             return response.read().decode("utf-8"), None
+    except ToolkitError as exc:
+        return None, str(exc)
     except HTTPError as exc:  # pragma: no cover - network dependent
         return None, f"HTTP {exc.code}: {exc.reason}"
     except URLError as exc:  # pragma: no cover - network dependent
@@ -433,7 +484,7 @@ def extract_hash_from_url(url: str | None) -> str | None:
     if not url:
         return None
     decoded = unquote(url)
-    match = re.search(r"([a-f0-9]{10,})\.(?:json|ya?ml)", decoded)
+    match = HASHED_SPEC_URL_RE.search(decoded)
     if match:
         return match.group(1)
     return None

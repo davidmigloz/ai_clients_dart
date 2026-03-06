@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from .config import (
+    AuthConfig,
     EXIT_FAILURE,
     EXIT_SUCCESS,
     EXIT_USAGE,
@@ -20,6 +21,7 @@ from .config import (
     SpecConfig,
     ToolkitConfig,
     ToolkitError,
+    default_output_dir,
     dump_manifest,
     extract_hash_from_url,
     fetch_remote_document,
@@ -49,6 +51,10 @@ from .dart_inspect import (
 
 HTTP_METHODS = ("get", "post", "put", "patch", "delete")
 UNKNOWN_ENUM_FALLBACKS = {"unknown", "unspecified"}
+MAX_VERSION_HISTORY = 10
+VERSION_SEGMENT_RE = re.compile(r"^v\d+")
+PART_OF_RE = re.compile(r"\bpart of\b")
+WORKSPACE_BLOCK_RE = re.compile(r"workspace:\n((?:\s+- .+\n)+)")
 
 
 @dataclass(frozen=True, slots=True)
@@ -118,7 +124,7 @@ def _is_path_parameter(segment: str) -> bool:
 
 def _trim_path_prefixes(parts: list[str]) -> list[str]:
     trimmed = list(parts)
-    while trimmed and (_is_path_parameter(trimmed[0]) or trimmed[0] == "api" or re.match(r"^v\d+", trimmed[0])):
+    while trimmed and (_is_path_parameter(trimmed[0]) or trimmed[0] == "api" or VERSION_SEGMENT_RE.match(trimmed[0])):
         trimmed = trimmed[1:]
     return trimmed
 
@@ -249,15 +255,10 @@ def _read_git_file(repo_root: Path, git_ref: str, path: Path) -> dict[str, Any]:
     )
     if completed.returncode != 0:
         raise ToolkitError(f"Unable to read {relative} from git ref '{git_ref}': {completed.stderr.strip()}")
-    try:
-        return json.loads(completed.stdout)
-    except json.JSONDecodeError:
-        try:
-            import yaml
-
-            return yaml.safe_load(completed.stdout)
-        except Exception as exc:  # pragma: no cover - depends on env
-            raise ToolkitError(f"Failed to parse {relative} from git ref '{git_ref}': {exc}") from exc
+    payload = read_structured_text(completed.stdout, source=f"{relative} from git ref '{git_ref}'")
+    if not isinstance(payload, dict):
+        raise ToolkitError(f"Payload at {relative} from git ref '{git_ref}' must be an object")
+    return payload
 
 
 def _load_old_new_payloads(
@@ -1084,7 +1085,7 @@ def _verify_exports(config: ToolkitConfig) -> tuple[int, dict[str, Any]]:
         if path.name in skip or any(part.startswith(".") for part in path.parts):
             continue
         head = "\n".join(read_text(path).splitlines()[:5])
-        if re.search(r"\bpart of\b", head):
+        if PART_OF_RE.search(head):
             continue
         model_files.append(path.resolve())
     barrel_files = _discover_barrel_files(config)
@@ -1651,7 +1652,7 @@ def _render_barrel(config: ToolkitConfig, name: str) -> str:
 
 def _workspace_pubspec_update(pubspec: Path, package_path: str) -> str:
     content = pubspec.read_text()
-    workspace_match = re.search(r"workspace:\n((?:\s+- .+\n)+)", content)
+    workspace_match = WORKSPACE_BLOCK_RE.search(content)
     if not workspace_match:
         raise ToolkitError("Workspace list not found in root pubspec.yaml")
     entries = [line.strip()[2:] for line in workspace_match.group(1).splitlines() if line.strip().startswith("- ")]
@@ -1866,7 +1867,7 @@ def _write_spec_metadata(
                 "fetched_at": current.get("last_fetched"),
             },
         )
-        history = history[:10]
+        history = history[:MAX_VERSION_HISTORY]
 
     specs[spec_name] = {
         "title": spec_payload.get("info", {}).get("title", "Unknown"),
@@ -1959,7 +1960,7 @@ def command_create(args: Any) -> tuple[int, dict[str, Any]]:
         document, error = fetch_remote_document(
             args.spec_url,
             bootstrap_api_key,
-            requires_auth,
+            AuthConfig(location="header", name="Authorization", prefix="Bearer ") if requires_auth else None,
         )
         if error:
             raise ToolkitError(f"Failed to fetch spec from {args.spec_url}: {error}")
@@ -2002,16 +2003,25 @@ def command_create(args: Any) -> tuple[int, dict[str, Any]]:
                 "url": args.spec_url,
                 "requires_auth": requires_auth,
                 "auth_env_vars": args.auth_env_var,
+                "auth": {
+                    "location": "header",
+                    "name": "Authorization",
+                    "prefix": "Bearer ",
+                }
+                if requires_auth
+                else None,
                 "description": f"{args.display_name} API",
                 "source_file": "specs/openapi.source.json" if args.spec_file else None,
             }
         },
         "specs_dir": f"packages/{args.package_name}/specs",
-        "output_dir": f"/tmp/{args.package_name}-api-toolkit",
+        "output_dir": str(default_output_dir(args.package_name)),
         "preflight": {},
     }
     if not args.spec_file:
         specs_json["specs"]["main"].pop("source_file")
+    if not requires_auth:
+        specs_json["specs"]["main"].pop("auth")
     documentation_json = {
         "removed_apis": [],
         "tool_properties": {},
@@ -2143,7 +2153,7 @@ def command_fetch(args: Any) -> tuple[int, dict[str, Any]]:
         last_error = None
         document = None
         for url in [candidate for candidate in urls if candidate]:
-            document, last_error = fetch_remote_document(url, get_api_key(spec), spec.requires_auth)
+            document, last_error = fetch_remote_document(url, get_api_key(spec), spec.resolved_auth)
             if document:
                 payload["source_url"] = url
                 break
@@ -2223,7 +2233,9 @@ def command_describe(args: Any) -> tuple[int, dict[str, Any]]:
                 "local_file": item.local_file,
                 "canonical_path": str(config.canonical_spec_path(name)),
                 "fetched_path": str(config.fetched_spec_path(name)),
+                "requires_auth": item.requires_auth,
                 "auth_env_vars": item.auth_env_vars,
+                "auth": asdict(item.auth) if item.auth else None,
                 "experimental": item.experimental,
                 "websocket_endpoints": item.websocket_endpoints,
             }

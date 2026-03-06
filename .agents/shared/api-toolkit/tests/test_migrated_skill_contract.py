@@ -605,6 +605,18 @@ class MigratedSkillContractTests(unittest.TestCase):
         for path in expected:
             self.assertIn("- Auth: No auth env vars required.", path.read_text(), msg=f"Unexpected auth guidance in {path}")
 
+    def test_googleai_main_spec_uses_header_auth_transport(self) -> None:
+        specs_path = ROOT / "packages" / "googleai_dart" / ".agents" / "skills" / "openapi-googleai" / "config" / "specs.json"
+        raw = json.loads(specs_path.read_text())
+        self.assertEqual(
+            raw["specs"]["main"].get("auth"),
+            {
+                "location": "header",
+                "name": "x-goog-api-key",
+                "prefix": "",
+            },
+        )
+
     def test_real_package_guides_use_package_and_surface_titles(self) -> None:
         for config_dir in CONFIG_DIRS:
             config = load_toolkit_config(config_dir)
@@ -613,6 +625,14 @@ class MigratedSkillContractTests(unittest.TestCase):
             self.assertTrue(guide_path.exists(), msg=f"Missing package guide for {config_dir}")
             title = guide_path.read_text().splitlines()[0]
             self.assertEqual(title, f"# {config.package.name} {surface} Package Guide", msg=f"Unexpected title in {guide_path}")
+
+    def test_shared_generic_assets_do_not_hardcode_googleai_package(self) -> None:
+        for path in (
+            TOOLKIT_ROOT / "assets" / "example_template.dart",
+            TOOLKIT_ROOT / "assets" / "test_template.dart",
+        ):
+            text = path.read_text()
+            self.assertNotIn("package:googleai_dart", text, msg=f"Found hardcoded googleai import in {path}")
 
     def test_real_manifest_coverage_aliases_match_audited_grouped_resources(self) -> None:
         expected = {

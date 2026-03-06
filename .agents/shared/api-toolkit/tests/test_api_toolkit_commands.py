@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -509,6 +510,76 @@ class ApiToolkitCommandTests(unittest.TestCase):
             message = str(ctx.exception)
             self.assertIn("https://example.com/openapi.yaml", message)
             self.assertIn("pip install pyyaml --user", message)
+
+    def test_read_git_file_parses_json_from_git_ref(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            repo_root = Path(tmp_dir)
+            spec_path = repo_root / "packages" / "sample_dart" / "specs" / "openapi.json"
+            spec_path.parent.mkdir(parents=True)
+            spec_path.write_text(json.dumps({"openapi": "3.1.0", "info": {"title": "Sample", "version": "1"}}))
+            subprocess.run(["git", "init"], cwd=repo_root, check=True, capture_output=True, text=True)
+            subprocess.run(["git", "config", "user.name", "Test User"], cwd=repo_root, check=True, capture_output=True, text=True)
+            subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=repo_root, check=True, capture_output=True, text=True)
+            subprocess.run(["git", "add", "."], cwd=repo_root, check=True, capture_output=True, text=True)
+            subprocess.run(["git", "commit", "-m", "init"], cwd=repo_root, check=True, capture_output=True, text=True)
+
+            payload = toolkit_operations._read_git_file(repo_root, "HEAD", spec_path)
+
+            self.assertEqual(payload["info"]["title"], "Sample")
+
+    def test_read_git_file_parses_yaml_from_git_ref(self) -> None:
+        if not toolkit_config.HAS_YAML:
+            self.skipTest("PyYAML not available")
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            repo_root = Path(tmp_dir)
+            spec_path = repo_root / "packages" / "sample_dart" / "specs" / "openapi.yaml"
+            spec_path.parent.mkdir(parents=True)
+            spec_path.write_text("openapi: 3.1.0\ninfo:\n  title: Sample\n  version: '1'\n")
+            subprocess.run(["git", "init"], cwd=repo_root, check=True, capture_output=True, text=True)
+            subprocess.run(["git", "config", "user.name", "Test User"], cwd=repo_root, check=True, capture_output=True, text=True)
+            subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=repo_root, check=True, capture_output=True, text=True)
+            subprocess.run(["git", "add", "."], cwd=repo_root, check=True, capture_output=True, text=True)
+            subprocess.run(["git", "commit", "-m", "init"], cwd=repo_root, check=True, capture_output=True, text=True)
+
+            payload = toolkit_operations._read_git_file(repo_root, "HEAD", spec_path)
+
+            self.assertEqual(payload["info"]["title"], "Sample")
+
+    def test_read_git_file_reports_invalid_git_ref(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            repo_root = Path(tmp_dir)
+            spec_path = repo_root / "packages" / "sample_dart" / "specs" / "openapi.json"
+            spec_path.parent.mkdir(parents=True)
+            spec_path.write_text(json.dumps({"openapi": "3.1.0"}))
+            subprocess.run(["git", "init"], cwd=repo_root, check=True, capture_output=True, text=True)
+            subprocess.run(["git", "config", "user.name", "Test User"], cwd=repo_root, check=True, capture_output=True, text=True)
+            subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=repo_root, check=True, capture_output=True, text=True)
+            subprocess.run(["git", "add", "."], cwd=repo_root, check=True, capture_output=True, text=True)
+            subprocess.run(["git", "commit", "-m", "init"], cwd=repo_root, check=True, capture_output=True, text=True)
+
+            with self.assertRaises(ToolkitError) as ctx:
+                toolkit_operations._read_git_file(repo_root, "missing-ref", spec_path)
+
+            self.assertIn("Unable to read", str(ctx.exception))
+
+    def test_read_git_file_reports_invalid_yaml_without_broad_exception_masking(self) -> None:
+        if not toolkit_config.HAS_YAML:
+            self.skipTest("PyYAML not available")
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            repo_root = Path(tmp_dir)
+            spec_path = repo_root / "packages" / "sample_dart" / "specs" / "openapi.yaml"
+            spec_path.parent.mkdir(parents=True)
+            spec_path.write_text("openapi: [\n")
+            subprocess.run(["git", "init"], cwd=repo_root, check=True, capture_output=True, text=True)
+            subprocess.run(["git", "config", "user.name", "Test User"], cwd=repo_root, check=True, capture_output=True, text=True)
+            subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=repo_root, check=True, capture_output=True, text=True)
+            subprocess.run(["git", "add", "."], cwd=repo_root, check=True, capture_output=True, text=True)
+            subprocess.run(["git", "commit", "-m", "init"], cwd=repo_root, check=True, capture_output=True, text=True)
+
+            with self.assertRaises(ToolkitError) as ctx:
+                toolkit_operations._read_git_file(repo_root, "HEAD", spec_path)
+
+            self.assertIn("Failed to parse", str(ctx.exception))
 
     def test_remote_fetch_updates_spec_metadata(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -1043,7 +1114,7 @@ class ApiToolkitCommandTests(unittest.TestCase):
             self.assertFalse((repo_root / ".agents" / "shared" / "api-toolkit" / ".tmp-create-spec.json").exists())
             self.assertTrue(payload["dry_run"])
             self.assertIsNotNone(fetch_mock)
-            fetch_mock.assert_called_once_with("https://example.com/openapi.json", None, False)
+            fetch_mock.assert_called_once_with("https://example.com/openapi.json", None, None)
 
     def test_create_spec_url_uses_auth_env_var_for_remote_bootstrap(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_repo, tempfile.TemporaryDirectory() as tmp_other:
@@ -1099,7 +1170,7 @@ class ApiToolkitCommandTests(unittest.TestCase):
             fetch_mock.assert_called_once_with(
                 "https://example.com/openapi.json",
                 "test-key",
-                True,
+                toolkit_config.AuthConfig(location="header", name="Authorization", prefix="Bearer "),
             )
 
     def test_create_writes_bootstrap_files_and_workspace_entry(self) -> None:
@@ -1176,8 +1247,16 @@ class ApiToolkitCommandTests(unittest.TestCase):
             self.assertIn("`output_dir/latest-main.json` into `specs/openapi.json`", creation_plan_text)
             self.assertTrue(generated_config.specs["main"].requires_auth)
             self.assertEqual(
+                generated_config.output_dir,
+                toolkit_config.default_output_dir("bootstrap_client_dart"),
+            )
+            self.assertEqual(
                 generated_config.specs["main"].auth_env_vars,
                 ["BOOTSTRAP_API_KEY"],
+            )
+            self.assertEqual(
+                generated_config.specs["main"].auth,
+                toolkit_config.AuthConfig(location="header", name="Authorization", prefix="Bearer "),
             )
 
     def test_create_normalizes_discriminator_mapping_for_bootstrap_manifest(self) -> None:
@@ -1581,6 +1660,138 @@ class ApiToolkitCommandTests(unittest.TestCase):
             self.assertIn("if (optionalNested != null) 'optionalNested': optionalNested!.toJson(),", preview)
             self.assertIn("'requiredNumber': requiredNumber,", preview)
             self.assertIn("if (optionalNumber != null) 'optionalNumber': optionalNumber!,", preview)
+
+    def test_scaffold_preview_renders_empty_object_class(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            output_dir = root / "tmp" / "sample"
+            (package_root / "specs" / "openapi.json").write_text(
+                json.dumps(
+                    {
+                        "openapi": "3.1.0",
+                        "info": {"title": "Sample", "version": "1"},
+                        "paths": {},
+                        "components": {"schemas": {"Empty": {"type": "object", "properties": {}}}},
+                    }
+                )
+            )
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample API", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(output_dir),
+                },
+                manifest_payload={
+                    "surface": "openapi",
+                    "type_mappings": {},
+                    "placement": {"categories": {}, "default_category": "common", "parent_model_patterns": {}},
+                    "coverage": {},
+                    "types": {
+                        "Empty": {
+                            "spec": "main",
+                            "kind": "object",
+                            "dart_class": "Empty",
+                            "file": "lib/src/models/common/empty.dart",
+                            "schema": "Empty",
+                        }
+                    },
+                },
+            )
+
+            exit_code, payload = command_scaffold(
+                SimpleNamespace(
+                    config_dir=config_dir,
+                    target="schema",
+                    name="Empty",
+                    spec_name=None,
+                    output=None,
+                    dry_run=True,
+                )
+            )
+
+            self.assertEqual(exit_code, 0)
+            preview = payload["preview"]
+            self.assertIn("class Empty {", preview)
+            self.assertIn("const Empty({", preview)
+            self.assertIn("factory Empty.fromJson(Map<String, dynamic> json) {", preview)
+            self.assertIn("Map<String, dynamic> toJson() => {", preview)
+            self.assertIn("Empty copyWith({", preview)
+
+    def test_scaffold_preview_serializes_nullable_self_reference(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            output_dir = root / "tmp" / "sample"
+            (package_root / "specs" / "openapi.json").write_text(
+                json.dumps(
+                    {
+                        "openapi": "3.1.0",
+                        "info": {"title": "Sample", "version": "1"},
+                        "paths": {},
+                        "components": {
+                            "schemas": {
+                                "Node": {
+                                    "type": "object",
+                                    "properties": {
+                                        "child": {"$ref": "#/components/schemas/Node"},
+                                    },
+                                }
+                            }
+                        },
+                    }
+                )
+            )
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample API", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(output_dir),
+                },
+                manifest_payload={
+                    "surface": "openapi",
+                    "type_mappings": {},
+                    "placement": {"categories": {}, "default_category": "common", "parent_model_patterns": {}},
+                    "coverage": {},
+                    "types": {
+                        "Node": {
+                            "spec": "main",
+                            "kind": "object",
+                            "dart_class": "Node",
+                            "file": "lib/src/models/common/node.dart",
+                            "schema": "Node",
+                        }
+                    },
+                },
+            )
+
+            exit_code, payload = command_scaffold(
+                SimpleNamespace(
+                    config_dir=config_dir,
+                    target="schema",
+                    name="Node",
+                    spec_name=None,
+                    output=None,
+                    dry_run=True,
+                )
+            )
+
+            self.assertEqual(exit_code, 0)
+            preview = payload["preview"]
+            self.assertIn(
+                "child: json['child'] != null ? Node.fromJson(json['child'] as Map<String, dynamic>) : null,",
+                preview,
+            )
+            self.assertIn(
+                "if (child != null) 'child': child!.toJson(),",
+                preview,
+            )
 
     def test_scaffold_preview_serializes_scalar_arrays(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:

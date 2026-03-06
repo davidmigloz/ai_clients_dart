@@ -9,6 +9,11 @@
         "GEMINI_API_KEY",
         "GOOGLE_AI_API_KEY"
       ],
+      "auth": {
+        "location": "header",
+        "name": "x-goog-api-key",
+        "prefix": ""
+      },
       "description": "Core Gemini API - generation, embeddings, files, models, etc.",
       "fetch_mode": "remote"
     },

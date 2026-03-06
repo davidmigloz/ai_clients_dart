@@ -9,7 +9,7 @@
 //
 // See references/implementation-patterns.md for detailed conventions
 
-import 'package:googleai_dart/src/models/{subdirectory}/{class_file}.dart';
+import 'package:{package_name}/src/models/{subdirectory}/{class_file}.dart';
 import 'package:test/test.dart';
 
 void main() {

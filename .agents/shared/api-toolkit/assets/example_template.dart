@@ -7,11 +7,11 @@
 /// - Feature 3 description
 library;
 
-import 'package:googleai_dart/googleai_dart.dart';
+import 'package:{package_name}/{package_name}.dart';
 
 void main() async {
-  final client = GoogleAIClient(
-    config: const GoogleAIConfig(authProvider: ApiKeyProvider('YOUR_API_KEY')),
+  final client = {ClientClassName}(
+    config: const {ConfigClassName}(authProvider: ApiKeyProvider('YOUR_API_KEY')),
   );
 
   try {
@@ -32,7 +32,7 @@ void main() async {
 }
 
 /// Basic non-streaming example.
-Future<void> basicExample(GoogleAIClient client) async {
+Future<void> basicExample({ClientClassName} client) async {
   print('=== Basic Example ===\n');
 
   // Replace with actual API call
@@ -45,7 +45,7 @@ Future<void> basicExample(GoogleAIClient client) async {
 }
 
 /// Streaming example with real-time events.
-Future<void> streamingExample(GoogleAIClient client) async {
+Future<void> streamingExample({ClientClassName} client) async {
   print('=== Streaming Example ===\n');
 
   // Replace with actual streaming API call
@@ -74,7 +74,7 @@ Future<void> streamingExample(GoogleAIClient client) async {
 }
 
 /// Multi-turn or advanced feature example.
-Future<void> advancedExample(GoogleAIClient client) async {
+Future<void> advancedExample({ClientClassName} client) async {
   print('=== Advanced Example ===\n');
 
   // Example: Multi-turn conversation with context
@@ -91,7 +91,7 @@ Future<void> advancedExample(GoogleAIClient client) async {
 }
 
 /// Function/tool calling example.
-Future<void> toolExample(GoogleAIClient client) async {
+Future<void> toolExample({ClientClassName} client) async {
   print('=== Tool Example ===\n');
 
   // Define tools

@@ -26,6 +26,20 @@ Each migrated skill keeps exactly four config files in `config/`:
 
 Checked-in canonical specs live under the package `specs/` directory, not inside skill config.
 
+`specs.json` may also define:
+- `output_dir` for fetched candidate specs; when omitted, api-toolkit uses the OS temp directory
+- per-spec auth with `requires_auth`, `auth_env_vars`, and optional `auth` transport config
+
+Auth transport config shape:
+
+```json
+{
+  "location": "header",
+  "name": "Authorization",
+  "prefix": "Bearer "
+}
+```
+
 ## Workflow
 
 Existing package update loop:
