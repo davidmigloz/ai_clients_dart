@@ -1251,10 +1251,13 @@ class FineTuneDPOHyperparameters {
       other is FineTuneDPOHyperparameters &&
           runtimeType == other.runtimeType &&
           beta == other.beta &&
+          batchSize == other.batchSize &&
+          learningRateMultiplier == other.learningRateMultiplier &&
           nEpochs == other.nEpochs;
 
   @override
-  int get hashCode => Object.hash(beta, nEpochs);
+  int get hashCode =>
+      Object.hash(beta, batchSize, learningRateMultiplier, nEpochs);
 
   @override
   String toString() => 'FineTuneDPOHyperparameters(...)';
@@ -1301,10 +1304,11 @@ class FineTuneReinforcementMethod {
       identical(this, other) ||
       other is FineTuneReinforcementMethod &&
           runtimeType == other.runtimeType &&
+          _mapEquals(grader, other.grader) &&
           hyperparameters == other.hyperparameters;
 
   @override
-  int get hashCode => hyperparameters.hashCode;
+  int get hashCode => Object.hash(grader.length, hyperparameters);
 
   @override
   String toString() => 'FineTuneReinforcementMethod(...)';
@@ -1391,12 +1395,40 @@ class FineTuneReinforcementHyperparameters {
       other is FineTuneReinforcementHyperparameters &&
           runtimeType == other.runtimeType &&
           batchSize == other.batchSize &&
+          learningRateMultiplier == other.learningRateMultiplier &&
           nEpochs == other.nEpochs &&
-          reasoningEffort == other.reasoningEffort;
+          reasoningEffort == other.reasoningEffort &&
+          computeMultiplier == other.computeMultiplier &&
+          evalInterval == other.evalInterval &&
+          evalSamples == other.evalSamples;
 
   @override
-  int get hashCode => Object.hash(batchSize, nEpochs, reasoningEffort);
+  int get hashCode => Object.hash(
+    batchSize,
+    learningRateMultiplier,
+    nEpochs,
+    reasoningEffort,
+    computeMultiplier,
+    evalInterval,
+    evalSamples,
+  );
 
   @override
   String toString() => 'FineTuneReinforcementHyperparameters(...)';
+}
+
+// Helper for deep map equality.
+bool _mapEquals(Map<String, dynamic> a, Map<String, dynamic> b) {
+  if (a.length != b.length) return false;
+  for (final key in a.keys) {
+    if (!b.containsKey(key)) return false;
+    final aVal = a[key];
+    final bVal = b[key];
+    if (aVal is Map<String, dynamic> && bVal is Map<String, dynamic>) {
+      if (!_mapEquals(aVal, bVal)) return false;
+    } else if (aVal != bVal) {
+      return false;
+    }
+  }
+  return true;
 }

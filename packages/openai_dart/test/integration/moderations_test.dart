@@ -164,8 +164,9 @@ void main() {
         expect(result.categoryScores.illicit, greaterThanOrEqualTo(0.0));
         expect(result.categoryScores.illicitViolent, greaterThanOrEqualTo(0.0));
 
-        // Applied input types should be present
-        final applied = result.categoryAppliedInputTypes;
+        // Applied input types should be present for omni-moderation
+        expect(result.categoryAppliedInputTypes, isNotNull);
+        final applied = result.categoryAppliedInputTypes!;
         expect(applied.hate, isNotEmpty);
         expect(applied.harassment, isNotEmpty);
         expect(applied.selfHarm, isNotEmpty);
@@ -207,7 +208,8 @@ void main() {
         expect(result.flagged, isFalse);
 
         // Applied input types should reflect text input
-        expect(result.categoryAppliedInputTypes.hate, contains('text'));
+        expect(result.categoryAppliedInputTypes, isNotNull);
+        expect(result.categoryAppliedInputTypes!.hate, contains('text'));
       },
     );
 
