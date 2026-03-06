@@ -21,7 +21,7 @@ class ContainerFile {
     required this.object,
     required this.containerId,
     required this.createdAt,
-    required this.bytes,
+    this.bytes,
     required this.path,
     this.source,
   });
@@ -33,7 +33,7 @@ class ContainerFile {
       object: json['object'] as String? ?? 'container.file',
       containerId: json['container_id'] as String,
       createdAt: json['created_at'] as int,
-      bytes: json['bytes'] as int,
+      bytes: json['bytes'] as int?,
       path: json['path'] as String,
       source: json['source'] as String?,
     );
@@ -51,8 +51,8 @@ class ContainerFile {
   /// Unix timestamp (in seconds) when the file was created.
   final int createdAt;
 
-  /// Size of the file in bytes.
-  final int bytes;
+  /// Size of the file in bytes, or null if not yet available.
+  final int? bytes;
 
   /// Path of the file in the container.
   final String path;
@@ -70,7 +70,7 @@ class ContainerFile {
     'object': object,
     'container_id': containerId,
     'created_at': createdAt,
-    'bytes': bytes,
+    if (bytes != null) 'bytes': bytes,
     'path': path,
     if (source != null) 'source': source,
   };

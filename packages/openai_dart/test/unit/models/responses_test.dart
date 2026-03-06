@@ -1219,6 +1219,7 @@ void main() {
       final json = {
         'type': 'code_interpreter_call',
         'id': 'ci_123',
+        'container_id': 'cntr_abc',
         'code': 'print("hello")',
         'language': 'python',
         'outputs': [
@@ -1247,6 +1248,7 @@ void main() {
     test('CodeInterpreterCallOutputItem serializes correctly', () {
       const item = CodeInterpreterCallOutputItem(
         id: 'ci_123',
+        containerId: 'cntr_abc',
         code: 'x = 1 + 1',
         language: 'python',
         status: ItemStatus.completed,
@@ -1288,6 +1290,7 @@ void main() {
     test('CodeInterpreterCallOutputItem with typed outputs round-trips', () {
       const item = CodeInterpreterCallOutputItem(
         id: 'ci_456',
+        containerId: 'cntr_abc',
         code: 'import matplotlib',
         language: 'python',
         outputs: [
@@ -1667,6 +1670,7 @@ void main() {
         output: [
           CodeInterpreterCallOutputItem(
             id: 'ci_1',
+            containerId: 'cntr_abc',
             code: 'print(42)',
             language: 'python',
           ),

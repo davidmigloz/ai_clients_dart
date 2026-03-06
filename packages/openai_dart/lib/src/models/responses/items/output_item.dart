@@ -601,6 +601,9 @@ class CodeInterpreterCallOutputItem extends OutputItem {
   /// Unique identifier.
   final String id;
 
+  /// The ID of the container used to run the code.
+  final String? containerId;
+
   /// The code that was executed.
   final String? code;
 
@@ -616,6 +619,7 @@ class CodeInterpreterCallOutputItem extends OutputItem {
   /// Creates a [CodeInterpreterCallOutputItem].
   const CodeInterpreterCallOutputItem({
     required this.id,
+    this.containerId,
     this.code,
     this.language,
     this.outputs,
@@ -626,6 +630,7 @@ class CodeInterpreterCallOutputItem extends OutputItem {
   factory CodeInterpreterCallOutputItem.fromJson(Map<String, dynamic> json) {
     return CodeInterpreterCallOutputItem(
       id: json['id'] as String,
+      containerId: json['container_id'] as String?,
       code: json['code'] as String?,
       language: json['language'] as String?,
       outputs: (json['outputs'] as List?)
@@ -643,6 +648,7 @@ class CodeInterpreterCallOutputItem extends OutputItem {
   Map<String, dynamic> toJson() => {
     'type': 'code_interpreter_call',
     'id': id,
+    if (containerId != null) 'container_id': containerId,
     if (code != null) 'code': code,
     if (language != null) 'language': language,
     if (outputs != null) 'outputs': outputs!.map((e) => e.toJson()).toList(),
@@ -655,6 +661,7 @@ class CodeInterpreterCallOutputItem extends OutputItem {
       other is CodeInterpreterCallOutputItem &&
           runtimeType == other.runtimeType &&
           id == other.id &&
+          containerId == other.containerId &&
           code == other.code &&
           language == other.language &&
           listsEqual(outputs, other.outputs) &&
@@ -663,6 +670,7 @@ class CodeInterpreterCallOutputItem extends OutputItem {
   @override
   int get hashCode => Object.hash(
     id,
+    containerId,
     code,
     language,
     outputs != null ? Object.hashAll(outputs!) : null,
@@ -671,7 +679,7 @@ class CodeInterpreterCallOutputItem extends OutputItem {
 
   @override
   String toString() =>
-      'CodeInterpreterCallOutputItem(id: $id, code: $code, language: $language, outputs: $outputs, status: $status)';
+      'CodeInterpreterCallOutputItem(id: $id, containerId: $containerId, code: $code, language: $language, outputs: $outputs, status: $status)';
 }
 
 /// An image generation call output item.
