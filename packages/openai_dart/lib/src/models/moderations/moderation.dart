@@ -40,7 +40,8 @@ class ModerationRequest {
 
   /// The moderation model to use.
   ///
-  /// Defaults to `omni-moderation-latest`. Use `text-moderation-stable`
+  /// If omitted, the server will use its current default moderation model
+  /// (see the API documentation for details). Use `text-moderation-stable`
   /// for consistent behavior across model updates, or
   /// `omni-moderation-latest` for multi-modal (text + image) moderation.
   final String? model;
