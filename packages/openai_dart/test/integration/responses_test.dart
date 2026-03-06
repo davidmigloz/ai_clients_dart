@@ -315,50 +315,6 @@ void main() {
         expect(finalAccumulator.responseId, isNotNull);
       },
     );
-
-    test(
-      'handles keepalive events during long-running image generation stream',
-      timeout: const Timeout(Duration(minutes: 5)),
-      () async {
-        if (apiKey == null) {
-          markTestSkipped('API key not available');
-          return;
-        }
-
-        final stream = client!.responses.createStream(
-          CreateResponseRequest(
-            model: 'gpt-4o',
-            input: const ResponseInput.text(
-              'Generate a simple image of a red circle on white background.',
-            ),
-            tools: [
-              ResponseTool.imageGeneration(quality: 'low', size: '1024x1024'),
-            ],
-          ),
-        );
-
-        final events = <ResponseStreamEvent>[];
-        await stream.forEach(events.add);
-
-        // Stream should complete without throwing FormatException on keepalive
-        expect(events, isNotEmpty);
-        expect(events.last.isFinal, isTrue);
-
-        // Check if any keepalive/unknown events were received
-        final unknownEvents = events.whereType<UnknownEvent>().toList();
-        print(
-          'Received ${events.length} events, '
-          '${unknownEvents.length} unknown '
-          '(${unknownEvents.map((e) => e.type).toSet()})',
-        );
-
-        // Verify image generation events are present
-        expect(
-          events.whereType<ResponseImageGenerationCallInProgressEvent>(),
-          isNotEmpty,
-        );
-      },
-    );
   });
 
   // ==========================================================================
@@ -1000,6 +956,50 @@ void main() {
   // ==========================================================================
 
   group('Optional Tests', skip: 'Expensive/slow tests - run manually', () {
+    test(
+      'handles keepalive events during long-running image generation stream',
+      timeout: const Timeout(Duration(minutes: 5)),
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        final stream = client!.responses.createStream(
+          CreateResponseRequest(
+            model: 'gpt-4o',
+            input: const ResponseInput.text(
+              'Generate a simple image of a red circle on white background.',
+            ),
+            tools: [
+              ResponseTool.imageGeneration(quality: 'low', size: '1024x1024'),
+            ],
+          ),
+        );
+
+        final events = <ResponseStreamEvent>[];
+        await stream.forEach(events.add);
+
+        // Stream should complete without throwing FormatException on keepalive
+        expect(events, isNotEmpty);
+        expect(events.last.isFinal, isTrue);
+
+        // Check if any keepalive/unknown events were received
+        final unknownEvents = events.whereType<UnknownEvent>().toList();
+        print(
+          'Received ${events.length} events, '
+          '${unknownEvents.length} unknown '
+          '(${unknownEvents.map((e) => e.type).toSet()})',
+        );
+
+        // Verify image generation events are present
+        expect(
+          events.whereType<ResponseImageGenerationCallInProgressEvent>(),
+          isNotEmpty,
+        );
+      },
+    );
+
     test(
       'processes image input (vision)',
       timeout: const Timeout(Duration(minutes: 3)),

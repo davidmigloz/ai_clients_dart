@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality_helpers.dart';
 import '../content/annotation.dart';
 import '../content/logprob.dart';
 import '../content/output_content.dart';
@@ -3479,10 +3480,12 @@ class UnknownEvent extends ResponseStreamEvent {
       other is UnknownEvent &&
           runtimeType == other.runtimeType &&
           type == other.type &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          mapsDeepEqual(rawJson, other.rawJson);
 
   @override
-  int get hashCode => Object.hash(type, sequenceNumber);
+  int get hashCode =>
+      Object.hash(type, sequenceNumber, mapDeepHashCode(rawJson));
 
   @override
   String toString() => 'UnknownEvent(type: $type)';

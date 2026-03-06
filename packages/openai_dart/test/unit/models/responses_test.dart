@@ -2039,6 +2039,25 @@ void main() {
       expect(event.toJson(), equals(json));
     });
 
+    test('UnknownEvent equality includes rawJson', () {
+      const a = UnknownEvent(
+        type: 'keepalive',
+        rawJson: {'type': 'keepalive', 'data': 'A'},
+      );
+      const b = UnknownEvent(
+        type: 'keepalive',
+        rawJson: {'type': 'keepalive', 'data': 'A'},
+      );
+      const c = UnknownEvent(
+        type: 'keepalive',
+        rawJson: {'type': 'keepalive', 'data': 'B'},
+      );
+
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+      expect(a, isNot(equals(c)));
+    });
+
     test('accumulator handles UnknownEvent gracefully', () {
       final accumulator = ResponseStreamAccumulator()
         // Should not throw
