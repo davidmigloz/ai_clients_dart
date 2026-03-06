@@ -6,16 +6,16 @@ import 'model_details.dart';
 /// Summary information for a locally available model.
 @immutable
 class ModelSummary {
-  /// Model name.
+  /// Display name including tag (e.g., `llama3.2:latest`).
   final String? name;
 
-  /// Model identifier.
+  /// Model identifier used in API requests.
   final String? model;
 
-  /// Remote model name, if using a remote/proxy model.
+  /// Remote model name when routed through a remote Ollama instance.
   final String? remoteModel;
 
-  /// Remote host, if using a remote/proxy model.
+  /// Remote host address when routed through a remote Ollama instance.
   final String? remoteHost;
 
   /// Last modified timestamp in ISO 8601 format.

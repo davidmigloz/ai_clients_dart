@@ -117,28 +117,10 @@ class ChatStreamEvent {
           runtimeType == other.runtimeType &&
           model == other.model &&
           createdAt == other.createdAt &&
-          done == other.done &&
-          doneReason == other.doneReason &&
-          totalDuration == other.totalDuration &&
-          loadDuration == other.loadDuration &&
-          promptEvalCount == other.promptEvalCount &&
-          promptEvalDuration == other.promptEvalDuration &&
-          evalCount == other.evalCount &&
-          evalDuration == other.evalDuration;
+          done == other.done;
 
   @override
-  int get hashCode => Object.hash(
-    model,
-    createdAt,
-    done,
-    doneReason,
-    totalDuration,
-    loadDuration,
-    promptEvalCount,
-    promptEvalDuration,
-    evalCount,
-    evalDuration,
-  );
+  int get hashCode => Object.hash(model, createdAt, done);
 
   @override
   String toString() =>
