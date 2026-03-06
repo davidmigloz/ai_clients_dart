@@ -1455,6 +1455,18 @@ def _scaffold_to_json_expression(field_name: str, prop: dict[str, Any], type_map
     return field
 
 
+def _scaffold_nullable_to_json_expression(field_name: str, json_value: str) -> str:
+    field = camel_case(field_name)
+    if json_value == "TODO()":
+        return json_value
+    if json_value == field:
+        return f"{field}!"
+    prefix = f"{field}."
+    if json_value.startswith(prefix):
+        return f"{field}!{json_value[len(field):]}"
+    return json_value
+
+
 def _scaffold_class_source(class_name: str, props: dict[str, dict[str, Any]], type_mappings: dict[str, str]) -> str:
     lines = [
         "const Object _unsetCopyWithValue = _UnsetCopyWithSentinel();",
@@ -1491,7 +1503,7 @@ def _scaffold_class_source(class_name: str, props: dict[str, dict[str, Any]], ty
         if prop.get("required"):
             lines.append(f"    '{name}': {json_value},")
         else:
-            nullable_value = json_value if json_value == "TODO()" else json_value.replace(field, f"{field}!")
+            nullable_value = _scaffold_nullable_to_json_expression(name, json_value)
             lines.append(f"    if ({field} != null) '{name}': {nullable_value},")
     lines.append("  };")
     lines.append("")

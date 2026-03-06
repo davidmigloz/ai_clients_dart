@@ -1663,6 +1663,82 @@ class ApiToolkitCommandTests(unittest.TestCase):
             )
             self.assertIn("'items': items.map((item) => item.toJson()).toList(),", preview)
 
+    def test_scaffold_preview_nullable_to_json_only_asserts_root_field_reference(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            output_dir = root / "tmp" / "sample"
+            (package_root / "specs" / "openapi.json").write_text(
+                json.dumps(
+                    {
+                        "openapi": "3.1.0",
+                        "info": {"title": "Sample", "version": "1"},
+                        "paths": {},
+                        "components": {
+                            "schemas": {
+                                "Nested": {
+                                    "type": "object",
+                                    "properties": {"id": {"type": "string"}},
+                                },
+                                "Example": {
+                                    "type": "object",
+                                    "properties": {
+                                        "item": {
+                                            "type": "array",
+                                            "items": {"$ref": "#/components/schemas/Nested"},
+                                        },
+                                        "json": {"$ref": "#/components/schemas/Nested"},
+                                    },
+                                },
+                            }
+                        },
+                    }
+                )
+            )
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample API", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(output_dir),
+                },
+                manifest_payload={
+                    "surface": "openapi",
+                    "type_mappings": {},
+                    "placement": {"categories": {}, "default_category": "common", "parent_model_patterns": {}},
+                    "coverage": {},
+                    "types": {
+                        "Example": {
+                            "spec": "main",
+                            "kind": "object",
+                            "dart_class": "Example",
+                            "file": "lib/src/models/common/example.dart",
+                            "schema": "Example",
+                        }
+                    },
+                },
+            )
+
+            exit_code, payload = command_scaffold(
+                SimpleNamespace(
+                    config_dir=config_dir,
+                    target="schema",
+                    name="Example",
+                    spec_name=None,
+                    output=None,
+                    dry_run=True,
+                )
+            )
+
+            self.assertEqual(exit_code, 0)
+            preview = payload["preview"]
+            self.assertIn("if (item != null) 'item': item!.map((item) => item.toJson()).toList(),", preview)
+            self.assertIn("if (json != null) 'json': json!.toJson(),", preview)
+            self.assertNotIn("item!.map((item!)", preview)
+            self.assertNotIn("json!.toJson!()", preview)
+
     def test_scaffold_preview_marks_unsupported_array_shapes_with_todo(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
