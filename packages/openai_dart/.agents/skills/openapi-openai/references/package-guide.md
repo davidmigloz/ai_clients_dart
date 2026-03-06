@@ -1,4 +1,4 @@
-# Package Guide
+# openai_dart OpenAPI Package Guide
 
 ## Core Paths
 

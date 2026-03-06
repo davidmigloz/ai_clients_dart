@@ -1,4 +1,4 @@
-# Package Guide
+# googleai_dart WebSocket Package Guide
 
 ## Core Paths
 

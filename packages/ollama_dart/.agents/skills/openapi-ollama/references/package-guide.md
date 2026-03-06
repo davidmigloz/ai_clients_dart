@@ -1,4 +1,4 @@
-# Package Guide
+# ollama_dart OpenAPI Package Guide
 
 ## Core Paths
 

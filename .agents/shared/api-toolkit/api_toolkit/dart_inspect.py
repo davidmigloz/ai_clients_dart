@@ -29,7 +29,7 @@ def find_declared_classes(path: Path) -> list[str]:
 def extract_class_block(content: str, class_name: str) -> str:
     start = re.search(rf"\b(?:sealed\s+class|class|enum)\s+{re.escape(class_name)}\b", content)
     if not start:
-        return content
+        return ""
     index = start.start()
     brace_index = content.find("{", index)
     if brace_index == -1:

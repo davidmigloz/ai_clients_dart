@@ -1,4 +1,4 @@
-# Package Guide
+# mistralai_dart OpenAPI Package Guide
 
 ## Core Paths
 

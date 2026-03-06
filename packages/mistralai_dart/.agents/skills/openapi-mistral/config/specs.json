@@ -5,9 +5,7 @@
       "url": "https://docs.mistral.ai/openapi.yaml",
       "local_file": "openapi.json",
       "requires_auth": false,
-      "auth_env_vars": [
-        "MISTRAL_API_KEY"
-      ],
+      "auth_env_vars": [],
       "description": "Mistral AI API for chat, embeddings, and more",
       "fetch_mode": "remote"
     }

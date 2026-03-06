@@ -7,7 +7,7 @@ description: Update mistralai_dart from Mistral AI OpenAPI changes. Use for spec
 
 ## Prerequisites
 
-- Auth: `MISTRAL_API_KEY`
+- Auth: No auth env vars required.
 - CLI: `python3 .agents/shared/api-toolkit/scripts/api_toolkit.py`
 - Commands work from any directory. Use `--config-dir` to resolve the package and repo roots.
 

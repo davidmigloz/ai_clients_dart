@@ -1597,7 +1597,7 @@ dart test test/unit/
 
 def _render_package_guide(package_name: str, shortname: str) -> str:
     config_dir = f"packages/{package_name}/.agents/skills/openapi-{shortname}/config"
-    return f"""# Package Guide
+    return f"""# {package_name} OpenAPI Package Guide
 
 ## Core Paths
 

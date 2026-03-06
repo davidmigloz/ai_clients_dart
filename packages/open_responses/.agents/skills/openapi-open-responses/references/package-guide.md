@@ -1,4 +1,4 @@
-# Package Guide
+# open_responses OpenAPI Package Guide
 
 ## Core Paths
 

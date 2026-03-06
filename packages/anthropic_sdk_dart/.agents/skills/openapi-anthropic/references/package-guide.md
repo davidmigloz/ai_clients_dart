@@ -1,4 +1,4 @@
-# Package Guide
+# anthropic_sdk_dart OpenAPI Package Guide
 
 ## Core Paths
 

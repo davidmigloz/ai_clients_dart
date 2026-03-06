@@ -53,6 +53,18 @@ class DartInspectTests(unittest.TestCase):
 
         self.assertEqual(block, "enum Transport {\n  car,\n  train,\n}")
 
+    def test_extract_class_block_returns_empty_string_when_class_is_missing(self) -> None:
+        content = (
+            "class Example {\n"
+            "  final String id;\n"
+            "  const Example(this.id);\n"
+            "}\n"
+        )
+
+        block = extract_class_block(content, "Missing")
+
+        self.assertEqual(block, "")
+
     def test_extract_fields_includes_getters_and_nullability_with_class_scope(self) -> None:
         content = (
             "class Outside {\n"
@@ -81,6 +93,22 @@ class DartInspectTests(unittest.TestCase):
         self.assertTrue(fields["count"].is_nullable)
         self.assertEqual(fields["tags"].dart_type, "List<String>")
         self.assertTrue(fields["tags"].is_nullable)
+
+    def test_extract_fields_returns_empty_when_class_is_missing(self) -> None:
+        content = (
+            "class Example {\n"
+            "  final String id;\n"
+            "  const Example(this.id);\n"
+            "}\n"
+        )
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path = Path(tmp_dir) / "example.dart"
+            path.write_text(content)
+
+            fields = extract_fields(path, "Missing")
+
+        self.assertEqual(fields, {})
 
     def test_extract_method_body_supports_brace_methods(self) -> None:
         content = (

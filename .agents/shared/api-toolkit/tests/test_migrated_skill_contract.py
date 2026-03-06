@@ -168,6 +168,33 @@ class MigratedSkillContractTests(unittest.TestCase):
                     offenders.append(f"{config_dir}:{spec_name} -> {', '.join(remote_only)}")
         self.assertEqual(offenders, [])
 
+    def test_requires_auth_false_specs_do_not_declare_auth_env_vars(self) -> None:
+        offenders: list[str] = []
+        for config_dir in CONFIG_DIRS:
+            raw = json.loads((config_dir / "specs.json").read_text())
+            for spec_name, spec in raw["specs"].items():
+                if spec.get("requires_auth") is False and spec.get("auth_env_vars"):
+                    offenders.append(f"{config_dir}:{spec_name}")
+        self.assertEqual(offenders, [])
+
+    def test_public_remote_skill_docs_do_not_claim_auth_when_fetch_is_public(self) -> None:
+        expected = {
+            ROOT / "packages" / "anthropic_sdk_dart" / ".agents" / "skills" / "openapi-anthropic" / "SKILL.md",
+            ROOT / "packages" / "mistralai_dart" / ".agents" / "skills" / "openapi-mistral" / "SKILL.md",
+            ROOT / "packages" / "openai_dart" / ".agents" / "skills" / "openapi-openai" / "SKILL.md",
+        }
+        for path in expected:
+            self.assertIn("- Auth: No auth env vars required.", path.read_text(), msg=f"Unexpected auth guidance in {path}")
+
+    def test_real_package_guides_use_package_and_surface_titles(self) -> None:
+        for config_dir in CONFIG_DIRS:
+            config = load_toolkit_config(config_dir)
+            surface = "WebSocket" if config.manifest.surface == "websocket" else "OpenAPI"
+            guide_path = config_dir.parent / "references" / "package-guide.md"
+            self.assertTrue(guide_path.exists(), msg=f"Missing package guide for {config_dir}")
+            title = guide_path.read_text().splitlines()[0]
+            self.assertEqual(title, f"# {config.package.name} {surface} Package Guide", msg=f"Unexpected title in {guide_path}")
+
     def test_full_verify_passes_for_all_real_skills(self) -> None:
         for config_dir in CONFIG_DIRS:
             exit_code, payload = command_verify(

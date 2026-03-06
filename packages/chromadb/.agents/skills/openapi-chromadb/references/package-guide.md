@@ -1,4 +1,4 @@
-# Package Guide
+# chromadb OpenAPI Package Guide
 
 ## Core Paths
 
