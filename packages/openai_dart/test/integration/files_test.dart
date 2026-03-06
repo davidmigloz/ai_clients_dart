@@ -80,6 +80,8 @@ void main() {
         expect(uploaded.filename, 'test_training.jsonl');
         expect(uploaded.purpose, FilePurpose.fineTune);
         expect(uploaded.bytes, greaterThan(0));
+        expect(uploaded.createdAt, greaterThan(0));
+        expect(uploaded.createdAtDateTime, isA<DateTime>());
 
         final fileId = uploaded.id;
 
@@ -90,6 +92,11 @@ void main() {
           expect(retrieved.id, fileId);
           expect(retrieved.filename, 'test_training.jsonl');
           expect(retrieved.object, 'file');
+          expect(retrieved.createdAtDateTime, isA<DateTime>());
+          // expiresAt is nullable — may or may not be set depending on file type
+          if (retrieved.expiresAt != null) {
+            expect(retrieved.expiresAtDateTime, isA<DateTime>());
+          }
 
           // List with filter
           final filtered = await client!.files.list(

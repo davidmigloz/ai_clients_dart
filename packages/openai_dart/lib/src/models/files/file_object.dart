@@ -25,6 +25,7 @@ class FileObject {
     required this.purpose,
     this.status,
     this.statusDetails,
+    this.expiresAt,
   });
 
   /// Creates a [FileObject] from JSON.
@@ -40,6 +41,7 @@ class FileObject {
           ? FileStatus.fromJson(json['status'] as String)
           : null,
       statusDetails: json['status_details'] as String?,
+      expiresAt: json['expires_at'] as int?,
     );
   }
 
@@ -67,6 +69,14 @@ class FileObject {
   /// Additional details about the status (if any).
   final String? statusDetails;
 
+  /// The Unix timestamp (in seconds) for when the file will expire.
+  final int? expiresAt;
+
+  /// The file expiration time as a DateTime, or null if no expiration.
+  DateTime? get expiresAtDateTime => expiresAt != null
+      ? DateTime.fromMillisecondsSinceEpoch(expiresAt! * 1000)
+      : null;
+
   /// The file creation time as a DateTime.
   DateTime get createdAtDateTime =>
       DateTime.fromMillisecondsSinceEpoch(createdAt * 1000);
@@ -81,6 +91,7 @@ class FileObject {
     'purpose': purpose.toJson(),
     if (status != null) 'status': status!.toJson(),
     if (statusDetails != null) 'status_details': statusDetails,
+    if (expiresAt != null) 'expires_at': expiresAt,
   };
 
   @override
@@ -221,7 +232,10 @@ enum FilePurpose {
   vision._('vision'),
 
   /// For evaluations.
-  evals._('evals');
+  evals._('evals'),
+
+  /// User data.
+  userData._('user_data');
 
   const FilePurpose._(this._value);
 
