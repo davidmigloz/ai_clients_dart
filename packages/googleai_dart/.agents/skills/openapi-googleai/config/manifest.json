@@ -132,9 +132,7 @@
       "dart_class": "Tool",
       "file": "lib/src/models/tools/tool.dart",
       "schema": "Tool",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "Candidate": {
@@ -143,9 +141,7 @@
       "dart_class": "Candidate",
       "file": "lib/src/models/content/candidate.dart",
       "schema": "Candidate",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "Content": {
@@ -164,9 +160,7 @@
       "dart_class": "GenerationConfig",
       "file": "lib/src/models/generation/generation_config.dart",
       "schema": "GenerationConfig",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "ToolConfig": {
@@ -175,9 +169,7 @@
       "dart_class": "ToolConfig",
       "file": "lib/src/models/tools/tool_config.dart",
       "schema": "ToolConfig",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "GroundingMetadata": {
@@ -186,9 +178,7 @@
       "dart_class": "GroundingMetadata",
       "file": "lib/src/models/metadata/grounding_metadata.dart",
       "schema": "GroundingMetadata",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "FunctionCall": {
@@ -207,9 +197,7 @@
       "dart_class": "FunctionResponse",
       "file": "lib/src/models/tools/function_response.dart",
       "schema": "FunctionResponse",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "GroundingChunk": {
@@ -371,9 +359,7 @@
       "dart_class": "InteractionContent",
       "file": "lib/src/models/interactions/content/content.dart",
       "kind": "skip",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "discriminator": {
         "field": "type",
         "mapping": {
@@ -665,9 +651,7 @@
       "dart_class": "Interaction",
       "file": "lib/src/models/interactions/interaction.dart",
       "kind": "skip",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
     },
     "InteractionEvent": {

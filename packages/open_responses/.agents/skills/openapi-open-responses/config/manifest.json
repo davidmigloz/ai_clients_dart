@@ -115,9 +115,7 @@
       "dart_class": "ResponseResource",
       "file": "lib/src/models/response/response_resource.dart",
       "schema": "ResponseResource",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "CreateResponseBody": {

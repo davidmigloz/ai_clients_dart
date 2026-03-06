@@ -119,9 +119,7 @@
       "dart_class": "ChatCompletionResponse",
       "file": "lib/src/models/chat/chat_completion_response.dart",
       "schema": "ChatCompletionResponse",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "EmbeddingRequest": {
@@ -140,9 +138,7 @@
       "dart_class": "EmbeddingResponse",
       "file": "lib/src/models/embeddings/embedding_response.dart",
       "schema": "EmbeddingResponse",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "ModelCard": {
@@ -151,9 +147,7 @@
       "dart_class": "Model",
       "file": "lib/src/models/models/model.dart",
       "schema": "ModelCard",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "ChatMessage": {

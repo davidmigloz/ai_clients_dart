@@ -97,9 +97,7 @@
       "dart_class": "MessageCreateRequest",
       "file": "lib/src/models/messages/message_create_request.dart",
       "schema": "CreateMessageRequest",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "Tool": {

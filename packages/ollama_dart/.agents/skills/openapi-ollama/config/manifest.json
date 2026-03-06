@@ -216,9 +216,7 @@
       "dart_class": "ChatMessage",
       "file": "lib/src/models/chat/chat_message.dart",
       "schema": "Message",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "GenerateChatCompletionRequest": {
@@ -227,9 +225,7 @@
       "dart_class": "ChatRequest",
       "file": "lib/src/models/chat/chat_request.dart",
       "schema": "GenerateChatCompletionRequest",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "GenerateChatCompletionResponse": {
@@ -238,9 +234,7 @@
       "dart_class": "ChatResponse",
       "file": "lib/src/models/chat/chat_response.dart",
       "schema": "GenerateChatCompletionResponse",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "GenerateCompletionRequest": {
@@ -249,9 +243,7 @@
       "dart_class": "GenerateRequest",
       "file": "lib/src/models/completions/generate_request.dart",
       "schema": "GenerateCompletionRequest",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "GenerateCompletionResponse": {
@@ -260,9 +252,7 @@
       "dart_class": "GenerateResponse",
       "file": "lib/src/models/completions/generate_response.dart",
       "schema": "GenerateCompletionResponse",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "GenerateEmbeddingRequest": {
@@ -271,9 +261,7 @@
       "dart_class": "EmbedRequest",
       "file": "lib/src/models/embeddings/embed_request.dart",
       "schema": "GenerateEmbeddingRequest",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "GenerateEmbeddingResponse": {
@@ -282,9 +270,7 @@
       "dart_class": "EmbedResponse",
       "file": "lib/src/models/embeddings/embed_response.dart",
       "schema": "GenerateEmbeddingResponse",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "Tool": {
@@ -293,9 +279,7 @@
       "dart_class": "ToolDefinition",
       "file": "lib/src/models/tools/tool_definition.dart",
       "schema": "Tool",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "Model": {
@@ -304,9 +288,7 @@
       "dart_class": "ModelSummary",
       "file": "lib/src/models/models/model_summary.dart",
       "schema": "Model",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "ModelInfo": {
@@ -315,9 +297,7 @@
       "dart_class": "ShowResponse",
       "file": "lib/src/models/models/show_response.dart",
       "schema": "ModelInfo",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "RequestOptions": {
@@ -326,9 +306,7 @@
       "dart_class": "ModelOptions",
       "file": "lib/src/models/metadata/model_options.dart",
       "schema": "RequestOptions",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     }
   }

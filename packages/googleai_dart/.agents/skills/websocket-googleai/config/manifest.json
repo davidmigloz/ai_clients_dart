@@ -224,9 +224,7 @@
       "dart_class": "LiveGenerationConfig",
       "file": "lib/src/models/live/config/live_generation_config.dart",
       "schema": "LiveGenerationConfig",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "PrebuiltVoiceConfig": {
@@ -253,9 +251,7 @@
       "dart_class": "RealtimeInputConfig",
       "file": "lib/src/models/live/config/realtime_input_config.dart",
       "schema": "RealtimeInputConfig",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "SessionResumptionConfig": {
@@ -283,9 +279,7 @@
       "dart_class": "SpeechConfig",
       "file": "lib/src/models/live/config/speech_config.dart",
       "schema": "SpeechConfig",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "Transcription": {
@@ -343,9 +337,7 @@
       "kind": "skip",
       "dart_class": "LiveConfig",
       "schema": "LiveConfig",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "file": "lib/src/models/live/config/live_config.dart",
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     }

@@ -98,9 +98,7 @@
       "dart_class": "Collection",
       "file": "lib/src/models/collections/collection.dart",
       "schema": "Collection",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "QueryResponse": {
@@ -109,9 +107,7 @@
       "dart_class": "QueryResponse",
       "file": "lib/src/models/records/query_response.dart",
       "schema": "QueryResponse",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "GetResponse": {
@@ -120,9 +116,7 @@
       "dart_class": "GetResponse",
       "file": "lib/src/models/records/get_response.dart",
       "schema": "GetResponse",
-      "tags": [
-        "critical"
-      ],
+      "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     }
   }

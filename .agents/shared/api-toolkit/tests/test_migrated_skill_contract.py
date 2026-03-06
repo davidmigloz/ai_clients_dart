@@ -140,6 +140,15 @@ class MigratedSkillContractTests(unittest.TestCase):
             skill_yaml = config_dir.parent / "agents" / "openai.yaml"
             self.assertIn(expected, skill_yaml.read_text(), msg=f"Unexpected skill label text in {skill_yaml}")
 
+    def test_real_manifests_do_not_mark_skipped_entries_as_critical(self) -> None:
+        offenders: list[str] = []
+        for config_dir in CONFIG_DIRS:
+            config = load_toolkit_config(config_dir)
+            for entry in config.manifest.types.values():
+                if entry.kind == "skip" and "critical" in entry.tags:
+                    offenders.append(f"{config_dir}: {entry.key}")
+        self.assertEqual(offenders, [])
+
     def test_full_verify_passes_for_all_real_skills(self) -> None:
         for config_dir in CONFIG_DIRS:
             exit_code, payload = command_verify(
