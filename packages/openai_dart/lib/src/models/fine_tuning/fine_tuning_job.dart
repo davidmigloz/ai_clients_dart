@@ -27,6 +27,8 @@ class FineTuningJob {
     this.integrations,
     required this.seed,
     this.estimatedFinish,
+    this.method,
+    this.metadata,
   });
 
   /// Creates a [FineTuningJob] from JSON.
@@ -57,6 +59,11 @@ class FineTuningJob {
           .toList(),
       seed: json['seed'] as int,
       estimatedFinish: json['estimated_finish'] as int?,
+      method: json['method'] != null
+          ? FineTuneMethod.fromJson(json['method'] as Map<String, dynamic>)
+          : null,
+      metadata: (json['metadata'] as Map<String, dynamic>?)
+          ?.cast<String, String>(),
     );
   }
 
@@ -111,6 +118,12 @@ class FineTuningJob {
   /// Estimated finish time.
   final int? estimatedFinish;
 
+  /// The method used for fine-tuning.
+  final FineTuneMethod? method;
+
+  /// Set of 16 key-value pairs that can be attached to an object.
+  final Map<String, String>? metadata;
+
   /// Whether the job is still running.
   bool get isRunning =>
       status == FineTuningStatus.validatingFiles ||
@@ -143,6 +156,8 @@ class FineTuningJob {
       'integrations': integrations!.map((i) => i.toJson()).toList(),
     'seed': seed,
     if (estimatedFinish != null) 'estimated_finish': estimatedFinish,
+    if (method != null) 'method': method!.toJson(),
+    if (metadata != null) 'metadata': metadata,
   };
 
   @override
@@ -222,6 +237,8 @@ class CreateFineTuningJobRequest {
     this.validationFile,
     this.integrations,
     this.seed,
+    this.method,
+    this.metadata,
   });
 
   /// Creates a [CreateFineTuningJobRequest] from JSON.
@@ -243,6 +260,11 @@ class CreateFineTuningJobRequest {
           )
           .toList(),
       seed: json['seed'] as int?,
+      method: json['method'] != null
+          ? FineTuneMethod.fromJson(json['method'] as Map<String, dynamic>)
+          : null,
+      metadata: (json['metadata'] as Map<String, dynamic>?)
+          ?.cast<String, String>(),
     );
   }
 
@@ -267,6 +289,12 @@ class CreateFineTuningJobRequest {
   /// The random seed.
   final int? seed;
 
+  /// The method used for fine-tuning.
+  final FineTuneMethod? method;
+
+  /// Set of 16 key-value pairs that can be attached to an object.
+  final Map<String, String>? metadata;
+
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'model': model,
@@ -277,6 +305,8 @@ class CreateFineTuningJobRequest {
     if (integrations != null)
       'integrations': integrations!.map((i) => i.toJson()).toList(),
     if (seed != null) 'seed': seed,
+    if (method != null) 'method': method!.toJson(),
+    if (metadata != null) 'metadata': metadata,
   };
 
   @override
@@ -1004,4 +1034,364 @@ class FineTuningCheckpointList {
 
   @override
   String toString() => 'FineTuningCheckpointList(${data.length} checkpoints)';
+}
+
+/// The method used for fine-tuning.
+///
+/// Supports supervised, DPO (Direct Preference Optimization), and
+/// reinforcement learning methods.
+@immutable
+class FineTuneMethod {
+  /// Creates a [FineTuneMethod].
+  const FineTuneMethod({
+    required this.type,
+    this.supervised,
+    this.dpo,
+    this.reinforcement,
+  });
+
+  /// Creates a [FineTuneMethod] from JSON.
+  factory FineTuneMethod.fromJson(Map<String, dynamic> json) {
+    return FineTuneMethod(
+      type: json['type'] as String,
+      supervised: json['supervised'] != null
+          ? FineTuneSupervisedMethod.fromJson(
+              json['supervised'] as Map<String, dynamic>,
+            )
+          : null,
+      dpo: json['dpo'] != null
+          ? FineTuneDPOMethod.fromJson(json['dpo'] as Map<String, dynamic>)
+          : null,
+      reinforcement: json['reinforcement'] != null
+          ? FineTuneReinforcementMethod.fromJson(
+              json['reinforcement'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+
+  /// Creates a supervised fine-tune method.
+  factory FineTuneMethod.supervised({FineTuneSupervisedMethod? config}) =>
+      FineTuneMethod(type: 'supervised', supervised: config);
+
+  /// Creates a DPO fine-tune method.
+  factory FineTuneMethod.dpo({FineTuneDPOMethod? config}) =>
+      FineTuneMethod(type: 'dpo', dpo: config);
+
+  /// Creates a reinforcement fine-tune method.
+  factory FineTuneMethod.reinforcement({
+    required FineTuneReinforcementMethod config,
+  }) => FineTuneMethod(type: 'reinforcement', reinforcement: config);
+
+  /// The type of method: `supervised`, `dpo`, or `reinforcement`.
+  final String type;
+
+  /// Configuration for supervised fine-tuning.
+  final FineTuneSupervisedMethod? supervised;
+
+  /// Configuration for DPO fine-tuning.
+  final FineTuneDPOMethod? dpo;
+
+  /// Configuration for reinforcement fine-tuning.
+  final FineTuneReinforcementMethod? reinforcement;
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    if (supervised != null) 'supervised': supervised!.toJson(),
+    if (dpo != null) 'dpo': dpo!.toJson(),
+    if (reinforcement != null) 'reinforcement': reinforcement!.toJson(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FineTuneMethod &&
+          runtimeType == other.runtimeType &&
+          type == other.type;
+
+  @override
+  int get hashCode => type.hashCode;
+
+  @override
+  String toString() => 'FineTuneMethod(type: $type)';
+}
+
+/// Configuration for the supervised fine-tuning method.
+@immutable
+class FineTuneSupervisedMethod {
+  /// Creates a [FineTuneSupervisedMethod].
+  const FineTuneSupervisedMethod({this.hyperparameters});
+
+  /// Creates a [FineTuneSupervisedMethod] from JSON.
+  factory FineTuneSupervisedMethod.fromJson(Map<String, dynamic> json) {
+    return FineTuneSupervisedMethod(
+      hyperparameters: json['hyperparameters'] != null
+          ? HyperparametersRequest.fromJson(
+              json['hyperparameters'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+
+  /// The hyperparameters used for the fine-tuning job.
+  final HyperparametersRequest? hyperparameters;
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    if (hyperparameters != null) 'hyperparameters': hyperparameters!.toJson(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FineTuneSupervisedMethod &&
+          runtimeType == other.runtimeType &&
+          hyperparameters == other.hyperparameters;
+
+  @override
+  int get hashCode => hyperparameters.hashCode;
+
+  @override
+  String toString() => 'FineTuneSupervisedMethod(...)';
+}
+
+/// Configuration for the DPO fine-tuning method.
+@immutable
+class FineTuneDPOMethod {
+  /// Creates a [FineTuneDPOMethod].
+  const FineTuneDPOMethod({this.hyperparameters});
+
+  /// Creates a [FineTuneDPOMethod] from JSON.
+  factory FineTuneDPOMethod.fromJson(Map<String, dynamic> json) {
+    return FineTuneDPOMethod(
+      hyperparameters: json['hyperparameters'] != null
+          ? FineTuneDPOHyperparameters.fromJson(
+              json['hyperparameters'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+
+  /// The hyperparameters used for DPO fine-tuning.
+  final FineTuneDPOHyperparameters? hyperparameters;
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    if (hyperparameters != null) 'hyperparameters': hyperparameters!.toJson(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FineTuneDPOMethod &&
+          runtimeType == other.runtimeType &&
+          hyperparameters == other.hyperparameters;
+
+  @override
+  int get hashCode => hyperparameters.hashCode;
+
+  @override
+  String toString() => 'FineTuneDPOMethod(...)';
+}
+
+/// Hyperparameters for DPO fine-tuning.
+@immutable
+class FineTuneDPOHyperparameters {
+  /// Creates a [FineTuneDPOHyperparameters].
+  const FineTuneDPOHyperparameters({
+    this.beta,
+    this.batchSize,
+    this.learningRateMultiplier,
+    this.nEpochs,
+  });
+
+  /// Creates a [FineTuneDPOHyperparameters] from JSON.
+  factory FineTuneDPOHyperparameters.fromJson(Map<String, dynamic> json) {
+    return FineTuneDPOHyperparameters(
+      beta: json['beta'] != null
+          ? AutoOrDouble.fromJson(json['beta'] as Object)
+          : null,
+      batchSize: json['batch_size'] != null
+          ? AutoOrInt.fromJson(json['batch_size'] as Object)
+          : null,
+      learningRateMultiplier: json['learning_rate_multiplier'] != null
+          ? AutoOrDouble.fromJson(json['learning_rate_multiplier'] as Object)
+          : null,
+      nEpochs: json['n_epochs'] != null
+          ? AutoOrInt.fromJson(json['n_epochs'] as Object)
+          : null,
+    );
+  }
+
+  /// The beta value for the DPO method.
+  final AutoOrDouble? beta;
+
+  /// The batch size ("auto" or a specific integer).
+  final AutoOrInt? batchSize;
+
+  /// The learning rate multiplier ("auto" or a specific double).
+  final AutoOrDouble? learningRateMultiplier;
+
+  /// The number of epochs ("auto" or a specific integer).
+  final AutoOrInt? nEpochs;
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    if (beta != null) 'beta': beta!.toJson(),
+    if (batchSize != null) 'batch_size': batchSize!.toJson(),
+    if (learningRateMultiplier != null)
+      'learning_rate_multiplier': learningRateMultiplier!.toJson(),
+    if (nEpochs != null) 'n_epochs': nEpochs!.toJson(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FineTuneDPOHyperparameters &&
+          runtimeType == other.runtimeType &&
+          beta == other.beta &&
+          nEpochs == other.nEpochs;
+
+  @override
+  int get hashCode => Object.hash(beta, nEpochs);
+
+  @override
+  String toString() => 'FineTuneDPOHyperparameters(...)';
+}
+
+/// Configuration for the reinforcement fine-tuning method.
+@immutable
+class FineTuneReinforcementMethod {
+  /// Creates a [FineTuneReinforcementMethod].
+  const FineTuneReinforcementMethod({
+    required this.grader,
+    this.hyperparameters,
+  });
+
+  /// Creates a [FineTuneReinforcementMethod] from JSON.
+  factory FineTuneReinforcementMethod.fromJson(Map<String, dynamic> json) {
+    return FineTuneReinforcementMethod(
+      grader: json['grader'] as Map<String, dynamic>,
+      hyperparameters: json['hyperparameters'] != null
+          ? FineTuneReinforcementHyperparameters.fromJson(
+              json['hyperparameters'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+
+  /// The grader used for the fine-tuning job.
+  ///
+  /// Can be a `string_check`, `text_similarity`, `python`, `score_model`,
+  /// or `multi` grader. Use the `type` key to determine the grader type.
+  final Map<String, dynamic> grader;
+
+  /// The hyperparameters for reinforcement fine-tuning.
+  final FineTuneReinforcementHyperparameters? hyperparameters;
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    'grader': grader,
+    if (hyperparameters != null) 'hyperparameters': hyperparameters!.toJson(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FineTuneReinforcementMethod && runtimeType == other.runtimeType;
+
+  @override
+  int get hashCode => grader.hashCode;
+
+  @override
+  String toString() => 'FineTuneReinforcementMethod(...)';
+}
+
+/// Hyperparameters for reinforcement fine-tuning.
+@immutable
+class FineTuneReinforcementHyperparameters {
+  /// Creates a [FineTuneReinforcementHyperparameters].
+  const FineTuneReinforcementHyperparameters({
+    this.batchSize,
+    this.learningRateMultiplier,
+    this.nEpochs,
+    this.reasoningEffort,
+    this.computeMultiplier,
+    this.evalInterval,
+    this.evalSamples,
+  });
+
+  /// Creates a [FineTuneReinforcementHyperparameters] from JSON.
+  factory FineTuneReinforcementHyperparameters.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return FineTuneReinforcementHyperparameters(
+      batchSize: json['batch_size'] != null
+          ? AutoOrInt.fromJson(json['batch_size'] as Object)
+          : null,
+      learningRateMultiplier: json['learning_rate_multiplier'] != null
+          ? AutoOrDouble.fromJson(json['learning_rate_multiplier'] as Object)
+          : null,
+      nEpochs: json['n_epochs'] != null
+          ? AutoOrInt.fromJson(json['n_epochs'] as Object)
+          : null,
+      reasoningEffort: json['reasoning_effort'] as String?,
+      computeMultiplier: json['compute_multiplier'] != null
+          ? AutoOrDouble.fromJson(json['compute_multiplier'] as Object)
+          : null,
+      evalInterval: json['eval_interval'] != null
+          ? AutoOrInt.fromJson(json['eval_interval'] as Object)
+          : null,
+      evalSamples: json['eval_samples'] != null
+          ? AutoOrInt.fromJson(json['eval_samples'] as Object)
+          : null,
+    );
+  }
+
+  /// The batch size ("auto" or a specific integer).
+  final AutoOrInt? batchSize;
+
+  /// The learning rate multiplier ("auto" or a specific double).
+  final AutoOrDouble? learningRateMultiplier;
+
+  /// The number of epochs ("auto" or a specific integer).
+  final AutoOrInt? nEpochs;
+
+  /// Level of reasoning effort: `default`, `low`, `medium`, or `high`.
+  final String? reasoningEffort;
+
+  /// Multiplier on compute used for exploring search space during training.
+  final AutoOrDouble? computeMultiplier;
+
+  /// The number of training steps between evaluation runs.
+  final AutoOrInt? evalInterval;
+
+  /// Number of evaluation samples to generate per training step.
+  final AutoOrInt? evalSamples;
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    if (batchSize != null) 'batch_size': batchSize!.toJson(),
+    if (learningRateMultiplier != null)
+      'learning_rate_multiplier': learningRateMultiplier!.toJson(),
+    if (nEpochs != null) 'n_epochs': nEpochs!.toJson(),
+    if (reasoningEffort != null) 'reasoning_effort': reasoningEffort,
+    if (computeMultiplier != null)
+      'compute_multiplier': computeMultiplier!.toJson(),
+    if (evalInterval != null) 'eval_interval': evalInterval!.toJson(),
+    if (evalSamples != null) 'eval_samples': evalSamples!.toJson(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FineTuneReinforcementHyperparameters &&
+          runtimeType == other.runtimeType;
+
+  @override
+  int get hashCode => Object.hash(batchSize, nEpochs, reasoningEffort);
+
+  @override
+  String toString() => 'FineTuneReinforcementHyperparameters(...)';
 }

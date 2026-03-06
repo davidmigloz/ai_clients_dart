@@ -118,11 +118,13 @@ void main() {
         String? jobId;
 
         try {
-          // Create a fine-tuning job
+          // Create a fine-tuning job with method and metadata
           final job = await client!.fineTuning.jobs.create(
             CreateFineTuningJobRequest(
               model: 'gpt-4o-mini-2024-07-18',
               trainingFile: fileId,
+              method: FineTuneMethod.supervised(),
+              metadata: const {'test_key': 'test_value', 'env': 'integration'},
             ),
           );
 
@@ -143,6 +145,15 @@ void main() {
           );
           expect(job.createdAt, greaterThan(0));
 
+          // Verify method is returned
+          expect(job.method, isNotNull);
+          expect(job.method!.type, 'supervised');
+
+          // Verify metadata is returned
+          expect(job.metadata, isNotNull);
+          expect(job.metadata!['test_key'], 'test_value');
+          expect(job.metadata!['env'], 'integration');
+
           // Retrieve the job
           final retrieved = await client!.fineTuning.jobs.retrieve(jobId);
 
@@ -150,6 +161,12 @@ void main() {
           expect(retrieved.object, 'fine_tuning.job');
           expect(retrieved.trainingFile, fileId);
           expect(retrieved.model, 'gpt-4o-mini-2024-07-18');
+
+          // Verify method and metadata persist on retrieval
+          expect(retrieved.method, isNotNull);
+          expect(retrieved.method!.type, 'supervised');
+          expect(retrieved.metadata, isNotNull);
+          expect(retrieved.metadata!['test_key'], 'test_value');
 
           // List events for the job
           final events = await client!.fineTuning.jobs.listEvents(jobId);
