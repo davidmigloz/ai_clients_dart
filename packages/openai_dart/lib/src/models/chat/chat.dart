@@ -11,3 +11,4 @@ export 'prediction.dart';
 export 'reasoning_detail.dart';
 export 'tool_call.dart';
 export 'user_message_content.dart';
+export 'web_search_options.dart';

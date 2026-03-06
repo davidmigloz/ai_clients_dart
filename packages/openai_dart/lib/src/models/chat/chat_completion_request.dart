@@ -2,13 +2,16 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import '../common/response_format.dart';
+import '../responses/config/prompt_cache_retention.dart';
 import '../responses/config/reasoning_effort.dart';
+import '../responses/config/verbosity.dart';
 import '../tools/tool.dart';
 import '../tools/tool_choice.dart';
 import 'chat_audio_config.dart';
 import 'chat_message.dart';
 import 'openrouter_config.dart';
 import 'prediction.dart';
+import 'web_search_options.dart';
 
 /// Request for creating a chat completion.
 ///
@@ -59,8 +62,13 @@ class ChatCompletionCreateRequest {
     this.streamOptions,
     this.reasoningEffort,
     this.prediction,
+    this.verbosity,
     this.modalities,
     this.audio,
+    this.webSearchOptions,
+    this.promptCacheKey,
+    this.promptCacheRetention,
+    this.safetyIdentifier,
     // OpenRouter-specific parameters
     this.topK,
     this.minP,
@@ -119,6 +127,9 @@ class ChatCompletionCreateRequest {
       reasoningEffort: json['reasoning_effort'] != null
           ? ReasoningEffort.fromJson(json['reasoning_effort'] as String)
           : null,
+      verbosity: json['verbosity'] != null
+          ? Verbosity.fromJson(json['verbosity'] as String)
+          : null,
       prediction: json['prediction'] != null
           ? Prediction.fromJson(json['prediction'] as Map<String, dynamic>)
           : null,
@@ -128,6 +139,18 @@ class ChatCompletionCreateRequest {
       audio: json['audio'] != null
           ? ChatAudioConfig.fromJson(json['audio'] as Map<String, dynamic>)
           : null,
+      webSearchOptions: json['web_search_options'] != null
+          ? WebSearchOptions.fromJson(
+              json['web_search_options'] as Map<String, dynamic>,
+            )
+          : null,
+      promptCacheKey: json['prompt_cache_key'] as String?,
+      promptCacheRetention: json['prompt_cache_retention'] != null
+          ? PromptCacheRetention.fromJson(
+              json['prompt_cache_retention'] as String,
+            )
+          : null,
+      safetyIdentifier: json['safety_identifier'] as String?,
       // OpenRouter-specific parameters
       topK: json['top_k'] as int?,
       minP: (json['min_p'] as num?)?.toDouble(),
@@ -281,6 +304,12 @@ class ChatCompletionCreateRequest {
   /// but take longer to process.
   final ReasoningEffort? reasoningEffort;
 
+  /// Controls the verbosity of the model's response.
+  ///
+  /// Lower values will result in more concise responses, while higher values
+  /// will result in more verbose responses.
+  final Verbosity? verbosity;
+
   /// Predicted output for faster responses.
   ///
   /// When you have high confidence in a significant portion of the response,
@@ -299,6 +328,30 @@ class ChatCompletionCreateRequest {
   /// Required when [modalities] includes [ChatModality.audio].
   /// Configures the voice and format for audio responses.
   final ChatAudioConfig? audio;
+
+  /// Web search options for including web results in the response.
+  ///
+  /// Learn more about the
+  /// [web search tool](https://platform.openai.com/docs/guides/tools-web-search?api-mode=chat).
+  final WebSearchOptions? webSearchOptions;
+
+  /// Prompt cache key for optimizing cache hit rates.
+  ///
+  /// Used by OpenAI to cache responses for similar requests.
+  /// Replaces the [user] field for caching purposes.
+  final String? promptCacheKey;
+
+  /// The retention policy for the prompt cache.
+  ///
+  /// Set to [PromptCacheRetention.h24] to enable extended prompt caching,
+  /// which keeps cached prefixes active for up to 24 hours.
+  final PromptCacheRetention? promptCacheRetention;
+
+  /// A stable identifier for detecting usage policy violations.
+  ///
+  /// Should uniquely identify each user (max 64 characters).
+  /// We recommend hashing the username or email address.
+  final String? safetyIdentifier;
 
   // ---------------------------------------------------------------------------
   // OpenRouter-specific parameters
@@ -399,10 +452,17 @@ class ChatCompletionCreateRequest {
     if (store != null) 'store': store,
     if (streamOptions != null) 'stream_options': streamOptions!.toJson(),
     if (reasoningEffort != null) 'reasoning_effort': reasoningEffort!.toJson(),
+    if (verbosity != null) 'verbosity': verbosity!.toJson(),
     if (prediction != null) 'prediction': prediction!.toJson(),
     if (modalities != null)
       'modalities': modalities!.map((m) => m.toJson()).toList(),
     if (audio != null) 'audio': audio!.toJson(),
+    if (webSearchOptions != null)
+      'web_search_options': webSearchOptions!.toJson(),
+    if (promptCacheKey != null) 'prompt_cache_key': promptCacheKey,
+    if (promptCacheRetention != null)
+      'prompt_cache_retention': promptCacheRetention!.toJson(),
+    if (safetyIdentifier != null) 'safety_identifier': safetyIdentifier,
     // OpenRouter-specific parameters
     if (topK != null) 'top_k': topK,
     if (minP != null) 'min_p': minP,
@@ -442,9 +502,14 @@ class ChatCompletionCreateRequest {
     Object? store = unsetCopyWithValue,
     Object? streamOptions = unsetCopyWithValue,
     Object? reasoningEffort = unsetCopyWithValue,
+    Object? verbosity = unsetCopyWithValue,
     Object? prediction = unsetCopyWithValue,
     Object? modalities = unsetCopyWithValue,
     Object? audio = unsetCopyWithValue,
+    Object? webSearchOptions = unsetCopyWithValue,
+    Object? promptCacheKey = unsetCopyWithValue,
+    Object? promptCacheRetention = unsetCopyWithValue,
+    Object? safetyIdentifier = unsetCopyWithValue,
     // OpenRouter-specific parameters
     Object? topK = unsetCopyWithValue,
     Object? minP = unsetCopyWithValue,
@@ -512,6 +577,9 @@ class ChatCompletionCreateRequest {
       reasoningEffort: reasoningEffort == unsetCopyWithValue
           ? this.reasoningEffort
           : reasoningEffort as ReasoningEffort?,
+      verbosity: verbosity == unsetCopyWithValue
+          ? this.verbosity
+          : verbosity as Verbosity?,
       prediction: prediction == unsetCopyWithValue
           ? this.prediction
           : prediction as Prediction?,
@@ -521,6 +589,18 @@ class ChatCompletionCreateRequest {
       audio: audio == unsetCopyWithValue
           ? this.audio
           : audio as ChatAudioConfig?,
+      webSearchOptions: webSearchOptions == unsetCopyWithValue
+          ? this.webSearchOptions
+          : webSearchOptions as WebSearchOptions?,
+      promptCacheKey: promptCacheKey == unsetCopyWithValue
+          ? this.promptCacheKey
+          : promptCacheKey as String?,
+      promptCacheRetention: promptCacheRetention == unsetCopyWithValue
+          ? this.promptCacheRetention
+          : promptCacheRetention as PromptCacheRetention?,
+      safetyIdentifier: safetyIdentifier == unsetCopyWithValue
+          ? this.safetyIdentifier
+          : safetyIdentifier as String?,
       // OpenRouter-specific parameters
       topK: topK == unsetCopyWithValue ? this.topK : topK as int?,
       minP: minP == unsetCopyWithValue ? this.minP : minP as double?,

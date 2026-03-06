@@ -403,6 +403,52 @@ void main() {
       expect(updated.model, 'gpt-4o'); // unchanged
     });
 
+    test('supports verbosity parameter', () {
+      final request = ChatCompletionCreateRequest(
+        model: 'gpt-4o',
+        messages: [ChatMessage.user('Explain quantum physics.')],
+        verbosity: Verbosity.low,
+      );
+
+      final json = request.toJson();
+      expect(json['verbosity'], 'low');
+      expect(request.verbosity, Verbosity.low);
+    });
+
+    test('fromJson parses verbosity', () {
+      final json = {
+        'model': 'gpt-4o',
+        'messages': [
+          {'role': 'user', 'content': 'Hello'},
+        ],
+        'verbosity': 'high',
+      };
+
+      final request = ChatCompletionCreateRequest.fromJson(json);
+      expect(request.verbosity, Verbosity.high);
+    });
+
+    test('copyWith works with verbosity', () {
+      final request = ChatCompletionCreateRequest(
+        model: 'gpt-4o',
+        messages: [ChatMessage.user('Hello!')],
+      );
+
+      final updated = request.copyWith(verbosity: Verbosity.medium);
+      expect(updated.verbosity, Verbosity.medium);
+      expect(updated.model, 'gpt-4o'); // unchanged
+    });
+
+    test('verbosity omitted from JSON when null', () {
+      final request = ChatCompletionCreateRequest(
+        model: 'gpt-4o',
+        messages: [ChatMessage.user('Hello!')],
+      );
+
+      final json = request.toJson();
+      expect(json.containsKey('verbosity'), isFalse);
+    });
+
     test('metadata omitted when all values are null', () {
       final request = ChatCompletionCreateRequest(
         model: 'gpt-4o',
@@ -441,6 +487,227 @@ void main() {
 
       expect(restored.metadata, equals({'key': 'value'}));
     });
+
+    test('supports web_search_options parameter', () {
+      final request = ChatCompletionCreateRequest(
+        model: 'gpt-4o',
+        messages: [ChatMessage.user('Search the web for latest news.')],
+        webSearchOptions: const WebSearchOptions(
+          searchContextSize: 'medium',
+          userLocation: WebSearchUserLocation(
+            approximate: WebSearchLocation(
+              country: 'US',
+              region: 'California',
+              city: 'San Francisco',
+              timezone: 'America/Los_Angeles',
+            ),
+          ),
+        ),
+      );
+
+      final json = request.toJson();
+      expect(json['web_search_options'], {
+        'search_context_size': 'medium',
+        'user_location': {
+          'type': 'approximate',
+          'approximate': {
+            'country': 'US',
+            'region': 'California',
+            'city': 'San Francisco',
+            'timezone': 'America/Los_Angeles',
+          },
+        },
+      });
+    });
+
+    test('fromJson parses web_search_options', () {
+      final json = {
+        'model': 'gpt-4o',
+        'messages': [
+          {'role': 'user', 'content': 'Hello'},
+        ],
+        'web_search_options': {
+          'search_context_size': 'high',
+          'user_location': {
+            'type': 'approximate',
+            'approximate': {'country': 'GB', 'city': 'London'},
+          },
+        },
+      };
+
+      final request = ChatCompletionCreateRequest.fromJson(json);
+      expect(request.webSearchOptions, isNotNull);
+      expect(request.webSearchOptions!.searchContextSize, 'high');
+      expect(request.webSearchOptions!.userLocation!.approximate.country, 'GB');
+      expect(
+        request.webSearchOptions!.userLocation!.approximate.city,
+        'London',
+      );
+    });
+
+    test('supports prompt_cache_key parameter', () {
+      final request = ChatCompletionCreateRequest(
+        model: 'gpt-4o',
+        messages: [ChatMessage.user('Hello!')],
+        promptCacheKey: 'cache-key-123',
+      );
+
+      final json = request.toJson();
+      expect(json['prompt_cache_key'], 'cache-key-123');
+    });
+
+    test('fromJson parses prompt_cache_key', () {
+      final json = {
+        'model': 'gpt-4o',
+        'messages': [
+          {'role': 'user', 'content': 'Hello'},
+        ],
+        'prompt_cache_key': 'my-key',
+      };
+
+      final request = ChatCompletionCreateRequest.fromJson(json);
+      expect(request.promptCacheKey, 'my-key');
+    });
+
+    test('supports prompt_cache_retention parameter', () {
+      final request = ChatCompletionCreateRequest(
+        model: 'gpt-4o',
+        messages: [ChatMessage.user('Hello!')],
+        promptCacheRetention: PromptCacheRetention.h24,
+      );
+
+      final json = request.toJson();
+      expect(json['prompt_cache_retention'], '24h');
+    });
+
+    test('fromJson parses prompt_cache_retention', () {
+      final json = {
+        'model': 'gpt-4o',
+        'messages': [
+          {'role': 'user', 'content': 'Hello'},
+        ],
+        'prompt_cache_retention': 'in-memory',
+      };
+
+      final request = ChatCompletionCreateRequest.fromJson(json);
+      expect(request.promptCacheRetention, PromptCacheRetention.inMemory);
+    });
+
+    test('supports safety_identifier parameter', () {
+      final request = ChatCompletionCreateRequest(
+        model: 'gpt-4o',
+        messages: [ChatMessage.user('Hello!')],
+        safetyIdentifier: 'user-hash-abc123',
+      );
+
+      final json = request.toJson();
+      expect(json['safety_identifier'], 'user-hash-abc123');
+    });
+
+    test('fromJson parses safety_identifier', () {
+      final json = {
+        'model': 'gpt-4o',
+        'messages': [
+          {'role': 'user', 'content': 'Hello'},
+        ],
+        'safety_identifier': 'user-hash-xyz',
+      };
+
+      final request = ChatCompletionCreateRequest.fromJson(json);
+      expect(request.safetyIdentifier, 'user-hash-xyz');
+    });
+
+    test('copyWith works with new fields', () {
+      final request = ChatCompletionCreateRequest(
+        model: 'gpt-4o',
+        messages: [ChatMessage.user('Hello!')],
+      );
+
+      final updated = request.copyWith(
+        webSearchOptions: const WebSearchOptions(searchContextSize: 'low'),
+        promptCacheKey: 'key-1',
+        promptCacheRetention: PromptCacheRetention.h24,
+        safetyIdentifier: 'safety-1',
+      );
+
+      expect(updated.webSearchOptions!.searchContextSize, 'low');
+      expect(updated.promptCacheKey, 'key-1');
+      expect(updated.promptCacheRetention, PromptCacheRetention.h24);
+      expect(updated.safetyIdentifier, 'safety-1');
+      expect(updated.model, 'gpt-4o'); // unchanged
+    });
+
+    test('new fields omitted from JSON when null', () {
+      final request = ChatCompletionCreateRequest(
+        model: 'gpt-4o',
+        messages: [ChatMessage.user('Hello!')],
+      );
+
+      final json = request.toJson();
+      expect(json.containsKey('web_search_options'), isFalse);
+      expect(json.containsKey('prompt_cache_key'), isFalse);
+      expect(json.containsKey('prompt_cache_retention'), isFalse);
+      expect(json.containsKey('safety_identifier'), isFalse);
+    });
+  });
+
+  group('WebSearchOptions', () {
+    test('toJson produces correct nested structure', () {
+      const options = WebSearchOptions(
+        searchContextSize: 'medium',
+        userLocation: WebSearchUserLocation(
+          approximate: WebSearchLocation(country: 'US', region: 'California'),
+        ),
+      );
+
+      final json = options.toJson();
+      expect(json, {
+        'search_context_size': 'medium',
+        'user_location': {
+          'type': 'approximate',
+          'approximate': {'country': 'US', 'region': 'California'},
+        },
+      });
+    });
+
+    test('fromJson parses correctly', () {
+      final json = {
+        'search_context_size': 'high',
+        'user_location': {
+          'type': 'approximate',
+          'approximate': {
+            'country': 'GB',
+            'city': 'London',
+            'timezone': 'Europe/London',
+          },
+        },
+      };
+
+      final options = WebSearchOptions.fromJson(json);
+      expect(options.searchContextSize, 'high');
+      expect(options.userLocation, isNotNull);
+      expect(options.userLocation!.approximate.country, 'GB');
+      expect(options.userLocation!.approximate.city, 'London');
+      expect(options.userLocation!.approximate.timezone, 'Europe/London');
+    });
+
+    test('toJson omits null fields', () {
+      const options = WebSearchOptions();
+      final json = options.toJson();
+      expect(json, isEmpty);
+    });
+
+    test('round-trip preserves data', () {
+      const original = WebSearchOptions(
+        searchContextSize: 'low',
+        userLocation: WebSearchUserLocation(
+          approximate: WebSearchLocation(country: 'DE'),
+        ),
+      );
+
+      final restored = WebSearchOptions.fromJson(original.toJson());
+      expect(restored, original);
+    });
   });
 
   group('FinishReason', () {
@@ -460,6 +727,24 @@ void main() {
       expect(FinishReason.length.toJson(), 'length');
       expect(FinishReason.toolCalls.toJson(), 'tool_calls');
       expect(FinishReason.contentFilter.toJson(), 'content_filter');
+    });
+  });
+
+  group('Verbosity', () {
+    test('has correct values matching spec', () {
+      expect(Verbosity.low.toJson(), 'low');
+      expect(Verbosity.medium.toJson(), 'medium');
+      expect(Verbosity.high.toJson(), 'high');
+    });
+
+    test('fromJson parses all valid values', () {
+      expect(Verbosity.fromJson('low'), Verbosity.low);
+      expect(Verbosity.fromJson('medium'), Verbosity.medium);
+      expect(Verbosity.fromJson('high'), Verbosity.high);
+    });
+
+    test('fromJson returns unknown for unrecognized values', () {
+      expect(Verbosity.fromJson('something_else'), Verbosity.unknown);
     });
   });
 
