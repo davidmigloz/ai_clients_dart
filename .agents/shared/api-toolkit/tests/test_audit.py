@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import io
 import json
 import os
+import tarfile
 import tempfile
 import unittest
 from pathlib import Path
@@ -15,6 +17,7 @@ if str(ROOT) not in os.sys.path:
 from api_toolkit.config import ReferenceImplConfig, ReferenceSymbolConfig, ToolkitError
 from api_toolkit.operations import (
     _ReferenceUnavailableError,
+    _extract_tar_safely,
     _load_reference_resources,
     _load_reference_types,
     command_audit,
@@ -870,13 +873,59 @@ class AuditCommandTests(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["results"]["reference"]["missing_methods"], [])
 
+    def test_reference_audit_global_mode_does_not_count_resource_methods_as_client_methods(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            package_root, config_dir = self._create_openapi_config(root)
+            reference_root = root / "reference"
+            reference_root.mkdir(parents=True)
+            (reference_root / "client.py").write_text(
+                "class Client:\n"
+                "    def generate(self):\n"
+                "        pass\n"
+            )
+            self._write_config(
+                config_dir,
+                {
+                    "openapi": "3.1.0",
+                    "info": {"title": "Sample", "version": "1"},
+                    "paths": {},
+                    "components": {"schemas": {}},
+                },
+                audit={
+                    "excluded_schemas": [],
+                    "schema_aliases": {},
+                    "reference_impl": {
+                        "repo": "owner/repo",
+                        "ref": "main",
+                        "resources": {
+                            "adapter": "python_client_methods",
+                            "path": "client.py",
+                            "class_name": "Client",
+                        },
+                    },
+                },
+            )
+            self._write_resource(
+                package_root,
+                "lib/src/resources/models_resource.dart",
+                "class ModelsResource {\n"
+                "  Future<void> generate() async {}\n"
+                "}\n",
+            )
+
+            with patch("api_toolkit.operations._download_reference_repo", return_value=(reference_root, reference_root)):
+                exit_code, payload = command_audit(self._audit_args(config_dir, checks="reference"))
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(
+                payload["results"]["reference"]["missing_methods"],
+                [{"resource": "*", "methods": ["generate"]}],
+            )
+
     def test_reference_adapters_cover_client_members_methods_and_type_collectors(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             reference_root = self._create_reference_repo(Path(tmp_dir) / "reference")
-            class_index = {}
-            for path in sorted(reference_root.rglob("*.py")):
-                # Reuse the same on-disk tree for every adapter helper.
-                pass
             from api_toolkit.operations import _python_class_index  # local import to avoid growing top-level imports
 
             class_index = _python_class_index(reference_root)
@@ -1103,6 +1152,38 @@ class AuditCommandTests(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["spec_name"], "interactions")
             self.assertEqual(payload["results"]["schema"]["schemas"][0]["dart_class"], "InteractionTool")
+
+    def test_reference_types_from_init_exports_uses_all_when_named_imports_are_absent(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            reference_root = Path(tmp_dir) / "reference"
+            types_dir = reference_root / "src" / "openai" / "types"
+            types_dir.mkdir(parents=True)
+            (types_dir / "__init__.py").write_text("__all__ = ['Widget', 'Gadget']\n")
+
+            exports = _load_reference_types(
+                reference_root,
+                ReferenceImplConfig(
+                    repo="owner/repo",
+                    ref="main",
+                    types=ReferenceSymbolConfig(adapter="python_init_exports", path="src/openai/types/__init__.py"),
+                ),
+            )
+
+            self.assertEqual(exports, {"Widget", "Gadget"})
+
+    def test_extract_tar_safely_rejects_path_traversal_members(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            archive_path = Path(tmp_dir) / "archive.tar.gz"
+            with tarfile.open(archive_path, mode="w:gz") as tar:
+                payload = b"owned"
+                info = tarfile.TarInfo("../escape.txt")
+                info.size = len(payload)
+                tar.addfile(info, io.BytesIO(payload))
+
+            with tempfile.TemporaryDirectory() as extract_dir:
+                with tarfile.open(archive_path, mode="r:gz") as tar:
+                    with self.assertRaises(_ReferenceUnavailableError):
+                        _extract_tar_safely(tar, Path(extract_dir))
 
 
 if __name__ == "__main__":

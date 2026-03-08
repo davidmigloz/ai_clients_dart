@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import ast
-import io
+import inspect
 import json
 import os
 import re
@@ -1770,16 +1770,36 @@ def _download_reference_repo(repo: str, ref: str) -> tuple[Path, Path]:
     url = f"https://codeload.github.com/{repo}/tar.gz/{ref}"
     request = Request(url, headers={"User-Agent": "api-toolkit/1.0"})
     temp_root = Path(tempfile.mkdtemp(prefix="api-toolkit-audit-"))
+    archive_path = temp_root / "reference.tar.gz"
     try:
-        with urlopen(request, timeout=30) as response:
-            archive = response.read()
-        with tarfile.open(fileobj=io.BytesIO(archive), mode="r:gz") as tar:
-            tar.extractall(temp_root)
+        with urlopen(request, timeout=30) as response, archive_path.open("wb") as archive_file:
+            shutil.copyfileobj(response, archive_file)
+        with tarfile.open(archive_path, mode="r:gz") as tar:
+            _extract_tar_safely(tar, temp_root)
     except (HTTPError, URLError, OSError, tarfile.TarError) as exc:
         shutil.rmtree(temp_root, ignore_errors=True)
         raise _ReferenceUnavailableError(f"Failed to download reference implementation {repo}@{ref}: {exc}") from exc
+    finally:
+        archive_path.unlink(missing_ok=True)
     extracted = next((path for path in temp_root.iterdir() if path.is_dir()), temp_root)
     return extracted, temp_root
+
+
+def _extract_tar_safely(tar: tarfile.TarFile, destination: Path) -> None:
+    destination = destination.resolve()
+    members = tar.getmembers()
+    for member in members:
+        member_path = (destination / member.name).resolve()
+        try:
+            member_path.relative_to(destination)
+        except ValueError as exc:
+            raise _ReferenceUnavailableError(
+                f"Archive member '{member.name}' would extract outside '{destination}'"
+            ) from exc
+    if "filter" in inspect.signature(tar.extractall).parameters:
+        tar.extractall(destination, filter="data")
+    else:  # pragma: no cover - older Python fallback
+        tar.extractall(destination)
 
 
 def _reference_symbol_path(root: Path, relative: str) -> Path:
@@ -1840,7 +1860,7 @@ def _reference_types_from_init_exports(root: Path, config: ReferenceSymbolConfig
                         if isinstance(item, ast.Constant) and isinstance(item.value, str)
                     }
     if explicit_all is not None:
-        exported &= explicit_all if exported else explicit_all
+        exported = (exported & explicit_all) if exported else explicit_all
     exported = _apply_symbol_filters(exported, config)
     return _apply_symbol_aliases(exported, config.aliases)
 
@@ -2285,8 +2305,8 @@ def _run_reference_audit(config: ToolkitConfig, spec_name: str) -> dict[str, Any
         python_index = _python_class_index(repo_root)
         mode, reference_resources, issues = _load_reference_resources(repo_root, reference, python_index)
         reference_types = _load_reference_types(repo_root, reference)
-        dart_resources, dart_resource_methods = _dart_resource_inventory(config)
-        dart_global_methods = dart_resource_methods | _dart_client_method_inventory(config)
+        dart_resources, _ = _dart_resource_inventory(config)
+        dart_client_methods = _dart_client_method_inventory(config)
         dart_types = set(_dart_class_index(config))
 
         missing_resources: list[str] = []
@@ -2311,7 +2331,7 @@ def _run_reference_audit(config: ToolkitConfig, spec_name: str) -> dict[str, Any
                     )
         else:
             global_methods = reference_resources if isinstance(reference_resources, set) else set()
-            gaps = sorted(global_methods - dart_global_methods)
+            gaps = sorted(global_methods - dart_client_methods)
             if gaps:
                 missing_methods.append({"resource": "*", "methods": gaps})
                 issues.append(
