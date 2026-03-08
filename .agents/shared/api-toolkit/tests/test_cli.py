@@ -14,6 +14,12 @@ from api_toolkit.config import EXIT_FAILURE, ToolkitError
 
 
 class CliTests(unittest.TestCase):
+    def test_main_routes_audit_command(self) -> None:
+        with patch("api_toolkit.cli.command_audit", return_value=(0, {"command": "audit"})):
+            exit_code = main(["audit", "--config-dir", "/tmp"])
+
+        self.assertEqual(exit_code, 0)
+
     def test_main_returns_exit_failure_for_unexpected_exceptions(self) -> None:
         with patch("api_toolkit.cli.command_describe", side_effect=RuntimeError("boom")):
             exit_code = main(["describe", "--config-dir", "/tmp"])

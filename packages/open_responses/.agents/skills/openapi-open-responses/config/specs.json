@@ -7,7 +7,23 @@
       "requires_auth": false,
       "auth_env_vars": [],
       "description": "OpenResponses unified LLM API specification",
-      "fetch_mode": "remote"
+      "fetch_mode": "remote",
+      "audit": {
+        "excluded_schemas": [],
+        "schema_aliases": {},
+        "reference_impl": {
+          "repo": "openai/openai-python",
+          "ref": "main",
+          "resources": {
+            "adapter": "python_stainless_resources",
+            "path": "src/openai/resources/responses"
+          },
+          "types": {
+            "adapter": "python_init_exports",
+            "path": "src/openai/types/responses/__init__.py"
+          }
+        }
+      }
     }
   },
   "specs_dir": "packages/open_responses/specs",

@@ -78,6 +78,38 @@ class ConfigTests(unittest.TestCase):
                 config = load_toolkit_config(config_dir)
                 self.assertEqual(config.output_dir, (Path(tmp_dir) / "sample_dart-api-toolkit").resolve())
 
+    def test_load_toolkit_config_parses_audit_config(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            config_dir = self._write_minimal_config(Path(tmp_dir))
+            specs_json = json.loads((config_dir / "specs.json").read_text())
+            specs_json["specs"]["main"]["audit"] = {
+                "excluded_schemas": ["InternalOnly"],
+                "schema_aliases": {"ResponseObject": "Response"},
+                "reference_impl": {
+                    "repo": "openai/openai-python",
+                    "ref": "main",
+                    "resources": {
+                        "adapter": "python_stainless_resources",
+                        "path": "src/openai/resources",
+                    },
+                    "types": {
+                        "adapter": "python_init_exports",
+                        "path": "src/openai/types/__init__.py",
+                    },
+                },
+            }
+            (config_dir / "specs.json").write_text(json.dumps(specs_json, indent=2))
+
+            config = load_toolkit_config(config_dir)
+
+            audit = config.specs["main"].audit
+            self.assertEqual(audit.excluded_schemas, ["InternalOnly"])
+            self.assertEqual(audit.schema_aliases, {"ResponseObject": "Response"})
+            self.assertIsNotNone(audit.reference_impl)
+            self.assertEqual(audit.reference_impl.repo, "openai/openai-python")
+            self.assertEqual(audit.reference_impl.resources.adapter, "python_stainless_resources")
+            self.assertEqual(audit.reference_impl.types.path, "src/openai/types/__init__.py")
+
     def test_fetch_remote_document_uses_header_auth_without_mutating_url(self) -> None:
         with patch("api_toolkit.config.urlopen") as mock_urlopen:
             response = MagicMock()

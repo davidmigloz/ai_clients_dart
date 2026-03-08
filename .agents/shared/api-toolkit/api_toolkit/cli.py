@@ -8,6 +8,7 @@ from typing import Any
 
 from .config import EXIT_FAILURE, EXIT_SUCCESS, EXIT_USAGE, ToolkitError, choose_format
 from .operations import (
+    command_audit,
     command_create,
     command_describe,
     command_fetch,
@@ -73,6 +74,15 @@ def build_parser() -> argparse.ArgumentParser:
     scaffold_parser.add_argument("--dry-run", action="store_true")
     _add_common_output_args(scaffold_parser, include_fields=True)
 
+    audit_parser = subparsers.add_parser("audit", help="Run advisory OpenAPI schema and reference audits")
+    audit_parser.add_argument("--config-dir", type=Path, required=True)
+    audit_parser.add_argument("--spec-name")
+    audit_parser.add_argument("--checks", default="all", choices=["schema", "reference", "all"])
+    audit_parser.add_argument("--scope", default="all", choices=["matched", "unmatched", "all"])
+    audit_parser.add_argument("--schema")
+    audit_parser.add_argument("--include-excluded", action="store_true")
+    _add_common_output_args(audit_parser, include_fields=True)
+
     verify_parser = subparsers.add_parser("verify", help="Run toolkit verification checks")
     verify_parser.add_argument("--config-dir", type=Path, required=True)
     verify_parser.add_argument("--spec-name")
@@ -133,6 +143,8 @@ def main(argv: list[str] | None = None) -> int:
             exit_code, payload = command_describe(args)
         elif args.command == "scaffold":
             exit_code, payload = command_scaffold(args)
+        elif args.command == "audit":
+            exit_code, payload = command_audit(args)
         elif args.command == "verify":
             exit_code, payload = command_verify(args)
         else:  # pragma: no cover - argparse prevents this

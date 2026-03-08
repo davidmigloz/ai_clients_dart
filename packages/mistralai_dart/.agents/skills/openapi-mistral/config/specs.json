@@ -7,7 +7,25 @@
       "requires_auth": false,
       "auth_env_vars": [],
       "description": "Mistral AI API for chat, embeddings, and more",
-      "fetch_mode": "remote"
+      "fetch_mode": "remote",
+      "audit": {
+        "excluded_schemas": [],
+        "schema_aliases": {},
+        "reference_impl": {
+          "repo": "mistralai/client-python",
+          "ref": "main",
+          "resources": {
+            "adapter": "python_client_members",
+            "path": "src/mistralai/client/sdk.py",
+            "class_name": "Mistral",
+            "member_map_name": "_sub_sdk_map"
+          },
+          "types": {
+            "adapter": "python_recursive_classes",
+            "path": "src/mistralai/client/models"
+          }
+        }
+      }
     }
   },
   "specs_dir": "packages/mistralai_dart/specs",

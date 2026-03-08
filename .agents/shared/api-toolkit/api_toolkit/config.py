@@ -78,6 +78,7 @@ class SpecConfig:
     source_file: str | None = None
     experimental: bool = False
     websocket_endpoints: dict[str, Any] = field(default_factory=dict)
+    audit: "AuditConfig" = field(default_factory=lambda: AuditConfig())
 
     @property
     def resolved_auth(self) -> "AuthConfig | None":
@@ -91,6 +92,45 @@ class AuthConfig:
     location: str
     name: str
     prefix: str = ""
+
+
+@dataclass(slots=True, frozen=True)
+class ReferenceSymbolConfig:
+    adapter: str
+    path: str | None = None
+    paths: list[str] = field(default_factory=list)
+    class_name: str | None = None
+    member_map_name: str | None = None
+    include: list[str] = field(default_factory=list)
+    exclude: list[str] = field(default_factory=list)
+    aliases: dict[str, str] = field(default_factory=dict)
+
+    @property
+    def all_paths(self) -> list[str]:
+        combined: list[str] = []
+        if self.path:
+            combined.append(self.path)
+        combined.extend(self.paths)
+        deduped: list[str] = []
+        for item in combined:
+            if item not in deduped:
+                deduped.append(item)
+        return deduped
+
+
+@dataclass(slots=True, frozen=True)
+class ReferenceImplConfig:
+    repo: str
+    ref: str
+    resources: ReferenceSymbolConfig | None = None
+    types: ReferenceSymbolConfig | None = None
+
+
+@dataclass(slots=True, frozen=True)
+class AuditConfig:
+    excluded_schemas: list[str] = field(default_factory=list)
+    schema_aliases: dict[str, str] = field(default_factory=dict)
+    reference_impl: ReferenceImplConfig | None = None
 
 
 @dataclass(slots=True)
@@ -311,6 +351,88 @@ def _parse_auth_config(raw: Any, *, source: str) -> AuthConfig | None:
     return AuthConfig(location=location, name=name, prefix=prefix)
 
 
+def _parse_reference_symbol_config(raw: Any, *, source: str) -> ReferenceSymbolConfig | None:
+    if raw is None:
+        return None
+    if not isinstance(raw, dict):
+        raise ToolkitError(f"{source} must be an object")
+    adapter = raw.get("adapter")
+    if not isinstance(adapter, str) or not adapter:
+        raise ToolkitError(f"{source}.adapter must be a non-empty string")
+    path = raw.get("path")
+    if path is not None and not isinstance(path, str):
+        raise ToolkitError(f"{source}.path must be a string")
+    paths = raw.get("paths", [])
+    if not isinstance(paths, list) or any(not isinstance(item, str) for item in paths):
+        raise ToolkitError(f"{source}.paths must be a list of strings")
+    class_name = raw.get("class_name")
+    if class_name is not None and not isinstance(class_name, str):
+        raise ToolkitError(f"{source}.class_name must be a string")
+    member_map_name = raw.get("member_map_name")
+    if member_map_name is not None and not isinstance(member_map_name, str):
+        raise ToolkitError(f"{source}.member_map_name must be a string")
+    include = raw.get("include", [])
+    if not isinstance(include, list) or any(not isinstance(item, str) for item in include):
+        raise ToolkitError(f"{source}.include must be a list of strings")
+    exclude = raw.get("exclude", [])
+    if not isinstance(exclude, list) or any(not isinstance(item, str) for item in exclude):
+        raise ToolkitError(f"{source}.exclude must be a list of strings")
+    aliases = raw.get("aliases", {})
+    if not isinstance(aliases, dict) or any(
+        not isinstance(key, str) or not isinstance(value, str) for key, value in aliases.items()
+    ):
+        raise ToolkitError(f"{source}.aliases must be an object of string-to-string mappings")
+    return ReferenceSymbolConfig(
+        adapter=adapter,
+        path=path,
+        paths=paths,
+        class_name=class_name,
+        member_map_name=member_map_name,
+        include=include,
+        exclude=exclude,
+        aliases=aliases,
+    )
+
+
+def _parse_reference_impl_config(raw: Any, *, source: str) -> ReferenceImplConfig | None:
+    if raw is None:
+        return None
+    if not isinstance(raw, dict):
+        raise ToolkitError(f"{source} must be an object")
+    repo = raw.get("repo")
+    ref = raw.get("ref", "main")
+    if not isinstance(repo, str) or not repo:
+        raise ToolkitError(f"{source}.repo must be a non-empty string")
+    if not isinstance(ref, str) or not ref:
+        raise ToolkitError(f"{source}.ref must be a non-empty string")
+    return ReferenceImplConfig(
+        repo=repo,
+        ref=ref,
+        resources=_parse_reference_symbol_config(raw.get("resources"), source=f"{source}.resources"),
+        types=_parse_reference_symbol_config(raw.get("types"), source=f"{source}.types"),
+    )
+
+
+def _parse_audit_config(raw: Any, *, source: str) -> AuditConfig:
+    if raw is None:
+        return AuditConfig()
+    if not isinstance(raw, dict):
+        raise ToolkitError(f"{source} must be an object")
+    excluded_schemas = raw.get("excluded_schemas", [])
+    if not isinstance(excluded_schemas, list) or any(not isinstance(item, str) for item in excluded_schemas):
+        raise ToolkitError(f"{source}.excluded_schemas must be a list of strings")
+    schema_aliases = raw.get("schema_aliases", {})
+    if not isinstance(schema_aliases, dict) or any(
+        not isinstance(key, str) or not isinstance(value, str) for key, value in schema_aliases.items()
+    ):
+        raise ToolkitError(f"{source}.schema_aliases must be an object of string-to-string mappings")
+    return AuditConfig(
+        excluded_schemas=excluded_schemas,
+        schema_aliases=schema_aliases,
+        reference_impl=_parse_reference_impl_config(raw.get("reference_impl"), source=f"{source}.reference_impl"),
+    )
+
+
 def load_toolkit_config(config_dir: Path) -> ToolkitConfig:
     config_dir = config_dir.resolve()
     if not config_dir.exists():
@@ -361,6 +483,7 @@ def load_toolkit_config(config_dir: Path) -> ToolkitConfig:
             source_file=raw.get("source_file"),
             experimental=raw.get("experimental", False),
             websocket_endpoints=raw.get("websocket_endpoints", {}),
+            audit=_parse_audit_config(raw.get("audit"), source=f"specs.{name}.audit"),
         )
 
     manifest_json = read_json_file(config_dir / "manifest.json", {})

@@ -15,7 +15,24 @@
         "prefix": ""
       },
       "description": "Core Gemini API - generation, embeddings, files, models, etc.",
-      "fetch_mode": "remote"
+      "fetch_mode": "remote",
+      "audit": {
+        "excluded_schemas": [],
+        "schema_aliases": {},
+        "reference_impl": {
+          "repo": "googleapis/python-genai",
+          "ref": "main",
+          "resources": {
+            "adapter": "python_client_members",
+            "path": "google/genai/client.py",
+            "class_name": "Client"
+          },
+          "types": {
+            "adapter": "python_single_file_classes",
+            "path": "google/genai/types.py"
+          }
+        }
+      }
     },
     "interactions": {
       "name": "Interactions API",
@@ -25,7 +42,27 @@
       "auth_env_vars": [],
       "experimental": true,
       "description": "Server-side state, agents, background execution",
-      "fetch_mode": "remote"
+      "fetch_mode": "remote",
+      "audit": {
+        "excluded_schemas": [],
+        "schema_aliases": {},
+        "reference_impl": {
+          "repo": "googleapis/python-genai",
+          "ref": "main",
+          "resources": {
+            "adapter": "python_client_members",
+            "path": "google/genai/client.py",
+            "class_name": "Client",
+            "include": [
+              "interactions"
+            ]
+          },
+          "types": {
+            "adapter": "python_init_exports",
+            "path": "google/genai/_interactions/types/__init__.py"
+          }
+        }
+      }
     }
   },
   "specs_dir": "packages/googleai_dart/specs",

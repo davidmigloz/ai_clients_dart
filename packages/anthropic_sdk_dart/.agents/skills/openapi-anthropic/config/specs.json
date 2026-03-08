@@ -7,7 +7,23 @@
       "requires_auth": false,
       "auth_env_vars": [],
       "description": "Anthropic API for Claude models",
-      "fetch_mode": "remote"
+      "fetch_mode": "remote",
+      "audit": {
+        "excluded_schemas": [],
+        "schema_aliases": {},
+        "reference_impl": {
+          "repo": "anthropics/anthropic-sdk-python",
+          "ref": "main",
+          "resources": {
+            "adapter": "python_stainless_resources",
+            "path": "src/anthropic/resources"
+          },
+          "types": {
+            "adapter": "python_init_exports",
+            "path": "src/anthropic/types/__init__.py"
+          }
+        }
+      }
     }
   },
   "preflight": {

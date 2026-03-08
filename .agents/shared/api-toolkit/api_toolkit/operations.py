@@ -1,15 +1,21 @@
 from __future__ import annotations
 
+import ast
+import io
 import json
 import os
 import re
 import shutil
 import subprocess
+import tarfile
+import tempfile
 from collections import defaultdict
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 
 from .config import (
     AuthConfig,
@@ -18,6 +24,8 @@ from .config import (
     EXIT_USAGE,
     DocumentationConfig,
     ManifestEntry,
+    ReferenceImplConfig,
+    ReferenceSymbolConfig,
     SpecConfig,
     ToolkitConfig,
     ToolkitError,
@@ -41,7 +49,9 @@ from .dart_inspect import (
     contains_all_names,
     extract_class_block,
     extract_fields,
+    extract_from_json_keys,
     extract_method_body,
+    extract_public_methods,
     find_declared_classes,
     read_text,
     snake_case,
@@ -55,6 +65,9 @@ MAX_VERSION_HISTORY = 10
 VERSION_SEGMENT_RE = re.compile(r"^v\d+")
 PART_OF_RE = re.compile(r"\bpart of\b")
 WORKSPACE_BLOCK_RE = re.compile(r"workspace:\n((?:\s+- .+\n)+)")
+DART_EXPORT_DIRECTIVE_RE = re.compile(r"\bexport\b[\s\S]*?;")
+DART_QUOTED_PATH_RE = re.compile(r"""(['"])([^'"]+\.dart)\1""")
+DART_RESOURCE_GETTER_RE = re.compile(r"\b([A-Z]\w*Resource)\??\s+get\s+(\w+)\s*(?:=>|{)")
 
 
 @dataclass(frozen=True, slots=True)
@@ -1357,6 +1370,1037 @@ def _verify_docs(config: ToolkitConfig) -> tuple[int, dict[str, Any]]:
     }
 
 
+class _ReferenceUnavailableError(RuntimeError):
+    pass
+
+
+def _audit_issue(check: str, level: str, name: str, message: str, *, file: str | None = None) -> dict[str, Any]:
+    issue = _type_issue(level, name, message, file=file)
+    issue["check"] = check
+    return issue
+
+
+def _iter_schema_refs(node: Any) -> set[str]:
+    refs: set[str] = set()
+    if isinstance(node, dict):
+        ref = node.get("$ref")
+        if isinstance(ref, str):
+            refs.add(ref.split("/")[-1])
+        discriminator = node.get("discriminator", {})
+        if isinstance(discriminator, dict):
+            mapping = discriminator.get("mapping", {})
+            if isinstance(mapping, dict):
+                for target in mapping.values():
+                    if isinstance(target, str):
+                        refs.add(target.split("/")[-1])
+        for value in node.values():
+            refs.update(_iter_schema_refs(value))
+    elif isinstance(node, list):
+        for item in node:
+            refs.update(_iter_schema_refs(item))
+    return refs
+
+
+def _iter_content_schema_refs(content: Any) -> set[str]:
+    refs: set[str] = set()
+    if not isinstance(content, dict):
+        return refs
+    for media in content.values():
+        if not isinstance(media, dict):
+            continue
+        refs.update(_iter_schema_refs(media.get("schema")))
+    return refs
+
+
+def _iter_request_schema_refs(request_body: Any) -> set[str]:
+    if not isinstance(request_body, dict):
+        return set()
+    return _iter_content_schema_refs(request_body.get("content", {}))
+
+
+def _iter_response_schema_refs(responses: Any) -> set[str]:
+    refs: set[str] = set()
+    if not isinstance(responses, dict):
+        return refs
+    for status, response in responses.items():
+        if not str(status).startswith("2") and status != "default":
+            continue
+        if not isinstance(response, dict):
+            continue
+        refs.update(_iter_content_schema_refs(response.get("content", {})))
+    return refs
+
+
+def _iter_parameter_schema_refs(
+    parameters: Any,
+    spec_payload: dict[str, Any],
+    *,
+    resolving_parameters: tuple[str, ...] = (),
+) -> set[str]:
+    refs: set[str] = set()
+    if not isinstance(parameters, list):
+        return refs
+    component_parameters = spec_payload.get("components", {}).get("parameters", {})
+    for parameter in parameters:
+        if not isinstance(parameter, dict):
+            continue
+        ref = parameter.get("$ref")
+        if isinstance(ref, str):
+            if ref.startswith("#/components/parameters/"):
+                parameter_name = ref.split("/")[-1]
+                if parameter_name in resolving_parameters:
+                    continue
+                refs.update(
+                    _iter_parameter_schema_refs(
+                        [component_parameters.get(parameter_name)],
+                        spec_payload,
+                        resolving_parameters=(*resolving_parameters, parameter_name),
+                    )
+                )
+                continue
+            refs.update(_iter_schema_refs(parameter))
+            continue
+        refs.update(_iter_schema_refs(parameter.get("schema")))
+        refs.update(_iter_content_schema_refs(parameter.get("content", {})))
+    return refs
+
+
+def _included_schema_names(
+    config: ToolkitConfig,
+    spec_name: str,
+    spec_payload: dict[str, Any],
+    *,
+    include_excluded: bool,
+) -> list[str]:
+    spec = config.specs[spec_name]
+    excluded_paths = config.manifest.coverage.get("excluded_paths", [])
+    excluded_tags = set(config.manifest.coverage.get("excluded_tags", []))
+    root_schemas: set[str] = set()
+    for path, path_payload in spec_payload.get("paths", {}).items():
+        if not isinstance(path_payload, dict):
+            continue
+        for method in HTTP_METHODS:
+            operation = path_payload.get(method)
+            if not isinstance(operation, dict):
+                continue
+            if not include_excluded:
+                if any(re.match(pattern, path) for pattern in excluded_paths):
+                    continue
+                if excluded_tags and any(tag in excluded_tags for tag in operation.get("tags", [])):
+                    continue
+            root_schemas.update(_iter_parameter_schema_refs(path_payload.get("parameters"), spec_payload))
+            root_schemas.update(_iter_parameter_schema_refs(operation.get("parameters"), spec_payload))
+            root_schemas.update(_iter_request_schema_refs(operation.get("requestBody")))
+            root_schemas.update(_iter_response_schema_refs(operation.get("responses", {})))
+
+    all_schemas = spec_payload.get("components", {}).get("schemas", {})
+    pending = list(root_schemas)
+    included: set[str] = set()
+    while pending:
+        current = pending.pop()
+        if current in included or current not in all_schemas:
+            continue
+        included.add(current)
+        pending.extend(sorted(_iter_schema_refs(all_schemas[current]) - included))
+
+    excluded_schemas = set(spec.audit.excluded_schemas)
+    return sorted(name for name in included if name not in excluded_schemas)
+
+
+def _dart_models_root(config: ToolkitConfig) -> Path:
+    return config.package_root / config.package.models_dir
+
+
+def _dart_class_index(config: ToolkitConfig) -> dict[str, list[Path]]:
+    models_dir = _dart_models_root(config)
+    if not models_dir.exists():
+        return {}
+    skip_names = set(config.package.skip_files)
+    index: dict[str, list[Path]] = defaultdict(list)
+    for path in sorted(models_dir.rglob("*.dart")):
+        if path.name in skip_names or any(part.startswith(".") for part in path.parts):
+            continue
+        for class_name in find_declared_classes(path):
+            index[class_name].append(path)
+    return {key: value for key, value in index.items()}
+
+
+def _resolve_audit_class_matches(
+    class_index: dict[str, list[Path]],
+    class_name: str,
+) -> list[tuple[str, Path]]:
+    return [(class_name, path) for path in class_index.get(class_name, [])]
+
+
+def _schema_manifest_match(config: ToolkitConfig, spec_name: str, schema_name: str) -> ManifestEntry | None:
+    candidates = [entry for entry in _entries_for_spec(config, spec_name) if entry.schema_name == schema_name or entry.key == schema_name]
+    if not candidates:
+        return None
+    exact_key = [entry for entry in candidates if entry.key == schema_name]
+    if exact_key:
+        return sorted(exact_key, key=lambda item: item.key)[0]
+    exact_schema = [entry for entry in candidates if entry.schema_name == schema_name]
+    if exact_schema:
+        return sorted(exact_schema, key=lambda item: item.key)[0]
+    return sorted(candidates, key=lambda item: item.key)[0]
+
+
+def _resolve_schema_alias_match(
+    config: ToolkitConfig,
+    spec_name: str,
+    alias_target: str,
+    class_index: dict[str, list[Path]],
+) -> tuple[str, ManifestEntry | None, str | None, Path | None, str | None]:
+    manifest_matches = _lookup_entries(config, alias_target, spec_name)
+    if len(manifest_matches) == 1:
+        entry = manifest_matches[0]
+        return "matched", entry, entry.dart_class, config.resolve_package_path(entry.file), "schema_alias"
+    if len(manifest_matches) > 1:
+        return "ambiguous", None, None, None, "schema_alias"
+    class_matches = _resolve_audit_class_matches(class_index, alias_target)
+    if len(class_matches) == 1:
+        class_name, file_path = class_matches[0]
+        return "matched", None, class_name, file_path, "schema_alias"
+    if len(class_matches) > 1:
+        return "ambiguous", None, None, None, "schema_alias"
+    return "unmatched", None, None, None, None
+
+
+def _heuristic_schema_match(
+    schema_name: str,
+    class_index: dict[str, list[Path]],
+) -> tuple[str, str | None, Path | None, str | None]:
+    candidates: list[tuple[str, str]] = [("exact_class", schema_name)]
+    if schema_name.endswith("Object") and len(schema_name) > len("Object"):
+        candidates.append(("strip_object_suffix", schema_name[: -len("Object")]))
+    if schema_name.startswith("Create") and schema_name.endswith("Request") and len(schema_name) > len("CreateRequest"):
+        candidates.append(("create_request_transform", schema_name[len("Create") :]))
+    if schema_name.startswith("Create") and schema_name.endswith("Response") and len(schema_name) > len("CreateResponse"):
+        candidates.append(("create_response_transform", schema_name[len("Create") :]))
+
+    for source, class_name in candidates:
+        matches = _resolve_audit_class_matches(class_index, class_name)
+        if not matches:
+            continue
+        if len(matches) == 1:
+            resolved_name, file_path = matches[0]
+            return "matched", resolved_name, file_path, source
+        return "ambiguous", None, None, source
+    return "unmatched", None, None, None
+
+
+def _schema_property_coverage(
+    config: ToolkitConfig,
+    file_path: Path,
+    class_name: str,
+    schema_name: str,
+    spec_payload: dict[str, Any],
+) -> dict[str, Any]:
+    if not file_path.exists():
+        return {
+            "covered_properties": [],
+            "missing_properties": sorted(_openapi_property_info(spec_payload, schema_name)),
+            "from_json_keys": [],
+            "declared_fields": [],
+        }
+
+    content = read_text(file_path)
+    class_block = extract_class_block(content, class_name)
+    fields = extract_fields(file_path, class_name)
+    constant_fields = _constant_getter_fields(class_block)
+    inherited_fields = _inherited_member_fields(class_block)
+    from_json_keys = extract_from_json_keys(content, class_name)
+    properties = _openapi_property_info(spec_payload, schema_name)
+    covered: list[str] = []
+    missing: list[str] = []
+    for property_name in sorted(properties):
+        field_name = camel_case(property_name)
+        if (
+            field_name in fields
+            or property_name in fields
+            or field_name in constant_fields
+            or property_name in constant_fields
+            or field_name in inherited_fields
+            or property_name in inherited_fields
+            or property_name in from_json_keys
+        ):
+            covered.append(property_name)
+        else:
+            missing.append(property_name)
+    return {
+        "covered_properties": covered,
+        "missing_properties": missing,
+        "from_json_keys": sorted(from_json_keys),
+        "declared_fields": sorted(set(fields) | constant_fields | inherited_fields),
+    }
+
+
+def _normalize_audit_scope(scope: str, status: str) -> bool:
+    if scope == "all":
+        return True
+    if scope == "matched":
+        return status == "matched"
+    return status != "matched"
+
+
+def _python_module(path: Path) -> ast.Module:
+    return ast.parse(path.read_text(), filename=str(path))
+
+
+def _python_decorator_name(node: ast.AST) -> str | None:
+    if isinstance(node, ast.Name):
+        return node.id
+    if isinstance(node, ast.Attribute):
+        return node.attr
+    if isinstance(node, ast.Call):
+        return _python_decorator_name(node.func)
+    return None
+
+
+def _python_method_defs(node: ast.ClassDef) -> list[ast.FunctionDef | ast.AsyncFunctionDef]:
+    return [
+        item
+        for item in node.body
+        if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
+    ]
+
+
+def _python_public_methods_from_class(node: ast.ClassDef) -> set[str]:
+    methods: set[str] = set()
+    for function in _python_method_defs(node):
+        if function.name.startswith("_") or function.name == "__init__":
+            continue
+        decorator_names = {_python_decorator_name(decorator) for decorator in function.decorator_list}
+        if decorator_names & {"property", "cached_property", "classmethod", "staticmethod"}:
+            continue
+        methods.add(function.name)
+    return methods
+
+
+def _python_top_level_classes(path: Path) -> dict[str, ast.ClassDef]:
+    return {
+        item.name: item
+        for item in _python_module(path).body
+        if isinstance(item, ast.ClassDef)
+    }
+
+
+def _python_class_index(root: Path) -> dict[str, list[Path]]:
+    index: dict[str, list[Path]] = defaultdict(list)
+    for path in sorted(root.rglob("*.py")):
+        if any(part.startswith(".") for part in path.parts):
+            continue
+        try:
+            classes = _python_top_level_classes(path)
+        except SyntaxError:
+            continue
+        for class_name in classes:
+            index[class_name].append(path)
+    return {key: value for key, value in index.items()}
+
+
+def _python_name_from_expr(node: ast.AST | None) -> str | None:
+    if node is None:
+        return None
+    if isinstance(node, ast.Name):
+        return node.id
+    if isinstance(node, ast.Attribute):
+        return node.attr
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return node.value
+    if isinstance(node, ast.Subscript):
+        return _python_name_from_expr(node.value)
+    return None
+
+
+def _python_property_members(node: ast.ClassDef) -> dict[str, str | None]:
+    members: dict[str, str | None] = {}
+    for function in _python_method_defs(node):
+        decorator_names = {_python_decorator_name(decorator) for decorator in function.decorator_list}
+        if function.name.startswith("_") or not (decorator_names & {"property", "cached_property"}):
+            continue
+        inferred = _python_name_from_expr(function.returns)
+        if inferred is None:
+            for child in ast.walk(function):
+                if isinstance(child, ast.Return):
+                    if isinstance(child.value, ast.Call):
+                        inferred = _python_name_from_expr(child.value.func)
+                        break
+                    inferred = _python_name_from_expr(child.value)
+                    if inferred:
+                        break
+        members[function.name] = inferred
+    return members
+
+
+def _python_init_members(node: ast.ClassDef) -> dict[str, str | None]:
+    members: dict[str, str | None] = {}
+    init_function = next((item for item in _python_method_defs(node) if item.name == "__init__"), None)
+    if init_function is None:
+        return members
+    for child in ast.walk(init_function):
+        if not isinstance(child, ast.Assign):
+            continue
+        for target in child.targets:
+            if isinstance(target, ast.Attribute) and isinstance(target.value, ast.Name) and target.value.id == "self":
+                class_name = _python_name_from_expr(child.value.func) if isinstance(child.value, ast.Call) else _python_name_from_expr(child.value)
+                members[target.attr] = class_name
+    return members
+
+
+def _python_member_map(node: ast.ClassDef, member_map_name: str | None) -> dict[str, str | None]:
+    if not member_map_name:
+        return {}
+    for item in node.body:
+        if not isinstance(item, ast.Assign):
+            continue
+        for target in item.targets:
+            if isinstance(target, ast.Name) and target.id == member_map_name and isinstance(item.value, ast.Dict):
+                mapping: dict[str, str | None] = {}
+                for key, value in zip(item.value.keys, item.value.values):
+                    key_name = _python_name_from_expr(key)
+                    value_name = _python_name_from_expr(value)
+                    if key_name:
+                        mapping[key_name] = value_name
+                return mapping
+    return {}
+
+
+def _download_reference_repo(repo: str, ref: str) -> tuple[Path, Path]:
+    url = f"https://codeload.github.com/{repo}/tar.gz/{ref}"
+    request = Request(url, headers={"User-Agent": "api-toolkit/1.0"})
+    temp_root = Path(tempfile.mkdtemp(prefix="api-toolkit-audit-"))
+    try:
+        with urlopen(request, timeout=30) as response:
+            archive = response.read()
+        with tarfile.open(fileobj=io.BytesIO(archive), mode="r:gz") as tar:
+            tar.extractall(temp_root)
+    except (HTTPError, URLError, OSError, tarfile.TarError) as exc:
+        shutil.rmtree(temp_root, ignore_errors=True)
+        raise _ReferenceUnavailableError(f"Failed to download reference implementation {repo}@{ref}: {exc}") from exc
+    extracted = next((path for path in temp_root.iterdir() if path.is_dir()), temp_root)
+    return extracted, temp_root
+
+
+def _reference_symbol_path(root: Path, relative: str) -> Path:
+    return (root / relative).resolve()
+
+
+def _apply_symbol_filters(values: set[str], config: ReferenceSymbolConfig) -> set[str]:
+    filtered = set(values)
+    if config.include:
+        filtered &= set(config.include)
+    if config.exclude:
+        filtered -= set(config.exclude)
+    return filtered
+
+
+def _apply_symbol_aliases(values: set[str], aliases: dict[str, str]) -> set[str]:
+    return {aliases.get(value, value) for value in values}
+
+
+def _normalize_reference_resource(name: str) -> str:
+    return _normalize_coverage_resource_name(name)
+
+
+def _normalize_reference_method(name: str) -> str:
+    return snake_case(name)
+
+
+def _reference_resource_name_from_path(base: Path, path: Path, aliases: dict[str, str]) -> str:
+    relative_parts = list(path.relative_to(base).with_suffix("").parts)
+    if base.name != "resources" and relative_parts and relative_parts[0] != base.name:
+        relative_parts = [base.name, *relative_parts]
+    collapsed_parts: list[str] = []
+    for part in relative_parts:
+        if collapsed_parts and collapsed_parts[-1] == part:
+            continue
+        collapsed_parts.append(part)
+    raw_name = "_".join(collapsed_parts)
+    alias_target = aliases.get(raw_name, aliases.get(path.stem, raw_name))
+    return _normalize_reference_resource(alias_target)
+
+
+def _reference_types_from_init_exports(root: Path, config: ReferenceSymbolConfig) -> set[str]:
+    path = _reference_symbol_path(root, config.path or "")
+    module = _python_module(path)
+    exported = set()
+    explicit_all: set[str] | None = None
+    for node in module.body:
+        if isinstance(node, ast.ImportFrom):
+            for alias in node.names:
+                if alias.name != "*" and not alias.name.startswith("_"):
+                    exported.add(alias.asname or alias.name)
+        elif isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name) and target.id == "__all__" and isinstance(node.value, (ast.List, ast.Tuple)):
+                    explicit_all = {
+                        item.value
+                        for item in node.value.elts
+                        if isinstance(item, ast.Constant) and isinstance(item.value, str)
+                    }
+    if explicit_all is not None:
+        exported &= explicit_all if exported else explicit_all
+    exported = _apply_symbol_filters(exported, config)
+    return _apply_symbol_aliases(exported, config.aliases)
+
+
+def _reference_types_from_single_file(root: Path, config: ReferenceSymbolConfig) -> set[str]:
+    values: set[str] = set()
+    for relative in config.all_paths:
+        path = _reference_symbol_path(root, relative)
+        values.update(name for name in _python_top_level_classes(path) if not name.startswith("_"))
+    values = _apply_symbol_filters(values, config)
+    return _apply_symbol_aliases(values, config.aliases)
+
+
+def _reference_types_from_recursive_paths(root: Path, config: ReferenceSymbolConfig) -> set[str]:
+    values: set[str] = set()
+    for relative in config.all_paths:
+        base = _reference_symbol_path(root, relative)
+        for path in sorted(base.rglob("*.py")):
+            if path.name == "__init__.py":
+                continue
+            values.update(name for name in _python_top_level_classes(path) if not name.startswith("_"))
+    values = _apply_symbol_filters(values, config)
+    return _apply_symbol_aliases(values, config.aliases)
+
+
+def _python_methods_for_class(
+    class_index: dict[str, list[Path]],
+    class_name: str | None,
+) -> tuple[set[str], str | None]:
+    if not class_name:
+        return set(), "Reference class could not be inferred"
+    paths = class_index.get(class_name, [])
+    if not paths:
+        return set(), f"Reference class '{class_name}' was not found"
+    if len(paths) > 1:
+        return set(), f"Reference class '{class_name}' is ambiguous across multiple files"
+    methods = _python_public_methods_from_class(_python_top_level_classes(paths[0])[class_name])
+    return {_normalize_reference_method(method) for method in methods}, None
+
+
+def _reference_resources_from_stainless(
+    root: Path,
+    config: ReferenceSymbolConfig,
+) -> tuple[dict[str, set[str]], list[dict[str, Any]]]:
+    resources: dict[str, set[str]] = {}
+    issues: list[dict[str, Any]] = []
+    base = _reference_symbol_path(root, config.path or "")
+    for path in sorted(base.rglob("*.py")):
+        if path.name == "__init__.py" or path.name.startswith("_"):
+            continue
+        classes = _python_top_level_classes(path)
+        resource_methods: set[str] = set()
+        for class_name, node in classes.items():
+            base_names = {_python_name_from_expr(base_node) for base_node in node.bases}
+            if not (base_names & {"SyncAPIResource", "AsyncAPIResource", "SyncPage", "AsyncPage"}):
+                continue
+            resource_methods.update(_normalize_reference_method(method) for method in _python_public_methods_from_class(node))
+        if not resource_methods:
+            continue
+        resource_name = _reference_resource_name_from_path(base, path, config.aliases)
+        if config.include and resource_name not in {_normalize_reference_resource(item) for item in config.include}:
+            continue
+        if resource_name in {_normalize_reference_resource(item) for item in config.exclude}:
+            continue
+        resources.setdefault(resource_name, set()).update(resource_methods)
+    return resources, issues
+
+
+def _reference_resources_from_client_members(
+    root: Path,
+    config: ReferenceSymbolConfig,
+    class_index: dict[str, list[Path]],
+) -> tuple[dict[str, set[str]], list[dict[str, Any]]]:
+    path = _reference_symbol_path(root, config.path or "")
+    classes = _python_top_level_classes(path)
+    if not config.class_name or config.class_name not in classes:
+        raise ToolkitError(f"Reference client class '{config.class_name}' not found in {path}")
+    client_class = classes[config.class_name]
+    members = {}
+    members.update(_python_property_members(client_class))
+    members.update(_python_init_members(client_class))
+    members.update(_python_member_map(client_class, config.member_map_name))
+    issues: list[dict[str, Any]] = []
+    resources: dict[str, set[str]] = {}
+    allowed_include = {_normalize_reference_resource(item) for item in config.include}
+    blocked = {_normalize_reference_resource(item) for item in config.exclude}
+    for member_name, class_name in sorted(members.items()):
+        resource_name = _normalize_reference_resource(config.aliases.get(member_name, member_name))
+        if allowed_include and resource_name not in allowed_include:
+            continue
+        if resource_name in blocked or member_name.startswith("_"):
+            continue
+        methods, error = _python_methods_for_class(class_index, class_name)
+        if error:
+            issues.append(_audit_issue("reference", "warning", resource_name, error))
+        resources[resource_name] = methods
+    return resources, issues
+
+
+def _reference_global_methods_from_client(
+    root: Path,
+    config: ReferenceSymbolConfig,
+) -> tuple[set[str], list[dict[str, Any]]]:
+    path = _reference_symbol_path(root, config.path or "")
+    classes = _python_top_level_classes(path)
+    if not config.class_name or config.class_name not in classes:
+        raise ToolkitError(f"Reference client class '{config.class_name}' not found in {path}")
+    methods = _python_public_methods_from_class(classes[config.class_name])
+    normalized = {_normalize_reference_method(config.aliases.get(method, method)) for method in methods}
+    normalized = _apply_symbol_filters(normalized, config)
+    return normalized, []
+
+
+def _load_reference_resources(
+    root: Path,
+    reference: ReferenceImplConfig,
+    class_index: dict[str, list[Path]],
+) -> tuple[str, dict[str, set[str]] | set[str], list[dict[str, Any]]]:
+    if reference.resources is None:
+        return "none", {}, []
+    config = reference.resources
+    if config.adapter == "python_stainless_resources":
+        resources, issues = _reference_resources_from_stainless(root, config)
+        return "grouped", resources, issues
+    if config.adapter == "python_client_members":
+        resources, issues = _reference_resources_from_client_members(root, config, class_index)
+        return "grouped", resources, issues
+    if config.adapter == "python_client_methods":
+        methods, issues = _reference_global_methods_from_client(root, config)
+        return "global", methods, issues
+    raise ToolkitError(f"Unsupported reference resources adapter '{config.adapter}'")
+
+
+def _load_reference_types(root: Path, reference: ReferenceImplConfig) -> set[str]:
+    if reference.types is None:
+        return set()
+    config = reference.types
+    if config.adapter == "python_init_exports":
+        return _reference_types_from_init_exports(root, config)
+    if config.adapter == "python_single_file_classes":
+        return _reference_types_from_single_file(root, config)
+    if config.adapter == "python_recursive_classes":
+        return _reference_types_from_recursive_paths(root, config)
+    raise ToolkitError(f"Unsupported reference types adapter '{config.adapter}'")
+
+
+def _audit_dart_export_targets(path: Path) -> set[Path]:
+    targets: set[Path] = set()
+    for directive in DART_EXPORT_DIRECTIVE_RE.finditer(read_text(path)):
+        for _, relative_path in DART_QUOTED_PATH_RE.findall(directive.group(0)):
+            target = (path.parent / relative_path).resolve()
+            if target.exists():
+                targets.add(target)
+    return targets
+
+
+def _audit_dart_resource_sources(path: Path, visited: set[Path] | None = None) -> set[Path]:
+    visited = visited or set()
+    resolved_path = path.resolve()
+    if resolved_path in visited or not resolved_path.exists():
+        return set()
+    visited.add(resolved_path)
+    sources = {resolved_path}
+    for target in _audit_dart_export_targets(resolved_path):
+        sources.update(_audit_dart_resource_sources(target, visited))
+    return sources
+
+
+def _dart_resource_class_details(
+    class_name: str,
+    class_sources: dict[str, set[Path]],
+) -> tuple[set[str], list[tuple[str, str]]]:
+    methods: set[str] = set()
+    child_resources: set[tuple[str, str]] = set()
+    for source_path in sorted(class_sources.get(class_name, set())):
+        content = read_text(source_path)
+        class_block = extract_class_block(content, class_name)
+        if not class_block:
+            continue
+        methods.update(
+            _normalize_reference_method(method)
+            for method in extract_public_methods(source_path, class_name)
+        )
+        child_resources.update(
+            (getter_name, child_class)
+            for child_class, getter_name in DART_RESOURCE_GETTER_RE.findall(class_block)
+        )
+    return methods, sorted(child_resources)
+
+
+def _dart_resource_inventory(config: ToolkitConfig) -> tuple[dict[str, set[str]], set[str]]:
+    resources_dir = config.package_root / config.package.resources_dir
+    resources: dict[str, set[str]] = {}
+    global_methods: set[str] = set()
+    if not resources_dir.exists():
+        return resources, global_methods
+    class_sources: dict[str, set[Path]] = defaultdict(set)
+    root_resources: list[tuple[str, str]] = []
+    for path in sorted(resources_dir.rglob("*_resource.dart")):
+        resource_name = _normalize_reference_resource(path.stem)
+        class_name = to_pascal_case(path.stem)
+        root_resources.append((resource_name, class_name))
+        for source_path in sorted(_audit_dart_resource_sources(path)):
+            for declared_class in find_declared_classes(source_path):
+                if declared_class.endswith("Resource"):
+                    class_sources[declared_class].add(source_path)
+
+    class_details = {
+        class_name: _dart_resource_class_details(class_name, class_sources)
+        for class_name in sorted(class_sources)
+    }
+    referenced_children = {
+        child_class
+        for _, children in class_details.values()
+        for _, child_class in children
+        if child_class in class_details
+    }
+
+    visited: set[tuple[str, str]] = set()
+    for resource_name, class_name in root_resources:
+        if class_name in referenced_children:
+            continue
+        pending = [(resource_name, class_name)]
+        while pending:
+            current_name, current_class = pending.pop()
+            if (current_name, current_class) in visited or current_class not in class_details:
+                continue
+            visited.add((current_name, current_class))
+            methods, child_resources = class_details[current_class]
+            resources.setdefault(current_name, set()).update(methods)
+            global_methods.update(methods)
+            for getter_name, child_class in child_resources:
+                if child_class not in class_details:
+                    continue
+                child_name = f"{current_name}_{_normalize_reference_resource(getter_name)}"
+                pending.append((child_name, child_class))
+    return resources, global_methods
+
+
+def _dart_client_method_inventory(config: ToolkitConfig) -> set[str]:
+    client_dir = config.package_root / "lib" / "src" / "client"
+    if not client_dir.exists():
+        return set()
+    methods: set[str] = set()
+    for path in sorted(client_dir.glob("*_client.dart")):
+        for class_name in find_declared_classes(path):
+            if not class_name.endswith("Client"):
+                continue
+            methods.update(
+                _normalize_reference_method(method)
+                for method in extract_public_methods(path, class_name)
+            )
+    return methods
+
+
+def _load_optional_spec_payload(config: ToolkitConfig, spec_name: str) -> dict[str, Any] | None:
+    try:
+        spec_path = _selected_spec_path(config, spec_name, prefer_fetched=True)
+    except ToolkitError:
+        return None
+    return _load_spec_payload(spec_path)
+
+
+def _audit_schema_selector_candidates(config: ToolkitConfig, schema_filter: str) -> dict[str, set[str]]:
+    candidates: dict[str, set[str]] = defaultdict(set)
+    for entry in config.manifest.types.values():
+        if entry.key == schema_filter or entry.schema_name == schema_filter or entry.dart_class == schema_filter:
+            candidates[entry.spec].add(entry.key)
+    for spec_name in config.specs:
+        spec_payload = _load_optional_spec_payload(config, spec_name)
+        if spec_payload is None:
+            continue
+        if schema_filter in spec_payload.get("components", {}).get("schemas", {}):
+            candidates[spec_name].add(schema_filter)
+    return dict(candidates)
+
+
+def _format_audit_schema_selector_candidates(candidates: dict[str, set[str]]) -> str:
+    return ", ".join(
+        f"{spec_name}: {', '.join(sorted(values))}"
+        for spec_name, values in sorted(candidates.items())
+    )
+
+
+def _resolve_audit_spec_name(
+    config: ToolkitConfig,
+    requested_spec_name: str | None,
+    *,
+    checks: list[str],
+    schema_filter: str | None,
+) -> str:
+    if requested_spec_name:
+        return config.get_spec(requested_spec_name)[0]
+    if "schema" not in checks or not schema_filter:
+        return config.get_spec(None)[0]
+    candidates = _audit_schema_selector_candidates(config, schema_filter)
+    if not candidates:
+        raise ToolkitError(f"Unknown schema '{schema_filter}'")
+    if len(candidates) > 1:
+        raise ToolkitError(
+            f"Schema selector '{schema_filter}' is ambiguous across specs. "
+            f"Use --spec-name. Candidates: {_format_audit_schema_selector_candidates(candidates)}"
+        )
+    return next(iter(candidates))
+
+
+def _resolve_audit_schema_filter(
+    config: ToolkitConfig,
+    spec_name: str,
+    schema_filter: str | None,
+    spec_payload: dict[str, Any],
+) -> str | None:
+    if not schema_filter:
+        return None
+    matches = _lookup_entries(config, schema_filter, spec_name)
+    if len(matches) == 1:
+        return matches[0].schema_name
+    if len(matches) > 1:
+        candidates = ", ".join(sorted(entry.key for entry in matches))
+        raise ToolkitError(
+            f"Schema selector '{schema_filter}' is ambiguous in spec '{spec_name}'. Candidates: {candidates}"
+        )
+    available_schemas = set(spec_payload.get("components", {}).get("schemas", {}))
+    if schema_filter in available_schemas:
+        return schema_filter
+    raise ToolkitError(f"Unknown schema '{schema_filter}'")
+
+
+def _run_schema_audit(
+    config: ToolkitConfig,
+    spec_name: str,
+    spec_payload: dict[str, Any],
+    *,
+    scope: str,
+    schema_filter: str | None,
+    include_excluded: bool,
+) -> dict[str, Any]:
+    audit = config.specs[spec_name].audit
+    class_index = _dart_class_index(config)
+    included = _included_schema_names(config, spec_name, spec_payload, include_excluded=include_excluded)
+    available_schemas = set(spec_payload.get("components", {}).get("schemas", {}))
+    resolved_schema_filter = _resolve_audit_schema_filter(config, spec_name, schema_filter, spec_payload)
+    if resolved_schema_filter and resolved_schema_filter not in included and resolved_schema_filter in available_schemas:
+        included.append(resolved_schema_filter)
+        included = sorted(set(included))
+
+    issues: list[dict[str, Any]] = []
+    schema_items: list[dict[str, Any]] = []
+    for schema_name in included:
+        if resolved_schema_filter and schema_name != resolved_schema_filter:
+            continue
+
+        manifest_entry = _schema_manifest_match(config, spec_name, schema_name)
+        status = "unmatched"
+        source = None
+        class_name = None
+        file_path: Path | None = None
+        manifest_key = None
+
+        if manifest_entry is not None:
+            status = "matched"
+            source = "manifest"
+            class_name = manifest_entry.dart_class
+            file_path = config.resolve_package_path(manifest_entry.file)
+            manifest_key = manifest_entry.key
+        elif schema_name in audit.schema_aliases:
+            status, alias_entry, class_name, file_path, source = _resolve_schema_alias_match(
+                config, spec_name, audit.schema_aliases[schema_name], class_index
+            )
+            if alias_entry is not None:
+                manifest_key = alias_entry.key
+                class_name = alias_entry.dart_class
+                file_path = config.resolve_package_path(alias_entry.file)
+        else:
+            status, class_name, file_path, source = _heuristic_schema_match(schema_name, class_index)
+
+        item = {
+            "schema_name": schema_name,
+            "status": status,
+            "source": source,
+            "manifest_key": manifest_key,
+            "dart_class": class_name,
+            "file": str(file_path.relative_to(config.package_root)) if file_path and file_path.exists() else (str(file_path) if file_path else None),
+            "covered_properties": [],
+            "missing_properties": [],
+        }
+        if status == "matched" and class_name and file_path is not None:
+            coverage = _schema_property_coverage(config, file_path, class_name, schema_name, spec_payload)
+            item.update(coverage)
+            if coverage["missing_properties"]:
+                issues.append(
+                    _audit_issue(
+                        "schema",
+                        "warning",
+                        schema_name,
+                        f"Matched Dart model is missing properties: {', '.join(coverage['missing_properties'])}",
+                        file=item["file"],
+                    )
+                )
+        elif status == "ambiguous":
+            issues.append(_audit_issue("schema", "warning", schema_name, f"Schema match is ambiguous after applying '{source}'"))
+        else:
+            issues.append(_audit_issue("schema", "warning", schema_name, "Schema has no Dart model match"))
+
+        if _normalize_audit_scope(scope, status):
+            schema_items.append(item)
+
+    matched_count = sum(1 for item in schema_items if item["status"] == "matched")
+    ambiguous_count = sum(1 for item in schema_items if item["status"] == "ambiguous")
+    unmatched_count = sum(1 for item in schema_items if item["status"] == "unmatched")
+    return {
+        "status": "ok",
+        "scope": scope,
+        "schema_filter": resolved_schema_filter,
+        "included_schema_count": len(included),
+        "returned_schema_count": len(schema_items),
+        "matched_schema_count": matched_count,
+        "ambiguous_schema_count": ambiguous_count,
+        "unmatched_schema_count": unmatched_count,
+        "schemas": schema_items,
+        "issues": issues,
+    }
+
+
+def _run_reference_audit(config: ToolkitConfig, spec_name: str) -> dict[str, Any]:
+    reference = config.specs[spec_name].audit.reference_impl
+    if reference is None:
+        raise ToolkitError(f"Spec '{spec_name}' has no audit.reference_impl configuration")
+
+    try:
+        repo_root, temp_root = _download_reference_repo(reference.repo, reference.ref)
+    except _ReferenceUnavailableError as exc:
+        issue = _audit_issue("reference", "warning", "reference_impl", str(exc))
+        return {
+            "status": "unavailable",
+            "repo": reference.repo,
+            "ref": reference.ref,
+            "issues": [issue],
+        }
+
+    try:
+        python_index = _python_class_index(repo_root)
+        mode, reference_resources, issues = _load_reference_resources(repo_root, reference, python_index)
+        reference_types = _load_reference_types(repo_root, reference)
+        dart_resources, dart_resource_methods = _dart_resource_inventory(config)
+        dart_global_methods = dart_resource_methods | _dart_client_method_inventory(config)
+        dart_types = set(_dart_class_index(config))
+
+        missing_resources: list[str] = []
+        missing_methods: list[dict[str, Any]] = []
+        if mode == "grouped":
+            grouped = reference_resources if isinstance(reference_resources, dict) else {}
+            for resource_name, methods in sorted(grouped.items()):
+                if resource_name not in dart_resources:
+                    missing_resources.append(resource_name)
+                    issues.append(_audit_issue("reference", "warning", resource_name, "Reference resource has no Dart counterpart"))
+                    continue
+                gaps = sorted(methods - dart_resources[resource_name])
+                if gaps:
+                    missing_methods.append({"resource": resource_name, "methods": gaps})
+                    issues.append(
+                        _audit_issue(
+                            "reference",
+                            "warning",
+                            resource_name,
+                            f"Dart resource is missing reference methods: {', '.join(gaps)}",
+                        )
+                    )
+        else:
+            global_methods = reference_resources if isinstance(reference_resources, set) else set()
+            gaps = sorted(global_methods - dart_global_methods)
+            if gaps:
+                missing_methods.append({"resource": "*", "methods": gaps})
+                issues.append(
+                    _audit_issue(
+                        "reference",
+                        "warning",
+                        "global_methods",
+                        f"Dart client is missing reference methods: {', '.join(gaps)}",
+                    )
+                )
+
+        missing_types = sorted(reference_types - dart_types)
+        if missing_types:
+            issues.append(
+                _audit_issue(
+                    "reference",
+                    "warning",
+                    "types",
+                    f"Dart models are missing reference types: {', '.join(missing_types)}",
+                )
+            )
+
+        return {
+            "status": "ok",
+            "repo": reference.repo,
+            "ref": reference.ref,
+            "mode": mode,
+            "reference_resource_count": len(reference_resources) if isinstance(reference_resources, dict) else 0,
+            "reference_method_count": len(reference_resources) if isinstance(reference_resources, set) else 0,
+            "reference_type_count": len(reference_types),
+            "dart_resource_count": len(dart_resources),
+            "dart_type_count": len(dart_types),
+            "missing_resources": missing_resources,
+            "missing_methods": missing_methods,
+            "missing_types": missing_types,
+            "issues": issues,
+        }
+    finally:
+        shutil.rmtree(temp_root, ignore_errors=True)
+
+
+def command_audit(args: Any) -> tuple[int, dict[str, Any]]:
+    config = load_toolkit_config(args.config_dir)
+    if config.manifest.surface != "openapi":
+        raise ToolkitError("The audit command currently supports OpenAPI skills only")
+
+    checks = ["schema", "reference"] if args.checks == "all" else [args.checks]
+    spec_name = _resolve_audit_spec_name(config, args.spec_name, checks=checks, schema_filter=args.schema)
+    spec_payload = (
+        _load_spec_payload(_selected_spec_path(config, spec_name, prefer_fetched=True))
+        if "schema" in checks
+        else None
+    )
+    results: dict[str, Any] = {}
+    issues: list[dict[str, Any]] = []
+
+    for check in checks:
+        if check == "schema":
+            if spec_payload is None:
+                raise ToolkitError(f"No spec found for '{spec_name}'")
+            result = _run_schema_audit(
+                config,
+                spec_name,
+                spec_payload,
+                scope=args.scope,
+                schema_filter=args.schema,
+                include_excluded=args.include_excluded,
+            )
+        elif check == "reference":
+            result = _run_reference_audit(config, spec_name)
+        else:  # pragma: no cover - argparse prevents this
+            raise ToolkitError(f"Unsupported audit check '{check}'")
+        results[check] = result
+        issues.extend(result.get("issues", []))
+
+    return EXIT_SUCCESS, {
+        "command": "audit",
+        "surface": config.manifest.surface,
+        "spec_name": spec_name,
+        "checks": checks,
+        "results": results,
+        "issues": issues,
+        "summary": {
+            "warning_count": sum(1 for issue in issues if issue["level"] == "warning"),
+            "info_count": sum(1 for issue in issues if issue["level"] == "info"),
+            "checks_with_findings": [name for name, result in results.items() if result.get("issues")],
+            "unavailable_checks": [name for name, result in results.items() if result.get("status") == "unavailable"],
+        },
+    }
 def _emit_review_changelog(config: ToolkitConfig, diff: dict[str, Any]) -> str:
     lines = [f"# {config.package.changelog_title}", ""]
     if config.manifest.surface == "openapi":
@@ -2012,6 +3056,10 @@ def command_create(args: Any) -> tuple[int, dict[str, Any]]:
                 else None,
                 "description": f"{args.display_name} API",
                 "source_file": "specs/openapi.source.json" if args.spec_file else None,
+                "audit": {
+                    "excluded_schemas": [],
+                    "schema_aliases": {},
+                },
             }
         },
         "specs_dir": f"packages/{args.package_name}/specs",
@@ -2236,6 +3284,7 @@ def command_describe(args: Any) -> tuple[int, dict[str, Any]]:
                 "requires_auth": item.requires_auth,
                 "auth_env_vars": item.auth_env_vars,
                 "auth": asdict(item.auth) if item.auth else None,
+                "audit": asdict(item.audit),
                 "experimental": item.experimental,
                 "websocket_endpoints": item.websocket_endpoints,
             }

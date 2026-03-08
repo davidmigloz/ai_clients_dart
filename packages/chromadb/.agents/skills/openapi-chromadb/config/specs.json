@@ -7,7 +7,24 @@
       "requires_auth": false,
       "auth_env_vars": [],
       "description": "ChromaDB vector database API",
-      "fetch_mode": "remote"
+      "fetch_mode": "remote",
+      "audit": {
+        "excluded_schemas": [],
+        "schema_aliases": {},
+        "reference_impl": {
+          "repo": "chroma-core/chroma",
+          "ref": "main",
+          "resources": {
+            "adapter": "python_client_methods",
+            "path": "chromadb/api/client.py",
+            "class_name": "Client"
+          },
+          "types": {
+            "adapter": "python_recursive_classes",
+            "path": "chromadb/api/models"
+          }
+        }
+      }
     }
   },
   "specs_dir": "packages/chromadb/specs",

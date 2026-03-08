@@ -7,7 +7,24 @@
       "requires_auth": false,
       "auth_env_vars": [],
       "description": "Ollama API for running LLMs locally",
-      "fetch_mode": "remote"
+      "fetch_mode": "remote",
+      "audit": {
+        "excluded_schemas": [],
+        "schema_aliases": {},
+        "reference_impl": {
+          "repo": "ollama/ollama-python",
+          "ref": "main",
+          "resources": {
+            "adapter": "python_client_methods",
+            "path": "ollama/_client.py",
+            "class_name": "Client"
+          },
+          "types": {
+            "adapter": "python_single_file_classes",
+            "path": "ollama/_types.py"
+          }
+        }
+      }
     }
   },
   "specs_dir": "packages/ollama_dart/specs",

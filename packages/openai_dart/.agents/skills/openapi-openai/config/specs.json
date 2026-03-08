@@ -7,7 +7,23 @@
       "requires_auth": false,
       "auth_env_vars": [],
       "description": "OpenAI API for GPT, DALL-E, Whisper, and more",
-      "fetch_mode": "remote"
+      "fetch_mode": "remote",
+      "audit": {
+        "excluded_schemas": [],
+        "schema_aliases": {},
+        "reference_impl": {
+          "repo": "openai/openai-python",
+          "ref": "main",
+          "resources": {
+            "adapter": "python_stainless_resources",
+            "path": "src/openai/resources"
+          },
+          "types": {
+            "adapter": "python_init_exports",
+            "path": "src/openai/types/__init__.py"
+          }
+        }
+      }
     }
   },
   "preflight": {

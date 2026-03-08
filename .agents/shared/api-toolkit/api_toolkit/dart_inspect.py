@@ -16,6 +16,7 @@ class DartField:
 FIELD_PATTERN = re.compile(r"^\s*final\s+([\w<>?,.\s]+?)\s+(\w+)\s*;", re.MULTILINE)
 GETTER_PATTERN = re.compile(r"^\s*([\w<>?,.\s]+?)\s+get\s+(\w+)\s*(?:=>|{)", re.MULTILINE)
 CLASS_PATTERN = re.compile(r"(?:sealed\s+class|class|enum)\s+(\w+)")
+FROM_JSON_KEY_RE = re.compile(r"""\bjson\s*\[\s*(['"])([^'"]+)\1\s*\]""")
 
 
 def read_text(path: Path) -> str:
@@ -104,6 +105,44 @@ def extract_method_body(content: str, method_pattern: str) -> str:
             if depth == 0:
                 return content[brace_index : position + 1]
     return ""
+
+
+def extract_from_json_keys(content: str, class_name: str) -> set[str]:
+    class_block = extract_class_block(content, class_name)
+    if not class_block:
+        return set()
+    body = extract_method_body(class_block, rf"factory\s+{re.escape(class_name)}\.fromJson")
+    if not body:
+        return set()
+    return {match.group(2) for match in FROM_JSON_KEY_RE.finditer(body)}
+
+
+def extract_public_methods(path: Path, class_name: str | None = None) -> set[str]:
+    content = read_text(path)
+    if class_name:
+        content = extract_class_block(content, class_name)
+    if not content:
+        return set()
+    methods: set[str] = set()
+    brace_depth = 0
+    for line in content.splitlines():
+        stripped = line.strip()
+        if brace_depth == 1:
+            if not stripped or stripped.startswith(
+                ("class ", "sealed class ", "enum ", "static ", "factory ", "const ", "@")
+            ):
+                brace_depth += line.count("{") - line.count("}")
+                continue
+            if " get " not in stripped and not stripped.startswith("get "):
+                match = re.match(r"(?:[\w<>,?.]+\s+)+([a-zA-Z]\w*)\s*\(", stripped)
+                if match:
+                    name = match.group(1)
+                    if not name.startswith("_") and name not in {"get", "set"} and (
+                        not class_name or name != class_name
+                    ):
+                        methods.add(name)
+        brace_depth += line.count("{") - line.count("}")
+    return methods
 
 
 def camel_case(name: str) -> str:

@@ -9,7 +9,13 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in os.sys.path:
     os.sys.path.insert(0, str(ROOT))
 
-from api_toolkit.dart_inspect import extract_class_block, extract_fields, extract_method_body
+from api_toolkit.dart_inspect import (
+    extract_class_block,
+    extract_fields,
+    extract_from_json_keys,
+    extract_method_body,
+    extract_public_methods,
+)
 
 
 class DartInspectTests(unittest.TestCase):
@@ -144,6 +150,74 @@ class DartInspectTests(unittest.TestCase):
         body = extract_method_body(content, r"toString\s*\(\)")
 
         self.assertEqual(body, "=> 'Example(id: $id)'")
+
+    def test_extract_from_json_keys_reads_single_and_double_quoted_keys(self) -> None:
+        content = (
+            "class Example {\n"
+            "  factory Example.fromJson(Map<String, dynamic> json) {\n"
+            "    return Example(\n"
+            "      id: json['id'] as String,\n"
+            '      displayName: json["display_name"] as String?,\n'
+            "    );\n"
+            "  }\n"
+            "}\n"
+        )
+
+        keys = extract_from_json_keys(content, "Example")
+
+        self.assertEqual(keys, {"id", "display_name"})
+
+    def test_extract_from_json_keys_returns_empty_set_for_missing_class(self) -> None:
+        content = "class Example { const Example(); }\n"
+
+        keys = extract_from_json_keys(content, "Missing")
+
+        self.assertEqual(keys, set())
+
+    def test_extract_public_methods_ignores_private_getters_static_and_constructors(self) -> None:
+        content = (
+            "class ExampleResource {\n"
+            "  ExampleResource();\n"
+            "  static void helper() {}\n"
+            "  String get value => 'x';\n"
+            "  Future<void> create() async {}\n"
+            "  Stream<String> listAll() async* {}\n"
+            "  void _private() {}\n"
+            "}\n"
+        )
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path = Path(tmp_dir) / "example_resource.dart"
+            path.write_text(content)
+
+            methods = extract_public_methods(path, "ExampleResource")
+
+        self.assertEqual(methods, {"create", "listAll"})
+
+    def test_extract_public_methods_ignores_method_body_statements(self) -> None:
+        content = (
+            "class ExampleResource {\n"
+            "  Future<void> create() async {\n"
+            "    return VersionResponse(version: '1');\n"
+            "  }\n"
+            "  Stream<String> streamValues() async* {\n"
+            "    await for (final value in source()) {\n"
+            "      yield value;\n"
+            "    }\n"
+            "  }\n"
+            "  List<String> parse() {\n"
+            "    return parseJsonList();\n"
+            "  }\n"
+            "}\n"
+        )
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path = Path(tmp_dir) / "example_resource.dart"
+            path.write_text(content)
+
+            methods = extract_public_methods(path, "ExampleResource")
+
+        self.assertEqual(methods, {"create", "parse", "streamValues"})
 
 
 if __name__ == "__main__":
