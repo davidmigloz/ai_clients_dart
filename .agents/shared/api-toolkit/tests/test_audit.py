@@ -17,6 +17,7 @@ if str(ROOT) not in os.sys.path:
 from api_toolkit.config import ReferenceImplConfig, ReferenceSymbolConfig, ToolkitError
 from api_toolkit.operations import (
     _ReferenceUnavailableError,
+    _download_reference_repo,
     _extract_tar_safely,
     _load_reference_resources,
     _load_reference_types,
@@ -1184,6 +1185,33 @@ class AuditCommandTests(unittest.TestCase):
                 with tarfile.open(archive_path, mode="r:gz") as tar:
                     with self.assertRaises(_ReferenceUnavailableError):
                         _extract_tar_safely(tar, Path(extract_dir))
+
+    def test_download_reference_repo_cleans_temp_root_when_safe_extract_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            temp_root = Path(tmp_dir) / "download-root"
+            temp_root.mkdir()
+            archive = io.BytesIO()
+            with tarfile.open(fileobj=archive, mode="w:gz") as tar:
+                payload = b"ok"
+                info = tarfile.TarInfo("reference-main/file.txt")
+                info.size = len(payload)
+                tar.addfile(info, io.BytesIO(payload))
+
+            class _FakeResponse(io.BytesIO):
+                def __enter__(self) -> "_FakeResponse":
+                    return self
+
+                def __exit__(self, exc_type, exc, tb) -> bool:
+                    self.close()
+                    return False
+
+            with patch("api_toolkit.operations.tempfile.mkdtemp", return_value=str(temp_root)):
+                with patch("api_toolkit.operations.urlopen", return_value=_FakeResponse(archive.getvalue())):
+                    with patch("api_toolkit.operations._extract_tar_safely", side_effect=_ReferenceUnavailableError("blocked")):
+                        with self.assertRaisesRegex(_ReferenceUnavailableError, "blocked"):
+                            _download_reference_repo("owner/repo", "main")
+
+            self.assertFalse(temp_root.exists())
 
 
 if __name__ == "__main__":

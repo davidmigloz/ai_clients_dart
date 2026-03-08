@@ -1776,6 +1776,9 @@ def _download_reference_repo(repo: str, ref: str) -> tuple[Path, Path]:
             shutil.copyfileobj(response, archive_file)
         with tarfile.open(archive_path, mode="r:gz") as tar:
             _extract_tar_safely(tar, temp_root)
+    except _ReferenceUnavailableError:
+        shutil.rmtree(temp_root, ignore_errors=True)
+        raise
     except (HTTPError, URLError, OSError, tarfile.TarError) as exc:
         shutil.rmtree(temp_root, ignore_errors=True)
         raise _ReferenceUnavailableError(f"Failed to download reference implementation {repo}@{ref}: {exc}") from exc
