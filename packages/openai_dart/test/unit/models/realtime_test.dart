@@ -132,7 +132,7 @@ void main() {
       final json = {
         'id': 'sess_abc123',
         'object': 'realtime.session',
-        'model': 'gpt-4o-realtime-preview',
+        'model': 'gpt-realtime-1.5',
         'modalities': ['text', 'audio'],
         'instructions': 'You are a helpful assistant.',
         'voice': 'alloy',
@@ -152,7 +152,7 @@ void main() {
       final session = RealtimeSession.fromJson(json);
 
       expect(session.id, 'sess_abc123');
-      expect(session.model, 'gpt-4o-realtime-preview');
+      expect(session.model, 'gpt-realtime-1.5');
       expect(session.modalities, ['text', 'audio']);
       expect(session.voice, RealtimeVoice.alloy);
       expect(session.inputAudioFormat, RealtimeAudioFormat.pcm16);
@@ -168,7 +168,7 @@ void main() {
       final json = {
         'id': 'sess_abc123',
         'object': 'realtime.session',
-        'model': 'gpt-4o-realtime-preview',
+        'model': 'gpt-realtime-1.5',
         'max_response_output_tokens': 4096,
       };
 
@@ -182,7 +182,7 @@ void main() {
       const session = RealtimeSession(
         id: 'sess_abc123',
         object: 'realtime.session',
-        model: 'gpt-4o-realtime-preview',
+        model: 'gpt-realtime-1.5',
         voice: RealtimeVoice.shimmer,
         inputAudioFormat: RealtimeAudioFormat.g711Ulaw,
         toolChoice: RealtimeToolChoiceRequired(),

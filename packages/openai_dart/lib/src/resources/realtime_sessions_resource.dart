@@ -18,7 +18,7 @@ import 'base_resource.dart';
 /// // Create a realtime session with ephemeral key
 /// final session = await client.realtimeSessions.create(
 ///   RealtimeSessionCreateRequest(
-///     model: 'gpt-4o-realtime-preview',
+///     model: 'gpt-realtime-1.5',
 ///     voice: RealtimeVoice.alloy,
 ///   ),
 /// );
@@ -74,7 +74,7 @@ class RealtimeSessionsResource extends ResourceBase {
   /// ```dart
   /// final session = await client.realtimeSessions.create(
   ///   RealtimeSessionCreateRequest(
-  ///     model: 'gpt-4o-realtime-preview',
+  ///     model: 'gpt-realtime-1.5',
   ///     voice: RealtimeVoice.alloy,
   ///     instructions: 'You are a helpful assistant.',
   ///     turnDetection: TurnDetection(
@@ -175,7 +175,7 @@ class RealtimeSessionsResource extends ResourceBase {
   ///   RealtimeClientSecretCreateRequest(
   ///     expiresAfter: ExpiresAfter(anchor: 'created_at', seconds: 3600),
   ///     session: RealtimeSessionCreateRequest(
-  ///       model: 'gpt-4o-realtime-preview',
+  ///       model: 'gpt-realtime-1.5',
   ///       voice: RealtimeVoice.shimmer,
   ///     ),
   ///   ),
@@ -245,7 +245,7 @@ class RealtimeCallsResource extends ResourceBase {
   ///   RealtimeCallCreateRequest(
   ///     sdp: myPeerConnection.localDescription.sdp,
   ///     session: RealtimeSessionCreateRequest(
-  ///       model: 'gpt-4o-realtime-preview',
+  ///       model: 'gpt-realtime-1.5',
   ///       voice: RealtimeVoice.alloy,
   ///     ),
   ///   ),

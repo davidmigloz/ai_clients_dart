@@ -62,7 +62,7 @@ class ExpiresAfter {
 ///   RealtimeClientSecretCreateRequest(
 ///     expiresAfter: ExpiresAfter(anchor: 'created_at', seconds: 3600),
 ///     session: RealtimeSessionCreateRequest(
-///       model: 'gpt-4o-realtime-preview',
+///       model: 'gpt-realtime-1.5',
 ///       voice: RealtimeVoice.alloy,
 ///     ),
 ///   ),

@@ -701,7 +701,7 @@ import 'package:openai_dart/openai_dart_realtime.dart' as realtime;
 
 // Connect to a realtime session
 final session = await client.realtime.connect(
-  model: 'gpt-4o-realtime-preview',
+  model: 'gpt-realtime-1.5',
   config: realtime.SessionUpdateConfig(
     voice: 'alloy',
     instructions: 'You are a helpful assistant.',

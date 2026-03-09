@@ -13,7 +13,7 @@ import 'package:meta/meta.dart';
 ///
 /// ```dart
 /// final request = ChatCompletionCreateRequest(
-///   model: 'gpt-4o-audio-preview',
+///   model: 'gpt-audio-1.5',
 ///   messages: [...],
 ///   modalities: [ChatModality.text, ChatModality.audio],
 ///   audio: ChatAudioConfig(
@@ -54,7 +54,7 @@ enum ChatModality {
 
 /// Voice options for chat audio output.
 ///
-/// These voices are available for the `gpt-4o-audio-preview` model
+/// These voices are available for the `gpt-audio-1.5` model
 /// when generating audio responses.
 enum ChatAudioVoice {
   /// Alloy voice.
@@ -157,14 +157,14 @@ enum ChatAudioFormat {
 
 /// Configuration for audio output in chat completions.
 ///
-/// Used with `gpt-4o-audio-preview` to configure how audio responses
+/// Used with `gpt-audio-1.5` to configure how audio responses
 /// are generated.
 ///
 /// ## Example
 ///
 /// ```dart
 /// final request = ChatCompletionCreateRequest(
-///   model: 'gpt-4o-audio-preview',
+///   model: 'gpt-audio-1.5',
 ///   messages: [ChatMessage.user('Tell me a story.')],
 ///   modalities: [ChatModality.text, ChatModality.audio],
 ///   audio: ChatAudioConfig(

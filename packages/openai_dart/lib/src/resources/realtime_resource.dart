@@ -19,7 +19,7 @@ import 'realtime/websocket_connector.dart';
 /// ```dart
 /// // Connect to realtime session
 /// final session = await client.realtime.connect(
-///   model: 'gpt-4o-realtime-preview',
+///   model: 'gpt-realtime-1.5',
 /// );
 ///
 /// // Listen for events
@@ -49,7 +49,7 @@ class RealtimeResource extends ResourceBase {
   ///
   /// ## Parameters
   ///
-  /// - [model] - The model to use (e.g., 'gpt-4o-realtime-preview').
+  /// - [model] - The model to use (e.g., 'gpt-realtime-1.5').
   /// - [config] - Optional session configuration.
   ///
   /// ## Returns
@@ -67,7 +67,7 @@ class RealtimeResource extends ResourceBase {
   ///
   /// ```dart
   /// final session = await client.realtime.connect(
-  ///   model: 'gpt-4o-realtime-preview',
+  ///   model: 'gpt-realtime-1.5',
   ///   config: SessionUpdateConfig(
   ///     voice: 'alloy',
   ///     instructions: 'You are a helpful assistant.',

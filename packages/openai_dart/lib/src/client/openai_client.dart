@@ -629,7 +629,7 @@ class OpenAIClient {
   ///
   /// ```dart
   /// final session = await client.realtime.connect(
-  ///   model: 'gpt-4o-realtime-preview',
+  ///   model: 'gpt-realtime-1.5',
   /// );
   ///
   /// session.events.listen((event) {
@@ -661,7 +661,7 @@ class OpenAIClient {
   /// // Create a session with ephemeral key
   /// final session = await client.realtimeSessions.create(
   ///   RealtimeSessionCreateRequest(
-  ///     model: 'gpt-4o-realtime-preview',
+  ///     model: 'gpt-realtime-1.5',
   ///     voice: RealtimeVoice.alloy,
   ///   ),
   /// );

@@ -97,7 +97,7 @@ class NoiseReductionConfig {
 /// ```dart
 /// final response = await client.realtimeSessions.create(
 ///   RealtimeSessionCreateRequest(
-///     model: 'gpt-4o-realtime-preview',
+///     model: 'gpt-realtime-1.5',
 ///     voice: RealtimeVoice.alloy,
 ///     instructions: 'You are a helpful assistant.',
 ///   ),
@@ -181,7 +181,7 @@ class RealtimeSessionCreateRequest {
   /// for realtime sessions. Only needed for certain endpoints like client secrets.
   final String? type;
 
-  /// The model to use (required for HTTP, e.g., 'gpt-4o-realtime-preview').
+  /// The model to use (required for HTTP, e.g., 'gpt-realtime-1.5').
   final String model;
 
   /// The modalities enabled (e.g., ["text", "audio"]).

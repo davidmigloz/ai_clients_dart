@@ -15,16 +15,13 @@ void main() {
       // Test that buildUrl works correctly for the realtime endpoint
       final httpUrl = builder.buildUrl(
         '/realtime',
-        queryParams: {'model': 'gpt-4o-realtime-preview'},
+        queryParams: {'model': 'gpt-realtime-1.5'},
       );
 
       expect(httpUrl.scheme, equals('https'));
       expect(httpUrl.host, equals('api.openai.com'));
       expect(httpUrl.path, equals('/v1/realtime'));
-      expect(
-        httpUrl.queryParameters['model'],
-        equals('gpt-4o-realtime-preview'),
-      );
+      expect(httpUrl.queryParameters['model'], equals('gpt-realtime-1.5'));
 
       // Verify scheme conversion
       final wsUrl = httpUrl.replace(
@@ -33,7 +30,7 @@ void main() {
       expect(wsUrl.scheme, equals('wss'));
       expect(wsUrl.host, equals('api.openai.com'));
       expect(wsUrl.path, equals('/v1/realtime'));
-      expect(wsUrl.queryParameters['model'], equals('gpt-4o-realtime-preview'));
+      expect(wsUrl.queryParameters['model'], equals('gpt-realtime-1.5'));
     });
 
     test('buildUrl handles HTTP base URL (converts to WS)', () {
@@ -46,7 +43,7 @@ void main() {
 
       final httpUrl = builder.buildUrl(
         '/realtime',
-        queryParams: {'model': 'gpt-4o-realtime-preview'},
+        queryParams: {'model': 'gpt-realtime-1.5'},
       );
 
       // Verify scheme conversion for HTTP -> WS
@@ -70,7 +67,7 @@ void main() {
 
       final httpUrl = builder.buildUrl(
         '/realtime',
-        queryParams: {'model': 'gpt-4o-realtime-preview'},
+        queryParams: {'model': 'gpt-realtime-1.5'},
       );
 
       expect(httpUrl.scheme, equals('https'));
@@ -78,10 +75,7 @@ void main() {
       expect(httpUrl.path, equals('/openai/deployments/my-deploy/realtime'));
       // Both base URL params and request params should be present
       expect(httpUrl.queryParameters['api-version'], equals('2024-10-01'));
-      expect(
-        httpUrl.queryParameters['model'],
-        equals('gpt-4o-realtime-preview'),
-      );
+      expect(httpUrl.queryParameters['model'], equals('gpt-realtime-1.5'));
 
       // Verify scheme conversion
       final wsUrl = httpUrl.replace(

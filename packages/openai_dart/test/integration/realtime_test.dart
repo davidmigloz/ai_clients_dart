@@ -45,7 +45,7 @@ void main() {
 
         final response = await client!.realtimeSessions.create(
           const realtime.RealtimeSessionCreateRequest(
-            model: 'gpt-4o-realtime-preview',
+            model: 'gpt-realtime-1.5',
           ),
         );
 
@@ -72,7 +72,7 @@ void main() {
 
         final response = await client!.realtimeSessions.create(
           const realtime.RealtimeSessionCreateRequest(
-            model: 'gpt-4o-realtime-preview',
+            model: 'gpt-realtime-1.5',
             modalities: ['text', 'audio'],
             voice: realtime.RealtimeVoice.alloy,
             instructions: 'You are a helpful assistant.',
@@ -141,7 +141,7 @@ void main() {
             ),
             session: realtime.RealtimeSessionCreateRequest(
               type: 'realtime', // Required discriminator for client secrets
-              model: 'gpt-4o-realtime-preview',
+              model: 'gpt-realtime-1.5',
             ),
           ),
         );
@@ -171,7 +171,7 @@ void main() {
         }
 
         final connection = await client!.realtime.connect(
-          model: 'gpt-4o-realtime-preview',
+          model: 'gpt-realtime-1.5',
         );
 
         expect(connection.isClosed, isFalse);
@@ -191,7 +191,7 @@ void main() {
         }
 
         final connection = await client!.realtime.connect(
-          model: 'gpt-4o-realtime-preview',
+          model: 'gpt-realtime-1.5',
         );
 
         try {
@@ -220,7 +220,7 @@ void main() {
         }
 
         final connection = await client!.realtime.connect(
-          model: 'gpt-4o-realtime-preview',
+          model: 'gpt-realtime-1.5',
         );
 
         // Wait for session created
@@ -245,7 +245,7 @@ void main() {
 
         for (var i = 0; i < 2; i++) {
           final connection = await client!.realtime.connect(
-            model: 'gpt-4o-realtime-preview',
+            model: 'gpt-realtime-1.5',
           );
 
           await waitForEvent<realtime.SessionCreatedEvent>(connection);
@@ -275,7 +275,7 @@ void main() {
         }
 
         final connection = await client!.realtime.connect(
-          model: 'gpt-4o-realtime-preview',
+          model: 'gpt-realtime-1.5',
         );
 
         try {
@@ -317,7 +317,7 @@ void main() {
         }
 
         final connection = await client!.realtime.connect(
-          model: 'gpt-4o-realtime-preview',
+          model: 'gpt-realtime-1.5',
           config: const realtime.SessionUpdateConfig(
             voice: realtime.RealtimeVoice.echo,
             modalities: ['text', 'audio'],
@@ -361,7 +361,7 @@ void main() {
         }
 
         final connection = await client!.realtime.connect(
-          model: 'gpt-4o-realtime-preview',
+          model: 'gpt-realtime-1.5',
           config: const realtime.SessionUpdateConfig(modalities: ['text']),
         );
 
@@ -421,7 +421,7 @@ void main() {
         }
 
         final connection = await client!.realtime.connect(
-          model: 'gpt-4o-realtime-preview',
+          model: 'gpt-realtime-1.5',
           config: const realtime.SessionUpdateConfig(
             modalities: ['text'],
             tools: [
@@ -529,7 +529,7 @@ void main() {
         }
 
         final connection = await client!.realtime.connect(
-          model: 'gpt-4o-realtime-preview',
+          model: 'gpt-realtime-1.5',
           config: const realtime.SessionUpdateConfig(modalities: ['text']),
         );
 
@@ -577,7 +577,7 @@ void main() {
         }
 
         final connection = await client!.realtime.connect(
-          model: 'gpt-4o-realtime-preview',
+          model: 'gpt-realtime-1.5',
           config: const realtime.SessionUpdateConfig(modalities: ['text']),
         );
 
@@ -627,7 +627,7 @@ void main() {
         }
 
         final connection = await client!.realtime.connect(
-          model: 'gpt-4o-realtime-preview',
+          model: 'gpt-realtime-1.5',
           config: const realtime.SessionUpdateConfig(modalities: ['text']),
         );
 
@@ -686,7 +686,7 @@ void main() {
         }
 
         final connection = await client!.realtime.connect(
-          model: 'gpt-4o-realtime-preview',
+          model: 'gpt-realtime-1.5',
         );
 
         try {
@@ -736,7 +736,7 @@ void main() {
         final audioBytes = await audioFile.readAsBytes();
 
         final connection = await client!.realtime.connect(
-          model: 'gpt-4o-realtime-preview',
+          model: 'gpt-realtime-1.5',
           config: const realtime.SessionUpdateConfig(
             modalities: ['text', 'audio'],
             inputAudioFormat: realtime.RealtimeAudioFormat.pcm16,
@@ -817,7 +817,7 @@ void main() {
         }
 
         final connection = await client!.realtime.connect(
-          model: 'gpt-4o-realtime-preview',
+          model: 'gpt-realtime-1.5',
           config: const realtime.SessionUpdateConfig(
             modalities: ['text', 'audio'],
             inputAudioFormat: realtime.RealtimeAudioFormat.pcm16,

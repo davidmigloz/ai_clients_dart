@@ -351,7 +351,7 @@ void main() {
 
     test('supports modalities for audio output', () {
       final request = ChatCompletionCreateRequest(
-        model: 'gpt-4o-audio-preview',
+        model: 'gpt-audio-1.5',
         messages: [ChatMessage.user('Tell me a story.')],
         modalities: const [ChatModality.text, ChatModality.audio],
         audio: const ChatAudioConfig(

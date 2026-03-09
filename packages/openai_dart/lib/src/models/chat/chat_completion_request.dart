@@ -320,7 +320,7 @@ class ChatCompletionCreateRequest {
   /// Output modalities to request.
   ///
   /// Use `[ChatModality.text, ChatModality.audio]` to request both text
-  /// and audio output from audio-capable models like `gpt-4o-audio-preview`.
+  /// and audio output from audio-capable models like `gpt-audio-1.5`.
   final List<ChatModality>? modalities;
 
   /// Audio output configuration.
