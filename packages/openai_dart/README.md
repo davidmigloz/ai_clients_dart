@@ -103,6 +103,8 @@ Unofficial Dart client for the **[OpenAI API](https://platform.openai.com/docs/a
 ### Realtime API
 
 - WebSocket-based real-time conversations
+- WebRTC support via HTTP SDP signaling (`realtimeSessions.calls`)
+- Call management (create, accept, reject, refer, hangup)
 - Audio input/output streaming
 - Server and client events
 
@@ -234,7 +236,7 @@ Includes: Assistants, Threads, Messages, Runs, Vector Stores.
 import 'package:openai_dart/openai_dart_realtime.dart' as realtime;
 ```
 
-Includes: WebSocket-based real-time conversations with audio streaming.
+Includes: Real-time conversations via WebSocket (audio streaming) and WebRTC (HTTP-based SDP signaling).
 
 ### Handling Name Conflicts
 
@@ -515,6 +517,99 @@ print('Transcription: ${response.text}');
 
 </details>
 
+### Realtime API
+
+<details>
+<summary><b>WebSocket Connection Example</b></summary>
+
+```dart
+import 'package:openai_dart/openai_dart.dart';
+import 'package:openai_dart/openai_dart_realtime.dart' as realtime;
+
+final client = OpenAIClient.fromEnvironment();
+
+// Connect to a realtime session via WebSocket
+final session = await client.realtime.connect(
+  model: 'gpt-realtime-1.5',
+  config: const realtime.SessionUpdateConfig(
+    voice: realtime.RealtimeVoice.alloy,
+    instructions: 'You are a helpful assistant.',
+  ),
+);
+
+// Listen for events
+session.events.listen((event) {
+  switch (event) {
+    case realtime.SessionCreatedEvent(:final session):
+      print('Session created: ${session.id}');
+    case realtime.ResponseTextDeltaEvent(:final delta):
+      stdout.write(delta);
+    case realtime.ErrorEvent(:final error):
+      print('Error: ${error.message}');
+    default:
+      break;
+  }
+});
+
+// Send audio or create responses
+session.createResponse();
+
+// Close when done
+await session.close();
+client.close();
+```
+
+</details>
+
+<details>
+<summary><b>WebRTC Call Example</b></summary>
+
+> **Note:** For WebRTC peer connections in Flutter, use the
+> [`flutter_webrtc`](https://pub.dev/packages/flutter_webrtc) package.
+
+```dart
+import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:openai_dart/openai_dart.dart';
+import 'package:openai_dart/openai_dart_realtime.dart' as realtime;
+
+final client = OpenAIClient.fromEnvironment();
+
+// 1. Create a peer connection and generate an SDP offer
+final pc = await createPeerConnection({'iceServers': []});
+final offer = await pc.createOffer();
+await pc.setLocalDescription(offer);
+
+// 2. Send the SDP offer to OpenAI and get the SDP answer
+final sdpAnswer = await client.realtimeSessions.calls.create(
+  realtime.RealtimeCallCreateRequest(
+    sdp: offer.sdp!,
+    session: const realtime.RealtimeSessionCreateRequest(
+      model: 'gpt-realtime-1.5',
+      voice: realtime.RealtimeVoice.alloy,
+    ),
+  ),
+);
+
+// 3. Set the SDP answer to complete the WebRTC handshake
+await pc.setRemoteDescription(RTCSessionDescription(sdpAnswer, 'answer'));
+
+// Call management operations
+await client.realtimeSessions.calls.accept(callId);
+await client.realtimeSessions.calls.hangup(callId);
+await client.realtimeSessions.calls.refer(
+  callId,
+  realtime.RealtimeCallReferRequest(targetUri: 'tel:+14155550123'),
+);
+await client.realtimeSessions.calls.reject(
+  callId,
+  request: realtime.RealtimeCallRejectRequest(statusCode: 486),
+);
+
+client.close();
+```
+
+</details>
+
 ## Extension Methods
 
 The package provides convenient extension methods for common operations:
@@ -580,6 +675,7 @@ See the [example/](example/) directory for complete examples:
 | [`batches_example.dart`](example/batches_example.dart) | Batch processing for async jobs |
 | [`moderation_example.dart`](example/moderation_example.dart) | Content moderation |
 | [`web_search_example.dart`](example/web_search_example.dart) | Web search with Responses API |
+| [`realtime_example.dart`](example/realtime_example.dart) | Realtime API (WebSocket and WebRTC) |
 | [`fine_tuning_example.dart`](example/fine_tuning_example.dart) | Fine-tuning job management |
 
 ## API Coverage

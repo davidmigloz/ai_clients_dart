@@ -1,6 +1,7 @@
 /// Realtime API for OpenAI.
 ///
-/// Provides WebSocket-based real-time conversations with audio streaming.
+/// Provides real-time conversations via WebSocket (audio streaming) and
+/// WebRTC (HTTP-based SDP signaling with call management).
 ///
 /// Import with prefix to avoid naming conflicts with Responses API:
 /// ```dart
