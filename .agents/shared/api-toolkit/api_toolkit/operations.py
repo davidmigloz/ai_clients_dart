@@ -1644,7 +1644,10 @@ def _normalize_audit_scope(scope: str, status: str) -> bool:
 
 
 def _python_module(path: Path) -> ast.Module:
-    return ast.parse(path.read_text(), filename=str(path))
+    try:
+        return ast.parse(path.read_text(), filename=str(path))
+    except (OSError, UnicodeError, SyntaxError) as exc:
+        raise ToolkitError(f"Failed to load Python module from path '{path}': {exc}") from exc
 
 
 def _python_decorator_name(node: ast.AST) -> str | None:
@@ -1802,11 +1805,26 @@ def _extract_tar_safely(tar: tarfile.TarFile, destination: Path) -> None:
     if "filter" in inspect.signature(tar.extractall).parameters:
         tar.extractall(destination, filter="data")
     else:  # pragma: no cover - older Python fallback
-        tar.extractall(destination)
+        # Emulate filter="data" by excluding symlinks, hardlinks, and device files.
+        safe_members = [
+            m
+            for m in members
+            if not (m.issym() or m.islnk() or m.isdev())
+        ]
+        tar.extractall(destination, members=safe_members)
 
 
 def _reference_symbol_path(root: Path, relative: str) -> Path:
-    return (root / relative).resolve()
+    root_resolved = root.resolve()
+    resolved = (root_resolved / relative).resolve()
+    try:
+        resolved.relative_to(root_resolved)
+    except ValueError as exc:
+        raise ToolkitError(
+            f"Configured reference implementation path '{relative}' escapes "
+            f"the reference root '{root_resolved}'"
+        ) from exc
+    return resolved
 
 
 def _apply_symbol_filters(values: set[str], config: ReferenceSymbolConfig) -> set[str]:

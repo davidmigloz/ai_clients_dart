@@ -21,6 +21,8 @@ from api_toolkit.operations import (
     _extract_tar_safely,
     _load_reference_resources,
     _load_reference_types,
+    _python_module,
+    _reference_symbol_path,
     command_audit,
 )
 
@@ -1212,6 +1214,63 @@ class AuditCommandTests(unittest.TestCase):
                             _download_reference_repo("owner/repo", "main")
 
             self.assertFalse(temp_root.exists())
+
+    def test_extract_tar_safely_rejects_symlinks_in_fallback(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            archive_path = Path(tmp_dir) / "archive.tar.gz"
+            with tarfile.open(archive_path, mode="w:gz") as tar:
+                # Add a symlink member
+                info = tarfile.TarInfo("link")
+                info.type = tarfile.SYMTYPE
+                info.linkname = "/etc/passwd"
+                tar.addfile(info)
+                # Add a regular file
+                payload = b"safe"
+                info = tarfile.TarInfo("safe.txt")
+                info.size = len(payload)
+                tar.addfile(info, io.BytesIO(payload))
+
+            with tempfile.TemporaryDirectory() as extract_dir:
+                extract_path = Path(extract_dir)
+                with tarfile.open(archive_path, mode="r:gz") as tar:
+                    # Simulate old Python without filter parameter
+                    with patch.object(type(tar), "extractall", wraps=tar.extractall) as mock_extract:
+                        # Remove 'filter' from signature to trigger fallback
+                        import inspect
+                        orig_sig = inspect.signature(tar.extractall)
+                        fake_params = {k: v for k, v in orig_sig.parameters.items() if k != "filter"}
+                        fake_sig = orig_sig.replace(parameters=fake_params.values())
+                        with patch("api_toolkit.operations.inspect.signature", return_value=fake_sig):
+                            _extract_tar_safely(tar, extract_path)
+                    # Symlink should not have been extracted
+                    self.assertFalse((extract_path / "link").exists())
+                    # Regular file should have been extracted
+                    self.assertTrue((extract_path / "safe.txt").exists())
+
+    def test_reference_symbol_path_rejects_traversal(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            with self.assertRaises(ToolkitError):
+                _reference_symbol_path(root, "../../etc/passwd")
+
+    def test_reference_symbol_path_allows_valid_path(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            sub = root / "sub"
+            sub.mkdir()
+            result = _reference_symbol_path(root, "sub")
+            self.assertEqual(result, sub.resolve())
+
+    def test_python_module_wraps_file_errors(self) -> None:
+        with self.assertRaises(ToolkitError):
+            _python_module(Path("/nonexistent/path/module.py"))
+
+    def test_python_module_wraps_syntax_errors(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            bad_file = Path(tmp_dir) / "bad.py"
+            bad_file.write_text("def broken(:\n")
+            with self.assertRaises(ToolkitError):
+                _python_module(bad_file)
 
 
 if __name__ == "__main__":
