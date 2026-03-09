@@ -1695,7 +1695,7 @@ def _python_class_index(root: Path) -> dict[str, list[Path]]:
             continue
         try:
             classes = _python_top_level_classes(path)
-        except SyntaxError:
+        except (SyntaxError, ToolkitError):
             continue
         for class_name in classes:
             index[class_name].append(path)
