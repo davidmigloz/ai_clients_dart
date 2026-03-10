@@ -32,6 +32,7 @@ Stream<Map<String, dynamic>> parseSSE(Stream<List<int>> byteStream) async* {
         return;
       }
 
+      if (dataBuffer.isNotEmpty) dataBuffer.write('\n');
       dataBuffer.write(data);
     } else if (line.isEmpty && dataBuffer.isNotEmpty) {
       // Empty line signals end of event

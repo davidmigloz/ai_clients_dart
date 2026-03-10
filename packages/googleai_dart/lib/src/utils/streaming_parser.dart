@@ -30,7 +30,9 @@ Stream<Map<String, dynamic>> parseSSE(Stream<String> stream) async* {
       currentEvent = line.substring(6).trim();
     } else if (line.startsWith('data:')) {
       final data = line.substring(5).trim();
-      if (data.isNotEmpty && data != '[DONE]') {
+      if (data == '[DONE]') return;
+      if (data.isNotEmpty) {
+        if (dataBuffer.isNotEmpty) dataBuffer.write('\n');
         dataBuffer.write(data);
       }
     } else if (line.isEmpty && dataBuffer.isNotEmpty) {

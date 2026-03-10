@@ -29,7 +29,9 @@ class SseParser {
       if (line.startsWith('event:')) {
         currentEvent = line.substring(6).trim();
       } else if (line.startsWith('data:')) {
-        dataBuffer.write(line.substring(5).trim());
+        final data = line.substring(5).trim();
+        if (dataBuffer.isNotEmpty) dataBuffer.write('\n');
+        dataBuffer.write(data);
       } else if (line.isEmpty && dataBuffer.isNotEmpty) {
         // Empty line signals end of event
         final data = dataBuffer.toString();
@@ -81,6 +83,8 @@ extension SseEventExtension on Map<String, dynamic> {
 
   /// Creates a copy without the internal event type field.
   Map<String, dynamic> withoutEventType() {
-    return Map<String, dynamic>.from(this)..remove('_event');
+    return Map<String, dynamic>.from(this)
+      ..remove('_event')
+      ..remove('_rawData');
   }
 }

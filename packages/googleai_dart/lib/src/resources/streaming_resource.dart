@@ -120,7 +120,14 @@ mixin StreamingResource on ResourceBase {
         subscription = source.listen(
           (json) {
             if (!aborted && !controllerClosed) {
-              controller.add(fromJson(json));
+              try {
+                controller.add(fromJson(json));
+              } catch (e, st) {
+                controller.addError(e, st);
+                controllerClosed = true;
+                unawaited(subscription.cancel());
+                unawaited(controller.close());
+              }
             }
           },
           onError: (Object error, StackTrace stackTrace) {

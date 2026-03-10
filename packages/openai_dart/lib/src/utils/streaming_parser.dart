@@ -50,6 +50,7 @@ class SseParser {
           return;
         }
 
+        if (dataBuffer.isNotEmpty) dataBuffer.write('\n');
         dataBuffer.write(data);
       } else if (line.isEmpty && dataBuffer.isNotEmpty) {
         // Empty line signals end of event
@@ -196,6 +197,8 @@ extension SseEventExtension on Map<String, dynamic> {
 
   /// Creates a copy without the internal event type field.
   Map<String, dynamic> withoutEventType() {
-    return Map<String, dynamic>.from(this)..remove('_event');
+    return Map<String, dynamic>.from(this)
+      ..remove('_event')
+      ..remove('_rawData');
   }
 }

@@ -446,7 +446,7 @@ class AbortedException extends {PackageName}Exception {
 }
 
 class StreamException extends {PackageName}Exception {
-  final String? partialData;             // Raw JSON from the error event
+  final String? partialData;             // JSON payload from the error event (if any)
 }
 ```
 
