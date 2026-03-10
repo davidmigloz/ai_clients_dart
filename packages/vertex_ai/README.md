@@ -7,6 +7,9 @@
 
 Unofficial Dart client for the [Vertex AI](https://cloud.google.com/vertex-ai) API.
 
+> [!CAUTION]
+> **This package is deprecated.** Use [`googleai_dart`](https://pub.dev/packages/googleai_dart) instead, which provides a unified client for both the Google AI and Vertex AI Gemini APIs.
+
 ## Features
 
 - [Generative AI](https://cloud.google.com/vertex-ai/docs/generative-ai/learn/overview)
@@ -360,6 +363,10 @@ final res = await machineEngineQuery.indexEndpoints.findNeighbors(
 ```
 
 Docs: https://cloud.google.com/vertex-ai/docs/matching-engine/query-index-public-endpoint
+
+## Sponsor
+
+If these packages are useful to you or your company, please [sponsor the project](https://github.com/sponsors/davidmigloz). Development and maintenance are provided to the community for free, but integration tests against real APIs and the tooling required to build and verify releases still have real costs. Your support, at any level, helps keep these packages maintained and free for the Dart & Flutter community.
 
 ## License
 
