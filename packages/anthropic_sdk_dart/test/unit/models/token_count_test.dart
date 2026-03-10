@@ -37,6 +37,7 @@ void main() {
           },
         },
         'speed': 'fast',
+        'cache_control': {'type': 'ephemeral'},
       };
 
       final request = TokenCountRequest.fromJson(json);
@@ -50,6 +51,8 @@ void main() {
       expect(request.outputConfig, isNotNull);
       expect(request.outputConfig!.effort, EffortLevel.high);
       expect(request.speed, Speed.fast);
+      expect(request.cacheControl, isNotNull);
+      expect(request.cacheControl!.type, 'ephemeral');
     });
 
     test('fromJson deserializes with required fields only', () {
@@ -68,6 +71,7 @@ void main() {
       expect(request.toolChoice, isNull);
       expect(request.tools, isNull);
       expect(request.thinking, isNull);
+      expect(request.cacheControl, isNull);
     });
 
     test('fromJson deserializes system as string', () {
@@ -128,6 +132,7 @@ void main() {
       expect(json.containsKey('tool_choice'), isFalse);
       expect(json.containsKey('tools'), isFalse);
       expect(json.containsKey('thinking'), isFalse);
+      expect(json.containsKey('cache_control'), isFalse);
     });
 
     test('fromJson parses thinking config', () {
@@ -167,6 +172,7 @@ void main() {
         ],
         outputConfig: const OutputConfig(effort: EffortLevel.high),
         speed: Speed.fast,
+        cacheControl: const CacheControlEphemeral(),
       );
 
       final tokenRequest = TokenCountRequest.fromMessageCreateRequest(request);
@@ -179,6 +185,7 @@ void main() {
       expect(tokenRequest.tools, request.tools);
       expect(tokenRequest.outputConfig, request.outputConfig);
       expect(tokenRequest.speed, request.speed);
+      expect(tokenRequest.cacheControl, request.cacheControl);
     });
 
     test('omits fields not in TokenCountRequest', () {
@@ -204,6 +211,7 @@ void main() {
       expect(tokenRequest.tools, isNull);
       expect(tokenRequest.outputConfig, isNull);
       expect(tokenRequest.speed, isNull);
+      expect(tokenRequest.cacheControl, isNull);
     });
 
     test('handles minimal request', () {

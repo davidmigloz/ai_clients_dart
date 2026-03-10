@@ -206,6 +206,12 @@ class MessageCreateRequest {
   /// Inference speed mode.
   final Speed? speed;
 
+  /// Top-level cache control.
+  ///
+  /// Automatically applies a cache control marker to the last cacheable block
+  /// in the request.
+  final CacheControlEphemeral? cacheControl;
+
   /// Creates a [MessageCreateRequest].
   const MessageCreateRequest({
     required this.model,
@@ -226,6 +232,7 @@ class MessageCreateRequest {
     this.outputConfig,
     this.container,
     this.speed,
+    this.cacheControl,
   });
 
   /// Creates a [MessageCreateRequest] from JSON.
@@ -267,6 +274,11 @@ class MessageCreateRequest {
       speed: json['speed'] != null
           ? Speed.fromJson(json['speed'] as String)
           : null,
+      cacheControl: json['cache_control'] != null
+          ? CacheControlEphemeral.fromJson(
+              json['cache_control'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
@@ -290,6 +302,7 @@ class MessageCreateRequest {
     if (outputConfig != null) 'output_config': outputConfig!.toJson(),
     if (container != null) 'container': container,
     if (speed != null) 'speed': speed!.toJson(),
+    if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -312,6 +325,7 @@ class MessageCreateRequest {
     Object? outputConfig = unsetCopyWithValue,
     Object? container = unsetCopyWithValue,
     Object? speed = unsetCopyWithValue,
+    Object? cacheControl = unsetCopyWithValue,
   }) {
     return MessageCreateRequest(
       model: model ?? this.model,
@@ -354,6 +368,9 @@ class MessageCreateRequest {
           ? this.container
           : container as String?,
       speed: speed == unsetCopyWithValue ? this.speed : speed as Speed?,
+      cacheControl: cacheControl == unsetCopyWithValue
+          ? this.cacheControl
+          : cacheControl as CacheControlEphemeral?,
     );
   }
 
@@ -379,7 +396,8 @@ class MessageCreateRequest {
           inferenceGeo == other.inferenceGeo &&
           outputConfig == other.outputConfig &&
           container == other.container &&
-          speed == other.speed;
+          speed == other.speed &&
+          cacheControl == other.cacheControl;
 
   @override
   int get hashCode => Object.hash(
@@ -401,6 +419,7 @@ class MessageCreateRequest {
     outputConfig,
     container,
     speed,
+    cacheControl,
   );
 
   @override
@@ -411,5 +430,5 @@ class MessageCreateRequest {
       'stream: $stream, temperature: $temperature, thinking: $thinking, '
       'toolChoice: $toolChoice, tools: $tools, topP: $topP, topK: $topK, '
       'inferenceGeo: $inferenceGeo, outputConfig: $outputConfig, '
-      'container: $container, speed: $speed)';
+      'container: $container, speed: $speed, cacheControl: $cacheControl)';
 }

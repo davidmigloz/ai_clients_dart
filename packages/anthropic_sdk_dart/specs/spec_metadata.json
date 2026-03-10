@@ -1,11 +1,16 @@
 {
   "specs": {
     "main": {
-      "title": "Anthropic API",
-      "current_version": "13d3d0a8e62a955b8b4df99c18d387d0",
-      "last_fetched": "2026-02-19T17:34:16Z",
-      "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/anthropic%2Fanthropic-5387c517ad6a3b9790063962c2956476b24a17d163c68c8d091367f6db8cf4ed.yml",
-      "version_history": []
+      "current_version": "unknown",
+      "last_fetched": "2026-03-10T06:24:47.609679Z",
+      "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/anthropic%2Fanthropic-60fbf504538934c934f523d456bbf3cd99e7f1e2275041f74d5beb627bf38e19.yml",
+      "title": "Anthropic API + top-level-cache-control",
+      "version_history": [
+        {
+          "fetched_at": "2026-02-19T17:34:16Z",
+          "version": "13d3d0a8e62a955b8b4df99c18d387d0"
+        }
+      ]
     }
   }
 }

@@ -6,6 +6,7 @@ import '../common/equality.dart';
 import '../messages/input_message.dart';
 import '../messages/message_create_request.dart';
 import '../messages/thinking_config.dart';
+import '../metadata/cache_control.dart';
 import '../metadata/speed.dart';
 import '../tools/tool_choice.dart';
 import '../tools/tool_definition.dart';
@@ -43,6 +44,12 @@ class TokenCountRequest {
   /// Inference speed mode.
   final Speed? speed;
 
+  /// Top-level cache control.
+  ///
+  /// Automatically applies a cache control marker to the last cacheable block
+  /// in the request.
+  final CacheControlEphemeral? cacheControl;
+
   /// Creates a [TokenCountRequest].
   const TokenCountRequest({
     required this.model,
@@ -53,6 +60,7 @@ class TokenCountRequest {
     this.tools,
     this.outputConfig,
     this.speed,
+    this.cacheControl,
   });
 
   /// Creates a [TokenCountRequest] from a [MessageCreateRequest].
@@ -71,6 +79,7 @@ class TokenCountRequest {
       tools: request.tools,
       outputConfig: request.outputConfig,
       speed: request.speed,
+      cacheControl: request.cacheControl,
     );
   }
 
@@ -99,6 +108,11 @@ class TokenCountRequest {
       speed: json['speed'] != null
           ? Speed.fromJson(json['speed'] as String)
           : null,
+      cacheControl: json['cache_control'] != null
+          ? CacheControlEphemeral.fromJson(
+              json['cache_control'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
@@ -112,6 +126,7 @@ class TokenCountRequest {
     if (tools != null) 'tools': tools!.map((e) => e.toJson()).toList(),
     if (outputConfig != null) 'output_config': outputConfig!.toJson(),
     if (speed != null) 'speed': speed!.toJson(),
+    if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -124,6 +139,7 @@ class TokenCountRequest {
     Object? tools = unsetCopyWithValue,
     Object? outputConfig = unsetCopyWithValue,
     Object? speed = unsetCopyWithValue,
+    Object? cacheControl = unsetCopyWithValue,
   }) {
     return TokenCountRequest(
       model: model ?? this.model,
@@ -144,6 +160,9 @@ class TokenCountRequest {
           ? this.outputConfig
           : outputConfig as OutputConfig?,
       speed: speed == unsetCopyWithValue ? this.speed : speed as Speed?,
+      cacheControl: cacheControl == unsetCopyWithValue
+          ? this.cacheControl
+          : cacheControl as CacheControlEphemeral?,
     );
   }
 
@@ -159,7 +178,8 @@ class TokenCountRequest {
           toolChoice == other.toolChoice &&
           listsEqual(tools, other.tools) &&
           outputConfig == other.outputConfig &&
-          speed == other.speed;
+          speed == other.speed &&
+          cacheControl == other.cacheControl;
 
   @override
   int get hashCode => Object.hash(
@@ -171,13 +191,15 @@ class TokenCountRequest {
     listHash(tools),
     outputConfig,
     speed,
+    cacheControl,
   );
 
   @override
   String toString() =>
       'TokenCountRequest(model: $model, messages: $messages, system: $system, '
       'thinking: $thinking, toolChoice: $toolChoice, tools: $tools, '
-      'outputConfig: $outputConfig, speed: $speed)';
+      'outputConfig: $outputConfig, speed: $speed, '
+      'cacheControl: $cacheControl)';
 }
 
 /// Response for token counting.
