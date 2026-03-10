@@ -26,7 +26,7 @@ void main() {
           prompt: 'Transcribe this meeting about AI',
           temperature: 0.5,
           timestampGranularities: true,
-          contextBias: {'AI': 1.5, 'Mistral': 2.0},
+          contextBias: ['AI', 'Mistral'],
           diarize: true,
         );
         expect(request.file, 'file-123');
@@ -36,7 +36,7 @@ void main() {
         expect(request.prompt, 'Transcribe this meeting about AI');
         expect(request.temperature, 0.5);
         expect(request.timestampGranularities, true);
-        expect(request.contextBias, {'AI': 1.5, 'Mistral': 2.0});
+        expect(request.contextBias, ['AI', 'Mistral']);
         expect(request.diarize, true);
       });
     });
@@ -65,7 +65,7 @@ void main() {
           prompt: 'Technical meeting',
           temperature: 0.3,
           timestampGranularities: true,
-          contextBias: {'AI': 1.5},
+          contextBias: ['AI'],
           diarize: true,
         );
         final json = request.toJson();
@@ -76,7 +76,7 @@ void main() {
         expect(json['prompt'], 'Technical meeting');
         expect(json['temperature'], 0.3);
         expect(json['timestamp_granularities'], true);
-        expect(json['context_bias'], {'AI': 1.5});
+        expect(json['context_bias'], ['AI']);
         expect(json['diarize'], true);
       });
     });
@@ -98,7 +98,7 @@ void main() {
           'prompt': 'French conversation',
           'temperature': 0.7,
           'timestamp_granularities': false,
-          'context_bias': {'Mistral': 2.0},
+          'context_bias': ['Mistral'],
           'diarize': true,
         };
         final request = TranscriptionRequest.fromJson(json);
@@ -109,7 +109,7 @@ void main() {
         expect(request.prompt, 'French conversation');
         expect(request.temperature, 0.7);
         expect(request.timestampGranularities, false);
-        expect(request.contextBias, {'Mistral': 2.0});
+        expect(request.contextBias, ['Mistral']);
         expect(request.diarize, true);
       });
 
@@ -146,7 +146,7 @@ void main() {
           prompt: 'Original prompt',
           temperature: 0.5,
           timestampGranularities: true,
-          contextBias: {'AI': 1.0},
+          contextBias: ['AI'],
           diarize: false,
         );
         final copy = original.copyWith(
@@ -157,7 +157,7 @@ void main() {
           prompt: 'New prompt',
           temperature: 0.8,
           timestampGranularities: false,
-          contextBias: {'Mistral': 2.0},
+          contextBias: ['Mistral'],
           diarize: true,
         );
         expect(copy.file, 'file-456');
@@ -167,7 +167,7 @@ void main() {
         expect(copy.prompt, 'New prompt');
         expect(copy.temperature, 0.8);
         expect(copy.timestampGranularities, false);
-        expect(copy.contextBias, {'Mistral': 2.0});
+        expect(copy.contextBias, ['Mistral']);
         expect(copy.diarize, true);
       });
 
@@ -231,7 +231,7 @@ void main() {
           prompt: 'Spanish podcast',
           temperature: 0.4,
           timestampGranularities: true,
-          contextBias: {'podcast': 1.5, 'tema': 2.0},
+          contextBias: ['podcast', 'tema'],
           diarize: true,
         );
         final json = original.toJson();

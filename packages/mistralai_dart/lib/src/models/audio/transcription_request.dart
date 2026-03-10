@@ -40,8 +40,8 @@ class TranscriptionRequest {
 
   /// Bias towards specific words or phrases during transcription.
   ///
-  /// A map of text to bias weight. Positive values increase likelihood.
-  final Map<String, double>? contextBias;
+  /// A list of words or phrases to bias towards during transcription.
+  final List<String>? contextBias;
 
   /// Whether to enable speaker diarization.
   final bool? diarize;
@@ -69,9 +69,7 @@ class TranscriptionRequest {
         prompt: json['prompt'] as String?,
         temperature: (json['temperature'] as num?)?.toDouble(),
         timestampGranularities: json['timestamp_granularities'] as bool?,
-        contextBias: (json['context_bias'] as Map<String, dynamic>?)?.map(
-          (k, v) => MapEntry(k, (v as num).toDouble()),
-        ),
+        contextBias: (json['context_bias'] as List?)?.cast<String>(),
         diarize: json['diarize'] as bool?,
       );
 
@@ -98,7 +96,7 @@ class TranscriptionRequest {
     String? prompt,
     double? temperature,
     bool? timestampGranularities,
-    Map<String, double>? contextBias,
+    List<String>? contextBias,
     bool? diarize,
   }) => TranscriptionRequest(
     file: file ?? this.file,

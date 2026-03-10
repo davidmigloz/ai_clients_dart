@@ -77,7 +77,7 @@ class BatchJobsResource extends ResourceBase {
   /// Creates a new batch job.
   ///
   /// The [request] must specify:
-  /// - [inputFiles] - IDs of input files containing batch requests (JSONL format)
+  /// - Either [inputFiles] (IDs of input files in JSONL format) or [requests] (inline batch requests)
   /// - [endpoint] - API endpoint to process requests against (e.g., `/v1/chat/completions`)
   /// - [model] - Model to use for processing
   ///
