@@ -235,7 +235,7 @@ void main() {
     test('status helpers work correctly', () {
       const runningJob = BatchJob(
         id: 'batch-123',
-        inputFileId: 'file-123',
+        inputFiles: ['file-123'],
         endpoint: '/v1/chat/completions',
         model: 'mistral-small-latest',
         status: BatchJobStatus.running,
@@ -247,7 +247,7 @@ void main() {
 
       const successJob = BatchJob(
         id: 'batch-123',
-        inputFileId: 'file-123',
+        inputFiles: ['file-123'],
         endpoint: '/v1/chat/completions',
         model: 'mistral-small-latest',
         status: BatchJobStatus.success,
@@ -259,7 +259,7 @@ void main() {
 
       const failedJob = BatchJob(
         id: 'batch-123',
-        inputFileId: 'file-123',
+        inputFiles: ['file-123'],
         endpoint: '/v1/chat/completions',
         model: 'mistral-small-latest',
         status: BatchJobStatus.failed,
@@ -273,7 +273,7 @@ void main() {
     test('progress calculation works', () {
       const job = BatchJob(
         id: 'batch-123',
-        inputFileId: 'file-123',
+        inputFiles: ['file-123'],
         endpoint: '/v1/chat/completions',
         model: 'mistral-small-latest',
         status: BatchJobStatus.running,
@@ -287,7 +287,7 @@ void main() {
     test('progress returns 0 when no total', () {
       const job = BatchJob(
         id: 'batch-123',
-        inputFileId: 'file-123',
+        inputFiles: ['file-123'],
         endpoint: '/v1/chat/completions',
         model: 'mistral-small-latest',
         status: BatchJobStatus.queued,

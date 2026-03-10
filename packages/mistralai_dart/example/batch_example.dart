@@ -85,7 +85,7 @@ print('Created job: ${job.id}');
       print('Model: ${job.model}');
       print('Endpoint: ${job.endpoint}');
       print('Status: ${job.status.value}');
-      print('Input File: ${job.inputFileId}');
+      print('Input Files: ${job.inputFiles}');
       print('Output File: ${job.outputFileId ?? "N/A"}');
       print('Error File: ${job.errorFileId ?? "N/A"}');
 

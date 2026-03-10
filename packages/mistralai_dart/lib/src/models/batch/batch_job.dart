@@ -25,8 +25,8 @@ class BatchJob {
   /// Object type (always "batch").
   final String object;
 
-  /// File ID containing the input data.
-  final String inputFileId;
+  /// File IDs containing the input data.
+  final List<String> inputFiles;
 
   /// API endpoint being called.
   final String endpoint;
@@ -74,7 +74,7 @@ class BatchJob {
   const BatchJob({
     required this.id,
     this.object = 'batch',
-    required this.inputFileId,
+    required this.inputFiles,
     required this.endpoint,
     required this.model,
     this.outputFileId,
@@ -95,10 +95,7 @@ class BatchJob {
   factory BatchJob.fromJson(Map<String, dynamic> json) => BatchJob(
     id: json['id'] as String? ?? '',
     object: json['object'] as String? ?? 'batch',
-    inputFileId:
-        json['input_file_id'] as String? ??
-        json['input_files'] as String? ??
-        '',
+    inputFiles: (json['input_files'] as List?)?.cast<String>() ?? <String>[],
     endpoint: json['endpoint'] as String? ?? '',
     model: json['model'] as String? ?? '',
     outputFileId:
@@ -125,7 +122,7 @@ class BatchJob {
   Map<String, dynamic> toJson() => {
     'id': id,
     'object': object,
-    'input_file_id': inputFileId,
+    'input_files': inputFiles,
     'endpoint': endpoint,
     'model': model,
     if (outputFileId != null) 'output_file_id': outputFileId,

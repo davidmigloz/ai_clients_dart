@@ -7,7 +7,7 @@ void main() {
       test('parses minimal job', () {
         final json = {
           'id': 'batch-123',
-          'input_file_id': 'file-abc',
+          'input_files': ['file-abc'],
           'endpoint': '/v1/chat/completions',
           'model': 'mistral-small-latest',
           'status': 'QUEUED',
@@ -17,7 +17,7 @@ void main() {
 
         expect(job.id, 'batch-123');
         expect(job.object, 'batch');
-        expect(job.inputFileId, 'file-abc');
+        expect(job.inputFiles, ['file-abc']);
         expect(job.endpoint, '/v1/chat/completions');
         expect(job.model, 'mistral-small-latest');
         expect(job.status, BatchJobStatus.queued);
@@ -30,7 +30,7 @@ void main() {
         final json = {
           'id': 'batch-456',
           'object': 'batch',
-          'input_file_id': 'file-input',
+          'input_files': ['file-input'],
           'endpoint': '/v1/embeddings',
           'model': 'mistral-embed',
           'output_file_id': 'file-output',
@@ -53,7 +53,7 @@ void main() {
 
         expect(job.id, 'batch-456');
         expect(job.object, 'batch');
-        expect(job.inputFileId, 'file-input');
+        expect(job.inputFiles, ['file-input']);
         expect(job.endpoint, '/v1/embeddings');
         expect(job.model, 'mistral-embed');
         expect(job.outputFileId, 'file-output');
@@ -71,10 +71,10 @@ void main() {
         expect(job.metadata, {'project': 'test'});
       });
 
-      test('parses alternative field names (input_files, output_file)', () {
+      test('parses alternative field names (output_file, error_file)', () {
         final json = {
           'id': 'batch-789',
-          'input_files': 'file-alt-input',
+          'input_files': ['file-alt-input'],
           'output_file': 'file-alt-output',
           'error_file': 'file-alt-errors',
           'endpoint': '/v1/chat/completions',
@@ -84,7 +84,7 @@ void main() {
 
         final job = BatchJob.fromJson(json);
 
-        expect(job.inputFileId, 'file-alt-input');
+        expect(job.inputFiles, ['file-alt-input']);
         expect(job.outputFileId, 'file-alt-output');
         expect(job.errorFileId, 'file-alt-errors');
       });
@@ -92,7 +92,7 @@ void main() {
       test('parses timestamps as epoch seconds', () {
         final json = {
           'id': 'batch-epoch',
-          'input_file_id': 'file-abc',
+          'input_files': ['file-abc'],
           'endpoint': '/v1/chat/completions',
           'model': 'mistral-small-latest',
           'status': 'SUCCESS',
@@ -110,7 +110,7 @@ void main() {
       test('serializes to JSON', () {
         const job = BatchJob(
           id: 'batch-123',
-          inputFileId: 'file-input',
+          inputFiles: ['file-input'],
           endpoint: '/v1/chat/completions',
           model: 'mistral-small-latest',
           status: BatchJobStatus.running,
@@ -122,7 +122,7 @@ void main() {
 
         expect(json['id'], 'batch-123');
         expect(json['object'], 'batch');
-        expect(json['input_file_id'], 'file-input');
+        expect(json['input_files'], ['file-input']);
         expect(json['endpoint'], '/v1/chat/completions');
         expect(json['model'], 'mistral-small-latest');
         expect(json['status'], 'RUNNING');
@@ -133,7 +133,7 @@ void main() {
       test('omits null fields', () {
         const job = BatchJob(
           id: 'batch-123',
-          inputFileId: 'file-input',
+          inputFiles: ['file-input'],
           endpoint: '/v1/chat/completions',
           model: 'mistral-small-latest',
           status: BatchJobStatus.queued,
@@ -153,7 +153,7 @@ void main() {
         expect(
           const BatchJob(
             id: '1',
-            inputFileId: 'f',
+            inputFiles: ['f'],
             endpoint: '/v1/chat/completions',
             model: 'm',
             status: BatchJobStatus.queued,
@@ -163,7 +163,7 @@ void main() {
         expect(
           const BatchJob(
             id: '1',
-            inputFileId: 'f',
+            inputFiles: ['f'],
             endpoint: '/v1/chat/completions',
             model: 'm',
             status: BatchJobStatus.running,
@@ -173,7 +173,7 @@ void main() {
         expect(
           const BatchJob(
             id: '1',
-            inputFileId: 'f',
+            inputFiles: ['f'],
             endpoint: '/v1/chat/completions',
             model: 'm',
             status: BatchJobStatus.success,
@@ -192,7 +192,7 @@ void main() {
           expect(
             BatchJob(
               id: '1',
-              inputFileId: 'f',
+              inputFiles: const ['f'],
               endpoint: '/v1/chat/completions',
               model: 'm',
               status: status,
@@ -207,7 +207,7 @@ void main() {
         expect(
           const BatchJob(
             id: '1',
-            inputFileId: 'f',
+            inputFiles: ['f'],
             endpoint: '/v1/chat/completions',
             model: 'm',
             status: BatchJobStatus.success,
@@ -217,7 +217,7 @@ void main() {
         expect(
           const BatchJob(
             id: '1',
-            inputFileId: 'f',
+            inputFiles: ['f'],
             endpoint: '/v1/chat/completions',
             model: 'm',
             status: BatchJobStatus.failed,
@@ -229,7 +229,7 @@ void main() {
       test('progress calculates percentage correctly', () {
         const job = BatchJob(
           id: '1',
-          inputFileId: 'f',
+          inputFiles: ['f'],
           endpoint: '/v1/chat/completions',
           model: 'm',
           status: BatchJobStatus.running,
@@ -244,7 +244,7 @@ void main() {
         expect(
           const BatchJob(
             id: '1',
-            inputFileId: 'f',
+            inputFiles: ['f'],
             endpoint: '/v1/chat/completions',
             model: 'm',
             status: BatchJobStatus.queued,
@@ -254,7 +254,7 @@ void main() {
         expect(
           const BatchJob(
             id: '1',
-            inputFileId: 'f',
+            inputFiles: ['f'],
             endpoint: '/v1/chat/completions',
             model: 'm',
             status: BatchJobStatus.queued,
@@ -269,14 +269,14 @@ void main() {
       test('jobs with same id are equal', () {
         const job1 = BatchJob(
           id: 'batch-123',
-          inputFileId: 'file-a',
+          inputFiles: ['file-a'],
           endpoint: '/v1/chat/completions',
           model: 'mistral-small-latest',
           status: BatchJobStatus.queued,
         );
         const job2 = BatchJob(
           id: 'batch-123',
-          inputFileId: 'file-b', // Different file
+          inputFiles: ['file-b'], // Different file
           endpoint: '/v1/embeddings', // Different endpoint
           model: 'mistral-embed', // Different model
           status: BatchJobStatus.success, // Different status
@@ -289,14 +289,14 @@ void main() {
       test('jobs with different ids are not equal', () {
         const job1 = BatchJob(
           id: 'batch-123',
-          inputFileId: 'file-a',
+          inputFiles: ['file-a'],
           endpoint: '/v1/chat/completions',
           model: 'mistral-small-latest',
           status: BatchJobStatus.queued,
         );
         const job2 = BatchJob(
           id: 'batch-456',
-          inputFileId: 'file-a',
+          inputFiles: ['file-a'],
           endpoint: '/v1/chat/completions',
           model: 'mistral-small-latest',
           status: BatchJobStatus.queued,
@@ -309,7 +309,7 @@ void main() {
     test('toString returns readable representation', () {
       const job = BatchJob(
         id: 'batch-123',
-        inputFileId: 'file-a',
+        inputFiles: ['file-a'],
         endpoint: '/v1/chat/completions',
         model: 'mistral-small-latest',
         status: BatchJobStatus.running,
