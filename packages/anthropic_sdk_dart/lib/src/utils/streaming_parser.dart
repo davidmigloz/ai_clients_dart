@@ -42,7 +42,11 @@ class SseParser {
             yield json;
           } catch (_) {
             if (currentEvent == 'error') {
-              yield <String, dynamic>{'_event': 'error', '_rawData': data};
+              yield <String, dynamic>{
+                '_event': 'error',
+                '_rawData': data,
+                'type': 'error',
+              };
             }
           }
         }
@@ -63,7 +67,11 @@ class SseParser {
           yield json;
         } catch (_) {
           if (currentEvent == 'error') {
-            yield <String, dynamic>{'_event': 'error', '_rawData': data};
+            yield <String, dynamic>{
+              '_event': 'error',
+              '_rawData': data,
+              'type': 'error',
+            };
           }
         }
       }
@@ -78,8 +86,6 @@ extension SseEventExtension on Map<String, dynamic> {
 
   /// Creates a copy without the internal event type field.
   Map<String, dynamic> withoutEventType() {
-    return Map<String, dynamic>.from(this)
-      ..remove('_event')
-      ..remove('_rawData');
+    return Map<String, dynamic>.from(this)..remove('_event');
   }
 }

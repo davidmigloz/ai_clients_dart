@@ -45,8 +45,29 @@ class SseParser {
         // Data line
         final data = line.substring(5).trim();
 
-        // Check for end-of-stream marker
+        // Check for end-of-stream marker — flush any buffered data first
         if (data == '[DONE]') {
+          if (dataBuffer.isNotEmpty) {
+            final buffered = dataBuffer.toString();
+            dataBuffer.clear();
+            if (buffered.isNotEmpty) {
+              try {
+                final json = jsonDecode(buffered) as Map<String, dynamic>;
+                if (currentEvent != null) {
+                  json['_event'] = currentEvent;
+                }
+                yield json;
+              } catch (_) {
+                if (currentEvent == 'error') {
+                  yield <String, dynamic>{
+                    '_event': 'error',
+                    '_rawData': buffered,
+                    'type': 'error',
+                  };
+                }
+              }
+            }
+          }
           return;
         }
 
@@ -67,7 +88,11 @@ class SseParser {
             yield json;
           } catch (_) {
             if (currentEvent == 'error') {
-              yield <String, dynamic>{'_event': 'error', '_rawData': data};
+              yield <String, dynamic>{
+                '_event': 'error',
+                '_rawData': data,
+                'type': 'error',
+              };
             }
           }
         }
@@ -88,7 +113,11 @@ class SseParser {
           yield json;
         } catch (_) {
           if (currentEvent == 'error') {
-            yield <String, dynamic>{'_event': 'error', '_rawData': data};
+            yield <String, dynamic>{
+              '_event': 'error',
+              '_rawData': data,
+              'type': 'error',
+            };
           }
         }
       }
@@ -197,8 +226,6 @@ extension SseEventExtension on Map<String, dynamic> {
 
   /// Creates a copy without the internal event type field.
   Map<String, dynamic> withoutEventType() {
-    return Map<String, dynamic>.from(this)
-      ..remove('_event')
-      ..remove('_rawData');
+    return Map<String, dynamic>.from(this)..remove('_event');
   }
 }

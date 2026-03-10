@@ -30,7 +30,31 @@ Stream<Map<String, dynamic>> parseSSE(Stream<String> stream) async* {
       currentEvent = line.substring(6).trim();
     } else if (line.startsWith('data:')) {
       final data = line.substring(5).trim();
-      if (data == '[DONE]') return;
+      // Check for stream end marker — flush any buffered data first
+      if (data == '[DONE]') {
+        if (dataBuffer.isNotEmpty) {
+          final buffered = dataBuffer.toString();
+          dataBuffer.clear();
+          if (buffered.isNotEmpty) {
+            try {
+              final json = jsonDecode(buffered) as Map<String, dynamic>;
+              if (currentEvent != null) {
+                json['_event'] = currentEvent;
+              }
+              yield json;
+            } catch (_) {
+              if (currentEvent == 'error') {
+                yield <String, dynamic>{
+                  '_event': 'error',
+                  '_rawData': buffered,
+                  'type': 'error',
+                };
+              }
+            }
+          }
+        }
+        return;
+      }
       if (data.isNotEmpty) {
         if (dataBuffer.isNotEmpty) dataBuffer.write('\n');
         dataBuffer.write(data);
@@ -49,7 +73,11 @@ Stream<Map<String, dynamic>> parseSSE(Stream<String> stream) async* {
           yield json;
         } catch (_) {
           if (currentEvent == 'error') {
-            yield <String, dynamic>{'_event': 'error', '_rawData': data};
+            yield <String, dynamic>{
+              '_event': 'error',
+              '_rawData': data,
+              'type': 'error',
+            };
           }
         }
       }
@@ -70,7 +98,11 @@ Stream<Map<String, dynamic>> parseSSE(Stream<String> stream) async* {
         yield json;
       } catch (_) {
         if (currentEvent == 'error') {
-          yield <String, dynamic>{'_event': 'error', '_rawData': data};
+          yield <String, dynamic>{
+            '_event': 'error',
+            '_rawData': data,
+            'type': 'error',
+          };
         }
       }
     }

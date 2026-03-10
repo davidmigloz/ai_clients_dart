@@ -213,6 +213,7 @@ void main() {
         expect(events, hasLength(1));
         expect(events[0]['_event'], 'error');
         expect(events[0]['_rawData'], 'Service unavailable');
+        expect(events[0]['type'], 'error');
       },
     );
 
@@ -226,6 +227,16 @@ void main() {
       expect(events, hasLength(1));
       expect(events[0]['_event'], 'error');
       expect(events[0]['error'], isA<Map<String, dynamic>>());
+    });
+
+    test('[DONE] flushes buffered data before terminating', () async {
+      // data: line followed by data: [DONE] without blank line between
+      final bytes = utf8.encode('data: {"id":"1"}\ndata: [DONE]\n');
+      final stream = Stream<List<int>>.value(bytes);
+      final results = await parseSSE(stream).toList();
+
+      expect(results, hasLength(1));
+      expect(results[0]['id'], '1');
     });
   });
 

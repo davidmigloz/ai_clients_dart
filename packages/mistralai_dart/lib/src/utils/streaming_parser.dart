@@ -27,13 +27,36 @@ Stream<Map<String, dynamic>> parseSSE(Stream<List<int>> byteStream) async* {
     } else if (line.startsWith('data:')) {
       final data = line.substring(5).trim();
 
-      // Check for stream end marker
+      // Check for stream end marker — flush any buffered data first
       if (data == '[DONE]') {
+        if (dataBuffer.isNotEmpty) {
+          final buffered = dataBuffer.toString();
+          dataBuffer.clear();
+          if (buffered.isNotEmpty) {
+            try {
+              final json = jsonDecode(buffered) as Map<String, dynamic>;
+              if (currentEvent != null) {
+                json['_event'] = currentEvent;
+              }
+              yield json;
+            } catch (_) {
+              if (currentEvent == 'error') {
+                yield <String, dynamic>{
+                  '_event': 'error',
+                  '_rawData': buffered,
+                  'type': 'error',
+                };
+              }
+            }
+          }
+        }
         return;
       }
 
-      if (dataBuffer.isNotEmpty) dataBuffer.write('\n');
-      dataBuffer.write(data);
+      if (data.isNotEmpty) {
+        if (dataBuffer.isNotEmpty) dataBuffer.write('\n');
+        dataBuffer.write(data);
+      }
     } else if (line.isEmpty && dataBuffer.isNotEmpty) {
       // Empty line signals end of event
       final data = dataBuffer.toString();
@@ -48,7 +71,11 @@ Stream<Map<String, dynamic>> parseSSE(Stream<List<int>> byteStream) async* {
           yield json;
         } catch (_) {
           if (currentEvent == 'error') {
-            yield <String, dynamic>{'_event': 'error', '_rawData': data};
+            yield <String, dynamic>{
+              '_event': 'error',
+              '_rawData': data,
+              'type': 'error',
+            };
           }
         }
       }
@@ -69,7 +96,11 @@ Stream<Map<String, dynamic>> parseSSE(Stream<List<int>> byteStream) async* {
         yield json;
       } catch (_) {
         if (currentEvent == 'error') {
-          yield <String, dynamic>{'_event': 'error', '_rawData': data};
+          yield <String, dynamic>{
+            '_event': 'error',
+            '_rawData': data,
+            'type': 'error',
+          };
         }
       }
     }
@@ -77,6 +108,11 @@ Stream<Map<String, dynamic>> parseSSE(Stream<List<int>> byteStream) async* {
 }
 
 /// Parses a stream of bytes as SSE and converts to typed objects.
+///
+/// **Note:** This convenience function does not check for inline stream errors
+/// (e.g., `event: error` or `{"error": ...}` in data). If you need error
+/// detection, iterate over [parseSSE] directly and check each event before
+/// calling `fromJson`.
 ///
 /// Example:
 /// ```dart

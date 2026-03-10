@@ -213,8 +213,18 @@ void main() {
         expect(events, hasLength(1));
         expect(events[0]['_event'], 'error');
         expect(events[0]['_rawData'], 'Service unavailable');
+        expect(events[0]['type'], 'error');
       },
     );
+
+    test('[DONE] flushes buffered data before terminating', () async {
+      // data: line followed by data: [DONE] without blank line between
+      final lines = Stream.fromIterable(['data: {"id":"1"}', 'data: [DONE]']);
+      final results = await parseSSE(lines).toList();
+
+      expect(results, hasLength(1));
+      expect(results[0]['id'], '1');
+    });
 
     test('WHATWG spec compliance: space after colon is optional', () async {
       // Per WHATWG spec: space after colon is optional and should be stripped

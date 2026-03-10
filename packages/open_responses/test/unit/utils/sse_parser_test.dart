@@ -22,6 +22,7 @@ void main() {
       expect(events, hasLength(1));
       expect(events[0]['_event'], 'error');
       expect(events[0]['_rawData'], 'Service unavailable');
+      expect(events[0]['type'], 'error');
     });
 
     test('parses event: error with JSON data normally', () async {
