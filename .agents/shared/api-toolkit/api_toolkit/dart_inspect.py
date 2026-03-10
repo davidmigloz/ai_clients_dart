@@ -85,10 +85,15 @@ def extract_method_body(content: str, method_pattern: str) -> str:
 
     # If the pattern already consumed '=>', find the terminating semicolon
     if "=>" in match.group(0):
+        # Include the '=>' in the returned body for consistency
+        arrow_pos = match.group(0).rfind("=>")
+        body_start = match.start() + arrow_pos
         semicolon_index = content.find(";", start)
         if semicolon_index != -1:
-            return content[start:semicolon_index]
-        return ""
+            return content[body_start:semicolon_index]
+        newline_index = content.find("\n", start)
+        end_index = newline_index if newline_index != -1 else len(content)
+        return content[body_start:end_index]
 
     brace_index = content.find("{", start)
     arrow_index = content.find("=>", start)
@@ -98,7 +103,9 @@ def extract_method_body(content: str, method_pattern: str) -> str:
         semicolon_index = content.find(";", arrow_index)
         if semicolon_index != -1:
             return content[arrow_index:semicolon_index]
-        return ""
+        newline_index = content.find("\n", arrow_index)
+        end_index = newline_index if newline_index != -1 else len(content)
+        return content[arrow_index:end_index]
 
     # Block body — track brace depth
     if brace_index == -1:
