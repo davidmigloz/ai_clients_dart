@@ -28,27 +28,25 @@ Future<void> main() async {
       ),
     );
 
-    // Listen for events
-    ws.events.listen((event) {
+    // Listen for events using await for to process them until done
+    ws.createResponse();
+
+    await for (final event in ws.events) {
       switch (event) {
         case realtime.SessionCreatedEvent(:final session):
           print('Session created: ${session.id}');
         case realtime.ResponseTextDeltaEvent(:final delta):
           stdout.write(delta);
-        case realtime.ResponseTextDoneEvent():
-          print(''); // newline after text
+        case realtime.ResponseDoneEvent():
+          print(''); // newline after response completes
+          await ws.close();
         case realtime.ErrorEvent(:final error):
           print('Error: ${error.message}');
+          await ws.close();
         default:
           break;
       }
-    });
-
-    // Create a text response
-    ws.createResponse();
-
-    // Close WebSocket when done
-    await ws.close();
+    }
 
     // --- Ephemeral client secret (for web/frontend clients) ---
     print('\n=== Ephemeral Client Secret ===\n');
