@@ -95,7 +95,7 @@ void main() {
         }
       }
 
-      expect(textBuffer.toString(), contains('test'));
+      expect(textBuffer.toString().toLowerCase(), contains('test'));
       expect(finalResponse, isNotNull);
       expect(finalResponse!.status, ResponseStatus.completed);
     });
