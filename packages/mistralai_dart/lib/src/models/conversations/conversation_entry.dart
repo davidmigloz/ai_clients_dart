@@ -235,9 +235,7 @@ class FunctionCallEntry extends ConversationEntry {
       callId: json['call_id'] as String?,
       agentId: json['agent_id'] as String?,
       confirmationStatus: json['confirmation_status'] != null
-          ? ConfirmationStatus.fromJson(
-              json['confirmation_status'] as String,
-            )
+          ? ConfirmationStatus.fromJson(json['confirmation_status'] as String)
           : null,
       model: json['model'] as String?,
     );

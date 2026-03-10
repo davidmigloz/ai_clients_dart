@@ -80,9 +80,9 @@ void main() {
     });
 
     group('equality', () {
-      test('equals with same customId', () {
+      test('equals with same customId and body', () {
         const r1 = BatchRequest(body: {'a': 1}, customId: 'req-001');
-        const r2 = BatchRequest(body: {'b': 2}, customId: 'req-001');
+        const r2 = BatchRequest(body: {'a': 1}, customId: 'req-001');
         expect(r1, equals(r2));
         expect(r1.hashCode, equals(r2.hashCode));
       });
@@ -93,9 +93,15 @@ void main() {
         expect(r1, isNot(equals(r2)));
       });
 
-      test('equals with both null customId', () {
+      test('not equals with different body', () {
+        const r1 = BatchRequest(body: {'a': 1}, customId: 'req-001');
+        const r2 = BatchRequest(body: {'b': 2}, customId: 'req-001');
+        expect(r1, isNot(equals(r2)));
+      });
+
+      test('equals with both null customId and same body', () {
         const r1 = BatchRequest(body: {'a': 1});
-        const r2 = BatchRequest(body: {'b': 2});
+        const r2 = BatchRequest(body: {'a': 1});
         expect(r1, equals(r2));
         expect(r1.hashCode, equals(r2.hashCode));
       });

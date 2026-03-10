@@ -6,12 +6,12 @@ void main() {
     group('constructor', () {
       test('creates request with required fields', () {
         const request = CreateBatchJobRequest(
-          inputFileId: 'file-123',
+          inputFiles: ['file-123'],
           endpoint: '/v1/chat/completions',
           model: 'mistral-small-latest',
         );
 
-        expect(request.inputFileId, 'file-123');
+        expect(request.inputFiles, ['file-123']);
         expect(request.endpoint, '/v1/chat/completions');
         expect(request.model, 'mistral-small-latest');
         expect(request.metadata, isNull);
@@ -19,20 +19,20 @@ void main() {
         expect(request.requests, isNull);
       });
 
-      test('creates request with null inputFileId', () {
+      test('creates request with null inputFiles', () {
         const request = CreateBatchJobRequest(
           endpoint: '/v1/chat/completions',
           model: 'mistral-small-latest',
         );
 
-        expect(request.inputFileId, isNull);
+        expect(request.inputFiles, isNull);
         expect(request.endpoint, '/v1/chat/completions');
         expect(request.model, 'mistral-small-latest');
       });
 
       test('creates request with all fields', () {
         const request = CreateBatchJobRequest(
-          inputFileId: 'file-456',
+          inputFiles: ['file-456'],
           endpoint: '/v1/embeddings',
           model: 'mistral-embed',
           metadata: {'project': 'test', 'version': '1.0'},
@@ -42,7 +42,7 @@ void main() {
           ],
         );
 
-        expect(request.inputFileId, 'file-456');
+        expect(request.inputFiles, ['file-456']);
         expect(request.endpoint, '/v1/embeddings');
         expect(request.model, 'mistral-embed');
         expect(request.metadata, {'project': 'test', 'version': '1.0'});
@@ -51,7 +51,7 @@ void main() {
         expect(request.requests![0].customId, 'req-1');
       });
 
-      test('creates request with inline requests instead of inputFileId', () {
+      test('creates request with inline requests instead of inputFiles', () {
         const request = CreateBatchJobRequest(
           endpoint: '/v1/chat/completions',
           model: 'mistral-small-latest',
@@ -61,7 +61,7 @@ void main() {
           ],
         );
 
-        expect(request.inputFileId, isNull);
+        expect(request.inputFiles, isNull);
         expect(request.requests, hasLength(2));
         expect(request.requests![0].body, {'prompt': 'Hello'});
         expect(request.requests![1].customId, 'req-2');
@@ -71,33 +71,33 @@ void main() {
     group('fromJson', () {
       test('parses request with input_files field', () {
         final json = {
-          'input_files': 'file-123',
+          'input_files': ['file-123'],
           'endpoint': '/v1/chat/completions',
           'model': 'mistral-small-latest',
         };
 
         final request = CreateBatchJobRequest.fromJson(json);
 
-        expect(request.inputFileId, 'file-123');
+        expect(request.inputFiles, ['file-123']);
         expect(request.endpoint, '/v1/chat/completions');
         expect(request.model, 'mistral-small-latest');
       });
 
-      test('parses request with input_file_id field', () {
+      test('parses request with input_files as list', () {
         final json = {
-          'input_file_id': 'file-456',
+          'input_files': ['file-456'],
           'endpoint': '/v1/embeddings',
           'model': 'mistral-embed',
         };
 
         final request = CreateBatchJobRequest.fromJson(json);
 
-        expect(request.inputFileId, 'file-456');
+        expect(request.inputFiles, ['file-456']);
       });
 
       test('parses request with all fields', () {
         final json = {
-          'input_files': 'file-789',
+          'input_files': ['file-789'],
           'endpoint': '/v1/moderations',
           'model': 'mistral-moderation-latest',
           'metadata': {'key': 'value'},
@@ -106,7 +106,7 @@ void main() {
 
         final request = CreateBatchJobRequest.fromJson(json);
 
-        expect(request.inputFileId, 'file-789');
+        expect(request.inputFiles, ['file-789']);
         expect(request.endpoint, '/v1/moderations');
         expect(request.model, 'mistral-moderation-latest');
         expect(request.metadata, {'key': 'value'});
@@ -130,7 +130,7 @@ void main() {
 
         final request = CreateBatchJobRequest.fromJson(json);
 
-        expect(request.inputFileId, isNull);
+        expect(request.inputFiles, isNull);
         expect(request.requests, hasLength(2));
         expect(request.requests![0].body, {'prompt': 'Hello'});
         expect(request.requests![0].customId, 'req-1');
@@ -138,7 +138,7 @@ void main() {
         expect(request.requests![1].customId, isNull);
       });
 
-      test('parses request with null inputFileId', () {
+      test('parses request with null inputFiles', () {
         final json = {
           'endpoint': '/v1/chat/completions',
           'model': 'mistral-small-latest',
@@ -146,7 +146,7 @@ void main() {
 
         final request = CreateBatchJobRequest.fromJson(json);
 
-        expect(request.inputFileId, isNull);
+        expect(request.inputFiles, isNull);
         expect(request.requests, isNull);
       });
     });
@@ -154,14 +154,14 @@ void main() {
     group('toJson', () {
       test('serializes with input_files field', () {
         const request = CreateBatchJobRequest(
-          inputFileId: 'file-123',
+          inputFiles: ['file-123'],
           endpoint: '/v1/chat/completions',
           model: 'mistral-small-latest',
         );
 
         final json = request.toJson();
 
-        expect(json['input_files'], 'file-123');
+        expect(json['input_files'], ['file-123']);
         expect(json['endpoint'], '/v1/chat/completions');
         expect(json['model'], 'mistral-small-latest');
         expect(json.containsKey('metadata'), isFalse);
@@ -169,7 +169,7 @@ void main() {
         expect(json.containsKey('requests'), isFalse);
       });
 
-      test('serializes without inputFileId when null', () {
+      test('serializes without inputFiles when null', () {
         const request = CreateBatchJobRequest(
           endpoint: '/v1/chat/completions',
           model: 'mistral-small-latest',
@@ -182,7 +182,7 @@ void main() {
 
       test('serializes all fields', () {
         const request = CreateBatchJobRequest(
-          inputFileId: 'file-456',
+          inputFiles: ['file-456'],
           endpoint: '/v1/embeddings',
           model: 'mistral-embed',
           metadata: {'env': 'prod'},
@@ -194,7 +194,7 @@ void main() {
 
         final json = request.toJson();
 
-        expect(json['input_files'], 'file-456');
+        expect(json['input_files'], ['file-456']);
         expect(json['endpoint'], '/v1/embeddings');
         expect(json['model'], 'mistral-embed');
         expect(json['metadata'], {'env': 'prod'});
@@ -225,18 +225,18 @@ void main() {
     group('copyWith', () {
       test('copies with new values', () {
         const original = CreateBatchJobRequest(
-          inputFileId: 'file-123',
+          inputFiles: ['file-123'],
           endpoint: '/v1/chat/completions',
           model: 'mistral-small-latest',
         );
 
         final copy = original.copyWith(
-          inputFileId: 'file-456',
+          inputFiles: ['file-456'],
           model: 'mistral-large-latest',
           timeoutHours: 24,
         );
 
-        expect(copy.inputFileId, 'file-456');
+        expect(copy.inputFiles, ['file-456']);
         expect(copy.endpoint, '/v1/chat/completions'); // Unchanged
         expect(copy.model, 'mistral-large-latest');
         expect(copy.timeoutHours, 24);
@@ -244,7 +244,7 @@ void main() {
 
       test('preserves existing values when not specified', () {
         const original = CreateBatchJobRequest(
-          inputFileId: 'file-123',
+          inputFiles: ['file-123'],
           endpoint: '/v1/chat/completions',
           model: 'mistral-small-latest',
           metadata: {'key': 'value'},
@@ -256,7 +256,7 @@ void main() {
 
         final copy = original.copyWith();
 
-        expect(copy.inputFileId, 'file-123');
+        expect(copy.inputFiles, ['file-123']);
         expect(copy.endpoint, '/v1/chat/completions');
         expect(copy.model, 'mistral-small-latest');
         expect(copy.metadata, {'key': 'value'});
@@ -266,7 +266,7 @@ void main() {
 
       test('copies with new requests', () {
         const original = CreateBatchJobRequest(
-          inputFileId: 'file-123',
+          inputFiles: ['file-123'],
           endpoint: '/v1/chat/completions',
           model: 'mistral-small-latest',
         );
@@ -277,7 +277,7 @@ void main() {
           ],
         );
 
-        expect(copy.inputFileId, 'file-123');
+        expect(copy.inputFiles, ['file-123']);
         expect(copy.requests, hasLength(1));
         expect(copy.requests![0].customId, 'req-new');
       });
@@ -286,12 +286,12 @@ void main() {
     group('equality', () {
       test('requests with same key fields are equal', () {
         const request1 = CreateBatchJobRequest(
-          inputFileId: 'file-123',
+          inputFiles: ['file-123'],
           endpoint: '/v1/chat/completions',
           model: 'mistral-small-latest',
         );
         const request2 = CreateBatchJobRequest(
-          inputFileId: 'file-123',
+          inputFiles: ['file-123'],
           endpoint: '/v1/chat/completions',
           model: 'mistral-small-latest',
           timeoutHours: 24, // Different but not part of equality
@@ -303,12 +303,12 @@ void main() {
 
       test('requests with different fields are not equal', () {
         const request1 = CreateBatchJobRequest(
-          inputFileId: 'file-123',
+          inputFiles: ['file-123'],
           endpoint: '/v1/chat/completions',
           model: 'mistral-small-latest',
         );
         const request2 = CreateBatchJobRequest(
-          inputFileId: 'file-456', // Different
+          inputFiles: ['file-456'], // Different
           endpoint: '/v1/chat/completions',
           model: 'mistral-small-latest',
         );
@@ -319,7 +319,7 @@ void main() {
 
     test('toString returns readable representation', () {
       const request = CreateBatchJobRequest(
-        inputFileId: 'file-123',
+        inputFiles: ['file-123'],
         endpoint: '/v1/chat/completions',
         model: 'mistral-small-latest',
       );

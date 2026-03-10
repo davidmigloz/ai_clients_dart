@@ -28,8 +28,8 @@ class AgentAliasResponse {
       AgentAliasResponse(
         alias: json['alias'] as String? ?? '',
         version: json['version'] as int? ?? 0,
-        createdAt: _parseDateTime(json['created_at']) ?? DateTime.now(),
-        updatedAt: _parseDateTime(json['updated_at']) ?? DateTime.now(),
+        createdAt: _parseDateTime(json['created_at']) ?? DateTime.utc(1970),
+        updatedAt: _parseDateTime(json['updated_at']) ?? DateTime.utc(1970),
       );
 
   /// Converts to JSON.

@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../../utils/equality_helpers.dart';
+
 /// Request for text classification.
 @immutable
 class ClassificationRequest {
@@ -58,10 +60,13 @@ class ClassificationRequest {
       identical(this, other) ||
       other is ClassificationRequest &&
           runtimeType == other.runtimeType &&
-          model == other.model;
+          model == other.model &&
+          listsEqual(input, other.input) &&
+          mapsEqual(metadata, other.metadata);
 
   @override
-  int get hashCode => Object.hash(model, input);
+  int get hashCode =>
+      Object.hash(model, Object.hashAll(input), mapHash(metadata));
 
   @override
   String toString() =>

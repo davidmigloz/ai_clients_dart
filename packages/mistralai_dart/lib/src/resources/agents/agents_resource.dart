@@ -181,8 +181,8 @@ class AgentsResource extends ResourceBase with StreamingResource {
   /// The [agentId] identifies the agent.
   /// Optional [page] and [pageSize] for pagination.
   ///
-  /// Returns an [AgentList] containing agent versions.
-  Future<AgentList> listVersions({
+  /// Returns a list of [Agent] versions.
+  Future<List<Agent>> listVersions({
     required String agentId,
     int? page,
     int? pageSize,
@@ -201,19 +201,21 @@ class AgentsResource extends ResourceBase with StreamingResource {
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(httpRequest);
-    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
-    return AgentList.fromJson(responseBody);
+    final responseBody = jsonDecode(response.body) as List<dynamic>;
+    return responseBody
+        .map((e) => Agent.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   /// Retrieves a specific version of an agent.
   ///
   /// The [agentId] identifies the agent.
-  /// The [version] is the version number to retrieve.
+  /// The [version] identifies the version to retrieve.
   ///
   /// Returns the [Agent] at the specified version.
   Future<Agent> retrieveVersion({
     required String agentId,
-    required int version,
+    required String version,
   }) async {
     final url = requestBuilder.buildUrl(
       '/v1/agents/$agentId/versions/$version',
@@ -259,14 +261,13 @@ class AgentsResource extends ResourceBase with StreamingResource {
     required String alias,
     required int version,
   }) async {
-    final url = requestBuilder.buildUrl('/v1/agents/$agentId/aliases');
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'Content-Type': 'application/json'},
+    final url = requestBuilder.buildUrl(
+      '/v1/agents/$agentId/aliases',
+      queryParams: {'alias': alias, 'version': version.toString()},
     );
+    final headers = requestBuilder.buildHeaders();
 
-    final httpRequest = http.Request('PUT', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode({'alias': alias, 'version': version});
+    final httpRequest = http.Request('PUT', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(httpRequest);
     final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
@@ -281,14 +282,13 @@ class AgentsResource extends ResourceBase with StreamingResource {
     required String agentId,
     required String alias,
   }) async {
-    final url = requestBuilder.buildUrl('/v1/agents/$agentId/aliases');
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'Content-Type': 'application/json'},
+    final url = requestBuilder.buildUrl(
+      '/v1/agents/$agentId/aliases',
+      queryParams: {'alias': alias},
     );
+    final headers = requestBuilder.buildHeaders();
 
-    final httpRequest = http.Request('DELETE', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode({'alias': alias});
+    final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
 
     await interceptorChain.execute(httpRequest);
   }

@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../../utils/equality_helpers.dart';
+
 /// An individual request within a batch job.
 @immutable
 class BatchRequest {
@@ -29,10 +31,11 @@ class BatchRequest {
       identical(this, other) ||
       other is BatchRequest &&
           runtimeType == other.runtimeType &&
-          customId == other.customId;
+          customId == other.customId &&
+          mapsEqual(body, other.body);
 
   @override
-  int get hashCode => customId.hashCode;
+  int get hashCode => Object.hash(customId, mapHash(body));
 
   @override
   String toString() => 'BatchRequest(customId: $customId)';
