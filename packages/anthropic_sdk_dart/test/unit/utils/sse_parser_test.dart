@@ -249,6 +249,15 @@ data: {"type":"message_start"}''';
       expect(events[0]['type'], 'error');
     });
 
+    test('[DONE] flushes buffered data before terminating', () async {
+      const input = 'data: {"type":"message_start"}\ndata: [DONE]\n';
+      final stream = Stream<List<int>>.value(utf8.encode(input));
+
+      final events = await SseParser().parse(stream).toList();
+      expect(events, hasLength(1));
+      expect(events[0]['type'], 'message_start');
+    });
+
     test('event type does not leak across events without data', () async {
       // event: error with no data, followed by a normal event
       const input =

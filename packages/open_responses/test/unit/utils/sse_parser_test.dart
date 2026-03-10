@@ -36,6 +36,15 @@ void main() {
       expect(events[0]['error'], isA<Map<String, dynamic>>());
     });
 
+    test('[DONE] flushes buffered data before terminating', () async {
+      const input = 'data: {"type":"response.created"}\ndata: [DONE]\n';
+      final stream = Stream<List<int>>.value(utf8.encode(input));
+
+      final events = await SseParser().parse(stream).toList();
+      expect(events, hasLength(1));
+      expect(events[0]['type'], 'response.created');
+    });
+
     test('event type does not leak across events without data', () async {
       const input =
           'event: error\n\nevent: message\ndata: {"type":"response.created"}\n\n';
