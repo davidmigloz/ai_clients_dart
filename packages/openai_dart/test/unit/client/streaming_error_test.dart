@@ -203,8 +203,14 @@ void main() {
         fail('Should have thrown');
       } on StreamException catch (e) {
         expect(e.partialData, isNotNull);
-        expect(e.partialData, contains('Too many tokens...'));
-        expect(e.partialData, contains('error_code'));
+        // partialData should be valid JSON
+        final parsed = jsonDecode(e.partialData!) as Map<String, dynamic>;
+        expect(parsed['error'], isA<Map<String, dynamic>>());
+        final error = parsed['error'] as Map<String, dynamic>;
+        expect(error['error'], 'Too many tokens...');
+        expect(error['error_code'], 4001);
+        // Internal _event field should be stripped
+        expect(parsed.containsKey('_event'), isFalse);
       }
       client.close();
     });

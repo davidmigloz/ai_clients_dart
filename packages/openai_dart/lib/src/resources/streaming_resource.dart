@@ -236,4 +236,44 @@ mixin StreamingResource on ResourceBase {
       rethrow;
     }
   }
+
+  /// Checks for inline errors in SSE stream data and throws
+  /// [StreamException] if found.
+  ///
+  /// Detects two error patterns:
+  /// 1. SSE `event: error` — parser sets `_event: "error"` in the JSON map
+  /// 2. Error objects in data — from providers like AWS Bedrock that embed
+  ///    errors in HTTP 200 SSE responses
+  ///
+  /// Supports multiple error formats:
+  /// - Standard OpenAI: `{"error": {"message": "...", "type": "..."}}`
+  /// - AWS Bedrock: `{"error": {"error": "...", "error_code": 4001}}`
+  /// - Plain string: `{"error": "Something went wrong"}`
+  ///
+  /// This is intentionally NOT called from [streamSseEvents] because some
+  /// resources (e.g., Responses API) handle `ErrorEvent` as a normal stream
+  /// event rather than as an exception.
+  Never throwInlineStreamError(
+    Map<String, dynamic> json,
+    String? sseEvent,
+    Object? error,
+  ) {
+    String message;
+    if (error is Map<String, dynamic>) {
+      message = (error['message'] ?? error['error'] ?? 'Unknown stream error')
+          .toString();
+    } else if (error is String) {
+      message = error;
+    } else if (sseEvent == 'error') {
+      message = 'Stream error event received';
+    } else {
+      message = 'Unknown stream error';
+    }
+
+    Logger('OpenAIClient').warning('Inline stream error: $message');
+
+    // Strip internal `_event` field and encode as JSON for partialData
+    final cleanJson = Map<String, dynamic>.from(json)..remove('_event');
+    throw StreamException(message: message, partialData: jsonEncode(cleanJson));
+  }
 }
