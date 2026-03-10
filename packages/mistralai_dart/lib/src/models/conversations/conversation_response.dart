@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../../utils/equality_helpers.dart';
 import '../metadata/usage_info.dart';
+import '../moderations/guardrail_config.dart';
 import 'conversation_entry.dart';
 
 /// Response from starting or appending to a conversation.
@@ -16,11 +17,15 @@ class ConversationResponse {
   /// Usage information for this request.
   final UsageInfo? usage;
 
+  /// Guardrail results for this response.
+  final GuardrailConfig? guardrails;
+
   /// Creates a [ConversationResponse].
   const ConversationResponse({
     required this.conversationId,
     required this.outputs,
     this.usage,
+    this.guardrails,
   });
 
   /// Creates a [ConversationResponse] from JSON.
@@ -37,6 +42,9 @@ class ConversationResponse {
       usage: json['usage'] != null
           ? UsageInfo.fromJson(json['usage'] as Map<String, dynamic>)
           : null,
+      guardrails: json['guardrails'] != null
+          ? GuardrailConfig.fromJson(json['guardrails'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -46,6 +54,7 @@ class ConversationResponse {
       'conversation_id': conversationId,
       'outputs': outputs.map((e) => e.toJson()).toList(),
       if (usage != null) 'usage': usage!.toJson(),
+      if (guardrails != null) 'guardrails': guardrails!.toJson(),
     };
   }
 

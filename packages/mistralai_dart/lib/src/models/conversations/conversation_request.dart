@@ -2,7 +2,9 @@ import 'package:meta/meta.dart';
 
 import '../../utils/equality_helpers.dart';
 import '../metadata/response_format.dart';
+import '../moderations/guardrail_config.dart';
 import '../tools/tool.dart';
+import '../tools/tool_call_confirmation.dart';
 import '../tools/tool_choice.dart';
 import 'conversation_entry.dart';
 
@@ -51,6 +53,9 @@ class StartConversationRequest {
   /// Optional metadata for the conversation.
   final Map<String, dynamic>? metadata;
 
+  /// Guardrail configuration for content moderation.
+  final GuardrailConfig? guardrails;
+
   /// Creates a [StartConversationRequest].
   const StartConversationRequest({
     this.model,
@@ -66,6 +71,7 @@ class StartConversationRequest {
     this.responseFormat,
     this.randomSeed,
     this.metadata,
+    this.guardrails,
   });
 
   /// Creates a request with a simple user message.
@@ -119,6 +125,9 @@ class StartConversationRequest {
           : null,
       randomSeed: json['random_seed'] as int?,
       metadata: json['metadata'] as Map<String, dynamic>?,
+      guardrails: json['guardrails'] != null
+          ? GuardrailConfig.fromJson(json['guardrails'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -138,6 +147,7 @@ class StartConversationRequest {
       if (responseFormat != null) 'response_format': responseFormat!.toJson(),
       if (randomSeed != null) 'random_seed': randomSeed,
       if (metadata != null) 'metadata': metadata,
+      if (guardrails != null) 'guardrails': guardrails!.toJson(),
     };
   }
 
@@ -156,6 +166,7 @@ class StartConversationRequest {
     ResponseFormat? responseFormat,
     int? randomSeed,
     Map<String, dynamic>? metadata,
+    GuardrailConfig? guardrails,
   }) {
     return StartConversationRequest(
       model: model ?? this.model,
@@ -171,6 +182,7 @@ class StartConversationRequest {
       responseFormat: responseFormat ?? this.responseFormat,
       randomSeed: randomSeed ?? this.randomSeed,
       metadata: metadata ?? this.metadata,
+      guardrails: guardrails ?? this.guardrails,
     );
   }
 
@@ -194,7 +206,7 @@ class StartConversationRequest {
 @immutable
 class AppendConversationRequest {
   /// The inputs to append to the conversation.
-  final List<ConversationEntry> inputs;
+  final List<ConversationEntry>? inputs;
 
   /// Whether to store the results on Mistral's servers.
   final bool? store;
@@ -223,9 +235,12 @@ class AppendConversationRequest {
   /// Random seed for reproducibility.
   final int? randomSeed;
 
+  /// Tool call confirmations for calls requiring user approval.
+  final List<ToolCallConfirmation>? toolConfirmations;
+
   /// Creates an [AppendConversationRequest].
   const AppendConversationRequest({
-    required this.inputs,
+    this.inputs,
     this.store,
     this.maxTokens,
     this.stop,
@@ -235,6 +250,7 @@ class AppendConversationRequest {
     this.toolChoice,
     this.responseFormat,
     this.randomSeed,
+    this.toolConfirmations,
   });
 
   /// Creates a request with a simple user message.
@@ -255,13 +271,9 @@ class AppendConversationRequest {
   /// Creates an [AppendConversationRequest] from JSON.
   factory AppendConversationRequest.fromJson(Map<String, dynamic> json) {
     return AppendConversationRequest(
-      inputs:
-          (json['inputs'] as List<dynamic>?)
-              ?.map(
-                (e) => ConversationEntry.fromJson(e as Map<String, dynamic>),
-              )
-              .toList() ??
-          [],
+      inputs: (json['inputs'] as List<dynamic>?)
+          ?.map((e) => ConversationEntry.fromJson(e as Map<String, dynamic>))
+          .toList(),
       store: json['store'] as bool?,
       maxTokens: json['max_tokens'] as int?,
       stop: (json['stop'] as List<dynamic>?)?.cast<String>(),
@@ -279,13 +291,16 @@ class AppendConversationRequest {
             )
           : null,
       randomSeed: json['random_seed'] as int?,
+      toolConfirmations: (json['tool_confirmations'] as List<dynamic>?)
+          ?.map((e) => ToolCallConfirmation.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
   }
 
   /// Converts this request to JSON.
   Map<String, dynamic> toJson() {
     return {
-      'inputs': inputs.map((e) => e.toJson()).toList(),
+      if (inputs != null) 'inputs': inputs!.map((e) => e.toJson()).toList(),
       if (store != null) 'store': store,
       if (maxTokens != null) 'max_tokens': maxTokens,
       if (stop != null) 'stop': stop,
@@ -295,6 +310,10 @@ class AppendConversationRequest {
       if (toolChoice != null) 'tool_choice': toolChoice!.toJson(),
       if (responseFormat != null) 'response_format': responseFormat!.toJson(),
       if (randomSeed != null) 'random_seed': randomSeed,
+      if (toolConfirmations != null)
+        'tool_confirmations': toolConfirmations!
+            .map((e) => e.toJson())
+            .toList(),
     };
   }
 
@@ -310,6 +329,7 @@ class AppendConversationRequest {
     ToolChoice? toolChoice,
     ResponseFormat? responseFormat,
     int? randomSeed,
+    List<ToolCallConfirmation>? toolConfirmations,
   }) {
     return AppendConversationRequest(
       inputs: inputs ?? this.inputs,
@@ -322,6 +342,7 @@ class AppendConversationRequest {
       toolChoice: toolChoice ?? this.toolChoice,
       responseFormat: responseFormat ?? this.responseFormat,
       randomSeed: randomSeed ?? this.randomSeed,
+      toolConfirmations: toolConfirmations ?? this.toolConfirmations,
     );
   }
 
@@ -339,11 +360,12 @@ class AppendConversationRequest {
           listsEqual(tools, other.tools) &&
           toolChoice == other.toolChoice &&
           responseFormat == other.responseFormat &&
-          randomSeed == other.randomSeed;
+          randomSeed == other.randomSeed &&
+          listsEqual(toolConfirmations, other.toolConfirmations);
 
   @override
   int get hashCode => Object.hash(
-    Object.hashAll(inputs),
+    Object.hashAll(inputs ?? []),
     store,
     maxTokens,
     Object.hashAll(stop ?? []),
@@ -356,7 +378,8 @@ class AppendConversationRequest {
   );
 
   @override
-  String toString() => 'AppendConversationRequest(inputs: ${inputs.length})';
+  String toString() =>
+      'AppendConversationRequest(inputs: ${inputs?.length ?? 0})';
 }
 
 /// Request to restart a conversation from a specific entry.
@@ -392,6 +415,9 @@ class RestartConversationRequest {
   /// Random seed for reproducibility.
   final int? randomSeed;
 
+  /// Guardrail configuration for content moderation.
+  final GuardrailConfig? guardrails;
+
   /// Creates a [RestartConversationRequest].
   const RestartConversationRequest({
     required this.entryId,
@@ -404,6 +430,7 @@ class RestartConversationRequest {
     this.toolChoice,
     this.responseFormat,
     this.randomSeed,
+    this.guardrails,
   });
 
   /// Creates a [RestartConversationRequest] from JSON.
@@ -427,6 +454,9 @@ class RestartConversationRequest {
             )
           : null,
       randomSeed: json['random_seed'] as int?,
+      guardrails: json['guardrails'] != null
+          ? GuardrailConfig.fromJson(json['guardrails'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -443,6 +473,7 @@ class RestartConversationRequest {
       if (toolChoice != null) 'tool_choice': toolChoice!.toJson(),
       if (responseFormat != null) 'response_format': responseFormat!.toJson(),
       if (randomSeed != null) 'random_seed': randomSeed,
+      if (guardrails != null) 'guardrails': guardrails!.toJson(),
     };
   }
 
@@ -458,6 +489,7 @@ class RestartConversationRequest {
     ToolChoice? toolChoice,
     ResponseFormat? responseFormat,
     int? randomSeed,
+    GuardrailConfig? guardrails,
   }) {
     return RestartConversationRequest(
       entryId: entryId ?? this.entryId,
@@ -470,6 +502,7 @@ class RestartConversationRequest {
       toolChoice: toolChoice ?? this.toolChoice,
       responseFormat: responseFormat ?? this.responseFormat,
       randomSeed: randomSeed ?? this.randomSeed,
+      guardrails: guardrails ?? this.guardrails,
     );
   }
 

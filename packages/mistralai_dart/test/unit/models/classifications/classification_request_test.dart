@@ -41,6 +41,20 @@ void main() {
 
         expect(request.model, 'mistral-moderation-latest');
         expect(request.input, ['Content 1', 'Content 2']);
+        expect(request.metadata, isNull);
+      });
+
+      test('should parse request with metadata', () {
+        final json = <String, dynamic>{
+          'model': 'mistral-moderation-latest',
+          'input': ['Content 1'],
+          'metadata': {'project': 'test'},
+        };
+
+        final request = ClassificationRequest.fromJson(json);
+
+        expect(request.input, ['Content 1']);
+        expect(request.metadata, {'project': 'test'});
       });
 
       test('should parse request with string input', () {
@@ -84,6 +98,7 @@ void main() {
 
         expect(json['model'], 'mistral-moderation-latest');
         expect(json['input'], ['Test content']);
+        expect(json.containsKey('metadata'), isFalse);
       });
 
       test('should serialize multiple inputs', () {
@@ -94,6 +109,18 @@ void main() {
         final json = request.toJson();
 
         expect(json['input'], ['Content 1', 'Content 2']);
+      });
+
+      test('should serialize with metadata', () {
+        const request = ClassificationRequest(
+          input: ['Content 1'],
+          metadata: {'project': 'test', 'version': '1.0'},
+        );
+
+        final json = request.toJson();
+
+        expect(json['input'], ['Content 1']);
+        expect(json['metadata'], {'project': 'test', 'version': '1.0'});
       });
     });
 

@@ -32,6 +32,9 @@ class OcrRequest {
   /// Image minimum size.
   final int? imageMinSize;
 
+  /// Custom prompt for document annotation.
+  final String? documentAnnotationPrompt;
+
   /// Creates an [OcrRequest].
   const OcrRequest({
     this.model = 'mistral-ocr-latest',
@@ -41,6 +44,7 @@ class OcrRequest {
     this.includeImageBase64,
     this.imageLimit,
     this.imageMinSize,
+    this.documentAnnotationPrompt,
   });
 
   /// Creates an [OcrRequest] from a URL.
@@ -98,6 +102,7 @@ class OcrRequest {
     includeImageBase64: json['include_image_base64'] as bool?,
     imageLimit: json['image_limit'] as int?,
     imageMinSize: json['image_min_size'] as int?,
+    documentAnnotationPrompt: json['document_annotation_prompt'] as String?,
   );
 
   /// Converts to JSON.
@@ -109,6 +114,8 @@ class OcrRequest {
     if (includeImageBase64 != null) 'include_image_base64': includeImageBase64,
     if (imageLimit != null) 'image_limit': imageLimit,
     if (imageMinSize != null) 'image_min_size': imageMinSize,
+    if (documentAnnotationPrompt != null)
+      'document_annotation_prompt': documentAnnotationPrompt,
   };
 
   /// Creates a copy with the specified fields replaced.
@@ -120,6 +127,7 @@ class OcrRequest {
     bool? includeImageBase64,
     int? imageLimit,
     int? imageMinSize,
+    String? documentAnnotationPrompt,
   }) => OcrRequest(
     model: model ?? this.model,
     document: document ?? this.document,
@@ -128,6 +136,8 @@ class OcrRequest {
     includeImageBase64: includeImageBase64 ?? this.includeImageBase64,
     imageLimit: imageLimit ?? this.imageLimit,
     imageMinSize: imageMinSize ?? this.imageMinSize,
+    documentAnnotationPrompt:
+        documentAnnotationPrompt ?? this.documentAnnotationPrompt,
   );
 
   @override

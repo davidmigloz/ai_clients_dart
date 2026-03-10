@@ -50,6 +50,7 @@ void main() {
           responseFormat: ResponseFormatJsonObject(),
           randomSeed: 42,
           metadata: {'key': 'value'},
+          guardrails: GuardrailConfig(blockOnError: true),
         );
         expect(request.store, true);
         expect(request.stop, ['END']);
@@ -59,6 +60,7 @@ void main() {
         expect(request.responseFormat, isA<ResponseFormatJsonObject>());
         expect(request.randomSeed, 42);
         expect(request.metadata?['key'], 'value');
+        expect(request.guardrails?.blockOnError, isTrue);
       });
     });
 
@@ -222,12 +224,19 @@ void main() {
           toolChoice: ToolChoiceAuto(),
           responseFormat: ResponseFormatText(),
           randomSeed: 99,
+          toolConfirmations: [
+            ToolCallConfirmation.allow(toolCallId: 'call-1'),
+            ToolCallConfirmation.deny(toolCallId: 'call-2'),
+          ],
         );
         expect(request.store, true);
         expect(request.maxTokens, 500);
         expect(request.stop, ['END']);
         expect(request.temperature, 0.7);
         expect(request.topP, 0.95);
+        expect(request.toolConfirmations, hasLength(2));
+        expect(request.toolConfirmations![0].confirmation, 'allow');
+        expect(request.toolConfirmations![1].confirmation, 'deny');
       });
     });
 
@@ -239,7 +248,7 @@ void main() {
         );
         expect(request.inputs, hasLength(1));
         expect(
-          (request.inputs.first as MessageInputEntry).content,
+          (request.inputs!.first as MessageInputEntry).content,
           'Continue please',
         );
         expect(request.maxTokens, 200);
@@ -317,6 +326,7 @@ void main() {
           topP: 0.85,
           tools: [Tool.codeInterpreter()],
           randomSeed: 77,
+          guardrails: GuardrailConfig(blockOnError: true),
         );
         expect(request.entryId, 'entry-456');
         expect(request.store, true);
@@ -324,6 +334,7 @@ void main() {
         expect(request.stop, ['DONE']);
         expect(request.temperature, 0.6);
         expect(request.randomSeed, 77);
+        expect(request.guardrails?.blockOnError, isTrue);
       });
     });
 

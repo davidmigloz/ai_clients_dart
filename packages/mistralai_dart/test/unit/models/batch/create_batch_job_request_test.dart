@@ -16,6 +16,18 @@ void main() {
         expect(request.model, 'mistral-small-latest');
         expect(request.metadata, isNull);
         expect(request.timeoutHours, isNull);
+        expect(request.requests, isNull);
+      });
+
+      test('creates request with null inputFileId', () {
+        const request = CreateBatchJobRequest(
+          endpoint: '/v1/chat/completions',
+          model: 'mistral-small-latest',
+        );
+
+        expect(request.inputFileId, isNull);
+        expect(request.endpoint, '/v1/chat/completions');
+        expect(request.model, 'mistral-small-latest');
       });
 
       test('creates request with all fields', () {
@@ -25,6 +37,9 @@ void main() {
           model: 'mistral-embed',
           metadata: {'project': 'test', 'version': '1.0'},
           timeoutHours: 24,
+          requests: [
+            BatchRequest(body: {'prompt': 'Hello'}, customId: 'req-1'),
+          ],
         );
 
         expect(request.inputFileId, 'file-456');
@@ -32,6 +47,24 @@ void main() {
         expect(request.model, 'mistral-embed');
         expect(request.metadata, {'project': 'test', 'version': '1.0'});
         expect(request.timeoutHours, 24);
+        expect(request.requests, hasLength(1));
+        expect(request.requests![0].customId, 'req-1');
+      });
+
+      test('creates request with inline requests instead of inputFileId', () {
+        const request = CreateBatchJobRequest(
+          endpoint: '/v1/chat/completions',
+          model: 'mistral-small-latest',
+          requests: [
+            BatchRequest(body: {'prompt': 'Hello'}, customId: 'req-1'),
+            BatchRequest(body: {'prompt': 'World'}, customId: 'req-2'),
+          ],
+        );
+
+        expect(request.inputFileId, isNull);
+        expect(request.requests, hasLength(2));
+        expect(request.requests![0].body, {'prompt': 'Hello'});
+        expect(request.requests![1].customId, 'req-2');
       });
     });
 
@@ -79,6 +112,43 @@ void main() {
         expect(request.metadata, {'key': 'value'});
         expect(request.timeoutHours, 48);
       });
+
+      test('parses request with inline requests', () {
+        final json = {
+          'endpoint': '/v1/chat/completions',
+          'model': 'mistral-small-latest',
+          'requests': [
+            {
+              'body': {'prompt': 'Hello'},
+              'custom_id': 'req-1',
+            },
+            {
+              'body': {'prompt': 'World'},
+            },
+          ],
+        };
+
+        final request = CreateBatchJobRequest.fromJson(json);
+
+        expect(request.inputFileId, isNull);
+        expect(request.requests, hasLength(2));
+        expect(request.requests![0].body, {'prompt': 'Hello'});
+        expect(request.requests![0].customId, 'req-1');
+        expect(request.requests![1].body, {'prompt': 'World'});
+        expect(request.requests![1].customId, isNull);
+      });
+
+      test('parses request with null inputFileId', () {
+        final json = {
+          'endpoint': '/v1/chat/completions',
+          'model': 'mistral-small-latest',
+        };
+
+        final request = CreateBatchJobRequest.fromJson(json);
+
+        expect(request.inputFileId, isNull);
+        expect(request.requests, isNull);
+      });
     });
 
     group('toJson', () {
@@ -96,6 +166,18 @@ void main() {
         expect(json['model'], 'mistral-small-latest');
         expect(json.containsKey('metadata'), isFalse);
         expect(json.containsKey('timeout_hours'), isFalse);
+        expect(json.containsKey('requests'), isFalse);
+      });
+
+      test('serializes without inputFileId when null', () {
+        const request = CreateBatchJobRequest(
+          endpoint: '/v1/chat/completions',
+          model: 'mistral-small-latest',
+        );
+
+        final json = request.toJson();
+
+        expect(json.containsKey('input_files'), isFalse);
       });
 
       test('serializes all fields', () {
@@ -105,6 +187,9 @@ void main() {
           model: 'mistral-embed',
           metadata: {'env': 'prod'},
           timeoutHours: 12,
+          requests: [
+            BatchRequest(body: {'prompt': 'Hello'}, customId: 'req-1'),
+          ],
         );
 
         final json = request.toJson();
@@ -114,6 +199,26 @@ void main() {
         expect(json['model'], 'mistral-embed');
         expect(json['metadata'], {'env': 'prod'});
         expect(json['timeout_hours'], 12);
+        expect(json['requests'], isList);
+        expect(json['requests'] as List, hasLength(1));
+      });
+
+      test('serializes with inline requests', () {
+        const request = CreateBatchJobRequest(
+          endpoint: '/v1/chat/completions',
+          model: 'mistral-small-latest',
+          requests: [
+            BatchRequest(body: {'prompt': 'Hello'}, customId: 'req-1'),
+          ],
+        );
+
+        final json = request.toJson();
+
+        expect(json.containsKey('input_files'), isFalse);
+        expect(json['requests'], isList);
+        final requests = json['requests'] as List;
+        expect(requests, hasLength(1));
+        expect((requests[0] as Map<String, dynamic>)['custom_id'], 'req-1');
       });
     });
 
@@ -144,6 +249,9 @@ void main() {
           model: 'mistral-small-latest',
           metadata: {'key': 'value'},
           timeoutHours: 48,
+          requests: [
+            BatchRequest(body: {'prompt': 'Hello'}, customId: 'req-1'),
+          ],
         );
 
         final copy = original.copyWith();
@@ -153,6 +261,25 @@ void main() {
         expect(copy.model, 'mistral-small-latest');
         expect(copy.metadata, {'key': 'value'});
         expect(copy.timeoutHours, 48);
+        expect(copy.requests, hasLength(1));
+      });
+
+      test('copies with new requests', () {
+        const original = CreateBatchJobRequest(
+          inputFileId: 'file-123',
+          endpoint: '/v1/chat/completions',
+          model: 'mistral-small-latest',
+        );
+
+        final copy = original.copyWith(
+          requests: const [
+            BatchRequest(body: {'prompt': 'New'}, customId: 'req-new'),
+          ],
+        );
+
+        expect(copy.inputFileId, 'file-123');
+        expect(copy.requests, hasLength(1));
+        expect(copy.requests![0].customId, 'req-new');
       });
     });
 

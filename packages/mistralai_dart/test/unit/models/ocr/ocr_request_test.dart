@@ -25,6 +25,7 @@ void main() {
           includeImageBase64: true,
           imageLimit: 10,
           imageMinSize: 100,
+          documentAnnotationPrompt: 'Annotate tables and charts',
         );
 
         expect(request.model, 'custom-ocr-model');
@@ -34,6 +35,7 @@ void main() {
         expect(request.includeImageBase64, isTrue);
         expect(request.imageLimit, 10);
         expect(request.imageMinSize, 100);
+        expect(request.documentAnnotationPrompt, 'Annotate tables and charts');
       });
     });
 
@@ -88,6 +90,7 @@ void main() {
         expect(document['document_url'], 'https://example.com/doc.pdf');
         expect(json.containsKey('id'), isFalse);
         expect(json.containsKey('pages'), isFalse);
+        expect(json.containsKey('document_annotation_prompt'), isFalse);
       });
 
       test('serializes full request', () {
@@ -99,6 +102,7 @@ void main() {
           includeImageBase64: true,
           imageLimit: 5,
           imageMinSize: 50,
+          documentAnnotationPrompt: 'Annotate everything',
         );
 
         final json = request.toJson();
@@ -111,6 +115,7 @@ void main() {
         expect(json['include_image_base64'], true);
         expect(json['image_limit'], 5);
         expect(json['image_min_size'], 50);
+        expect(json['document_annotation_prompt'], 'Annotate everything');
       });
     });
 
@@ -134,6 +139,22 @@ void main() {
         expect(request.id, 'req-123');
         expect(request.pages, [0, 1]);
         expect(request.includeImageBase64, isTrue);
+        expect(request.documentAnnotationPrompt, isNull);
+      });
+
+      test('parses request with documentAnnotationPrompt', () {
+        final json = {
+          'model': 'mistral-ocr-latest',
+          'document': {
+            'type': 'document_url',
+            'document_url': 'https://example.com/doc.pdf',
+          },
+          'document_annotation_prompt': 'Annotate tables',
+        };
+
+        final request = OcrRequest.fromJson(json);
+
+        expect(request.documentAnnotationPrompt, 'Annotate tables');
       });
     });
 
@@ -157,6 +178,7 @@ void main() {
           id: 'req-001',
           pages: [0],
           includeImageBase64: true,
+          documentAnnotationPrompt: 'Annotate all',
         );
 
         final copy = original.copyWith();
@@ -165,6 +187,20 @@ void main() {
         expect(copy.id, 'req-001');
         expect(copy.pages, [0]);
         expect(copy.includeImageBase64, isTrue);
+        expect(copy.documentAnnotationPrompt, 'Annotate all');
+      });
+
+      test('copies with new documentAnnotationPrompt', () {
+        const original = OcrRequest(
+          document: UrlDocument('https://example.com/doc.pdf'),
+        );
+
+        final copy = original.copyWith(
+          documentAnnotationPrompt: 'Focus on tables',
+        );
+
+        expect(copy.documentAnnotationPrompt, 'Focus on tables');
+        expect(copy.document, equals(original.document));
       });
     });
 

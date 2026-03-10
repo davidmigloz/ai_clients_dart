@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../moderations/guardrail_config.dart';
 import '../tools/tool.dart';
 
 /// An AI agent configuration.
@@ -29,6 +30,12 @@ class Agent {
   /// Custom metadata for the agent.
   final Map<String, dynamic>? metadata;
 
+  /// Guardrail configuration for content moderation.
+  final GuardrailConfig? guardrails;
+
+  /// Message describing the changes in this version.
+  final String? versionMessage;
+
   /// Current version number.
   final int version;
 
@@ -48,6 +55,8 @@ class Agent {
     this.instructions,
     this.tools,
     this.metadata,
+    this.guardrails,
+    this.versionMessage,
     this.version = 1,
     this.createdAt,
     this.updatedAt,
@@ -65,6 +74,10 @@ class Agent {
         ?.map((e) => Tool.fromJson(e as Map<String, dynamic>))
         .toList(),
     metadata: json['metadata'] as Map<String, dynamic>?,
+    guardrails: json['guardrails'] != null
+        ? GuardrailConfig.fromJson(json['guardrails'] as Map<String, dynamic>)
+        : null,
+    versionMessage: json['version_message'] as String?,
     version: json['version'] as int? ?? 1,
     createdAt: _parseDateTime(json['created_at']),
     updatedAt: _parseDateTime(json['updated_at']),
@@ -80,6 +93,8 @@ class Agent {
     if (instructions != null) 'instructions': instructions,
     if (tools != null) 'tools': tools!.map((e) => e.toJson()).toList(),
     if (metadata != null) 'metadata': metadata,
+    if (guardrails != null) 'guardrails': guardrails!.toJson(),
+    if (versionMessage != null) 'version_message': versionMessage,
     'version': version,
     if (createdAt != null)
       'created_at': createdAt!.millisecondsSinceEpoch ~/ 1000,

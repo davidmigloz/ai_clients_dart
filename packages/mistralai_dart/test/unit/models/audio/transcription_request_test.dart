@@ -13,6 +13,8 @@ void main() {
         expect(request.prompt, isNull);
         expect(request.temperature, isNull);
         expect(request.timestampGranularities, isNull);
+        expect(request.contextBias, isNull);
+        expect(request.diarize, isNull);
       });
 
       test('creates with all parameters', () {
@@ -24,6 +26,8 @@ void main() {
           prompt: 'Transcribe this meeting about AI',
           temperature: 0.5,
           timestampGranularities: true,
+          contextBias: {'AI': 1.5, 'Mistral': 2.0},
+          diarize: true,
         );
         expect(request.file, 'file-123');
         expect(request.model, 'custom-model');
@@ -32,6 +36,8 @@ void main() {
         expect(request.prompt, 'Transcribe this meeting about AI');
         expect(request.temperature, 0.5);
         expect(request.timestampGranularities, true);
+        expect(request.contextBias, {'AI': 1.5, 'Mistral': 2.0});
+        expect(request.diarize, true);
       });
     });
 
@@ -46,6 +52,8 @@ void main() {
         expect(json.containsKey('prompt'), isFalse);
         expect(json.containsKey('temperature'), isFalse);
         expect(json.containsKey('timestamp_granularities'), isFalse);
+        expect(json.containsKey('context_bias'), isFalse);
+        expect(json.containsKey('diarize'), isFalse);
       });
 
       test('serializes all fields', () {
@@ -57,6 +65,8 @@ void main() {
           prompt: 'Technical meeting',
           temperature: 0.3,
           timestampGranularities: true,
+          contextBias: {'AI': 1.5},
+          diarize: true,
         );
         final json = request.toJson();
         expect(json['file'], 'file-123');
@@ -66,6 +76,8 @@ void main() {
         expect(json['prompt'], 'Technical meeting');
         expect(json['temperature'], 0.3);
         expect(json['timestamp_granularities'], true);
+        expect(json['context_bias'], {'AI': 1.5});
+        expect(json['diarize'], true);
       });
     });
 
@@ -86,6 +98,8 @@ void main() {
           'prompt': 'French conversation',
           'temperature': 0.7,
           'timestamp_granularities': false,
+          'context_bias': {'Mistral': 2.0},
+          'diarize': true,
         };
         final request = TranscriptionRequest.fromJson(json);
         expect(request.file, 'file-456');
@@ -95,6 +109,8 @@ void main() {
         expect(request.prompt, 'French conversation');
         expect(request.temperature, 0.7);
         expect(request.timestampGranularities, false);
+        expect(request.contextBias, {'Mistral': 2.0});
+        expect(request.diarize, true);
       });
 
       test('handles missing optional fields', () {
@@ -108,6 +124,8 @@ void main() {
         expect(request.prompt, isNull);
         expect(request.temperature, isNull);
         expect(request.timestampGranularities, isNull);
+        expect(request.contextBias, isNull);
+        expect(request.diarize, isNull);
       });
     });
 
@@ -128,6 +146,8 @@ void main() {
           prompt: 'Original prompt',
           temperature: 0.5,
           timestampGranularities: true,
+          contextBias: {'AI': 1.0},
+          diarize: false,
         );
         final copy = original.copyWith(
           file: 'file-456',
@@ -137,6 +157,8 @@ void main() {
           prompt: 'New prompt',
           temperature: 0.8,
           timestampGranularities: false,
+          contextBias: {'Mistral': 2.0},
+          diarize: true,
         );
         expect(copy.file, 'file-456');
         expect(copy.model, 'model-2');
@@ -145,6 +167,8 @@ void main() {
         expect(copy.prompt, 'New prompt');
         expect(copy.temperature, 0.8);
         expect(copy.timestampGranularities, false);
+        expect(copy.contextBias, {'Mistral': 2.0});
+        expect(copy.diarize, true);
       });
 
       test('copies with partial changes', () {
@@ -207,6 +231,8 @@ void main() {
           prompt: 'Spanish podcast',
           temperature: 0.4,
           timestampGranularities: true,
+          contextBias: {'podcast': 1.5, 'tema': 2.0},
+          diarize: true,
         );
         final json = original.toJson();
         final restored = TranscriptionRequest.fromJson(json);
@@ -220,6 +246,8 @@ void main() {
           restored.timestampGranularities,
           original.timestampGranularities,
         );
+        expect(restored.contextBias, original.contextBias);
+        expect(restored.diarize, original.diarize);
       });
     });
   });

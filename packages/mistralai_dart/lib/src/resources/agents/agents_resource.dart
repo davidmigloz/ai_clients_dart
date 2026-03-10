@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../../models/agents/agent.dart';
+import '../../models/agents/agent_alias_response.dart';
 import '../../models/agents/agent_completion_request.dart';
 import '../../models/agents/agent_completion_response.dart';
 import '../../models/agents/agent_list.dart';
@@ -173,6 +174,123 @@ class AgentsResource extends ResourceBase with StreamingResource {
     final response = await interceptorChain.execute(httpRequest);
     final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
     return Agent.fromJson(responseBody);
+  }
+
+  /// Lists all versions of an agent.
+  ///
+  /// The [agentId] identifies the agent.
+  /// Optional [page] and [pageSize] for pagination.
+  ///
+  /// Returns an [AgentList] containing agent versions.
+  Future<AgentList> listVersions({
+    required String agentId,
+    int? page,
+    int? pageSize,
+  }) async {
+    final queryParams = <String, String>{
+      if (page != null) 'page': page.toString(),
+      if (pageSize != null) 'page_size': pageSize.toString(),
+    };
+
+    final url = requestBuilder.buildUrl(
+      '/v1/agents/$agentId/versions',
+      queryParams: queryParams,
+    );
+    final headers = requestBuilder.buildHeaders();
+
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+
+    final response = await interceptorChain.execute(httpRequest);
+    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
+    return AgentList.fromJson(responseBody);
+  }
+
+  /// Retrieves a specific version of an agent.
+  ///
+  /// The [agentId] identifies the agent.
+  /// The [version] is the version number to retrieve.
+  ///
+  /// Returns the [Agent] at the specified version.
+  Future<Agent> retrieveVersion({
+    required String agentId,
+    required int version,
+  }) async {
+    final url = requestBuilder.buildUrl(
+      '/v1/agents/$agentId/versions/$version',
+    );
+    final headers = requestBuilder.buildHeaders();
+
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+
+    final response = await interceptorChain.execute(httpRequest);
+    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
+    return Agent.fromJson(responseBody);
+  }
+
+  /// Lists all aliases for an agent.
+  ///
+  /// The [agentId] identifies the agent.
+  ///
+  /// Returns a list of [AgentAliasResponse].
+  Future<List<AgentAliasResponse>> listAliases({
+    required String agentId,
+  }) async {
+    final url = requestBuilder.buildUrl('/v1/agents/$agentId/aliases');
+    final headers = requestBuilder.buildHeaders();
+
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+
+    final response = await interceptorChain.execute(httpRequest);
+    final responseBody = jsonDecode(response.body) as List<dynamic>;
+    return responseBody
+        .map((e) => AgentAliasResponse.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Creates or updates an agent version alias.
+  ///
+  /// The [agentId] identifies the agent.
+  /// The [alias] is the alias name.
+  /// The [version] is the version number to point the alias to.
+  ///
+  /// Returns the created/updated [AgentAliasResponse].
+  Future<AgentAliasResponse> createOrUpdateAlias({
+    required String agentId,
+    required String alias,
+    required int version,
+  }) async {
+    final url = requestBuilder.buildUrl('/v1/agents/$agentId/aliases');
+    final headers = requestBuilder.buildHeaders(
+      additionalHeaders: {'Content-Type': 'application/json'},
+    );
+
+    final httpRequest = http.Request('PUT', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode({'alias': alias, 'version': version});
+
+    final response = await interceptorChain.execute(httpRequest);
+    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
+    return AgentAliasResponse.fromJson(responseBody);
+  }
+
+  /// Deletes an agent version alias.
+  ///
+  /// The [agentId] identifies the agent.
+  /// The [alias] is the alias name to delete.
+  Future<void> deleteAlias({
+    required String agentId,
+    required String alias,
+  }) async {
+    final url = requestBuilder.buildUrl('/v1/agents/$agentId/aliases');
+    final headers = requestBuilder.buildHeaders(
+      additionalHeaders: {'Content-Type': 'application/json'},
+    );
+
+    final httpRequest = http.Request('DELETE', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode({'alias': alias});
+
+    await interceptorChain.execute(httpRequest);
   }
 
   /// Generates a completion using an agent.

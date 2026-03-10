@@ -9,10 +9,14 @@ class ClassificationRequest {
   /// The input text(s) to classify.
   final List<String> input;
 
+  /// Optional metadata for the request.
+  final Map<String, dynamic>? metadata;
+
   /// Creates a [ClassificationRequest].
   const ClassificationRequest({
     this.model = 'mistral-moderation-latest',
     required this.input,
+    this.metadata,
   });
 
   /// Creates a [ClassificationRequest] for a single text input.
@@ -38,11 +42,16 @@ class ClassificationRequest {
     return ClassificationRequest(
       model: json['model'] as String? ?? 'mistral-moderation-latest',
       input: inputs,
+      metadata: json['metadata'] as Map<String, dynamic>?,
     );
   }
 
   /// Converts to JSON.
-  Map<String, dynamic> toJson() => {'model': model, 'input': input};
+  Map<String, dynamic> toJson() => {
+    'model': model,
+    'input': input,
+    if (metadata != null) 'metadata': metadata,
+  };
 
   @override
   bool operator ==(Object other) =>

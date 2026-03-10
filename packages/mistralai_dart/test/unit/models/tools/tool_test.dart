@@ -73,6 +73,27 @@ void main() {
         expect(tool1.hashCode, equals(tool2.hashCode));
         expect(tool1, isNot(equals(tool3)));
       });
+
+      test('copyWith creates a copy with new function', () {
+        const original = FunctionTool(
+          function: FunctionDefinition(name: 'old_func', description: 'old'),
+        );
+        const newDef = FunctionDefinition(name: 'new_func', description: 'new');
+        final copied = original.copyWith(function: newDef);
+
+        expect(copied.function.name, 'new_func');
+        expect(copied.function.description, 'new');
+      });
+
+      test('copyWith preserves function when not specified', () {
+        const original = FunctionTool(
+          function: FunctionDefinition(name: 'my_func', description: 'desc'),
+        );
+        final copied = original.copyWith();
+
+        expect(copied, equals(original));
+        expect(copied.function.name, 'my_func');
+      });
     });
 
     group('WebSearchTool', () {
@@ -86,6 +107,18 @@ void main() {
         expect(tool, isA<WebSearchTool>());
       });
 
+      test('creates with toolConfiguration', () {
+        const tool = WebSearchTool(
+          toolConfiguration: ToolConfiguration(
+            include: ['func1'],
+            requiresConfirmation: ['func2'],
+          ),
+        );
+        expect(tool.toolConfiguration, isNotNull);
+        expect(tool.toolConfiguration!.include, ['func1']);
+        expect(tool.toolConfiguration!.requiresConfirmation, ['func2']);
+      });
+
       test('serializes to JSON', () {
         const tool = WebSearchTool();
         final json = tool.toJson();
@@ -93,9 +126,43 @@ void main() {
         expect(json, {'type': 'web_search'});
       });
 
+      test('serializes to JSON with toolConfiguration', () {
+        const tool = WebSearchTool(
+          toolConfiguration: ToolConfiguration(
+            include: ['func1'],
+            requiresConfirmation: ['func2'],
+          ),
+        );
+        final json = tool.toJson();
+
+        expect(json['type'], 'web_search');
+        expect(json['tool_configuration'], isA<Map<String, dynamic>>());
+        expect((json['tool_configuration'] as Map)['include'], ['func1']);
+        expect((json['tool_configuration'] as Map)['requires_confirmation'], [
+          'func2',
+        ]);
+      });
+
       test('deserializes from JSON', () {
         final tool = Tool.fromJson(const {'type': 'web_search'});
         expect(tool, isA<WebSearchTool>());
+      });
+
+      test('deserializes from JSON with toolConfiguration', () {
+        final tool = Tool.fromJson(const {
+          'type': 'web_search',
+          'tool_configuration': {
+            'include': ['func1'],
+            'requires_confirmation': ['func2'],
+          },
+        });
+        expect(tool, isA<WebSearchTool>());
+        final webSearchTool = tool as WebSearchTool;
+        expect(webSearchTool.toolConfiguration, isNotNull);
+        expect(webSearchTool.toolConfiguration!.include, ['func1']);
+        expect(webSearchTool.toolConfiguration!.requiresConfirmation, [
+          'func2',
+        ]);
       });
 
       test('equality works correctly', () {
@@ -118,6 +185,14 @@ void main() {
         expect(tool, isA<WebSearchPremiumTool>());
       });
 
+      test('creates with toolConfiguration', () {
+        const tool = WebSearchPremiumTool(
+          toolConfiguration: ToolConfiguration(include: ['search']),
+        );
+        expect(tool.toolConfiguration, isNotNull);
+        expect(tool.toolConfiguration!.include, ['search']);
+      });
+
       test('serializes to JSON', () {
         const tool = WebSearchPremiumTool();
         final json = tool.toJson();
@@ -125,9 +200,35 @@ void main() {
         expect(json, {'type': 'web_search_premium'});
       });
 
+      test('serializes to JSON with toolConfiguration', () {
+        const tool = WebSearchPremiumTool(
+          toolConfiguration: ToolConfiguration(exclude: ['private_search']),
+        );
+        final json = tool.toJson();
+
+        expect(json['type'], 'web_search_premium');
+        expect(json['tool_configuration'], isA<Map<String, dynamic>>());
+        expect((json['tool_configuration'] as Map)['exclude'], [
+          'private_search',
+        ]);
+      });
+
       test('deserializes from JSON', () {
         final tool = Tool.fromJson(const {'type': 'web_search_premium'});
         expect(tool, isA<WebSearchPremiumTool>());
+      });
+
+      test('deserializes from JSON with toolConfiguration', () {
+        final tool = Tool.fromJson(const {
+          'type': 'web_search_premium',
+          'tool_configuration': {
+            'exclude': ['private_search'],
+          },
+        });
+        expect(tool, isA<WebSearchPremiumTool>());
+        final premiumTool = tool as WebSearchPremiumTool;
+        expect(premiumTool.toolConfiguration, isNotNull);
+        expect(premiumTool.toolConfiguration!.exclude, ['private_search']);
       });
     });
 
@@ -142,6 +243,16 @@ void main() {
         expect(tool, isA<CodeInterpreterTool>());
       });
 
+      test('creates with toolConfiguration', () {
+        const tool = CodeInterpreterTool(
+          toolConfiguration: ToolConfiguration(
+            requiresConfirmation: ['execute'],
+          ),
+        );
+        expect(tool.toolConfiguration, isNotNull);
+        expect(tool.toolConfiguration!.requiresConfirmation, ['execute']);
+      });
+
       test('serializes to JSON', () {
         const tool = CodeInterpreterTool();
         final json = tool.toJson();
@@ -149,9 +260,39 @@ void main() {
         expect(json, {'type': 'code_interpreter'});
       });
 
+      test('serializes to JSON with toolConfiguration', () {
+        const tool = CodeInterpreterTool(
+          toolConfiguration: ToolConfiguration(
+            requiresConfirmation: ['execute'],
+          ),
+        );
+        final json = tool.toJson();
+
+        expect(json['type'], 'code_interpreter');
+        expect(json['tool_configuration'], isA<Map<String, dynamic>>());
+        expect((json['tool_configuration'] as Map)['requires_confirmation'], [
+          'execute',
+        ]);
+      });
+
       test('deserializes from JSON', () {
         final tool = Tool.fromJson(const {'type': 'code_interpreter'});
         expect(tool, isA<CodeInterpreterTool>());
+      });
+
+      test('deserializes from JSON with toolConfiguration', () {
+        final tool = Tool.fromJson(const {
+          'type': 'code_interpreter',
+          'tool_configuration': {
+            'requires_confirmation': ['execute'],
+          },
+        });
+        expect(tool, isA<CodeInterpreterTool>());
+        final codeInterpreter = tool as CodeInterpreterTool;
+        expect(codeInterpreter.toolConfiguration, isNotNull);
+        expect(codeInterpreter.toolConfiguration!.requiresConfirmation, [
+          'execute',
+        ]);
       });
     });
 
@@ -166,6 +307,14 @@ void main() {
         expect(tool, isA<ImageGenerationTool>());
       });
 
+      test('creates with toolConfiguration', () {
+        const tool = ImageGenerationTool(
+          toolConfiguration: ToolConfiguration(include: ['generate']),
+        );
+        expect(tool.toolConfiguration, isNotNull);
+        expect(tool.toolConfiguration!.include, ['generate']);
+      });
+
       test('serializes to JSON', () {
         const tool = ImageGenerationTool();
         final json = tool.toJson();
@@ -173,9 +322,33 @@ void main() {
         expect(json, {'type': 'image_generation'});
       });
 
+      test('serializes to JSON with toolConfiguration', () {
+        const tool = ImageGenerationTool(
+          toolConfiguration: ToolConfiguration(include: ['generate']),
+        );
+        final json = tool.toJson();
+
+        expect(json['type'], 'image_generation');
+        expect(json['tool_configuration'], isA<Map<String, dynamic>>());
+        expect((json['tool_configuration'] as Map)['include'], ['generate']);
+      });
+
       test('deserializes from JSON', () {
         final tool = Tool.fromJson(const {'type': 'image_generation'});
         expect(tool, isA<ImageGenerationTool>());
+      });
+
+      test('deserializes from JSON with toolConfiguration', () {
+        final tool = Tool.fromJson(const {
+          'type': 'image_generation',
+          'tool_configuration': {
+            'include': ['generate'],
+          },
+        });
+        expect(tool, isA<ImageGenerationTool>());
+        final imageGenTool = tool as ImageGenerationTool;
+        expect(imageGenTool.toolConfiguration, isNotNull);
+        expect(imageGenTool.toolConfiguration!.include, ['generate']);
       });
     });
 
@@ -213,6 +386,32 @@ void main() {
         });
       });
 
+      test('creates with toolConfiguration', () {
+        const tool = DocumentLibraryTool(
+          libraryIds: ['lib1'],
+          toolConfiguration: ToolConfiguration(
+            include: ['search'],
+            requiresConfirmation: ['delete'],
+          ),
+        );
+        expect(tool.toolConfiguration, isNotNull);
+        expect(tool.toolConfiguration!.include, ['search']);
+        expect(tool.toolConfiguration!.requiresConfirmation, ['delete']);
+      });
+
+      test('serializes to JSON with toolConfiguration', () {
+        const tool = DocumentLibraryTool(
+          libraryIds: ['lib1'],
+          toolConfiguration: ToolConfiguration(include: ['search']),
+        );
+        final json = tool.toJson();
+
+        expect(json['type'], 'document_library');
+        expect(json['library_ids'], ['lib1']);
+        expect(json['tool_configuration'], isA<Map<String, dynamic>>());
+        expect((json['tool_configuration'] as Map)['include'], ['search']);
+      });
+
       test('deserializes from JSON', () {
         final tool = Tool.fromJson(const {
           'type': 'document_library',
@@ -220,6 +419,23 @@ void main() {
         });
         expect(tool, isA<DocumentLibraryTool>());
         expect((tool as DocumentLibraryTool).libraryIds, ['lib1']);
+      });
+
+      test('deserializes from JSON with toolConfiguration', () {
+        final tool = Tool.fromJson(const {
+          'type': 'document_library',
+          'library_ids': ['lib1'],
+          'tool_configuration': {
+            'include': ['search'],
+            'requires_confirmation': ['delete'],
+          },
+        });
+        expect(tool, isA<DocumentLibraryTool>());
+        final docLibTool = tool as DocumentLibraryTool;
+        expect(docLibTool.libraryIds, ['lib1']);
+        expect(docLibTool.toolConfiguration, isNotNull);
+        expect(docLibTool.toolConfiguration!.include, ['search']);
+        expect(docLibTool.toolConfiguration!.requiresConfirmation, ['delete']);
       });
 
       test('equality works correctly', () {

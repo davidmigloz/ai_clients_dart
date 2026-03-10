@@ -63,6 +63,7 @@ export 'src/extensions/chat_completion_extensions.dart';
 export 'src/extensions/chat_stream_extensions.dart';
 // --- Models: Agents (Beta) ---
 export 'src/models/agents/agent.dart';
+export 'src/models/agents/agent_alias_response.dart';
 export 'src/models/agents/agent_completion_request.dart';
 export 'src/models/agents/agent_completion_response.dart';
 export 'src/models/agents/agent_list.dart';
@@ -79,6 +80,7 @@ export 'src/models/batch/batch_error.dart';
 export 'src/models/batch/batch_job.dart';
 export 'src/models/batch/batch_job_list.dart';
 export 'src/models/batch/batch_job_status.dart';
+export 'src/models/batch/batch_request.dart';
 export 'src/models/batch/create_batch_job_request.dart';
 // --- Models: Chat ---
 export 'src/models/chat/chat_choice.dart';
@@ -154,6 +156,7 @@ export 'src/models/models/model_list.dart';
 // --- Models: Moderations ---
 export 'src/models/moderations/category_scores.dart';
 export 'src/models/moderations/chat_moderation_request.dart';
+export 'src/models/moderations/guardrail_config.dart';
 export 'src/models/moderations/moderation_request.dart';
 export 'src/models/moderations/moderation_response.dart';
 export 'src/models/moderations/moderation_result.dart';
@@ -168,7 +171,9 @@ export 'src/models/tools/function_call.dart';
 export 'src/models/tools/function_definition.dart';
 export 'src/models/tools/tool.dart';
 export 'src/models/tools/tool_call.dart';
+export 'src/models/tools/tool_call_confirmation.dart';
 export 'src/models/tools/tool_choice.dart';
+export 'src/models/tools/tool_configuration.dart';
 // --- Utils ---
 export 'src/utils/job_poller.dart';
 export 'src/utils/paginator.dart';

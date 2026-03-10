@@ -179,6 +179,9 @@ void main() {
           expect(entry.name, 'search');
           expect(entry.arguments, '{"query": "test"}');
           expect(entry.type, 'function.call');
+          expect(entry.agentId, isNull);
+          expect(entry.confirmationStatus, isNull);
+          expect(entry.model, isNull);
         });
 
         test('creates with all parameters', () {
@@ -187,9 +190,15 @@ void main() {
             name: 'calculate',
             arguments: '{"x": 1, "y": 2}',
             callId: 'call-123',
+            agentId: 'agent-456',
+            confirmationStatus: 'pending',
+            model: 'mistral-large-latest',
           );
           expect(entry.id, 'fc-1');
           expect(entry.callId, 'call-123');
+          expect(entry.agentId, 'agent-456');
+          expect(entry.confirmationStatus, 'pending');
+          expect(entry.model, 'mistral-large-latest');
         });
       });
 
@@ -207,6 +216,23 @@ void main() {
           expect(json['arguments'], '{}');
           expect(json['id'], 'fc-1');
           expect(json['call_id'], 'call-1');
+          expect(json.containsKey('agent_id'), isFalse);
+          expect(json.containsKey('confirmation_status'), isFalse);
+          expect(json.containsKey('model'), isFalse);
+        });
+
+        test('serializes new fields', () {
+          const entry = FunctionCallEntry(
+            name: 'search',
+            arguments: '{}',
+            agentId: 'agent-1',
+            confirmationStatus: 'allowed',
+            model: 'mistral-large-latest',
+          );
+          final json = entry.toJson();
+          expect(json['agent_id'], 'agent-1');
+          expect(json['confirmation_status'], 'allowed');
+          expect(json['model'], 'mistral-large-latest');
         });
       });
 
@@ -223,6 +249,21 @@ void main() {
           expect(entry.name, 'get_weather');
           expect(entry.arguments, '{"city": "Paris"}');
           expect(entry.callId, 'call-2');
+        });
+
+        test('deserializes new fields', () {
+          final json = <String, dynamic>{
+            'type': 'function.call',
+            'name': 'search',
+            'arguments': '{}',
+            'agent_id': 'agent-abc',
+            'confirmation_status': 'denied',
+            'model': 'codestral-latest',
+          };
+          final entry = FunctionCallEntry.fromJson(json);
+          expect(entry.agentId, 'agent-abc');
+          expect(entry.confirmationStatus, 'denied');
+          expect(entry.model, 'codestral-latest');
         });
       });
 
@@ -294,6 +335,8 @@ void main() {
           const entry = ToolExecutionEntry(toolType: 'web_search');
           expect(entry.toolType, 'web_search');
           expect(entry.type, 'tool.execution');
+          expect(entry.agentId, isNull);
+          expect(entry.model, isNull);
         });
 
         test('creates with input and output', () {
@@ -306,6 +349,16 @@ void main() {
           expect(entry.input, {'code': 'print(1+1)'});
           expect(entry.output, {'result': '2'});
           expect(entry.status, 'completed');
+        });
+
+        test('creates with agentId and model', () {
+          const entry = ToolExecutionEntry(
+            toolType: 'web_search',
+            agentId: 'agent-123',
+            model: 'mistral-large-latest',
+          );
+          expect(entry.agentId, 'agent-123');
+          expect(entry.model, 'mistral-large-latest');
         });
       });
 
@@ -324,6 +377,19 @@ void main() {
           expect(json['input'], {'query': 'test'});
           expect(json['output'], {'results': <dynamic>[]});
           expect(json['status'], 'success');
+          expect(json.containsKey('agent_id'), isFalse);
+          expect(json.containsKey('model'), isFalse);
+        });
+
+        test('serializes agentId and model', () {
+          const entry = ToolExecutionEntry(
+            toolType: 'web_search',
+            agentId: 'agent-1',
+            model: 'mistral-large-latest',
+          );
+          final json = entry.toJson();
+          expect(json['agent_id'], 'agent-1');
+          expect(json['model'], 'mistral-large-latest');
         });
       });
 
@@ -339,6 +405,18 @@ void main() {
           final entry = ToolExecutionEntry.fromJson(json);
           expect(entry.toolType, 'image_generation');
           expect(entry.status, 'done');
+        });
+
+        test('deserializes agentId and model', () {
+          final json = <String, dynamic>{
+            'type': 'tool.execution',
+            'tool_type': 'code_interpreter',
+            'agent_id': 'agent-xyz',
+            'model': 'codestral-latest',
+          };
+          final entry = ToolExecutionEntry.fromJson(json);
+          expect(entry.agentId, 'agent-xyz');
+          expect(entry.model, 'codestral-latest');
         });
       });
     });

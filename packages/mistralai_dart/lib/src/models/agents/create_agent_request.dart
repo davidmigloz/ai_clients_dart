@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../moderations/guardrail_config.dart';
 import '../tools/tool.dart';
 
 /// Request to create a new agent.
@@ -23,6 +24,12 @@ class CreateAgentRequest {
   /// Custom metadata for the agent.
   final Map<String, dynamic>? metadata;
 
+  /// Guardrail configuration for content moderation.
+  final GuardrailConfig? guardrails;
+
+  /// Message describing the changes in this version.
+  final String? versionMessage;
+
   /// Creates a [CreateAgentRequest].
   const CreateAgentRequest({
     required this.name,
@@ -31,6 +38,8 @@ class CreateAgentRequest {
     this.instructions,
     this.tools,
     this.metadata,
+    this.guardrails,
+    this.versionMessage,
   });
 
   /// Creates a [CreateAgentRequest] from JSON.
@@ -44,6 +53,12 @@ class CreateAgentRequest {
             ?.map((e) => Tool.fromJson(e as Map<String, dynamic>))
             .toList(),
         metadata: json['metadata'] as Map<String, dynamic>?,
+        guardrails: json['guardrails'] != null
+            ? GuardrailConfig.fromJson(
+                json['guardrails'] as Map<String, dynamic>,
+              )
+            : null,
+        versionMessage: json['version_message'] as String?,
       );
 
   /// Converts to JSON.
@@ -54,6 +69,8 @@ class CreateAgentRequest {
     if (instructions != null) 'instructions': instructions,
     if (tools != null) 'tools': tools!.map((e) => e.toJson()).toList(),
     if (metadata != null) 'metadata': metadata,
+    if (guardrails != null) 'guardrails': guardrails!.toJson(),
+    if (versionMessage != null) 'version_message': versionMessage,
   };
 
   /// Creates a copy with the specified fields replaced.
@@ -64,6 +81,8 @@ class CreateAgentRequest {
     String? instructions,
     List<Tool>? tools,
     Map<String, dynamic>? metadata,
+    GuardrailConfig? guardrails,
+    String? versionMessage,
   }) => CreateAgentRequest(
     name: name ?? this.name,
     description: description ?? this.description,
@@ -71,6 +90,8 @@ class CreateAgentRequest {
     instructions: instructions ?? this.instructions,
     tools: tools ?? this.tools,
     metadata: metadata ?? this.metadata,
+    guardrails: guardrails ?? this.guardrails,
+    versionMessage: versionMessage ?? this.versionMessage,
   );
 
   @override
