@@ -97,6 +97,7 @@ export 'src/models/classifications/classification_result.dart';
 // --- Models: Content ---
 export 'src/models/content/content_part.dart';
 // --- Models: Conversations (Beta) ---
+export 'src/models/conversations/confirmation_status.dart';
 export 'src/models/conversations/conversation.dart';
 export 'src/models/conversations/conversation_entry.dart';
 export 'src/models/conversations/conversation_request.dart';

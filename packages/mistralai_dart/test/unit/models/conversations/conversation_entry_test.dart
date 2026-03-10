@@ -191,13 +191,13 @@ void main() {
             arguments: '{"x": 1, "y": 2}',
             callId: 'call-123',
             agentId: 'agent-456',
-            confirmationStatus: 'pending',
+            confirmationStatus: ConfirmationStatus.pending,
             model: 'mistral-large-latest',
           );
           expect(entry.id, 'fc-1');
           expect(entry.callId, 'call-123');
           expect(entry.agentId, 'agent-456');
-          expect(entry.confirmationStatus, 'pending');
+          expect(entry.confirmationStatus, ConfirmationStatus.pending);
           expect(entry.model, 'mistral-large-latest');
         });
       });
@@ -226,7 +226,7 @@ void main() {
             name: 'search',
             arguments: '{}',
             agentId: 'agent-1',
-            confirmationStatus: 'allowed',
+            confirmationStatus: ConfirmationStatus.allowed,
             model: 'mistral-large-latest',
           );
           final json = entry.toJson();
@@ -262,8 +262,19 @@ void main() {
           };
           final entry = FunctionCallEntry.fromJson(json);
           expect(entry.agentId, 'agent-abc');
-          expect(entry.confirmationStatus, 'denied');
+          expect(entry.confirmationStatus, ConfirmationStatus.denied);
           expect(entry.model, 'codestral-latest');
+        });
+
+        test('deserializes unknown confirmation_status gracefully', () {
+          final json = <String, dynamic>{
+            'type': 'function.call',
+            'name': 'search',
+            'arguments': '{}',
+            'confirmation_status': 'some_future_status',
+          };
+          final entry = FunctionCallEntry.fromJson(json);
+          expect(entry.confirmationStatus, ConfirmationStatus.unknown);
         });
       });
 

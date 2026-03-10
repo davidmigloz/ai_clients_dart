@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../tools/tool_call.dart';
+import 'confirmation_status.dart';
 
 /// A sealed class representing an entry in a conversation.
 ///
@@ -206,9 +207,7 @@ class FunctionCallEntry extends ConversationEntry {
   final String? agentId;
 
   /// The confirmation status of this tool call.
-  ///
-  /// Values: "pending", "allowed", "denied".
-  final String? confirmationStatus;
+  final ConfirmationStatus? confirmationStatus;
 
   /// The model used for this function call.
   final String? model;
@@ -235,7 +234,11 @@ class FunctionCallEntry extends ConversationEntry {
       arguments: json['arguments'] as String? ?? '',
       callId: json['call_id'] as String?,
       agentId: json['agent_id'] as String?,
-      confirmationStatus: json['confirmation_status'] as String?,
+      confirmationStatus: json['confirmation_status'] != null
+          ? ConfirmationStatus.fromJson(
+              json['confirmation_status'] as String,
+            )
+          : null,
       model: json['model'] as String?,
     );
   }
@@ -249,7 +252,8 @@ class FunctionCallEntry extends ConversationEntry {
       if (id != null) 'id': id,
       if (callId != null) 'call_id': callId,
       if (agentId != null) 'agent_id': agentId,
-      if (confirmationStatus != null) 'confirmation_status': confirmationStatus,
+      if (confirmationStatus != null)
+        'confirmation_status': confirmationStatus!.toJson(),
       if (model != null) 'model': model,
     };
   }
@@ -261,7 +265,7 @@ class FunctionCallEntry extends ConversationEntry {
     String? arguments,
     String? callId,
     String? agentId,
-    String? confirmationStatus,
+    ConfirmationStatus? confirmationStatus,
     String? model,
   }) {
     return FunctionCallEntry(
