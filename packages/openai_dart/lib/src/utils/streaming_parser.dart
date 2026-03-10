@@ -106,7 +106,7 @@ class SseParser {
     // Handle any remaining data
     if (dataBuffer.isNotEmpty) {
       final data = dataBuffer.toString();
-      if (data.isNotEmpty && data != '[DONE]') {
+      if (data.isNotEmpty) {
         try {
           final json = jsonDecode(data) as Map<String, dynamic>;
           if (currentEvent != null) {
