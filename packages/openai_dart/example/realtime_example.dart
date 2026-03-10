@@ -82,7 +82,8 @@ Future<void> main() async {
     // await pc.setLocalDescription(offer);
 
     // In a real application, you would get the SDP offer from your
-    // RTCPeerConnection. Here we show the API call pattern.
+    // RTCPeerConnection. This dummy SDP is for illustration only and
+    // will be rejected by the API — replace it with a real SDP offer.
     const sdpOffer =
         'v=0\r\n'
         'o=- 0 0 IN IP4 127.0.0.1\r\n'
