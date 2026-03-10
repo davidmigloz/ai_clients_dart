@@ -18,7 +18,7 @@ class ConversationResponse {
   final UsageInfo? usage;
 
   /// Guardrail results for this response.
-  final GuardrailConfig? guardrails;
+  final List<GuardrailConfig>? guardrails;
 
   /// Creates a [ConversationResponse].
   const ConversationResponse({
@@ -42,9 +42,9 @@ class ConversationResponse {
       usage: json['usage'] != null
           ? UsageInfo.fromJson(json['usage'] as Map<String, dynamic>)
           : null,
-      guardrails: json['guardrails'] != null
-          ? GuardrailConfig.fromJson(json['guardrails'] as Map<String, dynamic>)
-          : null,
+      guardrails: (json['guardrails'] as List?)
+          ?.map((e) => GuardrailConfig.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
   }
 
@@ -54,7 +54,8 @@ class ConversationResponse {
       'conversation_id': conversationId,
       'outputs': outputs.map((e) => e.toJson()).toList(),
       if (usage != null) 'usage': usage!.toJson(),
-      if (guardrails != null) 'guardrails': guardrails!.toJson(),
+      if (guardrails != null)
+        'guardrails': guardrails!.map((e) => e.toJson()).toList(),
     };
   }
 

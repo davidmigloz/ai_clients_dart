@@ -23,19 +23,21 @@ void main() {
             completionTokens: 5,
             totalTokens: 15,
           ),
-          guardrails: GuardrailConfig(
-            blockOnError: true,
-            moderationLlmV1: ModerationLLMV1Config(
-              action: ModerationLLMV1Action.block,
+          guardrails: [
+            GuardrailConfig(
+              blockOnError: true,
+              moderationLlmV1: ModerationLLMV1Config(
+                action: ModerationLLMV1Action.block,
+              ),
             ),
-          ),
+          ],
         );
         expect(response.outputs, hasLength(1));
         expect(response.usage?.totalTokens, 15);
         expect(response.guardrails, isNotNull);
-        expect(response.guardrails!.blockOnError, isTrue);
+        expect(response.guardrails!.first.blockOnError, isTrue);
         expect(
-          response.guardrails!.moderationLlmV1!.action,
+          response.guardrails!.first.moderationLlmV1!.action,
           ModerationLLMV1Action.block,
         );
       });
@@ -72,14 +74,13 @@ void main() {
         const response = ConversationResponse(
           conversationId: 'conv-123',
           outputs: [],
-          guardrails: GuardrailConfig(blockOnError: true),
+          guardrails: [GuardrailConfig(blockOnError: true)],
         );
         final json = response.toJson();
-        expect(json['guardrails'], isA<Map<String, dynamic>>());
-        expect(
-          (json['guardrails'] as Map<String, dynamic>)['block_on_error'],
-          true,
-        );
+        expect(json['guardrails'], isList);
+        final guardrail =
+            (json['guardrails'] as List).first as Map<String, dynamic>;
+        expect(guardrail['block_on_error'], true);
       });
     });
 
@@ -116,16 +117,18 @@ void main() {
         final json = <String, dynamic>{
           'conversation_id': 'conv-gr',
           'outputs': <dynamic>[],
-          'guardrails': {
-            'block_on_error': true,
-            'moderation_llm_v1': {'action': 'block'},
-          },
+          'guardrails': [
+            {
+              'block_on_error': true,
+              'moderation_llm_v1': {'action': 'block'},
+            },
+          ],
         };
         final response = ConversationResponse.fromJson(json);
         expect(response.guardrails, isNotNull);
-        expect(response.guardrails!.blockOnError, isTrue);
+        expect(response.guardrails!.first.blockOnError, isTrue);
         expect(
-          response.guardrails!.moderationLlmV1!.action,
+          response.guardrails!.first.moderationLlmV1!.action,
           ModerationLLMV1Action.block,
         );
       });

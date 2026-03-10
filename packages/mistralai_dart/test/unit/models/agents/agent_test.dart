@@ -127,7 +127,7 @@ void main() {
         expect(guardrail['block_on_error'], true);
         expect(json['version_message'], 'Added guardrails');
         expect(json['version'], 3);
-        expect(json['created_at'], 1705312800);
+        expect(json['created_at'], createdAt.toIso8601String());
       });
     });
 

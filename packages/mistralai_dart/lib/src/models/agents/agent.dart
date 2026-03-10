@@ -97,10 +97,8 @@ class Agent {
       'guardrails': guardrails!.map((e) => e.toJson()).toList(),
     if (versionMessage != null) 'version_message': versionMessage,
     'version': version,
-    if (createdAt != null)
-      'created_at': createdAt!.millisecondsSinceEpoch ~/ 1000,
-    if (updatedAt != null)
-      'updated_at': updatedAt!.millisecondsSinceEpoch ~/ 1000,
+    if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
+    if (updatedAt != null) 'updated_at': updatedAt!.toIso8601String(),
   };
 
   @override

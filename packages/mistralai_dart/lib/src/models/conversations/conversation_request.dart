@@ -53,8 +53,8 @@ class StartConversationRequest {
   /// Optional metadata for the conversation.
   final Map<String, dynamic>? metadata;
 
-  /// Guardrail configuration for content moderation.
-  final GuardrailConfig? guardrails;
+  /// Guardrail configurations for content moderation.
+  final List<GuardrailConfig>? guardrails;
 
   /// Creates a [StartConversationRequest].
   const StartConversationRequest({
@@ -125,9 +125,9 @@ class StartConversationRequest {
           : null,
       randomSeed: json['random_seed'] as int?,
       metadata: json['metadata'] as Map<String, dynamic>?,
-      guardrails: json['guardrails'] != null
-          ? GuardrailConfig.fromJson(json['guardrails'] as Map<String, dynamic>)
-          : null,
+      guardrails: (json['guardrails'] as List?)
+          ?.map((e) => GuardrailConfig.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
   }
 
@@ -147,7 +147,8 @@ class StartConversationRequest {
       if (responseFormat != null) 'response_format': responseFormat!.toJson(),
       if (randomSeed != null) 'random_seed': randomSeed,
       if (metadata != null) 'metadata': metadata,
-      if (guardrails != null) 'guardrails': guardrails!.toJson(),
+      if (guardrails != null)
+        'guardrails': guardrails!.map((e) => e.toJson()).toList(),
     };
   }
 
@@ -166,7 +167,7 @@ class StartConversationRequest {
     ResponseFormat? responseFormat,
     int? randomSeed,
     Map<String, dynamic>? metadata,
-    GuardrailConfig? guardrails,
+    List<GuardrailConfig>? guardrails,
   }) {
     return StartConversationRequest(
       model: model ?? this.model,
@@ -416,8 +417,8 @@ class RestartConversationRequest {
   /// Random seed for reproducibility.
   final int? randomSeed;
 
-  /// Guardrail configuration for content moderation.
-  final GuardrailConfig? guardrails;
+  /// Guardrail configurations for content moderation.
+  final List<GuardrailConfig>? guardrails;
 
   /// Creates a [RestartConversationRequest].
   const RestartConversationRequest({
@@ -455,9 +456,9 @@ class RestartConversationRequest {
             )
           : null,
       randomSeed: json['random_seed'] as int?,
-      guardrails: json['guardrails'] != null
-          ? GuardrailConfig.fromJson(json['guardrails'] as Map<String, dynamic>)
-          : null,
+      guardrails: (json['guardrails'] as List?)
+          ?.map((e) => GuardrailConfig.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
   }
 
@@ -474,7 +475,8 @@ class RestartConversationRequest {
       if (toolChoice != null) 'tool_choice': toolChoice!.toJson(),
       if (responseFormat != null) 'response_format': responseFormat!.toJson(),
       if (randomSeed != null) 'random_seed': randomSeed,
-      if (guardrails != null) 'guardrails': guardrails!.toJson(),
+      if (guardrails != null)
+        'guardrails': guardrails!.map((e) => e.toJson()).toList(),
     };
   }
 
@@ -490,7 +492,7 @@ class RestartConversationRequest {
     ToolChoice? toolChoice,
     ResponseFormat? responseFormat,
     int? randomSeed,
-    GuardrailConfig? guardrails,
+    List<GuardrailConfig>? guardrails,
   }) {
     return RestartConversationRequest(
       entryId: entryId ?? this.entryId,

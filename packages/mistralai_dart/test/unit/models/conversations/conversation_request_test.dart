@@ -50,7 +50,7 @@ void main() {
           responseFormat: ResponseFormatJsonObject(),
           randomSeed: 42,
           metadata: {'key': 'value'},
-          guardrails: GuardrailConfig(blockOnError: true),
+          guardrails: [GuardrailConfig(blockOnError: true)],
         );
         expect(request.store, true);
         expect(request.stop, ['END']);
@@ -60,7 +60,7 @@ void main() {
         expect(request.responseFormat, isA<ResponseFormatJsonObject>());
         expect(request.randomSeed, 42);
         expect(request.metadata?['key'], 'value');
-        expect(request.guardrails?.blockOnError, isTrue);
+        expect(request.guardrails?.first.blockOnError, isTrue);
       });
     });
 
@@ -326,7 +326,7 @@ void main() {
           topP: 0.85,
           tools: [Tool.codeInterpreter()],
           randomSeed: 77,
-          guardrails: GuardrailConfig(blockOnError: true),
+          guardrails: [GuardrailConfig(blockOnError: true)],
         );
         expect(request.entryId, 'entry-456');
         expect(request.store, true);
@@ -334,7 +334,7 @@ void main() {
         expect(request.stop, ['DONE']);
         expect(request.temperature, 0.6);
         expect(request.randomSeed, 77);
-        expect(request.guardrails?.blockOnError, isTrue);
+        expect(request.guardrails?.first.blockOnError, isTrue);
       });
     });
 
