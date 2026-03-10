@@ -9,7 +9,7 @@ class CreateBatchJobRequest {
   /// The list of input file IDs containing batch requests.
   ///
   /// Each file must be in JSONL format where each line is a valid request
-  /// object. Either [inputFiles] or [requests] must be provided.
+  /// object. Typically either [inputFiles] or [requests] is provided.
   final List<String>? inputFiles;
 
   /// The API endpoint to process requests against.

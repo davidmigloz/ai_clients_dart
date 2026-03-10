@@ -375,6 +375,7 @@ class AppendConversationRequest {
     toolChoice,
     responseFormat,
     randomSeed,
+    Object.hashAll(toolConfirmations ?? []),
   );
 
   @override
