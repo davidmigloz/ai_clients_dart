@@ -383,7 +383,7 @@ await for (final job in paginator.items()) {
 // Create batch job
 final job = await client.batch.jobs.create(
   request: CreateBatchJobRequest(
-    inputFileId: 'file-abc123',
+    inputFiles: ['file-abc123'],
     endpoint: '/v1/chat/completions',
     model: 'mistral-small-latest',
   ),

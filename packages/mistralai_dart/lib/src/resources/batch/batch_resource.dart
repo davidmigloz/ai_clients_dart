@@ -24,7 +24,7 @@ import 'batch_jobs_resource.dart';
 /// // 2. Create a batch job
 /// final job = await client.batch.jobs.create(
 ///   request: CreateBatchJobRequest(
-///     inputFileId: file.id,
+///     inputFiles: [file.id],
 ///     endpoint: '/v1/chat/completions',
 ///     model: 'mistral-small-latest',
 ///   ),

@@ -66,7 +66,7 @@ final inputFile = await client.files.upload(
 // Create the batch job
 final job = await client.batch.jobs.create(
   request: CreateBatchJobRequest(
-    inputFileId: inputFile.id,
+    inputFiles: [inputFile.id],
     endpoint: '/v1/chat/completions',
     model: 'mistral-small-latest',
     metadata: {'project': 'my-project'},
@@ -213,7 +213,7 @@ final file = await client.files.upload(
 // 3. Create batch job
 final job = await client.batch.jobs.create(
   request: CreateBatchJobRequest(
-    inputFileId: file.id,
+    inputFiles: [file.id],
     endpoint: '/v1/chat/completions',
     model: 'mistral-small-latest',
   ),

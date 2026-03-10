@@ -22,7 +22,7 @@ import '../base_resource.dart';
 /// // Create a batch job
 /// final job = await client.batch.jobs.create(
 ///   request: CreateBatchJobRequest(
-///     inputFileId: 'file-abc123',
+///     inputFiles: ['file-abc123'],
 ///     endpoint: '/v1/chat/completions',
 ///     model: 'mistral-small-latest',
 ///   ),
@@ -77,7 +77,7 @@ class BatchJobsResource extends ResourceBase {
   /// Creates a new batch job.
   ///
   /// The [request] must specify:
-  /// - [inputFileId] - ID of the input file containing batch requests (JSONL format)
+  /// - [inputFiles] - IDs of input files containing batch requests (JSONL format)
   /// - [endpoint] - API endpoint to process requests against (e.g., `/v1/chat/completions`)
   /// - [model] - Model to use for processing
   ///
