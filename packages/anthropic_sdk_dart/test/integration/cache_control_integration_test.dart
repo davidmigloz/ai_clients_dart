@@ -68,9 +68,7 @@ void main() {
             model: 'claude-haiku-4-5-20251001',
             maxTokens: 100,
             system: SystemPrompt.text('You are a helpful assistant.'),
-            messages: [
-              InputMessage.user('Say hello.'),
-            ],
+            messages: [InputMessage.user('Say hello.')],
             cacheControl: const CacheControlEphemeral(ttl: CacheTtl.ttl5m),
           ),
         );
