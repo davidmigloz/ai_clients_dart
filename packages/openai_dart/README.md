@@ -537,25 +537,25 @@ final session = await client.realtime.connect(
   ),
 );
 
-// Listen for events
-session.events.listen((event) {
+// Send a request and process events until the response is complete
+session.createResponse();
+
+await for (final event in session.events) {
   switch (event) {
     case realtime.SessionCreatedEvent(:final session):
       print('Session created: ${session.id}');
     case realtime.ResponseTextDeltaEvent(:final delta):
       stdout.write(delta);
+    case realtime.ResponseDoneEvent():
+      await session.close();
     case realtime.ErrorEvent(:final error):
       print('Error: ${error.message}');
+      await session.close();
     default:
       break;
   }
-});
+}
 
-// Send audio or create responses
-session.createResponse();
-
-// Close when done
-await session.close();
 client.close();
 ```
 

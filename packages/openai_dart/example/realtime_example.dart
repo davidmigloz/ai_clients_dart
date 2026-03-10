@@ -81,31 +81,24 @@ Future<void> main() async {
     // final offer = await pc.createOffer();
     // await pc.setLocalDescription(offer);
 
-    // In a real application, you would get the SDP offer from your
-    // RTCPeerConnection. This dummy SDP is for illustration only and
-    // will be rejected by the API — replace it with a real SDP offer.
-    const sdpOffer =
-        'v=0\r\n'
-        'o=- 0 0 IN IP4 127.0.0.1\r\n'
-        's=-\r\n'
-        't=0 0\r\n';
-
-    // Create a WebRTC call with an SDP offer
-    // Returns the SDP answer string
-    final sdpAnswer = await client.realtimeSessions.calls.create(
-      const realtime.RealtimeCallCreateRequest(
-        sdp: sdpOffer,
-        session: realtime.RealtimeSessionCreateRequest(
-          model: 'gpt-realtime-1.5',
-          voice: realtime.RealtimeVoice.alloy,
-        ),
-      ),
-    );
-
-    print('Received SDP answer (${sdpAnswer.length} chars)');
-
-    // In a real application, set the SDP answer to complete the handshake:
-    // await pc.setRemoteDescription(RTCSessionDescription(sdpAnswer, 'answer'));
+    // Create a WebRTC call by sending an SDP offer and receiving an SDP answer.
+    // In a real application, use the SDP offer from your RTCPeerConnection:
+    //
+    // final sdpAnswer = await client.realtimeSessions.calls.create(
+    //   realtime.RealtimeCallCreateRequest(
+    //     sdp: offer.sdp!,
+    //     session: realtime.RealtimeSessionCreateRequest(
+    //       model: 'gpt-realtime-1.5',
+    //       voice: realtime.RealtimeVoice.alloy,
+    //     ),
+    //   ),
+    // );
+    //
+    // // Set the SDP answer to complete the WebRTC handshake
+    // await pc.setRemoteDescription(
+    //   RTCSessionDescription(sdpAnswer, 'answer'),
+    // );
+    print('calls.create(request) - Create a WebRTC call with SDP exchange');
 
     // --- WebRTC: Call management ---
     print('\n=== WebRTC: Call Management ===\n');
