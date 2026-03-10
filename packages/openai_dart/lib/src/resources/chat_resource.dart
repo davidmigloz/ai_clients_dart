@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:logging/logging.dart';
 
+import '../errors/exceptions.dart';
 import '../models/chat/chat.dart';
 import '../models/streaming/streaming.dart';
 import 'base_resource.dart';
@@ -180,7 +182,42 @@ class ChatCompletionsResource extends ResourceBase with StreamingResource {
       endpoint: _endpoint,
       body: requestBody,
       abortTrigger: abortTrigger,
-    ).map(ChatStreamEvent.fromJson);
+    ).map((json) {
+      // Detect errors embedded in stream data.
+      // Two cases:
+      // 1. SSE `event: error` (OpenAI standard) — parser sets `_event: "error"`
+      // 2. Error objects in data (OpenAI-compatible providers like AWS Bedrock)
+      final sseEvent = json['_event'] as String?;
+      final error = json['error'];
+      if (sseEvent == 'error' || error != null) {
+        _throwInlineStreamError(json, sseEvent, error);
+      }
+      return ChatStreamEvent.fromJson(json);
+    });
+  }
+
+  Never _throwInlineStreamError(
+    Map<String, dynamic> json,
+    String? sseEvent,
+    Object? error,
+  ) {
+    String message;
+    if (error is Map<String, dynamic>) {
+      // Standard: {"error": {"message": "...", "type": "..."}}
+      // Bedrock:  {"error": {"error": "...", "error_code": 4001}}
+      message = (error['message'] ?? error['error'] ?? 'Unknown stream error')
+          .toString();
+    } else if (error is String) {
+      message = error;
+    } else if (sseEvent == 'error') {
+      message = 'Stream error event received';
+    } else {
+      message = 'Unknown stream error';
+    }
+
+    Logger('OpenAIClient').warning('Inline stream error: $message');
+
+    throw StreamException(message: message, partialData: json.toString());
   }
 
   /// Creates a streaming chat completion with accumulated events.
