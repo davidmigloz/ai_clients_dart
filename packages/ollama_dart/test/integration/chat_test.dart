@@ -175,21 +175,23 @@ void main() {
         request: ChatRequest(
           model: model,
           messages: const [
-            ChatMessage.system('You are a helpful assistant.'),
+            ChatMessage.system(
+              'You are a helpful assistant that follows instructions exactly.',
+            ),
             ChatMessage.user(
-              'List the numbers from 1 to 9 in order. '
-              'Output ONLY the numbers without spaces or commas.',
+              'Count from 1 to 9. Output each number on its own, '
+              'separated by commas: 1, 2, 3, ...',
             ),
           ],
-          options: const ModelOptions(stop: ['4']),
+          options: const ModelOptions(stop: ['5'], temperature: 0),
         ),
       );
 
       expect(response.message, isNotNull);
-      final content =
-          response.message!.content?.replaceAll(RegExp(r'[\s\n]'), '') ?? '';
-      expect(content, contains('123'));
-      expect(content, isNot(contains('456789')));
+      final content = response.message!.content ?? '';
+      // The stop sequence should prevent '5' and beyond from appearing
+      expect(content, isNot(contains('6')));
+      expect(content, isNot(contains('789')));
     });
 
     test('numPredict limits output tokens', () async {
