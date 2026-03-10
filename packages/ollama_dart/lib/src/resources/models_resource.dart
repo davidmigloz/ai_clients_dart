@@ -132,6 +132,9 @@ class ModelsResource extends ResourceBase with StreamingResource {
     final streamedResponse = await sendStreamingRequest(httpRequest);
 
     await for (final json in parseNDJSON(streamedResponse.stream)) {
+      if (json['error'] != null) {
+        throwInlineStreamError(json);
+      }
       yield StatusEvent.fromJson(json);
     }
   }
@@ -219,6 +222,9 @@ class ModelsResource extends ResourceBase with StreamingResource {
     final streamedResponse = await sendStreamingRequest(httpRequest);
 
     await for (final json in parseNDJSON(streamedResponse.stream)) {
+      if (json['error'] != null) {
+        throwInlineStreamError(json);
+      }
       yield StatusEvent.fromJson(json);
     }
   }
@@ -272,6 +278,9 @@ class ModelsResource extends ResourceBase with StreamingResource {
     final streamedResponse = await sendStreamingRequest(httpRequest);
 
     await for (final json in parseNDJSON(streamedResponse.stream)) {
+      if (json['error'] != null) {
+        throwInlineStreamError(json);
+      }
       yield StatusEvent.fromJson(json);
     }
   }

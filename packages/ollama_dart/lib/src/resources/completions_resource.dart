@@ -74,6 +74,9 @@ class CompletionsResource extends ResourceBase with StreamingResource {
 
     // Parse NDJSON stream
     await for (final json in parseNDJSON(streamedResponse.stream)) {
+      if (json['error'] != null) {
+        throwInlineStreamError(json);
+      }
       yield GenerateStreamEvent.fromJson(json);
     }
   }

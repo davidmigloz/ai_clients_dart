@@ -60,6 +60,7 @@ class ResponseMetadata {
 /// - [ValidationException] — Client-side validation errors
 /// - [TimeoutException] — Request timeouts
 /// - [AbortedException] — Request cancellation
+/// - [StreamException] — Errors detected in streaming data
 /// - [LiveSessionClosedException] — Live session closed
 /// - [LiveSessionSetupException] — Live session setup failure
 /// - [LiveSessionException] — General Live session errors
@@ -312,6 +313,35 @@ class AbortedException extends GoogleAIException {
   @override
   String toString() =>
       'AbortedException($stage): $message [ID: $correlationId]';
+}
+
+/// Exception for errors detected in streaming data.
+///
+/// Thrown when the server sends an error embedded in an HTTP 200 streaming
+/// response (e.g., via SSE `event: error` or `{"error": ...}` in data).
+class StreamException extends GoogleAIException {
+  @override
+  final String message;
+
+  /// Any partial data received before the error occurred.
+  final String? partialData;
+
+  @override
+  final StackTrace? stackTrace;
+
+  @override
+  final Exception? cause;
+
+  /// Creates a [StreamException].
+  const StreamException({
+    required this.message,
+    this.partialData,
+    this.stackTrace,
+    this.cause,
+  }) : super();
+
+  @override
+  String toString() => 'StreamException: $message';
 }
 
 // =============================================================================

@@ -193,6 +193,11 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     final jsonStream = parseSSE(lineStream);
 
     await for (final json in jsonStream) {
+      final sseEvent = json['_event'] as String?;
+      final error = json['error'];
+      if (sseEvent == 'error' || error != null) {
+        throwInlineStreamError(json, sseEvent, error);
+      }
       yield InteractionEvent.fromJson(json);
     }
   }
@@ -228,6 +233,11 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     final jsonStream = parseSSE(lineStream);
 
     await for (final json in jsonStream) {
+      final sseEvent = json['_event'] as String?;
+      final error = json['error'];
+      if (sseEvent == 'error' || error != null) {
+        throwInlineStreamError(json, sseEvent, error);
+      }
       yield InteractionEvent.fromJson(json);
     }
   }

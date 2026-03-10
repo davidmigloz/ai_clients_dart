@@ -161,6 +161,8 @@ Streaming responses (SSE) cannot pass through the full interceptor chain since `
 
 This is an acceptable tradeoff for real-time streaming while maintaining security.
 
+**Inline Error Detection**: Some providers (e.g., AWS Bedrock) embed errors in HTTP 200 streaming responses instead of returning error status codes. Resources that consume SSE or NDJSON streams must check each event for error indicators (`event: error` SSE type or `{"error": ...}` in data) before deserializing. Detected errors throw `StreamException`. SSE parsers also handle `event: error` with non-JSON payloads by yielding synthetic JSON maps with `_event` and `_rawData` fields.
+
 ### Multipart Uploads
 
 Like streaming, multipart form uploads use `httpClient.send()` directly, bypassing the interceptor chain.
@@ -441,6 +443,10 @@ class AbortedException extends {PackageName}Exception {
   final String correlationId;
   final DateTime timestamp;
   final AbortionStage stage;           // beforeRequest, duringRequest, duringResponse, duringStream
+}
+
+class StreamException extends {PackageName}Exception {
+  final String? partialData;             // Raw JSON from the error event
 }
 ```
 

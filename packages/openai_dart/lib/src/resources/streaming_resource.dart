@@ -265,7 +265,7 @@ mixin StreamingResource on ResourceBase {
     } else if (error is String) {
       message = error;
     } else if (sseEvent == 'error') {
-      message = 'Stream error event received';
+      message = (json['_rawData'] as String?) ?? 'Stream error event received';
     } else {
       message = 'Unknown stream error';
     }
@@ -273,7 +273,9 @@ mixin StreamingResource on ResourceBase {
     Logger('OpenAIClient').warning('Inline stream error: $message');
 
     // Strip internal `_event` field and encode as JSON for partialData
-    final cleanJson = Map<String, dynamic>.from(json)..remove('_event');
+    final cleanJson = Map<String, dynamic>.from(json)
+      ..remove('_event')
+      ..remove('_rawData');
     throw StreamException(message: message, partialData: jsonEncode(cleanJson));
   }
 }

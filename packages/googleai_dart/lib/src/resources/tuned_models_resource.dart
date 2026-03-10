@@ -135,11 +135,23 @@ class TunedModelsResource extends ResourceBase with StreamingResource {
         source: jsonStream,
         abortTrigger: abortTrigger,
         requestId: requestId,
-        fromJson: GenerateContentResponse.fromJson,
+        fromJson: (json) {
+          final sseEvent = json['_event'] as String?;
+          final error = json['error'];
+          if (sseEvent == 'error' || error != null) {
+            throwInlineStreamError(json, sseEvent, error);
+          }
+          return GenerateContentResponse.fromJson(json);
+        },
       );
     } else {
       // No abort trigger, stream normally
       await for (final json in jsonStream) {
+        final sseEvent = json['_event'] as String?;
+        final error = json['error'];
+        if (sseEvent == 'error' || error != null) {
+          throwInlineStreamError(json, sseEvent, error);
+        }
         yield GenerateContentResponse.fromJson(json);
       }
     }

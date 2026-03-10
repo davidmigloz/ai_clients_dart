@@ -1715,9 +1715,20 @@ class ErrorEvent extends StreamingEvent {
 
   /// Creates an [ErrorEvent] from JSON.
   factory ErrorEvent.fromJson(Map<String, dynamic> json) {
+    final error = json['error'];
+    if (error is Map<String, dynamic>) {
+      return ErrorEvent(
+        sequenceNumber: json['sequence_number'] as int? ?? 0,
+        error: ErrorPayload.fromJson(error),
+      );
+    }
+    // Handle non-JSON SSE error events (e.g., plain-text payloads)
     return ErrorEvent(
       sequenceNumber: json['sequence_number'] as int? ?? 0,
-      error: ErrorPayload.fromJson(json['error'] as Map<String, dynamic>),
+      error: ErrorPayload(
+        type: 'stream_error',
+        message: (json['_rawData'] as String?) ?? 'Unknown stream error',
+      ),
     );
   }
 

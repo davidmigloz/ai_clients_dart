@@ -214,6 +214,34 @@ void main() {
       expect(errorEvent.errorType, 'invalid_request_error');
       expect(errorEvent.message, 'Invalid model specified');
     });
+
+    test(
+      'ErrorEvent.fromJson handles non-JSON SSE error (missing error field)',
+      () {
+        final json = <String, dynamic>{
+          'type': 'error',
+          '_event': 'error',
+          '_rawData': 'Service temporarily unavailable',
+        };
+        final event = MessageStreamEvent.fromJson(json);
+        expect(event, isA<ErrorEvent>());
+        final errorEvent = event as ErrorEvent;
+        expect(errorEvent.errorType, 'stream_error');
+        expect(errorEvent.message, 'Service temporarily unavailable');
+      },
+    );
+
+    test('ErrorEvent.fromJson handles standard error format', () {
+      final json = <String, dynamic>{
+        'type': 'error',
+        'error': {'type': 'overloaded_error', 'message': 'Overloaded'},
+      };
+      final event = MessageStreamEvent.fromJson(json);
+      expect(event, isA<ErrorEvent>());
+      final errorEvent = event as ErrorEvent;
+      expect(errorEvent.errorType, 'overloaded_error');
+      expect(errorEvent.message, 'Overloaded');
+    });
   });
 
   group('ContentBlockDelta', () {

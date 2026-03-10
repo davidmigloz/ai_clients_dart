@@ -309,10 +309,17 @@ class ErrorEvent extends MessageStreamEvent {
 
   /// Creates an [ErrorEvent] from JSON.
   factory ErrorEvent.fromJson(Map<String, dynamic> json) {
-    final error = json['error'] as Map<String, dynamic>;
+    final error = json['error'];
+    if (error is Map<String, dynamic>) {
+      return ErrorEvent(
+        errorType: error['type'] as String? ?? 'unknown',
+        message: error['message'] as String? ?? 'Unknown error',
+      );
+    }
+    // Handle non-JSON SSE error events (e.g., plain-text payloads)
     return ErrorEvent(
-      errorType: error['type'] as String,
-      message: error['message'] as String,
+      errorType: 'stream_error',
+      message: (json['_rawData'] as String?) ?? 'Unknown stream error',
     );
   }
 

@@ -174,4 +174,16 @@ mixin StreamingResource on ResourceBase {
       Logger('Ollama.HTTP').severe('STREAM ERROR [$requestId] $error', error);
     }
   }
+
+  /// Checks for inline errors in NDJSON stream data and throws
+  /// [StreamException] if found.
+  ///
+  /// Ollama embeds errors in HTTP 200 streaming responses as
+  /// `{"error": "message string"}`.
+  Never throwInlineStreamError(Map<String, dynamic> json) {
+    final error = json['error'];
+    final message = error is String ? error : 'Unknown stream error';
+    Logger('Ollama.HTTP').warning('Inline stream error: $message');
+    throw StreamException(message: message, partialData: jsonEncode(json));
+  }
 }

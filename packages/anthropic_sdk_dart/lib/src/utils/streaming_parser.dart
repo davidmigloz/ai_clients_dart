@@ -39,7 +39,9 @@ class SseParser {
             }
             yield json;
           } catch (_) {
-            // Skip malformed JSON
+            if (currentEvent == 'error') {
+              yield <String, dynamic>{'_event': 'error', '_rawData': data};
+            }
           }
         }
 
@@ -58,7 +60,9 @@ class SseParser {
           }
           yield json;
         } catch (_) {
-          // Skip malformed JSON
+          if (currentEvent == 'error') {
+            yield <String, dynamic>{'_event': 'error', '_rawData': data};
+          }
         }
       }
     }

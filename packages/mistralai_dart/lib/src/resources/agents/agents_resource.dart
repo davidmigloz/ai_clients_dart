@@ -373,6 +373,11 @@ class AgentsResource extends ResourceBase with StreamingResource {
 
     // Parse SSE stream - uses same response format as chat
     await for (final json in parseSSE(streamedResponse.stream)) {
+      final sseEvent = json['_event'] as String?;
+      final error = json['error'];
+      if (sseEvent == 'error' || error != null) {
+        throwInlineStreamError(json, sseEvent, error);
+      }
       yield ChatCompletionStreamResponse.fromJson(json);
     }
   }

@@ -14,37 +14,61 @@ import 'dart:convert';
 /// }
 /// ```
 Stream<Map<String, dynamic>> parseSSE(Stream<List<int>> byteStream) async* {
-  final buffer = StringBuffer();
+  final lines = byteStream
+      .transform(utf8.decoder)
+      .transform(const LineSplitter());
 
-  await for (final chunk in byteStream.transform(utf8.decoder)) {
-    buffer.write(chunk);
-    final content = buffer.toString();
-    final lines = content.split('\n');
+  String? currentEvent;
+  final dataBuffer = StringBuffer();
 
-    // Keep the last potentially incomplete line in the buffer
-    buffer.clear();
-    if (!content.endsWith('\n')) {
-      buffer.write(lines.removeLast());
-    }
+  await for (final line in lines) {
+    if (line.startsWith('event:')) {
+      currentEvent = line.substring(6).trim();
+    } else if (line.startsWith('data:')) {
+      final data = line.substring(5).trim();
 
-    for (final line in lines) {
-      final trimmed = line.trim();
-      if (trimmed.isEmpty) continue;
+      // Check for stream end marker
+      if (data == '[DONE]') {
+        return;
+      }
 
-      if (trimmed.startsWith('data: ')) {
-        final data = trimmed.substring(6).trim();
+      dataBuffer.write(data);
+    } else if (line.isEmpty && dataBuffer.isNotEmpty) {
+      // Empty line signals end of event
+      final data = dataBuffer.toString();
+      dataBuffer.clear();
 
-        // Check for stream end marker
-        if (data == '[DONE]') {
-          return;
-        }
-
-        if (data.isNotEmpty) {
-          try {
-            yield jsonDecode(data) as Map<String, dynamic>;
-          } catch (_) {
-            // Skip malformed JSON
+      if (data.isNotEmpty) {
+        try {
+          final json = jsonDecode(data) as Map<String, dynamic>;
+          if (currentEvent != null) {
+            json['_event'] = currentEvent;
           }
+          yield json;
+        } catch (_) {
+          if (currentEvent == 'error') {
+            yield <String, dynamic>{'_event': 'error', '_rawData': data};
+          }
+        }
+      }
+
+      currentEvent = null;
+    }
+  }
+
+  // Handle any remaining data
+  if (dataBuffer.isNotEmpty) {
+    final data = dataBuffer.toString();
+    if (data.isNotEmpty && data != '[DONE]') {
+      try {
+        final json = jsonDecode(data) as Map<String, dynamic>;
+        if (currentEvent != null) {
+          json['_event'] = currentEvent;
+        }
+        yield json;
+      } catch (_) {
+        if (currentEvent == 'error') {
+          yield <String, dynamic>{'_event': 'error', '_rawData': data};
         }
       }
     }

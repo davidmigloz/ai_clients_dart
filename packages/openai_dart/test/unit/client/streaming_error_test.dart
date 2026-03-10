@@ -214,5 +214,27 @@ void main() {
       }
       client.close();
     });
+
+    test(
+      '11. SSE event: error with non-JSON data throws StreamException',
+      () async {
+        final client = createMockClient([
+          'event: error\ndata: Service temporarily unavailable\n\n',
+          'data: [DONE]\n\n',
+        ]);
+
+        await expectLater(
+          createStream(client).toList(),
+          throwsA(
+            isA<StreamException>().having(
+              (e) => e.message,
+              'message',
+              'Service temporarily unavailable',
+            ),
+          ),
+        );
+        client.close();
+      },
+    );
   });
 }

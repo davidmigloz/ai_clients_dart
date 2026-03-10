@@ -237,5 +237,15 @@ data: {"type":"message_start"}''';
       expect(results, hasLength(1));
       expect(results[0]['type'], 'message_start');
     });
+
+    test('yields synthetic JSON for event: error with non-JSON data', () async {
+      const input = 'event: error\ndata: Service unavailable\n\n';
+      final stream = Stream<List<int>>.value(utf8.encode(input));
+
+      final events = await SseParser().parse(stream).toList();
+      expect(events, hasLength(1));
+      expect(events[0]['_event'], 'error');
+      expect(events[0]['_rawData'], 'Service unavailable');
+    });
   });
 }

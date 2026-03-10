@@ -69,6 +69,7 @@ export 'src/errors/exceptions.dart'
         AuthenticationException,
         OllamaException,
         RateLimitException,
+        StreamException,
         TimeoutException,
         ValidationException;
 // Chat Models

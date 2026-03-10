@@ -179,4 +179,35 @@ mixin StreamingResource on ResourceBase {
       Logger('Mistral.HTTP').severe('STREAM ERROR [$requestId] $error', error);
     }
   }
+
+  /// Checks for inline errors in SSE stream data and throws
+  /// [StreamException] if found.
+  ///
+  /// Detects two error patterns:
+  /// 1. SSE `event: error` — parser sets `_event: "error"` in the JSON map
+  /// 2. Error objects in data — `{"error": ...}` in the JSON payload
+  Never throwInlineStreamError(
+    Map<String, dynamic> json,
+    String? sseEvent,
+    Object? error,
+  ) {
+    String message;
+    if (error is Map<String, dynamic>) {
+      message = (error['message'] ?? error['error'] ?? 'Unknown stream error')
+          .toString();
+    } else if (error is String) {
+      message = error;
+    } else if (sseEvent == 'error') {
+      message = (json['_rawData'] as String?) ?? 'Stream error event received';
+    } else {
+      message = 'Unknown stream error';
+    }
+
+    Logger('Mistral.HTTP').warning('Inline stream error: $message');
+
+    final cleanJson = Map<String, dynamic>.from(json)
+      ..remove('_event')
+      ..remove('_rawData');
+    throw StreamException(message: message, partialData: jsonEncode(cleanJson));
+  }
 }

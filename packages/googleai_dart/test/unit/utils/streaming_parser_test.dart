@@ -11,7 +11,9 @@ void main() {
     test('parses valid SSE data lines with space (standard format)', () async {
       final input = Stream.fromIterable([
         'data: {"message": "hello"}',
+        '',
         'data: {"message": "world"}',
+        '',
       ]);
 
       final results = await parseSSE(input).toList();
@@ -25,7 +27,9 @@ void main() {
       // Some providers omit the space after the colon
       final input = Stream.fromIterable([
         'data:{"message": "hello"}',
+        '',
         'data:{"message": "world"}',
+        '',
       ]);
 
       final results = await parseSSE(input).toList();
@@ -38,8 +42,11 @@ void main() {
     test('parses mixed SSE formats (with and without spaces)', () async {
       final input = Stream.fromIterable([
         'data: {"format": "with-space"}',
+        '',
         'data:{"format": "no-space"}',
+        '',
         'data:  {"format": "multiple-spaces"}',
+        '',
       ]);
 
       final results = await parseSSE(input).toList();
@@ -54,8 +61,10 @@ void main() {
       final input = Stream.fromIterable([
         'event: message',
         'data: {"valid": true}',
+        '',
         'id: 123',
         'data: {"valid": false}',
+        '',
       ]);
 
       final results = await parseSSE(input).toList();
@@ -68,22 +77,25 @@ void main() {
     test('handles [DONE] sentinel', () async {
       final input = Stream.fromIterable([
         'data: {"count": 1}',
+        '',
         'data: [DONE]',
-        'data: {"count": 2}',
+        '',
       ]);
 
       final results = await parseSSE(input).toList();
 
-      expect(results, hasLength(2));
+      expect(results, hasLength(1));
       expect(results[0]['count'], equals(1));
-      expect(results[1]['count'], equals(2));
     });
 
     test('skips empty data lines', () async {
       final input = Stream.fromIterable([
         'data: ',
+        '',
         'data: {"valid": true}',
+        '',
         'data:   ',
+        '',
       ]);
 
       final results = await parseSSE(input).toList();
@@ -95,8 +107,11 @@ void main() {
     test('handles malformed JSON gracefully', () async {
       final input = Stream.fromIterable([
         'data: {"valid": true}',
+        '',
         'data: {invalid json',
+        '',
         'data: {"valid": false}',
+        '',
       ]);
 
       final results = await parseSSE(input).toList();
@@ -109,6 +124,7 @@ void main() {
     test('handles nested JSON objects', () async {
       final input = Stream.fromIterable([
         'data: {"nested": {"level": 1, "data": {"level": 2}}}',
+        '',
       ]);
 
       final results = await parseSSE(input).toList();
@@ -121,6 +137,7 @@ void main() {
     test('handles arrays in JSON', () async {
       final input = Stream.fromIterable([
         'data: {"items": [1, 2, 3], "names": ["a", "b"]}',
+        '',
       ]);
 
       final results = await parseSSE(input).toList();
@@ -133,6 +150,7 @@ void main() {
     test('handles Unicode characters', () async {
       final input = Stream.fromIterable([
         'data: {"emoji": "🚀", "chinese": "你好", "arabic": "مرحبا"}',
+        '',
       ]);
 
       final results = await parseSSE(input).toList();
@@ -164,6 +182,40 @@ void main() {
       expect(results, isEmpty);
     });
 
+    test('parseSSE tracks event type and includes _event field', () async {
+      final lines = Stream.fromIterable([
+        'event: message',
+        'data: {"text":"hello"}',
+        '',
+        'data: {"text":"world"}',
+        '',
+      ]);
+
+      final events = await parseSSE(lines).toList();
+      expect(events, hasLength(2));
+      expect(events[0]['_event'], 'message');
+      expect(events[0]['text'], 'hello');
+      // Second event has no event type
+      expect(events[1].containsKey('_event'), isFalse);
+      expect(events[1]['text'], 'world');
+    });
+
+    test(
+      'parseSSE yields synthetic JSON for event: error with non-JSON data',
+      () async {
+        final lines = Stream.fromIterable([
+          'event: error',
+          'data: Service unavailable',
+          '',
+        ]);
+
+        final events = await parseSSE(lines).toList();
+        expect(events, hasLength(1));
+        expect(events[0]['_event'], 'error');
+        expect(events[0]['_rawData'], 'Service unavailable');
+      },
+    );
+
     test('WHATWG spec compliance: space after colon is optional', () async {
       // Per WHATWG spec: space after colon is optional and should be stripped
       // Both "data:value" and "data: value" should result in same parsed value
@@ -175,7 +227,7 @@ void main() {
       ];
 
       for (final (input, expectedValue) in testCases) {
-        final stream = Stream.fromIterable([input]);
+        final stream = Stream.fromIterable([input, '']);
         final results = await parseSSE(stream).toList();
 
         expect(results, hasLength(1), reason: 'Failed for input: $input');
@@ -364,8 +416,11 @@ void main() {
     test('SSE full pipeline: bytes → lines → JSON', () async {
       final bytes = utf8.encode(
         'data: {"id": 1}\n'
+        '\n'
         'data: {"id": 2}\n'
-        'data: [DONE]\n',
+        '\n'
+        'data: [DONE]\n'
+        '\n',
       );
       final byteStream = Stream.value(bytes);
 

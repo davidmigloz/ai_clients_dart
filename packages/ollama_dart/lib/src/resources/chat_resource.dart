@@ -72,6 +72,9 @@ class ChatResource extends ResourceBase with StreamingResource {
 
     // Parse NDJSON stream
     await for (final json in parseNDJSON(streamedResponse.stream)) {
+      if (json['error'] != null) {
+        throwInlineStreamError(json);
+      }
       yield ChatStreamEvent.fromJson(json);
     }
   }
