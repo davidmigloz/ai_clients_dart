@@ -14,7 +14,7 @@ void main() {
       client = OpenAIClient(
         config: OpenAIConfig(
           authProvider: const ApiKeyProvider('sk-test-key'),
-          baseUrl: 'http://localhost:${server.port}',
+          baseUrl: 'http://${server.address.host}:${server.port}',
         ),
       );
     });
