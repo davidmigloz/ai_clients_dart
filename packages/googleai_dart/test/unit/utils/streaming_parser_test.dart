@@ -217,6 +217,21 @@ void main() {
       },
     );
 
+    test('event type does not leak across events without data', () async {
+      final lines = Stream.fromIterable([
+        'event: error',
+        '',
+        'event: message',
+        'data: {"text":"hello"}',
+        '',
+      ]);
+      final results = await parseSSE(lines).toList();
+
+      expect(results, hasLength(1));
+      expect(results[0]['text'], 'hello');
+      expect(results[0]['_event'], 'message');
+    });
+
     test('[DONE] flushes buffered data before terminating', () async {
       // data: line followed by data: [DONE] without blank line between
       final lines = Stream.fromIterable(['data: {"id":"1"}', 'data: [DONE]']);

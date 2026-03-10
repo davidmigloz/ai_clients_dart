@@ -59,25 +59,27 @@ Stream<Map<String, dynamic>> parseSSE(Stream<String> stream) async* {
         if (dataBuffer.isNotEmpty) dataBuffer.write('\n');
         dataBuffer.write(data);
       }
-    } else if (line.isEmpty && dataBuffer.isNotEmpty) {
+    } else if (line.isEmpty) {
       // Empty line signals end of event
-      final data = dataBuffer.toString();
-      dataBuffer.clear();
+      if (dataBuffer.isNotEmpty) {
+        final data = dataBuffer.toString();
+        dataBuffer.clear();
 
-      if (data.isNotEmpty) {
-        try {
-          final json = jsonDecode(data) as Map<String, dynamic>;
-          if (currentEvent != null) {
-            json['_event'] = currentEvent;
-          }
-          yield json;
-        } catch (_) {
-          if (currentEvent == 'error') {
-            yield <String, dynamic>{
-              '_event': 'error',
-              '_rawData': data,
-              'type': 'error',
-            };
+        if (data.isNotEmpty) {
+          try {
+            final json = jsonDecode(data) as Map<String, dynamic>;
+            if (currentEvent != null) {
+              json['_event'] = currentEvent;
+            }
+            yield json;
+          } catch (_) {
+            if (currentEvent == 'error') {
+              yield <String, dynamic>{
+                '_event': 'error',
+                '_rawData': data,
+                'type': 'error',
+              };
+            }
           }
         }
       }

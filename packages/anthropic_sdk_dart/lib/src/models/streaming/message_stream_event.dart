@@ -316,6 +316,9 @@ class ErrorEvent extends MessageStreamEvent {
         message: error['message'] as String? ?? 'Unknown error',
       );
     }
+    if (error is String) {
+      return ErrorEvent(errorType: 'stream_error', message: error);
+    }
     // Handle non-JSON SSE error events (e.g., plain-text payloads)
     return ErrorEvent(
       errorType: 'stream_error',

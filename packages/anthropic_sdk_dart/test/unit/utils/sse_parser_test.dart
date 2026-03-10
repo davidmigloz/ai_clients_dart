@@ -248,5 +248,19 @@ data: {"type":"message_start"}''';
       expect(events[0]['_rawData'], 'Service unavailable');
       expect(events[0]['type'], 'error');
     });
+
+    test('event type does not leak across events without data', () async {
+      // event: error with no data, followed by a normal event
+      const input =
+          'event: error\n\nevent: message_start\ndata: {"type":"message_start"}\n\n';
+      final stream = Stream<List<int>>.value(utf8.encode(input));
+
+      final events = await SseParser().parse(stream).toList();
+      expect(events, hasLength(1));
+      expect(events[0]['type'], 'message_start');
+      // The error event type should NOT have leaked
+      expect(events[0].containsKey('_event'), isTrue);
+      expect(events[0]['_event'], 'message_start');
+    });
   });
 }

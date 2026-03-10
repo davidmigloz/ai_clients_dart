@@ -229,6 +229,18 @@ void main() {
       expect(events[0]['error'], isA<Map<String, dynamic>>());
     });
 
+    test('event type does not leak across events without data', () async {
+      final bytes = utf8.encode(
+        'event: error\n\nevent: message\ndata: {"text":"hello"}\n\n',
+      );
+      final stream = Stream<List<int>>.value(bytes);
+      final results = await parseSSE(stream).toList();
+
+      expect(results, hasLength(1));
+      expect(results[0]['text'], 'hello');
+      expect(results[0]['_event'], 'message');
+    });
+
     test('[DONE] flushes buffered data before terminating', () async {
       // data: line followed by data: [DONE] without blank line between
       final bytes = utf8.encode('data: {"id":"1"}\ndata: [DONE]\n');

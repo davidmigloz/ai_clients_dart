@@ -242,6 +242,15 @@ void main() {
       expect(errorEvent.errorType, 'overloaded_error');
       expect(errorEvent.message, 'Overloaded');
     });
+
+    test('ErrorEvent.fromJson handles plain string error', () {
+      final json = <String, dynamic>{'type': 'error', 'error': 'overloaded'};
+      final event = MessageStreamEvent.fromJson(json);
+      expect(event, isA<ErrorEvent>());
+      final errorEvent = event as ErrorEvent;
+      expect(errorEvent.errorType, 'stream_error');
+      expect(errorEvent.message, 'overloaded');
+    });
   });
 
   group('ContentBlockDelta', () {

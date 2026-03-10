@@ -114,6 +114,15 @@ void main() {
       },
     );
 
+    test('ErrorEvent.fromJson handles plain string error', () {
+      final json = <String, dynamic>{'type': 'error', 'error': 'overloaded'};
+      final event = StreamingEvent.fromJson(json);
+      expect(event, isA<ErrorEvent>());
+      final errorEvent = event as ErrorEvent;
+      expect(errorEvent.error.type, 'stream_error');
+      expect(errorEvent.error.message, 'overloaded');
+    });
+
     test('toJson round-trips correctly', () {
       const original = OutputTextDeltaEvent(
         sequenceNumber: 5,
