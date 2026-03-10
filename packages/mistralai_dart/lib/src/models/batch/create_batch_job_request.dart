@@ -26,14 +26,14 @@ class CreateBatchJobRequest {
   /// Optional metadata for the batch job.
   final Map<String, dynamic>? metadata;
 
-  /// Timeout in seconds for completing the batch job.
+  /// Timeout in hours for completing the batch job.
   ///
   /// If not completed within this time, the job will be marked as timed out.
   final int? timeoutHours;
 
   /// Inline batch requests.
   ///
-  /// Alternative to using [inputFileId] for providing requests directly.
+  /// Alternative to using [inputFiles] for providing requests directly.
   final List<BatchRequest>? requests;
 
   /// Creates a [CreateBatchJobRequest].

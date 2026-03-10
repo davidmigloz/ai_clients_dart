@@ -24,12 +24,14 @@ void main() {
           instructions: 'Updated instructions',
           tools: [Tool.webSearch()],
           metadata: {'updated': true},
-          guardrails: GuardrailConfig(
-            blockOnError: true,
-            moderationLlmV1: ModerationLLMV1Config(
-              action: ModerationLLMV1Action.block,
+          guardrails: [
+            GuardrailConfig(
+              blockOnError: true,
+              moderationLlmV1: ModerationLLMV1Config(
+                action: ModerationLLMV1Action.block,
+              ),
             ),
-          ),
+          ],
           versionMessage: 'Updated guardrails',
         );
         expect(request.name, 'Updated Name');
@@ -39,9 +41,9 @@ void main() {
         expect(request.tools, hasLength(1));
         expect(request.metadata?['updated'], true);
         expect(request.guardrails, isNotNull);
-        expect(request.guardrails!.blockOnError, isTrue);
+        expect(request.guardrails!.first.blockOnError, isTrue);
         expect(
-          request.guardrails!.moderationLlmV1!.action,
+          request.guardrails!.first.moderationLlmV1!.action,
           ModerationLLMV1Action.block,
         );
         expect(request.versionMessage, 'Updated guardrails');
@@ -79,7 +81,7 @@ void main() {
           instructions: 'Full instructions',
           tools: [Tool.codeInterpreter()],
           metadata: {'all': 'fields'},
-          guardrails: GuardrailConfig(blockOnError: true),
+          guardrails: [GuardrailConfig(blockOnError: true)],
           versionMessage: 'Full update',
         );
         final json = request.toJson();
@@ -89,11 +91,10 @@ void main() {
         expect(json['instructions'], 'Full instructions');
         expect(json['tools'], isList);
         expect(json['metadata'], {'all': 'fields'});
-        expect(json['guardrails'], isA<Map<String, dynamic>>());
-        expect(
-          (json['guardrails'] as Map<String, dynamic>)['block_on_error'],
-          true,
-        );
+        expect(json['guardrails'], isList);
+        final guardrail =
+            (json['guardrails'] as List).first as Map<String, dynamic>;
+        expect(guardrail['block_on_error'], true);
         expect(json['version_message'], 'Full update');
       });
     });
@@ -122,10 +123,12 @@ void main() {
             {'type': 'code_interpreter'},
           ],
           'metadata': {'from': 'json'},
-          'guardrails': {
-            'block_on_error': true,
-            'moderation_llm_v1': {'action': 'block'},
-          },
+          'guardrails': [
+            {
+              'block_on_error': true,
+              'moderation_llm_v1': {'action': 'block'},
+            },
+          ],
           'version_message': 'Deserialized version',
         };
         final request = UpdateAgentRequest.fromJson(json);
@@ -136,9 +139,9 @@ void main() {
         expect(request.tools, hasLength(1));
         expect(request.metadata?['from'], 'json');
         expect(request.guardrails, isNotNull);
-        expect(request.guardrails!.blockOnError, isTrue);
+        expect(request.guardrails!.first.blockOnError, isTrue);
         expect(
-          request.guardrails!.moderationLlmV1!.action,
+          request.guardrails!.first.moderationLlmV1!.action,
           ModerationLLMV1Action.block,
         );
         expect(request.versionMessage, 'Deserialized version');
@@ -167,7 +170,7 @@ void main() {
           model: 'new-model',
           instructions: 'New instructions',
           metadata: {'new': true},
-          guardrails: const GuardrailConfig(blockOnError: true),
+          guardrails: const [GuardrailConfig(blockOnError: true)],
           versionMessage: 'Copied update',
         );
         expect(copy.name, 'New');
@@ -175,7 +178,7 @@ void main() {
         expect(copy.model, 'new-model');
         expect(copy.instructions, 'New instructions');
         expect(copy.metadata?['new'], true);
-        expect(copy.guardrails?.blockOnError, isTrue);
+        expect(copy.guardrails?.first.blockOnError, isTrue);
         expect(copy.versionMessage, 'Copied update');
       });
     });

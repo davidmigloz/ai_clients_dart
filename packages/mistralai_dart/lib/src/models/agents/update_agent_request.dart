@@ -24,8 +24,8 @@ class UpdateAgentRequest {
   /// New metadata.
   final Map<String, dynamic>? metadata;
 
-  /// Guardrail configuration for content moderation.
-  final GuardrailConfig? guardrails;
+  /// Guardrail configurations for content moderation.
+  final List<GuardrailConfig>? guardrails;
 
   /// Message describing the changes in this version.
   final String? versionMessage;
@@ -53,11 +53,9 @@ class UpdateAgentRequest {
             ?.map((e) => Tool.fromJson(e as Map<String, dynamic>))
             .toList(),
         metadata: json['metadata'] as Map<String, dynamic>?,
-        guardrails: json['guardrails'] != null
-            ? GuardrailConfig.fromJson(
-                json['guardrails'] as Map<String, dynamic>,
-              )
-            : null,
+        guardrails: (json['guardrails'] as List?)
+            ?.map((e) => GuardrailConfig.fromJson(e as Map<String, dynamic>))
+            .toList(),
         versionMessage: json['version_message'] as String?,
       );
 
@@ -69,7 +67,8 @@ class UpdateAgentRequest {
     if (instructions != null) 'instructions': instructions,
     if (tools != null) 'tools': tools!.map((e) => e.toJson()).toList(),
     if (metadata != null) 'metadata': metadata,
-    if (guardrails != null) 'guardrails': guardrails!.toJson(),
+    if (guardrails != null)
+      'guardrails': guardrails!.map((e) => e.toJson()).toList(),
     if (versionMessage != null) 'version_message': versionMessage,
   };
 
@@ -81,7 +80,7 @@ class UpdateAgentRequest {
     String? instructions,
     List<Tool>? tools,
     Map<String, dynamic>? metadata,
-    GuardrailConfig? guardrails,
+    List<GuardrailConfig>? guardrails,
     String? versionMessage,
   }) => UpdateAgentRequest(
     name: name ?? this.name,

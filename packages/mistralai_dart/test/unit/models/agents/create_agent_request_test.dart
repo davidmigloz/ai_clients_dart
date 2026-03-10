@@ -27,12 +27,14 @@ void main() {
           instructions: 'You are a coding expert.',
           tools: [Tool.codeInterpreter(), Tool.webSearch()],
           metadata: {'team': 'dev'},
-          guardrails: GuardrailConfig(
-            blockOnError: true,
-            moderationLlmV1: ModerationLLMV1Config(
-              action: ModerationLLMV1Action.block,
+          guardrails: [
+            GuardrailConfig(
+              blockOnError: true,
+              moderationLlmV1: ModerationLLMV1Config(
+                action: ModerationLLMV1Action.block,
+              ),
             ),
-          ),
+          ],
           versionMessage: 'Initial version',
         );
         expect(request.name, 'Full Agent');
@@ -42,9 +44,9 @@ void main() {
         expect(request.tools, hasLength(2));
         expect(request.metadata?['team'], 'dev');
         expect(request.guardrails, isNotNull);
-        expect(request.guardrails!.blockOnError, isTrue);
+        expect(request.guardrails!.first.blockOnError, isTrue);
         expect(
-          request.guardrails!.moderationLlmV1!.action,
+          request.guardrails!.first.moderationLlmV1!.action,
           ModerationLLMV1Action.block,
         );
         expect(request.versionMessage, 'Initial version');
@@ -76,7 +78,7 @@ void main() {
           instructions: 'Be helpful.',
           tools: [Tool.codeInterpreter()],
           metadata: {'key': 'value'},
-          guardrails: GuardrailConfig(blockOnError: true),
+          guardrails: [GuardrailConfig(blockOnError: true)],
           versionMessage: 'v1 release',
         );
         final json = request.toJson();
@@ -86,11 +88,10 @@ void main() {
         expect(json['instructions'], 'Be helpful.');
         expect(json['tools'], isList);
         expect(json['metadata'], {'key': 'value'});
-        expect(json['guardrails'], isA<Map<String, dynamic>>());
-        expect(
-          (json['guardrails'] as Map<String, dynamic>)['block_on_error'],
-          true,
-        );
+        expect(json['guardrails'], isList);
+        final guardrail =
+            (json['guardrails'] as List).first as Map<String, dynamic>;
+        expect(guardrail['block_on_error'], true);
         expect(json['version_message'], 'v1 release');
       });
     });
@@ -116,10 +117,12 @@ void main() {
             {'type': 'web_search'},
           ],
           'metadata': {'env': 'test'},
-          'guardrails': {
-            'block_on_error': true,
-            'moderation_llm_v1': {'action': 'block'},
-          },
+          'guardrails': [
+            {
+              'block_on_error': true,
+              'moderation_llm_v1': {'action': 'block'},
+            },
+          ],
           'version_message': 'Complete version',
         };
         final request = CreateAgentRequest.fromJson(json);
@@ -130,9 +133,9 @@ void main() {
         expect(request.tools, hasLength(1));
         expect(request.metadata?['env'], 'test');
         expect(request.guardrails, isNotNull);
-        expect(request.guardrails!.blockOnError, isTrue);
+        expect(request.guardrails!.first.blockOnError, isTrue);
         expect(
-          request.guardrails!.moderationLlmV1!.action,
+          request.guardrails!.first.moderationLlmV1!.action,
           ModerationLLMV1Action.block,
         );
         expect(request.versionMessage, 'Complete version');
@@ -166,7 +169,7 @@ void main() {
           model: 'mistral-large-latest',
           instructions: 'New instructions',
           metadata: {'key': 'new'},
-          guardrails: const GuardrailConfig(blockOnError: true),
+          guardrails: const [GuardrailConfig(blockOnError: true)],
           versionMessage: 'Copied version',
         );
         expect(copy.name, 'New Name');
@@ -174,7 +177,7 @@ void main() {
         expect(copy.model, 'mistral-large-latest');
         expect(copy.instructions, 'New instructions');
         expect(copy.metadata?['key'], 'new');
-        expect(copy.guardrails?.blockOnError, isTrue);
+        expect(copy.guardrails?.first.blockOnError, isTrue);
         expect(copy.versionMessage, 'Copied version');
       });
 
