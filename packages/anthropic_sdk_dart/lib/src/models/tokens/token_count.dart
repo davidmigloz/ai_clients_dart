@@ -66,7 +66,8 @@ class TokenCountRequest {
   /// Creates a [TokenCountRequest] from a [MessageCreateRequest].
   ///
   /// Copies the fields relevant to token counting: model, messages,
-  /// system, thinking, toolChoice, tools, outputConfig, and speed.
+  /// system, thinking, toolChoice, tools, outputConfig, speed, and
+  /// cacheControl.
   factory TokenCountRequest.fromMessageCreateRequest(
     MessageCreateRequest request,
   ) {
