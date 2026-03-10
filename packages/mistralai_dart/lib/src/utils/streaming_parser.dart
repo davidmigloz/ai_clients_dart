@@ -53,10 +53,8 @@ Stream<Map<String, dynamic>> parseSSE(Stream<List<int>> byteStream) async* {
         return;
       }
 
-      if (data.isNotEmpty) {
-        if (dataBuffer.isNotEmpty) dataBuffer.write('\n');
-        dataBuffer.write(data);
-      }
+      if (dataBuffer.isNotEmpty) dataBuffer.write('\n');
+      dataBuffer.write(data);
     } else if (line.isEmpty) {
       // Empty line signals end of event
       if (dataBuffer.isNotEmpty) {
@@ -143,12 +141,19 @@ Stream<T> parseSSEAs<T>(
 ///   print(json); // Each line parsed as Map<String, dynamic>
 /// }
 /// ```
-Stream<Map<String, dynamic>> parseNDJSON(Stream<List<int>> byteStream) {
-  return byteStream
+Stream<Map<String, dynamic>> parseNDJSON(Stream<List<int>> byteStream) async* {
+  final lines = byteStream
       .transform(utf8.decoder)
       .transform(const LineSplitter())
-      .where((line) => line.isNotEmpty)
-      .map((line) => jsonDecode(line) as Map<String, dynamic>);
+      .where((line) => line.isNotEmpty);
+
+  await for (final line in lines) {
+    try {
+      yield jsonDecode(line) as Map<String, dynamic>;
+    } catch (_) {
+      // Skip malformed JSON lines
+    }
+  }
 }
 
 /// Parses a stream of bytes as NDJSON and converts to typed objects.
@@ -163,12 +168,10 @@ Stream<Map<String, dynamic>> parseNDJSON(Stream<List<int>> byteStream) {
 Stream<T> parseNDJSONAs<T>(
   Stream<List<int>> byteStream,
   T Function(Map<String, dynamic>) fromJson,
-) {
-  return byteStream
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .where((line) => line.isNotEmpty)
-      .map((line) => fromJson(jsonDecode(line) as Map<String, dynamic>));
+) async* {
+  await for (final json in parseNDJSON(byteStream)) {
+    yield fromJson(json);
+  }
 }
 
 /// Transforms a byte stream to lines.

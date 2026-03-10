@@ -291,6 +291,22 @@ void main() {
       expect(results[0]['emoji'], '🚀');
       expect(results[0]['text'], '日本語');
     });
+
+    test('skips malformed JSON gracefully', () async {
+      final ndjsonData = [
+        '{"id":"1"}',
+        '{invalid json}',
+        '{"id":"2"}',
+      ].join('\n');
+
+      final bytes = utf8.encode(ndjsonData);
+      final stream = Stream<List<int>>.value(bytes);
+      final results = await parseNDJSON(stream).toList();
+
+      expect(results, hasLength(2));
+      expect(results[0]['id'], '1');
+      expect(results[1]['id'], '2');
+    });
   });
 
   group('bytesToLines', () {

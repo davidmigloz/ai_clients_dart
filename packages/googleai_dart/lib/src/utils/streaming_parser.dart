@@ -55,10 +55,8 @@ Stream<Map<String, dynamic>> parseSSE(Stream<String> stream) async* {
         }
         return;
       }
-      if (data.isNotEmpty) {
-        if (dataBuffer.isNotEmpty) dataBuffer.write('\n');
-        dataBuffer.write(data);
-      }
+      if (dataBuffer.isNotEmpty) dataBuffer.write('\n');
+      dataBuffer.write(data);
     } else if (line.isEmpty) {
       // Empty line signals end of event
       if (dataBuffer.isNotEmpty) {

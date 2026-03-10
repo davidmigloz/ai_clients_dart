@@ -143,10 +143,22 @@ class SseParser {
         currentEvent = line.substring(6).trim();
       } else if (line.startsWith('data:')) {
         final data = line.substring(5).trim();
+
+        // Check for end-of-stream marker — flush any buffered data first
         if (data == '[DONE]') {
+          if (dataBuffer.isNotEmpty) {
+            yield SseEvent(
+              event: currentEvent,
+              data: dataBuffer.toString(),
+              id: id,
+              retry: retry,
+            );
+            dataBuffer.clear();
+          }
           yield const SseEvent(event: 'done', data: '[DONE]');
           return;
         }
+
         if (dataBuffer.isNotEmpty) {
           dataBuffer.write('\n');
         }
@@ -155,16 +167,18 @@ class SseParser {
         id = line.substring(3).trim();
       } else if (line.startsWith('retry:')) {
         retry = int.tryParse(line.substring(6).trim());
-      } else if (line.isEmpty && dataBuffer.isNotEmpty) {
+      } else if (line.isEmpty) {
         // Empty line signals end of event
-        yield SseEvent(
-          event: currentEvent,
-          data: dataBuffer.toString(),
-          id: id,
-          retry: retry,
-        );
+        if (dataBuffer.isNotEmpty) {
+          yield SseEvent(
+            event: currentEvent,
+            data: dataBuffer.toString(),
+            id: id,
+            retry: retry,
+          );
+          dataBuffer.clear();
+        }
 
-        dataBuffer.clear();
         currentEvent = null;
         id = null;
         retry = null;
