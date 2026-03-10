@@ -57,6 +57,10 @@ mcp__dart__pub(command: "outdated")  # Check outdated dependencies
 
 **IMPORTANT**: Never run integration tests (which hit live APIs) unless explicitly requested by the user — they are expensive. Only run unit tests by default by targeting `test/unit/` directories (e.g., `mcp__dart__run_tests` with paths `["packages/foo/test/unit"]`).
 
+**Test placement rules:**
+- `test/integration/` — Tests that hit **live external APIs** (require API keys, network access). Must be tagged with `@Tags(['integration'])` and include a `library;` directive so CI can exclude them.
+- `test/unit/` — All other tests, including tests with local `HttpServer`, `MockClient`, or any self-contained test that does not call external services. These run in CI by default.
+
 **Using CLI (Fallback):**
 
 ```bash
