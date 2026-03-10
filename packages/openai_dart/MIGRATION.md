@@ -742,6 +742,7 @@ signaling. Use `client.realtimeSessions.calls` to manage WebRTC calls.
 
 ```dart
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:openai_dart/openai_dart.dart';
 import 'package:openai_dart/openai_dart_realtime.dart' as realtime;
 
 // 1. Create a peer connection and generate an SDP offer
@@ -763,7 +764,8 @@ final sdpAnswer = await client.realtimeSessions.calls.create(
 // 3. Set the SDP answer to complete the WebRTC handshake
 await pc.setRemoteDescription(RTCSessionDescription(sdpAnswer, 'answer'));
 
-// Additional call management methods:
+// Additional call management methods (callId is obtained from your SIP/telephony layer):
+const callId = 'call_xxx';
 await client.realtimeSessions.calls.accept(callId);
 await client.realtimeSessions.calls.hangup(callId);
 await client.realtimeSessions.calls.refer(

@@ -593,7 +593,8 @@ final sdpAnswer = await client.realtimeSessions.calls.create(
 // 3. Set the SDP answer to complete the WebRTC handshake
 await pc.setRemoteDescription(RTCSessionDescription(sdpAnswer, 'answer'));
 
-// Call management operations
+// Call management operations (callId is obtained from your SIP/telephony layer)
+const callId = 'call_xxx';
 await client.realtimeSessions.calls.accept(callId);
 await client.realtimeSessions.calls.hangup(callId);
 await client.realtimeSessions.calls.refer(
