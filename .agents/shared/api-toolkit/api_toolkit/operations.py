@@ -1255,6 +1255,9 @@ def _verify_openapi_docs(config: ToolkitConfig, readme: str) -> list[dict[str, A
         for resource in discovered_resources
         if resource.resource_key in excluded_resources
     }
+    # Include raw exclusion names so non-API references (e.g. client.close())
+    # are also suppressed in the README stale-reference check.
+    excluded_access_paths |= {name.lower() for name in config.documentation.excluded_resources}
     readme_lower = readme.lower()
     documented_resources = {
         resource.resource_key
