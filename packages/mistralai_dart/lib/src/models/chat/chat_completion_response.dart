@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../../utils/equality_helpers.dart';
+import '../common/copy_with_sentinel.dart';
 import '../metadata/usage_info.dart';
 import 'chat_choice.dart';
 
@@ -62,6 +63,23 @@ class ChatCompletionResponse {
     if (usage != null) 'usage': usage!.toJson(),
   };
 
+  /// Creates a copy with the given fields replaced.
+  ChatCompletionResponse copyWith({
+    String? id,
+    String? object,
+    int? created,
+    String? model,
+    List<ChatChoice>? choices,
+    Object? usage = unsetCopyWithValue,
+  }) => ChatCompletionResponse(
+    id: id ?? this.id,
+    object: object ?? this.object,
+    created: created ?? this.created,
+    model: model ?? this.model,
+    choices: choices ?? this.choices,
+    usage: usage == unsetCopyWithValue ? this.usage : usage as UsageInfo?,
+  );
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -80,6 +98,6 @@ class ChatCompletionResponse {
 
   @override
   String toString() =>
-      'ChatCompletionResponse(id: $id, model: $model, '
-      'choices: ${choices.length})';
+      'ChatCompletionResponse(id: $id, object: $object, created: $created, '
+      'model: $model, choices: ${choices.length}, usage: $usage)';
 }

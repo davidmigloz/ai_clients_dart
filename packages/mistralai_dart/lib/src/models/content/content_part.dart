@@ -47,6 +47,10 @@ class TextContentPart extends ContentPart {
   @override
   Map<String, dynamic> toJson() => {'type': type, 'text': text};
 
+  /// Creates a copy with the given fields replaced.
+  TextContentPart copyWith({String? text}) =>
+      TextContentPart(text ?? this.text);
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -92,6 +96,10 @@ class ImageUrlContentPart extends ContentPart {
     'type': type,
     'image_url': {'url': url},
   };
+
+  /// Creates a copy with the given fields replaced.
+  ImageUrlContentPart copyWith({String? url}) =>
+      ImageUrlContentPart(url ?? this.url);
 
   @override
   bool operator ==(Object other) =>

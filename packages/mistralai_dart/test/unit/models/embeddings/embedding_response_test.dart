@@ -79,6 +79,116 @@ void main() {
       expect(json['data'], isList);
       expect(json['model'], 'mistral-embed');
     });
+
+    group('copyWith', () {
+      test('copies with no changes', () {
+        const original = EmbeddingResponse(
+          id: 'emb-100',
+          object: 'list',
+          model: 'mistral-embed',
+          data: [
+            EmbeddingData(object: 'embedding', embedding: [0.1], index: 0),
+          ],
+          usage: UsageInfo(
+            promptTokens: 5,
+            completionTokens: 0,
+            totalTokens: 5,
+          ),
+        );
+        final copied = original.copyWith();
+
+        expect(copied, equals(original));
+        expect(copied.id, original.id);
+        expect(copied.object, original.object);
+        expect(copied.model, original.model);
+        expect(copied.data, original.data);
+        expect(copied.usage, original.usage);
+      });
+
+      test('copies with all changes', () {
+        const original = EmbeddingResponse(
+          id: 'emb-100',
+          object: 'list',
+          model: 'mistral-embed',
+          data: [],
+        );
+        final copied = original.copyWith(
+          id: 'emb-200',
+          object: 'updated-list',
+          model: 'new-embed',
+          data: const [
+            EmbeddingData(object: 'embedding', embedding: [0.9], index: 0),
+          ],
+          usage: const UsageInfo(
+            promptTokens: 10,
+            completionTokens: 0,
+            totalTokens: 10,
+          ),
+        );
+
+        expect(copied.id, 'emb-200');
+        expect(copied.object, 'updated-list');
+        expect(copied.model, 'new-embed');
+        expect(copied.data, hasLength(1));
+        expect(copied.usage!.promptTokens, 10);
+      });
+
+      test('copies with partial changes', () {
+        const original = EmbeddingResponse(
+          id: 'emb-100',
+          object: 'list',
+          model: 'mistral-embed',
+          data: [],
+          usage: UsageInfo(
+            promptTokens: 5,
+            completionTokens: 0,
+            totalTokens: 5,
+          ),
+        );
+        final copied = original.copyWith(model: 'new-embed');
+
+        expect(copied.id, 'emb-100');
+        expect(copied.model, 'new-embed');
+        expect(copied.usage, original.usage);
+      });
+
+      test('can set usage to null', () {
+        const original = EmbeddingResponse(
+          id: 'emb-100',
+          object: 'list',
+          model: 'mistral-embed',
+          data: [],
+          usage: UsageInfo(
+            promptTokens: 5,
+            completionTokens: 0,
+            totalTokens: 5,
+          ),
+        );
+        final copied = original.copyWith(usage: null);
+
+        expect(copied.usage, isNull);
+      });
+    });
+
+    group('toString', () {
+      test('includes all fields', () {
+        const response = EmbeddingResponse(
+          id: 'emb-test',
+          object: 'list',
+          model: 'mistral-embed',
+          data: [
+            EmbeddingData(object: 'embedding', embedding: [0.1], index: 0),
+          ],
+        );
+        final str = response.toString();
+
+        expect(
+          str,
+          'EmbeddingResponse(id: emb-test, object: list, '
+          'model: mistral-embed, data: 1, usage: null)',
+        );
+      });
+    });
   });
 
   group('EmbeddingData', () {

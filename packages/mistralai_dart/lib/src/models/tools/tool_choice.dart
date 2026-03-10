@@ -147,8 +147,12 @@ class ToolChoiceFunction extends ToolChoice {
     );
   }
 
+  /// Creates a copy with the given fields replaced.
+  ToolChoiceFunction copyWith({String? name}) =>
+      ToolChoiceFunction(name: name ?? this.name);
+
   @override
-  Object toJson() => {
+  Map<String, dynamic> toJson() => {
     'type': 'function',
     'function': {'name': name},
   };

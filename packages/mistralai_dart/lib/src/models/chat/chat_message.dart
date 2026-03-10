@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../content/content_part.dart';
 import '../tools/tool_call.dart';
 
@@ -72,6 +73,10 @@ class SystemMessage extends ChatMessage {
   @override
   Map<String, dynamic> toJson() => {'role': role, 'content': content};
 
+  /// Creates a copy with the given fields replaced.
+  SystemMessage copyWith({String? content}) =>
+      SystemMessage(content: content ?? this.content);
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -133,6 +138,10 @@ class UserMessage extends ChatMessage {
         ? content
         : (content as List<ContentPart>).map((e) => e.toJson()).toList(),
   };
+
+  /// Creates a copy with the given fields replaced.
+  UserMessage copyWith({Object? content}) =>
+      UserMessage(content: content ?? this.content);
 
   @override
   bool operator ==(Object other) =>
@@ -201,6 +210,19 @@ class AssistantMessage extends ChatMessage {
     if (prefix != null) 'prefix': prefix,
   };
 
+  /// Creates a copy with the given fields replaced.
+  AssistantMessage copyWith({
+    Object? content = unsetCopyWithValue,
+    Object? toolCalls = unsetCopyWithValue,
+    Object? prefix = unsetCopyWithValue,
+  }) => AssistantMessage(
+    content: content == unsetCopyWithValue ? this.content : content as String?,
+    toolCalls: toolCalls == unsetCopyWithValue
+        ? this.toolCalls
+        : toolCalls as List<ToolCall>?,
+    prefix: prefix == unsetCopyWithValue ? this.prefix : prefix as bool?,
+  );
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -265,6 +287,17 @@ class ToolMessage extends ChatMessage {
     if (name != null) 'name': name,
     'content': content,
   };
+
+  /// Creates a copy with the given fields replaced.
+  ToolMessage copyWith({
+    String? toolCallId,
+    Object? name = unsetCopyWithValue,
+    String? content,
+  }) => ToolMessage(
+    toolCallId: toolCallId ?? this.toolCallId,
+    name: name == unsetCopyWithValue ? this.name : name as String?,
+    content: content ?? this.content,
+  );
 
   @override
   bool operator ==(Object other) =>

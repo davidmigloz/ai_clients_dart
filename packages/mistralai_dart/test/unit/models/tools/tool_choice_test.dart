@@ -82,11 +82,9 @@ void main() {
         final choice = ToolChoice.function('my_func');
         final json = choice.toJson();
 
-        expect(json, isA<Map<String, dynamic>>());
-        final map = json as Map<String, dynamic>;
-        expect(map['type'], 'function');
-        expect(map['function'], isA<Map<String, dynamic>>());
-        expect((map['function'] as Map)['name'], 'my_func');
+        expect(json['type'], 'function');
+        expect(json['function'], isA<Map<String, dynamic>>());
+        expect((json['function'] as Map)['name'], 'my_func');
       });
 
       test('deserializes from JSON', () {
@@ -98,6 +96,21 @@ void main() {
 
         expect(choice, isA<ToolChoiceFunction>());
         expect((choice as ToolChoiceFunction).name, 'test_func');
+      });
+
+      test('copyWith creates a copy with new name', () {
+        const original = ToolChoiceFunction(name: 'old_func');
+        final copied = original.copyWith(name: 'new_func');
+
+        expect(copied.name, 'new_func');
+      });
+
+      test('copyWith preserves name when not specified', () {
+        const original = ToolChoiceFunction(name: 'my_func');
+        final copied = original.copyWith();
+
+        expect(copied, equals(original));
+        expect(copied.name, 'my_func');
       });
     });
 

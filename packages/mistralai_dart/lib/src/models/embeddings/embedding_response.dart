@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../../utils/equality_helpers.dart';
+import '../common/copy_with_sentinel.dart';
 import '../metadata/usage_info.dart';
 import 'embedding_data.dart';
 
@@ -56,6 +57,21 @@ class EmbeddingResponse {
     if (usage != null) 'usage': usage!.toJson(),
   };
 
+  /// Creates a copy with the given fields replaced.
+  EmbeddingResponse copyWith({
+    String? id,
+    String? object,
+    String? model,
+    List<EmbeddingData>? data,
+    Object? usage = unsetCopyWithValue,
+  }) => EmbeddingResponse(
+    id: id ?? this.id,
+    object: object ?? this.object,
+    model: model ?? this.model,
+    data: data ?? this.data,
+    usage: usage == unsetCopyWithValue ? this.usage : usage as UsageInfo?,
+  );
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -73,5 +89,6 @@ class EmbeddingResponse {
 
   @override
   String toString() =>
-      'EmbeddingResponse(id: $id, model: $model, data: ${data.length} items)';
+      'EmbeddingResponse(id: $id, object: $object, model: $model, '
+      'data: ${data.length}, usage: $usage)';
 }

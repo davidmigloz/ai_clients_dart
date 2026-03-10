@@ -69,6 +69,7 @@ void main() {
       expect(request.encodingFormat, isNull);
       expect(request.outputDimension, isNull);
       expect(request.outputDtype, isNull);
+      expect(request.metadata, isNull);
     });
 
     test('creates with outputDimension', () {
@@ -98,6 +99,7 @@ void main() {
         outputDimension: 256,
         outputDtype: EmbeddingDtype.int8,
         encodingFormat: 'float',
+        metadata: {'project': 'test'},
       );
 
       final json = request.toJson();
@@ -107,6 +109,15 @@ void main() {
       expect(json['output_dimension'], 256);
       expect(json['output_dtype'], 'int8');
       expect(json['encoding_format'], 'float');
+      expect(json['metadata'], {'project': 'test'});
+    });
+
+    test('omits null metadata from JSON', () {
+      const request = EmbeddingRequest(model: 'mistral-embed', input: 'Test');
+
+      final json = request.toJson();
+
+      expect(json.containsKey('metadata'), isFalse);
     });
 
     test('deserializes with all optional fields', () {
@@ -116,6 +127,7 @@ void main() {
         'output_dimension': 512,
         'output_dtype': 'int8',
         'encoding_format': 'base64',
+        'metadata': {'project': 'test'},
       };
 
       final request = EmbeddingRequest.fromJson(json);
@@ -123,6 +135,7 @@ void main() {
       expect(request.outputDimension, 512);
       expect(request.outputDtype, EmbeddingDtype.int8);
       expect(request.encodingFormat, 'base64');
+      expect(request.metadata, {'project': 'test'});
     });
 
     test('copyWith creates a copy with modified fields', () {
@@ -159,6 +172,84 @@ void main() {
       expect(modified.outputDimension, 256);
       expect(modified.outputDtype, EmbeddingDtype.int8);
       expect(modified.encodingFormat, 'base64');
+    });
+
+    test('copyWith updates metadata', () {
+      const original = EmbeddingRequest(
+        model: 'mistral-embed',
+        input: 'Test',
+        metadata: {'key': 'old'},
+      );
+
+      final modified = original.copyWith(metadata: {'key': 'new'});
+
+      expect(modified.metadata, {'key': 'new'});
+      expect(modified.model, 'mistral-embed');
+      expect(modified.input, 'Test');
+    });
+
+    group('equality', () {
+      test('requests with different metadata are not equal', () {
+        const request1 = EmbeddingRequest(
+          model: 'mistral-embed',
+          input: 'Test',
+          metadata: {'key': 'value1'},
+        );
+        const request2 = EmbeddingRequest(
+          model: 'mistral-embed',
+          input: 'Test',
+          metadata: {'key': 'value2'},
+        );
+
+        expect(request1, isNot(equals(request2)));
+      });
+
+      test('requests with same metadata are equal', () {
+        const request1 = EmbeddingRequest(
+          model: 'mistral-embed',
+          input: 'Test',
+          metadata: {'key': 'value'},
+        );
+        const request2 = EmbeddingRequest(
+          model: 'mistral-embed',
+          input: 'Test',
+          metadata: {'key': 'value'},
+        );
+
+        expect(request1, equals(request2));
+        expect(request1.hashCode, equals(request2.hashCode));
+      });
+    });
+
+    group('toString', () {
+      test('includes all fields including metadata', () {
+        const request = EmbeddingRequest(
+          model: 'mistral-embed',
+          input: 'Test',
+          encodingFormat: 'float',
+          outputDimension: 256,
+          outputDtype: EmbeddingDtype.int8,
+          metadata: {'project': 'test'},
+        );
+        final str = request.toString();
+
+        expect(
+          str,
+          'EmbeddingRequest(model: mistral-embed, input: Test, '
+          'encodingFormat: float, outputDimension: 256, '
+          'outputDtype: EmbeddingDtype.int8, metadata: {project: test})',
+        );
+      });
+
+      test('shows null for missing optional fields', () {
+        const request = EmbeddingRequest(model: 'mistral-embed', input: 'Test');
+        final str = request.toString();
+
+        expect(str, contains('encodingFormat: null'));
+        expect(str, contains('outputDimension: null'));
+        expect(str, contains('outputDtype: null'));
+        expect(str, contains('metadata: null'));
+      });
     });
   });
 

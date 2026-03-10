@@ -114,12 +114,11 @@
     },
     "ChatCompletionResponse": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "ChatCompletionResponse",
       "file": "lib/src/models/chat/chat_completion_response.dart",
       "schema": "ChatCompletionResponse",
-      "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "tags": []
     },
     "EmbeddingRequest": {
       "spec": "main",
@@ -133,21 +132,20 @@
     },
     "EmbeddingResponse": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "EmbeddingResponse",
       "file": "lib/src/models/embeddings/embedding_response.dart",
       "schema": "EmbeddingResponse",
-      "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "tags": []
     },
     "ModelCard": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "Model",
       "file": "lib/src/models/models/model.dart",
-      "schema": "ModelCard",
+      "schema": "BaseModelCard",
       "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": ["deprecation", "deprecation_replacement_model"]
     },
     "ChatMessage": {
       "spec": "main",
@@ -168,39 +166,35 @@
     },
     "SystemMessage": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "SystemMessage",
       "file": "lib/src/models/chat/chat_message.dart",
       "schema": "SystemMessage",
-      "parent": "ChatMessage",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "ChatMessage"
     },
     "UserMessage": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "UserMessage",
       "file": "lib/src/models/chat/chat_message.dart",
       "schema": "UserMessage",
-      "parent": "ChatMessage",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "ChatMessage"
     },
     "AssistantMessage": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "AssistantMessage",
       "file": "lib/src/models/chat/chat_message.dart",
       "schema": "AssistantMessage",
-      "parent": "ChatMessage",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "ChatMessage"
     },
     "ToolMessage": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "ToolMessage",
       "file": "lib/src/models/chat/chat_message.dart",
       "schema": "ToolMessage",
-      "parent": "ChatMessage",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "ChatMessage"
     },
     "ContentPart": {
       "spec": "main",
@@ -219,21 +213,20 @@
     },
     "TextChunk": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "TextContentPart",
       "file": "lib/src/models/content/content_part.dart",
       "schema": "TextChunk",
-      "parent": "ContentPart",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "ContentPart"
     },
     "ImageURLChunk": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "ImageUrlContentPart",
       "file": "lib/src/models/content/content_part.dart",
       "schema": "ImageURLChunk",
       "parent": "ContentPart",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": ["image_url"]
     },
     "Tool": {
       "spec": "main",
@@ -251,12 +244,11 @@
     },
     "FunctionTool": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "FunctionTool",
       "file": "lib/src/models/tools/tool.dart",
       "schema": "FunctionTool",
-      "parent": "Tool",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "Tool"
     },
     "ToolChoice": {
       "spec": "main",
@@ -301,21 +293,29 @@
     },
     "FunctionName": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "ToolChoiceFunction",
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": "FunctionName",
-      "parent": "ToolChoice",
-      "note": "Uses string values or object for discrimination. Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "ToolChoice"
     },
-    "ResponseFormat": {
+    "ResponseFormat:ResponseFormatJsonObject": {
       "spec": "main",
-      "kind": "skip",
-      "dart_class": "ResponseFormatJson",
+      "kind": "extension",
+      "dart_class": "ResponseFormatJsonObject",
       "file": "lib/src/models/metadata/response_format.dart",
-      "schema": "ResponseFormat",
+      "schema": null,
       "parent": "ResponseFormat",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": null
+    },
+    "ResponseFormat:ResponseFormatJsonSchema": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ResponseFormatJsonSchema",
+      "file": "lib/src/models/metadata/response_format.dart",
+      "schema": null,
+      "parent": "ResponseFormat",
+      "note": null
     },
     "ResponseFormat:ResponseFormatText": {
       "spec": "main",

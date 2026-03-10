@@ -134,5 +134,119 @@ void main() {
       // Note: equality is based on id, object, created, model only
       expect(response1, equals(response2));
     });
+
+    group('copyWith', () {
+      test('copies with no changes', () {
+        const original = ChatCompletionResponse(
+          id: 'cmpl-100',
+          object: 'chat.completion',
+          created: 1699000000,
+          model: 'mistral-small-latest',
+          choices: [
+            ChatChoice(
+              index: 0,
+              message: AssistantMessage(content: 'Hi'),
+              finishReason: FinishReason.stop,
+            ),
+          ],
+          usage: UsageInfo(
+            promptTokens: 5,
+            completionTokens: 10,
+            totalTokens: 15,
+          ),
+        );
+        final copied = original.copyWith();
+
+        expect(copied, equals(original));
+        expect(copied.id, original.id);
+        expect(copied.object, original.object);
+        expect(copied.created, original.created);
+        expect(copied.model, original.model);
+        expect(copied.choices, original.choices);
+        expect(copied.usage, original.usage);
+      });
+
+      test('copies with all changes', () {
+        const original = ChatCompletionResponse(
+          id: 'cmpl-100',
+          object: 'chat.completion',
+          created: 1699000000,
+          model: 'mistral-small-latest',
+          choices: [],
+        );
+        final copied = original.copyWith(
+          id: 'cmpl-200',
+          object: 'chat.completion.chunk',
+          created: 1699000001,
+          model: 'mistral-large-latest',
+          choices: const [
+            ChatChoice(
+              index: 0,
+              message: AssistantMessage(content: 'New'),
+              finishReason: FinishReason.length,
+            ),
+          ],
+          usage: const UsageInfo(
+            promptTokens: 20,
+            completionTokens: 30,
+            totalTokens: 50,
+          ),
+        );
+
+        expect(copied.id, 'cmpl-200');
+        expect(copied.object, 'chat.completion.chunk');
+        expect(copied.created, 1699000001);
+        expect(copied.model, 'mistral-large-latest');
+        expect(copied.choices, hasLength(1));
+        expect(copied.choices.first.message.content, 'New');
+        expect(copied.usage!.totalTokens, 50);
+      });
+
+      test('copies with partial changes', () {
+        const original = ChatCompletionResponse(
+          id: 'cmpl-100',
+          object: 'chat.completion',
+          created: 1699000000,
+          model: 'mistral-small-latest',
+          choices: [],
+          usage: UsageInfo(
+            promptTokens: 5,
+            completionTokens: 10,
+            totalTokens: 15,
+          ),
+        );
+        final copied = original.copyWith(model: 'mistral-large-latest');
+
+        expect(copied.id, 'cmpl-100');
+        expect(copied.model, 'mistral-large-latest');
+        expect(copied.usage, original.usage);
+      });
+    });
+
+    group('toString', () {
+      test('includes all fields', () {
+        const response = ChatCompletionResponse(
+          id: 'cmpl-test',
+          object: 'chat.completion',
+          created: 1699000000,
+          model: 'mistral-small-latest',
+          choices: [
+            ChatChoice(
+              index: 0,
+              message: AssistantMessage(content: 'Hi'),
+              finishReason: FinishReason.stop,
+            ),
+          ],
+        );
+        final str = response.toString();
+
+        expect(
+          str,
+          'ChatCompletionResponse(id: cmpl-test, object: chat.completion, '
+          'created: 1699000000, model: mistral-small-latest, '
+          'choices: 1, usage: null)',
+        );
+      });
+    });
   });
 }

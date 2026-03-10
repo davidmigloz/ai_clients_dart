@@ -66,14 +66,12 @@ Future<void> getModelDetails(MistralClient client) async {
     if (model.maxContextLength != null) {
       print('  Max context length: ${model.maxContextLength}');
     }
-    if (model.capabilities != null) {
-      print('  Capabilities:');
-      final caps = model.capabilities!;
-      print('    - Completion: ${caps.completionChat}');
-      print('    - Fine-tuning: ${caps.fineTuning}');
-      print('    - Function calling: ${caps.functionCalling}');
-      print('    - Vision: ${caps.vision}');
-    }
+    print('  Capabilities:');
+    final caps = model.capabilities;
+    print('    - Completion: ${caps.completionChat}');
+    print('    - Fine-tuning: ${caps.fineTuning}');
+    print('    - Function calling: ${caps.functionCalling}');
+    print('    - Vision: ${caps.vision}');
   } catch (e) {
     print('Error retrieving model: $e');
   }
@@ -89,7 +87,7 @@ Future<void> filterModelsByCapability(MistralClient client) async {
 
   // Filter for vision-capable models
   final visionModels = models.data.where((m) {
-    return m.capabilities?.vision ?? false;
+    return m.capabilities.vision ?? false;
   }).toList();
 
   print('Vision-capable models (${visionModels.length}):');
@@ -100,7 +98,7 @@ Future<void> filterModelsByCapability(MistralClient client) async {
 
   // Filter for function-calling models
   final functionModels = models.data.where((m) {
-    return m.capabilities?.functionCalling ?? false;
+    return m.capabilities.functionCalling ?? false;
   }).toList();
 
   print('Function-calling models (${functionModels.length}):');
@@ -111,7 +109,7 @@ Future<void> filterModelsByCapability(MistralClient client) async {
 
   // Filter for fine-tuning capable models
   final fineTuningModels = models.data.where((m) {
-    return m.capabilities?.fineTuning ?? false;
+    return m.capabilities.fineTuning ?? false;
   }).toList();
 
   print('Fine-tuning capable models (${fineTuningModels.length}):');

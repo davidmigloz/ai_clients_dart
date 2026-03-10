@@ -306,5 +306,23 @@ class ChatCompletionRequest {
 
   @override
   String toString() =>
-      'ChatCompletionRequest(model: $model, messages: ${messages.length} msgs)';
+      'ChatCompletionRequest(model: $model, '
+      'messages: ${messages.length}, '
+      'temperature: $temperature, '
+      'topP: $topP, '
+      'maxTokens: $maxTokens, '
+      'stream: $stream, '
+      'stop: $stop, '
+      'randomSeed: $randomSeed, '
+      'responseFormat: $responseFormat, '
+      'tools: $tools, '
+      'toolChoice: $toolChoice, '
+      'presencePenalty: $presencePenalty, '
+      'frequencyPenalty: $frequencyPenalty, '
+      'n: $n, '
+      'parallelToolCalls: $parallelToolCalls, '
+      'safePrompt: $safePrompt, '
+      'metadata: $metadata, '
+      'prediction: $prediction, '
+      'promptMode: $promptMode)';
 }

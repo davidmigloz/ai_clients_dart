@@ -37,6 +37,9 @@ class EmbeddingRequest {
   /// - [EmbeddingDtype.ubinary] - Unsigned binary quantization
   final EmbeddingDtype? outputDtype;
 
+  /// Optional metadata for the request.
+  final Map<String, dynamic>? metadata;
+
   /// Creates an [EmbeddingRequest].
   const EmbeddingRequest({
     required this.model,
@@ -44,6 +47,7 @@ class EmbeddingRequest {
     this.encodingFormat,
     this.outputDimension,
     this.outputDtype,
+    this.metadata,
   });
 
   /// Creates an [EmbeddingRequest] for a single input.
@@ -86,6 +90,7 @@ class EmbeddingRequest {
         outputDtype: json['output_dtype'] != null
             ? EmbeddingDtype.fromString(json['output_dtype'] as String?)
             : null,
+        metadata: json['metadata'] as Map<String, dynamic>?,
       );
 
   /// Converts to JSON.
@@ -95,6 +100,7 @@ class EmbeddingRequest {
     if (encodingFormat != null) 'encoding_format': encodingFormat,
     if (outputDimension != null) 'output_dimension': outputDimension,
     if (outputDtype != null) 'output_dtype': outputDtype!.value,
+    if (metadata != null) 'metadata': metadata,
   };
 
   /// Creates a copy with replaced values.
@@ -104,6 +110,7 @@ class EmbeddingRequest {
     Object? encodingFormat = unsetCopyWithValue,
     Object? outputDimension = unsetCopyWithValue,
     Object? outputDtype = unsetCopyWithValue,
+    Object? metadata = unsetCopyWithValue,
   }) {
     return EmbeddingRequest(
       model: model ?? this.model,
@@ -117,6 +124,9 @@ class EmbeddingRequest {
       outputDtype: outputDtype == unsetCopyWithValue
           ? this.outputDtype
           : outputDtype as EmbeddingDtype?,
+      metadata: metadata == unsetCopyWithValue
+          ? this.metadata
+          : metadata as Map<String, dynamic>?,
     );
   }
 
@@ -129,7 +139,8 @@ class EmbeddingRequest {
           _inputEquals(input, other.input) &&
           encodingFormat == other.encodingFormat &&
           outputDimension == other.outputDimension &&
-          outputDtype == other.outputDtype;
+          outputDtype == other.outputDtype &&
+          mapsEqual(metadata, other.metadata);
 
   /// Compares input fields which can be String or `List<String>`.
   static bool _inputEquals(Object a, Object b) {
@@ -146,11 +157,12 @@ class EmbeddingRequest {
     encodingFormat,
     outputDimension,
     outputDtype,
+    mapHash(metadata),
   );
 
   @override
   String toString() =>
       'EmbeddingRequest(model: $model, input: $input, '
       'encodingFormat: $encodingFormat, outputDimension: $outputDimension, '
-      'outputDtype: $outputDtype)';
+      'outputDtype: $outputDtype, metadata: $metadata)';
 }

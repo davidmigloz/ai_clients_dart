@@ -14,7 +14,11 @@
     "base_resource",
     "fineTuningModels",
     "streaming_resource",
-    "transcriptions"
+    "transcriptions",
+    "close",
+    "fromenvironment",
+    "withapikey",
+    "withbaseurl"
   ],
   "resource_to_example": {
     "chat": "chat",

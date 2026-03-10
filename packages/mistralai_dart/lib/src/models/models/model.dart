@@ -1,5 +1,8 @@
 import 'package:meta/meta.dart';
 
+import '../../utils/equality_helpers.dart';
+import '../common/copy_with_sentinel.dart';
+
 /// Information about a model.
 @immutable
 class Model {
@@ -34,7 +37,7 @@ class Model {
   final String? type;
 
   /// The capabilities of this model.
-  final ModelCapabilities? capabilities;
+  final ModelCapabilities capabilities;
 
   /// Creates a [Model].
   const Model({
@@ -48,7 +51,7 @@ class Model {
     this.aliases,
     this.defaultModelTemperature,
     this.type,
-    this.capabilities,
+    this.capabilities = const ModelCapabilities(),
   });
 
   /// Creates a [Model] from JSON.
@@ -68,7 +71,42 @@ class Model {
         ? ModelCapabilities.fromJson(
             json['capabilities'] as Map<String, dynamic>,
           )
-        : null,
+        : const ModelCapabilities(),
+  );
+
+  /// Creates a copy with the given fields replaced.
+  Model copyWith({
+    String? id,
+    String? object,
+    Object? created = unsetCopyWithValue,
+    Object? ownedBy = unsetCopyWithValue,
+    Object? name = unsetCopyWithValue,
+    Object? description = unsetCopyWithValue,
+    Object? maxContextLength = unsetCopyWithValue,
+    Object? aliases = unsetCopyWithValue,
+    Object? defaultModelTemperature = unsetCopyWithValue,
+    Object? type = unsetCopyWithValue,
+    ModelCapabilities? capabilities,
+  }) => Model(
+    id: id ?? this.id,
+    object: object ?? this.object,
+    created: created == unsetCopyWithValue ? this.created : created as int?,
+    ownedBy: ownedBy == unsetCopyWithValue ? this.ownedBy : ownedBy as String?,
+    name: name == unsetCopyWithValue ? this.name : name as String?,
+    description: description == unsetCopyWithValue
+        ? this.description
+        : description as String?,
+    maxContextLength: maxContextLength == unsetCopyWithValue
+        ? this.maxContextLength
+        : maxContextLength as int?,
+    aliases: aliases == unsetCopyWithValue
+        ? this.aliases
+        : aliases as List<String>?,
+    defaultModelTemperature: defaultModelTemperature == unsetCopyWithValue
+        ? this.defaultModelTemperature
+        : defaultModelTemperature as double?,
+    type: type == unsetCopyWithValue ? this.type : type as String?,
+    capabilities: capabilities ?? this.capabilities,
   );
 
   /// Converts to JSON.
@@ -84,19 +122,48 @@ class Model {
     if (defaultModelTemperature != null)
       'default_model_temperature': defaultModelTemperature,
     if (type != null) 'type': type,
-    if (capabilities != null) 'capabilities': capabilities!.toJson(),
+    'capabilities': capabilities.toJson(),
   };
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is Model && runtimeType == other.runtimeType && id == other.id;
+      other is Model &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          object == other.object &&
+          created == other.created &&
+          ownedBy == other.ownedBy &&
+          name == other.name &&
+          description == other.description &&
+          maxContextLength == other.maxContextLength &&
+          listsEqual(aliases, other.aliases) &&
+          defaultModelTemperature == other.defaultModelTemperature &&
+          type == other.type &&
+          capabilities == other.capabilities;
 
   @override
-  int get hashCode => id.hashCode;
+  int get hashCode => Object.hash(
+    id,
+    object,
+    created,
+    ownedBy,
+    name,
+    description,
+    maxContextLength,
+    Object.hashAll(aliases ?? []),
+    defaultModelTemperature,
+    type,
+    capabilities,
+  );
 
   @override
-  String toString() => 'Model(id: $id, name: $name)';
+  String toString() =>
+      'Model(id: $id, object: $object, created: $created, '
+      'ownedBy: $ownedBy, name: $name, description: $description, '
+      'maxContextLength: $maxContextLength, aliases: $aliases, '
+      'defaultModelTemperature: $defaultModelTemperature, '
+      'type: $type, capabilities: $capabilities)';
 }
 
 /// Capabilities of a model.
@@ -120,6 +187,9 @@ class ModelCapabilities {
   /// Whether the model supports classification tasks.
   final bool? classification;
 
+  /// Whether the model supports audio transcription.
+  final bool? audioTranscription;
+
   /// Creates [ModelCapabilities].
   const ModelCapabilities({
     this.completionChat,
@@ -128,6 +198,7 @@ class ModelCapabilities {
     this.fineTuning,
     this.vision,
     this.classification,
+    this.audioTranscription,
   });
 
   /// Creates [ModelCapabilities] from JSON.
@@ -139,6 +210,7 @@ class ModelCapabilities {
         fineTuning: json['fine_tuning'] as bool?,
         vision: json['vision'] as bool?,
         classification: json['classification'] as bool?,
+        audioTranscription: json['audio_transcription'] as bool?,
       );
 
   /// Converts to JSON.
@@ -149,6 +221,7 @@ class ModelCapabilities {
     if (fineTuning != null) 'fine_tuning': fineTuning,
     if (vision != null) 'vision': vision,
     if (classification != null) 'classification': classification,
+    if (audioTranscription != null) 'audio_transcription': audioTranscription,
   };
 
   @override
@@ -161,7 +234,8 @@ class ModelCapabilities {
           functionCalling == other.functionCalling &&
           fineTuning == other.fineTuning &&
           vision == other.vision &&
-          classification == other.classification;
+          classification == other.classification &&
+          audioTranscription == other.audioTranscription;
 
   @override
   int get hashCode => Object.hash(
@@ -171,6 +245,7 @@ class ModelCapabilities {
     fineTuning,
     vision,
     classification,
+    audioTranscription,
   );
 
   @override

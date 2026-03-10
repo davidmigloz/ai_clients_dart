@@ -29,6 +29,21 @@ void main() {
         expect(message.role, 'system');
         expect(message.toJson()['content'], 'You are a helpful assistant.');
       });
+
+      test('copyWith creates a copy with new content', () {
+        const original = SystemMessage(content: 'Be helpful.');
+        final copied = original.copyWith(content: 'Be concise.');
+
+        expect(copied.content, 'Be concise.');
+      });
+
+      test('copyWith preserves content when not specified', () {
+        const original = SystemMessage(content: 'Be helpful.');
+        final copied = original.copyWith();
+
+        expect(copied.content, 'Be helpful.');
+        expect(copied, equals(original));
+      });
     });
 
     group('UserMessage', () {
@@ -107,6 +122,33 @@ void main() {
           'https://example.com/img.png',
         );
       });
+
+      test('copyWith with new string content', () {
+        const original = UserMessage(content: 'Hello');
+        final copied = original.copyWith(content: 'Goodbye');
+
+        expect(copied.content, 'Goodbye');
+      });
+
+      test('copyWith with new multimodal content', () {
+        const original = UserMessage(content: 'Hello');
+        final copied = original.copyWith(
+          content: [ContentPart.text('New text')],
+        );
+
+        expect(copied.content, isA<List<ContentPart>>());
+        final parts = copied.content as List<ContentPart>;
+        expect(parts.first, isA<TextContentPart>());
+        expect((parts.first as TextContentPart).text, 'New text');
+      });
+
+      test('copyWith preserves content when not specified', () {
+        const original = UserMessage(content: 'Hello');
+        final copied = original.copyWith();
+
+        expect(copied.content, 'Hello');
+        expect(copied, equals(original));
+      });
     });
 
     group('AssistantMessage', () {
@@ -175,6 +217,42 @@ void main() {
         expect(message.toJson()['content'], 'Here is your answer.');
         expect(message.toJson()['tool_calls'], isList);
       });
+
+      test('copyWith with changes', () {
+        const original = AssistantMessage(content: 'Hello', prefix: true);
+        final copied = original.copyWith(content: 'Goodbye', prefix: false);
+
+        expect(copied.content, 'Goodbye');
+        expect(copied.prefix, false);
+        expect(copied.toolCalls, isNull);
+      });
+
+      test('copyWith preserves values when not specified', () {
+        const original = AssistantMessage(
+          content: 'Hello',
+          toolCalls: [
+            ToolCall(
+              id: 'call_1',
+              function: FunctionCall(name: 'fn', arguments: '{}'),
+            ),
+          ],
+          prefix: true,
+        );
+        final copied = original.copyWith();
+
+        expect(copied, equals(original));
+        expect(copied.content, 'Hello');
+        expect(copied.toolCalls, hasLength(1));
+        expect(copied.prefix, true);
+      });
+
+      test('copyWith can set nullable fields to null', () {
+        const original = AssistantMessage(content: 'Hello', prefix: true);
+        final copied = original.copyWith(content: null, prefix: null);
+
+        expect(copied.content, isNull);
+        expect(copied.prefix, isNull);
+      });
     });
 
     group('ToolMessage', () {
@@ -211,6 +289,49 @@ void main() {
         final messageJson = message.toJson();
         expect(messageJson['tool_call_id'], 'call_456');
         expect(messageJson['content'], '{"data": 42}');
+      });
+
+      test('copyWith with changes', () {
+        const original = ToolMessage(
+          toolCallId: 'call_1',
+          content: 'result',
+          name: 'my_tool',
+        );
+        final copied = original.copyWith(
+          toolCallId: 'call_2',
+          content: 'new result',
+        );
+
+        expect(copied.toolCallId, 'call_2');
+        expect(copied.content, 'new result');
+        expect(copied.name, 'my_tool');
+      });
+
+      test('copyWith preserves values when not specified', () {
+        const original = ToolMessage(
+          toolCallId: 'call_1',
+          content: 'result',
+          name: 'my_tool',
+        );
+        final copied = original.copyWith();
+
+        expect(copied, equals(original));
+        expect(copied.toolCallId, 'call_1');
+        expect(copied.content, 'result');
+        expect(copied.name, 'my_tool');
+      });
+
+      test('copyWith can set nullable name to null', () {
+        const original = ToolMessage(
+          toolCallId: 'call_1',
+          content: 'result',
+          name: 'my_tool',
+        );
+        final copied = original.copyWith(name: null);
+
+        expect(copied.name, isNull);
+        expect(copied.toolCallId, 'call_1');
+        expect(copied.content, 'result');
       });
     });
   });

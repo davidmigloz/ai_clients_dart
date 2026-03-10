@@ -202,5 +202,37 @@ void main() {
         expect(copied.temperature, original.temperature);
       });
     });
+
+    group('toString', () {
+      test('includes all fields', () {
+        final request = ChatCompletionRequest(
+          model: 'mistral-small-latest',
+          messages: [ChatMessage.user('Hello')],
+          temperature: 0.5,
+        );
+        final str = request.toString();
+
+        expect(str, contains('ChatCompletionRequest('));
+        expect(str, contains('model: mistral-small-latest'));
+        expect(str, contains('messages: 1'));
+        expect(str, contains('temperature: 0.5'));
+        expect(str, contains('topP: null'));
+        expect(str, contains('maxTokens: null'));
+        expect(str, contains('stream: null'));
+        expect(str, contains('stop: null'));
+        expect(str, contains('randomSeed: null'));
+        expect(str, contains('responseFormat: null'));
+        expect(str, contains('tools: null'));
+        expect(str, contains('toolChoice: null'));
+        expect(str, contains('presencePenalty: null'));
+        expect(str, contains('frequencyPenalty: null'));
+        expect(str, contains('n: null'));
+        expect(str, contains('parallelToolCalls: null'));
+        expect(str, contains('safePrompt: null'));
+        expect(str, contains('metadata: null'));
+        expect(str, contains('prediction: null'));
+        expect(str, contains('promptMode: null'));
+      });
+    });
   });
 }
