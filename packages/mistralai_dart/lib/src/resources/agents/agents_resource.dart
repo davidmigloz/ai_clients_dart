@@ -210,12 +210,13 @@ class AgentsResource extends ResourceBase with StreamingResource {
   /// Retrieves a specific version of an agent.
   ///
   /// The [agentId] identifies the agent.
-  /// The [version] identifies the version to retrieve.
+  /// The [version] identifies the version to retrieve. Can be a version
+  /// number or an alias name (e.g., "latest").
   ///
   /// Returns the [Agent] at the specified version.
   Future<Agent> retrieveVersion({
     required String agentId,
-    required int version,
+    required String version,
   }) async {
     final url = requestBuilder.buildUrl(
       '/v1/agents/$agentId/versions/$version',

@@ -58,7 +58,7 @@ class AgentAliasResponse {
 DateTime? _parseDateTime(dynamic value) {
   if (value == null) return null;
   if (value is int) {
-    return DateTime.fromMillisecondsSinceEpoch(value * 1000);
+    return DateTime.fromMillisecondsSinceEpoch(value * 1000, isUtc: true);
   }
   if (value is String) {
     return DateTime.tryParse(value);
