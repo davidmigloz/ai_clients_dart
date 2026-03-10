@@ -120,6 +120,36 @@ void main() {
       expect(json['system'], 'Be helpful');
     });
 
+    test('toJson serializes cache_control with TTL', () {
+      final request = TokenCountRequest(
+        model: 'claude-sonnet-4-20250514',
+        messages: [InputMessage.user('Hello')],
+        cacheControl: const CacheControlEphemeral(ttl: CacheTtl.ttl5m),
+      );
+
+      final json = request.toJson();
+
+      expect(json['cache_control'], isA<Map<String, dynamic>>());
+      final cc = json['cache_control'] as Map<String, dynamic>;
+      expect(cc['type'], 'ephemeral');
+      expect(cc['ttl'], '5m');
+    });
+
+    test('toJson serializes cache_control without TTL', () {
+      final request = TokenCountRequest(
+        model: 'claude-sonnet-4-20250514',
+        messages: [InputMessage.user('Hello')],
+        cacheControl: const CacheControlEphemeral(),
+      );
+
+      final json = request.toJson();
+
+      expect(json['cache_control'], isA<Map<String, dynamic>>());
+      final cc = json['cache_control'] as Map<String, dynamic>;
+      expect(cc['type'], 'ephemeral');
+      expect(cc.containsKey('ttl'), isFalse);
+    });
+
     test('toJson excludes null optional fields', () {
       final request = TokenCountRequest(
         model: 'claude-sonnet-4-20250514',
