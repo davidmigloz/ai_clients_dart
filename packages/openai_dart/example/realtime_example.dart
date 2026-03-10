@@ -15,26 +15,11 @@ Future<void> main() async {
   final client = OpenAIClient.fromEnvironment();
 
   try {
-    // --- WebSocket: Real-time session ---
-    print('=== WebSocket: Create Session ===\n');
+    // --- WebSocket: Connect directly (server-side) ---
+    print('=== WebSocket: Direct Connection ===\n');
 
-    // Create a realtime session with an ephemeral client secret
-    final session = await client.realtimeSessions.create(
-      const realtime.RealtimeSessionCreateRequest(
-        model: 'gpt-realtime-1.5',
-        voice: realtime.RealtimeVoice.alloy,
-        instructions: 'You are a helpful assistant.',
-        turnDetection: realtime.TurnDetection(
-          type: realtime.TurnDetectionType.serverVad,
-        ),
-      ),
-    );
-
-    print('Session ID: ${session.id}');
-    print('Client secret: ${session.clientSecret?.value}');
-    print('Expires at: ${session.clientSecret?.expiresAt}\n');
-
-    // Use the client secret to connect via WebSocket
+    // Connect to a realtime session via WebSocket using the main API key.
+    // This is suitable for server-side (Dart VM) usage.
     final ws = await client.realtime.connect(
       model: 'gpt-realtime-1.5',
       config: const realtime.SessionUpdateConfig(
@@ -64,6 +49,29 @@ Future<void> main() async {
 
     // Close WebSocket when done
     await ws.close();
+
+    // --- Ephemeral client secret (for web/frontend clients) ---
+    print('\n=== Ephemeral Client Secret ===\n');
+
+    // On web platforms, browsers cannot set custom headers on WebSocket
+    // connections. Use realtimeSessions.create() to obtain an ephemeral
+    // client secret, then pass it to your frontend to connect directly.
+    final session = await client.realtimeSessions.create(
+      const realtime.RealtimeSessionCreateRequest(
+        model: 'gpt-realtime-1.5',
+        voice: realtime.RealtimeVoice.alloy,
+        instructions: 'You are a helpful assistant.',
+        turnDetection: realtime.TurnDetection(
+          type: realtime.TurnDetectionType.serverVad,
+        ),
+      ),
+    );
+
+    print('Session ID: ${session.id}');
+    print('Client secret: ${session.clientSecret?.value}');
+    print('Expires at: ${session.clientSecret?.expiresAt}');
+    // Use session.clientSecret.value as the Bearer token when connecting
+    // from a browser WebSocket client.
 
     // --- WebRTC: Create call with SDP exchange ---
     print('\n=== WebRTC: SDP Exchange ===\n');
