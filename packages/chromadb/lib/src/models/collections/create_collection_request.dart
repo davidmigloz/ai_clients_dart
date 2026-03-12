@@ -27,8 +27,8 @@ class CreateCollectionRequest {
   Map<String, dynamic> toJson() {
     return {
       'name': name,
-      if (metadata != null) 'metadata': metadata,
-      if (getOrCreate != null) 'get_or_create': getOrCreate,
+      'metadata': ?metadata,
+      'get_or_create': ?getOrCreate,
     };
   }
 

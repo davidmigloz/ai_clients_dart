@@ -42,9 +42,8 @@ class CollectionSchema {
     return {
       'defaults': defaults,
       'keys': keys,
-      if (cmek != null) 'cmek': cmek,
-      if (sourceAttachedFunctionId != null)
-        'source_attached_function_id': sourceAttachedFunctionId,
+      'cmek': ?cmek,
+      'source_attached_function_id': ?sourceAttachedFunctionId,
     };
   }
 

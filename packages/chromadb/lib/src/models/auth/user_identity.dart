@@ -33,9 +33,9 @@ class UserIdentity {
   /// Converts this identity to JSON.
   Map<String, dynamic> toJson() {
     return {
-      if (userId != null) 'user_id': userId,
-      if (tenant != null) 'tenant': tenant,
-      if (databases != null) 'databases': databases,
+      'user_id': ?userId,
+      'tenant': ?tenant,
+      'databases': ?databases,
     };
   }
 

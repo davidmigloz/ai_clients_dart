@@ -93,13 +93,13 @@ class Collection {
     return {
       'id': id,
       'name': name,
-      if (metadata != null) 'metadata': metadata,
+      'metadata': ?metadata,
       'tenant': tenant,
       'database': database,
       'log_position': logPosition,
       'version': version,
       'configuration_json': configurationJson.toJson(),
-      if (dimension != null) 'dimension': dimension,
+      'dimension': ?dimension,
       if (schema != null) 'schema': schema!.toJson(),
     };
   }

@@ -20,7 +20,7 @@ class DeleteCollectionRecordsResponse {
 
   /// Converts this response to JSON.
   Map<String, dynamic> toJson() {
-    return {if (deleted != null) 'deleted': deleted};
+    return {'deleted': ?deleted};
   }
 
   /// Creates a copy with replaced values.

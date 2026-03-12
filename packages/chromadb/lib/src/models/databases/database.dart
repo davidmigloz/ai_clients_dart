@@ -46,7 +46,7 @@ class Database {
 
   /// Converts this database to JSON.
   Map<String, dynamic> toJson() {
-    return {'id': id, 'name': name, if (tenant != null) 'tenant': tenant};
+    return {'id': id, 'name': name, 'tenant': ?tenant};
   }
 
   /// Creates a copy of this database with optional modifications.

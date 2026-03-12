@@ -13,7 +13,7 @@ class DetachFunctionRequest {
 
   /// Converts this request to JSON.
   Map<String, dynamic> toJson() {
-    return {if (deleteOutput != null) 'delete_output': deleteOutput};
+    return {'delete_output': ?deleteOutput};
   }
 
   /// Creates a copy with replaced values.

@@ -28,8 +28,8 @@ class SearchFilter {
   /// Converts this filter to JSON.
   Map<String, dynamic> toJson() {
     return {
-      if (queryIds != null) 'query_ids': queryIds,
-      if (whereClause != null) 'where_clause': whereClause,
+      'query_ids': ?queryIds,
+      'where_clause': ?whereClause,
     };
   }
 
@@ -92,8 +92,8 @@ class SearchGroupBy {
   /// Converts this group by to JSON.
   Map<String, dynamic> toJson() {
     return {
-      if (aggregate != null) 'aggregate': aggregate,
-      if (keys != null) 'keys': keys,
+      'aggregate': ?aggregate,
+      'keys': ?keys,
     };
   }
 
@@ -151,8 +151,8 @@ class SearchLimit {
   /// Converts this limit to JSON.
   Map<String, dynamic> toJson() {
     return {
-      if (limit != null) 'limit': limit,
-      if (offset != null) 'offset': offset,
+      'limit': ?limit,
+      'offset': ?offset,
     };
   }
 
@@ -203,7 +203,7 @@ class SearchSelect {
 
   /// Converts this select to JSON.
   Map<String, dynamic> toJson() {
-    return {if (keys != null) 'keys': keys};
+    return {'keys': ?keys};
   }
 
   /// Creates a copy with replaced values.
@@ -284,7 +284,7 @@ class SearchPayload {
       if (filter != null) 'filter': filter!.toJson(),
       if (groupBy != null) 'group_by': groupBy!.toJson(),
       if (limit != null) 'limit': limit!.toJson(),
-      if (rank != null) 'rank': rank,
+      'rank': ?rank,
       if (select != null) 'select': select!.toJson(),
     };
   }

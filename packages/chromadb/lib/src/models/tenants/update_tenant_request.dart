@@ -13,7 +13,7 @@ class UpdateTenantRequest {
 
   /// Converts this request to JSON.
   Map<String, dynamic> toJson() {
-    return {if (newName != null) 'new_name': newName};
+    return {'new_name': ?newName};
   }
 
   /// Creates a copy with replaced values.

@@ -115,27 +115,24 @@ class SpannIndexConfig {
   /// Converts this config to JSON.
   Map<String, dynamic> toJson() {
     return {
-      if (centerDriftThreshold != null)
-        'center_drift_threshold': centerDriftThreshold,
-      if (efConstruction != null) 'ef_construction': efConstruction,
-      if (efSearch != null) 'ef_search': efSearch,
-      if (initialLambda != null) 'initial_lambda': initialLambda,
-      if (maxNeighbors != null) 'max_neighbors': maxNeighbors,
-      if (mergeThreshold != null) 'merge_threshold': mergeThreshold,
-      if (nreplicaCount != null) 'nreplica_count': nreplicaCount,
-      if (numCentersToMergeTo != null)
-        'num_centers_to_merge_to': numCentersToMergeTo,
-      if (numSamplesKmeans != null) 'num_samples_kmeans': numSamplesKmeans,
+      'center_drift_threshold': ?centerDriftThreshold,
+      'ef_construction': ?efConstruction,
+      'ef_search': ?efSearch,
+      'initial_lambda': ?initialLambda,
+      'max_neighbors': ?maxNeighbors,
+      'merge_threshold': ?mergeThreshold,
+      'nreplica_count': ?nreplicaCount,
+      'num_centers_to_merge_to': ?numCentersToMergeTo,
+      'num_samples_kmeans': ?numSamplesKmeans,
       if (quantize != null) 'quantize': quantize!.toJson(),
-      if (reassignNeighborCount != null)
-        'reassign_neighbor_count': reassignNeighborCount,
-      if (searchNprobe != null) 'search_nprobe': searchNprobe,
-      if (searchRngEpsilon != null) 'search_rng_epsilon': searchRngEpsilon,
-      if (searchRngFactor != null) 'search_rng_factor': searchRngFactor,
-      if (splitThreshold != null) 'split_threshold': splitThreshold,
-      if (writeNprobe != null) 'write_nprobe': writeNprobe,
-      if (writeRngEpsilon != null) 'write_rng_epsilon': writeRngEpsilon,
-      if (writeRngFactor != null) 'write_rng_factor': writeRngFactor,
+      'reassign_neighbor_count': ?reassignNeighborCount,
+      'search_nprobe': ?searchNprobe,
+      'search_rng_epsilon': ?searchRngEpsilon,
+      'search_rng_factor': ?searchRngFactor,
+      'split_threshold': ?splitThreshold,
+      'write_nprobe': ?writeNprobe,
+      'write_rng_epsilon': ?writeRngEpsilon,
+      'write_rng_factor': ?writeRngFactor,
     };
   }
 

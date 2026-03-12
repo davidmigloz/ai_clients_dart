@@ -86,7 +86,7 @@ class AttachedFunction {
       'database_id': databaseId,
       'completion_offset': completionOffset,
       'min_records_for_invocation': minRecordsForInvocation,
-      if (params != null) 'params': params,
+      'params': ?params,
     };
   }
 

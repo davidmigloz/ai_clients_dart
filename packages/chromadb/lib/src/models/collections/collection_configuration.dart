@@ -36,9 +36,9 @@ class CollectionConfiguration {
   /// Converts this configuration to JSON.
   Map<String, dynamic> toJson() {
     return {
-      if (hnsw != null) 'hnsw': hnsw,
-      if (spann != null) 'spann': spann,
-      if (embeddingFunction != null) 'embedding_function': embeddingFunction,
+      'hnsw': ?hnsw,
+      'spann': ?spann,
+      'embedding_function': ?embeddingFunction,
     };
   }
 

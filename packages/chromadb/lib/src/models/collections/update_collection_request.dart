@@ -18,8 +18,8 @@ class UpdateCollectionRequest {
   /// Converts this request to JSON.
   Map<String, dynamic> toJson() {
     return {
-      if (newName != null) 'new_name': newName,
-      if (newMetadata != null) 'new_metadata': newMetadata,
+      'new_name': ?newName,
+      'new_metadata': ?newMetadata,
     };
   }
 
