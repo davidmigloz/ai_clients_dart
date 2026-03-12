@@ -66,9 +66,7 @@ class GroundingChunk {
           ? this.retrievedContext
           : retrievedContext as RetrievedContext?,
       maps: maps == unsetCopyWithValue ? this.maps : maps as Maps?,
-      image: image == unsetCopyWithValue
-          ? this.image
-          : image as Image?,
+      image: image == unsetCopyWithValue ? this.image : image as Image?,
     );
   }
 

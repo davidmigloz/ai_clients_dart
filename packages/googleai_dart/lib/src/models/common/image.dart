@@ -15,12 +15,7 @@ class Image {
   final String? title;
 
   /// Creates an [Image].
-  const Image({
-    this.domain,
-    this.imageUri,
-    this.sourceUri,
-    this.title,
-  });
+  const Image({this.domain, this.imageUri, this.sourceUri, this.title});
 
   /// Creates an [Image] from JSON.
   factory Image.fromJson(Map<String, dynamic> json) => Image(

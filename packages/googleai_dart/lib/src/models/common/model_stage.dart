@@ -52,8 +52,7 @@ String modelStageToString(ModelStage value) {
   return switch (value) {
     ModelStage.unspecified ||
     // ignore: deprecated_member_use_from_same_package
-    ModelStage.modelStageUnspecified =>
-      'MODEL_STAGE_UNSPECIFIED',
+    ModelStage.modelStageUnspecified => 'MODEL_STAGE_UNSPECIFIED',
     ModelStage.unstableExperimental => 'UNSTABLE_EXPERIMENTAL',
     ModelStage.experimental => 'EXPERIMENTAL',
     ModelStage.preview => 'PREVIEW',
