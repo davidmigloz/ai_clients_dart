@@ -116,34 +116,40 @@
       "files",
       "tunedModels"
     ],
-    "notes": {},
+    "notes": {
+      "files:register": "POST /v1beta/files:register \u2014 Registers GCS files with FileService. Models (RegisterFilesRequest/RegisterFilesResponse) are implemented; resource method not yet added to the files resource."
+    },
     "expected_properties": {},
     "excluded_properties": {
-      "global": []
+      "global": [],
+      "GenerationConfig": [
+        "_responseJsonSchema"
+      ]
     },
     "resource_aliases": {
       "dynamic": "models"
     },
-    "excluded_resources": []
+    "excluded_resources": [
+      "files:register"
+    ]
   },
   "types": {
     "Tool": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "Tool",
       "file": "lib/src/models/tools/tool.dart",
       "schema": "Tool",
       "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "googleSearch is GoogleSearch?; codeExecution and urlContext remain Map<String,dynamic> (empty schemas in spec)"
     },
     "Candidate": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "Candidate",
       "file": "lib/src/models/content/candidate.dart",
       "schema": "Candidate",
-      "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "tags": []
     },
     "Content": {
       "spec": "main",
@@ -157,30 +163,32 @@
     },
     "GenerationConfig": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "GenerationConfig",
       "file": "lib/src/models/generation/generation_config.dart",
       "schema": "GenerationConfig",
       "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Excludes _responseJsonSchema (internal underscore-prefixed field) via excluded_properties",
+      "excluded_properties": [
+        "_responseJsonSchema"
+      ]
     },
     "ToolConfig": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "ToolConfig",
       "file": "lib/src/models/tools/tool_config.dart",
       "schema": "ToolConfig",
-      "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "tags": []
     },
     "GroundingMetadata": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "GroundingMetadata",
       "file": "lib/src/models/metadata/grounding_metadata.dart",
       "schema": "GroundingMetadata",
       "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Includes imageSearchQueries field added in spec update"
     },
     "FunctionCall": {
       "spec": "main",
@@ -194,36 +202,33 @@
     },
     "FunctionResponse": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "FunctionResponse",
       "file": "lib/src/models/tools/function_response.dart",
       "schema": "FunctionResponse",
-      "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "tags": []
     },
     "GroundingChunk": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "GroundingChunk",
       "file": "lib/src/models/metadata/grounding_chunk.dart",
       "schema": "GroundingChunk",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Includes image field added in spec update"
     },
     "Blob": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "Blob",
       "file": "lib/src/models/content/blob.dart",
-      "schema": "Blob",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "schema": "Blob"
     },
     "FileData": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "FileData",
       "file": "lib/src/models/content/file_data.dart",
-      "schema": "FileData",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "schema": "FileData"
     },
     "ExecutableCode": {
       "spec": "main",
@@ -246,7 +251,7 @@
       "file": "lib/src/models/content/part.dart",
       "schema": "Part",
       "parent": "Part",
-      "note": "Uses field presence for discrimination, not a 'type' field. Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Intentional skip: uses Dart sealed-class field-presence discrimination rather than spec's flat schema. The spec's Part schema represents a union of mutually exclusive fields, which is modeled in Dart as a sealed class hierarchy."
     },
     "AgentOption": {
       "spec": "interactions",
@@ -966,6 +971,108 @@
       "file": "lib/src/models/interactions/common/video_mime_type_option.dart",
       "kind": "skip",
       "note": "No direct one-to-one Dart model is currently tracked for this schema. Review manually when the schema changes."
+    },
+    "GoogleSearch": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GoogleSearch",
+      "file": "lib/src/models/common/google_search.dart",
+      "schema": "GoogleSearch"
+    },
+    "Interval": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Interval",
+      "file": "lib/src/models/common/interval.dart",
+      "schema": "Interval"
+    },
+    "SearchTypes": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SearchTypes",
+      "file": "lib/src/models/common/search_types.dart",
+      "schema": "SearchTypes"
+    },
+    "ImageSearch": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ImageSearch",
+      "file": "lib/src/models/common/image_search.dart",
+      "schema": "ImageSearch",
+      "note": "Empty schema in spec (no properties). Implementation is an empty class."
+    },
+    "WebSearch": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "WebSearch",
+      "file": "lib/src/models/common/web_search.dart",
+      "schema": "WebSearch",
+      "note": "Empty schema in spec (no properties). Implementation is an empty class."
+    },
+    "Image": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Image",
+      "file": "lib/src/models/common/image.dart",
+      "schema": "Image"
+    },
+    "GroundingChunkCustomMetadata": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GroundingChunkCustomMetadata",
+      "file": "lib/src/models/common/grounding_chunk_custom_metadata.dart",
+      "schema": "GroundingChunkCustomMetadata"
+    },
+    "GroundingChunkStringList": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GroundingChunkStringList",
+      "file": "lib/src/models/common/grounding_chunk_string_list.dart",
+      "schema": "GroundingChunkStringList"
+    },
+    "GroundingSupport": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GroundingSupport",
+      "file": "lib/src/models/metadata/grounding_support.dart",
+      "schema": "GoogleAiGenerativelanguageV1betaGroundingSupport",
+      "note": "Spec renamed schema to GoogleAiGenerativelanguageV1betaGroundingSupport; Dart class retains GroundingSupport name with added renderedParts field"
+    },
+    "ModelStage": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ModelStage",
+      "file": "lib/src/models/common/model_stage.dart",
+      "schema": "ModelStage"
+    },
+    "ModelStatus": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ModelStatus",
+      "file": "lib/src/models/common/model_status.dart",
+      "schema": "ModelStatus"
+    },
+    "RegisterFilesRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RegisterFilesRequest",
+      "file": "lib/src/models/common/register_files_request.dart",
+      "schema": "RegisterFilesRequest"
+    },
+    "RegisterFilesResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RegisterFilesResponse",
+      "file": "lib/src/models/common/register_files_response.dart",
+      "schema": "RegisterFilesResponse"
+    },
+    "MediaResolution": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "MediaResolution",
+      "file": "lib/src/models/content/media_resolution.dart",
+      "schema": "MediaResolution",
+      "note": "Removed from OpenAPI spec but still present in python-genai and js-genai SDKs. Kept with numTokens field added to match PartMediaResolution in reference SDKs."
     }
   }
 }
