@@ -23,12 +23,11 @@ enum ModelStage {
 
   /// Retired stage.
   retired,
-
-  /// Unknown stage.
-  unknown,
 }
 
 /// Parses a [ModelStage] from its string representation.
+///
+/// Unrecognized values map to [ModelStage.modelStageUnspecified].
 ModelStage modelStageFromString(String? value) {
   final normalized = value?.toUpperCase();
   return switch (normalized) {
@@ -40,7 +39,7 @@ ModelStage modelStageFromString(String? value) {
     'LEGACY' => ModelStage.legacy,
     'DEPRECATED' => ModelStage.deprecated,
     'RETIRED' => ModelStage.retired,
-    _ => ModelStage.unknown,
+    _ => ModelStage.modelStageUnspecified,
   };
 }
 
@@ -55,6 +54,5 @@ String modelStageToString(ModelStage value) {
     ModelStage.legacy => 'LEGACY',
     ModelStage.deprecated => 'DEPRECATED',
     ModelStage.retired => 'RETIRED',
-    ModelStage.unknown => 'MODEL_STAGE_UNSPECIFIED',
   };
 }

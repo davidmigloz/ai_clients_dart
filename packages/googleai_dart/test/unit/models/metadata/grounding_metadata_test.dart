@@ -200,7 +200,7 @@ void main() {
           'domain': 'example.com',
           'imageUri': 'https://img.example.com/photo.jpg',
           'sourceUri': 'https://example.com/page',
-          'title': 'Example Image',
+          'title': 'Example GroundingImage',
         },
       };
 
@@ -210,7 +210,7 @@ void main() {
       expect(chunk.image!.domain, 'example.com');
       expect(chunk.image!.imageUri, 'https://img.example.com/photo.jpg');
       expect(chunk.image!.sourceUri, 'https://example.com/page');
-      expect(chunk.image!.title, 'Example Image');
+      expect(chunk.image!.title, 'Example GroundingImage');
       expect(chunk.web, isNull);
     });
 
@@ -229,7 +229,7 @@ void main() {
 
     test('toJson serializes image chunk correctly', () {
       const chunk = GroundingChunk(
-        image: Image(
+        image: GroundingImage(
           domain: 'example.com',
           imageUri: 'https://img.example.com/photo.jpg',
         ),
@@ -248,7 +248,7 @@ void main() {
         'image': {
           'domain': 'test.com',
           'imageUri': 'https://img.test.com/img.png',
-          'title': 'Test Image',
+          'title': 'Test GroundingImage',
         },
       };
 
@@ -258,7 +258,7 @@ void main() {
 
       expect(imageJson['domain'], 'test.com');
       expect(imageJson['imageUri'], 'https://img.test.com/img.png');
-      expect(imageJson['title'], 'Test Image');
+      expect(imageJson['title'], 'Test GroundingImage');
     });
   });
 

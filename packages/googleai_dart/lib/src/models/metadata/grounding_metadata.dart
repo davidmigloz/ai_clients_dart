@@ -28,7 +28,7 @@ class GroundingMetadata {
   /// Only populated in the case that grounding with Google Maps is enabled.
   final String? googleMapsWidgetContextToken;
 
-  /// Optional. Image search queries for the following-up image searches.
+  /// Optional. Image search queries for the follow-up image searches.
   final List<String>? imageSearchQueries;
 
   /// Creates a [GroundingMetadata].
