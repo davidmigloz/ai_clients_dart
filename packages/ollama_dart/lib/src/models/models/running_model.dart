@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 
 /// Information about a currently running model.
 @immutable
@@ -94,11 +95,32 @@ class RunningModel {
       other is RunningModel &&
           runtimeType == other.runtimeType &&
           model == other.model &&
-          digest == other.digest;
+          size == other.size &&
+          digest == other.digest &&
+          mapsDeepEqual(details, other.details) &&
+          expiresAt == other.expiresAt &&
+          sizeVram == other.sizeVram &&
+          contextLength == other.contextLength;
 
   @override
-  int get hashCode => Object.hash(model, digest);
+  int get hashCode => Object.hash(
+    model,
+    size,
+    digest,
+    mapDeepHashCode(details),
+    expiresAt,
+    sizeVram,
+    contextLength,
+  );
 
   @override
-  String toString() => 'RunningModel(model: $model, sizeVram: $sizeVram)';
+  String toString() =>
+      'RunningModel('
+      'model: $model, '
+      'size: $size, '
+      'digest: $digest, '
+      'details: $details, '
+      'expiresAt: $expiresAt, '
+      'sizeVram: $sizeVram, '
+      'contextLength: $contextLength)';
 }

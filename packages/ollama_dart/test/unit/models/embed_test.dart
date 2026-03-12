@@ -53,11 +53,50 @@ void main() {
       expect(json['keep_alive'], '5m');
     });
 
-    test('equality works correctly', () {
+    test('equality works correctly for string input', () {
       const request1 = EmbedRequest(model: 'nomic-embed-text', input: 'Hello');
       const request2 = EmbedRequest(model: 'nomic-embed-text', input: 'Hello');
 
       expect(request1, equals(request2));
+      expect(request1.hashCode, equals(request2.hashCode));
+    });
+
+    test('equality works correctly for list input', () {
+      const request1 = EmbedRequest(
+        model: 'nomic-embed-text',
+        input: ['Hello', 'World'],
+      );
+      const request2 = EmbedRequest(
+        model: 'nomic-embed-text',
+        input: ['Hello', 'World'],
+      );
+      const request3 = EmbedRequest(
+        model: 'nomic-embed-text',
+        input: ['Hello', 'Different'],
+      );
+
+      expect(request1, equals(request2));
+      expect(request1.hashCode, equals(request2.hashCode));
+      expect(request1, isNot(equals(request3)));
+    });
+
+    test('equality includes all fields', () {
+      const request1 = EmbedRequest(
+        model: 'nomic-embed-text',
+        input: 'Hello',
+        truncate: true,
+        dimensions: 512,
+        keepAlive: '5m',
+      );
+      const request2 = EmbedRequest(
+        model: 'nomic-embed-text',
+        input: 'Hello',
+        truncate: false,
+        dimensions: 512,
+        keepAlive: '5m',
+      );
+
+      expect(request1, isNot(equals(request2)));
     });
   });
 
@@ -146,6 +185,62 @@ void main() {
       const response = EmbedResponse(model: 'nomic-embed-text');
 
       expect(response.embedding, isNull);
+    });
+
+    test('equality compares nested embeddings by content', () {
+      const response1 = EmbedResponse(
+        model: 'nomic-embed-text',
+        embeddings: [
+          [0.1, 0.2, 0.3],
+          [0.4, 0.5, 0.6],
+        ],
+        totalDuration: 1000000,
+        loadDuration: 500000,
+        promptEvalCount: 5,
+      );
+      const response2 = EmbedResponse(
+        model: 'nomic-embed-text',
+        embeddings: [
+          [0.1, 0.2, 0.3],
+          [0.4, 0.5, 0.6],
+        ],
+        totalDuration: 1000000,
+        loadDuration: 500000,
+        promptEvalCount: 5,
+      );
+
+      expect(response1, equals(response2));
+      expect(response1.hashCode, equals(response2.hashCode));
+    });
+
+    test('equality detects single element change in embeddings', () {
+      const response1 = EmbedResponse(
+        model: 'nomic-embed-text',
+        embeddings: [
+          [0.1, 0.2, 0.3],
+        ],
+      );
+      const response2 = EmbedResponse(
+        model: 'nomic-embed-text',
+        embeddings: [
+          [0.1, 0.2, 0.999],
+        ],
+      );
+
+      expect(response1, isNot(equals(response2)));
+    });
+
+    test('equality includes duration and token fields', () {
+      const response1 = EmbedResponse(
+        model: 'nomic-embed-text',
+        totalDuration: 1000000,
+      );
+      const response2 = EmbedResponse(
+        model: 'nomic-embed-text',
+        totalDuration: 2000000,
+      );
+
+      expect(response1, isNot(equals(response2)));
     });
   });
 }
