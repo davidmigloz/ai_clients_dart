@@ -38,20 +38,16 @@ Future<void> demonstrateCaching(GoogleAIClient client) async {
   // 1. Create cached content with system instructions
   print('1. Creating cached content with system instructions...');
   final cachedContent = await client.cachedContents.create(
-    cachedContent: const CachedContent(
+    cachedContent: CachedContent(
       model: 'models/gemini-3.1-flash-preview',
       displayName: 'Math Expert Cache',
-      systemInstruction: Content(
-        parts: [
-          TextPart(
-            'You are an expert mathematician and educator. '
-            'When answering questions:\n'
-            '1. Provide step-by-step explanations\n'
-            '2. Use clear mathematical notation\n'
-            '3. Include examples when helpful\n'
-            '4. Explain the reasoning behind each step',
-          ),
-        ],
+      systemInstruction: Content.text(
+        'You are an expert mathematician and educator. '
+        'When answering questions:\n'
+        '1. Provide step-by-step explanations\n'
+        '2. Use clear mathematical notation\n'
+        '3. Include examples when helpful\n'
+        '4. Explain the reasoning behind each step',
       ),
       ttl: '3600s', // Cache for 1 hour
     ),

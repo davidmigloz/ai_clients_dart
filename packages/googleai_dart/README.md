@@ -918,10 +918,10 @@ import 'package:googleai_dart/googleai_dart.dart';
 // Assumes you have a configured client instance
 // Create cached content with system instructions
 final cachedContent = await client.cachedContents.create(
-  cachedContent: const CachedContent(
+  cachedContent: CachedContent(
     model: 'models/gemini-3.1-flash-preview',
     displayName: 'Math Expert Cache',
-    systemInstruction: Content(parts: [TextPart('You are an expert mathematician...')]),
+    systemInstruction: Content.text('You are an expert mathematician...'),
     ttl: '3600s', // Cache for 1 hour
   ),
 );
