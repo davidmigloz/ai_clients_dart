@@ -384,17 +384,17 @@ void main() {
 
       final ctx = RetrievedContext.fromJson(json);
 
-      expect(ctx.customMetadata![0].stringListValue!.values, ['dart', 'flutter']);
+      expect(ctx.customMetadata![0].stringListValue!.values, [
+        'dart',
+        'flutter',
+      ]);
     });
 
     test('toJson serializes customMetadata', () {
       const ctx = RetrievedContext(
         uri: 'gs://bucket/doc.pdf',
         customMetadata: [
-          GroundingChunkCustomMetadata(
-            key: 'author',
-            stringValue: 'Alice',
-          ),
+          GroundingChunkCustomMetadata(key: 'author', stringValue: 'Alice'),
         ],
       );
 

@@ -15,7 +15,12 @@ class GroundingImage {
   final String? title;
 
   /// Creates an [GroundingImage].
-  const GroundingImage({this.domain, this.imageUri, this.sourceUri, this.title});
+  const GroundingImage({
+    this.domain,
+    this.imageUri,
+    this.sourceUri,
+    this.title,
+  });
 
   /// Creates an [GroundingImage] from JSON.
   factory GroundingImage.fromJson(Map<String, dynamic> json) => GroundingImage(
