@@ -124,11 +124,6 @@
       "severity": "error"
     },
     {
-      "pattern": "\\bToolConfig\\s*\\(",
-      "message": "ToolConfig is Map<String, dynamic>, not a typed class",
-      "severity": "warning"
-    },
-    {
       "pattern": "\\bRetrievalConfig\\s*\\(",
       "message": "RetrievalConfig should be Map, not typed class",
       "severity": "warning"

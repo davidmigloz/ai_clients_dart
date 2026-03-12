@@ -26,7 +26,7 @@ python3 .agents/shared/api-toolkit/scripts/api_toolkit.py review \
   --config-dir packages/googleai_dart/.agents/skills/openapi-googleai/config \
   --spec-name main
 ```
-3. Implement with `scaffold` plus the package references, then promote the candidate spec. The verifier reads `specs_dir/{local_file}` — copy using the exact `local_file` name from specs.json, not the spec-name:
+3. Implement with `scaffold` plus the package references, then promote the candidate spec. The verifier reads `specs_dir/{local_file}` — copy using the exact `local_file` name from [`config/specs.json`](packages/googleai_dart/.agents/skills/openapi-googleai/config/specs.json), not the spec-name:
    ```bash
    # For --spec-name main (local_file = "openapi.json"):
    cp /tmp/openapi-googleai-dart/latest-main.json packages/googleai_dart/specs/openapi.json
