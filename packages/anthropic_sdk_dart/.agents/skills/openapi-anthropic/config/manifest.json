@@ -117,10 +117,7 @@
       "kind": "object",
       "dart_class": "CacheControlEphemeral",
       "file": "lib/src/models/metadata/cache_control.dart",
-      "schema": "CacheControlEphemeral",
-      "excluded_properties": [
-        "type"
-      ]
+      "schema": "CacheControlEphemeral"
     },
     "InputSchema": {
       "spec": "main",
@@ -671,10 +668,7 @@
       "dart_class": "Base64ImageSource",
       "file": "lib/src/models/sources/image_source.dart",
       "schema": "Base64ImageSource",
-      "parent": "ImageSource",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "ImageSource"
     },
     "URLImageSource": {
       "spec": "main",
@@ -682,10 +676,7 @@
       "dart_class": "UrlImageSource",
       "file": "lib/src/models/sources/image_source.dart",
       "schema": "URLImageSource",
-      "parent": "ImageSource",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "ImageSource"
     },
     "DocumentSource": {
       "spec": "main",
@@ -709,10 +700,7 @@
       "dart_class": "Base64PdfSource",
       "file": "lib/src/models/sources/document_source.dart",
       "schema": "Base64PDFSource",
-      "parent": "DocumentSource",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "DocumentSource"
     },
     "PlainTextSource": {
       "spec": "main",
@@ -720,10 +708,7 @@
       "dart_class": "PlainTextSource",
       "file": "lib/src/models/sources/document_source.dart",
       "schema": "PlainTextSource",
-      "parent": "DocumentSource",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "DocumentSource"
     },
     "URLPDFSource": {
       "spec": "main",
@@ -731,10 +716,7 @@
       "dart_class": "UrlPdfSource",
       "file": "lib/src/models/sources/document_source.dart",
       "schema": "URLPDFSource",
-      "parent": "DocumentSource",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "DocumentSource"
     },
     "MessageStreamEvent": {
       "spec": "main",
@@ -763,10 +745,7 @@
       "dart_class": "MessageStartEvent",
       "file": "lib/src/models/streaming/message_stream_event.dart",
       "schema": "MessageStartEvent",
-      "parent": "MessageStreamEvent",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "MessageStreamEvent"
     },
     "MessageDeltaEvent": {
       "spec": "main",
@@ -774,10 +753,7 @@
       "dart_class": "MessageDeltaEvent",
       "file": "lib/src/models/streaming/message_stream_event.dart",
       "schema": "MessageDeltaEvent",
-      "parent": "MessageStreamEvent",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "MessageStreamEvent"
     },
     "MessageStopEvent": {
       "spec": "main",
@@ -785,10 +761,7 @@
       "dart_class": "MessageStopEvent",
       "file": "lib/src/models/streaming/message_stream_event.dart",
       "schema": "MessageStopEvent",
-      "parent": "MessageStreamEvent",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "MessageStreamEvent"
     },
     "ContentBlockStartEvent": {
       "spec": "main",
@@ -796,10 +769,7 @@
       "dart_class": "ContentBlockStartEvent",
       "file": "lib/src/models/streaming/message_stream_event.dart",
       "schema": "ContentBlockStartEvent",
-      "parent": "MessageStreamEvent",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "MessageStreamEvent"
     },
     "ContentBlockDeltaEvent": {
       "spec": "main",
@@ -807,10 +777,7 @@
       "dart_class": "ContentBlockDeltaEvent",
       "file": "lib/src/models/streaming/message_stream_event.dart",
       "schema": "ContentBlockDeltaEvent",
-      "parent": "MessageStreamEvent",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "MessageStreamEvent"
     },
     "ContentBlockStopEvent": {
       "spec": "main",
@@ -818,10 +785,7 @@
       "dart_class": "ContentBlockStopEvent",
       "file": "lib/src/models/streaming/message_stream_event.dart",
       "schema": "ContentBlockStopEvent",
-      "parent": "MessageStreamEvent",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "MessageStreamEvent"
     },
     "PingEvent": {
       "spec": "main",
@@ -1125,7 +1089,6 @@
       "schema": "BashTool_20250124",
       "parent": "BuiltInTool",
       "excluded_properties": [
-        "type",
         "name"
       ]
     },
@@ -1137,7 +1100,6 @@
       "schema": "BetaTextEditor_20250124",
       "parent": "BuiltInTool",
       "excluded_properties": [
-        "type",
         "name"
       ]
     },
@@ -1149,7 +1111,6 @@
       "schema": "BetaTextEditor_20250429",
       "parent": "BuiltInTool",
       "excluded_properties": [
-        "type",
         "name"
       ]
     },
@@ -1161,7 +1122,6 @@
       "schema": "BetaTextEditor_20250728",
       "parent": "BuiltInTool",
       "excluded_properties": [
-        "type",
         "name"
       ]
     },
@@ -1173,7 +1133,6 @@
       "schema": "BetaWebSearchTool_20250305",
       "parent": "BuiltInTool",
       "excluded_properties": [
-        "type",
         "name"
       ]
     },
@@ -1185,7 +1144,6 @@
       "schema": "BetaWebFetchTool_20250910",
       "parent": "BuiltInTool",
       "excluded_properties": [
-        "type",
         "name"
       ]
     },
@@ -1197,7 +1155,6 @@
       "schema": "BetaMemoryTool_20250818",
       "parent": "BuiltInTool",
       "excluded_properties": [
-        "type",
         "name"
       ]
     },
@@ -1209,7 +1166,6 @@
       "schema": "BetaToolSearchToolBM25_20251119",
       "parent": "BuiltInTool",
       "excluded_properties": [
-        "type",
         "name"
       ]
     },
@@ -1221,7 +1177,6 @@
       "schema": "BetaToolSearchToolRegex_20251119",
       "parent": "BuiltInTool",
       "excluded_properties": [
-        "type",
         "name"
       ]
     },
@@ -1233,7 +1188,6 @@
       "schema": "BetaCodeExecutionTool_20250522",
       "parent": "BuiltInTool",
       "excluded_properties": [
-        "type",
         "name"
       ]
     },
@@ -1245,7 +1199,6 @@
       "schema": "BetaComputerUseTool_20251124",
       "parent": "BuiltInTool",
       "excluded_properties": [
-        "type",
         "allowed_callers",
         "defer_loading",
         "enable_zoom",
@@ -1262,7 +1215,6 @@
       "schema": "BetaMCPToolset",
       "parent": "BuiltInTool",
       "excluded_properties": [
-        "type",
         "configs",
         "default_config",
         "mcp_server_name"
