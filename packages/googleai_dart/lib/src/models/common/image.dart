@@ -1,7 +1,7 @@
 import '../copy_with_sentinel.dart';
 
 /// An image result from a web search.
-class GroundingImage {
+class Image {
   /// Optional. The domain of the image.
   final String? domain;
 
@@ -14,16 +14,16 @@ class GroundingImage {
   /// Optional. The title of the image.
   final String? title;
 
-  /// Creates an [GroundingImage].
-  const GroundingImage({
+  /// Creates an [Image].
+  const Image({
     this.domain,
     this.imageUri,
     this.sourceUri,
     this.title,
   });
 
-  /// Creates an [GroundingImage] from JSON.
-  factory GroundingImage.fromJson(Map<String, dynamic> json) => GroundingImage(
+  /// Creates an [Image] from JSON.
+  factory Image.fromJson(Map<String, dynamic> json) => Image(
     domain: json['domain'] as String?,
     imageUri: json['imageUri'] as String?,
     sourceUri: json['sourceUri'] as String?,
@@ -39,13 +39,13 @@ class GroundingImage {
   };
 
   /// Creates a copy with replaced values.
-  GroundingImage copyWith({
+  Image copyWith({
     Object? domain = unsetCopyWithValue,
     Object? imageUri = unsetCopyWithValue,
     Object? sourceUri = unsetCopyWithValue,
     Object? title = unsetCopyWithValue,
   }) {
-    return GroundingImage(
+    return Image(
       domain: domain == unsetCopyWithValue ? this.domain : domain as String?,
       imageUri: imageUri == unsetCopyWithValue
           ? this.imageUri
@@ -59,5 +59,5 @@ class GroundingImage {
 
   @override
   String toString() =>
-      'GroundingImage(domain: $domain, imageUri: $imageUri, sourceUri: $sourceUri, title: $title)';
+      'Image(domain: $domain, imageUri: $imageUri, sourceUri: $sourceUri, title: $title)';
 }

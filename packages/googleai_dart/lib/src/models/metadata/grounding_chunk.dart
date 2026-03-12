@@ -16,7 +16,7 @@ class GroundingChunk {
   final Maps? maps;
 
   /// Optional. Grounding chunk image.
-  final GroundingImage? image;
+  final Image? image;
 
   /// Creates a [GroundingChunk].
   const GroundingChunk({
@@ -40,7 +40,7 @@ class GroundingChunk {
         ? Maps.fromJson(json['maps'] as Map<String, dynamic>)
         : null,
     image: json['image'] != null
-        ? GroundingImage.fromJson(json['image'] as Map<String, dynamic>)
+        ? Image.fromJson(json['image'] as Map<String, dynamic>)
         : null,
   );
 
@@ -68,7 +68,7 @@ class GroundingChunk {
       maps: maps == unsetCopyWithValue ? this.maps : maps as Maps?,
       image: image == unsetCopyWithValue
           ? this.image
-          : image as GroundingImage?,
+          : image as Image?,
     );
   }
 

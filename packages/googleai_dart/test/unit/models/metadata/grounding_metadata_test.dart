@@ -229,7 +229,7 @@ void main() {
 
     test('toJson serializes image chunk correctly', () {
       const chunk = GroundingChunk(
-        image: GroundingImage(
+        image: Image(
           domain: 'example.com',
           imageUri: 'https://img.example.com/photo.jpg',
         ),
