@@ -98,6 +98,7 @@ export 'src/models/files/video_metadata.dart';
 export 'src/models/files/white_space_config.dart';
 // Models - Generation
 export 'src/models/generation/answer_style.dart';
+export 'src/models/generation/attribution_source_id.dart';
 export 'src/models/generation/block_reason.dart';
 export 'src/models/generation/condition.dart';
 export 'src/models/generation/count_tokens_request.dart';
@@ -107,7 +108,9 @@ export 'src/models/generation/generate_answer_response.dart';
 export 'src/models/generation/generate_content_request.dart';
 export 'src/models/generation/generate_content_response.dart';
 export 'src/models/generation/generation_config.dart';
+export 'src/models/generation/grounding_attribution.dart';
 export 'src/models/generation/grounding_passage.dart';
+export 'src/models/generation/grounding_passage_id.dart';
 export 'src/models/generation/grounding_passages.dart';
 export 'src/models/generation/image_config.dart';
 export 'src/models/generation/input_feedback.dart';

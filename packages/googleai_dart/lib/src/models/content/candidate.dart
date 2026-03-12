@@ -1,4 +1,5 @@
 import '../copy_with_sentinel.dart';
+import '../generation/grounding_attribution.dart';
 import '../metadata/finish_reason.dart';
 import '../metadata/grounding_metadata.dart';
 import '../safety/safety_rating.dart';
@@ -41,7 +42,7 @@ class Candidate {
   /// Attribution information for sources that contributed to a grounded answer.
   ///
   /// This field is populated for `GenerateAnswer` calls.
-  final List<Map<String, dynamic>>? groundingAttributions;
+  final List<GroundingAttribution>? groundingAttributions;
 
   /// Metadata related to URL context retrieval tool.
   final Map<String, dynamic>? urlContextMetadata;
@@ -95,7 +96,7 @@ class Candidate {
           )
         : null,
     groundingAttributions: (json['groundingAttributions'] as List<dynamic>?)
-        ?.map((e) => e as Map<String, dynamic>)
+        ?.map((e) => GroundingAttribution.fromJson(e as Map<String, dynamic>))
         .toList(),
     urlContextMetadata: json['urlContextMetadata'] as Map<String, dynamic>?,
   );
@@ -117,7 +118,9 @@ class Candidate {
     if (groundingMetadata != null)
       'groundingMetadata': groundingMetadata!.toJson(),
     if (groundingAttributions != null)
-      'groundingAttributions': groundingAttributions,
+      'groundingAttributions': groundingAttributions!
+          .map((e) => e.toJson())
+          .toList(),
     if (urlContextMetadata != null) 'urlContextMetadata': urlContextMetadata,
   };
 
@@ -167,7 +170,7 @@ class Candidate {
           : groundingMetadata as GroundingMetadata?,
       groundingAttributions: groundingAttributions == unsetCopyWithValue
           ? this.groundingAttributions
-          : groundingAttributions as List<Map<String, dynamic>>?,
+          : groundingAttributions as List<GroundingAttribution>?,
       urlContextMetadata: urlContextMetadata == unsetCopyWithValue
           ? this.urlContextMetadata
           : urlContextMetadata as Map<String, dynamic>?,
