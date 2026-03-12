@@ -447,7 +447,8 @@ void main() {
         final count = await collection.count();
 
         expect(count, 42);
-        verify(() => mockRecords.count()).called(1);
+        verify(() => mockRecords.count(readLevel: any(named: 'readLevel')))
+            .called(1);
       });
 
       test('id and name getters work correctly', () {

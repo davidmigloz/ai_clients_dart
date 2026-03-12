@@ -661,4 +661,139 @@ void main() {
       expect(response1.hashCode, equals(response2.hashCode));
     });
   });
+
+  group('IndexStatusResponse', () {
+    test('fromJson creates response with all fields', () {
+      final json = {
+        'num_indexed_ops': 100,
+        'num_unindexed_ops': 20,
+        'op_indexing_progress': 0.83,
+        'total_ops': 120,
+      };
+
+      final response = IndexStatusResponse.fromJson(json);
+
+      expect(response.numIndexedOps, 100);
+      expect(response.numUnindexedOps, 20);
+      expect(response.opIndexingProgress, 0.83);
+      expect(response.totalOps, 120);
+    });
+
+    test('toJson converts response correctly', () {
+      const response = IndexStatusResponse(
+        numIndexedOps: 50,
+        numUnindexedOps: 10,
+        opIndexingProgress: 0.83,
+        totalOps: 60,
+      );
+
+      final json = response.toJson();
+
+      expect(json['num_indexed_ops'], 50);
+      expect(json['num_unindexed_ops'], 10);
+      expect(json['op_indexing_progress'], 0.83);
+      expect(json['total_ops'], 60);
+    });
+
+    test('copyWith replaces specified fields', () {
+      const original = IndexStatusResponse(
+        numIndexedOps: 50,
+        numUnindexedOps: 10,
+        opIndexingProgress: 0.83,
+        totalOps: 60,
+      );
+
+      final copy = original.copyWith(numIndexedOps: 55, numUnindexedOps: 5);
+
+      expect(copy.numIndexedOps, 55);
+      expect(copy.numUnindexedOps, 5);
+      expect(copy.opIndexingProgress, 0.83);
+      expect(copy.totalOps, 60);
+    });
+
+    test('equality and hashCode', () {
+      const r1 = IndexStatusResponse(
+        numIndexedOps: 10,
+        numUnindexedOps: 5,
+        opIndexingProgress: 0.67,
+        totalOps: 15,
+      );
+      const r2 = IndexStatusResponse(
+        numIndexedOps: 10,
+        numUnindexedOps: 5,
+        opIndexingProgress: 0.67,
+        totalOps: 15,
+      );
+      const r3 = IndexStatusResponse(
+        numIndexedOps: 11,
+        numUnindexedOps: 5,
+        opIndexingProgress: 0.67,
+        totalOps: 15,
+      );
+
+      expect(r1, equals(r2));
+      expect(r1.hashCode, equals(r2.hashCode));
+      expect(r1, isNot(equals(r3)));
+    });
+  });
+
+  group('DeleteCollectionRecordsResponse', () {
+    test('fromJson creates response with deleted count', () {
+      final json = {'deleted': 5};
+
+      final response = DeleteCollectionRecordsResponse.fromJson(json);
+
+      expect(response.deleted, 5);
+    });
+
+    test('fromJson handles missing deleted field', () {
+      final json = <String, dynamic>{};
+
+      final response = DeleteCollectionRecordsResponse.fromJson(json);
+
+      expect(response.deleted, isNull);
+    });
+
+    test('toJson converts response correctly', () {
+      const response = DeleteCollectionRecordsResponse(deleted: 3);
+
+      final json = response.toJson();
+
+      expect(json['deleted'], 3);
+    });
+
+    test('toJson omits null deleted', () {
+      const response = DeleteCollectionRecordsResponse();
+
+      final json = response.toJson();
+
+      expect(json.containsKey('deleted'), isFalse);
+    });
+
+    test('copyWith replaces deleted', () {
+      const original = DeleteCollectionRecordsResponse(deleted: 5);
+
+      final copy = original.copyWith(deleted: 10);
+
+      expect(copy.deleted, 10);
+    });
+
+    test('copyWith can set deleted to null', () {
+      const original = DeleteCollectionRecordsResponse(deleted: 5);
+
+      final copy = original.copyWith(deleted: null);
+
+      expect(copy.deleted, isNull);
+    });
+
+    test('equality and hashCode', () {
+      const r1 = DeleteCollectionRecordsResponse(deleted: 5);
+      const r2 = DeleteCollectionRecordsResponse(deleted: 5);
+      const r3 = DeleteCollectionRecordsResponse(deleted: 3);
+
+      expect(r1, equals(r2));
+      expect(r1.hashCode, equals(r2.hashCode));
+      expect(r1, isNot(equals(r3)));
+    });
+  });
 }

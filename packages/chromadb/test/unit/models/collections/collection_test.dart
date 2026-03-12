@@ -45,7 +45,7 @@ void main() {
       expect(collection.schema!.keys, {'title': 'text'});
     });
 
-    test('fromJson handles null optional fields', () {
+    test('fromJson handles minimal required fields', () {
       final json = {
         'id': 'coll-456',
         'name': 'minimal-collection',
