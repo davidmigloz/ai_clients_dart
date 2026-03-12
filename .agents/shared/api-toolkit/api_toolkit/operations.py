@@ -2688,7 +2688,10 @@ def _scaffold_class_source(class_name: str, props: dict[str, dict[str, Any]], ty
             lines.append(f"    '{name}': {json_value},")
         else:
             nullable_value = _scaffold_nullable_to_json_expression(name, json_value)
-            lines.append(f"    if ({field} != null) '{name}': {nullable_value},")
+            if json_value == field:
+                lines.append(f"    '{name}': ?{field},")
+            else:
+                lines.append(f"    if ({field} != null) '{name}': {nullable_value},")
     lines.append("  };")
     lines.append("")
     lines.append(f"  {class_name} copyWith({{")

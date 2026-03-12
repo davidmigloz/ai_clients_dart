@@ -81,7 +81,9 @@
     "notes": {},
     "expected_properties": {},
     "excluded_properties": {
-      "global": []
+      "global": [],
+      "GetResponse": ["data"],
+      "QueryResponse": ["data"]
     },
     "resource_aliases": {
       "healthcheck": "health",
@@ -95,30 +97,85 @@
   "types": {
     "Collection": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "Collection",
       "file": "lib/src/models/collections/collection.dart",
       "schema": "Collection",
-      "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "tags": []
     },
     "QueryResponse": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "QueryResponse",
       "file": "lib/src/models/records/query_response.dart",
       "schema": "QueryResponse",
-      "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "tags": []
     },
     "GetResponse": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "GetResponse",
       "file": "lib/src/models/records/get_response.dart",
       "schema": "GetResponse",
+      "tags": []
+    },
+    "DeleteCollectionRecordsPayload": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "DeleteCollectionRecordsPayload",
       "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "notes": "Request payload constructed inline in RecordsResource.deleteRecords"
+    },
+    "DeleteCollectionRecordsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeleteCollectionRecordsResponse",
+      "file": "lib/src/models/records/delete_collection_records_response.dart",
+      "schema": "DeleteCollectionRecordsResponse",
+      "tags": []
+    },
+    "IndexStatusResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "IndexStatusResponse",
+      "file": "lib/src/models/records/index_status_response.dart",
+      "schema": "IndexStatusResponse",
+      "tags": []
+    },
+    "Quantization": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "Quantization",
+      "file": "lib/src/models/collections/quantization.dart",
+      "schema": "Quantization",
+      "tags": []
+    },
+    "ReadLevel": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ReadLevel",
+      "file": "lib/src/models/records/read_level.dart",
+      "schema": "ReadLevel",
+      "tags": []
+    },
+    "SearchRequestPayload": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "SearchRequestPayload",
+      "tags": [],
+      "notes": "Request payload constructed inline in RecordsResource.search"
+    },
+    "SpannIndexConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SpannIndexConfig",
+      "file": "lib/src/models/collections/spann_index_config.dart",
+      "schema": "SpannIndexConfig",
+      "tags": []
     }
   }
 }

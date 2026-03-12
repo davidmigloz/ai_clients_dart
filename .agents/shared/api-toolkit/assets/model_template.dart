@@ -53,11 +53,11 @@ class {ClassName} {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
-        if (name != null) 'name': name,
-        if (displayName != null) 'displayName': displayName,
-        if (tags != null) 'tags': tags,
-        if (createTime != null) 'createTime': createTime,
-        if (updateTime != null) 'updateTime': updateTime,
+        'name': ?name,
+        'displayName': ?displayName,
+        'tags': ?tags,
+        'createTime': ?createTime,
+        'updateTime': ?updateTime,
       };
 
   /// Creates a copy with replaced values.

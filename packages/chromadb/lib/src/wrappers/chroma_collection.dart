@@ -4,9 +4,12 @@ import '../models/collections/collection.dart';
 import '../models/functions/attach_function_response.dart';
 import '../models/functions/detach_function_response.dart';
 import '../models/functions/get_attached_function_response.dart';
+import '../models/records/delete_collection_records_response.dart';
 import '../models/records/get_response.dart';
 import '../models/records/include.dart';
+import '../models/records/index_status_response.dart';
 import '../models/records/query_response.dart';
+import '../models/records/read_level.dart';
 import '../models/records/search_request.dart';
 import '../models/records/search_response.dart';
 import '../resources/collections_resource.dart';
@@ -232,25 +235,39 @@ class ChromaCollection {
   /// - Field selection for results
   ///
   /// [searches] - List of search payloads with filter/group/limit/rank/select.
-  Future<SearchResponse> search({required List<SearchPayload> searches}) {
-    return _records.search(searches: searches);
+  /// [readLevel] - Read level for consistency vs performance tradeoffs.
+  Future<SearchResponse> search({
+    required List<SearchPayload> searches,
+    ReadLevel? readLevel,
+  }) {
+    return _records.search(searches: searches, readLevel: readLevel);
   }
 
   /// Deletes records from the collection.
-  Future<List<String>> delete({
+  ///
+  /// [limit] - Maximum number of records to delete.
+  Future<DeleteCollectionRecordsResponse> delete({
     List<String>? ids,
     Map<String, dynamic>? where,
     Map<String, dynamic>? whereDocument,
+    int? limit,
   }) {
     return _records.deleteRecords(
       ids: ids,
       where: where,
       whereDocument: whereDocument,
+      limit: limit,
     );
   }
 
   /// Counts records in the collection.
-  Future<int> count() => _records.count();
+  ///
+  /// [readLevel] - Read level for consistency vs performance tradeoffs.
+  Future<int> count({ReadLevel? readLevel}) =>
+      _records.count(readLevel: readLevel);
+
+  /// Gets the indexing status of the collection.
+  Future<IndexStatusResponse> indexingStatus() => _records.indexingStatus();
 
   /// Peeks at the first N records.
   Future<GetResponse> peek({int limit = 10, List<Include>? include}) {

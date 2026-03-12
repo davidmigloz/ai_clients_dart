@@ -1,0 +1,11 @@
+{
+  "specs": {
+    "main": {
+      "current_version": "1.0.0",
+      "last_fetched": "2026-03-12T22:20:21.327343Z",
+      "source_url": "https://api.trychroma.com/openapi.json",
+      "title": "chroma-frontend",
+      "version_history": []
+    }
+  }
+}

@@ -34,7 +34,7 @@ class QueryResponse {
   final List<List<String>>? data;
 
   /// The fields that were included in the response.
-  final List<Include>? include;
+  final List<Include> include;
 
   /// Creates a query response.
   const QueryResponse({
@@ -45,7 +45,7 @@ class QueryResponse {
     this.distances,
     this.uris,
     this.data,
-    this.include,
+    required this.include,
   });
 
   /// Creates a query response from JSON.
@@ -80,9 +80,7 @@ class QueryResponse {
       data: (json['data'] as List<dynamic>?)
           ?.map((e) => (e as List<dynamic>? ?? []).cast<String>())
           .toList(),
-      include: (json['include'] as List<dynamic>?) != null
-          ? Include.fromApiList(json['include'] as List<dynamic>)
-          : null,
+      include: Include.fromApiList(json['include'] as List<dynamic>),
     );
   }
 
@@ -96,7 +94,7 @@ class QueryResponse {
       'distances': ?distances,
       'uris': ?uris,
       'data': ?data,
-      if (include != null) 'include': Include.toApiList(include!),
+      'include': Include.toApiList(include),
     };
   }
 
@@ -112,7 +110,7 @@ class QueryResponse {
     Object? distances = unsetCopyWithValue,
     Object? uris = unsetCopyWithValue,
     Object? data = unsetCopyWithValue,
-    Object? include = unsetCopyWithValue,
+    List<Include>? include,
   }) {
     return QueryResponse(
       ids: ids ?? this.ids,
@@ -134,9 +132,7 @@ class QueryResponse {
       data: data == unsetCopyWithValue
           ? this.data
           : data as List<List<String>>?,
-      include: include == unsetCopyWithValue
-          ? this.include
-          : include as List<Include>?,
+      include: include ?? this.include,
     );
   }
 
@@ -167,12 +163,12 @@ class QueryResponse {
     distances == null ? null : Object.hashAll(distances!.map(Object.hashAll)),
     uris == null ? null : Object.hashAll(uris!.map(Object.hashAll)),
     data == null ? null : Object.hashAll(data!.map(Object.hashAll)),
-    include == null ? null : Object.hashAll(include!),
+    Object.hashAll(include),
   );
 
   @override
   String toString() =>
-      'QueryResponse(queries: $queryCount, '
+      'QueryResponse(ids: ${ids.length} queries, '
       'embeddings: ${embeddings != null}, '
       'documents: ${documents != null}, '
       'metadatas: ${metadatas != null}, '

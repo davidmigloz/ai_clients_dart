@@ -21,19 +21,19 @@ class Collection {
   final Map<String, dynamic>? metadata;
 
   /// The tenant this collection belongs to.
-  final String? tenant;
+  final String tenant;
 
   /// The database this collection belongs to.
-  final String? database;
+  final String database;
 
   /// The current log position for this collection.
-  final int? logPosition;
+  final int logPosition;
 
   /// The collection's version number.
-  final int? version;
+  final int version;
 
   /// The collection's configuration (HNSW, SPANN, embedding function).
-  final CollectionConfiguration? configurationJson;
+  final CollectionConfiguration configurationJson;
 
   /// The dimension of vectors in this collection.
   final int? dimension;
@@ -46,11 +46,11 @@ class Collection {
     required this.id,
     required this.name,
     this.metadata,
-    this.tenant,
-    this.database,
-    this.logPosition,
-    this.version,
-    this.configurationJson,
+    required this.tenant,
+    required this.database,
+    required this.logPosition,
+    required this.version,
+    required this.configurationJson,
     this.dimension,
     this.schema,
   });
@@ -74,15 +74,13 @@ class Collection {
       id: id ?? name!,
       name: name ?? id!,
       metadata: json['metadata'] as Map<String, dynamic>?,
-      tenant: json['tenant'] as String?,
-      database: json['database'] as String?,
-      logPosition: json['log_position'] as int?,
-      version: json['version'] as int?,
-      configurationJson: json['configuration_json'] != null
-          ? CollectionConfiguration.fromJson(
-              json['configuration_json'] as Map<String, dynamic>,
-            )
-          : null,
+      tenant: json['tenant'] as String,
+      database: json['database'] as String,
+      logPosition: json['log_position'] as int,
+      version: json['version'] as int,
+      configurationJson: CollectionConfiguration.fromJson(
+        json['configuration_json'] as Map<String, dynamic>,
+      ),
       dimension: json['dimension'] as int?,
       schema: json['schema'] != null
           ? CollectionSchema.fromJson(json['schema'] as Map<String, dynamic>)
@@ -96,12 +94,11 @@ class Collection {
       'id': id,
       'name': name,
       if (metadata != null) 'metadata': metadata,
-      if (tenant != null) 'tenant': tenant,
-      if (database != null) 'database': database,
-      if (logPosition != null) 'log_position': logPosition,
-      if (version != null) 'version': version,
-      if (configurationJson != null)
-        'configuration_json': configurationJson!.toJson(),
+      'tenant': tenant,
+      'database': database,
+      'log_position': logPosition,
+      'version': version,
+      'configuration_json': configurationJson.toJson(),
       if (dimension != null) 'dimension': dimension,
       if (schema != null) 'schema': schema!.toJson(),
     };
@@ -112,11 +109,11 @@ class Collection {
     String? id,
     String? name,
     Object? metadata = unsetCopyWithValue,
-    Object? tenant = unsetCopyWithValue,
-    Object? database = unsetCopyWithValue,
-    Object? logPosition = unsetCopyWithValue,
-    Object? version = unsetCopyWithValue,
-    Object? configurationJson = unsetCopyWithValue,
+    String? tenant,
+    String? database,
+    int? logPosition,
+    int? version,
+    CollectionConfiguration? configurationJson,
     Object? dimension = unsetCopyWithValue,
     Object? schema = unsetCopyWithValue,
   }) {
@@ -126,17 +123,11 @@ class Collection {
       metadata: metadata == unsetCopyWithValue
           ? this.metadata
           : metadata as Map<String, dynamic>?,
-      tenant: tenant == unsetCopyWithValue ? this.tenant : tenant as String?,
-      database: database == unsetCopyWithValue
-          ? this.database
-          : database as String?,
-      logPosition: logPosition == unsetCopyWithValue
-          ? this.logPosition
-          : logPosition as int?,
-      version: version == unsetCopyWithValue ? this.version : version as int?,
-      configurationJson: configurationJson == unsetCopyWithValue
-          ? this.configurationJson
-          : configurationJson as CollectionConfiguration?,
+      tenant: tenant ?? this.tenant,
+      database: database ?? this.database,
+      logPosition: logPosition ?? this.logPosition,
+      version: version ?? this.version,
+      configurationJson: configurationJson ?? this.configurationJson,
       dimension: dimension == unsetCopyWithValue
           ? this.dimension
           : dimension as int?,
@@ -181,6 +172,6 @@ class Collection {
       'Collection(id: $id, name: $name, metadata: $metadata, '
       'tenant: $tenant, database: $database, '
       'logPosition: $logPosition, version: $version, '
-      'configurationJson: ${configurationJson != null}, '
+      'configurationJson: $configurationJson, '
       'dimension: $dimension, schema: ${schema != null})';
 }

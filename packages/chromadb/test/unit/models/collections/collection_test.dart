@@ -32,12 +32,11 @@ void main() {
       expect(collection.database, 'my-database');
       expect(collection.logPosition, 42);
       expect(collection.version, 1);
-      expect(collection.configurationJson, isNotNull);
-      expect(collection.configurationJson!.hnsw, {
+      expect(collection.configurationJson.hnsw, {
         'space': 'cosine',
         'ef_construction': 100,
       });
-      expect(collection.configurationJson!.embeddingFunction, {
+      expect(collection.configurationJson.embeddingFunction, {
         'name': 'default',
       });
       expect(collection.dimension, 384);
@@ -47,18 +46,26 @@ void main() {
     });
 
     test('fromJson handles null optional fields', () {
-      final json = {'id': 'coll-456', 'name': 'minimal-collection'};
+      final json = {
+        'id': 'coll-456',
+        'name': 'minimal-collection',
+        'tenant': 'default_tenant',
+        'database': 'default_database',
+        'log_position': 0,
+        'version': 0,
+        'configuration_json': <String, dynamic>{},
+      };
 
       final collection = Collection.fromJson(json);
 
       expect(collection.id, 'coll-456');
       expect(collection.name, 'minimal-collection');
       expect(collection.metadata, isNull);
-      expect(collection.tenant, isNull);
-      expect(collection.database, isNull);
-      expect(collection.logPosition, isNull);
-      expect(collection.version, isNull);
-      expect(collection.configurationJson, isNull);
+      expect(collection.tenant, 'default_tenant');
+      expect(collection.database, 'default_database');
+      expect(collection.logPosition, 0);
+      expect(collection.version, 0);
+      expect(collection.configurationJson, isNotNull);
       expect(collection.dimension, isNull);
       expect(collection.schema, isNull);
     });
@@ -96,19 +103,27 @@ void main() {
       });
     });
 
-    test('toJson excludes null values', () {
-      const collection = Collection(id: 'coll-only', name: 'minimal');
+    test('toJson excludes null optional values', () {
+      const collection = Collection(
+        id: 'coll-only',
+        name: 'minimal',
+        tenant: 'default_tenant',
+        database: 'default_database',
+        logPosition: 0,
+        version: 0,
+        configurationJson: CollectionConfiguration(),
+      );
 
       final json = collection.toJson();
 
       expect(json['id'], 'coll-only');
       expect(json['name'], 'minimal');
       expect(json.containsKey('metadata'), isFalse);
-      expect(json.containsKey('tenant'), isFalse);
-      expect(json.containsKey('database'), isFalse);
-      expect(json.containsKey('log_position'), isFalse);
-      expect(json.containsKey('version'), isFalse);
-      expect(json.containsKey('configuration_json'), isFalse);
+      expect(json['tenant'], 'default_tenant');
+      expect(json['database'], 'default_database');
+      expect(json['log_position'], 0);
+      expect(json['version'], 0);
+      expect(json.containsKey('configuration_json'), isTrue);
       expect(json.containsKey('dimension'), isFalse);
       expect(json.containsKey('schema'), isFalse);
     });
@@ -122,6 +137,7 @@ void main() {
         database: 'original-database',
         logPosition: 50,
         version: 3,
+        configurationJson: CollectionConfiguration(),
       );
 
       final copied = original.copyWith();
@@ -140,6 +156,11 @@ void main() {
         id: 'original-id',
         name: 'original-name',
         metadata: {'original': 'data'},
+        tenant: 'default_tenant',
+        database: 'default_database',
+        logPosition: 0,
+        version: 0,
+        configurationJson: CollectionConfiguration(),
       );
 
       final copied = original.copyWith(
@@ -153,23 +174,71 @@ void main() {
     });
 
     test('equality works correctly', () {
-      const coll1 = Collection(id: 'id', name: 'coll');
-      const coll2 = Collection(id: 'id', name: 'coll');
-      const coll3 = Collection(id: 'other', name: 'coll');
+      const coll1 = Collection(
+        id: 'id',
+        name: 'coll',
+        tenant: 'default_tenant',
+        database: 'default_database',
+        logPosition: 0,
+        version: 0,
+        configurationJson: CollectionConfiguration(),
+      );
+      const coll2 = Collection(
+        id: 'id',
+        name: 'coll',
+        tenant: 'default_tenant',
+        database: 'default_database',
+        logPosition: 0,
+        version: 0,
+        configurationJson: CollectionConfiguration(),
+      );
+      const coll3 = Collection(
+        id: 'other',
+        name: 'coll',
+        tenant: 'default_tenant',
+        database: 'default_database',
+        logPosition: 0,
+        version: 0,
+        configurationJson: CollectionConfiguration(),
+      );
 
       expect(coll1, equals(coll2));
       expect(coll1, isNot(equals(coll3)));
     });
 
     test('hashCode is consistent with equality', () {
-      const coll1 = Collection(id: 'id', name: 'coll');
-      const coll2 = Collection(id: 'id', name: 'coll');
+      const coll1 = Collection(
+        id: 'id',
+        name: 'coll',
+        tenant: 'default_tenant',
+        database: 'default_database',
+        logPosition: 0,
+        version: 0,
+        configurationJson: CollectionConfiguration(),
+      );
+      const coll2 = Collection(
+        id: 'id',
+        name: 'coll',
+        tenant: 'default_tenant',
+        database: 'default_database',
+        logPosition: 0,
+        version: 0,
+        configurationJson: CollectionConfiguration(),
+      );
 
       expect(coll1.hashCode, equals(coll2.hashCode));
     });
 
     test('toString returns readable representation', () {
-      const collection = Collection(id: 'coll-123', name: 'my-coll');
+      const collection = Collection(
+        id: 'coll-123',
+        name: 'my-coll',
+        tenant: 'default_tenant',
+        database: 'default_database',
+        logPosition: 0,
+        version: 0,
+        configurationJson: CollectionConfiguration(),
+      );
 
       expect(collection.toString(), contains('Collection'));
       expect(collection.toString(), contains('coll-123'));

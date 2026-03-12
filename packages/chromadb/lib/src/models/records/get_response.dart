@@ -25,8 +25,11 @@ class GetResponse {
   /// The URIs for each record (if requested).
   final List<String?>? uris;
 
+  /// The loaded data (if requested and DataLoader configured).
+  final List<String>? data;
+
   /// The fields that were included in the response.
-  final List<Include>? include;
+  final List<Include> include;
 
   /// Creates a get response.
   const GetResponse({
@@ -35,7 +38,8 @@ class GetResponse {
     this.documents,
     this.metadatas,
     this.uris,
-    this.include,
+    this.data,
+    required this.include,
   });
 
   /// Creates a get response from JSON.
@@ -50,9 +54,8 @@ class GetResponse {
           ?.map((e) => e as Map<String, dynamic>?)
           .toList(),
       uris: (json['uris'] as List<dynamic>?)?.cast<String?>(),
-      include: (json['include'] as List<dynamic>?) != null
-          ? Include.fromApiList(json['include'] as List<dynamic>)
-          : null,
+      data: (json['data'] as List<dynamic>?)?.cast<String>(),
+      include: Include.fromApiList(json['include'] as List<dynamic>),
     );
   }
 
@@ -64,7 +67,8 @@ class GetResponse {
       'documents': ?documents,
       'metadatas': ?metadatas,
       'uris': ?uris,
-      if (include != null) 'include': Include.toApiList(include!),
+      'data': ?data,
+      'include': Include.toApiList(include),
     };
   }
 
@@ -84,7 +88,8 @@ class GetResponse {
     Object? documents = unsetCopyWithValue,
     Object? metadatas = unsetCopyWithValue,
     Object? uris = unsetCopyWithValue,
-    Object? include = unsetCopyWithValue,
+    Object? data = unsetCopyWithValue,
+    List<Include>? include,
   }) {
     return GetResponse(
       ids: ids ?? this.ids,
@@ -98,9 +103,8 @@ class GetResponse {
           ? this.metadatas
           : metadatas as List<Map<String, dynamic>?>?,
       uris: uris == unsetCopyWithValue ? this.uris : uris as List<String?>?,
-      include: include == unsetCopyWithValue
-          ? this.include
-          : include as List<Include>?,
+      data: data == unsetCopyWithValue ? this.data : data as List<String>?,
+      include: include ?? this.include,
     );
   }
 
@@ -114,6 +118,7 @@ class GetResponse {
           deepEquals(documents, other.documents) &&
           deepEquals(metadatas, other.metadatas) &&
           deepEquals(uris, other.uris) &&
+          deepEquals(data, other.data) &&
           deepEquals(include, other.include);
 
   @override
@@ -123,7 +128,8 @@ class GetResponse {
     documents == null ? null : Object.hashAll(documents!),
     metadatas == null ? null : Object.hashAll(metadatas!),
     uris == null ? null : Object.hashAll(uris!),
-    include == null ? null : Object.hashAll(include!),
+    data == null ? null : Object.hashAll(data!),
+    Object.hashAll(include),
   );
 
   @override
@@ -133,5 +139,6 @@ class GetResponse {
       'documents: ${documents != null}, '
       'metadatas: ${metadatas != null}, '
       'uris: ${uris != null}, '
+      'data: ${data != null}, '
       'include: $include)';
 }

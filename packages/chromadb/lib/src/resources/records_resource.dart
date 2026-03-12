@@ -2,9 +2,12 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../models/records/delete_collection_records_response.dart';
 import '../models/records/get_response.dart';
 import '../models/records/include.dart';
+import '../models/records/index_status_response.dart';
 import '../models/records/query_response.dart';
+import '../models/records/read_level.dart';
 import '../models/records/search_request.dart';
 import '../models/records/search_response.dart';
 import 'base_resource.dart';
@@ -258,6 +261,7 @@ class RecordsResource extends ResourceBase {
   /// Performs hybrid search across the collection.
   ///
   /// [searches] - List of search payloads with filter/group/limit/rank/select.
+  /// [readLevel] - Read level for consistency vs performance tradeoffs.
   ///
   /// This is an advanced search method supporting:
   /// - Filtering by IDs or metadata conditions
@@ -269,10 +273,14 @@ class RecordsResource extends ResourceBase {
   /// Returns results organized by search query.
   ///
   /// Endpoint: `POST /api/v2/.../collections/{id}/search`
-  Future<SearchResponse> search({required List<SearchPayload> searches}) async {
+  Future<SearchResponse> search({
+    required List<SearchPayload> searches,
+    ReadLevel? readLevel,
+  }) async {
     ensureNotClosed?.call();
     final body = <String, dynamic>{
       'searches': searches.map((s) => s.toJson()).toList(),
+      if (readLevel != null) 'read_level': readLevel.toJson(),
     };
 
     final url = requestBuilder.buildUrl('$_basePath/search');
@@ -292,22 +300,25 @@ class RecordsResource extends ResourceBase {
   /// [ids] - Specific IDs to delete.
   /// [where] - Metadata filter for records to delete.
   /// [whereDocument] - Document content filter for records to delete.
+  /// [limit] - Maximum number of records to delete.
   ///
   /// At least one of [ids], [where], or [whereDocument] must be provided.
   ///
-  /// Returns the IDs of deleted records.
+  /// Returns the number of deleted records.
   ///
   /// Endpoint: `POST /api/v2/.../collections/{id}/delete`
-  Future<List<String>> deleteRecords({
+  Future<DeleteCollectionRecordsResponse> deleteRecords({
     List<String>? ids,
     Map<String, dynamic>? where,
     Map<String, dynamic>? whereDocument,
+    int? limit,
   }) async {
     ensureNotClosed?.call();
     final body = <String, dynamic>{
       'ids': ?ids,
       'where': ?where,
       'where_document': ?whereDocument,
+      'limit': ?limit,
     };
 
     final url = requestBuilder.buildUrl('$_basePath/delete');
@@ -316,44 +327,46 @@ class RecordsResource extends ResourceBase {
       ..headers.addAll(headers)
       ..body = jsonEncode(body);
     final response = await interceptorChain.execute(httpRequest);
-    return _parseDeleteResponse(response);
-  }
-
-  /// Parses the delete response which may be a direct array or {"ids": [...]}.
-  List<String> _parseDeleteResponse(http.Response response) {
-    if (response.body.isEmpty) {
-      return [];
-    }
-
-    final decoded = jsonDecode(response.body);
-
-    // Handle direct array response: ["id1", "id2"]
-    if (decoded is List) {
-      return decoded.cast<String>();
-    }
-
-    // Handle object response: {"ids": ["id1", "id2"]}
-    if (decoded is Map<String, dynamic>) {
-      final ids = decoded['ids'];
-      if (ids is List) {
-        return ids.cast<String>();
-      }
-    }
-
-    return [];
+    return DeleteCollectionRecordsResponse.fromJson(parseJson(response));
   }
 
   /// Counts records in the collection.
   ///
+  /// [readLevel] - Read level for consistency vs performance tradeoffs.
+  ///
   /// Returns the total number of records.
   ///
   /// Endpoint: `GET /api/v2/.../collections/{id}/count`
-  Future<int> count() async {
+  Future<int> count({ReadLevel? readLevel}) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('$_basePath/count');
+    final queryParams = <String, String>{
+      if (readLevel != null) 'read_level': readLevel.value,
+    };
+    final url = requestBuilder.buildUrl(
+      '$_basePath/count',
+      queryParameters: queryParams,
+    );
     final headers = requestBuilder.buildHeaders(null);
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
     return parseInt(response);
+  }
+
+  /// Gets the indexing status of the collection.
+  ///
+  /// Returns information about how many operations have been indexed
+  /// and the overall indexing progress.
+  ///
+  /// Endpoint: `GET /api/v2/.../collections/{id}/indexing_status`
+  Future<IndexStatusResponse> indexingStatus() async {
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl('$_basePath/indexing_status');
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(
+      httpRequest,
+      isIdempotent: true,
+    );
+    return IndexStatusResponse.fromJson(parseJson(response));
   }
 }

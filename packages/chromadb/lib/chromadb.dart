@@ -77,6 +77,8 @@ export 'src/models/collections/collection.dart';
 export 'src/models/collections/collection_configuration.dart';
 export 'src/models/collections/collection_schema.dart';
 export 'src/models/collections/create_collection_request.dart';
+export 'src/models/collections/quantization.dart';
+export 'src/models/collections/spann_index_config.dart';
 export 'src/models/collections/update_collection_request.dart';
 
 // Models - Databases
@@ -97,9 +99,12 @@ export 'src/models/metadata/heartbeat_response.dart';
 export 'src/models/metadata/version_response.dart';
 
 // Models - Records
+export 'src/models/records/delete_collection_records_response.dart';
 export 'src/models/records/get_response.dart';
 export 'src/models/records/include.dart';
+export 'src/models/records/index_status_response.dart';
 export 'src/models/records/query_response.dart';
+export 'src/models/records/read_level.dart';
 export 'src/models/records/search_request.dart';
 export 'src/models/records/search_response.dart';
 
