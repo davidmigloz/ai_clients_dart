@@ -1,11 +1,10 @@
 import 'package:googleai_dart/src/models/common/grounding_chunk_custom_metadata.dart';
-import 'package:googleai_dart/src/models/common/grounding_chunk_string_list.dart';
 import 'package:googleai_dart/src/models/common/image.dart';
 import 'package:googleai_dart/src/models/metadata/grounding_chunk.dart';
 import 'package:googleai_dart/src/models/metadata/grounding_metadata.dart';
 import 'package:googleai_dart/src/models/metadata/grounding_support.dart';
-import 'package:googleai_dart/src/models/metadata/retrieved_context.dart';
 import 'package:googleai_dart/src/models/metadata/retrieval_metadata.dart';
+import 'package:googleai_dart/src/models/metadata/retrieved_context.dart';
 import 'package:googleai_dart/src/models/metadata/search_entry_point.dart';
 import 'package:googleai_dart/src/models/metadata/segment.dart';
 import 'package:googleai_dart/src/models/metadata/web.dart';
