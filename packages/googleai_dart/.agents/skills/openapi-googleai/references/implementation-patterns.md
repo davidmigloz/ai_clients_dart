@@ -21,9 +21,12 @@ When the toolkit scaffolds new files, they require two fixes before they are val
    const Object _unsetCopyWithValue = _UnsetCopyWithSentinel();
    class _UnsetCopyWithSentinel { const _UnsetCopyWithSentinel(); }
    ```
-   with an import and use the shared sentinel:
+   with an import of the shared sentinel using the correct relative path for the file's directory:
    ```dart
+   // e.g. for lib/src/models/common/foo.dart:
    import '../copy_with_sentinel.dart';
+   // e.g. for lib/src/models/interactions/content/foo.dart:
+   import '../../copy_with_sentinel.dart';
    // then use `unsetCopyWithValue` (not `_unsetCopyWithValue`) throughout the file
    ```
 
@@ -45,9 +48,11 @@ import '../../models/files/file.dart' as file_model;
 
 ## Enum Serialization Pattern
 
-Enums use standalone functions rather than methods on the enum:
+Most enums use standalone functions rather than methods on the enum:
 ```dart
 ModelStage modelStageFromString(String? value) => switch (value) { ... };
 String modelStageToString(ModelStage value) => switch (value) { ... };
 ```
 When scaffolded files incorrectly call `ModelStage.fromJson(...)` or `.toJson()`, replace with `modelStageFromString(...)` and `modelStageToString(...)`.
+
+Some enums define `fromJson()`/`toJson()` instance methods instead (e.g. `FunctionResponseScheduling`). Check the existing codebase pattern for the specific enum before choosing an approach.
