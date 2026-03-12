@@ -29,6 +29,18 @@ sealed class Part {
   /// ```
   factory Part.text(String text) = TextPart;
 
+  /// Creates an inline data part from raw bytes.
+  ///
+  /// The bytes are base64-encoded automatically.
+  ///
+  /// Example:
+  /// ```dart
+  /// final imageBytes = await File('photo.png').readAsBytes();
+  /// final part = Part.bytes(imageBytes, 'image/png');
+  /// ```
+  factory Part.bytes(List<int> bytes, String mimeType) =>
+      InlineDataPart(Blob(mimeType: mimeType, data: base64Encode(bytes)));
+
   /// Creates an inline data part from base64-encoded data.
   ///
   /// Example:

@@ -129,10 +129,7 @@ final response = await client.models.generateContent(
   model: 'gemini-3.1-flash-preview',
   request: GenerateContentRequest(
     contents: [
-      Content(
-        parts: [TextPart('Explain quantum computing')],
-        role: 'user',
-      ),
+      Content.text('Explain quantum computing'),
     ],
   ),
 );

@@ -189,6 +189,10 @@ void main() {
         TaskType.retrievalDocument,
         TaskType.semanticSimilarity,
         TaskType.classification,
+        TaskType.clustering,
+        TaskType.questionAnswering,
+        TaskType.factVerification,
+        TaskType.codeRetrievalQuery,
       ];
 
       for (final taskType in taskTypes) {
@@ -204,6 +208,25 @@ void main() {
 
         expect(response.embedding.values, isNotEmpty);
       }
+    });
+
+    test('generates embedding with reduced output dimensionality', () async {
+      if (apiKey == null) {
+        markTestSkipped('API key not available');
+        return;
+      }
+
+      const reducedDimension = 256;
+      final response = await client!.models.embedContent(
+        model: defaultEmbeddingModel,
+        request: const EmbedContentRequest(
+          content: Content(parts: [TextPart('Hello, world!')]),
+          outputDimensionality: reducedDimension,
+        ),
+      );
+
+      expect(response.embedding.values, isNotEmpty);
+      expect(response.embedding.values.length, equals(reducedDimension));
     });
 
     test('handles API errors gracefully', () {

@@ -401,7 +401,7 @@ class ModelsResource extends ResourceBase with StreamingResource {
   /// For asynchronous batch processing, use [asyncBatchEmbedContent].
   ///
   /// The [model] parameter specifies which embedding model to use
-  /// (e.g., "text-embedding-004").
+  /// (e.g., "gemini-embedding-2-preview").
   /// The [request] contains a list of embed content requests.
   ///
   /// Returns a [BatchEmbedContentsResponse] with embeddings for each request,
@@ -456,7 +456,7 @@ class ModelsResource extends ResourceBase with StreamingResource {
   /// the batch processing status.
   ///
   /// The [model] parameter specifies which embedding model to use
-  /// (e.g., "text-embedding-004").
+  /// (e.g., "gemini-embedding-2-preview").
   /// The [batch] contains the batch configuration including input configuration.
   /// If [batch.model] is not set, it will be auto-populated from [model].
   ///

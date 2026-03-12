@@ -17,6 +17,15 @@ enum TaskType {
 
   /// Clustering.
   clustering,
+
+  /// Question answering.
+  questionAnswering,
+
+  /// Fact verification.
+  factVerification,
+
+  /// Code retrieval query.
+  codeRetrievalQuery,
 }
 
 /// Converts string to TaskType enum.
@@ -27,6 +36,9 @@ TaskType taskTypeFromString(String? value) {
     'SEMANTIC_SIMILARITY' => TaskType.semanticSimilarity,
     'CLASSIFICATION' => TaskType.classification,
     'CLUSTERING' => TaskType.clustering,
+    'QUESTION_ANSWERING' => TaskType.questionAnswering,
+    'FACT_VERIFICATION' => TaskType.factVerification,
+    'CODE_RETRIEVAL_QUERY' => TaskType.codeRetrievalQuery,
     _ => TaskType.unspecified,
   };
 }
@@ -39,6 +51,9 @@ String taskTypeToString(TaskType type) {
     TaskType.semanticSimilarity => 'SEMANTIC_SIMILARITY',
     TaskType.classification => 'CLASSIFICATION',
     TaskType.clustering => 'CLUSTERING',
+    TaskType.questionAnswering => 'QUESTION_ANSWERING',
+    TaskType.factVerification => 'FACT_VERIFICATION',
+    TaskType.codeRetrievalQuery => 'CODE_RETRIEVAL_QUERY',
     TaskType.unspecified => 'TASK_TYPE_UNSPECIFIED',
   };
 }

@@ -110,16 +110,10 @@ void main() async {
         request: GenerateContentRequest(
           contents: [
             // Include the original generation turn
-            const Content(
-              role: 'user',
-              parts: [TextPart('A calm lake surrounded by pine trees')],
-            ),
-            Content(role: 'model', parts: initialImageParts),
+            Content.user([Part.text('A calm lake surrounded by pine trees')]),
+            Content.model(initialImageParts),
             // Request an edit
-            const Content(
-              role: 'user',
-              parts: [TextPart('Add a small wooden cabin on the shore')],
-            ),
+            Content.user([Part.text('Add a small wooden cabin on the shore')]),
           ],
           generationConfig: const GenerationConfig(
             responseModalities: ['TEXT', 'IMAGE'],

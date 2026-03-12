@@ -271,10 +271,7 @@ final response = await vertexClient.models.generateContent(
   model: 'gemini-3.1-flash-preview',
   request: GenerateContentRequest(
     contents: [
-      Content(
-        parts: [TextPart('Explain quantum computing')],
-        role: 'user',
-      ),
+      Content.text('Explain quantum computing'),
     ],
   ),
 );
@@ -789,24 +786,60 @@ See [file_search_example.dart](example/file_search_example.dart) for a complete 
 
 ### Embeddings
 
+Supports fully multimodal embedding models like `gemini-embedding-2-preview`,
+which can embed text, images, video, audio, and documents into a unified
+embedding space.
+
 <details>
-<summary><b>Embeddings Example</b></summary>
+<summary><b>Text Embedding Example</b></summary>
 
 ```dart
 import 'package:googleai_dart/googleai_dart.dart';
 
 // Assumes you have a configured client instance
 final response = await client.models.embedContent(
-  model: 'gemini-embedding-001',
+  model: 'gemini-embedding-2-preview',
   request: EmbedContentRequest(
-    content: Content(
-      parts: [TextPart('Hello world')],
-    ),
+    content: Content.text('Hello world'),
     taskType: TaskType.retrievalDocument,
+    outputDimensionality: 768, // Optional: reduce dimensions (128-3072)
   ),
 );
 
 print(response.embedding.values); // List<double>
+```
+
+</details>
+
+<details>
+<summary><b>Multimodal Embedding Example</b></summary>
+
+```dart
+import 'dart:io';
+import 'package:googleai_dart/googleai_dart.dart';
+
+final imageBytes = await File('example.png').readAsBytes();
+final audioBytes = await File('sample.mp3').readAsBytes();
+
+// Embed text, image, and audio
+final responses = await client.models.batchEmbedContents(
+  model: 'gemini-embedding-2-preview',
+  request: BatchEmbedContentsRequest(
+    requests: [
+      EmbedContentRequest(
+        content: Content.text('What is the meaning of life?'),
+      ),
+      EmbedContentRequest(
+        content: Content(parts: [Part.bytes(imageBytes, 'image/png')]),
+      ),
+      EmbedContentRequest(
+        content: Content(parts: [Part.bytes(audioBytes, 'audio/mpeg')]),
+      ),
+    ],
+  ),
+);
+
+print(responses.embeddings); // Text, image, and audio in the same space
 ```
 
 </details>
@@ -845,16 +878,10 @@ final response = await client.models.generateContent(
   model: 'gemini-3.1-flash-preview',
   request: GenerateContentRequest(
     contents: [
-      Content(
-        parts: [
-          TextPart('Describe this image'),
-          FileData(
-            fileUri: file.uri,
-            mimeType: file.mimeType,
-          ),
-        ],
-        role: 'user',
-      ),
+      Content.user([
+        Part.text('Describe this image'),
+        Part.file(file.uri, mimeType: file.mimeType),
+      ]),
     ],
   ),
 );
@@ -894,9 +921,7 @@ final cachedContent = await client.cachedContents.create(
   cachedContent: const CachedContent(
     model: 'models/gemini-3.1-flash-preview',
     displayName: 'Math Expert Cache',
-    systemInstruction: Content(
-      parts: [TextPart('You are an expert mathematician...')],
-    ),
+    systemInstruction: Content(parts: [TextPart('You are an expert mathematician...')]),
     ttl: '3600s', // Cache for 1 hour
   ),
 );
@@ -948,19 +973,14 @@ final response = await client.models.generateAnswer(
   model: 'aqa',
   request: const GenerateAnswerRequest(
     contents: [
-      Content(
-        parts: [TextPart('What is the capital of France?')],
-        role: 'user',
-      ),
+      Content.text('What is the capital of France?'),
     ],
     answerStyle: AnswerStyle.abstractive, // Or: extractive, verbose
     inlinePassages: GroundingPassages(
       passages: [
         GroundingPassage(
           id: 'passage-1',
-          content: Content(
-            parts: [TextPart('Paris is the capital of France.')],
-          ),
+          content: Content.text('Paris is the capital of France.'),
         ),
       ],
     ),
@@ -979,17 +999,12 @@ final ragResponse = await client.models.generateAnswer(
   model: 'aqa',
   request: const GenerateAnswerRequest(
     contents: [
-      Content(
-        parts: [TextPart('What are the key features of Dart?')],
-        role: 'user',
-      ),
+      Content.text('What are the key features of Dart?'),
     ],
     answerStyle: AnswerStyle.verbose,
     semanticRetriever: SemanticRetrieverConfig(
       source: 'corpora/my-corpus',
-      query: Content(
-        parts: [TextPart('Dart programming language features')],
-      ),
+      query: Content.text('Dart programming language features'),
       maxChunksCount: 5,
       minimumRelevanceScore: 0.5,
     ),

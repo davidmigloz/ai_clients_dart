@@ -101,7 +101,7 @@ void main() async {
     // 5. Create an async batch for embeddings
     print('5. Creating async batch for embeddings...');
     final embedBatch = await client.models.asyncBatchEmbedContent(
-      model: 'text-embedding-004',
+      model: 'gemini-embedding-2-preview',
       batch: EmbedContentBatch(
         displayName: 'Product Descriptions Embeddings',
         // model is auto-populated from the method parameter
