@@ -246,6 +246,9 @@ class ChromaCollection {
   /// Deletes records from the collection.
   ///
   /// [limit] - Maximum number of records to delete.
+  ///
+  /// Returns a [DeleteCollectionRecordsResponse] with the count of deleted
+  /// records.
   Future<DeleteCollectionRecordsResponse> delete({
     List<String>? ids,
     Map<String, dynamic>? where,

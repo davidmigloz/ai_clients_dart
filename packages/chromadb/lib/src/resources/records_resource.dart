@@ -304,7 +304,8 @@ class RecordsResource extends ResourceBase {
   ///
   /// At least one of [ids], [where], or [whereDocument] must be provided.
   ///
-  /// Returns the number of deleted records.
+  /// Returns a [DeleteCollectionRecordsResponse] with the count of deleted
+  /// records (via [DeleteCollectionRecordsResponse.deleted]).
   ///
   /// Endpoint: `POST /api/v2/.../collections/{id}/delete`
   Future<DeleteCollectionRecordsResponse> deleteRecords({
