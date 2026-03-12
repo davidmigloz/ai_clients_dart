@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 import '../common/response_format.dart';
 import '../common/think_value.dart';
 import '../metadata/model_options.dart';
@@ -136,11 +137,41 @@ class ChatRequest {
       other is ChatRequest &&
           runtimeType == other.runtimeType &&
           model == other.model &&
-          stream == other.stream;
+          listsEqual(messages, other.messages) &&
+          listsEqual(tools, other.tools) &&
+          format == other.format &&
+          options == other.options &&
+          stream == other.stream &&
+          think == other.think &&
+          keepAlive == other.keepAlive &&
+          logprobs == other.logprobs &&
+          topLogprobs == other.topLogprobs;
 
   @override
-  int get hashCode => Object.hash(model, stream);
+  int get hashCode => Object.hashAll([
+    model,
+    listHash(messages),
+    listHash(tools),
+    format,
+    options,
+    stream,
+    think,
+    keepAlive,
+    logprobs,
+    topLogprobs,
+  ]);
 
   @override
-  String toString() => 'ChatRequest(model: $model, messages: $messages)';
+  String toString() =>
+      'ChatRequest('
+      'model: $model, '
+      'messages: $messages, '
+      'tools: $tools, '
+      'format: $format, '
+      'options: $options, '
+      'stream: $stream, '
+      'think: $think, '
+      'keepAlive: $keepAlive, '
+      'logprobs: $logprobs, '
+      'topLogprobs: $topLogprobs)';
 }

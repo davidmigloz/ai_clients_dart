@@ -60,18 +60,18 @@
     },
     "default_category": "common",
     "parent_model_patterns": {
-      "Message": [
+      "ChatMessage": [
         ".*Content$"
       ],
-      "Tool": [
+      "ToolDefinition": [
         ".*Function$",
         ".*Call$"
       ],
-      "GenerateChatCompletionRequest": [
+      "ChatRequest": [
         ".*Message$",
         ".*Tool$"
       ],
-      "GenerateCompletionRequest": [
+      "GenerateRequest": [
         ".*Options$"
       ]
     }
@@ -211,104 +211,93 @@
     "excluded_resources": []
   },
   "types": {
-    "Message": {
+    "ChatMessage": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "verify",
       "dart_class": "ChatMessage",
       "file": "lib/src/models/chat/chat_message.dart",
-      "schema": "Message",
-      "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "schema": "ChatMessage",
+      "tags": []
     },
-    "GenerateChatCompletionRequest": {
+    "ChatRequest": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "verify",
       "dart_class": "ChatRequest",
       "file": "lib/src/models/chat/chat_request.dart",
-      "schema": "GenerateChatCompletionRequest",
-      "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "schema": "ChatRequest",
+      "tags": []
     },
-    "GenerateChatCompletionResponse": {
+    "ChatResponse": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "verify",
       "dart_class": "ChatResponse",
       "file": "lib/src/models/chat/chat_response.dart",
-      "schema": "GenerateChatCompletionResponse",
-      "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "schema": "ChatResponse",
+      "tags": []
     },
-    "GenerateCompletionRequest": {
+    "GenerateRequest": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "verify",
       "dart_class": "GenerateRequest",
       "file": "lib/src/models/completions/generate_request.dart",
-      "schema": "GenerateCompletionRequest",
-      "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "schema": "GenerateRequest",
+      "tags": []
     },
-    "GenerateCompletionResponse": {
+    "GenerateResponse": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "verify",
       "dart_class": "GenerateResponse",
       "file": "lib/src/models/completions/generate_response.dart",
-      "schema": "GenerateCompletionResponse",
-      "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "schema": "GenerateResponse",
+      "tags": []
     },
-    "GenerateEmbeddingRequest": {
+    "EmbedRequest": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "verify",
       "dart_class": "EmbedRequest",
       "file": "lib/src/models/embeddings/embed_request.dart",
-      "schema": "GenerateEmbeddingRequest",
-      "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "schema": "EmbedRequest",
+      "tags": []
     },
-    "GenerateEmbeddingResponse": {
+    "EmbedResponse": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "verify",
       "dart_class": "EmbedResponse",
       "file": "lib/src/models/embeddings/embed_response.dart",
-      "schema": "GenerateEmbeddingResponse",
-      "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "schema": "EmbedResponse",
+      "tags": []
     },
-    "Tool": {
+    "ToolDefinition": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "verify",
       "dart_class": "ToolDefinition",
       "file": "lib/src/models/tools/tool_definition.dart",
-      "schema": "Tool",
-      "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "schema": "ToolDefinition",
+      "tags": []
     },
-    "Model": {
+    "ModelSummary": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "verify",
       "dart_class": "ModelSummary",
       "file": "lib/src/models/models/model_summary.dart",
-      "schema": "Model",
-      "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "schema": "ModelSummary",
+      "tags": []
     },
-    "ModelInfo": {
+    "ShowResponse": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "verify",
       "dart_class": "ShowResponse",
       "file": "lib/src/models/models/show_response.dart",
-      "schema": "ModelInfo",
-      "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "schema": "ShowResponse",
+      "tags": []
     },
-    "RequestOptions": {
+    "ModelOptions": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "verify",
       "dart_class": "ModelOptions",
       "file": "lib/src/models/metadata/model_options.dart",
-      "schema": "RequestOptions",
-      "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "schema": "ModelOptions",
+      "tags": []
     }
   }
 }

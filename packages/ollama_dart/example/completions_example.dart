@@ -10,13 +10,13 @@ void main() async {
   try {
     // Basic text completion
     print('--- Basic Text Completion ---');
-    final response = await client.completions.generate(
+    final result = await client.completions.generate(
       request: const GenerateRequest(
         model: 'gpt-oss',
         prompt: 'Complete this sentence: The capital of France is',
       ),
     );
-    print('Generated: ${response.response}');
+    print('Generated: ${result.response}');
     print('');
 
     // With system prompt

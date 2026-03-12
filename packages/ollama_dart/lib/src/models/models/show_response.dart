@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 
 /// Response containing model details.
 @immutable
@@ -102,11 +103,30 @@ class ShowResponse {
           parameters == other.parameters &&
           license == other.license &&
           modifiedAt == other.modifiedAt &&
-          template == other.template;
+          mapsEqual(details, other.details) &&
+          template == other.template &&
+          listsEqual(capabilities, other.capabilities) &&
+          mapsEqual(modelInfo, other.modelInfo);
 
   @override
-  int get hashCode => Object.hash(parameters, license, modifiedAt, template);
+  int get hashCode => Object.hash(
+    parameters,
+    license,
+    modifiedAt,
+    mapHash(details),
+    template,
+    listHash(capabilities),
+    mapHash(modelInfo),
+  );
 
   @override
-  String toString() => 'ShowResponse(capabilities: $capabilities)';
+  String toString() =>
+      'ShowResponse('
+      'parameters: $parameters, '
+      'license: $license, '
+      'modifiedAt: $modifiedAt, '
+      'details: $details, '
+      'template: $template, '
+      'capabilities: $capabilities, '
+      'modelInfo: $modelInfo)';
 }

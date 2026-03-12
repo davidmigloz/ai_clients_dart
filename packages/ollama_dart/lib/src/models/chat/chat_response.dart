@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import '../common/done_reason.dart';
+import '../common/equality_helpers.dart';
 import '../completions/logprob.dart';
 import '../tools/tool_call.dart';
 import 'chat_message.dart';
@@ -62,17 +63,22 @@ class ChatResponseMessage {
           runtimeType == other.runtimeType &&
           role == other.role &&
           content == other.content &&
-          thinking == other.thinking;
+          thinking == other.thinking &&
+          listsEqual(toolCalls, other.toolCalls) &&
+          listsEqual(images, other.images);
 
   @override
-  int get hashCode => Object.hash(role, content, thinking);
+  int get hashCode =>
+      Object.hash(role, content, thinking, listHash(toolCalls), listHash(images));
 
   @override
   String toString() =>
       'ChatResponseMessage('
       'role: $role, '
       'content: $content, '
-      'thinking: $thinking)';
+      'thinking: $thinking, '
+      'toolCalls: $toolCalls, '
+      'images: $images)';
 }
 
 /// Response from chat completion.
@@ -243,16 +249,53 @@ class ChatResponse {
       other is ChatResponse &&
           runtimeType == other.runtimeType &&
           model == other.model &&
+          remoteModel == other.remoteModel &&
+          remoteHost == other.remoteHost &&
           createdAt == other.createdAt &&
-          done == other.done;
+          message == other.message &&
+          done == other.done &&
+          doneReason == other.doneReason &&
+          totalDuration == other.totalDuration &&
+          loadDuration == other.loadDuration &&
+          promptEvalCount == other.promptEvalCount &&
+          promptEvalDuration == other.promptEvalDuration &&
+          evalCount == other.evalCount &&
+          evalDuration == other.evalDuration &&
+          listsEqual(logprobs, other.logprobs);
 
   @override
-  int get hashCode => Object.hash(model, createdAt, done);
+  int get hashCode => Object.hashAll([
+    model,
+    remoteModel,
+    remoteHost,
+    createdAt,
+    message,
+    done,
+    doneReason,
+    totalDuration,
+    loadDuration,
+    promptEvalCount,
+    promptEvalDuration,
+    evalCount,
+    evalDuration,
+    listHash(logprobs),
+  ]);
 
   @override
   String toString() =>
       'ChatResponse('
       'model: $model, '
+      'remoteModel: $remoteModel, '
+      'remoteHost: $remoteHost, '
+      'createdAt: $createdAt, '
       'message: $message, '
-      'done: $done)';
+      'done: $done, '
+      'doneReason: $doneReason, '
+      'totalDuration: $totalDuration, '
+      'loadDuration: $loadDuration, '
+      'promptEvalCount: $promptEvalCount, '
+      'promptEvalDuration: $promptEvalDuration, '
+      'evalCount: $evalCount, '
+      'evalDuration: $evalDuration, '
+      'logprobs: $logprobs)';
 }

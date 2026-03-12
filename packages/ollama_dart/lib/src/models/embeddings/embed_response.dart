@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 
 /// Response from embedding generation.
 @immutable
@@ -85,13 +86,38 @@ class EmbedResponse {
       identical(this, other) ||
       other is EmbedResponse &&
           runtimeType == other.runtimeType &&
-          model == other.model;
+          model == other.model &&
+          _nestedListsEqual(embeddings, other.embeddings) &&
+          totalDuration == other.totalDuration &&
+          loadDuration == other.loadDuration &&
+          promptEvalCount == other.promptEvalCount;
 
   @override
-  int get hashCode => model.hashCode;
+  int get hashCode => Object.hash(
+    model,
+    embeddings == null ? null.hashCode : Object.hashAll(embeddings!.map(listHash)),
+    totalDuration,
+    loadDuration,
+    promptEvalCount,
+  );
 
   @override
   String toString() =>
-      'EmbedResponse(model: $model, '
-      'embeddings: ${embeddings?.length ?? 0} vectors)';
+      'EmbedResponse('
+      'model: $model, '
+      'embeddings: ${embeddings?.length ?? 0} vectors, '
+      'totalDuration: $totalDuration, '
+      'loadDuration: $loadDuration, '
+      'promptEvalCount: $promptEvalCount)';
+}
+
+/// Compares two nested lists for equality.
+bool _nestedListsEqual(List<List<double>>? a, List<List<double>>? b) {
+  if (identical(a, b)) return true;
+  if (a == null || b == null) return false;
+  if (a.length != b.length) return false;
+  for (var i = 0; i < a.length; i++) {
+    if (!listsEqual(a[i], b[i])) return false;
+  }
+  return true;
 }

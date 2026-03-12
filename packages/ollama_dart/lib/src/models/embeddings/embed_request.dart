@@ -91,11 +91,23 @@ class EmbedRequest {
       other is EmbedRequest &&
           runtimeType == other.runtimeType &&
           model == other.model &&
-          input == other.input;
+          input == other.input &&
+          truncate == other.truncate &&
+          dimensions == other.dimensions &&
+          keepAlive == other.keepAlive &&
+          options == other.options;
 
   @override
-  int get hashCode => Object.hash(model, input);
+  int get hashCode =>
+      Object.hash(model, input, truncate, dimensions, keepAlive, options);
 
   @override
-  String toString() => 'EmbedRequest(model: $model, input: $input)';
+  String toString() =>
+      'EmbedRequest('
+      'model: $model, '
+      'input: $input, '
+      'truncate: $truncate, '
+      'dimensions: $dimensions, '
+      'keepAlive: $keepAlive, '
+      'options: $options)';
 }

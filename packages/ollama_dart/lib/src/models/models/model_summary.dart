@@ -105,11 +105,27 @@ class ModelSummary {
       other is ModelSummary &&
           runtimeType == other.runtimeType &&
           name == other.name &&
-          digest == other.digest;
+          model == other.model &&
+          remoteModel == other.remoteModel &&
+          remoteHost == other.remoteHost &&
+          modifiedAt == other.modifiedAt &&
+          size == other.size &&
+          digest == other.digest &&
+          details == other.details;
 
   @override
-  int get hashCode => Object.hash(name, digest);
+  int get hashCode =>
+      Object.hash(name, model, remoteModel, remoteHost, modifiedAt, size, digest, details);
 
   @override
-  String toString() => 'ModelSummary(name: $name, size: $size)';
+  String toString() =>
+      'ModelSummary('
+      'name: $name, '
+      'model: $model, '
+      'remoteModel: $remoteModel, '
+      'remoteHost: $remoteHost, '
+      'modifiedAt: $modifiedAt, '
+      'size: $size, '
+      'digest: $digest, '
+      'details: $details)';
 }

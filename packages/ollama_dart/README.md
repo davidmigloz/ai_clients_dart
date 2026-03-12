@@ -243,14 +243,14 @@ import 'package:ollama_dart/ollama_dart.dart';
 
 final client = OllamaClient();
 
-final response = await client.completions.generate(
+final result = await client.completions.generate(
   request: GenerateRequest(
     model: 'gpt-oss',
     prompt: 'Complete this: The capital of France is',
   ),
 );
 
-print(response.response);
+print(result.response);
 client.close();
 ```
 

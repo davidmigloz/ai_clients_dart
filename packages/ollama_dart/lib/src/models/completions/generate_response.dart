@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import '../common/done_reason.dart';
+import '../common/equality_helpers.dart';
 import 'logprob.dart';
 
 /// Response from text generation.
@@ -194,16 +195,59 @@ class GenerateResponse {
       other is GenerateResponse &&
           runtimeType == other.runtimeType &&
           model == other.model &&
+          remoteModel == other.remoteModel &&
+          remoteHost == other.remoteHost &&
+          createdAt == other.createdAt &&
           response == other.response &&
-          done == other.done;
+          thinking == other.thinking &&
+          done == other.done &&
+          doneReason == other.doneReason &&
+          listsEqual(context, other.context) &&
+          totalDuration == other.totalDuration &&
+          loadDuration == other.loadDuration &&
+          promptEvalCount == other.promptEvalCount &&
+          promptEvalDuration == other.promptEvalDuration &&
+          evalCount == other.evalCount &&
+          evalDuration == other.evalDuration &&
+          listsEqual(logprobs, other.logprobs);
 
   @override
-  int get hashCode => Object.hash(model, response, done);
+  int get hashCode => Object.hashAll([
+    model,
+    remoteModel,
+    remoteHost,
+    createdAt,
+    response,
+    thinking,
+    done,
+    doneReason,
+    listHash(context),
+    totalDuration,
+    loadDuration,
+    promptEvalCount,
+    promptEvalDuration,
+    evalCount,
+    evalDuration,
+    listHash(logprobs),
+  ]);
 
   @override
   String toString() =>
       'GenerateResponse('
       'model: $model, '
+      'remoteModel: $remoteModel, '
+      'remoteHost: $remoteHost, '
+      'createdAt: $createdAt, '
       'response: $response, '
-      'done: $done)';
+      'thinking: $thinking, '
+      'done: $done, '
+      'doneReason: $doneReason, '
+      'context: $context, '
+      'totalDuration: $totalDuration, '
+      'loadDuration: $loadDuration, '
+      'promptEvalCount: $promptEvalCount, '
+      'promptEvalDuration: $promptEvalDuration, '
+      'evalCount: $evalCount, '
+      'evalDuration: $evalDuration, '
+      'logprobs: $logprobs)';
 }

@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 import '../common/response_format.dart';
 import '../common/think_value.dart';
 import '../metadata/model_options.dart';
@@ -181,11 +182,56 @@ class GenerateRequest {
       other is GenerateRequest &&
           runtimeType == other.runtimeType &&
           model == other.model &&
-          prompt == other.prompt;
+          prompt == other.prompt &&
+          suffix == other.suffix &&
+          listsEqual(images, other.images) &&
+          format == other.format &&
+          system == other.system &&
+          template == other.template &&
+          listsEqual(context, other.context) &&
+          stream == other.stream &&
+          think == other.think &&
+          raw == other.raw &&
+          keepAlive == other.keepAlive &&
+          options == other.options &&
+          logprobs == other.logprobs &&
+          topLogprobs == other.topLogprobs;
 
   @override
-  int get hashCode => Object.hash(model, prompt);
+  int get hashCode => Object.hashAll([
+    model,
+    prompt,
+    suffix,
+    listHash(images),
+    format,
+    system,
+    template,
+    listHash(context),
+    stream,
+    think,
+    raw,
+    keepAlive,
+    options,
+    logprobs,
+    topLogprobs,
+  ]);
 
   @override
-  String toString() => 'GenerateRequest(model: $model, prompt: $prompt)';
+  String toString() =>
+      'GenerateRequest('
+      'model: $model, '
+      'prompt: $prompt, '
+      'suffix: $suffix, '
+      'images: $images, '
+      'format: $format, '
+      'system: $system, '
+      'template: $template, '
+      'context: $context, '
+      'stream: $stream, '
+      'think: $think, '
+      'raw: $raw, '
+      'keepAlive: $keepAlive, '
+      'options: $options, '
+      'logprobs: $logprobs, '
+      'topLogprobs: $topLogprobs)';
 }
