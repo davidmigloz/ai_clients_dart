@@ -138,7 +138,7 @@
       "file": "lib/src/models/tools/tool.dart",
       "schema": "Tool",
       "tags": [],
-      "note": "codeExecution and urlContext remain Map<String,dynamic> (empty schemas in spec); googleSearch is also Map<String,dynamic> even though GoogleSearch schema has a timeRangeFilter property — migrate to typed model when needed"
+      "note": "codeExecution and urlContext remain Map<String,dynamic> (empty schemas in spec)"
     },
     "Candidate": {
       "spec": "main",
