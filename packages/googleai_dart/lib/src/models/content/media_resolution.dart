@@ -1,6 +1,6 @@
 import '../copy_with_sentinel.dart';
 
-/// Media resolution for a media part, returned in the response.
+/// Media resolution for a media part.
 class MediaResolution {
   /// The media resolution level used.
   final MediaResolutionLevel? level;

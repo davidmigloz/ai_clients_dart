@@ -27,7 +27,9 @@ class GenerateContentRequest {
   /// Cached content name.
   final String? cachedContent;
 
-  /// Optional. Whether to store the generation for use in a future request.
+  /// Optional. Controls whether this request and its generated content
+  /// are stored for logging and monitoring, overriding the project-level
+  /// logging configuration.
   final bool? store;
 
   /// Creates a [GenerateContentRequest].

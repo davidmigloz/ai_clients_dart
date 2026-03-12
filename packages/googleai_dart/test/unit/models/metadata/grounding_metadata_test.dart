@@ -1,3 +1,4 @@
+import 'package:googleai_dart/src/models/common/image.dart';
 import 'package:googleai_dart/src/models/metadata/grounding_chunk.dart';
 import 'package:googleai_dart/src/models/metadata/grounding_metadata.dart';
 import 'package:googleai_dart/src/models/metadata/grounding_support.dart';
@@ -148,9 +149,30 @@ void main() {
       expect(chunk.web!.uri, 'https://example.com');
       expect(chunk.web!.title, 'Example Title');
       expect(chunk.retrievedContext, isNull);
+      expect(chunk.image, isNull);
     });
 
-    test('toJson serializes correctly', () {
+    test('fromJson with image chunk', () {
+      final json = {
+        'image': {
+          'domain': 'example.com',
+          'imageUri': 'https://img.example.com/photo.jpg',
+          'sourceUri': 'https://example.com/page',
+          'title': 'Example Image',
+        },
+      };
+
+      final chunk = GroundingChunk.fromJson(json);
+
+      expect(chunk.image, isNotNull);
+      expect(chunk.image!.domain, 'example.com');
+      expect(chunk.image!.imageUri, 'https://img.example.com/photo.jpg');
+      expect(chunk.image!.sourceUri, 'https://example.com/page');
+      expect(chunk.image!.title, 'Example Image');
+      expect(chunk.web, isNull);
+    });
+
+    test('toJson serializes web chunk correctly', () {
       const chunk = GroundingChunk(
         web: Web(uri: 'https://test.com', title: 'Test'),
       );
@@ -160,6 +182,41 @@ void main() {
 
       expect(webJson!['uri'], 'https://test.com');
       expect(webJson['title'], 'Test');
+      expect(json.containsKey('image'), isFalse);
+    });
+
+    test('toJson serializes image chunk correctly', () {
+      const chunk = GroundingChunk(
+        image: Image(
+          domain: 'example.com',
+          imageUri: 'https://img.example.com/photo.jpg',
+        ),
+      );
+
+      final json = chunk.toJson();
+      final imageJson = json['image'] as Map<String, dynamic>?;
+
+      expect(imageJson!['domain'], 'example.com');
+      expect(imageJson['imageUri'], 'https://img.example.com/photo.jpg');
+      expect(json.containsKey('web'), isFalse);
+    });
+
+    test('round-trip preserves image chunk', () {
+      final json = {
+        'image': {
+          'domain': 'test.com',
+          'imageUri': 'https://img.test.com/img.png',
+          'title': 'Test Image',
+        },
+      };
+
+      final chunk = GroundingChunk.fromJson(json);
+      final serialized = chunk.toJson();
+      final imageJson = serialized['image'] as Map<String, dynamic>;
+
+      expect(imageJson['domain'], 'test.com');
+      expect(imageJson['imageUri'], 'https://img.test.com/img.png');
+      expect(imageJson['title'], 'Test Image');
     });
   });
 
@@ -178,6 +235,50 @@ void main() {
       expect(support.segment!.text, 'supported text');
       expect(support.groundingChunkIndices, [0, 1]);
       expect(support.confidenceScores, [0.9, 0.8]);
+    });
+
+    test('fromJson parses renderedParts', () {
+      final json = {
+        'groundingChunkIndices': [0],
+        'confidenceScores': [0.95],
+        'renderedParts': [0, 2],
+      };
+
+      final support = GroundingSupport.fromJson(json);
+
+      expect(support.renderedParts, [0, 2]);
+    });
+
+    test('toJson serializes renderedParts', () {
+      const support = GroundingSupport(
+        groundingChunkIndices: [0],
+        renderedParts: [1, 3],
+      );
+
+      final json = support.toJson();
+
+      expect(json['renderedParts'], [1, 3]);
+    });
+
+    test('toJson omits null renderedParts', () {
+      const support = GroundingSupport(groundingChunkIndices: [0]);
+
+      final json = support.toJson();
+
+      expect(json.containsKey('renderedParts'), isFalse);
+    });
+
+    test('round-trip preserves renderedParts', () {
+      final json = {
+        'groundingChunkIndices': [0, 1],
+        'confidenceScores': [0.9, 0.8],
+        'renderedParts': [0, 1, 2],
+      };
+
+      final support = GroundingSupport.fromJson(json);
+      final serialized = support.toJson();
+
+      expect(serialized['renderedParts'], json['renderedParts']);
     });
   });
 
