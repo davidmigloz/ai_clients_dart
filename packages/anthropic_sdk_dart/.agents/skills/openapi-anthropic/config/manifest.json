@@ -179,10 +179,7 @@
       "dart_class": "TextBlock",
       "file": "lib/src/models/content/content_block.dart",
       "schema": "ResponseTextBlock",
-      "parent": "ContentBlock",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "ContentBlock"
     },
     "ThinkingBlock": {
       "spec": "main",
@@ -190,10 +187,7 @@
       "dart_class": "ThinkingBlock",
       "file": "lib/src/models/content/content_block.dart",
       "schema": "ResponseThinkingBlock",
-      "parent": "ContentBlock",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "ContentBlock"
     },
     "RedactedThinkingBlock": {
       "spec": "main",
@@ -201,10 +195,7 @@
       "dart_class": "RedactedThinkingBlock",
       "file": "lib/src/models/content/content_block.dart",
       "schema": "ResponseRedactedThinkingBlock",
-      "parent": "ContentBlock",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "ContentBlock"
     },
     "ToolUseBlock": {
       "spec": "main",
@@ -214,7 +205,6 @@
       "schema": "ResponseToolUseBlock",
       "parent": "ContentBlock",
       "excluded_properties": [
-        "type",
         "caller"
       ]
     },
@@ -226,7 +216,6 @@
       "schema": "ResponseServerToolUseBlock",
       "parent": "ContentBlock",
       "excluded_properties": [
-        "type",
         "caller"
       ]
     },
@@ -238,7 +227,6 @@
       "schema": "ResponseWebSearchToolResultBlock",
       "parent": "ContentBlock",
       "excluded_properties": [
-        "type",
         "caller"
       ]
     },
@@ -250,7 +238,6 @@
       "schema": "ResponseWebFetchToolResultBlock",
       "parent": "ContentBlock",
       "excluded_properties": [
-        "type",
         "caller"
       ]
     },
@@ -260,10 +247,7 @@
       "dart_class": "CodeExecutionToolResultBlock",
       "file": "lib/src/models/content/content_block.dart",
       "schema": "ResponseCodeExecutionToolResultBlock",
-      "parent": "ContentBlock",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "ContentBlock"
     },
     "ResponseBashCodeExecutionToolResultBlock": {
       "spec": "main",
@@ -271,10 +255,7 @@
       "dart_class": "BashCodeExecutionToolResultBlock",
       "file": "lib/src/models/content/content_block.dart",
       "schema": "ResponseBashCodeExecutionToolResultBlock",
-      "parent": "ContentBlock",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "ContentBlock"
     },
     "ResponseTextEditorCodeExecutionToolResultBlock": {
       "spec": "main",
@@ -282,10 +263,7 @@
       "dart_class": "TextEditorCodeExecutionToolResultBlock",
       "file": "lib/src/models/content/content_block.dart",
       "schema": "ResponseTextEditorCodeExecutionToolResultBlock",
-      "parent": "ContentBlock",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "ContentBlock"
     },
     "ResponseToolSearchToolResultBlock": {
       "spec": "main",
@@ -293,10 +271,7 @@
       "dart_class": "ToolSearchToolResultBlock",
       "file": "lib/src/models/content/content_block.dart",
       "schema": "ResponseToolSearchToolResultBlock",
-      "parent": "ContentBlock",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "ContentBlock"
     },
     "ResponseContainerUploadBlock": {
       "spec": "main",
@@ -304,10 +279,7 @@
       "dart_class": "ContainerUploadBlock",
       "file": "lib/src/models/content/content_block.dart",
       "schema": "ResponseContainerUploadBlock",
-      "parent": "ContentBlock",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "ContentBlock"
     },
     "ResponseCompactionBlock": {
       "spec": "main",
@@ -315,10 +287,7 @@
       "dart_class": "CompactionBlock",
       "file": "lib/src/models/content/content_block.dart",
       "schema": "BetaResponseCompactionBlock",
-      "parent": "ContentBlock",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "ContentBlock"
     },
     "InputContentBlock": {
       "spec": "main",
@@ -356,7 +325,6 @@
       "schema": "RequestTextBlock",
       "parent": "InputContentBlock",
       "excluded_properties": [
-        "type",
         "citations"
       ]
     },
@@ -366,10 +334,7 @@
       "dart_class": "ImageInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
       "schema": "RequestImageBlock",
-      "parent": "InputContentBlock",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "InputContentBlock"
     },
     "DocumentBlockParam": {
       "spec": "main",
@@ -379,7 +344,6 @@
       "schema": "RequestDocumentBlock",
       "parent": "InputContentBlock",
       "excluded_properties": [
-        "type",
         "citations",
         "context"
       ]
@@ -390,10 +354,7 @@
       "dart_class": "ToolUseInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
       "schema": "RequestToolUseBlock",
-      "parent": "InputContentBlock",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "InputContentBlock"
     },
     "ToolResultBlockParam": {
       "spec": "main",
@@ -401,10 +362,7 @@
       "dart_class": "ToolResultInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
       "schema": "RequestToolResultBlock",
-      "parent": "InputContentBlock",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "InputContentBlock"
     },
     "ServerToolUseBlockParam": {
       "spec": "main",
@@ -412,10 +370,7 @@
       "dart_class": "ServerToolUseInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
       "schema": "RequestServerToolUseBlock",
-      "parent": "InputContentBlock",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "InputContentBlock"
     },
     "RequestWebSearchToolResultBlockParam": {
       "spec": "main",
@@ -423,10 +378,7 @@
       "dart_class": "WebSearchToolResultInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
       "schema": "RequestWebSearchToolResultBlock",
-      "parent": "InputContentBlock",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "InputContentBlock"
     },
     "RequestWebFetchToolResultBlockParam": {
       "spec": "main",
@@ -434,10 +386,7 @@
       "dart_class": "WebFetchToolResultInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
       "schema": "RequestWebFetchToolResultBlock",
-      "parent": "InputContentBlock",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "InputContentBlock"
     },
     "RequestCodeExecutionToolResultBlockParam": {
       "spec": "main",
@@ -445,10 +394,7 @@
       "dart_class": "CodeExecutionToolResultInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
       "schema": "RequestCodeExecutionToolResultBlock",
-      "parent": "InputContentBlock",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "InputContentBlock"
     },
     "RequestBashCodeExecutionToolResultBlockParam": {
       "spec": "main",
@@ -456,10 +402,7 @@
       "dart_class": "BashCodeExecutionToolResultInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
       "schema": "RequestBashCodeExecutionToolResultBlock",
-      "parent": "InputContentBlock",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "InputContentBlock"
     },
     "RequestTextEditorCodeExecutionToolResultBlockParam": {
       "spec": "main",
@@ -467,10 +410,7 @@
       "dart_class": "TextEditorCodeExecutionToolResultInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
       "schema": "RequestTextEditorCodeExecutionToolResultBlock",
-      "parent": "InputContentBlock",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "InputContentBlock"
     },
     "RequestToolSearchToolResultBlockParam": {
       "spec": "main",
@@ -478,10 +418,7 @@
       "dart_class": "ToolSearchToolResultInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
       "schema": "RequestToolSearchToolResultBlock",
-      "parent": "InputContentBlock",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "InputContentBlock"
     },
     "RequestContainerUploadBlockParam": {
       "spec": "main",
@@ -489,10 +426,7 @@
       "dart_class": "ContainerUploadInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
       "schema": "RequestContainerUploadBlock",
-      "parent": "InputContentBlock",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "InputContentBlock"
     },
     "RequestCompactionBlockParam": {
       "spec": "main",
@@ -500,10 +434,7 @@
       "dart_class": "CompactionInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
       "schema": "BetaRequestCompactionBlock",
-      "parent": "InputContentBlock",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "InputContentBlock"
     },
     "RequestToolReferenceBlockParam": {
       "spec": "main",
@@ -511,10 +442,7 @@
       "dart_class": "ToolReferenceInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
       "schema": "RequestToolReferenceBlock",
-      "parent": "InputContentBlock",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "InputContentBlock"
     },
     "ToolResultContent": {
       "spec": "main",
@@ -574,7 +502,6 @@
       "schema": "BetaResponseCharLocationCitation",
       "parent": "Citation",
       "excluded_properties": [
-        "type",
         "file_id"
       ]
     },
@@ -586,7 +513,6 @@
       "schema": "BetaResponsePageLocationCitation",
       "parent": "Citation",
       "excluded_properties": [
-        "type",
         "file_id"
       ]
     },
@@ -598,7 +524,6 @@
       "schema": "BetaResponseContentBlockLocationCitation",
       "parent": "Citation",
       "excluded_properties": [
-        "type",
         "file_id"
       ]
     },
@@ -610,7 +535,6 @@
       "schema": "BetaResponseWebSearchResultLocationCitation",
       "parent": "Citation",
       "excluded_properties": [
-        "type",
         "url"
       ]
     },
@@ -830,10 +754,7 @@
       "dart_class": "TextDelta",
       "file": "lib/src/models/streaming/content_block_delta.dart",
       "schema": "TextContentBlockDelta",
-      "parent": "ContentBlockDelta",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "ContentBlockDelta"
     },
     "InputJSONDelta": {
       "spec": "main",
@@ -841,10 +762,7 @@
       "dart_class": "InputJsonDelta",
       "file": "lib/src/models/streaming/content_block_delta.dart",
       "schema": "InputJsonContentBlockDelta",
-      "parent": "ContentBlockDelta",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "ContentBlockDelta"
     },
     "ThinkingDelta": {
       "spec": "main",
@@ -852,10 +770,7 @@
       "dart_class": "ThinkingDelta",
       "file": "lib/src/models/streaming/content_block_delta.dart",
       "schema": "ThinkingContentBlockDelta",
-      "parent": "ContentBlockDelta",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "ContentBlockDelta"
     },
     "SignatureDelta": {
       "spec": "main",
@@ -863,10 +778,7 @@
       "dart_class": "SignatureDelta",
       "file": "lib/src/models/streaming/content_block_delta.dart",
       "schema": "SignatureContentBlockDelta",
-      "parent": "ContentBlockDelta",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "ContentBlockDelta"
     },
     "CitationsDelta": {
       "spec": "main",
@@ -874,10 +786,7 @@
       "dart_class": "CitationsDelta",
       "file": "lib/src/models/streaming/content_block_delta.dart",
       "schema": "CitationsDelta",
-      "parent": "ContentBlockDelta",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "ContentBlockDelta"
     },
     "CompactionDelta": {
       "spec": "main",
@@ -885,10 +794,7 @@
       "dart_class": "CompactionDelta",
       "file": "lib/src/models/streaming/content_block_delta.dart",
       "schema": "BetaCompactionContentBlockDelta",
-      "parent": "ContentBlockDelta",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "ContentBlockDelta"
     },
     "ThinkingConfig": {
       "spec": "main",
@@ -912,10 +818,7 @@
       "dart_class": "ThinkingEnabled",
       "file": "lib/src/models/messages/thinking_config.dart",
       "schema": "ThinkingConfigEnabled",
-      "parent": "ThinkingConfig",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "ThinkingConfig"
     },
     "ThinkingConfigDisabled": {
       "spec": "main",
@@ -923,10 +826,7 @@
       "dart_class": "ThinkingDisabled",
       "file": "lib/src/models/messages/thinking_config.dart",
       "schema": "ThinkingConfigDisabled",
-      "parent": "ThinkingConfig",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "ThinkingConfig"
     },
     "ThinkingConfigAdaptive": {
       "spec": "main",
@@ -934,10 +834,7 @@
       "dart_class": "ThinkingAdaptive",
       "file": "lib/src/models/messages/thinking_config.dart",
       "schema": "ThinkingConfigAdaptive",
-      "parent": "ThinkingConfig",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "ThinkingConfig"
     },
     "ToolChoice": {
       "spec": "main",
@@ -962,10 +859,7 @@
       "dart_class": "ToolChoiceAuto",
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": "ToolChoiceAuto",
-      "parent": "ToolChoice",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "ToolChoice"
     },
     "ToolChoiceAny": {
       "spec": "main",
@@ -973,10 +867,7 @@
       "dart_class": "ToolChoiceAny",
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": "ToolChoiceAny",
-      "parent": "ToolChoice",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "ToolChoice"
     },
     "ToolChoiceTool": {
       "spec": "main",
@@ -984,10 +875,7 @@
       "dart_class": "ToolChoiceTool",
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": "ToolChoiceTool",
-      "parent": "ToolChoice",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "ToolChoice"
     },
     "ToolChoiceNone": {
       "spec": "main",
@@ -995,10 +883,7 @@
       "dart_class": "ToolChoiceNone",
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": "ToolChoiceNone",
-      "parent": "ToolChoice",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "ToolChoice"
     },
     "ToolCaller": {
       "spec": "main",
@@ -1243,10 +1128,7 @@
       "dart_class": "BatchResultSucceeded",
       "file": "lib/src/models/batches/message_batch.dart",
       "schema": "SucceededResult",
-      "parent": "BatchResult",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "BatchResult"
     },
     "ErroredResult": {
       "spec": "main",
@@ -1254,10 +1136,7 @@
       "dart_class": "BatchResultErrored",
       "file": "lib/src/models/batches/message_batch.dart",
       "schema": "ErroredResult",
-      "parent": "BatchResult",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "BatchResult"
     },
     "CanceledResult": {
       "spec": "main",
@@ -1265,10 +1144,7 @@
       "dart_class": "BatchResultCanceled",
       "file": "lib/src/models/batches/message_batch.dart",
       "schema": "CanceledResult",
-      "parent": "BatchResult",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "BatchResult"
     },
     "ExpiredResult": {
       "spec": "main",
@@ -1276,10 +1152,7 @@
       "dart_class": "BatchResultExpired",
       "file": "lib/src/models/batches/message_batch.dart",
       "schema": "ExpiredResult",
-      "parent": "BatchResult",
-      "excluded_properties": [
-        "type"
-      ]
+      "parent": "BatchResult"
     },
     "MessageContent": {
       "spec": "main",

@@ -852,6 +852,17 @@ def _verify_object_entry(config: ToolkitConfig, spec_payload: dict[str, Any], en
     if not props:
         return [_type_issue("error", entry.key, f"No spec fields found for '{entry.schema_name}'", file=entry.file)]
 
+    # For sealed_variant entries, auto-exclude the parent's discriminator field
+    # since it is handled by the parent class's fromJson dispatch, not stored
+    # as a field on the variant.
+    excluded = set(entry.excluded_properties)
+    if entry.kind == "sealed_variant" and entry.parent:
+        parent_entry = config.manifest.types.get(entry.parent)
+        if parent_entry and parent_entry.discriminator:
+            discriminator_field = parent_entry.discriminator.get("field")
+            if discriminator_field:
+                excluded.add(discriminator_field)
+
     fields = extract_fields(file_path, entry.dart_class)
     content = read_text(file_path)
     class_block = extract_class_block(content, entry.dart_class)
@@ -860,7 +871,7 @@ def _verify_object_entry(config: ToolkitConfig, spec_payload: dict[str, Any], en
     issues: list[dict[str, Any]] = []
     expected_field_names: set[str] = set()
     for name, prop in props.items():
-        if name in entry.excluded_properties:
+        if name in excluded:
             continue
         field_name = camel_case(name)
         expected_field_names.add(field_name)
