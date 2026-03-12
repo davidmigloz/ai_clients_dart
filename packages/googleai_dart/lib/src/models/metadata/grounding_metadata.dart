@@ -54,9 +54,7 @@ class GroundingMetadata {
             ?.map((e) => GroundingChunk.fromJson(e as Map<String, dynamic>))
             .toList(),
         groundingSupports: (json['groundingSupports'] as List?)
-            ?.map(
-              (e) => GroundingSupport.fromJson(e as Map<String, dynamic>),
-            )
+            ?.map((e) => GroundingSupport.fromJson(e as Map<String, dynamic>))
             .toList(),
         retrievalMetadata: json['retrievalMetadata'] != null
             ? RetrievalMetadata.fromJson(

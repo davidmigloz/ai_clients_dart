@@ -43,8 +43,9 @@ class GroundingSupport {
         confidenceScores: (json['confidenceScores'] as List?)
             ?.map((e) => (e as num).toDouble())
             .toList(),
-        renderedParts:
-            (json['renderedParts'] as List?)?.map((e) => e as int).toList(),
+        renderedParts: (json['renderedParts'] as List?)
+            ?.map((e) => e as int)
+            .toList(),
       );
 
   /// Converts to JSON.
