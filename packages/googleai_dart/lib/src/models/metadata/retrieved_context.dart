@@ -1,3 +1,4 @@
+import '../common/grounding_chunk_custom_metadata.dart';
 import '../copy_with_sentinel.dart';
 
 /// Chunk from context retrieved by the file search tool.
@@ -16,12 +17,16 @@ class RetrievedContext {
   /// Example: `fileSearchStores/123`
   final String? fileSearchStore;
 
+  /// Optional. Custom metadata associated with the retrieved context.
+  final List<GroundingChunkCustomMetadata>? customMetadata;
+
   /// Creates a [RetrievedContext].
   const RetrievedContext({
     this.uri,
     this.title,
     this.text,
     this.fileSearchStore,
+    this.customMetadata,
   });
 
   /// Creates a [RetrievedContext] from JSON.
@@ -31,6 +36,13 @@ class RetrievedContext {
         title: json['title'] as String?,
         text: json['text'] as String?,
         fileSearchStore: json['fileSearchStore'] as String?,
+        customMetadata: (json['customMetadata'] as List?)
+            ?.map(
+              (e) => GroundingChunkCustomMetadata.fromJson(
+                e as Map<String, dynamic>,
+              ),
+            )
+            .toList(),
       );
 
   /// Converts to JSON.
@@ -39,6 +51,8 @@ class RetrievedContext {
     if (title != null) 'title': title,
     if (text != null) 'text': text,
     if (fileSearchStore != null) 'fileSearchStore': fileSearchStore,
+    if (customMetadata != null)
+      'customMetadata': customMetadata!.map((e) => e.toJson()).toList(),
   };
 
   /// Creates a copy with replaced values.
@@ -47,6 +61,7 @@ class RetrievedContext {
     Object? title = unsetCopyWithValue,
     Object? text = unsetCopyWithValue,
     Object? fileSearchStore = unsetCopyWithValue,
+    Object? customMetadata = unsetCopyWithValue,
   }) {
     return RetrievedContext(
       uri: uri == unsetCopyWithValue ? this.uri : uri as String?,
@@ -55,10 +70,13 @@ class RetrievedContext {
       fileSearchStore: fileSearchStore == unsetCopyWithValue
           ? this.fileSearchStore
           : fileSearchStore as String?,
+      customMetadata: customMetadata == unsetCopyWithValue
+          ? this.customMetadata
+          : customMetadata as List<GroundingChunkCustomMetadata>?,
     );
   }
 
   @override
   String toString() =>
-      'RetrievedContext(uri: $uri, title: $title, text: $text, fileSearchStore: $fileSearchStore)';
+      'RetrievedContext(uri: $uri, title: $title, text: $text, fileSearchStore: $fileSearchStore, customMetadata: $customMetadata)';
 }

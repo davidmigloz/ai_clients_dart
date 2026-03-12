@@ -27,6 +27,9 @@ class GenerateContentRequest {
   /// Cached content name.
   final String? cachedContent;
 
+  /// Optional. Whether to store the generation for use in a future request.
+  final bool? store;
+
   /// Creates a [GenerateContentRequest].
   const GenerateContentRequest({
     required this.contents,
@@ -36,6 +39,7 @@ class GenerateContentRequest {
     this.systemInstruction,
     this.generationConfig,
     this.cachedContent,
+    this.store,
   });
 
   /// Creates a [GenerateContentRequest] from JSON.
@@ -66,6 +70,7 @@ class GenerateContentRequest {
               )
             : null,
         cachedContent: json['cachedContent'] as String?,
+        store: json['store'] as bool?,
       );
 
   /// Converts to JSON.
@@ -80,6 +85,7 @@ class GenerateContentRequest {
     if (generationConfig != null)
       'generationConfig': generationConfig!.toJson(),
     if (cachedContent != null) 'cachedContent': cachedContent,
+    if (store != null) 'store': store,
   };
 
   /// Creates a copy with replaced values.
@@ -91,6 +97,7 @@ class GenerateContentRequest {
     Object? systemInstruction = unsetCopyWithValue,
     Object? generationConfig = unsetCopyWithValue,
     Object? cachedContent = unsetCopyWithValue,
+    Object? store = unsetCopyWithValue,
   }) {
     return GenerateContentRequest(
       contents: contents == unsetCopyWithValue
@@ -112,6 +119,7 @@ class GenerateContentRequest {
       cachedContent: cachedContent == unsetCopyWithValue
           ? this.cachedContent
           : cachedContent as String?,
+      store: store == unsetCopyWithValue ? this.store : store as bool?,
     );
   }
 }

@@ -1,3 +1,4 @@
+import '../common/google_search.dart';
 import '../copy_with_sentinel.dart';
 import 'computer_use.dart';
 import 'file_search.dart';
@@ -15,7 +16,7 @@ class Tool {
   final Map<String, dynamic>? codeExecution;
 
   /// Google search capability.
-  final Map<String, dynamic>? googleSearch;
+  final GoogleSearch? googleSearch;
 
   /// File search tool that retrieves knowledge from Semantic Retrieval
   /// corpora.
@@ -69,7 +70,9 @@ class Tool {
               .toList()
         : null,
     codeExecution: json['codeExecution'] as Map<String, dynamic>?,
-    googleSearch: json['googleSearch'] as Map<String, dynamic>?,
+    googleSearch: json['googleSearch'] != null
+        ? GoogleSearch.fromJson(json['googleSearch'] as Map<String, dynamic>)
+        : null,
     fileSearch: json['fileSearch'] != null
         ? FileSearch.fromJson(json['fileSearch'] as Map<String, dynamic>)
         : null,
@@ -99,7 +102,7 @@ class Tool {
           .map((e) => e.toJson())
           .toList(),
     if (codeExecution != null) 'codeExecution': codeExecution,
-    if (googleSearch != null) 'googleSearch': googleSearch,
+    if (googleSearch != null) 'googleSearch': googleSearch!.toJson(),
     if (fileSearch != null) 'fileSearch': fileSearch!.toJson(),
     if (mcpServers != null)
       'mcpServers': mcpServers!.map((e) => e.toJson()).toList(),
@@ -131,7 +134,7 @@ class Tool {
           : codeExecution as Map<String, dynamic>?,
       googleSearch: googleSearch == unsetCopyWithValue
           ? this.googleSearch
-          : googleSearch as Map<String, dynamic>?,
+          : googleSearch as GoogleSearch?,
       fileSearch: fileSearch == unsetCopyWithValue
           ? this.fileSearch
           : fileSearch as FileSearch?,

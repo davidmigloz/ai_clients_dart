@@ -44,6 +44,19 @@ export 'src/models/batch/status.dart';
 export 'src/models/caching/cached_content.dart';
 export 'src/models/caching/cached_content_usage_metadata.dart';
 export 'src/models/caching/list_cached_contents_response.dart';
+// Models - Common
+export 'src/models/common/google_search.dart';
+export 'src/models/common/grounding_chunk_custom_metadata.dart';
+export 'src/models/common/grounding_chunk_string_list.dart';
+export 'src/models/common/image.dart';
+export 'src/models/common/image_search.dart';
+export 'src/models/common/interval.dart';
+export 'src/models/common/model_stage.dart';
+export 'src/models/common/model_status.dart';
+export 'src/models/common/register_files_request.dart';
+export 'src/models/common/register_files_response.dart';
+export 'src/models/common/search_types.dart';
+export 'src/models/common/web_search.dart';
 // Models - Content
 export 'src/models/content/blob.dart';
 export 'src/models/content/candidate.dart';

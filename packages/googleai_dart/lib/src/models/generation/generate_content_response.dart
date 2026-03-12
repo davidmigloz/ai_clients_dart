@@ -1,3 +1,4 @@
+import '../common/model_status.dart';
 import '../content/candidate.dart';
 import '../copy_with_sentinel.dart';
 import '../metadata/usage_metadata.dart';
@@ -20,6 +21,9 @@ class GenerateContentResponse {
   /// Unique identifier for the response.
   final String? responseId;
 
+  /// Optional. The status of the model used for generation.
+  final ModelStatus? modelStatus;
+
   /// Creates a [GenerateContentResponse].
   const GenerateContentResponse({
     this.candidates,
@@ -27,6 +31,7 @@ class GenerateContentResponse {
     this.usageMetadata,
     this.modelVersion,
     this.responseId,
+    this.modelStatus,
   });
 
   /// Creates a [GenerateContentResponse] from JSON.
@@ -49,6 +54,9 @@ class GenerateContentResponse {
             : null,
         modelVersion: json['modelVersion'] as String?,
         responseId: json['responseId'] as String?,
+        modelStatus: json['modelStatus'] != null
+            ? ModelStatus.fromJson(json['modelStatus'] as Map<String, dynamic>)
+            : null,
       );
 
   /// Converts to JSON.
@@ -59,6 +67,7 @@ class GenerateContentResponse {
     if (usageMetadata != null) 'usageMetadata': usageMetadata!.toJson(),
     if (modelVersion != null) 'modelVersion': modelVersion,
     if (responseId != null) 'responseId': responseId,
+    if (modelStatus != null) 'modelStatus': modelStatus!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -68,6 +77,7 @@ class GenerateContentResponse {
     Object? usageMetadata = unsetCopyWithValue,
     Object? modelVersion = unsetCopyWithValue,
     Object? responseId = unsetCopyWithValue,
+    Object? modelStatus = unsetCopyWithValue,
   }) {
     return GenerateContentResponse(
       candidates: candidates == unsetCopyWithValue
@@ -85,6 +95,9 @@ class GenerateContentResponse {
       responseId: responseId == unsetCopyWithValue
           ? this.responseId
           : responseId as String?,
+      modelStatus: modelStatus == unsetCopyWithValue
+          ? this.modelStatus
+          : modelStatus as ModelStatus?,
     );
   }
 }

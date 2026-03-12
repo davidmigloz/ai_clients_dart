@@ -1,12 +1,15 @@
 import '../copy_with_sentinel.dart';
 
-/// Media resolution for the input media.
+/// Media resolution for a media part, returned in the response.
 class MediaResolution {
-  /// The media resolution level.
+  /// The media resolution level used.
   final MediaResolutionLevel? level;
 
+  /// The number of tokens used for the media part at this resolution.
+  final int? numTokens;
+
   /// Creates a [MediaResolution].
-  const MediaResolution({this.level});
+  const MediaResolution({this.level, this.numTokens});
 
   /// Creates a [MediaResolution] from JSON.
   factory MediaResolution.fromJson(Map<String, dynamic> json) =>
@@ -14,22 +17,32 @@ class MediaResolution {
         level: json['level'] != null
             ? MediaResolutionLevel.fromString(json['level'] as String)
             : null,
+        numTokens: json['numTokens'] as int?,
       );
 
   /// Converts to JSON.
-  Map<String, dynamic> toJson() => {if (level != null) 'level': level!.value};
+  Map<String, dynamic> toJson() => {
+    if (level != null) 'level': level!.value,
+    if (numTokens != null) 'numTokens': numTokens,
+  };
 
   /// Creates a copy with replaced values.
-  MediaResolution copyWith({Object? level = unsetCopyWithValue}) {
+  MediaResolution copyWith({
+    Object? level = unsetCopyWithValue,
+    Object? numTokens = unsetCopyWithValue,
+  }) {
     return MediaResolution(
       level: level == unsetCopyWithValue
           ? this.level
           : level as MediaResolutionLevel?,
+      numTokens: numTokens == unsetCopyWithValue
+          ? this.numTokens
+          : numTokens as int?,
     );
   }
 
   @override
-  String toString() => 'MediaResolution(level: $level)';
+  String toString() => 'MediaResolution(level: $level, numTokens: $numTokens)';
 }
 
 /// Media resolution level.

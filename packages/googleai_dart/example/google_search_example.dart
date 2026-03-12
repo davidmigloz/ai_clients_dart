@@ -39,8 +39,8 @@ Future<void> googleSearchWithGenerateContent(GoogleAIClient client) async {
       contents: [
         Content.text('Who won Euro 2024 and what was the final score?'),
       ],
-      // Enable Google Search grounding with an empty map
-      tools: const [Tool(googleSearch: {})],
+      // Enable Google Search grounding
+      tools: const [Tool(googleSearch: GoogleSearch())],
     ),
   );
 

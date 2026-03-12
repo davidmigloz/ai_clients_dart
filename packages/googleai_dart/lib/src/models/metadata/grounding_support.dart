@@ -19,11 +19,16 @@ class GroundingSupport {
   /// same size as the grounding_chunk_indices.
   final List<double>? confidenceScores;
 
+  /// Optional. Indices of the parts that were rendered for this grounding
+  /// support.
+  final List<int>? renderedParts;
+
   /// Creates a [GroundingSupport].
   const GroundingSupport({
     this.segment,
     this.groundingChunkIndices,
     this.confidenceScores,
+    this.renderedParts,
   });
 
   /// Creates a [GroundingSupport] from JSON.
@@ -38,6 +43,8 @@ class GroundingSupport {
         confidenceScores: (json['confidenceScores'] as List?)
             ?.map((e) => (e as num).toDouble())
             .toList(),
+        renderedParts:
+            (json['renderedParts'] as List?)?.map((e) => e as int).toList(),
       );
 
   /// Converts to JSON.
@@ -46,6 +53,7 @@ class GroundingSupport {
     if (groundingChunkIndices != null)
       'groundingChunkIndices': groundingChunkIndices,
     if (confidenceScores != null) 'confidenceScores': confidenceScores,
+    if (renderedParts != null) 'renderedParts': renderedParts,
   };
 
   /// Creates a copy with replaced values.
@@ -53,6 +61,7 @@ class GroundingSupport {
     Object? segment = unsetCopyWithValue,
     Object? groundingChunkIndices = unsetCopyWithValue,
     Object? confidenceScores = unsetCopyWithValue,
+    Object? renderedParts = unsetCopyWithValue,
   }) {
     return GroundingSupport(
       segment: segment == unsetCopyWithValue
@@ -64,10 +73,13 @@ class GroundingSupport {
       confidenceScores: confidenceScores == unsetCopyWithValue
           ? this.confidenceScores
           : confidenceScores as List<double>?,
+      renderedParts: renderedParts == unsetCopyWithValue
+          ? this.renderedParts
+          : renderedParts as List<int>?,
     );
   }
 
   @override
   String toString() =>
-      'GroundingSupport(segment: $segment, groundingChunkIndices: $groundingChunkIndices, confidenceScores: $confidenceScores)';
+      'GroundingSupport(segment: $segment, groundingChunkIndices: $groundingChunkIndices, confidenceScores: $confidenceScores, renderedParts: $renderedParts)';
 }

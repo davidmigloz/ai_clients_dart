@@ -28,6 +28,9 @@ class GroundingMetadata {
   /// Only populated in the case that grounding with Google Maps is enabled.
   final String? googleMapsWidgetContextToken;
 
+  /// Optional. Image search queries for the following-up image searches.
+  final List<String>? imageSearchQueries;
+
   /// Creates a [GroundingMetadata].
   const GroundingMetadata({
     this.searchEntryPoint,
@@ -36,6 +39,7 @@ class GroundingMetadata {
     this.retrievalMetadata,
     this.webSearchQueries,
     this.googleMapsWidgetContextToken,
+    this.imageSearchQueries,
   });
 
   /// Creates a [GroundingMetadata] from JSON.
@@ -50,7 +54,9 @@ class GroundingMetadata {
             ?.map((e) => GroundingChunk.fromJson(e as Map<String, dynamic>))
             .toList(),
         groundingSupports: (json['groundingSupports'] as List?)
-            ?.map((e) => GroundingSupport.fromJson(e as Map<String, dynamic>))
+            ?.map(
+              (e) => GroundingSupport.fromJson(e as Map<String, dynamic>),
+            )
             .toList(),
         retrievalMetadata: json['retrievalMetadata'] != null
             ? RetrievalMetadata.fromJson(
@@ -62,6 +68,9 @@ class GroundingMetadata {
             .toList(),
         googleMapsWidgetContextToken:
             json['googleMapsWidgetContextToken'] as String?,
+        imageSearchQueries: (json['imageSearchQueries'] as List?)
+            ?.map((e) => e as String)
+            .toList(),
       );
 
   /// Converts to JSON.
@@ -72,6 +81,7 @@ class GroundingMetadata {
       'groundingChunks': groundingChunks!.map((e) => e.toJson()).toList(),
     if (groundingSupports != null)
       'groundingSupports': groundingSupports!.map((e) => e.toJson()).toList(),
+    if (imageSearchQueries != null) 'imageSearchQueries': imageSearchQueries,
     if (retrievalMetadata != null)
       'retrievalMetadata': retrievalMetadata!.toJson(),
     if (webSearchQueries != null) 'webSearchQueries': webSearchQueries,
@@ -87,6 +97,7 @@ class GroundingMetadata {
     Object? retrievalMetadata = unsetCopyWithValue,
     Object? webSearchQueries = unsetCopyWithValue,
     Object? googleMapsWidgetContextToken = unsetCopyWithValue,
+    Object? imageSearchQueries = unsetCopyWithValue,
   }) {
     return GroundingMetadata(
       searchEntryPoint: searchEntryPoint == unsetCopyWithValue
@@ -108,10 +119,13 @@ class GroundingMetadata {
           googleMapsWidgetContextToken == unsetCopyWithValue
           ? this.googleMapsWidgetContextToken
           : googleMapsWidgetContextToken as String?,
+      imageSearchQueries: imageSearchQueries == unsetCopyWithValue
+          ? this.imageSearchQueries
+          : imageSearchQueries as List<String>?,
     );
   }
 
   @override
   String toString() =>
-      'GroundingMetadata(searchEntryPoint: $searchEntryPoint, groundingChunks: $groundingChunks, groundingSupports: $groundingSupports, retrievalMetadata: $retrievalMetadata, webSearchQueries: $webSearchQueries, googleMapsWidgetContextToken: $googleMapsWidgetContextToken)';
+      'GroundingMetadata(searchEntryPoint: $searchEntryPoint, groundingChunks: $groundingChunks, groundingSupports: $groundingSupports, retrievalMetadata: $retrievalMetadata, webSearchQueries: $webSearchQueries, googleMapsWidgetContextToken: $googleMapsWidgetContextToken, imageSearchQueries: $imageSearchQueries)';
 }
