@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 import '../metadata/model_options.dart';
 
 /// Request for generating embeddings.
@@ -91,15 +92,21 @@ class EmbedRequest {
       other is EmbedRequest &&
           runtimeType == other.runtimeType &&
           model == other.model &&
-          input == other.input &&
+          _inputEquals(input, other.input) &&
           truncate == other.truncate &&
           dimensions == other.dimensions &&
           keepAlive == other.keepAlive &&
           options == other.options;
 
   @override
-  int get hashCode =>
-      Object.hash(model, input, truncate, dimensions, keepAlive, options);
+  int get hashCode => Object.hash(
+    model,
+    input is List ? listHash(input as List) : input,
+    truncate,
+    dimensions,
+    keepAlive,
+    options,
+  );
 
   @override
   String toString() =>
@@ -110,4 +117,12 @@ class EmbedRequest {
       'dimensions: $dimensions, '
       'keepAlive: $keepAlive, '
       'options: $options)';
+}
+
+/// Compares two [EmbedRequest.input] values for equality.
+///
+/// Handles both [String] and [List<String>] cases.
+bool _inputEquals(Object a, Object b) {
+  if (a is List && b is List) return listsEqual(a, b);
+  return a == b;
 }

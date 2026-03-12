@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 
 /// Additional information about the model's format and family.
 @immutable
@@ -86,12 +87,29 @@ class ModelDetails {
       other is ModelDetails &&
           runtimeType == other.runtimeType &&
           format == other.format &&
-          family == other.family;
+          family == other.family &&
+          listsEqual(families, other.families) &&
+          parameterSize == other.parameterSize &&
+          quantizationLevel == other.quantizationLevel &&
+          parentModel == other.parentModel;
 
   @override
-  int get hashCode => Object.hash(format, family);
+  int get hashCode => Object.hash(
+    format,
+    family,
+    listHash(families),
+    parameterSize,
+    quantizationLevel,
+    parentModel,
+  );
 
   @override
   String toString() =>
-      'ModelDetails(format: $format, family: $family, parameterSize: $parameterSize)';
+      'ModelDetails('
+      'format: $format, '
+      'family: $family, '
+      'families: $families, '
+      'parameterSize: $parameterSize, '
+      'quantizationLevel: $quantizationLevel, '
+      'parentModel: $parentModel)';
 }

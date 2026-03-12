@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 
 /// Log probability information for a single token alternative.
 @immutable
@@ -52,10 +53,11 @@ class TokenLogprob {
       other is TokenLogprob &&
           runtimeType == other.runtimeType &&
           token == other.token &&
-          logprob == other.logprob;
+          logprob == other.logprob &&
+          listsEqual(bytes, other.bytes);
 
   @override
-  int get hashCode => Object.hash(token, logprob);
+  int get hashCode => Object.hash(token, logprob, listHash(bytes));
 
   @override
   String toString() =>
@@ -127,10 +129,13 @@ class Logprob {
       other is Logprob &&
           runtimeType == other.runtimeType &&
           token == other.token &&
-          logprob == other.logprob;
+          logprob == other.logprob &&
+          listsEqual(bytes, other.bytes) &&
+          listsEqual(topLogprobs, other.topLogprobs);
 
   @override
-  int get hashCode => Object.hash(token, logprob);
+  int get hashCode =>
+      Object.hash(token, logprob, listHash(bytes), listHash(topLogprobs));
 
   @override
   String toString() =>

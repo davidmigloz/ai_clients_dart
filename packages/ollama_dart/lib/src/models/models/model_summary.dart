@@ -114,8 +114,16 @@ class ModelSummary {
           details == other.details;
 
   @override
-  int get hashCode =>
-      Object.hash(name, model, remoteModel, remoteHost, modifiedAt, size, digest, details);
+  int get hashCode => Object.hash(
+    name,
+    model,
+    remoteModel,
+    remoteHost,
+    modifiedAt,
+    size,
+    digest,
+    details,
+  );
 
   @override
   String toString() =>

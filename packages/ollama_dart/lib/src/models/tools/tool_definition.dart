@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 
 /// Function definition for a tool.
 @immutable
@@ -56,10 +57,12 @@ class ToolFunction {
       other is ToolFunction &&
           runtimeType == other.runtimeType &&
           name == other.name &&
-          description == other.description;
+          description == other.description &&
+          mapsDeepEqual(parameters, other.parameters);
 
   @override
-  int get hashCode => Object.hash(name, description);
+  int get hashCode =>
+      Object.hash(name, description, mapDeepHashCode(parameters));
 
   @override
   String toString() =>

@@ -95,7 +95,9 @@ class EmbedResponse {
   @override
   int get hashCode => Object.hash(
     model,
-    embeddings == null ? null.hashCode : Object.hashAll(embeddings!.map(listHash)),
+    embeddings == null
+        ? null.hashCode
+        : Object.hashAll(embeddings!.map(listHash)),
     totalDuration,
     loadDuration,
     promptEvalCount,

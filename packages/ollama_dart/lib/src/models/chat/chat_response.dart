@@ -68,8 +68,13 @@ class ChatResponseMessage {
           listsEqual(images, other.images);
 
   @override
-  int get hashCode =>
-      Object.hash(role, content, thinking, listHash(toolCalls), listHash(images));
+  int get hashCode => Object.hash(
+    role,
+    content,
+    thinking,
+    listHash(toolCalls),
+    listHash(images),
+  );
 
   @override
   String toString() =>

@@ -61,10 +61,11 @@ class ToolCallFunction {
           runtimeType == other.runtimeType &&
           name == other.name &&
           description == other.description &&
-          mapsEqual(arguments, other.arguments);
+          mapsDeepEqual(arguments, other.arguments);
 
   @override
-  int get hashCode => Object.hash(name, description, mapHash(arguments));
+  int get hashCode =>
+      Object.hash(name, description, mapDeepHashCode(arguments));
 
   @override
   String toString() =>

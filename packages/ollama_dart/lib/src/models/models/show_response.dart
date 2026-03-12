@@ -103,20 +103,20 @@ class ShowResponse {
           parameters == other.parameters &&
           license == other.license &&
           modifiedAt == other.modifiedAt &&
-          mapsEqual(details, other.details) &&
+          mapsDeepEqual(details, other.details) &&
           template == other.template &&
           listsEqual(capabilities, other.capabilities) &&
-          mapsEqual(modelInfo, other.modelInfo);
+          mapsDeepEqual(modelInfo, other.modelInfo);
 
   @override
   int get hashCode => Object.hash(
     parameters,
     license,
     modifiedAt,
-    mapHash(details),
+    mapDeepHashCode(details),
     template,
     listHash(capabilities),
-    mapHash(modelInfo),
+    mapDeepHashCode(modelInfo),
   );
 
   @override
