@@ -993,6 +993,23 @@ if (response.answerableProbability != null &&
     response.answerableProbability! < 0.5) {
   print('⚠️ Answer may not be grounded in sources');
 }
+
+// Using semantic retriever (for large corpora)
+final ragResponse = await client.models.generateAnswer(
+  model: 'aqa',
+  request: GenerateAnswerRequest(
+    contents: [
+      Content.text('What are the key features of Dart?'),
+    ],
+    answerStyle: AnswerStyle.verbose,
+    semanticRetriever: SemanticRetrieverConfig(
+      source: 'corpora/my-corpus',
+      query: Content.text('Dart programming language features'),
+      maxChunksCount: 5,
+      minimumRelevanceScore: 0.5,
+    ),
+  ),
+);
 ```
 
 **Features:**

@@ -99,6 +99,7 @@ export 'src/models/files/white_space_config.dart';
 // Models - Generation
 export 'src/models/generation/answer_style.dart';
 export 'src/models/generation/block_reason.dart';
+export 'src/models/generation/condition.dart';
 export 'src/models/generation/count_tokens_request.dart';
 export 'src/models/generation/count_tokens_response.dart';
 export 'src/models/generation/generate_answer_request.dart';
@@ -110,8 +111,11 @@ export 'src/models/generation/grounding_passage.dart';
 export 'src/models/generation/grounding_passages.dart';
 export 'src/models/generation/image_config.dart';
 export 'src/models/generation/input_feedback.dart';
+export 'src/models/generation/metadata_filter.dart';
 export 'src/models/generation/prompt_feedback.dart';
 export 'src/models/generation/schema.dart';
+export 'src/models/generation/semantic_retriever_chunk.dart';
+export 'src/models/generation/semantic_retriever_config.dart';
 export 'src/models/generation/thinking_config.dart';
 export 'src/models/generation/thinking_level.dart';
 // Models - Interactions API (Experimental)
