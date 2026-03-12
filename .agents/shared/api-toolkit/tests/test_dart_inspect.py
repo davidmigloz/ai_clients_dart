@@ -14,6 +14,7 @@ from api_toolkit.dart_inspect import (
     extract_fields,
     extract_from_json_keys,
     extract_method_body,
+    extract_named_factories,
     extract_public_methods,
 )
 
@@ -193,6 +194,58 @@ class DartInspectTests(unittest.TestCase):
             methods = extract_public_methods(path, "ExampleResource")
 
         self.assertEqual(methods, {"create", "listAll"})
+
+    def test_extract_named_factories_detects_named_factory_constructors(self) -> None:
+        content = (
+            "class MyClient {\n"
+            "  MyClient();\n"
+            "  factory MyClient.fromEnvironment() => MyClient();\n"
+            "  factory MyClient.withApiKey(String key) => MyClient();\n"
+            "  void close() {}\n"
+            "  Future<void> connect() async {}\n"
+            "}\n"
+        )
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path = Path(tmp_dir) / "my_client.dart"
+            path.write_text(content)
+
+            factories = extract_named_factories(path, "MyClient")
+
+        self.assertEqual(factories, {"fromEnvironment", "withApiKey"})
+
+    def test_extract_named_factories_excludes_unnamed_constructors_and_methods(self) -> None:
+        content = (
+            "class MyClient {\n"
+            "  MyClient();\n"
+            "  const MyClient.internal();\n"
+            "  void close() {}\n"
+            "}\n"
+        )
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path = Path(tmp_dir) / "my_client.dart"
+            path.write_text(content)
+
+            factories = extract_named_factories(path, "MyClient")
+
+        # const named constructor (no factory keyword) is not included
+        self.assertEqual(factories, set())
+
+    def test_extract_named_factories_returns_empty_for_missing_class(self) -> None:
+        content = (
+            "class MyClient {\n"
+            "  factory MyClient.fromEnvironment() => MyClient();\n"
+            "}\n"
+        )
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path = Path(tmp_dir) / "my_client.dart"
+            path.write_text(content)
+
+            factories = extract_named_factories(path, "Missing")
+
+        self.assertEqual(factories, set())
 
     def test_extract_public_methods_ignores_method_body_statements(self) -> None:
         content = (

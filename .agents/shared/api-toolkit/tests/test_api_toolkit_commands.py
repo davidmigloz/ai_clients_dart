@@ -4247,6 +4247,68 @@ class ApiToolkitCommandTests(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["results"]["docs"]["issues"], [])
 
+    def test_verify_docs_client_utility_methods_not_flagged_as_stale(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample API", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(root / "tmp" / "sample"),
+                },
+            )
+            (package_root / "specs" / "openapi.json").write_text(
+                json.dumps({"openapi": "3.1.0", "info": {"title": "Sample", "version": "1"}, "paths": {}, "components": {"schemas": {}}})
+            )
+            # Client with regular utility methods and named factory constructors
+            client_dir = package_root / "lib" / "src" / "client"
+            client_dir.mkdir(parents=True)
+            (client_dir / "sample_client.dart").write_text(
+                "class SampleClient {\n"
+                "  factory SampleClient.fromEnvironment() => SampleClient._();\n"
+                "  SampleClient._();\n"
+                "  void close() {}\n"
+                "}\n"
+            )
+            # Live client in a subdirectory (not lib/src/client/)
+            live_dir = package_root / "lib" / "src" / "live"
+            live_dir.mkdir(parents=True)
+            (live_dir / "live_client.dart").write_text(
+                "class LiveClient {\n"
+                "  Future<void> connect() async {}\n"
+                "  Future<void> resume(String id) async {}\n"
+                "}\n"
+            )
+            # README references these utility methods — should NOT trigger stale warnings
+            (package_root / "README.md").write_text(
+                "# Sample\n\n"
+                "Use `client.close()` to release resources.\n"
+                "Use `client.fromEnvironment()` to create from env.\n"
+                "Use `liveClient.connect()` to start a session.\n"
+                "Use `liveClient.resume(id)` to resume.\n"
+            )
+
+            exit_code, payload = command_verify(
+                SimpleNamespace(
+                    config_dir=config_dir,
+                    spec_name=None,
+                    checks="docs",
+                    scope="all",
+                    type_name=None,
+                    baseline=None,
+                    git_ref=None,
+                )
+            )
+
+            self.assertEqual(exit_code, 0)
+            docs_issues = payload["results"]["docs"]["issues"]
+            stale_warnings = [i for i in docs_issues if i.get("level") == "warning" and "stale" in i.get("message", "").lower()]
+            self.assertEqual(stale_warnings, [], f"Unexpected stale-reference warnings: {stale_warnings}")
+
     def test_selected_assets_use_local_sentinel_pattern(self) -> None:
         toolkit_root = Path(__file__).resolve().parents[1]
         model_template = (toolkit_root / "assets" / "model_template.dart").read_text()
