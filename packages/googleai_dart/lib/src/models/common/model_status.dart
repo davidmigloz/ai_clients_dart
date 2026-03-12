@@ -10,7 +10,7 @@ class ModelStatus {
   final ModelStage? modelStage;
 
   /// Optional. The time when the model will be retired.
-  final String? retirementTime;
+  final DateTime? retirementTime;
 
   /// Creates a [ModelStatus].
   const ModelStatus({this.message, this.modelStage, this.retirementTime});
@@ -21,14 +21,17 @@ class ModelStatus {
     modelStage: json['modelStage'] != null
         ? modelStageFromString(json['modelStage'] as String)
         : null,
-    retirementTime: json['retirementTime'] as String?,
+    retirementTime: json['retirementTime'] != null
+        ? DateTime.parse(json['retirementTime'] as String)
+        : null,
   );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (message != null) 'message': message,
     if (modelStage != null) 'modelStage': modelStageToString(modelStage!),
-    if (retirementTime != null) 'retirementTime': retirementTime,
+    if (retirementTime != null)
+      'retirementTime': retirementTime!.toIso8601String(),
   };
 
   /// Creates a copy with replaced values.
@@ -46,11 +49,11 @@ class ModelStatus {
           : modelStage as ModelStage?,
       retirementTime: retirementTime == unsetCopyWithValue
           ? this.retirementTime
-          : retirementTime as String?,
+          : retirementTime as DateTime?,
     );
   }
 
   @override
   String toString() =>
-      'ModelStatus(message: $message, modelStage: $modelStage, retirementTime: $retirementTime)';
+      'ModelStatus(message: $message, modelStage: $modelStage, retirementTime: ${retirementTime?.toIso8601String()})';
 }

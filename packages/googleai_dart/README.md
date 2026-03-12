@@ -585,8 +585,8 @@ final response = await client.models.generateContent(
   model: 'gemini-3.1-flash-preview',
   request: GenerateContentRequest(
     contents: [Content.text('Who won Euro 2024?')],
-    // Enable Google Search grounding with an empty map
-    tools: [Tool(googleSearch: {})],
+    // Enable Google Search grounding
+    tools: [Tool(googleSearch: GoogleSearch())],
   ),
 );
 

@@ -30,7 +30,8 @@ enum ModelStage {
 
 /// Parses a [ModelStage] from its string representation.
 ModelStage modelStageFromString(String? value) {
-  return switch (value) {
+  final normalized = value?.toUpperCase();
+  return switch (normalized) {
     'MODEL_STAGE_UNSPECIFIED' => ModelStage.modelStageUnspecified,
     'UNSTABLE_EXPERIMENTAL' => ModelStage.unstableExperimental,
     'EXPERIMENTAL' => ModelStage.experimental,
@@ -54,6 +55,6 @@ String modelStageToString(ModelStage value) {
     ModelStage.legacy => 'LEGACY',
     ModelStage.deprecated => 'DEPRECATED',
     ModelStage.retired => 'RETIRED',
-    ModelStage.unknown => 'unknown',
+    ModelStage.unknown => 'MODEL_STAGE_UNSPECIFIED',
   };
 }
