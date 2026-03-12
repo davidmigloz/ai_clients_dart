@@ -51,6 +51,7 @@ from .dart_inspect import (
     extract_fields,
     extract_from_json_keys,
     extract_method_body,
+    extract_named_factories,
     extract_public_methods,
     find_declared_classes,
     read_text,
@@ -768,7 +769,9 @@ def _check_field_methods(entry: ManifestEntry, file_path: Path, fields: set[str]
         "toString": extract_method_body(class_block, r"toString\s*\(\)"),
     }
     effective_fields = fields - constant_fields
-    json_keys = {snake_case(field) for field in effective_fields} | effective_fields
+    # Build (camelCase, snake_case) pairs for fromJson/toJson — at least one variant must appear.
+    # This supports both packages that use snake_case JSON keys and those that use camelCase.
+    json_key_alternatives = [(field, snake_case(field)) for field in effective_fields]
     for method_name, body in methods.items():
         if not body:
             if method_name in required_methods:
@@ -781,8 +784,17 @@ def _check_field_methods(entry: ManifestEntry, file_path: Path, fields: set[str]
                     )
                 )
             continue
-        expected = effective_fields if method_name in {"copyWith", "operator ==", "hashCode", "toString"} else json_keys
-        missing = contains_all_names(body, expected)
+        if method_name in {"copyWith", "operator ==", "hashCode", "toString"}:
+            # These methods reference Dart field names directly (always camelCase)
+            missing = contains_all_names(body, effective_fields)
+        else:
+            # fromJson and toJson: accept either camelCase or snake_case JSON key
+            missing = {
+                camel
+                for camel, snake in json_key_alternatives
+                if not re.search(rf"\b{re.escape(camel)}\b", body)
+                and not re.search(rf"\b{re.escape(snake)}\b", body)
+            }
         if missing:
             issues.append(
                 _type_issue(
@@ -1258,6 +1270,14 @@ def _verify_openapi_docs(config: ToolkitConfig, readme: str) -> list[dict[str, A
     # Include raw exclusion names so non-API references (e.g. client.close())
     # are also suppressed in the README stale-reference check.
     excluded_access_paths |= {name.lower() for name in config.documentation.excluded_resources}
+    # Auto-detect client utility methods (close, fromEnvironment, createLiveClient, etc.)
+    # from *_client.dart files so README references to these methods don't get flagged
+    # as stale resource references.
+    client_methods = _dart_client_method_inventory(config)
+    # _dart_client_method_inventory returns snake_case (e.g. "create_live_client").
+    # Convert to camelCase then lowercase to match the README scanner's output.
+    client_method_access_paths = {camel_case(m).lower() for m in client_methods}
+    excluded_access_paths |= client_method_access_paths - implemented_access_paths
     readme_lower = readme.lower()
     documented_resources = {
         resource.resource_key
@@ -2125,17 +2145,21 @@ def _dart_resource_inventory(config: ToolkitConfig) -> tuple[dict[str, set[str]]
 
 
 def _dart_client_method_inventory(config: ToolkitConfig) -> set[str]:
-    client_dir = config.package_root / "lib" / "src" / "client"
-    if not client_dir.exists():
+    src_dir = config.package_root / "lib" / "src"
+    if not src_dir.exists():
         return set()
     methods: set[str] = set()
-    for path in sorted(client_dir.glob("*_client.dart")):
+    for path in sorted(src_dir.rglob("*_client.dart")):
         for class_name in find_declared_classes(path):
             if not class_name.endswith("Client"):
                 continue
             methods.update(
                 _normalize_reference_method(method)
                 for method in extract_public_methods(path, class_name)
+            )
+            methods.update(
+                _normalize_reference_method(factory)
+                for factory in extract_named_factories(path, class_name)
             )
     return methods
 

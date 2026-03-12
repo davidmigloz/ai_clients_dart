@@ -160,6 +160,16 @@ def extract_public_methods(path: Path, class_name: str | None = None) -> set[str
     return methods
 
 
+def extract_named_factories(path: Path, class_name: str | None = None) -> set[str]:
+    content = read_text(path)
+    if class_name:
+        content = extract_class_block(content, class_name)
+    if not content:
+        return set()
+    # Match named factory constructors: factory ClassName.factoryName(
+    return {m.group(1) for m in re.finditer(r"\bfactory\s+\w+\.(\w+)\s*[(<]", content)}
+
+
 def camel_case(name: str) -> str:
     if "_" not in name:
         return name[0].lower() + name[1:] if name and name[0].isupper() else name

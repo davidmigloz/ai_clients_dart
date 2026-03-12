@@ -106,16 +106,7 @@
     "fileSearchStores": "completeApi",
     "corpora": "completeApi"
   },
-  "excluded_from_examples": [
-    "authTokens",
-    "corpora",
-    "documents",
-    "fileSearchStores",
-    "generatedFiles",
-    "operations",
-    "permissions",
-    "tunedModels"
-  ],
+  "excluded_from_examples": [],
   "drift_patterns": [
     {
       "pattern": "response\\.candidates\\?\\.first\\.content\\?\\.parts\\b",
