@@ -25,11 +25,7 @@ class CreateCollectionRequest {
 
   /// Converts this request to JSON.
   Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'metadata': ?metadata,
-      'get_or_create': ?getOrCreate,
-    };
+    return {'name': name, 'metadata': ?metadata, 'get_or_create': ?getOrCreate};
   }
 
   /// Creates a copy with replaced values.

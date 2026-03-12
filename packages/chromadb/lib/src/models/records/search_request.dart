@@ -27,10 +27,7 @@ class SearchFilter {
 
   /// Converts this filter to JSON.
   Map<String, dynamic> toJson() {
-    return {
-      'query_ids': ?queryIds,
-      'where_clause': ?whereClause,
-    };
+    return {'query_ids': ?queryIds, 'where_clause': ?whereClause};
   }
 
   /// Creates a copy with replaced values.
@@ -91,10 +88,7 @@ class SearchGroupBy {
 
   /// Converts this group by to JSON.
   Map<String, dynamic> toJson() {
-    return {
-      'aggregate': ?aggregate,
-      'keys': ?keys,
-    };
+    return {'aggregate': ?aggregate, 'keys': ?keys};
   }
 
   /// Creates a copy with replaced values.
@@ -150,10 +144,7 @@ class SearchLimit {
 
   /// Converts this limit to JSON.
   Map<String, dynamic> toJson() {
-    return {
-      'limit': ?limit,
-      'offset': ?offset,
-    };
+    return {'limit': ?limit, 'offset': ?offset};
   }
 
   /// Creates a copy with replaced values.

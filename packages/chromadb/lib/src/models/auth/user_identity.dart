@@ -32,11 +32,7 @@ class UserIdentity {
 
   /// Converts this identity to JSON.
   Map<String, dynamic> toJson() {
-    return {
-      'user_id': ?userId,
-      'tenant': ?tenant,
-      'databases': ?databases,
-    };
+    return {'user_id': ?userId, 'tenant': ?tenant, 'databases': ?databases};
   }
 
   /// Creates a copy of this identity with optional modifications.
