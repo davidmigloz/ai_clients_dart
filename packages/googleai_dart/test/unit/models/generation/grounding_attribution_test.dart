@@ -155,10 +155,7 @@ void main() {
       );
       final restored = GroundingAttribution.fromJson(attr.toJson());
       expect(restored.content!.parts, hasLength(1));
-      expect(
-        restored.sourceId!.semanticRetrieverChunk!.source,
-        'corpora/123',
-      );
+      expect(restored.sourceId!.semanticRetrieverChunk!.source, 'corpora/123');
     });
 
     test('copyWith', () {
@@ -167,9 +164,7 @@ void main() {
           groundingPassage: GroundingPassageId(partIndex: 0, passageId: 'p0'),
         ),
       );
-      final updated = attr.copyWith(
-        content: Content.text('new content'),
-      );
+      final updated = attr.copyWith(content: Content.text('new content'));
       expect(updated.content, isNotNull);
       expect(updated.sourceId!.groundingPassage!.passageId, 'p0');
     });
@@ -208,12 +203,18 @@ void main() {
       final candidate = Candidate.fromJson(json);
       expect(candidate.groundingAttributions, hasLength(2));
       expect(
-        candidate.groundingAttributions![0].sourceId!.groundingPassage!
+        candidate
+            .groundingAttributions![0]
+            .sourceId!
+            .groundingPassage!
             .passageId,
         'p1',
       );
       expect(
-        candidate.groundingAttributions![1].sourceId!.semanticRetrieverChunk!
+        candidate
+            .groundingAttributions![1]
+            .sourceId!
+            .semanticRetrieverChunk!
             .source,
         'corpora/123',
       );
