@@ -24,7 +24,9 @@ void main() async {
       cachedContent: CachedContent(
         model: 'models/gemini-3.1-flash-preview',
         displayName: 'Math Expert Cache',
-        systemInstruction: Content.text('You are an expert mathematician.'),
+        systemInstruction: Content(
+          parts: [Part.text('You are an expert mathematician.')],
+        ),
         ttl: '3600s', // Cache for 1 hour
       ),
     );
