@@ -61,3 +61,7 @@ class Image {
   String toString() =>
       'Image(domain: $domain, imageUri: $imageUri, sourceUri: $sourceUri, title: $title)';
 }
+
+/// Deprecated: Use [Image] instead.
+@Deprecated('Use Image instead')
+typedef GroundingImage = Image;
