@@ -3,10 +3,6 @@ enum ModelStage {
   /// Unspecified stage.
   unspecified,
 
-  /// Deprecated: Use [unspecified] instead.
-  @Deprecated('Use ModelStage.unspecified instead')
-  modelStageUnspecified,
-
   /// Unstable experimental stage.
   unstableExperimental,
 
@@ -50,9 +46,7 @@ ModelStage modelStageFromString(String? value) {
 /// Converts a [ModelStage] to its string representation.
 String modelStageToString(ModelStage value) {
   return switch (value) {
-    ModelStage.unspecified ||
-    // ignore: deprecated_member_use_from_same_package
-    ModelStage.modelStageUnspecified => 'MODEL_STAGE_UNSPECIFIED',
+    ModelStage.unspecified => 'MODEL_STAGE_UNSPECIFIED',
     ModelStage.unstableExperimental => 'UNSTABLE_EXPERIMENTAL',
     ModelStage.experimental => 'EXPERIMENTAL',
     ModelStage.preview => 'PREVIEW',
