@@ -73,7 +73,9 @@
       "global": []
     },
     "resource_aliases": {},
-    "excluded_resources": ["complete"]
+    "excluded_resources": [
+      "complete"
+    ]
   },
   "types": {
     "Message": {
@@ -88,12 +90,11 @@
     },
     "CreateMessageRequest": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "MessageCreateRequest",
       "file": "lib/src/models/messages/message_create_request.dart",
-      "schema": "CreateMessageRequest",
-      "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "schema": "CreateMessageParams",
+      "tags": []
     },
     "Tool": {
       "spec": "main",
@@ -102,7 +103,7 @@
       "file": "lib/src/models/tools/tool_definition.dart",
       "schema": "Tool",
       "parent": "ToolDefinition",
-      "note": "Detects built-in vs custom by checking if type starts with known prefixes (bash_, web_search_, etc.). Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Wrapper class \u2014 CustomToolDefinition wraps the spec Tool schema with additional routing logic."
     },
     "Usage": {
       "spec": "main",
@@ -113,11 +114,13 @@
     },
     "CacheControlEphemeral": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "CacheControlEphemeral",
       "file": "lib/src/models/metadata/cache_control.dart",
       "schema": "CacheControlEphemeral",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "InputSchema": {
       "spec": "main",
@@ -128,19 +131,17 @@
     },
     "RequestCounts": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "RequestCounts",
       "file": "lib/src/models/batches/message_batch.dart",
-      "schema": "RequestCounts",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "schema": "BetaRequestCounts"
     },
     "MessageBatchIndividualResponse": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "BatchIndividualResponse",
       "file": "lib/src/models/batches/message_batch.dart",
-      "schema": "MessageBatchIndividualResponse",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "schema": "BetaMessageBatchIndividualResponse"
     },
     "MessageBatch": {
       "spec": "main",
@@ -177,120 +178,150 @@
     },
     "TextBlock": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "TextBlock",
       "file": "lib/src/models/content/content_block.dart",
-      "schema": "TextBlock",
+      "schema": "ResponseTextBlock",
       "parent": "ContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "ThinkingBlock": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ThinkingBlock",
       "file": "lib/src/models/content/content_block.dart",
-      "schema": "ThinkingBlock",
+      "schema": "ResponseThinkingBlock",
       "parent": "ContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "RedactedThinkingBlock": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "RedactedThinkingBlock",
       "file": "lib/src/models/content/content_block.dart",
-      "schema": "RedactedThinkingBlock",
+      "schema": "ResponseRedactedThinkingBlock",
       "parent": "ContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "ToolUseBlock": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ToolUseBlock",
       "file": "lib/src/models/content/content_block.dart",
-      "schema": "ToolUseBlock",
+      "schema": "ResponseToolUseBlock",
       "parent": "ContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type",
+        "caller"
+      ]
     },
     "ServerToolUseBlock": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ServerToolUseBlock",
       "file": "lib/src/models/content/content_block.dart",
-      "schema": "ServerToolUseBlock",
+      "schema": "ResponseServerToolUseBlock",
       "parent": "ContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type",
+        "caller"
+      ]
     },
     "ResponseWebSearchToolResultBlock": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "WebSearchToolResultBlock",
       "file": "lib/src/models/content/content_block.dart",
       "schema": "ResponseWebSearchToolResultBlock",
       "parent": "ContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type",
+        "caller"
+      ]
     },
     "ResponseWebFetchToolResultBlock": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "WebFetchToolResultBlock",
       "file": "lib/src/models/content/content_block.dart",
       "schema": "ResponseWebFetchToolResultBlock",
       "parent": "ContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type",
+        "caller"
+      ]
     },
     "ResponseCodeExecutionToolResultBlock": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "CodeExecutionToolResultBlock",
       "file": "lib/src/models/content/content_block.dart",
       "schema": "ResponseCodeExecutionToolResultBlock",
       "parent": "ContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "ResponseBashCodeExecutionToolResultBlock": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "BashCodeExecutionToolResultBlock",
       "file": "lib/src/models/content/content_block.dart",
       "schema": "ResponseBashCodeExecutionToolResultBlock",
       "parent": "ContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "ResponseTextEditorCodeExecutionToolResultBlock": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "TextEditorCodeExecutionToolResultBlock",
       "file": "lib/src/models/content/content_block.dart",
       "schema": "ResponseTextEditorCodeExecutionToolResultBlock",
       "parent": "ContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "ResponseToolSearchToolResultBlock": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ToolSearchToolResultBlock",
       "file": "lib/src/models/content/content_block.dart",
       "schema": "ResponseToolSearchToolResultBlock",
       "parent": "ContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "ResponseContainerUploadBlock": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ContainerUploadBlock",
       "file": "lib/src/models/content/content_block.dart",
       "schema": "ResponseContainerUploadBlock",
       "parent": "ContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "ResponseCompactionBlock": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "CompactionBlock",
       "file": "lib/src/models/content/content_block.dart",
-      "schema": "ResponseCompactionBlock",
+      "schema": "BetaResponseCompactionBlock",
       "parent": "ContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "InputContentBlock": {
       "spec": "main",
@@ -322,138 +353,171 @@
     },
     "TextBlockParam": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "TextInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
-      "schema": "TextBlockParam",
+      "schema": "RequestTextBlock",
       "parent": "InputContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type",
+        "citations"
+      ]
     },
     "ImageBlockParam": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ImageInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
-      "schema": "ImageBlockParam",
+      "schema": "RequestImageBlock",
       "parent": "InputContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "DocumentBlockParam": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "DocumentInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
-      "schema": "DocumentBlockParam",
+      "schema": "RequestDocumentBlock",
       "parent": "InputContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type",
+        "citations",
+        "context"
+      ]
     },
     "ToolUseBlockParam": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ToolUseInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
-      "schema": "ToolUseBlockParam",
+      "schema": "RequestToolUseBlock",
       "parent": "InputContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "ToolResultBlockParam": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ToolResultInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
-      "schema": "ToolResultBlockParam",
+      "schema": "RequestToolResultBlock",
       "parent": "InputContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "ServerToolUseBlockParam": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ServerToolUseInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
-      "schema": "ServerToolUseBlockParam",
+      "schema": "RequestServerToolUseBlock",
       "parent": "InputContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "RequestWebSearchToolResultBlockParam": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "WebSearchToolResultInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
-      "schema": "RequestWebSearchToolResultBlockParam",
+      "schema": "RequestWebSearchToolResultBlock",
       "parent": "InputContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "RequestWebFetchToolResultBlockParam": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "WebFetchToolResultInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
-      "schema": "RequestWebFetchToolResultBlockParam",
+      "schema": "RequestWebFetchToolResultBlock",
       "parent": "InputContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "RequestCodeExecutionToolResultBlockParam": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "CodeExecutionToolResultInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
-      "schema": "RequestCodeExecutionToolResultBlockParam",
+      "schema": "RequestCodeExecutionToolResultBlock",
       "parent": "InputContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "RequestBashCodeExecutionToolResultBlockParam": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "BashCodeExecutionToolResultInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
-      "schema": "RequestBashCodeExecutionToolResultBlockParam",
+      "schema": "RequestBashCodeExecutionToolResultBlock",
       "parent": "InputContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "RequestTextEditorCodeExecutionToolResultBlockParam": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "TextEditorCodeExecutionToolResultInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
-      "schema": "RequestTextEditorCodeExecutionToolResultBlockParam",
+      "schema": "RequestTextEditorCodeExecutionToolResultBlock",
       "parent": "InputContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "RequestToolSearchToolResultBlockParam": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ToolSearchToolResultInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
-      "schema": "RequestToolSearchToolResultBlockParam",
+      "schema": "RequestToolSearchToolResultBlock",
       "parent": "InputContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "RequestContainerUploadBlockParam": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ContainerUploadInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
-      "schema": "RequestContainerUploadBlockParam",
+      "schema": "RequestContainerUploadBlock",
       "parent": "InputContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "RequestCompactionBlockParam": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "CompactionInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
-      "schema": "RequestCompactionBlockParam",
+      "schema": "BetaRequestCompactionBlock",
       "parent": "InputContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "RequestToolReferenceBlockParam": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ToolReferenceInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
-      "schema": "RequestToolReferenceBlockParam",
+      "schema": "RequestToolReferenceBlock",
       "parent": "InputContentBlock",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "ToolResultContent": {
       "spec": "main",
@@ -477,7 +541,7 @@
       "file": "lib/src/models/content/input_content_block.dart",
       "schema": "ToolResultBlockParamContentVariant0",
       "parent": "ToolResultContent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Anonymous spec variant \u2014 not a named schema, represents text content within tool results."
     },
     "ToolResultBlockParamContentVariant1": {
       "spec": "main",
@@ -486,7 +550,7 @@
       "file": "lib/src/models/content/input_content_block.dart",
       "schema": "ToolResultBlockParamContentVariant1",
       "parent": "ToolResultContent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Anonymous spec variant \u2014 not a named schema, represents image/document content within tool results."
     },
     "Citation": {
       "spec": "main",
@@ -507,39 +571,51 @@
     },
     "CitationCharLocation": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "CharLocationCitation",
       "file": "lib/src/models/content/content_block.dart",
-      "schema": "CitationCharLocation",
+      "schema": "BetaResponseCharLocationCitation",
       "parent": "Citation",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type",
+        "file_id"
+      ]
     },
     "CitationPageLocation": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "PageLocationCitation",
       "file": "lib/src/models/content/content_block.dart",
-      "schema": "CitationPageLocation",
+      "schema": "BetaResponsePageLocationCitation",
       "parent": "Citation",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type",
+        "file_id"
+      ]
     },
     "CitationContentBlockLocation": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ContentBlockLocationCitation",
       "file": "lib/src/models/content/content_block.dart",
-      "schema": "CitationContentBlockLocation",
+      "schema": "BetaResponseContentBlockLocationCitation",
       "parent": "Citation",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type",
+        "file_id"
+      ]
     },
     "CitationWebSearchResultLocation": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "WebSearchResultLocationCitation",
       "file": "lib/src/models/content/content_block.dart",
-      "schema": "CitationWebSearchResultLocation",
+      "schema": "BetaResponseWebSearchResultLocationCitation",
       "parent": "Citation",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type",
+        "url"
+      ]
     },
     "WebSearchResult": {
       "spec": "main",
@@ -563,7 +639,7 @@
       "file": "lib/src/models/content/content_block.dart",
       "schema": "array of ResponseWebSearchResultBlock",
       "parent": "WebSearchResult",
-      "note": "content is anyOf: List<WebSearchResultItem> (success) or Map with type=web_search_tool_result_error (error). fromJson accepts Object, not Map. Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "content is anyOf: List<WebSearchResultItem> (success) or Map with type=web_search_tool_result_error (error). fromJson accepts Object, not Map."
     },
     "ResponseWebSearchToolResultError": {
       "spec": "main",
@@ -572,7 +648,7 @@
       "file": "lib/src/models/content/content_block.dart",
       "schema": "ResponseWebSearchToolResultError",
       "parent": "WebSearchResult",
-      "note": "content is anyOf: List<WebSearchResultItem> (success) or Map with type=web_search_tool_result_error (error). fromJson accepts Object, not Map. Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "content is anyOf: List<WebSearchResultItem> (success) or Map with type=web_search_tool_result_error (error). fromJson accepts Object, not Map."
     },
     "ImageSource": {
       "spec": "main",
@@ -591,21 +667,25 @@
     },
     "Base64ImageSource": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "Base64ImageSource",
       "file": "lib/src/models/sources/image_source.dart",
       "schema": "Base64ImageSource",
       "parent": "ImageSource",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "URLImageSource": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "UrlImageSource",
       "file": "lib/src/models/sources/image_source.dart",
       "schema": "URLImageSource",
       "parent": "ImageSource",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "DocumentSource": {
       "spec": "main",
@@ -625,30 +705,36 @@
     },
     "Base64PDFSource": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "Base64PdfSource",
       "file": "lib/src/models/sources/document_source.dart",
       "schema": "Base64PDFSource",
       "parent": "DocumentSource",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "PlainTextSource": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "PlainTextSource",
       "file": "lib/src/models/sources/document_source.dart",
       "schema": "PlainTextSource",
       "parent": "DocumentSource",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "URLPDFSource": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "UrlPdfSource",
       "file": "lib/src/models/sources/document_source.dart",
       "schema": "URLPDFSource",
       "parent": "DocumentSource",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "MessageStreamEvent": {
       "spec": "main",
@@ -673,57 +759,69 @@
     },
     "MessageStartEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "MessageStartEvent",
       "file": "lib/src/models/streaming/message_stream_event.dart",
       "schema": "MessageStartEvent",
       "parent": "MessageStreamEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "MessageDeltaEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "MessageDeltaEvent",
       "file": "lib/src/models/streaming/message_stream_event.dart",
       "schema": "MessageDeltaEvent",
       "parent": "MessageStreamEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "MessageStopEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "MessageStopEvent",
       "file": "lib/src/models/streaming/message_stream_event.dart",
       "schema": "MessageStopEvent",
       "parent": "MessageStreamEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "ContentBlockStartEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ContentBlockStartEvent",
       "file": "lib/src/models/streaming/message_stream_event.dart",
       "schema": "ContentBlockStartEvent",
       "parent": "MessageStreamEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "ContentBlockDeltaEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ContentBlockDeltaEvent",
       "file": "lib/src/models/streaming/message_stream_event.dart",
       "schema": "ContentBlockDeltaEvent",
       "parent": "MessageStreamEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "ContentBlockStopEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ContentBlockStopEvent",
       "file": "lib/src/models/streaming/message_stream_event.dart",
       "schema": "ContentBlockStopEvent",
       "parent": "MessageStreamEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "PingEvent": {
       "spec": "main",
@@ -732,7 +830,7 @@
       "file": "lib/src/models/streaming/message_stream_event.dart",
       "schema": "PingEvent",
       "parent": "MessageStreamEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "No named schema in spec \u2014 the ping event has no dedicated schema definition."
     },
     "ErrorEvent": {
       "spec": "main",
@@ -741,7 +839,7 @@
       "file": "lib/src/models/streaming/message_stream_event.dart",
       "schema": "ErrorEvent",
       "parent": "MessageStreamEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "No named schema in spec \u2014 the error event uses a non-standard nested error object structure."
     },
     "ContentBlockDelta": {
       "spec": "main",
@@ -764,57 +862,69 @@
     },
     "TextDelta": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "TextDelta",
       "file": "lib/src/models/streaming/content_block_delta.dart",
-      "schema": "TextDelta",
+      "schema": "TextContentBlockDelta",
       "parent": "ContentBlockDelta",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "InputJSONDelta": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "InputJsonDelta",
       "file": "lib/src/models/streaming/content_block_delta.dart",
-      "schema": "InputJSONDelta",
+      "schema": "InputJsonContentBlockDelta",
       "parent": "ContentBlockDelta",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "ThinkingDelta": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ThinkingDelta",
       "file": "lib/src/models/streaming/content_block_delta.dart",
-      "schema": "ThinkingDelta",
+      "schema": "ThinkingContentBlockDelta",
       "parent": "ContentBlockDelta",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "SignatureDelta": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "SignatureDelta",
       "file": "lib/src/models/streaming/content_block_delta.dart",
-      "schema": "SignatureDelta",
+      "schema": "SignatureContentBlockDelta",
       "parent": "ContentBlockDelta",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "CitationsDelta": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "CitationsDelta",
       "file": "lib/src/models/streaming/content_block_delta.dart",
       "schema": "CitationsDelta",
       "parent": "ContentBlockDelta",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "CompactionDelta": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "CompactionDelta",
       "file": "lib/src/models/streaming/content_block_delta.dart",
-      "schema": "CompactionDelta",
+      "schema": "BetaCompactionContentBlockDelta",
       "parent": "ContentBlockDelta",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "ThinkingConfig": {
       "spec": "main",
@@ -834,30 +944,36 @@
     },
     "ThinkingConfigEnabled": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ThinkingEnabled",
       "file": "lib/src/models/messages/thinking_config.dart",
       "schema": "ThinkingConfigEnabled",
       "parent": "ThinkingConfig",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "ThinkingConfigDisabled": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ThinkingDisabled",
       "file": "lib/src/models/messages/thinking_config.dart",
       "schema": "ThinkingConfigDisabled",
       "parent": "ThinkingConfig",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "ThinkingConfigAdaptive": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ThinkingAdaptive",
       "file": "lib/src/models/messages/thinking_config.dart",
       "schema": "ThinkingConfigAdaptive",
       "parent": "ThinkingConfig",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "ToolChoice": {
       "spec": "main",
@@ -878,54 +994,61 @@
     },
     "ToolChoiceAuto": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ToolChoiceAuto",
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": "ToolChoiceAuto",
       "parent": "ToolChoice",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "ToolChoiceAny": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ToolChoiceAny",
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": "ToolChoiceAny",
       "parent": "ToolChoice",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "ToolChoiceTool": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ToolChoiceTool",
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": "ToolChoiceTool",
       "parent": "ToolChoice",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "ToolChoiceNone": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ToolChoiceNone",
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": "ToolChoiceNone",
       "parent": "ToolChoice",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "ToolCaller": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_parent",
       "dart_class": "ToolCaller",
       "file": "lib/src/models/tools/tool_caller.dart",
       "schema": null,
       "discriminator": {
         "field": "type",
         "mapping": {
-          "DirectToolCaller": "direct",
-          "ServerToolCaller": "versioned (e.g. code_execution_20260120)"
+          "DirectToolCaller": "direct"
         }
       },
-      "note": "Defaults to 'direct' when type is absent. Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "ServerToolCaller is a catch-all for non-direct types (versioned tool callers). DirectToolCaller is the default when type is absent."
     },
     "DirectToolCaller": {
       "spec": "main",
@@ -934,7 +1057,7 @@
       "file": "lib/src/models/tools/tool_caller.dart",
       "schema": "DirectToolCaller",
       "parent": "ToolCaller",
-      "note": "Defaults to 'direct' when type is absent. Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "No named schema in spec \u2014 DirectToolCaller is the default when type is absent."
     },
     "ServerToolCaller": {
       "spec": "main",
@@ -958,7 +1081,7 @@
           "various built-in tool schemas": "versioned prefix"
         }
       },
-      "note": "Detects built-in vs custom by checking if type starts with known prefixes (bash_, web_search_, etc.). Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Non-standard type_prefix discriminator \u2014 detects built-in vs custom by checking if type starts with known prefixes (bash_, web_search_, etc.)."
     },
     "various built-in tool schemas": {
       "spec": "main",
@@ -967,7 +1090,7 @@
       "file": "lib/src/models/tools/tool_definition.dart",
       "schema": "various built-in tool schemas",
       "parent": "ToolDefinition",
-      "note": "Detects built-in vs custom by checking if type starts with known prefixes (bash_, web_search_, etc.). Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Virtual grouping entry \u2014 individual built-in tool types are mapped separately."
     },
     "BuiltInTool": {
       "spec": "main",
@@ -992,115 +1115,158 @@
           "McpToolset (beta)": "mcp_* prefix"
         }
       },
-      "note": "Uses versioned type strings (e.g. bash_20250124). Some types map to the same class. TextEditorToolBase and ToolSearchTool are intermediate sealed subtypes for grouping. Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Parent sealed class not a named schema in spec \u2014 built-in tools use versioned type strings as discriminators."
     },
     "BashTool20250124": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "BashTool",
       "file": "lib/src/models/tools/built_in_tools.dart",
-      "schema": "BashTool20250124",
+      "schema": "BashTool_20250124",
       "parent": "BuiltInTool",
-      "note": "Uses versioned type strings (e.g. bash_20250124). Some types map to the same class. TextEditorToolBase and ToolSearchTool are intermediate sealed subtypes for grouping. Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type",
+        "name"
+      ]
     },
     "TextEditor20250124": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "TextEditorTool20250124",
       "file": "lib/src/models/tools/built_in_tools.dart",
-      "schema": "TextEditor20250124",
+      "schema": "BetaTextEditor_20250124",
       "parent": "BuiltInTool",
-      "note": "Uses versioned type strings (e.g. bash_20250124). Some types map to the same class. TextEditorToolBase and ToolSearchTool are intermediate sealed subtypes for grouping. Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type",
+        "name"
+      ]
     },
     "TextEditor20250429": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "TextEditorTool20250429",
       "file": "lib/src/models/tools/built_in_tools.dart",
-      "schema": "TextEditor20250429",
+      "schema": "BetaTextEditor_20250429",
       "parent": "BuiltInTool",
-      "note": "Uses versioned type strings (e.g. bash_20250124). Some types map to the same class. TextEditorToolBase and ToolSearchTool are intermediate sealed subtypes for grouping. Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type",
+        "name"
+      ]
     },
     "TextEditor20250728": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "TextEditorTool",
       "file": "lib/src/models/tools/built_in_tools.dart",
-      "schema": "TextEditor20250728",
+      "schema": "BetaTextEditor_20250728",
       "parent": "BuiltInTool",
-      "note": "Uses versioned type strings (e.g. bash_20250124). Some types map to the same class. TextEditorToolBase and ToolSearchTool are intermediate sealed subtypes for grouping. Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type",
+        "name"
+      ]
     },
     "WebSearchTool20250305": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "WebSearchTool",
       "file": "lib/src/models/tools/built_in_tools.dart",
-      "schema": "WebSearchTool20250305",
+      "schema": "BetaWebSearchTool_20250305",
       "parent": "BuiltInTool",
-      "note": "Uses versioned type strings (e.g. bash_20250124). Some types map to the same class. TextEditorToolBase and ToolSearchTool are intermediate sealed subtypes for grouping. Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type",
+        "name"
+      ]
     },
     "WebFetchTool20250910": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "WebFetchTool",
       "file": "lib/src/models/tools/built_in_tools.dart",
-      "schema": "WebFetchTool20250910",
+      "schema": "BetaWebFetchTool_20250910",
       "parent": "BuiltInTool",
-      "note": "Uses versioned type strings (e.g. bash_20250124). Some types map to the same class. TextEditorToolBase and ToolSearchTool are intermediate sealed subtypes for grouping. Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type",
+        "name"
+      ]
     },
     "MemoryTool20250818": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "MemoryTool",
       "file": "lib/src/models/tools/built_in_tools.dart",
-      "schema": "MemoryTool20250818",
+      "schema": "BetaMemoryTool_20250818",
       "parent": "BuiltInTool",
-      "note": "Uses versioned type strings (e.g. bash_20250124). Some types map to the same class. TextEditorToolBase and ToolSearchTool are intermediate sealed subtypes for grouping. Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type",
+        "name"
+      ]
     },
     "ToolSearchToolBm25": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ToolSearchToolBm25",
       "file": "lib/src/models/tools/built_in_tools.dart",
-      "schema": "ToolSearchToolBm25",
+      "schema": "BetaToolSearchToolBM25_20251119",
       "parent": "BuiltInTool",
-      "note": "Uses versioned type strings (e.g. bash_20250124). Some types map to the same class. TextEditorToolBase and ToolSearchTool are intermediate sealed subtypes for grouping. Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type",
+        "name"
+      ]
     },
     "ToolSearchToolRegex": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ToolSearchToolRegex",
       "file": "lib/src/models/tools/built_in_tools.dart",
-      "schema": "ToolSearchToolRegex",
+      "schema": "BetaToolSearchToolRegex_20251119",
       "parent": "BuiltInTool",
-      "note": "Uses versioned type strings (e.g. bash_20250124). Some types map to the same class. TextEditorToolBase and ToolSearchTool are intermediate sealed subtypes for grouping. Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type",
+        "name"
+      ]
     },
     "CodeExecutionTool20250522": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "CodeExecutionBuiltInTool",
       "file": "lib/src/models/tools/built_in_tools.dart",
-      "schema": "CodeExecutionTool20250522",
+      "schema": "BetaCodeExecutionTool_20250522",
       "parent": "BuiltInTool",
-      "note": "Uses versioned type strings (e.g. bash_20250124). Some types map to the same class. TextEditorToolBase and ToolSearchTool are intermediate sealed subtypes for grouping. Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type",
+        "name"
+      ]
     },
     "ComputerUseTool (beta)": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ComputerUseTool",
-      "file": "lib/src/models/tools/built_in_tools.dart",
-      "schema": "ComputerUseTool (beta)",
+      "file": "lib/src/models/beta/tools/computer_use_tool.dart",
+      "schema": "BetaComputerUseTool_20251124",
       "parent": "BuiltInTool",
-      "note": "Uses versioned type strings (e.g. bash_20250124). Some types map to the same class. TextEditorToolBase and ToolSearchTool are intermediate sealed subtypes for grouping. Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type",
+        "allowed_callers",
+        "defer_loading",
+        "enable_zoom",
+        "input_examples",
+        "name",
+        "strict"
+      ]
     },
     "McpToolset (beta)": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "McpToolset",
-      "file": "lib/src/models/tools/built_in_tools.dart",
-      "schema": "McpToolset (beta)",
+      "file": "lib/src/models/beta/tools/mcp_toolset.dart",
+      "schema": "BetaMCPToolset",
       "parent": "BuiltInTool",
-      "note": "Uses versioned type strings (e.g. bash_20250124). Some types map to the same class. TextEditorToolBase and ToolSearchTool are intermediate sealed subtypes for grouping. Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type",
+        "configs",
+        "default_config",
+        "mcp_server_name"
+      ]
     },
     "BatchResult": {
       "spec": "main",
@@ -1121,39 +1287,47 @@
     },
     "SucceededResult": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "BatchResultSucceeded",
       "file": "lib/src/models/batches/message_batch.dart",
       "schema": "SucceededResult",
       "parent": "BatchResult",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "ErroredResult": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "BatchResultErrored",
       "file": "lib/src/models/batches/message_batch.dart",
       "schema": "ErroredResult",
       "parent": "BatchResult",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "CanceledResult": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "BatchResultCanceled",
       "file": "lib/src/models/batches/message_batch.dart",
       "schema": "CanceledResult",
       "parent": "BatchResult",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "ExpiredResult": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "BatchResultExpired",
       "file": "lib/src/models/batches/message_batch.dart",
       "schema": "ExpiredResult",
       "parent": "BatchResult",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "excluded_properties": [
+        "type"
+      ]
     },
     "MessageContent": {
       "spec": "main",

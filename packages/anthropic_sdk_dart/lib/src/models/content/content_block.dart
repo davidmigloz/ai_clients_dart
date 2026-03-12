@@ -1037,6 +1037,25 @@ class CharLocationCitation extends Citation {
     'end_char_index': endCharIndex,
   };
 
+  /// Creates a copy with replaced values.
+  CharLocationCitation copyWith({
+    String? citedText,
+    int? documentIndex,
+    Object? documentTitle = unsetCopyWithValue,
+    int? startCharIndex,
+    int? endCharIndex,
+  }) {
+    return CharLocationCitation(
+      citedText: citedText ?? this.citedText,
+      documentIndex: documentIndex ?? this.documentIndex,
+      documentTitle: documentTitle == unsetCopyWithValue
+          ? this.documentTitle
+          : documentTitle as String?,
+      startCharIndex: startCharIndex ?? this.startCharIndex,
+      endCharIndex: endCharIndex ?? this.endCharIndex,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1111,6 +1130,25 @@ class PageLocationCitation extends Citation {
     'start_page_number': startPageNumber,
     'end_page_number': endPageNumber,
   };
+
+  /// Creates a copy with replaced values.
+  PageLocationCitation copyWith({
+    String? citedText,
+    int? documentIndex,
+    Object? documentTitle = unsetCopyWithValue,
+    int? startPageNumber,
+    int? endPageNumber,
+  }) {
+    return PageLocationCitation(
+      citedText: citedText ?? this.citedText,
+      documentIndex: documentIndex ?? this.documentIndex,
+      documentTitle: documentTitle == unsetCopyWithValue
+          ? this.documentTitle
+          : documentTitle as String?,
+      startPageNumber: startPageNumber ?? this.startPageNumber,
+      endPageNumber: endPageNumber ?? this.endPageNumber,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -1187,6 +1225,25 @@ class ContentBlockLocationCitation extends Citation {
     'end_block_index': endBlockIndex,
   };
 
+  /// Creates a copy with replaced values.
+  ContentBlockLocationCitation copyWith({
+    String? citedText,
+    int? documentIndex,
+    Object? documentTitle = unsetCopyWithValue,
+    int? startBlockIndex,
+    int? endBlockIndex,
+  }) {
+    return ContentBlockLocationCitation(
+      citedText: citedText ?? this.citedText,
+      documentIndex: documentIndex ?? this.documentIndex,
+      documentTitle: documentTitle == unsetCopyWithValue
+          ? this.documentTitle
+          : documentTitle as String?,
+      startBlockIndex: startBlockIndex ?? this.startBlockIndex,
+      endBlockIndex: endBlockIndex ?? this.endBlockIndex,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1255,6 +1312,21 @@ class WebSearchResultLocationCitation extends Citation {
     if (title != null) 'title': title,
     if (url != null) 'url': url,
   };
+
+  /// Creates a copy with replaced values.
+  WebSearchResultLocationCitation copyWith({
+    String? citedText,
+    String? encryptedIndex,
+    Object? title = unsetCopyWithValue,
+    Object? url = unsetCopyWithValue,
+  }) {
+    return WebSearchResultLocationCitation(
+      citedText: citedText ?? this.citedText,
+      encryptedIndex: encryptedIndex ?? this.encryptedIndex,
+      title: title == unsetCopyWithValue ? this.title : title as String?,
+      url: url == unsetCopyWithValue ? this.url : url as String?,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>

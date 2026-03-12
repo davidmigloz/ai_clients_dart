@@ -211,6 +211,11 @@ class ToolChoiceNone extends ToolChoice {
   @override
   Map<String, dynamic> toJson() => {'type': 'none'};
 
+  /// Creates a copy with replaced values.
+  ToolChoiceNone copyWith() {
+    return const ToolChoiceNone();
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

@@ -52,6 +52,23 @@ class RequestCounts {
     'expired': expired,
   };
 
+  /// Creates a copy with replaced values.
+  RequestCounts copyWith({
+    int? processing,
+    int? succeeded,
+    int? errored,
+    int? canceled,
+    int? expired,
+  }) {
+    return RequestCounts(
+      processing: processing ?? this.processing,
+      succeeded: succeeded ?? this.succeeded,
+      errored: errored ?? this.errored,
+      canceled: canceled ?? this.canceled,
+      expired: expired ?? this.expired,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -380,6 +397,11 @@ class BatchResultSucceeded extends BatchResult {
     'message': message.toJson(),
   };
 
+  /// Creates a copy with replaced values.
+  BatchResultSucceeded copyWith({Message? message}) {
+    return BatchResultSucceeded(message: message ?? this.message);
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -451,6 +473,11 @@ class BatchResultErrored extends BatchResult {
   @override
   Map<String, dynamic> toJson() => {'type': 'errored', 'error': error.toJson()};
 
+  /// Creates a copy with replaced values.
+  BatchResultErrored copyWith({BatchError? error}) {
+    return BatchResultErrored(error: error ?? this.error);
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -479,6 +506,11 @@ class BatchResultCanceled extends BatchResult {
   @override
   Map<String, dynamic> toJson() => {'type': 'canceled'};
 
+  /// Creates a copy with replaced values.
+  BatchResultCanceled copyWith() {
+    return const BatchResultCanceled();
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -504,6 +536,11 @@ class BatchResultExpired extends BatchResult {
 
   @override
   Map<String, dynamic> toJson() => {'type': 'expired'};
+
+  /// Creates a copy with replaced values.
+  BatchResultExpired copyWith() {
+    return const BatchResultExpired();
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -542,6 +579,14 @@ class BatchIndividualResponse {
     'custom_id': customId,
     'result': result.toJson(),
   };
+
+  /// Creates a copy with replaced values.
+  BatchIndividualResponse copyWith({String? customId, BatchResult? result}) {
+    return BatchIndividualResponse(
+      customId: customId ?? this.customId,
+      result: result ?? this.result,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>

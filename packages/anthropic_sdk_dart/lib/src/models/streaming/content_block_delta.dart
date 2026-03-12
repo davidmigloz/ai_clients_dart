@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../content/content_block.dart';
 
 /// Delta content for streaming content block updates.
@@ -59,6 +60,11 @@ class TextDelta extends ContentBlockDelta {
   @override
   Map<String, dynamic> toJson() => {'type': 'text_delta', 'text': text};
 
+  /// Creates a copy with replaced values.
+  TextDelta copyWith({String? text}) {
+    return TextDelta(text ?? this.text);
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -92,6 +98,11 @@ class InputJsonDelta extends ContentBlockDelta {
     'type': 'input_json_delta',
     'partial_json': partialJson,
   };
+
+  /// Creates a copy with replaced values.
+  InputJsonDelta copyWith({String? partialJson}) {
+    return InputJsonDelta(partialJson ?? this.partialJson);
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -128,6 +139,11 @@ class ThinkingDelta extends ContentBlockDelta {
     'thinking': thinking,
   };
 
+  /// Creates a copy with replaced values.
+  ThinkingDelta copyWith({String? thinking}) {
+    return ThinkingDelta(thinking ?? this.thinking);
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -162,6 +178,13 @@ class CompactionDelta extends ContentBlockDelta {
     'content': content,
   };
 
+  /// Creates a copy with replaced values.
+  CompactionDelta copyWith({Object? content = unsetCopyWithValue}) {
+    return CompactionDelta(
+      content == unsetCopyWithValue ? this.content : content as String?,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -195,6 +218,11 @@ class SignatureDelta extends ContentBlockDelta {
     'type': 'signature_delta',
     'signature': signature,
   };
+
+  /// Creates a copy with replaced values.
+  SignatureDelta copyWith({String? signature}) {
+    return SignatureDelta(signature ?? this.signature);
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -231,6 +259,11 @@ class CitationsDelta extends ContentBlockDelta {
     'type': 'citations_delta',
     'citation': citation.toJson(),
   };
+
+  /// Creates a copy with replaced values.
+  CitationsDelta copyWith({Citation? citation}) {
+    return CitationsDelta(citation ?? this.citation);
+  }
 
   @override
   bool operator ==(Object other) =>

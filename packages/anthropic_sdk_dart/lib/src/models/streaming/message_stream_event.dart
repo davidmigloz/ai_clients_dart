@@ -51,6 +51,11 @@ class MessageStartEvent extends MessageStreamEvent {
   @override
   Map<String, dynamic> toJson() => {'type': type, 'message': message.toJson()};
 
+  /// Creates a copy with replaced values.
+  MessageStartEvent copyWith({Message? message}) {
+    return MessageStartEvent(message: message ?? this.message);
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -95,6 +100,14 @@ class MessageDeltaEvent extends MessageStreamEvent {
     'usage': usage.toJson(),
   };
 
+  /// Creates a copy with replaced values.
+  MessageDeltaEvent copyWith({MessageDelta? delta, MessageDeltaUsage? usage}) {
+    return MessageDeltaEvent(
+      delta: delta ?? this.delta,
+      usage: usage ?? this.usage,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -126,6 +139,11 @@ class MessageStopEvent extends MessageStreamEvent {
 
   @override
   Map<String, dynamic> toJson() => {'type': type};
+
+  /// Creates a copy with replaced values.
+  MessageStopEvent copyWith() {
+    return const MessageStopEvent();
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -174,6 +192,14 @@ class ContentBlockStartEvent extends MessageStreamEvent {
     'content_block': contentBlock.toJson(),
   };
 
+  /// Creates a copy with replaced values.
+  ContentBlockStartEvent copyWith({int? index, ContentBlock? contentBlock}) {
+    return ContentBlockStartEvent(
+      index: index ?? this.index,
+      contentBlock: contentBlock ?? this.contentBlock,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -220,6 +246,14 @@ class ContentBlockDeltaEvent extends MessageStreamEvent {
     'delta': delta.toJson(),
   };
 
+  /// Creates a copy with replaced values.
+  ContentBlockDeltaEvent copyWith({int? index, ContentBlockDelta? delta}) {
+    return ContentBlockDeltaEvent(
+      index: index ?? this.index,
+      delta: delta ?? this.delta,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -254,6 +288,11 @@ class ContentBlockStopEvent extends MessageStreamEvent {
 
   @override
   Map<String, dynamic> toJson() => {'type': type, 'index': index};
+
+  /// Creates a copy with replaced values.
+  ContentBlockStopEvent copyWith({int? index}) {
+    return ContentBlockStopEvent(index: index ?? this.index);
+  }
 
   @override
   bool operator ==(Object other) =>

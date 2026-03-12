@@ -88,6 +88,11 @@ class ThinkingDisabled extends ThinkingConfig {
   @override
   Map<String, dynamic> toJson() => {'type': 'disabled'};
 
+  /// Creates a copy with replaced values.
+  ThinkingDisabled copyWith() {
+    return const ThinkingDisabled();
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -113,6 +118,11 @@ class ThinkingAdaptive extends ThinkingConfig {
 
   @override
   Map<String, dynamic> toJson() => {'type': 'adaptive'};
+
+  /// Creates a copy with replaced values.
+  ThinkingAdaptive copyWith() {
+    return const ThinkingAdaptive();
+  }
 
   @override
   bool operator ==(Object other) =>
