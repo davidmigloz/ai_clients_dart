@@ -36,10 +36,7 @@ void main() {
     });
 
     test('taskTypeFromString is case-insensitive', () {
-      expect(
-        taskTypeFromString('retrieval_query'),
-        TaskType.retrievalQuery,
-      );
+      expect(taskTypeFromString('retrieval_query'), TaskType.retrievalQuery);
       expect(
         taskTypeFromString('question_answering'),
         TaskType.questionAnswering,
@@ -49,7 +46,10 @@ void main() {
     test('taskTypeToString converts all enum values', () {
       expect(taskTypeToString(TaskType.unspecified), 'TASK_TYPE_UNSPECIFIED');
       expect(taskTypeToString(TaskType.retrievalQuery), 'RETRIEVAL_QUERY');
-      expect(taskTypeToString(TaskType.retrievalDocument), 'RETRIEVAL_DOCUMENT');
+      expect(
+        taskTypeToString(TaskType.retrievalDocument),
+        'RETRIEVAL_DOCUMENT',
+      );
       expect(
         taskTypeToString(TaskType.semanticSimilarity),
         'SEMANTIC_SIMILARITY',
@@ -60,10 +60,7 @@ void main() {
         taskTypeToString(TaskType.questionAnswering),
         'QUESTION_ANSWERING',
       );
-      expect(
-        taskTypeToString(TaskType.factVerification),
-        'FACT_VERIFICATION',
-      );
+      expect(taskTypeToString(TaskType.factVerification), 'FACT_VERIFICATION');
       expect(
         taskTypeToString(TaskType.codeRetrievalQuery),
         'CODE_RETRIEVAL_QUERY',
