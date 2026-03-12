@@ -121,10 +121,7 @@
     },
     "expected_properties": {},
     "excluded_properties": {
-      "global": [],
-      "GenerationConfig": [
-        "_responseJsonSchema"
-      ]
+      "global": []
     },
     "resource_aliases": {
       "dynamic": "models"
@@ -141,7 +138,7 @@
       "file": "lib/src/models/tools/tool.dart",
       "schema": "Tool",
       "tags": [],
-      "note": "googleSearch is GoogleSearch?; codeExecution and urlContext remain Map<String,dynamic> (empty schemas in spec)"
+      "note": "googleSearch, codeExecution and urlContext remain Map<String,dynamic> (empty schemas in spec)"
     },
     "Candidate": {
       "spec": "main",
@@ -188,7 +185,7 @@
       "file": "lib/src/models/metadata/grounding_metadata.dart",
       "schema": "GroundingMetadata",
       "tags": [],
-      "note": "Includes imageSearchQueries field added in spec update"
+      "note": "Includes googleMapsWidgetContextToken field added in spec update"
     },
     "FunctionCall": {
       "spec": "main",
@@ -214,7 +211,7 @@
       "dart_class": "GroundingChunk",
       "file": "lib/src/models/metadata/grounding_chunk.dart",
       "schema": "GroundingChunk",
-      "note": "Includes image field added in spec update"
+      "note": "Upgraded from skip to object; fields match spec (web, retrievedContext, maps)"
     },
     "Blob": {
       "spec": "main",
@@ -1036,7 +1033,7 @@
       "dart_class": "GroundingSupport",
       "file": "lib/src/models/metadata/grounding_support.dart",
       "schema": "GoogleAiGenerativelanguageV1betaGroundingSupport",
-      "note": "Spec renamed schema to GoogleAiGenerativelanguageV1betaGroundingSupport; Dart class retains GroundingSupport name with added renderedParts field"
+      "note": "Spec schema is GoogleAiGenerativelanguageV1betaGroundingSupport; Dart class retains the GroundingSupport name."
     },
     "ModelStage": {
       "spec": "main",
@@ -1072,7 +1069,7 @@
       "dart_class": "MediaResolution",
       "file": "lib/src/models/content/media_resolution.dart",
       "schema": "MediaResolution",
-      "note": "Removed from OpenAPI spec but still present in python-genai and js-genai SDKs. Kept with numTokens field added to match PartMediaResolution in reference SDKs."
+      "note": "Retained for compatibility with python-genai and js-genai SDKs; numTokens field added to match PartMediaResolution in reference SDKs."
     }
   }
 }

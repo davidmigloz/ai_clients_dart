@@ -9,7 +9,7 @@
 - **Python SDK** (primary): `github.com/googleapis/python-genai` — used by the toolkit audit for resource and type coverage
 - **JavaScript/TypeScript SDK** (secondary): `github.com/googleapis/js-genai` (`src/types.ts`) — useful for verifying schema design decisions, especially when the spec is ambiguous
 
-When a spec schema has no properties (e.g. `ImageSearch`, `WebSearch`), check js-genai `src/types.ts` to confirm the type is intentionally an empty marker interface before implementing as an empty Dart class.
+When a spec schema has no properties (e.g. `ImageSearch`, `WebSearch`), check js-genai `src/types.ts` to confirm the type is intentionally an empty marker interface before implementing as an empty Dart class. For such empty-marker schemas, keep the manifest entry as `kind: "skip"` (or otherwise exclude it) rather than mapping it as an `object`, because the toolkit verifier fails on object schemas with no properties ("No spec fields found").
 
 ## Scaffolded File Fixes
 
