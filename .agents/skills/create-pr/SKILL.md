@@ -38,14 +38,14 @@ Gather the full picture of what needs to go into the PR.
    git diff --cached --stat  # staged changes summary
    ```
 
-2. **Existing commits on branch** (if already on a non-main branch):
+2. **Existing commits on branch** (if already on a non-base branch):
    ```bash
-   git log main..HEAD --oneline
+   git log {base}..HEAD --oneline   # {base} is the --base argument, default: main
    ```
 
 3. **Categorize by package**: For each changed file, extract the `packages/{pkg}/` prefix. Files outside `packages/` go into a "root" category.
 
-4. **No changes?** If the working tree is clean AND there are no commits ahead of main, report this and stop.
+4. **No changes?** If the working tree is clean AND there are no commits ahead of the base branch, report this and stop.
 
 5. **User-specified subset**: If the user's instructions mention specific files or packages to include, filter to only those. Otherwise, include all changes by default — the user asked for a PR, so include everything. Only ask for clarification if the user's `$ARGUMENTS` mention a package or scope but it's genuinely ambiguous which files they mean.
 

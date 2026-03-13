@@ -220,7 +220,7 @@ Store the mapping (package → list of PR summaries) for use in Step 5.
 
 Cross-check the version bumps computed in Step 3 against the PR context returned by the subagent. Commit subjects often understate the impact of a change — a commit typed as `fix` or `refactor` may actually introduce breaking API changes that the PR description makes explicit.
 
-For each package, review the PR summaries (especially `has_breaking_signals` and `breaking_details`) and flag **semver mismatches**:
+For each package, review the PR summaries (especially `has_breaking_signals` and `breaking_changes`) and flag **semver mismatches**:
 
 1. **Undeclared breaking changes**: A PR's body describes breaking changes (removed fields, renamed APIs, changed defaults, dropped platform support) but no commit in that package carries a `!` suffix or `BREAKING CHANGE:` footer. → **Warn the user** and recommend upgrading the bump to major (or minor for pre-1.0 packages).
 
