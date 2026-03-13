@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../content/annotation.dart';
 import '../content/logprob.dart';
@@ -168,11 +169,11 @@ sealed class ResponseStreamEvent {
   /// Converts to JSON.
   Map<String, dynamic> toJson();
 
-  /// Whether this event indicates the stream has ended.
-  bool get isFinal =>
-      this is ResponseCompletedEvent ||
-      this is ResponseFailedEvent ||
-      this is ResponseIncompleteEvent;
+  /// Whether this event signals the end of the stream.
+  ///
+  /// Returns `true` for [ResponseCompletedEvent], [ResponseFailedEvent],
+  /// and [ResponseIncompleteEvent].
+  bool get isFinal => false;
 }
 
 // ============================================================
@@ -220,6 +221,19 @@ class ResponseCreatedEvent extends ResponseStreamEvent {
   @override
   int get hashCode => Object.hash(response, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  ResponseCreatedEvent copyWith({
+    Response? response,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseCreatedEvent(
+      response: response ?? this.response,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() => 'ResponseCreatedEvent(response: ${response.id})';
 }
@@ -265,6 +279,19 @@ class ResponseQueuedEvent extends ResponseStreamEvent {
   @override
   int get hashCode => Object.hash(response, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  ResponseQueuedEvent copyWith({
+    Response? response,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseQueuedEvent(
+      response: response ?? this.response,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() => 'ResponseQueuedEvent(response: ${response.id})';
 }
@@ -309,6 +336,19 @@ class ResponseInProgressEvent extends ResponseStreamEvent {
 
   @override
   int get hashCode => Object.hash(response, sequenceNumber);
+
+  /// Creates a copy with replaced values.
+  ResponseInProgressEvent copyWith({
+    Response? response,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseInProgressEvent(
+      response: response ?? this.response,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
 
   @override
   String toString() => 'ResponseInProgressEvent(response: ${response.id})';
@@ -356,6 +396,22 @@ class ResponseCompletedEvent extends ResponseStreamEvent {
   int get hashCode => Object.hash(response, sequenceNumber);
 
   @override
+  bool get isFinal => true;
+
+  /// Creates a copy with replaced values.
+  ResponseCompletedEvent copyWith({
+    Response? response,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseCompletedEvent(
+      response: response ?? this.response,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
+  @override
   String toString() => 'ResponseCompletedEvent(response: ${response.id})';
 }
 
@@ -401,6 +457,22 @@ class ResponseFailedEvent extends ResponseStreamEvent {
   int get hashCode => Object.hash(response, sequenceNumber);
 
   @override
+  bool get isFinal => true;
+
+  /// Creates a copy with replaced values.
+  ResponseFailedEvent copyWith({
+    Response? response,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseFailedEvent(
+      response: response ?? this.response,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
+  @override
   String toString() => 'ResponseFailedEvent(response: ${response.id})';
 }
 
@@ -444,6 +516,22 @@ class ResponseIncompleteEvent extends ResponseStreamEvent {
 
   @override
   int get hashCode => Object.hash(response, sequenceNumber);
+
+  @override
+  bool get isFinal => true;
+
+  /// Creates a copy with replaced values.
+  ResponseIncompleteEvent copyWith({
+    Response? response,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseIncompleteEvent(
+      response: response ?? this.response,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
 
   @override
   String toString() => 'ResponseIncompleteEvent(response: ${response.id})';
@@ -504,6 +592,21 @@ class OutputItemAddedEvent extends ResponseStreamEvent {
   @override
   int get hashCode => Object.hash(outputIndex, item, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  OutputItemAddedEvent copyWith({
+    int? outputIndex,
+    OutputItem? item,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return OutputItemAddedEvent(
+      outputIndex: outputIndex ?? this.outputIndex,
+      item: item ?? this.item,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() => 'OutputItemAddedEvent(outputIndex: $outputIndex)';
 }
@@ -558,6 +661,21 @@ class OutputItemDoneEvent extends ResponseStreamEvent {
 
   @override
   int get hashCode => Object.hash(outputIndex, item, sequenceNumber);
+
+  /// Creates a copy with replaced values.
+  OutputItemDoneEvent copyWith({
+    int? outputIndex,
+    OutputItem? item,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return OutputItemDoneEvent(
+      outputIndex: outputIndex ?? this.outputIndex,
+      item: item ?? this.item,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
 
   @override
   String toString() => 'OutputItemDoneEvent(outputIndex: $outputIndex)';
@@ -633,6 +751,25 @@ class ContentPartAddedEvent extends ResponseStreamEvent {
   int get hashCode =>
       Object.hash(itemId, outputIndex, contentIndex, part, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  ContentPartAddedEvent copyWith({
+    int? outputIndex,
+    int? contentIndex,
+    OutputContent? part,
+    Object? itemId = unsetCopyWithValue,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ContentPartAddedEvent(
+      outputIndex: outputIndex ?? this.outputIndex,
+      contentIndex: contentIndex ?? this.contentIndex,
+      part: part ?? this.part,
+      itemId: itemId == unsetCopyWithValue ? this.itemId : itemId as String?,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() =>
       'ContentPartAddedEvent(outputIndex: $outputIndex, contentIndex: $contentIndex)';
@@ -703,6 +840,25 @@ class ContentPartDoneEvent extends ResponseStreamEvent {
   @override
   int get hashCode =>
       Object.hash(itemId, outputIndex, contentIndex, part, sequenceNumber);
+
+  /// Creates a copy with replaced values.
+  ContentPartDoneEvent copyWith({
+    int? outputIndex,
+    int? contentIndex,
+    OutputContent? part,
+    Object? itemId = unsetCopyWithValue,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ContentPartDoneEvent(
+      outputIndex: outputIndex ?? this.outputIndex,
+      contentIndex: contentIndex ?? this.contentIndex,
+      part: part ?? this.part,
+      itemId: itemId == unsetCopyWithValue ? this.itemId : itemId as String?,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
 
   @override
   String toString() =>
@@ -787,6 +943,29 @@ class OutputTextDeltaEvent extends ResponseStreamEvent {
   int get hashCode =>
       Object.hash(itemId, outputIndex, contentIndex, delta, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  OutputTextDeltaEvent copyWith({
+    int? outputIndex,
+    int? contentIndex,
+    String? delta,
+    Object? itemId = unsetCopyWithValue,
+    Object? logprobs = unsetCopyWithValue,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return OutputTextDeltaEvent(
+      outputIndex: outputIndex ?? this.outputIndex,
+      contentIndex: contentIndex ?? this.contentIndex,
+      delta: delta ?? this.delta,
+      itemId: itemId == unsetCopyWithValue ? this.itemId : itemId as String?,
+      logprobs: logprobs == unsetCopyWithValue
+          ? this.logprobs
+          : logprobs as List<LogProb>?,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() => 'OutputTextDeltaEvent(delta: $delta)';
 }
@@ -864,6 +1043,29 @@ class OutputTextDoneEvent extends ResponseStreamEvent {
   @override
   int get hashCode =>
       Object.hash(itemId, outputIndex, contentIndex, text, sequenceNumber);
+
+  /// Creates a copy with replaced values.
+  OutputTextDoneEvent copyWith({
+    int? outputIndex,
+    int? contentIndex,
+    String? text,
+    Object? itemId = unsetCopyWithValue,
+    Object? logprobs = unsetCopyWithValue,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return OutputTextDoneEvent(
+      outputIndex: outputIndex ?? this.outputIndex,
+      contentIndex: contentIndex ?? this.contentIndex,
+      text: text ?? this.text,
+      itemId: itemId == unsetCopyWithValue ? this.itemId : itemId as String?,
+      logprobs: logprobs == unsetCopyWithValue
+          ? this.logprobs
+          : logprobs as List<LogProb>?,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
 
   @override
   String toString() =>
@@ -951,6 +1153,27 @@ class OutputTextAnnotationAddedEvent extends ResponseStreamEvent {
     sequenceNumber,
   );
 
+  /// Creates a copy with replaced values.
+  OutputTextAnnotationAddedEvent copyWith({
+    int? outputIndex,
+    int? contentIndex,
+    int? annotationIndex,
+    Annotation? annotation,
+    Object? itemId = unsetCopyWithValue,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return OutputTextAnnotationAddedEvent(
+      outputIndex: outputIndex ?? this.outputIndex,
+      contentIndex: contentIndex ?? this.contentIndex,
+      annotationIndex: annotationIndex ?? this.annotationIndex,
+      annotation: annotation ?? this.annotation,
+      itemId: itemId == unsetCopyWithValue ? this.itemId : itemId as String?,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() =>
       'OutputTextAnnotationAddedEvent(annotationIndex: $annotationIndex)';
@@ -1026,6 +1249,25 @@ class RefusalDeltaEvent extends ResponseStreamEvent {
   int get hashCode =>
       Object.hash(itemId, outputIndex, contentIndex, delta, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  RefusalDeltaEvent copyWith({
+    int? outputIndex,
+    int? contentIndex,
+    String? delta,
+    Object? itemId = unsetCopyWithValue,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return RefusalDeltaEvent(
+      outputIndex: outputIndex ?? this.outputIndex,
+      contentIndex: contentIndex ?? this.contentIndex,
+      delta: delta ?? this.delta,
+      itemId: itemId == unsetCopyWithValue ? this.itemId : itemId as String?,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() => 'RefusalDeltaEvent(delta: $delta)';
 }
@@ -1096,6 +1338,25 @@ class RefusalDoneEvent extends ResponseStreamEvent {
   int get hashCode =>
       Object.hash(itemId, outputIndex, contentIndex, refusal, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  RefusalDoneEvent copyWith({
+    int? outputIndex,
+    int? contentIndex,
+    String? refusal,
+    Object? itemId = unsetCopyWithValue,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return RefusalDoneEvent(
+      outputIndex: outputIndex ?? this.outputIndex,
+      contentIndex: contentIndex ?? this.contentIndex,
+      refusal: refusal ?? this.refusal,
+      itemId: itemId == unsetCopyWithValue ? this.itemId : itemId as String?,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() => 'RefusalDoneEvent(refusal: $refusal)';
 }
@@ -1161,6 +1422,23 @@ class FunctionCallArgumentsDeltaEvent extends ResponseStreamEvent {
 
   @override
   int get hashCode => Object.hash(itemId, outputIndex, delta, sequenceNumber);
+
+  /// Creates a copy with replaced values.
+  FunctionCallArgumentsDeltaEvent copyWith({
+    int? outputIndex,
+    String? delta,
+    Object? itemId = unsetCopyWithValue,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return FunctionCallArgumentsDeltaEvent(
+      outputIndex: outputIndex ?? this.outputIndex,
+      delta: delta ?? this.delta,
+      itemId: itemId == unsetCopyWithValue ? this.itemId : itemId as String?,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
 
   @override
   String toString() =>
@@ -1232,6 +1510,25 @@ class FunctionCallArgumentsDoneEvent extends ResponseStreamEvent {
   @override
   int get hashCode =>
       Object.hash(itemId, outputIndex, name, arguments, sequenceNumber);
+
+  /// Creates a copy with replaced values.
+  FunctionCallArgumentsDoneEvent copyWith({
+    int? outputIndex,
+    String? arguments,
+    Object? itemId = unsetCopyWithValue,
+    Object? name = unsetCopyWithValue,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return FunctionCallArgumentsDoneEvent(
+      outputIndex: outputIndex ?? this.outputIndex,
+      arguments: arguments ?? this.arguments,
+      itemId: itemId == unsetCopyWithValue ? this.itemId : itemId as String?,
+      name: name == unsetCopyWithValue ? this.name : name as String?,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
 
   @override
   String toString() =>
@@ -1310,6 +1607,27 @@ class ReasoningTextDeltaEvent extends ResponseStreamEvent {
   int get hashCode =>
       Object.hash(itemId, outputIndex, contentIndex, delta, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  ReasoningTextDeltaEvent copyWith({
+    int? outputIndex,
+    String? delta,
+    Object? itemId = unsetCopyWithValue,
+    Object? contentIndex = unsetCopyWithValue,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ReasoningTextDeltaEvent(
+      outputIndex: outputIndex ?? this.outputIndex,
+      delta: delta ?? this.delta,
+      itemId: itemId == unsetCopyWithValue ? this.itemId : itemId as String?,
+      contentIndex: contentIndex == unsetCopyWithValue
+          ? this.contentIndex
+          : contentIndex as int?,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() => 'ReasoningTextDeltaEvent(delta: $delta)';
 }
@@ -1381,6 +1699,27 @@ class ReasoningTextDoneEvent extends ResponseStreamEvent {
   @override
   int get hashCode =>
       Object.hash(itemId, outputIndex, contentIndex, text, sequenceNumber);
+
+  /// Creates a copy with replaced values.
+  ReasoningTextDoneEvent copyWith({
+    int? outputIndex,
+    String? text,
+    Object? itemId = unsetCopyWithValue,
+    Object? contentIndex = unsetCopyWithValue,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ReasoningTextDoneEvent(
+      outputIndex: outputIndex ?? this.outputIndex,
+      text: text ?? this.text,
+      itemId: itemId == unsetCopyWithValue ? this.itemId : itemId as String?,
+      contentIndex: contentIndex == unsetCopyWithValue
+          ? this.contentIndex
+          : contentIndex as int?,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
 
   @override
   String toString() => 'ReasoningTextDoneEvent(text: $text)';
@@ -1464,6 +1803,25 @@ class ReasoningSummaryPartAddedEvent extends ResponseStreamEvent {
   int get hashCode =>
       Object.hash(itemId, outputIndex, summaryIndex, part, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  ReasoningSummaryPartAddedEvent copyWith({
+    int? outputIndex,
+    int? summaryIndex,
+    Map<String, dynamic>? part,
+    Object? itemId = unsetCopyWithValue,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ReasoningSummaryPartAddedEvent(
+      outputIndex: outputIndex ?? this.outputIndex,
+      summaryIndex: summaryIndex ?? this.summaryIndex,
+      part: part ?? this.part,
+      itemId: itemId == unsetCopyWithValue ? this.itemId : itemId as String?,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() =>
       'ReasoningSummaryPartAddedEvent(outputIndex: $outputIndex, summaryIndex: $summaryIndex)';
@@ -1533,6 +1891,25 @@ class ReasoningSummaryPartDoneEvent extends ResponseStreamEvent {
   @override
   int get hashCode =>
       Object.hash(itemId, outputIndex, summaryIndex, part, sequenceNumber);
+
+  /// Creates a copy with replaced values.
+  ReasoningSummaryPartDoneEvent copyWith({
+    int? outputIndex,
+    int? summaryIndex,
+    Map<String, dynamic>? part,
+    Object? itemId = unsetCopyWithValue,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ReasoningSummaryPartDoneEvent(
+      outputIndex: outputIndex ?? this.outputIndex,
+      summaryIndex: summaryIndex ?? this.summaryIndex,
+      part: part ?? this.part,
+      itemId: itemId == unsetCopyWithValue ? this.itemId : itemId as String?,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
 
   @override
   String toString() =>
@@ -1605,6 +1982,25 @@ class ReasoningSummaryTextDeltaEvent extends ResponseStreamEvent {
   int get hashCode =>
       Object.hash(itemId, outputIndex, summaryIndex, delta, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  ReasoningSummaryTextDeltaEvent copyWith({
+    int? outputIndex,
+    int? summaryIndex,
+    String? delta,
+    Object? itemId = unsetCopyWithValue,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ReasoningSummaryTextDeltaEvent(
+      outputIndex: outputIndex ?? this.outputIndex,
+      summaryIndex: summaryIndex ?? this.summaryIndex,
+      delta: delta ?? this.delta,
+      itemId: itemId == unsetCopyWithValue ? this.itemId : itemId as String?,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() =>
       'ReasoningSummaryTextDeltaEvent(outputIndex: $outputIndex, delta: $delta)';
@@ -1676,6 +2072,25 @@ class ReasoningSummaryTextDoneEvent extends ResponseStreamEvent {
   int get hashCode =>
       Object.hash(itemId, outputIndex, summaryIndex, text, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  ReasoningSummaryTextDoneEvent copyWith({
+    int? outputIndex,
+    int? summaryIndex,
+    String? text,
+    Object? itemId = unsetCopyWithValue,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ReasoningSummaryTextDoneEvent(
+      outputIndex: outputIndex ?? this.outputIndex,
+      summaryIndex: summaryIndex ?? this.summaryIndex,
+      text: text ?? this.text,
+      itemId: itemId == unsetCopyWithValue ? this.itemId : itemId as String?,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() =>
       'ReasoningSummaryTextDoneEvent(outputIndex: $outputIndex, text: $text)';
@@ -1726,6 +2141,19 @@ class ResponseAudioDeltaEvent extends ResponseStreamEvent {
   @override
   int get hashCode => Object.hash(delta, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  ResponseAudioDeltaEvent copyWith({
+    String? delta,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseAudioDeltaEvent(
+      delta: delta ?? this.delta,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() => 'ResponseAudioDeltaEvent(deltaLength: ${delta.length})';
 }
@@ -1764,6 +2192,17 @@ class ResponseAudioDoneEvent extends ResponseStreamEvent {
 
   @override
   int get hashCode => sequenceNumber.hashCode;
+
+  /// Creates a copy with replaced values.
+  ResponseAudioDoneEvent copyWith({
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseAudioDoneEvent(
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
 
   @override
   String toString() => 'ResponseAudioDoneEvent()';
@@ -1815,6 +2254,19 @@ class ResponseAudioTranscriptDeltaEvent extends ResponseStreamEvent {
   @override
   int get hashCode => Object.hash(delta, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  ResponseAudioTranscriptDeltaEvent copyWith({
+    String? delta,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseAudioTranscriptDeltaEvent(
+      delta: delta ?? this.delta,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() => 'ResponseAudioTranscriptDeltaEvent(delta: $delta)';
 }
@@ -1853,6 +2305,17 @@ class ResponseAudioTranscriptDoneEvent extends ResponseStreamEvent {
 
   @override
   int get hashCode => sequenceNumber.hashCode;
+
+  /// Creates a copy with replaced values.
+  ResponseAudioTranscriptDoneEvent copyWith({
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseAudioTranscriptDoneEvent(
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
 
   @override
   String toString() => 'ResponseAudioTranscriptDoneEvent()';
@@ -1915,6 +2378,21 @@ class ResponseWebSearchCallInProgressEvent extends ResponseStreamEvent {
   @override
   int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  ResponseWebSearchCallInProgressEvent copyWith({
+    String? itemId,
+    int? outputIndex,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseWebSearchCallInProgressEvent(
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() => 'ResponseWebSearchCallInProgressEvent(itemId: $itemId)';
 }
@@ -1972,6 +2450,21 @@ class ResponseWebSearchCallSearchingEvent extends ResponseStreamEvent {
   @override
   int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  ResponseWebSearchCallSearchingEvent copyWith({
+    String? itemId,
+    int? outputIndex,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseWebSearchCallSearchingEvent(
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() => 'ResponseWebSearchCallSearchingEvent(itemId: $itemId)';
 }
@@ -2028,6 +2521,21 @@ class ResponseWebSearchCallCompletedEvent extends ResponseStreamEvent {
 
   @override
   int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
+
+  /// Creates a copy with replaced values.
+  ResponseWebSearchCallCompletedEvent copyWith({
+    String? itemId,
+    int? outputIndex,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseWebSearchCallCompletedEvent(
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
 
   @override
   String toString() => 'ResponseWebSearchCallCompletedEvent(itemId: $itemId)';
@@ -2090,6 +2598,21 @@ class ResponseFileSearchCallInProgressEvent extends ResponseStreamEvent {
   @override
   int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  ResponseFileSearchCallInProgressEvent copyWith({
+    String? itemId,
+    int? outputIndex,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseFileSearchCallInProgressEvent(
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() => 'ResponseFileSearchCallInProgressEvent(itemId: $itemId)';
 }
@@ -2147,6 +2670,21 @@ class ResponseFileSearchCallSearchingEvent extends ResponseStreamEvent {
   @override
   int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  ResponseFileSearchCallSearchingEvent copyWith({
+    String? itemId,
+    int? outputIndex,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseFileSearchCallSearchingEvent(
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() => 'ResponseFileSearchCallSearchingEvent(itemId: $itemId)';
 }
@@ -2203,6 +2741,21 @@ class ResponseFileSearchCallCompletedEvent extends ResponseStreamEvent {
 
   @override
   int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
+
+  /// Creates a copy with replaced values.
+  ResponseFileSearchCallCompletedEvent copyWith({
+    String? itemId,
+    int? outputIndex,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseFileSearchCallCompletedEvent(
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
 
   @override
   String toString() => 'ResponseFileSearchCallCompletedEvent(itemId: $itemId)';
@@ -2265,6 +2818,21 @@ class ResponseCodeInterpreterCallInProgressEvent extends ResponseStreamEvent {
   @override
   int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  ResponseCodeInterpreterCallInProgressEvent copyWith({
+    String? itemId,
+    int? outputIndex,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseCodeInterpreterCallInProgressEvent(
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() =>
       'ResponseCodeInterpreterCallInProgressEvent(itemId: $itemId)';
@@ -2322,6 +2890,21 @@ class ResponseCodeInterpreterCallInterpretingEvent extends ResponseStreamEvent {
 
   @override
   int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
+
+  /// Creates a copy with replaced values.
+  ResponseCodeInterpreterCallInterpretingEvent copyWith({
+    String? itemId,
+    int? outputIndex,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseCodeInterpreterCallInterpretingEvent(
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
 
   @override
   String toString() =>
@@ -2388,6 +2971,23 @@ class ResponseCodeInterpreterCallCodeDeltaEvent extends ResponseStreamEvent {
   @override
   int get hashCode => Object.hash(itemId, outputIndex, delta, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  ResponseCodeInterpreterCallCodeDeltaEvent copyWith({
+    String? itemId,
+    int? outputIndex,
+    String? delta,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseCodeInterpreterCallCodeDeltaEvent(
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      delta: delta ?? this.delta,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() =>
       'ResponseCodeInterpreterCallCodeDeltaEvent(delta: $delta)';
@@ -2453,6 +3053,23 @@ class ResponseCodeInterpreterCallCodeDoneEvent extends ResponseStreamEvent {
   @override
   int get hashCode => Object.hash(itemId, outputIndex, code, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  ResponseCodeInterpreterCallCodeDoneEvent copyWith({
+    String? itemId,
+    int? outputIndex,
+    String? code,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseCodeInterpreterCallCodeDoneEvent(
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      code: code ?? this.code,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() =>
       'ResponseCodeInterpreterCallCodeDoneEvent(codeLength: ${code.length})';
@@ -2510,6 +3127,21 @@ class ResponseCodeInterpreterCallCompletedEvent extends ResponseStreamEvent {
 
   @override
   int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
+
+  /// Creates a copy with replaced values.
+  ResponseCodeInterpreterCallCompletedEvent copyWith({
+    String? itemId,
+    int? outputIndex,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseCodeInterpreterCallCompletedEvent(
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
 
   @override
   String toString() =>
@@ -2573,6 +3205,21 @@ class ResponseImageGenerationCallInProgressEvent extends ResponseStreamEvent {
   @override
   int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  ResponseImageGenerationCallInProgressEvent copyWith({
+    String? itemId,
+    int? outputIndex,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseImageGenerationCallInProgressEvent(
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() =>
       'ResponseImageGenerationCallInProgressEvent(itemId: $itemId)';
@@ -2630,6 +3277,21 @@ class ResponseImageGenerationCallGeneratingEvent extends ResponseStreamEvent {
 
   @override
   int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
+
+  /// Creates a copy with replaced values.
+  ResponseImageGenerationCallGeneratingEvent copyWith({
+    String? itemId,
+    int? outputIndex,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseImageGenerationCallGeneratingEvent(
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
 
   @override
   String toString() =>
@@ -2703,6 +3365,25 @@ class ResponseImageGenerationCallPartialImageEvent extends ResponseStreamEvent {
   int get hashCode =>
       Object.hash(itemId, outputIndex, partialImageIndex, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  ResponseImageGenerationCallPartialImageEvent copyWith({
+    String? itemId,
+    int? outputIndex,
+    String? partialImageB64,
+    int? partialImageIndex,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseImageGenerationCallPartialImageEvent(
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      partialImageB64: partialImageB64 ?? this.partialImageB64,
+      partialImageIndex: partialImageIndex ?? this.partialImageIndex,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() =>
       'ResponseImageGenerationCallPartialImageEvent(partialImageIndex: $partialImageIndex)';
@@ -2760,6 +3441,21 @@ class ResponseImageGenerationCallCompletedEvent extends ResponseStreamEvent {
 
   @override
   int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
+
+  /// Creates a copy with replaced values.
+  ResponseImageGenerationCallCompletedEvent copyWith({
+    String? itemId,
+    int? outputIndex,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseImageGenerationCallCompletedEvent(
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
 
   @override
   String toString() =>
@@ -2821,6 +3517,21 @@ class ResponseMcpCallInProgressEvent extends ResponseStreamEvent {
   @override
   int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  ResponseMcpCallInProgressEvent copyWith({
+    String? itemId,
+    int? outputIndex,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseMcpCallInProgressEvent(
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() => 'ResponseMcpCallInProgressEvent(itemId: $itemId)';
 }
@@ -2876,6 +3587,21 @@ class ResponseMcpCallCompletedEvent extends ResponseStreamEvent {
   @override
   int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  ResponseMcpCallCompletedEvent copyWith({
+    String? itemId,
+    int? outputIndex,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseMcpCallCompletedEvent(
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() => 'ResponseMcpCallCompletedEvent(itemId: $itemId)';
 }
@@ -2930,6 +3656,21 @@ class ResponseMcpCallFailedEvent extends ResponseStreamEvent {
 
   @override
   int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
+
+  /// Creates a copy with replaced values.
+  ResponseMcpCallFailedEvent copyWith({
+    String? itemId,
+    int? outputIndex,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseMcpCallFailedEvent(
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
 
   @override
   String toString() => 'ResponseMcpCallFailedEvent(itemId: $itemId)';
@@ -2994,6 +3735,23 @@ class ResponseMcpCallArgumentsDeltaEvent extends ResponseStreamEvent {
 
   @override
   int get hashCode => Object.hash(itemId, outputIndex, delta, sequenceNumber);
+
+  /// Creates a copy with replaced values.
+  ResponseMcpCallArgumentsDeltaEvent copyWith({
+    String? itemId,
+    int? outputIndex,
+    String? delta,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseMcpCallArgumentsDeltaEvent(
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      delta: delta ?? this.delta,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
 
   @override
   String toString() => 'ResponseMcpCallArgumentsDeltaEvent(delta: $delta)';
@@ -3060,6 +3818,23 @@ class ResponseMcpCallArgumentsDoneEvent extends ResponseStreamEvent {
   int get hashCode =>
       Object.hash(itemId, outputIndex, arguments, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  ResponseMcpCallArgumentsDoneEvent copyWith({
+    String? itemId,
+    int? outputIndex,
+    String? arguments,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseMcpCallArgumentsDoneEvent(
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      arguments: arguments ?? this.arguments,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() =>
       'ResponseMcpCallArgumentsDoneEvent(arguments: $arguments)';
@@ -3118,6 +3893,21 @@ class ResponseMcpListToolsInProgressEvent extends ResponseStreamEvent {
   @override
   int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  ResponseMcpListToolsInProgressEvent copyWith({
+    String? itemId,
+    int? outputIndex,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseMcpListToolsInProgressEvent(
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() => 'ResponseMcpListToolsInProgressEvent(itemId: $itemId)';
 }
@@ -3175,6 +3965,21 @@ class ResponseMcpListToolsCompletedEvent extends ResponseStreamEvent {
   @override
   int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  ResponseMcpListToolsCompletedEvent copyWith({
+    String? itemId,
+    int? outputIndex,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseMcpListToolsCompletedEvent(
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() => 'ResponseMcpListToolsCompletedEvent(itemId: $itemId)';
 }
@@ -3229,6 +4034,21 @@ class ResponseMcpListToolsFailedEvent extends ResponseStreamEvent {
 
   @override
   int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
+
+  /// Creates a copy with replaced values.
+  ResponseMcpListToolsFailedEvent copyWith({
+    String? itemId,
+    int? outputIndex,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseMcpListToolsFailedEvent(
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
 
   @override
   String toString() => 'ResponseMcpListToolsFailedEvent(itemId: $itemId)';
@@ -3298,6 +4118,23 @@ class ResponseCustomToolCallInputDeltaEvent extends ResponseStreamEvent {
   @override
   int get hashCode => Object.hash(itemId, outputIndex, delta, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  ResponseCustomToolCallInputDeltaEvent copyWith({
+    String? itemId,
+    int? outputIndex,
+    String? delta,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseCustomToolCallInputDeltaEvent(
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      delta: delta ?? this.delta,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() => 'ResponseCustomToolCallInputDeltaEvent(delta: $delta)';
 }
@@ -3361,6 +4198,23 @@ class ResponseCustomToolCallInputDoneEvent extends ResponseStreamEvent {
 
   @override
   int get hashCode => Object.hash(itemId, outputIndex, input, sequenceNumber);
+
+  /// Creates a copy with replaced values.
+  ResponseCustomToolCallInputDoneEvent copyWith({
+    String? itemId,
+    int? outputIndex,
+    String? input,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ResponseCustomToolCallInputDoneEvent(
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      input: input ?? this.input,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
 
   @override
   String toString() => 'ResponseCustomToolCallInputDoneEvent(input: $input)';
@@ -3431,6 +4285,23 @@ class ErrorEvent extends ResponseStreamEvent {
   @override
   int get hashCode => Object.hash(code, message, param, sequenceNumber);
 
+  /// Creates a copy with replaced values.
+  ErrorEvent copyWith({
+    String? code,
+    String? message,
+    Object? param = unsetCopyWithValue,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return ErrorEvent(
+      code: code ?? this.code,
+      message: message ?? this.message,
+      param: param == unsetCopyWithValue ? this.param : param as String?,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
+
   @override
   String toString() => 'ErrorEvent(code: $code, message: $message)';
 }
@@ -3486,6 +4357,21 @@ class UnknownEvent extends ResponseStreamEvent {
   @override
   int get hashCode =>
       Object.hash(type, sequenceNumber, mapDeepHashCode(rawJson));
+
+  /// Creates a copy with replaced values.
+  UnknownEvent copyWith({
+    String? type,
+    Map<String, dynamic>? rawJson,
+    Object? sequenceNumber = unsetCopyWithValue,
+  }) {
+    return UnknownEvent(
+      type: type ?? this.type,
+      rawJson: rawJson ?? this.rawJson,
+      sequenceNumber: sequenceNumber == unsetCopyWithValue
+          ? this.sequenceNumber
+          : sequenceNumber as int?,
+    );
+  }
 
   @override
   String toString() => 'UnknownEvent(type: $type)';

@@ -2,4 +2,5 @@
 library;
 
 export 'chat_extensions.dart';
+export 'response_stream_extensions.dart';
 export 'stream_extensions.dart';

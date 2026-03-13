@@ -117,7 +117,9 @@ class EmbeddingRequest {
       Object.hash(model, input, encodingFormat, dimensions, user);
 
   @override
-  String toString() => 'EmbeddingRequest(model: $model, input: $input)';
+  String toString() =>
+      'EmbeddingRequest(model: $model, input: $input, '
+      'encodingFormat: $encodingFormat, dimensions: $dimensions, user: $user)';
 }
 
 /// The input for embedding generation.

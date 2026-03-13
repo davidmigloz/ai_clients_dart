@@ -438,6 +438,9 @@ sealed class MessageContent {
     };
   }
 
+  /// The type of this content.
+  String get type;
+
   /// Converts to JSON.
   Map<String, dynamic> toJson();
 }
@@ -459,7 +462,15 @@ class TextMessageContent implements MessageContent {
   final TextContent text;
 
   @override
+  String get type => 'text';
+
+  @override
   Map<String, dynamic> toJson() => {'type': 'text', 'text': text.toJson()};
+
+  /// Creates a copy with the given fields replaced.
+  TextMessageContent copyWith({TextContent? text}) {
+    return TextMessageContent(text: text ?? this.text);
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -472,7 +483,7 @@ class TextMessageContent implements MessageContent {
   int get hashCode => text.hashCode;
 
   @override
-  String toString() => 'TextMessageContent(${text.value.length} chars)';
+  String toString() => 'TextMessageContent(text: $text)';
 }
 
 /// Text content with annotations.
@@ -529,6 +540,9 @@ sealed class TextAnnotation {
     };
   }
 
+  /// The type of this annotation.
+  String get type;
+
   /// Converts to JSON.
   Map<String, dynamic> toJson();
 }
@@ -569,6 +583,9 @@ class FileCitationAnnotation implements TextAnnotation {
   final int endIndex;
 
   @override
+  String get type => 'file_citation';
+
+  @override
   Map<String, dynamic> toJson() => {
     'type': 'file_citation',
     'text': text,
@@ -577,18 +594,37 @@ class FileCitationAnnotation implements TextAnnotation {
     'end_index': endIndex,
   };
 
+  /// Creates a copy with the given fields replaced.
+  FileCitationAnnotation copyWith({
+    String? text,
+    FileCitation? fileCitation,
+    int? startIndex,
+    int? endIndex,
+  }) {
+    return FileCitationAnnotation(
+      text: text ?? this.text,
+      fileCitation: fileCitation ?? this.fileCitation,
+      startIndex: startIndex ?? this.startIndex,
+      endIndex: endIndex ?? this.endIndex,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is FileCitationAnnotation &&
           runtimeType == other.runtimeType &&
-          text == other.text;
+          text == other.text &&
+          fileCitation == other.fileCitation &&
+          startIndex == other.startIndex &&
+          endIndex == other.endIndex;
 
   @override
-  int get hashCode => text.hashCode;
+  int get hashCode => Object.hash(text, fileCitation, startIndex, endIndex);
 
   @override
-  String toString() => 'FileCitationAnnotation($startIndex-$endIndex)';
+  String toString() =>
+      'FileCitationAnnotation(text: $text, fileCitation: $fileCitation, startIndex: $startIndex, endIndex: $endIndex)';
 }
 
 /// A file citation.
@@ -665,6 +701,9 @@ class FilePathAnnotation implements TextAnnotation {
   final int endIndex;
 
   @override
+  String get type => 'file_path';
+
+  @override
   Map<String, dynamic> toJson() => {
     'type': 'file_path',
     'text': text,
@@ -673,18 +712,37 @@ class FilePathAnnotation implements TextAnnotation {
     'end_index': endIndex,
   };
 
+  /// Creates a copy with the given fields replaced.
+  FilePathAnnotation copyWith({
+    String? text,
+    FilePath? filePath,
+    int? startIndex,
+    int? endIndex,
+  }) {
+    return FilePathAnnotation(
+      text: text ?? this.text,
+      filePath: filePath ?? this.filePath,
+      startIndex: startIndex ?? this.startIndex,
+      endIndex: endIndex ?? this.endIndex,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is FilePathAnnotation &&
           runtimeType == other.runtimeType &&
-          text == other.text;
+          text == other.text &&
+          filePath == other.filePath &&
+          startIndex == other.startIndex &&
+          endIndex == other.endIndex;
 
   @override
-  int get hashCode => text.hashCode;
+  int get hashCode => Object.hash(text, filePath, startIndex, endIndex);
 
   @override
-  String toString() => 'FilePathAnnotation($startIndex-$endIndex)';
+  String toString() =>
+      'FilePathAnnotation(text: $text, filePath: $filePath, startIndex: $startIndex, endIndex: $endIndex)';
 }
 
 /// A file path reference.
@@ -735,10 +793,18 @@ class ImageUrlMessageContent implements MessageContent {
   final ImageUrl imageUrl;
 
   @override
+  String get type => 'image_url';
+
+  @override
   Map<String, dynamic> toJson() => {
     'type': 'image_url',
     'image_url': imageUrl.toJson(),
   };
+
+  /// Creates a copy with the given fields replaced.
+  ImageUrlMessageContent copyWith({ImageUrl? imageUrl}) {
+    return ImageUrlMessageContent(imageUrl: imageUrl ?? this.imageUrl);
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -751,7 +817,7 @@ class ImageUrlMessageContent implements MessageContent {
   int get hashCode => imageUrl.hashCode;
 
   @override
-  String toString() => 'ImageUrlMessageContent(${imageUrl.url})';
+  String toString() => 'ImageUrlMessageContent(imageUrl: $imageUrl)';
 }
 
 /// An image URL.
@@ -809,10 +875,18 @@ class ImageFileMessageContent implements MessageContent {
   final ImageFile imageFile;
 
   @override
+  String get type => 'image_file';
+
+  @override
   Map<String, dynamic> toJson() => {
     'type': 'image_file',
     'image_file': imageFile.toJson(),
   };
+
+  /// Creates a copy with the given fields replaced.
+  ImageFileMessageContent copyWith({ImageFile? imageFile}) {
+    return ImageFileMessageContent(imageFile: imageFile ?? this.imageFile);
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -825,7 +899,7 @@ class ImageFileMessageContent implements MessageContent {
   int get hashCode => imageFile.hashCode;
 
   @override
-  String toString() => 'ImageFileMessageContent(${imageFile.fileId})';
+  String toString() => 'ImageFileMessageContent(imageFile: $imageFile)';
 }
 
 /// An image file reference.
@@ -883,7 +957,15 @@ class RefusalMessageContent implements MessageContent {
   final String refusal;
 
   @override
+  String get type => 'refusal';
+
+  @override
   Map<String, dynamic> toJson() => {'type': 'refusal', 'refusal': refusal};
+
+  /// Creates a copy with the given fields replaced.
+  RefusalMessageContent copyWith({String? refusal}) {
+    return RefusalMessageContent(refusal: refusal ?? this.refusal);
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -896,5 +978,5 @@ class RefusalMessageContent implements MessageContent {
   int get hashCode => refusal.hashCode;
 
   @override
-  String toString() => 'RefusalMessageContent(${refusal.length} chars)';
+  String toString() => 'RefusalMessageContent(refusal: $refusal)';
 }

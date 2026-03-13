@@ -80,6 +80,11 @@ class TextContentPart extends ContentPart {
   @override
   Map<String, dynamic> toJson() => {'type': type, 'text': text};
 
+  /// Creates a copy with the given fields replaced.
+  TextContentPart copyWith({String? text}) {
+    return TextContentPart(text: text ?? this.text);
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

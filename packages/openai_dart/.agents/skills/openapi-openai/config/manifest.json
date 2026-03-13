@@ -249,7 +249,7 @@
       "file": "lib/src/models/chat/chat_completion_request.dart",
       "schema": "CreateChatCompletionRequest",
       "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Spec uses allOf — verifier cannot extract top-level properties. Missing copyWith."
     },
     "CreateChatCompletionResponse": {
       "spec": "main",
@@ -258,7 +258,7 @@
       "file": "lib/src/models/chat/chat_completion.dart",
       "schema": "CreateChatCompletionResponse",
       "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Missing copyWith. Has extra non-spec field (provider) for OpenRouter compat."
     },
     "ChatCompletionRequestMessage": {
       "spec": "main",
@@ -267,7 +267,7 @@
       "file": "lib/src/models/chat/chat_message.dart",
       "schema": "ChatCompletionRequestMessage",
       "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Spec schema is a oneOf discriminated union, not a verifiable object. Already tracked as sealed_parent via ChatMessage entry."
     },
     "CreateEmbeddingRequest": {
       "spec": "main",
@@ -286,7 +286,7 @@
       "file": "lib/src/models/embeddings/embedding_response.dart",
       "schema": "CreateEmbeddingResponse",
       "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Missing copyWith."
     },
     "CreateImageRequest": {
       "spec": "main",
@@ -295,7 +295,7 @@
       "file": "lib/src/models/images/image_request.dart",
       "schema": "CreateImageRequest",
       "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Missing copyWith. Spec has many new fields (output_format, stream, moderation, background) not yet in Dart."
     },
     "CreateSpeechRequest": {
       "spec": "main",
@@ -304,7 +304,7 @@
       "file": "lib/src/models/audio/speech_request.dart",
       "schema": "CreateSpeechRequest",
       "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Missing copyWith. Spec has new fields (instructions, stream_format) not yet in Dart."
     },
     "CreateTranscriptionRequest": {
       "spec": "main",
@@ -313,7 +313,7 @@
       "file": "lib/src/models/audio/transcription.dart",
       "schema": "CreateTranscriptionRequest",
       "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Missing copyWith. Spec has many new fields (include, stream, chunking_strategy, etc.) not yet in Dart."
     },
     "AssistantObject": {
       "spec": "main",
@@ -322,7 +322,7 @@
       "file": "lib/src/models/assistants/assistant.dart",
       "schema": "AssistantObject",
       "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Missing copyWith. Complex object with many required fields."
     },
     "ThreadObject": {
       "spec": "main",
@@ -331,7 +331,7 @@
       "file": "lib/src/models/threads/thread.dart",
       "schema": "ThreadObject",
       "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Missing copyWith."
     },
     "RunObject": {
       "spec": "main",
@@ -340,7 +340,7 @@
       "file": "lib/src/models/runs/run.dart",
       "schema": "RunObject",
       "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Missing copyWith. Complex object with 26+ required fields."
     },
     "CompletionUsage": {
       "spec": "main",
@@ -348,23 +348,21 @@
       "dart_class": "Usage",
       "file": "lib/src/models/common/usage.dart",
       "schema": "CompletionUsage",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "completionTokens is nullable for provider compat but spec requires non-null. toString missing promptTokensDetails/completionTokensDetails."
     },
     "ChatCompletionTool": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "Tool",
       "file": "lib/src/models/tools/tool.dart",
-      "schema": "ChatCompletionTool",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "schema": "ChatCompletionTool"
     },
     "FunctionObject": {
       "spec": "main",
-      "kind": "skip",
-      "dart_class": "Function",
-      "file": "lib/src/models/tools/function.dart",
-      "schema": "FunctionObject",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "kind": "object",
+      "dart_class": "FunctionDefinition",
+      "file": "lib/src/models/tools/tool.dart",
+      "schema": "FunctionObject"
     },
     "ChatMessage": {
       "spec": "main",
@@ -386,21 +384,19 @@
     },
     "ChatCompletionRequestSystemMessage": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "SystemMessage",
       "file": "lib/src/models/chat/chat_message.dart",
       "schema": "ChatCompletionRequestSystemMessage",
-      "parent": "ChatMessage",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "ChatMessage"
     },
     "ChatCompletionRequestUserMessage": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "UserMessage",
       "file": "lib/src/models/chat/chat_message.dart",
       "schema": "ChatCompletionRequestUserMessage",
-      "parent": "ChatMessage",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "ChatMessage"
     },
     "ChatCompletionRequestAssistantMessage": {
       "spec": "main",
@@ -409,25 +405,23 @@
       "file": "lib/src/models/chat/chat_message.dart",
       "schema": "ChatCompletionRequestAssistantMessage",
       "parent": "ChatMessage",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Sealed variant missing copyWith. role is constant getter. Has extra non-spec fields (reasoningContent, reasoning, reasoningDetails) for DeepSeek/OpenRouter compat. Spec has deprecated audio/function_call fields not in Dart."
     },
     "ChatCompletionRequestToolMessage": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ToolMessage",
       "file": "lib/src/models/chat/chat_message.dart",
       "schema": "ChatCompletionRequestToolMessage",
-      "parent": "ChatMessage",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "ChatMessage"
     },
     "ChatCompletionRequestDeveloperMessage": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "DeveloperMessage",
       "file": "lib/src/models/chat/chat_message.dart",
       "schema": "ChatCompletionRequestDeveloperMessage",
-      "parent": "ChatMessage",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "ChatMessage"
     },
     "ContentPart": {
       "spec": "main",
@@ -447,12 +441,11 @@
     },
     "ChatCompletionRequestMessageContentPartText": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "TextContentPart",
       "file": "lib/src/models/chat/content_part.dart",
       "schema": "ChatCompletionRequestMessageContentPartText",
-      "parent": "ContentPart",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "ContentPart"
     },
     "ChatCompletionRequestMessageContentPartImage": {
       "spec": "main",
@@ -461,7 +454,7 @@
       "file": "lib/src/models/chat/content_part.dart",
       "schema": "ChatCompletionRequestMessageContentPartImage",
       "parent": "ContentPart",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Sealed variant missing copyWith. type is constant getter. Dart flattens spec's nested image_url object into url/detail fields."
     },
     "ChatCompletionRequestMessageContentPartAudio": {
       "spec": "main",
@@ -470,7 +463,7 @@
       "file": "lib/src/models/chat/content_part.dart",
       "schema": "ChatCompletionRequestMessageContentPartAudio",
       "parent": "ContentPart",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Sealed variant missing copyWith. type is constant getter. Dart flattens spec's nested input_audio object into data/format fields."
     },
     "ChatStreamEvent": {
       "spec": "main",
@@ -484,7 +477,7 @@
           "CreateChatCompletionStreamResponse": "chat.completion.chunk"
         }
       },
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Not a sealed class in Dart (plain class). No spec schema. All required spec fields are nullable for provider compat. Has extra provider field for OpenRouter."
     },
     "CreateChatCompletionStreamResponse": {
       "spec": "main",
@@ -493,7 +486,7 @@
       "file": "lib/src/models/streaming/chat_stream_event.dart",
       "schema": "CreateChatCompletionStreamResponse",
       "parent": "ChatStreamEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Dart uses ChatStreamEvent (plain class) instead of separate ChatStreamChunk subclass. Required spec fields (id, choices, created, model, object) are nullable for provider compat."
     },
     "ResponseFormat": {
       "spec": "main",
@@ -518,7 +511,7 @@
       "file": "lib/src/models/common/response_format.dart",
       "schema": "ResponseFormatText",
       "parent": "ResponseFormat",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Const singleton sealed variant: no data fields, no fromJson factory, no copyWith. type is constant getter."
     },
     "ResponseFormatJsonObject": {
       "spec": "main",
@@ -527,7 +520,7 @@
       "file": "lib/src/models/common/response_format.dart",
       "schema": "ResponseFormatJsonObject",
       "parent": "ResponseFormat",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Const singleton sealed variant: no data fields, no fromJson factory, no copyWith. type is constant getter."
     },
     "ResponseFormatJsonSchema": {
       "spec": "main",
@@ -536,7 +529,7 @@
       "file": "lib/src/models/common/response_format.dart",
       "schema": "ResponseFormatJsonSchema",
       "parent": "ResponseFormat",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Sealed variant missing copyWith. type is constant getter. Dart flattens spec's nested json_schema object into name/schema/description/strict fields."
     },
     "ToolChoice": {
       "spec": "main",
@@ -559,7 +552,7 @@
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": null,
       "parent": "ToolChoice",
-      "note": "Uses string values ('auto', 'none', 'required') or object for function choice"
+      "note": "Dart-only string variant for 'auto'"
     },
     "ToolChoice:ToolChoiceNone": {
       "spec": "main",
@@ -568,7 +561,7 @@
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": null,
       "parent": "ToolChoice",
-      "note": "Uses string values ('auto', 'none', 'required') or object for function choice"
+      "note": "Dart-only string variant for 'none'"
     },
     "ToolChoice:ToolChoiceRequired": {
       "spec": "main",
@@ -577,7 +570,7 @@
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": null,
       "parent": "ToolChoice",
-      "note": "Uses string values ('auto', 'none', 'required') or object for function choice"
+      "note": "Dart-only string variant for 'required'"
     },
     "ChatCompletionNamedToolChoice": {
       "spec": "main",
@@ -586,7 +579,7 @@
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": "ChatCompletionNamedToolChoice",
       "parent": "ToolChoice",
-      "note": "Uses string values ('auto', 'none', 'required') or object for function choice. Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Sealed variant missing copyWith. Dart flattens spec's nested function.name into name field. toJson returns Map not standard object shape."
     },
     "AssistantTool": {
       "spec": "main",
@@ -611,7 +604,7 @@
       "file": "lib/src/models/assistants/assistant_tool.dart",
       "schema": "AssistantToolsCode",
       "parent": "AssistantTool",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Const singleton sealed variant: no data fields, no fromJson factory, no copyWith. type is constant getter."
     },
     "AssistantToolsFileSearch": {
       "spec": "main",
@@ -620,7 +613,7 @@
       "file": "lib/src/models/assistants/assistant_tool.dart",
       "schema": "AssistantToolsFileSearch",
       "parent": "AssistantTool",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Sealed variant missing copyWith. type is constant getter. Dart flattens spec's nested file_search object into maxNumResults/rankingOptions fields. ==/hashCode incomplete (missing rankingOptions)."
     },
     "AssistantToolsFunction": {
       "spec": "main",
@@ -629,7 +622,7 @@
       "file": "lib/src/models/assistants/assistant_tool.dart",
       "schema": "AssistantToolsFunction",
       "parent": "AssistantTool",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Sealed variant missing copyWith. type is constant getter. Dart flattens spec's nested function object into name/description/parameters/strict fields. ==/hashCode only compare name."
     },
     "StepDetails": {
       "spec": "main",
@@ -653,16 +646,15 @@
       "file": "lib/src/models/runs/run_step.dart",
       "schema": "RunStepDetailsMessageCreationObject",
       "parent": "StepDetails",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Sealed variant missing copyWith. type is constant getter. Dart flattens spec's nested message_creation.message_id into messageId field."
     },
     "RunStepDetailsToolCallsObject": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ToolCallsDetails",
       "file": "lib/src/models/runs/run_step.dart",
       "schema": "RunStepDetailsToolCallsObject",
-      "parent": "StepDetails",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "StepDetails"
     },
     "StepToolCall": {
       "spec": "main",
@@ -687,16 +679,15 @@
       "file": "lib/src/models/runs/run_step.dart",
       "schema": "RunStepDetailsToolCallsCodeObject",
       "parent": "StepToolCall",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Sealed variant missing copyWith. type is constant getter. Dart flattens spec's nested code_interpreter object into input/outputs fields. ==/hashCode only compare id."
     },
     "RunStepDetailsToolCallsFileSearchObject": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "FileSearchStepCall",
       "file": "lib/src/models/runs/run_step.dart",
       "schema": "RunStepDetailsToolCallsFileSearchObject",
-      "parent": "StepToolCall",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "StepToolCall"
     },
     "RunStepDetailsToolCallsFunctionObject": {
       "spec": "main",
@@ -705,7 +696,7 @@
       "file": "lib/src/models/runs/run_step.dart",
       "schema": "RunStepDetailsToolCallsFunctionObject",
       "parent": "StepToolCall",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Sealed variant missing copyWith. type is constant getter. Dart flattens spec's nested function object into name/arguments/output fields. ==/hashCode only compare id."
     },
     "CodeInterpreterOutput": {
       "spec": "main",
@@ -724,12 +715,11 @@
     },
     "RunStepDetailsToolCallsCodeOutputLogsObject": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "LogsOutput",
       "file": "lib/src/models/runs/run_step.dart",
       "schema": "RunStepDetailsToolCallsCodeOutputLogsObject",
-      "parent": "CodeInterpreterOutput",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "CodeInterpreterOutput"
     },
     "RunStepDetailsToolCallsCodeOutputImageObject": {
       "spec": "main",
@@ -738,7 +728,7 @@
       "file": "lib/src/models/runs/run_step.dart",
       "schema": "RunStepDetailsToolCallsCodeOutputImageObject",
       "parent": "CodeInterpreterOutput",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Sealed variant missing copyWith. type is constant getter. Dart flattens spec's nested image.file_id into fileId field."
     },
     "MessageContent": {
       "spec": "main",
@@ -759,39 +749,35 @@
     },
     "MessageContentTextObject": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "TextMessageContent",
       "file": "lib/src/models/threads/message.dart",
       "schema": "MessageContentTextObject",
-      "parent": "MessageContent",
-      "note": "Message content for Assistants API threads (not to be confused with chat messages). Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "MessageContent"
     },
     "MessageContentImageUrlObject": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ImageUrlMessageContent",
       "file": "lib/src/models/threads/message.dart",
       "schema": "MessageContentImageUrlObject",
-      "parent": "MessageContent",
-      "note": "Message content for Assistants API threads (not to be confused with chat messages). Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "MessageContent"
     },
     "MessageContentImageFileObject": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ImageFileMessageContent",
       "file": "lib/src/models/threads/message.dart",
       "schema": "MessageContentImageFileObject",
-      "parent": "MessageContent",
-      "note": "Message content for Assistants API threads (not to be confused with chat messages). Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "MessageContent"
     },
     "MessageContentRefusalObject": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "RefusalMessageContent",
       "file": "lib/src/models/threads/message.dart",
       "schema": "MessageContentRefusalObject",
-      "parent": "MessageContent",
-      "note": "Message content for Assistants API threads (not to be confused with chat messages). Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "MessageContent"
     },
     "TextAnnotation": {
       "spec": "main",
@@ -810,21 +796,19 @@
     },
     "MessageContentTextAnnotationsFileCitationObject": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "FileCitationAnnotation",
       "file": "lib/src/models/threads/message.dart",
       "schema": "MessageContentTextAnnotationsFileCitationObject",
-      "parent": "TextAnnotation",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "TextAnnotation"
     },
     "MessageContentTextAnnotationsFilePathObject": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "FilePathAnnotation",
       "file": "lib/src/models/threads/message.dart",
       "schema": "MessageContentTextAnnotationsFilePathObject",
-      "parent": "TextAnnotation",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "TextAnnotation"
     }
   }
 }
