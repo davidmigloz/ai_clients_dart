@@ -1244,6 +1244,10 @@
       },
       "FileSearchResultDelta": {
         "properties": {
+          "call_id": {
+            "description": "The ID of the file search call.",
+            "type": "string"
+          },
           "result": {
             "items": {
               "$ref": "#/components/schemas/FileSearchResult"
@@ -2629,7 +2633,7 @@
           {
             "const": "gemini-3-pro-image-preview",
             "description": "State-of-the-art image generation and editing model.",
-            "x-stainless-nominal": "false`"
+            "x-stainless-nominal": false
           },
           {
             "const": "gemini-3-pro-preview",
@@ -3103,7 +3107,7 @@
                 "call_id": "call_123456",
                 "result": [
                   {
-                    "status": "SUCCESS",
+                    "status": "success",
                     "url": "https://www.example.com"
                   }
                 ],
