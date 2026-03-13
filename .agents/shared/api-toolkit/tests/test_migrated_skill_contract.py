@@ -395,8 +395,8 @@ EXPECTED_DOC_EXCLUSIONS = {
         "excluded_from_examples": [],
     },
     "mistralai_dart/openapi-mistral": {
-        "excluded_resources": ["base_resource", "fineTuningModels", "streaming_resource", "transcriptions"],
-        "excluded_from_examples": ["classifications", "files", "fineTuningModels", "moderations", "transcriptions"],
+        "excluded_resources": ["base_resource", "fineTuningModels", "streaming_resource"],
+        "excluded_from_examples": [],
     },
     "ollama_dart/openapi-ollama": {
         "excluded_resources": ["base_resource", "streaming"],
