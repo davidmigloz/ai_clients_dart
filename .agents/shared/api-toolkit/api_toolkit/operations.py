@@ -160,7 +160,7 @@ def _resolve_ref(ref: str) -> str:
 def _match_excluded_path(pattern: str, path: str) -> bool:
     """Return whether *path* matches *pattern* via :func:`re.match`.
 
-    Raises ``ValueError`` if *pattern* is not a valid regular expression.
+    Raises ``ToolkitError`` if *pattern* is not a valid regular expression.
     """
     try:
         return re.match(pattern, path) is not None
@@ -169,7 +169,7 @@ def _match_excluded_path(pattern: str, path: str) -> bool:
 
 
 def _normalize_resource_name(name: str) -> str:
-    """Return *name* in camelCase with the ``_resource`` suffix stripped.
+    """Return *name* in camelCase with ``_resource`` removed.
 
     Used when generating documentation resource accessor paths.
     """
@@ -177,7 +177,7 @@ def _normalize_resource_name(name: str) -> str:
 
 
 def _normalize_coverage_resource_name(name: str) -> str:
-    """Return *name* in snake_case with the ``_resource`` suffix stripped.
+    """Return *name* in snake_case with ``_resource`` removed.
 
     Query/fragment parts are removed first.  Used for coverage-report resource keys.
     """
@@ -1452,6 +1452,7 @@ def _verify_docs(config: ToolkitConfig) -> tuple[int, dict[str, Any]]:
         "summary": {
             "errors": sum(1 for issue in issues if issue["level"] == "error"),
             "warnings": sum(1 for issue in issues if issue["level"] == "warning"),
+            "infos": sum(1 for issue in issues if issue["level"] == "info"),
         },
     }
 
