@@ -5,6 +5,7 @@ part 'audio_content.dart';
 part 'code_execution_call_content.dart';
 part 'code_execution_result_content.dart';
 part 'document_content.dart';
+part 'file_search_call_content.dart';
 part 'file_search_result_content.dart';
 part 'function_call_content.dart';
 part 'function_result_content.dart';
@@ -21,7 +22,7 @@ part 'video_content.dart';
 
 /// The content of an interaction response.
 ///
-/// This is a sealed class with 17 subtypes representing different content
+/// This is a sealed class with 18 subtypes representing different content
 /// types in the Interactions API.
 sealed class InteractionContent {
   /// The type discriminator for this content.
@@ -49,6 +50,7 @@ sealed class InteractionContent {
       'google_search_result' => GoogleSearchResultContent.fromJson(json),
       'mcp_server_tool_call' => McpServerToolCallContent.fromJson(json),
       'mcp_server_tool_result' => McpServerToolResultContent.fromJson(json),
+      'file_search_call' => FileSearchCallContent.fromJson(json),
       'file_search_result' => FileSearchResultContent.fromJson(json),
       _ => throw ArgumentError('Unknown content type: $type'),
     };

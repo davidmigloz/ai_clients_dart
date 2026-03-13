@@ -1,4 +1,5 @@
 import '../copy_with_sentinel.dart';
+import 'image_config.dart';
 import 'speech_config.dart';
 import 'thinking_level.dart';
 import 'thinking_summaries.dart';
@@ -33,6 +34,9 @@ class InteractionGenerationConfig {
   /// Configuration for speech interaction.
   final List<InteractionSpeechConfig>? speechConfig;
 
+  /// Configuration for image interaction.
+  final InteractionImageConfig? imageConfig;
+
   /// Creates an [InteractionGenerationConfig] instance.
   const InteractionGenerationConfig({
     this.temperature,
@@ -44,6 +48,7 @@ class InteractionGenerationConfig {
     this.thinkingSummaries,
     this.maxOutputTokens,
     this.speechConfig,
+    this.imageConfig,
   });
 
   /// Creates an [InteractionGenerationConfig] from JSON.
@@ -71,6 +76,11 @@ class InteractionGenerationConfig {
           (e) => InteractionSpeechConfig.fromJson(e as Map<String, dynamic>),
         )
         .toList(),
+    imageConfig: json['image_config'] != null
+        ? InteractionImageConfig.fromJson(
+            json['image_config'] as Map<String, dynamic>,
+          )
+        : null,
   );
 
   /// Converts to JSON.
@@ -89,6 +99,7 @@ class InteractionGenerationConfig {
     if (maxOutputTokens != null) 'max_output_tokens': maxOutputTokens,
     if (speechConfig != null)
       'speech_config': speechConfig!.map((e) => e.toJson()).toList(),
+    if (imageConfig != null) 'image_config': imageConfig!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -102,6 +113,7 @@ class InteractionGenerationConfig {
     Object? thinkingSummaries = unsetCopyWithValue,
     Object? maxOutputTokens = unsetCopyWithValue,
     Object? speechConfig = unsetCopyWithValue,
+    Object? imageConfig = unsetCopyWithValue,
   }) {
     return InteractionGenerationConfig(
       temperature: temperature == unsetCopyWithValue
@@ -127,6 +139,9 @@ class InteractionGenerationConfig {
       speechConfig: speechConfig == unsetCopyWithValue
           ? this.speechConfig
           : speechConfig as List<InteractionSpeechConfig>?,
+      imageConfig: imageConfig == unsetCopyWithValue
+          ? this.imageConfig
+          : imageConfig as InteractionImageConfig?,
     );
   }
 }

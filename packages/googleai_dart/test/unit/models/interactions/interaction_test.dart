@@ -283,7 +283,7 @@ void main() {
         'total_input_tokens': 100,
         'total_output_tokens': 50,
         'total_tokens': 150,
-        'total_reasoning_tokens': 20,
+        'total_thought_tokens': 20,
         'total_tool_use_tokens': 10,
         'total_cached_tokens': 5,
         'input_tokens_by_modality': [
@@ -297,7 +297,7 @@ void main() {
       expect(usage.totalInputTokens, 100);
       expect(usage.totalOutputTokens, 50);
       expect(usage.totalTokens, 150);
-      expect(usage.totalReasoningTokens, 20);
+      expect(usage.totalThoughtTokens, 20);
       expect(usage.totalToolUseTokens, 10);
       expect(usage.totalCachedTokens, 5);
       expect(usage.inputTokensByModality, isNotNull);

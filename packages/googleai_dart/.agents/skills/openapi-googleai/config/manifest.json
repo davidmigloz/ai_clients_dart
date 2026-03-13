@@ -117,7 +117,7 @@
       "tunedModels"
     ],
     "notes": {
-      "files:register": "POST /v1beta/files:register \u2014 Registers GCS files with FileService. Models (RegisterFilesRequest/RegisterFilesResponse) are implemented; resource method not yet added to the files resource."
+      "files:register": "POST /v1beta/files:register — Registers GCS files with FileService. Models (RegisterFilesRequest/RegisterFilesResponse) are implemented; resource method not yet added to the files resource."
     },
     "expected_properties": {},
     "excluded_properties": {
@@ -269,7 +269,7 @@
       "spec": "interactions",
       "schema": "Annotation",
       "parent": "InteractionContent",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "Annotation",
       "file": "lib/src/models/interactions/content/annotation.dart"
     },
@@ -277,7 +277,7 @@
       "spec": "interactions",
       "schema": "AudioContent",
       "parent": "InteractionContent",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "AudioContent",
       "file": "lib/src/models/interactions/content/audio_content.dart"
     },
@@ -289,13 +289,44 @@
       "kind": "skip",
       "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
     },
-    "AudioMimeTypeOption": {
+    "FileSearchCallContent": {
       "spec": "interactions",
-      "schema": "AudioMimeTypeOption",
-      "dart_class": "AudioMimeTypeOption",
-      "file": "lib/src/models/interactions/common/audio_mime_type_option.dart",
+      "schema": "FileSearchCallContent",
+      "parent": "InteractionContent",
+      "kind": "sealed_variant",
+      "dart_class": "FileSearchCallContent",
+      "file": "lib/src/models/interactions/content/file_search_call_content.dart"
+    },
+    "FileSearchCallDelta": {
+      "spec": "interactions",
+      "schema": "FileSearchCallDelta",
+      "dart_class": "FileSearchCallDelta",
+      "file": "lib/src/models/interactions/deltas/file_search_call_delta.dart",
       "kind": "skip",
-      "note": "No direct one-to-one Dart model is currently tracked for this schema. Review manually when the schema changes."
+      "note": "Delta type tracked as sealed variant of InteractionDelta."
+    },
+    "interactions:ImageConfig": {
+      "spec": "interactions",
+      "schema": "ImageConfig",
+      "dart_class": "InteractionImageConfig",
+      "file": "lib/src/models/interactions/image_config.dart",
+      "kind": "object"
+    },
+    "InteractionCompleteEvent": {
+      "spec": "interactions",
+      "schema": "InteractionCompleteEvent",
+      "dart_class": "InteractionCompleteEvent",
+      "file": "lib/src/models/interactions/events/interaction_complete_event.dart",
+      "kind": "skip",
+      "note": "Now a standalone spec schema (was part of generic InteractionEvent). Implementation unchanged as sealed subclass of InteractionEvent."
+    },
+    "InteractionStartEvent": {
+      "spec": "interactions",
+      "schema": "InteractionStartEvent",
+      "dart_class": "InteractionStartEvent",
+      "file": "lib/src/models/interactions/events/interaction_start_event.dart",
+      "kind": "skip",
+      "note": "Now a standalone spec schema (was part of generic InteractionEvent). Implementation unchanged as sealed subclass of InteractionEvent."
     },
     "interactions:CodeExecution": {
       "spec": "interactions",
@@ -335,7 +366,7 @@
       "spec": "interactions",
       "schema": "CodeExecutionResultContent",
       "parent": "InteractionContent",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "CodeExecutionResultContent",
       "file": "lib/src/models/interactions/content/code_execution_result_content.dart"
     },
@@ -382,6 +413,7 @@
           "google_search_result": "#/components/schemas/GoogleSearchResultContent",
           "mcp_server_tool_call": "#/components/schemas/McpServerToolCallContent",
           "mcp_server_tool_result": "#/components/schemas/McpServerToolResultContent",
+          "file_search_call": "#/components/schemas/FileSearchCallContent",
           "file_search_result": "#/components/schemas/FileSearchResultContent"
         }
       },
@@ -438,7 +470,7 @@
       "spec": "interactions",
       "schema": "DocumentContent",
       "parent": "InteractionContent",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "DocumentContent",
       "file": "lib/src/models/interactions/content/document_content.dart"
     },
@@ -449,14 +481,6 @@
       "file": "lib/src/models/interactions/deltas/document_delta.dart",
       "kind": "skip",
       "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
-    },
-    "DocumentMimeTypeOption": {
-      "spec": "interactions",
-      "schema": "DocumentMimeTypeOption",
-      "dart_class": "DocumentMimeTypeOption",
-      "file": "lib/src/models/interactions/common/document_mime_type_option.dart",
-      "kind": "skip",
-      "note": "No direct one-to-one Dart model is currently tracked for this schema. Review manually when the schema changes."
     },
     "DynamicAgentConfig": {
       "spec": "interactions",
@@ -494,7 +518,7 @@
       "spec": "interactions",
       "schema": "FileSearchResult",
       "parent": "InteractionContent",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "FileSearchResult",
       "file": "lib/src/models/interactions/content/file_search_result_content.dart"
     },
@@ -502,7 +526,7 @@
       "spec": "interactions",
       "schema": "FileSearchResultContent",
       "parent": "InteractionContent",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "FileSearchResultContent",
       "file": "lib/src/models/interactions/content/file_search_result_content.dart"
     },
@@ -527,7 +551,7 @@
       "spec": "interactions",
       "schema": "FunctionCallContent",
       "parent": "InteractionContent",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "FunctionCallContent",
       "file": "lib/src/models/interactions/content/function_call_content.dart"
     },
@@ -543,7 +567,7 @@
       "spec": "interactions",
       "schema": "FunctionResultContent",
       "parent": "InteractionContent",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "FunctionResultContent",
       "file": "lib/src/models/interactions/content/function_result_content.dart"
     },
@@ -612,7 +636,7 @@
       "spec": "interactions",
       "schema": "GoogleSearchResultContent",
       "parent": "InteractionContent",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "GoogleSearchResultContent",
       "file": "lib/src/models/interactions/content/google_search_result_content.dart"
     },
@@ -628,7 +652,7 @@
       "spec": "interactions",
       "schema": "ImageContent",
       "parent": "InteractionContent",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "ImageContent",
       "file": "lib/src/models/interactions/content/image_content.dart"
     },
@@ -640,14 +664,6 @@
       "kind": "skip",
       "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
     },
-    "ImageMimeTypeOption": {
-      "spec": "interactions",
-      "schema": "ImageMimeTypeOption",
-      "dart_class": "ImageMimeTypeOption",
-      "file": "lib/src/models/interactions/common/image_mime_type_option.dart",
-      "kind": "skip",
-      "note": "No direct one-to-one Dart model is currently tracked for this schema. Review manually when the schema changes."
-    },
     "Interaction": {
       "spec": "interactions",
       "schema": "Interaction",
@@ -656,14 +672,6 @@
       "kind": "skip",
       "tags": [],
       "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
-    },
-    "InteractionEvent": {
-      "spec": "interactions",
-      "schema": "InteractionEvent",
-      "dart_class": "InteractionEvent",
-      "file": "lib/src/models/interactions/events/events.dart",
-      "kind": "skip",
-      "note": "interaction.start and interaction.complete share the spec schema but are represented by dedicated subclasses."
     },
     "InteractionSseEvent": {
       "spec": "interactions",
@@ -694,7 +702,7 @@
       "spec": "interactions",
       "schema": "McpServerToolCallContent",
       "parent": "InteractionContent",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "McpServerToolCallContent",
       "file": "lib/src/models/interactions/content/mcp_server_tool_call_content.dart"
     },
@@ -765,7 +773,7 @@
       "spec": "interactions",
       "schema": "TextContent",
       "parent": "InteractionContent",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "TextContent",
       "file": "lib/src/models/interactions/content/text_content.dart"
     },
@@ -797,7 +805,7 @@
       "spec": "interactions",
       "schema": "ThoughtContent",
       "parent": "InteractionContent",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "ThoughtContent",
       "file": "lib/src/models/interactions/content/thought_content.dart"
     },
@@ -846,14 +854,6 @@
           "file_search": "#/components/schemas/FileSearch"
         }
       }
-    },
-    "ToolChoice": {
-      "spec": "interactions",
-      "schema": "ToolChoice",
-      "dart_class": "InteractionToolChoice",
-      "file": "lib/src/models/interactions/tool_choice.dart",
-      "kind": "skip",
-      "note": "Union wrapper represented by InteractionToolChoice plus AllowedTools rather than a direct generated sealed hierarchy."
     },
     "ToolChoiceConfig": {
       "spec": "interactions",
@@ -918,7 +918,7 @@
       "spec": "interactions",
       "schema": "UrlContextResult",
       "parent": "InteractionContent",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "UrlContextResult",
       "file": "lib/src/models/interactions/content/url_context_result_content.dart"
     },
@@ -926,7 +926,7 @@
       "spec": "interactions",
       "schema": "UrlContextResultContent",
       "parent": "InteractionContent",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "UrlContextResultContent",
       "file": "lib/src/models/interactions/content/url_context_result_content.dart"
     },
@@ -949,7 +949,7 @@
       "spec": "interactions",
       "schema": "VideoContent",
       "parent": "InteractionContent",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "VideoContent",
       "file": "lib/src/models/interactions/content/video_content.dart"
     },
@@ -960,14 +960,6 @@
       "file": "lib/src/models/interactions/deltas/video_delta.dart",
       "kind": "skip",
       "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
-    },
-    "VideoMimeTypeOption": {
-      "spec": "interactions",
-      "schema": "VideoMimeTypeOption",
-      "dart_class": "VideoMimeTypeOption",
-      "file": "lib/src/models/interactions/common/video_mime_type_option.dart",
-      "kind": "skip",
-      "note": "No direct one-to-one Dart model is currently tracked for this schema. Review manually when the schema changes."
     },
     "GoogleSearch": {
       "spec": "main",

@@ -10,7 +10,8 @@ import 'usage.dart';
 /// The Interaction resource.
 ///
 /// Represents a single interaction with the Gemini API using server-side
-/// state management.
+/// state management. Contains both request parameters (input, tools, config)
+/// and response fields (outputs, usage, status).
 class Interaction {
   /// A unique identifier for the interaction.
   final String id;
@@ -33,6 +34,12 @@ class Interaction {
   /// The role of the interaction response.
   final String? role;
 
+  /// The inputs for the interaction.
+  ///
+  /// Can be a [String], a [List<InteractionContent>], a [List<Turn>],
+  /// or a single [InteractionContent].
+  final Object? input;
+
   /// Output only. Responses from the model.
   final List<InteractionContent>? outputs;
 
@@ -45,6 +52,24 @@ class Interaction {
   /// The ID of the previous interaction, if any.
   final String? previousInteractionId;
 
+  /// System instruction for the interaction.
+  final String? systemInstruction;
+
+  /// A list of tool declarations the model may call during interaction.
+  final List<InteractionTool>? tools;
+
+  /// Configuration parameters for the model interaction.
+  final InteractionGenerationConfig? generationConfig;
+
+  /// The requested modalities of the response.
+  final List<InteractionResponseModality>? responseModalities;
+
+  /// The mime type of the response.
+  final String? responseMimeType;
+
+  /// Configuration for the agent.
+  final AgentConfig? agentConfig;
+
   /// Creates an [Interaction] instance.
   const Interaction({
     required this.id,
@@ -54,10 +79,17 @@ class Interaction {
     this.created,
     this.updated,
     this.role,
+    this.input,
     this.outputs,
     this.usage,
     this.object = 'interaction',
     this.previousInteractionId,
+    this.systemInstruction,
+    this.tools,
+    this.generationConfig,
+    this.responseModalities,
+    this.responseMimeType,
+    this.agentConfig,
   });
 
   /// Creates an [Interaction] from JSON.
@@ -73,6 +105,7 @@ class Interaction {
         ? DateTime.parse(json['updated'] as String)
         : null,
     role: json['role'] as String?,
+    input: json['input'],
     outputs: (json['outputs'] as List<dynamic>?)
         ?.map((e) => InteractionContent.fromJson(e as Map<String, dynamic>))
         .toList(),
@@ -81,6 +114,22 @@ class Interaction {
         : null,
     object: json['object'] as String? ?? 'interaction',
     previousInteractionId: json['previous_interaction_id'] as String?,
+    systemInstruction: json['system_instruction'] as String?,
+    tools: (json['tools'] as List<dynamic>?)
+        ?.map((e) => InteractionTool.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    generationConfig: json['generation_config'] != null
+        ? InteractionGenerationConfig.fromJson(
+            json['generation_config'] as Map<String, dynamic>,
+          )
+        : null,
+    responseModalities: (json['response_modalities'] as List<dynamic>?)
+        ?.map((e) => interactionResponseModalityFromString(e as String))
+        .toList(),
+    responseMimeType: json['response_mime_type'] as String?,
+    agentConfig: json['agent_config'] != null
+        ? AgentConfig.fromJson(json['agent_config'] as Map<String, dynamic>)
+        : null,
   );
 
   /// Converts to JSON.
@@ -92,11 +141,22 @@ class Interaction {
     if (created != null) 'created': created!.toIso8601String(),
     if (updated != null) 'updated': updated!.toIso8601String(),
     if (role != null) 'role': role,
+    if (input != null) 'input': input,
     if (outputs != null) 'outputs': outputs!.map((e) => e.toJson()).toList(),
     if (usage != null) 'usage': usage!.toJson(),
     'object': object,
     if (previousInteractionId != null)
       'previous_interaction_id': previousInteractionId,
+    if (systemInstruction != null) 'system_instruction': systemInstruction,
+    if (tools != null) 'tools': tools!.map((e) => e.toJson()).toList(),
+    if (generationConfig != null)
+      'generation_config': generationConfig!.toJson(),
+    if (responseModalities != null)
+      'response_modalities': responseModalities!
+          .map(interactionResponseModalityToString)
+          .toList(),
+    if (responseMimeType != null) 'response_mime_type': responseMimeType,
+    if (agentConfig != null) 'agent_config': agentConfig!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -108,10 +168,17 @@ class Interaction {
     Object? created = unsetCopyWithValue,
     Object? updated = unsetCopyWithValue,
     Object? role = unsetCopyWithValue,
+    Object? input = unsetCopyWithValue,
     Object? outputs = unsetCopyWithValue,
     Object? usage = unsetCopyWithValue,
     Object? object = unsetCopyWithValue,
     Object? previousInteractionId = unsetCopyWithValue,
+    Object? systemInstruction = unsetCopyWithValue,
+    Object? tools = unsetCopyWithValue,
+    Object? generationConfig = unsetCopyWithValue,
+    Object? responseModalities = unsetCopyWithValue,
+    Object? responseMimeType = unsetCopyWithValue,
+    Object? agentConfig = unsetCopyWithValue,
   }) {
     return Interaction(
       id: id == unsetCopyWithValue ? this.id : id! as String,
@@ -127,6 +194,7 @@ class Interaction {
           ? this.updated
           : updated as DateTime?,
       role: role == unsetCopyWithValue ? this.role : role as String?,
+      input: input == unsetCopyWithValue ? this.input : input,
       outputs: outputs == unsetCopyWithValue
           ? this.outputs
           : outputs as List<InteractionContent>?,
@@ -137,6 +205,24 @@ class Interaction {
       previousInteractionId: previousInteractionId == unsetCopyWithValue
           ? this.previousInteractionId
           : previousInteractionId as String?,
+      systemInstruction: systemInstruction == unsetCopyWithValue
+          ? this.systemInstruction
+          : systemInstruction as String?,
+      tools: tools == unsetCopyWithValue
+          ? this.tools
+          : tools as List<InteractionTool>?,
+      generationConfig: generationConfig == unsetCopyWithValue
+          ? this.generationConfig
+          : generationConfig as InteractionGenerationConfig?,
+      responseModalities: responseModalities == unsetCopyWithValue
+          ? this.responseModalities
+          : responseModalities as List<InteractionResponseModality>?,
+      responseMimeType: responseMimeType == unsetCopyWithValue
+          ? this.responseMimeType
+          : responseMimeType as String?,
+      agentConfig: agentConfig == unsetCopyWithValue
+          ? this.agentConfig
+          : agentConfig as AgentConfig?,
     );
   }
 }

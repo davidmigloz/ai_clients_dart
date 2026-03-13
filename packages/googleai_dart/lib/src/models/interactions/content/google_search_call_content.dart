@@ -11,8 +11,11 @@ class GoogleSearchCallContent extends InteractionContent {
   /// Web search queries for the following-up web search.
   final List<String>? queries;
 
+  /// The type of search grounding enabled.
+  final String? searchType;
+
   /// Creates a [GoogleSearchCallContent] instance.
-  const GoogleSearchCallContent({this.id, this.queries});
+  const GoogleSearchCallContent({this.id, this.queries, this.searchType});
 
   /// Creates a [GoogleSearchCallContent] from JSON.
   factory GoogleSearchCallContent.fromJson(Map<String, dynamic> json) {
@@ -20,6 +23,7 @@ class GoogleSearchCallContent extends InteractionContent {
     return GoogleSearchCallContent(
       id: json['id'] as String?,
       queries: (arguments?['queries'] as List<dynamic>?)?.cast<String>(),
+      searchType: json['search_type'] as String?,
     );
   }
 
@@ -28,18 +32,23 @@ class GoogleSearchCallContent extends InteractionContent {
     'type': type,
     if (id != null) 'id': id,
     if (queries != null) 'arguments': {'queries': queries},
+    if (searchType != null) 'search_type': searchType,
   };
 
   /// Creates a copy with replaced values.
   GoogleSearchCallContent copyWith({
     Object? id = unsetCopyWithValue,
     Object? queries = unsetCopyWithValue,
+    Object? searchType = unsetCopyWithValue,
   }) {
     return GoogleSearchCallContent(
       id: id == unsetCopyWithValue ? this.id : id as String?,
       queries: queries == unsetCopyWithValue
           ? this.queries
           : queries as List<String>?,
+      searchType: searchType == unsetCopyWithValue
+          ? this.searchType
+          : searchType as String?,
     );
   }
 }

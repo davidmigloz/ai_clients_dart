@@ -128,6 +128,7 @@ export 'src/models/interactions/content/content.dart';
 export 'src/models/interactions/deltas/deltas.dart';
 export 'src/models/interactions/events/events.dart';
 export 'src/models/interactions/generation_config.dart';
+export 'src/models/interactions/image_config.dart';
 export 'src/models/interactions/interaction.dart';
 export 'src/models/interactions/interaction_status.dart';
 export 'src/models/interactions/modality_tokens.dart';

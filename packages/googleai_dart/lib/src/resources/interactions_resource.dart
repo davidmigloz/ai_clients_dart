@@ -107,9 +107,19 @@ class InteractionsResource extends ResourceBase with StreamingResource {
 
   /// Gets an interaction by ID.
   ///
+  /// If [includeInput] is true, the response includes the input that was
+  /// sent with the interaction.
+  ///
   /// Returns the [Interaction] with its current state and outputs.
-  Future<Interaction> get(String id) async {
-    final url = requestBuilder.buildUrl('/{version}/interactions/$id');
+  Future<Interaction> get(String id, {bool? includeInput}) async {
+    final queryParams = <String, String>{
+      if (includeInput ?? false) 'include_input': 'true',
+    };
+
+    final url = requestBuilder.buildUrl(
+      '/{version}/interactions/$id',
+      queryParams: queryParams,
+    );
 
     final headers = requestBuilder.buildHeaders();
 

@@ -4,6 +4,7 @@ part 'audio_delta.dart';
 part 'code_execution_call_delta.dart';
 part 'code_execution_result_delta.dart';
 part 'document_delta.dart';
+part 'file_search_call_delta.dart';
 part 'file_search_result_delta.dart';
 part 'function_call_delta.dart';
 part 'function_result_delta.dart';
@@ -49,6 +50,7 @@ sealed class InteractionDelta {
       'google_search_result' => GoogleSearchResultDelta.fromJson(json),
       'mcp_server_tool_call' => McpServerToolCallDelta.fromJson(json),
       'mcp_server_tool_result' => McpServerToolResultDelta.fromJson(json),
+      'file_search_call' => FileSearchCallDelta.fromJson(json),
       'file_search_result' => FileSearchResultDelta.fromJson(json),
       _ => throw ArgumentError('Unknown delta type: $type'),
     };

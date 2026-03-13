@@ -28,7 +28,7 @@ class InteractionUsage {
   final List<ModalityTokens>? toolUseTokensByModality;
 
   /// Number of tokens of thoughts for thinking models.
-  final int? totalReasoningTokens;
+  final int? totalThoughtTokens;
 
   /// Total token count for the interaction request.
   final int? totalTokens;
@@ -43,7 +43,7 @@ class InteractionUsage {
     this.outputTokensByModality,
     this.totalToolUseTokens,
     this.toolUseTokensByModality,
-    this.totalReasoningTokens,
+    this.totalThoughtTokens,
     this.totalTokens,
   });
 
@@ -70,7 +70,7 @@ class InteractionUsage {
             (json['tool_use_tokens_by_modality'] as List<dynamic>?)
                 ?.map((e) => ModalityTokens.fromJson(e as Map<String, dynamic>))
                 .toList(),
-        totalReasoningTokens: json['total_reasoning_tokens'] as int?,
+        totalThoughtTokens: json['total_thought_tokens'] as int?,
         totalTokens: json['total_tokens'] as int?,
       );
 
@@ -96,8 +96,7 @@ class InteractionUsage {
       'tool_use_tokens_by_modality': toolUseTokensByModality!
           .map((e) => e.toJson())
           .toList(),
-    if (totalReasoningTokens != null)
-      'total_reasoning_tokens': totalReasoningTokens,
+    if (totalThoughtTokens != null) 'total_thought_tokens': totalThoughtTokens,
     if (totalTokens != null) 'total_tokens': totalTokens,
   };
 
@@ -111,7 +110,7 @@ class InteractionUsage {
     Object? outputTokensByModality = unsetCopyWithValue,
     Object? totalToolUseTokens = unsetCopyWithValue,
     Object? toolUseTokensByModality = unsetCopyWithValue,
-    Object? totalReasoningTokens = unsetCopyWithValue,
+    Object? totalThoughtTokens = unsetCopyWithValue,
     Object? totalTokens = unsetCopyWithValue,
   }) {
     return InteractionUsage(
@@ -139,9 +138,9 @@ class InteractionUsage {
       toolUseTokensByModality: toolUseTokensByModality == unsetCopyWithValue
           ? this.toolUseTokensByModality
           : toolUseTokensByModality as List<ModalityTokens>?,
-      totalReasoningTokens: totalReasoningTokens == unsetCopyWithValue
-          ? this.totalReasoningTokens
-          : totalReasoningTokens as int?,
+      totalThoughtTokens: totalThoughtTokens == unsetCopyWithValue
+          ? this.totalThoughtTokens
+          : totalThoughtTokens as int?,
       totalTokens: totalTokens == unsetCopyWithValue
           ? this.totalTokens
           : totalTokens as int?,
