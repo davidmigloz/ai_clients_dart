@@ -1,7 +1,9 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../content/input_content.dart';
+import '../content/output_content.dart';
 import '../content/reasoning_summary_content.dart';
 import '../metadata/function_call_status.dart';
 import '../metadata/item_status.dart';
@@ -32,76 +34,340 @@ sealed class Item {
 }
 
 /// A message item in a conversation.
-@immutable
-class MessageItem extends Item {
+///
+/// This is a sealed class hierarchy dispatched by [role]:
+/// - [UserMessageItem] — role `user`
+/// - [SystemMessageItem] — role `system`
+/// - [DeveloperMessageItem] — role `developer`
+/// - [AssistantMessageItem] — role `assistant`
+sealed class MessageItem extends Item {
   /// Unique identifier.
-  final String? id;
+  String? get id;
 
   /// The role of the message.
-  final MessageRole role;
-
-  /// The content of the message.
-  final List<InputContent> content;
+  MessageRole get role;
 
   /// Item status (for output items).
-  final ItemStatus? status;
+  ItemStatus? get status;
 
   /// Creates a [MessageItem].
-  const MessageItem({
-    this.id,
-    required this.role,
-    required this.content,
-    this.status,
-  });
+  const MessageItem();
 
   /// Creates a user message.
-  factory MessageItem.user(List<InputContent> content) =>
-      MessageItem(role: MessageRole.user, content: content);
+  static MessageItem user(
+    List<InputContent> content, {
+    String? id,
+    ItemStatus? status,
+  }) => UserMessageItem(
+    content: UserMessagePartsContent(content),
+    id: id,
+    status: status,
+  );
 
   /// Creates a user message with simple text.
-  factory MessageItem.userText(String text) => MessageItem(
-    role: MessageRole.user,
-    content: [InputTextContent(text: text)],
-  );
+  static MessageItem userText(String text, {String? id, ItemStatus? status}) =>
+      UserMessageItem(
+        content: UserMessageTextContent(text),
+        id: id,
+        status: status,
+      );
 
   /// Creates a system message.
-  factory MessageItem.system(List<InputContent> content) =>
-      MessageItem(role: MessageRole.system, content: content);
+  static MessageItem system(
+    List<InputContent> content, {
+    String? id,
+    ItemStatus? status,
+  }) => SystemMessageItem(
+    content: content.map((c) => (c as InputTextContent).text).join(),
+    id: id,
+    status: status,
+  );
 
   /// Creates a system message with simple text.
-  factory MessageItem.systemText(String text) => MessageItem(
-    role: MessageRole.system,
-    content: [InputTextContent(text: text)],
-  );
+  static MessageItem systemText(
+    String text, {
+    String? id,
+    ItemStatus? status,
+  }) => SystemMessageItem(content: text, id: id, status: status);
 
   /// Creates a developer message.
-  factory MessageItem.developer(List<InputContent> content) =>
-      MessageItem(role: MessageRole.developer, content: content);
-
-  /// Creates a developer message with simple text.
-  factory MessageItem.developerText(String text) => MessageItem(
-    role: MessageRole.developer,
-    content: [InputTextContent(text: text)],
+  static MessageItem developer(
+    List<InputContent> content, {
+    String? id,
+    ItemStatus? status,
+  }) => DeveloperMessageItem(
+    content: content.map((c) => (c as InputTextContent).text).join(),
+    id: id,
+    status: status,
   );
 
+  /// Creates a developer message with simple text.
+  static MessageItem developerText(
+    String text, {
+    String? id,
+    ItemStatus? status,
+  }) => DeveloperMessageItem(content: text, id: id, status: status);
+
   /// Creates an assistant message.
-  factory MessageItem.assistant(List<InputContent> content) =>
-      MessageItem(role: MessageRole.assistant, content: content);
+  static MessageItem assistant(
+    List<OutputContent> content, {
+    String? id,
+    ItemStatus? status,
+  }) => AssistantMessageItem(
+    content: AssistantMessagePartsContent(content),
+    id: id,
+    status: status,
+  );
 
   /// Creates an assistant message with simple text.
-  factory MessageItem.assistantText(String text) => MessageItem(
-    role: MessageRole.assistant,
-    content: [InputTextContent(text: text)],
+  static MessageItem assistantText(
+    String text, {
+    String? id,
+    ItemStatus? status,
+  }) => AssistantMessageItem(
+    content: AssistantMessageTextContent(text),
+    id: id,
+    status: status,
   );
 
   /// Creates a [MessageItem] from JSON.
   factory MessageItem.fromJson(Map<String, dynamic> json) {
-    return MessageItem(
+    final role = json['role'] as String;
+    return switch (role) {
+      'user' => UserMessageItem.fromJson(json),
+      'system' => SystemMessageItem.fromJson(json),
+      'developer' => DeveloperMessageItem.fromJson(json),
+      'assistant' => AssistantMessageItem.fromJson(json),
+      _ => throw FormatException('Unknown MessageItem role: $role'),
+    };
+  }
+}
+
+/// Content for a user message.
+///
+/// Can be either a simple text string or a list of input content parts.
+sealed class UserMessageContent {
+  /// Creates a [UserMessageContent].
+  const UserMessageContent();
+
+  /// Creates a text content.
+  static UserMessageContent fromText(String text) =>
+      UserMessageTextContent(text);
+
+  /// Creates a parts content.
+  static UserMessageContent parts(List<InputContent> parts) =>
+      UserMessagePartsContent(parts);
+
+  /// Extracts the text from this content.
+  ///
+  /// For [UserMessageTextContent], returns the text directly.
+  /// For [UserMessagePartsContent], joins all [InputTextContent] parts.
+  String? get text;
+
+  /// Creates a [UserMessageContent] from JSON.
+  factory UserMessageContent.fromJson(Object json) {
+    if (json is String) return UserMessageTextContent(json);
+    if (json is List) {
+      return UserMessagePartsContent(
+        json
+            .map((e) => InputContent.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+    }
+    throw FormatException('Invalid UserMessageContent format: $json');
+  }
+
+  /// Converts to JSON.
+  Object toJson();
+}
+
+/// Simple text content for a user message.
+@immutable
+class UserMessageTextContent extends UserMessageContent {
+  /// The text content.
+  final String value;
+
+  /// Creates a [UserMessageTextContent].
+  const UserMessageTextContent(this.value);
+
+  @override
+  String get text => value;
+
+  @override
+  Object toJson() => [
+    {'type': 'input_text', 'text': value},
+  ];
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserMessageTextContent &&
+          runtimeType == other.runtimeType &&
+          value == other.value;
+
+  @override
+  int get hashCode => value.hashCode;
+
+  @override
+  String toString() => 'UserMessageTextContent($value)';
+}
+
+/// List of input content parts for a user message.
+@immutable
+class UserMessagePartsContent extends UserMessageContent {
+  /// The content parts.
+  final List<InputContent> parts;
+
+  /// Creates a [UserMessagePartsContent].
+  const UserMessagePartsContent(this.parts);
+
+  @override
+  String? get text {
+    final texts = parts.whereType<InputTextContent>().map((c) => c.text);
+    return texts.isEmpty ? null : texts.join();
+  }
+
+  @override
+  Object toJson() => parts.map((e) => e.toJson()).toList();
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserMessagePartsContent &&
+          runtimeType == other.runtimeType &&
+          listsEqual(parts, other.parts);
+
+  @override
+  int get hashCode => Object.hashAll(parts);
+
+  @override
+  String toString() => 'UserMessagePartsContent($parts)';
+}
+
+/// Content for an assistant message.
+///
+/// Can be either a simple text string or a list of output content parts.
+sealed class AssistantMessageContent {
+  /// Creates an [AssistantMessageContent].
+  const AssistantMessageContent();
+
+  /// Creates a text content.
+  static AssistantMessageContent fromText(String text) =>
+      AssistantMessageTextContent(text);
+
+  /// Creates a parts content.
+  static AssistantMessageContent parts(List<OutputContent> parts) =>
+      AssistantMessagePartsContent(parts);
+
+  /// Extracts the text from this content.
+  ///
+  /// For [AssistantMessageTextContent], returns the text directly.
+  /// For [AssistantMessagePartsContent], joins all [OutputTextContent] parts.
+  String? get text;
+
+  /// Creates an [AssistantMessageContent] from JSON.
+  factory AssistantMessageContent.fromJson(Object json) {
+    if (json is String) return AssistantMessageTextContent(json);
+    if (json is List) {
+      return AssistantMessagePartsContent(
+        json
+            .map((e) => OutputContent.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+    }
+    throw FormatException('Invalid AssistantMessageContent format: $json');
+  }
+
+  /// Converts to JSON.
+  Object toJson();
+}
+
+/// Simple text content for an assistant message.
+@immutable
+class AssistantMessageTextContent extends AssistantMessageContent {
+  /// The text content.
+  final String value;
+
+  /// Creates an [AssistantMessageTextContent].
+  const AssistantMessageTextContent(this.value);
+
+  @override
+  String get text => value;
+
+  @override
+  Object toJson() => [
+    {'type': 'output_text', 'text': value},
+  ];
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AssistantMessageTextContent &&
+          runtimeType == other.runtimeType &&
+          value == other.value;
+
+  @override
+  int get hashCode => value.hashCode;
+
+  @override
+  String toString() => 'AssistantMessageTextContent($value)';
+}
+
+/// List of output content parts for an assistant message.
+@immutable
+class AssistantMessagePartsContent extends AssistantMessageContent {
+  /// The content parts.
+  final List<OutputContent> parts;
+
+  /// Creates an [AssistantMessagePartsContent].
+  const AssistantMessagePartsContent(this.parts);
+
+  @override
+  String? get text {
+    final texts = parts.whereType<OutputTextContent>().map((c) => c.text);
+    return texts.isEmpty ? null : texts.join();
+  }
+
+  @override
+  Object toJson() => parts.map((e) => e.toJson()).toList();
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AssistantMessagePartsContent &&
+          runtimeType == other.runtimeType &&
+          listsEqual(parts, other.parts);
+
+  @override
+  int get hashCode => Object.hashAll(parts);
+
+  @override
+  String toString() => 'AssistantMessagePartsContent($parts)';
+}
+
+/// A user message item.
+@immutable
+class UserMessageItem extends MessageItem {
+  @override
+  final String? id;
+
+  @override
+  MessageRole get role => MessageRole.user;
+
+  /// The content of the message.
+  final UserMessageContent content;
+
+  @override
+  final ItemStatus? status;
+
+  /// Creates a [UserMessageItem].
+  const UserMessageItem({this.id, required this.content, this.status});
+
+  /// Creates a [UserMessageItem] from JSON.
+  factory UserMessageItem.fromJson(Map<String, dynamic> json) {
+    return UserMessageItem(
       id: json['id'] as String?,
-      role: MessageRole.fromJson(json['role'] as String),
-      content: (json['content'] as List)
-          .map((e) => InputContent.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      content: UserMessageContent.fromJson(json['content']),
       status: json['status'] != null
           ? ItemStatus.fromJson(json['status'] as String)
           : null,
@@ -113,26 +379,282 @@ class MessageItem extends Item {
     'type': 'message',
     if (id != null) 'id': id,
     'role': role.toJson(),
-    'content': content.map((e) => e.toJson()).toList(),
+    'content': content.toJson(),
     if (status != null) 'status': status!.toJson(),
   };
+
+  /// Creates a copy with replaced values.
+  UserMessageItem copyWith({
+    Object? id = unsetCopyWithValue,
+    UserMessageContent? content,
+    Object? status = unsetCopyWithValue,
+  }) {
+    return UserMessageItem(
+      id: id == unsetCopyWithValue ? this.id : id as String?,
+      content: content ?? this.content,
+      status: status == unsetCopyWithValue
+          ? this.status
+          : status as ItemStatus?,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is MessageItem &&
+      other is UserMessageItem &&
           runtimeType == other.runtimeType &&
           id == other.id &&
-          role == other.role &&
-          listsEqual(content, other.content) &&
+          content == other.content &&
           status == other.status;
 
   @override
-  int get hashCode => Object.hash(id, role, content, status);
+  int get hashCode => Object.hash(id, content, status);
 
   @override
   String toString() =>
-      'MessageItem(id: $id, role: $role, content: $content, status: $status)';
+      'UserMessageItem(id: $id, content: $content, status: $status)';
+}
+
+/// A system message item.
+@immutable
+class SystemMessageItem extends MessageItem {
+  @override
+  final String? id;
+
+  @override
+  MessageRole get role => MessageRole.system;
+
+  /// The content of the message.
+  ///
+  /// System messages only support text content. When deserializing from JSON,
+  /// a list of `input_text` items is joined into a single string.
+  final String content;
+
+  @override
+  final ItemStatus? status;
+
+  /// Creates a [SystemMessageItem].
+  const SystemMessageItem({this.id, required this.content, this.status});
+
+  /// Creates a [SystemMessageItem] from JSON.
+  factory SystemMessageItem.fromJson(Map<String, dynamic> json) {
+    final content = json['content'];
+    final String text;
+    if (content is String) {
+      text = content;
+    } else if (content is List) {
+      text = content
+          .map((e) => (e as Map<String, dynamic>)['text'] as String)
+          .join();
+    } else {
+      throw FormatException('Invalid SystemMessageItem content: $content');
+    }
+    return SystemMessageItem(
+      id: json['id'] as String?,
+      content: text,
+      status: json['status'] != null
+          ? ItemStatus.fromJson(json['status'] as String)
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'message',
+    if (id != null) 'id': id,
+    'role': role.toJson(),
+    'content': [
+      {'type': 'input_text', 'text': content},
+    ],
+    if (status != null) 'status': status!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  SystemMessageItem copyWith({
+    Object? id = unsetCopyWithValue,
+    String? content,
+    Object? status = unsetCopyWithValue,
+  }) {
+    return SystemMessageItem(
+      id: id == unsetCopyWithValue ? this.id : id as String?,
+      content: content ?? this.content,
+      status: status == unsetCopyWithValue
+          ? this.status
+          : status as ItemStatus?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SystemMessageItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          content == other.content &&
+          status == other.status;
+
+  @override
+  int get hashCode => Object.hash(id, content, status);
+
+  @override
+  String toString() =>
+      'SystemMessageItem(id: $id, content: $content, status: $status)';
+}
+
+/// A developer message item.
+@immutable
+class DeveloperMessageItem extends MessageItem {
+  @override
+  final String? id;
+
+  @override
+  MessageRole get role => MessageRole.developer;
+
+  /// The content of the message.
+  ///
+  /// Developer messages only support text content. When deserializing from JSON,
+  /// a list of `input_text` items is joined into a single string.
+  final String content;
+
+  @override
+  final ItemStatus? status;
+
+  /// Creates a [DeveloperMessageItem].
+  const DeveloperMessageItem({this.id, required this.content, this.status});
+
+  /// Creates a [DeveloperMessageItem] from JSON.
+  factory DeveloperMessageItem.fromJson(Map<String, dynamic> json) {
+    final content = json['content'];
+    final String text;
+    if (content is String) {
+      text = content;
+    } else if (content is List) {
+      text = content
+          .map((e) => (e as Map<String, dynamic>)['text'] as String)
+          .join();
+    } else {
+      throw FormatException('Invalid DeveloperMessageItem content: $content');
+    }
+    return DeveloperMessageItem(
+      id: json['id'] as String?,
+      content: text,
+      status: json['status'] != null
+          ? ItemStatus.fromJson(json['status'] as String)
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'message',
+    if (id != null) 'id': id,
+    'role': role.toJson(),
+    'content': [
+      {'type': 'input_text', 'text': content},
+    ],
+    if (status != null) 'status': status!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  DeveloperMessageItem copyWith({
+    Object? id = unsetCopyWithValue,
+    String? content,
+    Object? status = unsetCopyWithValue,
+  }) {
+    return DeveloperMessageItem(
+      id: id == unsetCopyWithValue ? this.id : id as String?,
+      content: content ?? this.content,
+      status: status == unsetCopyWithValue
+          ? this.status
+          : status as ItemStatus?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DeveloperMessageItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          content == other.content &&
+          status == other.status;
+
+  @override
+  int get hashCode => Object.hash(id, content, status);
+
+  @override
+  String toString() =>
+      'DeveloperMessageItem(id: $id, content: $content, status: $status)';
+}
+
+/// An assistant message item.
+@immutable
+class AssistantMessageItem extends MessageItem {
+  @override
+  final String? id;
+
+  @override
+  MessageRole get role => MessageRole.assistant;
+
+  /// The content of the message.
+  final AssistantMessageContent content;
+
+  @override
+  final ItemStatus? status;
+
+  /// Creates an [AssistantMessageItem].
+  const AssistantMessageItem({this.id, required this.content, this.status});
+
+  /// Creates an [AssistantMessageItem] from JSON.
+  factory AssistantMessageItem.fromJson(Map<String, dynamic> json) {
+    return AssistantMessageItem(
+      id: json['id'] as String?,
+      content: AssistantMessageContent.fromJson(json['content']),
+      status: json['status'] != null
+          ? ItemStatus.fromJson(json['status'] as String)
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'message',
+    if (id != null) 'id': id,
+    'role': role.toJson(),
+    'content': content.toJson(),
+    if (status != null) 'status': status!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  AssistantMessageItem copyWith({
+    Object? id = unsetCopyWithValue,
+    AssistantMessageContent? content,
+    Object? status = unsetCopyWithValue,
+  }) {
+    return AssistantMessageItem(
+      id: id == unsetCopyWithValue ? this.id : id as String?,
+      content: content ?? this.content,
+      status: status == unsetCopyWithValue
+          ? this.status
+          : status as ItemStatus?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AssistantMessageItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          content == other.content &&
+          status == other.status;
+
+  @override
+  int get hashCode => Object.hash(id, content, status);
+
+  @override
+  String toString() =>
+      'AssistantMessageItem(id: $id, content: $content, status: $status)';
 }
 
 /// A function call item.
@@ -184,6 +706,25 @@ class FunctionCallItem extends Item {
     'arguments': arguments,
     if (status != null) 'status': status!.toJson(),
   };
+
+  /// Creates a copy with replaced values.
+  FunctionCallItem copyWith({
+    Object? id = unsetCopyWithValue,
+    String? callId,
+    String? name,
+    String? arguments,
+    Object? status = unsetCopyWithValue,
+  }) {
+    return FunctionCallItem(
+      id: id == unsetCopyWithValue ? this.id : id as String?,
+      callId: callId ?? this.callId,
+      name: name ?? this.name,
+      arguments: arguments ?? this.arguments,
+      status: status == unsetCopyWithValue
+          ? this.status
+          : status as ItemStatus?,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -341,6 +882,23 @@ class FunctionCallOutputItem extends Item {
     if (status != null) 'status': status!.toJson(),
   };
 
+  /// Creates a copy with replaced values.
+  FunctionCallOutputItem copyWith({
+    Object? id = unsetCopyWithValue,
+    String? callId,
+    FunctionCallOutput? output,
+    Object? status = unsetCopyWithValue,
+  }) {
+    return FunctionCallOutputItem(
+      id: id == unsetCopyWithValue ? this.id : id as String?,
+      callId: callId ?? this.callId,
+      output: output ?? this.output,
+      status: status == unsetCopyWithValue
+          ? this.status
+          : status as FunctionCallStatus?,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -375,6 +933,11 @@ class ItemReference extends Item {
 
   @override
   Map<String, dynamic> toJson() => {'type': 'item_reference', 'id': id};
+
+  /// Creates a copy with replaced values.
+  ItemReference copyWith({String? id}) {
+    return ItemReference(id: id ?? this.id);
+  }
 
   @override
   bool operator ==(Object other) =>

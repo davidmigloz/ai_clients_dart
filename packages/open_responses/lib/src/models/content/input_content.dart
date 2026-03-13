@@ -1,11 +1,31 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../metadata/image_detail.dart';
 
 /// Input content for messages.
 sealed class InputContent {
   /// Creates an [InputContent].
   const InputContent();
+
+  /// Creates a text input content.
+  static InputContent text(String text) => InputTextContent(text: text);
+
+  /// Creates an image input content from a URL.
+  static InputContent imageUrl(String url, {ImageDetail? detail}) =>
+      InputImageContent.url(url, detail: detail);
+
+  /// Creates an image input content from a file ID.
+  static InputContent imageFile(String fileId, {ImageDetail? detail}) =>
+      InputImageContent.file(fileId, detail: detail);
+
+  /// Creates a file input content from a URL.
+  static InputContent fileUrl(String url, {String? filename}) =>
+      InputFileContent.url(url, filename: filename);
+
+  /// Creates a video input content from a URL.
+  static InputContent videoUrl(String videoUrl) =>
+      InputVideoContent(videoUrl: videoUrl);
 
   /// Creates an [InputContent] from JSON.
   factory InputContent.fromJson(Map<String, dynamic> json) {
@@ -39,6 +59,11 @@ class InputTextContent extends InputContent {
 
   @override
   Map<String, dynamic> toJson() => {'type': 'input_text', 'text': text};
+
+  /// Creates a copy with replaced values.
+  InputTextContent copyWith({String? text}) {
+    return InputTextContent(text: text ?? this.text);
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -105,6 +130,23 @@ class InputImageContent extends InputContent {
     if (fileId != null) 'file_id': fileId,
     if (detail != null) 'detail': detail!.toJson(),
   };
+
+  /// Creates a copy with replaced values.
+  InputImageContent copyWith({
+    Object? imageUrl = unsetCopyWithValue,
+    Object? fileId = unsetCopyWithValue,
+    Object? detail = unsetCopyWithValue,
+  }) {
+    return InputImageContent(
+      imageUrl: imageUrl == unsetCopyWithValue
+          ? this.imageUrl
+          : imageUrl as String?,
+      fileId: fileId == unsetCopyWithValue ? this.fileId : fileId as String?,
+      detail: detail == unsetCopyWithValue
+          ? this.detail
+          : detail as ImageDetail?,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -189,6 +231,27 @@ class InputFileContent extends InputContent {
     if (filename != null) 'filename': filename,
   };
 
+  /// Creates a copy with replaced values.
+  InputFileContent copyWith({
+    Object? fileUrl = unsetCopyWithValue,
+    Object? fileId = unsetCopyWithValue,
+    Object? fileData = unsetCopyWithValue,
+    Object? filename = unsetCopyWithValue,
+  }) {
+    return InputFileContent(
+      fileUrl: fileUrl == unsetCopyWithValue
+          ? this.fileUrl
+          : fileUrl as String?,
+      fileId: fileId == unsetCopyWithValue ? this.fileId : fileId as String?,
+      fileData: fileData == unsetCopyWithValue
+          ? this.fileData
+          : fileData as String?,
+      filename: filename == unsetCopyWithValue
+          ? this.filename
+          : filename as String?,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -226,6 +289,11 @@ class InputVideoContent extends InputContent {
     'type': 'input_video',
     'video_url': videoUrl,
   };
+
+  /// Creates a copy with replaced values.
+  InputVideoContent copyWith({String? videoUrl}) {
+    return InputVideoContent(videoUrl: videoUrl ?? this.videoUrl);
+  }
 
   @override
   bool operator ==(Object other) =>

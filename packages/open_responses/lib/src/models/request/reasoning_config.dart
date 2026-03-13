@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../metadata/reasoning_effort.dart';
 import '../metadata/reasoning_summary.dart';
 
@@ -32,6 +33,21 @@ class ReasoningConfig {
     if (effort != null) 'effort': effort!.toJson(),
     if (summary != null) 'summary': summary!.toJson(),
   };
+
+  /// Creates a copy with replaced values.
+  ReasoningConfig copyWith({
+    Object? effort = unsetCopyWithValue,
+    Object? summary = unsetCopyWithValue,
+  }) {
+    return ReasoningConfig(
+      effort: effort == unsetCopyWithValue
+          ? this.effort
+          : effort as ReasoningEffort?,
+      summary: summary == unsetCopyWithValue
+          ? this.summary
+          : summary as ReasoningSummary?,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>

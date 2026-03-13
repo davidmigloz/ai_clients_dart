@@ -28,7 +28,7 @@ void main() async {
     final response = await client.responses.create(
       const CreateResponseRequest(
         model: 'gpt-4o-mini',
-        input: 'Solve 8x + 31 = 2',
+        input: ResponseTextInput('Solve 8x + 31 = 2'),
       ),
     );
 

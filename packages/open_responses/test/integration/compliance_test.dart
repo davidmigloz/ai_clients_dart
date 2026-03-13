@@ -95,7 +95,7 @@ void main() {
           final response = await client.responses.create(
             CreateResponseRequest(
               model: provider.model,
-              input: 'Say "Hello" and nothing else.',
+              input: const ResponseTextInput('Say "Hello" and nothing else.'),
             ),
           );
 
@@ -111,7 +111,7 @@ void main() {
           final response = await client.responses.create(
             CreateResponseRequest(
               model: provider.model,
-              input: 'What is 2 + 2?',
+              input: const ResponseTextInput('What is 2 + 2?'),
               instructions: 'Always respond with only the numeric answer.',
             ),
           );
@@ -125,10 +125,10 @@ void main() {
           final response = await client.responses.create(
             CreateResponseRequest(
               model: provider.model,
-              input: [
+              input: ResponseItemsInput([
                 MessageItem.systemText('You are a helpful assistant.'),
                 MessageItem.userText('What is the capital of France?'),
-              ],
+              ]),
             ),
           );
 
@@ -144,7 +144,7 @@ void main() {
               .createStream(
                 CreateResponseRequest(
                   model: provider.model,
-                  input: 'Count from 1 to 3.',
+                  input: const ResponseTextInput('Count from 1 to 3.'),
                 ),
               )
               .forEach(events.add);
@@ -166,7 +166,7 @@ void main() {
               .createStream(
                 CreateResponseRequest(
                   model: provider.model,
-                  input: 'Say "test".',
+                  input: const ResponseTextInput('Say "test".'),
                 ),
               )
               .forEach((event) {
@@ -183,7 +183,10 @@ void main() {
           final textBuffer = StringBuffer();
 
           final runner = client.responses.stream(
-            CreateResponseRequest(model: provider.model, input: 'Say "hello".'),
+            CreateResponseRequest(
+              model: provider.model,
+              input: const ResponseTextInput('Say "hello".'),
+            ),
           )..onTextDelta(textBuffer.write);
 
           final finalResponse = await runner.finalResponse;
@@ -198,7 +201,7 @@ void main() {
           final response = await client.responses.create(
             CreateResponseRequest(
               model: provider.model,
-              input: 'What is the weather in Paris?',
+              input: const ResponseTextInput('What is the weather in Paris?'),
               tools: const [
                 FunctionTool(
                   name: 'get_weather',
@@ -226,7 +229,10 @@ void main() {
         // EXT-001: Response extensions work
         test('EXT-001: Response extensions work correctly', () async {
           final response = await client.responses.create(
-            CreateResponseRequest(model: provider.model, input: 'Hello'),
+            CreateResponseRequest(
+              model: provider.model,
+              input: const ResponseTextInput('Hello'),
+            ),
           );
 
           // Verify all extension methods work
@@ -247,7 +253,7 @@ void main() {
           final response = await client.responses.create(
             CreateResponseRequest(
               model: provider.model,
-              input: 'What is 1 + 1?',
+              input: const ResponseTextInput('What is 1 + 1?'),
               temperature: 0,
             ),
           );
@@ -261,7 +267,7 @@ void main() {
           final response = await client.responses.create(
             CreateResponseRequest(
               model: provider.model,
-              input: 'Write a story.',
+              input: const ResponseTextInput('Write a story.'),
               maxOutputTokens: 20,
             ),
           );
@@ -274,7 +280,7 @@ void main() {
         test('JSON-001: Request serializes correctly', () {
           const request = CreateResponseRequest(
             model: 'test-model',
-            input: 'Hello',
+            input: ResponseTextInput('Hello'),
             instructions: 'Be helpful',
             temperature: 0.7,
             maxOutputTokens: 100,
@@ -305,7 +311,10 @@ void main() {
         // JSON-002: Response deserializes correctly
         test('JSON-002: Response deserializes correctly', () async {
           final response = await client.responses.create(
-            CreateResponseRequest(model: provider.model, input: 'Hello'),
+            CreateResponseRequest(
+              model: provider.model,
+              input: const ResponseTextInput('Hello'),
+            ),
           );
 
           // Verify JSON round-trip
@@ -351,7 +360,10 @@ void main() {
         // Run the same request on all providers
         for (final provider in availableProviders) {
           final response = await clients[provider.name]!.responses.create(
-            CreateResponseRequest(model: provider.model, input: 'Say "test".'),
+            CreateResponseRequest(
+              model: provider.model,
+              input: const ResponseTextInput('Say "test".'),
+            ),
           );
           responses[provider.name] = response;
         }

@@ -116,7 +116,7 @@
       "file": "lib/src/models/response/response_resource.dart",
       "schema": "ResponseResource",
       "tags": [],
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Intentionally nullable fields for provider compatibility: many spec-required properties (created_at, model, output, tools, etc.) are nullable in Dart to handle partial responses from various providers."
     },
     "CreateResponseBody": {
       "spec": "main",
@@ -130,27 +130,24 @@
     },
     "TextParam": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "TextConfig",
       "file": "lib/src/models/request/text_config.dart",
-      "schema": "TextParam",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "schema": "TextParam"
     },
     "ReasoningParam": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "ReasoningConfig",
       "file": "lib/src/models/request/reasoning_config.dart",
-      "schema": "ReasoningParam",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "schema": "ReasoningParam"
     },
     "ErrorPayload": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "ErrorPayload",
       "file": "lib/src/models/response/error_payload.dart",
-      "schema": "ErrorPayload",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "schema": "ErrorPayload"
     },
     "LogProb": {
       "spec": "main",
@@ -158,7 +155,7 @@
       "dart_class": "LogProb",
       "file": "lib/src/models/content/logprob.dart",
       "schema": "LogProb",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Fields bytes and top_logprobs are intentionally nullable for defensive parsing across providers, though spec marks them required."
     },
     "TopLogProb": {
       "spec": "main",
@@ -166,7 +163,7 @@
       "dart_class": "TopLogProb",
       "file": "lib/src/models/content/logprob.dart",
       "schema": "TopLogProb",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Field bytes is intentionally nullable for defensive parsing across providers, though spec marks it required."
     },
     "StreamingEvent": {
       "spec": "main",
@@ -202,179 +199,159 @@
           "ResponseReasoningSummaryDoneStreamingEvent": "response.reasoning_summary.done",
           "ErrorStreamingEvent": "error"
         }
-      },
-      "note": null
+      }
     },
     "ResponseCreatedStreamingEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ResponseCreatedEvent",
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ResponseCreatedStreamingEvent",
-      "parent": "StreamingEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "StreamingEvent"
     },
     "ResponseQueuedStreamingEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ResponseQueuedEvent",
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ResponseQueuedStreamingEvent",
-      "parent": "StreamingEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "StreamingEvent"
     },
     "ResponseInProgressStreamingEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ResponseInProgressEvent",
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ResponseInProgressStreamingEvent",
-      "parent": "StreamingEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "StreamingEvent"
     },
     "ResponseCompletedStreamingEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ResponseCompletedEvent",
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ResponseCompletedStreamingEvent",
-      "parent": "StreamingEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "StreamingEvent"
     },
     "ResponseFailedStreamingEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ResponseFailedEvent",
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ResponseFailedStreamingEvent",
-      "parent": "StreamingEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "StreamingEvent"
     },
     "ResponseIncompleteStreamingEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ResponseIncompleteEvent",
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ResponseIncompleteStreamingEvent",
-      "parent": "StreamingEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "StreamingEvent"
     },
     "ResponseOutputItemAddedStreamingEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "OutputItemAddedEvent",
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ResponseOutputItemAddedStreamingEvent",
-      "parent": "StreamingEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "StreamingEvent"
     },
     "ResponseOutputItemDoneStreamingEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "OutputItemDoneEvent",
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ResponseOutputItemDoneStreamingEvent",
-      "parent": "StreamingEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "StreamingEvent"
     },
     "ResponseContentPartAddedStreamingEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ContentPartAddedEvent",
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ResponseContentPartAddedStreamingEvent",
-      "parent": "StreamingEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "StreamingEvent"
     },
     "ResponseContentPartDoneStreamingEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ContentPartDoneEvent",
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ResponseContentPartDoneStreamingEvent",
-      "parent": "StreamingEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "StreamingEvent"
     },
     "ResponseOutputTextDeltaStreamingEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "OutputTextDeltaEvent",
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ResponseOutputTextDeltaStreamingEvent",
-      "parent": "StreamingEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "StreamingEvent"
     },
     "ResponseOutputTextDoneStreamingEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "OutputTextDoneEvent",
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ResponseOutputTextDoneStreamingEvent",
-      "parent": "StreamingEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "StreamingEvent"
     },
     "ResponseOutputTextAnnotationAddedStreamingEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "OutputTextAnnotationAddedEvent",
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ResponseOutputTextAnnotationAddedStreamingEvent",
-      "parent": "StreamingEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "StreamingEvent"
     },
     "ResponseRefusalDeltaStreamingEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "RefusalDeltaEvent",
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ResponseRefusalDeltaStreamingEvent",
-      "parent": "StreamingEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "StreamingEvent"
     },
     "ResponseRefusalDoneStreamingEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "RefusalDoneEvent",
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ResponseRefusalDoneStreamingEvent",
-      "parent": "StreamingEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "StreamingEvent"
     },
     "ResponseFunctionCallArgumentsDeltaStreamingEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "FunctionCallArgumentsDeltaEvent",
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ResponseFunctionCallArgumentsDeltaStreamingEvent",
-      "parent": "StreamingEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "StreamingEvent"
     },
     "ResponseFunctionCallArgumentsDoneStreamingEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "FunctionCallArgumentsDoneEvent",
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ResponseFunctionCallArgumentsDoneStreamingEvent",
-      "parent": "StreamingEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "StreamingEvent"
     },
     "ResponseReasoningDeltaStreamingEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ReasoningDeltaEvent",
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ResponseReasoningDeltaStreamingEvent",
-      "parent": "StreamingEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "StreamingEvent"
     },
     "ResponseReasoningDoneStreamingEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ReasoningDoneEvent",
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ResponseReasoningDoneStreamingEvent",
-      "parent": "StreamingEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "StreamingEvent"
     },
     "ResponseReasoningSummaryPartAddedStreamingEvent": {
       "spec": "main",
@@ -383,16 +360,15 @@
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ResponseReasoningSummaryPartAddedStreamingEvent",
       "parent": "StreamingEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Field part is intentionally nullable for provider compatibility, though spec marks it required."
     },
     "ResponseReasoningSummaryPartDoneStreamingEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ReasoningSummaryPartDoneEvent",
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ResponseReasoningSummaryPartDoneStreamingEvent",
-      "parent": "StreamingEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "StreamingEvent"
     },
     "ResponseReasoningSummaryDeltaStreamingEvent": {
       "spec": "main",
@@ -401,7 +377,7 @@
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ResponseReasoningSummaryDeltaStreamingEvent",
       "parent": "StreamingEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Fields item_id, output_index, summary_index are intentionally nullable for provider compatibility, though spec marks them required."
     },
     "ResponseReasoningSummaryDoneStreamingEvent": {
       "spec": "main",
@@ -410,16 +386,15 @@
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ResponseReasoningSummaryDoneStreamingEvent",
       "parent": "StreamingEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Fields item_id, output_index, summary_index are intentionally nullable for provider compatibility, though spec marks them required."
     },
     "ErrorStreamingEvent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ErrorEvent",
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ErrorStreamingEvent",
-      "parent": "StreamingEvent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "StreamingEvent"
     },
     "ToolChoice": {
       "spec": "main",
@@ -433,8 +408,7 @@
           "SpecificFunctionParam": "function",
           "AllowedToolsParam": "allowed_tools"
         }
-      },
-      "note": null
+      }
     },
     "ToolChoice:ToolChoiceNone": {
       "spec": "main",
@@ -442,8 +416,7 @@
       "dart_class": "ToolChoiceNone",
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": null,
-      "parent": "ToolChoice",
-      "note": null
+      "parent": "ToolChoice"
     },
     "ToolChoice:ToolChoiceAuto": {
       "spec": "main",
@@ -451,8 +424,7 @@
       "dart_class": "ToolChoiceAuto",
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": null,
-      "parent": "ToolChoice",
-      "note": null
+      "parent": "ToolChoice"
     },
     "ToolChoice:ToolChoiceRequired": {
       "spec": "main",
@@ -460,8 +432,7 @@
       "dart_class": "ToolChoiceRequired",
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": null,
-      "parent": "ToolChoice",
-      "note": null
+      "parent": "ToolChoice"
     },
     "SpecificFunctionParam": {
       "spec": "main",
@@ -470,7 +441,7 @@
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": "SpecificFunctionParam",
       "parent": "ToolChoice",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "toJson() returns Object instead of Map<String, dynamic>, which the verifier cannot inspect for serialization checks."
     },
     "AllowedToolsParam": {
       "spec": "main",
@@ -479,7 +450,7 @@
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": "AllowedToolsParam",
       "parent": "ToolChoice",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "toJson() returns Object instead of Map<String, dynamic>, which the verifier cannot inspect for serialization checks."
     },
     "InputContent": {
       "spec": "main",
@@ -491,48 +462,44 @@
         "field": "type",
         "mapping": {
           "InputTextContentParam": "input_text",
-          "InputImageContentParam": "input_image",
+          "InputImageContent": "input_image",
           "InputFileContentParam": "input_file",
-          "InputVideoContentParam": "input_video"
+          "InputVideoContent": "input_video"
         }
-      },
-      "note": null
+      }
     },
     "InputTextContentParam": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "InputTextContent",
       "file": "lib/src/models/content/input_content.dart",
       "schema": "InputTextContentParam",
-      "parent": "InputContent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "InputContent"
     },
-    "InputImageContentParam": {
+    "InputImageContent": {
       "spec": "main",
       "kind": "skip",
       "dart_class": "InputImageContent",
       "file": "lib/src/models/content/input_content.dart",
-      "schema": "InputImageContentParam",
+      "schema": "InputImageContent",
       "parent": "InputContent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Field detail is intentionally nullable for ergonomics (spec default is auto). Also has extension field fileId not in spec."
     },
     "InputFileContentParam": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "InputFileContent",
       "file": "lib/src/models/content/input_content.dart",
       "schema": "InputFileContentParam",
-      "parent": "InputContent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "InputContent"
     },
-    "InputVideoContentParam": {
+    "InputVideoContent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "InputVideoContent",
       "file": "lib/src/models/content/input_content.dart",
-      "schema": "InputVideoContentParam",
-      "parent": "InputContent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "schema": "InputVideoContent",
+      "parent": "InputContent"
     },
     "OutputContent": {
       "spec": "main",
@@ -546,8 +513,7 @@
           "OutputTextContent": "output_text",
           "RefusalContent": "refusal"
         }
-      },
-      "note": null
+      }
     },
     "OutputTextContent": {
       "spec": "main",
@@ -556,7 +522,7 @@
       "file": "lib/src/models/content/output_content.dart",
       "schema": "OutputTextContent",
       "parent": "OutputContent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Fields annotations and logprobs are intentionally nullable for provider compatibility, though spec marks them required."
     },
     "OutputContent:ReasoningTextContent": {
       "spec": "main",
@@ -564,17 +530,15 @@
       "dart_class": "ReasoningTextContent",
       "file": "lib/src/models/content/output_content.dart",
       "schema": null,
-      "parent": "OutputContent",
-      "note": null
+      "parent": "OutputContent"
     },
     "RefusalContent": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "RefusalContent",
       "file": "lib/src/models/content/output_content.dart",
       "schema": "RefusalContent",
-      "parent": "OutputContent",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "OutputContent"
     },
     "Tool": {
       "spec": "main",
@@ -587,17 +551,15 @@
         "mapping": {
           "FunctionToolParam": "function"
         }
-      },
-      "note": null
+      }
     },
     "FunctionToolParam": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "FunctionTool",
       "file": "lib/src/models/tools/tool.dart",
       "schema": "FunctionToolParam",
-      "parent": "Tool",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "Tool"
     },
     "Tool:McpTool": {
       "spec": "main",
@@ -605,8 +567,7 @@
       "dart_class": "McpTool",
       "file": "lib/src/models/tools/tool.dart",
       "schema": null,
-      "parent": "Tool",
-      "note": null
+      "parent": "Tool"
     },
     "Annotation": {
       "spec": "main",
@@ -617,19 +578,17 @@
       "discriminator": {
         "field": "type",
         "mapping": {
-          "UrlCitationAnnotation": "url_citation"
+          "UrlCitationParam": "url_citation"
         }
-      },
-      "note": null
+      }
     },
-    "UrlCitationAnnotation": {
+    "UrlCitationParam": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "UrlCitation",
       "file": "lib/src/models/content/annotation.dart",
-      "schema": "UrlCitationAnnotation",
-      "parent": "Annotation",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "schema": "UrlCitationParam",
+      "parent": "Annotation"
     },
     "Annotation:FileCitation": {
       "spec": "main",
@@ -637,8 +596,7 @@
       "dart_class": "FileCitation",
       "file": "lib/src/models/content/annotation.dart",
       "schema": null,
-      "parent": "Annotation",
-      "note": null
+      "parent": "Annotation"
     },
     "Annotation:FilePathAnnotation": {
       "spec": "main",
@@ -646,8 +604,7 @@
       "dart_class": "FilePathAnnotation",
       "file": "lib/src/models/content/annotation.dart",
       "schema": null,
-      "parent": "Annotation",
-      "note": null
+      "parent": "Annotation"
     },
     "Item": {
       "spec": "main",
@@ -658,49 +615,86 @@
       "discriminator": {
         "field": "type",
         "mapping": {
-          "MessageItemParam": "message",
+          "MessageItem": "message",
           "FunctionCallItemParam": "function_call",
           "FunctionCallOutputItemParam": "function_call_output",
           "ItemReferenceParam": "item_reference"
         }
-      },
-      "note": null
+      }
     },
-    "MessageItemParam": {
+    "MessageItem": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_parent",
       "dart_class": "MessageItem",
       "file": "lib/src/models/items/item.dart",
-      "schema": "MessageItemParam",
+      "schema": null,
       "parent": "Item",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "discriminator": {
+        "field": "role",
+        "mapping": {
+          "UserMessageItemParam": "user",
+          "SystemMessageItemParam": "system",
+          "DeveloperMessageItemParam": "developer",
+          "AssistantMessageItemParam": "assistant"
+        }
+      }
+    },
+    "UserMessageItemParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "UserMessageItem",
+      "file": "lib/src/models/items/item.dart",
+      "schema": "UserMessageItemParam",
+      "parent": "MessageItem"
+    },
+    "SystemMessageItemParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SystemMessageItem",
+      "file": "lib/src/models/items/item.dart",
+      "schema": "SystemMessageItemParam",
+      "parent": "MessageItem"
+    },
+    "DeveloperMessageItemParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "DeveloperMessageItem",
+      "file": "lib/src/models/items/item.dart",
+      "schema": "DeveloperMessageItemParam",
+      "parent": "MessageItem"
+    },
+    "AssistantMessageItemParam": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "AssistantMessageItem",
+      "file": "lib/src/models/items/item.dart",
+      "schema": "AssistantMessageItemParam",
+      "parent": "MessageItem",
+      "note": "Content uses broader OutputContent than spec's 2 types (output_text, refusal). Also supports ReasoningTextContent and SummaryTextContent extensions."
     },
     "FunctionCallItemParam": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "FunctionCallItem",
       "file": "lib/src/models/items/item.dart",
       "schema": "FunctionCallItemParam",
-      "parent": "Item",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "Item"
     },
     "FunctionCallOutputItemParam": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "FunctionCallOutputItem",
       "file": "lib/src/models/items/item.dart",
       "schema": "FunctionCallOutputItemParam",
-      "parent": "Item",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "Item"
     },
     "ItemReferenceParam": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ItemReference",
       "file": "lib/src/models/items/item.dart",
       "schema": "ItemReferenceParam",
-      "parent": "Item",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "parent": "Item"
     },
     "OutputItem": {
       "spec": "main",

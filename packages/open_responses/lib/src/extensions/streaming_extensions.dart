@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import '../client/streaming_event_accumulator.dart';
 import '../models/response/response_resource.dart';
 import '../models/streaming/streaming_event.dart';
 
@@ -47,4 +50,26 @@ extension StreamingEventsExtensions on Stream<StreamingEvent> {
   Stream<String> get textDeltas => where(
     (e) => e is OutputTextDeltaEvent,
   ).map((e) => (e as OutputTextDeltaEvent).delta);
+
+  /// Collects all text deltas into a single string.
+  Future<String> collectText() async {
+    final buffer = StringBuffer();
+    await for (final event in this) {
+      if (event is OutputTextDeltaEvent) {
+        buffer.write(event.delta);
+      }
+    }
+    return buffer.toString();
+  }
+
+  /// Returns a stream of progressive accumulator snapshots.
+  ///
+  /// Each emitted snapshot reflects the state after processing the latest event.
+  Stream<StreamingEventAccumulatorSnapshot> accumulate() {
+    final accumulator = StreamingEventAccumulator();
+    return map((event) {
+      accumulator.add(event);
+      return accumulator.snapshot;
+    });
+  }
 }

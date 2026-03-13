@@ -31,7 +31,7 @@ void main() {
       final response = await client.responses.create(
         const CreateResponseRequest(
           model: model,
-          input: 'Say "Hello, World!" and nothing else.',
+          input: ResponseTextInput('Say "Hello, World!" and nothing else.'),
         ),
       );
 
@@ -44,7 +44,7 @@ void main() {
       final response = await client.responses.create(
         const CreateResponseRequest(
           model: model,
-          input: 'What is my name?',
+          input: ResponseTextInput('What is my name?'),
           instructions:
               "You are a helpful assistant. The user's name is Alice.",
         ),
@@ -61,7 +61,7 @@ void main() {
           .createStream(
             const CreateResponseRequest(
               model: model,
-              input: 'Count from 1 to 3.',
+              input: ResponseTextInput('Count from 1 to 3.'),
             ),
           )
           .forEach(events.add);
@@ -85,7 +85,7 @@ void main() {
       final runner = client.responses.stream(
         const CreateResponseRequest(
           model: model,
-          input: 'Say "test" and nothing else.',
+          input: ResponseTextInput('Say "test" and nothing else.'),
         ),
       )..onTextDelta(textBuffer.write);
 
@@ -104,7 +104,7 @@ void main() {
       final response = await client.responses.create(
         const CreateResponseRequest(
           model: model,
-          input: 'What is the weather in San Francisco?',
+          input: ResponseTextInput('What is the weather in San Francisco?'),
           tools: [
             FunctionTool(
               name: 'get_weather',
@@ -138,7 +138,7 @@ void main() {
           .createStream(
             const CreateResponseRequest(
               model: model,
-              input: 'What is the weather in Tokyo?',
+              input: ResponseTextInput('What is the weather in Tokyo?'),
               tools: [
                 FunctionTool(
                   name: 'get_weather',
@@ -169,7 +169,7 @@ void main() {
       final response1 = await client.responses.create(
         const CreateResponseRequest(
           model: model,
-          input: 'My favorite color is blue. Remember this.',
+          input: ResponseTextInput('My favorite color is blue. Remember this.'),
         ),
       );
 
@@ -179,7 +179,7 @@ void main() {
       final response2 = await client.responses.create(
         CreateResponseRequest(
           model: model,
-          input: 'What is my favorite color?',
+          input: const ResponseTextInput('What is my favorite color?'),
           previousResponseId: response1.id,
         ),
       );
@@ -192,7 +192,7 @@ void main() {
       final response = await client.responses.create(
         const CreateResponseRequest(
           model: model,
-          input: 'List 2 fruits with their colors.',
+          input: ResponseTextInput('List 2 fruits with their colors.'),
           text: TextConfig(
             format: JsonSchemaFormat(
               name: 'fruits',
@@ -230,10 +230,10 @@ void main() {
       final response = await client.responses.create(
         CreateResponseRequest(
           model: model,
-          input: [
+          input: ResponseItemsInput([
             MessageItem.systemText('You only respond in uppercase letters.'),
             MessageItem.userText('say hi'),
-          ],
+          ]),
         ),
       );
 
@@ -247,7 +247,10 @@ void main() {
 
     test('usage tracking', () async {
       final response = await client.responses.create(
-        const CreateResponseRequest(model: model, input: 'Hello'),
+        const CreateResponseRequest(
+          model: model,
+          input: ResponseTextInput('Hello'),
+        ),
       );
 
       expect(response.usage, isNotNull);
@@ -261,7 +264,7 @@ void main() {
       final response = await client.responses.create(
         const CreateResponseRequest(
           model: model,
-          input: 'What is 2 + 2?',
+          input: ResponseTextInput('What is 2 + 2?'),
           temperature: 0,
         ),
       );
@@ -274,7 +277,7 @@ void main() {
       final response = await client.responses.create(
         const CreateResponseRequest(
           model: model,
-          input: 'Write a very long story about a dragon.',
+          input: ResponseTextInput('Write a very long story about a dragon.'),
           maxOutputTokens: 20,
         ),
       );
@@ -287,7 +290,7 @@ void main() {
       final response = await client.responses.create(
         CreateResponseRequest(
           model: 'gpt-4o-mini', // Vision-capable model
-          input: [
+          input: ResponseItemsInput([
             MessageItem.user(const [
               InputTextContent(text: 'What is shown in this image?'),
               InputImageContent.url(
@@ -296,7 +299,7 @@ void main() {
                 detail: ImageDetail.low,
               ),
             ]),
-          ],
+          ]),
         ),
       );
 
@@ -321,7 +324,9 @@ void main() {
       final response = await client.responses.create(
         CreateResponseRequest(
           model: reasoningModel,
-          input: 'What is 25 * 17? Think step by step.',
+          input: const ResponseTextInput(
+            'What is 25 * 17? Think step by step.',
+          ),
           reasoning: const ReasoningConfig(
             effort: ReasoningEffort.medium,
             summary: ReasoningSummary.auto,
@@ -353,7 +358,7 @@ void main() {
       final response = await client.responses.create(
         CreateResponseRequest(
           model: model,
-          input: 'Use the available tools to help me.',
+          input: const ResponseTextInput('Use the available tools to help me.'),
           tools: [
             McpTool(
               serverLabel: 'test-server',
@@ -378,7 +383,10 @@ void main() {
 
       try {
         await badClient.responses.create(
-          const CreateResponseRequest(model: 'gpt-4o-mini', input: 'Hello'),
+          const CreateResponseRequest(
+            model: 'gpt-4o-mini',
+            input: ResponseTextInput('Hello'),
+          ),
         );
         fail('Should have thrown an exception');
       } on AuthenticationException catch (e) {
@@ -396,7 +404,7 @@ void main() {
         await client.responses.create(
           const CreateResponseRequest(
             model: 'nonexistent-model-xyz',
-            input: 'Hello',
+            input: ResponseTextInput('Hello'),
           ),
         );
         fail('Should have thrown an exception');
@@ -415,7 +423,7 @@ void main() {
         await client.responses.create(
           const CreateResponseRequest(
             model: model,
-            input: 'Hello',
+            input: ResponseTextInput('Hello'),
             // Invalid temperature (must be 0-2)
             temperature: 5.0,
           ),
@@ -440,7 +448,10 @@ void main() {
       try {
         await badClient.responses
             .createStream(
-              const CreateResponseRequest(model: 'gpt-4o-mini', input: 'Hello'),
+              const CreateResponseRequest(
+                model: 'gpt-4o-mini',
+                input: ResponseTextInput('Hello'),
+              ),
             )
             .first;
         fail('Should have thrown an exception');

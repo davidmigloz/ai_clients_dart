@@ -4,14 +4,20 @@ import 'package:test/test.dart';
 void main() {
   group('CreateResponseRequest', () {
     test('constructs with required fields', () {
-      const request = CreateResponseRequest(model: 'gpt-4o', input: 'Hello');
+      const request = CreateResponseRequest(
+        model: 'gpt-4o',
+        input: ResponseTextInput('Hello'),
+      );
 
       expect(request.model, 'gpt-4o');
-      expect(request.input, 'Hello');
+      expect(request.input, const ResponseTextInput('Hello'));
     });
 
     test('toJson produces correct JSON for string input', () {
-      const request = CreateResponseRequest(model: 'gpt-4o', input: 'Hello');
+      const request = CreateResponseRequest(
+        model: 'gpt-4o',
+        input: ResponseTextInput('Hello'),
+      );
       final json = request.toJson();
 
       expect(json['model'], 'gpt-4o');
@@ -21,7 +27,7 @@ void main() {
     test('toJson produces correct JSON for item list input', () {
       final request = CreateResponseRequest(
         model: 'gpt-4o',
-        input: [MessageItem.userText('Hello')],
+        input: ResponseItemsInput([MessageItem.userText('Hello')]),
       );
       final json = request.toJson();
 
@@ -36,7 +42,7 @@ void main() {
     test('toJson includes optional fields when set', () {
       const request = CreateResponseRequest(
         model: 'gpt-4o',
-        input: 'Hello',
+        input: ResponseTextInput('Hello'),
         instructions: 'Be helpful',
         maxOutputTokens: 1000,
         temperature: 0.7,
@@ -51,7 +57,10 @@ void main() {
     });
 
     test('toJson omits null optional fields', () {
-      const request = CreateResponseRequest(model: 'gpt-4o', input: 'Hello');
+      const request = CreateResponseRequest(
+        model: 'gpt-4o',
+        input: ResponseTextInput('Hello'),
+      );
       final json = request.toJson();
 
       expect(json.containsKey('instructions'), isFalse);
@@ -67,23 +76,29 @@ void main() {
       );
 
       expect(request.model, 'gpt-4o');
-      expect(request.input, 'Hello');
+      expect(request.input, const ResponseTextInput('Hello'));
       expect(request.temperature, 0.5);
     });
 
     test('copyWith creates modified copy', () {
-      const original = CreateResponseRequest(model: 'gpt-4o', input: 'Hello');
+      const original = CreateResponseRequest(
+        model: 'gpt-4o',
+        input: ResponseTextInput('Hello'),
+      );
       final modified = original.copyWith(model: 'gpt-5', temperature: 0.8);
 
       expect(modified.model, 'gpt-5');
       expect(modified.temperature, 0.8);
-      expect(modified.input, 'Hello'); // Preserved from original
+      expect(
+        modified.input,
+        const ResponseTextInput('Hello'),
+      ); // Preserved from original
     });
 
     test('copyWith preserves original when no changes', () {
       const original = CreateResponseRequest(
         model: 'gpt-4o',
-        input: 'Hello',
+        input: ResponseTextInput('Hello'),
         temperature: 0.7,
       );
       final copy = original.copyWith();
@@ -96,7 +111,7 @@ void main() {
     test('includes tools in JSON when specified', () {
       const request = CreateResponseRequest(
         model: 'gpt-4o',
-        input: 'Hello',
+        input: ResponseTextInput('Hello'),
         tools: [
           FunctionTool(
             name: 'get_weather',
@@ -120,7 +135,7 @@ void main() {
     test('includes reasoning config when specified', () {
       const request = CreateResponseRequest(
         model: 'o1',
-        input: 'Solve this math problem',
+        input: ResponseTextInput('Solve this math problem'),
         reasoning: ReasoningConfig(
           effort: ReasoningEffort.high,
           summary: ReasoningSummary.detailed,
@@ -136,7 +151,7 @@ void main() {
     test('includes text config with JSON schema when specified', () {
       const request = CreateResponseRequest(
         model: 'gpt-4o',
-        input: 'List 3 fruits',
+        input: ResponseTextInput('List 3 fruits'),
         text: TextConfig(
           format: JsonSchemaFormat(
             name: 'fruits',

@@ -28,11 +28,11 @@ void main() async {
     final response = await client.responses.create(
       const CreateResponseRequest(
         model: 'o1-mini', // Use a reasoning model
-        input: '''
+        input: ResponseTextInput('''
 A farmer has 17 sheep. All but 9 run away.
 How many sheep does the farmer have left?
 Explain your reasoning step by step.
-''',
+'''),
         reasoning: ReasoningConfig(
           effort: ReasoningEffort.high,
           summary: ReasoningSummary.detailed,
@@ -63,7 +63,9 @@ Explain your reasoning step by step.
     await for (final event in client.responses.createStream(
       const CreateResponseRequest(
         model: 'o1-mini',
-        input: 'What is the next number in this sequence: 2, 6, 12, 20, 30, ?',
+        input: ResponseTextInput(
+          'What is the next number in this sequence: 2, 6, 12, 20, 30, ?',
+        ),
         reasoning: ReasoningConfig(
           effort: ReasoningEffort.medium,
           summary: ReasoningSummary.concise,
@@ -104,7 +106,7 @@ Explain your reasoning step by step.
       final effortResponse = await client.responses.create(
         CreateResponseRequest(
           model: 'o1-mini',
-          input: 'Is 97 a prime number?',
+          input: const ResponseTextInput('Is 97 a prime number?'),
           reasoning: ReasoningConfig(effort: effort),
         ),
       );

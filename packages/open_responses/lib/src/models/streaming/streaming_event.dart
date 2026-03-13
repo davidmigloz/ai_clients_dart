@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../content/annotation.dart';
 import '../content/logprob.dart';
@@ -126,6 +127,17 @@ class ResponseCreatedEvent extends StreamingEvent {
     'response': response.toJson(),
   };
 
+  /// Creates a copy with replaced values.
+  ResponseCreatedEvent copyWith({
+    int? sequenceNumber,
+    ResponseResource? response,
+  }) {
+    return ResponseCreatedEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      response: response ?? this.response,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -176,6 +188,17 @@ class ResponseQueuedEvent extends StreamingEvent {
     'sequence_number': sequenceNumber,
     'response': response.toJson(),
   };
+
+  /// Creates a copy with replaced values.
+  ResponseQueuedEvent copyWith({
+    int? sequenceNumber,
+    ResponseResource? response,
+  }) {
+    return ResponseQueuedEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      response: response ?? this.response,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -228,6 +251,17 @@ class ResponseInProgressEvent extends StreamingEvent {
     'response': response.toJson(),
   };
 
+  /// Creates a copy with replaced values.
+  ResponseInProgressEvent copyWith({
+    int? sequenceNumber,
+    ResponseResource? response,
+  }) {
+    return ResponseInProgressEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      response: response ?? this.response,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -278,6 +312,17 @@ class ResponseCompletedEvent extends StreamingEvent {
     'sequence_number': sequenceNumber,
     'response': response.toJson(),
   };
+
+  /// Creates a copy with replaced values.
+  ResponseCompletedEvent copyWith({
+    int? sequenceNumber,
+    ResponseResource? response,
+  }) {
+    return ResponseCompletedEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      response: response ?? this.response,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -330,6 +375,17 @@ class ResponseFailedEvent extends StreamingEvent {
     'response': response.toJson(),
   };
 
+  /// Creates a copy with replaced values.
+  ResponseFailedEvent copyWith({
+    int? sequenceNumber,
+    ResponseResource? response,
+  }) {
+    return ResponseFailedEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      response: response ?? this.response,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -380,6 +436,17 @@ class ResponseIncompleteEvent extends StreamingEvent {
     'sequence_number': sequenceNumber,
     'response': response.toJson(),
   };
+
+  /// Creates a copy with replaced values.
+  ResponseIncompleteEvent copyWith({
+    int? sequenceNumber,
+    ResponseResource? response,
+  }) {
+    return ResponseIncompleteEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      response: response ?? this.response,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -440,6 +507,19 @@ class OutputItemAddedEvent extends StreamingEvent {
     'item': item.toJson(),
   };
 
+  /// Creates a copy with replaced values.
+  OutputItemAddedEvent copyWith({
+    int? sequenceNumber,
+    int? outputIndex,
+    OutputItem? item,
+  }) {
+    return OutputItemAddedEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      outputIndex: outputIndex ?? this.outputIndex,
+      item: item ?? this.item,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -495,6 +575,19 @@ class OutputItemDoneEvent extends StreamingEvent {
     'output_index': outputIndex,
     'item': item.toJson(),
   };
+
+  /// Creates a copy with replaced values.
+  OutputItemDoneEvent copyWith({
+    int? sequenceNumber,
+    int? outputIndex,
+    OutputItem? item,
+  }) {
+    return OutputItemDoneEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      outputIndex: outputIndex ?? this.outputIndex,
+      item: item ?? this.item,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -568,6 +661,23 @@ class ContentPartAddedEvent extends StreamingEvent {
     'part': part.toJson(),
   };
 
+  /// Creates a copy with replaced values.
+  ContentPartAddedEvent copyWith({
+    int? sequenceNumber,
+    String? itemId,
+    int? outputIndex,
+    int? contentIndex,
+    OutputContent? part,
+  }) {
+    return ContentPartAddedEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      contentIndex: contentIndex ?? this.contentIndex,
+      part: part ?? this.part,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -585,7 +695,7 @@ class ContentPartAddedEvent extends StreamingEvent {
 
   @override
   String toString() =>
-      'ContentPartAddedEvent(sequenceNumber: $sequenceNumber, itemId: $itemId, outputIndex: $outputIndex, contentIndex: $contentIndex)';
+      'ContentPartAddedEvent(sequenceNumber: $sequenceNumber, itemId: $itemId, outputIndex: $outputIndex, contentIndex: $contentIndex, part: $part)';
 }
 
 /// Event indicating a content part is done.
@@ -639,6 +749,23 @@ class ContentPartDoneEvent extends StreamingEvent {
     'part': part.toJson(),
   };
 
+  /// Creates a copy with replaced values.
+  ContentPartDoneEvent copyWith({
+    int? sequenceNumber,
+    String? itemId,
+    int? outputIndex,
+    int? contentIndex,
+    OutputContent? part,
+  }) {
+    return ContentPartDoneEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      contentIndex: contentIndex ?? this.contentIndex,
+      part: part ?? this.part,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -656,7 +783,7 @@ class ContentPartDoneEvent extends StreamingEvent {
 
   @override
   String toString() =>
-      'ContentPartDoneEvent(sequenceNumber: $sequenceNumber, itemId: $itemId, outputIndex: $outputIndex, contentIndex: $contentIndex)';
+      'ContentPartDoneEvent(sequenceNumber: $sequenceNumber, itemId: $itemId, outputIndex: $outputIndex, contentIndex: $contentIndex, part: $part)';
 }
 
 // ============================================================================
@@ -731,6 +858,29 @@ class OutputTextDeltaEvent extends StreamingEvent {
     if (obfuscation != null) 'obfuscation': obfuscation,
   };
 
+  /// Creates a copy with replaced values.
+  OutputTextDeltaEvent copyWith({
+    int? sequenceNumber,
+    String? itemId,
+    int? outputIndex,
+    int? contentIndex,
+    String? delta,
+    List<LogProb>? logprobs,
+    Object? obfuscation = unsetCopyWithValue,
+  }) {
+    return OutputTextDeltaEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      contentIndex: contentIndex ?? this.contentIndex,
+      delta: delta ?? this.delta,
+      logprobs: logprobs ?? this.logprobs,
+      obfuscation: obfuscation == unsetCopyWithValue
+          ? this.obfuscation
+          : obfuscation as String?,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -756,7 +906,8 @@ class OutputTextDeltaEvent extends StreamingEvent {
   );
 
   @override
-  String toString() => 'OutputTextDeltaEvent(delta: $delta)';
+  String toString() =>
+      'OutputTextDeltaEvent(sequenceNumber: $sequenceNumber, itemId: $itemId, outputIndex: $outputIndex, contentIndex: $contentIndex, delta: $delta, logprobs: $logprobs, obfuscation: $obfuscation)';
 }
 
 /// Event indicating output text is done.
@@ -821,6 +972,25 @@ class OutputTextDoneEvent extends StreamingEvent {
       'logprobs': logprobs.map((e) => e.toJson()).toList(),
   };
 
+  /// Creates a copy with replaced values.
+  OutputTextDoneEvent copyWith({
+    int? sequenceNumber,
+    String? itemId,
+    int? outputIndex,
+    int? contentIndex,
+    String? text,
+    List<LogProb>? logprobs,
+  }) {
+    return OutputTextDoneEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      contentIndex: contentIndex ?? this.contentIndex,
+      text: text ?? this.text,
+      logprobs: logprobs ?? this.logprobs,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -844,7 +1014,8 @@ class OutputTextDoneEvent extends StreamingEvent {
   );
 
   @override
-  String toString() => 'OutputTextDoneEvent(text: $text)';
+  String toString() =>
+      'OutputTextDoneEvent(sequenceNumber: $sequenceNumber, itemId: $itemId, outputIndex: $outputIndex, contentIndex: $contentIndex, text: $text, logprobs: $logprobs)';
 }
 
 /// Event indicating an annotation was added.
@@ -906,6 +1077,25 @@ class OutputTextAnnotationAddedEvent extends StreamingEvent {
     'annotation': annotation.toJson(),
   };
 
+  /// Creates a copy with replaced values.
+  OutputTextAnnotationAddedEvent copyWith({
+    int? sequenceNumber,
+    String? itemId,
+    int? outputIndex,
+    int? contentIndex,
+    int? annotationIndex,
+    Annotation? annotation,
+  }) {
+    return OutputTextAnnotationAddedEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      contentIndex: contentIndex ?? this.contentIndex,
+      annotationIndex: annotationIndex ?? this.annotationIndex,
+      annotation: annotation ?? this.annotation,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -930,7 +1120,7 @@ class OutputTextAnnotationAddedEvent extends StreamingEvent {
 
   @override
   String toString() =>
-      'OutputTextAnnotationAddedEvent(annotationIndex: $annotationIndex, annotation: $annotation)';
+      'OutputTextAnnotationAddedEvent(sequenceNumber: $sequenceNumber, itemId: $itemId, outputIndex: $outputIndex, contentIndex: $contentIndex, annotationIndex: $annotationIndex, annotation: $annotation)';
 }
 
 // ============================================================================
@@ -988,6 +1178,23 @@ class RefusalDeltaEvent extends StreamingEvent {
     'delta': delta,
   };
 
+  /// Creates a copy with replaced values.
+  RefusalDeltaEvent copyWith({
+    int? sequenceNumber,
+    String? itemId,
+    int? outputIndex,
+    int? contentIndex,
+    String? delta,
+  }) {
+    return RefusalDeltaEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      contentIndex: contentIndex ?? this.contentIndex,
+      delta: delta ?? this.delta,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1004,7 +1211,8 @@ class RefusalDeltaEvent extends StreamingEvent {
       Object.hash(sequenceNumber, itemId, outputIndex, contentIndex, delta);
 
   @override
-  String toString() => 'RefusalDeltaEvent(delta: $delta)';
+  String toString() =>
+      'RefusalDeltaEvent(sequenceNumber: $sequenceNumber, itemId: $itemId, outputIndex: $outputIndex, contentIndex: $contentIndex, delta: $delta)';
 }
 
 /// Event indicating refusal is done.
@@ -1058,6 +1266,23 @@ class RefusalDoneEvent extends StreamingEvent {
     'refusal': refusal,
   };
 
+  /// Creates a copy with replaced values.
+  RefusalDoneEvent copyWith({
+    int? sequenceNumber,
+    String? itemId,
+    int? outputIndex,
+    int? contentIndex,
+    String? refusal,
+  }) {
+    return RefusalDoneEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      contentIndex: contentIndex ?? this.contentIndex,
+      refusal: refusal ?? this.refusal,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1074,7 +1299,8 @@ class RefusalDoneEvent extends StreamingEvent {
       Object.hash(sequenceNumber, itemId, outputIndex, contentIndex, refusal);
 
   @override
-  String toString() => 'RefusalDoneEvent(refusal: $refusal)';
+  String toString() =>
+      'RefusalDoneEvent(sequenceNumber: $sequenceNumber, itemId: $itemId, outputIndex: $outputIndex, contentIndex: $contentIndex, refusal: $refusal)';
 }
 
 // ============================================================================
@@ -1096,9 +1322,6 @@ class FunctionCallArgumentsDeltaEvent extends StreamingEvent {
   /// The output index.
   final int outputIndex;
 
-  /// The call ID.
-  final String? callId;
-
   /// The arguments delta.
   final String delta;
 
@@ -1110,7 +1333,6 @@ class FunctionCallArgumentsDeltaEvent extends StreamingEvent {
     required this.sequenceNumber,
     required this.itemId,
     required this.outputIndex,
-    this.callId,
     required this.delta,
     this.obfuscation,
   });
@@ -1121,7 +1343,6 @@ class FunctionCallArgumentsDeltaEvent extends StreamingEvent {
       sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
-      callId: json['call_id'] as String?,
       delta: json['delta'] as String,
       obfuscation: json['obfuscation'] as String?,
     );
@@ -1133,10 +1354,28 @@ class FunctionCallArgumentsDeltaEvent extends StreamingEvent {
     'sequence_number': sequenceNumber,
     'item_id': itemId,
     'output_index': outputIndex,
-    if (callId != null) 'call_id': callId,
     'delta': delta,
     if (obfuscation != null) 'obfuscation': obfuscation,
   };
+
+  /// Creates a copy with replaced values.
+  FunctionCallArgumentsDeltaEvent copyWith({
+    int? sequenceNumber,
+    String? itemId,
+    int? outputIndex,
+    String? delta,
+    Object? obfuscation = unsetCopyWithValue,
+  }) {
+    return FunctionCallArgumentsDeltaEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      delta: delta ?? this.delta,
+      obfuscation: obfuscation == unsetCopyWithValue
+          ? this.obfuscation
+          : obfuscation as String?,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -1146,23 +1385,16 @@ class FunctionCallArgumentsDeltaEvent extends StreamingEvent {
           sequenceNumber == other.sequenceNumber &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
-          callId == other.callId &&
           delta == other.delta &&
           obfuscation == other.obfuscation;
 
   @override
-  int get hashCode => Object.hash(
-    sequenceNumber,
-    itemId,
-    outputIndex,
-    callId,
-    delta,
-    obfuscation,
-  );
+  int get hashCode =>
+      Object.hash(sequenceNumber, itemId, outputIndex, delta, obfuscation);
 
   @override
   String toString() =>
-      'FunctionCallArgumentsDeltaEvent(callId: $callId, delta: $delta)';
+      'FunctionCallArgumentsDeltaEvent(sequenceNumber: $sequenceNumber, itemId: $itemId, outputIndex: $outputIndex, delta: $delta, obfuscation: $obfuscation)';
 }
 
 /// Event indicating function call arguments are done.
@@ -1180,9 +1412,6 @@ class FunctionCallArgumentsDoneEvent extends StreamingEvent {
   /// The output index.
   final int outputIndex;
 
-  /// The call ID.
-  final String? callId;
-
   /// The complete arguments.
   final String arguments;
 
@@ -1191,7 +1420,6 @@ class FunctionCallArgumentsDoneEvent extends StreamingEvent {
     required this.sequenceNumber,
     required this.itemId,
     required this.outputIndex,
-    this.callId,
     required this.arguments,
   });
 
@@ -1201,7 +1429,6 @@ class FunctionCallArgumentsDoneEvent extends StreamingEvent {
       sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
-      callId: json['call_id'] as String?,
       arguments: json['arguments'] as String,
     );
   }
@@ -1212,9 +1439,23 @@ class FunctionCallArgumentsDoneEvent extends StreamingEvent {
     'sequence_number': sequenceNumber,
     'item_id': itemId,
     'output_index': outputIndex,
-    if (callId != null) 'call_id': callId,
     'arguments': arguments,
   };
+
+  /// Creates a copy with replaced values.
+  FunctionCallArgumentsDoneEvent copyWith({
+    int? sequenceNumber,
+    String? itemId,
+    int? outputIndex,
+    String? arguments,
+  }) {
+    return FunctionCallArgumentsDoneEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      arguments: arguments ?? this.arguments,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -1224,16 +1465,15 @@ class FunctionCallArgumentsDoneEvent extends StreamingEvent {
           sequenceNumber == other.sequenceNumber &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
-          callId == other.callId &&
           arguments == other.arguments;
 
   @override
   int get hashCode =>
-      Object.hash(sequenceNumber, itemId, outputIndex, callId, arguments);
+      Object.hash(sequenceNumber, itemId, outputIndex, arguments);
 
   @override
   String toString() =>
-      'FunctionCallArgumentsDoneEvent(callId: $callId, arguments: $arguments)';
+      'FunctionCallArgumentsDoneEvent(sequenceNumber: $sequenceNumber, itemId: $itemId, outputIndex: $outputIndex, arguments: $arguments)';
 }
 
 // ============================================================================
@@ -1297,6 +1537,27 @@ class ReasoningDeltaEvent extends StreamingEvent {
     if (obfuscation != null) 'obfuscation': obfuscation,
   };
 
+  /// Creates a copy with replaced values.
+  ReasoningDeltaEvent copyWith({
+    int? sequenceNumber,
+    String? itemId,
+    int? outputIndex,
+    int? contentIndex,
+    String? delta,
+    Object? obfuscation = unsetCopyWithValue,
+  }) {
+    return ReasoningDeltaEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      contentIndex: contentIndex ?? this.contentIndex,
+      delta: delta ?? this.delta,
+      obfuscation: obfuscation == unsetCopyWithValue
+          ? this.obfuscation
+          : obfuscation as String?,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1320,7 +1581,8 @@ class ReasoningDeltaEvent extends StreamingEvent {
   );
 
   @override
-  String toString() => 'ReasoningDeltaEvent(delta: $delta)';
+  String toString() =>
+      'ReasoningDeltaEvent(sequenceNumber: $sequenceNumber, itemId: $itemId, outputIndex: $outputIndex, contentIndex: $contentIndex, delta: $delta, obfuscation: $obfuscation)';
 }
 
 /// Event indicating reasoning is done.
@@ -1374,6 +1636,23 @@ class ReasoningDoneEvent extends StreamingEvent {
     'text': text,
   };
 
+  /// Creates a copy with replaced values.
+  ReasoningDoneEvent copyWith({
+    int? sequenceNumber,
+    String? itemId,
+    int? outputIndex,
+    int? contentIndex,
+    String? text,
+  }) {
+    return ReasoningDoneEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      contentIndex: contentIndex ?? this.contentIndex,
+      text: text ?? this.text,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1390,7 +1669,8 @@ class ReasoningDoneEvent extends StreamingEvent {
       Object.hash(sequenceNumber, itemId, outputIndex, contentIndex, text);
 
   @override
-  String toString() => 'ReasoningDoneEvent(text: $text)';
+  String toString() =>
+      'ReasoningDoneEvent(sequenceNumber: $sequenceNumber, itemId: $itemId, outputIndex: $outputIndex, contentIndex: $contentIndex, text: $text)';
 }
 
 /// Event indicating a reasoning summary part was added.
@@ -1447,6 +1727,25 @@ class ReasoningSummaryPartAddedEvent extends StreamingEvent {
     'summary_index': summaryIndex,
     if (part != null) 'part': part!.toJson(),
   };
+
+  /// Creates a copy with replaced values.
+  ReasoningSummaryPartAddedEvent copyWith({
+    int? sequenceNumber,
+    String? itemId,
+    int? outputIndex,
+    int? summaryIndex,
+    Object? part = unsetCopyWithValue,
+  }) {
+    return ReasoningSummaryPartAddedEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      summaryIndex: summaryIndex ?? this.summaryIndex,
+      part: part == unsetCopyWithValue
+          ? this.part
+          : part as ReasoningSummaryContent?,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -1521,6 +1820,23 @@ class ReasoningSummaryPartDoneEvent extends StreamingEvent {
     'part': part.toJson(),
   };
 
+  /// Creates a copy with replaced values.
+  ReasoningSummaryPartDoneEvent copyWith({
+    int? sequenceNumber,
+    String? itemId,
+    int? outputIndex,
+    int? summaryIndex,
+    ReasoningSummaryContent? part,
+  }) {
+    return ReasoningSummaryPartDoneEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      itemId: itemId ?? this.itemId,
+      outputIndex: outputIndex ?? this.outputIndex,
+      summaryIndex: summaryIndex ?? this.summaryIndex,
+      part: part ?? this.part,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1538,7 +1854,7 @@ class ReasoningSummaryPartDoneEvent extends StreamingEvent {
 
   @override
   String toString() =>
-      'ReasoningSummaryPartDoneEvent(summaryIndex: $summaryIndex, part: $part)';
+      'ReasoningSummaryPartDoneEvent(sequenceNumber: $sequenceNumber, itemId: $itemId, outputIndex: $outputIndex, summaryIndex: $summaryIndex, part: $part)';
 }
 
 /// Event with reasoning summary delta.
@@ -1597,6 +1913,31 @@ class ReasoningSummaryDeltaEvent extends StreamingEvent {
     'delta': delta,
     if (obfuscation != null) 'obfuscation': obfuscation,
   };
+
+  /// Creates a copy with replaced values.
+  ReasoningSummaryDeltaEvent copyWith({
+    int? sequenceNumber,
+    Object? itemId = unsetCopyWithValue,
+    Object? outputIndex = unsetCopyWithValue,
+    Object? summaryIndex = unsetCopyWithValue,
+    String? delta,
+    Object? obfuscation = unsetCopyWithValue,
+  }) {
+    return ReasoningSummaryDeltaEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      itemId: itemId == unsetCopyWithValue ? this.itemId : itemId as String?,
+      outputIndex: outputIndex == unsetCopyWithValue
+          ? this.outputIndex
+          : outputIndex as int?,
+      summaryIndex: summaryIndex == unsetCopyWithValue
+          ? this.summaryIndex
+          : summaryIndex as int?,
+      delta: delta ?? this.delta,
+      obfuscation: obfuscation == unsetCopyWithValue
+          ? this.obfuscation
+          : obfuscation as String?,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -1675,6 +2016,27 @@ class ReasoningSummaryDoneEvent extends StreamingEvent {
     'text': text,
   };
 
+  /// Creates a copy with replaced values.
+  ReasoningSummaryDoneEvent copyWith({
+    int? sequenceNumber,
+    Object? itemId = unsetCopyWithValue,
+    Object? outputIndex = unsetCopyWithValue,
+    Object? summaryIndex = unsetCopyWithValue,
+    String? text,
+  }) {
+    return ReasoningSummaryDoneEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      itemId: itemId == unsetCopyWithValue ? this.itemId : itemId as String?,
+      outputIndex: outputIndex == unsetCopyWithValue
+          ? this.outputIndex
+          : outputIndex as int?,
+      summaryIndex: summaryIndex == unsetCopyWithValue
+          ? this.summaryIndex
+          : summaryIndex as int?,
+      text: text ?? this.text,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1744,6 +2106,14 @@ class ErrorEvent extends StreamingEvent {
     'sequence_number': sequenceNumber,
     'error': error.toJson(),
   };
+
+  /// Creates a copy with replaced values.
+  ErrorEvent copyWith({int? sequenceNumber, ErrorPayload? error}) {
+    return ErrorEvent(
+      sequenceNumber: sequenceNumber ?? this.sequenceNumber,
+      error: error ?? this.error,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>

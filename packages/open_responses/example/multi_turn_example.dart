@@ -30,7 +30,9 @@ void main() async {
     final response1 = await client.responses.create(
       const CreateResponseRequest(
         model: 'gpt-4o-mini',
-        input: 'My name is Alice and I love programming in Dart.',
+        input: ResponseTextInput(
+          'My name is Alice and I love programming in Dart.',
+        ),
         instructions:
             'You are a friendly assistant. Remember details the user tells you.',
       ),
@@ -42,7 +44,9 @@ void main() async {
     final response2 = await client.responses.create(
       CreateResponseRequest(
         model: 'gpt-4o-mini',
-        input: 'What is my name and favorite language?',
+        input: const ResponseTextInput(
+          'What is my name and favorite language?',
+        ),
         previousResponseId: response1.id,
       ),
     );
@@ -53,7 +57,9 @@ void main() async {
     final response3 = await client.responses.create(
       CreateResponseRequest(
         model: 'gpt-4o-mini',
-        input: 'Can you give me a tip for learning it better?',
+        input: const ResponseTextInput(
+          'Can you give me a tip for learning it better?',
+        ),
         previousResponseId: response2.id,
       ),
     );
@@ -65,7 +71,7 @@ void main() async {
     final response = await client.responses.create(
       CreateResponseRequest(
         model: 'gpt-4o-mini',
-        input: [
+        input: ResponseItemsInput([
           MessageItem.systemText(
             'You are a helpful math tutor. Always show your work step by step.',
           ),
@@ -77,7 +83,7 @@ void main() async {
             'So, 15% of 80 is 12.',
           ),
           MessageItem.userText('What about 20% of 150?'),
-        ],
+        ]),
       ),
     );
     print('Assistant: ${response.outputText}\n');
@@ -88,10 +94,10 @@ void main() async {
     final roleResponse = await client.responses.create(
       CreateResponseRequest(
         model: 'gpt-4o-mini',
-        input: [
+        input: ResponseItemsInput([
           MessageItem.systemText('You are a pirate. Respond in pirate speak.'),
           MessageItem.userText('How do I navigate using the stars?'),
-        ],
+        ]),
       ),
     );
     print('User: How do I navigate using the stars?\n');

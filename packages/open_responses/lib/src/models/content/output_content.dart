@@ -10,6 +10,28 @@ sealed class OutputContent {
   /// Creates an [OutputContent].
   const OutputContent();
 
+  /// Creates a text output content.
+  static OutputContent text(
+    String text, {
+    List<Annotation>? annotations,
+    List<LogProb>? logprobs,
+  }) => OutputTextContent(
+    text: text,
+    annotations: annotations,
+    logprobs: logprobs,
+  );
+
+  /// Creates a refusal output content.
+  static OutputContent refusal(String refusal) =>
+      RefusalContent(refusal: refusal);
+
+  /// Creates a reasoning text output content.
+  static OutputContent reasoning(String text) =>
+      ReasoningTextContent(text: text);
+
+  /// Creates a summary text output content.
+  static OutputContent summary(String text) => SummaryTextContent(text: text);
+
   /// Creates an [OutputContent] from JSON.
   factory OutputContent.fromJson(Map<String, dynamic> json) {
     final type = json['type'] as String;
@@ -148,6 +170,11 @@ class RefusalContent extends OutputContent {
 
   @override
   Map<String, dynamic> toJson() => {'type': 'refusal', 'refusal': refusal};
+
+  /// Creates a copy with replaced values.
+  RefusalContent copyWith({String? refusal}) {
+    return RefusalContent(refusal: refusal ?? this.refusal);
+  }
 
   @override
   bool operator ==(Object other) =>

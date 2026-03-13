@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../metadata/verbosity.dart';
 
@@ -32,6 +33,21 @@ class TextConfig {
     if (format != null) 'format': format!.toJson(),
     if (verbosity != null) 'verbosity': verbosity!.toJson(),
   };
+
+  /// Creates a copy with replaced values.
+  TextConfig copyWith({
+    Object? format = unsetCopyWithValue,
+    Object? verbosity = unsetCopyWithValue,
+  }) {
+    return TextConfig(
+      format: format == unsetCopyWithValue
+          ? this.format
+          : format as TextFormat?,
+      verbosity: verbosity == unsetCopyWithValue
+          ? this.verbosity
+          : verbosity as Verbosity?,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>

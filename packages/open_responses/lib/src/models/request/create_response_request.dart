@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 import '../items/item.dart';
 import '../metadata/include.dart';
 import '../metadata/service_tier.dart';
@@ -11,6 +12,86 @@ import 'reasoning_config.dart';
 import 'stream_options.dart';
 import 'text_config.dart';
 
+/// Type-safe input for a response request.
+///
+/// Can be either a simple text string or a list of input items.
+sealed class ResponseInput {
+  /// Creates a [ResponseInput].
+  const ResponseInput();
+
+  /// Creates a text input.
+  static ResponseInput text(String text) => ResponseTextInput(text);
+
+  /// Creates an items input.
+  static ResponseInput items(List<Item> items) => ResponseItemsInput(items);
+
+  /// Creates a [ResponseInput] from JSON.
+  factory ResponseInput.fromJson(Object json) {
+    if (json is String) return ResponseTextInput(json);
+    if (json is List) {
+      return ResponseItemsInput(
+        json.map((e) => Item.fromJson(e as Map<String, dynamic>)).toList(),
+      );
+    }
+    throw FormatException('Invalid ResponseInput format: $json');
+  }
+
+  /// Converts to JSON.
+  Object toJson();
+}
+
+/// A simple text input.
+@immutable
+class ResponseTextInput extends ResponseInput {
+  /// The text input.
+  final String text;
+
+  /// Creates a [ResponseTextInput].
+  const ResponseTextInput(this.text);
+
+  @override
+  Object toJson() => text;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ResponseTextInput &&
+          runtimeType == other.runtimeType &&
+          text == other.text;
+
+  @override
+  int get hashCode => text.hashCode;
+
+  @override
+  String toString() => 'ResponseTextInput($text)';
+}
+
+/// A list of items input.
+@immutable
+class ResponseItemsInput extends ResponseInput {
+  /// The input items.
+  final List<Item> items;
+
+  /// Creates a [ResponseItemsInput].
+  const ResponseItemsInput(this.items);
+
+  @override
+  Object toJson() => items.map((e) => e.toJson()).toList();
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ResponseItemsInput &&
+          runtimeType == other.runtimeType &&
+          listsEqual(items, other.items);
+
+  @override
+  int get hashCode => Object.hashAll(items);
+
+  @override
+  String toString() => 'ResponseItemsInput($items)';
+}
+
 /// Request to create a response.
 @immutable
 class CreateResponseRequest {
@@ -19,8 +100,9 @@ class CreateResponseRequest {
 
   /// The input for the response.
   ///
-  /// Can be a `String` (for simple text) or `List<Item>` (for complex messages).
-  final Object input;
+  /// Can be a [ResponseTextInput] (for simple text) or [ResponseItemsInput]
+  /// (for complex messages).
+  final ResponseInput input;
 
   /// System-level instructions for the model.
   final String? instructions;
@@ -134,7 +216,7 @@ class CreateResponseRequest {
   }) {
     return CreateResponseRequest(
       model: model,
-      input: input,
+      input: ResponseTextInput(input),
       instructions: instructions,
       maxOutputTokens: maxOutputTokens,
       temperature: temperature,
@@ -145,7 +227,7 @@ class CreateResponseRequest {
   factory CreateResponseRequest.fromJson(Map<String, dynamic> json) {
     return CreateResponseRequest(
       model: json['model'] as String,
-      input: _parseInput(json['input']),
+      input: ResponseInput.fromJson(json['input']),
       instructions: json['instructions'] as String?,
       tools: (json['tools'] as List?)
           ?.map((e) => Tool.fromJson(e as Map<String, dynamic>))
@@ -191,20 +273,10 @@ class CreateResponseRequest {
     );
   }
 
-  static Object _parseInput(Object? input) {
-    if (input is String) return input;
-    if (input is List) {
-      return input
-          .map((e) => Item.fromJson(e as Map<String, dynamic>))
-          .toList();
-    }
-    throw FormatException('Invalid input format: $input');
-  }
-
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'model': model,
-    'input': _inputToJson(),
+    'input': input.toJson(),
     if (instructions != null) 'instructions': instructions,
     if (tools != null) 'tools': tools!.map((e) => e.toJson()).toList(),
     if (toolChoice != null) 'tool_choice': toolChoice!.toJson(),
@@ -231,18 +303,10 @@ class CreateResponseRequest {
     if (topLogprobs != null) 'top_logprobs': topLogprobs,
   };
 
-  Object _inputToJson() {
-    if (input is String) return input;
-    if (input is List<Item>) {
-      return (input as List<Item>).map((e) => e.toJson()).toList();
-    }
-    throw StateError('Invalid input type: ${input.runtimeType}');
-  }
-
   /// Creates a copy with replaced values.
   CreateResponseRequest copyWith({
     String? model,
-    Object? input,
+    ResponseInput? input,
     Object? instructions = unsetCopyWithValue,
     Object? tools = unsetCopyWithValue,
     Object? toolChoice = unsetCopyWithValue,
@@ -344,6 +408,7 @@ class CreateResponseRequest {
           model == other.model &&
           input == other.input &&
           instructions == other.instructions &&
+          tools == other.tools &&
           toolChoice == other.toolChoice &&
           previousResponseId == other.previousResponseId &&
           maxOutputTokens == other.maxOutputTokens &&
@@ -358,6 +423,8 @@ class CreateResponseRequest {
           truncation == other.truncation &&
           parallelToolCalls == other.parallelToolCalls &&
           serviceTier == other.serviceTier &&
+          metadata == other.metadata &&
+          include == other.include &&
           store == other.store &&
           background == other.background &&
           maxToolCalls == other.maxToolCalls &&
@@ -370,6 +437,7 @@ class CreateResponseRequest {
     model,
     input,
     instructions,
+    tools,
     toolChoice,
     previousResponseId,
     maxOutputTokens,
@@ -384,6 +452,8 @@ class CreateResponseRequest {
     truncation,
     parallelToolCalls,
     serviceTier,
+    metadata,
+    include,
     store,
     background,
     maxToolCalls,
@@ -394,5 +464,18 @@ class CreateResponseRequest {
 
   @override
   String toString() =>
-      'CreateResponseRequest(model: $model, input: $input, ...)';
+      'CreateResponseRequest('
+      'model: $model, input: $input, instructions: $instructions, '
+      'tools: $tools, toolChoice: $toolChoice, '
+      'previousResponseId: $previousResponseId, '
+      'maxOutputTokens: $maxOutputTokens, temperature: $temperature, '
+      'topP: $topP, presencePenalty: $presencePenalty, '
+      'frequencyPenalty: $frequencyPenalty, stream: $stream, '
+      'streamOptions: $streamOptions, reasoning: $reasoning, '
+      'text: $text, truncation: $truncation, '
+      'parallelToolCalls: $parallelToolCalls, serviceTier: $serviceTier, '
+      'metadata: $metadata, include: $include, store: $store, '
+      'background: $background, maxToolCalls: $maxToolCalls, '
+      'safetyIdentifier: $safetyIdentifier, '
+      'promptCacheKey: $promptCacheKey, topLogprobs: $topLogprobs)';
 }

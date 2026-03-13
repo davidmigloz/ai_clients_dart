@@ -34,7 +34,9 @@ void main() async {
     final response = await client.responses.create(
       const CreateResponseRequest(
         model: 'gpt-4o-mini',
-        input: 'How does tiktoken handle encoding special characters?',
+        input: ResponseTextInput(
+          'How does tiktoken handle encoding special characters?',
+        ),
         tools: [
           McpTool(
             serverLabel: 'gitmcp',
@@ -69,7 +71,9 @@ void main() async {
     final multiResponse = await client.responses.create(
       const CreateResponseRequest(
         model: 'gpt-4o-mini',
-        input: 'Compare how tiktoken and gpt-3-encoder handle token counting.',
+        input: ResponseTextInput(
+          'Compare how tiktoken and gpt-3-encoder handle token counting.',
+        ),
         tools: [
           McpTool(
             serverLabel: 'tiktoken-docs',
@@ -93,8 +97,9 @@ void main() async {
     final combinedResponse = await client.responses.create(
       const CreateResponseRequest(
         model: 'gpt-4o-mini',
-        input:
-            'Search for information about tokenization, then save a summary to a file.',
+        input: ResponseTextInput(
+          'Search for information about tokenization, then save a summary to a file.',
+        ),
         tools: [
           // MCP tool for documentation search
           McpTool(
@@ -137,7 +142,7 @@ void main() async {
     final approvalResponse = await client.responses.create(
       const CreateResponseRequest(
         model: 'gpt-4o-mini',
-        input: 'What are the main features of the project?',
+        input: ResponseTextInput('What are the main features of the project?'),
         tools: [
           McpTool(
             serverLabel: 'project-docs',

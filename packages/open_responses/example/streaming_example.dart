@@ -30,7 +30,7 @@ void main() async {
         client.responses.stream(
             const CreateResponseRequest(
               model: 'gpt-4o-mini',
-              input: 'Write a haiku about programming.',
+              input: ResponseTextInput('Write a haiku about programming.'),
             ),
           )
           ..onTextDelta(stdout.write)
@@ -51,7 +51,7 @@ void main() async {
     await for (final event in client.responses.createStream(
       const CreateResponseRequest(
         model: 'gpt-4o-mini',
-        input: 'Count from 1 to 5, one number per line.',
+        input: ResponseTextInput('Count from 1 to 5, one number per line.'),
       ),
     )) {
       switch (event) {
@@ -76,7 +76,7 @@ void main() async {
         .createStream(
           const CreateResponseRequest(
             model: 'gpt-4o-mini',
-            input: 'Say "Hello, World!"',
+            input: ResponseTextInput('Say "Hello, World!"'),
           ),
         )
         .text;

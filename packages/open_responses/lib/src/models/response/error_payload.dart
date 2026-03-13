@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 
 /// Error information from a failed response.
@@ -57,6 +58,25 @@ class ErrorPayload {
     if (param != null) 'param': param,
     if (headers != null) 'headers': headers,
   };
+
+  /// Creates a copy with replaced values.
+  ErrorPayload copyWith({
+    String? type,
+    Object? code = unsetCopyWithValue,
+    String? message,
+    Object? param = unsetCopyWithValue,
+    Object? headers = unsetCopyWithValue,
+  }) {
+    return ErrorPayload(
+      type: type ?? this.type,
+      code: code == unsetCopyWithValue ? this.code : code as String?,
+      message: message ?? this.message,
+      param: param == unsetCopyWithValue ? this.param : param as String?,
+      headers: headers == unsetCopyWithValue
+          ? this.headers
+          : headers as Map<String, String>?,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>

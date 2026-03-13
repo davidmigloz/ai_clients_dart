@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 
 /// Tool choice mode for allowed tools.
@@ -109,6 +110,25 @@ sealed class ToolChoice {
     throw FormatException('Invalid ToolChoice format: $json');
   }
 
+  /// No tool should be called.
+  static const ToolChoice auto = ToolChoiceAuto();
+
+  /// No tool should be called.
+  static const ToolChoice none = ToolChoiceNone();
+
+  /// Model must call at least one tool.
+  static const ToolChoice required = ToolChoiceRequired();
+
+  /// Model must call the specified function.
+  static ToolChoice function_({required String name}) =>
+      ToolChoiceFunction(name: name);
+
+  /// Model can only call the specified tools.
+  static ToolChoice allowedTools({
+    required List<SpecificToolChoice> tools,
+    ToolChoiceMode? mode,
+  }) => ToolChoiceAllowedTools(tools: tools, mode: mode);
+
   /// Converts to JSON.
   Object toJson();
 }
@@ -131,7 +151,7 @@ class ToolChoiceNone extends ToolChoice {
   int get hashCode => runtimeType.hashCode;
 
   @override
-  String toString() => 'ToolChoiceNone()';
+  String toString() => 'ToolChoice.none';
 }
 
 /// Model automatically decides whether to call tools.
@@ -152,7 +172,7 @@ class ToolChoiceAuto extends ToolChoice {
   int get hashCode => runtimeType.hashCode;
 
   @override
-  String toString() => 'ToolChoiceAuto()';
+  String toString() => 'ToolChoice.auto';
 }
 
 /// Model must call at least one tool.
@@ -173,7 +193,7 @@ class ToolChoiceRequired extends ToolChoice {
   int get hashCode => runtimeType.hashCode;
 
   @override
-  String toString() => 'ToolChoiceRequired()';
+  String toString() => 'ToolChoice.required';
 }
 
 /// Model must call the specified function.
@@ -192,6 +212,11 @@ class ToolChoiceFunction extends ToolChoice {
 
   @override
   Object toJson() => {'type': 'function', 'name': name};
+
+  /// Creates a copy with replaced values.
+  ToolChoiceFunction copyWith({String? name}) {
+    return ToolChoiceFunction(name: name ?? this.name);
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -239,6 +264,17 @@ class ToolChoiceAllowedTools extends ToolChoice {
     'tools': tools.map((e) => e.toJson()).toList(),
     if (mode != null) 'mode': mode!.toJson(),
   };
+
+  /// Creates a copy with replaced values.
+  ToolChoiceAllowedTools copyWith({
+    List<SpecificToolChoice>? tools,
+    Object? mode = unsetCopyWithValue,
+  }) {
+    return ToolChoiceAllowedTools(
+      tools: tools ?? this.tools,
+      mode: mode == unsetCopyWithValue ? this.mode : mode as ToolChoiceMode?,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>

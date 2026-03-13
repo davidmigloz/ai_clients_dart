@@ -44,7 +44,6 @@ void main() {
           sequenceNumber: 0,
           itemId: 'call_001',
           outputIndex: 0,
-          callId: 'call_abc',
           delta: '{"loc',
         );
 
@@ -206,7 +205,6 @@ void main() {
             sequenceNumber: 2,
             itemId: 'call_001',
             outputIndex: 1,
-            callId: 'call_abc',
             delta: '{"x": 1}',
           ),
           const OutputTextDeltaEvent(

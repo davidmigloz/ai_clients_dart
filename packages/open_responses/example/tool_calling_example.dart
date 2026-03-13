@@ -70,7 +70,9 @@ void main() async {
     final response = await client.responses.create(
       CreateResponseRequest(
         model: 'gpt-4o-mini',
-        input: 'What is the weather in San Francisco and the time in Tokyo?',
+        input: const ResponseTextInput(
+          'What is the weather in San Francisco and the time in Tokyo?',
+        ),
         tools: tools,
       ),
     );
@@ -101,7 +103,7 @@ void main() async {
       final finalResponse = await client.responses.create(
         CreateResponseRequest(
           model: 'gpt-4o-mini',
-          input: toolResults,
+          input: ResponseItemsInput(toolResults),
           previousResponseId: response.id,
         ),
       );
@@ -121,7 +123,7 @@ void main() async {
     await for (final event in client.responses.createStream(
       CreateResponseRequest(
         model: 'gpt-4o-mini',
-        input: 'What is the weather like in London?',
+        input: const ResponseTextInput('What is the weather like in London?'),
         tools: tools,
       ),
     )) {
@@ -130,7 +132,7 @@ void main() async {
           argsBuffer.write(event.delta);
           stdout.write(event.delta);
         case FunctionCallArgumentsDoneEvent():
-          print('\n\nFunction call complete: ${event.callId}');
+          print('\n\nFunction call complete: ${event.itemId}');
           print('Full arguments: ${event.arguments}');
         case ResponseCompletedEvent():
           print('\nStream completed');

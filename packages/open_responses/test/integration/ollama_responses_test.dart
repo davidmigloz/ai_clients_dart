@@ -30,7 +30,7 @@ void main() {
       final response = await client.responses.create(
         CreateResponseRequest(
           model: model,
-          input: 'Say "Hello" and nothing else.',
+          input: const ResponseTextInput('Say "Hello" and nothing else.'),
         ),
       );
 
@@ -43,7 +43,7 @@ void main() {
       final response = await client.responses.create(
         CreateResponseRequest(
           model: model,
-          input: 'What is 2 + 2?',
+          input: const ResponseTextInput('What is 2 + 2?'),
           instructions: 'You are a math tutor. Always show your work.',
         ),
       );
@@ -57,7 +57,10 @@ void main() {
 
       await client.responses
           .createStream(
-            CreateResponseRequest(model: model, input: 'Count from 1 to 3.'),
+            CreateResponseRequest(
+              model: model,
+              input: const ResponseTextInput('Count from 1 to 3.'),
+            ),
           )
           .forEach(events.add);
 
@@ -77,7 +80,10 @@ void main() {
       final textBuffer = StringBuffer();
 
       final runner = client.responses.stream(
-        CreateResponseRequest(model: model, input: 'Say "test".'),
+        CreateResponseRequest(
+          model: model,
+          input: const ResponseTextInput('Say "test".'),
+        ),
       )..onTextDelta(textBuffer.write);
 
       final finalResponse = await runner.finalResponse;
@@ -91,7 +97,7 @@ void main() {
       final response = await client.responses.create(
         CreateResponseRequest(
           model: model,
-          input: 'What is the weather in Paris?',
+          input: const ResponseTextInput('What is the weather in Paris?'),
           tools: const [
             FunctionTool(
               name: 'get_weather',
@@ -123,10 +129,10 @@ void main() {
       final response = await client.responses.create(
         CreateResponseRequest(
           model: model,
-          input: [
+          input: ResponseItemsInput([
             MessageItem.systemText('You are a helpful assistant.'),
             MessageItem.userText('What is the capital of France?'),
-          ],
+          ]),
         ),
       );
 
@@ -136,7 +142,10 @@ void main() {
 
     test('usage tracking', () async {
       final response = await client.responses.create(
-        CreateResponseRequest(model: model, input: 'Hello'),
+        CreateResponseRequest(
+          model: model,
+          input: const ResponseTextInput('Hello'),
+        ),
       );
 
       // Ollama may or may not return usage depending on version
@@ -150,7 +159,7 @@ void main() {
       final response = await client.responses.create(
         CreateResponseRequest(
           model: model,
-          input: 'What is 1 + 1?',
+          input: const ResponseTextInput('What is 1 + 1?'),
           temperature: 0,
         ),
       );
@@ -161,7 +170,10 @@ void main() {
 
     test('response extensions work correctly', () async {
       final response = await client.responses.create(
-        CreateResponseRequest(model: model, input: 'Say hello.'),
+        CreateResponseRequest(
+          model: model,
+          input: const ResponseTextInput('Say hello.'),
+        ),
       );
 
       expect(response.isCompleted, isTrue);

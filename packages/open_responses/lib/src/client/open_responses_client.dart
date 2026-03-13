@@ -28,7 +28,7 @@ import 'retry_wrapper.dart';
 /// final response = await client.responses.create(
 ///   CreateResponseRequest(
 ///     model: 'gpt-4o',
-///     input: 'Hello, world!',
+///     input: ResponseTextInput('Hello, world!'),
 ///   ),
 /// );
 ///

@@ -66,6 +66,17 @@ class MessageOutputItem extends OutputItem {
     );
   }
 
+  /// Combined text from all [OutputTextContent] parts.
+  ///
+  /// Returns `null` if there are no text content parts.
+  String? get text {
+    final texts = content.whereType<OutputTextContent>().map((c) => c.text);
+    return texts.isEmpty ? null : texts.join();
+  }
+
+  /// Whether any content part is a refusal.
+  bool get hasRefusal => content.any((c) => c is RefusalContent);
+
   @override
   Map<String, dynamic> toJson() => {
     'type': 'message',
@@ -142,6 +153,9 @@ class FunctionCallOutputItemResponse extends OutputItem {
     'arguments': arguments,
     if (status != null) 'status': status!.toJson(),
   };
+
+  /// Whether this function call is completed.
+  bool get isCompleted => status == ItemStatus.completed;
 
   /// Converts to a [FunctionCallItem] for use as input.
   FunctionCallItem toFunctionCallItem() => FunctionCallItem(

@@ -62,6 +62,21 @@ class UrlCitation extends Annotation {
     'title': title,
   };
 
+  /// Creates a copy with replaced values.
+  UrlCitation copyWith({
+    int? startIndex,
+    int? endIndex,
+    String? url,
+    String? title,
+  }) {
+    return UrlCitation(
+      startIndex: startIndex ?? this.startIndex,
+      endIndex: endIndex ?? this.endIndex,
+      url: url ?? this.url,
+      title: title ?? this.title,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

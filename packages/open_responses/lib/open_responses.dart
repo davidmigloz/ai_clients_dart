@@ -17,7 +17,7 @@
 /// final response = await client.responses.create(
 ///   CreateResponseRequest(
 ///     model: 'gpt-4o',
-///     input: 'Hello, world!',
+///     input: ResponseTextInput('Hello, world!'),
 ///   ),
 /// );
 ///
@@ -59,6 +59,7 @@ export 'src/auth/auth_provider.dart';
 export 'src/client/config.dart';
 export 'src/client/open_responses_client.dart';
 export 'src/client/response_stream.dart';
+export 'src/client/streaming_event_accumulator.dart';
 
 // Errors
 export 'src/errors/exceptions.dart';

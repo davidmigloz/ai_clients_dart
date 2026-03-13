@@ -29,7 +29,10 @@ void main() {
         mockClient.queueJsonResponse(basicCompletedResponse());
 
         await client.responses.create(
-          const CreateResponseRequest(model: 'gpt-4o', input: 'Hello'),
+          const CreateResponseRequest(
+            model: 'gpt-4o',
+            input: ResponseTextInput('Hello'),
+          ),
         );
 
         expect(mockClient.requests, hasLength(1));
@@ -45,7 +48,7 @@ void main() {
         await client.responses.create(
           const CreateResponseRequest(
             model: 'gpt-4o',
-            input: 'Hello',
+            input: ResponseTextInput('Hello'),
             instructions: 'Be helpful',
             temperature: 0.7,
             maxOutputTokens: 100,
@@ -67,7 +70,10 @@ void main() {
         );
 
         final response = await client.responses.create(
-          const CreateResponseRequest(model: 'gpt-4o', input: 'Hello'),
+          const CreateResponseRequest(
+            model: 'gpt-4o',
+            input: ResponseTextInput('Hello'),
+          ),
         );
 
         expect(response.id, 'resp_abc123');
@@ -87,7 +93,7 @@ void main() {
         final response = await client.responses.create(
           const CreateResponseRequest(
             model: 'gpt-4o',
-            input: 'What is the weather?',
+            input: ResponseTextInput('What is the weather?'),
             tools: [
               FunctionTool(
                 name: 'get_weather',
@@ -113,7 +119,10 @@ void main() {
         );
 
         final response = await client.responses.create(
-          const CreateResponseRequest(model: 'gpt-4o', input: 'Bad content'),
+          const CreateResponseRequest(
+            model: 'gpt-4o',
+            input: ResponseTextInput('Bad content'),
+          ),
         );
 
         expect(response.status, ResponseStatus.failed);
@@ -130,7 +139,7 @@ void main() {
         await client.responses.create(
           const CreateResponseRequest(
             model: 'gpt-4o',
-            input: 'Hello',
+            input: ResponseTextInput('Hello'),
             stream: true, // Will be overridden
           ),
         );
@@ -145,7 +154,7 @@ void main() {
         await client.responses.create(
           const CreateResponseRequest(
             model: 'gpt-4o',
-            input: 'Hello',
+            input: ResponseTextInput('Hello'),
             tools: [
               FunctionTool(
                 name: 'calculator',
@@ -172,7 +181,7 @@ void main() {
         await client.responses.create(
           const CreateResponseRequest(
             model: 'gpt-4o',
-            input: 'Hello',
+            input: ResponseTextInput('Hello'),
             tools: [
               McpTool(
                 serverLabel: 'test-server',
@@ -193,12 +202,12 @@ void main() {
         await client.responses.create(
           CreateResponseRequest(
             model: 'gpt-4o',
-            input: [
+            input: ResponseItemsInput([
               MessageItem.systemText('You are helpful.'),
               MessageItem.userText('Hello'),
               MessageItem.assistantText('Hi there!'),
               MessageItem.userText('How are you?'),
-            ],
+            ]),
           ),
         );
 
@@ -211,7 +220,7 @@ void main() {
         await client.responses.create(
           const CreateResponseRequest(
             model: 'o1',
-            input: 'Solve this problem.',
+            input: ResponseTextInput('Solve this problem.'),
             reasoning: ReasoningConfig(
               effort: ReasoningEffort.high,
               summary: ReasoningSummary.auto,
@@ -228,7 +237,7 @@ void main() {
         await client.responses.create(
           const CreateResponseRequest(
             model: 'gpt-4o',
-            input: 'List some fruits.',
+            input: ResponseTextInput('List some fruits.'),
             text: TextConfig(
               format: JsonSchemaFormat(
                 name: 'fruits',
@@ -262,7 +271,10 @@ void main() {
 
         final events = await client.responses
             .createStream(
-              const CreateResponseRequest(model: 'gpt-4o', input: 'Hello'),
+              const CreateResponseRequest(
+                model: 'gpt-4o',
+                input: ResponseTextInput('Hello'),
+              ),
             )
             .toList();
 
@@ -278,7 +290,10 @@ void main() {
 
         final events = await client.responses
             .createStream(
-              const CreateResponseRequest(model: 'gpt-4o', input: 'Hello'),
+              const CreateResponseRequest(
+                model: 'gpt-4o',
+                input: ResponseTextInput('Hello'),
+              ),
             )
             .toList();
 
@@ -294,7 +309,7 @@ void main() {
             .createStream(
               const CreateResponseRequest(
                 model: 'gpt-4o',
-                input: 'Hello',
+                input: ResponseTextInput('Hello'),
                 stream: false, // Will be overridden to true
               ),
             )
@@ -314,7 +329,10 @@ void main() {
 
         final events = await client.responses
             .createStream(
-              const CreateResponseRequest(model: 'gpt-4o', input: 'Hello'),
+              const CreateResponseRequest(
+                model: 'gpt-4o',
+                input: ResponseTextInput('Hello'),
+              ),
             )
             .toList();
 
@@ -329,7 +347,10 @@ void main() {
       test('returns ResponseStream with builder pattern', () {
         // stream() is lazy - no requests until consumed
         final runner = client.responses.stream(
-          const CreateResponseRequest(model: 'gpt-4o', input: 'Hello'),
+          const CreateResponseRequest(
+            model: 'gpt-4o',
+            input: ResponseTextInput('Hello'),
+          ),
         );
 
         expect(runner, isA<ResponseStream>());
@@ -342,7 +363,10 @@ void main() {
 
         final textBuffer = StringBuffer();
         final runner = client.responses.stream(
-          const CreateResponseRequest(model: 'gpt-4o', input: 'Hello'),
+          const CreateResponseRequest(
+            model: 'gpt-4o',
+            input: ResponseTextInput('Hello'),
+          ),
         )..onTextDelta(textBuffer.write);
 
         await runner.finalResponse;
@@ -359,7 +383,10 @@ void main() {
         );
 
         final runner = client.responses.stream(
-          const CreateResponseRequest(model: 'gpt-4o', input: 'Hello'),
+          const CreateResponseRequest(
+            model: 'gpt-4o',
+            input: ResponseTextInput('Hello'),
+          ),
         );
 
         final response = await runner.finalResponse;
@@ -375,7 +402,10 @@ void main() {
         );
 
         final runner = client.responses.stream(
-          const CreateResponseRequest(model: 'gpt-4o', input: 'Hello'),
+          const CreateResponseRequest(
+            model: 'gpt-4o',
+            input: ResponseTextInput('Hello'),
+          ),
         );
 
         final text = await runner.text;
@@ -387,7 +417,10 @@ void main() {
         mockClient.queueStreamingResponse(basicStreamingEvents());
 
         final runner = client.responses.stream(
-          const CreateResponseRequest(model: 'gpt-4o', input: 'Hello'),
+          const CreateResponseRequest(
+            model: 'gpt-4o',
+            input: ResponseTextInput('Hello'),
+          ),
         );
 
         final events = await runner.asStream().toList();
@@ -405,7 +438,10 @@ void main() {
 
         final runner =
             client.responses.stream(
-                const CreateResponseRequest(model: 'gpt-4o', input: 'Hello'),
+                const CreateResponseRequest(
+                  model: 'gpt-4o',
+                  input: ResponseTextInput('Hello'),
+                ),
               )
               ..onEvent(allEvents.add)
               ..onTextDelta(textDeltas.add);
@@ -428,7 +464,10 @@ void main() {
 
         expect(
           () => client.responses.create(
-            const CreateResponseRequest(model: 'gpt-4o', input: 'Hello'),
+            const CreateResponseRequest(
+              model: 'gpt-4o',
+              input: ResponseTextInput('Hello'),
+            ),
           ),
           throwsA(isA<ValidationException>()),
         );
@@ -439,7 +478,10 @@ void main() {
 
         expect(
           () => client.responses.create(
-            const CreateResponseRequest(model: 'gpt-4o', input: 'Hello'),
+            const CreateResponseRequest(
+              model: 'gpt-4o',
+              input: ResponseTextInput('Hello'),
+            ),
           ),
           throwsA(isA<AuthenticationException>()),
         );
@@ -450,7 +492,10 @@ void main() {
 
         expect(
           () => client.responses.create(
-            const CreateResponseRequest(model: 'gpt-4o', input: 'Hello'),
+            const CreateResponseRequest(
+              model: 'gpt-4o',
+              input: ResponseTextInput('Hello'),
+            ),
           ),
           throwsA(isA<RateLimitException>()),
         );
@@ -461,7 +506,10 @@ void main() {
 
         expect(
           () => client.responses.create(
-            const CreateResponseRequest(model: 'gpt-4o', input: 'Hello'),
+            const CreateResponseRequest(
+              model: 'gpt-4o',
+              input: ResponseTextInput('Hello'),
+            ),
           ),
           throwsA(isA<ApiException>()),
         );
@@ -473,7 +521,10 @@ void main() {
         expect(
           () => client.responses
               .createStream(
-                const CreateResponseRequest(model: 'gpt-4o', input: 'Hello'),
+                const CreateResponseRequest(
+                  model: 'gpt-4o',
+                  input: ResponseTextInput('Hello'),
+                ),
               )
               .toList(),
           throwsA(isA<ValidationException>()),
@@ -486,7 +537,10 @@ void main() {
         expect(
           () => client.responses
               .createStream(
-                const CreateResponseRequest(model: 'gpt-4o', input: 'Hello'),
+                const CreateResponseRequest(
+                  model: 'gpt-4o',
+                  input: ResponseTextInput('Hello'),
+                ),
               )
               .toList(),
           throwsA(isA<AuthenticationException>()),
@@ -505,7 +559,10 @@ void main() {
         mockClient.queueJsonResponse(basicCompletedResponse());
 
         await customClient.responses.create(
-          const CreateResponseRequest(model: 'gpt-4o', input: 'Hello'),
+          const CreateResponseRequest(
+            model: 'gpt-4o',
+            input: ResponseTextInput('Hello'),
+          ),
         );
 
         expect(mockClient.lastRequest!.url.host, 'custom.api.com');
@@ -525,7 +582,10 @@ void main() {
         mockClient.queueJsonResponse(basicCompletedResponse());
 
         await customClient.responses.create(
-          const CreateResponseRequest(model: 'gpt-4o', input: 'Hello'),
+          const CreateResponseRequest(
+            model: 'gpt-4o',
+            input: ResponseTextInput('Hello'),
+          ),
         );
 
         expect(
@@ -540,7 +600,10 @@ void main() {
         mockClient.queueJsonResponse(basicCompletedResponse());
 
         await client.responses.create(
-          const CreateResponseRequest(model: 'gpt-4o', input: 'Hello'),
+          const CreateResponseRequest(
+            model: 'gpt-4o',
+            input: ResponseTextInput('Hello'),
+          ),
         );
 
         expect(

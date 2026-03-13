@@ -1,11 +1,38 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 
 /// Tool definition for function calling.
 sealed class Tool {
   /// Creates a [Tool].
   const Tool();
+
+  /// Creates a function tool.
+  static Tool function_({
+    required String name,
+    String? description,
+    Map<String, dynamic>? parameters,
+    bool? strict,
+  }) => FunctionTool(
+    name: name,
+    description: description,
+    parameters: parameters,
+    strict: strict,
+  );
+
+  /// Creates an MCP tool.
+  static Tool mcp({
+    required String serverLabel,
+    required String serverUrl,
+    List<String>? allowedTools,
+    String? requireApproval,
+  }) => McpTool(
+    serverLabel: serverLabel,
+    serverUrl: serverUrl,
+    allowedTools: allowedTools,
+    requireApproval: requireApproval,
+  );
 
   /// Creates a [Tool] from JSON.
   factory Tool.fromJson(Map<String, dynamic> json) {
@@ -62,6 +89,25 @@ class FunctionTool extends Tool {
     if (parameters != null) 'parameters': parameters,
     if (strict != null) 'strict': strict,
   };
+
+  /// Creates a copy with replaced values.
+  FunctionTool copyWith({
+    String? name,
+    Object? description = unsetCopyWithValue,
+    Object? parameters = unsetCopyWithValue,
+    Object? strict = unsetCopyWithValue,
+  }) {
+    return FunctionTool(
+      name: name ?? this.name,
+      description: description == unsetCopyWithValue
+          ? this.description
+          : description as String?,
+      parameters: parameters == unsetCopyWithValue
+          ? this.parameters
+          : parameters as Map<String, dynamic>?,
+      strict: strict == unsetCopyWithValue ? this.strict : strict as bool?,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>

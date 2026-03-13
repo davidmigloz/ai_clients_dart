@@ -17,7 +17,10 @@ void main() {
         final client = OpenResponsesClient()..close();
         await expectLater(
           client.responses.create(
-            const CreateResponseRequest(model: 'gpt-4o', input: 'Hello'),
+            const CreateResponseRequest(
+              model: 'gpt-4o',
+              input: ResponseTextInput('Hello'),
+            ),
           ),
           throwsA(isA<StateError>()),
         );

@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 
 /// Log probability information for a token.
@@ -52,6 +53,23 @@ class LogProb {
       'top_logprobs': topLogprobs!.map((e) => e.toJson()).toList(),
   };
 
+  /// Creates a copy with replaced values.
+  LogProb copyWith({
+    String? token,
+    double? logprob,
+    Object? bytes = unsetCopyWithValue,
+    Object? topLogprobs = unsetCopyWithValue,
+  }) {
+    return LogProb(
+      token: token ?? this.token,
+      logprob: logprob ?? this.logprob,
+      bytes: bytes == unsetCopyWithValue ? this.bytes : bytes as List<int>?,
+      topLogprobs: topLogprobs == unsetCopyWithValue
+          ? this.topLogprobs
+          : topLogprobs as List<TopLogProb>?,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -103,6 +121,19 @@ class TopLogProb {
     'logprob': logprob,
     if (bytes != null) 'bytes': bytes,
   };
+
+  /// Creates a copy with replaced values.
+  TopLogProb copyWith({
+    String? token,
+    double? logprob,
+    Object? bytes = unsetCopyWithValue,
+  }) {
+    return TopLogProb(
+      token: token ?? this.token,
+      logprob: logprob ?? this.logprob,
+      bytes: bytes == unsetCopyWithValue ? this.bytes : bytes as List<int>?,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>

@@ -29,8 +29,9 @@ void main() async {
     final response = await client.responses.create(
       const CreateResponseRequest(
         model: 'gpt-4o-mini',
-        input:
-            'List 3 popular programming languages with their main use cases.',
+        input: ResponseTextInput(
+          'List 3 popular programming languages with their main use cases.',
+        ),
         text: TextConfig(
           format: JsonSchemaFormat(
             name: 'programming_languages',
@@ -84,7 +85,9 @@ void main() async {
     final recipeResponse = await client.responses.create(
       const CreateResponseRequest(
         model: 'gpt-4o-mini',
-        input: 'Create a simple recipe for chocolate chip cookies.',
+        input: ResponseTextInput(
+          'Create a simple recipe for chocolate chip cookies.',
+        ),
         text: TextConfig(
           format: JsonSchemaFormat(
             name: 'recipe',
@@ -151,11 +154,12 @@ void main() async {
     final sentimentResponse = await client.responses.create(
       const CreateResponseRequest(
         model: 'gpt-4o-mini',
-        input:
-            'Analyze the sentiment of these reviews:\n'
-            '1. "This product is amazing! Best purchase ever!"\n'
-            '2. "Terrible quality, broke after one day."\n'
-            '3. "It works okay, nothing special."',
+        input: ResponseTextInput(
+          'Analyze the sentiment of these reviews:\n'
+          '1. "This product is amazing! Best purchase ever!"\n'
+          '2. "Terrible quality, broke after one day."\n'
+          '3. "It works okay, nothing special."',
+        ),
         text: TextConfig(
           format: JsonSchemaFormat(
             name: 'sentiment_analysis',
@@ -213,7 +217,7 @@ void main() async {
     final textResponse = await client.responses.create(
       const CreateResponseRequest(
         model: 'gpt-4o-mini',
-        input: 'Say hello in one sentence.',
+        input: ResponseTextInput('Say hello in one sentence.'),
         text: TextConfig(format: TextResponseFormat()),
       ),
     );

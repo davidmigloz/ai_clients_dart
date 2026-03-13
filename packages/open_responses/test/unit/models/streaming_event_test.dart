@@ -77,7 +77,7 @@ void main() {
 
       expect(event, isA<FunctionCallArgumentsDeltaEvent>());
       expect((event as FunctionCallArgumentsDeltaEvent).delta, '{"loc');
-      expect(event.callId, 'call_abc123');
+      expect(event.itemId, 'call_001');
     });
 
     test('fromJson parses error event', () {

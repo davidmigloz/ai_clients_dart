@@ -137,7 +137,7 @@ void main() {
 
       test('toString returns expected value', () {
         const choice = ToolChoiceNone();
-        expect(choice.toString(), 'ToolChoiceNone()');
+        expect(choice.toString(), 'ToolChoice.none');
       });
     });
 
@@ -155,7 +155,7 @@ void main() {
 
       test('toString returns expected value', () {
         const choice = ToolChoiceAuto();
-        expect(choice.toString(), 'ToolChoiceAuto()');
+        expect(choice.toString(), 'ToolChoice.auto');
       });
     });
 
@@ -173,7 +173,7 @@ void main() {
 
       test('toString returns expected value', () {
         const choice = ToolChoiceRequired();
-        expect(choice.toString(), 'ToolChoiceRequired()');
+        expect(choice.toString(), 'ToolChoice.required');
       });
     });
 

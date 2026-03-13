@@ -32,7 +32,7 @@ void main() {
       final response = await client.responses.create(
         CreateResponseRequest(
           model: _model,
-          input: 'Say "Hello" and nothing else.',
+          input: const ResponseTextInput('Say "Hello" and nothing else.'),
         ),
       );
 
@@ -45,7 +45,7 @@ void main() {
       final response = await client.responses.create(
         CreateResponseRequest(
           model: _model,
-          input: 'What is 5 + 3?',
+          input: const ResponseTextInput('What is 5 + 3?'),
           instructions:
               'You are a math assistant. Give only the numeric answer.',
         ),
@@ -69,7 +69,10 @@ void main() {
 
         await client.responses
             .createStream(
-              CreateResponseRequest(model: _model, input: 'Count from 1 to 3.'),
+              CreateResponseRequest(
+                model: _model,
+                input: const ResponseTextInput('Count from 1 to 3.'),
+              ),
             )
             .forEach(events.add);
 
@@ -90,7 +93,10 @@ void main() {
         final textBuffer = StringBuffer();
 
         final runner = client.responses.stream(
-          CreateResponseRequest(model: _model, input: 'Say "test".'),
+          CreateResponseRequest(
+            model: _model,
+            input: const ResponseTextInput('Say "test".'),
+          ),
         )..onTextDelta(textBuffer.write);
 
         final finalResponse = await runner.finalResponse;
@@ -104,7 +110,7 @@ void main() {
       final response = await client.responses.create(
         CreateResponseRequest(
           model: _model,
-          input: 'What is the weather in London?',
+          input: const ResponseTextInput('What is the weather in London?'),
           tools: const [
             FunctionTool(
               name: 'get_weather',
@@ -135,10 +141,10 @@ void main() {
       final response = await client.responses.create(
         CreateResponseRequest(
           model: _model,
-          input: [
+          input: ResponseItemsInput([
             MessageItem.systemText('You are a geography expert.'),
             MessageItem.userText('What is the capital of Japan?'),
-          ],
+          ]),
         ),
       );
 
@@ -150,7 +156,7 @@ void main() {
       final response = await client.responses.create(
         CreateResponseRequest(
           model: _model,
-          input: 'Name 2 colors.',
+          input: const ResponseTextInput('Name 2 colors.'),
           text: const TextConfig(
             format: JsonSchemaFormat(
               name: 'colors',
@@ -179,7 +185,10 @@ void main() {
 
     test('response extensions', () async {
       final response = await client.responses.create(
-        CreateResponseRequest(model: _model, input: 'Hello'),
+        CreateResponseRequest(
+          model: _model,
+          input: const ResponseTextInput('Hello'),
+        ),
       );
 
       expect(response.isCompleted, isTrue);
@@ -188,7 +197,10 @@ void main() {
 
     test('usage tracking', () async {
       final response = await client.responses.create(
-        CreateResponseRequest(model: _model, input: 'Hello'),
+        CreateResponseRequest(
+          model: _model,
+          input: const ResponseTextInput('Hello'),
+        ),
       );
 
       // Usage may or may not be available depending on the HF space
