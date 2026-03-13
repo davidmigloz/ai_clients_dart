@@ -165,7 +165,7 @@ def _match_excluded_path(pattern: str, path: str) -> bool:
     try:
         return re.match(pattern, path) is not None
     except re.error as exc:
-        raise ValueError(f"Invalid excluded_paths regex pattern {pattern!r}: {exc}") from exc
+        raise ToolkitError(f"Invalid excluded_paths regex pattern {pattern!r}: {exc}") from exc
 
 
 def _normalize_resource_name(name: str) -> str:
@@ -896,7 +896,9 @@ def _verify_object_entry(config: ToolkitConfig, spec_payload: dict[str, Any], en
     excluded = set(entry.excluded_properties)
     if entry.kind == "sealed_variant" and entry.parent:
         current_parent_key = entry.parent
-        while current_parent_key:
+        visited: set[str] = set()
+        while current_parent_key and current_parent_key not in visited:
+            visited.add(current_parent_key)
             parent_entry = config.manifest.types.get(current_parent_key)
             if not parent_entry:
                 break
@@ -1870,6 +1872,12 @@ def _download_reference_repo(repo: str, ref: str, *, _max_attempts: int = 2) -> 
             raise
         except (HTTPError, URLError, OSError, tarfile.TarError) as exc:
             if attempt < _max_attempts:
+                # Clean up partial state before retrying to avoid stale files.
+                for child in temp_root.iterdir():
+                    if child.is_dir():
+                        shutil.rmtree(child, ignore_errors=True)
+                    else:
+                        child.unlink(missing_ok=True)
                 time.sleep(2)
                 continue
             shutil.rmtree(temp_root, ignore_errors=True)
