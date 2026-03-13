@@ -182,6 +182,39 @@ Then list commits per package, grouped by:
 
 ---
 
+## Step 4b: Fetch PR Context for Changelog Summaries
+
+> **Skip this step in `--plan` mode.**
+
+Commit subjects are terse one-liners (e.g., `feat(chromadb): update OpenAPI spec and implement new models`). They tell you *what* file changed but not *why* it matters or what users should know. PR descriptions in this repo follow a standard template with a `## Summary` section containing bullet points that describe the full rationale, scope of changes, and migration notes. This step fetches that richer context so Step 5 can write meaningful changelog summaries instead of parroting commit subjects.
+
+### Collect PR numbers
+
+From the commits parsed in Step 3, extract unique PR numbers. PR references appear as `(#N)` in commit subjects. Deduplicate across all packages — a single PR may appear in commits for multiple packages.
+
+### Fetch PR descriptions via subagent
+
+Spawn a **single subagent** (using the Agent tool) with:
+
+- The deduplicated list of PR numbers
+- Instructions to run `gh pr view {N} --json title,body` for each PR
+- For each PR body:
+  1. **Primary extraction**: Look for a `## Summary` heading and extract the bullet points underneath it (up to the next `##` heading or end of body). This is the standard PR template in this repo.
+  2. **Strip boilerplate**: Remove review tool badges, HTML comments (`<!-- ... -->`), test plan sections, and other template noise.
+  3. **Fallback**: If no `## Summary` heading exists, use the first substantive paragraph of the PR body (skip blank lines, HTML comments, and badge images at the top).
+  4. **Error fallback**: If `gh pr view` fails for a PR (e.g., PR was from a fork, or was deleted), log a warning and skip that PR — do not fail the release.
+- Return a structured list: `[{pr: N, title: "...", summary_bullets: ["..."]}, ...]`
+
+**Why a single subagent**: PR bodies can be large and noisy. Fetching them in a subagent keeps that content out of the main context window. A single subagent (rather than one per PR) avoids spawn overhead while still isolating the data.
+
+### Map PR summaries to packages
+
+After the subagent returns, map each PR's summary to the packages it affects by matching PR numbers back to the per-package commit lists from Step 3. A PR that appears in commits for multiple packages should be available to all of them.
+
+Store the mapping (package → list of PR summaries) for use in Step 5.
+
+---
+
 ## Step 5: Write Changelogs
 
 For each released package, **prepend** a new section to `packages/{pkg}/CHANGELOG.md`.
@@ -219,6 +252,21 @@ For each released package, **prepend** a new section to `packages/{pkg}/CHANGELO
 7. **Standard markdown list**: `- **TYPE**: ...` (no leading space)
 8. **Breaking note**: Only include `> Note: This release has breaking changes.` if there are breaking changes
 9. **AI summary**: Write 1-3 sentences summarizing the main changes in plain English. Place it between the breaking note (if any) and the entry list.
+
+   **Primary source**: Use the PR summaries collected in Step 4b as the primary source for writing the summary. PR descriptions contain the rationale, scope, and user-facing impact that commit subjects lack. Synthesize across multiple PRs into a coherent narrative — do not simply parrot PR titles or concatenate bullet points.
+
+   **Quality guidance**:
+   - Focus on **user-facing impact**: what changed, why it matters, and any migration notes
+   - Mention specific capabilities added or problems fixed, not just "updated X"
+   - If a release includes breaking changes, call out what broke and what users need to do
+
+   **Fallback**: If PR context is unavailable for some or all commits (e.g., Step 4b was skipped, PRs failed to fetch, or commits have no PR references), fall back to commit messages. Synthesize commit subjects into the best summary possible.
+
+   **Before/after example** — commit-only summary (current quality):
+   > Updated OpenAPI spec and added new models.
+
+   **PR-enriched summary (target quality):**
+   > Update ChromaDB client to latest API spec — adds quantization support, spanned index config, and read-level controls for queries. Collection fields that were previously nullable are now required, matching the upstream API contract.
 
 ### Pre-existing changelog sections
 
@@ -426,6 +474,9 @@ EOF
 8. **Partial publish failure** → report status, revert unpublished packages, only commit/tag published ones
 9. **Cross-package commits** → file-path detection handles correctly (same commit may appear in multiple packages)
 10. **Aggregate tag collision** → append counter suffix (`.1`, `.2`, etc.)
+11. **PR fetch failures** → warn and fall back to commit messages for changelog summaries
+12. **Commits without PR references** → use commit message only for that commit's contribution to the summary
+13. **PR covers multiple packages** → include its summary bullets in every relevant package's changelog summary
 
 ---
 
