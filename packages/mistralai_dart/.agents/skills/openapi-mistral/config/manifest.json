@@ -145,7 +145,10 @@
       "file": "lib/src/models/models/model.dart",
       "schema": "BaseModelCard",
       "tags": [],
-      "excluded_properties": ["deprecation", "deprecation_replacement_model"]
+      "excluded_properties": [
+        "deprecation",
+        "deprecation_replacement_model"
+      ]
     },
     "ChatMessage": {
       "spec": "main",
@@ -166,7 +169,7 @@
     },
     "SystemMessage": {
       "spec": "main",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "SystemMessage",
       "file": "lib/src/models/chat/chat_message.dart",
       "schema": "SystemMessage",
@@ -174,7 +177,7 @@
     },
     "UserMessage": {
       "spec": "main",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "UserMessage",
       "file": "lib/src/models/chat/chat_message.dart",
       "schema": "UserMessage",
@@ -182,7 +185,7 @@
     },
     "AssistantMessage": {
       "spec": "main",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "AssistantMessage",
       "file": "lib/src/models/chat/chat_message.dart",
       "schema": "AssistantMessage",
@@ -190,7 +193,7 @@
     },
     "ToolMessage": {
       "spec": "main",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "ToolMessage",
       "file": "lib/src/models/chat/chat_message.dart",
       "schema": "ToolMessage",
@@ -213,7 +216,7 @@
     },
     "TextChunk": {
       "spec": "main",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "TextContentPart",
       "file": "lib/src/models/content/content_part.dart",
       "schema": "TextChunk",
@@ -221,12 +224,14 @@
     },
     "ImageURLChunk": {
       "spec": "main",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "ImageUrlContentPart",
       "file": "lib/src/models/content/content_part.dart",
       "schema": "ImageURLChunk",
       "parent": "ContentPart",
-      "excluded_properties": ["image_url"]
+      "excluded_properties": [
+        "image_url"
+      ]
     },
     "Tool": {
       "spec": "main",
@@ -244,7 +249,7 @@
     },
     "FunctionTool": {
       "spec": "main",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "FunctionTool",
       "file": "lib/src/models/tools/tool.dart",
       "schema": "FunctionTool",
@@ -293,7 +298,7 @@
     },
     "FunctionName": {
       "spec": "main",
-      "kind": "object",
+      "kind": "sealed_variant",
       "dart_class": "ToolChoiceFunction",
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": "FunctionName",

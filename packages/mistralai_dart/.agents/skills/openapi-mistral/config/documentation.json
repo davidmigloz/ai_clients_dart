@@ -13,21 +13,18 @@
   "excluded_resources": [
     "base_resource",
     "fineTuningModels",
-    "streaming_resource",
-    "transcriptions"
+    "streaming_resource"
   ],
   "resource_to_example": {
     "chat": "chat",
+    "classifications": "classification",
     "embeddings": "embeddings",
+    "fim": "fim",
     "models": "models",
-    "fim": "fim"
+    "moderations": "moderation",
+    "fineTuningModels": "fine_tuning",
+    "transcriptions": "audio"
   },
-  "excluded_from_examples": [
-    "classifications",
-    "files",
-    "fineTuningModels",
-    "moderations",
-    "transcriptions"
-  ],
+  "excluded_from_examples": [],
   "drift_patterns": []
 }
