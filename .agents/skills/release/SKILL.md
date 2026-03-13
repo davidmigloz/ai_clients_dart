@@ -198,16 +198,15 @@ Spawn a **single subagent** (using the Agent tool) with:
 
 - The deduplicated list of PR numbers
 - Instructions to run `gh pr view {N} --json title,body` for each PR
-- For each PR body:
-  1. **Primary extraction**: Look for a `## Summary` heading and extract the bullet points underneath it (up to the next `##` heading or end of body). This is the conventional format used in this repo's PRs.
-  2. **Strip boilerplate**: Remove review tool badges, HTML comments (`<!-- ... -->`), test plan sections, and other template noise.
-  3. **Fallback**: If no `## Summary` heading exists, use the first substantive paragraph of the PR body (skip blank lines, HTML comments, and badge images at the top). Wrap the paragraph as a single entry in `summary_bullets` so downstream handling is uniform.
-  4. **Error fallback**: If `gh pr view` fails for a PR (e.g., PR was from a fork, or was deleted), log a warning and skip that PR — do not fail the release.
-- Additionally, flag any **breaking change signals** found in the PR body:
-  - Phrases like "breaking change", "migration required", "removed", "renamed", "changed signature", "no longer supports"
-  - A `BREAKING CHANGE:` section or `> Note: This release has breaking changes.`
-  - Fields or parameters that changed from optional to required, or were removed
-- Return a structured list: `[{pr: N, title: "...", summary_bullets: ["..."], has_breaking_signals: true/false, breaking_details: "..."}]`
+- For each PR body, extract the structured sections created by the `/create-pr` skill:
+  1. **`## Summary`**: Extract the bullet points (up to the next `##` heading or end of body). This is the primary source for changelog entries.
+  2. **`## Details`**: Extract the full content of this section. Contains extended context — API examples, architecture decisions, configuration changes — that enriches changelog summaries beyond what the bullets provide.
+  3. **`## Breaking Changes`**: Extract this section if present. This is the most reliable signal for breaking changes — more precise than heuristic phrase matching in the general body. Contains migration paths and before/after code examples.
+  4. **Strip boilerplate**: Remove review tool badges, HTML comments (`<!-- ... -->`), `## Test Plan` sections, and other template noise.
+  5. **Fallback**: If no `## Summary` heading exists (older PRs or external contributors), use the first substantive paragraph of the PR body (skip blank lines, HTML comments, and badge images at the top). Wrap the paragraph as a single entry in `summary_bullets` so downstream handling is uniform.
+  6. **Error fallback**: If `gh pr view` fails for a PR (e.g., PR was from a fork, or was deleted), log a warning and skip that PR — do not fail the release.
+- Return a structured list: `[{pr: N, title: "...", summary_bullets: ["..."], details: "...", breaking_changes: "...", has_breaking_signals: true/false}]`
+  - `has_breaking_signals` is `true` if a `## Breaking Changes` section exists, OR if the body contains phrases like "breaking change", "migration required", "removed", "renamed", "changed signature", "no longer supports"
 
 **Why a single subagent**: PR bodies can be large and noisy. Fetching them in a subagent keeps that content out of the main context window. A single subagent (rather than one per PR) avoids spawn overhead while still isolating the data.
 

@@ -110,26 +110,23 @@ Use the `/release` skill to publish packages. It handles the full lifecycle: det
 
 ## GitHub
 
+### Creating Pull Requests
+
+Use the `/create-pr` skill to create pull requests. It handles conventional commit titles, structured descriptions, labels, and assignees automatically.
+
+```
+/create-pr              # Create PR from all uncommitted changes
+/create-pr --draft      # Create as draft PR
+```
+
 ### Labels
 
-When creating issues or pull requests, you **must** always set the following labels:
+Labels are managed automatically by `/create-pr`, but for reference:
 
 - **`p:{package}`** (required) - The package(s) affected (e.g., `p:openai_dart`, `p:googleai_dart`)
 - **`t:{type}`** (required) - The type of issue/PR (e.g., `t:bug`, `t:feature`, `t:enhancement`)
 - **`f:{flag}`** (optional) - Additional flags (e.g., `f:help-wanted`, `f:good-first-issue`)
 
-To list all available labels:
-
-```bash
-gh label list --repo davidmigloz/ai_clients_dart
-```
-
 ### Assignees
 
-Issues and pull requests should be assigned to the code owner of the affected code. Code owners are defined in `.github/CODEOWNERS`.
-
-To find the code owner for a path:
-
-```bash
-cat .github/CODEOWNERS
-```
+Assigned automatically by `/create-pr` from `.github/CODEOWNERS`.
