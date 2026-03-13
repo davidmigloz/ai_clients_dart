@@ -176,9 +176,9 @@ Then list commits per package, grouped by:
 1. **Release-triggering commits** (feat, fix, refactor, docs, breaking)
 2. **Non-release commits** (test, chore, build, etc.) — shown for awareness but labeled as "will not affect version"
 
-**Ask user to confirm** before proceeding. They may override bump types or skip specific packages.
+**Do not ask for confirmation yet** — Step 4b may surface semver adjustments that affect the plan. Display the plan above for the user to review; confirmation will happen after Step 4b verifies semver bumps.
 
-**If `--plan` mode**: STOP here. Do not proceed to any file edits.
+**If `--plan` mode**: **Ask user to confirm** (they may override bump types or skip specific packages), then STOP here. Do not proceed to any file edits. Step 4b is skipped in plan mode, so confirmation happens here.
 
 ---
 
@@ -201,7 +201,7 @@ Spawn a **single subagent** (using the Agent tool) with:
 - For each PR body:
   1. **Primary extraction**: Look for a `## Summary` heading and extract the bullet points underneath it (up to the next `##` heading or end of body). This is the standard PR template in this repo.
   2. **Strip boilerplate**: Remove review tool badges, HTML comments (`<!-- ... -->`), test plan sections, and other template noise.
-  3. **Fallback**: If no `## Summary` heading exists, use the first substantive paragraph of the PR body (skip blank lines, HTML comments, and badge images at the top).
+  3. **Fallback**: If no `## Summary` heading exists, use the first substantive paragraph of the PR body (skip blank lines, HTML comments, and badge images at the top). Wrap the paragraph as a single entry in `summary_bullets` so downstream handling is uniform.
   4. **Error fallback**: If `gh pr view` fails for a PR (e.g., PR was from a fork, or was deleted), log a warning and skip that PR — do not fail the release.
 - Additionally, flag any **breaking change signals** found in the PR body:
   - Phrases like "breaking change", "migration required", "removed", "renamed", "changed signature", "no longer supports"
@@ -229,7 +229,7 @@ For each package, review the PR summaries (especially `has_breaking_signals` and
 
 3. **No action needed**: The PR context confirms the commit-derived bump is appropriate.
 
-Present any flagged mismatches to the user as part of Step 4's confirmation prompt, **before** proceeding to changelog writing. The user decides whether to accept or override the bump. Example:
+Present any flagged mismatches to the user along with the release plan from Step 4, and **ask the user to confirm** the final version bumps before proceeding to changelog writing. The user decides whether to accept or override. If there are no mismatches, confirm the plan as-is. Example:
 
 ```
 ⚠️  Semver check — PR context suggests bump adjustments:
@@ -561,7 +561,8 @@ cat > /tmp/release-progress.md <<'EOF'
 ## Completed Steps
 - [x] Step 1: Environment validated
 - [x] Step 2-3: Changes detected, bumps computed
-- [x] Step 4: Plan confirmed
+- [x] Step 4: Plan displayed
+- [x] Step 4b: PR context fetched, semver verified, plan confirmed
 - [x] Step 5: Changelogs written (all packages)
 - [x] Step 6: pubspec.yaml updated (all packages)
 - [x] Step 7: Dry-run passed
@@ -583,7 +584,8 @@ Update this file after completing each step. A new session can read it to resume
 
 | Interrupted After | State | Recovery Procedure |
 |---|---|---|
-| **Step 4** (plan confirmed) | No files modified yet. | Start fresh from Step 5. |
+| **Step 4** (plan displayed) | No files modified yet. | Start fresh from Step 4b (PR context fetch and confirmation). |
+| **Step 4b** (plan confirmed) | No files modified yet. PR context fetched, semver verified. | Start fresh from Step 5. |
 | **Steps 5-6** (changelogs/pubspec written) | Working tree has uncommitted changes. | Verify the changes with `git diff`. Resume from Step 7 (dry-run publish). |
 | **Step 7** (dry-run passed) | Working tree has uncommitted changes, dry-run validated. | Resume from Step 8 (publish). |
 | **Step 8** (some packages published) | Some packages live on pub.dev, uncommitted changes in tree. | **Critical**: Check which packages are published (`curl -s https://pub.dev/api/packages/{pkg}`). For unpublished packages, revert their files (`git checkout HEAD -- packages/{pkg}/pubspec.yaml packages/{pkg}/CHANGELOG.md`). Resume from Step 8b with only the published packages. |
