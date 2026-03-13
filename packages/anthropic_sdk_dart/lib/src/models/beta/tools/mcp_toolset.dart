@@ -106,8 +106,9 @@ class McpToolset extends BuiltInTool {
 
   @override
   String toString() =>
-      'McpToolset(type: $type, serverDefinition: $serverDefinition, '
-      'toolConfiguration: $toolConfiguration)';
+      'McpToolset(type: $type, authorizationToken: $authorizationToken, '
+      'serverDefinition: $serverDefinition, '
+      'toolConfiguration: $toolConfiguration, cacheControl: $cacheControl)';
 }
 
 /// MCP server URL definition.
