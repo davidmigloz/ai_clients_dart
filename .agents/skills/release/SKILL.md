@@ -182,11 +182,11 @@ Then list commits per package, grouped by:
 
 ---
 
-## Step 4b: Fetch PR Context for Changelog Summaries
+## Step 4b: Fetch PR Context for Semver Verification and Changelog Summaries
 
 > **Skip this step in `--plan` mode.**
 
-Commit subjects are terse one-liners (e.g., `feat(chromadb): update OpenAPI spec and implement new models`). They tell you *what* file changed but not *why* it matters or what users should know. PR descriptions in this repo follow a standard template with a `## Summary` section containing bullet points that describe the full rationale, scope of changes, and migration notes. This step fetches that richer context so Step 5 can write meaningful changelog summaries instead of parroting commit subjects.
+Commit subjects are terse one-liners (e.g., `feat(chromadb): update OpenAPI spec and implement new models`). They tell you *what* file changed but not *why* it matters or what users should know. PR descriptions in this repo follow a standard template with a `## Summary` section containing bullet points that describe the full rationale, scope of changes, and migration notes. This step fetches that richer context to (1) verify that the semver bump from Step 3 is correct and (2) give Step 5 the information it needs to write meaningful changelog summaries.
 
 ### Collect PR numbers
 
@@ -203,7 +203,11 @@ Spawn a **single subagent** (using the Agent tool) with:
   2. **Strip boilerplate**: Remove review tool badges, HTML comments (`<!-- ... -->`), test plan sections, and other template noise.
   3. **Fallback**: If no `## Summary` heading exists, use the first substantive paragraph of the PR body (skip blank lines, HTML comments, and badge images at the top).
   4. **Error fallback**: If `gh pr view` fails for a PR (e.g., PR was from a fork, or was deleted), log a warning and skip that PR — do not fail the release.
-- Return a structured list: `[{pr: N, title: "...", summary_bullets: ["..."]}, ...]`
+- Additionally, flag any **breaking change signals** found in the PR body:
+  - Phrases like "breaking change", "migration required", "removed", "renamed", "changed signature", "no longer supports"
+  - A `BREAKING CHANGE:` section or `> Note: This release has breaking changes.`
+  - Fields or parameters that changed from optional to required, or were removed
+- Return a structured list: `[{pr: N, title: "...", summary_bullets: ["..."], has_breaking_signals: true/false, breaking_details: "..."}]`
 
 **Why a single subagent**: PR bodies can be large and noisy. Fetching them in a subagent keeps that content out of the main context window. A single subagent (rather than one per PR) avoids spawn overhead while still isolating the data.
 
@@ -212,6 +216,33 @@ Spawn a **single subagent** (using the Agent tool) with:
 After the subagent returns, map each PR's summary to the packages it affects by matching PR numbers back to the per-package commit lists from Step 3. A PR that appears in commits for multiple packages should be available to all of them.
 
 Store the mapping (package → list of PR summaries) for use in Step 5.
+
+### Verify semver bumps against PR context
+
+Cross-check the version bumps computed in Step 3 against the PR context returned by the subagent. Commit subjects often understate the impact of a change — a commit typed as `fix` or `refactor` may actually introduce breaking API changes that the PR description makes explicit.
+
+For each package, review the PR summaries (especially `has_breaking_signals` and `breaking_details`) and flag **semver mismatches**:
+
+1. **Undeclared breaking changes**: A PR's body describes breaking changes (removed fields, renamed APIs, changed defaults, dropped platform support) but no commit in that package carries a `!` suffix or `BREAKING CHANGE:` footer. → **Warn the user** and recommend upgrading the bump to major (or minor for pre-1.0 packages).
+
+2. **Feature misclassified as fix**: A PR describes new capabilities, new API surface, or new configuration options, but all commits are typed as `fix` or `refactor`. → **Suggest** upgrading the bump to minor (or patch for pre-1.0 packages).
+
+3. **No action needed**: The PR context confirms the commit-derived bump is appropriate.
+
+Present any flagged mismatches to the user as part of Step 4's confirmation prompt, **before** proceeding to changelog writing. The user decides whether to accept or override the bump. Example:
+
+```
+⚠️  Semver check — PR context suggests bump adjustments:
+
+| Package      | Computed Bump | PR Signal          | Suggested Bump | Reason                                      |
+|--------------|---------------|--------------------|----------------|----------------------------------------------|
+| chromadb     | patch         | breaking signals   | minor (pre-1.0)| PR #99: nullable fields now required          |
+| openai_dart  | patch         | new feature        | minor          | PR #95: adds new embedding model support      |
+
+Accept computed bumps, or adjust? [accept / adjust]
+```
+
+> **Why this matters**: Semver is a contract with downstream users. A breaking change shipped as a patch version can break builds silently. Commit subjects are written quickly and are often wrong about impact level — PR descriptions, written for reviewers, are more reliable.
 
 ---
 
@@ -477,6 +508,7 @@ EOF
 11. **PR fetch failures** → warn and fall back to commit messages for changelog summaries
 12. **Commits without PR references** → use commit message only for that commit's contribution to the summary
 13. **PR covers multiple packages** → include its summary bullets in every relevant package's changelog summary
+14. **PR signals breaking but commits don't** → warn user and suggest bump upgrade; user decides
 
 ---
 
