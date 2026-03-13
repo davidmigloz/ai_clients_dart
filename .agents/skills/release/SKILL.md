@@ -176,9 +176,9 @@ Then list commits per package, grouped by:
 1. **Release-triggering commits** (feat, fix, refactor, docs, breaking)
 2. **Non-release commits** (test, chore, build, etc.) — shown for awareness but labeled as "will not affect version"
 
-**Do not ask for confirmation yet** — Step 4b may surface semver adjustments that affect the plan. Display the plan above for the user to review; confirmation will happen after Step 4b verifies semver bumps.
+**If `--plan` mode**: **Ask user to confirm** (they may override bump types or skip specific packages), then STOP here. Do not proceed to any file edits. Step 4b is skipped in plan mode, so confirmation happens in this step.
 
-**If `--plan` mode**: **Ask user to confirm** (they may override bump types or skip specific packages), then STOP here. Do not proceed to any file edits. Step 4b is skipped in plan mode, so confirmation happens here.
+**If `--dry-run` or full release mode**: Do not ask for confirmation yet — Step 4b may surface semver adjustments that affect the plan. Display the plan for the user to review; confirmation will happen at the end of Step 4b after semver verification.
 
 ---
 
@@ -186,7 +186,7 @@ Then list commits per package, grouped by:
 
 > **Skip this step in `--plan` mode.**
 
-Commit subjects are terse one-liners (e.g., `feat(chromadb): update OpenAPI spec and implement new models`). They tell you *what* file changed but not *why* it matters or what users should know. PR descriptions in this repo follow a standard template with a `## Summary` section containing bullet points that describe the full rationale, scope of changes, and migration notes. This step fetches that richer context to (1) verify that the semver bump from Step 3 is correct and (2) give Step 5 the information it needs to write meaningful changelog summaries.
+Commit subjects are terse one-liners (e.g., `feat(chromadb): update OpenAPI spec and implement new models`). They tell you *what* file changed but not *why* it matters or what users should know. PR descriptions in this repo conventionally include a `## Summary` section with bullet points describing the full rationale, scope of changes, and migration notes. This step fetches that richer context to (1) verify that the semver bump from Step 3 is correct and (2) give Step 5 the information it needs to write meaningful changelog summaries.
 
 ### Collect PR numbers
 
@@ -199,7 +199,7 @@ Spawn a **single subagent** (using the Agent tool) with:
 - The deduplicated list of PR numbers
 - Instructions to run `gh pr view {N} --json title,body` for each PR
 - For each PR body:
-  1. **Primary extraction**: Look for a `## Summary` heading and extract the bullet points underneath it (up to the next `##` heading or end of body). This is the standard PR template in this repo.
+  1. **Primary extraction**: Look for a `## Summary` heading and extract the bullet points underneath it (up to the next `##` heading or end of body). This is the conventional format used in this repo's PRs.
   2. **Strip boilerplate**: Remove review tool badges, HTML comments (`<!-- ... -->`), test plan sections, and other template noise.
   3. **Fallback**: If no `## Summary` heading exists, use the first substantive paragraph of the PR body (skip blank lines, HTML comments, and badge images at the top). Wrap the paragraph as a single entry in `summary_bullets` so downstream handling is uniform.
   4. **Error fallback**: If `gh pr view` fails for a PR (e.g., PR was from a fork, or was deleted), log a warning and skip that PR — do not fail the release.
