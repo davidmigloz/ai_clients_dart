@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import tarfile
 import tempfile
+import time
 from collections import defaultdict
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
@@ -60,7 +61,7 @@ from .dart_inspect import (
 )
 
 
-HTTP_METHODS = ("get", "post", "put", "patch", "delete")
+HTTP_METHODS = ("get", "post", "put", "patch", "delete", "head", "options", "trace")
 UNKNOWN_ENUM_FALLBACKS = {"unknown", "unspecified"}
 MAX_VERSION_HISTORY = 10
 VERSION_SEGMENT_RE = re.compile(r"^v\d+")
@@ -143,16 +144,52 @@ def _trim_path_prefixes(parts: list[str]) -> list[str]:
     return trimmed
 
 
+def _resolve_ref(ref: str) -> str:
+    """Extract the last segment from a JSON Reference string (e.g. ``#/components/schemas/Foo`` → ``Foo``).
+
+    Raises ``ValueError`` if *ref* is empty or the resolved segment is empty.
+    """
+    if not ref:
+        raise ValueError("Empty $ref string")
+    segment = ref.split("/")[-1]
+    if not segment:
+        raise ValueError(f"$ref resolved to an empty segment: {ref!r}")
+    return segment
+
+
+def _match_excluded_path(pattern: str, path: str) -> bool:
+    """Return whether *path* matches *pattern* via :func:`re.match`.
+
+    Raises ``ValueError`` if *pattern* is not a valid regular expression.
+    """
+    try:
+        return re.match(pattern, path) is not None
+    except re.error as exc:
+        raise ValueError(f"Invalid excluded_paths regex pattern {pattern!r}: {exc}") from exc
+
+
 def _normalize_resource_name(name: str) -> str:
+    """Return *name* in camelCase with the ``_resource`` suffix stripped.
+
+    Used when generating documentation resource accessor paths.
+    """
     return camel_case(name.replace("_resource", "").replace("-", "_"))
 
 
 def _normalize_coverage_resource_name(name: str) -> str:
+    """Return *name* in snake_case with the ``_resource`` suffix stripped.
+
+    Query/fragment parts are removed first.  Used for coverage-report resource keys.
+    """
     base = re.split(r"[?#]", name, maxsplit=1)[0]
     return snake_case(base.replace("_resource", "").replace("-", "_")).replace("__", "_")
 
 
 def _normalize_example_name(name: str) -> str:
+    """Return *name* in snake_case with the ``_example`` suffix stripped.
+
+    Used for example-file lookup keys.
+    """
     return snake_case(name).removesuffix("_example")
 
 
@@ -207,7 +244,7 @@ def _normalize_discriminator_mapping(mapping: dict[str, Any]) -> dict[str, str]:
     for discriminator_value, target in mapping.items():
         if not isinstance(target, str):
             continue
-        normalized[target.split("/")[-1]] = discriminator_value
+        normalized[_resolve_ref(target)] = discriminator_value
     return normalized
 
 
@@ -319,7 +356,7 @@ def _extract_operation_schema(request_body: Any) -> str | None:
     content = request_body.get("content", {})
     schema = content.get("application/json", {}).get("schema", {})
     if "$ref" in schema:
-        return schema["$ref"].split("/")[-1]
+        return _resolve_ref(schema["$ref"])
     return None
 
 
@@ -330,7 +367,7 @@ def _extract_response_schema(responses: dict[str, Any]) -> str | None:
         content = response.get("content", {})
         schema = content.get("application/json", {}).get("schema", {})
         if "$ref" in schema:
-            return schema["$ref"].split("/")[-1]
+            return _resolve_ref(schema["$ref"])
     return None
 
 
@@ -356,7 +393,7 @@ def _flatten_schema(schema: dict[str, Any], all_schemas: dict[str, Any], resolvi
     }
 
     if "$ref" in schema:
-        ref_name = schema["$ref"].split("/")[-1]
+        ref_name = _resolve_ref(schema["$ref"])
         if ref_name in resolving_refs:
             return _empty_flattened_schema()
         ref_schema = all_schemas.get(ref_name, {})
@@ -374,7 +411,7 @@ def _flatten_schema(schema: dict[str, Any], all_schemas: dict[str, Any], resolvi
     for union_key in ("oneOf", "anyOf"):
         for item in schema.get(union_key, []):
             if "$ref" in item:
-                result["union_members"].add(item["$ref"].split("/")[-1])
+                result["union_members"].add(_resolve_ref(item["$ref"]))
             elif "type" in item:
                 result["union_members"].add(f"{union_key}:{item['type']}")
 
@@ -544,7 +581,7 @@ def _coverage_gaps(config: ToolkitConfig, spec: dict[str, Any], *, resource_filt
     }
     expected_resources: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for path, path_payload in spec.get("paths", {}).items():
-        if any(re.match(pattern, path) for pattern in excluded_paths):
+        if any(_match_excluded_path(pattern, path) for pattern in excluded_paths):
             continue
         for method in HTTP_METHODS:
             if method not in path_payload:
@@ -673,7 +710,7 @@ def _openapi_property_info(schema: dict[str, Any], schema_name: str) -> dict[str
         results[name] = _parse_openapi_property(prop, required, name)
     for item in raw.get("allOf", []):
         if "$ref" in item:
-            ref_name = item["$ref"].split("/")[-1]
+            ref_name = _resolve_ref(item["$ref"])
             results.update(_openapi_property_info(schema, ref_name))
         for name, prop in item.get("properties", {}).items():
             results[name] = _parse_openapi_property(prop, set(item.get("required", [])), name)
@@ -688,7 +725,7 @@ def _parse_openapi_property(prop: dict[str, Any], required: set[str], name: str)
         "items": prop.get("items"),
     }
     if "$ref" in prop:
-        info["ref"] = prop["$ref"].split("/")[-1]
+        info["ref"] = _resolve_ref(prop["$ref"])
         return info
     if "anyOf" in prop:
         non_null = [item for item in prop["anyOf"] if item.get("type") != "null"]
@@ -697,7 +734,7 @@ def _parse_openapi_property(prop: dict[str, Any], required: set[str], name: str)
         if non_null:
             first = non_null[0]
             if "$ref" in first:
-                info["ref"] = first["$ref"].split("/")[-1]
+                info["ref"] = _resolve_ref(first["$ref"])
             else:
                 info["type"] = first.get("type")
                 info["items"] = first.get("items")
@@ -705,7 +742,7 @@ def _parse_openapi_property(prop: dict[str, Any], required: set[str], name: str)
     if "allOf" in prop:
         for item in prop["allOf"]:
             if "$ref" in item:
-                info["ref"] = item["$ref"].split("/")[-1]
+                info["ref"] = _resolve_ref(item["$ref"])
                 break
     return info
 
@@ -852,16 +889,22 @@ def _verify_object_entry(config: ToolkitConfig, spec_payload: dict[str, Any], en
     if not props:
         return [_type_issue("error", entry.key, f"No spec fields found for '{entry.schema_name}'", file=entry.file)]
 
-    # For sealed_variant entries, auto-exclude the parent's discriminator field
-    # since it is handled by the parent class's fromJson dispatch, not stored
-    # as a field on the variant.
+    # For sealed_variant entries, auto-exclude discriminator fields from all
+    # ancestor sealed_parent entries. This handles nested hierarchies like
+    # UserMessageItem → MessageItem (role) → Item (type), where both 'type'
+    # and 'role' are dispatch constants, not stored fields on the leaf variant.
     excluded = set(entry.excluded_properties)
     if entry.kind == "sealed_variant" and entry.parent:
-        parent_entry = config.manifest.types.get(entry.parent)
-        if parent_entry and parent_entry.discriminator:
-            discriminator_field = parent_entry.discriminator.get("field")
-            if discriminator_field:
-                excluded.add(discriminator_field)
+        current_parent_key = entry.parent
+        while current_parent_key:
+            parent_entry = config.manifest.types.get(current_parent_key)
+            if not parent_entry:
+                break
+            if parent_entry.discriminator:
+                discriminator_field = parent_entry.discriminator.get("field")
+                if discriminator_field:
+                    excluded.add(discriminator_field)
+            current_parent_key = parent_entry.parent
 
     fields = extract_fields(file_path, entry.dart_class)
     content = read_text(file_path)
@@ -925,7 +968,7 @@ def _discriminator_value_for_variant(mapping: dict[str, Any], variant: ManifestE
     for discriminator_value, target in mapping.items():
         if not isinstance(discriminator_value, str) or not isinstance(target, str):
             continue
-        target_name = target.split("/")[-1]
+        target_name = _resolve_ref(target)
         if target_name in {variant.schema_name, variant.dart_class}:
             return discriminator_value
 
@@ -1022,7 +1065,7 @@ def _verify_implementation(
     if scope == "all" and coverage_summary["partial_coverage"]:
         issues.append(
             _type_issue(
-                "warning",
+                "info",
                 "implementation",
                 f"Strict implementation verification is partial because {coverage_summary['skipped_entry_count']} manifest entries are marked as kind='skip'",
             )
@@ -1048,6 +1091,13 @@ def _verify_implementation(
         elif entry.kind == "extension" and not entry.schema:
             issues.extend(_verify_extension_entry(config, entry))
         else:
+            if entry.kind not in {"object", "sealed_variant", "extension"}:
+                issues.append(_type_issue(
+                    "info",
+                    entry.key,
+                    f"Unrecognized manifest entry kind '{entry.kind}' for {entry.key}; treating as object",
+                    file=entry.file,
+                ))
             issues.extend(_verify_object_entry(config, spec_payload, entry))
 
     for parent in parents:
@@ -1376,7 +1426,7 @@ def _verify_docs(config: ToolkitConfig) -> tuple[int, dict[str, Any]]:
     if coverage_summary["partial_coverage"]:
         issues.append(
             _type_issue(
-                "warning",
+                "info",
                 "documentation",
                 "Documentation verification is partial because documentation.json excludes resources or example checks",
             )
@@ -1419,14 +1469,14 @@ def _iter_schema_refs(node: Any) -> set[str]:
     if isinstance(node, dict):
         ref = node.get("$ref")
         if isinstance(ref, str):
-            refs.add(ref.split("/")[-1])
+            refs.add(_resolve_ref(ref))
         discriminator = node.get("discriminator", {})
         if isinstance(discriminator, dict):
             mapping = discriminator.get("mapping", {})
             if isinstance(mapping, dict):
                 for target in mapping.values():
                     if isinstance(target, str):
-                        refs.add(target.split("/")[-1])
+                        refs.add(_resolve_ref(target))
         for value in node.values():
             refs.update(_iter_schema_refs(value))
     elif isinstance(node, list):
@@ -1481,7 +1531,7 @@ def _iter_parameter_schema_refs(
         ref = parameter.get("$ref")
         if isinstance(ref, str):
             if ref.startswith("#/components/parameters/"):
-                parameter_name = ref.split("/")[-1]
+                parameter_name = _resolve_ref(ref)
                 if parameter_name in resolving_parameters:
                     continue
                 refs.update(
@@ -1518,7 +1568,7 @@ def _included_schema_names(
             if not isinstance(operation, dict):
                 continue
             if not include_excluded:
-                if any(re.match(pattern, path) for pattern in excluded_paths):
+                if any(_match_excluded_path(pattern, path) for pattern in excluded_paths):
                     continue
                 if excluded_tags and any(tag in excluded_tags for tag in operation.get("tags", [])):
                     continue
@@ -1803,24 +1853,29 @@ def _python_member_map(node: ast.ClassDef, member_map_name: str | None) -> dict[
     return {}
 
 
-def _download_reference_repo(repo: str, ref: str) -> tuple[Path, Path]:
+def _download_reference_repo(repo: str, ref: str, *, _max_attempts: int = 2) -> tuple[Path, Path]:
     url = f"https://codeload.github.com/{repo}/tar.gz/{ref}"
     request = Request(url, headers={"User-Agent": "api-toolkit/1.0"})
     temp_root = Path(tempfile.mkdtemp(prefix="api-toolkit-audit-"))
     archive_path = temp_root / "reference.tar.gz"
-    try:
-        with urlopen(request, timeout=30) as response, archive_path.open("wb") as archive_file:
-            shutil.copyfileobj(response, archive_file)
-        with tarfile.open(archive_path, mode="r:gz") as tar:
-            _extract_tar_safely(tar, temp_root)
-    except _ReferenceUnavailableError:
-        shutil.rmtree(temp_root, ignore_errors=True)
-        raise
-    except (HTTPError, URLError, OSError, tarfile.TarError) as exc:
-        shutil.rmtree(temp_root, ignore_errors=True)
-        raise _ReferenceUnavailableError(f"Failed to download reference implementation {repo}@{ref}: {exc}") from exc
-    finally:
-        archive_path.unlink(missing_ok=True)
+    for attempt in range(1, _max_attempts + 1):
+        try:
+            with urlopen(request, timeout=30) as response, archive_path.open("wb") as archive_file:
+                shutil.copyfileobj(response, archive_file)
+            with tarfile.open(archive_path, mode="r:gz") as tar:
+                _extract_tar_safely(tar, temp_root)
+            break
+        except _ReferenceUnavailableError:
+            shutil.rmtree(temp_root, ignore_errors=True)
+            raise
+        except (HTTPError, URLError, OSError, tarfile.TarError) as exc:
+            if attempt < _max_attempts:
+                time.sleep(2)
+                continue
+            shutil.rmtree(temp_root, ignore_errors=True)
+            raise _ReferenceUnavailableError(f"Failed to download reference implementation {repo}@{ref}: {exc}") from exc
+        finally:
+            archive_path.unlink(missing_ok=True)
     extracted = next((path for path in temp_root.iterdir() if path.is_dir()), temp_root)
     return extracted, temp_root
 
@@ -2575,7 +2630,7 @@ def _dart_type_from_prop(type_mappings: dict[str, str], prop: dict[str, Any]) ->
     if type_name == "array":
         items = prop.get("items", {})
         if "$ref" in items:
-            return f"List<{items['$ref'].split('/')[-1]}>"
+            return f"List<{_resolve_ref(items['$ref'])}>"
         return f"List<{type_mappings.get(items.get('type', 'dynamic'), 'dynamic')}>"
     if type_name == "object":
         return "Map<String, dynamic>"
@@ -2586,7 +2641,7 @@ def _scaffold_array_from_json(field_name: str, prop: dict[str, Any], type_mappin
     items = prop.get("items") or {}
     value = f"json['{field_name}']"
     if "$ref" in items:
-        ref_type = items["$ref"].split("/")[-1]
+        ref_type = _resolve_ref(items["$ref"])
         expression = (
             f"({value} as List<dynamic>).map((item) => "
             f"{ref_type}.fromJson(item as Map<String, dynamic>)).toList()"
