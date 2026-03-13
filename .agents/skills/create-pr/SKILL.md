@@ -24,6 +24,7 @@ Parse `$ARGUMENTS` for options:
 1. **CLI availability**: `git` and `gh` must be on PATH.
 2. **GitHub auth**: `gh auth status` must show authenticated.
 3. **Repository root**: Use `git rev-parse --show-toplevel` to determine the repo root. All commands should use absolute paths or `cd` to repo root first (Bash doesn't persist `cd` between calls).
+4. **Base branch**: Resolve `{base}` from `--base` argument (default: `main`). Verify it exists: `git rev-parse --verify {base}`. If it fails, try `git fetch origin {base}` and re-verify. If still invalid, report the error and stop.
 
 ---
 
@@ -110,7 +111,7 @@ Log the commit plan for the user's reference (this is informational, not a confi
 
 ## Step 5: Create Branch
 
-If already on a non-main branch with relevant commits, reuse it.
+If already on a non-base branch with relevant commits, reuse it.
 
 Otherwise, generate a branch name:
 - **Single package**: `{type}/{pkg}-{kebab-case-description}`
@@ -241,7 +242,7 @@ Map changed directories to labels using this table:
 
 > Note the special case: directory `open_responses` maps to label `p:open_responses_dart`.
 
-Apply one `p:` label for each affected package. If changes are only in root files (outside `packages/`), no package label is needed — but this is unusual and worth confirming with the user.
+Apply one `p:` label for each affected package. If changes are only in root files (outside `packages/`), omit the `p:` label — this is valid for cross-cutting changes like CI, docs, or skill files.
 
 ### Type labels (`t:`)
 
@@ -299,7 +300,7 @@ Do NOT ask the user for confirmation — proceed directly. The user asked you to
    )" \
      --label "p:chromadb,t:feature" \
      --assignee "davidmigloz" \
-     --base main
+     --base {base}
    ```
    Add `--draft` if the user requested it or passed `--draft` in arguments.
 
@@ -311,7 +312,7 @@ Do NOT ask the user for confirmation — proceed directly. The user asked you to
 
 1. **No changes** → report and stop
 2. **Already on a feature branch with commits** → detect and reuse; only create new commits for uncommitted changes
-3. **Changes only outside `packages/`** → no package label; use root scope or no scope for commits
+3. **Changes only outside `packages/`** → omit `p:` label; use root scope or no scope for commits
 4. **Breaking changes** → ensure `!` in commit type, include `## Breaking Changes` section in PR body
 5. **User wants to split into multiple PRs** → guide them to specify a subset, create one PR, then repeat
 6. **Branch name collision** → append counter suffix (`-2`, `-3`, etc.)
