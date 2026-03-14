@@ -58,9 +58,7 @@ void main() {
       });
 
       test('toJson returns list of maps', () {
-        const input = ContentListInput([
-          TextContent(text: 'Hello'),
-        ]);
+        const input = ContentListInput([TextContent(text: 'Hello')]);
         final json = input.toJson() as List<dynamic>;
         expect(json, hasLength(1));
         expect((json[0] as Map<String, dynamic>)['type'], 'text');
@@ -92,16 +90,14 @@ void main() {
           TextContent(text: 'Hello'),
         );
         expect(input, isA<SingleContentInput>());
-        expect(
-          (input as SingleContentInput).content,
-          isA<TextContent>(),
-        );
+        expect((input as SingleContentInput).content, isA<TextContent>());
       });
 
       test('fromJson with single content map', () {
-        final input = InteractionInput.fromJson(
-          {'type': 'text', 'text': 'Hello'},
-        );
+        final input = InteractionInput.fromJson({
+          'type': 'text',
+          'text': 'Hello',
+        });
         expect(input, isA<SingleContentInput>());
         final single = input as SingleContentInput;
         expect(single.content, isA<TextContent>());
@@ -184,10 +180,7 @@ void main() {
 
     group('fromJson error handling', () {
       test('throws ArgumentError for unsupported type', () {
-        expect(
-          () => InteractionInput.fromJson(42),
-          throwsArgumentError,
-        );
+        expect(() => InteractionInput.fromJson(42), throwsArgumentError);
       });
     });
   });
@@ -214,9 +207,7 @@ void main() {
 
     group('TurnContentList', () {
       test('factory constructor', () {
-        const content = TurnContent.contentList([
-          TextContent(text: 'Hello'),
-        ]);
+        const content = TurnContent.contentList([TextContent(text: 'Hello')]);
         expect(content, isA<TurnContentList>());
         expect((content as TurnContentList).content, hasLength(1));
       });
@@ -241,20 +232,14 @@ void main() {
 
     group('fromJson error handling', () {
       test('throws ArgumentError for unsupported type', () {
-        expect(
-          () => TurnContent.fromJson(42),
-          throwsArgumentError,
-        );
+        expect(() => TurnContent.fromJson(42), throwsArgumentError);
       });
     });
   });
 
   group('CreateModelInteractionParams with InteractionInput', () {
     test('fromJson parses text input', () {
-      final json = {
-        'model': 'gemini-2.0-flash',
-        'input': 'Hello',
-      };
+      final json = {'model': 'gemini-2.0-flash', 'input': 'Hello'};
       final params = CreateModelInteractionParams.fromJson(json);
       expect(params.input, isA<TextInput>());
       expect((params.input! as TextInput).text, 'Hello');
@@ -278,10 +263,7 @@ void main() {
 
   group('CreateAgentInteractionParams with InteractionInput', () {
     test('fromJson parses text input', () {
-      final json = {
-        'agent': 'deep-research',
-        'input': 'Research this topic',
-      };
+      final json = {'agent': 'deep-research', 'input': 'Research this topic'};
       final params = CreateAgentInteractionParams.fromJson(json);
       expect(params.input, isA<TextInput>());
       expect((params.input! as TextInput).text, 'Research this topic');

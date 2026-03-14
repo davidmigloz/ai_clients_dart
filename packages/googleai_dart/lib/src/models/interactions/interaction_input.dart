@@ -15,14 +15,12 @@ sealed class InteractionInput {
   const factory InteractionInput.text(String text) = TextInput;
 
   /// Creates a [ContentListInput] with the given [content] list.
-  const factory InteractionInput.contentList(
-    List<InteractionContent> content,
-  ) = ContentListInput;
+  const factory InteractionInput.contentList(List<InteractionContent> content) =
+      ContentListInput;
 
   /// Creates a [SingleContentInput] with the given [content].
-  const factory InteractionInput.singleContent(
-    InteractionContent content,
-  ) = SingleContentInput;
+  const factory InteractionInput.singleContent(InteractionContent content) =
+      SingleContentInput;
 
   /// Creates a [TurnsInput] with the given [turns].
   const factory InteractionInput.turns(List<Turn> turns) = TurnsInput;
@@ -49,9 +47,7 @@ sealed class InteractionInput {
       final first = json.first;
       if (first is Map<String, dynamic> && first.containsKey('role')) {
         return TurnsInput(
-          json
-              .map((e) => Turn.fromJson(e as Map<String, dynamic>))
-              .toList(),
+          json.map((e) => Turn.fromJson(e as Map<String, dynamic>)).toList(),
         );
       }
       return ContentListInput(

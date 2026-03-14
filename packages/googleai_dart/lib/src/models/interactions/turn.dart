@@ -18,15 +18,14 @@ class Turn {
 
   /// Creates a [Turn] with text content.
   Turn.text({required this.role, required String text})
-      : content = TurnTextContent(text);
+    : content = TurnTextContent(text);
 
   /// Creates a [Turn] from JSON.
   factory Turn.fromJson(Map<String, dynamic> json) => Turn(
     role: json['role'] as String?,
-    content:
-        json['content'] != null
-            ? TurnContent.fromJson(json['content'] as Object)
-            : null,
+    content: json['content'] != null
+        ? TurnContent.fromJson(json['content'] as Object)
+        : null,
   );
 
   /// Converts to JSON.

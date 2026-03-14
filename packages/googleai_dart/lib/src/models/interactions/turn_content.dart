@@ -12,9 +12,8 @@ sealed class TurnContent {
   const factory TurnContent.text(String text) = TurnTextContent;
 
   /// Creates a [TurnContentList] with the given [content] list.
-  const factory TurnContent.contentList(
-    List<InteractionContent> content,
-  ) = TurnContentList;
+  const factory TurnContent.contentList(List<InteractionContent> content) =
+      TurnContentList;
 
   /// Creates a [TurnContent] from a JSON value.
   ///
