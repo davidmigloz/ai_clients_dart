@@ -13,7 +13,10 @@ enum InteractionStatus {
   failed,
 
   /// The interaction was cancelled.
-  cancelled;
+  cancelled,
+
+  /// The interaction is incomplete.
+  incomplete;
 
   /// Creates an [InteractionStatus] from a JSON string.
   static InteractionStatus fromString(String? value) {
@@ -23,6 +26,7 @@ enum InteractionStatus {
       'completed' => InteractionStatus.completed,
       'failed' => InteractionStatus.failed,
       'cancelled' => InteractionStatus.cancelled,
+      'incomplete' => InteractionStatus.incomplete,
       _ => InteractionStatus.inProgress,
     };
   }
@@ -35,6 +39,7 @@ enum InteractionStatus {
       InteractionStatus.completed => 'completed',
       InteractionStatus.failed => 'failed',
       InteractionStatus.cancelled => 'cancelled',
+      InteractionStatus.incomplete => 'incomplete',
     };
   }
 }

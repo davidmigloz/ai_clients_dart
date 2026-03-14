@@ -55,6 +55,7 @@ void main() {
           'completed': InteractionStatus.completed,
           'failed': InteractionStatus.failed,
           'cancelled': InteractionStatus.cancelled,
+          'incomplete': InteractionStatus.incomplete,
         };
 
         for (final entry in statuses.entries) {
@@ -258,6 +259,10 @@ void main() {
         InteractionStatus.fromString('cancelled'),
         InteractionStatus.cancelled,
       );
+      expect(
+        InteractionStatus.fromString('incomplete'),
+        InteractionStatus.incomplete,
+      );
     });
 
     test('fromString returns default for unknown value', () {
@@ -274,6 +279,7 @@ void main() {
       expect(InteractionStatus.completed.toJson(), 'completed');
       expect(InteractionStatus.failed.toJson(), 'failed');
       expect(InteractionStatus.cancelled.toJson(), 'cancelled');
+      expect(InteractionStatus.incomplete.toJson(), 'incomplete');
     });
   });
 

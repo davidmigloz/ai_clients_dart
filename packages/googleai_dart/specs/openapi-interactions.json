@@ -295,8 +295,6 @@
           }
         },
         "required": [
-          "call_id",
-          "result",
           "type"
         ],
         "type": "object"
@@ -1162,8 +1160,7 @@
           }
         },
         "required": [
-          "type",
-          "id"
+          "type"
         ],
         "type": "object"
       },
@@ -1237,8 +1234,7 @@
           }
         },
         "required": [
-          "type",
-          "call_id"
+          "type"
         ],
         "type": "object"
       },
@@ -1343,9 +1339,6 @@
           }
         },
         "required": [
-          "name",
-          "id",
-          "arguments",
           "type"
         ],
         "type": "object"
@@ -1444,8 +1437,6 @@
           }
         },
         "required": [
-          "call_id",
-          "result",
           "type"
         ],
         "type": "object"
@@ -1755,9 +1746,7 @@
           }
         },
         "required": [
-          "type",
-          "call_id",
-          "result"
+          "type"
         ],
         "type": "object"
       },
@@ -2385,10 +2374,6 @@
           }
         },
         "required": [
-          "name",
-          "server_name",
-          "arguments",
-          "id",
           "type"
         ],
         "type": "object"
@@ -2715,8 +2700,7 @@
           }
         },
         "required": [
-          "type",
-          "text"
+          "type"
         ],
         "type": "object"
       },
@@ -3141,9 +3125,7 @@
           }
         },
         "required": [
-          "type",
-          "call_id",
-          "result"
+          "type"
         ],
         "type": "object"
       },

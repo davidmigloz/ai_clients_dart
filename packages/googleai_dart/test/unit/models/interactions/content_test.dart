@@ -26,6 +26,13 @@ void main() {
         expect((content as TextContent).text, 'Hello world');
       });
 
+      test('deserializes partial content (content.start event)', () {
+        final json = {'type': 'text'};
+        final content = InteractionContent.fromJson(json);
+        expect(content, isA<TextContent>());
+        expect((content as TextContent).text, isNull);
+      });
+
       test('roundtrip serialization', () {
         const original = TextContent(text: 'Test message');
         final json = original.toJson();
@@ -473,6 +480,38 @@ void main() {
             () => InteractionContent.fromJson(json),
             returnsNormally,
             reason: 'Failed for type: ${json['type']}',
+          );
+        }
+      });
+
+      test('all 18 content variants handle partial JSON (content.start)', () {
+        // content.start events send only {"type": "..."} without data fields
+        final types = [
+          'text',
+          'image',
+          'audio',
+          'document',
+          'video',
+          'thought',
+          'function_call',
+          'function_result',
+          'code_execution_call',
+          'code_execution_result',
+          'url_context_call',
+          'url_context_result',
+          'google_search_call',
+          'google_search_result',
+          'mcp_server_tool_call',
+          'mcp_server_tool_result',
+          'file_search_call',
+          'file_search_result',
+        ];
+
+        for (final type in types) {
+          expect(
+            () => InteractionContent.fromJson({'type': type}),
+            returnsNormally,
+            reason: 'Partial JSON failed for type: $type',
           );
         }
       });

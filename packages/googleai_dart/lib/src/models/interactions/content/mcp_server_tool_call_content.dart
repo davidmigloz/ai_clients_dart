@@ -6,41 +6,41 @@ class McpServerToolCallContent extends InteractionContent {
   String get type => 'mcp_server_tool_call';
 
   /// A unique ID for this specific tool call.
-  final String id;
+  final String? id;
 
   /// The name of the tool which was called.
-  final String name;
+  final String? name;
 
   /// The name of the used MCP server.
-  final String serverName;
+  final String? serverName;
 
   /// The JSON object of arguments for the function.
-  final Map<String, dynamic> arguments;
+  final Map<String, dynamic>? arguments;
 
   /// Creates a [McpServerToolCallContent] instance.
   const McpServerToolCallContent({
-    required this.id,
-    required this.name,
-    required this.serverName,
-    required this.arguments,
+    this.id,
+    this.name,
+    this.serverName,
+    this.arguments,
   });
 
   /// Creates a [McpServerToolCallContent] from JSON.
   factory McpServerToolCallContent.fromJson(Map<String, dynamic> json) =>
       McpServerToolCallContent(
-        id: json['id'] as String,
-        name: json['name'] as String,
-        serverName: json['server_name'] as String,
-        arguments: json['arguments'] as Map<String, dynamic>,
+        id: json['id'] as String?,
+        name: json['name'] as String?,
+        serverName: json['server_name'] as String?,
+        arguments: json['arguments'] as Map<String, dynamic>?,
       );
 
   @override
   Map<String, dynamic> toJson() => {
     'type': type,
-    'id': id,
-    'name': name,
-    'server_name': serverName,
-    'arguments': arguments,
+    if (id != null) 'id': id,
+    if (name != null) 'name': name,
+    if (serverName != null) 'server_name': serverName,
+    if (arguments != null) 'arguments': arguments,
   };
 
   /// Creates a copy with replaced values.
@@ -51,14 +51,14 @@ class McpServerToolCallContent extends InteractionContent {
     Object? arguments = unsetCopyWithValue,
   }) {
     return McpServerToolCallContent(
-      id: id == unsetCopyWithValue ? this.id : id! as String,
-      name: name == unsetCopyWithValue ? this.name : name! as String,
+      id: id == unsetCopyWithValue ? this.id : id as String?,
+      name: name == unsetCopyWithValue ? this.name : name as String?,
       serverName: serverName == unsetCopyWithValue
           ? this.serverName
-          : serverName! as String,
+          : serverName as String?,
       arguments: arguments == unsetCopyWithValue
           ? this.arguments
-          : arguments! as Map<String, dynamic>,
+          : arguments as Map<String, dynamic>?,
     );
   }
 }

@@ -6,22 +6,25 @@ class FileSearchCallContent extends InteractionContent {
   String get type => 'file_search_call';
 
   /// A unique ID for this specific tool call.
-  final String id;
+  final String? id;
 
   /// Creates a [FileSearchCallContent] instance.
-  const FileSearchCallContent({required this.id});
+  const FileSearchCallContent({this.id});
 
   /// Creates a [FileSearchCallContent] from JSON.
   factory FileSearchCallContent.fromJson(Map<String, dynamic> json) =>
-      FileSearchCallContent(id: json['id'] as String);
+      FileSearchCallContent(id: json['id'] as String?);
 
   @override
-  Map<String, dynamic> toJson() => {'type': type, 'id': id};
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    if (id != null) 'id': id,
+  };
 
   /// Creates a copy with replaced values.
   FileSearchCallContent copyWith({Object? id = unsetCopyWithValue}) {
     return FileSearchCallContent(
-      id: id == unsetCopyWithValue ? this.id : id! as String,
+      id: id == unsetCopyWithValue ? this.id : id as String?,
     );
   }
 }

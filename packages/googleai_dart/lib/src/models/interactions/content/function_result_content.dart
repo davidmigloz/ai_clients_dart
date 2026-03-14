@@ -6,10 +6,10 @@ class FunctionResultContent extends InteractionContent {
   String get type => 'function_result';
 
   /// ID to match the ID from the function call block.
-  final String callId;
+  final String? callId;
 
   /// The result of the tool call.
-  final Object result;
+  final Object? result;
 
   /// The name of the tool that was called.
   final String? name;
@@ -19,8 +19,8 @@ class FunctionResultContent extends InteractionContent {
 
   /// Creates a [FunctionResultContent] instance.
   const FunctionResultContent({
-    required this.callId,
-    required this.result,
+    this.callId,
+    this.result,
     this.name,
     this.isError,
   });
@@ -28,8 +28,8 @@ class FunctionResultContent extends InteractionContent {
   /// Creates a [FunctionResultContent] from JSON.
   factory FunctionResultContent.fromJson(Map<String, dynamic> json) =>
       FunctionResultContent(
-        callId: json['call_id'] as String,
-        result: json['result'] as Object,
+        callId: json['call_id'] as String?,
+        result: json['result'],
         name: json['name'] as String?,
         isError: json['is_error'] as bool?,
       );
@@ -37,8 +37,8 @@ class FunctionResultContent extends InteractionContent {
   @override
   Map<String, dynamic> toJson() => {
     'type': type,
-    'call_id': callId,
-    'result': result,
+    if (callId != null) 'call_id': callId,
+    if (result != null) 'result': result,
     if (name != null) 'name': name,
     if (isError != null) 'is_error': isError,
   };
@@ -51,8 +51,8 @@ class FunctionResultContent extends InteractionContent {
     Object? isError = unsetCopyWithValue,
   }) {
     return FunctionResultContent(
-      callId: callId == unsetCopyWithValue ? this.callId : callId! as String,
-      result: result == unsetCopyWithValue ? this.result : result!,
+      callId: callId == unsetCopyWithValue ? this.callId : callId as String?,
+      result: result == unsetCopyWithValue ? this.result : result,
       name: name == unsetCopyWithValue ? this.name : name as String?,
       isError: isError == unsetCopyWithValue ? this.isError : isError as bool?,
     );

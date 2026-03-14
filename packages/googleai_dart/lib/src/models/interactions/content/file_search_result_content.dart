@@ -6,18 +6,18 @@ class FileSearchResultContent extends InteractionContent {
   String get type => 'file_search_result';
 
   /// ID to match the ID from the file search call block.
-  final String callId;
+  final String? callId;
 
   /// The results of the File Search.
   final List<FileSearchResult>? result;
 
   /// Creates a [FileSearchResultContent] instance.
-  const FileSearchResultContent({required this.callId, this.result});
+  const FileSearchResultContent({this.callId, this.result});
 
   /// Creates a [FileSearchResultContent] from JSON.
   factory FileSearchResultContent.fromJson(Map<String, dynamic> json) =>
       FileSearchResultContent(
-        callId: json['call_id'] as String,
+        callId: json['call_id'] as String?,
         result: (json['result'] as List<dynamic>?)
             ?.map((e) => FileSearchResult.fromJson(e as Map<String, dynamic>))
             .toList(),
@@ -26,7 +26,7 @@ class FileSearchResultContent extends InteractionContent {
   @override
   Map<String, dynamic> toJson() => {
     'type': type,
-    'call_id': callId,
+    if (callId != null) 'call_id': callId,
     if (result != null) 'result': result!.map((e) => e.toJson()).toList(),
   };
 
@@ -36,7 +36,7 @@ class FileSearchResultContent extends InteractionContent {
     Object? result = unsetCopyWithValue,
   }) {
     return FileSearchResultContent(
-      callId: callId == unsetCopyWithValue ? this.callId : callId! as String,
+      callId: callId == unsetCopyWithValue ? this.callId : callId as String?,
       result: result == unsetCopyWithValue
           ? this.result
           : result as List<FileSearchResult>?,

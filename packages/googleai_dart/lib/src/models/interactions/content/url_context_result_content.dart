@@ -6,10 +6,10 @@ class UrlContextResultContent extends InteractionContent {
   String get type => 'url_context_result';
 
   /// ID to match the ID from the URL context call block.
-  final String callId;
+  final String? callId;
 
   /// The results of the URL context.
-  final List<UrlContextResult> result;
+  final List<UrlContextResult>? result;
 
   /// Whether the URL context resulted in an error.
   final bool? isError;
@@ -19,8 +19,8 @@ class UrlContextResultContent extends InteractionContent {
 
   /// Creates a [UrlContextResultContent] instance.
   const UrlContextResultContent({
-    required this.callId,
-    required this.result,
+    this.callId,
+    this.result,
     this.isError,
     this.signature,
   });
@@ -28,9 +28,9 @@ class UrlContextResultContent extends InteractionContent {
   /// Creates a [UrlContextResultContent] from JSON.
   factory UrlContextResultContent.fromJson(Map<String, dynamic> json) =>
       UrlContextResultContent(
-        callId: json['call_id'] as String,
-        result: (json['result'] as List<dynamic>)
-            .map((e) => UrlContextResult.fromJson(e as Map<String, dynamic>))
+        callId: json['call_id'] as String?,
+        result: (json['result'] as List<dynamic>?)
+            ?.map((e) => UrlContextResult.fromJson(e as Map<String, dynamic>))
             .toList(),
         isError: json['is_error'] as bool?,
         signature: json['signature'] as String?,
@@ -39,8 +39,8 @@ class UrlContextResultContent extends InteractionContent {
   @override
   Map<String, dynamic> toJson() => {
     'type': type,
-    'call_id': callId,
-    'result': result.map((e) => e.toJson()).toList(),
+    if (callId != null) 'call_id': callId,
+    if (result != null) 'result': result!.map((e) => e.toJson()).toList(),
     if (isError != null) 'is_error': isError,
     if (signature != null) 'signature': signature,
   };
@@ -53,10 +53,10 @@ class UrlContextResultContent extends InteractionContent {
     Object? signature = unsetCopyWithValue,
   }) {
     return UrlContextResultContent(
-      callId: callId == unsetCopyWithValue ? this.callId : callId! as String,
+      callId: callId == unsetCopyWithValue ? this.callId : callId as String?,
       result: result == unsetCopyWithValue
           ? this.result
-          : result! as List<UrlContextResult>,
+          : result as List<UrlContextResult>?,
       isError: isError == unsetCopyWithValue ? this.isError : isError as bool?,
       signature: signature == unsetCopyWithValue
           ? this.signature
