@@ -42,7 +42,7 @@ extension ResponseStreamExtension on Stream<ResponseStreamEvent> {
     return buffer.toString();
   }
 
-  /// Returns a stream of progressive accumulator snapshots.
+  /// Returns a stream of progressive accumulator states.
   ///
   /// Each emitted value reflects the state after processing the latest event.
   ///

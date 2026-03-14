@@ -465,6 +465,39 @@ class AssistantMessage extends ChatMessage {
     reasoningDetails != null ? Object.hashAll(reasoningDetails!) : null,
   );
 
+  /// Creates a copy with the given fields replaced.
+  AssistantMessage copyWith({
+    Object? content = unsetCopyWithValue,
+    Object? name = unsetCopyWithValue,
+    Object? refusal = unsetCopyWithValue,
+    Object? toolCalls = unsetCopyWithValue,
+    Object? reasoningContent = unsetCopyWithValue,
+    Object? reasoning = unsetCopyWithValue,
+    Object? reasoningDetails = unsetCopyWithValue,
+  }) {
+    return AssistantMessage(
+      content: content == unsetCopyWithValue
+          ? this.content
+          : content as String?,
+      name: name == unsetCopyWithValue ? this.name : name as String?,
+      refusal: refusal == unsetCopyWithValue
+          ? this.refusal
+          : refusal as String?,
+      toolCalls: toolCalls == unsetCopyWithValue
+          ? this.toolCalls
+          : toolCalls as List<ToolCall>?,
+      reasoningContent: reasoningContent == unsetCopyWithValue
+          ? this.reasoningContent
+          : reasoningContent as String?,
+      reasoning: reasoning == unsetCopyWithValue
+          ? this.reasoning
+          : reasoning as String?,
+      reasoningDetails: reasoningDetails == unsetCopyWithValue
+          ? this.reasoningDetails
+          : reasoningDetails as List<ReasoningDetail>?,
+    );
+  }
+
   @override
   String toString() {
     if (hasToolCalls) {

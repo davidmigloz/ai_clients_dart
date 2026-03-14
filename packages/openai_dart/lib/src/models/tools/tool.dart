@@ -170,11 +170,47 @@ class FunctionDefinition {
           runtimeType == other.runtimeType &&
           name == other.name &&
           description == other.description &&
-          parameters == other.parameters &&
+          _deepEquals(parameters, other.parameters) &&
           strict == other.strict;
 
   @override
-  int get hashCode => Object.hash(name, description, parameters, strict);
+  int get hashCode => Object.hash(name, description, _deepHash(parameters), strict);
+
+  /// Deep equality for JSON-like structures (Map, List, primitives).
+  static bool _deepEquals(Object? a, Object? b) {
+    if (identical(a, b)) return true;
+    if (a is Map && b is Map) {
+      if (a.length != b.length) return false;
+      for (final key in a.keys) {
+        if (!b.containsKey(key) || !_deepEquals(a[key], b[key])) return false;
+      }
+      return true;
+    }
+    if (a is List && b is List) {
+      if (a.length != b.length) return false;
+      for (var i = 0; i < a.length; i++) {
+        if (!_deepEquals(a[i], b[i])) return false;
+      }
+      return true;
+    }
+    return a == b;
+  }
+
+  /// Deep hash for JSON-like structures.
+  static int _deepHash(Object? obj) {
+    if (obj is Map) {
+      // XOR so hash is order-independent.
+      var hash = 0;
+      for (final entry in obj.entries) {
+        hash ^= Object.hash(entry.key, _deepHash(entry.value));
+      }
+      return hash;
+    }
+    if (obj is List) {
+      return Object.hashAll(obj.map(_deepHash));
+    }
+    return obj.hashCode;
+  }
 
   @override
   String toString() =>
