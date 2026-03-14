@@ -97,7 +97,7 @@ class MessageOutputItem extends OutputItem {
           status == other.status;
 
   @override
-  int get hashCode => Object.hash(id, role, content, status);
+  int get hashCode => Object.hash(id, role, Object.hashAll(content), status);
 
   @override
   String toString() =>

@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import '../client/streaming_event_accumulator.dart';
 import '../models/response/response_resource.dart';
 import '../models/streaming/streaming_event.dart';

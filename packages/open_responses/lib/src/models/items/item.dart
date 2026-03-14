@@ -446,9 +446,16 @@ class SystemMessageItem extends MessageItem {
     if (content is String) {
       text = content;
     } else if (content is List) {
-      text = content
-          .map((e) => (e as Map<String, dynamic>)['text'] as String)
-          .join();
+      text = content.map((e) {
+        final part = e as Map<String, dynamic>;
+        final partText = part['text'] as String?;
+        if (partText == null) {
+          throw FormatException(
+            'SystemMessageItem content part missing "text": $part',
+          );
+        }
+        return partText;
+      }).join();
     } else {
       throw FormatException('Invalid SystemMessageItem content: $content');
     }
@@ -532,9 +539,16 @@ class DeveloperMessageItem extends MessageItem {
     if (content is String) {
       text = content;
     } else if (content is List) {
-      text = content
-          .map((e) => (e as Map<String, dynamic>)['text'] as String)
-          .join();
+      text = content.map((e) {
+        final part = e as Map<String, dynamic>;
+        final partText = part['text'] as String?;
+        if (partText == null) {
+          throw FormatException(
+            'DeveloperMessageItem content part missing "text": $part',
+          );
+        }
+        return partText;
+      }).join();
     } else {
       throw FormatException('Invalid DeveloperMessageItem content: $content');
     }
