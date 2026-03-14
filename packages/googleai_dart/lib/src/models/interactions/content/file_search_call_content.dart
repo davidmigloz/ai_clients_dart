@@ -16,10 +16,7 @@ class FileSearchCallContent extends InteractionContent {
       FileSearchCallContent(id: json['id'] as String?);
 
   @override
-  Map<String, dynamic> toJson() => {
-    'type': type,
-    if (id != null) 'id': id,
-  };
+  Map<String, dynamic> toJson() => {'type': type, if (id != null) 'id': id};
 
   /// Creates a copy with replaced values.
   FileSearchCallContent copyWith({Object? id = unsetCopyWithValue}) {
