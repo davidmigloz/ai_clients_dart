@@ -145,7 +145,10 @@ sealed class MessageItem extends Item {
 
 /// Content for a user message.
 ///
-/// Can be either a simple text string or a list of input content parts.
+/// Supports two representations internally ([UserMessageTextContent] and
+/// [UserMessagePartsContent]), but always serializes to a list of content
+/// parts in JSON. Use [fromJson] to deserialize from either a plain string
+/// or a list of content objects.
 sealed class UserMessageContent {
   /// Creates a [UserMessageContent].
   const UserMessageContent();

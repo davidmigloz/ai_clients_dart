@@ -65,6 +65,11 @@ extension StreamingEventsExtensions on Stream<StreamingEvent> {
   /// Returns a stream of progressive accumulator snapshots.
   ///
   /// Each emitted snapshot reflects the state after processing the latest event.
+  ///
+  /// **Note:** The returned stream shares a single [StreamingEventAccumulator]
+  /// instance. If the source stream is a broadcast stream, each listener will
+  /// share the same accumulator state. Use a separate call per listener if
+  /// independent accumulation is needed.
   Stream<StreamingEventAccumulatorSnapshot> accumulate() {
     final accumulator = StreamingEventAccumulator();
     return map((event) {

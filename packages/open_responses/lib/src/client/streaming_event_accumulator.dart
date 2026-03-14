@@ -26,6 +26,9 @@ class StreamingEventAccumulatorSnapshot {
   /// The accumulated reasoning content.
   final String reasoning;
 
+  /// The accumulated reasoning summary content.
+  final String reasoningSummary;
+
   /// The accumulated function call arguments, keyed by item ID (unmodifiable).
   final Map<String, String> functionArguments;
 
@@ -48,6 +51,7 @@ class StreamingEventAccumulatorSnapshot {
   StreamingEventAccumulatorSnapshot({
     this.text = '',
     this.reasoning = '',
+    this.reasoningSummary = '',
     Map<String, String> functionArguments = const {},
     this.response,
     this.latestEvent,
@@ -61,6 +65,7 @@ class StreamingEventAccumulatorSnapshot {
 class StreamingEventAccumulator {
   final _textBuffer = StringBuffer();
   final _reasoningBuffer = StringBuffer();
+  final _reasoningSummaryBuffer = StringBuffer();
   final Map<String, StringBuffer> _functionArgsBuffers = {};
   ResponseResource? _response;
   StreamingEvent? _latestEvent;
@@ -73,6 +78,9 @@ class StreamingEventAccumulator {
 
   /// The accumulated reasoning content.
   String get reasoning => _reasoningBuffer.toString();
+
+  /// The accumulated reasoning summary content.
+  String get reasoningSummary => _reasoningSummaryBuffer.toString();
 
   /// The accumulated function call arguments, keyed by item ID.
   Map<String, String> get functionArguments =>
@@ -102,19 +110,25 @@ class StreamingEventAccumulator {
         _textBuffer.write(delta);
       case ReasoningDeltaEvent(:final delta):
         _reasoningBuffer.write(delta);
+      case ReasoningSummaryDeltaEvent(:final delta):
+        _reasoningSummaryBuffer.write(delta);
       case FunctionCallArgumentsDeltaEvent(:final itemId, :final delta):
         (_functionArgsBuffers[itemId] ??= StringBuffer()).write(delta);
       case ResponseCompletedEvent(:final response):
         _response = response;
         _isComplete = true;
         _isSuccessful = true;
+        _isFailed = false;
       case ResponseFailedEvent(:final response):
         _response = response;
         _isComplete = true;
+        _isSuccessful = false;
         _isFailed = true;
       case ResponseIncompleteEvent(:final response):
         _response = response;
         _isComplete = true;
+        _isSuccessful = false;
+        _isFailed = false;
       default:
         break;
     }
@@ -125,6 +139,7 @@ class StreamingEventAccumulator {
       StreamingEventAccumulatorSnapshot(
         text: text,
         reasoning: reasoning,
+        reasoningSummary: reasoningSummary,
         functionArguments: functionArguments,
         response: _response,
         latestEvent: _latestEvent,
@@ -137,6 +152,7 @@ class StreamingEventAccumulator {
   void reset() {
     _textBuffer.clear();
     _reasoningBuffer.clear();
+    _reasoningSummaryBuffer.clear();
     _functionArgsBuffers.clear();
     _response = null;
     _latestEvent = null;
