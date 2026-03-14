@@ -94,7 +94,7 @@ void main() async {
   );
 
   final response = await client.responses.create(
-    CreateResponseRequest(
+    CreateResponseRequest.text(
       model: 'gpt-4o',
       input: 'What is the capital of France?',
     ),
@@ -131,7 +131,7 @@ final client = OpenResponsesClient(
 );
 
 final response = await client.responses.create(
-  CreateResponseRequest(
+  CreateResponseRequest.text(
     model: 'gpt-4o',
     input: 'What is the capital of France?',
   ),
@@ -152,7 +152,7 @@ client.close();
 ```dart
 // Using the builder pattern
 final runner = client.responses.stream(
-  CreateResponseRequest(
+  CreateResponseRequest.text(
     model: 'gpt-4o',
     input: 'Write a haiku about programming.',
   ),
@@ -180,7 +180,7 @@ await for (final event in client.responses.createStream(request)) {
 final response = await client.responses.create(
   CreateResponseRequest(
     model: 'gpt-4o',
-    input: 'What is the weather in San Francisco?',
+    input: ResponseTextInput('What is the weather in San Francisco?'),
     tools: [
       FunctionTool(
         name: 'get_weather',
@@ -215,7 +215,7 @@ if (response.hasToolCalls) {
 ```dart
 // First turn
 final response1 = await client.responses.create(
-  CreateResponseRequest(
+  CreateResponseRequest.text(
     model: 'gpt-4o',
     input: 'My name is Alice.',
   ),
@@ -225,7 +225,7 @@ final response1 = await client.responses.create(
 final response2 = await client.responses.create(
   CreateResponseRequest(
     model: 'gpt-4o',
-    input: 'What is my name?',
+    input: ResponseTextInput('What is my name?'),
     previousResponseId: response1.id,
   ),
 );
@@ -244,7 +244,7 @@ print(response2.outputText); // Your name is Alice.
 final response = await client.responses.create(
   CreateResponseRequest(
     model: 'gpt-4o',
-    input: 'List 3 fruits with their colors.',
+    input: ResponseTextInput('List 3 fruits with their colors.'),
     text: TextConfig(
       format: JsonSchemaFormat(
         name: 'fruits',
@@ -364,12 +364,12 @@ Build complex inputs with message items:
 final response = await client.responses.create(
   CreateResponseRequest(
     model: 'gpt-4o',
-    input: [
+    input: ResponseItemsInput([
       MessageItem.systemText('You are a helpful assistant.'),
       MessageItem.userText('Hello!'),
       MessageItem.assistantText('Hi there! How can I help?'),
       MessageItem.userText('What can you do?'),
-    ],
+    ]),
   ),
 );
 ```
