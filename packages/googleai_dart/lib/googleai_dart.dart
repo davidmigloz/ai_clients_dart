@@ -130,6 +130,7 @@ export 'src/models/interactions/events/events.dart';
 export 'src/models/interactions/generation_config.dart';
 export 'src/models/interactions/image_config.dart';
 export 'src/models/interactions/interaction.dart';
+export 'src/models/interactions/interaction_input.dart';
 export 'src/models/interactions/interaction_status.dart';
 export 'src/models/interactions/modality_tokens.dart';
 export 'src/models/interactions/response_modality.dart';
@@ -140,6 +141,7 @@ export 'src/models/interactions/tool_choice.dart';
 export 'src/models/interactions/tool_choice_type.dart';
 export 'src/models/interactions/tools/tools.dart';
 export 'src/models/interactions/turn.dart';
+export 'src/models/interactions/turn_content.dart';
 export 'src/models/interactions/usage.dart';
 // Models - Live API
 export 'src/models/live/config/audio_transcription_config.dart';

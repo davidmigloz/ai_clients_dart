@@ -334,8 +334,10 @@ void main() {
 
       expect(turn.role, 'user');
       expect(turn.content, isNotNull);
-      expect(turn.content, isA<List<dynamic>>());
-      expect((turn.content! as List<dynamic>).length, 1);
+      expect(turn.content, isA<TurnContentList>());
+      final contentList = turn.content! as TurnContentList;
+      expect(contentList.content.length, 1);
+      expect(contentList.content.first, isA<TextContent>());
     });
 
     test('fromJson with text string', () {
@@ -344,13 +346,14 @@ void main() {
       final turn = Turn.fromJson(json);
 
       expect(turn.role, 'user');
-      expect(turn.content, 'Hello');
+      expect(turn.content, isA<TurnTextContent>());
+      expect((turn.content! as TurnTextContent).text, 'Hello');
     });
 
     test('toJson with content list', () {
       const turn = Turn(
         role: 'model',
-        content: [TextContent(text: 'Response')],
+        content: TurnContentList([TextContent(text: 'Response')]),
       );
 
       final json = turn.toJson();
@@ -361,10 +364,20 @@ void main() {
     });
 
     test('Turn.text factory', () {
-      const turn = Turn.text(role: 'user', text: 'Hello');
+      final turn = Turn.text(role: 'user', text: 'Hello');
 
       expect(turn.role, 'user');
-      expect(turn.content, 'Hello');
+      expect(turn.content, isA<TurnTextContent>());
+      expect((turn.content! as TurnTextContent).text, 'Hello');
+    });
+
+    test('copyWith preserves TurnContent type', () {
+      final turn = Turn.text(role: 'user', text: 'Hello');
+      final copy = turn.copyWith(role: 'model');
+
+      expect(copy.role, 'model');
+      expect(copy.content, isA<TurnTextContent>());
+      expect((copy.content! as TurnTextContent).text, 'Hello');
     });
   });
 

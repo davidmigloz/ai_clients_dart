@@ -1,4 +1,5 @@
 import '../copy_with_sentinel.dart';
+import 'turn_content.dart';
 
 /// A conversation turn in an interaction.
 class Turn {
@@ -8,24 +9,30 @@ class Turn {
 
   /// The content of the turn.
   ///
-  /// Can be a [String] for simple text content, or a [List<dynamic>] for
-  /// multimodal content (containing Content objects).
-  final Object? content;
+  /// Can be a [TurnTextContent] for simple text content, or a
+  /// [TurnContentList] for multimodal content.
+  final TurnContent? content;
 
   /// Creates a [Turn] instance.
   const Turn({this.role, this.content});
 
   /// Creates a [Turn] with text content.
-  const Turn.text({required this.role, required String text}) : content = text;
+  Turn.text({required this.role, required String text})
+      : content = TurnTextContent(text);
 
   /// Creates a [Turn] from JSON.
-  factory Turn.fromJson(Map<String, dynamic> json) =>
-      Turn(role: json['role'] as String?, content: json['content']);
+  factory Turn.fromJson(Map<String, dynamic> json) => Turn(
+    role: json['role'] as String?,
+    content:
+        json['content'] != null
+            ? TurnContent.fromJson(json['content'] as Object)
+            : null,
+  );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (role != null) 'role': role,
-    if (content != null) 'content': content,
+    if (content != null) 'content': content!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -35,7 +42,9 @@ class Turn {
   }) {
     return Turn(
       role: role == unsetCopyWithValue ? this.role : role as String?,
-      content: content == unsetCopyWithValue ? this.content : content,
+      content: content == unsetCopyWithValue
+          ? this.content
+          : content as TurnContent?,
     );
   }
 }

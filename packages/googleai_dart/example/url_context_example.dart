@@ -68,8 +68,8 @@ Future<void> urlContextWithInteractions(GoogleAIClient client) async {
 
   await for (final event in client.interactions.createStream(
     model: 'gemini-3.1-flash-preview',
-    input:
-        'What are the key features mentioned on https://pub.dev/packages/googleai_dart ?',
+    input: const InteractionInput.text(
+        'What are the key features mentioned on https://pub.dev/packages/googleai_dart ?'),
     tools: const [UrlContextTool()],
   )) {
     switch (event) {

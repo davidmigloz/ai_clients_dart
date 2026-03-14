@@ -2,6 +2,7 @@ import '../copy_with_sentinel.dart';
 import 'agent_config.dart';
 import 'content/content.dart';
 import 'generation_config.dart';
+import 'interaction_input.dart';
 import 'interaction_status.dart';
 import 'response_modality.dart';
 import 'tools/tools.dart';
@@ -234,9 +235,9 @@ class CreateModelInteractionParams {
 
   /// The input for the interaction.
   ///
-  /// Can be a [String] for simple text, a [List<dynamic>] for multimodal
-  /// content, or a [List<Turn>] for multi-turn conversations.
-  final Object? input;
+  /// Can be a [TextInput], a [ContentListInput], a [TurnsInput],
+  /// or a [SingleContentInput].
+  final InteractionInput? input;
 
   /// System instruction for the interaction.
   final String? systemInstruction;
@@ -276,7 +277,9 @@ class CreateModelInteractionParams {
   factory CreateModelInteractionParams.fromJson(Map<String, dynamic> json) =>
       CreateModelInteractionParams(
         model: json['model'] as String,
-        input: json['input'],
+        input: json['input'] != null
+            ? InteractionInput.fromJson(json['input'] as Object)
+            : null,
         systemInstruction: json['system_instruction'] as String?,
         tools: (json['tools'] as List<dynamic>?)
             ?.map((e) => InteractionTool.fromJson(e as Map<String, dynamic>))
@@ -297,7 +300,7 @@ class CreateModelInteractionParams {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'model': model,
-    if (input != null) 'input': input,
+    if (input != null) 'input': input!.toJson(),
     if (systemInstruction != null) 'system_instruction': systemInstruction,
     if (tools != null) 'tools': tools!.map((e) => e.toJson()).toList(),
     if (generationConfig != null)
@@ -319,7 +322,7 @@ class CreateAgentInteractionParams {
   final String agent;
 
   /// The input for the interaction.
-  final Object? input;
+  final InteractionInput? input;
 
   /// Configuration for the agent.
   final AgentConfig? agentConfig;
@@ -343,7 +346,9 @@ class CreateAgentInteractionParams {
   factory CreateAgentInteractionParams.fromJson(Map<String, dynamic> json) =>
       CreateAgentInteractionParams(
         agent: json['agent'] as String,
-        input: json['input'],
+        input: json['input'] != null
+            ? InteractionInput.fromJson(json['input'] as Object)
+            : null,
         agentConfig: json['agent_config'] != null
             ? AgentConfig.fromJson(json['agent_config'] as Map<String, dynamic>)
             : null,
@@ -354,7 +359,7 @@ class CreateAgentInteractionParams {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'agent': agent,
-    if (input != null) 'input': input,
+    if (input != null) 'input': input!.toJson(),
     if (agentConfig != null) 'agent_config': agentConfig!.toJson(),
     if (previousInteractionId != null)
       'previous_interaction_id': previousInteractionId,

@@ -2,9 +2,9 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../models/interactions/content/content.dart';
 import '../models/interactions/events/events.dart';
 import '../models/interactions/interaction.dart';
+import '../models/interactions/interaction_input.dart';
 import '../models/interactions/tools/tools.dart';
 import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
@@ -30,13 +30,13 @@ class InteractionsResource extends ResourceBase with StreamingResource {
   /// Creates a new interaction.
   ///
   /// The [model] specifies which model to use (e.g., "gemini-3.1-flash-preview").
-  /// The [input] can be a [String], a [List<InteractionContent>], or
-  /// a list of turns for multi-turn conversations.
+  /// The [input] can be a [TextInput], a [ContentListInput],
+  /// a [TurnsInput], or a [SingleContentInput].
   ///
   /// Returns the [Interaction] with the model's response.
   Future<Interaction> create({
     required String model,
-    Object? input,
+    InteractionInput? input,
     String? systemInstruction,
     List<InteractionTool>? tools,
     Map<String, dynamic>? generationConfig,
@@ -51,7 +51,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
 
     final body = <String, dynamic>{
       'model': model,
-      if (input != null) 'input': _serializeInput(input),
+      if (input != null) 'input': input.toJson(),
       'system_instruction': ?systemInstruction,
       if (tools != null) 'tools': tools.map((t) => t.toJson()).toList(),
       'generation_config': ?generationConfig,
@@ -76,7 +76,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
   /// Returns the [Interaction] with the agent's response.
   Future<Interaction> createWithAgent({
     required String agent,
-    Object? input,
+    InteractionInput? input,
     Map<String, dynamic>? agentConfig,
     String? previousInteractionId,
     bool? background,
@@ -89,7 +89,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
 
     final body = <String, dynamic>{
       'agent': agent,
-      if (input != null) 'input': _serializeInput(input),
+      if (input != null) 'input': input.toJson(),
       'agent_config': ?agentConfig,
       'previous_interaction_id': ?previousInteractionId,
       'background': ?background,
@@ -167,7 +167,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
   /// Returns a stream of [InteractionEvent]s as the model generates the response.
   Stream<InteractionEvent> createStream({
     required String model,
-    Object? input,
+    InteractionInput? input,
     String? systemInstruction,
     List<InteractionTool>? tools,
     Map<String, dynamic>? generationConfig,
@@ -184,7 +184,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
 
     final body = <String, dynamic>{
       'model': model,
-      if (input != null) 'input': _serializeInput(input),
+      if (input != null) 'input': input.toJson(),
       'system_instruction': ?systemInstruction,
       if (tools != null) 'tools': tools.map((t) => t.toJson()).toList(),
       'generation_config': ?generationConfig,
@@ -239,19 +239,6 @@ class InteractionsResource extends ResourceBase with StreamingResource {
 
     await for (final json in jsonStream) {
       yield InteractionEvent.fromJson(json);
-    }
-  }
-
-  /// Serializes input for the API.
-  Object _serializeInput(Object input) {
-    if (input is String) {
-      return input;
-    } else if (input is List<InteractionContent>) {
-      return input.map((c) => c.toJson()).toList();
-    } else if (input is List) {
-      return input;
-    } else {
-      return input;
     }
   }
 }

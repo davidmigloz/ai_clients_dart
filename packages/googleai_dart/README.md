@@ -615,7 +615,7 @@ Or use the Interactions API for streaming:
 ```dart
 await for (final event in client.interactions.createStream(
   model: 'gemini-3.1-flash-preview',
-  input: 'What are today\'s top technology news?',
+  input: InteractionInput.text('What are today\'s top technology news?'),
   tools: [GoogleSearchTool()],
 )) {
   if (event case ContentDeltaEvent(:final delta)) {
@@ -658,7 +658,7 @@ Or with the Interactions API:
 ```dart
 await for (final event in client.interactions.createStream(
   model: 'gemini-3.1-flash-preview',
-  input: 'Summarize https://pub.dev/packages/googleai_dart',
+  input: InteractionInput.text('Summarize https://pub.dev/packages/googleai_dart'),
   tools: [UrlContextTool()],
 )) {
   if (event case ContentDeltaEvent(:final delta)) {

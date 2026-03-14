@@ -38,7 +38,7 @@ Future<void> simpleInteraction(GoogleAIClient client) async {
 
   final interaction = await client.interactions.create(
     model: 'gemini-3.1-flash-preview',
-    input: 'What is the capital of France?',
+    input: const InteractionInput.text('What is the capital of France?'),
   );
 
   print('Status: ${interaction.status}');
@@ -62,7 +62,7 @@ Future<void> streamingInteraction(GoogleAIClient client) async {
 
   await for (final event in client.interactions.createStream(
     model: 'gemini-3.1-flash-preview',
-    input: 'Write a haiku about programming.',
+    input: const InteractionInput.text('Write a haiku about programming.'),
   )) {
     switch (event) {
       case InteractionStartEvent():
@@ -97,7 +97,7 @@ Future<void> multiTurnConversation(GoogleAIClient client) async {
   // First turn
   final turn1 = await client.interactions.create(
     model: 'gemini-3.1-flash-preview',
-    input: 'My name is Alice.',
+    input: const InteractionInput.text('My name is Alice.'),
   );
   print('Turn 1 - User: My name is Alice.');
   print('Assistant: ${turn1.text}');
@@ -105,7 +105,7 @@ Future<void> multiTurnConversation(GoogleAIClient client) async {
   // Second turn - references the first interaction
   final turn2 = await client.interactions.create(
     model: 'gemini-3.1-flash-preview',
-    input: 'What is my name?',
+    input: const InteractionInput.text('What is my name?'),
     previousInteractionId: turn1.id,
   );
   print('Turn 2 - User: What is my name?');
@@ -136,7 +136,7 @@ Future<void> functionCallingInteraction(GoogleAIClient client) async {
   // Stream the interaction to see function calls in real-time
   await for (final event in client.interactions.createStream(
     model: 'gemini-3.1-flash-preview',
-    input: 'What is the weather in Paris?',
+    input: const InteractionInput.text('What is the weather in Paris?'),
     tools: tools,
   )) {
     switch (event) {
