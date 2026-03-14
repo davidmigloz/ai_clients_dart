@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/usage.dart';
+import '../responses/common/equality_helpers.dart';
 
 /// A step in a run's execution.
 ///
@@ -364,15 +365,7 @@ class ToolCallsDetails implements StepDetails {
       identical(this, other) ||
       other is ToolCallsDetails &&
           runtimeType == other.runtimeType &&
-          _listEquals(toolCalls, other.toolCalls);
-
-  bool _listEquals<T>(List<T> a, List<T> b) {
-    if (a.length != b.length) return false;
-    for (var i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
-  }
+          listsEqual(toolCalls, other.toolCalls);
 
   @override
   int get hashCode => Object.hashAll(toolCalls);

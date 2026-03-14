@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../responses/common/equality_helpers.dart';
 import 'content_part.dart';
 import 'reasoning_detail.dart';
 import 'tool_call.dart';
@@ -439,20 +440,10 @@ class AssistantMessage extends ChatMessage {
           content == other.content &&
           name == other.name &&
           refusal == other.refusal &&
-          _listEquals(toolCalls, other.toolCalls) &&
+          listsEqual(toolCalls, other.toolCalls) &&
           reasoningContent == other.reasoningContent &&
           reasoning == other.reasoning &&
-          _listEquals(reasoningDetails, other.reasoningDetails);
-
-  bool _listEquals<T>(List<T>? a, List<T>? b) {
-    if (a == null && b == null) return true;
-    if (a == null || b == null) return false;
-    if (a.length != b.length) return false;
-    for (var i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
-  }
+          listsEqual(reasoningDetails, other.reasoningDetails);
 
   @override
   int get hashCode => Object.hash(

@@ -405,7 +405,7 @@
       "file": "lib/src/models/chat/chat_message.dart",
       "schema": "ChatCompletionRequestAssistantMessage",
       "parent": "ChatMessage",
-      "note": "Sealed variant missing copyWith. role is constant getter. Has extra non-spec fields (reasoningContent, reasoning, reasoningDetails) for DeepSeek/OpenRouter compat. Spec has deprecated audio/function_call fields not in Dart."
+      "note": "role is constant getter. Has extra non-spec fields (reasoningContent, reasoning, reasoningDetails) for DeepSeek/OpenRouter compat. Spec has deprecated audio/function_call fields not in Dart."
     },
     "ChatCompletionRequestToolMessage": {
       "spec": "main",
@@ -454,7 +454,7 @@
       "file": "lib/src/models/chat/content_part.dart",
       "schema": "ChatCompletionRequestMessageContentPartImage",
       "parent": "ContentPart",
-      "note": "Sealed variant missing copyWith. type is constant getter. Dart flattens spec's nested image_url object into url/detail fields."
+      "note": "type is constant getter. Dart flattens spec's nested image_url object into url/detail fields."
     },
     "ChatCompletionRequestMessageContentPartAudio": {
       "spec": "main",
@@ -463,7 +463,7 @@
       "file": "lib/src/models/chat/content_part.dart",
       "schema": "ChatCompletionRequestMessageContentPartAudio",
       "parent": "ContentPart",
-      "note": "Sealed variant missing copyWith. type is constant getter. Dart flattens spec's nested input_audio object into data/format fields."
+      "note": "type is constant getter. Dart flattens spec's nested input_audio object into data/format fields."
     },
     "ChatStreamEvent": {
       "spec": "main",
