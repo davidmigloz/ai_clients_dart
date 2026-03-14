@@ -94,7 +94,7 @@ void main() {
       ];
 
       final stream = Stream.fromIterable(events);
-      final deltas = await stream.textDeltas.toList();
+      final deltas = await stream.textDeltas().toList();
 
       expect(deltas, equals(['Hello', ' world']));
     });
@@ -109,7 +109,7 @@ void main() {
       ];
 
       final stream = Stream.fromIterable(events);
-      final deltas = await stream.textDeltas.toList();
+      final deltas = await stream.textDeltas().toList();
 
       expect(deltas, isEmpty);
     });

@@ -12,13 +12,17 @@ extension ResponseStreamExtension on Stream<ResponseStreamEvent> {
   /// ```dart
   /// final stream = client.responses.createStream(request);
   ///
-  /// await for (final text in stream.textDeltas) {
+  /// await for (final text in stream.textDeltas()) {
   ///   stdout.write(text);
   /// }
   /// ```
-  Stream<String> get textDeltas => where(
-    (e) => e is OutputTextDeltaEvent,
-  ).map((e) => (e as OutputTextDeltaEvent).delta);
+  Stream<String> textDeltas() async* {
+    await for (final event in this) {
+      if (event is OutputTextDeltaEvent) {
+        yield event.delta;
+      }
+    }
+  }
 
   /// Collects all text deltas into a single string.
   ///
