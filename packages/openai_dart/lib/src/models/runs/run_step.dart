@@ -591,13 +591,14 @@ class FileSearchStepCall implements StepToolCall {
       identical(this, other) ||
       other is FileSearchStepCall &&
           runtimeType == other.runtimeType &&
-          id == other.id;
+          id == other.id &&
+          mapsDeepEqual(fileSearch, other.fileSearch);
 
   @override
-  int get hashCode => id.hashCode;
+  int get hashCode => Object.hash(id, mapDeepHashCode(fileSearch));
 
   @override
-  String toString() => 'FileSearchStepCall(id: $id)';
+  String toString() => 'FileSearchStepCall(id: $id, fileSearch: $fileSearch)';
 }
 
 /// A function tool call.
