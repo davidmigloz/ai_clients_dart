@@ -408,7 +408,7 @@ class CreateResponseRequest {
           model == other.model &&
           input == other.input &&
           instructions == other.instructions &&
-          tools == other.tools &&
+          listsEqual(tools, other.tools) &&
           toolChoice == other.toolChoice &&
           previousResponseId == other.previousResponseId &&
           maxOutputTokens == other.maxOutputTokens &&
@@ -423,8 +423,8 @@ class CreateResponseRequest {
           truncation == other.truncation &&
           parallelToolCalls == other.parallelToolCalls &&
           serviceTier == other.serviceTier &&
-          metadata == other.metadata &&
-          include == other.include &&
+          mapsEqual(metadata, other.metadata) &&
+          listsEqual(include, other.include) &&
           store == other.store &&
           background == other.background &&
           maxToolCalls == other.maxToolCalls &&
@@ -437,7 +437,7 @@ class CreateResponseRequest {
     model,
     input,
     instructions,
-    tools,
+    listHash(tools),
     toolChoice,
     previousResponseId,
     maxOutputTokens,
@@ -452,8 +452,8 @@ class CreateResponseRequest {
     truncation,
     parallelToolCalls,
     serviceTier,
-    metadata,
-    include,
+    mapHash(metadata),
+    listHash(include),
     store,
     background,
     maxToolCalls,

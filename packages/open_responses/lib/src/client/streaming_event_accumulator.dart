@@ -26,7 +26,7 @@ class StreamingEventAccumulatorSnapshot {
   /// The accumulated reasoning content.
   final String reasoning;
 
-  /// The accumulated function call arguments, keyed by item ID.
+  /// The accumulated function call arguments, keyed by item ID (unmodifiable).
   final Map<String, String> functionArguments;
 
   /// The final response, if the stream has completed.
@@ -45,16 +45,16 @@ class StreamingEventAccumulatorSnapshot {
   final bool isFailed;
 
   /// Creates a [StreamingEventAccumulatorSnapshot].
-  const StreamingEventAccumulatorSnapshot({
+  StreamingEventAccumulatorSnapshot({
     this.text = '',
     this.reasoning = '',
-    this.functionArguments = const {},
+    Map<String, String> functionArguments = const {},
     this.response,
     this.latestEvent,
     this.isComplete = false,
     this.isSuccessful = false,
     this.isFailed = false,
-  });
+  }) : functionArguments = Map.unmodifiable(functionArguments);
 }
 
 /// Accumulates streaming events into progressive state snapshots.

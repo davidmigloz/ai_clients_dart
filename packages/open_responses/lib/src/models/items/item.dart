@@ -74,11 +74,11 @@ sealed class MessageItem extends Item {
 
   /// Creates a system message.
   static MessageItem system(
-    List<InputContent> content, {
+    List<InputTextContent> content, {
     String? id,
     ItemStatus? status,
   }) => SystemMessageItem(
-    content: content.map((c) => (c as InputTextContent).text).join(),
+    content: content.map((c) => c.text).join(),
     id: id,
     status: status,
   );
@@ -92,11 +92,11 @@ sealed class MessageItem extends Item {
 
   /// Creates a developer message.
   static MessageItem developer(
-    List<InputContent> content, {
+    List<InputTextContent> content, {
     String? id,
     ItemStatus? status,
   }) => DeveloperMessageItem(
-    content: content.map((c) => (c as InputTextContent).text).join(),
+    content: content.map((c) => c.text).join(),
     id: id,
     status: status,
   );

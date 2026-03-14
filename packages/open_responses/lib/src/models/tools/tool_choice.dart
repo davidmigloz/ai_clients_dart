@@ -110,7 +110,7 @@ sealed class ToolChoice {
     throw FormatException('Invalid ToolChoice format: $json');
   }
 
-  /// No tool should be called.
+  /// Model automatically decides whether to call tools.
   static const ToolChoice auto = ToolChoiceAuto();
 
   /// No tool should be called.
