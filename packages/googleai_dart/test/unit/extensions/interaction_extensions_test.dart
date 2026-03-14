@@ -33,6 +33,28 @@ void main() {
         expect(interaction.text, isNull);
       });
 
+      test('skips TextContent with null text (content.start events)', () {
+        const interaction = Interaction(
+          id: 'test-id',
+          status: InteractionStatus.completed,
+          outputs: [
+            TextContent(),
+            TextContent(text: 'Hello'),
+            TextContent(),
+          ],
+        );
+        expect(interaction.text, 'Hello');
+      });
+
+      test('returns null when only null-text outputs', () {
+        const interaction = Interaction(
+          id: 'test-id',
+          status: InteractionStatus.completed,
+          outputs: [TextContent()],
+        );
+        expect(interaction.text, isNull);
+      });
+
       test('skips non-text outputs', () {
         const interaction = Interaction(
           id: 'test-id',

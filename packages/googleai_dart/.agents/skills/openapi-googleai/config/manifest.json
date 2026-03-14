@@ -268,8 +268,7 @@
     "Annotation": {
       "spec": "interactions",
       "schema": "Annotation",
-      "parent": "InteractionContent",
-      "kind": "sealed_variant",
+      "kind": "object",
       "dart_class": "Annotation",
       "file": "lib/src/models/interactions/content/annotation.dart"
     },
@@ -517,8 +516,7 @@
     "FileSearchResult": {
       "spec": "interactions",
       "schema": "FileSearchResult",
-      "parent": "InteractionContent",
-      "kind": "sealed_variant",
+      "kind": "object",
       "dart_class": "FileSearchResult",
       "file": "lib/src/models/interactions/content/file_search_result_content.dart"
     },
@@ -626,7 +624,6 @@
     "GoogleSearchResult": {
       "spec": "interactions",
       "schema": "GoogleSearchResult",
-      "parent": "InteractionContent",
       "kind": "skip",
       "dart_class": "GoogleSearchResult",
       "file": "lib/src/models/interactions/content/google_search_result_content.dart",
@@ -917,8 +914,7 @@
     "UrlContextResult": {
       "spec": "interactions",
       "schema": "UrlContextResult",
-      "parent": "InteractionContent",
-      "kind": "sealed_variant",
+      "kind": "object",
       "dart_class": "UrlContextResult",
       "file": "lib/src/models/interactions/content/url_context_result_content.dart"
     },
