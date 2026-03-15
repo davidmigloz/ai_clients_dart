@@ -189,7 +189,7 @@ Future<void> fileSearchWithInteractions(GoogleAIClient client) async {
 // Stream responses with file search
 await for (final event in client.interactions.createStream(
   model: 'gemini-3.1-flash-preview',
-  input: 'Summarize the key points from my documents',
+  input: InteractionInput.text('Summarize the key points from my documents'),
   tools: [
     FileSearchTool(
       fileSearchStoreNames: ['fileSearchStores/your-store-id'],

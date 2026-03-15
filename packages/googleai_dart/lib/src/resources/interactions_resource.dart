@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../models/interactions/agent_config.dart';
 import '../models/interactions/events/events.dart';
+import '../models/interactions/generation_config.dart';
 import '../models/interactions/interaction.dart';
 import '../models/interactions/interaction_input.dart';
 import '../models/interactions/tools/tools.dart';
@@ -40,7 +41,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     InteractionInput? input,
     String? systemInstruction,
     List<InteractionTool>? tools,
-    Map<String, dynamic>? generationConfig,
+    InteractionGenerationConfig? generationConfig,
     String? previousInteractionId,
     bool? background,
   }) async {
@@ -55,7 +56,8 @@ class InteractionsResource extends ResourceBase with StreamingResource {
       if (input != null) 'input': input.toJson(),
       'system_instruction': ?systemInstruction,
       if (tools != null) 'tools': tools.map((t) => t.toJson()).toList(),
-      'generation_config': ?generationConfig,
+      if (generationConfig != null)
+        'generation_config': generationConfig.toJson(),
       'previous_interaction_id': ?previousInteractionId,
       'background': ?background,
     };
@@ -171,7 +173,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     InteractionInput? input,
     String? systemInstruction,
     List<InteractionTool>? tools,
-    Map<String, dynamic>? generationConfig,
+    InteractionGenerationConfig? generationConfig,
     String? previousInteractionId,
   }) async* {
     final url = requestBuilder.buildUrl(
@@ -188,7 +190,8 @@ class InteractionsResource extends ResourceBase with StreamingResource {
       if (input != null) 'input': input.toJson(),
       'system_instruction': ?systemInstruction,
       if (tools != null) 'tools': tools.map((t) => t.toJson()).toList(),
-      'generation_config': ?generationConfig,
+      if (generationConfig != null)
+        'generation_config': generationConfig.toJson(),
       'previous_interaction_id': ?previousInteractionId,
     };
 
