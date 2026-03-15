@@ -29,10 +29,9 @@ sealed class InteractionInput {
   ///
   /// - A [String] is parsed as [TextInput].
   /// - A [Map] with a `type` key is parsed as [SingleContentInput].
-  /// - A [List] where the first element has a `role` key is parsed as
-  ///   [TurnsInput].
-  /// - A [List] where elements have a `type` key is parsed as
-  ///   [ContentListInput].
+  /// - A [List] where the first element has a `type` key is parsed as
+  ///   [ContentListInput] (since [InteractionContent] always requires `type`).
+  /// - A [List] where elements lack a `type` key is parsed as [TurnsInput].
   factory InteractionInput.fromJson(Object json) {
     if (json is String) {
       return TextInput(json);
@@ -51,15 +50,17 @@ sealed class InteractionInput {
         return const ContentListInput([]);
       }
       final first = json.first;
-      if (first is Map<String, dynamic> && first.containsKey('role')) {
-        return TurnsInput(
-          json.map((e) => Turn.fromJson(e as Map<String, dynamic>)).toList(),
+      if (first is Map<String, dynamic> && first.containsKey('type')) {
+        return ContentListInput(
+          json
+              .map(
+                (e) => InteractionContent.fromJson(e as Map<String, dynamic>),
+              )
+              .toList(),
         );
       }
-      return ContentListInput(
-        json
-            .map((e) => InteractionContent.fromJson(e as Map<String, dynamic>))
-            .toList(),
+      return TurnsInput(
+        json.map((e) => Turn.fromJson(e as Map<String, dynamic>)).toList(),
       );
     }
     throw ArgumentError('Unknown InteractionInput format: ${json.runtimeType}');
