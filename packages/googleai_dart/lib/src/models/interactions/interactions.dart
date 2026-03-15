@@ -13,6 +13,7 @@ export 'thinking_level.dart';
 export 'thinking_summaries.dart';
 export 'tool_choice.dart';
 export 'tool_choice_type.dart';
+export 'tool_result.dart';
 export 'tools/tools.dart';
 export 'turn.dart';
 export 'usage.dart';

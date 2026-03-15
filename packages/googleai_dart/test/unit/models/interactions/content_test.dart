@@ -247,9 +247,10 @@ void main() {
       test('creates with function result', () {
         const content = FunctionResultContent(
           callId: 'call-123',
-          result: {'temp': 72},
+          result: ToolResultObject({'temp': 72}),
         );
-        expect(content.result, {'temp': 72});
+        expect(content.result, isA<ToolResultObject>());
+        expect((content.result! as ToolResultObject).value, {'temp': 72});
         expect(content.callId, 'call-123');
         expect(content.type, 'function_result');
       });
@@ -257,7 +258,7 @@ void main() {
       test('serializes to JSON', () {
         const content = FunctionResultContent(
           callId: 'call-456',
-          result: {'results': <String>[]},
+          result: ToolResultObject({'results': <String>[]}),
           name: 'search',
         );
         final json = content.toJson();

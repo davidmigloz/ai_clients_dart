@@ -9,7 +9,7 @@ class FunctionResultDelta extends InteractionDelta {
   final String? name;
 
   /// The result of the function call.
-  final Object? result;
+  final ToolResult? result;
 
   /// Whether the function call resulted in an error.
   final bool? isError;
@@ -21,7 +21,9 @@ class FunctionResultDelta extends InteractionDelta {
   factory FunctionResultDelta.fromJson(Map<String, dynamic> json) =>
       FunctionResultDelta(
         name: json['name'] as String?,
-        result: json['result'],
+        result: json['result'] != null
+            ? ToolResult.fromJson(json['result'] as Object)
+            : null,
         isError: json['is_error'] as bool?,
       );
 
@@ -29,7 +31,7 @@ class FunctionResultDelta extends InteractionDelta {
   Map<String, dynamic> toJson() => {
     'type': type,
     if (name != null) 'name': name,
-    if (result != null) 'result': result,
+    if (result != null) 'result': result!.toJson(),
     if (isError != null) 'is_error': isError,
   };
 }

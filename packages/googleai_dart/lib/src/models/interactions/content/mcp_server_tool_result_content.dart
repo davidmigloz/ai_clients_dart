@@ -15,7 +15,7 @@ class McpServerToolResultContent extends InteractionContent {
   final String? serverName;
 
   /// The result of the tool call.
-  final Object? result;
+  final ToolResult? result;
 
   /// Whether the tool call resulted in an error.
   final bool? isError;
@@ -35,7 +35,9 @@ class McpServerToolResultContent extends InteractionContent {
         callId: json['call_id'] as String?,
         name: json['name'] as String?,
         serverName: json['server_name'] as String?,
-        result: json['result'],
+        result: json['result'] != null
+            ? ToolResult.fromJson(json['result'] as Object)
+            : null,
         isError: json['is_error'] as bool?,
       );
 
@@ -45,7 +47,7 @@ class McpServerToolResultContent extends InteractionContent {
     if (callId != null) 'call_id': callId,
     if (name != null) 'name': name,
     if (serverName != null) 'server_name': serverName,
-    if (result != null) 'result': result,
+    if (result != null) 'result': result!.toJson(),
     if (isError != null) 'is_error': isError,
   };
 
@@ -63,7 +65,9 @@ class McpServerToolResultContent extends InteractionContent {
       serverName: serverName == unsetCopyWithValue
           ? this.serverName
           : serverName as String?,
-      result: result == unsetCopyWithValue ? this.result : result,
+      result: result == unsetCopyWithValue
+          ? this.result
+          : result as ToolResult?,
       isError: isError == unsetCopyWithValue ? this.isError : isError as bool?,
     );
   }

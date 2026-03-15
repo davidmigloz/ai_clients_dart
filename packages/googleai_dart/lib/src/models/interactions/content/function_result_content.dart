@@ -9,7 +9,7 @@ class FunctionResultContent extends InteractionContent {
   final String? callId;
 
   /// The result of the tool call.
-  final Object? result;
+  final ToolResult? result;
 
   /// The name of the tool that was called.
   final String? name;
@@ -29,7 +29,9 @@ class FunctionResultContent extends InteractionContent {
   factory FunctionResultContent.fromJson(Map<String, dynamic> json) =>
       FunctionResultContent(
         callId: json['call_id'] as String?,
-        result: json['result'],
+        result: json['result'] != null
+            ? ToolResult.fromJson(json['result'] as Object)
+            : null,
         name: json['name'] as String?,
         isError: json['is_error'] as bool?,
       );
@@ -38,7 +40,7 @@ class FunctionResultContent extends InteractionContent {
   Map<String, dynamic> toJson() => {
     'type': type,
     if (callId != null) 'call_id': callId,
-    if (result != null) 'result': result,
+    if (result != null) 'result': result!.toJson(),
     if (name != null) 'name': name,
     if (isError != null) 'is_error': isError,
   };
@@ -52,7 +54,9 @@ class FunctionResultContent extends InteractionContent {
   }) {
     return FunctionResultContent(
       callId: callId == unsetCopyWithValue ? this.callId : callId as String?,
-      result: result == unsetCopyWithValue ? this.result : result,
+      result: result == unsetCopyWithValue
+          ? this.result
+          : result as ToolResult?,
       name: name == unsetCopyWithValue ? this.name : name as String?,
       isError: isError == unsetCopyWithValue ? this.isError : isError as bool?,
     );

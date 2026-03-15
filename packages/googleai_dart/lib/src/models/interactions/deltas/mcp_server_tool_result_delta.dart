@@ -12,7 +12,7 @@ class McpServerToolResultDelta extends InteractionDelta {
   final String? serverName;
 
   /// The result of the tool call.
-  final Object? result;
+  final ToolResult? result;
 
   /// Creates a [McpServerToolResultDelta] instance.
   const McpServerToolResultDelta({this.name, this.serverName, this.result});
@@ -22,7 +22,9 @@ class McpServerToolResultDelta extends InteractionDelta {
       McpServerToolResultDelta(
         name: json['name'] as String?,
         serverName: json['server_name'] as String?,
-        result: json['result'],
+        result: json['result'] != null
+            ? ToolResult.fromJson(json['result'] as Object)
+            : null,
       );
 
   @override
@@ -30,6 +32,6 @@ class McpServerToolResultDelta extends InteractionDelta {
     'type': type,
     if (name != null) 'name': name,
     if (serverName != null) 'server_name': serverName,
-    if (result != null) 'result': result,
+    if (result != null) 'result': result!.toJson(),
   };
 }

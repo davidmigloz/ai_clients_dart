@@ -1,4 +1,5 @@
 import '../content/content.dart';
+import '../tool_result.dart';
 
 part 'audio_delta.dart';
 part 'code_execution_call_delta.dart';

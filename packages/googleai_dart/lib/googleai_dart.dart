@@ -139,6 +139,7 @@ export 'src/models/interactions/thinking_level.dart';
 export 'src/models/interactions/thinking_summaries.dart';
 export 'src/models/interactions/tool_choice.dart';
 export 'src/models/interactions/tool_choice_type.dart';
+export 'src/models/interactions/tool_result.dart';
 export 'src/models/interactions/tools/tools.dart';
 export 'src/models/interactions/turn.dart';
 export 'src/models/interactions/turn_content.dart';
