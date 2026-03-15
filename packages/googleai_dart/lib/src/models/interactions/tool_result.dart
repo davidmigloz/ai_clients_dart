@@ -26,9 +26,7 @@ sealed class ToolResult {
   /// - A [String] is parsed as [ToolResultText].
   /// - A [List] is parsed as [ToolResultContentList] (each element parsed as
   ///   [InteractionContent]).
-  /// - A [Map] with an `items` key is parsed as [ToolResultContentList]
-  ///   (unwrapping the `items` array).
-  /// - A [Map] without an `items` key is parsed as [ToolResultObject].
+  /// - A [Map] is parsed as [ToolResultObject].
   factory ToolResult.fromJson(Object json) {
     if (json is String) {
       return ToolResultText(json);
@@ -41,16 +39,6 @@ sealed class ToolResult {
       );
     }
     if (json is Map<String, dynamic>) {
-      if (json.containsKey('items')) {
-        final items = json['items'] as List;
-        return ToolResultContentList(
-          items
-              .map(
-                (e) => InteractionContent.fromJson(e as Map<String, dynamic>),
-              )
-              .toList(),
-        );
-      }
       return ToolResultObject(json);
     }
     throw ArgumentError('Unknown ToolResult format: ${json.runtimeType}');
