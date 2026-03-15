@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../models/interactions/agent_config.dart';
 import '../models/interactions/events/events.dart';
 import '../models/interactions/interaction.dart';
 import '../models/interactions/interaction_input.dart';
@@ -77,7 +78,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
   Future<Interaction> createWithAgent({
     required String agent,
     InteractionInput? input,
-    Map<String, dynamic>? agentConfig,
+    AgentConfig? agentConfig,
     String? previousInteractionId,
     bool? background,
   }) async {
@@ -90,7 +91,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     final body = <String, dynamic>{
       'agent': agent,
       if (input != null) 'input': input.toJson(),
-      'agent_config': ?agentConfig,
+      if (agentConfig != null) 'agent_config': agentConfig.toJson(),
       'previous_interaction_id': ?previousInteractionId,
       'background': ?background,
     };
