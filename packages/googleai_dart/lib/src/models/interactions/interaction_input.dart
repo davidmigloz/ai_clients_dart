@@ -38,6 +38,12 @@ sealed class InteractionInput {
       return TextInput(json);
     }
     if (json is Map<String, dynamic>) {
+      if (!json.containsKey('type')) {
+        throw ArgumentError(
+          'InteractionInput Map must contain a "type" key, '
+          'got keys: ${json.keys.toList()}',
+        );
+      }
       return SingleContentInput(InteractionContent.fromJson(json));
     }
     if (json is List) {

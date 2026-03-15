@@ -37,9 +37,9 @@ class Interaction {
 
   /// The inputs for the interaction.
   ///
-  /// Can be a [String], a [List<InteractionContent>], a [List<Turn>],
-  /// or a single [InteractionContent].
-  final Object? input;
+  /// Can be a [TextInput], a [ContentListInput], a [TurnsInput],
+  /// or a [SingleContentInput].
+  final InteractionInput? input;
 
   /// Output only. Responses from the model.
   final List<InteractionContent>? outputs;
@@ -106,7 +106,9 @@ class Interaction {
         ? DateTime.parse(json['updated'] as String)
         : null,
     role: json['role'] as String?,
-    input: json['input'],
+    input: json['input'] != null
+        ? InteractionInput.fromJson(json['input'] as Object)
+        : null,
     outputs: (json['outputs'] as List<dynamic>?)
         ?.map((e) => InteractionContent.fromJson(e as Map<String, dynamic>))
         .toList(),
@@ -142,7 +144,7 @@ class Interaction {
     if (created != null) 'created': created!.toIso8601String(),
     if (updated != null) 'updated': updated!.toIso8601String(),
     if (role != null) 'role': role,
-    if (input != null) 'input': input,
+    if (input != null) 'input': input!.toJson(),
     if (outputs != null) 'outputs': outputs!.map((e) => e.toJson()).toList(),
     if (usage != null) 'usage': usage!.toJson(),
     'object': object,
@@ -195,7 +197,9 @@ class Interaction {
           ? this.updated
           : updated as DateTime?,
       role: role == unsetCopyWithValue ? this.role : role as String?,
-      input: input == unsetCopyWithValue ? this.input : input,
+      input: input == unsetCopyWithValue
+          ? this.input
+          : input as InteractionInput?,
       outputs: outputs == unsetCopyWithValue
           ? this.outputs
           : outputs as List<InteractionContent>?,
