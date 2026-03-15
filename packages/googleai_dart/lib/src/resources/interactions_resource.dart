@@ -7,6 +7,7 @@ import '../models/interactions/events/events.dart';
 import '../models/interactions/generation_config.dart';
 import '../models/interactions/interaction.dart';
 import '../models/interactions/interaction_input.dart';
+import '../models/interactions/response_modality.dart';
 import '../models/interactions/tools/tools.dart';
 import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
@@ -42,6 +43,8 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     String? systemInstruction,
     List<InteractionTool>? tools,
     InteractionGenerationConfig? generationConfig,
+    List<InteractionResponseModality>? responseModalities,
+    String? responseMimeType,
     String? previousInteractionId,
     bool? background,
   }) async {
@@ -58,6 +61,11 @@ class InteractionsResource extends ResourceBase with StreamingResource {
       if (tools != null) 'tools': tools.map((t) => t.toJson()).toList(),
       if (generationConfig != null)
         'generation_config': generationConfig.toJson(),
+      if (responseModalities != null)
+        'response_modalities': responseModalities
+            .map(interactionResponseModalityToString)
+            .toList(),
+      'response_mime_type': ?responseMimeType,
       'previous_interaction_id': ?previousInteractionId,
       'background': ?background,
     };
@@ -174,6 +182,8 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     String? systemInstruction,
     List<InteractionTool>? tools,
     InteractionGenerationConfig? generationConfig,
+    List<InteractionResponseModality>? responseModalities,
+    String? responseMimeType,
     String? previousInteractionId,
   }) async* {
     final url = requestBuilder.buildUrl(
@@ -192,6 +202,11 @@ class InteractionsResource extends ResourceBase with StreamingResource {
       if (tools != null) 'tools': tools.map((t) => t.toJson()).toList(),
       if (generationConfig != null)
         'generation_config': generationConfig.toJson(),
+      if (responseModalities != null)
+        'response_modalities': responseModalities
+            .map(interactionResponseModalityToString)
+            .toList(),
+      'response_mime_type': ?responseMimeType,
       'previous_interaction_id': ?previousInteractionId,
     };
 
