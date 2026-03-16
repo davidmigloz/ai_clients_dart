@@ -154,7 +154,15 @@ class CompletionsResource extends ResourceBase with StreamingResource {
       if (sseEvent == 'error' || error != null) {
         throwInlineStreamError(json, sseEvent, error);
       }
-      return Completion.fromJson(json);
+      try {
+        return Completion.fromJson(json);
+      } on TypeError catch (e) {
+        throw ParseException(
+          message: 'Failed to parse completion stream event: $e',
+          responseBody: json.toString(),
+          cause: e,
+        );
+      }
     });
   }
 }

@@ -215,7 +215,15 @@ class ChatCompletionsResource extends ResourceBase with StreamingResource {
       if (sseEvent == 'error' || error != null) {
         throwInlineStreamError(json, sseEvent, error);
       }
-      return ChatStreamEvent.fromJson(json);
+      try {
+        return ChatStreamEvent.fromJson(json);
+      } on TypeError catch (e) {
+        throw ParseException(
+          message: 'Failed to parse chat stream event: $e',
+          responseBody: json.toString(),
+          cause: e,
+        );
+      }
     });
   }
 
