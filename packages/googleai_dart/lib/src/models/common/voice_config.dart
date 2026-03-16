@@ -96,8 +96,7 @@ class MultiSpeakerVoiceConfig {
       speakerVoiceConfigs: json['speakerVoiceConfigs'] != null
           ? (json['speakerVoiceConfigs'] as List)
                 .map(
-                  (e) =>
-                      SpeakerVoiceConfig.fromJson(e as Map<String, dynamic>),
+                  (e) => SpeakerVoiceConfig.fromJson(e as Map<String, dynamic>),
                 )
                 .toList()
           : const [],
