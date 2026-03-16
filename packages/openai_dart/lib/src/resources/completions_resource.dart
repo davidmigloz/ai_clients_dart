@@ -76,21 +76,29 @@ class CompletionsResource extends ResourceBase with StreamingResource {
       httpRequest,
       abortTrigger: abortTrigger,
     );
-    final json = jsonDecode(response.body) as Map<String, dynamic>;
-    // Detect error responses returned with HTTP 200 by some third-party
-    // proxies (e.g., custom AWS Bedrock Java/Spring proxies may return
-    // {message: "...", code: -1} with status 200). See: genkit-dart#214
-    if (!json.containsKey('choices') &&
-        (json.containsKey('message') || json.containsKey('error'))) {
-      throw ParseException(
-        message:
-            'Server returned an error response with HTTP 200: '
-            '${json['message'] ?? json['error']}',
-        responseBody: response.body,
-      );
-    }
     try {
+      final json = jsonDecode(response.body) as Map<String, dynamic>;
+      // Detect error responses returned with HTTP 200 by some third-party
+      // proxies (e.g., custom AWS Bedrock Java/Spring proxies may return
+      // {message: "...", code: -1} with status 200). See: genkit-dart#214
+      if (!json.containsKey('choices') &&
+          (json.containsKey('message') || json.containsKey('error'))) {
+        throw ParseException(
+          message:
+              'Server returned an error response with HTTP 200: '
+              '${json['message'] ?? json['error']}',
+          responseBody: response.body,
+        );
+      }
       return Completion.fromJson(json);
+    } on ParseException {
+      rethrow;
+    } on FormatException catch (e) {
+      throw ParseException(
+        message: 'Failed to parse completion response: $e',
+        responseBody: response.body,
+        cause: e,
+      );
     } on TypeError catch (e) {
       throw ParseException(
         message: 'Failed to parse completion response: $e',

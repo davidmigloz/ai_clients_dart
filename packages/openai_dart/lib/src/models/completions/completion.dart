@@ -174,11 +174,11 @@ class CompletionRequest {
 class Completion {
   /// Creates a [Completion].
   const Completion({
-    required this.id,
-    required this.object,
+    this.id = '',
+    this.object = 'text_completion',
     this.created,
-    required this.model,
-    required this.choices,
+    this.model = '',
+    this.choices = const [],
     this.usage,
     this.systemFingerprint,
   });
@@ -186,13 +186,19 @@ class Completion {
   /// Creates a [Completion] from JSON.
   factory Completion.fromJson(Map<String, dynamic> json) {
     return Completion(
-      id: json['id'] as String,
-      object: json['object'] as String,
+      // Some providers may omit id
+      id: json['id'] as String? ?? '',
+      // Some providers may omit or use a different object type
+      object: json['object'] as String? ?? 'text_completion',
       created: json['created'] as int?,
-      model: json['model'] as String,
-      choices: (json['choices'] as List<dynamic>)
-          .map((e) => CompletionChoice.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      // Some providers may omit the model field
+      model: json['model'] as String? ?? '',
+      // Custom proxies may return error responses without choices
+      choices:
+          (json['choices'] as List<dynamic>?)
+              ?.map((e) => CompletionChoice.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
       usage: json['usage'] != null
           ? Usage.fromJson(json['usage'] as Map<String, dynamic>)
           : null,
@@ -201,9 +207,13 @@ class Completion {
   }
 
   /// The completion ID.
+  ///
+  /// May be empty with some OpenAI-compatible providers that omit this field.
   final String id;
 
-  /// The object type (always "text_completion").
+  /// The object type (usually "text_completion").
+  ///
+  /// May be missing or different with some OpenAI-compatible providers.
   final String object;
 
   /// The Unix timestamp.
@@ -212,9 +222,14 @@ class Completion {
   final int? created;
 
   /// The model used.
+  ///
+  /// May be empty with some OpenAI-compatible providers that omit this field.
   final String model;
 
   /// The completion choices.
+  ///
+  /// Defaults to empty if missing. Some proxy servers may return error
+  /// responses without a choices array.
   final List<CompletionChoice> choices;
 
   /// Token usage statistics.
