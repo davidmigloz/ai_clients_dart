@@ -87,9 +87,14 @@ void main() {
         final parts = response.candidates!.first.content?.parts;
         expect(parts, isNotEmpty);
 
-        final audioPart = parts!.whereType<InlineDataPart>().first;
-        expect(audioPart.inlineData.mimeType, contains('audio'));
-        expect(audioPart.inlineData.data, isNotEmpty);
+        final audioParts = parts!.whereType<InlineDataPart>().toList();
+        expect(
+          audioParts,
+          isNotEmpty,
+          reason: 'Expected InlineDataPart with audio, got: $parts',
+        );
+        expect(audioParts.first.inlineData.mimeType, contains('audio'));
+        expect(audioParts.first.inlineData.data, isNotEmpty);
       },
     );
 
@@ -128,9 +133,14 @@ void main() {
         final parts = response.candidates!.first.content?.parts;
         expect(parts, isNotEmpty);
 
-        final audioPart = parts!.whereType<InlineDataPart>().first;
-        expect(audioPart.inlineData.mimeType, contains('audio'));
-        expect(audioPart.inlineData.data, isNotEmpty);
+        final audioParts = parts!.whereType<InlineDataPart>().toList();
+        expect(
+          audioParts,
+          isNotEmpty,
+          reason: 'Expected InlineDataPart with audio, got: $parts',
+        );
+        expect(audioParts.first.inlineData.mimeType, contains('audio'));
+        expect(audioParts.first.inlineData.data, isNotEmpty);
       },
     );
   });
