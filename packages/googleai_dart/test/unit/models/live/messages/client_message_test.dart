@@ -175,7 +175,10 @@ void main() {
       final setup = message as BidiGenerateContentSetup;
       expect(setup.model, 'models/gemini-2.0-flash-live-001');
       expect(setup.generationConfig, isNotNull);
-      expect(setup.generationConfig!.responseModalities, equals(['AUDIO']));
+      expect(
+        setup.generationConfig!.responseModalities,
+        equals([ResponseModality.audio]),
+      );
     });
 
     test('round-trip preserves all fields', () {

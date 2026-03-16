@@ -27,7 +27,7 @@ import 'websocket_connector.dart' as ws;
 ///   model: 'gemini-2.0-flash-live-001',
 ///   liveConfig: LiveConfig(
 ///     generationConfig: LiveGenerationConfig(
-///       responseModalities: ['AUDIO', 'TEXT'],
+///       responseModalities: [ResponseModality.audio, ResponseModality.text],
 ///     ),
 ///   ),
 /// );

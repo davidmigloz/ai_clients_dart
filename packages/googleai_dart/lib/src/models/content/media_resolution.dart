@@ -69,8 +69,9 @@ enum MediaResolutionLevel {
 
   /// Creates a [MediaResolutionLevel] from a string value.
   static MediaResolutionLevel fromString(String value) {
+    final upper = value.toUpperCase();
     return MediaResolutionLevel.values.firstWhere(
-      (e) => e.value == value,
+      (e) => e.value.toUpperCase() == upper,
       orElse: () => MediaResolutionLevel.unspecified,
     );
   }

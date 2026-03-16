@@ -1,3 +1,4 @@
+import '../../copy_with_sentinel.dart';
 import 'voice_config.dart';
 
 /// Configuration for speech synthesis.
@@ -55,15 +56,20 @@ class SpeechConfig {
 
   /// Creates a copy with the given fields replaced.
   SpeechConfig copyWith({
-    VoiceConfig? voiceConfig,
-    String? languageCode,
-    MultiSpeakerVoiceConfig? multiSpeakerVoiceConfig,
+    Object? voiceConfig = unsetCopyWithValue,
+    Object? languageCode = unsetCopyWithValue,
+    Object? multiSpeakerVoiceConfig = unsetCopyWithValue,
   }) {
     return SpeechConfig(
-      voiceConfig: voiceConfig ?? this.voiceConfig,
-      languageCode: languageCode ?? this.languageCode,
-      multiSpeakerVoiceConfig:
-          multiSpeakerVoiceConfig ?? this.multiSpeakerVoiceConfig,
+      voiceConfig: voiceConfig == unsetCopyWithValue
+          ? this.voiceConfig
+          : voiceConfig as VoiceConfig?,
+      languageCode: languageCode == unsetCopyWithValue
+          ? this.languageCode
+          : languageCode as String?,
+      multiSpeakerVoiceConfig: multiSpeakerVoiceConfig == unsetCopyWithValue
+          ? this.multiSpeakerVoiceConfig
+          : multiSpeakerVoiceConfig as MultiSpeakerVoiceConfig?,
     );
   }
 

@@ -40,7 +40,7 @@ void main() {
         expect(config.generationConfig, isNotNull);
         expect(
           config.generationConfig!.responseModalities,
-          equals(['AUDIO', 'TEXT']),
+          equals([ResponseModality.audio, ResponseModality.text]),
         );
         expect(config.systemInstruction, isNotNull);
         expect(config.tools, isNotNull);
@@ -77,7 +77,10 @@ void main() {
         final config = LiveConfig.fromJson(json);
 
         expect(config.generationConfig, isNotNull);
-        expect(config.generationConfig!.responseModalities, equals(['AUDIO']));
+        expect(
+          config.generationConfig!.responseModalities,
+          equals([ResponseModality.audio]),
+        );
         expect(config.systemInstruction, isNull);
       });
     });
@@ -155,7 +158,10 @@ void main() {
           inputAudioTranscription: AudioTranscriptionConfig.enabled(),
         );
 
-        expect(updated.generationConfig!.responseModalities, contains('TEXT'));
+        expect(
+          updated.generationConfig!.responseModalities,
+          contains(ResponseModality.text),
+        );
         expect(updated.inputAudioTranscription, isNotNull);
       });
     });
@@ -168,7 +174,10 @@ void main() {
         );
 
         expect(config.generationConfig, isNotNull);
-        expect(config.generationConfig!.responseModalities, equals(['AUDIO']));
+        expect(
+          config.generationConfig!.responseModalities,
+          equals([ResponseModality.audio]),
+        );
         expect(config.realtimeInputConfig, isNotNull);
       });
 
@@ -181,7 +190,7 @@ void main() {
         expect(config.generationConfig, isNotNull);
         expect(
           config.generationConfig!.responseModalities,
-          equals(['AUDIO', 'TEXT']),
+          equals([ResponseModality.audio, ResponseModality.text]),
         );
         expect(config.inputAudioTranscription, isNotNull);
         expect(config.outputAudioTranscription, isNotNull);

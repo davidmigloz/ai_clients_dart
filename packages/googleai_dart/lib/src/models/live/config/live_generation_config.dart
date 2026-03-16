@@ -1,13 +1,14 @@
+import '../../generation/response_modality.dart';
 import 'speech_config.dart';
 
 /// Generation configuration for Live API sessions.
 ///
 /// Controls response modalities, temperature, and other generation settings.
 class LiveGenerationConfig {
-  /// Response modalities (e.g., ["AUDIO"], ["TEXT"], ["AUDIO", "TEXT"]).
+  /// Response modalities.
   ///
   /// Specifies what types of content the model should generate.
-  final List<String>? responseModalities;
+  final List<ResponseModality>? responseModalities;
 
   /// Speech configuration for audio output.
   final SpeechConfig? speechConfig;
@@ -43,7 +44,7 @@ class LiveGenerationConfig {
     int? maxOutputTokens,
   }) {
     return LiveGenerationConfig(
-      responseModalities: const ['AUDIO'],
+      responseModalities: const [ResponseModality.audio],
       speechConfig: speechConfig,
       temperature: temperature,
       maxOutputTokens: maxOutputTokens,
@@ -56,7 +57,7 @@ class LiveGenerationConfig {
     int? maxOutputTokens,
   }) {
     return LiveGenerationConfig(
-      responseModalities: const ['TEXT'],
+      responseModalities: const [ResponseModality.text],
       temperature: temperature,
       maxOutputTokens: maxOutputTokens,
     );
@@ -69,7 +70,7 @@ class LiveGenerationConfig {
     int? maxOutputTokens,
   }) {
     return LiveGenerationConfig(
-      responseModalities: const ['AUDIO', 'TEXT'],
+      responseModalities: const [ResponseModality.audio, ResponseModality.text],
       speechConfig: speechConfig,
       temperature: temperature,
       maxOutputTokens: maxOutputTokens,
@@ -79,9 +80,9 @@ class LiveGenerationConfig {
   /// Creates from JSON.
   factory LiveGenerationConfig.fromJson(Map<String, dynamic> json) {
     return LiveGenerationConfig(
-      responseModalities: json['responseModalities'] != null
-          ? (json['responseModalities'] as List<dynamic>).cast<String>()
-          : null,
+      responseModalities: (json['responseModalities'] as List?)
+          ?.map((e) => responseModalityFromString(e as String))
+          .toList(),
       speechConfig: json['speechConfig'] != null
           ? SpeechConfig.fromJson(json['speechConfig'] as Map<String, dynamic>)
           : null,
@@ -96,7 +97,10 @@ class LiveGenerationConfig {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
-    if (responseModalities != null) 'responseModalities': responseModalities,
+    if (responseModalities != null)
+      'responseModalities': responseModalities!
+          .map(responseModalityToString)
+          .toList(),
     if (speechConfig != null) 'speechConfig': speechConfig!.toJson(),
     if (temperature != null) 'temperature': temperature,
     if (maxOutputTokens != null) 'maxOutputTokens': maxOutputTokens,
@@ -106,7 +110,7 @@ class LiveGenerationConfig {
 
   /// Creates a copy with the given fields replaced.
   LiveGenerationConfig copyWith({
-    List<String>? responseModalities,
+    List<ResponseModality>? responseModalities,
     SpeechConfig? speechConfig,
     double? temperature,
     int? maxOutputTokens,

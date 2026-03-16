@@ -21,7 +21,10 @@ void main() {
 
         final config = LiveGenerationConfig.fromJson(json);
 
-        expect(config.responseModalities, equals(['AUDIO', 'TEXT']));
+        expect(
+          config.responseModalities,
+          equals([ResponseModality.audio, ResponseModality.text]),
+        );
         expect(config.speechConfig, isNotNull);
         expect(config.temperature, 0.7);
         expect(config.maxOutputTokens, 1024);
@@ -47,7 +50,7 @@ void main() {
         };
         final config = LiveGenerationConfig.fromJson(json);
 
-        expect(config.responseModalities, equals(['AUDIO']));
+        expect(config.responseModalities, equals([ResponseModality.audio]));
         expect(config.speechConfig, isNull);
         expect(config.temperature, isNull);
       });
@@ -63,7 +66,10 @@ void main() {
     group('toJson', () {
       test('includes all non-null fields', () {
         final config = LiveGenerationConfig(
-          responseModalities: const ['AUDIO', 'TEXT'],
+          responseModalities: const [
+            ResponseModality.audio,
+            ResponseModality.text,
+          ],
           speechConfig: SpeechConfig.withVoice('Puck'),
           temperature: 0.7,
           maxOutputTokens: 1024,
@@ -90,7 +96,7 @@ void main() {
 
       test('includes only specified fields', () {
         const config = LiveGenerationConfig(
-          responseModalities: ['TEXT'],
+          responseModalities: [ResponseModality.text],
           temperature: 0.5,
         );
         final json = config.toJson();
@@ -105,7 +111,7 @@ void main() {
     group('copyWith', () {
       test('with no params returns instance with same values', () {
         const original = LiveGenerationConfig(
-          responseModalities: ['AUDIO'],
+          responseModalities: [ResponseModality.audio],
           temperature: 0.7,
         );
         final copied = original.copyWith();
@@ -116,7 +122,7 @@ void main() {
 
       test('updates specified fields only', () {
         const original = LiveGenerationConfig(
-          responseModalities: ['AUDIO'],
+          responseModalities: [ResponseModality.audio],
           temperature: 0.7,
         );
         final updated = original.copyWith(temperature: 0.9);
@@ -127,16 +133,16 @@ void main() {
 
       test('can update multiple fields', () {
         const original = LiveGenerationConfig(
-          responseModalities: ['AUDIO'],
+          responseModalities: [ResponseModality.audio],
           temperature: 0.7,
         );
         final updated = original.copyWith(
-          responseModalities: ['TEXT'],
+          responseModalities: const [ResponseModality.text],
           temperature: 0.5,
           maxOutputTokens: 512,
         );
 
-        expect(updated.responseModalities, equals(['TEXT']));
+        expect(updated.responseModalities, equals([ResponseModality.text]));
         expect(updated.temperature, 0.5);
         expect(updated.maxOutputTokens, 512);
       });
@@ -149,7 +155,7 @@ void main() {
           maxOutputTokens: 1024,
         );
 
-        expect(config.responseModalities, equals(['AUDIO']));
+        expect(config.responseModalities, equals([ResponseModality.audio]));
         expect(config.temperature, 0.8);
         expect(config.maxOutputTokens, 1024);
       });
@@ -159,7 +165,7 @@ void main() {
           speechConfig: SpeechConfig.withVoice('Puck'),
         );
 
-        expect(config.responseModalities, equals(['AUDIO']));
+        expect(config.responseModalities, equals([ResponseModality.audio]));
         expect(config.speechConfig, isNotNull);
       });
 
@@ -169,7 +175,7 @@ void main() {
           maxOutputTokens: 2048,
         );
 
-        expect(config.responseModalities, equals(['TEXT']));
+        expect(config.responseModalities, equals([ResponseModality.text]));
         expect(config.temperature, 0.5);
         expect(config.maxOutputTokens, 2048);
       });
@@ -180,7 +186,10 @@ void main() {
           temperature: 0.7,
         );
 
-        expect(config.responseModalities, equals(['AUDIO', 'TEXT']));
+        expect(
+          config.responseModalities,
+          equals([ResponseModality.audio, ResponseModality.text]),
+        );
         expect(config.speechConfig, isNotNull);
         expect(config.temperature, 0.7);
       });
@@ -188,14 +197,20 @@ void main() {
       test('textAndAudio without speechConfig', () {
         final config = LiveGenerationConfig.textAndAudio();
 
-        expect(config.responseModalities, equals(['AUDIO', 'TEXT']));
+        expect(
+          config.responseModalities,
+          equals([ResponseModality.audio, ResponseModality.text]),
+        );
         expect(config.speechConfig, isNull);
       });
     });
 
     test('round-trip conversion preserves data', () {
       final original = LiveGenerationConfig(
-        responseModalities: const ['AUDIO', 'TEXT'],
+        responseModalities: const [
+          ResponseModality.audio,
+          ResponseModality.text,
+        ],
         speechConfig: SpeechConfig.withVoice('Puck'),
         temperature: 0.7,
         maxOutputTokens: 1024,
@@ -215,7 +230,7 @@ void main() {
 
     test('toString includes key fields', () {
       const config = LiveGenerationConfig(
-        responseModalities: ['AUDIO'],
+        responseModalities: [ResponseModality.audio],
         temperature: 0.7,
       );
       final str = config.toString();

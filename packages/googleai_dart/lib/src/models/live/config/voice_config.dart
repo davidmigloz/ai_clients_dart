@@ -1,3 +1,5 @@
+import '../../copy_with_sentinel.dart';
+
 /// Configuration for voice selection.
 ///
 /// Specifies which voice to use for audio output.
@@ -33,9 +35,11 @@ class VoiceConfig {
   };
 
   /// Creates a copy with the given fields replaced.
-  VoiceConfig copyWith({PrebuiltVoiceConfig? prebuiltVoiceConfig}) {
+  VoiceConfig copyWith({Object? prebuiltVoiceConfig = unsetCopyWithValue}) {
     return VoiceConfig(
-      prebuiltVoiceConfig: prebuiltVoiceConfig ?? this.prebuiltVoiceConfig,
+      prebuiltVoiceConfig: prebuiltVoiceConfig == unsetCopyWithValue
+          ? this.prebuiltVoiceConfig
+          : prebuiltVoiceConfig as PrebuiltVoiceConfig?,
     );
   }
 
@@ -64,8 +68,12 @@ class PrebuiltVoiceConfig {
   };
 
   /// Creates a copy with the given fields replaced.
-  PrebuiltVoiceConfig copyWith({String? voiceName}) {
-    return PrebuiltVoiceConfig(voiceName: voiceName ?? this.voiceName);
+  PrebuiltVoiceConfig copyWith({Object? voiceName = unsetCopyWithValue}) {
+    return PrebuiltVoiceConfig(
+      voiceName: voiceName == unsetCopyWithValue
+          ? this.voiceName
+          : voiceName as String?,
+    );
   }
 
   @override
@@ -85,7 +93,8 @@ class MultiSpeakerVoiceConfig {
   /// Creates from JSON.
   factory MultiSpeakerVoiceConfig.fromJson(Map<String, dynamic> json) {
     return MultiSpeakerVoiceConfig(
-      speakerVoiceConfigs: (json['speakerVoiceConfigs'] as List?)
+      speakerVoiceConfigs:
+          (json['speakerVoiceConfigs'] as List?)
               ?.map(
                 (e) => SpeakerVoiceConfig.fromJson(e as Map<String, dynamic>),
               )
@@ -97,8 +106,9 @@ class MultiSpeakerVoiceConfig {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (speakerVoiceConfigs.isNotEmpty)
-      'speakerVoiceConfigs':
-          speakerVoiceConfigs.map((e) => e.toJson()).toList(),
+      'speakerVoiceConfigs': speakerVoiceConfigs
+          .map((e) => e.toJson())
+          .toList(),
   };
 
   /// Creates a copy with the given fields replaced.
@@ -143,10 +153,17 @@ class SpeakerVoiceConfig {
   };
 
   /// Creates a copy with the given fields replaced.
-  SpeakerVoiceConfig copyWith({String? speaker, VoiceConfig? voiceConfig}) {
+  SpeakerVoiceConfig copyWith({
+    Object? speaker = unsetCopyWithValue,
+    Object? voiceConfig = unsetCopyWithValue,
+  }) {
     return SpeakerVoiceConfig(
-      speaker: speaker ?? this.speaker,
-      voiceConfig: voiceConfig ?? this.voiceConfig,
+      speaker: speaker == unsetCopyWithValue
+          ? this.speaker
+          : speaker as String?,
+      voiceConfig: voiceConfig == unsetCopyWithValue
+          ? this.voiceConfig
+          : voiceConfig as VoiceConfig?,
     );
   }
 
