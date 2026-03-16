@@ -146,7 +146,7 @@ void main() {
         ).readAsBytes();
 
         final response = await client!.models.generateContent(
-          model: defaultGenerativeModel,
+          model: defaultSTTModel,
           request: GenerateContentRequest(
             contents: [
               Content(
