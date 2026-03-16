@@ -122,16 +122,6 @@
       "pattern": "delta\\.url\\b(?!s)",
       "message": "Uses .urls (plural), not .url",
       "severity": "error"
-    },
-    {
-      "pattern": "\\bRetrievalConfig\\s*\\(",
-      "message": "RetrievalConfig should be Map, not typed class",
-      "severity": "warning"
-    },
-    {
-      "pattern": "\\bLatLng\\s*\\(",
-      "message": "LatLng should be Map, not typed class",
-      "severity": "warning"
     }
   ]
 }
