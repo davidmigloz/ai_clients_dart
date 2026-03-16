@@ -143,7 +143,7 @@ class ChatCompletionsResource extends ResourceBase with StreamingResource {
         throw ParseException(
           message:
               'Server returned an error response with HTTP 200: '
-              '${json['message'] ?? json['error']}',
+              '${_errorMessage(json)}',
           responseBody: response.body,
         );
       }
@@ -270,4 +270,15 @@ class ChatCompletionsResource extends ResourceBase with StreamingResource {
       return accumulator;
     });
   }
+}
+
+/// Extracts a human-readable error message from a JSON error response.
+///
+/// Handles both flat `{message: "..."}` (custom proxies) and nested
+/// `{error: {message: "..."}}` (OpenAI-style) shapes.
+String _errorMessage(Map<String, dynamic> json) {
+  if (json['message'] != null) return json['message'].toString();
+  final error = json['error'];
+  if (error is Map) return (error['message'] ?? error).toString();
+  return error.toString();
 }
