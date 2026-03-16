@@ -188,7 +188,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
   }) async* {
     final url = requestBuilder.buildUrl(
       '/{version}/interactions',
-      queryParams: {'stream': 'true', 'alt': 'sse'},
+      queryParams: {'alt': 'sse'},
     );
 
     final headers = requestBuilder.buildHeaders(
@@ -197,6 +197,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
 
     final body = <String, dynamic>{
       'model': model,
+      'stream': true,
       if (input != null) 'input': input.toJson(),
       'system_instruction': ?systemInstruction,
       if (tools != null) 'tools': tools.map((t) => t.toJson()).toList(),
