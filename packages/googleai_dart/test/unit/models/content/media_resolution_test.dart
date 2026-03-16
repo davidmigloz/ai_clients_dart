@@ -67,18 +67,71 @@ void main() {
   });
 
   group('MediaResolutionLevel', () {
-    test('fromString returns ultraHigh for MEDIA_RESOLUTION_ULTRA_HIGH', () {
-      expect(
-        MediaResolutionLevel.fromString('MEDIA_RESOLUTION_ULTRA_HIGH'),
-        MediaResolutionLevel.ultraHigh,
-      );
+    group('mediaResolutionLevelFromString', () {
+      test('parses all known values', () {
+        expect(
+          mediaResolutionLevelFromString('MEDIA_RESOLUTION_LOW'),
+          MediaResolutionLevel.low,
+        );
+        expect(
+          mediaResolutionLevelFromString('MEDIA_RESOLUTION_MEDIUM'),
+          MediaResolutionLevel.medium,
+        );
+        expect(
+          mediaResolutionLevelFromString('MEDIA_RESOLUTION_HIGH'),
+          MediaResolutionLevel.high,
+        );
+        expect(
+          mediaResolutionLevelFromString('MEDIA_RESOLUTION_ULTRA_HIGH'),
+          MediaResolutionLevel.ultraHigh,
+        );
+      });
+
+      test('returns unspecified for unknown values', () {
+        expect(
+          mediaResolutionLevelFromString('UNKNOWN_VALUE'),
+          MediaResolutionLevel.unspecified,
+        );
+      });
+
+      test('returns unspecified for null', () {
+        expect(
+          mediaResolutionLevelFromString(null),
+          MediaResolutionLevel.unspecified,
+        );
+      });
+
+      test('is case-insensitive', () {
+        expect(
+          mediaResolutionLevelFromString('media_resolution_high'),
+          MediaResolutionLevel.high,
+        );
+      });
     });
 
-    test('fromString falls back to unspecified for unknown values', () {
-      expect(
-        MediaResolutionLevel.fromString('UNKNOWN_VALUE'),
-        MediaResolutionLevel.unspecified,
-      );
+    group('mediaResolutionLevelToString', () {
+      test('converts all enum values', () {
+        expect(
+          mediaResolutionLevelToString(MediaResolutionLevel.low),
+          'MEDIA_RESOLUTION_LOW',
+        );
+        expect(
+          mediaResolutionLevelToString(MediaResolutionLevel.ultraHigh),
+          'MEDIA_RESOLUTION_ULTRA_HIGH',
+        );
+        expect(
+          mediaResolutionLevelToString(MediaResolutionLevel.unspecified),
+          'MEDIA_RESOLUTION_UNSPECIFIED',
+        );
+      });
+    });
+
+    test('round-trip conversion preserves all values', () {
+      for (final level in MediaResolutionLevel.values) {
+        final str = mediaResolutionLevelToString(level);
+        final restored = mediaResolutionLevelFromString(str);
+        expect(restored, level, reason: 'Failed for $level');
+      }
     });
   });
 }

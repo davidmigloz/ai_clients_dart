@@ -135,7 +135,7 @@ class GenerationConfig {
             ?.map((e) => responseModalityFromString(e as String))
             .toList(),
         mediaResolution: json['mediaResolution'] != null
-            ? MediaResolutionLevel.fromString(json['mediaResolution'] as String)
+            ? mediaResolutionLevelFromString(json['mediaResolution'] as String)
             : null,
         responseJsonSchema: json['responseJsonSchema'] as Map<String, dynamic>?,
         enableEnhancedCivicAnswers: json['enableEnhancedCivicAnswers'] as bool?,
@@ -167,7 +167,8 @@ class GenerationConfig {
       'responseModalities': responseModalities!
           .map(responseModalityToString)
           .toList(),
-    if (mediaResolution != null) 'mediaResolution': mediaResolution!.value,
+    if (mediaResolution != null)
+      'mediaResolution': mediaResolutionLevelToString(mediaResolution!),
     if (responseJsonSchema != null) 'responseJsonSchema': responseJsonSchema,
     if (enableEnhancedCivicAnswers != null)
       'enableEnhancedCivicAnswers': enableEnhancedCivicAnswers,

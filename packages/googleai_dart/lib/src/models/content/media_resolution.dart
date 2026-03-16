@@ -15,14 +15,14 @@ class MediaResolution {
   factory MediaResolution.fromJson(Map<String, dynamic> json) =>
       MediaResolution(
         level: json['level'] != null
-            ? MediaResolutionLevel.fromString(json['level'] as String)
+            ? mediaResolutionLevelFromString(json['level'] as String)
             : null,
         numTokens: json['numTokens'] as int?,
       );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
-    if (level != null) 'level': level!.value,
+    if (level != null) 'level': mediaResolutionLevelToString(level!),
     if (numTokens != null) 'numTokens': numTokens,
   };
 
@@ -48,31 +48,39 @@ class MediaResolution {
 /// Media resolution level.
 enum MediaResolutionLevel {
   /// Media resolution has not been set.
-  unspecified('MEDIA_RESOLUTION_UNSPECIFIED'),
+  unspecified,
 
   /// Media resolution set to low.
-  low('MEDIA_RESOLUTION_LOW'),
+  low,
 
   /// Media resolution set to medium.
-  medium('MEDIA_RESOLUTION_MEDIUM'),
+  medium,
 
   /// Media resolution set to high.
-  high('MEDIA_RESOLUTION_HIGH'),
+  high,
 
   /// Media resolution set to ultra high.
-  ultraHigh('MEDIA_RESOLUTION_ULTRA_HIGH');
+  ultraHigh,
+}
 
-  const MediaResolutionLevel(this.value);
+/// Converts a string to a [MediaResolutionLevel] enum value.
+MediaResolutionLevel mediaResolutionLevelFromString(String? value) {
+  return switch (value?.toUpperCase()) {
+    'MEDIA_RESOLUTION_LOW' => MediaResolutionLevel.low,
+    'MEDIA_RESOLUTION_MEDIUM' => MediaResolutionLevel.medium,
+    'MEDIA_RESOLUTION_HIGH' => MediaResolutionLevel.high,
+    'MEDIA_RESOLUTION_ULTRA_HIGH' => MediaResolutionLevel.ultraHigh,
+    _ => MediaResolutionLevel.unspecified,
+  };
+}
 
-  /// The string value of the enum.
-  final String value;
-
-  /// Creates a [MediaResolutionLevel] from a string value.
-  static MediaResolutionLevel fromString(String value) {
-    final upper = value.toUpperCase();
-    return MediaResolutionLevel.values.firstWhere(
-      (e) => e.value.toUpperCase() == upper,
-      orElse: () => MediaResolutionLevel.unspecified,
-    );
-  }
+/// Converts a [MediaResolutionLevel] enum value to a string.
+String mediaResolutionLevelToString(MediaResolutionLevel level) {
+  return switch (level) {
+    MediaResolutionLevel.low => 'MEDIA_RESOLUTION_LOW',
+    MediaResolutionLevel.medium => 'MEDIA_RESOLUTION_MEDIUM',
+    MediaResolutionLevel.high => 'MEDIA_RESOLUTION_HIGH',
+    MediaResolutionLevel.ultraHigh => 'MEDIA_RESOLUTION_ULTRA_HIGH',
+    MediaResolutionLevel.unspecified => 'MEDIA_RESOLUTION_UNSPECIFIED',
+  };
 }
