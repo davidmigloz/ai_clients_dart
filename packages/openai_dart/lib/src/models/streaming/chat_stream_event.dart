@@ -402,7 +402,7 @@ class FunctionCallDelta {
       // a parsed object instead of a JSON string fragment.
       arguments: switch (json['arguments']) {
         final String s => s,
-        final Map m => jsonEncode(m),
+        final Map<dynamic, dynamic> m => jsonEncode(m),
         _ => null,
       },
     );
