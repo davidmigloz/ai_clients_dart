@@ -11,18 +11,22 @@ import 'test_config.dart';
 
 /// Path to the test samples directory.
 ///
-/// Resolves relative to the package root regardless of working directory.
-final String _samplesDir = '${_packageRoot()}/test/samples';
+/// Tests may run from the workspace root or the package directory,
+/// so we check both known locations.
+final String _samplesDir = _resolveSamplesDir();
 
-String _packageRoot() {
-  // Walk up from this file's location to find the package root
-  var dir = io.Directory('packages/googleai_dart');
-  if (dir.existsSync()) return dir.path;
-  // Fallback: already in the package directory
-  dir = io.Directory('test/samples');
-  if (dir.existsSync()) return '.';
-  // Last resort: use an absolute path
-  return 'packages/googleai_dart';
+String _resolveSamplesDir() {
+  const candidates = [
+    'packages/googleai_dart/test/samples', // workspace root
+    'test/samples', // package root
+  ];
+  for (final path in candidates) {
+    if (io.Directory(path).existsSync()) return path;
+  }
+  throw StateError(
+    'Cannot find test/samples directory. '
+    'Run tests from the workspace root or the package directory.',
+  );
 }
 
 /// Integration tests for TTS (Text-to-Speech) and STT (Speech-to-Text).
