@@ -138,10 +138,7 @@ void main() {
         final config = SpeechConfig.fromJson(json);
 
         expect(config.multiSpeakerVoiceConfig, isNotNull);
-        expect(
-          config.multiSpeakerVoiceConfig!.speakerVoiceConfigs.length,
-          2,
-        );
+        expect(config.multiSpeakerVoiceConfig!.speakerVoiceConfigs.length, 2);
         expect(
           config.multiSpeakerVoiceConfig!.speakerVoiceConfigs[0].speaker,
           'Alice',
@@ -183,17 +180,12 @@ void main() {
         const original = SpeechConfig();
         final updated = original.copyWith(
           multiSpeakerVoiceConfig: const MultiSpeakerVoiceConfig(
-            speakerVoiceConfigs: [
-              SpeakerVoiceConfig(speaker: 'Host'),
-            ],
+            speakerVoiceConfigs: [SpeakerVoiceConfig(speaker: 'Host')],
           ),
         );
 
         expect(updated.multiSpeakerVoiceConfig, isNotNull);
-        expect(
-          updated.multiSpeakerVoiceConfig!.speakerVoiceConfigs.length,
-          1,
-        );
+        expect(updated.multiSpeakerVoiceConfig!.speakerVoiceConfigs.length, 1);
       });
     });
 

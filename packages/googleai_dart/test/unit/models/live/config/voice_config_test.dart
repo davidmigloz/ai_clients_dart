@@ -234,9 +234,7 @@ void main() {
       test('updates speakerVoiceConfigs', () {
         const original = MultiSpeakerVoiceConfig();
         final updated = original.copyWith(
-          speakerVoiceConfigs: [
-            const SpeakerVoiceConfig(speaker: 'Alice'),
-          ],
+          speakerVoiceConfigs: [const SpeakerVoiceConfig(speaker: 'Alice')],
         );
 
         expect(updated.speakerVoiceConfigs, hasLength(1));

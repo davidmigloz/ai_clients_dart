@@ -135,14 +135,10 @@ class GenerationConfig {
             ?.map((e) => responseModalityFromString(e as String))
             .toList(),
         mediaResolution: json['mediaResolution'] != null
-            ? MediaResolutionLevel.fromString(
-                json['mediaResolution'] as String,
-              )
+            ? MediaResolutionLevel.fromString(json['mediaResolution'] as String)
             : null,
-        responseJsonSchema:
-            json['responseJsonSchema'] as Map<String, dynamic>?,
-        enableEnhancedCivicAnswers:
-            json['enableEnhancedCivicAnswers'] as bool?,
+        responseJsonSchema: json['responseJsonSchema'] as Map<String, dynamic>?,
+        enableEnhancedCivicAnswers: json['enableEnhancedCivicAnswers'] as bool?,
         speechConfig: json['speechConfig'] != null
             ? SpeechConfig.fromJson(
                 json['speechConfig'] as Map<String, dynamic>,
@@ -168,8 +164,9 @@ class GenerationConfig {
     if (responseLogprobs != null) 'responseLogprobs': responseLogprobs,
     if (logprobs != null) 'logprobs': logprobs,
     if (responseModalities != null)
-      'responseModalities':
-          responseModalities!.map(responseModalityToString).toList(),
+      'responseModalities': responseModalities!
+          .map(responseModalityToString)
+          .toList(),
     if (mediaResolution != null) 'mediaResolution': mediaResolution!.value,
     if (responseJsonSchema != null) 'responseJsonSchema': responseJsonSchema,
     if (enableEnhancedCivicAnswers != null)
@@ -237,8 +234,9 @@ class GenerationConfig {
       responseLogprobs: responseLogprobs == unsetCopyWithValue
           ? this.responseLogprobs
           : responseLogprobs as bool?,
-      logprobs:
-          logprobs == unsetCopyWithValue ? this.logprobs : logprobs as int?,
+      logprobs: logprobs == unsetCopyWithValue
+          ? this.logprobs
+          : logprobs as int?,
       responseModalities: responseModalities == unsetCopyWithValue
           ? this.responseModalities
           : responseModalities as List<ResponseModality>?,
@@ -250,8 +248,8 @@ class GenerationConfig {
           : responseJsonSchema as Map<String, dynamic>?,
       enableEnhancedCivicAnswers:
           enableEnhancedCivicAnswers == unsetCopyWithValue
-              ? this.enableEnhancedCivicAnswers
-              : enableEnhancedCivicAnswers as bool?,
+          ? this.enableEnhancedCivicAnswers
+          : enableEnhancedCivicAnswers as bool?,
       speechConfig: speechConfig == unsetCopyWithValue
           ? this.speechConfig
           : speechConfig as SpeechConfig?,
