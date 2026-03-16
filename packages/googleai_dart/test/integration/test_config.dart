@@ -10,6 +10,10 @@ const defaultGenerativeModel = 'gemini-2.5-flash';
 /// The default embedding model to use for embedding tests.
 const defaultEmbeddingModel = 'gemini-embedding-2-preview';
 
+/// The default model to use for Interactions API tests.
+/// Note: This is a preview model - ID may change.
+const defaultInteractionsModel = 'gemini-3-flash-preview';
+
 /// The default model to use for Live API WebSocket streaming tests.
 /// Note: This is a preview model - ID may change.
 const defaultLiveModel = 'gemini-2.5-flash-native-audio-preview-12-2025';

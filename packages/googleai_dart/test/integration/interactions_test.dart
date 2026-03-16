@@ -7,9 +7,7 @@ import 'dart:io';
 import 'package:googleai_dart/googleai_dart.dart';
 import 'package:test/test.dart';
 
-/// The model to use for interactions tests.
-/// The Interactions API requires a preview model.
-const _interactionsModel = 'gemini-3-flash-preview';
+import 'test_config.dart';
 
 /// Integration tests for the Interactions API.
 ///
@@ -20,8 +18,9 @@ void main() {
   GoogleAIClient? client;
 
   setUpAll(() {
-    apiKey = Platform.environment['GEMINI_API_KEY'];
-    if (apiKey == null || apiKey!.isEmpty) {
+    final key = Platform.environment['GEMINI_API_KEY'];
+    apiKey = (key != null && key.isNotEmpty) ? key : null;
+    if (apiKey == null) {
       print(
         '⚠️  GEMINI_API_KEY not set. Integration tests will be skipped.\n'
         '   To run these tests, export GEMINI_API_KEY=your_api_key',
@@ -45,7 +44,7 @@ void main() {
       }
 
       final interaction = await client!.interactions.create(
-        model: _interactionsModel,
+        model: defaultInteractionsModel,
         input: const InteractionInput.text(
           'Say "Hello, World!" and nothing else.',
         ),
@@ -65,7 +64,7 @@ void main() {
       }
 
       final interaction = await client!.interactions.create(
-        model: _interactionsModel,
+        model: defaultInteractionsModel,
         input: const InteractionInput.text('What are you?'),
         systemInstruction:
             'You are a helpful pirate. Always respond with pirate language.',
@@ -82,7 +81,7 @@ void main() {
       }
 
       final interaction = await client!.interactions.create(
-        model: _interactionsModel,
+        model: defaultInteractionsModel,
         input: const InteractionInput.text('Count from 1 to 3.'),
         generationConfig: const InteractionGenerationConfig(
           temperature: 0.1,
@@ -110,7 +109,7 @@ void main() {
       }
 
       final interaction = await client!.interactions.create(
-        model: _interactionsModel,
+        model: defaultInteractionsModel,
         input: const InteractionInput.text('Hi'),
       );
 
@@ -130,7 +129,7 @@ void main() {
 
       // Create an interaction first
       final created = await client!.interactions.create(
-        model: _interactionsModel,
+        model: defaultInteractionsModel,
         input: const InteractionInput.text('What is 2 + 2?'),
       );
 
@@ -149,7 +148,7 @@ void main() {
       }
 
       final created = await client!.interactions.create(
-        model: _interactionsModel,
+        model: defaultInteractionsModel,
         input: const InteractionInput.text('Hello there'),
       );
 
@@ -169,7 +168,7 @@ void main() {
       }
 
       final created = await client!.interactions.create(
-        model: _interactionsModel,
+        model: defaultInteractionsModel,
         input: const InteractionInput.text('Temporary message'),
       );
 
@@ -193,14 +192,14 @@ void main() {
 
       // First turn: introduce a name
       final turn1 = await client!.interactions.create(
-        model: _interactionsModel,
+        model: defaultInteractionsModel,
         input: const InteractionInput.text('My name is Alice.'),
       );
       expect(turn1.status, InteractionStatus.completed);
 
       // Second turn: ask about the name, referencing the first interaction
       final turn2 = await client!.interactions.create(
-        model: _interactionsModel,
+        model: defaultInteractionsModel,
         input: const InteractionInput.text('What is my name?'),
         previousInteractionId: turn1.id,
       );
@@ -216,14 +215,14 @@ void main() {
       }
 
       final turn1 = await client!.interactions.create(
-        model: _interactionsModel,
+        model: defaultInteractionsModel,
         input: const InteractionInput.text(
           'Remember this number: 42. Just acknowledge.',
         ),
       );
 
       final turn2 = await client!.interactions.create(
-        model: _interactionsModel,
+        model: defaultInteractionsModel,
         input: const InteractionInput.text(
           'Now remember this color: blue. Just acknowledge.',
         ),
@@ -231,7 +230,7 @@ void main() {
       );
 
       final turn3 = await client!.interactions.create(
-        model: _interactionsModel,
+        model: defaultInteractionsModel,
         input: const InteractionInput.text(
           'What number and color did I tell you to remember?',
         ),
@@ -251,7 +250,7 @@ void main() {
       }
 
       final interaction = await client!.interactions.create(
-        model: _interactionsModel,
+        model: defaultInteractionsModel,
         input: const InteractionInput.turns([
           Turn(role: 'user', content: TurnTextContent('My name is Bob.')),
           Turn(
@@ -291,7 +290,7 @@ void main() {
         ];
 
         final interaction = await client!.interactions.create(
-          model: _interactionsModel,
+          model: defaultInteractionsModel,
           input: const InteractionInput.text(
             'What is the weather in Paris right now?',
           ),
@@ -334,7 +333,7 @@ void main() {
 
       // Step 1: Send request that triggers function call
       final step1 = await client!.interactions.create(
-        model: _interactionsModel,
+        model: defaultInteractionsModel,
         input: const InteractionInput.text(
           'What is the temperature in London?',
         ),
@@ -346,7 +345,7 @@ void main() {
 
       // Step 2: Return the function result
       final step2 = await client!.interactions.create(
-        model: _interactionsModel,
+        model: defaultInteractionsModel,
         input: InteractionInput.singleContent(
           FunctionResultContent(
             callId: functionCall.id,
@@ -372,7 +371,7 @@ void main() {
       }
 
       final interaction = await client!.interactions.create(
-        model: _interactionsModel,
+        model: defaultInteractionsModel,
         input: const InteractionInput.text('What is the current date today?'),
         tools: const [GoogleSearchTool()],
       );
@@ -400,7 +399,7 @@ void main() {
         }
 
         final interaction = await client!.interactions.create(
-          model: _interactionsModel,
+          model: defaultInteractionsModel,
           input: const InteractionInput.text(
             'What is Dart according to https://dart.dev/overview ?',
           ),
@@ -426,7 +425,7 @@ void main() {
       final events = <InteractionEvent>[];
       await client!.interactions
           .createStream(
-            model: _interactionsModel,
+            model: defaultInteractionsModel,
             input: const InteractionInput.text('Say "hello" and nothing else.'),
           )
           .forEach(events.add);
@@ -467,7 +466,7 @@ void main() {
       final events = <InteractionEvent>[];
       await client!.interactions
           .createStream(
-            model: _interactionsModel,
+            model: defaultInteractionsModel,
             input: const InteractionInput.text('Say "test".'),
           )
           .forEach(events.add);
@@ -505,7 +504,7 @@ void main() {
       final events = <InteractionEvent>[];
       await client!.interactions
           .createStream(
-            model: _interactionsModel,
+            model: defaultInteractionsModel,
             input: const InteractionInput.text('What is the weather in Tokyo?'),
             tools: tools,
           )
@@ -534,7 +533,7 @@ void main() {
 
       // First turn (non-streaming to get the ID)
       final turn1 = await client!.interactions.create(
-        model: _interactionsModel,
+        model: defaultInteractionsModel,
         input: const InteractionInput.text('My favorite color is green.'),
       );
 
@@ -542,7 +541,7 @@ void main() {
       final events = <InteractionEvent>[];
       await client!.interactions
           .createStream(
-            model: _interactionsModel,
+            model: defaultInteractionsModel,
             input: const InteractionInput.text('What is my favorite color?'),
             previousInteractionId: turn1.id,
           )
@@ -566,7 +565,7 @@ void main() {
       final events = <InteractionEvent>[];
       await client!.interactions
           .createStream(
-            model: _interactionsModel,
+            model: defaultInteractionsModel,
             input: const InteractionInput.text(
               'What day of the week is it today?',
             ),
@@ -580,16 +579,17 @@ void main() {
       final completeEvent = events.whereType<InteractionCompleteEvent>().first;
       expect(completeEvent.interaction?.status, InteractionStatus.completed);
 
-      // Should have google search related content starts
-      final searchStarts = events
-          .whereType<ContentStartEvent>()
-          .where(
-            (e) =>
-                e.content is GoogleSearchCallContent ||
-                e.content is GoogleSearchResultContent,
-          )
-          .toList();
-      expect(searchStarts, isNotEmpty);
+      // Should have google search related events (content starts or deltas)
+      final hasSearchEvents = events.any(
+        (e) =>
+            (e is ContentStartEvent &&
+                (e.content is GoogleSearchCallContent ||
+                    e.content is GoogleSearchResultContent)) ||
+            (e is ContentDeltaEvent &&
+                (e.delta is GoogleSearchCallDelta ||
+                    e.delta is GoogleSearchResultDelta)),
+      );
+      expect(hasSearchEvents, isTrue);
     });
   });
 
@@ -601,7 +601,7 @@ void main() {
       }
 
       final interaction = await client!.interactions.create(
-        model: _interactionsModel,
+        model: defaultInteractionsModel,
         input: const InteractionInput.text(
           'Write two short sentences about Dart.',
         ),
@@ -620,7 +620,7 @@ void main() {
       }
 
       final interaction = await client!.interactions.create(
-        model: _interactionsModel,
+        model: defaultInteractionsModel,
         input: const InteractionInput.text('Get weather in Berlin.'),
         tools: const [
           FunctionTool(
