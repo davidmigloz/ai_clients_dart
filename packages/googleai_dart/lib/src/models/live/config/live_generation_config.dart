@@ -1,5 +1,5 @@
+import '../../common/speech_config.dart';
 import '../../generation/response_modality.dart';
-import 'speech_config.dart';
 
 /// Generation configuration for Live API sessions.
 ///

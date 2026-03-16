@@ -1,3 +1,4 @@
+import '../../common/speech_config.dart';
 import '../../content/content.dart';
 import '../../tools/tool.dart';
 import 'audio_transcription_config.dart';
@@ -6,7 +7,6 @@ import 'live_generation_config.dart';
 import 'proactivity_config.dart';
 import 'realtime_input_config.dart';
 import 'session_resumption_config.dart';
-import 'speech_config.dart';
 
 /// Main configuration for Live API sessions.
 ///

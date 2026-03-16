@@ -231,7 +231,7 @@
       "spec": "live",
       "kind": "skip",
       "dart_class": "PrebuiltVoiceConfig",
-      "file": "lib/src/models/live/config/voice_config.dart",
+      "file": "lib/src/models/common/voice_config.dart",
       "schema": "PrebuiltVoiceConfig",
       "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
@@ -277,7 +277,7 @@
       "spec": "live",
       "kind": "skip",
       "dart_class": "SpeechConfig",
-      "file": "lib/src/models/live/config/speech_config.dart",
+      "file": "lib/src/models/common/speech_config.dart",
       "schema": "SpeechConfig",
       "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
@@ -295,7 +295,7 @@
       "spec": "live",
       "kind": "skip",
       "dart_class": "VoiceConfig",
-      "file": "lib/src/models/live/config/voice_config.dart",
+      "file": "lib/src/models/common/voice_config.dart",
       "schema": "VoiceConfig",
       "tags": [],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."

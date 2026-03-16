@@ -56,6 +56,8 @@ export 'src/models/common/model_status.dart';
 export 'src/models/common/register_files_request.dart';
 export 'src/models/common/register_files_response.dart';
 export 'src/models/common/search_types.dart';
+export 'src/models/common/speech_config.dart';
+export 'src/models/common/voice_config.dart';
 export 'src/models/common/web_search.dart';
 // Models - Content
 export 'src/models/content/blob.dart';
@@ -155,9 +157,7 @@ export 'src/models/live/config/proactivity_config.dart';
 export 'src/models/live/config/realtime_input_config.dart';
 export 'src/models/live/config/session_resumption_config.dart';
 export 'src/models/live/config/sliding_window.dart';
-export 'src/models/live/config/speech_config.dart';
 export 'src/models/live/config/transcription.dart';
-export 'src/models/live/config/voice_config.dart';
 export 'src/models/live/enums/activity_handling.dart';
 export 'src/models/live/enums/end_sensitivity.dart';
 export 'src/models/live/enums/start_sensitivity.dart';

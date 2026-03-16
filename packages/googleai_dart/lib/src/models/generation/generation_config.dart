@@ -1,6 +1,6 @@
+import '../common/speech_config.dart';
 import '../content/media_resolution.dart';
 import '../copy_with_sentinel.dart';
-import '../live/config/speech_config.dart';
 import 'image_config.dart';
 import 'response_modality.dart';
 import 'thinking_config.dart';

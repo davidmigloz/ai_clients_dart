@@ -1,4 +1,4 @@
-import '../../copy_with_sentinel.dart';
+import '../copy_with_sentinel.dart';
 import 'voice_config.dart';
 
 /// Configuration for speech synthesis.
