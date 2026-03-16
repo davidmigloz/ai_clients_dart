@@ -156,6 +156,12 @@ class CompletionsResource extends ResourceBase with StreamingResource {
       }
       try {
         return Completion.fromJson(json);
+      } on FormatException catch (e) {
+        throw ParseException(
+          message: 'Failed to parse completion stream event: $e',
+          responseBody: json.toString(),
+          cause: e,
+        );
       } on TypeError catch (e) {
         throw ParseException(
           message: 'Failed to parse completion stream event: $e',

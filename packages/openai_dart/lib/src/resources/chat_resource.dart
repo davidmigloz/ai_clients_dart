@@ -217,6 +217,12 @@ class ChatCompletionsResource extends ResourceBase with StreamingResource {
       }
       try {
         return ChatStreamEvent.fromJson(json);
+      } on FormatException catch (e) {
+        throw ParseException(
+          message: 'Failed to parse chat stream event: $e',
+          responseBody: json.toString(),
+          cause: e,
+        );
       } on TypeError catch (e) {
         throw ParseException(
           message: 'Failed to parse chat stream event: $e',

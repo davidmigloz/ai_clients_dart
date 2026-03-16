@@ -106,7 +106,7 @@ class FunctionCall {
       // that pass through Converse API's toolUse.input without stringifying).
       arguments: switch (json['arguments']) {
         final String s => s,
-        final Map<String, dynamic> m => jsonEncode(m),
+        final Map m => jsonEncode(m),
         null => '{}',
         final other => other.toString(),
       },
