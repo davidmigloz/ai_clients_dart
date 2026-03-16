@@ -1,4 +1,5 @@
 import '../../common/speech_config.dart';
+import '../../copy_with_sentinel.dart';
 import '../../generation/response_modality.dart';
 
 /// Generation configuration for Live API sessions.
@@ -110,20 +111,28 @@ class LiveGenerationConfig {
 
   /// Creates a copy with the given fields replaced.
   LiveGenerationConfig copyWith({
-    List<ResponseModality>? responseModalities,
-    SpeechConfig? speechConfig,
-    double? temperature,
-    int? maxOutputTokens,
-    double? topP,
-    int? topK,
+    Object? responseModalities = unsetCopyWithValue,
+    Object? speechConfig = unsetCopyWithValue,
+    Object? temperature = unsetCopyWithValue,
+    Object? maxOutputTokens = unsetCopyWithValue,
+    Object? topP = unsetCopyWithValue,
+    Object? topK = unsetCopyWithValue,
   }) {
     return LiveGenerationConfig(
-      responseModalities: responseModalities ?? this.responseModalities,
-      speechConfig: speechConfig ?? this.speechConfig,
-      temperature: temperature ?? this.temperature,
-      maxOutputTokens: maxOutputTokens ?? this.maxOutputTokens,
-      topP: topP ?? this.topP,
-      topK: topK ?? this.topK,
+      responseModalities: responseModalities == unsetCopyWithValue
+          ? this.responseModalities
+          : responseModalities as List<ResponseModality>?,
+      speechConfig: speechConfig == unsetCopyWithValue
+          ? this.speechConfig
+          : speechConfig as SpeechConfig?,
+      temperature: temperature == unsetCopyWithValue
+          ? this.temperature
+          : temperature as double?,
+      maxOutputTokens: maxOutputTokens == unsetCopyWithValue
+          ? this.maxOutputTokens
+          : maxOutputTokens as int?,
+      topP: topP == unsetCopyWithValue ? this.topP : topP as double?,
+      topK: topK == unsetCopyWithValue ? this.topK : topK as int?,
     );
   }
 
