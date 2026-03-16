@@ -108,7 +108,7 @@ class FunctionCall {
         final String s => s,
         final Map<dynamic, dynamic> m => jsonEncode(m),
         null => '{}',
-        final other => other.toString(),
+        final other => jsonEncode(other),
       },
     );
   }

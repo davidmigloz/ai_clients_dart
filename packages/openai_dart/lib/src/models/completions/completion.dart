@@ -174,11 +174,11 @@ class CompletionRequest {
 class Completion {
   /// Creates a [Completion].
   const Completion({
-    this.id = '',
-    this.object = 'text_completion',
+    required this.id,
+    required this.object,
     this.created,
-    this.model = '',
-    this.choices = const [],
+    required this.model,
+    required this.choices,
     this.usage,
     this.systemFingerprint,
   });

@@ -30,10 +30,10 @@ class ChatCompletion {
   /// Creates a [ChatCompletion].
   const ChatCompletion({
     this.id,
-    this.object = 'chat.completion',
+    required this.object,
     this.created,
-    this.model = '',
-    this.choices = const [],
+    required this.model,
+    required this.choices,
     this.usage,
     this.systemFingerprint,
     this.serviceTier,
