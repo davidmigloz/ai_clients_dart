@@ -9,7 +9,7 @@
 /// Supported models: gemini-2.5-flash-image, gemini-3.1-pro-image-preview
 ///
 /// Note: The model always returns both text and images when using
-/// `responseModalities: ['TEXT', 'IMAGE']`.
+/// `responseModalities: [ResponseModality.text, ResponseModality.image]`.
 library;
 
 import 'dart:convert';
@@ -35,7 +35,7 @@ void main() async {
           Content.text('Generate an image of a sunset over mountains'),
         ],
         generationConfig: const GenerationConfig(
-          responseModalities: ['TEXT', 'IMAGE'],
+          responseModalities: [ResponseModality.text, ResponseModality.image],
         ),
       ),
     );
@@ -67,7 +67,7 @@ void main() async {
           Content.text('A futuristic cityscape at night with neon lights'),
         ],
         generationConfig: const GenerationConfig(
-          responseModalities: ['TEXT', 'IMAGE'],
+          responseModalities: [ResponseModality.text, ResponseModality.image],
           imageConfig: ImageConfig(
             aspectRatio: '16:9', // Widescreen format
             imageSize: '2K', // Higher resolution
@@ -94,7 +94,7 @@ void main() async {
       request: GenerateContentRequest(
         contents: [Content.text('A calm lake surrounded by pine trees')],
         generationConfig: const GenerationConfig(
-          responseModalities: ['TEXT', 'IMAGE'],
+          responseModalities: [ResponseModality.text, ResponseModality.image],
         ),
       ),
     );
@@ -116,7 +116,7 @@ void main() async {
             Content.user([Part.text('Add a small wooden cabin on the shore')]),
           ],
           generationConfig: const GenerationConfig(
-            responseModalities: ['TEXT', 'IMAGE'],
+            responseModalities: [ResponseModality.text, ResponseModality.image],
           ),
         ),
       );
@@ -139,7 +139,7 @@ void main() async {
       request: GenerateContentRequest(
         contents: [Content.text('A cute robot holding a cup of coffee')],
         generationConfig: const GenerationConfig(
-          responseModalities: ['TEXT', 'IMAGE'],
+          responseModalities: [ResponseModality.text, ResponseModality.image],
           imageConfig: ImageConfig(
             aspectRatio: '1:1', // Square format
             imageSize: '1K',

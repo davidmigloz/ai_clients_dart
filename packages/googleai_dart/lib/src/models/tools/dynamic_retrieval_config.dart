@@ -1,13 +1,14 @@
 import '../copy_with_sentinel.dart';
+import 'dynamic_retrieval_mode.dart';
 
 /// Describes the options to customize dynamic retrieval.
 class DynamicRetrievalConfig {
   /// The mode of the predictor to be used in dynamic retrieval.
   ///
-  /// Values: 'MODE_UNSPECIFIED', 'MODE_DYNAMIC'
-  /// - MODE_UNSPECIFIED: Always trigger retrieval.
-  /// - MODE_DYNAMIC: Run retrieval only when system decides it is necessary.
-  final String? mode;
+  /// - [DynamicRetrievalMode.unspecified]: Always trigger retrieval.
+  /// - [DynamicRetrievalMode.dynamic_]: Run retrieval only when system decides
+  ///   it is necessary.
+  final DynamicRetrievalMode? mode;
 
   /// The threshold to be used in dynamic retrieval.
   ///
@@ -20,13 +21,15 @@ class DynamicRetrievalConfig {
   /// Creates a [DynamicRetrievalConfig] from JSON.
   factory DynamicRetrievalConfig.fromJson(Map<String, dynamic> json) =>
       DynamicRetrievalConfig(
-        mode: json['mode'] as String?,
+        mode: json['mode'] != null
+            ? dynamicRetrievalModeFromString(json['mode'] as String)
+            : null,
         dynamicThreshold: (json['dynamicThreshold'] as num?)?.toDouble(),
       );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
-    if (mode != null) 'mode': mode,
+    if (mode != null) 'mode': dynamicRetrievalModeToString(mode!),
     if (dynamicThreshold != null) 'dynamicThreshold': dynamicThreshold,
   };
 
@@ -36,7 +39,9 @@ class DynamicRetrievalConfig {
     Object? dynamicThreshold = unsetCopyWithValue,
   }) {
     return DynamicRetrievalConfig(
-      mode: mode == unsetCopyWithValue ? this.mode : mode as String?,
+      mode: mode == unsetCopyWithValue
+          ? this.mode
+          : mode as DynamicRetrievalMode?,
       dynamicThreshold: dynamicThreshold == unsetCopyWithValue
           ? this.dynamicThreshold
           : dynamicThreshold as double?,

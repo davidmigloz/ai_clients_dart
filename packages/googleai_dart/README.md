@@ -50,7 +50,7 @@ Unofficial Dart client for the **[Google AI Gemini Developer API](https://ai.goo
   - Google Maps (geospatial context)
   - MCP servers (Model Context Protocol)
 - ✅ Safety settings support
-- ✅ Native image generation (`responseModalities: ['IMAGE']` with `imageConfig`)
+- ✅ Native image generation
 
 #### Embeddings
 
@@ -435,7 +435,7 @@ final response = await client.models.generateContent(
   request: GenerateContentRequest(
     contents: [Content.text('A sunset over mountains')],
     generationConfig: const GenerationConfig(
-      responseModalities: ['TEXT', 'IMAGE'],
+      responseModalities: [ResponseModality.text, ResponseModality.image],
     ),
   ),
 );
@@ -467,7 +467,7 @@ final response = await client.models.generateContent(
   request: GenerateContentRequest(
     contents: [Content.text('A futuristic cityscape')],
     generationConfig: const GenerationConfig(
-      responseModalities: ['TEXT', 'IMAGE'],
+      responseModalities: [ResponseModality.text, ResponseModality.image],
       imageConfig: ImageConfig(
         aspectRatio: '16:9',  // 1:1, 2:3, 3:2, 3:4, 4:3, 9:16, 16:9, 21:9
         imageSize: '2K',      // 1K, 2K, 4K
@@ -644,8 +644,8 @@ final response = await client.models.generateContent(
     contents: [
       Content.text('Summarize the main points from: https://dart.dev/overview'),
     ],
-    // Enable URL Context with an empty map
-    tools: [Tool(urlContext: {})],
+    // Enable URL Context
+    tools: [Tool(urlContext: UrlContext())],
   ),
 );
 
@@ -687,15 +687,12 @@ final response = await client.models.generateContent(
     contents: [Content.text('Find Italian restaurants nearby')],
     // Enable Google Maps with widget support
     tools: [Tool(googleMaps: GoogleMaps(enableWidget: true))],
-    // Provide user location context (as Map)
-    toolConfig: {
-      'retrievalConfig': {
-        'latLng': {
-          'latitude': 40.758896,
-          'longitude': -73.985130,
-        },
-      },
-    },
+    // Provide user location context
+    toolConfig: ToolConfig(
+      retrievalConfig: RetrievalConfig(
+        latLng: LatLng(latitude: 40.758896, longitude: -73.985130),
+      ),
+    ),
   ),
 );
 

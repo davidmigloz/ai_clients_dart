@@ -1,5 +1,8 @@
+import '../content/media_resolution.dart';
 import '../copy_with_sentinel.dart';
+import '../live/config/speech_config.dart';
 import 'image_config.dart';
+import 'response_modality.dart';
 import 'thinking_config.dart';
 
 /// Configuration options for model generation.
@@ -57,15 +60,11 @@ class GenerationConfig {
   /// The requested modalities of the response.
   ///
   /// Represents the set of modalities that the model can return.
-  /// Supported values: TEXT, IMAGE, AUDIO.
   /// An empty list is equivalent to requesting only text.
-  final List<String>? responseModalities;
+  final List<ResponseModality>? responseModalities;
 
   /// Media resolution for input media.
-  ///
-  /// Supported values: MEDIA_RESOLUTION_UNSPECIFIED, MEDIA_RESOLUTION_LOW,
-  /// MEDIA_RESOLUTION_MEDIUM, MEDIA_RESOLUTION_HIGH.
-  final String? mediaResolution;
+  final MediaResolutionLevel? mediaResolution;
 
   /// Response JSON schema for structured output.
   ///
@@ -82,7 +81,7 @@ class GenerationConfig {
   ///
   /// Contains voice configuration for speech output including
   /// single-voice and multi-speaker setups.
-  final Map<String, dynamic>? speechConfig;
+  final SpeechConfig? speechConfig;
 
   /// Creates a [GenerationConfig].
   const GenerationConfig({
@@ -133,11 +132,22 @@ class GenerationConfig {
         responseLogprobs: json['responseLogprobs'] as bool?,
         logprobs: json['logprobs'] as int?,
         responseModalities: (json['responseModalities'] as List?)
-            ?.cast<String>(),
-        mediaResolution: json['mediaResolution'] as String?,
-        responseJsonSchema: json['responseJsonSchema'] as Map<String, dynamic>?,
-        enableEnhancedCivicAnswers: json['enableEnhancedCivicAnswers'] as bool?,
-        speechConfig: json['speechConfig'] as Map<String, dynamic>?,
+            ?.map((e) => responseModalityFromString(e as String))
+            .toList(),
+        mediaResolution: json['mediaResolution'] != null
+            ? MediaResolutionLevel.fromString(
+                json['mediaResolution'] as String,
+              )
+            : null,
+        responseJsonSchema:
+            json['responseJsonSchema'] as Map<String, dynamic>?,
+        enableEnhancedCivicAnswers:
+            json['enableEnhancedCivicAnswers'] as bool?,
+        speechConfig: json['speechConfig'] != null
+            ? SpeechConfig.fromJson(
+                json['speechConfig'] as Map<String, dynamic>,
+              )
+            : null,
       );
 
   /// Converts to JSON.
@@ -157,12 +167,14 @@ class GenerationConfig {
     if (seed != null) 'seed': seed,
     if (responseLogprobs != null) 'responseLogprobs': responseLogprobs,
     if (logprobs != null) 'logprobs': logprobs,
-    if (responseModalities != null) 'responseModalities': responseModalities,
-    if (mediaResolution != null) 'mediaResolution': mediaResolution,
+    if (responseModalities != null)
+      'responseModalities':
+          responseModalities!.map(responseModalityToString).toList(),
+    if (mediaResolution != null) 'mediaResolution': mediaResolution!.value,
     if (responseJsonSchema != null) 'responseJsonSchema': responseJsonSchema,
     if (enableEnhancedCivicAnswers != null)
       'enableEnhancedCivicAnswers': enableEnhancedCivicAnswers,
-    if (speechConfig != null) 'speechConfig': speechConfig,
+    if (speechConfig != null) 'speechConfig': speechConfig!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -225,25 +237,24 @@ class GenerationConfig {
       responseLogprobs: responseLogprobs == unsetCopyWithValue
           ? this.responseLogprobs
           : responseLogprobs as bool?,
-      logprobs: logprobs == unsetCopyWithValue
-          ? this.logprobs
-          : logprobs as int?,
+      logprobs:
+          logprobs == unsetCopyWithValue ? this.logprobs : logprobs as int?,
       responseModalities: responseModalities == unsetCopyWithValue
           ? this.responseModalities
-          : responseModalities as List<String>?,
+          : responseModalities as List<ResponseModality>?,
       mediaResolution: mediaResolution == unsetCopyWithValue
           ? this.mediaResolution
-          : mediaResolution as String?,
+          : mediaResolution as MediaResolutionLevel?,
       responseJsonSchema: responseJsonSchema == unsetCopyWithValue
           ? this.responseJsonSchema
           : responseJsonSchema as Map<String, dynamic>?,
       enableEnhancedCivicAnswers:
           enableEnhancedCivicAnswers == unsetCopyWithValue
-          ? this.enableEnhancedCivicAnswers
-          : enableEnhancedCivicAnswers as bool?,
+              ? this.enableEnhancedCivicAnswers
+              : enableEnhancedCivicAnswers as bool?,
       speechConfig: speechConfig == unsetCopyWithValue
           ? this.speechConfig
-          : speechConfig as Map<String, dynamic>?,
+          : speechConfig as SpeechConfig?,
     );
   }
 }

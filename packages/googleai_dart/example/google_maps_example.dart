@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print, avoid_dynamic_calls, prefer_const_constructors
+// ignore_for_file: avoid_print, prefer_const_constructors
 /// Demonstrates Google Maps grounding for geospatial context.
 ///
 /// Google Maps grounding enables the model to access location and place
@@ -63,16 +63,13 @@ Future<void> mapsWithLocationContext(GoogleAIClient client) async {
       contents: [Content.text('Find Italian restaurants near me')],
       // Enable Google Maps grounding
       tools: const [Tool(googleMaps: GoogleMaps())],
-      // Provide user location for context (as Map)
-      toolConfig: {
-        'retrievalConfig': {
-          'latLng': {
-            'latitude': 40.758896, // Times Square, New York
-            'longitude': -73.985130,
-          },
-          'languageCode': 'en-US',
-        },
-      },
+      // Provide user location for context
+      toolConfig: ToolConfig(
+        retrievalConfig: RetrievalConfig(
+          latLng: LatLng(latitude: 40.758896, longitude: -73.985130),
+          languageCode: 'en-US',
+        ),
+      ),
     ),
   );
 
@@ -99,12 +96,12 @@ Future<void> mapsWithWidgetToken(GoogleAIClient client) async {
       // Enable Google Maps with widget support
       tools: const [Tool(googleMaps: GoogleMaps(enableWidget: true))],
       // Provide location near Eiffel Tower
-      toolConfig: {
-        'retrievalConfig': {
-          'latLng': {'latitude': 48.858370, 'longitude': 2.294481},
-          'languageCode': 'en-US',
-        },
-      },
+      toolConfig: ToolConfig(
+        retrievalConfig: RetrievalConfig(
+          latLng: LatLng(latitude: 48.858370, longitude: 2.294481),
+          languageCode: 'en-US',
+        ),
+      ),
     ),
   );
 

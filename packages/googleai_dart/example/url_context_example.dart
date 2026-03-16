@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print, avoid_dynamic_calls
+// ignore_for_file: avoid_print
 /// Demonstrates URL Context tool for fetching and analyzing web content.
 ///
 /// The URL Context tool enables the model to retrieve and process content
@@ -49,8 +49,8 @@ Future<void> urlContextWithGenerateContent(GoogleAIClient client) async {
           'https://dart.dev/overview',
         ),
       ],
-      // Enable URL Context with an empty map
-      tools: const [Tool(urlContext: {})],
+      // Enable URL Context
+      tools: const [Tool(urlContext: UrlContext())],
     ),
   );
 
@@ -118,7 +118,7 @@ Future<void> compareMultipleUrls(GoogleAIClient client) async {
           'Which one is more beginner-friendly and why?',
         ),
       ],
-      tools: const [Tool(urlContext: {})],
+      tools: const [Tool(urlContext: UrlContext())],
     ),
   );
 

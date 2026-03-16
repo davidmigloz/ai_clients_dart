@@ -72,6 +72,89 @@ class PrebuiltVoiceConfig {
   String toString() => 'PrebuiltVoiceConfig(voiceName: $voiceName)';
 }
 
+/// Configuration for multi-speaker voice output.
+///
+/// Allows configuring different voices for different speakers.
+class MultiSpeakerVoiceConfig {
+  /// Voice configurations for each speaker.
+  final List<SpeakerVoiceConfig> speakerVoiceConfigs;
+
+  /// Creates a [MultiSpeakerVoiceConfig].
+  const MultiSpeakerVoiceConfig({this.speakerVoiceConfigs = const []});
+
+  /// Creates from JSON.
+  factory MultiSpeakerVoiceConfig.fromJson(Map<String, dynamic> json) {
+    return MultiSpeakerVoiceConfig(
+      speakerVoiceConfigs: (json['speakerVoiceConfigs'] as List?)
+              ?.map(
+                (e) => SpeakerVoiceConfig.fromJson(e as Map<String, dynamic>),
+              )
+              .toList() ??
+          const [],
+    );
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    if (speakerVoiceConfigs.isNotEmpty)
+      'speakerVoiceConfigs':
+          speakerVoiceConfigs.map((e) => e.toJson()).toList(),
+  };
+
+  /// Creates a copy with the given fields replaced.
+  MultiSpeakerVoiceConfig copyWith({
+    List<SpeakerVoiceConfig>? speakerVoiceConfigs,
+  }) {
+    return MultiSpeakerVoiceConfig(
+      speakerVoiceConfigs: speakerVoiceConfigs ?? this.speakerVoiceConfigs,
+    );
+  }
+
+  @override
+  String toString() =>
+      'MultiSpeakerVoiceConfig(speakerVoiceConfigs: $speakerVoiceConfigs)';
+}
+
+/// Configuration for a single speaker's voice.
+class SpeakerVoiceConfig {
+  /// The speaker identifier.
+  final String? speaker;
+
+  /// The voice configuration for this speaker.
+  final VoiceConfig? voiceConfig;
+
+  /// Creates a [SpeakerVoiceConfig].
+  const SpeakerVoiceConfig({this.speaker, this.voiceConfig});
+
+  /// Creates from JSON.
+  factory SpeakerVoiceConfig.fromJson(Map<String, dynamic> json) {
+    return SpeakerVoiceConfig(
+      speaker: json['speaker'] as String?,
+      voiceConfig: json['voiceConfig'] != null
+          ? VoiceConfig.fromJson(json['voiceConfig'] as Map<String, dynamic>)
+          : null,
+    );
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    if (speaker != null) 'speaker': speaker,
+    if (voiceConfig != null) 'voiceConfig': voiceConfig!.toJson(),
+  };
+
+  /// Creates a copy with the given fields replaced.
+  SpeakerVoiceConfig copyWith({String? speaker, VoiceConfig? voiceConfig}) {
+    return SpeakerVoiceConfig(
+      speaker: speaker ?? this.speaker,
+      voiceConfig: voiceConfig ?? this.voiceConfig,
+    );
+  }
+
+  @override
+  String toString() =>
+      'SpeakerVoiceConfig(speaker: $speaker, voiceConfig: $voiceConfig)';
+}
+
 /// Available prebuilt voices for Live API.
 abstract class LiveVoices {
   LiveVoices._();

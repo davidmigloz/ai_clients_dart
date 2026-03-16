@@ -1,4 +1,5 @@
 import '../copy_with_sentinel.dart';
+import 'computer_use_environment.dart';
 
 /// Computer Use tool type.
 ///
@@ -7,8 +8,8 @@ import '../copy_with_sentinel.dart';
 class ComputerUse {
   /// The environment being operated.
   ///
-  /// Currently only 'ENVIRONMENT_BROWSER' is supported.
-  final String? environment;
+  /// Currently only [ComputerUseEnvironment.browser] is supported.
+  final ComputerUseEnvironment? environment;
 
   /// List of predefined functions to exclude from the model call.
   ///
@@ -22,14 +23,17 @@ class ComputerUse {
 
   /// Creates a [ComputerUse] from JSON.
   factory ComputerUse.fromJson(Map<String, dynamic> json) => ComputerUse(
-    environment: json['environment'] as String?,
+    environment: json['environment'] != null
+        ? computerUseEnvironmentFromString(json['environment'] as String)
+        : null,
     excludedPredefinedFunctions:
         (json['excludedPredefinedFunctions'] as List<dynamic>?)?.cast<String>(),
   );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
-    if (environment != null) 'environment': environment,
+    if (environment != null)
+      'environment': computerUseEnvironmentToString(environment!),
     if (excludedPredefinedFunctions != null)
       'excludedPredefinedFunctions': excludedPredefinedFunctions,
   };
@@ -42,7 +46,7 @@ class ComputerUse {
     return ComputerUse(
       environment: environment == unsetCopyWithValue
           ? this.environment
-          : environment as String?,
+          : environment as ComputerUseEnvironment?,
       excludedPredefinedFunctions:
           excludedPredefinedFunctions == unsetCopyWithValue
           ? this.excludedPredefinedFunctions

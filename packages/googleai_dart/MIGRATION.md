@@ -17,7 +17,7 @@ All list fields that previously used `List<dynamic>` are now strongly typed. Thi
 | `GroundingSupport`   | `groundingChunkIndices` | `List<dynamic>` | `List<int>`     |
 | `GroundingSupport`   | `confidenceScores`      | `List<dynamic>` | `List<double>`  |
 | `GenerationConfig`   | `stopSequences`         | `List<dynamic>` | `List<String>`  |
-| `GenerationConfig`   | `responseModalities`    | `List<dynamic>` | `List<String>`  |
+| `GenerationConfig`   | `responseModalities`    | `List<dynamic>` | `List<ResponseModality>` |
 | `Schema`             | `enumValues`            | `List<dynamic>` | `List<String>`  |
 | `Schema`             | `required`              | `List<dynamic>` | `List<String>`  |
 | `GroundingMetadata`  | `webSearchQueries`      | `List<dynamic>` | `List<String>`  |

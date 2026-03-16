@@ -116,6 +116,7 @@ export 'src/models/generation/image_config.dart';
 export 'src/models/generation/input_feedback.dart';
 export 'src/models/generation/metadata_filter.dart';
 export 'src/models/generation/prompt_feedback.dart';
+export 'src/models/generation/response_modality.dart';
 export 'src/models/generation/schema.dart';
 export 'src/models/generation/semantic_retriever_chunk.dart';
 export 'src/models/generation/semantic_retriever_config.dart';
@@ -211,9 +212,12 @@ export 'src/models/safety/harm_probability.dart';
 export 'src/models/safety/safety_rating.dart';
 export 'src/models/safety/safety_setting.dart';
 // Models - Tools
+export 'src/models/tools/code_execution.dart';
 export 'src/models/tools/code_execution_result.dart';
 export 'src/models/tools/computer_use.dart';
+export 'src/models/tools/computer_use_environment.dart';
 export 'src/models/tools/dynamic_retrieval_config.dart';
+export 'src/models/tools/dynamic_retrieval_mode.dart';
 export 'src/models/tools/executable_code.dart';
 export 'src/models/tools/file_search.dart';
 export 'src/models/tools/function_call.dart';
@@ -226,6 +230,7 @@ export 'src/models/tools/mcp_server.dart';
 export 'src/models/tools/streamable_http_transport.dart';
 export 'src/models/tools/tool.dart';
 export 'src/models/tools/tool_config.dart';
+export 'src/models/tools/url_context.dart';
 // Utilities
 export 'src/utils/lro_poller.dart';
 export 'src/utils/paginator.dart';

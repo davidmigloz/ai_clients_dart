@@ -1,11 +1,13 @@
 import '../common/google_search.dart';
 import '../copy_with_sentinel.dart';
+import 'code_execution.dart';
 import 'computer_use.dart';
 import 'file_search.dart';
 import 'function_declaration.dart';
 import 'google_maps.dart';
 import 'google_search_retrieval.dart';
 import 'mcp_server.dart';
+import 'url_context.dart';
 
 /// Tool that the model may use to generate a response.
 class Tool {
@@ -13,7 +15,7 @@ class Tool {
   final List<FunctionDeclaration>? functionDeclarations;
 
   /// Code execution capability.
-  final Map<String, dynamic>? codeExecution;
+  final CodeExecution? codeExecution;
 
   /// Google search capability.
   final GoogleSearch? googleSearch;
@@ -33,7 +35,7 @@ class Tool {
   /// Enables the model to retrieve and process content from URLs provided
   /// in the prompt. Supports HTML, JSON, text, XML, CSS, JavaScript, CSV,
   /// RTF, images, and PDFs. Maximum 20 URLs per request, 34MB per URL.
-  final Map<String, dynamic>? urlContext;
+  final UrlContext? urlContext;
 
   /// Tool to support the model interacting directly with the computer.
   ///
@@ -69,7 +71,9 @@ class Tool {
               )
               .toList()
         : null,
-    codeExecution: json['codeExecution'] as Map<String, dynamic>?,
+    codeExecution: json['codeExecution'] != null
+        ? CodeExecution.fromJson(json['codeExecution'] as Map<String, dynamic>)
+        : null,
     googleSearch: json['googleSearch'] != null
         ? GoogleSearch.fromJson(json['googleSearch'] as Map<String, dynamic>)
         : null,
@@ -84,7 +88,9 @@ class Tool {
     googleMaps: json['googleMaps'] != null
         ? GoogleMaps.fromJson(json['googleMaps'] as Map<String, dynamic>)
         : null,
-    urlContext: json['urlContext'] as Map<String, dynamic>?,
+    urlContext: json['urlContext'] != null
+        ? UrlContext.fromJson(json['urlContext'] as Map<String, dynamic>)
+        : null,
     computerUse: json['computerUse'] != null
         ? ComputerUse.fromJson(json['computerUse'] as Map<String, dynamic>)
         : null,
@@ -101,13 +107,13 @@ class Tool {
       'functionDeclarations': functionDeclarations!
           .map((e) => e.toJson())
           .toList(),
-    if (codeExecution != null) 'codeExecution': codeExecution,
+    if (codeExecution != null) 'codeExecution': codeExecution!.toJson(),
     if (googleSearch != null) 'googleSearch': googleSearch!.toJson(),
     if (fileSearch != null) 'fileSearch': fileSearch!.toJson(),
     if (mcpServers != null)
       'mcpServers': mcpServers!.map((e) => e.toJson()).toList(),
     if (googleMaps != null) 'googleMaps': googleMaps!.toJson(),
-    if (urlContext != null) 'urlContext': urlContext,
+    if (urlContext != null) 'urlContext': urlContext!.toJson(),
     if (computerUse != null) 'computerUse': computerUse!.toJson(),
     if (googleSearchRetrieval != null)
       'googleSearchRetrieval': googleSearchRetrieval!.toJson(),
@@ -131,7 +137,7 @@ class Tool {
           : functionDeclarations as List<FunctionDeclaration>?,
       codeExecution: codeExecution == unsetCopyWithValue
           ? this.codeExecution
-          : codeExecution as Map<String, dynamic>?,
+          : codeExecution as CodeExecution?,
       googleSearch: googleSearch == unsetCopyWithValue
           ? this.googleSearch
           : googleSearch as GoogleSearch?,
@@ -146,7 +152,7 @@ class Tool {
           : googleMaps as GoogleMaps?,
       urlContext: urlContext == unsetCopyWithValue
           ? this.urlContext
-          : urlContext as Map<String, dynamic>?,
+          : urlContext as UrlContext?,
       computerUse: computerUse == unsetCopyWithValue
           ? this.computerUse
           : computerUse as ComputerUse?,

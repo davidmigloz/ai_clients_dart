@@ -68,17 +68,13 @@ void main() {
 
         final response = await client!.models.generateContent(
           model: defaultTTSModel,
-          request: const GenerateContentRequest(
-            contents: [
+          request: GenerateContentRequest(
+            contents: const [
               Content(parts: [TextPart('Hello, World!')], role: 'user'),
             ],
             generationConfig: GenerationConfig(
-              responseModalities: ['AUDIO'],
-              speechConfig: {
-                'voiceConfig': {
-                  'prebuiltVoiceConfig': {'voiceName': 'Kore'},
-                },
-              },
+              responseModalities: const [ResponseModality.audio],
+              speechConfig: SpeechConfig.withVoice('Kore'),
             ),
           ),
         );
@@ -109,8 +105,8 @@ void main() {
 
         final response = await client!.models.generateContent(
           model: defaultTTSModel,
-          request: const GenerateContentRequest(
-            contents: [
+          request: GenerateContentRequest(
+            contents: const [
               Content(
                 parts: [
                   TextPart('The quick brown fox jumps over the lazy dog.'),
@@ -119,12 +115,8 @@ void main() {
               ),
             ],
             generationConfig: GenerationConfig(
-              responseModalities: ['AUDIO'],
-              speechConfig: {
-                'voiceConfig': {
-                  'prebuiltVoiceConfig': {'voiceName': 'Puck'},
-                },
-              },
+              responseModalities: const [ResponseModality.audio],
+              speechConfig: SpeechConfig.withVoice('Puck'),
             ),
           ),
         );

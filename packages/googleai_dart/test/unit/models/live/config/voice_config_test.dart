@@ -169,6 +169,198 @@ void main() {
     });
   });
 
+  group('MultiSpeakerVoiceConfig', () {
+    group('fromJson', () {
+      test('creates with speaker voice configs', () {
+        final json = {
+          'speakerVoiceConfigs': [
+            {
+              'speaker': 'Alice',
+              'voiceConfig': {
+                'prebuiltVoiceConfig': {'voiceName': 'Kore'},
+              },
+            },
+            {
+              'speaker': 'Bob',
+              'voiceConfig': {
+                'prebuiltVoiceConfig': {'voiceName': 'Puck'},
+              },
+            },
+          ],
+        };
+
+        final config = MultiSpeakerVoiceConfig.fromJson(json);
+
+        expect(config.speakerVoiceConfigs, hasLength(2));
+        expect(config.speakerVoiceConfigs[0].speaker, 'Alice');
+        expect(config.speakerVoiceConfigs[1].speaker, 'Bob');
+      });
+
+      test('creates with empty list when missing', () {
+        final json = <String, dynamic>{};
+        final config = MultiSpeakerVoiceConfig.fromJson(json);
+
+        expect(config.speakerVoiceConfigs, isEmpty);
+      });
+    });
+
+    group('toJson', () {
+      test('includes non-empty speaker voice configs', () {
+        final config = MultiSpeakerVoiceConfig(
+          speakerVoiceConfigs: [
+            SpeakerVoiceConfig(
+              speaker: 'Host',
+              voiceConfig: VoiceConfig.prebuilt('Fenrir'),
+            ),
+          ],
+        );
+
+        final json = config.toJson();
+
+        expect(json['speakerVoiceConfigs'], isNotNull);
+        final configs = json['speakerVoiceConfigs'] as List;
+        expect(configs, hasLength(1));
+      });
+
+      test('omits empty speaker voice configs', () {
+        const config = MultiSpeakerVoiceConfig();
+        final json = config.toJson();
+
+        expect(json, isEmpty);
+      });
+    });
+
+    group('copyWith', () {
+      test('updates speakerVoiceConfigs', () {
+        const original = MultiSpeakerVoiceConfig();
+        final updated = original.copyWith(
+          speakerVoiceConfigs: [
+            const SpeakerVoiceConfig(speaker: 'Alice'),
+          ],
+        );
+
+        expect(updated.speakerVoiceConfigs, hasLength(1));
+        expect(updated.speakerVoiceConfigs[0].speaker, 'Alice');
+      });
+    });
+
+    test('round-trip conversion preserves data', () {
+      final original = MultiSpeakerVoiceConfig(
+        speakerVoiceConfigs: [
+          SpeakerVoiceConfig(
+            speaker: 'Narrator',
+            voiceConfig: VoiceConfig.prebuilt('Aoede'),
+          ),
+        ],
+      );
+
+      final json = original.toJson();
+      final restored = MultiSpeakerVoiceConfig.fromJson(json);
+
+      expect(restored.speakerVoiceConfigs, hasLength(1));
+      expect(restored.speakerVoiceConfigs[0].speaker, 'Narrator');
+    });
+
+    test('toString includes speakerVoiceConfigs', () {
+      const config = MultiSpeakerVoiceConfig();
+      final str = config.toString();
+
+      expect(str, contains('MultiSpeakerVoiceConfig'));
+      expect(str, contains('speakerVoiceConfigs'));
+    });
+  });
+
+  group('SpeakerVoiceConfig', () {
+    group('fromJson', () {
+      test('creates with all fields', () {
+        final json = {
+          'speaker': 'Alice',
+          'voiceConfig': {
+            'prebuiltVoiceConfig': {'voiceName': 'Kore'},
+          },
+        };
+
+        final config = SpeakerVoiceConfig.fromJson(json);
+
+        expect(config.speaker, 'Alice');
+        expect(config.voiceConfig, isNotNull);
+        expect(config.voiceConfig!.prebuiltVoiceConfig!.voiceName, 'Kore');
+      });
+
+      test('creates with minimal fields', () {
+        final json = <String, dynamic>{};
+        final config = SpeakerVoiceConfig.fromJson(json);
+
+        expect(config.speaker, isNull);
+        expect(config.voiceConfig, isNull);
+      });
+    });
+
+    group('toJson', () {
+      test('includes all non-null fields', () {
+        final config = SpeakerVoiceConfig(
+          speaker: 'Bob',
+          voiceConfig: VoiceConfig.prebuilt('Puck'),
+        );
+
+        final json = config.toJson();
+
+        expect(json['speaker'], 'Bob');
+        expect(json['voiceConfig'], isNotNull);
+      });
+
+      test('omits null fields', () {
+        const config = SpeakerVoiceConfig();
+        final json = config.toJson();
+
+        expect(json, isEmpty);
+      });
+    });
+
+    group('copyWith', () {
+      test('updates speaker', () {
+        const original = SpeakerVoiceConfig(speaker: 'Alice');
+        final updated = original.copyWith(speaker: 'Bob');
+
+        expect(updated.speaker, 'Bob');
+      });
+
+      test('updates voiceConfig', () {
+        const original = SpeakerVoiceConfig(speaker: 'Alice');
+        final updated = original.copyWith(
+          voiceConfig: VoiceConfig.prebuilt('Leda'),
+        );
+
+        expect(updated.voiceConfig!.prebuiltVoiceConfig!.voiceName, 'Leda');
+      });
+    });
+
+    test('round-trip conversion preserves data', () {
+      final original = SpeakerVoiceConfig(
+        speaker: 'Host',
+        voiceConfig: VoiceConfig.prebuilt('Orus'),
+      );
+
+      final json = original.toJson();
+      final restored = SpeakerVoiceConfig.fromJson(json);
+
+      expect(restored.speaker, original.speaker);
+      expect(
+        restored.voiceConfig!.prebuiltVoiceConfig!.voiceName,
+        original.voiceConfig!.prebuiltVoiceConfig!.voiceName,
+      );
+    });
+
+    test('toString includes all fields', () {
+      const config = SpeakerVoiceConfig(speaker: 'Test');
+      final str = config.toString();
+
+      expect(str, contains('SpeakerVoiceConfig'));
+      expect(str, contains('speaker'));
+      expect(str, contains('Test'));
+    });
+  });
+
   group('LiveVoices', () {
     test('contains all expected voices', () {
       expect(LiveVoices.puck, 'Puck');

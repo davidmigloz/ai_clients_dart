@@ -115,6 +115,88 @@ void main() {
       });
     });
 
+    group('multiSpeakerVoiceConfig', () {
+      test('fromJson creates SpeechConfig with multiSpeakerVoiceConfig', () {
+        final json = {
+          'multiSpeakerVoiceConfig': {
+            'speakerVoiceConfigs': [
+              {
+                'speaker': 'Alice',
+                'voiceConfig': {
+                  'prebuiltVoiceConfig': {'voiceName': 'Kore'},
+                },
+              },
+              {
+                'speaker': 'Bob',
+                'voiceConfig': {
+                  'prebuiltVoiceConfig': {'voiceName': 'Puck'},
+                },
+              },
+            ],
+          },
+        };
+        final config = SpeechConfig.fromJson(json);
+
+        expect(config.multiSpeakerVoiceConfig, isNotNull);
+        expect(
+          config.multiSpeakerVoiceConfig!.speakerVoiceConfigs.length,
+          2,
+        );
+        expect(
+          config.multiSpeakerVoiceConfig!.speakerVoiceConfigs[0].speaker,
+          'Alice',
+        );
+        expect(
+          config.multiSpeakerVoiceConfig!.speakerVoiceConfigs[1].speaker,
+          'Bob',
+        );
+      });
+
+      test('toJson includes multiSpeakerVoiceConfig', () {
+        final config = SpeechConfig(
+          multiSpeakerVoiceConfig: MultiSpeakerVoiceConfig(
+            speakerVoiceConfigs: [
+              SpeakerVoiceConfig(
+                speaker: 'Alice',
+                voiceConfig: VoiceConfig.prebuilt('Kore'),
+              ),
+            ],
+          ),
+        );
+
+        final json = config.toJson();
+
+        expect(json.containsKey('multiSpeakerVoiceConfig'), true);
+        final multiJson =
+            json['multiSpeakerVoiceConfig'] as Map<String, dynamic>;
+        expect(multiJson['speakerVoiceConfigs'], isNotEmpty);
+      });
+
+      test('omits null multiSpeakerVoiceConfig', () {
+        const config = SpeechConfig();
+        final json = config.toJson();
+
+        expect(json.containsKey('multiSpeakerVoiceConfig'), false);
+      });
+
+      test('copyWith updates multiSpeakerVoiceConfig', () {
+        const original = SpeechConfig();
+        final updated = original.copyWith(
+          multiSpeakerVoiceConfig: const MultiSpeakerVoiceConfig(
+            speakerVoiceConfigs: [
+              SpeakerVoiceConfig(speaker: 'Host'),
+            ],
+          ),
+        );
+
+        expect(updated.multiSpeakerVoiceConfig, isNotNull);
+        expect(
+          updated.multiSpeakerVoiceConfig!.speakerVoiceConfigs.length,
+          1,
+        );
+      });
+    });
+
     test('round-trip conversion preserves data', () {
       final original = SpeechConfig(
         voiceConfig: VoiceConfig.prebuilt('Puck'),

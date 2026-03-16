@@ -2,6 +2,7 @@ import '../content/content.dart';
 import '../copy_with_sentinel.dart';
 import '../safety/safety_setting.dart';
 import '../tools/tool.dart';
+import '../tools/tool_config.dart';
 import 'generation_config.dart';
 
 /// Request to generate content.
@@ -13,7 +14,7 @@ class GenerateContentRequest {
   final List<Tool>? tools;
 
   /// Tool configuration.
-  final Map<String, dynamic>? toolConfig;
+  final ToolConfig? toolConfig;
 
   /// Safety settings.
   final List<SafetySetting>? safetySettings;
@@ -55,7 +56,9 @@ class GenerateContentRequest {
                   .map((e) => Tool.fromJson(e as Map<String, dynamic>))
                   .toList()
             : null,
-        toolConfig: json['toolConfig'] as Map<String, dynamic>?,
+        toolConfig: json['toolConfig'] != null
+            ? ToolConfig.fromJson(json['toolConfig'] as Map<String, dynamic>)
+            : null,
         safetySettings: json['safetySettings'] != null
             ? (json['safetySettings'] as List)
                   .map((e) => SafetySetting.fromJson(e as Map<String, dynamic>))
@@ -79,7 +82,7 @@ class GenerateContentRequest {
   Map<String, dynamic> toJson() => {
     'contents': contents.map((e) => e.toJson()).toList(),
     if (tools != null) 'tools': tools!.map((e) => e.toJson()).toList(),
-    if (toolConfig != null) 'toolConfig': toolConfig,
+    if (toolConfig != null) 'toolConfig': toolConfig!.toJson(),
     if (safetySettings != null)
       'safetySettings': safetySettings!.map((e) => e.toJson()).toList(),
     if (systemInstruction != null)
@@ -108,7 +111,7 @@ class GenerateContentRequest {
       tools: tools == unsetCopyWithValue ? this.tools : tools as List<Tool>?,
       toolConfig: toolConfig == unsetCopyWithValue
           ? this.toolConfig
-          : toolConfig as Map<String, dynamic>?,
+          : toolConfig as ToolConfig?,
       safetySettings: safetySettings == unsetCopyWithValue
           ? this.safetySettings
           : safetySettings as List<SafetySetting>?,
