@@ -19,7 +19,13 @@ enum FinishReason {
   /// (Deprecated) The model called a function.
   ///
   /// Use [toolCalls] instead for newer API versions.
-  functionCall('function_call');
+  functionCall('function_call'),
+
+  /// An unrecognized finish reason from a third-party provider.
+  ///
+  /// Returned instead of throwing when [fromJson] encounters a value not
+  /// in the OpenAI spec. For example, OpenRouter may return "error".
+  unknown('unknown');
 
   const FinishReason(this.value);
 
@@ -27,13 +33,32 @@ enum FinishReason {
   final String value;
 
   /// Creates a [FinishReason] from a JSON string.
+  ///
+  /// In addition to standard OpenAI values, this handles non-standard
+  /// values returned by OpenAI-compatible providers:
+  ///
+  /// | Value            | Mapped to       | Provider                    |
+  /// |------------------|-----------------|-----------------------------|
+  /// | `end_turn`       | [stop]          | AWS Bedrock Converse API    |
+  /// | `tool_use`       | [toolCalls]     | AWS Bedrock Converse API    |
+  /// | `max_tokens`     | [length]        | AWS Bedrock Converse API    |
+  /// | `stop_sequence`  | [stop]          | AWS Bedrock Converse API    |
+  /// | `eos`            | [stop]          | TogetherAI                  |
+  /// | (unrecognized)   | [unknown]       | Any non-standard provider   |
   static FinishReason fromJson(String value) => switch (value) {
     'stop' => FinishReason.stop,
     'length' => FinishReason.length,
     'tool_calls' => FinishReason.toolCalls,
     'content_filter' => FinishReason.contentFilter,
     'function_call' => FinishReason.functionCall,
-    _ => throw FormatException('Unknown FinishReason: $value'),
+    // AWS Bedrock Converse API native values
+    'end_turn' => FinishReason.stop,
+    'stop_sequence' => FinishReason.stop,
+    'tool_use' => FinishReason.toolCalls,
+    'max_tokens' => FinishReason.length,
+    // TogetherAI end-of-sequence
+    'eos' => FinishReason.stop,
+    _ => FinishReason.unknown,
   };
 
   /// Converts to JSON string.

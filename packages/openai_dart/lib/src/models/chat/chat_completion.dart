@@ -30,10 +30,10 @@ class ChatCompletion {
   /// Creates a [ChatCompletion].
   const ChatCompletion({
     this.id,
-    required this.object,
+    this.object = 'chat.completion',
     this.created,
-    required this.model,
-    required this.choices,
+    this.model = '',
+    this.choices = const [],
     this.usage,
     this.systemFingerprint,
     this.serviceTier,
@@ -44,12 +44,17 @@ class ChatCompletion {
   factory ChatCompletion.fromJson(Map<String, dynamic> json) {
     return ChatCompletion(
       id: json['id'] as String?,
-      object: json['object'] as String,
+      // FastChat omits this; GPT4All historically returned "text_completion"
+      object: json['object'] as String? ?? 'chat.completion',
       created: json['created'] as int?,
-      model: json['model'] as String,
-      choices: (json['choices'] as List<dynamic>)
-          .map((e) => ChatChoice.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      // FastChat may omit this field
+      model: json['model'] as String? ?? '',
+      // Custom Bedrock proxies may return error responses without choices
+      choices:
+          (json['choices'] as List<dynamic>?)
+              ?.map((e) => ChatChoice.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
       usage: json['usage'] != null
           ? Usage.fromJson(json['usage'] as Map<String, dynamic>)
           : null,
@@ -65,7 +70,11 @@ class ChatCompletion {
   /// doesn't return `id` with some models).
   final String? id;
 
-  /// The object type (always "chat.completion").
+  /// The object type (usually "chat.completion").
+  ///
+  /// May be missing or different with some OpenAI-compatible providers
+  /// (e.g., FastChat omits this, GPT4All historically returned
+  /// "text_completion").
   final String object;
 
   /// The Unix timestamp when this completion was created.
@@ -74,9 +83,15 @@ class ChatCompletion {
   final int? created;
 
   /// The model used for this completion.
+  ///
+  /// May be empty with some OpenAI-compatible providers (e.g., FastChat
+  /// may omit this field).
   final String model;
 
   /// The list of completion choices.
+  ///
+  /// Defaults to empty if missing. Some proxy servers (e.g., custom Bedrock
+  /// proxies) may return error responses without a choices array.
   final List<ChatChoice> choices;
 
   /// Token usage statistics.

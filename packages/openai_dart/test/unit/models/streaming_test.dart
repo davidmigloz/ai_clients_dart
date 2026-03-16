@@ -467,10 +467,12 @@ void main() {
       );
     });
 
-    test('toChatCompletion() throws StateError when model is missing', () {
+    test('toChatCompletion() returns empty model when model is missing', () {
       final accumulator = ChatStreamAccumulator();
+      final completion = accumulator.toChatCompletion();
 
-      expect(accumulator.toChatCompletion, throwsStateError);
+      expect(completion.model, '');
+      expect(completion.choices.length, 1);
     });
 
     test('toChatCompletion() captures serviceTier and provider', () {
@@ -1536,6 +1538,93 @@ void main() {
         expect(accumulator.reasoning, '');
         expect(accumulator.hasReasoningContent, false);
       });
+    });
+  });
+
+  group('Third-party provider compatibility', () {
+    test('handles missing delta in choice — defaults to empty ChatDelta', () {
+      final json = jsonDecode_('''
+        {
+          "id": "chatcmpl-123",
+          "object": "chat.completion.chunk",
+          "created": 1677652288,
+          "model": "gpt-4o",
+          "choices": [
+            {
+              "index": 0,
+              "delta": null,
+              "finish_reason": "stop"
+            }
+          ]
+        }
+      ''');
+
+      final event = ChatStreamEvent.fromJson(json);
+      final choice = event.choices!.first;
+      expect(choice.delta.content, isNull);
+      expect(choice.delta.role, isNull);
+      expect(choice.finishReason, FinishReason.stop);
+    });
+
+    test('handles absent delta key in choice', () {
+      final json = {
+        'id': 'chatcmpl-123',
+        'object': 'chat.completion.chunk',
+        'created': 1677652288,
+        'model': 'gpt-4o',
+        'choices': <dynamic>[
+          {'index': 0, 'finish_reason': 'stop'},
+        ],
+      };
+
+      final event = ChatStreamEvent.fromJson(json);
+      final choice = event.choices!.first;
+      expect(choice.delta.content, isNull);
+    });
+
+    test('FunctionCallDelta handles arguments as Map', () {
+      final json = {
+        'name': 'get_weather',
+        'arguments': {'location': 'Boston'},
+      };
+
+      final delta = FunctionCallDelta.fromJson(json);
+      expect(delta.arguments, '{"location":"Boston"}');
+    });
+
+    test('FunctionCallDelta handles arguments as String', () {
+      final json = {'name': 'get_weather', 'arguments': '{"location":'};
+
+      final delta = FunctionCallDelta.fromJson(json);
+      expect(delta.arguments, '{"location":');
+    });
+
+    test('FunctionCallDelta handles null arguments', () {
+      final json = {'name': 'get_weather'};
+
+      final delta = FunctionCallDelta.fromJson(json);
+      expect(delta.arguments, isNull);
+    });
+
+    test('unknown finish_reason in stream chunk', () {
+      final json = jsonDecode_('''
+        {
+          "id": "chatcmpl-123",
+          "object": "chat.completion.chunk",
+          "created": 1677652288,
+          "model": "gpt-4o",
+          "choices": [
+            {
+              "index": 0,
+              "delta": {},
+              "finish_reason": "error"
+            }
+          ]
+        }
+      ''');
+
+      final event = ChatStreamEvent.fromJson(json);
+      expect(event.choices!.first.finishReason, FinishReason.unknown);
     });
   });
 }

@@ -1090,5 +1090,131 @@ void main() {
         expect(usage.totalTokens, 10);
       });
     });
+
+    group('ChatCompletion missing fields (third-party proxies)', () {
+      test('handles missing object field — defaults to chat.completion', () {
+        final json = {
+          'id': 'chatcmpl-123',
+          'created': 1677652288,
+          'model': 'gpt-4o',
+          'choices': <dynamic>[
+            {
+              'index': 0,
+              'message': {'role': 'assistant', 'content': 'Hello!'},
+              'finish_reason': 'stop',
+            },
+          ],
+        };
+
+        final completion = ChatCompletion.fromJson(json);
+        expect(completion.object, 'chat.completion');
+      });
+
+      test('handles missing model field — defaults to empty string', () {
+        final json = {
+          'id': 'chatcmpl-123',
+          'object': 'chat.completion',
+          'created': 1677652288,
+          'choices': <dynamic>[
+            {
+              'index': 0,
+              'message': {'role': 'assistant', 'content': 'Hello!'},
+              'finish_reason': 'stop',
+            },
+          ],
+        };
+
+        final completion = ChatCompletion.fromJson(json);
+        expect(completion.model, '');
+      });
+
+      test('handles missing choices field — defaults to empty list', () {
+        final json = {
+          'id': 'chatcmpl-123',
+          'object': 'chat.completion',
+          'created': 1677652288,
+          'model': 'gpt-4o',
+        };
+
+        final completion = ChatCompletion.fromJson(json);
+        expect(completion.choices, isEmpty);
+        expect(completion.text, isNull);
+      });
+    });
+
+    group('FunctionCall.arguments formats (third-party providers)', () {
+      test('handles arguments as Map — jsonEncodes it', () {
+        final json = {
+          'name': 'get_weather',
+          'arguments': {'location': 'Boston', 'unit': 'celsius'},
+        };
+
+        final call = FunctionCall.fromJson(json);
+        expect(call.arguments, '{"location":"Boston","unit":"celsius"}');
+        expect(call.argumentsMap['location'], 'Boston');
+      });
+
+      test('handles arguments as null — defaults to empty JSON object', () {
+        final json = {'name': 'do_something', 'arguments': null};
+
+        final call = FunctionCall.fromJson(json);
+        expect(call.arguments, '{}');
+      });
+
+      test('handles arguments as String — passes through', () {
+        final json = {
+          'name': 'get_weather',
+          'arguments': '{"location":"Boston"}',
+        };
+
+        final call = FunctionCall.fromJson(json);
+        expect(call.arguments, '{"location":"Boston"}');
+      });
+    });
+
+    group('ToolCall missing type (third-party providers)', () {
+      test('defaults type to function when omitted', () {
+        final json = {
+          'id': 'call_abc123',
+          'function': {
+            'name': 'get_weather',
+            'arguments': '{"location":"Boston"}',
+          },
+        };
+
+        final toolCall = ToolCall.fromJson(json);
+        expect(toolCall.type, 'function');
+      });
+    });
+
+    group('FinishReason non-standard values', () {
+      test('unknown finish_reason returns FinishReason.unknown', () {
+        expect(FinishReason.fromJson('error'), FinishReason.unknown);
+        expect(
+          FinishReason.fromJson('some_custom_value'),
+          FinishReason.unknown,
+        );
+      });
+
+      test('Bedrock end_turn maps to stop', () {
+        expect(FinishReason.fromJson('end_turn'), FinishReason.stop);
+      });
+
+      test('Bedrock tool_use maps to toolCalls', () {
+        expect(FinishReason.fromJson('tool_use'), FinishReason.toolCalls);
+      });
+
+      test('Bedrock max_tokens maps to length', () {
+        expect(FinishReason.fromJson('max_tokens'), FinishReason.length);
+      });
+
+      test('Bedrock stop_sequence maps to stop', () {
+        expect(FinishReason.fromJson('stop_sequence'), FinishReason.stop);
+      });
+
+      test('TogetherAI eos maps to stop', () {
+        expect(FinishReason.fromJson('eos'), FinishReason.stop);
+      });
+    });
   });
 }

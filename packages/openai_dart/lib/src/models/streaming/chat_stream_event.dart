@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:meta/meta.dart';
 
 import '../chat/chat_completion.dart';
@@ -155,7 +157,10 @@ class ChatStreamChoice {
   factory ChatStreamChoice.fromJson(Map<String, dynamic> json) {
     return ChatStreamChoice(
       index: json['index'] as int?,
-      delta: ChatDelta.fromJson(json['delta'] as Map<String, dynamic>),
+      // Some providers may return null or omit the delta field
+      delta: json['delta'] is Map<String, dynamic>
+          ? ChatDelta.fromJson(json['delta'] as Map<String, dynamic>)
+          : const ChatDelta(),
       finishReason: json['finish_reason'] != null
           ? FinishReason.fromJson(json['finish_reason'] as String)
           : null,
@@ -171,6 +176,9 @@ class ChatStreamChoice {
   final int? index;
 
   /// The delta content for this chunk.
+  ///
+  /// Defaults to an empty delta if null or missing in the JSON response,
+  /// which can occur with some OpenAI-compatible providers.
   final ChatDelta delta;
 
   /// The reason the model stopped generating (in the final chunk).
@@ -390,14 +398,24 @@ class FunctionCallDelta {
   factory FunctionCallDelta.fromJson(Map<String, dynamic> json) {
     return FunctionCallDelta(
       name: json['name'] as String?,
-      arguments: json['arguments'] as String?,
+      // Some providers (e.g., Llamafile, custom Bedrock proxies) may return
+      // a parsed object instead of a JSON string fragment.
+      arguments: switch (json['arguments']) {
+        final String s => s,
+        final Map<String, dynamic> m => jsonEncode(m),
+        _ => null,
+      },
     );
   }
 
   /// The name of the function (only in the first chunk for this function).
   final String? name;
 
-  /// The arguments delta (partial JSON string).
+  /// The partial arguments string for this chunk.
+  ///
+  /// Per the OpenAI spec, this is a JSON string fragment. Some providers
+  /// (e.g., Llamafile, custom Bedrock proxies) may return a parsed object
+  /// instead. The [fromJson] factory handles both formats.
   final String? arguments;
 
   /// Converts to JSON.
@@ -737,17 +755,7 @@ class ChatStreamAccumulator {
   ///
   /// For multi-choice streams, produces one [ChatChoice] per accumulated
   /// choice with independent content, tool calls, and finish reasons.
-  ///
-  /// Throws [StateError] if no model was received in the stream (required
-  /// by [ChatCompletion]).
   ChatCompletion toChatCompletion() {
-    final model = _model;
-    if (model == null) {
-      throw StateError(
-        'Cannot build ChatCompletion: no model received in stream',
-      );
-    }
-
     final chatChoices = _choices.isEmpty
         ? [const ChatChoice(index: 0, message: AssistantMessage())]
         : [
@@ -759,7 +767,7 @@ class ChatStreamAccumulator {
       id: _id,
       object: 'chat.completion',
       created: _created,
-      model: model,
+      model: _model ?? '',
       choices: chatChoices,
       usage: _usage,
       systemFingerprint: _systemFingerprint,

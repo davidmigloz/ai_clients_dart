@@ -208,6 +208,33 @@ void main() {
     });
   });
 
+  group('ParseException', () {
+    test('creates with message', () {
+      const exception = ParseException(message: 'Failed to parse response');
+
+      expect(exception.message, 'Failed to parse response');
+    });
+
+    test('includes response body when provided', () {
+      const exception = ParseException(
+        message: 'Failed to parse response',
+        responseBody: '{"invalid": json}',
+      );
+
+      expect(exception.responseBody, '{"invalid": json}');
+    });
+
+    test('includes cause when provided', () {
+      final cause = TypeError();
+      final exception = ParseException(
+        message: 'Failed to parse',
+        cause: cause,
+      );
+
+      expect(exception.cause, cause);
+    });
+  });
+
   group('createApiException', () {
     test('creates BadRequestException for 400', () {
       final exception = createApiException(

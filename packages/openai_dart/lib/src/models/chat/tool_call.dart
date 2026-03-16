@@ -44,7 +44,8 @@ class ToolCall {
   factory ToolCall.fromJson(Map<String, dynamic> json) {
     return ToolCall(
       id: json['id'] as String,
-      type: json['type'] as String,
+      // Some providers omit type (e.g., vLLM, custom proxies)
+      type: json['type'] as String? ?? 'function',
       function: FunctionCall.fromJson(json['function'] as Map<String, dynamic>),
     );
   }
@@ -53,6 +54,9 @@ class ToolCall {
   final String id;
 
   /// The type of the tool call (always "function" currently).
+  ///
+  /// Defaults to "function" if omitted by the provider (e.g., some vLLM
+  /// configurations and custom proxies may not include this field).
   final String type;
 
   /// The function call details.
@@ -97,7 +101,15 @@ class FunctionCall {
   factory FunctionCall.fromJson(Map<String, dynamic> json) {
     return FunctionCall(
       name: json['name'] as String,
-      arguments: json['arguments'] as String,
+      // Some providers return arguments as a parsed JSON object instead of a
+      // string (e.g., Llamafile — llama.cpp#20198, custom AWS Bedrock proxies
+      // that pass through Converse API's toolUse.input without stringifying).
+      arguments: switch (json['arguments']) {
+        final String s => s,
+        final Map<String, dynamic> m => jsonEncode(m),
+        null => '{}',
+        final other => other.toString(),
+      },
     );
   }
 
@@ -105,6 +117,12 @@ class FunctionCall {
   final String name;
 
   /// The arguments to pass to the function, as a JSON string.
+  ///
+  /// Per the OpenAI spec, this is always a JSON-encoded string. However,
+  /// some OpenAI-compatible providers return arguments as a parsed JSON
+  /// object instead (e.g., Llamafile — llama.cpp#20198, custom AWS Bedrock
+  /// proxies that pass through Converse API's `toolUse.input` without
+  /// stringifying). The [fromJson] factory handles both formats.
   final String arguments;
 
   /// The arguments parsed as a JSON map.
