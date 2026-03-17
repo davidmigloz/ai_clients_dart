@@ -97,7 +97,7 @@ void main() {
           var content = '';
           var chunkCount = 0;
           await for (final event in stream) {
-            final delta = event.choices?.firstOrNull?.delta.content;
+            final delta = event.choices?.first.delta.content;
             if (delta != null) {
               content += delta;
               chunkCount++;
