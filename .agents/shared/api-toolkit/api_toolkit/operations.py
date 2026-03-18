@@ -761,7 +761,8 @@ def _flatten_union_branches(branches: list[dict[str, Any]]) -> list[dict[str, An
 def _parse_openapi_property(prop: dict[str, Any], required: set[str], name: str) -> dict[str, Any]:
     raw_type = prop.get("type")
     # OpenAPI 3.1 allows type to be a list (e.g. ["integer", "null"]).
-    # Presence of "null" in the list means the field is nullable (not required).
+    # Presence of "null" in the list means the field's value may be null;
+    # required-ness is determined solely by the schema's required list.
     type_list_has_null = isinstance(raw_type, list) and "null" in raw_type
     info: dict[str, Any] = {
         "required": name in required,
@@ -823,6 +824,19 @@ def _parse_openapi_property(prop: dict[str, Any], required: set[str], name: str)
     return info
 
 
+def _resolve_openapi31_type(type_value: Any) -> str | None:
+    """Normalize an OpenAPI 3.1 type value to a scalar string.
+
+    OpenAPI 3.1 allows ``type`` to be a list (e.g. ``["integer", "null"]``).
+    Returns the single non-null type if there is exactly one, otherwise None.
+    Scalar strings (OpenAPI 3.0 style) are returned as-is.
+    """
+    if not isinstance(type_value, list):
+        return type_value
+    non_null = [t for t in type_value if t != "null"]
+    return non_null[0] if len(non_null) == 1 else None
+
+
 def _expected_dart_type(
     prop_info: dict[str, Any],
     config: ToolkitConfig,
@@ -855,12 +869,12 @@ def _expected_dart_type(
 
     spec_type = prop_info.get("type")
     # OpenAPI 3.1 allows type to be a list (e.g. ["integer", "null"]).
-    # A two-type list with null is a nullable scalar; 2+ non-null types is a union.
+    # 2+ non-null entries is a union; a single non-null entry is a nullable scalar.
     if isinstance(spec_type, list):
         non_null = [t for t in spec_type if t != "null"]
         if len(non_null) >= 2:
             return "__union__"
-        spec_type = non_null[0] if non_null else None
+        spec_type = _resolve_openapi31_type(spec_type)
     type_mappings = config.manifest.type_mappings
     if spec_type and spec_type in type_mappings:
         # Inline objects (type: "object" without $ref) are indeterminate —
@@ -3121,12 +3135,8 @@ def _scaffold_enum_source(class_name: str, values: list[str]) -> str:
 def _dart_type_from_prop(type_mappings: dict[str, str], prop: dict[str, Any]) -> str:
     if prop.get("ref"):
         return prop["ref"]
-    type_name = prop.get("type")
-    # OpenAPI 3.1 allows type to be a list (e.g. ["integer", "null"]).
-    # Normalize to the single non-null type; multi-type unions fall through to dynamic fallback.
-    if isinstance(type_name, list):
-        non_null = [t for t in type_name if t != "null"]
-        type_name = non_null[0] if len(non_null) == 1 else None
+    # OpenAPI 3.1 allows type to be a list; normalize to a scalar (None for multi-type unions).
+    type_name = _resolve_openapi31_type(prop.get("type"))
     if type_name == "array":
         items = prop.get("items", {})
         if "$ref" in items:
@@ -3166,11 +3176,7 @@ def _scaffold_array_from_json(field_name: str, prop: dict[str, Any], type_mappin
 def _scaffold_from_json_expression(field_name: str, prop: dict[str, Any], type_mappings: dict[str, str]) -> str:
     dart_type = _dart_type_from_prop(type_mappings, prop)
     value = f"json['{field_name}']"
-    resolved_type = prop.get("type")
-    if isinstance(resolved_type, list):
-        non_null = [t for t in resolved_type if t != "null"]
-        resolved_type = non_null[0] if len(non_null) == 1 else None
-    if resolved_type == "array":
+    if _resolve_openapi31_type(prop.get("type")) == "array":
         return _scaffold_array_from_json(field_name, prop, type_mappings)
     if prop.get("ref"):
         if prop.get("required"):
@@ -3186,11 +3192,7 @@ def _scaffold_from_json_expression(field_name: str, prop: dict[str, Any], type_m
 
 def _scaffold_to_json_expression(field_name: str, prop: dict[str, Any], type_mappings: dict[str, str]) -> str:
     field = camel_case(field_name)
-    resolved_type = prop.get("type")
-    if isinstance(resolved_type, list):
-        non_null = [t for t in resolved_type if t != "null"]
-        resolved_type = non_null[0] if len(non_null) == 1 else None
-    if resolved_type == "array":
+    if _resolve_openapi31_type(prop.get("type")) == "array":
         items = prop.get("items") or {}
         if "$ref" in items:
             return f"{field}.map((item) => item.toJson()).toList()"
