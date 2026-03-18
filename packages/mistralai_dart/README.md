@@ -779,11 +779,16 @@ This client implements the Mistral AI REST API:
 
 ### FineTuning Resource (`client.fineTuning`)
 
+`client.fineTuning.jobs`:
+
 - **jobs.create** - Create a fine-tuning job
 - **jobs.list** - List fine-tuning jobs
 - **jobs.retrieve** - Get job status
 - **jobs.cancel** - Cancel a job
 - **jobs.start** - Start a job
+
+`client.fineTuning.models`:
+
 - **models.archive** - Archive a fine-tuned model
 - **models.unarchive** - Unarchive a fine-tuned model
 - **models.update** - Update a fine-tuned model
