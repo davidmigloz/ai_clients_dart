@@ -4320,5 +4320,1675 @@ class ApiToolkitCommandTests(unittest.TestCase):
             self.assertIn("class _UnsetCopyWithSentinel {", content)
 
 
+    # ── Type safety & consistency tests ──────────────────────────────────
+
+    def _setup_type_check_env(
+        self,
+        root: Path,
+        *,
+        spec_schemas: dict,
+        manifest_types: dict,
+        dart_files: dict[str, str],
+        type_mappings: dict | None = None,
+    ) -> Path:
+        """Helper that wires up spec, manifest, and Dart files for type/consistency tests."""
+        self._write_workspace(root)
+        self._write_repo_license(root)
+        package_root, config_dir = self._create_openapi_config(root)
+        output_dir = root / "tmp" / "sample"
+        output_dir.mkdir(parents=True)
+        (package_root / "specs" / "openapi.json").write_text(json.dumps({
+            "openapi": "3.1.0",
+            "info": {"title": "Sample", "version": "1"},
+            "paths": {},
+            "components": {"schemas": spec_schemas},
+        }))
+        self._write_specs_and_manifest(
+            config_dir,
+            specs_payload={
+                "specs": {"main": {"name": "Sample", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                "specs_dir": "packages/sample_dart/specs",
+                "output_dir": str(output_dir),
+            },
+            manifest_payload={
+                "surface": "openapi",
+                "type_mappings": type_mappings or {"string": "String", "integer": "int", "number": "double", "boolean": "bool", "array": "List", "object": "Map"},
+                "placement": {"categories": {}, "default_category": "common", "parent_model_patterns": {}},
+                "coverage": {},
+                "types": manifest_types,
+            },
+        )
+        for rel_path, content in dart_files.items():
+            full_path = package_root / rel_path
+            full_path.parent.mkdir(parents=True, exist_ok=True)
+            full_path.write_text(content)
+        return config_dir
+
+    def _make_dart_class(self, class_name: str, fields: list[tuple[str, str, bool]]) -> str:
+        """Generate a minimal valid Dart class string with fromJson/toJson/copyWith."""
+        lines = [f"class {class_name} {{"]
+        for name, dart_type, nullable in fields:
+            suffix = "?" if nullable else ""
+            lines.append(f"  final {dart_type}{suffix} {name};")
+        lines.append(f"\n  const {class_name}({{")
+        for name, _, nullable in fields:
+            qualifier = "" if nullable else "required "
+            lines.append(f"    {qualifier}this.{name},")
+        lines.append("  });")
+        lines.append(f"\n  factory {class_name}.fromJson(Map<String, dynamic> json) => {class_name}(")
+        for name, dart_type, nullable in fields:
+            suffix = "?" if nullable else ""
+            lines.append(f"    {name}: json['{name}'] as {dart_type}{suffix},")
+        lines.append("  );")
+        lines.append("\n  Map<String, dynamic> toJson() => {")
+        for name, _, nullable in fields:
+            if nullable:
+                lines.append(f"    if ({name} != null) '{name}': {name},")
+            else:
+                lines.append(f"    '{name}': {name},")
+        lines.append("  };")
+        lines.append(f"\n  {class_name} copyWith({{")
+        for name, dart_type, _ in fields:
+            lines.append(f"    {dart_type}? {name},")
+        lines.append(f"  }}) => {class_name}(")
+        for name, _, _ in fields:
+            lines.append(f"        {name}: {name} ?? this.{name},")
+        lines.append("      );")
+        lines.append(f"\n  @override\n  bool operator ==(Object other) => identical(this, other) || (other is {class_name});")
+        lines.append(f"\n  @override\n  int get hashCode => 0;")
+        lines.append(f"\n  @override\n  String toString() => '{class_name}()';")
+        lines.append("}")
+        return "\n".join(lines) + "\n"
+
+    def test_verify_type_warns_object_for_ref_property(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Example": {
+                        "type": "object",
+                        "properties": {"config": {"$ref": "#/components/schemas/FooConfig"}},
+                        "required": ["config"],
+                    },
+                    "FooConfig": {"type": "object", "properties": {"name": {"type": "string"}}},
+                },
+                manifest_types={
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                    "FooConfig": {"spec": "main", "kind": "object", "dart_class": "FooConfig", "file": "lib/src/models/common/foo_config.dart", "schema": "FooConfig"},
+                },
+                dart_files={
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("config", "Object", False)]),
+                    "lib/src/models/common/foo_config.dart": self._make_dart_class("FooConfig", [("name", "String", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            type_warnings = [i for i in issues if i["level"] == "warning" and "Object" in i["message"] and "FooConfig" in i["message"]]
+            self.assertTrue(len(type_warnings) >= 1, f"Expected warning about Object vs FooConfig: {issues}")
+
+    def test_verify_type_warns_object_for_oneOf_union(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "result": {"oneOf": [
+                                {"$ref": "#/components/schemas/TypeA"},
+                                {"$ref": "#/components/schemas/TypeB"},
+                                {"type": "string"},
+                            ]},
+                        },
+                    },
+                    "TypeA": {"type": "object", "properties": {}},
+                    "TypeB": {"type": "object", "properties": {}},
+                },
+                manifest_types={
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                    "TypeA": {"spec": "main", "kind": "object", "dart_class": "TypeA", "file": "lib/src/models/common/type_a.dart", "schema": "TypeA"},
+                    "TypeB": {"spec": "main", "kind": "object", "dart_class": "TypeB", "file": "lib/src/models/common/type_b.dart", "schema": "TypeB"},
+                },
+                dart_files={
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("result", "Object", True)]),
+                    "lib/src/models/common/type_a.dart": self._make_dart_class("TypeA", []),
+                    "lib/src/models/common/type_b.dart": self._make_dart_class("TypeB", []),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            union_warnings = [i for i in issues if i["level"] == "warning" and "union" in i["message"]]
+            self.assertTrue(len(union_warnings) >= 1, f"Expected union warning: {issues}")
+
+    def test_verify_type_warns_object_for_anyOf_union(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "container": {"anyOf": [
+                                {"$ref": "#/components/schemas/ToolA"},
+                                {"$ref": "#/components/schemas/ToolB"},
+                            ]},
+                        },
+                    },
+                    "ToolA": {"type": "object", "properties": {}},
+                    "ToolB": {"type": "object", "properties": {}},
+                },
+                manifest_types={
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                    "ToolA": {"spec": "main", "kind": "object", "dart_class": "ToolA", "file": "lib/src/models/common/tool_a.dart", "schema": "ToolA"},
+                    "ToolB": {"spec": "main", "kind": "object", "dart_class": "ToolB", "file": "lib/src/models/common/tool_b.dart", "schema": "ToolB"},
+                },
+                dart_files={
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("container", "Object", True)]),
+                    "lib/src/models/common/tool_a.dart": self._make_dart_class("ToolA", []),
+                    "lib/src/models/common/tool_b.dart": self._make_dart_class("ToolB", []),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            union_warnings = [i for i in issues if i["level"] == "warning" and "union" in i["message"]]
+            self.assertTrue(len(union_warnings) >= 1, f"Expected union warning for anyOf: {issues}")
+
+    def test_verify_type_warns_object_for_pure_type_union(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "result": {"oneOf": [
+                                {"type": "object"},
+                                {"type": "object"},
+                                {"type": "string"},
+                            ]},
+                        },
+                    },
+                },
+                manifest_types={
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("result", "Object", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            union_warnings = [i for i in issues if i["level"] == "warning" and "union" in i["message"]]
+            self.assertTrue(len(union_warnings) >= 1, f"Expected union warning for pure-type union: {issues}")
+
+    def test_verify_type_unwraps_allOf_in_anyOf_branch(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "config": {"anyOf": [
+                                {"allOf": [{"$ref": "#/components/schemas/AudioTranscription"}]},
+                                {"type": "null"},
+                            ]},
+                        },
+                    },
+                    "AudioTranscription": {"type": "object", "properties": {"lang": {"type": "string"}}},
+                },
+                manifest_types={
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                    "AudioTranscription": {"spec": "main", "kind": "object", "dart_class": "AudioTranscription", "file": "lib/src/models/common/audio.dart", "schema": "AudioTranscription"},
+                },
+                dart_files={
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("config", "Object", True)]),
+                    "lib/src/models/common/audio.dart": self._make_dart_class("AudioTranscription", [("lang", "String", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            ref_warnings = [i for i in issues if i["level"] == "warning" and "AudioTranscription" in i["message"]]
+            self.assertTrue(len(ref_warnings) >= 1, f"Expected warning referencing AudioTranscription: {issues}")
+
+    def test_verify_type_unwraps_nested_oneOf_in_anyOf(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "effort": {"anyOf": [
+                                {"oneOf": [{"$ref": "#/components/schemas/ReasoningEffortEnum"}]},
+                                {"type": "null"},
+                            ]},
+                        },
+                    },
+                    "ReasoningEffortEnum": {"type": "string", "enum": ["low", "medium", "high"]},
+                },
+                manifest_types={
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                    "ReasoningEffortEnum": {"spec": "main", "kind": "enum", "dart_class": "ReasoningEffortEnum", "file": "lib/src/models/common/effort.dart", "schema": "ReasoningEffortEnum"},
+                },
+                dart_files={
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("effort", "Object", True)]),
+                    "lib/src/models/common/effort.dart": "enum ReasoningEffortEnum { low, medium, high, unknown }\n",
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            ref_warnings = [i for i in issues if i["level"] == "warning" and "ReasoningEffortEnum" in i["message"]]
+            self.assertTrue(len(ref_warnings) >= 1, f"Expected warning referencing ReasoningEffortEnum: {issues}")
+
+    def test_verify_type_no_warning_when_correct(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Example": {
+                        "type": "object",
+                        "properties": {"config": {"$ref": "#/components/schemas/FooConfig"}},
+                    },
+                    "FooConfig": {"type": "object", "properties": {"name": {"type": "string"}}},
+                },
+                manifest_types={
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                    "FooConfig": {"spec": "main", "kind": "object", "dart_class": "FooConfig", "file": "lib/src/models/common/foo_config.dart", "schema": "FooConfig"},
+                },
+                dart_files={
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("config", "FooConfig", True)]),
+                    "lib/src/models/common/foo_config.dart": self._make_dart_class("FooConfig", [("name", "String", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            type_warnings = [i for i in issues if i["level"] == "warning" and "typed as" in i.get("message", "")]
+            self.assertEqual(type_warnings, [], f"Unexpected type warnings: {type_warnings}")
+
+    def test_verify_type_alias_aware_lookup(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Example": {
+                        "type": "object",
+                        "properties": {"request": {"$ref": "#/components/schemas/CreateMessageParams"}},
+                    },
+                    "CreateMessageParams": {"type": "object", "properties": {"text": {"type": "string"}}},
+                },
+                manifest_types={
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                    "CreateMessageRequest": {"spec": "main", "kind": "object", "dart_class": "MessageCreateRequest", "file": "lib/src/models/common/msg_req.dart", "schema": "CreateMessageParams"},
+                },
+                dart_files={
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("request", "Object", True)]),
+                    "lib/src/models/common/msg_req.dart": self._make_dart_class("MessageCreateRequest", [("text", "String", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            alias_warnings = [i for i in issues if i["level"] == "warning" and "MessageCreateRequest" in i["message"]]
+            self.assertTrue(len(alias_warnings) >= 1, f"Expected alias-aware warning about MessageCreateRequest: {issues}")
+
+    def test_verify_type_list_generic_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "items": {"type": "array", "items": {"$ref": "#/components/schemas/Foo"}},
+                        },
+                    },
+                    "Foo": {"type": "object", "properties": {}},
+                },
+                manifest_types={
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                    "Foo": {"spec": "main", "kind": "object", "dart_class": "Foo", "file": "lib/src/models/common/foo.dart", "schema": "Foo"},
+                },
+                dart_files={
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("items", "List<Object>", True)]),
+                    "lib/src/models/common/foo.dart": self._make_dart_class("Foo", []),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            generic_infos = [i for i in issues if i["level"] == "info" and "generic parameter mismatch" in i.get("message", "")]
+            self.assertTrue(len(generic_infos) >= 1, f"Expected generic mismatch info: {issues}")
+
+    def test_verify_sibling_nullability_inconsistency(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Parent": {"type": "object", "properties": {"type": {"type": "string"}}},
+                    "VariantA": {"type": "object", "properties": {"id": {"type": "string"}, "type": {"type": "string"}}},
+                    "VariantB": {"type": "object", "properties": {"id": {"type": "string"}, "type": {"type": "string"}}},
+                    "VariantC": {"type": "object", "properties": {"id": {"type": "string"}, "type": {"type": "string"}}, "required": ["id"]},
+                },
+                manifest_types={
+                    "Parent": {"spec": "main", "kind": "sealed_parent", "dart_class": "Parent", "file": "lib/src/models/common/parent.dart", "schema": "Parent", "discriminator": {"field": "type"}},
+                    "VariantA": {"spec": "main", "kind": "sealed_variant", "dart_class": "VariantA", "file": "lib/src/models/common/variant_a.dart", "schema": "VariantA", "parent": "Parent"},
+                    "VariantB": {"spec": "main", "kind": "sealed_variant", "dart_class": "VariantB", "file": "lib/src/models/common/variant_b.dart", "schema": "VariantB", "parent": "Parent"},
+                    "VariantC": {"spec": "main", "kind": "sealed_variant", "dart_class": "VariantC", "file": "lib/src/models/common/variant_c.dart", "schema": "VariantC", "parent": "Parent"},
+                },
+                dart_files={
+                    "lib/src/models/common/parent.dart": "sealed class Parent {}\n",
+                    "lib/src/models/common/variant_a.dart": self._make_dart_class("VariantA", [("id", "String", True)]),
+                    "lib/src/models/common/variant_b.dart": self._make_dart_class("VariantB", [("id", "String", True)]),
+                    "lib/src/models/common/variant_c.dart": self._make_dart_class("VariantC", [("id", "String", False)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="consistency", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["consistency"]["issues"]
+            null_warnings = [i for i in issues if "inconsistent nullability" in i.get("message", "")]
+            self.assertTrue(len(null_warnings) >= 1, f"Expected nullability inconsistency warning: {issues}")
+
+    def test_verify_sibling_type_inconsistency(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Parent": {"type": "object", "properties": {"type": {"type": "string"}}},
+                    "VariantA": {"type": "object", "properties": {"content": {"type": "string"}, "type": {"type": "string"}}},
+                    "VariantB": {"type": "object", "properties": {"content": {"type": "string"}, "type": {"type": "string"}}},
+                },
+                manifest_types={
+                    "Parent": {"spec": "main", "kind": "sealed_parent", "dart_class": "Parent", "file": "lib/src/models/common/parent.dart", "schema": "Parent", "discriminator": {"field": "type"}},
+                    "VariantA": {"spec": "main", "kind": "sealed_variant", "dart_class": "VariantA", "file": "lib/src/models/common/variant_a.dart", "schema": "VariantA", "parent": "Parent"},
+                    "VariantB": {"spec": "main", "kind": "sealed_variant", "dart_class": "VariantB", "file": "lib/src/models/common/variant_b.dart", "schema": "VariantB", "parent": "Parent"},
+                },
+                dart_files={
+                    "lib/src/models/common/parent.dart": "sealed class Parent {}\n",
+                    "lib/src/models/common/variant_a.dart": self._make_dart_class("VariantA", [("content", "String", True)]),
+                    "lib/src/models/common/variant_b.dart": self._make_dart_class("VariantB", [("content", "Object", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="consistency", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["consistency"]["issues"]
+            type_warnings = [i for i in issues if "inconsistent types" in i.get("message", "")]
+            self.assertTrue(len(type_warnings) >= 1, f"Expected type inconsistency warning: {issues}")
+
+    def test_verify_sibling_consistent_ok(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Parent": {"type": "object", "properties": {"type": {"type": "string"}}},
+                    "VariantA": {"type": "object", "properties": {"id": {"type": "string"}, "type": {"type": "string"}}},
+                    "VariantB": {"type": "object", "properties": {"id": {"type": "string"}, "type": {"type": "string"}}},
+                },
+                manifest_types={
+                    "Parent": {"spec": "main", "kind": "sealed_parent", "dart_class": "Parent", "file": "lib/src/models/common/parent.dart", "schema": "Parent", "discriminator": {"field": "type"}},
+                    "VariantA": {"spec": "main", "kind": "sealed_variant", "dart_class": "VariantA", "file": "lib/src/models/common/variant_a.dart", "schema": "VariantA", "parent": "Parent"},
+                    "VariantB": {"spec": "main", "kind": "sealed_variant", "dart_class": "VariantB", "file": "lib/src/models/common/variant_b.dart", "schema": "VariantB", "parent": "Parent"},
+                },
+                dart_files={
+                    "lib/src/models/common/parent.dart": "sealed class Parent {}\n",
+                    "lib/src/models/common/variant_a.dart": self._make_dart_class("VariantA", [("id", "String", True)]),
+                    "lib/src/models/common/variant_b.dart": self._make_dart_class("VariantB", [("id", "String", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="consistency", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["consistency"]["issues"]
+            warnings = [i for i in issues if i["level"] == "warning"]
+            self.assertEqual(warnings, [], f"Unexpected sibling warnings: {warnings}")
+
+    def test_verify_sibling_includes_skip_entries(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Parent": {"type": "object", "properties": {"type": {"type": "string"}}},
+                    "VariantA": {"type": "object", "properties": {"id": {"type": "string"}, "type": {"type": "string"}}},
+                    "VariantB": {"type": "object", "properties": {"id": {"type": "string"}, "type": {"type": "string"}}},
+                    "SkipChild": {"type": "object", "properties": {"id": {"type": "string"}, "type": {"type": "string"}}, "required": ["id"]},
+                },
+                manifest_types={
+                    "Parent": {"spec": "main", "kind": "sealed_parent", "dart_class": "Parent", "file": "lib/src/models/common/parent.dart", "schema": "Parent", "discriminator": {"field": "type"}},
+                    "VariantA": {"spec": "main", "kind": "sealed_variant", "dart_class": "VariantA", "file": "lib/src/models/common/variant_a.dart", "schema": "VariantA", "parent": "Parent"},
+                    "VariantB": {"spec": "main", "kind": "sealed_variant", "dart_class": "VariantB", "file": "lib/src/models/common/variant_b.dart", "schema": "VariantB", "parent": "Parent"},
+                    "SkipChild": {"spec": "main", "kind": "skip", "dart_class": "SkipChild", "file": "lib/src/models/common/skip_child.dart", "schema": "SkipChild", "parent": "Parent", "note": "test skip"},
+                },
+                dart_files={
+                    "lib/src/models/common/parent.dart": "sealed class Parent {}\n",
+                    "lib/src/models/common/variant_a.dart": self._make_dart_class("VariantA", [("id", "String", True)]),
+                    "lib/src/models/common/variant_b.dart": self._make_dart_class("VariantB", [("id", "String", True)]),
+                    "lib/src/models/common/skip_child.dart": self._make_dart_class("SkipChild", [("id", "String", False)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="consistency", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["consistency"]["issues"]
+            null_warnings = [i for i in issues if "inconsistent nullability" in i.get("message", "")]
+            self.assertTrue(len(null_warnings) >= 1, f"Expected nullability warning including skip child: {issues}")
+
+    def test_verify_sibling_aliased_parent(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Tool": {"type": "object", "properties": {"type": {"type": "string"}}},
+                    "ToolA": {"type": "object", "properties": {"id": {"type": "string"}, "type": {"type": "string"}}},
+                    "ToolB": {"type": "object", "properties": {"id": {"type": "string"}, "type": {"type": "string"}}, "required": ["id"]},
+                },
+                manifest_types={
+                    "interactions:Tool": {"spec": "main", "kind": "sealed_parent", "dart_class": "InteractionTool", "file": "lib/src/models/common/tool.dart", "schema": "Tool", "discriminator": {"field": "type"}},
+                    "ToolA": {"spec": "main", "kind": "sealed_variant", "dart_class": "ToolA", "file": "lib/src/models/common/tool_a.dart", "schema": "ToolA", "parent": "InteractionTool"},
+                    "ToolB": {"spec": "main", "kind": "sealed_variant", "dart_class": "ToolB", "file": "lib/src/models/common/tool_b.dart", "schema": "ToolB", "parent": "InteractionTool"},
+                },
+                dart_files={
+                    "lib/src/models/common/tool.dart": "sealed class InteractionTool {}\n",
+                    "lib/src/models/common/tool_a.dart": self._make_dart_class("ToolA", [("id", "String", True)]),
+                    "lib/src/models/common/tool_b.dart": self._make_dart_class("ToolB", [("id", "String", False)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="consistency", scope="type", type_name="interactions:Tool", baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["consistency"]["issues"]
+            null_warnings = [i for i in issues if "inconsistent nullability" in i.get("message", "")]
+            self.assertTrue(len(null_warnings) >= 1, f"Expected warning despite aliased parent: {issues}")
+
+    def test_verify_all_includes_consistency(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Example": {
+                        "type": "object",
+                        "properties": {"id": {"type": "string"}},
+                        "required": ["id"],
+                    },
+                },
+                manifest_types={
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("id", "String", False)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="all", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            self.assertIn("consistency", payload["results"])
+            self.assertIn("implementation", payload["results"])
+
+    def test_verify_consistency_surfaces_in_warning_checks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Parent": {"type": "object", "properties": {"type": {"type": "string"}}},
+                    "VariantA": {"type": "object", "properties": {"id": {"type": "string"}, "type": {"type": "string"}}},
+                    "VariantB": {"type": "object", "properties": {"id": {"type": "string"}, "type": {"type": "string"}}, "required": ["id"]},
+                },
+                manifest_types={
+                    "Parent": {"spec": "main", "kind": "sealed_parent", "dart_class": "Parent", "file": "lib/src/models/common/parent.dart", "schema": "Parent", "discriminator": {"field": "type"}},
+                    "VariantA": {"spec": "main", "kind": "sealed_variant", "dart_class": "VariantA", "file": "lib/src/models/common/variant_a.dart", "schema": "VariantA", "parent": "Parent"},
+                    "VariantB": {"spec": "main", "kind": "sealed_variant", "dart_class": "VariantB", "file": "lib/src/models/common/variant_b.dart", "schema": "VariantB", "parent": "Parent"},
+                },
+                dart_files={
+                    "lib/src/models/common/parent.dart": "sealed class Parent {}\n",
+                    "lib/src/models/common/variant_a.dart": self._make_dart_class("VariantA", [("id", "String", True)]),
+                    "lib/src/models/common/variant_b.dart": self._make_dart_class("VariantB", [("id", "String", False)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="all", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            self.assertIn("consistency", payload["summary"]["warning_checks"])
+
+    def test_verify_consistency_payload_includes_observability_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Parent": {"type": "object", "properties": {"type": {"type": "string"}}},
+                    "VariantA": {"type": "object", "properties": {"id": {"type": "string"}, "type": {"type": "string"}}},
+                    "VariantB": {"type": "object", "properties": {"id": {"type": "string"}, "type": {"type": "string"}}},
+                },
+                manifest_types={
+                    "Parent": {"spec": "main", "kind": "sealed_parent", "dart_class": "Parent", "file": "lib/src/models/common/parent.dart", "schema": "Parent", "discriminator": {"field": "type"}},
+                    "VariantA": {"spec": "main", "kind": "sealed_variant", "dart_class": "VariantA", "file": "lib/src/models/common/variant_a.dart", "schema": "VariantA", "parent": "Parent"},
+                    "VariantB": {"spec": "main", "kind": "sealed_variant", "dart_class": "VariantB", "file": "lib/src/models/common/variant_b.dart", "schema": "VariantB", "parent": "Parent"},
+                },
+                dart_files={
+                    "lib/src/models/common/parent.dart": "sealed class Parent {}\n",
+                    "lib/src/models/common/variant_a.dart": self._make_dart_class("VariantA", [("id", "String", True)]),
+                    "lib/src/models/common/variant_b.dart": self._make_dart_class("VariantB", [("id", "String", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="consistency", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            consistency = payload["results"]["consistency"]
+            self.assertIn("scope", consistency)
+            self.assertIn("selected_types", consistency)
+            self.assertIn("checked_parent_groups", consistency)
+            self.assertIn("sibling_group_count", consistency)
+
+    def test_verify_sibling_skip_parent_wrapper(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Content": {"type": "object", "properties": {"type": {"type": "string"}}},
+                    "TextContent": {"type": "object", "properties": {"id": {"type": "string"}, "type": {"type": "string"}}},
+                    "ImageContent": {"type": "object", "properties": {"id": {"type": "string"}, "type": {"type": "string"}}, "required": ["id"]},
+                },
+                manifest_types={
+                    "interactions:Content": {"spec": "main", "kind": "skip", "dart_class": "InteractionContent", "file": "lib/src/models/common/content.dart", "schema": "Content", "note": "wrapper only"},
+                    "TextContent": {"spec": "main", "kind": "sealed_variant", "dart_class": "TextContent", "file": "lib/src/models/common/text.dart", "schema": "TextContent", "parent": "InteractionContent"},
+                    "ImageContent": {"spec": "main", "kind": "sealed_variant", "dart_class": "ImageContent", "file": "lib/src/models/common/image.dart", "schema": "ImageContent", "parent": "InteractionContent"},
+                },
+                dart_files={
+                    "lib/src/models/common/content.dart": "sealed class InteractionContent {}\n",
+                    "lib/src/models/common/text.dart": self._make_dart_class("TextContent", [("id", "String", True)]),
+                    "lib/src/models/common/image.dart": self._make_dart_class("ImageContent", [("id", "String", False)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="consistency", scope="type", type_name="interactions:Content", baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["consistency"]["issues"]
+            null_warnings = [i for i in issues if "inconsistent nullability" in i.get("message", "")]
+            self.assertTrue(len(null_warnings) >= 1, f"Expected nullability warning from skip parent wrapper: {issues}")
+
+
+    def test_verify_skip_entries_get_type_checks(self) -> None:
+        """P1: skip entries with schema+file still get type warnings."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Interaction": {
+                        "type": "object",
+                        "properties": {"input": {"$ref": "#/components/schemas/InteractionInput"}},
+                    },
+                    "InteractionInput": {"type": "object", "properties": {"text": {"type": "string"}}},
+                },
+                manifest_types={
+                    "Interaction": {"spec": "main", "kind": "skip", "dart_class": "Interaction", "file": "lib/src/models/common/interaction.dart", "schema": "Interaction", "note": "complex type"},
+                    "InteractionInput": {"spec": "main", "kind": "object", "dart_class": "InteractionInput", "file": "lib/src/models/common/input.dart", "schema": "InteractionInput"},
+                },
+                dart_files={
+                    "lib/src/models/common/interaction.dart": self._make_dart_class("Interaction", [("input", "Object", True)]),
+                    "lib/src/models/common/input.dart": self._make_dart_class("InteractionInput", [("text", "String", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            type_warnings = [i for i in issues if i["level"] == "warning" and "InteractionInput" in i.get("message", "")]
+            self.assertTrue(len(type_warnings) >= 1, f"Expected type warning on skip entry: {issues}")
+
+    def test_verify_type_no_false_positive_on_list_of_primitives(self) -> None:
+        """P2: List<String> should not warn when spec says array of string."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "tools": {"type": "array", "items": {"type": "string"}},
+                        },
+                        "required": ["tools"],
+                    },
+                },
+                manifest_types={
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("tools", "List<String>", False)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            type_issues = [i for i in issues if "typed as" in i.get("message", "") or "mismatch" in i.get("message", "")]
+            self.assertEqual(type_issues, [], f"Unexpected false positive on List<String>: {type_issues}")
+
+    def test_verify_type_respects_custom_array_container_mapping(self) -> None:
+        """Custom array type_mapping (e.g. BuiltList) should not cause false positive."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "tags": {"type": "array", "items": {"type": "string"}},
+                            "items": {"type": "array", "items": {"$ref": "#/components/schemas/Foo"}},
+                        },
+                        "required": ["tags", "items"],
+                    },
+                    "Foo": {"type": "object", "properties": {}},
+                },
+                manifest_types={
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                    "Foo": {"spec": "main", "kind": "object", "dart_class": "Foo", "file": "lib/src/models/common/foo.dart", "schema": "Foo"},
+                },
+                dart_files={
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("tags", "BuiltList<String>", False), ("items", "BuiltList<Foo>", False)]),
+                    "lib/src/models/common/foo.dart": self._make_dart_class("Foo", []),
+                },
+                type_mappings={"string": "String", "integer": "int", "number": "double", "boolean": "bool", "array": "BuiltList", "object": "Map"},
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            type_issues = [i for i in issues if "typed as" in i.get("message", "") or "mismatch" in i.get("message", "")]
+            self.assertEqual(type_issues, [], f"Unexpected false positive with custom BuiltList mapping: {type_issues}")
+
+    def test_verify_type_nested_array_resolves_inner_type(self) -> None:
+        """array<array<string>> should resolve to the correct nested generic, not bare container."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "matrix": {
+                                "type": "array",
+                                "items": {"type": "array", "items": {"type": "string"}},
+                            },
+                        },
+                        "required": ["matrix"],
+                    },
+                },
+                manifest_types={
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("matrix", "BuiltList<BuiltList<String>>", False)]),
+                },
+                type_mappings={"string": "String", "integer": "int", "number": "double", "boolean": "bool", "array": "BuiltList", "object": "Map"},
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            type_issues = [i for i in issues if "typed as" in i.get("message", "") or "mismatch" in i.get("message", "")]
+            self.assertEqual(type_issues, [], f"Unexpected false positive for nested BuiltList<BuiltList<String>>: {type_issues}")
+
+    def test_verify_type_no_false_positive_on_inline_object(self) -> None:
+        """P3: inline object (type: object without $ref) should not warn about Map."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "text": {"type": "object", "properties": {"value": {"type": "string"}}},
+                        },
+                    },
+                },
+                manifest_types={
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("text", "TextContent", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            type_issues = [i for i in issues if "typed as" in i.get("message", "") or "mismatch" in i.get("message", "")]
+            self.assertEqual(type_issues, [], f"Unexpected false positive on inline object: {type_issues}")
+
+    def test_verify_sibling_excluded_properties_suppresses_warning(self) -> None:
+        """P4: parent excluded_properties should suppress sibling divergence warnings."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "MessageItem": {"type": "object", "properties": {"type": {"type": "string"}}},
+                    "UserMsg": {"type": "object", "properties": {"content": {"type": "string"}, "type": {"type": "string"}}},
+                    "AssistantMsg": {"type": "object", "properties": {"content": {"type": "string"}, "type": {"type": "string"}}},
+                },
+                manifest_types={
+                    "MessageItem": {"spec": "main", "kind": "sealed_parent", "dart_class": "MessageItem", "file": "lib/src/models/common/msg_item.dart", "schema": "MessageItem", "discriminator": {"field": "type"}, "excluded_properties": ["content"]},
+                    "UserMsg": {"spec": "main", "kind": "sealed_variant", "dart_class": "UserMsg", "file": "lib/src/models/common/user_msg.dart", "schema": "UserMsg", "parent": "MessageItem"},
+                    "AssistantMsg": {"spec": "main", "kind": "sealed_variant", "dart_class": "AssistantMsg", "file": "lib/src/models/common/assistant_msg.dart", "schema": "AssistantMsg", "parent": "MessageItem"},
+                },
+                dart_files={
+                    "lib/src/models/common/msg_item.dart": "sealed class MessageItem {}\n",
+                    "lib/src/models/common/user_msg.dart": self._make_dart_class("UserMsg", [("content", "String", False)]),
+                    "lib/src/models/common/assistant_msg.dart": self._make_dart_class("AssistantMsg", [("content", "OutputContent", False)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="consistency", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["consistency"]["issues"]
+            content_warnings = [i for i in issues if "content" in i.get("message", "") and i["level"] == "warning"]
+            self.assertEqual(content_warnings, [], f"Expected content divergence to be suppressed: {content_warnings}")
+
+    def test_verify_skip_type_checks_only_on_scope_all(self) -> None:
+        """Skip-entry type checks should not run for scoped verification (type/critical)."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Selected": {
+                        "type": "object",
+                        "properties": {"id": {"type": "string"}},
+                        "required": ["id"],
+                    },
+                    "Skipped": {
+                        "type": "object",
+                        "properties": {"data": {"$ref": "#/components/schemas/SomeRef"}},
+                    },
+                    "SomeRef": {"type": "object", "properties": {}},
+                },
+                manifest_types={
+                    "Selected": {"spec": "main", "kind": "object", "dart_class": "Selected", "file": "lib/src/models/common/selected.dart", "schema": "Selected", "tags": ["critical"]},
+                    "Skipped": {"spec": "main", "kind": "skip", "dart_class": "Skipped", "file": "lib/src/models/common/skipped.dart", "schema": "Skipped", "note": "test"},
+                    "SomeRef": {"spec": "main", "kind": "object", "dart_class": "SomeRef", "file": "lib/src/models/common/some_ref.dart", "schema": "SomeRef"},
+                },
+                dart_files={
+                    "lib/src/models/common/selected.dart": self._make_dart_class("Selected", [("id", "String", False)]),
+                    "lib/src/models/common/skipped.dart": self._make_dart_class("Skipped", [("data", "Object", True)]),
+                    "lib/src/models/common/some_ref.dart": self._make_dart_class("SomeRef", []),
+                },
+            )
+            # scope=critical should NOT include the skip entry's type warnings
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="critical", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            skip_warnings = [i for i in issues if i.get("name") == "Skipped"]
+            self.assertEqual(skip_warnings, [], f"Skip entry should not appear in critical scope: {skip_warnings}")
+
+            # scope=all SHOULD include the skip entry's type warnings
+            _, payload_all = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues_all = payload_all["results"]["implementation"]["issues"]
+            skip_warnings_all = [i for i in issues_all if i.get("name") == "Skipped" and "SomeRef" in i.get("message", "")]
+            self.assertTrue(len(skip_warnings_all) >= 1, f"Skip entry type warnings expected in scope=all: {issues_all}")
+
+    def test_verify_type_union_when_allOf_mixed_with_ref(self) -> None:
+        """anyOf: [{$ref: AltConfig}, {allOf: [...]}] is a union — Object should warn regardless of branch order."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "ExampleA": {
+                        "type": "object",
+                        "properties": {
+                            "cfg": {"anyOf": [
+                                {"$ref": "#/components/schemas/AltConfig"},
+                                {"allOf": [{"$ref": "#/components/schemas/BaseConfig"}, {"properties": {"x": {"type": "string"}}}]},
+                            ]},
+                        },
+                    },
+                    "ExampleB": {
+                        "type": "object",
+                        "properties": {
+                            "cfg": {"anyOf": [
+                                {"allOf": [{"$ref": "#/components/schemas/BaseConfig"}, {"properties": {"x": {"type": "string"}}}]},
+                                {"$ref": "#/components/schemas/AltConfig"},
+                            ]},
+                        },
+                    },
+                    "AltConfig": {"type": "object", "properties": {}},
+                    "BaseConfig": {"type": "object", "properties": {}},
+                },
+                manifest_types={
+                    "ExampleA": {"spec": "main", "kind": "object", "dart_class": "ExampleA", "file": "lib/src/models/common/example_a.dart", "schema": "ExampleA"},
+                    "ExampleB": {"spec": "main", "kind": "object", "dart_class": "ExampleB", "file": "lib/src/models/common/example_b.dart", "schema": "ExampleB"},
+                    "AltConfig": {"spec": "main", "kind": "object", "dart_class": "AltConfig", "file": "lib/src/models/common/alt.dart", "schema": "AltConfig"},
+                    "BaseConfig": {"spec": "main", "kind": "object", "dart_class": "BaseConfig", "file": "lib/src/models/common/base.dart", "schema": "BaseConfig"},
+                },
+                dart_files={
+                    "lib/src/models/common/example_a.dart": self._make_dart_class("ExampleA", [("cfg", "Object", True)]),
+                    "lib/src/models/common/example_b.dart": self._make_dart_class("ExampleB", [("cfg", "Object", True)]),
+                    "lib/src/models/common/alt.dart": self._make_dart_class("AltConfig", []),
+                    "lib/src/models/common/base.dart": self._make_dart_class("BaseConfig", []),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            # Both orderings must trigger a union warning, never a single-type suggestion
+            a_warnings = [i for i in issues if i.get("name") == "ExampleA" and i["level"] == "warning" and "union" in i.get("message", "")]
+            b_warnings = [i for i in issues if i.get("name") == "ExampleB" and i["level"] == "warning" and "union" in i.get("message", "")]
+            a_wrong = [i for i in issues if i.get("name") == "ExampleA" and "AltConfig" in i.get("message", "")]
+            b_wrong = [i for i in issues if i.get("name") == "ExampleB" and "AltConfig" in i.get("message", "")]
+            self.assertTrue(len(a_warnings) >= 1, f"ExampleA (ref first): expected union warning, got: {issues}")
+            self.assertTrue(len(b_warnings) >= 1, f"ExampleB (allOf first): expected union warning, got: {issues}")
+            self.assertEqual(a_wrong, [], f"ExampleA must not suggest a single type: {a_wrong}")
+            self.assertEqual(b_wrong, [], f"ExampleB must not suggest a single type: {b_wrong}")
+
+    def test_verify_type_no_warning_for_multi_item_allOf_branch(self) -> None:
+        """P2a: anyOf with a multi-item allOf branch is indeterminate — no spurious type warning."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "config": {"anyOf": [
+                                {"allOf": [
+                                    {"$ref": "#/components/schemas/BaseConfig"},
+                                    {"properties": {"extra": {"type": "string"}}},
+                                ]},
+                                {"type": "null"},
+                            ]},
+                        },
+                    },
+                    "BaseConfig": {"type": "object", "properties": {"name": {"type": "string"}}},
+                },
+                manifest_types={
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                    "BaseConfig": {"spec": "main", "kind": "object", "dart_class": "BaseConfig", "file": "lib/src/models/common/base_config.dart", "schema": "BaseConfig"},
+                },
+                dart_files={
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("config", "ExtendedConfig", True)]),
+                    "lib/src/models/common/base_config.dart": self._make_dart_class("BaseConfig", [("name", "String", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            # Multi-item allOf branch is indeterminate — no type warning on a concrete Dart class
+            type_issues = [i for i in issues if "typed as" in i.get("message", "") and "config" in i.get("message", "").lower()]
+            self.assertEqual(type_issues, [], f"No type warning expected for multi-item allOf branch: {type_issues}")
+
+    def test_verify_type_warns_for_nested_union_in_anyOf(self) -> None:
+        """P2b: anyOf: [{oneOf: [A, B]}, null] should be counted as a 2-branch union."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "result": {"anyOf": [
+                                {"oneOf": [
+                                    {"$ref": "#/components/schemas/TypeA"},
+                                    {"$ref": "#/components/schemas/TypeB"},
+                                ]},
+                                {"type": "null"},
+                            ]},
+                        },
+                    },
+                    "TypeA": {"type": "object", "properties": {}},
+                    "TypeB": {"type": "object", "properties": {}},
+                },
+                manifest_types={
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                    "TypeA": {"spec": "main", "kind": "object", "dart_class": "TypeA", "file": "lib/src/models/common/type_a.dart", "schema": "TypeA"},
+                    "TypeB": {"spec": "main", "kind": "object", "dart_class": "TypeB", "file": "lib/src/models/common/type_b.dart", "schema": "TypeB"},
+                },
+                dart_files={
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("result", "Object", True)]),
+                    "lib/src/models/common/type_a.dart": self._make_dart_class("TypeA", []),
+                    "lib/src/models/common/type_b.dart": self._make_dart_class("TypeB", []),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            union_warnings = [i for i in issues if i["level"] == "warning" and "union" in i.get("message", "")]
+            self.assertTrue(len(union_warnings) >= 1, f"Expected union warning for nested anyOf/oneOf: {issues}")
+
+    def test_verify_sibling_excluded_properties_skip_wrapper_parent(self) -> None:
+        """excluded_properties on skip-wrapper parents (aliased key) should suppress sibling warnings."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Content": {"type": "object", "properties": {"type": {"type": "string"}}},
+                    "TextContent": {"type": "object", "properties": {"result": {"type": "string"}, "type": {"type": "string"}}},
+                    "ImageContent": {"type": "object", "properties": {"result": {"type": "string"}, "type": {"type": "string"}}},
+                },
+                manifest_types={
+                    "interactions:Content": {"spec": "main", "kind": "skip", "dart_class": "InteractionContent", "file": "lib/src/models/common/content.dart", "schema": "Content", "note": "wrapper", "excluded_properties": ["result"]},
+                    "TextContent": {"spec": "main", "kind": "sealed_variant", "dart_class": "TextContent", "file": "lib/src/models/common/text.dart", "schema": "TextContent", "parent": "InteractionContent"},
+                    "ImageContent": {"spec": "main", "kind": "sealed_variant", "dart_class": "ImageContent", "file": "lib/src/models/common/image.dart", "schema": "ImageContent", "parent": "InteractionContent"},
+                },
+                dart_files={
+                    "lib/src/models/common/content.dart": "sealed class InteractionContent {}\n",
+                    "lib/src/models/common/text.dart": self._make_dart_class("TextContent", [("result", "String", True)]),
+                    "lib/src/models/common/image.dart": self._make_dart_class("ImageContent", [("result", "Object", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="consistency", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["consistency"]["issues"]
+            result_warnings = [i for i in issues if "result" in i.get("message", "") and i["level"] == "warning"]
+            self.assertEqual(result_warnings, [], f"Expected 'result' divergence to be suppressed via skip-wrapper parent: {result_warnings}")
+
+
+    def test_verify_type_array_item_anyOf_wrapper_resolves_ref(self) -> None:
+        """items: {anyOf: [{$ref: Foo}, null]} should resolve to List<Foo>, not be indeterminate."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "FooItem": {"type": "object", "properties": {"name": {"type": "string"}}},
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "items": {
+                                "type": "array",
+                                "items": {"anyOf": [{"$ref": "#/components/schemas/FooItem"}, {"type": "null"}]},
+                            },
+                        },
+                    },
+                },
+                manifest_types={
+                    "FooItem": {"spec": "main", "kind": "object", "dart_class": "FooItem", "file": "lib/src/models/common/foo_item.dart", "schema": "FooItem"},
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/foo_item.dart": self._make_dart_class("FooItem", [("name", "String", True)]),
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("items", "Object", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            warnings = [i for i in issues if i["level"] == "warning" and "items" in i.get("message", "")]
+            self.assertTrue(len(warnings) >= 1, f"Expected warning for Object field when spec has array<anyOf FooItem>: {issues}")
+            self.assertTrue(any("FooItem" in i["message"] or "List" in i["message"] for i in warnings),
+                            f"Expected warning to reference FooItem or List: {warnings}")
+
+    def test_verify_type_array_item_anyOf_no_false_positive_when_correct(self) -> None:
+        """items: {anyOf: [{$ref: Foo}, null]} with Dart List<Foo>? should not warn."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "FooItem": {"type": "object", "properties": {"name": {"type": "string"}}},
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "items": {
+                                "type": "array",
+                                "items": {"anyOf": [{"$ref": "#/components/schemas/FooItem"}, {"type": "null"}]},
+                            },
+                        },
+                    },
+                },
+                manifest_types={
+                    "FooItem": {"spec": "main", "kind": "object", "dart_class": "FooItem", "file": "lib/src/models/common/foo_item.dart", "schema": "FooItem"},
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/foo_item.dart": self._make_dart_class("FooItem", [("name", "String", True)]),
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("items", "List<FooItem>", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            type_issues = [i for i in issues if "typed as" in i.get("message", "") or "mismatch" in i.get("message", "")]
+            self.assertEqual(type_issues, [], f"Unexpected false positive for List<FooItem> with anyOf-wrapped items: {type_issues}")
+
+
+    def test_verify_type_array_union_items_warns_object(self) -> None:
+        """array with multi-ref union items + Dart Object? should warn."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "TypeA": {"type": "object", "properties": {"a": {"type": "string"}}},
+                    "TypeB": {"type": "object", "properties": {"b": {"type": "string"}}},
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "items": {
+                                "type": "array",
+                                "items": {"anyOf": [{"$ref": "#/components/schemas/TypeA"}, {"$ref": "#/components/schemas/TypeB"}]},
+                            },
+                        },
+                    },
+                },
+                manifest_types={
+                    "TypeA": {"spec": "main", "kind": "object", "dart_class": "TypeA", "file": "lib/src/models/common/type_a.dart", "schema": "TypeA"},
+                    "TypeB": {"spec": "main", "kind": "object", "dart_class": "TypeB", "file": "lib/src/models/common/type_b.dart", "schema": "TypeB"},
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/type_a.dart": self._make_dart_class("TypeA", [("a", "String", True)]),
+                    "lib/src/models/common/type_b.dart": self._make_dart_class("TypeB", [("b", "String", True)]),
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("items", "Object", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            warnings = [i for i in issues if i["level"] == "warning" and "items" in i.get("message", "")]
+            self.assertTrue(len(warnings) >= 1, f"Expected warning for Object field when spec has array of union items: {issues}")
+            self.assertTrue(any("union" in i["message"] or "List" in i["message"] for i in warnings),
+                            f"Expected warning to mention union or List: {warnings}")
+
+    def test_verify_type_array_union_items_warns_list_of_object(self) -> None:
+        """array with multi-ref union items + Dart List<Object>? should warn about item type."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "TypeA": {"type": "object", "properties": {"a": {"type": "string"}}},
+                    "TypeB": {"type": "object", "properties": {"b": {"type": "string"}}},
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "items": {
+                                "type": "array",
+                                "items": {"anyOf": [{"$ref": "#/components/schemas/TypeA"}, {"$ref": "#/components/schemas/TypeB"}]},
+                            },
+                        },
+                    },
+                },
+                manifest_types={
+                    "TypeA": {"spec": "main", "kind": "object", "dart_class": "TypeA", "file": "lib/src/models/common/type_a.dart", "schema": "TypeA"},
+                    "TypeB": {"spec": "main", "kind": "object", "dart_class": "TypeB", "file": "lib/src/models/common/type_b.dart", "schema": "TypeB"},
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/type_a.dart": self._make_dart_class("TypeA", [("a", "String", True)]),
+                    "lib/src/models/common/type_b.dart": self._make_dart_class("TypeB", [("b", "String", True)]),
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("items", "List<Object>", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            warnings = [i for i in issues if i["level"] == "warning" and "items" in i.get("message", "")]
+            self.assertTrue(len(warnings) >= 1, f"Expected warning for List<Object> when spec has array of union items: {issues}")
+            self.assertTrue(any("item" in i["message"] and "union" in i["message"] for i in warnings),
+                            f"Expected warning to mention item type and union: {warnings}")
+
+    def test_verify_type_array_union_items_mismatch_for_wrong_container(self) -> None:
+        """array with union items + Dart String (completely wrong type) should emit info mismatch."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "TypeA": {"type": "object", "properties": {"a": {"type": "string"}}},
+                    "TypeB": {"type": "object", "properties": {"b": {"type": "string"}}},
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "items": {
+                                "type": "array",
+                                "items": {"anyOf": [{"$ref": "#/components/schemas/TypeA"}, {"$ref": "#/components/schemas/TypeB"}]},
+                            },
+                        },
+                    },
+                },
+                manifest_types={
+                    "TypeA": {"spec": "main", "kind": "object", "dart_class": "TypeA", "file": "lib/src/models/common/type_a.dart", "schema": "TypeA"},
+                    "TypeB": {"spec": "main", "kind": "object", "dart_class": "TypeB", "file": "lib/src/models/common/type_b.dart", "schema": "TypeB"},
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/type_a.dart": self._make_dart_class("TypeA", [("a", "String", True)]),
+                    "lib/src/models/common/type_b.dart": self._make_dart_class("TypeB", [("b", "String", True)]),
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("items", "String", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            info_issues = [i for i in issues if i["level"] == "info" and "items" in i.get("message", "")]
+            self.assertTrue(len(info_issues) >= 1, f"Expected info mismatch for String field on array-of-union-items spec: {issues}")
+            self.assertTrue(any("List" in i["message"] or "union" in i["message"] for i in info_issues),
+                            f"Expected mismatch to mention List or union: {info_issues}")
+
+    def test_verify_type_array_union_items_info_for_primitive_item_type(self) -> None:
+        """array with union items + Dart List<String>? should emit info (primitive item type)."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "TypeA": {"type": "object", "properties": {"a": {"type": "string"}}},
+                    "TypeB": {"type": "object", "properties": {"b": {"type": "string"}}},
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "items": {
+                                "type": "array",
+                                "items": {"anyOf": [{"$ref": "#/components/schemas/TypeA"}, {"$ref": "#/components/schemas/TypeB"}]},
+                            },
+                        },
+                    },
+                },
+                manifest_types={
+                    "TypeA": {"spec": "main", "kind": "object", "dart_class": "TypeA", "file": "lib/src/models/common/type_a.dart", "schema": "TypeA"},
+                    "TypeB": {"spec": "main", "kind": "object", "dart_class": "TypeB", "file": "lib/src/models/common/type_b.dart", "schema": "TypeB"},
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/type_a.dart": self._make_dart_class("TypeA", [("a", "String", True)]),
+                    "lib/src/models/common/type_b.dart": self._make_dart_class("TypeB", [("b", "String", True)]),
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("items", "List<String>", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            info_issues = [i for i in issues if i["level"] == "info" and "items" in i.get("message", "")]
+            self.assertTrue(len(info_issues) >= 1, f"Expected info issue for List<String> on union-item array: {issues}")
+
+    def test_verify_type_array_union_items_info_for_known_variant_item_type(self) -> None:
+        """array with union items + Dart List<TypeA>? should emit info (TypeA is a known manifest type, not the union parent)."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "TypeA": {"type": "object", "properties": {"a": {"type": "string"}}},
+                    "TypeB": {"type": "object", "properties": {"b": {"type": "string"}}},
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "items": {
+                                "type": "array",
+                                "items": {"anyOf": [{"$ref": "#/components/schemas/TypeA"}, {"$ref": "#/components/schemas/TypeB"}]},
+                            },
+                        },
+                    },
+                },
+                manifest_types={
+                    "TypeA": {"spec": "main", "kind": "object", "dart_class": "TypeA", "file": "lib/src/models/common/type_a.dart", "schema": "TypeA"},
+                    "TypeB": {"spec": "main", "kind": "object", "dart_class": "TypeB", "file": "lib/src/models/common/type_b.dart", "schema": "TypeB"},
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/type_a.dart": self._make_dart_class("TypeA", [("a", "String", True)]),
+                    "lib/src/models/common/type_b.dart": self._make_dart_class("TypeB", [("b", "String", True)]),
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("items", "List<TypeA>", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            info_issues = [i for i in issues if i["level"] == "info" and "items" in i.get("message", "")]
+            self.assertTrue(len(info_issues) >= 1, f"Expected info issue for List<TypeA> (known variant) on union-item array: {issues}")
+
+    def test_verify_type_array_union_items_no_warning_for_manifest_sealed_parent(self) -> None:
+        """List<ItemUnion> where ItemUnion is a manifest sealed_parent should not warn (not a concrete mismatch)."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "ItemUnion": {"type": "object", "properties": {"type": {"type": "string"}}},
+                    "TypeA": {"type": "object", "properties": {"a": {"type": "string"}, "type": {"type": "string"}}},
+                    "TypeB": {"type": "object", "properties": {"b": {"type": "string"}, "type": {"type": "string"}}},
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "items": {
+                                "type": "array",
+                                "items": {"anyOf": [{"$ref": "#/components/schemas/TypeA"}, {"$ref": "#/components/schemas/TypeB"}]},
+                            },
+                        },
+                    },
+                },
+                manifest_types={
+                    "ItemUnion": {"spec": "main", "kind": "sealed_parent", "dart_class": "ItemUnion", "file": "lib/src/models/common/item_union.dart", "schema": "ItemUnion"},
+                    "TypeA": {"spec": "main", "kind": "sealed_variant", "dart_class": "TypeA", "file": "lib/src/models/common/type_a.dart", "schema": "TypeA", "parent": "ItemUnion"},
+                    "TypeB": {"spec": "main", "kind": "sealed_variant", "dart_class": "TypeB", "file": "lib/src/models/common/type_b.dart", "schema": "TypeB", "parent": "ItemUnion"},
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/item_union.dart": "sealed class ItemUnion {}\n",
+                    "lib/src/models/common/type_a.dart": self._make_dart_class("TypeA", [("a", "String", True)]),
+                    "lib/src/models/common/type_b.dart": self._make_dart_class("TypeB", [("b", "String", True)]),
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("items", "List<ItemUnion>", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            type_issues = [i for i in issues if "items" in i.get("message", "") and i["level"] in ("warning", "info") and "union" in i.get("message", "")]
+            self.assertEqual(type_issues, [], f"False positive: List<ItemUnion> with sealed_parent in manifest should not warn: {type_issues}")
+
+    def test_verify_type_array_union_items_no_warning_for_skip_wrapper_parent(self) -> None:
+        """List<ItemUnion> where ItemUnion is a skip-wrapper parent (children reference it via parent field) should not warn."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "TypeA": {"type": "object", "properties": {"a": {"type": "string"}, "type": {"type": "string"}}},
+                    "TypeB": {"type": "object", "properties": {"b": {"type": "string"}, "type": {"type": "string"}}},
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "items": {
+                                "type": "array",
+                                "items": {"anyOf": [{"$ref": "#/components/schemas/TypeA"}, {"$ref": "#/components/schemas/TypeB"}]},
+                            },
+                        },
+                    },
+                },
+                manifest_types={
+                    "interactions:ItemUnion": {"spec": "main", "kind": "skip", "dart_class": "ItemUnion", "file": "lib/src/models/common/item_union.dart", "schema": None, "note": "wrapper"},
+                    "TypeA": {"spec": "main", "kind": "sealed_variant", "dart_class": "TypeA", "file": "lib/src/models/common/type_a.dart", "schema": "TypeA", "parent": "ItemUnion"},
+                    "TypeB": {"spec": "main", "kind": "sealed_variant", "dart_class": "TypeB", "file": "lib/src/models/common/type_b.dart", "schema": "TypeB", "parent": "ItemUnion"},
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/item_union.dart": "sealed class ItemUnion {}\n",
+                    "lib/src/models/common/type_a.dart": self._make_dart_class("TypeA", [("a", "String", True)]),
+                    "lib/src/models/common/type_b.dart": self._make_dart_class("TypeB", [("b", "String", True)]),
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("items", "List<ItemUnion>", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            type_issues = [i for i in issues if "items" in i.get("message", "") and i["level"] in ("warning", "info") and "union" in i.get("message", "")]
+            self.assertEqual(type_issues, [], f"False positive: List<ItemUnion> with skip-wrapper parent should not warn: {type_issues}")
+
+    def test_verify_type_array_union_items_no_warning_for_key_addressed_wrapper_parent(self) -> None:
+        """List<ItemUnion> where children reference the wrapper by manifest key (parent: 'interactions:ItemUnion') should not warn."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "TypeA": {"type": "object", "properties": {"a": {"type": "string"}, "type": {"type": "string"}}},
+                    "TypeB": {"type": "object", "properties": {"b": {"type": "string"}, "type": {"type": "string"}}},
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "items": {
+                                "type": "array",
+                                "items": {"anyOf": [{"$ref": "#/components/schemas/TypeA"}, {"$ref": "#/components/schemas/TypeB"}]},
+                            },
+                        },
+                    },
+                },
+                manifest_types={
+                    "interactions:ItemUnion": {"spec": "main", "kind": "skip", "dart_class": "ItemUnion", "file": "lib/src/models/common/item_union.dart", "schema": None, "note": "wrapper"},
+                    "TypeA": {"spec": "main", "kind": "sealed_variant", "dart_class": "TypeA", "file": "lib/src/models/common/type_a.dart", "schema": "TypeA", "parent": "interactions:ItemUnion"},
+                    "TypeB": {"spec": "main", "kind": "sealed_variant", "dart_class": "TypeB", "file": "lib/src/models/common/type_b.dart", "schema": "TypeB", "parent": "interactions:ItemUnion"},
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/item_union.dart": "sealed class ItemUnion {}\n",
+                    "lib/src/models/common/type_a.dart": self._make_dart_class("TypeA", [("a", "String", True)]),
+                    "lib/src/models/common/type_b.dart": self._make_dart_class("TypeB", [("b", "String", True)]),
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("items", "List<ItemUnion>", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            type_issues = [i for i in issues if "items" in i.get("message", "") and i["level"] in ("warning", "info") and "union" in i.get("message", "")]
+            self.assertEqual(type_issues, [], f"False positive: List<ItemUnion> with key-addressed skip-wrapper parent should not warn: {type_issues}")
+
+    def test_verify_skip_entry_array_union_items_no_warning_for_key_addressed_wrapper_parent(self) -> None:
+        """skip entry with List<ItemUnion> where children use parent: 'interactions:ItemUnion' (key ref) should not warn via _verify_field_types."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "TypeA": {"type": "object", "properties": {"a": {"type": "string"}, "type": {"type": "string"}}},
+                    "TypeB": {"type": "object", "properties": {"b": {"type": "string"}, "type": {"type": "string"}}},
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "items": {
+                                "type": "array",
+                                "items": {"anyOf": [{"$ref": "#/components/schemas/TypeA"}, {"$ref": "#/components/schemas/TypeB"}]},
+                            },
+                        },
+                    },
+                },
+                manifest_types={
+                    "interactions:ItemUnion": {"spec": "main", "kind": "skip", "dart_class": "ItemUnion", "file": "lib/src/models/common/item_union.dart", "schema": None, "note": "wrapper"},
+                    "TypeA": {"spec": "main", "kind": "sealed_variant", "dart_class": "TypeA", "file": "lib/src/models/common/type_a.dart", "schema": "TypeA", "parent": "interactions:ItemUnion"},
+                    "TypeB": {"spec": "main", "kind": "sealed_variant", "dart_class": "TypeB", "file": "lib/src/models/common/type_b.dart", "schema": "TypeB", "parent": "interactions:ItemUnion"},
+                    # Example is kind: skip so it goes through _verify_field_types
+                    "Example": {"spec": "main", "kind": "skip", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example", "note": "tested via skip path"},
+                },
+                dart_files={
+                    "lib/src/models/common/item_union.dart": "sealed class ItemUnion {}\n",
+                    "lib/src/models/common/type_a.dart": self._make_dart_class("TypeA", [("a", "String", True)]),
+                    "lib/src/models/common/type_b.dart": self._make_dart_class("TypeB", [("b", "String", True)]),
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("items", "List<ItemUnion>", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            type_issues = [i for i in issues if "items" in i.get("message", "") and i["level"] in ("warning", "info") and "union" in i.get("message", "")]
+            self.assertEqual(type_issues, [], f"False positive: skip entry List<ItemUnion> with key-addressed wrapper parent should not warn: {type_issues}")
+
+    def test_verify_type_array_composed_allof_items_indeterminate(self) -> None:
+        """items: {allOf: [{$ref: BaseConfig}, {properties: ...}]} is composition — indeterminate, no mismatch warning for wrapper types."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "BaseConfig": {"type": "object", "properties": {"id": {"type": "string"}}},
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "allOf": [
+                                        {"$ref": "#/components/schemas/BaseConfig"},
+                                        {"type": "object", "properties": {"extra": {"type": "string"}}},
+                                    ],
+                                },
+                            },
+                        },
+                    },
+                },
+                manifest_types={
+                    "BaseConfig": {"spec": "main", "kind": "object", "dart_class": "BaseConfig", "file": "lib/src/models/common/base_config.dart", "schema": "BaseConfig"},
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/base_config.dart": self._make_dart_class("BaseConfig", [("id", "String", True)]),
+                    # ItemWrapper is a valid subtype — should not be flagged as wrong
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("items", "List<ItemWrapper>", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            type_issues = [i for i in issues if "typed as" in i.get("message", "") or "mismatch" in i.get("message", "") or "item type" in i.get("message", "")]
+            self.assertEqual(type_issues, [], f"False positive: List<ItemWrapper> on composed allOf items should be indeterminate: {type_issues}")
+
+    def test_verify_type_nested_union_items_warns_object(self) -> None:
+        """List<List<Object>> on spec array<array<anyOf[TypeA, TypeB]>> should warn."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "TypeA": {"type": "object", "properties": {"a": {"type": "string"}}},
+                    "TypeB": {"type": "object", "properties": {"b": {"type": "string"}}},
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "matrix": {
+                                "type": "array",
+                                "items": {
+                                    "type": "array",
+                                    "items": {"anyOf": [{"$ref": "#/components/schemas/TypeA"}, {"$ref": "#/components/schemas/TypeB"}]},
+                                },
+                            },
+                        },
+                    },
+                },
+                manifest_types={
+                    "TypeA": {"spec": "main", "kind": "object", "dart_class": "TypeA", "file": "lib/src/models/common/type_a.dart", "schema": "TypeA"},
+                    "TypeB": {"spec": "main", "kind": "object", "dart_class": "TypeB", "file": "lib/src/models/common/type_b.dart", "schema": "TypeB"},
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/type_a.dart": self._make_dart_class("TypeA", [("a", "String", True)]),
+                    "lib/src/models/common/type_b.dart": self._make_dart_class("TypeB", [("b", "String", True)]),
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("matrix", "List<List<Object>>", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            warnings = [i for i in issues if i["level"] == "warning" and "matrix" in i.get("message", "")]
+            self.assertTrue(len(warnings) >= 1, f"Expected warning for List<List<Object>> on nested union-item array: {issues}")
+
+    def test_verify_type_nested_union_items_info_for_known_variant(self) -> None:
+        """List<List<TypeA>> on spec array<array<anyOf[TypeA, TypeB]>> should emit info."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "TypeA": {"type": "object", "properties": {"a": {"type": "string"}}},
+                    "TypeB": {"type": "object", "properties": {"b": {"type": "string"}}},
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "matrix": {
+                                "type": "array",
+                                "items": {
+                                    "type": "array",
+                                    "items": {"anyOf": [{"$ref": "#/components/schemas/TypeA"}, {"$ref": "#/components/schemas/TypeB"}]},
+                                },
+                            },
+                        },
+                    },
+                },
+                manifest_types={
+                    "TypeA": {"spec": "main", "kind": "object", "dart_class": "TypeA", "file": "lib/src/models/common/type_a.dart", "schema": "TypeA"},
+                    "TypeB": {"spec": "main", "kind": "object", "dart_class": "TypeB", "file": "lib/src/models/common/type_b.dart", "schema": "TypeB"},
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/type_a.dart": self._make_dart_class("TypeA", [("a", "String", True)]),
+                    "lib/src/models/common/type_b.dart": self._make_dart_class("TypeB", [("b", "String", True)]),
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("matrix", "List<List<TypeA>>", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            info_issues = [i for i in issues if i["level"] == "info" and "matrix" in i.get("message", "")]
+            self.assertTrue(len(info_issues) >= 1, f"Expected info for List<List<TypeA>> on nested union-item array: {issues}")
+
+    def test_verify_type_extension_parent_not_excluded_from_known_concrete(self) -> None:
+        """extension entry with parent: ToolChoice must not cause ToolChoice to be excluded from known_concrete."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "ToolChoice": {"type": "object", "properties": {"type": {"type": "string"}}},
+                    "TypeA": {"type": "object", "properties": {"a": {"type": "string"}}},
+                    "TypeB": {"type": "object", "properties": {"b": {"type": "string"}}},
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "items": {
+                                "type": "array",
+                                "items": {"anyOf": [{"$ref": "#/components/schemas/TypeA"}, {"$ref": "#/components/schemas/TypeB"}]},
+                            },
+                        },
+                    },
+                },
+                manifest_types={
+                    "ToolChoice": {"spec": "main", "kind": "object", "dart_class": "ToolChoice", "file": "lib/src/models/common/tool_choice.dart", "schema": "ToolChoice"},
+                    # extension that references ToolChoice as parent — must not suppress ToolChoice from known_concrete
+                    "ToolChoiceValues": {"spec": "main", "kind": "extension", "dart_class": "ToolChoiceValues", "file": "lib/src/models/common/tool_choice_values.dart", "schema": None, "parent": "ToolChoice"},
+                    "TypeA": {"spec": "main", "kind": "object", "dart_class": "TypeA", "file": "lib/src/models/common/type_a.dart", "schema": "TypeA"},
+                    "TypeB": {"spec": "main", "kind": "object", "dart_class": "TypeB", "file": "lib/src/models/common/type_b.dart", "schema": "TypeB"},
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/tool_choice.dart": self._make_dart_class("ToolChoice", [("type", "String", True)]),
+                    "lib/src/models/common/tool_choice_values.dart": "extension ToolChoiceValues on ToolChoice {}\n",
+                    "lib/src/models/common/type_a.dart": self._make_dart_class("TypeA", [("a", "String", True)]),
+                    "lib/src/models/common/type_b.dart": self._make_dart_class("TypeB", [("b", "String", True)]),
+                    # List<ToolChoice> is wrong here (specific class for a union-item array) — should be flagged
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("items", "List<ToolChoice>", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            info_issues = [i for i in issues if i["level"] == "info" and "items" in i.get("message", "") and "union" in i.get("message", "")]
+            self.assertTrue(len(info_issues) >= 1, f"Expected info for List<ToolChoice> (extension parent should not suppress ToolChoice): {issues}")
+
+    def test_verify_type_nested_union_items_info_for_wrong_inner_container(self) -> None:
+        """List<Set<TypeA>> on spec array<array<anyOf[TypeA,TypeB]>> should emit info (inner container diverges)."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "TypeA": {"type": "object", "properties": {"a": {"type": "string"}}},
+                    "TypeB": {"type": "object", "properties": {"b": {"type": "string"}}},
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "matrix": {
+                                "type": "array",
+                                "items": {
+                                    "type": "array",
+                                    "items": {"anyOf": [{"$ref": "#/components/schemas/TypeA"}, {"$ref": "#/components/schemas/TypeB"}]},
+                                },
+                            },
+                        },
+                    },
+                },
+                manifest_types={
+                    "TypeA": {"spec": "main", "kind": "object", "dart_class": "TypeA", "file": "lib/src/models/common/type_a.dart", "schema": "TypeA"},
+                    "TypeB": {"spec": "main", "kind": "object", "dart_class": "TypeB", "file": "lib/src/models/common/type_b.dart", "schema": "TypeB"},
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/type_a.dart": self._make_dart_class("TypeA", [("a", "String", True)]),
+                    "lib/src/models/common/type_b.dart": self._make_dart_class("TypeB", [("b", "String", True)]),
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("matrix", "List<Set<TypeA>>", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            info_issues = [i for i in issues if i["level"] == "info" and "matrix" in i.get("message", "")]
+            self.assertTrue(len(info_issues) >= 1, f"Expected info for List<Set<TypeA>> (wrong inner container): {issues}")
+
+    def test_verify_type_nested_union_items_no_false_positive_for_correct_sealed_type(self) -> None:
+        """List<List<ItemUnion>> where ItemUnion is sealed_parent should not warn at any nesting level."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "ItemUnion": {"type": "object", "properties": {"type": {"type": "string"}}},
+                    "TypeA": {"type": "object", "properties": {"a": {"type": "string"}, "type": {"type": "string"}}},
+                    "TypeB": {"type": "object", "properties": {"b": {"type": "string"}, "type": {"type": "string"}}},
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "matrix": {
+                                "type": "array",
+                                "items": {
+                                    "type": "array",
+                                    "items": {"anyOf": [{"$ref": "#/components/schemas/TypeA"}, {"$ref": "#/components/schemas/TypeB"}]},
+                                },
+                            },
+                        },
+                    },
+                },
+                manifest_types={
+                    "ItemUnion": {"spec": "main", "kind": "sealed_parent", "dart_class": "ItemUnion", "file": "lib/src/models/common/item_union.dart", "schema": "ItemUnion"},
+                    "TypeA": {"spec": "main", "kind": "sealed_variant", "dart_class": "TypeA", "file": "lib/src/models/common/type_a.dart", "schema": "TypeA", "parent": "ItemUnion"},
+                    "TypeB": {"spec": "main", "kind": "sealed_variant", "dart_class": "TypeB", "file": "lib/src/models/common/type_b.dart", "schema": "TypeB", "parent": "ItemUnion"},
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/item_union.dart": "sealed class ItemUnion {}\n",
+                    "lib/src/models/common/type_a.dart": self._make_dart_class("TypeA", [("a", "String", True)]),
+                    "lib/src/models/common/type_b.dart": self._make_dart_class("TypeB", [("b", "String", True)]),
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("matrix", "List<List<ItemUnion>>", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            type_issues = [i for i in issues if "matrix" in i.get("message", "") and i["level"] in ("warning", "info")
+                           and not any(m in i.get("message", "") for m in ("operator ==", "hashCode", "toString"))]
+            self.assertEqual(type_issues, [], f"False positive: List<List<ItemUnion>> should not warn for nested sealed type: {type_issues}")
+
+    def test_verify_type_array_union_items_no_warning_for_sealed_type(self) -> None:
+        """array with multi-ref union items + Dart List<ItemUnion>? should not warn."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "TypeA": {"type": "object", "properties": {"a": {"type": "string"}}},
+                    "TypeB": {"type": "object", "properties": {"b": {"type": "string"}}},
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "items": {
+                                "type": "array",
+                                "items": {"anyOf": [{"$ref": "#/components/schemas/TypeA"}, {"$ref": "#/components/schemas/TypeB"}]},
+                            },
+                        },
+                    },
+                },
+                manifest_types={
+                    "TypeA": {"spec": "main", "kind": "object", "dart_class": "TypeA", "file": "lib/src/models/common/type_a.dart", "schema": "TypeA"},
+                    "TypeB": {"spec": "main", "kind": "object", "dart_class": "TypeB", "file": "lib/src/models/common/type_b.dart", "schema": "TypeB"},
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/type_a.dart": self._make_dart_class("TypeA", [("a", "String", True)]),
+                    "lib/src/models/common/type_b.dart": self._make_dart_class("TypeB", [("b", "String", True)]),
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("items", "List<ItemUnion>", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            type_issues = [i for i in issues if "typed as" in i.get("message", "") or "mismatch" in i.get("message", "") or ("item" in i.get("message", "") and "union" in i.get("message", ""))]
+            self.assertEqual(type_issues, [], f"Unexpected false positive for List<ItemUnion> with union items: {type_issues}")
+
+
 if __name__ == "__main__":
     unittest.main()

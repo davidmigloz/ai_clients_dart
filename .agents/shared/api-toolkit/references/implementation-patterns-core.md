@@ -15,3 +15,32 @@
 | `extension` | Dart-only subclass with no spec schema (schema is `null`) |
 | `enum` | Enum types |
 | `skip` | Entries excluded from verification (with `note` explaining why) |
+
+## Type Safety Patterns
+
+### `oneOf` / `anyOf` Spec Fields → Sealed Dart Types
+
+When a spec property uses `oneOf` or `anyOf` with multiple `$ref` items or
+mixed types, the Dart field should use a sealed union type, not `Object?` or
+`dynamic`. The toolkit `verify --checks implementation` warns when it detects
+`Object` or `dynamic` for fields that reference specific schema types or unions.
+
+### Sibling Sealed Variants Must Have Consistent Field Patterns
+
+All variants of a sealed parent should use consistent nullability and types
+for fields with the same name. The toolkit `verify --checks consistency`
+warns on mismatches. For example, if most `*Delta` variants declare `id`
+as `String?`, a single variant with non-nullable `id` is flagged.
+
+### Discriminator Key Choice
+
+When implementing `fromJson` dispatch for sealed types, prefer always-required
+fields like `type` as the discriminator. Avoid optional fields like `role`
+that may not be present in all variants.
+
+### Resource Method Parameters (Future)
+
+Resource method signatures vary across packages (typed request objects,
+decomposed named params, positional args). A future toolkit enhancement
+will validate resource parameters against Params/Request models once a
+deterministic mapping source is established in the manifest.

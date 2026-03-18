@@ -46,6 +46,7 @@ from .config import (
     write_json,
 )
 from .dart_inspect import (
+    DartField,
     camel_case,
     contains_all_names,
     extract_class_block,
@@ -717,20 +718,68 @@ def _openapi_property_info(schema: dict[str, Any], schema_name: str) -> dict[str
     return results
 
 
+def _resolve_union_branch(branch: dict[str, Any]) -> dict[str, Any]:
+    """Unwrap allOf/oneOf/anyOf single-item wrappers to get the effective ref/type.
+
+    Only unwraps when there is exactly one non-null branch. Multi-item allOf
+    (composition / extension patterns) is left as-is — it is indeterminate and
+    must not be collapsed to the first $ref.
+    """
+    for key in ("allOf", "oneOf", "anyOf"):
+        if key in branch:
+            inner = [item for item in branch[key] if item.get("type") != "null"]
+            if len(inner) == 1:
+                return _resolve_union_branch(inner[0])
+    return branch
+
+
+def _flatten_union_branches(branches: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Recursively expand nested oneOf/anyOf wrappers into a flat list of leaf branches.
+
+    Multi-item allOf is treated as indeterminate and is NOT expanded, because it
+    represents composition / extension, not a discriminated union.
+    """
+    result: list[dict[str, Any]] = []
+    for branch in branches:
+        resolved = _resolve_union_branch(branch)
+        expanded = False
+        for key in ("oneOf", "anyOf"):
+            if key in resolved:
+                inner = [b for b in resolved[key] if b.get("type") != "null"]
+                if len(inner) >= 2:
+                    result.extend(_flatten_union_branches(inner))
+                    expanded = True
+                    break
+        if not expanded:
+            result.append(resolved)
+    return result
+
+
 def _parse_openapi_property(prop: dict[str, Any], required: set[str], name: str) -> dict[str, Any]:
-    info = {
+    info: dict[str, Any] = {
         "required": name in required,
         "type": prop.get("type"),
         "ref": None,
         "items": prop.get("items"),
+        "union_refs": [],
+        "union_types": [],
+        "union_branch_count": 0,  # total flat branches, including indeterminate allOf leaves
     }
     if "$ref" in prop:
         info["ref"] = _resolve_ref(prop["$ref"])
         return info
     if "anyOf" in prop:
-        non_null = [item for item in prop["anyOf"] if item.get("type") != "null"]
+        non_null = [_resolve_union_branch(item) for item in prop["anyOf"] if item.get("type") != "null"]
         if any(item.get("type") == "null" for item in prop["anyOf"]):
             info["required"] = False
+        # Flatten nested oneOf/anyOf wrappers before counting branches so that
+        # anyOf: [{oneOf: [A, B]}, null] is recognised as a 2-branch union.
+        # union_branch_count uses len(flat) so indeterminate allOf leaves are
+        # still counted even though they don't contribute to union_refs/types.
+        flat = _flatten_union_branches(non_null)
+        info["union_refs"] = [_resolve_ref(item["$ref"]) for item in flat if "$ref" in item]
+        info["union_types"] = [item.get("type") for item in flat if "type" in item and "$ref" not in item]
+        info["union_branch_count"] = len(flat)
         if non_null:
             first = non_null[0]
             if "$ref" in first:
@@ -739,12 +788,87 @@ def _parse_openapi_property(prop: dict[str, Any], required: set[str], name: str)
                 info["type"] = first.get("type")
                 info["items"] = first.get("items")
         return info
+    if "oneOf" in prop:
+        non_null = [_resolve_union_branch(item) for item in prop["oneOf"] if item.get("type") != "null"]
+        if any(item.get("type") == "null" for item in prop["oneOf"]):
+            info["required"] = False
+        flat = _flatten_union_branches(non_null)
+        info["union_refs"] = [_resolve_ref(item["$ref"]) for item in flat if "$ref" in item]
+        info["union_types"] = [item.get("type") for item in flat if "type" in item and "$ref" not in item]
+        info["union_branch_count"] = len(flat)
+        if len(non_null) == 1:
+            first = non_null[0]
+            if "$ref" in first:
+                info["ref"] = _resolve_ref(first["$ref"])
+            else:
+                info["type"] = first.get("type")
+                info["items"] = first.get("items")
+        return info
     if "allOf" in prop:
+        non_null = [item for item in prop["allOf"] if item.get("type") != "null"]
+        if len(non_null) > 1:
+            info["allof_composed"] = True  # composition — actual Dart type is indeterminate
         for item in prop["allOf"]:
             if "$ref" in item:
                 info["ref"] = _resolve_ref(item["$ref"])
                 break
     return info
+
+
+def _expected_dart_type(
+    prop_info: dict[str, Any],
+    config: ToolkitConfig,
+    spec_name: str,
+) -> str | None:
+    """Return expected Dart type, '__union__' for multi-type unions, or None if indeterminate."""
+    # Check union branches first — a multi-branch union should return __union__
+    # even when info["ref"] is set (anyOf fallback sets ref to the first item).
+    # union_branch_count is len(flat) which includes indeterminate allOf leaves
+    # that don't contribute to union_refs/union_types but are still real branches.
+    union_refs = prop_info.get("union_refs", [])
+    union_types = prop_info.get("union_types", [])
+    total_branches = max(len(union_refs) + len(union_types), prop_info.get("union_branch_count", 0))
+    if total_branches >= 2:
+        return "__union__"
+
+    # Multi-item allOf is composition (extension / mixin), not a simple ref — indeterminate.
+    if prop_info.get("allof_composed"):
+        return None
+
+    # Direct $ref → alias-aware lookup
+    if prop_info.get("ref"):
+        ref_name = prop_info["ref"]
+        matches = _lookup_entries(config, ref_name, spec_name)
+        if not matches:
+            matches = _lookup_entries(config, ref_name, None)
+        if matches:
+            return matches[0].dart_class
+        return ref_name
+
+    spec_type = prop_info.get("type")
+    type_mappings = config.manifest.type_mappings
+    if spec_type and spec_type in type_mappings:
+        # Inline objects (type: "object" without $ref) are indeterminate —
+        # the Dart code may use a wrapper class, Map, or a typed alias.
+        if spec_type == "object":
+            return None
+        if spec_type == "array":
+            items = prop_info.get("items")
+            if not items:
+                return None  # untyped array — indeterminate
+            container = type_mappings["array"]
+            # Parse the items schema through _parse_openapi_property so that
+            # anyOf/oneOf/allOf wrappers on item schemas (e.g. anyOf: [{$ref: Foo}, null])
+            # are fully unwrapped before the recursive type resolution.
+            item_prop_info = _parse_openapi_property(items, set(), "_item")
+            item_type = _expected_dart_type(item_prop_info, config, spec_name)
+            if item_type is None:
+                return None  # indeterminate item type
+            # Union items: keep the array shape so comparison can warn on Object/dynamic items.
+            return f"{container}<{item_type}>"
+        return type_mappings[spec_type]
+
+    return None
 
 
 def _websocket_property_info(schema: dict[str, Any], entry: ManifestEntry) -> dict[str, dict[str, Any]]:
@@ -873,6 +997,133 @@ def _verify_extension_entry(config: ToolkitConfig, entry: ManifestEntry) -> list
     return issues
 
 
+def _verify_field_types(
+    config: ToolkitConfig,
+    spec_payload: dict[str, Any],
+    entry: ManifestEntry,
+) -> list[dict[str, Any]]:
+    """Run only type-comparison checks on an entry's fields (no missing-field or method checks)."""
+    file_path = config.resolve_package_path(entry.file)
+    if not file_path.exists():
+        return []
+    if config.manifest.surface == "openapi":
+        props = _openapi_property_info(spec_payload, entry.schema_name)
+    else:
+        props = _websocket_property_info(spec_payload, entry)
+    if not props:
+        return []
+    fields = extract_fields(file_path, entry.dart_class)
+    issues: list[dict[str, Any]] = []
+    for name, prop in props.items():
+        field_name = camel_case(name)
+        dart_field = fields.get(field_name)
+        if dart_field is None:
+            continue
+        expected_type = _expected_dart_type(prop, config, entry.spec)
+        actual = dart_field.dart_type
+        if expected_type == "__union__":
+            if actual in ("Object", "dynamic"):
+                issues.append(_type_issue(
+                    "warning", entry.key,
+                    f"Property '{name}' is typed as '{actual}' but spec defines a "
+                    f"union (oneOf/anyOf) — consider a sealed Dart type",
+                    file=entry.file,
+                ))
+        elif expected_type is not None and "<__union__>" in expected_type:
+            container_name = expected_type.split("<")[0]
+            dart_class_for = {k: e.dart_class for k, e in config.manifest.types.items()}
+            union_parent_classes = (
+                {e.dart_class for e in config.manifest.types.values() if e.kind == "sealed_parent"}
+                | {dart_class_for.get(e.parent, e.parent) for e in config.manifest.types.values()
+                   if e.parent and e.kind in ("sealed_variant", "skip")}
+            )
+            known_concrete = set(config.manifest.type_mappings.values()) | {
+                e.dart_class for e in config.manifest.types.values()
+                if e.dart_class not in union_parent_classes
+            }
+            if actual in ("Object", "dynamic"):
+                issues.append(_type_issue(
+                    "warning", entry.key,
+                    f"Property '{name}' is typed as '{actual}' but spec defines a list of "
+                    f"union items — consider '{container_name}<SomeSealedType>'",
+                    file=entry.file,
+                ))
+            elif actual.split("<")[0] == container_name:
+                # Peel matching outer containers to reach the innermost divergence point,
+                # handling nested union lists like List<List<__union__>>.
+                inner_exp_m = re.match(r"^\w+<(.+)>$", expected_type)
+                act_inner_m = re.match(r"^\w+<(.+)>$", actual)
+                inner_exp = inner_exp_m.group(1) if inner_exp_m else ""
+                item_actual = act_inner_m.group(1).rstrip("?") if act_inner_m else ""
+                while "__union__" in inner_exp and item_actual:
+                    next_exp_base = inner_exp.split("<")[0]
+                    next_act_base = item_actual.split("<")[0]
+                    if next_act_base != next_exp_base:
+                        break
+                    next_exp_m = re.match(r"^\w+<(.+)>$", inner_exp)
+                    next_act_m = re.match(r"^\w+<(.+)>$", item_actual)
+                    if not next_exp_m or not next_act_m:
+                        break
+                    inner_exp = next_exp_m.group(1)
+                    item_actual = next_act_m.group(1).rstrip("?")
+                if "__union__" in inner_exp:
+                    if item_actual in ("Object", "dynamic"):
+                        issues.append(_type_issue(
+                            "warning", entry.key,
+                            f"Property '{name}' item type is '{item_actual}' but spec defines "
+                            f"union items — consider a sealed Dart type for items",
+                            file=entry.file,
+                        ))
+                    elif item_actual and item_actual in known_concrete:
+                        issues.append(_type_issue(
+                            "info", entry.key,
+                            f"Property '{name}' item type is '{item_actual}' but spec defines "
+                            f"union items — consider a sealed Dart type for items",
+                            file=entry.file,
+                        ))
+                    elif item_actual and "<" in inner_exp:
+                        # inner container diverged (e.g. Set<TypeA> where List<__union__> expected)
+                        issues.append(_type_issue(
+                            "info", entry.key,
+                            f"Property '{name}' item container is '{item_actual.split('<')[0]}' "
+                            f"but spec suggests '{inner_exp.split('<')[0]}<...>' (list of union items)",
+                            file=entry.file,
+                        ))
+            else:
+                issues.append(_type_issue(
+                    "info", entry.key,
+                    f"Property '{name}' is typed as '{actual}' "
+                    f"but spec suggests '{container_name}<...>' (list of union items)",
+                    file=entry.file,
+                ))
+        elif expected_type is not None:
+            if actual in ("Object", "dynamic"):
+                issues.append(_type_issue(
+                    "warning", entry.key,
+                    f"Property '{name}' is typed as '{actual}' but spec references "
+                    f"'{expected_type}' — consider using the specific Dart type",
+                    file=entry.file,
+                ))
+            elif actual != expected_type:
+                actual_base = actual.split("<")[0]
+                expected_base = expected_type.split("<")[0]
+                if actual_base != expected_base:
+                    issues.append(_type_issue(
+                        "info", entry.key,
+                        f"Property '{name}' is typed as '{actual}' "
+                        f"but spec suggests '{expected_type}'",
+                        file=entry.file,
+                    ))
+                elif actual != expected_type:
+                    issues.append(_type_issue(
+                        "info", entry.key,
+                        f"Property '{name}' generic parameter mismatch: "
+                        f"'{actual}' vs expected '{expected_type}'",
+                        file=entry.file,
+                    ))
+    return issues
+
+
 def _verify_object_entry(config: ToolkitConfig, spec_payload: dict[str, Any], entry: ManifestEntry) -> list[dict[str, Any]]:
     if entry.kind == "extension" and not entry.schema:
         return _verify_extension_entry(config, entry)
@@ -930,6 +1181,108 @@ def _verify_object_entry(config: ToolkitConfig, spec_payload: dict[str, Any], en
                 issues.append(_type_issue("error", entry.key, f"Property '{name}' is required in spec but nullable in Dart", file=entry.file))
             if not required and not dart_field.is_nullable and config.manifest.surface == "openapi":
                 issues.append(_type_issue("info", entry.key, f"Property '{name}' is optional in spec but non-nullable in Dart", file=entry.file))
+            expected_type = _expected_dart_type(prop, config, entry.spec)
+            actual = dart_field.dart_type
+            if expected_type == "__union__":
+                if actual in ("Object", "dynamic"):
+                    issues.append(_type_issue(
+                        "warning", entry.key,
+                        f"Property '{name}' is typed as '{actual}' but spec defines a "
+                        f"union (oneOf/anyOf) — consider a sealed Dart type",
+                        file=entry.file,
+                    ))
+            elif expected_type is not None and "<__union__>" in expected_type:
+                container_name = expected_type.split("<")[0]
+                dart_class_for = {k: e.dart_class for k, e in config.manifest.types.items()}
+                union_parent_classes = (
+                    {e.dart_class for e in config.manifest.types.values() if e.kind == "sealed_parent"}
+                    | {dart_class_for.get(e.parent, e.parent) for e in config.manifest.types.values()
+                       if e.parent and e.kind in ("sealed_variant", "skip")}
+                )
+                known_concrete = set(config.manifest.type_mappings.values()) | {
+                    e.dart_class for e in config.manifest.types.values()
+                    if e.dart_class not in union_parent_classes
+                }
+                if actual in ("Object", "dynamic"):
+                    issues.append(_type_issue(
+                        "warning", entry.key,
+                        f"Property '{name}' is typed as '{actual}' but spec defines a list of "
+                        f"union items — consider '{container_name}<SomeSealedType>'",
+                        file=entry.file,
+                    ))
+                elif actual.split("<")[0] == container_name:
+                    # Peel matching outer containers to reach the innermost divergence point,
+                    # handling nested union lists like List<List<__union__>>.
+                    inner_exp_m = re.match(r"^\w+<(.+)>$", expected_type)
+                    act_inner_m = re.match(r"^\w+<(.+)>$", actual)
+                    inner_exp = inner_exp_m.group(1) if inner_exp_m else ""
+                    item_actual = act_inner_m.group(1).rstrip("?") if act_inner_m else ""
+                    while "__union__" in inner_exp and item_actual:
+                        next_exp_base = inner_exp.split("<")[0]
+                        next_act_base = item_actual.split("<")[0]
+                        if next_act_base != next_exp_base:
+                            break
+                        next_exp_m = re.match(r"^\w+<(.+)>$", inner_exp)
+                        next_act_m = re.match(r"^\w+<(.+)>$", item_actual)
+                        if not next_exp_m or not next_act_m:
+                            break
+                        inner_exp = next_exp_m.group(1)
+                        item_actual = next_act_m.group(1).rstrip("?")
+                    if "__union__" in inner_exp:
+                        if item_actual in ("Object", "dynamic"):
+                            issues.append(_type_issue(
+                                "warning", entry.key,
+                                f"Property '{name}' item type is '{item_actual}' but spec defines "
+                                f"union items — consider a sealed Dart type for items",
+                                file=entry.file,
+                            ))
+                        elif item_actual and item_actual in known_concrete:
+                            issues.append(_type_issue(
+                                "info", entry.key,
+                                f"Property '{name}' item type is '{item_actual}' but spec defines "
+                                f"union items — consider a sealed Dart type for items",
+                                file=entry.file,
+                            ))
+                        elif item_actual and "<" in inner_exp:
+                            # inner container diverged (e.g. Set<TypeA> where List<__union__> expected)
+                            issues.append(_type_issue(
+                                "info", entry.key,
+                                f"Property '{name}' item container is '{item_actual.split('<')[0]}' "
+                                f"but spec suggests '{inner_exp.split('<')[0]}<...>' (list of union items)",
+                                file=entry.file,
+                            ))
+                else:
+                    issues.append(_type_issue(
+                        "info", entry.key,
+                        f"Property '{name}' is typed as '{actual}' "
+                        f"but spec suggests '{container_name}<...>' (list of union items)",
+                        file=entry.file,
+                    ))
+            elif expected_type is not None:
+                if actual in ("Object", "dynamic"):
+                    issues.append(_type_issue(
+                        "warning", entry.key,
+                        f"Property '{name}' is typed as '{actual}' but spec references "
+                        f"'{expected_type}' — consider using the specific Dart type",
+                        file=entry.file,
+                    ))
+                elif actual != expected_type:
+                    actual_base = actual.split("<")[0]
+                    expected_base = expected_type.split("<")[0]
+                    if actual_base != expected_base:
+                        issues.append(_type_issue(
+                            "info", entry.key,
+                            f"Property '{name}' is typed as '{actual}' "
+                            f"but spec suggests '{expected_type}'",
+                            file=entry.file,
+                        ))
+                    elif actual != expected_type:
+                        issues.append(_type_issue(
+                            "info", entry.key,
+                            f"Property '{name}' generic parameter mismatch: "
+                            f"'{actual}' vs expected '{expected_type}'",
+                            file=entry.file,
+                        ))
 
     issues.extend(_check_field_methods(entry, file_path, expected_field_names, constant_fields))
     return issues
@@ -1067,7 +1420,7 @@ def _verify_implementation(
     if scope == "all" and coverage_summary["partial_coverage"]:
         issues.append(
             _type_issue(
-                "info",
+                "warning",
                 "implementation",
                 f"Strict implementation verification is partial because {coverage_summary['skipped_entry_count']} manifest entries are marked as kind='skip'",
             )
@@ -1085,6 +1438,10 @@ def _verify_implementation(
 
     for entry in selected:
         if entry.kind == "skip":
+            # Skip entries bypass full verification but still run type checks
+            # when they have a schema and Dart file (fields are real code).
+            if entry.schema:
+                issues.extend(_verify_field_types(config, spec_payload, entry))
             continue
         if entry.kind == "enum":
             issues.extend(_verify_enum_entry(config, spec_payload, entry))
@@ -1101,6 +1458,17 @@ def _verify_implementation(
                     file=entry.file,
                 ))
             issues.extend(_verify_object_entry(config, spec_payload, entry))
+
+    # Run type checks on skip entries that weren't in the selected set.
+    # _select_entries with scope="all" excludes skip entries, but their
+    # fields are real code and type mismatches should still be flagged.
+    # Only do this for scope="all" — scoped runs should not surface
+    # warnings from unrelated skip entries the caller didn't ask for.
+    if scope == "all":
+        selected_keys = {entry.key for entry in selected}
+        for entry in entries_for_spec:
+            if entry.kind == "skip" and entry.key not in selected_keys and entry.schema:
+                issues.extend(_verify_field_types(config, spec_payload, entry))
 
     for parent in parents:
         issues.extend(_verify_sealed_parent(config, parent, by_parent.get(parent.key, [])))
@@ -1131,6 +1499,150 @@ def _verify_implementation(
         },
     }
     return exit_code, payload
+
+
+def _verify_sibling_consistency(
+    config: ToolkitConfig,
+    selected: list[ManifestEntry],
+    entries_for_spec: list[ManifestEntry],
+) -> tuple[list[dict[str, Any]], list[str]]:
+    issues: list[dict[str, Any]] = []
+
+    parent_references = _sealed_parent_reference_map(entries_for_spec)
+    relevant_parent_names: set[str] = set()
+    for entry in selected:
+        if entry.kind in ("sealed_variant", "skip") and entry.parent:
+            relevant_parent_names.update(
+                _parent_reference_names(entries_for_spec, entry.parent)
+            )
+        elif entry.kind in ("sealed_parent", "skip"):
+            relevant_parent_names.update(
+                _parent_reference_names(entries_for_spec, entry.key)
+            )
+            relevant_parent_names.update(
+                _parent_reference_names(entries_for_spec, entry.dart_class)
+            )
+
+    if not relevant_parent_names:
+        return issues, []
+
+    by_parent: dict[str, list[ManifestEntry]] = defaultdict(list)
+    for entry in entries_for_spec:
+        if entry.kind in ("sealed_variant", "skip") and entry.parent:
+            parent_names = _parent_reference_names(entries_for_spec, entry.parent)
+            if parent_names & relevant_parent_names:
+                canonical = parent_references.get(entry.parent)
+                group_key = canonical.key if canonical else entry.parent
+                by_parent[group_key].append(entry)
+
+    compared_parents: list[str] = []
+    for parent_key, siblings in by_parent.items():
+        if len(siblings) < 2:
+            continue
+
+        # Fields listed in the parent's excluded_properties are known to
+        # diverge intentionally — skip them in sibling comparison.
+        # Look up via manifest key first, then parent_references, then
+        # search entries_for_spec by dart_class (handles skip-wrapper
+        # parents like key "interactions:Content" / dart_class "InteractionContent").
+        parent_entry = config.manifest.types.get(parent_key) or parent_references.get(parent_key)
+        if not parent_entry:
+            for candidate in entries_for_spec:
+                if candidate.dart_class == parent_key or candidate.key == parent_key:
+                    parent_entry = candidate
+                    break
+        parent_excluded = set(
+            camel_case(p) for p in (parent_entry.excluded_properties if parent_entry else [])
+        )
+
+        sibling_fields: dict[str, dict[str, DartField]] = {}
+        for entry in siblings:
+            file_path = config.resolve_package_path(entry.file)
+            if file_path.exists():
+                sibling_fields[entry.key] = extract_fields(file_path, entry.dart_class)
+
+        all_field_names: set[str] = set()
+        for fields in sibling_fields.values():
+            all_field_names.update(fields.keys())
+        all_field_names -= parent_excluded
+
+        had_overlap = False
+        for field_name in sorted(all_field_names):
+            appearances = {
+                key: fields[field_name]
+                for key, fields in sibling_fields.items()
+                if field_name in fields
+            }
+            if len(appearances) < 2:
+                continue
+            had_overlap = True
+
+            nullabilities = {f.is_nullable for f in appearances.values()}
+            if len(nullabilities) > 1:
+                nullable = sorted(k for k, f in appearances.items() if f.is_nullable)
+                non_nullable = sorted(k for k, f in appearances.items() if not f.is_nullable)
+                issues.append(_type_issue(
+                    "warning", parent_key,
+                    f"Field '{field_name}' has inconsistent nullability: "
+                    f"nullable in [{', '.join(nullable)}], "
+                    f"non-nullable in [{', '.join(non_nullable)}]",
+                ))
+
+            types = {f.dart_type for f in appearances.values()}
+            if len(types) > 1:
+                details = sorted(f"{k}={f.dart_type}" for k, f in appearances.items())
+                issues.append(_type_issue(
+                    "warning", parent_key,
+                    f"Field '{field_name}' has inconsistent types: "
+                    f"{', '.join(details)}",
+                ))
+
+        if had_overlap:
+            compared_parents.append(parent_key)
+
+    return issues, sorted(compared_parents)
+
+
+def _verify_consistency(
+    config: ToolkitConfig,
+    spec_name: str,
+    scope: str,
+    type_name: str | None,
+    baseline: Path | None,
+    git_ref: str | None,
+) -> tuple[int, dict[str, Any]]:
+    if scope == "changed":
+        old_spec, new_spec = _load_old_new_payloads(config, spec_name, baseline=baseline, git_ref=git_ref)
+        diff = _compare_openapi(old_spec, new_spec) if config.manifest.surface == "openapi" else _compare_websocket(old_spec, new_spec)
+    else:
+        diff = None
+
+    selected, selection_issues = _select_entries(config, spec_name, scope, type_name, diff)
+    entries_for_spec = _entries_for_spec(config, spec_name)
+    issues = list(selection_issues)
+
+    sibling_issues, checked_parents = _verify_sibling_consistency(
+        config, selected, entries_for_spec,
+    )
+    issues.extend(sibling_issues)
+
+    error_count = sum(1 for i in issues if i["level"] == "error")
+    exit_code = EXIT_FAILURE if error_count else EXIT_SUCCESS
+
+    return exit_code, {
+        "command": "verify",
+        "check": "consistency",
+        "scope": scope,
+        "selected_types": sorted(entry.key for entry in selected),
+        "checked_parent_groups": checked_parents,
+        "sibling_group_count": len(checked_parents),
+        "issues": issues,
+        "summary": {
+            "errors": error_count,
+            "warnings": sum(1 for i in issues if i["level"] == "warning"),
+            "infos": sum(1 for i in issues if i["level"] == "info"),
+        },
+    }
 
 
 def _discover_barrel_files(config: ToolkitConfig) -> list[Path]:
@@ -1428,7 +1940,7 @@ def _verify_docs(config: ToolkitConfig) -> tuple[int, dict[str, Any]]:
     if coverage_summary["partial_coverage"]:
         issues.append(
             _type_issue(
-                "info",
+                "warning",
                 "documentation",
                 "Documentation verification is partial because documentation.json excludes resources or example checks",
             )
@@ -2752,10 +3264,7 @@ def _scaffold_class_source(class_name: str, props: dict[str, dict[str, Any]], ty
             lines.append(f"    '{name}': {json_value},")
         else:
             nullable_value = _scaffold_nullable_to_json_expression(name, json_value)
-            if json_value == field:
-                lines.append(f"    '{name}': ?{field},")
-            else:
-                lines.append(f"    if ({field} != null) '{name}': {nullable_value},")
+            lines.append(f"    if ({field} != null) '{name}': {nullable_value},")
     lines.append("  };")
     lines.append("")
     lines.append(f"  {class_name} copyWith({{")
@@ -3577,7 +4086,7 @@ def command_verify(args: Any) -> tuple[int, dict[str, Any]]:
     config = load_toolkit_config(args.config_dir)
     type_name = args.type_name if args.scope == "type" else None
     spec_name = _resolve_selected_spec_name(config, args.spec_name, type_name=type_name)
-    checks = ["implementation", "exports", "docs"] if args.checks == "all" else [args.checks]
+    checks = ["implementation", "exports", "docs", "consistency"] if args.checks == "all" else [args.checks]
 
     results = {}
     exit_code = EXIT_SUCCESS
@@ -3595,6 +4104,15 @@ def command_verify(args: Any) -> tuple[int, dict[str, Any]]:
             result_exit, payload = _verify_exports(config)
         elif check == "docs":
             result_exit, payload = _verify_docs(config)
+        elif check == "consistency":
+            result_exit, payload = _verify_consistency(
+                config,
+                spec_name,
+                args.scope,
+                args.type_name,
+                args.baseline,
+                args.git_ref,
+            )
         else:  # pragma: no cover - argparse prevents this
             raise ToolkitError(f"Unsupported check '{check}'")
         results[check] = payload

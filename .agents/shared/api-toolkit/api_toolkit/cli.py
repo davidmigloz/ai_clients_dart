@@ -86,7 +86,7 @@ def build_parser() -> argparse.ArgumentParser:
     verify_parser = subparsers.add_parser("verify", help="Run toolkit verification checks")
     verify_parser.add_argument("--config-dir", type=Path, required=True)
     verify_parser.add_argument("--spec-name")
-    verify_parser.add_argument("--checks", default="all", choices=["implementation", "exports", "docs", "all"])
+    verify_parser.add_argument("--checks", default="all", choices=["implementation", "exports", "docs", "consistency", "all"])
     verify_parser.add_argument("--scope", default="all", choices=["changed", "critical", "all", "type"])
     verify_parser.add_argument("--type-name")
     verify_parser.add_argument("--baseline", type=Path)
