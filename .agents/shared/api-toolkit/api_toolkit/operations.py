@@ -1040,11 +1040,12 @@ def _type_issues_for_field(
             ))
     elif "<__union__>" in expected_type:
         container_name = expected_type.split("<")[0]
+        full_suggestion = expected_type.replace("__union__", "SomeSealedType")
         if actual in ("Object", "dynamic"):
             issues.append(_type_issue(
                 "warning", entry_key,
                 f"Property '{name}' is typed as '{actual}' but spec defines a list of "
-                f"union items — consider '{container_name}<SomeSealedType>'",
+                f"union items — consider '{full_suggestion}'",
                 file=entry_file,
             ))
         elif actual.split("<")[0] == container_name:
@@ -1068,11 +1069,13 @@ def _type_issues_for_field(
                 item_actual = next_act_m.group(1).rstrip("?")
             if "__union__" in inner_exp:
                 if not item_actual:
-                    # Bare container without generic arg (e.g. List instead of List<X>)
+                    # Bare container without generic arg (e.g. List instead of List<X>).
+                    # Use the full expected shape so nested containers give the right hint
+                    # (e.g. List<List<SomeSealedType>> instead of just List<SomeSealedType>).
                     issues.append(_type_issue(
                         "info", entry_key,
                         f"Property '{name}' is typed as raw '{actual}' without a generic parameter; "
-                        f"spec defines a list of union items — consider '{container_name}<SomeSealedType>'",
+                        f"spec defines a list of union items — consider '{full_suggestion}'",
                         file=entry_file,
                     ))
                 elif item_actual in ("Object", "dynamic"):
