@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import '../common/keep_alive.dart';
 import '../common/response_format.dart';
 import '../common/think_value.dart';
 import '../metadata/model_options.dart';
@@ -38,7 +39,7 @@ class ChatRequest {
   final ThinkValue? think;
 
   /// Model keep-alive duration (e.g., `5m`, `0`).
-  final Object? keepAlive;
+  final KeepAlive? keepAlive;
 
   /// Whether to return log probabilities.
   final bool? logprobs;
@@ -75,7 +76,7 @@ class ChatRequest {
         : null,
     stream: json['stream'] as bool?,
     think: ThinkValue.fromJson(json['think']),
-    keepAlive: json['keep_alive'],
+    keepAlive: KeepAlive.fromJson(json['keep_alive']),
     logprobs: json['logprobs'] as bool?,
     topLogprobs: json['top_logprobs'] as int?,
   );
@@ -89,7 +90,7 @@ class ChatRequest {
     if (options != null) 'options': options!.toJson(),
     if (stream != null) 'stream': stream,
     if (think != null) 'think': think!.toJson(),
-    if (keepAlive != null) 'keep_alive': keepAlive,
+    if (keepAlive != null) 'keep_alive': keepAlive!.toJson(),
     if (logprobs != null) 'logprobs': logprobs,
     if (topLogprobs != null) 'top_logprobs': topLogprobs,
   };
@@ -121,7 +122,9 @@ class ChatRequest {
           : options as ModelOptions?,
       stream: stream == unsetCopyWithValue ? this.stream : stream as bool?,
       think: think == unsetCopyWithValue ? this.think : think as ThinkValue?,
-      keepAlive: keepAlive == unsetCopyWithValue ? this.keepAlive : keepAlive,
+      keepAlive: keepAlive == unsetCopyWithValue
+          ? this.keepAlive
+          : keepAlive as KeepAlive?,
       logprobs: logprobs == unsetCopyWithValue
           ? this.logprobs
           : logprobs as bool?,

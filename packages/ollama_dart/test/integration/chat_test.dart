@@ -183,7 +183,7 @@ void main() {
               'separated by commas: 1, 2, 3, ...',
             ),
           ],
-          options: const ModelOptions(stop: ['5'], temperature: 0),
+          options: const ModelOptions(stop: StopList(['5']), temperature: 0),
         ),
       );
 

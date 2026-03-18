@@ -67,7 +67,7 @@ import 'retry_wrapper.dart';
 /// final embeddings = await client.embeddings.create(
 ///   request: EmbedRequest(
 ///     model: 'nomic-embed-text',
-///     input: 'Hello, world!',
+///     input: EmbedInput.string('Hello, world!'),
 ///   ),
 /// );
 ///

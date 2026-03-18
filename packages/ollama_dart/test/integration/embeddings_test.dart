@@ -33,7 +33,10 @@ void main() {
 
     test('create generates embeddings for single text', () async {
       final response = await client.embeddings.create(
-        request: EmbedRequest(model: embedModel, input: 'Hello, world!'),
+        request: EmbedRequest(
+          model: embedModel,
+          input: EmbedInput.string('Hello, world!'),
+        ),
       );
 
       expect(response.embeddings, isNotNull);
@@ -51,7 +54,7 @@ void main() {
       final response = await client.embeddings.create(
         request: EmbedRequest(
           model: embedModel,
-          input: const ['Hello', 'World', 'Test'],
+          input: EmbedInput.list(const ['Hello', 'World', 'Test']),
         ),
       );
 
@@ -69,11 +72,11 @@ void main() {
       final response = await client.embeddings.create(
         request: EmbedRequest(
           model: embedModel,
-          input: const [
+          input: EmbedInput.list(const [
             'The cat sat on the mat',
             'A cat is sitting on a mat',
             'Quantum physics is complex',
-          ],
+          ]),
         ),
       );
 
@@ -108,7 +111,10 @@ void main() {
 
     test('includes timing statistics', () async {
       final response = await client.embeddings.create(
-        request: EmbedRequest(model: embedModel, input: 'Hello, world!'),
+        request: EmbedRequest(
+          model: embedModel,
+          input: EmbedInput.string('Hello, world!'),
+        ),
       );
 
       expect(response.totalDuration, isNotNull);

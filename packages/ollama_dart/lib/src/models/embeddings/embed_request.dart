@@ -1,8 +1,9 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
-import '../common/equality_helpers.dart';
+import '../common/keep_alive.dart';
 import '../metadata/model_options.dart';
+import 'embed_input.dart';
 
 /// Request for generating embeddings.
 @immutable
@@ -12,8 +13,8 @@ class EmbedRequest {
 
   /// Text or array of texts to generate embeddings for.
   ///
-  /// Can be a [String] or [List<String>].
-  final Object input;
+  /// Can be a [EmbedInputString] or [EmbedInputList].
+  final EmbedInput input;
 
   /// If true, truncate inputs that exceed the context window.
   final bool? truncate;
@@ -22,7 +23,7 @@ class EmbedRequest {
   final int? dimensions;
 
   /// Model keep-alive duration.
-  final String? keepAlive;
+  final KeepAlive? keepAlive;
 
   /// Runtime options for embedding generation.
   final ModelOptions? options;
@@ -40,10 +41,10 @@ class EmbedRequest {
   /// Creates an [EmbedRequest] from JSON.
   factory EmbedRequest.fromJson(Map<String, dynamic> json) => EmbedRequest(
     model: json['model'] as String,
-    input: json['input'] as Object,
+    input: EmbedInput.fromJson(json['input'] as Object),
     truncate: json['truncate'] as bool?,
     dimensions: json['dimensions'] as int?,
-    keepAlive: json['keep_alive'] as String?,
+    keepAlive: KeepAlive.fromJson(json['keep_alive']),
     options: json['options'] != null
         ? ModelOptions.fromJson(json['options'] as Map<String, dynamic>)
         : null,
@@ -52,17 +53,17 @@ class EmbedRequest {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'model': model,
-    'input': input,
+    'input': input.toJson(),
     if (truncate != null) 'truncate': truncate,
     if (dimensions != null) 'dimensions': dimensions,
-    if (keepAlive != null) 'keep_alive': keepAlive,
+    if (keepAlive != null) 'keep_alive': keepAlive!.toJson(),
     if (options != null) 'options': options!.toJson(),
   };
 
   /// Creates a copy with replaced values.
   EmbedRequest copyWith({
     String? model,
-    Object? input,
+    EmbedInput? input,
     Object? truncate = unsetCopyWithValue,
     Object? dimensions = unsetCopyWithValue,
     Object? keepAlive = unsetCopyWithValue,
@@ -79,7 +80,7 @@ class EmbedRequest {
           : dimensions as int?,
       keepAlive: keepAlive == unsetCopyWithValue
           ? this.keepAlive
-          : keepAlive as String?,
+          : keepAlive as KeepAlive?,
       options: options == unsetCopyWithValue
           ? this.options
           : options as ModelOptions?,
@@ -92,21 +93,15 @@ class EmbedRequest {
       other is EmbedRequest &&
           runtimeType == other.runtimeType &&
           model == other.model &&
-          _inputEquals(input, other.input) &&
+          input == other.input &&
           truncate == other.truncate &&
           dimensions == other.dimensions &&
           keepAlive == other.keepAlive &&
           options == other.options;
 
   @override
-  int get hashCode => Object.hash(
-    model,
-    input is List ? listHash(input as List) : input,
-    truncate,
-    dimensions,
-    keepAlive,
-    options,
-  );
+  int get hashCode =>
+      Object.hash(model, input, truncate, dimensions, keepAlive, options);
 
   @override
   String toString() =>
@@ -117,12 +112,4 @@ class EmbedRequest {
       'dimensions: $dimensions, '
       'keepAlive: $keepAlive, '
       'options: $options)';
-}
-
-/// Compares two [EmbedRequest.input] values for equality.
-///
-/// Handles both [String] and [List<String>] cases.
-bool _inputEquals(Object a, Object b) {
-  if (a is List && b is List) return listsEqual(a, b);
-  return a == b;
 }

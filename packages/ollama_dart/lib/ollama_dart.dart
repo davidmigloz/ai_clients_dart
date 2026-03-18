@@ -87,8 +87,12 @@ export 'src/models/chat/chat_stream_event.dart' show ChatStreamEvent;
 // Common Models
 export 'src/models/common/done_reason.dart'
     show DoneReason, doneReasonFromString, doneReasonToString;
+export 'src/models/common/keep_alive.dart'
+    show KeepAlive, KeepAliveDuration, KeepAliveNumber;
 export 'src/models/common/response_format.dart'
     show JsonFormat, ResponseFormat, SchemaFormat;
+export 'src/models/common/stop_sequence.dart'
+    show StopList, StopSequence, StopString;
 export 'src/models/common/think_value.dart'
     show ThinkEnabled, ThinkLevel, ThinkValue, ThinkWithLevel;
 // Completions Models
@@ -98,6 +102,8 @@ export 'src/models/completions/generate_stream_event.dart'
     show GenerateStreamEvent;
 export 'src/models/completions/logprob.dart' show Logprob, TokenLogprob;
 // Embeddings Models
+export 'src/models/embeddings/embed_input.dart'
+    show EmbedInput, EmbedInputList, EmbedInputString;
 export 'src/models/embeddings/embed_request.dart' show EmbedRequest;
 export 'src/models/embeddings/embed_response.dart' show EmbedResponse;
 // Metadata Models

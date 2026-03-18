@@ -32,7 +32,7 @@ void main() {
         stream: true,
         think: ThinkEnabled(true),
         raw: false,
-        keepAlive: '5m',
+        keepAlive: KeepAlive.duration('5m'),
         logprobs: true,
         topLogprobs: 5,
       );
@@ -46,7 +46,10 @@ void main() {
       expect(json['stream'], true);
       expect(json['think'], true);
       expect(json['raw'], false);
-      expect(json['keep_alive'], '5m');
+      expect(
+        json['keep_alive'],
+        '5m',
+      ); // KeepAliveDuration serializes to string
       expect(json['logprobs'], true);
       expect(json['top_logprobs'], 5);
     });

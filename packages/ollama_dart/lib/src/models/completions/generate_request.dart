@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import '../common/keep_alive.dart';
 import '../common/response_format.dart';
 import '../common/think_value.dart';
 import '../metadata/model_options.dart';
@@ -54,7 +55,7 @@ class GenerateRequest {
   final bool? raw;
 
   /// Model keep-alive duration (e.g., `5m`, `0`).
-  final Object? keepAlive;
+  final KeepAlive? keepAlive;
 
   /// Runtime options for generation.
   final ModelOptions? options;
@@ -98,7 +99,7 @@ class GenerateRequest {
         stream: json['stream'] as bool?,
         think: ThinkValue.fromJson(json['think']),
         raw: json['raw'] as bool?,
-        keepAlive: json['keep_alive'],
+        keepAlive: KeepAlive.fromJson(json['keep_alive']),
         options: json['options'] != null
             ? ModelOptions.fromJson(json['options'] as Map<String, dynamic>)
             : null,
@@ -119,7 +120,7 @@ class GenerateRequest {
     if (stream != null) 'stream': stream,
     if (think != null) 'think': think!.toJson(),
     if (raw != null) 'raw': raw,
-    if (keepAlive != null) 'keep_alive': keepAlive,
+    if (keepAlive != null) 'keep_alive': keepAlive!.toJson(),
     if (options != null) 'options': options!.toJson(),
     if (logprobs != null) 'logprobs': logprobs,
     if (topLogprobs != null) 'top_logprobs': topLogprobs,
@@ -163,7 +164,9 @@ class GenerateRequest {
       stream: stream == unsetCopyWithValue ? this.stream : stream as bool?,
       think: think == unsetCopyWithValue ? this.think : think as ThinkValue?,
       raw: raw == unsetCopyWithValue ? this.raw : raw as bool?,
-      keepAlive: keepAlive == unsetCopyWithValue ? this.keepAlive : keepAlive,
+      keepAlive: keepAlive == unsetCopyWithValue
+          ? this.keepAlive
+          : keepAlive as KeepAlive?,
       options: options == unsetCopyWithValue
           ? this.options
           : options as ModelOptions?,

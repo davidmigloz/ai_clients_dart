@@ -11,9 +11,9 @@ void main() async {
     // Generate embeddings for a single text
     print('--- Single Embedding ---');
     final response = await client.embeddings.create(
-      request: const EmbedRequest(
+      request: EmbedRequest(
         model: 'nomic-embed-text',
-        input: 'Hello, world!',
+        input: EmbedInput.string('Hello, world!'),
       ),
     );
 
@@ -26,13 +26,13 @@ void main() async {
     // Generate embeddings for multiple texts
     print('\n--- Batch Embeddings ---');
     final batchResponse = await client.embeddings.create(
-      request: const EmbedRequest(
+      request: EmbedRequest(
         model: 'nomic-embed-text',
-        input: [
+        input: EmbedInput.list(const [
           'The cat sat on the mat',
           'A dog is playing in the park',
           'Machine learning is fascinating',
-        ],
+        ]),
       ),
     );
 

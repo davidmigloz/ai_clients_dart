@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/stop_sequence.dart';
 
 /// Runtime options that control text generation.
 @immutable
@@ -61,7 +62,7 @@ class ModelOptions {
   /// Stop sequences that will halt generation.
   ///
   /// Can be a single string or a list of strings.
-  final Object? stop;
+  final StopSequence? stop;
 
   // ===========================================================================
   // Context and output parameters
@@ -177,7 +178,7 @@ class ModelOptions {
     mirostatTau: (json['mirostat_tau'] as num?)?.toDouble(),
     mirostatEta: (json['mirostat_eta'] as num?)?.toDouble(),
     penalizeNewline: json['penalize_newline'] as bool?,
-    stop: json['stop'],
+    stop: StopSequence.fromJson(json['stop']),
     // Context and output
     numCtx: json['num_ctx'] as int?,
     numPredict: json['num_predict'] as int?,
@@ -215,7 +216,7 @@ class ModelOptions {
     if (mirostatTau != null) 'mirostat_tau': mirostatTau,
     if (mirostatEta != null) 'mirostat_eta': mirostatEta,
     if (penalizeNewline != null) 'penalize_newline': penalizeNewline,
-    if (stop != null) 'stop': stop,
+    if (stop != null) 'stop': stop!.toJson(),
     // Context and output
     if (numCtx != null) 'num_ctx': numCtx,
     if (numPredict != null) 'num_predict': numPredict,
@@ -309,7 +310,7 @@ class ModelOptions {
       penalizeNewline: penalizeNewline == unsetCopyWithValue
           ? this.penalizeNewline
           : penalizeNewline as bool?,
-      stop: stop == unsetCopyWithValue ? this.stop : stop,
+      stop: stop == unsetCopyWithValue ? this.stop : stop as StopSequence?,
       // Context and output
       numCtx: numCtx == unsetCopyWithValue ? this.numCtx : numCtx as int?,
       numPredict: numPredict == unsetCopyWithValue

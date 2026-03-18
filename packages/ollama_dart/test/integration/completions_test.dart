@@ -118,7 +118,7 @@ void main() {
               'List the numbers from 1 to 9 in order. '
               'Output ONLY the numbers in one line without any spaces or commas. '
               'NUMBERS:',
-          options: const ModelOptions(stop: ['4']),
+          options: const ModelOptions(stop: StopList(['4'])),
         ),
       );
 
