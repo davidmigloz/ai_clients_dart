@@ -80,7 +80,7 @@ void main() {
     });
 
     test('creates with outputDimension', () {
-      final request = EmbeddingRequest(
+      const request = EmbeddingRequest(
         model: 'mistral-embed',
         input: EmbedInput.string('Test'),
         outputDimension: 256,
@@ -90,7 +90,7 @@ void main() {
     });
 
     test('creates with outputDtype', () {
-      final request = EmbeddingRequest(
+      const request = EmbeddingRequest(
         model: 'mistral-embed',
         input: EmbedInput.string('Test'),
         outputDtype: EmbeddingDtype.float,
@@ -100,13 +100,13 @@ void main() {
     });
 
     test('serializes with all optional fields', () {
-      final request = EmbeddingRequest(
+      const request = EmbeddingRequest(
         model: 'mistral-embed',
-        input: EmbedInput.list(const ['Hello', 'World']),
+        input: EmbedInput.list(['Hello', 'World']),
         outputDimension: 256,
         outputDtype: EmbeddingDtype.int8,
         encodingFormat: 'float',
-        metadata: const {'project': 'test'},
+        metadata: {'project': 'test'},
       );
 
       final json = request.toJson();
@@ -120,7 +120,7 @@ void main() {
     });
 
     test('omits null metadata from JSON', () {
-      final request = EmbeddingRequest(
+      const request = EmbeddingRequest(
         model: 'mistral-embed',
         input: EmbedInput.string('Test'),
       );
@@ -149,14 +149,14 @@ void main() {
     });
 
     test('copyWith creates a copy with modified fields', () {
-      final original = EmbeddingRequest(
+      const original = EmbeddingRequest(
         model: 'mistral-embed',
         input: EmbedInput.string('Original'),
         outputDimension: 256,
       );
 
       final modified = original.copyWith(
-        input: EmbedInput.string('Modified'),
+        input: const EmbedInput.string('Modified'),
         outputDimension: 512,
         outputDtype: EmbeddingDtype.float,
       );
@@ -168,7 +168,7 @@ void main() {
     });
 
     test('copyWith preserves unmodified fields', () {
-      final original = EmbeddingRequest(
+      const original = EmbeddingRequest(
         model: 'mistral-embed',
         input: EmbedInput.string('Test'),
         outputDimension: 256,
@@ -185,10 +185,10 @@ void main() {
     });
 
     test('copyWith updates metadata', () {
-      final original = EmbeddingRequest(
+      const original = EmbeddingRequest(
         model: 'mistral-embed',
         input: EmbedInput.string('Test'),
-        metadata: const {'key': 'old'},
+        metadata: {'key': 'old'},
       );
 
       final modified = original.copyWith(metadata: {'key': 'new'});
@@ -200,30 +200,30 @@ void main() {
 
     group('equality', () {
       test('requests with different metadata are not equal', () {
-        final request1 = EmbeddingRequest(
+        const request1 = EmbeddingRequest(
           model: 'mistral-embed',
           input: EmbedInput.string('Test'),
-          metadata: const {'key': 'value1'},
+          metadata: {'key': 'value1'},
         );
-        final request2 = EmbeddingRequest(
+        const request2 = EmbeddingRequest(
           model: 'mistral-embed',
           input: EmbedInput.string('Test'),
-          metadata: const {'key': 'value2'},
+          metadata: {'key': 'value2'},
         );
 
         expect(request1, isNot(equals(request2)));
       });
 
       test('requests with same metadata are equal', () {
-        final request1 = EmbeddingRequest(
+        const request1 = EmbeddingRequest(
           model: 'mistral-embed',
           input: EmbedInput.string('Test'),
-          metadata: const {'key': 'value'},
+          metadata: {'key': 'value'},
         );
-        final request2 = EmbeddingRequest(
+        const request2 = EmbeddingRequest(
           model: 'mistral-embed',
           input: EmbedInput.string('Test'),
-          metadata: const {'key': 'value'},
+          metadata: {'key': 'value'},
         );
 
         expect(request1, equals(request2));
@@ -233,13 +233,13 @@ void main() {
 
     group('toString', () {
       test('includes all fields including metadata', () {
-        final request = EmbeddingRequest(
+        const request = EmbeddingRequest(
           model: 'mistral-embed',
           input: EmbedInput.string('Test'),
           encodingFormat: 'float',
           outputDimension: 256,
           outputDtype: EmbeddingDtype.int8,
-          metadata: const {'project': 'test'},
+          metadata: {'project': 'test'},
         );
         final str = request.toString();
 
@@ -253,7 +253,7 @@ void main() {
       });
 
       test('shows null for missing optional fields', () {
-        final request = EmbeddingRequest(
+        const request = EmbeddingRequest(
           model: 'mistral-embed',
           input: EmbedInput.string('Test'),
         );

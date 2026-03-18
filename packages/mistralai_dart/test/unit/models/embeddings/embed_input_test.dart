@@ -5,13 +5,13 @@ void main() {
   group('EmbedInput', () {
     group('EmbedInputString', () {
       test('creates string input', () {
-        final input = EmbedInput.string('Hello!');
+        const input = EmbedInput.string('Hello!');
         expect(input, isA<EmbedInputString>());
         expect((input as EmbedInputString).value, 'Hello!');
       });
 
       test('serializes to JSON as string', () {
-        final input = EmbedInput.string('Hello!');
+        const input = EmbedInput.string('Hello!');
         expect(input.toJson(), 'Hello!');
       });
 
@@ -22,9 +22,9 @@ void main() {
       });
 
       test('equality works correctly', () {
-        final a = EmbedInput.string('Hello!');
-        final b = EmbedInput.string('Hello!');
-        final c = EmbedInput.string('Bye!');
+        const a = EmbedInput.string('Hello!');
+        const b = EmbedInput.string('Hello!');
+        const c = EmbedInput.string('Bye!');
 
         expect(a, equals(b));
         expect(a.hashCode, equals(b.hashCode));
@@ -32,20 +32,20 @@ void main() {
       });
 
       test('toString returns readable string', () {
-        final input = EmbedInput.string('Hello!');
+        const input = EmbedInput.string('Hello!');
         expect(input.toString(), 'EmbedInputString(Hello!)');
       });
     });
 
     group('EmbedInputList', () {
       test('creates list input', () {
-        final input = EmbedInput.list(['Hello!', 'World!']);
+        const input = EmbedInput.list(['Hello!', 'World!']);
         expect(input, isA<EmbedInputList>());
         expect((input as EmbedInputList).values, ['Hello!', 'World!']);
       });
 
       test('serializes to JSON as list', () {
-        final input = EmbedInput.list(['a', 'b', 'c']);
+        const input = EmbedInput.list(['a', 'b', 'c']);
         expect(input.toJson(), ['a', 'b', 'c']);
       });
 
@@ -56,9 +56,9 @@ void main() {
       });
 
       test('equality works correctly', () {
-        final a = EmbedInput.list(['Hello', 'World']);
-        final b = EmbedInput.list(['Hello', 'World']);
-        final c = EmbedInput.list(['Different']);
+        const a = EmbedInput.list(['Hello', 'World']);
+        const b = EmbedInput.list(['Hello', 'World']);
+        const c = EmbedInput.list(['Different']);
 
         expect(a, equals(b));
         expect(a.hashCode, equals(b.hashCode));
@@ -66,14 +66,14 @@ void main() {
       });
 
       test('equality fails for different length lists', () {
-        final a = EmbedInput.list(['Hello']);
-        final b = EmbedInput.list(['Hello', 'World']);
+        const a = EmbedInput.list(['Hello']);
+        const b = EmbedInput.list(['Hello', 'World']);
 
         expect(a, isNot(equals(b)));
       });
 
       test('toString returns readable string', () {
-        final input = EmbedInput.list(['a', 'b', 'c']);
+        const input = EmbedInput.list(['a', 'b', 'c']);
         expect(input.toString(), 'EmbedInputList(3 values)');
       });
     });
@@ -98,8 +98,8 @@ void main() {
 
     group('cross-type equality', () {
       test('string and list are not equal', () {
-        final string = EmbedInput.string('Hello');
-        final list = EmbedInput.list(['Hello']);
+        const string = EmbedInput.string('Hello');
+        const list = EmbedInput.list(['Hello']);
         expect(string, isNot(equals(list)));
       });
     });

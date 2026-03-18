@@ -105,9 +105,9 @@ Future<void> basicRag(MistralClient client) async {
 
   // Step 4: Retrieve relevant documents
   final queryResponse = await client.embeddings.create(
-    request: EmbeddingRequest(
+    request: const EmbeddingRequest(
       model: 'mistral-embed',
-      input: EmbedInput.list(const [query]),
+      input: EmbedInput.list([query]),
     ),
   );
 
@@ -176,9 +176,9 @@ Future<void> ragWithSources(MistralClient client) async {
   print('Query: "$query"\n');
 
   final queryEmbed = await client.embeddings.create(
-    request: EmbeddingRequest(
+    request: const EmbeddingRequest(
       model: 'mistral-embed',
-      input: EmbedInput.list(const [query]),
+      input: EmbedInput.list([query]),
     ),
   );
 
@@ -250,9 +250,9 @@ Future<void> ragWithContextManagement(MistralClient client) async {
   const query = 'Tell me about topic 5';
 
   final queryEmbed = await client.embeddings.create(
-    request: EmbeddingRequest(
+    request: const EmbeddingRequest(
       model: 'mistral-embed',
-      input: EmbedInput.list(const [query]),
+      input: EmbedInput.list([query]),
     ),
   );
 

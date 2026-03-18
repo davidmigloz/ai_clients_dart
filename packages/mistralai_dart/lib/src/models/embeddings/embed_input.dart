@@ -31,11 +31,10 @@ sealed class EmbedInput {
   }
 
   /// Creates input from a single string.
-  // ignore: use_named_constants
-  static EmbedInput string(String value) => EmbedInputString(value);
+  const factory EmbedInput.string(String value) = EmbedInputString;
 
   /// Creates input from a list of strings.
-  static EmbedInput list(List<String> values) => EmbedInputList(values);
+  const factory EmbedInput.list(List<String> values) = EmbedInputList;
 
   /// Converts to JSON format expected by the API.
   Object toJson();

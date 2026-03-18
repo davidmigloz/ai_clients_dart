@@ -42,7 +42,7 @@ void main() {
       }
 
       final response = await client!.embeddings.create(
-        request: EmbeddingRequest(
+        request: const EmbeddingRequest(
           model: defaultEmbeddingModel,
           input: EmbedInput.string('Hello, world!'),
         ),
@@ -62,9 +62,9 @@ void main() {
       }
 
       final response = await client!.embeddings.create(
-        request: EmbeddingRequest(
+        request: const EmbeddingRequest(
           model: defaultEmbeddingModel,
-          input: EmbedInput.list(const [
+          input: EmbedInput.list([
             'The quick brown fox',
             'jumps over the lazy dog',
             'Machine learning is fascinating',
@@ -87,7 +87,7 @@ void main() {
       }
 
       final response = await client!.embeddings.create(
-        request: EmbeddingRequest(
+        request: const EmbeddingRequest(
           model: defaultEmbeddingModel,
           input: EmbedInput.string('Test embedding'),
         ),
@@ -106,9 +106,9 @@ void main() {
       }
 
       final response = await client!.embeddings.create(
-        request: EmbeddingRequest(
+        request: const EmbeddingRequest(
           model: defaultEmbeddingModel,
-          input: EmbedInput.list(const [
+          input: EmbedInput.list([
             'I love programming in Dart',
             'Dart is my favorite programming language',
             'The weather is nice today',
