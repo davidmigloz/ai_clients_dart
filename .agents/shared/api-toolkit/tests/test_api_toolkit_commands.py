@@ -6398,5 +6398,42 @@ class ApiToolkitCommandTests(unittest.TestCase):
             self.assertEqual(optional_infos, [], f"anyOf nullable required field should not produce optional info: {optional_infos}")
 
 
+    def test_scaffold_nonnull_required_but_nullable(self) -> None:
+        """_is_scaffold_nonnull returns False for required+nullable; scaffold generates nullable Dart types."""
+        from api_toolkit.operations import (
+            _is_scaffold_nonnull, _scaffold_from_json_expression, _scaffold_class_source,
+        )
+        type_mappings = {"string": "String", "integer": "int", "array": "List"}
+
+        # required=True, nullable=False → non-nullable
+        self.assertTrue(_is_scaffold_nonnull({"required": True, "nullable": False}))
+        # required=True, nullable=True → nullable (required-but-nullable field)
+        self.assertFalse(_is_scaffold_nonnull({"required": True, "nullable": True}))
+        # required=False → nullable regardless
+        self.assertFalse(_is_scaffold_nonnull({"required": False}))
+        self.assertFalse(_is_scaffold_nonnull({}))
+
+        # fromJson for a required-but-nullable scalar should add "?" suffix
+        prop = {"type": "string", "required": True, "nullable": True}
+        expr = _scaffold_from_json_expression("value", prop, type_mappings)
+        self.assertIn("?", expr, f"Expected nullable cast in: {expr}")
+
+        # fromJson for a required non-nullable scalar should NOT have "?" suffix
+        prop_nonnull = {"type": "string", "required": True, "nullable": False}
+        expr_nonnull = _scaffold_from_json_expression("value", prop_nonnull, type_mappings)
+        self.assertNotIn("?", expr_nonnull, f"Expected non-nullable cast in: {expr_nonnull}")
+
+        # _scaffold_class_source field declaration
+        props = {
+            "value": {"type": "string", "required": True, "nullable": True},
+            "count": {"type": "integer", "required": True, "nullable": False},
+        }
+        source = _scaffold_class_source("Example", props, type_mappings)
+        self.assertIn("String? value", source, f"required+nullable field should be String?: {source}")
+        self.assertIn("int count", source, f"required+non-nullable field should be int: {source}")
+        # copyWith for required+nullable should use "as String?" not "! as String"
+        self.assertIn("as String?", source, f"copyWith for nullable field should use 'as String?': {source}")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -3151,6 +3151,16 @@ def _dart_type_from_prop(type_mappings: dict[str, str], prop: dict[str, Any]) ->
     return type_mappings.get(type_name, type_name or "dynamic")
 
 
+def _is_scaffold_nonnull(prop: dict[str, Any]) -> bool:
+    """Return True iff scaffold should generate a non-nullable Dart field/expression.
+
+    A field is non-nullable only when it is required (must be present) AND not nullable
+    (value cannot be null). A required-but-nullable field (e.g. anyOf: [T, null] in required)
+    must still generate nullable Dart types and null-guards in fromJson.
+    """
+    return bool(prop.get("required")) and not bool(prop.get("nullable", False))
+
+
 def _scaffold_array_from_json(field_name: str, prop: dict[str, Any], type_mappings: dict[str, str]) -> str:
     items = prop.get("items") or {}
     if isinstance(items, str):
@@ -3174,7 +3184,7 @@ def _scaffold_array_from_json(field_name: str, prop: dict[str, Any], type_mappin
                 expression = f"({value} as List<dynamic>).toList()"
             else:
                 expression = f"({value} as List<dynamic>).map((item) => item as {dart_item_type}).toList()"
-    if prop.get("required"):
+    if _is_scaffold_nonnull(prop):
         return expression
     return f"{value} != null ? {expression} : null"
 
@@ -3185,14 +3195,14 @@ def _scaffold_from_json_expression(field_name: str, prop: dict[str, Any], type_m
     if _resolve_openapi31_type(prop.get("type")) == "array":
         return _scaffold_array_from_json(field_name, prop, type_mappings)
     if prop.get("ref"):
-        if prop.get("required"):
+        if _is_scaffold_nonnull(prop):
             return f"{dart_type}.fromJson({value} as Map<String, dynamic>)"
         return f"{value} != null ? {dart_type}.fromJson({value} as Map<String, dynamic>) : null"
     if dart_type == "double":
-        if prop.get("required"):
+        if _is_scaffold_nonnull(prop):
             return f"({value} as num).toDouble()"
         return f"{value} != null ? ({value} as num).toDouble() : null"
-    suffix = "" if prop.get("required") else "?"
+    suffix = "" if _is_scaffold_nonnull(prop) else "?"
     return f"{value} as {dart_type}{suffix}"
 
 
@@ -3236,7 +3246,7 @@ def _scaffold_class_source(class_name: str, props: dict[str, dict[str, Any]], ty
     ]
     for name, prop in props.items():
         dart_type = _dart_type_from_prop(type_mappings, prop)
-        suffix = "" if prop.get("required") else "?"
+        suffix = "" if _is_scaffold_nonnull(prop) else "?"
         lines.append(f"  final {dart_type}{suffix} {camel_case(name)};")
     lines.append("")
     lines.append(f"  const {class_name}({{")
@@ -3277,7 +3287,7 @@ def _scaffold_class_source(class_name: str, props: dict[str, dict[str, Any]], ty
     for name, prop in props.items():
         field = camel_case(name)
         dart_type = _dart_type_from_prop(type_mappings, prop)
-        if prop.get("required"):
+        if _is_scaffold_nonnull(prop):
             lines.append(
                 f"      {field}: {field} == _unsetCopyWithValue ? this.{field} : {field}! as {dart_type},"
             )
