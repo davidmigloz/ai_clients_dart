@@ -1802,7 +1802,7 @@ class ApiToolkitCommandTests(unittest.TestCase):
             self.assertIn("'requiredNested': requiredNested.toJson(),", preview)
             self.assertIn("if (optionalNested != null) 'optionalNested': optionalNested!.toJson(),", preview)
             self.assertIn("'requiredNumber': requiredNumber,", preview)
-            self.assertIn("if (optionalNumber != null) 'optionalNumber': optionalNumber!,", preview)
+            self.assertIn("'optionalNumber': ?optionalNumber,", preview)
 
     def test_scaffold_preview_renders_empty_object_class(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -5988,6 +5988,44 @@ class ApiToolkitCommandTests(unittest.TestCase):
             issues = payload["results"]["implementation"]["issues"]
             type_issues = [i for i in issues if "typed as" in i.get("message", "") or "mismatch" in i.get("message", "") or ("item" in i.get("message", "") and "union" in i.get("message", ""))]
             self.assertEqual(type_issues, [], f"Unexpected false positive for List<ItemUnion> with union items: {type_issues}")
+
+
+    def test_verify_type_array_union_items_info_for_bare_container(self) -> None:
+        """array with union items + Dart List (no generic arg) should emit info."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "TypeA": {"type": "object", "properties": {"a": {"type": "string"}}},
+                    "TypeB": {"type": "object", "properties": {"b": {"type": "string"}}},
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "items": {
+                                "type": "array",
+                                "items": {"anyOf": [{"$ref": "#/components/schemas/TypeA"}, {"$ref": "#/components/schemas/TypeB"}]},
+                            },
+                        },
+                    },
+                },
+                manifest_types={
+                    "TypeA": {"spec": "main", "kind": "object", "dart_class": "TypeA", "file": "lib/src/models/common/type_a.dart", "schema": "TypeA"},
+                    "TypeB": {"spec": "main", "kind": "object", "dart_class": "TypeB", "file": "lib/src/models/common/type_b.dart", "schema": "TypeB"},
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/type_a.dart": self._make_dart_class("TypeA", [("a", "String", True)]),
+                    "lib/src/models/common/type_b.dart": self._make_dart_class("TypeB", [("b", "String", True)]),
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("items", "List", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            info_issues = [i for i in issues if i["level"] == "info" and "items" in i.get("message", "") and "generic" in i.get("message", "").lower() or
+                           i["level"] == "info" and "raw" in i.get("message", "") and "items" in i.get("message", "")]
+            self.assertTrue(len(info_issues) >= 1, f"Expected info for bare List (no generic) on union-item array: {issues}")
 
 
 if __name__ == "__main__":

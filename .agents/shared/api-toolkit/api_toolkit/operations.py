@@ -1002,7 +1002,7 @@ def _known_concrete_types(config: ToolkitConfig) -> set[str]:
 
     Used by type-mismatch checks to distinguish between 'unknown sealed type'
     (silent) and 'known concrete type used where a sealed union is expected' (info).
-    Computed once per verify call and passed into per-field helpers.
+    Computed once per entry and passed into per-field helpers.
     """
     dart_class_for = {k: e.dart_class for k, e in config.manifest.types.items()}
     union_parent_classes = (
@@ -1067,7 +1067,15 @@ def _type_issues_for_field(
                 inner_exp = next_exp_m.group(1)
                 item_actual = next_act_m.group(1).rstrip("?")
             if "__union__" in inner_exp:
-                if item_actual in ("Object", "dynamic"):
+                if not item_actual:
+                    # Bare container without generic arg (e.g. List instead of List<X>)
+                    issues.append(_type_issue(
+                        "info", entry_key,
+                        f"Property '{name}' is typed as raw '{actual}' without a generic parameter; "
+                        f"spec defines a list of union items — consider '{container_name}<SomeSealedType>'",
+                        file=entry_file,
+                    ))
+                elif item_actual in ("Object", "dynamic"):
                     issues.append(_type_issue(
                         "warning", entry_key,
                         f"Property '{name}' item type is '{item_actual}' but spec defines "
@@ -3203,7 +3211,12 @@ def _scaffold_class_source(class_name: str, props: dict[str, dict[str, Any]], ty
             lines.append(f"    '{name}': {json_value},")
         else:
             nullable_value = _scaffold_nullable_to_json_expression(name, json_value)
-            lines.append(f"    if ({field} != null) '{name}': {nullable_value},")
+            if json_value == field:
+                # Dart 3.7+ null-aware map entry: ?field is equivalent to
+                # if (field != null) 'name': field  — cleaner for simple fields.
+                lines.append(f"    '{name}': ?{field},")
+            else:
+                lines.append(f"    if ({field} != null) '{name}': {nullable_value},")
     lines.append("  };")
     lines.append("")
     lines.append(f"  {class_name} copyWith({{")
