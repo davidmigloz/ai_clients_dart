@@ -6308,6 +6308,29 @@ class ApiToolkitCommandTests(unittest.TestCase):
         self.assertIsInstance(result, str)
         self.assertNotEqual(result, "TODO()")
 
+    def test_dart_type_from_prop_bare_string_items_no_crash(self) -> None:
+        """_dart_type_from_prop must not crash when items is a bare string (WebSocket schema style)."""
+        from api_toolkit.operations import _dart_type_from_prop
+        type_mappings = {"string": "String", "integer": "int", "array": "List"}
+        # Primitive bare-string items (e.g. items: "string")
+        result = _dart_type_from_prop(type_mappings, {"type": "array", "items": "string"})
+        self.assertIn("String", result)
+        # Schema-ref bare-string items (e.g. items: "Tool")
+        result2 = _dart_type_from_prop(type_mappings, {"type": "array", "items": "Tool"})
+        self.assertIn("Tool", result2)
+
+    def test_scaffold_array_from_json_bare_string_items_no_crash(self) -> None:
+        """_scaffold_array_from_json must not crash when items is a bare string (WebSocket schema style)."""
+        from api_toolkit.operations import _scaffold_array_from_json
+        type_mappings = {"string": "String", "integer": "int", "array": "List"}
+        # Primitive bare-string items
+        result = _scaffold_array_from_json("tags", {"type": "array", "items": "string", "required": True}, type_mappings)
+        self.assertIsInstance(result, str)
+        self.assertNotEqual(result, "TODO()")
+        # Schema-ref bare-string items
+        result2 = _scaffold_array_from_json("tools", {"type": "array", "items": "Tool", "required": True}, type_mappings)
+        self.assertIn("Tool", result2)
+
     def test_dart_type_from_prop_list_type_no_crash(self) -> None:
         """_dart_type_from_prop must not crash when prop['type'] is an OpenAPI 3.1 list."""
         from api_toolkit.operations import _dart_type_from_prop

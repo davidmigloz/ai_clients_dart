@@ -3139,6 +3139,8 @@ def _dart_type_from_prop(type_mappings: dict[str, str], prop: dict[str, Any]) ->
     type_name = _resolve_openapi31_type(prop.get("type"))
     if type_name == "array":
         items = prop.get("items", {})
+        if isinstance(items, str):
+            items = {"type": items} if items in _OPENAPI_BUILTIN_TYPES else {"$ref": items}
         if "$ref" in items:
             return f"List<{_resolve_ref(items['$ref'])}>"
         return f"List<{type_mappings.get(items.get('type', 'dynamic'), 'dynamic')}>"
@@ -3149,6 +3151,8 @@ def _dart_type_from_prop(type_mappings: dict[str, str], prop: dict[str, Any]) ->
 
 def _scaffold_array_from_json(field_name: str, prop: dict[str, Any], type_mappings: dict[str, str]) -> str:
     items = prop.get("items") or {}
+    if isinstance(items, str):
+        items = {"type": items} if items in _OPENAPI_BUILTIN_TYPES else {"$ref": items}
     value = f"json['{field_name}']"
     if "$ref" in items:
         ref_type = _resolve_ref(items["$ref"])
