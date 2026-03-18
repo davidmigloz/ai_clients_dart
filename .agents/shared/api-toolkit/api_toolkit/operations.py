@@ -3208,17 +3208,24 @@ def _scaffold_from_json_expression(field_name: str, prop: dict[str, Any], type_m
 
 def _scaffold_to_json_expression(field_name: str, prop: dict[str, Any], type_mappings: dict[str, str]) -> str:
     field = camel_case(field_name)
+    nonnull = _is_scaffold_nonnull(prop)
+    # Use null-aware operator only when required+nullable: the field is non-None in the
+    # spec sense (must be present) but its value can be null. Plain optional fields
+    # (required=False) are post-processed by _scaffold_nullable_to_json_expression.
+    null_aware = not nonnull and bool(prop.get("required"))
     if _resolve_openapi31_type(prop.get("type")) == "array":
         items = prop.get("items") or {}
         if isinstance(items, str):
             items = {"type": items} if items in _OPENAPI_BUILTIN_TYPES else {"$ref": items}
         if "$ref" in items:
-            return f"{field}.map((item) => item.toJson()).toList()"
+            dot = "?." if null_aware else "."
+            return f"{field}{dot}map((item) => item.toJson()).toList()"
         if items.get("type"):
             return field
         return "TODO()"
     if prop.get("ref"):
-        return f"{field}.toJson()"
+        dot = "?." if null_aware else "."
+        return f"{field}{dot}toJson()"
     return field
 
 

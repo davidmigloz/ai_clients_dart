@@ -6434,6 +6434,36 @@ class ApiToolkitCommandTests(unittest.TestCase):
         # copyWith for required+nullable should use "as String?" not "! as String"
         self.assertIn("as String?", source, f"copyWith for nullable field should use 'as String?': {source}")
 
+    def test_scaffold_to_json_nullable_ref_uses_null_aware_operator(self) -> None:
+        """_scaffold_to_json_expression must use ?. for nullable ref and array-of-ref fields."""
+        from api_toolkit.operations import _scaffold_to_json_expression, _scaffold_class_source
+        type_mappings = {"string": "String", "integer": "int", "array": "List"}
+
+        # Non-nullable ref → plain .toJson()
+        prop_nonnull = {"ref": "Foo", "required": True, "nullable": False}
+        self.assertEqual(_scaffold_to_json_expression("item", prop_nonnull, type_mappings), "item.toJson()")
+
+        # Required+nullable ref → null-aware ?.toJson()
+        prop_nullable = {"ref": "Foo", "required": True, "nullable": True}
+        result = _scaffold_to_json_expression("item", prop_nullable, type_mappings)
+        self.assertIn("?.", result, f"Expected null-aware operator for required+nullable ref: {result}")
+
+        # Non-nullable array of refs → plain .map(...)
+        prop_arr_nonnull = {"type": "array", "items": {"$ref": "#/components/schemas/Foo"}, "required": True, "nullable": False}
+        result_arr = _scaffold_to_json_expression("items", prop_arr_nonnull, type_mappings)
+        self.assertIn("items.map", result_arr, f"Expected non-null map for non-nullable array: {result_arr}")
+        self.assertNotIn("?.", result_arr)
+
+        # Required+nullable array of refs → null-aware ?.map(...)
+        prop_arr_nullable = {"type": "array", "items": {"$ref": "#/components/schemas/Foo"}, "required": True, "nullable": True}
+        result_arr_null = _scaffold_to_json_expression("items", prop_arr_nullable, type_mappings)
+        self.assertIn("?.", result_arr_null, f"Expected null-aware map for nullable array of refs: {result_arr_null}")
+
+        # Verify the full class source emits null-safe toJson for required+nullable ref
+        props = {"item": {"ref": "Foo", "required": True, "nullable": True}}
+        source = _scaffold_class_source("Example", props, type_mappings)
+        self.assertIn("?.toJson()", source, f"class toJson should use ?.toJson() for required+nullable ref: {source}")
+
 
 if __name__ == "__main__":
     unittest.main()
