@@ -61,11 +61,11 @@ sealed class ChatMessage {
   /// Creates a tool result message.
   factory ChatMessage.tool({
     required String toolCallId,
-    required String content,
+    String? content,
     String? name,
   }) => ToolMessage(
     toolCallId: toolCallId,
-    content: MessageContent.text(content),
+    content: content != null ? MessageContent.text(content) : null,
     name: name,
   );
 }
@@ -145,10 +145,7 @@ class UserMessage extends ChatMessage {
   }
 
   @override
-  Map<String, dynamic> toJson() => {
-    'role': role,
-    if (content != null) 'content': content!.toJson(),
-  };
+  Map<String, dynamic> toJson() => {'role': role, 'content': content?.toJson()};
 
   /// Creates a copy with the given fields replaced.
   UserMessage copyWith({Object? content = unsetCopyWithValue}) => UserMessage(
@@ -294,7 +291,7 @@ class ToolMessage extends ChatMessage {
     'role': role,
     'tool_call_id': toolCallId,
     if (name != null) 'name': name,
-    if (content != null) 'content': content!.toJson(),
+    'content': content?.toJson(),
   };
 
   /// Creates a copy with the given fields replaced.

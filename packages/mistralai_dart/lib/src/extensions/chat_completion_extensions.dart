@@ -128,21 +128,20 @@ extension AssistantMessageExtensions on AssistantMessage {
       toolCalls?.map((tc) => tc.function).toList() ?? [];
 
   /// Whether this message has text content.
-  bool get hasContent {
-    final c = content;
-    if (c is MessageTextContent) return c.text.isNotEmpty;
-    return c != null;
-  }
+  bool get hasContent => switch (content) {
+    MessageTextContent(:final text) => text.isNotEmpty,
+    MessagePartsContent(:final parts) => parts.isNotEmpty,
+    null => false,
+  };
 }
 
 /// Convenience extensions for [SystemMessage].
 extension SystemMessageExtensions on SystemMessage {
   /// Whether this message has text content.
-  bool get hasContent {
-    final c = content;
-    if (c is MessageTextContent) return c.text.isNotEmpty;
-    return true;
-  }
+  bool get hasContent => switch (content) {
+    MessageTextContent(:final text) => text.isNotEmpty,
+    MessagePartsContent(:final parts) => parts.isNotEmpty,
+  };
 }
 
 /// Convenience extensions for [UserMessage].
@@ -164,9 +163,9 @@ extension UserMessageExtensions on UserMessage {
 /// Convenience extensions for [ToolMessage].
 extension ToolMessageExtensions on ToolMessage {
   /// Whether this message has text content.
-  bool get hasContent {
-    final c = content;
-    if (c is MessageTextContent) return c.text.isNotEmpty;
-    return c != null;
-  }
+  bool get hasContent => switch (content) {
+    MessageTextContent(:final text) => text.isNotEmpty,
+    MessagePartsContent(:final parts) => parts.isNotEmpty,
+    null => false,
+  };
 }
