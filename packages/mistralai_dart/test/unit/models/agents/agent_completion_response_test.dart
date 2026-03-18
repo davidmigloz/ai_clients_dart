@@ -20,7 +20,7 @@ void main() {
       });
 
       test('creates with all parameters', () {
-        final response = AgentCompletionResponse(
+        const response = AgentCompletionResponse(
           id: 'resp-456',
           object: 'chat.completion',
           created: 1705312800,
@@ -32,7 +32,7 @@ void main() {
               finishReason: FinishReason.stop,
             ),
           ],
-          usage: const UsageInfo(
+          usage: UsageInfo(
             promptTokens: 10,
             completionTokens: 5,
             totalTokens: 15,
@@ -65,7 +65,7 @@ void main() {
       });
 
       test('serializes all fields', () {
-        final response = AgentCompletionResponse(
+        const response = AgentCompletionResponse(
           id: 'resp-456',
           created: 1705312800,
           model: 'mistral-large-latest',
@@ -78,7 +78,7 @@ void main() {
               finishReason: FinishReason.stop,
             ),
           ],
-          usage: const UsageInfo(
+          usage: UsageInfo(
             promptTokens: 20,
             completionTokens: 10,
             totalTokens: 30,
@@ -167,7 +167,7 @@ void main() {
 
     group('convenience getters', () {
       test('firstChoice returns first choice', () {
-        final response = AgentCompletionResponse(
+        const response = AgentCompletionResponse(
           id: 'resp-123',
           created: 1705312800,
           model: 'model',
@@ -200,7 +200,7 @@ void main() {
       });
 
       test('text returns content from first choice', () {
-        final response = AgentCompletionResponse(
+        const response = AgentCompletionResponse(
           id: 'resp-123',
           created: 1705312800,
           model: 'model',
@@ -265,7 +265,7 @@ void main() {
 
     group('toString', () {
       test('returns descriptive string', () {
-        final response = AgentCompletionResponse(
+        const response = AgentCompletionResponse(
           id: 'resp-123',
           created: 1705312800,
           model: 'mistral-large-latest',
@@ -286,7 +286,7 @@ void main() {
 
     group('round-trip serialization', () {
       test('preserves all data through JSON round-trip', () {
-        final original = AgentCompletionResponse(
+        const original = AgentCompletionResponse(
           id: 'resp-roundtrip',
           object: 'chat.completion',
           created: 1705312800,
@@ -300,7 +300,7 @@ void main() {
               finishReason: FinishReason.stop,
             ),
           ],
-          usage: const UsageInfo(
+          usage: UsageInfo(
             promptTokens: 50,
             completionTokens: 100,
             totalTokens: 150,

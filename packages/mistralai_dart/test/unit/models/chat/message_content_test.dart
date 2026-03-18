@@ -5,13 +5,13 @@ void main() {
   group('MessageContent', () {
     group('MessageTextContent', () {
       test('creates text content', () {
-        final content = MessageContent.text('Hello!');
+        const content = MessageContent.text('Hello!');
         expect(content, isA<MessageTextContent>());
         expect((content as MessageTextContent).text, 'Hello!');
       });
 
       test('serializes to JSON as string', () {
-        final content = MessageContent.text('Hello!');
+        const content = MessageContent.text('Hello!');
         expect(content.toJson(), 'Hello!');
       });
 
@@ -22,9 +22,9 @@ void main() {
       });
 
       test('equality works correctly', () {
-        final a = MessageContent.text('Hello!');
-        final b = MessageContent.text('Hello!');
-        final c = MessageContent.text('Bye!');
+        const a = MessageContent.text('Hello!');
+        const b = MessageContent.text('Hello!');
+        const c = MessageContent.text('Bye!');
 
         expect(a, equals(b));
         expect(a.hashCode, equals(b.hashCode));
@@ -32,7 +32,7 @@ void main() {
       });
 
       test('toString returns readable string', () {
-        final content = MessageContent.text('Hello!');
+        const content = MessageContent.text('Hello!');
         expect(content.toString(), 'MessageTextContent(Hello!)');
       });
     });
@@ -134,7 +134,7 @@ void main() {
 
     group('cross-type equality', () {
       test('text and parts are not equal', () {
-        final text = MessageContent.text('Hello');
+        const text = MessageContent.text('Hello');
         final parts = MessageContent.parts([ContentPart.text('Hello')]);
         expect(text, isNot(equals(parts)));
       });

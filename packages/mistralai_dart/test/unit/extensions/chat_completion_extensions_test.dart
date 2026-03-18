@@ -4,7 +4,7 @@ import 'package:test/test.dart';
 void main() {
   group('ChatCompletionResponseExtensions', () {
     test('text returns content from first assistant message', () {
-      final response = ChatCompletionResponse(
+      const response = ChatCompletionResponse(
         id: 'chat-1',
         object: 'chat.completion',
         model: 'mistral-small-latest',
@@ -49,7 +49,7 @@ void main() {
     });
 
     test('allText concatenates text from all choices', () {
-      final response = ChatCompletionResponse(
+      const response = ChatCompletionResponse(
         id: 'chat-1',
         object: 'chat.completion',
         model: 'mistral-small-latest',
@@ -71,7 +71,7 @@ void main() {
     });
 
     test('firstChoice and lastChoice return correct choices', () {
-      final response = ChatCompletionResponse(
+      const response = ChatCompletionResponse(
         id: 'chat-1',
         object: 'chat.completion',
         model: 'mistral-small-latest',
@@ -159,7 +159,7 @@ void main() {
     });
 
     test('hasContent returns true when text or tool calls exist', () {
-      final withText = ChatCompletionResponse(
+      const withText = ChatCompletionResponse(
         id: 'chat-1',
         object: 'chat.completion',
         model: 'mistral-small-latest',
@@ -200,7 +200,7 @@ void main() {
     });
 
     test('finish reason helpers work correctly', () {
-      final stoppedNaturally = ChatCompletionResponse(
+      const stoppedNaturally = ChatCompletionResponse(
         id: 'chat-1',
         object: 'chat.completion',
         model: 'mistral-small-latest',
@@ -232,7 +232,7 @@ void main() {
       );
       expect(stoppedForTools.stoppedForToolCalls, isTrue);
 
-      final stoppedForLength = ChatCompletionResponse(
+      const stoppedForLength = ChatCompletionResponse(
         id: 'chat-3',
         object: 'chat.completion',
         model: 'mistral-small-latest',
@@ -253,7 +253,7 @@ void main() {
 
   group('ChatChoiceExtensions', () {
     test('text returns message content', () {
-      final choice = ChatChoice(
+      const choice = ChatChoice(
         index: 0,
         message: AssistantMessage(content: MessageContent.text('Test')),
         finishReason: FinishReason.stop,
@@ -289,7 +289,7 @@ void main() {
       expect(toolChoice.stoppedForToolCalls, isTrue);
       expect(toolChoice.stoppedNaturally, isFalse);
 
-      final stopChoice = ChatChoice(
+      const stopChoice = ChatChoice(
         index: 0,
         message: AssistantMessage(content: MessageContent.text('Done')),
         finishReason: FinishReason.stop,
@@ -314,18 +314,18 @@ void main() {
       expect(withCalls.hasToolCalls, isTrue);
       expect(withCalls.toolCallCount, 1);
 
-      final noCalls = AssistantMessage(content: MessageContent.text('Hello'));
+      const noCalls = AssistantMessage(content: MessageContent.text('Hello'));
       expect(noCalls.hasToolCalls, isFalse);
       expect(noCalls.toolCallCount, 0);
     });
 
     test('hasContent returns correct value', () {
-      final withContent = AssistantMessage(
+      const withContent = AssistantMessage(
         content: MessageContent.text('Hello'),
       );
       expect(withContent.hasContent, isTrue);
 
-      final emptyContent = AssistantMessage(content: MessageContent.text(''));
+      const emptyContent = AssistantMessage(content: MessageContent.text(''));
       expect(emptyContent.hasContent, isFalse);
 
       const nullContent = AssistantMessage(content: null);
@@ -369,25 +369,25 @@ void main() {
 
   group('SystemMessageExtensions', () {
     test('hasContent returns correct value', () {
-      final withContent = SystemMessage(
+      const withContent = SystemMessage(
         content: MessageContent.text('You are helpful.'),
       );
       expect(withContent.hasContent, isTrue);
 
-      final empty = SystemMessage(content: MessageContent.text(''));
+      const empty = SystemMessage(content: MessageContent.text(''));
       expect(empty.hasContent, isFalse);
     });
   });
 
   group('ToolMessageExtensions', () {
     test('hasContent returns correct value', () {
-      final withContent = ToolMessage(
+      const withContent = ToolMessage(
         toolCallId: 'call-1',
         content: MessageContent.text('{"result": 42}'),
       );
       expect(withContent.hasContent, isTrue);
 
-      final empty = ToolMessage(
+      const empty = ToolMessage(
         toolCallId: 'call-2',
         content: MessageContent.text(''),
       );

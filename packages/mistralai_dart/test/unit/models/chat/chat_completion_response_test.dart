@@ -4,7 +4,7 @@ import 'package:test/test.dart';
 void main() {
   group('ChatCompletionResponse', () {
     test('creates with required fields', () {
-      final response = ChatCompletionResponse(
+      const response = ChatCompletionResponse(
         id: 'cmpl-123',
         object: 'chat.completion',
         created: 1699000000,
@@ -78,7 +78,7 @@ void main() {
     });
 
     test('serializes to JSON', () {
-      final response = ChatCompletionResponse(
+      const response = ChatCompletionResponse(
         id: 'cmpl-abc',
         object: 'chat.completion',
         created: 1699000003,
@@ -90,7 +90,7 @@ void main() {
             finishReason: FinishReason.length,
           ),
         ],
-        usage: const UsageInfo(
+        usage: UsageInfo(
           promptTokens: 15,
           completionTokens: 25,
           totalTokens: 40,
@@ -140,7 +140,7 @@ void main() {
 
     group('copyWith', () {
       test('copies with no changes', () {
-        final original = ChatCompletionResponse(
+        const original = ChatCompletionResponse(
           id: 'cmpl-100',
           object: 'chat.completion',
           created: 1699000000,
@@ -152,7 +152,7 @@ void main() {
               finishReason: FinishReason.stop,
             ),
           ],
-          usage: const UsageInfo(
+          usage: UsageInfo(
             promptTokens: 5,
             completionTokens: 10,
             totalTokens: 15,
@@ -183,7 +183,7 @@ void main() {
           created: 1699000001,
           model: 'mistral-large-latest',
           choices: [
-            ChatChoice(
+            const ChatChoice(
               index: 0,
               message: AssistantMessage(content: MessageContent.text('New')),
               finishReason: FinishReason.length,
@@ -231,7 +231,7 @@ void main() {
 
     group('toString', () {
       test('includes all fields', () {
-        final response = ChatCompletionResponse(
+        const response = ChatCompletionResponse(
           id: 'cmpl-test',
           object: 'chat.completion',
           created: 1699000000,

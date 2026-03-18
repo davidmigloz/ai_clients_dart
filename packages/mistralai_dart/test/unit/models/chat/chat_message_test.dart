@@ -31,18 +31,18 @@ void main() {
       });
 
       test('copyWith creates a copy with new content', () {
-        final original = SystemMessage(
+        const original = SystemMessage(
           content: MessageContent.text('Be helpful.'),
         );
         final copied = original.copyWith(
-          content: MessageContent.text('Be concise.'),
+          content: const MessageContent.text('Be concise.'),
         );
 
         expect((copied.content as MessageTextContent).text, 'Be concise.');
       });
 
       test('copyWith preserves content when not specified', () {
-        final original = SystemMessage(
+        const original = SystemMessage(
           content: MessageContent.text('Be helpful.'),
         );
         final copied = original.copyWith();
@@ -130,16 +130,16 @@ void main() {
       });
 
       test('copyWith with new MessageContent', () {
-        final original = UserMessage(content: MessageContent.text('Hello'));
+        const original = UserMessage(content: MessageContent.text('Hello'));
         final copied = original.copyWith(
-          content: MessageContent.text('Goodbye'),
+          content: const MessageContent.text('Goodbye'),
         );
 
         expect((copied.content! as MessageTextContent).text, 'Goodbye');
       });
 
       test('copyWith with new multimodal content', () {
-        final original = UserMessage(content: MessageContent.text('Hello'));
+        const original = UserMessage(content: MessageContent.text('Hello'));
         final copied = original.copyWith(
           content: MessageContent.parts([ContentPart.text('New text')]),
         );
@@ -151,7 +151,7 @@ void main() {
       });
 
       test('copyWith preserves content when not specified', () {
-        final original = UserMessage(content: MessageContent.text('Hello'));
+        const original = UserMessage(content: MessageContent.text('Hello'));
         final copied = original.copyWith();
 
         expect((copied.content! as MessageTextContent).text, 'Hello');
@@ -227,12 +227,12 @@ void main() {
       });
 
       test('copyWith with changes', () {
-        final original = AssistantMessage(
+        const original = AssistantMessage(
           content: MessageContent.text('Hello'),
           prefix: true,
         );
         final copied = original.copyWith(
-          content: MessageContent.text('Goodbye'),
+          content: const MessageContent.text('Goodbye'),
           prefix: false,
         );
 
@@ -242,9 +242,9 @@ void main() {
       });
 
       test('copyWith preserves values when not specified', () {
-        final original = AssistantMessage(
+        const original = AssistantMessage(
           content: MessageContent.text('Hello'),
-          toolCalls: const [
+          toolCalls: [
             ToolCall(
               id: 'call_1',
               function: FunctionCall(name: 'fn', arguments: '{}'),
@@ -261,7 +261,7 @@ void main() {
       });
 
       test('copyWith can set nullable fields to null', () {
-        final original = AssistantMessage(
+        const original = AssistantMessage(
           content: MessageContent.text('Hello'),
           prefix: true,
         );
@@ -309,14 +309,14 @@ void main() {
       });
 
       test('copyWith with changes', () {
-        final original = ToolMessage(
+        const original = ToolMessage(
           toolCallId: 'call_1',
           content: MessageContent.text('result'),
           name: 'my_tool',
         );
         final copied = original.copyWith(
           toolCallId: 'call_2',
-          content: MessageContent.text('new result'),
+          content: const MessageContent.text('new result'),
         );
 
         expect(copied.toolCallId, 'call_2');
@@ -325,7 +325,7 @@ void main() {
       });
 
       test('copyWith preserves values when not specified', () {
-        final original = ToolMessage(
+        const original = ToolMessage(
           toolCallId: 'call_1',
           content: MessageContent.text('result'),
           name: 'my_tool',
@@ -339,7 +339,7 @@ void main() {
       });
 
       test('copyWith can set nullable name to null', () {
-        final original = ToolMessage(
+        const original = ToolMessage(
           toolCallId: 'call_1',
           content: MessageContent.text('result'),
           name: 'my_tool',

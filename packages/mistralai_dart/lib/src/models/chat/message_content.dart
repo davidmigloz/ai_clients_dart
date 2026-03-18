@@ -44,11 +44,11 @@ sealed class MessageContent {
   }
 
   /// Creates text content.
-  static MessageContent text(String text) => MessageTextContent(text);
+  const factory MessageContent.text(String text) = MessageTextContent;
 
   /// Creates content with multiple parts.
-  static MessageContent parts(List<ContentPart> parts) =>
-      MessagePartsContent(parts);
+  const factory MessageContent.parts(List<ContentPart> parts) =
+      MessagePartsContent;
 
   /// Converts to JSON format expected by the API.
   Object toJson();

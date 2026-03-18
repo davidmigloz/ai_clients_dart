@@ -4,7 +4,7 @@ import 'package:test/test.dart';
 void main() {
   group('ChatChoice', () {
     test('creates with required fields', () {
-      final choice = ChatChoice(
+      const choice = ChatChoice(
         index: 0,
         message: AssistantMessage(content: MessageContent.text('Hello!')),
       );
@@ -15,7 +15,7 @@ void main() {
     });
 
     test('creates with finish reason', () {
-      final choice = ChatChoice(
+      const choice = ChatChoice(
         index: 1,
         message: AssistantMessage(content: MessageContent.text('Done')),
         finishReason: FinishReason.stop,
@@ -85,7 +85,7 @@ void main() {
     });
 
     test('serializes to JSON', () {
-      final choice = ChatChoice(
+      const choice = ChatChoice(
         index: 0,
         message: AssistantMessage(content: MessageContent.text('Hello')),
         finishReason: FinishReason.stop,
@@ -99,17 +99,17 @@ void main() {
     });
 
     test('equality works correctly', () {
-      final choice1 = ChatChoice(
+      const choice1 = ChatChoice(
         index: 0,
         message: AssistantMessage(content: MessageContent.text('Test')),
         finishReason: FinishReason.stop,
       );
-      final choice2 = ChatChoice(
+      const choice2 = ChatChoice(
         index: 0,
         message: AssistantMessage(content: MessageContent.text('Test')),
         finishReason: FinishReason.stop,
       );
-      final choice3 = ChatChoice(
+      const choice3 = ChatChoice(
         index: 1,
         message: AssistantMessage(content: MessageContent.text('Test')),
         finishReason: FinishReason.stop,

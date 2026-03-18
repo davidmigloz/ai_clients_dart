@@ -86,7 +86,7 @@ class SystemMessage extends ChatMessage {
   factory SystemMessage.fromJson(Map<String, dynamic> json) {
     final content = json['content'];
     if (content == null) {
-      return SystemMessage(content: MessageContent.text(''));
+      return const SystemMessage(content: MessageContent.text(''));
     }
     return SystemMessage(content: MessageContent.fromJson(content as Object));
   }
