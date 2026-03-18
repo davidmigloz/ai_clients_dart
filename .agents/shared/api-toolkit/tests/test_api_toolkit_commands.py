@@ -6434,6 +6434,27 @@ class ApiToolkitCommandTests(unittest.TestCase):
         # copyWith for required+nullable should use "as String?" not "! as String"
         self.assertIn("as String?", source, f"copyWith for nullable field should use 'as String?': {source}")
 
+    def test_dart_type_from_prop_items_list_type_no_crash(self) -> None:
+        """_dart_type_from_prop must not crash when items['type'] is an OpenAPI 3.1 list."""
+        from api_toolkit.operations import _dart_type_from_prop
+        type_mappings = {"string": "String", "integer": "int", "array": "List"}
+        # items.type is a list (e.g. ["string", "null"]) — must not crash with TypeError
+        result = _dart_type_from_prop(type_mappings, {"type": "array", "items": {"type": ["string", "null"]}})
+        self.assertIn("String", result)
+        # Multi-type items → no unique type → fallback to dynamic
+        result2 = _dart_type_from_prop(type_mappings, {"type": "array", "items": {"type": ["string", "integer"]}})
+        self.assertIn("dynamic", result2)
+
+    def test_scaffold_array_from_json_items_list_type_no_crash(self) -> None:
+        """_scaffold_array_from_json must not crash when items['type'] is an OpenAPI 3.1 list."""
+        from api_toolkit.operations import _scaffold_array_from_json
+        type_mappings = {"string": "String", "integer": "int", "array": "List"}
+        # items.type = ["string", "null"] — must not crash
+        prop = {"type": "array", "items": {"type": ["string", "null"]}, "required": True}
+        result = _scaffold_array_from_json("tags", prop, type_mappings)
+        self.assertIsInstance(result, str)
+        self.assertIn("String", result)
+
     def test_scaffold_to_json_nullable_ref_uses_null_aware_operator(self) -> None:
         """_scaffold_to_json_expression must use ?. for nullable ref and array-of-ref fields."""
         from api_toolkit.operations import _scaffold_to_json_expression, _scaffold_class_source
