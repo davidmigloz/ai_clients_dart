@@ -6343,6 +6343,60 @@ class ApiToolkitCommandTests(unittest.TestCase):
         # Must not crash; exact fallback value is dynamic or None-mapped
         self.assertIsInstance(result2, str)
 
+    def test_scaffold_to_json_bare_string_items_no_crash(self) -> None:
+        """_scaffold_to_json_expression must not crash when items is a bare string (WebSocket schema style)."""
+        from api_toolkit.operations import _scaffold_to_json_expression
+        type_mappings = {"string": "String", "integer": "int", "array": "List"}
+        # Primitive bare-string items
+        result = _scaffold_to_json_expression("tags", {"type": "array", "items": "string", "required": True}, type_mappings)
+        self.assertIsInstance(result, str)
+        self.assertNotEqual(result, "TODO()")
+        # Schema-ref bare-string items
+        result2 = _scaffold_to_json_expression("tools", {"type": "array", "items": "Tool", "required": True}, type_mappings)
+        self.assertIsInstance(result2, str)
+
+    def test_resolve_openapi31_type_non_string_returns_none(self) -> None:
+        """_resolve_openapi31_type must return None for non-string non-list input (e.g. None itself)."""
+        from api_toolkit.operations import _resolve_openapi31_type
+        self.assertIsNone(_resolve_openapi31_type(None))
+        self.assertEqual(_resolve_openapi31_type("string"), "string")
+        self.assertEqual(_resolve_openapi31_type(["integer", "null"]), "integer")
+        self.assertIsNone(_resolve_openapi31_type(["string", "integer"]))  # multi-type → None
+
+    def test_verify_anyof_null_sets_nullable_not_required_false(self) -> None:
+        """anyOf: [SomeType, null] must not produce 'optional but non-nullable' info for required fields."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Example": {
+                        "type": "object",
+                        "required": ["value"],
+                        "properties": {
+                            "value": {"anyOf": [{"$ref": "#/components/schemas/Foo"}, {"type": "null"}]},
+                        },
+                    },
+                    "Foo": {"type": "object"},
+                },
+                manifest_types={
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                    "Foo": {"spec": "main", "kind": "object", "dart_class": "Foo", "file": "lib/src/models/common/foo.dart", "schema": "Foo"},
+                },
+                dart_files={
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("value", "Foo", False)]),
+                    "lib/src/models/common/foo.dart": self._make_dart_class("Foo", []),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            # Must not produce "optional in spec but non-nullable in Dart" info
+            optional_infos = [i for i in issues if i.get("name") == "Example"
+                              and i["level"] == "info"
+                              and "optional" in i.get("message", "").lower()]
+            self.assertEqual(optional_infos, [], f"anyOf nullable required field should not produce optional info: {optional_infos}")
+
 
 if __name__ == "__main__":
     unittest.main()

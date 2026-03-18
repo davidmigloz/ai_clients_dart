@@ -780,7 +780,7 @@ def _parse_openapi_property(prop: dict[str, Any], required: set[str], name: str)
     if "anyOf" in prop:
         non_null = [_resolve_union_branch(item) for item in prop["anyOf"] if item.get("type") != "null"]
         if any(item.get("type") == "null" for item in prop["anyOf"]):
-            info["required"] = False
+            info["nullable"] = True
         # Flatten nested oneOf/anyOf wrappers before counting branches so that
         # anyOf: [{oneOf: [A, B]}, null] is recognised as a 2-branch union.
         # union_branch_count uses len(flat) so indeterminate allOf leaves are
@@ -800,7 +800,7 @@ def _parse_openapi_property(prop: dict[str, Any], required: set[str], name: str)
     if "oneOf" in prop:
         non_null = [_resolve_union_branch(item) for item in prop["oneOf"] if item.get("type") != "null"]
         if any(item.get("type") == "null" for item in prop["oneOf"]):
-            info["required"] = False
+            info["nullable"] = True
         flat = _flatten_union_branches(non_null)
         info["union_refs"] = [_resolve_ref(item["$ref"]) for item in flat if "$ref" in item]
         info["union_types"] = [item.get("type") for item in flat if "type" in item and "$ref" not in item]
@@ -831,8 +831,10 @@ def _resolve_openapi31_type(type_value: Any) -> str | None:
     Returns the single non-null type if there is exactly one, otherwise None.
     Scalar strings (OpenAPI 3.0 style) are returned as-is.
     """
-    if not isinstance(type_value, list):
+    if isinstance(type_value, str):
         return type_value
+    if not isinstance(type_value, list):
+        return None
     non_null = [t for t in type_value if t != "null"]
     return non_null[0] if len(non_null) == 1 else None
 
@@ -3198,6 +3200,8 @@ def _scaffold_to_json_expression(field_name: str, prop: dict[str, Any], type_map
     field = camel_case(field_name)
     if _resolve_openapi31_type(prop.get("type")) == "array":
         items = prop.get("items") or {}
+        if isinstance(items, str):
+            items = {"type": items} if items in _OPENAPI_BUILTIN_TYPES else {"$ref": items}
         if "$ref" in items:
             return f"{field}.map((item) => item.toJson()).toList()"
         if items.get("type"):
