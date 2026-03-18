@@ -199,7 +199,13 @@
           "ResponseReasoningSummaryDoneStreamingEvent": "response.reasoning_summary.done",
           "ErrorStreamingEvent": "error"
         }
-      }
+      },
+      "excluded_properties": [
+        "item_id",
+        "output_index",
+        "summary_index",
+        "part"
+      ]
     },
     "ResponseCreatedStreamingEvent": {
       "spec": "main",
@@ -620,7 +626,11 @@
           "FunctionCallOutputItemParam": "function_call_output",
           "ItemReferenceParam": "item_reference"
         }
-      }
+      },
+      "excluded_properties": [
+        "id",
+        "status"
+      ]
     },
     "MessageItem": {
       "spec": "main",
@@ -637,7 +647,10 @@
           "DeveloperMessageItemParam": "developer",
           "AssistantMessageItemParam": "assistant"
         }
-      }
+      },
+      "excluded_properties": [
+        "content"
+      ]
     },
     "UserMessageItemParam": {
       "spec": "main",

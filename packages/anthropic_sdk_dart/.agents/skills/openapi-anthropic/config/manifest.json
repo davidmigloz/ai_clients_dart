@@ -103,7 +103,7 @@
       "file": "lib/src/models/tools/tool_definition.dart",
       "schema": "Tool",
       "parent": "ToolDefinition",
-      "note": "Wrapper class \u2014 CustomToolDefinition wraps the spec Tool schema with additional routing logic."
+      "note": "Wrapper class — CustomToolDefinition wraps the spec Tool schema with additional routing logic."
     },
     "Usage": {
       "spec": "main",
@@ -171,7 +171,10 @@
           "ResponseCompactionBlock": "compaction"
         }
       },
-      "note": null
+      "note": null,
+      "excluded_properties": [
+        "content"
+      ]
     },
     "TextBlock": {
       "spec": "main",
@@ -315,7 +318,11 @@
           "RequestToolReferenceBlockParam": "tool_reference"
         }
       },
-      "note": null
+      "note": null,
+      "excluded_properties": [
+        "content",
+        "source"
+      ]
     },
     "TextBlockParam": {
       "spec": "main",
@@ -466,7 +473,7 @@
       "file": "lib/src/models/content/input_content_block.dart",
       "schema": "ToolResultBlockParamContentVariant0",
       "parent": "ToolResultContent",
-      "note": "Anonymous spec variant \u2014 not a named schema, represents text content within tool results."
+      "note": "Anonymous spec variant — not a named schema, represents text content within tool results."
     },
     "ToolResultBlockParamContentVariant1": {
       "spec": "main",
@@ -475,7 +482,7 @@
       "file": "lib/src/models/content/input_content_block.dart",
       "schema": "ToolResultBlockParamContentVariant1",
       "parent": "ToolResultContent",
-      "note": "Anonymous spec variant \u2014 not a named schema, represents image/document content within tool results."
+      "note": "Anonymous spec variant — not a named schema, represents image/document content within tool results."
     },
     "Citation": {
       "spec": "main",
@@ -661,7 +668,11 @@
           "ErrorEvent": "error"
         }
       },
-      "note": null
+      "note": null,
+      "excluded_properties": [
+        "delta",
+        "message"
+      ]
     },
     "MessageStartEvent": {
       "spec": "main",
@@ -718,7 +729,7 @@
       "file": "lib/src/models/streaming/message_stream_event.dart",
       "schema": "PingEvent",
       "parent": "MessageStreamEvent",
-      "note": "No named schema in spec \u2014 the ping event has no dedicated schema definition."
+      "note": "No named schema in spec — the ping event has no dedicated schema definition."
     },
     "ErrorEvent": {
       "spec": "main",
@@ -727,7 +738,7 @@
       "file": "lib/src/models/streaming/message_stream_event.dart",
       "schema": "ErrorEvent",
       "parent": "MessageStreamEvent",
-      "note": "No named schema in spec \u2014 the error event uses a non-standard nested error object structure."
+      "note": "No named schema in spec — the error event uses a non-standard nested error object structure."
     },
     "ContentBlockDelta": {
       "spec": "main",
@@ -906,7 +917,7 @@
       "file": "lib/src/models/tools/tool_caller.dart",
       "schema": "DirectToolCaller",
       "parent": "ToolCaller",
-      "note": "No named schema in spec \u2014 DirectToolCaller is the default when type is absent."
+      "note": "No named schema in spec — DirectToolCaller is the default when type is absent."
     },
     "ServerToolCaller": {
       "spec": "main",
@@ -930,7 +941,7 @@
           "various built-in tool schemas": "versioned prefix"
         }
       },
-      "note": "Non-standard type_prefix discriminator \u2014 detects built-in vs custom by checking if type starts with known prefixes (bash_, web_search_, etc.)."
+      "note": "Non-standard type_prefix discriminator — detects built-in vs custom by checking if type starts with known prefixes (bash_, web_search_, etc.)."
     },
     "various built-in tool schemas": {
       "spec": "main",
@@ -939,7 +950,7 @@
       "file": "lib/src/models/tools/tool_definition.dart",
       "schema": "various built-in tool schemas",
       "parent": "ToolDefinition",
-      "note": "Virtual grouping entry \u2014 individual built-in tool types are mapped separately."
+      "note": "Virtual grouping entry — individual built-in tool types are mapped separately."
     },
     "BuiltInTool": {
       "spec": "main",
@@ -964,7 +975,7 @@
           "McpToolset (beta)": "mcp_* prefix"
         }
       },
-      "note": "Parent sealed class not a named schema in spec \u2014 built-in tools use versioned type strings as discriminators."
+      "note": "Parent sealed class not a named schema in spec — built-in tools use versioned type strings as discriminators."
     },
     "BashTool20250124": {
       "spec": "main",
@@ -1164,7 +1175,7 @@
         "field": "runtime_type",
         "mapping": {}
       },
-      "note": "fromJson accepts dynamic: String \u2192 TextMessageContent, List \u2192 BlocksMessageContent."
+      "note": "fromJson accepts dynamic: String → TextMessageContent, List → BlocksMessageContent."
     },
     "MessageContent:TextMessageContent": {
       "spec": "main",
@@ -1173,7 +1184,7 @@
       "file": "lib/src/models/messages/input_message.dart",
       "schema": null,
       "parent": "MessageContent",
-      "note": "fromJson accepts dynamic: String \u2192 TextMessageContent, List \u2192 BlocksMessageContent."
+      "note": "fromJson accepts dynamic: String → TextMessageContent, List → BlocksMessageContent."
     },
     "MessageContent:BlocksMessageContent": {
       "spec": "main",
@@ -1182,7 +1193,7 @@
       "file": "lib/src/models/messages/input_message.dart",
       "schema": null,
       "parent": "MessageContent",
-      "note": "fromJson accepts dynamic: String \u2192 TextMessageContent, List \u2192 BlocksMessageContent."
+      "note": "fromJson accepts dynamic: String → TextMessageContent, List → BlocksMessageContent."
     },
     "SystemPrompt": {
       "spec": "main",
@@ -1194,7 +1205,7 @@
         "field": "runtime_type",
         "mapping": {}
       },
-      "note": "fromJson accepts dynamic: String \u2192 TextSystemPrompt, List \u2192 BlocksSystemPrompt."
+      "note": "fromJson accepts dynamic: String → TextSystemPrompt, List → BlocksSystemPrompt."
     },
     "SystemPrompt:TextSystemPrompt": {
       "spec": "main",
@@ -1203,7 +1214,7 @@
       "file": "lib/src/models/messages/message_create_request.dart",
       "schema": null,
       "parent": "SystemPrompt",
-      "note": "fromJson accepts dynamic: String \u2192 TextSystemPrompt, List \u2192 BlocksSystemPrompt."
+      "note": "fromJson accepts dynamic: String → TextSystemPrompt, List → BlocksSystemPrompt."
     },
     "SystemPrompt:BlocksSystemPrompt": {
       "spec": "main",
@@ -1212,7 +1223,7 @@
       "file": "lib/src/models/messages/message_create_request.dart",
       "schema": null,
       "parent": "SystemPrompt",
-      "note": "fromJson accepts dynamic: String \u2192 TextSystemPrompt, List \u2192 BlocksSystemPrompt."
+      "note": "fromJson accepts dynamic: String → TextSystemPrompt, List → BlocksSystemPrompt."
     }
   }
 }

@@ -380,7 +380,10 @@
           "ChatCompletionRequestDeveloperMessage": "developer"
         }
       },
-      "note": null
+      "note": null,
+      "excluded_properties": [
+        "content"
+      ]
     },
     "ChatCompletionRequestSystemMessage": {
       "spec": "main",
