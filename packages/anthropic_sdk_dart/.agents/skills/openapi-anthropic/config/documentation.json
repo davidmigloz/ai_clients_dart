@@ -17,8 +17,7 @@
   ],
   "resource_to_example": {
     "messages": "messages",
-    "models": "models",
-    "batches": "batches"
+    "models": "models"
   },
   "excluded_from_examples": [],
   "drift_patterns": []

@@ -12,7 +12,6 @@
   },
   "excluded_resources": [
     "base_resource",
-    "fineTuningModels",
     "streaming_resource"
   ],
   "resource_to_example": {

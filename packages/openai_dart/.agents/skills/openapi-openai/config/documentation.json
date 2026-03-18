@@ -65,36 +65,9 @@
     "chat": "chat_example",
     "embeddings": "embeddings_example",
     "audio": "audio_example",
-    "images": "images_example",
-    "files": "files_example",
-    "assistants": "assistants_example",
-    "threads": "threads_example",
-    "batches": "batches_example",
-    "fine_tuning": "fine_tuning_example",
-    "realtime": "realtime_example"
+    "images": "images_example"
   },
-  "excluded_from_examples": [
-    "assistants",
-    "audio",
-    "batches",
-    "beta",
-    "chat",
-    "completions",
-    "embeddings",
-    "files",
-    "fineTuning",
-    "images",
-    "inputTokens",
-    "messages",
-    "moderations",
-    "realtime",
-    "realtimeSessions",
-    "runs",
-    "skills",
-    "threads",
-    "uploads",
-    "vectorStores"
-  ],
+  "excluded_from_examples": [],
   "drift_patterns": [
     {
       "pattern": "ChatCompletionModel\\.model\\(",

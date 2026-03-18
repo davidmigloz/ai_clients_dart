@@ -5,8 +5,7 @@
     "base_resource"
   ],
   "resource_to_example": {
-    "collections": "collections",
-    "embeddings": "embeddings"
+    "collections": "collections"
   },
   "excluded_from_examples": [],
   "drift_patterns": []
