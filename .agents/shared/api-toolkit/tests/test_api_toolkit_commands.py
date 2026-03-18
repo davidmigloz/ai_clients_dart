@@ -6101,6 +6101,37 @@ class ApiToolkitCommandTests(unittest.TestCase):
                            and "typed as" in i.get("message", "")]
             self.assertEqual(type_issues, [], f"Expected no type warnings for int? field with type=['integer','null']: {type_issues}")
 
+    def test_verify_type_openapi31_list_type_null_makes_field_nullable(self) -> None:
+        """OpenAPI 3.1 type: ['integer', 'null'] must not emit 'required but nullable' error even when the field is in required."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Example": {
+                        "type": "object",
+                        "required": ["count"],
+                        "properties": {
+                            "count": {"type": ["integer", "null"]},
+                        },
+                    },
+                },
+                manifest_types={
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("count", "int", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            # Must not produce "required in spec but nullable in Dart" error
+            required_errors = [i for i in issues if i.get("name") == "Example"
+                               and i["level"] == "error"
+                               and "required" in i.get("message", "").lower()]
+            self.assertEqual(required_errors, [], f"Expected no required/nullable error for type=['integer','null']: {required_errors}")
+
     def test_verify_type_openapi31_list_type_union_warns_object(self) -> None:
         """OpenAPI 3.1 type: ['string', 'integer'] (2+ non-null) is treated as a union; Object? should warn."""
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -6130,7 +6161,11 @@ class ApiToolkitCommandTests(unittest.TestCase):
                             f"Expected union/sealed warning for Object? with type=['string','integer']: {warnings}")
 
     def test_verify_type_websocket_string_items_no_crash(self) -> None:
-        """Websocket array items expressed as a bare string (e.g. 'string') must not crash."""
+        """OpenAPI schema with array items as a bare string (e.g. 'string') must not crash.
+
+        This covers the same normalization path as WebSocket schemas, which also
+        express array item types as bare strings rather than schema objects.
+        """
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
             config_dir = self._setup_type_check_env(root,

@@ -756,9 +756,13 @@ def _flatten_union_branches(branches: list[dict[str, Any]]) -> list[dict[str, An
 
 
 def _parse_openapi_property(prop: dict[str, Any], required: set[str], name: str) -> dict[str, Any]:
+    raw_type = prop.get("type")
+    # OpenAPI 3.1 allows type to be a list (e.g. ["integer", "null"]).
+    # Presence of "null" in the list means the field is nullable (not required).
+    type_list_has_null = isinstance(raw_type, list) and "null" in raw_type
     info: dict[str, Any] = {
-        "required": name in required,
-        "type": prop.get("type"),
+        "required": (name in required) and not type_list_has_null,
+        "type": raw_type,
         "ref": None,
         "items": prop.get("items"),
         "union_refs": [],
@@ -1046,7 +1050,7 @@ def _type_issues_for_field(
             issues.append(_type_issue(
                 "warning", entry_key,
                 f"Property '{name}' is typed as '{actual}' but spec defines a "
-                f"union (oneOf/anyOf) — consider a sealed Dart type",
+                f"union (oneOf/anyOf/type-list) — consider a sealed Dart type",
                 file=entry_file,
             ))
     elif "<__union__>" in expected_type:
