@@ -997,6 +997,133 @@ def _verify_extension_entry(config: ToolkitConfig, entry: ManifestEntry) -> list
     return issues
 
 
+def _known_concrete_types(config: ToolkitConfig) -> set[str]:
+    """Return Dart class names that are known-concrete (non-union-parent) types.
+
+    Used by type-mismatch checks to distinguish between 'unknown sealed type'
+    (silent) and 'known concrete type used where a sealed union is expected' (info).
+    Computed once per verify call and passed into per-field helpers.
+    """
+    dart_class_for = {k: e.dart_class for k, e in config.manifest.types.items()}
+    union_parent_classes = (
+        {e.dart_class for e in config.manifest.types.values() if e.kind == "sealed_parent"}
+        | {dart_class_for.get(e.parent, e.parent) for e in config.manifest.types.values()
+           if e.parent and e.kind in ("sealed_variant", "skip")}
+    )
+    return set(config.manifest.type_mappings.values()) | {
+        e.dart_class for e in config.manifest.types.values()
+        if e.dart_class not in union_parent_classes
+    }
+
+
+def _type_issues_for_field(
+    name: str,
+    actual: str,
+    expected_type: str,
+    entry_key: str,
+    entry_file: str,
+    known_concrete: set[str],
+) -> list[dict[str, Any]]:
+    """Return type-mismatch issues for a single field given its expected and actual Dart types.
+
+    ``expected_type`` must not be None — callers should guard before calling.
+    The ``[\\w.]+`` regex accepts dotted type prefixes (e.g. ``pkg.BuiltList<Foo>``).
+    """
+    issues: list[dict[str, Any]] = []
+    if expected_type == "__union__":
+        if actual in ("Object", "dynamic"):
+            issues.append(_type_issue(
+                "warning", entry_key,
+                f"Property '{name}' is typed as '{actual}' but spec defines a "
+                f"union (oneOf/anyOf) — consider a sealed Dart type",
+                file=entry_file,
+            ))
+    elif "<__union__>" in expected_type:
+        container_name = expected_type.split("<")[0]
+        if actual in ("Object", "dynamic"):
+            issues.append(_type_issue(
+                "warning", entry_key,
+                f"Property '{name}' is typed as '{actual}' but spec defines a list of "
+                f"union items — consider '{container_name}<SomeSealedType>'",
+                file=entry_file,
+            ))
+        elif actual.split("<")[0] == container_name:
+            # Peel matching outer containers to reach the innermost divergence point,
+            # handling nested union lists like List<List<__union__>>.
+            # [\w.]+ accepts dotted type prefixes such as pkg.BuiltList<Foo>.
+            inner_exp_m = re.match(r"^[\w.]+<(.+)>$", expected_type)
+            act_inner_m = re.match(r"^[\w.]+<(.+)>$", actual)
+            inner_exp = inner_exp_m.group(1) if inner_exp_m else ""
+            item_actual = act_inner_m.group(1).rstrip("?") if act_inner_m else ""
+            while "__union__" in inner_exp and item_actual:
+                next_exp_base = inner_exp.split("<")[0]
+                next_act_base = item_actual.split("<")[0]
+                if next_act_base != next_exp_base:
+                    break
+                next_exp_m = re.match(r"^[\w.]+<(.+)>$", inner_exp)
+                next_act_m = re.match(r"^[\w.]+<(.+)>$", item_actual)
+                if not next_exp_m or not next_act_m:
+                    break
+                inner_exp = next_exp_m.group(1)
+                item_actual = next_act_m.group(1).rstrip("?")
+            if "__union__" in inner_exp:
+                if item_actual in ("Object", "dynamic"):
+                    issues.append(_type_issue(
+                        "warning", entry_key,
+                        f"Property '{name}' item type is '{item_actual}' but spec defines "
+                        f"union items — consider a sealed Dart type for items",
+                        file=entry_file,
+                    ))
+                elif item_actual and item_actual in known_concrete:
+                    issues.append(_type_issue(
+                        "info", entry_key,
+                        f"Property '{name}' item type is '{item_actual}' but spec defines "
+                        f"union items — consider a sealed Dart type for items",
+                        file=entry_file,
+                    ))
+                elif item_actual and "<" in inner_exp:
+                    # inner container diverged (e.g. Set<TypeA> where List<__union__> expected)
+                    issues.append(_type_issue(
+                        "info", entry_key,
+                        f"Property '{name}' item container is '{item_actual.split('<')[0]}' "
+                        f"but spec suggests '{inner_exp.split('<')[0]}<...>' (list of union items)",
+                        file=entry_file,
+                    ))
+        else:
+            issues.append(_type_issue(
+                "info", entry_key,
+                f"Property '{name}' is typed as '{actual}' "
+                f"but spec suggests '{container_name}<...>' (list of union items)",
+                file=entry_file,
+            ))
+    else:
+        if actual in ("Object", "dynamic"):
+            issues.append(_type_issue(
+                "warning", entry_key,
+                f"Property '{name}' is typed as '{actual}' but spec references "
+                f"'{expected_type}' — consider using the specific Dart type",
+                file=entry_file,
+            ))
+        elif actual != expected_type:
+            actual_base = actual.split("<")[0]
+            expected_base = expected_type.split("<")[0]
+            if actual_base != expected_base:
+                issues.append(_type_issue(
+                    "info", entry_key,
+                    f"Property '{name}' is typed as '{actual}' "
+                    f"but spec suggests '{expected_type}'",
+                    file=entry_file,
+                ))
+            elif actual != expected_type:
+                issues.append(_type_issue(
+                    "info", entry_key,
+                    f"Property '{name}' generic parameter mismatch: "
+                    f"'{actual}' vs expected '{expected_type}'",
+                    file=entry_file,
+                ))
+    return issues
+
+
 def _verify_field_types(
     config: ToolkitConfig,
     spec_payload: dict[str, Any],
@@ -1013,114 +1140,22 @@ def _verify_field_types(
     if not props:
         return []
     fields = extract_fields(file_path, entry.dart_class)
+    excluded = set(entry.excluded_properties)
+    known_concrete = _known_concrete_types(config)
     issues: list[dict[str, Any]] = []
     for name, prop in props.items():
+        if name in excluded:
+            continue
         field_name = camel_case(name)
         dart_field = fields.get(field_name)
         if dart_field is None:
             continue
         expected_type = _expected_dart_type(prop, config, entry.spec)
-        actual = dart_field.dart_type
-        if expected_type == "__union__":
-            if actual in ("Object", "dynamic"):
-                issues.append(_type_issue(
-                    "warning", entry.key,
-                    f"Property '{name}' is typed as '{actual}' but spec defines a "
-                    f"union (oneOf/anyOf) — consider a sealed Dart type",
-                    file=entry.file,
-                ))
-        elif expected_type is not None and "<__union__>" in expected_type:
-            container_name = expected_type.split("<")[0]
-            dart_class_for = {k: e.dart_class for k, e in config.manifest.types.items()}
-            union_parent_classes = (
-                {e.dart_class for e in config.manifest.types.values() if e.kind == "sealed_parent"}
-                | {dart_class_for.get(e.parent, e.parent) for e in config.manifest.types.values()
-                   if e.parent and e.kind in ("sealed_variant", "skip")}
-            )
-            known_concrete = set(config.manifest.type_mappings.values()) | {
-                e.dart_class for e in config.manifest.types.values()
-                if e.dart_class not in union_parent_classes
-            }
-            if actual in ("Object", "dynamic"):
-                issues.append(_type_issue(
-                    "warning", entry.key,
-                    f"Property '{name}' is typed as '{actual}' but spec defines a list of "
-                    f"union items — consider '{container_name}<SomeSealedType>'",
-                    file=entry.file,
-                ))
-            elif actual.split("<")[0] == container_name:
-                # Peel matching outer containers to reach the innermost divergence point,
-                # handling nested union lists like List<List<__union__>>.
-                inner_exp_m = re.match(r"^\w+<(.+)>$", expected_type)
-                act_inner_m = re.match(r"^\w+<(.+)>$", actual)
-                inner_exp = inner_exp_m.group(1) if inner_exp_m else ""
-                item_actual = act_inner_m.group(1).rstrip("?") if act_inner_m else ""
-                while "__union__" in inner_exp and item_actual:
-                    next_exp_base = inner_exp.split("<")[0]
-                    next_act_base = item_actual.split("<")[0]
-                    if next_act_base != next_exp_base:
-                        break
-                    next_exp_m = re.match(r"^\w+<(.+)>$", inner_exp)
-                    next_act_m = re.match(r"^\w+<(.+)>$", item_actual)
-                    if not next_exp_m or not next_act_m:
-                        break
-                    inner_exp = next_exp_m.group(1)
-                    item_actual = next_act_m.group(1).rstrip("?")
-                if "__union__" in inner_exp:
-                    if item_actual in ("Object", "dynamic"):
-                        issues.append(_type_issue(
-                            "warning", entry.key,
-                            f"Property '{name}' item type is '{item_actual}' but spec defines "
-                            f"union items — consider a sealed Dart type for items",
-                            file=entry.file,
-                        ))
-                    elif item_actual and item_actual in known_concrete:
-                        issues.append(_type_issue(
-                            "info", entry.key,
-                            f"Property '{name}' item type is '{item_actual}' but spec defines "
-                            f"union items — consider a sealed Dart type for items",
-                            file=entry.file,
-                        ))
-                    elif item_actual and "<" in inner_exp:
-                        # inner container diverged (e.g. Set<TypeA> where List<__union__> expected)
-                        issues.append(_type_issue(
-                            "info", entry.key,
-                            f"Property '{name}' item container is '{item_actual.split('<')[0]}' "
-                            f"but spec suggests '{inner_exp.split('<')[0]}<...>' (list of union items)",
-                            file=entry.file,
-                        ))
-            else:
-                issues.append(_type_issue(
-                    "info", entry.key,
-                    f"Property '{name}' is typed as '{actual}' "
-                    f"but spec suggests '{container_name}<...>' (list of union items)",
-                    file=entry.file,
-                ))
-        elif expected_type is not None:
-            if actual in ("Object", "dynamic"):
-                issues.append(_type_issue(
-                    "warning", entry.key,
-                    f"Property '{name}' is typed as '{actual}' but spec references "
-                    f"'{expected_type}' — consider using the specific Dart type",
-                    file=entry.file,
-                ))
-            elif actual != expected_type:
-                actual_base = actual.split("<")[0]
-                expected_base = expected_type.split("<")[0]
-                if actual_base != expected_base:
-                    issues.append(_type_issue(
-                        "info", entry.key,
-                        f"Property '{name}' is typed as '{actual}' "
-                        f"but spec suggests '{expected_type}'",
-                        file=entry.file,
-                    ))
-                elif actual != expected_type:
-                    issues.append(_type_issue(
-                        "info", entry.key,
-                        f"Property '{name}' generic parameter mismatch: "
-                        f"'{actual}' vs expected '{expected_type}'",
-                        file=entry.file,
-                    ))
+        if expected_type is None:
+            continue
+        issues.extend(_type_issues_for_field(
+            name, dart_field.dart_type, expected_type, entry.key, entry.file, known_concrete,
+        ))
     return issues
 
 
@@ -1164,6 +1199,7 @@ def _verify_object_entry(config: ToolkitConfig, spec_payload: dict[str, Any], en
     class_block = extract_class_block(content, entry.dart_class)
     constant_fields = _constant_getter_fields(class_block)
     inherited_fields = _inherited_member_fields(class_block)
+    known_concrete = _known_concrete_types(config)
     issues: list[dict[str, Any]] = []
     expected_field_names: set[str] = set()
     for name, prop in props.items():
@@ -1182,107 +1218,10 @@ def _verify_object_entry(config: ToolkitConfig, spec_payload: dict[str, Any], en
             if not required and not dart_field.is_nullable and config.manifest.surface == "openapi":
                 issues.append(_type_issue("info", entry.key, f"Property '{name}' is optional in spec but non-nullable in Dart", file=entry.file))
             expected_type = _expected_dart_type(prop, config, entry.spec)
-            actual = dart_field.dart_type
-            if expected_type == "__union__":
-                if actual in ("Object", "dynamic"):
-                    issues.append(_type_issue(
-                        "warning", entry.key,
-                        f"Property '{name}' is typed as '{actual}' but spec defines a "
-                        f"union (oneOf/anyOf) — consider a sealed Dart type",
-                        file=entry.file,
-                    ))
-            elif expected_type is not None and "<__union__>" in expected_type:
-                container_name = expected_type.split("<")[0]
-                dart_class_for = {k: e.dart_class for k, e in config.manifest.types.items()}
-                union_parent_classes = (
-                    {e.dart_class for e in config.manifest.types.values() if e.kind == "sealed_parent"}
-                    | {dart_class_for.get(e.parent, e.parent) for e in config.manifest.types.values()
-                       if e.parent and e.kind in ("sealed_variant", "skip")}
-                )
-                known_concrete = set(config.manifest.type_mappings.values()) | {
-                    e.dart_class for e in config.manifest.types.values()
-                    if e.dart_class not in union_parent_classes
-                }
-                if actual in ("Object", "dynamic"):
-                    issues.append(_type_issue(
-                        "warning", entry.key,
-                        f"Property '{name}' is typed as '{actual}' but spec defines a list of "
-                        f"union items — consider '{container_name}<SomeSealedType>'",
-                        file=entry.file,
-                    ))
-                elif actual.split("<")[0] == container_name:
-                    # Peel matching outer containers to reach the innermost divergence point,
-                    # handling nested union lists like List<List<__union__>>.
-                    inner_exp_m = re.match(r"^\w+<(.+)>$", expected_type)
-                    act_inner_m = re.match(r"^\w+<(.+)>$", actual)
-                    inner_exp = inner_exp_m.group(1) if inner_exp_m else ""
-                    item_actual = act_inner_m.group(1).rstrip("?") if act_inner_m else ""
-                    while "__union__" in inner_exp and item_actual:
-                        next_exp_base = inner_exp.split("<")[0]
-                        next_act_base = item_actual.split("<")[0]
-                        if next_act_base != next_exp_base:
-                            break
-                        next_exp_m = re.match(r"^\w+<(.+)>$", inner_exp)
-                        next_act_m = re.match(r"^\w+<(.+)>$", item_actual)
-                        if not next_exp_m or not next_act_m:
-                            break
-                        inner_exp = next_exp_m.group(1)
-                        item_actual = next_act_m.group(1).rstrip("?")
-                    if "__union__" in inner_exp:
-                        if item_actual in ("Object", "dynamic"):
-                            issues.append(_type_issue(
-                                "warning", entry.key,
-                                f"Property '{name}' item type is '{item_actual}' but spec defines "
-                                f"union items — consider a sealed Dart type for items",
-                                file=entry.file,
-                            ))
-                        elif item_actual and item_actual in known_concrete:
-                            issues.append(_type_issue(
-                                "info", entry.key,
-                                f"Property '{name}' item type is '{item_actual}' but spec defines "
-                                f"union items — consider a sealed Dart type for items",
-                                file=entry.file,
-                            ))
-                        elif item_actual and "<" in inner_exp:
-                            # inner container diverged (e.g. Set<TypeA> where List<__union__> expected)
-                            issues.append(_type_issue(
-                                "info", entry.key,
-                                f"Property '{name}' item container is '{item_actual.split('<')[0]}' "
-                                f"but spec suggests '{inner_exp.split('<')[0]}<...>' (list of union items)",
-                                file=entry.file,
-                            ))
-                else:
-                    issues.append(_type_issue(
-                        "info", entry.key,
-                        f"Property '{name}' is typed as '{actual}' "
-                        f"but spec suggests '{container_name}<...>' (list of union items)",
-                        file=entry.file,
-                    ))
-            elif expected_type is not None:
-                if actual in ("Object", "dynamic"):
-                    issues.append(_type_issue(
-                        "warning", entry.key,
-                        f"Property '{name}' is typed as '{actual}' but spec references "
-                        f"'{expected_type}' — consider using the specific Dart type",
-                        file=entry.file,
-                    ))
-                elif actual != expected_type:
-                    actual_base = actual.split("<")[0]
-                    expected_base = expected_type.split("<")[0]
-                    if actual_base != expected_base:
-                        issues.append(_type_issue(
-                            "info", entry.key,
-                            f"Property '{name}' is typed as '{actual}' "
-                            f"but spec suggests '{expected_type}'",
-                            file=entry.file,
-                        ))
-                    elif actual != expected_type:
-                        issues.append(_type_issue(
-                            "info", entry.key,
-                            f"Property '{name}' generic parameter mismatch: "
-                            f"'{actual}' vs expected '{expected_type}'",
-                            file=entry.file,
-                        ))
+            if expected_type is not None:
+                issues.extend(_type_issues_for_field(
+                    name, dart_field.dart_type, expected_type, entry.key, entry.file, known_concrete,
+                ))
 
     issues.extend(_check_field_methods(entry, file_path, expected_field_names, constant_fields))
     return issues
