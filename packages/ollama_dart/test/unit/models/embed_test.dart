@@ -14,7 +14,7 @@ void main() {
     });
 
     test('toJson converts request correctly', () {
-      final request = EmbedRequest(
+      const request = EmbedRequest(
         model: 'nomic-embed-text',
         input: EmbedInput.string('Hello, world!'),
       );
@@ -40,12 +40,12 @@ void main() {
     });
 
     test('handles optional parameters', () {
-      final request = EmbedRequest(
+      const request = EmbedRequest(
         model: 'nomic-embed-text',
         input: EmbedInput.string('Hello'),
         truncate: true,
         dimensions: 512,
-        keepAlive: const KeepAlive.duration('5m'),
+        keepAlive: KeepAlive.duration('5m'),
       );
 
       final json = request.toJson();
@@ -56,11 +56,11 @@ void main() {
     });
 
     test('equality works correctly for string input', () {
-      final request1 = EmbedRequest(
+      const request1 = EmbedRequest(
         model: 'nomic-embed-text',
         input: EmbedInput.string('Hello'),
       );
-      final request2 = EmbedRequest(
+      const request2 = EmbedRequest(
         model: 'nomic-embed-text',
         input: EmbedInput.string('Hello'),
       );
@@ -70,15 +70,15 @@ void main() {
     });
 
     test('equality works correctly for list input', () {
-      final request1 = EmbedRequest(
+      const request1 = EmbedRequest(
         model: 'nomic-embed-text',
         input: EmbedInput.list(['Hello', 'World']),
       );
-      final request2 = EmbedRequest(
+      const request2 = EmbedRequest(
         model: 'nomic-embed-text',
         input: EmbedInput.list(['Hello', 'World']),
       );
-      final request3 = EmbedRequest(
+      const request3 = EmbedRequest(
         model: 'nomic-embed-text',
         input: EmbedInput.list(['Hello', 'Different']),
       );
@@ -89,19 +89,19 @@ void main() {
     });
 
     test('equality includes all fields', () {
-      final request1 = EmbedRequest(
+      const request1 = EmbedRequest(
         model: 'nomic-embed-text',
         input: EmbedInput.string('Hello'),
         truncate: true,
         dimensions: 512,
-        keepAlive: const KeepAlive.duration('5m'),
+        keepAlive: KeepAlive.duration('5m'),
       );
-      final request2 = EmbedRequest(
+      const request2 = EmbedRequest(
         model: 'nomic-embed-text',
         input: EmbedInput.string('Hello'),
         truncate: false,
         dimensions: 512,
-        keepAlive: const KeepAlive.duration('5m'),
+        keepAlive: KeepAlive.duration('5m'),
       );
 
       expect(request1, isNot(equals(request2)));

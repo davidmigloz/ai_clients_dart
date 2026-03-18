@@ -35,7 +35,7 @@ void main() {
       final response = await client.embeddings.create(
         request: EmbedRequest(
           model: embedModel,
-          input: EmbedInput.string('Hello, world!'),
+          input: const EmbedInput.string('Hello, world!'),
         ),
       );
 
@@ -54,7 +54,7 @@ void main() {
       final response = await client.embeddings.create(
         request: EmbedRequest(
           model: embedModel,
-          input: EmbedInput.list(const ['Hello', 'World', 'Test']),
+          input: const EmbedInput.list(['Hello', 'World', 'Test']),
         ),
       );
 
@@ -72,7 +72,7 @@ void main() {
       final response = await client.embeddings.create(
         request: EmbedRequest(
           model: embedModel,
-          input: EmbedInput.list(const [
+          input: const EmbedInput.list([
             'The cat sat on the mat',
             'A cat is sitting on a mat',
             'Quantum physics is complex',
@@ -113,7 +113,7 @@ void main() {
       final response = await client.embeddings.create(
         request: EmbedRequest(
           model: embedModel,
-          input: EmbedInput.string('Hello, world!'),
+          input: const EmbedInput.string('Hello, world!'),
         ),
       );
 
