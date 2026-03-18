@@ -846,6 +846,11 @@ def _expected_dart_type(
         return ref_name
 
     spec_type = prop_info.get("type")
+    # OpenAPI 3.1 allows type to be a list (e.g. ["integer", "null"]).
+    # Normalize to a single non-null type string for mapping lookup.
+    if isinstance(spec_type, list):
+        non_null = [t for t in spec_type if t != "null"]
+        spec_type = non_null[0] if len(non_null) == 1 else None
     type_mappings = config.manifest.type_mappings
     if spec_type and spec_type in type_mappings:
         # Inline objects (type: "object" without $ref) are indeterminate —
@@ -857,6 +862,10 @@ def _expected_dart_type(
             if not items:
                 return None  # untyped array — indeterminate
             container = type_mappings["array"]
+            # Websocket schemas may express items as a bare string type name
+            # (e.g. "string") instead of a dict — normalize to a dict first.
+            if isinstance(items, str):
+                items = {"type": items}
             # Parse the items schema through _parse_openapi_property so that
             # anyOf/oneOf/allOf wrappers on item schemas (e.g. anyOf: [{$ref: Foo}, null])
             # are fully unwrapped before the recursive type resolution.
@@ -1141,6 +1150,8 @@ def _verify_field_types(
     entry: ManifestEntry,
 ) -> list[dict[str, Any]]:
     """Run only type-comparison checks on an entry's fields (no missing-field or method checks)."""
+    if not entry.file:
+        return []
     file_path = config.resolve_package_path(entry.file)
     if not file_path.exists():
         return []
