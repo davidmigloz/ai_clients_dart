@@ -764,7 +764,8 @@ def _parse_openapi_property(prop: dict[str, Any], required: set[str], name: str)
     # Presence of "null" in the list means the field is nullable (not required).
     type_list_has_null = isinstance(raw_type, list) and "null" in raw_type
     info: dict[str, Any] = {
-        "required": (name in required) and not type_list_has_null,
+        "required": name in required,
+        "nullable": type_list_has_null,  # value can be null (orthogonal to required)
         "type": raw_type,
         "ref": None,
         "items": prop.get("items"),
@@ -1245,8 +1246,9 @@ def _verify_object_entry(config: ToolkitConfig, spec_payload: dict[str, Any], en
             continue
         dart_field = fields.get(field_name)
         required = bool(prop.get("required", False))
+        nullable = bool(prop.get("nullable", False))
         if dart_field is not None:
-            if required and dart_field.is_nullable:
+            if required and not nullable and dart_field.is_nullable:
                 issues.append(_type_issue("error", entry.key, f"Property '{name}' is required in spec but nullable in Dart", file=entry.file))
             if not required and not dart_field.is_nullable and config.manifest.surface == "openapi":
                 issues.append(_type_issue("info", entry.key, f"Property '{name}' is optional in spec but non-nullable in Dart", file=entry.file))
@@ -3121,7 +3123,7 @@ def _dart_type_from_prop(type_mappings: dict[str, str], prop: dict[str, Any]) ->
         return prop["ref"]
     type_name = prop.get("type")
     # OpenAPI 3.1 allows type to be a list (e.g. ["integer", "null"]).
-    # Normalize to the single non-null type; multi-type unions scaffold as Object.
+    # Normalize to the single non-null type; multi-type unions fall through to dynamic fallback.
     if isinstance(type_name, list):
         non_null = [t for t in type_name if t != "null"]
         type_name = non_null[0] if len(non_null) == 1 else None
@@ -3164,7 +3166,11 @@ def _scaffold_array_from_json(field_name: str, prop: dict[str, Any], type_mappin
 def _scaffold_from_json_expression(field_name: str, prop: dict[str, Any], type_mappings: dict[str, str]) -> str:
     dart_type = _dart_type_from_prop(type_mappings, prop)
     value = f"json['{field_name}']"
-    if prop.get("type") == "array":
+    resolved_type = prop.get("type")
+    if isinstance(resolved_type, list):
+        non_null = [t for t in resolved_type if t != "null"]
+        resolved_type = non_null[0] if len(non_null) == 1 else None
+    if resolved_type == "array":
         return _scaffold_array_from_json(field_name, prop, type_mappings)
     if prop.get("ref"):
         if prop.get("required"):
@@ -3180,7 +3186,11 @@ def _scaffold_from_json_expression(field_name: str, prop: dict[str, Any], type_m
 
 def _scaffold_to_json_expression(field_name: str, prop: dict[str, Any], type_mappings: dict[str, str]) -> str:
     field = camel_case(field_name)
-    if prop.get("type") == "array":
+    resolved_type = prop.get("type")
+    if isinstance(resolved_type, list):
+        non_null = [t for t in resolved_type if t != "null"]
+        resolved_type = non_null[0] if len(non_null) == 1 else None
+    if resolved_type == "array":
         items = prop.get("items") or {}
         if "$ref" in items:
             return f"{field}.map((item) => item.toJson()).toList()"

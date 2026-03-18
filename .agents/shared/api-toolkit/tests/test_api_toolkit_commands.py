@@ -6250,6 +6250,64 @@ class ApiToolkitCommandTests(unittest.TestCase):
             self.assertTrue(len(type_issues) >= 1,
                             f"Expected type issue for Object? when spec ref items='Tool': {issues}")
 
+    def test_verify_type_openapi31_nullable_required_no_spurious_optional_info(self) -> None:
+        """type: ['integer', 'null'] in required must not produce 'optional but non-nullable' info for a non-nullable Dart field."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Example": {
+                        "type": "object",
+                        "required": ["count"],
+                        "properties": {
+                            "count": {"type": ["integer", "null"]},
+                        },
+                    },
+                },
+                manifest_types={
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("count", "int", False)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            # Must not produce "optional in spec but non-nullable in Dart" info
+            optional_infos = [i for i in issues if i.get("name") == "Example"
+                              and i["level"] == "info"
+                              and "optional" in i.get("message", "").lower()]
+            self.assertEqual(optional_infos, [], f"Expected no spurious optional-info for nullable required field: {optional_infos}")
+
+    def test_scaffold_from_json_array_null_list_type(self) -> None:
+        """_scaffold_from_json_expression must handle type: ['array', 'null'] without crashing."""
+        from api_toolkit.operations import _scaffold_from_json_expression
+        type_mappings = {"string": "String", "integer": "int", "array": "List"}
+        prop = {
+            "type": ["array", "null"],
+            "items": {"type": "string"},
+            "required": False,
+        }
+        result = _scaffold_from_json_expression("tags", prop, type_mappings)
+        # Must not crash and should delegate to array scaffold
+        self.assertIn("List", result)
+
+    def test_scaffold_to_json_array_null_list_type(self) -> None:
+        """_scaffold_to_json_expression must handle type: ['array', 'null'] without crashing."""
+        from api_toolkit.operations import _scaffold_to_json_expression
+        type_mappings = {"string": "String", "integer": "int", "array": "List"}
+        prop = {
+            "type": ["array", "null"],
+            "items": {"type": "string"},
+            "required": False,
+        }
+        result = _scaffold_to_json_expression("tags", prop, type_mappings)
+        # Must not crash and should return the field name (simple array of primitives)
+        self.assertIsInstance(result, str)
+        self.assertNotEqual(result, "TODO()")
+
     def test_dart_type_from_prop_list_type_no_crash(self) -> None:
         """_dart_type_from_prop must not crash when prop['type'] is an OpenAPI 3.1 list."""
         from api_toolkit.operations import _dart_type_from_prop
