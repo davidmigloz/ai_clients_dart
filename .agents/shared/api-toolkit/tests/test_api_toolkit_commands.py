@@ -6216,6 +6216,52 @@ class ApiToolkitCommandTests(unittest.TestCase):
             errors = [i for i in issues if i.get("name") == "Orphan" and i["level"] == "error"]
             self.assertEqual(errors, [], f"Expected no errors for skip entry with null file: {errors}")
 
+    def test_verify_type_websocket_schema_ref_items_resolves(self) -> None:
+        """Websocket bare-string array items that are schema references (e.g. 'Tool') resolve via $ref path."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Tool": {"type": "object", "properties": {"name": {"type": "string"}}},
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "tools": {"type": "array", "items": "Tool"},
+                        },
+                    },
+                },
+                manifest_types={
+                    "Tool": {"spec": "main", "kind": "object", "dart_class": "Tool", "file": "lib/src/models/common/tool.dart", "schema": "Tool"},
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/tool.dart": self._make_dart_class("Tool", [("name", "String", True)]),
+                    # Object? — should produce a type warning since spec expects List<Tool>
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("tools", "Object", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            # Should warn that tools is Object but spec expects List<Tool>
+            type_issues = [i for i in issues if i.get("name") == "Example" and i["level"] in ("warning", "info")
+                           and "tools" in i.get("message", "")]
+            self.assertTrue(len(type_issues) >= 1,
+                            f"Expected type issue for Object? when spec ref items='Tool': {issues}")
+
+    def test_dart_type_from_prop_list_type_no_crash(self) -> None:
+        """_dart_type_from_prop must not crash when prop['type'] is an OpenAPI 3.1 list."""
+        from api_toolkit.operations import _dart_type_from_prop
+        type_mappings = {"string": "String", "integer": "int", "array": "List"}
+        # Nullable scalar: ['integer', 'null'] -> single non-null type -> int
+        result = _dart_type_from_prop(type_mappings, {"type": ["integer", "null"]})
+        self.assertEqual(result, "int")
+        # Multi-type union: ['string', 'integer'] -> no unique type -> fallback
+        result2 = _dart_type_from_prop(type_mappings, {"type": ["string", "integer"]})
+        # Must not crash; exact fallback value is dynamic or None-mapped
+        self.assertIsInstance(result2, str)
+
 
 if __name__ == "__main__":
     unittest.main()

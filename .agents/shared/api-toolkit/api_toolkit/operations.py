@@ -63,6 +63,9 @@ from .dart_inspect import (
 
 
 HTTP_METHODS = ("get", "post", "put", "patch", "delete", "head", "options", "trace")
+# Built-in OpenAPI/JSON Schema type names. Any bare string NOT in this set is
+# treated as a schema reference (e.g. "Tool", "Content") rather than a primitive.
+_OPENAPI_BUILTIN_TYPES = frozenset({"string", "integer", "number", "boolean", "array", "object", "null"})
 UNKNOWN_ENUM_FALLBACKS = {"unknown", "unspecified"}
 MAX_VERSION_HISTORY = 10
 VERSION_SEGMENT_RE = re.compile(r"^v\d+")
@@ -868,10 +871,12 @@ def _expected_dart_type(
             if not items:
                 return None  # untyped array — indeterminate
             container = type_mappings["array"]
-            # Websocket schemas may express items as a bare string type name
-            # (e.g. "string") instead of a dict — normalize to a dict first.
+            # Websocket schemas may express items as a bare string — either a
+            # primitive type name (e.g. "string") or a schema reference (e.g.
+            # "Tool"). Normalize to a dict using the appropriate key so that the
+            # ref-lookup path in _expected_dart_type can resolve schema references.
             if isinstance(items, str):
-                items = {"type": items}
+                items = {"type": items} if items in _OPENAPI_BUILTIN_TYPES else {"$ref": items}
             # Parse the items schema through _parse_openapi_property so that
             # anyOf/oneOf/allOf wrappers on item schemas (e.g. anyOf: [{$ref: Foo}, null])
             # are fully unwrapped before the recursive type resolution.
@@ -3115,6 +3120,11 @@ def _dart_type_from_prop(type_mappings: dict[str, str], prop: dict[str, Any]) ->
     if prop.get("ref"):
         return prop["ref"]
     type_name = prop.get("type")
+    # OpenAPI 3.1 allows type to be a list (e.g. ["integer", "null"]).
+    # Normalize to the single non-null type; multi-type unions scaffold as Object.
+    if isinstance(type_name, list):
+        non_null = [t for t in type_name if t != "null"]
+        type_name = non_null[0] if len(non_null) == 1 else None
     if type_name == "array":
         items = prop.get("items", {})
         if "$ref" in items:
