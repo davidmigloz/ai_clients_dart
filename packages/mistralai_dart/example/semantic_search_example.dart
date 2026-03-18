@@ -73,7 +73,10 @@ Future<void> basicSemanticSearch(MistralClient client) async {
   final allTexts = [...documents, query];
 
   final response = await client.embeddings.create(
-    request: EmbeddingRequest(model: 'mistral-embed', input: allTexts),
+    request: EmbeddingRequest(
+      model: 'mistral-embed',
+      input: EmbedInput.list(allTexts),
+    ),
   );
 
   // Extract embeddings
@@ -125,7 +128,10 @@ Future<void> documentRetrieval(MistralClient client) async {
   final texts = [...knowledgeBase.values, query];
 
   final response = await client.embeddings.create(
-    request: EmbeddingRequest(model: 'mistral-embed', input: texts.toList()),
+    request: EmbeddingRequest(
+      model: 'mistral-embed',
+      input: EmbedInput.list(texts.toList()),
+    ),
   );
 
   final embeddings = response.data.map((e) => e.embedding).toList();
@@ -176,7 +182,10 @@ Future<void> similarityThreshold(MistralClient client) async {
   final texts = [...items, query];
 
   final response = await client.embeddings.create(
-    request: EmbeddingRequest(model: 'mistral-embed', input: texts),
+    request: EmbeddingRequest(
+      model: 'mistral-embed',
+      input: EmbedInput.list(texts),
+    ),
   );
 
   final embeddings = response.data.map((e) => e.embedding).toList();

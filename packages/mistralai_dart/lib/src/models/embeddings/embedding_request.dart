@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../../utils/equality_helpers.dart';
 import '../common/copy_with_sentinel.dart';
+import 'embed_input.dart';
 import 'embedding_dtype.dart';
 
 /// Request for generating embeddings.
@@ -12,8 +13,9 @@ class EmbeddingRequest {
 
   /// The input text(s) to generate embeddings for.
   ///
-  /// Can be a single string or a list of strings.
-  final Object input;
+  /// Can be a single string ([EmbedInputString]) or a list of strings
+  /// ([EmbedInputList]).
+  final EmbedInput input;
 
   /// The format to return embeddings in.
   ///
@@ -59,7 +61,7 @@ class EmbeddingRequest {
     EmbeddingDtype? outputDtype,
   }) => EmbeddingRequest(
     model: model,
-    input: input,
+    input: EmbedInput.string(input),
     encodingFormat: encodingFormat,
     outputDimension: outputDimension,
     outputDtype: outputDtype,
@@ -74,7 +76,7 @@ class EmbeddingRequest {
     EmbeddingDtype? outputDtype,
   }) => EmbeddingRequest(
     model: model,
-    input: input,
+    input: EmbedInput.list(input),
     encodingFormat: encodingFormat,
     outputDimension: outputDimension,
     outputDtype: outputDtype,
@@ -84,7 +86,7 @@ class EmbeddingRequest {
   factory EmbeddingRequest.fromJson(Map<String, dynamic> json) =>
       EmbeddingRequest(
         model: json['model'] as String? ?? '',
-        input: json['input'] as Object,
+        input: EmbedInput.fromJson(json['input'] as Object),
         encodingFormat: json['encoding_format'] as String?,
         outputDimension: json['output_dimension'] as int?,
         outputDtype: json['output_dtype'] != null
@@ -96,7 +98,7 @@ class EmbeddingRequest {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'model': model,
-    'input': input,
+    'input': input.toJson(),
     if (encodingFormat != null) 'encoding_format': encodingFormat,
     if (outputDimension != null) 'output_dimension': outputDimension,
     if (outputDtype != null) 'output_dtype': outputDtype!.value,
@@ -106,7 +108,7 @@ class EmbeddingRequest {
   /// Creates a copy with replaced values.
   EmbeddingRequest copyWith({
     String? model,
-    Object? input,
+    EmbedInput? input,
     Object? encodingFormat = unsetCopyWithValue,
     Object? outputDimension = unsetCopyWithValue,
     Object? outputDtype = unsetCopyWithValue,
@@ -136,24 +138,16 @@ class EmbeddingRequest {
       other is EmbeddingRequest &&
           runtimeType == other.runtimeType &&
           model == other.model &&
-          _inputEquals(input, other.input) &&
+          input == other.input &&
           encodingFormat == other.encodingFormat &&
           outputDimension == other.outputDimension &&
           outputDtype == other.outputDtype &&
           mapsEqual(metadata, other.metadata);
 
-  /// Compares input fields which can be String or `List<String>`.
-  static bool _inputEquals(Object a, Object b) {
-    if (identical(a, b)) return true;
-    if (a is String && b is String) return a == b;
-    if (a is List && b is List) return listsEqual(a, b);
-    return false;
-  }
-
   @override
   int get hashCode => Object.hash(
     model,
-    input is List ? listHash(input as List) : input,
+    input,
     encodingFormat,
     outputDimension,
     outputDtype,

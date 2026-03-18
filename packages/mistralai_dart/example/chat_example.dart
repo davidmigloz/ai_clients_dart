@@ -28,7 +28,7 @@ void main() async {
       ),
     );
 
-    print('Response: ${response.choices.first.message.content}');
+    print('Response: ${response.text}');
     print('Tokens used: ${response.usage?.totalTokens}');
 
     // Multi-turn conversation
@@ -46,11 +46,11 @@ void main() async {
     );
 
     print('Q: What is 2 + 2?');
-    print('A: ${firstReply.choices.first.message.content}');
+    print('A: ${firstReply.text}');
 
     // Continue the conversation
     conversation
-      ..add(ChatMessage.assistant(firstReply.choices.first.message.content))
+      ..add(ChatMessage.assistant(firstReply.text))
       ..add(ChatMessage.user('And what is that multiplied by 3?'));
 
     final secondReply = await client.chat.create(
@@ -61,7 +61,7 @@ void main() async {
     );
 
     print('Q: And what is that multiplied by 3?');
-    print('A: ${secondReply.choices.first.message.content}');
+    print('A: ${secondReply.text}');
   } finally {
     client.close();
   }

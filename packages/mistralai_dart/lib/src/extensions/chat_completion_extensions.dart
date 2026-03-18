@@ -1,7 +1,7 @@
 import '../models/chat/chat_choice.dart';
 import '../models/chat/chat_completion_response.dart';
 import '../models/chat/chat_message.dart';
-import '../models/content/content_part.dart';
+import '../models/chat/message_content.dart';
 import '../models/metadata/finish_reason.dart';
 import '../models/tools/function_call.dart';
 import '../models/tools/tool_call.dart';
@@ -23,7 +23,11 @@ extension ChatCompletionResponseExtensions on ChatCompletionResponse {
   /// final response = await client.chat.create(request: request);
   /// print(response.text); // Prints the generated text
   /// ```
-  String? get text => firstChoice?.message.content;
+  String? get text {
+    final content = firstChoice?.message.content;
+    if (content is MessageTextContent) return content.text;
+    return null;
+  }
 
   /// All text content from all choices, concatenated.
   ///
@@ -33,8 +37,8 @@ extension ChatCompletionResponseExtensions on ChatCompletionResponse {
     var hasText = false;
     for (final choice in choices) {
       final content = choice.message.content;
-      if (content != null) {
-        buffer.write(content);
+      if (content is MessageTextContent) {
+        buffer.write(content.text);
         hasText = true;
       }
     }
@@ -88,7 +92,11 @@ extension ChatCompletionResponseExtensions on ChatCompletionResponse {
 /// Convenience extensions for [ChatChoice].
 extension ChatChoiceExtensions on ChatChoice {
   /// The text content from this choice's message.
-  String? get text => message.content;
+  String? get text {
+    final content = message.content;
+    if (content is MessageTextContent) return content.text;
+    return null;
+  }
 
   /// Tool calls from this choice's message.
   List<ToolCall> get toolCalls => message.toolCalls ?? <ToolCall>[];
@@ -120,29 +128,45 @@ extension AssistantMessageExtensions on AssistantMessage {
       toolCalls?.map((tc) => tc.function).toList() ?? [];
 
   /// Whether this message has text content.
-  bool get hasContent => content?.isNotEmpty ?? false;
+  bool get hasContent {
+    final c = content;
+    if (c is MessageTextContent) return c.text.isNotEmpty;
+    return c != null;
+  }
 }
 
 /// Convenience extensions for [SystemMessage].
 extension SystemMessageExtensions on SystemMessage {
   /// Whether this message has text content.
-  bool get hasContent => content.isNotEmpty;
+  bool get hasContent {
+    final c = content;
+    if (c is MessageTextContent) return c.text.isNotEmpty;
+    return true;
+  }
 }
 
 /// Convenience extensions for [UserMessage].
 extension UserMessageExtensions on UserMessage {
   /// Whether this message contains text content.
-  bool get isTextOnly => content is String;
+  bool get isTextOnly => content is MessageTextContent;
 
   /// Whether this message contains multimodal content.
-  bool get isMultimodal => content is List<ContentPart>;
+  bool get isMultimodal => content is MessagePartsContent;
 
   /// The text content if this is a text-only message, null otherwise.
-  String? get textContent => content is String ? content as String : null;
+  String? get textContent {
+    final c = content;
+    if (c is MessageTextContent) return c.text;
+    return null;
+  }
 }
 
 /// Convenience extensions for [ToolMessage].
 extension ToolMessageExtensions on ToolMessage {
   /// Whether this message has text content.
-  bool get hasContent => content.isNotEmpty;
+  bool get hasContent {
+    final c = content;
+    if (c is MessageTextContent) return c.text.isNotEmpty;
+    return c != null;
+  }
 }

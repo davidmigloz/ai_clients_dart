@@ -87,7 +87,10 @@ Future<void> basicRag(MistralClient client) async {
 
   // Step 2: Create embeddings for documents
   final docResponse = await client.embeddings.create(
-    request: EmbeddingRequest(model: 'mistral-embed', input: documents),
+    request: EmbeddingRequest(
+      model: 'mistral-embed',
+      input: EmbedInput.list(documents),
+    ),
   );
 
   final store = SimpleVectorStore()
@@ -102,7 +105,10 @@ Future<void> basicRag(MistralClient client) async {
 
   // Step 4: Retrieve relevant documents
   final queryResponse = await client.embeddings.create(
-    request: const EmbeddingRequest(model: 'mistral-embed', input: [query]),
+    request: EmbeddingRequest(
+      model: 'mistral-embed',
+      input: EmbedInput.list(const [query]),
+    ),
   );
 
   final relevantDocs = store.search(
@@ -155,7 +161,7 @@ Future<void> ragWithSources(MistralClient client) async {
   final response = await client.embeddings.create(
     request: EmbeddingRequest(
       model: 'mistral-embed',
-      input: sources.values.toList(),
+      input: EmbedInput.list(sources.values.toList()),
     ),
   );
 
@@ -170,7 +176,10 @@ Future<void> ragWithSources(MistralClient client) async {
   print('Query: "$query"\n');
 
   final queryEmbed = await client.embeddings.create(
-    request: const EmbeddingRequest(model: 'mistral-embed', input: [query]),
+    request: EmbeddingRequest(
+      model: 'mistral-embed',
+      input: EmbedInput.list(const [query]),
+    ),
   );
 
   final retrieved = store.search(queryEmbed.data.first.embedding, topK: 2);
@@ -228,7 +237,10 @@ Future<void> ragWithContextManagement(MistralClient client) async {
 
   // Create embeddings
   final docEmbeds = await client.embeddings.create(
-    request: EmbeddingRequest(model: 'mistral-embed', input: documents),
+    request: EmbeddingRequest(
+      model: 'mistral-embed',
+      input: EmbedInput.list(documents),
+    ),
   );
 
   final store = SimpleVectorStore()
@@ -238,7 +250,10 @@ Future<void> ragWithContextManagement(MistralClient client) async {
   const query = 'Tell me about topic 5';
 
   final queryEmbed = await client.embeddings.create(
-    request: const EmbeddingRequest(model: 'mistral-embed', input: [query]),
+    request: EmbeddingRequest(
+      model: 'mistral-embed',
+      input: EmbedInput.list(const [query]),
+    ),
   );
 
   // Retrieve with dynamic top-k based on context budget

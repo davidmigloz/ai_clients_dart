@@ -3,11 +3,18 @@ import 'package:meta/meta.dart';
 import '../common/copy_with_sentinel.dart';
 import '../content/content_part.dart';
 import '../tools/tool_call.dart';
+import 'message_content.dart';
 
 /// Sealed class for chat messages.
 ///
 /// Messages represent the conversation history between the user, system,
 /// assistant, and tools.
+///
+/// Subtypes:
+/// - [SystemMessage]: System instructions
+/// - [UserMessage]: User input (text or multimodal)
+/// - [AssistantMessage]: Model responses
+/// - [ToolMessage]: Tool call results
 sealed class ChatMessage {
   const ChatMessage();
 
@@ -29,29 +36,38 @@ sealed class ChatMessage {
   Map<String, dynamic> toJson();
 
   /// Creates a system message.
-  factory ChatMessage.system(String content) => SystemMessage(content: content);
+  factory ChatMessage.system(String content) =>
+      SystemMessage(content: MessageContent.text(content));
 
   /// Creates a user message with text content.
-  factory ChatMessage.user(String content) => UserMessage.text(content);
+  factory ChatMessage.user(String content) =>
+      UserMessage(content: MessageContent.text(content));
 
   /// Creates a user message with multimodal content.
   factory ChatMessage.userMultimodal(List<ContentPart> content) =>
-      UserMessage.multimodal(content);
+      UserMessage(content: MessageContent.parts(content));
 
   /// Creates an assistant message.
   factory ChatMessage.assistant(
     String? content, {
     List<ToolCall>? toolCalls,
     bool? prefix,
-  }) =>
-      AssistantMessage(content: content, toolCalls: toolCalls, prefix: prefix);
+  }) => AssistantMessage(
+    content: content != null ? MessageContent.text(content) : null,
+    toolCalls: toolCalls,
+    prefix: prefix,
+  );
 
   /// Creates a tool result message.
   factory ChatMessage.tool({
     required String toolCallId,
     required String content,
     String? name,
-  }) => ToolMessage(toolCallId: toolCallId, content: content, name: name);
+  }) => ToolMessage(
+    toolCallId: toolCallId,
+    content: MessageContent.text(content),
+    name: name,
+  );
 }
 
 /// System message for setting the behavior of the assistant.
@@ -61,20 +77,25 @@ class SystemMessage extends ChatMessage {
   String get role => 'system';
 
   /// The content of the system message.
-  final String content;
+  final MessageContent content;
 
   /// Creates a [SystemMessage].
   const SystemMessage({required this.content});
 
   /// Creates a [SystemMessage] from JSON.
-  factory SystemMessage.fromJson(Map<String, dynamic> json) =>
-      SystemMessage(content: json['content'] as String? ?? '');
+  factory SystemMessage.fromJson(Map<String, dynamic> json) {
+    final content = json['content'];
+    if (content == null) {
+      return SystemMessage(content: MessageContent.text(''));
+    }
+    return SystemMessage(content: MessageContent.fromJson(content as Object));
+  }
 
   @override
-  Map<String, dynamic> toJson() => {'role': role, 'content': content};
+  Map<String, dynamic> toJson() => {'role': role, 'content': content.toJson()};
 
   /// Creates a copy with the given fields replaced.
-  SystemMessage copyWith({String? content}) =>
+  SystemMessage copyWith({MessageContent? content}) =>
       SystemMessage(content: content ?? this.content);
 
   @override
@@ -100,67 +121,48 @@ class UserMessage extends ChatMessage {
   String get role => 'user';
 
   /// The content of the user message.
-  ///
-  /// Can be either a [String] for text-only content, or a
-  /// [List<ContentPart>] for multimodal content.
-  final Object content;
+  final MessageContent? content;
 
   /// Creates a [UserMessage].
-  const UserMessage({required this.content});
+  const UserMessage({this.content});
 
   /// Creates a text-only user message.
-  factory UserMessage.text(String text) => UserMessage(content: text);
+  factory UserMessage.text(String text) =>
+      UserMessage(content: MessageContent.text(text));
 
   /// Creates a multimodal user message with content parts.
   factory UserMessage.multimodal(List<ContentPart> parts) =>
-      UserMessage(content: parts);
+      UserMessage(content: MessageContent.parts(parts));
 
   /// Creates a [UserMessage] from JSON.
   factory UserMessage.fromJson(Map<String, dynamic> json) {
     final content = json['content'];
-    if (content is String) {
-      return UserMessage(content: content);
-    }
-    if (content is List) {
-      return UserMessage(
-        content: content
-            .map((e) => ContentPart.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
-    }
-    throw FormatException('Invalid content type: ${content.runtimeType}');
+    return UserMessage(
+      content: content != null
+          ? MessageContent.fromJson(content as Object)
+          : null,
+    );
   }
 
   @override
   Map<String, dynamic> toJson() => {
     'role': role,
-    'content': content is String
-        ? content
-        : (content as List<ContentPart>).map((e) => e.toJson()).toList(),
+    if (content != null) 'content': content!.toJson(),
   };
 
   /// Creates a copy with the given fields replaced.
-  UserMessage copyWith({Object? content}) =>
-      UserMessage(content: content ?? this.content);
+  UserMessage copyWith({Object? content = unsetCopyWithValue}) => UserMessage(
+    content: content == unsetCopyWithValue
+        ? this.content
+        : content as MessageContent?,
+  );
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is UserMessage &&
           runtimeType == other.runtimeType &&
-          _contentEquals(content, other.content);
-
-  bool _contentEquals(Object a, Object b) {
-    if (a is String && b is String) return a == b;
-    if (a is List<ContentPart> && b is List<ContentPart>) {
-      if (a.length != b.length) return false;
-      for (var i = 0; i < a.length; i++) {
-        if (a[i] != b[i]) return false;
-      }
-      return true;
-    }
-    return false;
-  }
+          content == other.content;
 
   @override
   int get hashCode => Object.hash(role, content);
@@ -177,8 +179,8 @@ class AssistantMessage extends ChatMessage {
   @override
   String get role => 'assistant';
 
-  /// The text content of the assistant's response.
-  final String? content;
+  /// The content of the assistant's response.
+  final MessageContent? content;
 
   /// Tool calls made by the assistant.
   final List<ToolCall>? toolCalls;
@@ -192,19 +194,23 @@ class AssistantMessage extends ChatMessage {
   const AssistantMessage({this.content, this.toolCalls, this.prefix});
 
   /// Creates an [AssistantMessage] from JSON.
-  factory AssistantMessage.fromJson(Map<String, dynamic> json) =>
-      AssistantMessage(
-        content: json['content'] as String?,
-        toolCalls: (json['tool_calls'] as List?)
-            ?.map((e) => ToolCall.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        prefix: json['prefix'] as bool?,
-      );
+  factory AssistantMessage.fromJson(Map<String, dynamic> json) {
+    final content = json['content'];
+    return AssistantMessage(
+      content: content != null
+          ? MessageContent.fromJson(content as Object)
+          : null,
+      toolCalls: (json['tool_calls'] as List?)
+          ?.map((e) => ToolCall.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      prefix: json['prefix'] as bool?,
+    );
+  }
 
   @override
   Map<String, dynamic> toJson() => {
     'role': role,
-    if (content != null) 'content': content,
+    if (content != null) 'content': content!.toJson(),
     if (toolCalls != null)
       'tool_calls': toolCalls!.map((e) => e.toJson()).toList(),
     if (prefix != null) 'prefix': prefix,
@@ -216,7 +222,9 @@ class AssistantMessage extends ChatMessage {
     Object? toolCalls = unsetCopyWithValue,
     Object? prefix = unsetCopyWithValue,
   }) => AssistantMessage(
-    content: content == unsetCopyWithValue ? this.content : content as String?,
+    content: content == unsetCopyWithValue
+        ? this.content
+        : content as MessageContent?,
     toolCalls: toolCalls == unsetCopyWithValue
         ? this.toolCalls
         : toolCalls as List<ToolCall>?,
@@ -264,39 +272,42 @@ class ToolMessage extends ChatMessage {
   final String? name;
 
   /// The content/result of the tool call.
-  final String content;
+  final MessageContent? content;
 
   /// Creates a [ToolMessage].
-  const ToolMessage({
-    required this.toolCallId,
-    required this.content,
-    this.name,
-  });
+  const ToolMessage({required this.toolCallId, this.content, this.name});
 
   /// Creates a [ToolMessage] from JSON.
-  factory ToolMessage.fromJson(Map<String, dynamic> json) => ToolMessage(
-    toolCallId: json['tool_call_id'] as String? ?? '',
-    name: json['name'] as String?,
-    content: json['content'] as String? ?? '',
-  );
+  factory ToolMessage.fromJson(Map<String, dynamic> json) {
+    final content = json['content'];
+    return ToolMessage(
+      toolCallId: json['tool_call_id'] as String? ?? '',
+      name: json['name'] as String?,
+      content: content != null
+          ? MessageContent.fromJson(content as Object)
+          : null,
+    );
+  }
 
   @override
   Map<String, dynamic> toJson() => {
     'role': role,
     'tool_call_id': toolCallId,
     if (name != null) 'name': name,
-    'content': content,
+    if (content != null) 'content': content!.toJson(),
   };
 
   /// Creates a copy with the given fields replaced.
   ToolMessage copyWith({
     String? toolCallId,
     Object? name = unsetCopyWithValue,
-    String? content,
+    Object? content = unsetCopyWithValue,
   }) => ToolMessage(
     toolCallId: toolCallId ?? this.toolCallId,
     name: name == unsetCopyWithValue ? this.name : name as String?,
-    content: content ?? this.content,
+    content: content == unsetCopyWithValue
+        ? this.content
+        : content as MessageContent?,
   );
 
   @override

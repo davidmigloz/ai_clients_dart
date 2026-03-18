@@ -4,20 +4,20 @@ import 'package:test/test.dart';
 void main() {
   group('ChatChoice', () {
     test('creates with required fields', () {
-      const choice = ChatChoice(
+      final choice = ChatChoice(
         index: 0,
-        message: AssistantMessage(content: 'Hello!'),
+        message: AssistantMessage(content: MessageContent.text('Hello!')),
       );
 
       expect(choice.index, 0);
-      expect(choice.message.content, 'Hello!');
+      expect((choice.message.content! as MessageTextContent).text, 'Hello!');
       expect(choice.finishReason, isNull);
     });
 
     test('creates with finish reason', () {
-      const choice = ChatChoice(
+      final choice = ChatChoice(
         index: 1,
-        message: AssistantMessage(content: 'Done'),
+        message: AssistantMessage(content: MessageContent.text('Done')),
         finishReason: FinishReason.stop,
       );
 
@@ -55,7 +55,10 @@ void main() {
       final choice = ChatChoice.fromJson(json);
 
       expect(choice.index, 0);
-      expect(choice.message.content, 'Test response');
+      expect(
+        (choice.message.content! as MessageTextContent).text,
+        'Test response',
+      );
       expect(choice.finishReason, FinishReason.stop);
     });
 
@@ -82,9 +85,9 @@ void main() {
     });
 
     test('serializes to JSON', () {
-      const choice = ChatChoice(
+      final choice = ChatChoice(
         index: 0,
-        message: AssistantMessage(content: 'Hello'),
+        message: AssistantMessage(content: MessageContent.text('Hello')),
         finishReason: FinishReason.stop,
       );
       final json = choice.toJson();
@@ -96,19 +99,19 @@ void main() {
     });
 
     test('equality works correctly', () {
-      const choice1 = ChatChoice(
+      final choice1 = ChatChoice(
         index: 0,
-        message: AssistantMessage(content: 'Test'),
+        message: AssistantMessage(content: MessageContent.text('Test')),
         finishReason: FinishReason.stop,
       );
-      const choice2 = ChatChoice(
+      final choice2 = ChatChoice(
         index: 0,
-        message: AssistantMessage(content: 'Test'),
+        message: AssistantMessage(content: MessageContent.text('Test')),
         finishReason: FinishReason.stop,
       );
-      const choice3 = ChatChoice(
+      final choice3 = ChatChoice(
         index: 1,
-        message: AssistantMessage(content: 'Test'),
+        message: AssistantMessage(content: MessageContent.text('Test')),
         finishReason: FinishReason.stop,
       );
 

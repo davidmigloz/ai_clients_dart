@@ -89,6 +89,7 @@ export 'src/models/chat/chat_completion_request.dart';
 export 'src/models/chat/chat_completion_response.dart';
 export 'src/models/chat/chat_completion_stream_response.dart';
 export 'src/models/chat/chat_message.dart';
+export 'src/models/chat/message_content.dart';
 // --- Models: Classifications ---
 export 'src/models/classifications/chat_classification_request.dart';
 export 'src/models/classifications/classification_request.dart';
@@ -103,6 +104,7 @@ export 'src/models/conversations/conversation_entry.dart';
 export 'src/models/conversations/conversation_request.dart';
 export 'src/models/conversations/conversation_response.dart';
 // --- Models: Embeddings ---
+export 'src/models/embeddings/embed_input.dart';
 export 'src/models/embeddings/embedding_data.dart';
 export 'src/models/embeddings/embedding_dtype.dart';
 export 'src/models/embeddings/embedding_request.dart';

@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../chat/chat_choice.dart';
+import '../chat/message_content.dart';
 import '../metadata/usage_info.dart';
 
 /// Response from agent completion.
@@ -67,7 +68,11 @@ class AgentCompletionResponse {
   ChatChoice? get firstChoice => choices.isNotEmpty ? choices.first : null;
 
   /// The text content from the first choice.
-  String? get text => firstChoice?.message.content;
+  String? get text {
+    final content = firstChoice?.message.content;
+    if (content is MessageTextContent) return content.text;
+    return null;
+  }
 
   @override
   bool operator ==(Object other) =>

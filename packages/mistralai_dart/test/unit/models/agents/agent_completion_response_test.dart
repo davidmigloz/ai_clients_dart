@@ -20,7 +20,7 @@ void main() {
       });
 
       test('creates with all parameters', () {
-        const response = AgentCompletionResponse(
+        final response = AgentCompletionResponse(
           id: 'resp-456',
           object: 'chat.completion',
           created: 1705312800,
@@ -28,11 +28,11 @@ void main() {
           choices: [
             ChatChoice(
               index: 0,
-              message: AssistantMessage(content: 'Hello!'),
+              message: AssistantMessage(content: MessageContent.text('Hello!')),
               finishReason: FinishReason.stop,
             ),
           ],
-          usage: UsageInfo(
+          usage: const UsageInfo(
             promptTokens: 10,
             completionTokens: 5,
             totalTokens: 15,
@@ -65,18 +65,20 @@ void main() {
       });
 
       test('serializes all fields', () {
-        const response = AgentCompletionResponse(
+        final response = AgentCompletionResponse(
           id: 'resp-456',
           created: 1705312800,
           model: 'mistral-large-latest',
           choices: [
             ChatChoice(
               index: 0,
-              message: AssistantMessage(content: 'Response'),
+              message: AssistantMessage(
+                content: MessageContent.text('Response'),
+              ),
               finishReason: FinishReason.stop,
             ),
           ],
-          usage: UsageInfo(
+          usage: const UsageInfo(
             promptTokens: 20,
             completionTokens: 10,
             totalTokens: 30,
@@ -134,7 +136,10 @@ void main() {
         expect(response.created, 1705312800);
         expect(response.model, 'mistral-large-latest');
         expect(response.choices, hasLength(1));
-        expect(response.choices.first.message.content, 'Full response');
+        expect(
+          (response.choices.first.message.content! as MessageTextContent).text,
+          'Full response',
+        );
         expect(response.usage?.totalTokens, 40);
       });
 
@@ -162,24 +167,26 @@ void main() {
 
     group('convenience getters', () {
       test('firstChoice returns first choice', () {
-        const response = AgentCompletionResponse(
+        final response = AgentCompletionResponse(
           id: 'resp-123',
           created: 1705312800,
           model: 'model',
           choices: [
             ChatChoice(
               index: 0,
-              message: AssistantMessage(content: 'First'),
+              message: AssistantMessage(content: MessageContent.text('First')),
               finishReason: FinishReason.stop,
             ),
             ChatChoice(
               index: 1,
-              message: AssistantMessage(content: 'Second'),
+              message: AssistantMessage(content: MessageContent.text('Second')),
               finishReason: FinishReason.stop,
             ),
           ],
         );
-        expect(response.firstChoice?.message.content, 'First');
+        final content =
+            response.firstChoice!.message.content! as MessageTextContent;
+        expect(content.text, 'First');
       });
 
       test('firstChoice returns null for empty choices', () {
@@ -193,14 +200,16 @@ void main() {
       });
 
       test('text returns content from first choice', () {
-        const response = AgentCompletionResponse(
+        final response = AgentCompletionResponse(
           id: 'resp-123',
           created: 1705312800,
           model: 'model',
           choices: [
             ChatChoice(
               index: 0,
-              message: AssistantMessage(content: 'Hello world!'),
+              message: AssistantMessage(
+                content: MessageContent.text('Hello world!'),
+              ),
               finishReason: FinishReason.stop,
             ),
           ],
@@ -256,14 +265,14 @@ void main() {
 
     group('toString', () {
       test('returns descriptive string', () {
-        const response = AgentCompletionResponse(
+        final response = AgentCompletionResponse(
           id: 'resp-123',
           created: 1705312800,
           model: 'mistral-large-latest',
           choices: [
             ChatChoice(
               index: 0,
-              message: AssistantMessage(content: 'Hi'),
+              message: AssistantMessage(content: MessageContent.text('Hi')),
               finishReason: FinishReason.stop,
             ),
           ],
@@ -277,7 +286,7 @@ void main() {
 
     group('round-trip serialization', () {
       test('preserves all data through JSON round-trip', () {
-        const original = AgentCompletionResponse(
+        final original = AgentCompletionResponse(
           id: 'resp-roundtrip',
           object: 'chat.completion',
           created: 1705312800,
@@ -285,11 +294,13 @@ void main() {
           choices: [
             ChatChoice(
               index: 0,
-              message: AssistantMessage(content: 'Round-trip content'),
+              message: AssistantMessage(
+                content: MessageContent.text('Round-trip content'),
+              ),
               finishReason: FinishReason.stop,
             ),
           ],
-          usage: UsageInfo(
+          usage: const UsageInfo(
             promptTokens: 50,
             completionTokens: 100,
             totalTokens: 150,
