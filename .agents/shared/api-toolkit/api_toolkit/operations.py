@@ -847,10 +847,12 @@ def _expected_dart_type(
 
     spec_type = prop_info.get("type")
     # OpenAPI 3.1 allows type to be a list (e.g. ["integer", "null"]).
-    # Normalize to a single non-null type string for mapping lookup.
+    # A two-type list with null is a nullable scalar; 2+ non-null types is a union.
     if isinstance(spec_type, list):
         non_null = [t for t in spec_type if t != "null"]
-        spec_type = non_null[0] if len(non_null) == 1 else None
+        if len(non_null) >= 2:
+            return "__union__"
+        spec_type = non_null[0] if non_null else None
     type_mappings = config.manifest.type_mappings
     if spec_type and spec_type in type_mappings:
         # Inline objects (type: "object" without $ref) are indeterminate —

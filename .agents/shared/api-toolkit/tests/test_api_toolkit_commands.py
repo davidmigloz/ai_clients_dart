@@ -6071,6 +6071,116 @@ class ApiToolkitCommandTests(unittest.TestCase):
             self.assertIn("List<List<SomeSealedType>>", info_issues[0]["message"],
                           f"Expected full nested suggestion in: {info_issues[0]['message']}")
 
+    def test_verify_type_openapi31_list_type_nullable_scalar(self) -> None:
+        """OpenAPI 3.1 type: ['integer', 'null'] resolves to the mapped Dart type (int)."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "count": {"type": ["integer", "null"]},
+                        },
+                    },
+                },
+                manifest_types={
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("count", "int", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            # Filter to type-mismatch issues only (exclude method-coverage warnings)
+            type_issues = [i for i in issues if i.get("name") == "Example"
+                           and i["level"] in ("warning", "error")
+                           and "typed as" in i.get("message", "")]
+            self.assertEqual(type_issues, [], f"Expected no type warnings for int? field with type=['integer','null']: {type_issues}")
+
+    def test_verify_type_openapi31_list_type_union_warns_object(self) -> None:
+        """OpenAPI 3.1 type: ['string', 'integer'] (2+ non-null) is treated as a union; Object? should warn."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "value": {"type": ["string", "integer"]},
+                        },
+                    },
+                },
+                manifest_types={
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("value", "Object", True)]),
+                },
+            )
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            warnings = [i for i in issues if i.get("name") == "Example" and i["level"] == "warning"]
+            self.assertTrue(any("union" in i["message"].lower() or "sealed" in i["message"].lower() for i in warnings),
+                            f"Expected union/sealed warning for Object? with type=['string','integer']: {warnings}")
+
+    def test_verify_type_websocket_string_items_no_crash(self) -> None:
+        """Websocket array items expressed as a bare string (e.g. 'string') must not crash."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Example": {
+                        "type": "object",
+                        "properties": {
+                            "tags": {"type": "array", "items": "string"},
+                        },
+                    },
+                },
+                manifest_types={
+                    "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"},
+                },
+                dart_files={
+                    "lib/src/models/common/example.dart": self._make_dart_class("Example", [("tags", "List<String>", True)]),
+                },
+            )
+            # Must not raise; result should contain no type-mismatch issues for Example
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            errors = [i for i in issues if i.get("name") == "Example" and i["level"] == "error"]
+            self.assertEqual(errors, [], f"Expected no errors for List<String> with items='string': {errors}")
+
+    def test_verify_field_types_null_file_no_crash(self) -> None:
+        """_verify_field_types on a skip entry with schema but file=null must not crash."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            config_dir = self._setup_type_check_env(root,
+                spec_schemas={
+                    "Orphan": {
+                        "type": "object",
+                        "properties": {"id": {"type": "string"}},
+                    },
+                },
+                manifest_types={
+                    "Orphan": {"spec": "main", "kind": "skip", "dart_class": None, "file": None, "schema": "Orphan"},
+                },
+                dart_files={},
+            )
+            # Must not raise; skip entry with null file returns no issues
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+            issues = payload["results"]["implementation"]["issues"]
+            errors = [i for i in issues if i.get("name") == "Orphan" and i["level"] == "error"]
+            self.assertEqual(errors, [], f"Expected no errors for skip entry with null file: {errors}")
+
 
 if __name__ == "__main__":
     unittest.main()
