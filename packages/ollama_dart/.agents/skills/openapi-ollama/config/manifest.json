@@ -213,7 +213,7 @@
   "types": {
     "ChatMessage": {
       "spec": "main",
-      "kind": "verify",
+      "kind": "object",
       "dart_class": "ChatMessage",
       "file": "lib/src/models/chat/chat_message.dart",
       "schema": "ChatMessage",
@@ -221,7 +221,7 @@
     },
     "ChatRequest": {
       "spec": "main",
-      "kind": "verify",
+      "kind": "object",
       "dart_class": "ChatRequest",
       "file": "lib/src/models/chat/chat_request.dart",
       "schema": "ChatRequest",
@@ -229,7 +229,7 @@
     },
     "ChatResponse": {
       "spec": "main",
-      "kind": "verify",
+      "kind": "object",
       "dart_class": "ChatResponse",
       "file": "lib/src/models/chat/chat_response.dart",
       "schema": "ChatResponse",
@@ -237,7 +237,7 @@
     },
     "GenerateRequest": {
       "spec": "main",
-      "kind": "verify",
+      "kind": "object",
       "dart_class": "GenerateRequest",
       "file": "lib/src/models/completions/generate_request.dart",
       "schema": "GenerateRequest",
@@ -245,7 +245,7 @@
     },
     "GenerateResponse": {
       "spec": "main",
-      "kind": "verify",
+      "kind": "object",
       "dart_class": "GenerateResponse",
       "file": "lib/src/models/completions/generate_response.dart",
       "schema": "GenerateResponse",
@@ -253,7 +253,7 @@
     },
     "EmbedRequest": {
       "spec": "main",
-      "kind": "verify",
+      "kind": "object",
       "dart_class": "EmbedRequest",
       "file": "lib/src/models/embeddings/embed_request.dart",
       "schema": "EmbedRequest",
@@ -261,7 +261,7 @@
     },
     "EmbedResponse": {
       "spec": "main",
-      "kind": "verify",
+      "kind": "object",
       "dart_class": "EmbedResponse",
       "file": "lib/src/models/embeddings/embed_response.dart",
       "schema": "EmbedResponse",
@@ -269,7 +269,7 @@
     },
     "ToolDefinition": {
       "spec": "main",
-      "kind": "verify",
+      "kind": "object",
       "dart_class": "ToolDefinition",
       "file": "lib/src/models/tools/tool_definition.dart",
       "schema": "ToolDefinition",
@@ -277,7 +277,7 @@
     },
     "ModelSummary": {
       "spec": "main",
-      "kind": "verify",
+      "kind": "object",
       "dart_class": "ModelSummary",
       "file": "lib/src/models/models/model_summary.dart",
       "schema": "ModelSummary",
@@ -285,7 +285,7 @@
     },
     "ShowResponse": {
       "spec": "main",
-      "kind": "verify",
+      "kind": "object",
       "dart_class": "ShowResponse",
       "file": "lib/src/models/models/show_response.dart",
       "schema": "ShowResponse",
@@ -293,7 +293,7 @@
     },
     "ModelOptions": {
       "spec": "main",
-      "kind": "verify",
+      "kind": "object",
       "dart_class": "ModelOptions",
       "file": "lib/src/models/metadata/model_options.dart",
       "schema": "ModelOptions",
