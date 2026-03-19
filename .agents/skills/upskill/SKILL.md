@@ -56,8 +56,8 @@ Use the GitHub REST API with pagination to fetch all closed PRs, then filter to 
 
 ```bash
 gh api "repos/{owner}/{repo}/pulls?state=closed&per_page=100" --paginate \
-  | jq -s '[.[][] | select(.merged_at != null) | {number, title, merged_at, author: .user.login}]
-  | [.[] | select(.number > START_PR)] | sort_by(.number)'
+  | jq -s --argjson start_pr "$START_PR" '[.[][] | select(.merged_at != null) | {number, title, merged_at, author: .user.login}]
+  | [.[] | select(.number > $start_pr)] | sort_by(.number)'
 ```
 
 `--paginate` emits one JSON array per page. Pipe into `jq -s` (slurp) to collect all pages into a single outer array, then `[][]` flattens it into one list before filtering and sorting.
@@ -197,6 +197,7 @@ Apply confirmed changes by editing the files directly. Read each target file fir
 - `.agents/shared/api-toolkit/references/implementation-patterns-core.md`
 - `packages/*/.agents/skills/*/references/REVIEW_CHECKLIST.md`
 - `packages/*/.agents/skills/*/references/implementation-patterns.md`
+- `config/state.json` (state tracking — updated in Step 9)
 
 ### Must NOT edit:
 
