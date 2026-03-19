@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../assistants/tool_resources.dart';
 import '../common/copy_with_sentinel.dart';
+import '../responses/common/equality_helpers.dart';
 
 /// A thread representing a conversation with an assistant.
 ///
@@ -102,11 +103,16 @@ class Thread {
           object == other.object &&
           createdAt == other.createdAt &&
           toolResources == other.toolResources &&
-          metadata == other.metadata;
+          mapsEqual(metadata, other.metadata);
 
   @override
-  int get hashCode =>
-      Object.hash(id, object, createdAt, toolResources, metadata);
+  int get hashCode => Object.hash(
+    id,
+    object,
+    createdAt,
+    toolResources,
+    Object.hashAll(metadata.entries),
+  );
 
   @override
   String toString() =>

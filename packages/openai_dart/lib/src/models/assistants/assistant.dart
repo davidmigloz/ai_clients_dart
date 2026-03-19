@@ -206,7 +206,7 @@ class Assistant {
           instructions == other.instructions &&
           listsEqual(tools, other.tools) &&
           toolResources == other.toolResources &&
-          metadata == other.metadata &&
+          mapsEqual(metadata, other.metadata) &&
           temperature == other.temperature &&
           topP == other.topP &&
           responseFormat == other.responseFormat;
@@ -222,20 +222,24 @@ class Assistant {
     instructions,
     Object.hashAll(tools),
     toolResources,
-    metadata,
+    Object.hashAll(metadata.entries),
     temperature,
     topP,
     responseFormat,
   );
 
   @override
-  String toString() =>
-      'Assistant(id: $id, object: $object, createdAt: $createdAt, '
-      'model: $model, name: $name, description: $description, '
-      'instructions: $instructions, tools: ${tools.length} items, '
-      'toolResources: $toolResources, metadata: ${metadata.length} entries, '
-      'temperature: $temperature, topP: $topP, '
-      'responseFormat: $responseFormat)';
+  String toString() {
+    final instrPreview = instructions != null && instructions!.length > 50
+        ? '${instructions!.substring(0, 50)}...'
+        : instructions;
+    return 'Assistant(id: $id, object: $object, createdAt: $createdAt, '
+        'model: $model, name: $name, description: $description, '
+        'instructions: $instrPreview, tools: ${tools.length} items, '
+        'toolResources: $toolResources, metadata: ${metadata.length} entries, '
+        'temperature: $temperature, topP: $topP, '
+        'responseFormat: $responseFormat)';
+  }
 }
 
 /// A list of assistants.

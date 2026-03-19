@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../responses/common/equality_helpers.dart';
 
 /// A tool that an assistant can use.
 ///
@@ -259,11 +260,12 @@ class FunctionTool implements AssistantTool {
           runtimeType == other.runtimeType &&
           name == other.name &&
           description == other.description &&
-          parameters == other.parameters &&
+          mapsDeepEqual(parameters, other.parameters) &&
           strict == other.strict;
 
   @override
-  int get hashCode => Object.hash(name, description, parameters, strict);
+  int get hashCode =>
+      Object.hash(name, description, mapDeepHashCode(parameters), strict);
 
   @override
   String toString() => 'FunctionTool(name: $name)';

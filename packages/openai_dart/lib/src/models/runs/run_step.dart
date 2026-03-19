@@ -470,7 +470,12 @@ class CodeInterpreterStepCall implements StepToolCall {
   int get hashCode => Object.hash(id, input, Object.hashAll(outputs));
 
   @override
-  String toString() => 'CodeInterpreterStepCall(id: $id, input: $input)';
+  String toString() {
+    final inputPreview = input.length > 50
+        ? '${input.substring(0, 50)}...'
+        : input;
+    return 'CodeInterpreterStepCall(id: $id, input: $inputPreview)';
+  }
 }
 
 /// A code interpreter output.
