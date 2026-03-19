@@ -15,6 +15,7 @@ This skill automates the feedback loop from PR reviews to skill files. It extrac
 
 Parse `$ARGUMENTS` for options:
 - **`--plan`** — Extract and analyze findings without editing any files. Safe to run anytime.
+- **`--dry-run`** — Run the full apply workflow (extraction, consolidation, validation, proposed updates) but stop before actually editing files. Shows exactly what would change without changing anything.
 - **`--from N`** — Start from PR number N instead of the config's `last_checked_pr`.
 
 ---
@@ -94,7 +95,7 @@ Pipe into `jq -s` to merge all pages into one array so parent-comment lookup via
 
 ### Early exit
 
-- **0 findings across all PRs** → update `config/state.json` to advance the cursor to the highest PR number processed, report "No valid findings in N PRs", and stop.
+- **0 findings across all PRs** → update `config/state.json` to advance the cursor to the highest PR number processed (unless in `--plan` or `--dry-run` mode), report "No valid findings in N PRs", and stop.
 
 ---
 
@@ -109,6 +110,7 @@ Take the raw findings and consolidate them into actionable patterns:
    - For **core-scoped** patterns: read section headings from `REVIEW_CHECKLIST-core.md` and `implementation-patterns-core.md`.
    - For **package-specific** patterns: also read the relevant per-package files (e.g., `packages/openai_dart/.agents/skills/openapi-openai/references/REVIEW_CHECKLIST.md`). Each package's files may have different section structures — adapt accordingly.
    - Map each pattern to the most relevant existing section. If no existing section fits, propose a new section name.
+   - **Fallback**: If a target file has no section headings (e.g., a new or flat file), treat the entire file as a single "General" section and place patterns there.
 5. **Target**: Determine which file each pattern belongs in:
    - Short checklist item → `REVIEW_CHECKLIST-core.md` (or per-package `REVIEW_CHECKLIST.md`)
    - Detailed pattern with code examples → `implementation-patterns-core.md` (or per-package `implementation-patterns.md`)
@@ -167,7 +169,7 @@ For each pattern classified as "Enhance existing" or "New addition", show the ex
 ```
 ### Update 1: {pattern name}
 **File**: .agents/shared/api-toolkit/references/REVIEW_CHECKLIST-core.md
-**Section**: Model Classes
+**Section**: {section name from file, or "General" if no sections exist}
 **Action**: Add new checklist item after existing item about X
 
 **Text to add**:
@@ -175,6 +177,8 @@ For each pattern classified as "Enhance existing" or "New addition", show the ex
 
 ---
 ```
+
+In **`--dry-run` mode**: display the proposed updates and stop here. Do not edit any files or update config.
 
 Wait for user confirmation before proceeding. The user may:
 - **Approve all** → proceed to Step 8
@@ -185,7 +189,7 @@ Wait for user confirmation before proceeding. The user may:
 
 ## Step 8: Update Skill Files
 
-Apply confirmed changes using the Edit tool. Read each target file first, then apply precise edits.
+Apply confirmed changes by editing the files directly. Read each target file first, then apply precise edits.
 
 ### Strict file scope — only these files may be edited:
 
@@ -203,7 +207,7 @@ Apply confirmed changes using the Edit tool. Read each target file first, then a
 
 ### Table of contents
 
-If `implementation-patterns-core.md` gains a new section, update the table of contents line at the top of the file to include a link to the new section.
+If `implementation-patterns-core.md` gains a new section and the file has a table of contents, update it to include a link to the new section.
 
 ---
 
@@ -247,11 +251,12 @@ Suggest using `/create-pr` to push the changes.
 ## Edge Cases
 
 1. **0 new PRs** → report "No new merged PRs since #{N}", stop.
-2. **0 findings** → update `config/state.json` to advance cursor, report "No valid findings", stop.
-3. **All patterns already documented** → report, update config, stop.
+2. **0 findings** → update `config/state.json` to advance cursor (unless in `--plan` or `--dry-run` mode), report "No valid findings", stop.
+3. **All patterns already documented** → report, update config (unless in `--plan` or `--dry-run` mode), stop.
 4. **No config file** → first run, default `--from 0`, warn user.
 5. **Rate limit < 100** → warn and stop before making API calls.
 6. **`--plan` mode** → run through Step 6, display results, skip all edits (including config update).
+6b. **`--dry-run` mode** → run through Step 7 (show proposed updates), skip all file edits and config updates.
 7. **PR has 0 review comments** → skip that PR, continue to next.
 8. **`**Not applicable.**` or other non-Valid replies** → filter to `**Valid` prefix only.
 9. **> 20 PRs to process** → spawn single subagent for extraction to avoid context overflow.
