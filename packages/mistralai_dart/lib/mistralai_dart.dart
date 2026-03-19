@@ -20,7 +20,7 @@
 ///       ],
 ///     ),
 ///   );
-///   print(response.choices.first.message.content);
+///   print(response.text);
 ///
 ///   client.close();
 /// }

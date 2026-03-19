@@ -32,7 +32,7 @@ void main() async {
       ),
     );
 
-    print('Response: ${response.choices.first.message.content}');
+    print('Response: ${response.text}');
 
     // Multiple images in one request
     print('\n=== Multiple Images ===');
@@ -55,7 +55,7 @@ void main() async {
       ),
     );
 
-    print('Response: ${multiImageResponse.choices.first.message.content}');
+    print('Response: ${multiImageResponse.text}');
   } finally {
     client.close();
   }

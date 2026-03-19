@@ -23,7 +23,7 @@ import 'streaming_resource.dart';
 ///     ],
 ///   ),
 /// );
-/// print(response.choices.first.message.content);
+/// print(response.text);
 /// ```
 class ChatResource extends ResourceBase with StreamingResource {
   /// Creates a [ChatResource].

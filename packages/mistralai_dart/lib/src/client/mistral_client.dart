@@ -65,7 +65,7 @@ import 'retry_wrapper.dart';
 ///     ],
 ///   ),
 /// );
-/// print(response.choices.first.message.content);
+/// print(response.text);
 ///
 /// // Streaming chat
 /// await for (final chunk in client.chat.createStream(
