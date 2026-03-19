@@ -197,14 +197,14 @@ Apply confirmed changes by editing the files directly. Read each target file fir
 - `.agents/shared/api-toolkit/references/implementation-patterns-core.md`
 - `packages/*/.agents/skills/*/references/REVIEW_CHECKLIST.md`
 - `packages/*/.agents/skills/*/references/implementation-patterns.md`
-- `config/state.json` (state tracking — updated in Step 9)
+- `.agents/skills/upskill/config/state.json` (state tracking — updated in Step 9)
 
 ### Must NOT edit:
 
 - Any Dart source code (`*.dart`)
 - Any `SKILL.md` file
 - `CLAUDE.md`
-- Any file outside `.agents/`
+- Any file not listed in the "Strict file scope" section above
 
 ### Table of contents
 
@@ -257,7 +257,7 @@ Suggest using `/create-pr` to push the changes.
 4. **No config file** → first run, default `--from 0`, warn user.
 5. **Rate limit < 100** → warn and stop before making API calls.
 6. **`--plan` mode** → run through Step 6, display results, skip all edits (including config update).
-6b. **`--dry-run` mode** → run through Step 7 (show proposed updates), skip all file edits and config updates.
+   - **`--dry-run` mode** → run through Step 7 (show proposed updates), skip all file edits and config updates.
 7. **PR has 0 review comments** → skip that PR, continue to next.
 8. **`**Not applicable.**` or other non-Valid replies** → filter to `**Valid` prefix only.
 9. **> 20 PRs to process** → spawn single subagent for extraction to avoid context overflow.
