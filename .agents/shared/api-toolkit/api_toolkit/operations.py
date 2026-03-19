@@ -1840,10 +1840,10 @@ def _docs_coverage_summary(config: ToolkitConfig, readme: str = "") -> dict[str,
         # Try snake_case, bare name without _resource suffix, and space-separated form.
         # Use word-boundary matching to avoid false positives (e.g. "beta" matching
         # "ChatKit API (Beta)" when the actual beta resource is undocumented).
-        base = name.replace("_resource", "").replace("-", "_").strip("_")
+        base = name.replace("_resource", "").replace("-", "_").strip("_").lower()
         variants = {name.lower(), snake_case(name), base, base.replace("_", " ")}
         return any(
-            re.search(rf"\b{re.escape(v)}\b", readme_lower)
+            re.search(rf"(?<!\()\b{re.escape(v)}\b(?!\))", readme_lower)
             for v in variants if v
         )
 
