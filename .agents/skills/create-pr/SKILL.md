@@ -207,6 +207,9 @@ The PR description serves two audiences: **package consumers** who discover chan
 
 - [ ] Unit tests pass for affected packages
 - [ ] New tests added for new functionality
+- [ ] Sealed class/enum changes include variant, round-trip, and error tests
+- [ ] `fromJson`/`toJson` round-trip serialization verified
+- [ ] `==`/`hashCode` contract verified (same fields in both)
 ```
 
 ### Writing guidance
@@ -218,6 +221,8 @@ The PR description serves two audiences: **package consumers** who discover chan
 **`## Breaking Changes`** — Only present when commits include `!` or `BREAKING CHANGE:` footer. The release skill uses this section as a reliable signal for semver verification — it's more precise than heuristic phrase matching in the general body. Always include migration steps with before/after code.
 
 **`## Test Plan`** — Checklist of what was tested or needs testing. Helps reviewers know what to verify. Check the boxes (`[x]`) for items you have already verified (e.g., tests you ran before creating the PR). Leave unchecked (`[ ]`) only items that still need verification.
+
+**Documentation accuracy** — Before finalizing the PR, verify that README examples, doc comment method names, and field lists still match the implementation. Renames and field additions are common sources of stale documentation.
 
 ---
 

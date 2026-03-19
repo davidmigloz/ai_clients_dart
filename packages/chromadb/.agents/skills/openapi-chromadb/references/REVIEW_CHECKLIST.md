@@ -16,3 +16,7 @@ dart analyze --fatal-infos
 dart format --set-exit-if-changed .
 dart test test/unit/
 ```
+
+## Implementation Review
+
+Read and apply the [core review checklist](../../../../../../.agents/shared/api-toolkit/references/REVIEW_CHECKLIST-core.md) — it contains the full implementation review checklist applicable to all packages.
