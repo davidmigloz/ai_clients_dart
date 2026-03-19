@@ -38,34 +38,21 @@
   "excluded_resources": [
     "assistants",
     "base_resource",
-    "batches",
     "beta",
-    "chatkit",
-    "completions",
-    "containers",
-    "conversations",
-    "evals",
-    "files",
-    "fineTuning",
     "inputTokens",
     "messages",
-    "models",
-    "moderations",
-    "realtime",
-    "realtimeSessions",
     "runs",
-    "skills",
     "streaming",
     "threads",
-    "uploads",
-    "vectorStores",
-    "videos"
+    "vectorStores"
   ],
   "resource_to_example": {
     "chat": "chat_example",
     "embeddings": "embeddings_example",
     "audio": "audio_example",
-    "images": "images_example"
+    "images": "images_example",
+    "moderations": "moderation_example",
+    "realtimeSessions": "realtime"
   },
   "excluded_from_examples": [],
   "drift_patterns": [

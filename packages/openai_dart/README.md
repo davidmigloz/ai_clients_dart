@@ -611,6 +611,283 @@ client.close();
 
 </details>
 
+### Completions (Legacy)
+
+<details>
+<summary><b>Completions Example</b></summary>
+
+```dart
+final completion = await client.completions.create(
+  CompletionRequest(
+    model: 'gpt-3.5-turbo-instruct',
+    prompt: CompletionPrompt.text('Say this is a test'),
+    maxTokens: 10,
+  ),
+);
+print(completion.text);
+```
+
+</details>
+
+### Files
+
+<details>
+<summary><b>Files Example</b></summary>
+
+```dart
+final file = await client.files.upload(
+  bytes: fileBytes,
+  filename: 'training.jsonl',
+  purpose: FilePurpose.fineTune,
+);
+
+final files = await client.files.list();
+final content = await client.files.retrieveContent(file.id);
+```
+
+</details>
+
+### Uploads
+
+<details>
+<summary><b>Uploads Example</b></summary>
+
+```dart
+// Create an upload for a large file
+final upload = await client.uploads.create(
+  CreateUploadRequest(
+    filename: 'large-file.jsonl',
+    purpose: FilePurpose.fineTune,
+    bytes: fileSize,
+    mimeType: 'application/jsonl',
+  ),
+);
+
+// Add parts and complete
+final part = await client.uploads.addPart(upload.id, data: chunkBytes);
+final completed = await client.uploads.complete(
+  upload.id,
+  partIds: [part.id],
+);
+```
+
+</details>
+
+### Batches
+
+<details>
+<summary><b>Batches Example</b></summary>
+
+```dart
+final batch = await client.batches.create(
+  CreateBatchRequest(
+    inputFileId: 'file-abc123',
+    endpoint: BatchEndpoint.chatCompletions,
+    completionWindow: CompletionWindow.hours24,
+  ),
+);
+
+final status = await client.batches.retrieve(batch.id);
+print('Status: ${status.status}');
+```
+
+</details>
+
+### Models
+
+<details>
+<summary><b>Models Example</b></summary>
+
+```dart
+final models = await client.models.list();
+for (final model in models.data) {
+  print(model.id);
+}
+
+final gpt4o = await client.models.retrieve('gpt-4o');
+```
+
+</details>
+
+### Moderations
+
+<details>
+<summary><b>Moderations Example</b></summary>
+
+```dart
+final result = await client.moderations.create(
+  ModerationRequest(
+    input: ModerationInput.text('Check this text'),
+  ),
+);
+print('Flagged: ${result.results.first.flagged}');
+```
+
+</details>
+
+### Fine-tuning
+
+<details>
+<summary><b>Fine-tuning Example</b></summary>
+
+```dart
+final job = await client.fineTuning.jobs.create(
+  CreateFineTuningJobRequest(
+    model: 'gpt-4o-mini-2024-07-18',
+    trainingFile: 'file-abc123',
+  ),
+);
+
+final status = await client.fineTuning.jobs.retrieve(job.id);
+print('Fine-tuned model: ${status.fineTunedModel}');
+```
+
+</details>
+
+### Evals
+
+<details>
+<summary><b>Evals Example</b></summary>
+
+```dart
+final eval = await client.evals.create(
+  CreateEvalRequest(
+    name: 'My Evaluation',
+    dataSourceConfig: EvalDataSourceConfig.custom(
+      itemSchema: {
+        'type': 'object',
+        'properties': {
+          'prompt': {'type': 'string'},
+          'expected': {'type': 'string'},
+        },
+      },
+    ),
+    testingCriteria: [
+      EvalGrader.stringCheck(
+        name: 'matches_expected',
+        input: '{{sample.output_text}}',
+        operation: StringCheckOperation.ilike,
+        reference: '%{{item.expected}}%',
+      ),
+    ],
+  ),
+);
+
+final run = await client.evals.runs.create(
+  eval.id,
+  CreateEvalRunRequest(
+    dataSource: EvalRunDataSource.jsonlContent([
+      {'prompt': 'Say hello', 'expected': 'hello'},
+    ]),
+  ),
+);
+```
+
+</details>
+
+### Videos (Sora)
+
+<details>
+<summary><b>Videos Example</b></summary>
+
+```dart
+final video = await client.videos.create(
+  CreateVideoRequest(
+    prompt: 'A cat playing piano in a jazz club',
+    model: 'sora-2',
+    size: VideoSize.size1280x720,
+    seconds: VideoSeconds.s8,
+  ),
+);
+
+final status = await client.videos.retrieve(video.id);
+if (status.isCompleted) {
+  final content = await client.videos.retrieveContent(video.id);
+}
+```
+
+</details>
+
+### Conversations
+
+<details>
+<summary><b>Conversations Example</b></summary>
+
+```dart
+final conversation = await client.conversations.create(
+  ConversationCreateRequest(
+    items: [MessageItem.userText('Hello!')],
+  ),
+);
+
+final items = await client.conversations.items.list(conversation.id);
+await client.conversations.delete(conversation.id);
+```
+
+</details>
+
+### Containers
+
+<details>
+<summary><b>Containers Example</b></summary>
+
+```dart
+final container = await client.containers.create(
+  CreateContainerRequest(name: 'my-container'),
+);
+
+final files = await client.containers.files.list(container.id);
+await client.containers.delete(container.id);
+```
+
+</details>
+
+### ChatKit (Beta)
+
+<details>
+<summary><b>ChatKit Example</b></summary>
+
+```dart
+final session = await client.chatkit.sessions.create(
+  CreateChatSessionRequest(
+    workflow: WorkflowParam(id: 'workflow-abc'),
+    user: 'user-123',
+  ),
+);
+
+final threads = await client.chatkit.threads.list();
+```
+
+</details>
+
+### Skills
+
+<details>
+<summary><b>Skills Example</b></summary>
+
+```dart
+final skills = await client.skills.list();
+final skill = await client.skills.retrieve('skill-abc123');
+final versions = await client.skills.versions.list('skill-abc123');
+```
+
+</details>
+
+### Input Tokens
+
+<details>
+<summary><b>Input Tokens Example</b></summary>
+
+```dart
+final tokenCount = await client.responses.inputTokens.count(
+  model: 'gpt-4o',
+  input: ResponseInput.text('Hello, how are you?'),
+);
+print('Input tokens: ${tokenCount.inputTokens}');
+```
+
+</details>
+
 ## Extension Methods
 
 The package provides convenient extension methods for common operations:
@@ -678,6 +955,10 @@ See the [example/](example/) directory for complete examples:
 | [`web_search_example.dart`](example/web_search_example.dart) | Web search with Responses API |
 | [`realtime_example.dart`](example/realtime_example.dart) | Realtime API (WebSocket and WebRTC) |
 | [`fine_tuning_example.dart`](example/fine_tuning_example.dart) | Fine-tuning job management |
+| [`completions_example.dart`](example/completions_example.dart) | Legacy completions API |
+| [`uploads_example.dart`](example/uploads_example.dart) | Large file multipart uploads |
+| [`skills_example.dart`](example/skills_example.dart) | Skills management |
+| [`input_tokens_example.dart`](example/input_tokens_example.dart) | Input token counting |
 
 ## API Coverage
 
