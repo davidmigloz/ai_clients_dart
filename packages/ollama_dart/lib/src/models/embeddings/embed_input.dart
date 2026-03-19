@@ -81,7 +81,9 @@ class EmbedInputList extends EmbedInput {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    if (other is! EmbedInputList) return false;
+    if (other is! EmbedInputList || runtimeType != other.runtimeType) {
+      return false;
+    }
     if (values.length != other.values.length) return false;
     for (var i = 0; i < values.length; i++) {
       if (values[i] != other.values[i]) return false;

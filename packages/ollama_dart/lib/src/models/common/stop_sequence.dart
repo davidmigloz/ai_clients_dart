@@ -50,7 +50,7 @@ class StopString extends StopSequence {
   const StopString(this.value);
 
   @override
-  Object toJson() => value;
+  Object toJson() => [value];
 
   @override
   bool operator ==(Object other) =>
@@ -81,7 +81,7 @@ class StopList extends StopSequence {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    if (other is! StopList) return false;
+    if (other is! StopList || runtimeType != other.runtimeType) return false;
     if (values.length != other.values.length) return false;
     for (var i = 0; i < values.length; i++) {
       if (values[i] != other.values[i]) return false;
