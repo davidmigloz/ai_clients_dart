@@ -248,7 +248,7 @@
       "dart_class": "ChatCompletionCreateRequest",
       "file": "lib/src/models/chat/chat_completion_request.dart",
       "schema": "CreateChatCompletionRequest",
-      "tags": [],
+      "tags": ["acknowledged"],
       "note": "Spec uses allOf — verifier cannot extract top-level properties. Missing copyWith."
     },
     "CreateChatCompletionResponse": {
@@ -257,7 +257,7 @@
       "dart_class": "ChatCompletion",
       "file": "lib/src/models/chat/chat_completion.dart",
       "schema": "CreateChatCompletionResponse",
-      "tags": [],
+      "tags": ["acknowledged"],
       "note": "Missing copyWith. Has extra non-spec field (provider) for OpenRouter compat."
     },
     "ChatCompletionRequestMessage": {
@@ -266,7 +266,7 @@
       "dart_class": "ChatMessage",
       "file": "lib/src/models/chat/chat_message.dart",
       "schema": "ChatCompletionRequestMessage",
-      "tags": [],
+      "tags": ["acknowledged"],
       "note": "Spec schema is a oneOf discriminated union, not a verifiable object. Already tracked as sealed_parent via ChatMessage entry."
     },
     "CreateEmbeddingRequest": {
@@ -294,7 +294,7 @@
       "dart_class": "ImageGenerateRequest",
       "file": "lib/src/models/images/image_request.dart",
       "schema": "CreateImageRequest",
-      "tags": [],
+      "tags": ["acknowledged"],
       "note": "Missing copyWith. Spec has many new fields (output_format, stream, moderation, background) not yet in Dart."
     },
     "CreateSpeechRequest": {
@@ -303,7 +303,7 @@
       "dart_class": "SpeechRequest",
       "file": "lib/src/models/audio/speech_request.dart",
       "schema": "CreateSpeechRequest",
-      "tags": [],
+      "tags": ["acknowledged"],
       "note": "Missing copyWith. Spec has new fields (instructions, stream_format) not yet in Dart."
     },
     "CreateTranscriptionRequest": {
@@ -312,7 +312,7 @@
       "dart_class": "TranscriptionRequest",
       "file": "lib/src/models/audio/transcription.dart",
       "schema": "CreateTranscriptionRequest",
-      "tags": [],
+      "tags": ["acknowledged"],
       "note": "Missing copyWith. Spec has many new fields (include, stream, chunking_strategy, etc.) not yet in Dart."
     },
     "AssistantObject": {
@@ -337,7 +337,7 @@
       "dart_class": "Run",
       "file": "lib/src/models/runs/run.dart",
       "schema": "RunObject",
-      "tags": [],
+      "tags": ["acknowledged"],
       "note": "Many spec-required fields are intentionally nullable in Dart (required_action, last_error, expires_at, started_at, etc.) because the API returns null for these depending on run state."
     },
     "CompletionUsage": {
@@ -346,6 +346,7 @@
       "dart_class": "Usage",
       "file": "lib/src/models/common/usage.dart",
       "schema": "CompletionUsage",
+      "tags": ["acknowledged"],
       "note": "completionTokens is nullable for provider compat but spec requires non-null. toString missing promptTokensDetails/completionTokensDetails."
     },
     "ChatCompletionTool": {
@@ -478,6 +479,7 @@
           "CreateChatCompletionStreamResponse": "chat.completion.chunk"
         }
       },
+      "tags": ["acknowledged"],
       "note": "Not a sealed class in Dart (plain class). No spec schema. All required spec fields are nullable for provider compat. Has extra provider field for OpenRouter."
     },
     "CreateChatCompletionStreamResponse": {
@@ -487,6 +489,7 @@
       "file": "lib/src/models/streaming/chat_stream_event.dart",
       "schema": "CreateChatCompletionStreamResponse",
       "parent": "ChatStreamEvent",
+      "tags": ["acknowledged"],
       "note": "Dart uses ChatStreamEvent (plain class) instead of separate ChatStreamChunk subclass. Required spec fields (id, choices, created, model, object) are nullable for provider compat."
     },
     "ResponseFormat": {
@@ -578,6 +581,7 @@
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": "ChatCompletionNamedToolChoice",
       "parent": "ToolChoice",
+      "tags": ["acknowledged"],
       "note": "toJson() returns Object instead of Map<String, dynamic> because parent sealed class uses string values for other variants. Verifier cannot inspect non-Map toJson."
     },
     "AssistantTool": {

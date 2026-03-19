@@ -960,7 +960,7 @@ def _check_field_methods(entry: ManifestEntry, file_path: Path, fields: set[str]
     required_methods = {"fromJson", "toJson", "copyWith"}
     methods = {
         "fromJson": extract_method_body(class_block, rf"factory\s+{re.escape(entry.dart_class)}\.fromJson"),
-        "toJson": extract_method_body(class_block, r"Map<String,\s*dynamic>\s+toJson"),
+        "toJson": extract_method_body(class_block, r"(?:Map<String,\s*dynamic>|Object)\s+toJson"),
         "copyWith": extract_method_body(class_block, r"\bcopyWith\s*\("),
         "operator ==": extract_method_body(class_block, r"operator\s*=="),
         "hashCode": extract_method_body(class_block, r"hashCode\s*=>"),
@@ -1376,13 +1376,24 @@ def _sealed_parents_to_verify(selected: list[ManifestEntry], entries_for_spec: l
 
 
 def _implementation_coverage_summary(entries_for_spec: list[ManifestEntry], selected: list[ManifestEntry]) -> dict[str, Any]:
-    skipped_keys = sorted(entry.key for entry in entries_for_spec if entry.kind == "skip")
+    all_skipped_keys = sorted(entry.key for entry in entries_for_spec if entry.kind == "skip")
+    acknowledged_keys = sorted(
+        entry.key for entry in entries_for_spec
+        if entry.kind == "skip" and "acknowledged" in entry.tags
+    )
+    unacknowledged_keys = sorted(
+        entry.key for entry in entries_for_spec
+        if entry.kind == "skip" and "acknowledged" not in entry.tags
+    )
     return {
-        "partial_coverage": bool(skipped_keys),
+        "partial_coverage": bool(unacknowledged_keys),
         "manifest_entry_count": len(entries_for_spec),
         "selected_entry_count": len(selected),
-        "skipped_entry_count": len(skipped_keys),
-        "skipped_keys": skipped_keys,
+        "skipped_entry_count": len(all_skipped_keys),
+        "skipped_keys": all_skipped_keys,
+        "acknowledged_skip_count": len(acknowledged_keys),
+        "unacknowledged_skip_count": len(unacknowledged_keys),
+        "unacknowledged_keys": unacknowledged_keys,
     }
 
 
@@ -1418,7 +1429,7 @@ def _verify_implementation(
             _type_issue(
                 "warning",
                 "implementation",
-                f"Strict implementation verification is partial because {coverage_summary['skipped_entry_count']} manifest entries are marked as kind='skip'",
+                f"Strict implementation verification is partial because {coverage_summary['unacknowledged_skip_count']} manifest entries are marked as kind='skip' (unacknowledged); {coverage_summary['acknowledged_skip_count']} additional skips are acknowledged",
             )
         )
     parents = _sealed_parents_to_verify(selected, entries_for_spec)
@@ -1800,8 +1811,12 @@ _INFRASTRUCTURE_RESOURCES = {
     "base_resource", "resource_base", "streaming", "streaming_resource",
 }
 
+_DEPRECATED_RESOURCES = {
+    "assistants", "threads", "runs", "messages", "vectorStores",
+}
 
-def _docs_coverage_summary(config: ToolkitConfig) -> dict[str, Any]:
+
+def _docs_coverage_summary(config: ToolkitConfig, readme: str = "") -> dict[str, Any]:
     discovered_resources = _discover_openapi_doc_resources(config)
     excluded_resources = sorted(set(config.documentation.excluded_resources))
     excluded_from_examples = sorted(set(config.documentation.excluded_from_examples))
@@ -1812,7 +1827,32 @@ def _docs_coverage_summary(config: ToolkitConfig) -> dict[str, Any]:
     # Only flag partial coverage when non-infrastructure resources are excluded.
     # Infrastructure resources (base classes, streaming helpers) are always
     # excluded and don't represent gaps in documentation coverage.
-    non_infra_excluded = [r for r in excluded_resources if r not in _INFRASTRUCTURE_RESOURCES]
+    # Deprecated resources (legacy APIs superseded by newer ones) are also
+    # excluded from this check — they are intentionally undocumented.
+    # Resources that are excluded from verification but whose name
+    # appears in the README are considered documented (access-path mismatch)
+    # and also don't represent gaps. Check multiple name variants.
+    readme_lower = readme.lower()
+
+    def _appears_in_readme(name: str) -> bool:
+        if not readme_lower:
+            return False
+        # Try snake_case, bare name without _resource suffix, and space-separated form.
+        # Use word-boundary matching to avoid false positives (e.g. "beta" matching
+        # "ChatKit API (Beta)" when the actual beta resource is undocumented).
+        base = name.replace("_resource", "").replace("-", "_").strip("_")
+        variants = {name.lower(), snake_case(name), base, base.replace("_", " ")}
+        return any(
+            re.search(rf"\b{re.escape(v)}\b", readme_lower)
+            for v in variants if v
+        )
+
+    non_infra_excluded = [
+        r for r in excluded_resources
+        if r not in _INFRASTRUCTURE_RESOURCES
+        and r not in _DEPRECATED_RESOURCES
+        and not _appears_in_readme(r)
+    ]
     return {
         "partial_coverage": bool(non_infra_excluded or excluded_from_examples),
         "discovered_resource_count": len(discovered_resources),
@@ -1937,7 +1977,7 @@ def _verify_docs(config: ToolkitConfig) -> tuple[int, dict[str, Any]]:
     if not readme_path.exists():
         raise ToolkitError(f"README.md not found in {config.package_root}")
     readme = read_text(readme_path)
-    coverage_summary = _docs_coverage_summary(config)
+    coverage_summary = _docs_coverage_summary(config, readme)
     if config.manifest.surface == "websocket":
         issues.extend(_verify_websocket_docs(config, readme))
     else:

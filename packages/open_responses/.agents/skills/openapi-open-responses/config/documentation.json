@@ -35,8 +35,6 @@
   "resource_to_example": {
     "responses": "createResponse"
   },
-  "excluded_from_examples": [
-    "responses"
-  ],
+  "excluded_from_examples": [],
   "drift_patterns": []
 }

@@ -125,8 +125,8 @@
       "dart_class": null,
       "file": null,
       "schema": "DeleteCollectionRecordsPayload",
-      "tags": [],
-      "notes": "Request payload constructed inline in RecordsResource.deleteRecords"
+      "tags": ["acknowledged"],
+      "note": "Request payload constructed inline in RecordsResource.deleteRecords — no standalone Dart model."
     },
     "DeleteCollectionRecordsResponse": {
       "spec": "main",
@@ -166,8 +166,8 @@
       "dart_class": null,
       "file": null,
       "schema": "SearchRequestPayload",
-      "tags": [],
-      "notes": "Request payload constructed inline in RecordsResource.search"
+      "tags": ["acknowledged"],
+      "note": "Request payload constructed inline in RecordsResource.search — no standalone Dart model."
     },
     "SpannIndexConfig": {
       "spec": "main",

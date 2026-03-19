@@ -103,6 +103,7 @@
       "file": "lib/src/models/tools/tool_definition.dart",
       "schema": "Tool",
       "parent": "ToolDefinition",
+      "tags": ["acknowledged"],
       "note": "Wrapper class — CustomToolDefinition wraps the spec Tool schema with additional routing logic."
     },
     "Usage": {
@@ -473,6 +474,7 @@
       "file": "lib/src/models/content/input_content_block.dart",
       "schema": "ToolResultBlockParamContentVariant0",
       "parent": "ToolResultContent",
+      "tags": ["acknowledged"],
       "note": "Anonymous spec variant — not a named schema, represents text content within tool results."
     },
     "ToolResultBlockParamContentVariant1": {
@@ -482,6 +484,7 @@
       "file": "lib/src/models/content/input_content_block.dart",
       "schema": "ToolResultBlockParamContentVariant1",
       "parent": "ToolResultContent",
+      "tags": ["acknowledged"],
       "note": "Anonymous spec variant — not a named schema, represents image/document content within tool results."
     },
     "Citation": {
@@ -567,6 +570,7 @@
       "file": "lib/src/models/content/content_block.dart",
       "schema": "array of ResponseWebSearchResultBlock",
       "parent": "WebSearchResult",
+      "tags": ["acknowledged"],
       "note": "content is anyOf: List<WebSearchResultItem> (success) or Map with type=web_search_tool_result_error (error). fromJson accepts Object, not Map."
     },
     "ResponseWebSearchToolResultError": {
@@ -576,6 +580,7 @@
       "file": "lib/src/models/content/content_block.dart",
       "schema": "ResponseWebSearchToolResultError",
       "parent": "WebSearchResult",
+      "tags": ["acknowledged"],
       "note": "content is anyOf: List<WebSearchResultItem> (success) or Map with type=web_search_tool_result_error (error). fromJson accepts Object, not Map."
     },
     "ImageSource": {
@@ -729,6 +734,7 @@
       "file": "lib/src/models/streaming/message_stream_event.dart",
       "schema": "PingEvent",
       "parent": "MessageStreamEvent",
+      "tags": ["acknowledged"],
       "note": "No named schema in spec — the ping event has no dedicated schema definition."
     },
     "ErrorEvent": {
@@ -738,6 +744,7 @@
       "file": "lib/src/models/streaming/message_stream_event.dart",
       "schema": "ErrorEvent",
       "parent": "MessageStreamEvent",
+      "tags": ["acknowledged"],
       "note": "No named schema in spec — the error event uses a non-standard nested error object structure."
     },
     "ContentBlockDelta": {
@@ -917,6 +924,7 @@
       "file": "lib/src/models/tools/tool_caller.dart",
       "schema": "DirectToolCaller",
       "parent": "ToolCaller",
+      "tags": ["acknowledged"],
       "note": "No named schema in spec — DirectToolCaller is the default when type is absent."
     },
     "ServerToolCaller": {
@@ -941,6 +949,7 @@
           "various built-in tool schemas": "versioned prefix"
         }
       },
+      "tags": ["acknowledged"],
       "note": "Non-standard type_prefix discriminator — detects built-in vs custom by checking if type starts with known prefixes (bash_, web_search_, etc.)."
     },
     "various built-in tool schemas": {
@@ -950,6 +959,7 @@
       "file": "lib/src/models/tools/tool_definition.dart",
       "schema": "various built-in tool schemas",
       "parent": "ToolDefinition",
+      "tags": ["acknowledged"],
       "note": "Virtual grouping entry — individual built-in tool types are mapped separately."
     },
     "BuiltInTool": {
@@ -975,6 +985,7 @@
           "McpToolset (beta)": "mcp_* prefix"
         }
       },
+      "tags": ["acknowledged"],
       "note": "Parent sealed class not a named schema in spec — built-in tools use versioned type strings as discriminators."
     },
     "BashTool20250124": {

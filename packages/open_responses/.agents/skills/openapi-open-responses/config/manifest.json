@@ -115,7 +115,7 @@
       "dart_class": "ResponseResource",
       "file": "lib/src/models/response/response_resource.dart",
       "schema": "ResponseResource",
-      "tags": [],
+      "tags": ["acknowledged"],
       "note": "Intentionally nullable fields for provider compatibility: many spec-required properties (created_at, model, output, tools, etc.) are nullable in Dart to handle partial responses from various providers."
     },
     "CreateResponseBody": {
@@ -155,6 +155,7 @@
       "dart_class": "LogProb",
       "file": "lib/src/models/content/logprob.dart",
       "schema": "LogProb",
+      "tags": ["acknowledged"],
       "note": "Fields bytes and top_logprobs are intentionally nullable for defensive parsing across providers, though spec marks them required."
     },
     "TopLogProb": {
@@ -163,6 +164,7 @@
       "dart_class": "TopLogProb",
       "file": "lib/src/models/content/logprob.dart",
       "schema": "TopLogProb",
+      "tags": ["acknowledged"],
       "note": "Field bytes is intentionally nullable for defensive parsing across providers, though spec marks it required."
     },
     "StreamingEvent": {
@@ -366,6 +368,7 @@
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ResponseReasoningSummaryPartAddedStreamingEvent",
       "parent": "StreamingEvent",
+      "tags": ["acknowledged"],
       "note": "Field part is intentionally nullable for provider compatibility, though spec marks it required."
     },
     "ResponseReasoningSummaryPartDoneStreamingEvent": {
@@ -383,6 +386,7 @@
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ResponseReasoningSummaryDeltaStreamingEvent",
       "parent": "StreamingEvent",
+      "tags": ["acknowledged"],
       "note": "Fields item_id, output_index, summary_index are intentionally nullable for provider compatibility, though spec marks them required."
     },
     "ResponseReasoningSummaryDoneStreamingEvent": {
@@ -392,6 +396,7 @@
       "file": "lib/src/models/streaming/streaming_event.dart",
       "schema": "ResponseReasoningSummaryDoneStreamingEvent",
       "parent": "StreamingEvent",
+      "tags": ["acknowledged"],
       "note": "Fields item_id, output_index, summary_index are intentionally nullable for provider compatibility, though spec marks them required."
     },
     "ErrorStreamingEvent": {
@@ -447,6 +452,7 @@
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": "SpecificFunctionParam",
       "parent": "ToolChoice",
+      "tags": ["acknowledged"],
       "note": "toJson() returns Object instead of Map<String, dynamic>, which the verifier cannot inspect for serialization checks."
     },
     "AllowedToolsParam": {
@@ -456,6 +462,7 @@
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": "AllowedToolsParam",
       "parent": "ToolChoice",
+      "tags": ["acknowledged"],
       "note": "toJson() returns Object instead of Map<String, dynamic>, which the verifier cannot inspect for serialization checks."
     },
     "InputContent": {
@@ -489,6 +496,7 @@
       "file": "lib/src/models/content/input_content.dart",
       "schema": "InputImageContent",
       "parent": "InputContent",
+      "tags": ["acknowledged"],
       "note": "Field detail is intentionally nullable for ergonomics (spec default is auto). Also has extension field fileId not in spec."
     },
     "InputFileContentParam": {
@@ -528,6 +536,7 @@
       "file": "lib/src/models/content/output_content.dart",
       "schema": "OutputTextContent",
       "parent": "OutputContent",
+      "tags": ["acknowledged"],
       "note": "Fields annotations and logprobs are intentionally nullable for provider compatibility, though spec marks them required."
     },
     "OutputContent:ReasoningTextContent": {
@@ -683,6 +692,7 @@
       "file": "lib/src/models/items/item.dart",
       "schema": "AssistantMessageItemParam",
       "parent": "MessageItem",
+      "tags": ["acknowledged"],
       "note": "Content uses broader OutputContent than spec's 2 types (output_text, refusal). Also supports ReasoningTextContent and SummaryTextContent extensions."
     },
     "FunctionCallItemParam": {

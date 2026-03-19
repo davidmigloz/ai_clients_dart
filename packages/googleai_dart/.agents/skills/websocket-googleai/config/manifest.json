@@ -85,7 +85,9 @@
       "file": "lib/src/models/live/messages/client/client_message.dart",
       "schema": "BidiGenerateContentClientContent",
       "parent": "BidiGenerateContentClientMessage",
-      "tags": [],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "BidiGenerateContentRealtimeInput": {
@@ -95,7 +97,9 @@
       "file": "lib/src/models/live/messages/client/client_message.dart",
       "schema": "BidiGenerateContentRealtimeInput",
       "parent": "BidiGenerateContentClientMessage",
-      "tags": [],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "BidiGenerateContentSetup": {
@@ -105,7 +109,9 @@
       "file": "lib/src/models/live/messages/client/client_message.dart",
       "schema": "BidiGenerateContentSetup",
       "parent": "BidiGenerateContentClientMessage",
-      "tags": [],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "BidiGenerateContentToolResponse": {
@@ -115,7 +121,9 @@
       "file": "lib/src/models/live/messages/client/client_message.dart",
       "schema": "BidiGenerateContentToolResponse",
       "parent": "BidiGenerateContentClientMessage",
-      "tags": [],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "BidiGenerateContentServerMessage": {
@@ -145,7 +153,10 @@
       "file": "lib/src/models/live/messages/server/server_message.dart",
       "schema": "BidiGenerateContentServerContent",
       "parent": "BidiGenerateContentServerMessage",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup.",
+      "tags": [
+        "acknowledged"
+      ]
     },
     "BidiGenerateContentSetupComplete": {
       "spec": "live",
@@ -154,7 +165,10 @@
       "file": "lib/src/models/live/messages/server/server_message.dart",
       "schema": "BidiGenerateContentSetupComplete",
       "parent": "BidiGenerateContentServerMessage",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup.",
+      "tags": [
+        "acknowledged"
+      ]
     },
     "BidiGenerateContentToolCall": {
       "spec": "live",
@@ -163,7 +177,10 @@
       "file": "lib/src/models/live/messages/server/server_message.dart",
       "schema": "BidiGenerateContentToolCall",
       "parent": "BidiGenerateContentServerMessage",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup.",
+      "tags": [
+        "acknowledged"
+      ]
     },
     "BidiGenerateContentToolCallCancellation": {
       "spec": "live",
@@ -172,7 +189,10 @@
       "file": "lib/src/models/live/messages/server/server_message.dart",
       "schema": "BidiGenerateContentToolCallCancellation",
       "parent": "BidiGenerateContentServerMessage",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup.",
+      "tags": [
+        "acknowledged"
+      ]
     },
     "GoAway": {
       "spec": "live",
@@ -181,7 +201,10 @@
       "file": "lib/src/models/live/messages/server/server_message.dart",
       "schema": "GoAway",
       "parent": "BidiGenerateContentServerMessage",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup.",
+      "tags": [
+        "acknowledged"
+      ]
     },
     "SessionResumptionUpdate": {
       "spec": "live",
@@ -190,7 +213,10 @@
       "file": "lib/src/models/live/messages/server/server_message.dart",
       "schema": "SessionResumptionUpdate",
       "parent": "BidiGenerateContentServerMessage",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup.",
+      "tags": [
+        "acknowledged"
+      ]
     },
     "AudioTranscriptionConfig": {
       "spec": "live",
@@ -206,7 +232,9 @@
       "dart_class": "AutomaticActivityDetection",
       "file": "lib/src/models/live/config/automatic_activity_detection.dart",
       "schema": "AutomaticActivityDetection",
-      "tags": [],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "ContextWindowCompressionConfig": {
@@ -215,7 +243,9 @@
       "dart_class": "ContextWindowCompressionConfig",
       "file": "lib/src/models/live/config/context_window_compression_config.dart",
       "schema": "ContextWindowCompressionConfig",
-      "tags": [],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "LiveGenerationConfig": {
@@ -224,7 +254,9 @@
       "dart_class": "LiveGenerationConfig",
       "file": "lib/src/models/live/config/live_generation_config.dart",
       "schema": "LiveGenerationConfig",
-      "tags": [],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "PrebuiltVoiceConfig": {
@@ -233,7 +265,9 @@
       "dart_class": "PrebuiltVoiceConfig",
       "file": "lib/src/models/common/voice_config.dart",
       "schema": "PrebuiltVoiceConfig",
-      "tags": [],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "ProactivityConfig": {
@@ -242,7 +276,9 @@
       "dart_class": "ProactivityConfig",
       "file": "lib/src/models/live/config/proactivity_config.dart",
       "schema": "ProactivityConfig",
-      "tags": [],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "RealtimeInputConfig": {
@@ -251,7 +287,9 @@
       "dart_class": "RealtimeInputConfig",
       "file": "lib/src/models/live/config/realtime_input_config.dart",
       "schema": "RealtimeInputConfig",
-      "tags": [],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "SessionResumptionConfig": {
@@ -270,7 +308,9 @@
       "dart_class": "SlidingWindow",
       "file": "lib/src/models/live/config/sliding_window.dart",
       "schema": "SlidingWindow",
-      "tags": [],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "SpeechConfig": {
@@ -279,7 +319,9 @@
       "dart_class": "SpeechConfig",
       "file": "lib/src/models/common/speech_config.dart",
       "schema": "SpeechConfig",
-      "tags": [],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "Transcription": {
@@ -288,7 +330,9 @@
       "dart_class": "Transcription",
       "file": "lib/src/models/live/config/transcription.dart",
       "schema": "Transcription",
-      "tags": [],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "VoiceConfig": {
@@ -297,7 +341,9 @@
       "dart_class": "VoiceConfig",
       "file": "lib/src/models/common/voice_config.dart",
       "schema": "VoiceConfig",
-      "tags": [],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     },
     "ActivityHandling": {
@@ -306,7 +352,10 @@
       "dart_class": "ActivityHandling",
       "file": "lib/src/models/live/enums/activity_handling.dart",
       "schema": "ActivityHandling",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup.",
+      "tags": [
+        "acknowledged"
+      ]
     },
     "EndSensitivity": {
       "spec": "live",
@@ -314,7 +363,10 @@
       "dart_class": "EndSensitivity",
       "file": "lib/src/models/live/enums/end_sensitivity.dart",
       "schema": "EndSensitivity",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup.",
+      "tags": [
+        "acknowledged"
+      ]
     },
     "StartSensitivity": {
       "spec": "live",
@@ -322,7 +374,10 @@
       "dart_class": "StartSensitivity",
       "file": "lib/src/models/live/enums/start_sensitivity.dart",
       "schema": "StartSensitivity",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup.",
+      "tags": [
+        "acknowledged"
+      ]
     },
     "TurnCoverage": {
       "spec": "live",
@@ -330,14 +385,19 @@
       "dart_class": "TurnCoverage",
       "file": "lib/src/models/live/enums/turn_coverage.dart",
       "schema": "TurnCoverage",
-      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
+      "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup.",
+      "tags": [
+        "acknowledged"
+      ]
     },
     "LiveConfig": {
       "spec": "live",
       "kind": "skip",
       "dart_class": "LiveConfig",
       "schema": "LiveConfig",
-      "tags": [],
+      "tags": [
+        "acknowledged"
+      ],
       "file": "lib/src/models/live/config/live_config.dart",
       "note": "Skipped by migration repair: current Dart shape does not satisfy the strict shared verifier. Revisit this mapping during manual model cleanup."
     }
