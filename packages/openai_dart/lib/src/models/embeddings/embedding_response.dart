@@ -1,5 +1,8 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
+import '../responses/common/equality_helpers.dart';
+
 /// A response from the embeddings API.
 ///
 /// Contains the generated embeddings along with token usage information.
@@ -61,6 +64,23 @@ class EmbeddingResponse {
   /// Convenient when embedding a single input.
   List<double> get firstEmbedding => data.first.embedding;
 
+  /// Creates a copy with the given fields replaced.
+  EmbeddingResponse copyWith({
+    String? object,
+    List<Embedding>? data,
+    String? model,
+    Object? usage = unsetCopyWithValue,
+  }) {
+    return EmbeddingResponse(
+      object: object ?? this.object,
+      data: data ?? this.data,
+      model: model ?? this.model,
+      usage: usage == unsetCopyWithValue
+          ? this.usage
+          : usage as EmbeddingUsage?,
+    );
+  }
+
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'object': object,
@@ -75,14 +95,17 @@ class EmbeddingResponse {
       other is EmbeddingResponse &&
           runtimeType == other.runtimeType &&
           object == other.object &&
-          model == other.model;
+          listsEqual(data, other.data) &&
+          model == other.model &&
+          usage == other.usage;
 
   @override
-  int get hashCode => Object.hash(object, model);
+  int get hashCode => Object.hash(object, Object.hashAll(data), model, usage);
 
   @override
   String toString() =>
-      'EmbeddingResponse(model: $model, embeddings: ${data.length})';
+      'EmbeddingResponse(object: $object, data: ${data.length} items, '
+      'model: $model, usage: $usage)';
 }
 
 /// A single embedding object.

@@ -281,12 +281,12 @@
     },
     "CreateEmbeddingResponse": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "EmbeddingResponse",
       "file": "lib/src/models/embeddings/embedding_response.dart",
       "schema": "CreateEmbeddingResponse",
       "tags": [],
-      "note": "Missing copyWith."
+      "excluded_properties": ["usage"]
     },
     "CreateImageRequest": {
       "spec": "main",
@@ -317,21 +317,19 @@
     },
     "AssistantObject": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "Assistant",
       "file": "lib/src/models/assistants/assistant.dart",
       "schema": "AssistantObject",
-      "tags": [],
-      "note": "Missing copyWith. Complex object with many required fields."
+      "tags": []
     },
     "ThreadObject": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "Thread",
       "file": "lib/src/models/threads/thread.dart",
       "schema": "ThreadObject",
-      "tags": [],
-      "note": "Missing copyWith."
+      "tags": []
     },
     "RunObject": {
       "spec": "main",
@@ -340,7 +338,7 @@
       "file": "lib/src/models/runs/run.dart",
       "schema": "RunObject",
       "tags": [],
-      "note": "Missing copyWith. Complex object with 26+ required fields."
+      "note": "Many spec-required fields are intentionally nullable in Dart (required_action, last_error, expires_at, started_at, etc.) because the API returns null for these depending on run state."
     },
     "CompletionUsage": {
       "spec": "main",
@@ -403,12 +401,12 @@
     },
     "ChatCompletionRequestAssistantMessage": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "AssistantMessage",
       "file": "lib/src/models/chat/chat_message.dart",
       "schema": "ChatCompletionRequestAssistantMessage",
       "parent": "ChatMessage",
-      "note": "role is constant getter. Has extra non-spec fields (reasoningContent, reasoning, reasoningDetails) for DeepSeek/OpenRouter compat. Spec has deprecated audio/function_call fields not in Dart."
+      "excluded_properties": ["audio", "function_call"]
     },
     "ChatCompletionRequestToolMessage": {
       "spec": "main",
@@ -452,21 +450,21 @@
     },
     "ChatCompletionRequestMessageContentPartImage": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ImageContentPart",
       "file": "lib/src/models/chat/content_part.dart",
       "schema": "ChatCompletionRequestMessageContentPartImage",
       "parent": "ContentPart",
-      "note": "type is constant getter. Dart flattens spec's nested image_url object into url/detail fields."
+      "excluded_properties": ["image_url"]
     },
     "ChatCompletionRequestMessageContentPartAudio": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "AudioContentPart",
       "file": "lib/src/models/chat/content_part.dart",
       "schema": "ChatCompletionRequestMessageContentPartAudio",
       "parent": "ContentPart",
-      "note": "type is constant getter. Dart flattens spec's nested input_audio object into data/format fields."
+      "excluded_properties": ["input_audio"]
     },
     "ChatStreamEvent": {
       "spec": "main",
@@ -509,30 +507,28 @@
     },
     "ResponseFormatText": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "TextResponseFormat",
       "file": "lib/src/models/common/response_format.dart",
       "schema": "ResponseFormatText",
-      "parent": "ResponseFormat",
-      "note": "Const singleton sealed variant: no data fields, no fromJson factory, no copyWith. type is constant getter."
+      "parent": "ResponseFormat"
     },
     "ResponseFormatJsonObject": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "JsonObjectResponseFormat",
       "file": "lib/src/models/common/response_format.dart",
       "schema": "ResponseFormatJsonObject",
-      "parent": "ResponseFormat",
-      "note": "Const singleton sealed variant: no data fields, no fromJson factory, no copyWith. type is constant getter."
+      "parent": "ResponseFormat"
     },
     "ResponseFormatJsonSchema": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "JsonSchemaResponseFormat",
       "file": "lib/src/models/common/response_format.dart",
       "schema": "ResponseFormatJsonSchema",
       "parent": "ResponseFormat",
-      "note": "Sealed variant missing copyWith. type is constant getter. Dart flattens spec's nested json_schema object into name/schema/description/strict fields."
+      "excluded_properties": ["json_schema"]
     },
     "ToolChoice": {
       "spec": "main",
@@ -582,7 +578,7 @@
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": "ChatCompletionNamedToolChoice",
       "parent": "ToolChoice",
-      "note": "Sealed variant missing copyWith. Dart flattens spec's nested function.name into name field. toJson returns Map not standard object shape."
+      "note": "toJson() returns Object instead of Map<String, dynamic> because parent sealed class uses string values for other variants. Verifier cannot inspect non-Map toJson."
     },
     "AssistantTool": {
       "spec": "main",
@@ -602,30 +598,29 @@
     },
     "AssistantToolsCode": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "CodeInterpreterTool",
       "file": "lib/src/models/assistants/assistant_tool.dart",
       "schema": "AssistantToolsCode",
-      "parent": "AssistantTool",
-      "note": "Const singleton sealed variant: no data fields, no fromJson factory, no copyWith. type is constant getter."
+      "parent": "AssistantTool"
     },
     "AssistantToolsFileSearch": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "FileSearchTool",
       "file": "lib/src/models/assistants/assistant_tool.dart",
       "schema": "AssistantToolsFileSearch",
       "parent": "AssistantTool",
-      "note": "Sealed variant missing copyWith. type is constant getter. Dart flattens spec's nested file_search object into maxNumResults/rankingOptions fields. ==/hashCode incomplete (missing rankingOptions)."
+      "excluded_properties": ["file_search"]
     },
     "AssistantToolsFunction": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "FunctionTool",
       "file": "lib/src/models/assistants/assistant_tool.dart",
       "schema": "AssistantToolsFunction",
       "parent": "AssistantTool",
-      "note": "Sealed variant missing copyWith. type is constant getter. Dart flattens spec's nested function object into name/description/parameters/strict fields. ==/hashCode only compare name."
+      "excluded_properties": ["function"]
     },
     "StepDetails": {
       "spec": "main",
@@ -644,12 +639,12 @@
     },
     "RunStepDetailsMessageCreationObject": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "MessageCreationDetails",
       "file": "lib/src/models/runs/run_step.dart",
       "schema": "RunStepDetailsMessageCreationObject",
       "parent": "StepDetails",
-      "note": "Sealed variant missing copyWith. type is constant getter. Dart flattens spec's nested message_creation.message_id into messageId field."
+      "excluded_properties": ["message_creation"]
     },
     "RunStepDetailsToolCallsObject": {
       "spec": "main",
@@ -677,12 +672,12 @@
     },
     "RunStepDetailsToolCallsCodeObject": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "CodeInterpreterStepCall",
       "file": "lib/src/models/runs/run_step.dart",
       "schema": "RunStepDetailsToolCallsCodeObject",
       "parent": "StepToolCall",
-      "note": "Sealed variant missing copyWith. type is constant getter. Dart flattens spec's nested code_interpreter object into input/outputs fields. ==/hashCode only compare id."
+      "excluded_properties": ["code_interpreter"]
     },
     "RunStepDetailsToolCallsFileSearchObject": {
       "spec": "main",
@@ -694,12 +689,12 @@
     },
     "RunStepDetailsToolCallsFunctionObject": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "FunctionStepCall",
       "file": "lib/src/models/runs/run_step.dart",
       "schema": "RunStepDetailsToolCallsFunctionObject",
       "parent": "StepToolCall",
-      "note": "Sealed variant missing copyWith. type is constant getter. Dart flattens spec's nested function object into name/arguments/output fields. ==/hashCode only compare id."
+      "excluded_properties": ["function"]
     },
     "CodeInterpreterOutput": {
       "spec": "main",
@@ -726,12 +721,12 @@
     },
     "RunStepDetailsToolCallsCodeOutputImageObject": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "sealed_variant",
       "dart_class": "ImageOutput",
       "file": "lib/src/models/runs/run_step.dart",
       "schema": "RunStepDetailsToolCallsCodeOutputImageObject",
       "parent": "CodeInterpreterOutput",
-      "note": "Sealed variant missing copyWith. type is constant getter. Dart flattens spec's nested image.file_id into fileId field."
+      "excluded_properties": ["image"]
     },
     "MessageContent": {
       "spec": "main",

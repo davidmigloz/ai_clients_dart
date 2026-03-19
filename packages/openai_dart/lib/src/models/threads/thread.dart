@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../assistants/tool_resources.dart';
+import '../common/copy_with_sentinel.dart';
 
 /// A thread representing a conversation with an assistant.
 ///
@@ -64,6 +65,25 @@ class Thread {
   DateTime get createdAtDateTime =>
       DateTime.fromMillisecondsSinceEpoch(createdAt * 1000);
 
+  /// Creates a copy with the given fields replaced.
+  Thread copyWith({
+    String? id,
+    String? object,
+    int? createdAt,
+    Object? toolResources = unsetCopyWithValue,
+    Map<String, String>? metadata,
+  }) {
+    return Thread(
+      id: id ?? this.id,
+      object: object ?? this.object,
+      createdAt: createdAt ?? this.createdAt,
+      toolResources: toolResources == unsetCopyWithValue
+          ? this.toolResources
+          : toolResources as ToolResources?,
+      metadata: metadata ?? this.metadata,
+    );
+  }
+
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -76,13 +96,22 @@ class Thread {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is Thread && runtimeType == other.runtimeType && id == other.id;
+      other is Thread &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          object == other.object &&
+          createdAt == other.createdAt &&
+          toolResources == other.toolResources &&
+          metadata == other.metadata;
 
   @override
-  int get hashCode => id.hashCode;
+  int get hashCode =>
+      Object.hash(id, object, createdAt, toolResources, metadata);
 
   @override
-  String toString() => 'Thread(id: $id)';
+  String toString() =>
+      'Thread(id: $id, object: $object, createdAt: $createdAt, '
+      'toolResources: $toolResources, metadata: ${metadata.length} entries)';
 }
 
 /// A request to create a thread.

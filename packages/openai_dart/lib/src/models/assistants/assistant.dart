@@ -1,6 +1,8 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/response_format.dart';
+import '../responses/common/equality_helpers.dart';
 import 'assistant_tool.dart';
 import 'tool_resources.dart';
 
@@ -130,6 +132,49 @@ class Assistant {
   /// Whether the assistant has any function tools.
   bool get hasFunctions => tools.any((t) => t is FunctionTool);
 
+  /// Creates a copy with the given fields replaced.
+  Assistant copyWith({
+    String? id,
+    String? object,
+    int? createdAt,
+    String? model,
+    Object? name = unsetCopyWithValue,
+    Object? description = unsetCopyWithValue,
+    Object? instructions = unsetCopyWithValue,
+    List<AssistantTool>? tools,
+    Object? toolResources = unsetCopyWithValue,
+    Map<String, String>? metadata,
+    Object? temperature = unsetCopyWithValue,
+    Object? topP = unsetCopyWithValue,
+    Object? responseFormat = unsetCopyWithValue,
+  }) {
+    return Assistant(
+      id: id ?? this.id,
+      object: object ?? this.object,
+      createdAt: createdAt ?? this.createdAt,
+      model: model ?? this.model,
+      name: name == unsetCopyWithValue ? this.name : name as String?,
+      description: description == unsetCopyWithValue
+          ? this.description
+          : description as String?,
+      instructions: instructions == unsetCopyWithValue
+          ? this.instructions
+          : instructions as String?,
+      tools: tools ?? this.tools,
+      toolResources: toolResources == unsetCopyWithValue
+          ? this.toolResources
+          : toolResources as ToolResources?,
+      metadata: metadata ?? this.metadata,
+      temperature: temperature == unsetCopyWithValue
+          ? this.temperature
+          : temperature as double?,
+      topP: topP == unsetCopyWithValue ? this.topP : topP as double?,
+      responseFormat: responseFormat == unsetCopyWithValue
+          ? this.responseFormat
+          : responseFormat as ResponseFormat?,
+    );
+  }
+
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -150,13 +195,47 @@ class Assistant {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is Assistant && runtimeType == other.runtimeType && id == other.id;
+      other is Assistant &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          object == other.object &&
+          createdAt == other.createdAt &&
+          model == other.model &&
+          name == other.name &&
+          description == other.description &&
+          instructions == other.instructions &&
+          listsEqual(tools, other.tools) &&
+          toolResources == other.toolResources &&
+          metadata == other.metadata &&
+          temperature == other.temperature &&
+          topP == other.topP &&
+          responseFormat == other.responseFormat;
 
   @override
-  int get hashCode => id.hashCode;
+  int get hashCode => Object.hash(
+    id,
+    object,
+    createdAt,
+    model,
+    name,
+    description,
+    instructions,
+    Object.hashAll(tools),
+    toolResources,
+    metadata,
+    temperature,
+    topP,
+    responseFormat,
+  );
 
   @override
-  String toString() => 'Assistant(id: $id, name: $name)';
+  String toString() =>
+      'Assistant(id: $id, object: $object, createdAt: $createdAt, '
+      'model: $model, name: $name, description: $description, '
+      'instructions: $instructions, tools: ${tools.length} items, '
+      'toolResources: $toolResources, metadata: ${metadata.length} entries, '
+      'temperature: $temperature, topP: $topP, '
+      'responseFormat: $responseFormat)';
 }
 
 /// A list of assistants.

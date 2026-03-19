@@ -44,3 +44,14 @@ Resource method signatures vary across packages (typed request objects,
 decomposed named params, positional args). A future toolkit enhancement
 will validate resource parameters against Params/Request models once a
 deterministic mapping source is established in the manifest.
+
+## `toString` Convention
+
+Every `@immutable` model class should include **all fields** in its `toString`
+output so that the toolkit verifier can confirm completeness. To keep output
+readable, truncate or summarize noisy values:
+
+- **Lists**: show count — `tools: ${tools.length} items`
+- **Maps**: show count — `metadata: ${metadata.length} entries`
+- **Long strings**: first N chars — `instructions: ${instructions?.substring(0, 50)}...`
+- **Nested objects**: use their own toString or show a summary field

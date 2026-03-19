@@ -491,13 +491,18 @@ class AssistantMessage extends ChatMessage {
 
   @override
   String toString() {
+    final extras = [
+      if (name != null) 'name: $name',
+      if (refusal != null) 'refusal: $refusal',
+    ];
+    final suffix = extras.isEmpty ? '' : ', ${extras.join(', ')}';
     if (hasToolCalls) {
-      return 'ChatMessage.assistant(toolCalls: ${toolCalls!.length})';
+      return 'ChatMessage.assistant(toolCalls: ${toolCalls!.length}$suffix)';
     }
     if (hasReasoningContent) {
-      return 'ChatMessage.assistant($content, hasReasoning: true)';
+      return 'ChatMessage.assistant($content, hasReasoning: true$suffix)';
     }
-    return 'ChatMessage.assistant($content)';
+    return 'ChatMessage.assistant($content$suffix)';
   }
 }
 

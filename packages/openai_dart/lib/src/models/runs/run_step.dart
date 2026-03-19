@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/usage.dart';
 import '../responses/common/equality_helpers.dart';
 
@@ -305,6 +306,11 @@ class MessageCreationDetails implements StepDetails {
   /// The ID of the created message.
   final String messageId;
 
+  /// Creates a copy with the given fields replaced.
+  MessageCreationDetails copyWith({String? messageId}) {
+    return MessageCreationDetails(messageId: messageId ?? this.messageId);
+  }
+
   @override
   String get type => 'message_creation';
 
@@ -425,6 +431,19 @@ class CodeInterpreterStepCall implements StepToolCall {
   /// The outputs.
   final List<CodeInterpreterOutput> outputs;
 
+  /// Creates a copy with the given fields replaced.
+  CodeInterpreterStepCall copyWith({
+    String? id,
+    String? input,
+    List<CodeInterpreterOutput>? outputs,
+  }) {
+    return CodeInterpreterStepCall(
+      id: id ?? this.id,
+      input: input ?? this.input,
+      outputs: outputs ?? this.outputs,
+    );
+  }
+
   @override
   String get type => 'code_interpreter';
 
@@ -443,13 +462,15 @@ class CodeInterpreterStepCall implements StepToolCall {
       identical(this, other) ||
       other is CodeInterpreterStepCall &&
           runtimeType == other.runtimeType &&
-          id == other.id;
+          id == other.id &&
+          input == other.input &&
+          listsEqual(outputs, other.outputs);
 
   @override
-  int get hashCode => id.hashCode;
+  int get hashCode => Object.hash(id, input, Object.hashAll(outputs));
 
   @override
-  String toString() => 'CodeInterpreterStepCall(id: $id)';
+  String toString() => 'CodeInterpreterStepCall(id: $id, input: $input)';
 }
 
 /// A code interpreter output.
@@ -524,6 +545,11 @@ class ImageOutput implements CodeInterpreterOutput {
 
   /// The file ID of the image.
   final String fileId;
+
+  /// Creates a copy with the given fields replaced.
+  ImageOutput copyWith({String? fileId}) {
+    return ImageOutput(fileId: fileId ?? this.fileId);
+  }
 
   @override
   String get type => 'image';
@@ -635,6 +661,21 @@ class FunctionStepCall implements StepToolCall {
   /// The function output (after submission).
   final String? output;
 
+  /// Creates a copy with the given fields replaced.
+  FunctionStepCall copyWith({
+    String? id,
+    String? name,
+    String? arguments,
+    Object? output = unsetCopyWithValue,
+  }) {
+    return FunctionStepCall(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      arguments: arguments ?? this.arguments,
+      output: output == unsetCopyWithValue ? this.output : output as String?,
+    );
+  }
+
   @override
   String get type => 'function';
 
@@ -654,10 +695,13 @@ class FunctionStepCall implements StepToolCall {
       identical(this, other) ||
       other is FunctionStepCall &&
           runtimeType == other.runtimeType &&
-          id == other.id;
+          id == other.id &&
+          name == other.name &&
+          arguments == other.arguments &&
+          output == other.output;
 
   @override
-  int get hashCode => id.hashCode;
+  int get hashCode => Object.hash(id, name, arguments, output);
 
   @override
   String toString() => 'FunctionStepCall(id: $id, name: $name)';

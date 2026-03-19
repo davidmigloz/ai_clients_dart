@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../assistants/assistant_tool.dart';
+import '../common/copy_with_sentinel.dart';
 import '../common/response_format.dart';
 import '../common/usage.dart';
 import '../tools/tool_choice.dart';
@@ -219,6 +220,99 @@ class Run {
 
   /// Whether the run failed.
   bool get isFailed => status == RunStatus.failed;
+
+  /// Creates a copy with the given fields replaced.
+  Run copyWith({
+    String? id,
+    String? object,
+    int? createdAt,
+    String? threadId,
+    String? assistantId,
+    RunStatus? status,
+    Object? requiredAction = unsetCopyWithValue,
+    Object? lastError = unsetCopyWithValue,
+    Object? expiresAt = unsetCopyWithValue,
+    Object? startedAt = unsetCopyWithValue,
+    Object? cancelledAt = unsetCopyWithValue,
+    Object? failedAt = unsetCopyWithValue,
+    Object? completedAt = unsetCopyWithValue,
+    Object? incompleteDetails = unsetCopyWithValue,
+    String? model,
+    Object? instructions = unsetCopyWithValue,
+    List<AssistantTool>? tools,
+    Map<String, String>? metadata,
+    Object? usage = unsetCopyWithValue,
+    Object? temperature = unsetCopyWithValue,
+    Object? topP = unsetCopyWithValue,
+    Object? maxPromptTokens = unsetCopyWithValue,
+    Object? maxCompletionTokens = unsetCopyWithValue,
+    Object? truncationStrategy = unsetCopyWithValue,
+    Object? toolChoice = unsetCopyWithValue,
+    Object? parallelToolCalls = unsetCopyWithValue,
+    Object? responseFormat = unsetCopyWithValue,
+  }) {
+    return Run(
+      id: id ?? this.id,
+      object: object ?? this.object,
+      createdAt: createdAt ?? this.createdAt,
+      threadId: threadId ?? this.threadId,
+      assistantId: assistantId ?? this.assistantId,
+      status: status ?? this.status,
+      requiredAction: requiredAction == unsetCopyWithValue
+          ? this.requiredAction
+          : requiredAction as RequiredAction?,
+      lastError: lastError == unsetCopyWithValue
+          ? this.lastError
+          : lastError as RunError?,
+      expiresAt: expiresAt == unsetCopyWithValue
+          ? this.expiresAt
+          : expiresAt as int?,
+      startedAt: startedAt == unsetCopyWithValue
+          ? this.startedAt
+          : startedAt as int?,
+      cancelledAt: cancelledAt == unsetCopyWithValue
+          ? this.cancelledAt
+          : cancelledAt as int?,
+      failedAt: failedAt == unsetCopyWithValue
+          ? this.failedAt
+          : failedAt as int?,
+      completedAt: completedAt == unsetCopyWithValue
+          ? this.completedAt
+          : completedAt as int?,
+      incompleteDetails: incompleteDetails == unsetCopyWithValue
+          ? this.incompleteDetails
+          : incompleteDetails as RunIncompleteDetails?,
+      model: model ?? this.model,
+      instructions: instructions == unsetCopyWithValue
+          ? this.instructions
+          : instructions as String?,
+      tools: tools ?? this.tools,
+      metadata: metadata ?? this.metadata,
+      usage: usage == unsetCopyWithValue ? this.usage : usage as Usage?,
+      temperature: temperature == unsetCopyWithValue
+          ? this.temperature
+          : temperature as double?,
+      topP: topP == unsetCopyWithValue ? this.topP : topP as double?,
+      maxPromptTokens: maxPromptTokens == unsetCopyWithValue
+          ? this.maxPromptTokens
+          : maxPromptTokens as int?,
+      maxCompletionTokens: maxCompletionTokens == unsetCopyWithValue
+          ? this.maxCompletionTokens
+          : maxCompletionTokens as int?,
+      truncationStrategy: truncationStrategy == unsetCopyWithValue
+          ? this.truncationStrategy
+          : truncationStrategy as TruncationStrategy?,
+      toolChoice: toolChoice == unsetCopyWithValue
+          ? this.toolChoice
+          : toolChoice as ToolChoice?,
+      parallelToolCalls: parallelToolCalls == unsetCopyWithValue
+          ? this.parallelToolCalls
+          : parallelToolCalls as bool?,
+      responseFormat: responseFormat == unsetCopyWithValue
+          ? this.responseFormat
+          : responseFormat as ResponseFormat?,
+    );
+  }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {

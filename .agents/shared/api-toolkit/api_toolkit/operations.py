@@ -967,6 +967,12 @@ def _check_field_methods(entry: ManifestEntry, file_path: Path, fields: set[str]
         "toString": extract_method_body(class_block, r"toString\s*\(\)"),
     }
     effective_fields = fields - constant_fields
+    if not effective_fields:
+        # Const singleton sealed variant — no data fields means no fromJson/copyWith needed.
+        # Still require toJson for serialization.
+        if not methods.get("toJson"):
+            issues.append(_type_issue("error", entry.key, "Missing toJson implementation", file=entry.file))
+        return issues
     # Build (camelCase, snake_case) pairs for fromJson/toJson — at least one variant must appear.
     # This supports both packages that use snake_case JSON keys and those that use camelCase.
     json_key_alternatives = [(field, snake_case(field)) for field in effective_fields]
@@ -1790,6 +1796,11 @@ def _verify_tool_properties(config: ToolkitConfig, readme: str) -> list[dict[str
     return issues
 
 
+_INFRASTRUCTURE_RESOURCES = {
+    "base_resource", "resource_base", "streaming", "streaming_resource",
+}
+
+
 def _docs_coverage_summary(config: ToolkitConfig) -> dict[str, Any]:
     discovered_resources = _discover_openapi_doc_resources(config)
     excluded_resources = sorted(set(config.documentation.excluded_resources))
@@ -1798,8 +1809,12 @@ def _docs_coverage_summary(config: ToolkitConfig) -> dict[str, Any]:
     verified_resources = [
         resource for resource in discovered_resources if resource.resource_key not in normalized_excluded_resources
     ]
+    # Only flag partial coverage when non-infrastructure resources are excluded.
+    # Infrastructure resources (base classes, streaming helpers) are always
+    # excluded and don't represent gaps in documentation coverage.
+    non_infra_excluded = [r for r in excluded_resources if r not in _INFRASTRUCTURE_RESOURCES]
     return {
-        "partial_coverage": bool(excluded_resources or excluded_from_examples),
+        "partial_coverage": bool(non_infra_excluded or excluded_from_examples),
         "discovered_resource_count": len(discovered_resources),
         "verified_resource_count": len(verified_resources),
         "excluded_resources": excluded_resources,

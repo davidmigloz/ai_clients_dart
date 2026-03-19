@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
+
 /// A tool that an assistant can use.
 ///
 /// Tools extend the assistant's capabilities beyond text generation.
@@ -98,6 +100,21 @@ class FileSearchTool implements AssistantTool {
   /// The ranking options for file search.
   final FileSearchRankingOptions? rankingOptions;
 
+  /// Creates a copy with the given fields replaced.
+  FileSearchTool copyWith({
+    Object? maxNumResults = unsetCopyWithValue,
+    Object? rankingOptions = unsetCopyWithValue,
+  }) {
+    return FileSearchTool(
+      maxNumResults: maxNumResults == unsetCopyWithValue
+          ? this.maxNumResults
+          : maxNumResults as int?,
+      rankingOptions: rankingOptions == unsetCopyWithValue
+          ? this.rankingOptions
+          : rankingOptions as FileSearchRankingOptions?,
+    );
+  }
+
   @override
   Map<String, dynamic> toJson() => {
     'type': 'file_search',
@@ -113,13 +130,15 @@ class FileSearchTool implements AssistantTool {
       identical(this, other) ||
       other is FileSearchTool &&
           runtimeType == other.runtimeType &&
-          maxNumResults == other.maxNumResults;
+          maxNumResults == other.maxNumResults &&
+          rankingOptions == other.rankingOptions;
 
   @override
-  int get hashCode => maxNumResults.hashCode;
+  int get hashCode => Object.hash(maxNumResults, rankingOptions);
 
   @override
-  String toString() => 'FileSearchTool(maxNumResults: $maxNumResults)';
+  String toString() =>
+      'FileSearchTool(maxNumResults: $maxNumResults, rankingOptions: $rankingOptions)';
 }
 
 /// Ranking options for file search.
@@ -203,6 +222,25 @@ class FunctionTool implements AssistantTool {
   /// Whether to enable strict schema adherence.
   final bool? strict;
 
+  /// Creates a copy with the given fields replaced.
+  FunctionTool copyWith({
+    String? name,
+    Object? description = unsetCopyWithValue,
+    Object? parameters = unsetCopyWithValue,
+    Object? strict = unsetCopyWithValue,
+  }) {
+    return FunctionTool(
+      name: name ?? this.name,
+      description: description == unsetCopyWithValue
+          ? this.description
+          : description as String?,
+      parameters: parameters == unsetCopyWithValue
+          ? this.parameters
+          : parameters as Map<String, dynamic>?,
+      strict: strict == unsetCopyWithValue ? this.strict : strict as bool?,
+    );
+  }
+
   @override
   Map<String, dynamic> toJson() => {
     'type': 'function',
@@ -219,10 +257,13 @@ class FunctionTool implements AssistantTool {
       identical(this, other) ||
       other is FunctionTool &&
           runtimeType == other.runtimeType &&
-          name == other.name;
+          name == other.name &&
+          description == other.description &&
+          parameters == other.parameters &&
+          strict == other.strict;
 
   @override
-  int get hashCode => name.hashCode;
+  int get hashCode => Object.hash(name, description, parameters, strict);
 
   @override
   String toString() => 'FunctionTool(name: $name)';

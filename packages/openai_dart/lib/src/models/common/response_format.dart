@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import 'copy_with_sentinel.dart';
+
 /// Specifies the format that the model must output.
 ///
 /// Compatible with GPT-4o, GPT-4o mini, GPT-4 Turbo, and all GPT-3.5 Turbo
@@ -169,6 +171,23 @@ class JsonSchemaResponseFormat extends ResponseFormat {
   /// When true, the model will be constrained to only generate
   /// outputs that conform exactly to the schema.
   final bool strict;
+
+  /// Creates a copy with the given fields replaced.
+  JsonSchemaResponseFormat copyWith({
+    String? name,
+    Map<String, dynamic>? schema,
+    Object? description = unsetCopyWithValue,
+    bool? strict,
+  }) {
+    return JsonSchemaResponseFormat(
+      name: name ?? this.name,
+      schema: schema ?? this.schema,
+      description: description == unsetCopyWithValue
+          ? this.description
+          : description as String?,
+      strict: strict ?? this.strict,
+    );
+  }
 
   @override
   String get type => 'json_schema';

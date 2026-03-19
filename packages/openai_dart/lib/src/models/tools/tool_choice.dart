@@ -131,6 +131,11 @@ class ToolChoiceFunction extends ToolChoice {
   /// The name of the function to call.
   final String name;
 
+  /// Creates a copy with the given fields replaced.
+  ToolChoiceFunction copyWith({String? name}) {
+    return ToolChoiceFunction(name: name ?? this.name);
+  }
+
   @override
   Object toJson() => {
     'type': 'function',
