@@ -74,11 +74,8 @@ extension ChatCompletionResponseExtensions on ChatCompletionResponse {
       toolCalls.map((tc) => tc.function).toList();
 
   /// Whether the response has valid content.
-  bool get hasContent {
-    final msg = firstChoice?.message;
-    if (msg is AssistantMessage) return msg.hasContent || hasToolCalls;
-    return text != null || hasToolCalls;
-  }
+  bool get hasContent =>
+      (firstChoice?.message.hasContent ?? false) || hasToolCalls;
 
   /// The finish reason from the first choice.
   FinishReason? get finishReason => firstChoice?.finishReason;
