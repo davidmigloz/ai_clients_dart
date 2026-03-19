@@ -165,7 +165,8 @@
           "ToolMessage": "tool"
         }
       },
-      "note": null
+      "excluded_properties": ["content"],
+      "note": "content nullability intentionally differs: non-nullable in SystemMessage (system prompts must have content), nullable in others (e.g. assistant tool-call-only messages)."
     },
     "SystemMessage": {
       "spec": "main",
