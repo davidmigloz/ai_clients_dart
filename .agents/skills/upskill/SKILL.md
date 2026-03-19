@@ -16,7 +16,7 @@ This skill automates the feedback loop from PR reviews to skill files. It extrac
 Parse `$ARGUMENTS` for options:
 - **`--plan`** — Extract and analyze findings without editing any files. Safe to run anytime.
 - **`--dry-run`** — Run the full apply workflow (extraction, consolidation, validation, proposed updates) but stop before actually editing files. Shows exactly what would change without changing anything.
-- **`--from N`** — Start from PR number N instead of the config's `last_checked_pr`.
+- **`--from N`** — Start after PR number N instead of the config's `last_checked_pr`.
 
 ---
 
@@ -24,7 +24,7 @@ Parse `$ARGUMENTS` for options:
 
 Perform all checks before proceeding. Fail fast with an actionable error message if any check fails.
 
-1. **CLI availability**: `gh` and `jq` must be on PATH.
+1. **CLI availability**: `git`, `gh`, and `jq` must be on PATH.
 2. **GitHub auth**: `gh auth status` must show authenticated.
 3. **Repository root**: Use `git rev-parse --show-toplevel` to determine the repo root. All file paths are relative to this root.
 4. **Rate limit**: Check remaining API calls:
