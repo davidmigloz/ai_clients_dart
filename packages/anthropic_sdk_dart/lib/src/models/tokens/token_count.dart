@@ -2,7 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../beta/config/output_config.dart';
 import '../common/copy_with_sentinel.dart';
-import '../common/equality.dart';
+import '../common/equality_helpers.dart';
 import '../messages/input_message.dart';
 import '../messages/message_create_request.dart';
 import '../messages/thinking_config.dart';

@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
-import '../common/equality.dart';
+import '../common/equality_helpers.dart';
 import '../tools/tool_caller.dart';
 
 /// Content block in a response message.

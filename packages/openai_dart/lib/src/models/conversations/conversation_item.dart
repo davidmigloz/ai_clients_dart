@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import '../responses/common/equality_helpers.dart';
+import '../common/equality_helpers.dart';
 import '../responses/config/function_call_status.dart';
 import '../responses/config/item_status.dart';
 import '../responses/config/tool_search_execution_type.dart';

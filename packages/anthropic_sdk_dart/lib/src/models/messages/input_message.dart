@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import '../common/equality.dart';
+import '../common/equality_helpers.dart';
 
 import '../content/input_content_block.dart';
 import 'message_role.dart';

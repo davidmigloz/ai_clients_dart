@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import '../common/equality_helpers.dart';
+import '../../common/equality_helpers.dart';
 
 /// Container configuration for the code interpreter tool.
 ///

@@ -7,7 +7,7 @@
   "tests_dir": "test/unit/models",
   "examples_dir": "example",
   "skip_files": ["copy_with_sentinel.dart"],
-  "internal_barrel_files": [],
+  "internal_barrel_files": ["equality_helpers.dart"],
   "pr_title_prefix": "feat(open_responses)",
   "changelog_title": "OpenResponses API Changelog"
 }

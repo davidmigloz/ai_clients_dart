@@ -2,7 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../beta/config/container.dart';
 import '../common/copy_with_sentinel.dart';
-import '../common/equality.dart';
+import '../common/equality_helpers.dart';
 import '../metadata/speed.dart';
 import '../metadata/stop_reason.dart';
 import '../metadata/usage.dart';

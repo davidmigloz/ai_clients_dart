@@ -1,4 +1,4 @@
 /// Common utilities for the Responses API models.
 library;
 
-export 'equality_helpers.dart';
+export '../../common/equality_helpers.dart';

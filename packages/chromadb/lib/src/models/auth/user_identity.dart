@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../../utils/copy_with_sentinel.dart';
-import '../../utils/equality_helpers.dart';
+import '../common/equality_helpers.dart';
 
 /// Response from the auth identity endpoint.
 ///

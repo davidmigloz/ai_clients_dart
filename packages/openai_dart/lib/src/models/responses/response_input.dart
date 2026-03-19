@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import 'common/equality_helpers.dart';
+import '../common/equality_helpers.dart';
 import 'items/item.dart';
 
 /// Input for a response request.

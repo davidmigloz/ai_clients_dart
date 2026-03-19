@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
 
-import '../../utils/equality_helpers.dart';
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 
 /// A document library for RAG (Retrieval-Augmented Generation).
 ///

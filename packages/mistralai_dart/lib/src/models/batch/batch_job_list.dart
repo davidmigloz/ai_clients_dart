@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import '../../utils/equality_helpers.dart';
+import '../common/equality_helpers.dart';
 import 'batch_job.dart';
 
 /// Response from listing batch jobs.

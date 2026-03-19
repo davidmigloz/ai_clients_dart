@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import '../common/equality.dart';
+import '../common/equality_helpers.dart';
 
 /// Information about an Anthropic model.
 @immutable

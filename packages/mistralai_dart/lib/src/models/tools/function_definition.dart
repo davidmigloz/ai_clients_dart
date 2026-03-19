@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import '../../utils/equality_helpers.dart';
+import '../common/equality_helpers.dart';
 
 /// Definition of a function that can be called by the model.
 @immutable

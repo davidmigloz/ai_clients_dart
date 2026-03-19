@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
 
-import '../../utils/equality_helpers.dart';
 import '../chat/chat_message.dart';
+import '../common/equality_helpers.dart';
 
 /// Request for chat-based moderation.
 @immutable

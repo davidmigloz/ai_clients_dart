@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import '../../utils/equality_helpers.dart';
+import '../common/equality_helpers.dart';
 import 'function_definition.dart';
 import 'tool_configuration.dart';
 

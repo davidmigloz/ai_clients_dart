@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import '../responses/common/equality_helpers.dart';
+import '../common/equality_helpers.dart';
 
 /// A server-side conversation that stores messages for the Responses API.
 ///

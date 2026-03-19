@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
 
-import '../../utils/equality_helpers.dart';
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 import '../metadata/prediction.dart';
 import '../metadata/prompt_mode.dart';
 import '../metadata/response_format.dart';

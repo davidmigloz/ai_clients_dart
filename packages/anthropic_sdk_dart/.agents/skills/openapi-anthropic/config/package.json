@@ -7,7 +7,7 @@
   "tests_dir": "test/unit/models",
   "examples_dir": "example",
   "skip_files": ["copy_with_sentinel.dart"],
-  "internal_barrel_files": ["equality.dart"],
+  "internal_barrel_files": ["equality_helpers.dart"],
   "pr_title_prefix": "feat(anthropic_sdk_dart)",
   "changelog_title": "Anthropic API Changelog"
 }

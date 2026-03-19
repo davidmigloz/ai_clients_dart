@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import '../../utils/equality_helpers.dart';
+import '../common/equality_helpers.dart';
 import 'ft_classifier_loss_function.dart';
 
 /// Classifier target configuration for a fine-tuned classifier model.

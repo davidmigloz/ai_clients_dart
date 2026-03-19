@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import '../../utils/equality_helpers.dart';
+import '../common/equality_helpers.dart';
 import '../metadata/finish_reason.dart';
 import '../tools/tool_call.dart';
 

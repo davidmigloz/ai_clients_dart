@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:meta/meta.dart';
 
 import '../../common/copy_with_sentinel.dart';
-import '../common/equality_helpers.dart';
+import '../../common/equality_helpers.dart';
 import '../config/function_call_status.dart';
 import '../config/item_status.dart';
 import '../config/message_phase.dart';

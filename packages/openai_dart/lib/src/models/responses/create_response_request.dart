@@ -2,7 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../chat/chat_completion_request.dart' show StreamOptions;
 import '../common/copy_with_sentinel.dart';
-import 'common/equality_helpers.dart';
+import '../common/equality_helpers.dart';
 import 'config/config.dart';
 import 'items/item.dart';
 import 'response_input.dart';

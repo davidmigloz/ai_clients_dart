@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:meta/meta.dart';
 
 import '../../utils/copy_with_sentinel.dart';
-import '../../utils/equality_helpers.dart';
+import '../common/equality_helpers.dart';
 
 /// Request to attach a function to a collection.
 ///

@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import '../common/equality_helpers.dart';
+import '../../common/equality_helpers.dart';
 import '../config/click_button.dart';
 
 /// An action performed by the computer use tool.

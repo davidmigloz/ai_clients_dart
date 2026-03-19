@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import 'common/equality_helpers.dart';
+import '../common/equality_helpers.dart';
 import 'config/prompt_cache_retention.dart';
 import 'config/response_status.dart';
 import 'config/service_tier.dart';

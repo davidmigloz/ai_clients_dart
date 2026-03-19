@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import '../common/equality_helpers.dart';
+import '../../common/equality_helpers.dart';
 
 /// Log probability information for a token.
 @immutable

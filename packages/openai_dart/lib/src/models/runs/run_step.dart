@@ -1,8 +1,8 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 import '../common/usage.dart';
-import '../responses/common/equality_helpers.dart';
 
 /// A step in a run's execution.
 ///

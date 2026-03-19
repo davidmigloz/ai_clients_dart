@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
-import '../common/equality.dart';
+import '../common/equality_helpers.dart';
 import '../metadata/cache_control.dart';
 
 // Include beta tools as part of this library to allow them to extend BuiltInTool

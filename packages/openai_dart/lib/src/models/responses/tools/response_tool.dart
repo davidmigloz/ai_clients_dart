@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import '../common/equality_helpers.dart';
+import '../../common/equality_helpers.dart';
 import '../config/search_content_type.dart';
 import '../config/tool_search_execution_type.dart';
 import 'code_interpreter_container.dart';

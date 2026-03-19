@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import '../responses/common/equality_helpers.dart';
+import '../common/equality_helpers.dart';
 import 'conversation_item.dart';
 
 /// A paginated list of conversation items.

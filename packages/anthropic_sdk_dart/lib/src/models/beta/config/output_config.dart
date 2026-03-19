@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../../common/copy_with_sentinel.dart';
-import '../../common/equality.dart';
+import '../../common/equality_helpers.dart';
 
 /// Response effort level for model generation.
 enum EffortLevel {

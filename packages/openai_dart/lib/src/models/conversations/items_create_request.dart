@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import '../responses/common/equality_helpers.dart';
+import '../common/equality_helpers.dart';
 import '../responses/items/item.dart';
 
 /// Request to add items to a conversation.

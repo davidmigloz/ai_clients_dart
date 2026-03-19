@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import '../common/equality_helpers.dart';
+import '../../common/equality_helpers.dart';
 
 /// Tool choice mode for allowed tools.
 enum ToolChoiceMode {

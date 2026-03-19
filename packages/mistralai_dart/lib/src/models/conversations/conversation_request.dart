@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import '../../utils/equality_helpers.dart';
+import '../common/equality_helpers.dart';
 import '../metadata/response_format.dart';
 import '../moderations/guardrail_config.dart';
 import '../tools/tool.dart';
