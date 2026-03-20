@@ -202,7 +202,7 @@ Spawn a **single subagent** (using the Agent tool) with:
   1. **`## Summary`**: Extract the bullet points (up to the next `##` heading or end of body). This is the primary source for changelog entries.
   2. **`## Details`**: Extract the full content of this section. Contains extended context — API examples, architecture decisions, configuration changes — that enriches changelog summaries beyond what the bullets provide.
   3. **`## Breaking Changes`**: Extract this section if present. This is the most reliable signal for breaking changes — more precise than heuristic phrase matching in the general body. Contains migration paths and before/after code examples.
-  4. **`## References`**: Extract this section if present. Contains links to official announcements, blog posts, or documentation. Parse each markdown link into `{title, url, description}` triples. As a fallback for PRs without this section, scan `## Summary` and `## Details` for markdown links whose domains match known provider sites (blog.google, openai.com/blog, docs.anthropic.com, mistral.ai/news, ollama.com/blog, docs.trychroma.com).
+  4. **`## References`**: Extract this section if present. Contains links to official announcements, blog posts, or documentation. Each list item follows the format `- [title](url) — description`. Parse per list item: extract `title` and `url` from the markdown link, and `description` from the trailing text after the em dash. As a fallback for PRs without this section, scan `## Summary` and `## Details` for markdown links whose domains match known provider sites (blog.google, openai.com/blog, docs.anthropic.com, mistral.ai/news, ollama.com/blog, docs.trychroma.com); for these fallback links, use the link text as `title` and set `description` to an empty string.
   5. **Strip boilerplate**: Remove review tool badges, HTML comments (`<!-- ... -->`), `## Test Plan` sections, and other template noise.
   6. **Fallback**: If no `## Summary` heading exists (older PRs or external contributors), use the first substantive paragraph of the PR body (skip blank lines, HTML comments, and badge images at the top). Wrap the paragraph as a single entry in `summary_bullets` so downstream handling is uniform.
   7. **Error fallback**: If `gh pr view` fails for a PR (e.g., PR was from a fork, or was deleted), log a warning and skip that PR — do not fail the release.
@@ -342,9 +342,9 @@ what the consumer needs to update.
 
 ### Entry format
 
-Prepend a new section after the `# Migration Guide` heading but before any
-existing `## Migrating from...` sections (reverse chronological — newest on
-top):
+Insert a new section after any introductory paragraph(s) that appear
+immediately under the `# Migration Guide` heading, and before any existing
+`## Migrating from...` sections (reverse chronological — newest on top):
 
     ## Migrating from v{prev}.x to v{new_version}
 
@@ -420,6 +420,8 @@ If there are **errors** (not warnings):
   ```bash
   git checkout HEAD -- packages/
   git clean -fdX packages/    # remove ignored/generated files (e.g., .dart_tool/, build outputs)
+  # Also remove any newly created MIGRATION.md files from Step 5b:
+  rm -f packages/{pkg}/MIGRATION.md  # only for packages where the file was newly created
   ```
 - Report which packages had errors and what the errors were.
 
