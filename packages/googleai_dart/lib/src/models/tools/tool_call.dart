@@ -1,7 +1,10 @@
 import '../copy_with_sentinel.dart';
 import 'tool_type.dart';
 
-/// A tool call returned from the model.
+/// A server-side tool invocation predicted by the model.
+///
+/// Clients should echo this back to the API in a subsequent turn alongside
+/// the matching [ToolResponse].
 class ToolCall {
   /// The arguments for the tool call.
   final Map<String, dynamic>? args;

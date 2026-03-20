@@ -1,7 +1,8 @@
 import '../copy_with_sentinel.dart';
 import 'tool_type.dart';
 
-/// A tool response to send back to the model.
+/// The result of a tool invocation, passed back to the API in a subsequent
+/// turn alongside the corresponding [ToolCall].
 class ToolResponse {
   /// Optional identifier of the tool call this response corresponds to, used
   /// to match [ToolCall.id] back to its response.
