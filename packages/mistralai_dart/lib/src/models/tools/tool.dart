@@ -1,12 +1,24 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import 'connector_auth.dart';
 import 'function_definition.dart';
 import 'tool_configuration.dart';
 
 /// A tool available to the model.
 ///
-/// Tools can be either user-defined functions or built-in Mistral tools.
+/// Tools can be user-defined functions, built-in Mistral tools, or custom
+/// connectors.
+///
+/// Variants:
+/// - [FunctionTool] — User-defined function tool.
+/// - [WebSearchTool] — Built-in web search tool.
+/// - [WebSearchPremiumTool] — Built-in premium web search tool.
+/// - [CodeInterpreterTool] — Built-in code interpreter tool.
+/// - [ImageGenerationTool] — Built-in image generation tool.
+/// - [DocumentLibraryTool] — Built-in document library tool.
+/// - [CustomConnectorTool] — Custom connector tool for agents.
 @immutable
 sealed class Tool {
   const Tool();
@@ -67,6 +79,18 @@ sealed class Tool {
     ToolConfiguration? toolConfiguration,
   }) = DocumentLibraryTool;
 
+  /// Creates a custom connector tool.
+  ///
+  /// Enables agents to use custom connectors for external integrations.
+  /// [connectorId] is the unique identifier of the connector.
+  /// [authorization] optionally provides authentication credentials.
+  /// [toolConfiguration] optionally configures tool behavior.
+  const factory Tool.connector({
+    required String connectorId,
+    ConnectorAuth? authorization,
+    ToolConfiguration? toolConfiguration,
+  }) = CustomConnectorTool;
+
   /// Creates a [Tool] from JSON.
   factory Tool.fromJson(Map<String, dynamic> json) {
     final type = json['type'] as String?;
@@ -83,6 +107,8 @@ sealed class Tool {
         return ImageGenerationTool.fromJson(json);
       case 'document_library':
         return DocumentLibraryTool.fromJson(json);
+      case 'connector':
+        return CustomConnectorTool.fromJson(json);
       default:
         // Default to function type for backwards compatibility
         return FunctionTool.fromJson(json);
@@ -358,5 +384,87 @@ class DocumentLibraryTool extends Tool {
   @override
   String toString() =>
       'DocumentLibraryTool(libraryIds: $libraryIds, '
+      'toolConfiguration: $toolConfiguration)';
+}
+
+/// A custom connector tool for agents.
+@immutable
+class CustomConnectorTool extends Tool {
+  /// The tool type, always 'connector'.
+  String get type => 'connector';
+
+  /// The unique identifier of the connector.
+  final String connectorId;
+
+  /// Authentication credentials for the connector.
+  final ConnectorAuth? authorization;
+
+  /// Configuration for the tool's behavior.
+  final ToolConfiguration? toolConfiguration;
+
+  /// Creates a [CustomConnectorTool].
+  const CustomConnectorTool({
+    required this.connectorId,
+    this.authorization,
+    this.toolConfiguration,
+  });
+
+  /// Creates a [CustomConnectorTool] from JSON.
+  factory CustomConnectorTool.fromJson(Map<String, dynamic> json) =>
+      CustomConnectorTool(
+        connectorId: json['connector_id'] as String? ?? '',
+        authorization: json['authorization'] != null
+            ? ConnectorAuth.fromJson(
+                json['authorization'] as Map<String, dynamic>,
+              )
+            : null,
+        toolConfiguration: json['tool_configuration'] != null
+            ? ToolConfiguration.fromJson(
+                json['tool_configuration'] as Map<String, dynamic>,
+              )
+            : null,
+      );
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'connector',
+    'connector_id': connectorId,
+    if (authorization != null) 'authorization': authorization!.toJson(),
+    if (toolConfiguration != null)
+      'tool_configuration': toolConfiguration!.toJson(),
+  };
+
+  /// Creates a copy with the given fields replaced.
+  CustomConnectorTool copyWith({
+    String? connectorId,
+    Object? authorization = unsetCopyWithValue,
+    Object? toolConfiguration = unsetCopyWithValue,
+  }) => CustomConnectorTool(
+    connectorId: connectorId ?? this.connectorId,
+    authorization: authorization == unsetCopyWithValue
+        ? this.authorization
+        : authorization as ConnectorAuth?,
+    toolConfiguration: toolConfiguration == unsetCopyWithValue
+        ? this.toolConfiguration
+        : toolConfiguration as ToolConfiguration?,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CustomConnectorTool &&
+          runtimeType == other.runtimeType &&
+          connectorId == other.connectorId &&
+          authorization == other.authorization &&
+          toolConfiguration == other.toolConfiguration;
+
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, connectorId, authorization, toolConfiguration);
+
+  @override
+  String toString() =>
+      'CustomConnectorTool(connectorId: $connectorId, '
+      'authorization: $authorization, '
       'toolConfiguration: $toolConfiguration)';
 }

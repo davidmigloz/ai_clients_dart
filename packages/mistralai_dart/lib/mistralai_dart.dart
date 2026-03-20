@@ -113,6 +113,7 @@ export 'src/models/embeddings/embedding_response.dart';
 export 'src/models/files/file_list.dart';
 export 'src/models/files/file_object.dart';
 export 'src/models/files/file_purpose.dart';
+export 'src/models/files/file_visibility.dart';
 export 'src/models/files/signed_url.dart';
 // --- Models: FIM ---
 export 'src/models/fim/fim_choice.dart';
@@ -170,6 +171,7 @@ export 'src/models/ocr/ocr_page.dart';
 export 'src/models/ocr/ocr_request.dart';
 export 'src/models/ocr/ocr_response.dart';
 // --- Models: Tools ---
+export 'src/models/tools/connector_auth.dart';
 export 'src/models/tools/function_call.dart';
 export 'src/models/tools/function_definition.dart';
 export 'src/models/tools/tool.dart';

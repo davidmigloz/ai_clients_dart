@@ -449,6 +449,108 @@ void main() {
       });
     });
 
+    group('CustomConnectorTool', () {
+      test('creates with required fields', () {
+        const tool = CustomConnectorTool(connectorId: 'my-connector');
+        expect(tool.connectorId, 'my-connector');
+        expect(tool.authorization, isNull);
+        expect(tool.toolConfiguration, isNull);
+      });
+
+      test('creates with named constructor', () {
+        const tool = Tool.connector(connectorId: 'my-connector');
+        expect(tool, isA<CustomConnectorTool>());
+        expect((tool as CustomConnectorTool).connectorId, 'my-connector');
+      });
+
+      test('creates with all fields', () {
+        const tool = CustomConnectorTool(
+          connectorId: 'my-connector',
+          authorization: ApiKeyAuth(value: 'secret'),
+          toolConfiguration: ToolConfiguration(include: ['func1']),
+        );
+        expect(tool.connectorId, 'my-connector');
+        expect(tool.authorization, isA<ApiKeyAuth>());
+        expect(tool.toolConfiguration?.include, ['func1']);
+      });
+
+      test('serializes to JSON', () {
+        const tool = CustomConnectorTool(connectorId: 'my-connector');
+        final json = tool.toJson();
+
+        expect(json['type'], 'connector');
+        expect(json['connector_id'], 'my-connector');
+        expect(json.containsKey('authorization'), isFalse);
+        expect(json.containsKey('tool_configuration'), isFalse);
+      });
+
+      test('serializes to JSON with all fields', () {
+        const tool = CustomConnectorTool(
+          connectorId: 'my-connector',
+          authorization: ApiKeyAuth(value: 'key'),
+          toolConfiguration: ToolConfiguration(include: ['func1']),
+        );
+        final json = tool.toJson();
+
+        expect(json['type'], 'connector');
+        expect(json['connector_id'], 'my-connector');
+        expect(json['authorization'], isA<Map<String, dynamic>>());
+        expect((json['authorization'] as Map)['type'], 'api-key');
+        expect((json['authorization'] as Map)['value'], 'key');
+        expect(json['tool_configuration'], isA<Map<String, dynamic>>());
+      });
+
+      test('deserializes from JSON', () {
+        final tool = Tool.fromJson(const {
+          'type': 'connector',
+          'connector_id': 'my-connector',
+        });
+        expect(tool, isA<CustomConnectorTool>());
+        expect((tool as CustomConnectorTool).connectorId, 'my-connector');
+      });
+
+      test('deserializes from JSON with all fields', () {
+        final tool = Tool.fromJson(const {
+          'type': 'connector',
+          'connector_id': 'my-connector',
+          'authorization': {'type': 'oauth2-token', 'value': 'token'},
+          'tool_configuration': {
+            'include': ['func1'],
+          },
+        });
+        expect(tool, isA<CustomConnectorTool>());
+        final connectorTool = tool as CustomConnectorTool;
+        expect(connectorTool.connectorId, 'my-connector');
+        expect(connectorTool.authorization, isA<OAuth2TokenAuth>());
+        expect(
+          (connectorTool.authorization! as OAuth2TokenAuth).value,
+          'token',
+        );
+        expect(connectorTool.toolConfiguration?.include, ['func1']);
+      });
+
+      test('equality works correctly', () {
+        const tool1 = CustomConnectorTool(connectorId: 'a');
+        const tool2 = CustomConnectorTool(connectorId: 'a');
+        const tool3 = CustomConnectorTool(connectorId: 'b');
+
+        expect(tool1, equals(tool2));
+        expect(tool1.hashCode, equals(tool2.hashCode));
+        expect(tool1, isNot(equals(tool3)));
+      });
+
+      test('round-trip serialization', () {
+        const original = CustomConnectorTool(
+          connectorId: 'my-connector',
+          authorization: ApiKeyAuth(value: 'key'),
+          toolConfiguration: ToolConfiguration(include: ['func1']),
+        );
+        final json = original.toJson();
+        final restored = Tool.fromJson(json) as CustomConnectorTool;
+        expect(restored, equals(original));
+      });
+    });
+
     group('fromJson defaults', () {
       test('defaults to function type for unknown or missing type', () {
         final tool = Tool.fromJson(const {

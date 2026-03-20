@@ -203,6 +203,80 @@ void main() {
       });
     });
 
+    group('with guardrails', () {
+      test('creates request with guardrails', () {
+        final request = ChatCompletionRequest(
+          model: 'mistral-large-latest',
+          messages: [ChatMessage.user('Hello')],
+          guardrails: const [
+            GuardrailConfig(
+              blockOnError: true,
+              moderationLlmV1: ModerationLLMV1Config(
+                action: ModerationLLMAction.block,
+              ),
+            ),
+          ],
+        );
+
+        expect(request.guardrails, hasLength(1));
+        expect(request.guardrails!.first.blockOnError, true);
+      });
+
+      test('serializes guardrails to JSON', () {
+        final request = ChatCompletionRequest(
+          model: 'mistral-large-latest',
+          messages: [ChatMessage.user('Hello')],
+          guardrails: const [
+            GuardrailConfig(
+              blockOnError: true,
+              moderationLlmV1: ModerationLLMV1Config(
+                action: ModerationLLMAction.block,
+              ),
+            ),
+          ],
+        );
+        final json = request.toJson();
+
+        expect(json['guardrails'], isList);
+        final guardrail =
+            (json['guardrails'] as List).first as Map<String, dynamic>;
+        expect(guardrail['block_on_error'], true);
+        expect((guardrail['moderation_llm_v1'] as Map)['action'], 'block');
+      });
+
+      test('deserializes guardrails from JSON', () {
+        final json = {
+          'model': 'mistral-large-latest',
+          'messages': [
+            {'role': 'user', 'content': 'Hello'},
+          ],
+          'guardrails': [
+            {
+              'block_on_error': true,
+              'moderation_llm_v1': {'action': 'block'},
+            },
+          ],
+        };
+        final request = ChatCompletionRequest.fromJson(json);
+
+        expect(request.guardrails, hasLength(1));
+        expect(request.guardrails!.first.blockOnError, true);
+        expect(
+          request.guardrails!.first.moderationLlmV1?.action,
+          ModerationLLMAction.block,
+        );
+      });
+
+      test('omits null guardrails in JSON', () {
+        final request = ChatCompletionRequest(
+          model: 'mistral-small-latest',
+          messages: [ChatMessage.user('Hello')],
+        );
+        final json = request.toJson();
+        expect(json.containsKey('guardrails'), isFalse);
+      });
+    });
+
     group('toString', () {
       test('includes all fields', () {
         final request = ChatCompletionRequest(
@@ -232,6 +306,7 @@ void main() {
         expect(str, contains('metadata: null'));
         expect(str, contains('prediction: null'));
         expect(str, contains('promptMode: null'));
+        expect(str, contains('guardrails: null'));
       });
     });
   });

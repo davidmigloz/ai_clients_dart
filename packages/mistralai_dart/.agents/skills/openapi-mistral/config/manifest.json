@@ -165,7 +165,9 @@
           "ToolMessage": "tool"
         }
       },
-      "excluded_properties": ["content"],
+      "excluded_properties": [
+        "content"
+      ],
       "note": "content nullability intentionally differs: non-nullable in SystemMessage (system prompts must have content), nullable in others (e.g. assistant tool-call-only messages)."
     },
     "SystemMessage": {
@@ -210,7 +212,12 @@
         "field": "type",
         "mapping": {
           "TextChunk": "text",
-          "ImageURLChunk": "image_url"
+          "ImageURLChunk": "image_url",
+          "DocumentURLChunk": "document_url",
+          "ReferenceChunk": "reference",
+          "FileChunk": "file",
+          "AudioChunk": "input_audio",
+          "ThinkChunk": "thinking"
         }
       },
       "note": null
@@ -234,6 +241,46 @@
         "image_url"
       ]
     },
+    "DocumentURLChunk": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "DocumentUrlContentPart",
+      "file": "lib/src/models/content/content_part.dart",
+      "schema": "DocumentURLChunk",
+      "parent": "ContentPart"
+    },
+    "ReferenceChunk": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ReferenceContentPart",
+      "file": "lib/src/models/content/content_part.dart",
+      "schema": "ReferenceChunk",
+      "parent": "ContentPart"
+    },
+    "FileChunk": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "FileContentPart",
+      "file": "lib/src/models/content/content_part.dart",
+      "schema": "FileChunk",
+      "parent": "ContentPart"
+    },
+    "AudioChunk": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AudioContentPart",
+      "file": "lib/src/models/content/content_part.dart",
+      "schema": "AudioChunk",
+      "parent": "ContentPart"
+    },
+    "ThinkChunk": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ThinkContentPart",
+      "file": "lib/src/models/content/content_part.dart",
+      "schema": "ThinkChunk",
+      "parent": "ContentPart"
+    },
     "Tool": {
       "spec": "main",
       "kind": "sealed_parent",
@@ -243,7 +290,8 @@
       "discriminator": {
         "field": "type",
         "mapping": {
-          "FunctionTool": "function"
+          "FunctionTool": "function",
+          "CustomConnector": "connector"
         }
       },
       "note": null
@@ -255,6 +303,73 @@
       "file": "lib/src/models/tools/tool.dart",
       "schema": "FunctionTool",
       "parent": "Tool"
+    },
+    "CustomConnector": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "CustomConnectorTool",
+      "file": "lib/src/models/tools/tool.dart",
+      "schema": "CustomConnector",
+      "parent": "Tool"
+    },
+    "ConnectorAuth": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ConnectorAuth",
+      "file": "lib/src/models/tools/connector_auth.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "APIKeyAuth": "api-key",
+          "OAuth2TokenAuth": "oauth2-token"
+        }
+      },
+      "note": null
+    },
+    "APIKeyAuth": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ApiKeyAuth",
+      "file": "lib/src/models/tools/connector_auth.dart",
+      "schema": "APIKeyAuth",
+      "parent": "ConnectorAuth"
+    },
+    "OAuth2TokenAuth": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "OAuth2TokenAuth",
+      "file": "lib/src/models/tools/connector_auth.dart",
+      "schema": "OAuth2TokenAuth",
+      "parent": "ConnectorAuth"
+    },
+    "ModerationLLMAction": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ModerationLLMAction",
+      "file": "lib/src/models/moderations/guardrail_config.dart",
+      "schema": "ModerationLLMAction"
+    },
+    "ModerationLLMV2Config": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ModerationLLMV2Config",
+      "file": "lib/src/models/moderations/guardrail_config.dart",
+      "schema": "ModerationLLMV2Config"
+    },
+    "ModerationLLMV2CategoryThresholds": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ModerationLLMV2CategoryThresholds",
+      "file": "lib/src/models/moderations/guardrail_config.dart",
+      "schema": "ModerationLLMV2CategoryThresholds"
+    },
+    "FileVisibility": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "FileVisibility",
+      "file": "lib/src/models/files/file_visibility.dart",
+      "schema": "FileVisibility"
     },
     "ToolChoice": {
       "spec": "main",
@@ -331,6 +446,1062 @@
       "schema": null,
       "parent": "ResponseFormat",
       "note": null
+    },
+    "Annotations": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Annotations",
+      "file": "",
+      "schema": "Annotations",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API"
+    },
+    "ApiEndpoint": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ApiEndpoint",
+      "file": "",
+      "schema": "ApiEndpoint",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API"
+    },
+    "AuthData": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "AuthData",
+      "file": "",
+      "schema": "AuthData",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API"
+    },
+    "BaseFieldDefinition": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "BaseFieldDefinition",
+      "file": "",
+      "schema": "BaseFieldDefinition",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API"
+    },
+    "BaseTaskStatus": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "BaseTaskStatus",
+      "file": "",
+      "schema": "BaseTaskStatus",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API"
+    },
+    "BlobResourceContents": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "BlobResourceContents",
+      "file": "",
+      "schema": "BlobResourceContents",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal MCP protocol type"
+    },
+    "BuiltInConnectors": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "BuiltInConnectors",
+      "file": "",
+      "schema": "BuiltInConnectors",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API"
+    },
+    "CampaignPreview": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "CampaignPreview",
+      "file": "",
+      "schema": "CampaignPreview",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 datasets/campaigns"
+    },
+    "CampaignPreviews": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "CampaignPreviews",
+      "file": "",
+      "schema": "CampaignPreviews",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 datasets/campaigns"
+    },
+    "CampaignSelectedEvents": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "CampaignSelectedEvents",
+      "file": "",
+      "schema": "CampaignSelectedEvents",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 datasets/campaigns"
+    },
+    "CampaignStatus": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "CampaignStatus",
+      "file": "",
+      "schema": "CampaignStatus",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 datasets/campaigns"
+    },
+    "ChatCompletionEvent": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ChatCompletionEvent",
+      "file": "",
+      "schema": "ChatCompletionEvent",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform observability"
+    },
+    "ChatCompletionEventIds": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ChatCompletionEventIds",
+      "file": "",
+      "schema": "ChatCompletionEventIds",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform observability"
+    },
+    "ChatCompletionEventPreview": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ChatCompletionEventPreview",
+      "file": "",
+      "schema": "ChatCompletionEventPreview",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform observability"
+    },
+    "ChatCompletionEvents": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ChatCompletionEvents",
+      "file": "",
+      "schema": "ChatCompletionEvents",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform observability"
+    },
+    "ChatCompletionFieldOptions": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ChatCompletionFieldOptions",
+      "file": "",
+      "schema": "ChatCompletionFieldOptions",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform observability"
+    },
+    "ChatCompletionFields": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ChatCompletionFields",
+      "file": "",
+      "schema": "ChatCompletionFields",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform observability"
+    },
+    "ChatTranscriptionEvent": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ChatTranscriptionEvent",
+      "file": "",
+      "schema": "ChatTranscriptionEvent",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform observability"
+    },
+    "CompletionArgs": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "CompletionArgs",
+      "file": "",
+      "schema": "CompletionArgs",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal fine-tuning detail"
+    },
+    "CompletionArgsStop": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "CompletionArgsStop",
+      "file": "",
+      "schema": "CompletionArgsStop",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal fine-tuning detail"
+    },
+    "Connector": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Connector",
+      "file": "",
+      "schema": "Connector",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal connector management API"
+    },
+    "ConnectorMCPCreate": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ConnectorMCPCreate",
+      "file": "",
+      "schema": "ConnectorMCPCreate",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal connector management API"
+    },
+    "ConnectorMCPUpdate": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ConnectorMCPUpdate",
+      "file": "",
+      "schema": "ConnectorMCPUpdate",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal connector management API"
+    },
+    "ConnectorSupportedLanguage": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ConnectorSupportedLanguage",
+      "file": "",
+      "schema": "ConnectorSupportedLanguage",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal connector management API"
+    },
+    "ConnectorsQueryFilters": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ConnectorsQueryFilters",
+      "file": "",
+      "schema": "ConnectorsQueryFilters",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal connector management API"
+    },
+    "ConversationPayload": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ConversationPayload",
+      "file": "",
+      "schema": "ConversationPayload",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API"
+    },
+    "ConversationSource": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ConversationSource",
+      "file": "",
+      "schema": "ConversationSource",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API"
+    },
+    "Dataset": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Dataset",
+      "file": "",
+      "schema": "Dataset",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 datasets"
+    },
+    "DatasetExport": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "DatasetExport",
+      "file": "",
+      "schema": "DatasetExport",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 datasets"
+    },
+    "DatasetImportTask": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "DatasetImportTask",
+      "file": "",
+      "schema": "DatasetImportTask",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 datasets"
+    },
+    "DatasetImportTasks": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "DatasetImportTasks",
+      "file": "",
+      "schema": "DatasetImportTasks",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 datasets"
+    },
+    "DatasetPreview": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "DatasetPreview",
+      "file": "",
+      "schema": "DatasetPreview",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 datasets"
+    },
+    "DatasetPreviews": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "DatasetPreviews",
+      "file": "",
+      "schema": "DatasetPreviews",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 datasets"
+    },
+    "DatasetRecord": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "DatasetRecord",
+      "file": "",
+      "schema": "DatasetRecord",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 datasets"
+    },
+    "DatasetRecords": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "DatasetRecords",
+      "file": "",
+      "schema": "DatasetRecords",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 datasets"
+    },
+    "DeleteDatasetRecordsInSchema": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "DeleteDatasetRecordsInSchema",
+      "file": "",
+      "schema": "DeleteDatasetRecordsInSchema",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 datasets"
+    },
+    "EmbeddedResource": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "EmbeddedResource",
+      "file": "",
+      "schema": "EmbeddedResource",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal MCP protocol type"
+    },
+    "ExecutionConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ExecutionConfig",
+      "file": "",
+      "schema": "ExecutionConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API"
+    },
+    "FeedResult_ChatCompletionEventPreview_": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "FeedResult_ChatCompletionEventPreview_",
+      "file": "",
+      "schema": "FeedResult_ChatCompletionEventPreview_",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform observability"
+    },
+    "FieldGroup": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "FieldGroup",
+      "file": "",
+      "schema": "FieldGroup",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 filtering"
+    },
+    "FieldOptionCountItem": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "FieldOptionCountItem",
+      "file": "",
+      "schema": "FieldOptionCountItem",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 filtering"
+    },
+    "FieldOptionCounts": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "FieldOptionCounts",
+      "file": "",
+      "schema": "FieldOptionCounts",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 filtering"
+    },
+    "FieldOptionCountsInSchema": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "FieldOptionCountsInSchema",
+      "file": "",
+      "schema": "FieldOptionCountsInSchema",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 filtering"
+    },
+    "FilterCondition": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "FilterCondition",
+      "file": "",
+      "schema": "FilterCondition",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 filtering"
+    },
+    "FilterGroup": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "FilterGroup",
+      "file": "",
+      "schema": "FilterGroup",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 filtering"
+    },
+    "FilterPayload": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "FilterPayload",
+      "file": "",
+      "schema": "FilterPayload",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 filtering"
+    },
+    "GetChatCompletionEventIdsInSchema": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "GetChatCompletionEventIdsInSchema",
+      "file": "",
+      "schema": "GetChatCompletionEventIdsInSchema",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform observability"
+    },
+    "GetChatCompletionEventsInSchema": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "GetChatCompletionEventsInSchema",
+      "file": "",
+      "schema": "GetChatCompletionEventsInSchema",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform observability"
+    },
+    "ImageContent": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ImageContent",
+      "file": "",
+      "schema": "ImageContent",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal MCP protocol type"
+    },
+    "JudgeClassificationOutput": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "JudgeClassificationOutput",
+      "file": "",
+      "schema": "JudgeClassificationOutput",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 judges"
+    },
+    "JudgeClassificationOutputOption": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "JudgeClassificationOutputOption",
+      "file": "",
+      "schema": "JudgeClassificationOutputOption",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 judges"
+    },
+    "JudgeOutput": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "JudgeOutput",
+      "file": "",
+      "schema": "JudgeOutput",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 judges"
+    },
+    "JudgeOutputType": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "JudgeOutputType",
+      "file": "",
+      "schema": "JudgeOutputType",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 judges"
+    },
+    "JudgePreview": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "JudgePreview",
+      "file": "",
+      "schema": "JudgePreview",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 judges"
+    },
+    "JudgePreviews": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "JudgePreviews",
+      "file": "",
+      "schema": "JudgePreviews",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 judges"
+    },
+    "JudgeRegressionOutput": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "JudgeRegressionOutput",
+      "file": "",
+      "schema": "JudgeRegressionOutput",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 judges"
+    },
+    "MCPResultMetadata": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "MCPResultMetadata",
+      "file": "",
+      "schema": "MCPResultMetadata",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal MCP protocol type"
+    },
+    "MCPServerIcon": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "MCPServerIcon",
+      "file": "",
+      "schema": "MCPServerIcon",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal MCP protocol type"
+    },
+    "MCPToolCallMetadata": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "MCPToolCallMetadata",
+      "file": "",
+      "schema": "MCPToolCallMetadata",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal MCP protocol type"
+    },
+    "MCPToolCallRequest": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "MCPToolCallRequest",
+      "file": "",
+      "schema": "MCPToolCallRequest",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal MCP protocol type"
+    },
+    "MCPToolCallResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "MCPToolCallResponse",
+      "file": "",
+      "schema": "MCPToolCallResponse",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal MCP protocol type"
+    },
+    "MessageResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "MessageResponse",
+      "file": "",
+      "schema": "MessageResponse",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API"
+    },
+    "OutputContentChunks": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "OutputContentChunks",
+      "file": "",
+      "schema": "OutputContentChunks",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API"
+    },
+    "PaginatedConnectors": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PaginatedConnectors",
+      "file": "",
+      "schema": "PaginatedConnectors",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal connector management API"
+    },
+    "PaginatedResult_CampaignPreview_": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PaginatedResult_CampaignPreview_",
+      "file": "",
+      "schema": "PaginatedResult_CampaignPreview_",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 pagination"
+    },
+    "PaginatedResult_ChatCompletionEventPreview_": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PaginatedResult_ChatCompletionEventPreview_",
+      "file": "",
+      "schema": "PaginatedResult_ChatCompletionEventPreview_",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 pagination"
+    },
+    "PaginatedResult_DatasetImportTask_": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PaginatedResult_DatasetImportTask_",
+      "file": "",
+      "schema": "PaginatedResult_DatasetImportTask_",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 pagination"
+    },
+    "PaginatedResult_DatasetPreview_": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PaginatedResult_DatasetPreview_",
+      "file": "",
+      "schema": "PaginatedResult_DatasetPreview_",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 pagination"
+    },
+    "PaginatedResult_DatasetRecord_": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PaginatedResult_DatasetRecord_",
+      "file": "",
+      "schema": "PaginatedResult_DatasetRecord_",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 pagination"
+    },
+    "PaginatedResult_JudgePreview_": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PaginatedResult_JudgePreview_",
+      "file": "",
+      "schema": "PaginatedResult_JudgePreview_",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 pagination"
+    },
+    "PaginationInfo": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PaginationInfo",
+      "file": "",
+      "schema": "PaginationInfo",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 pagination"
+    },
+    "PaginationResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PaginationResponse",
+      "file": "",
+      "schema": "PaginationResponse",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 pagination"
+    },
+    "PatchDatasetInSchema": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PatchDatasetInSchema",
+      "file": "",
+      "schema": "PatchDatasetInSchema",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 datasets"
+    },
+    "PostCampaignInSchema": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PostCampaignInSchema",
+      "file": "",
+      "schema": "PostCampaignInSchema",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 campaigns"
+    },
+    "PostChatCompletionEventJudgingInSchema": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PostChatCompletionEventJudgingInSchema",
+      "file": "",
+      "schema": "PostChatCompletionEventJudgingInSchema",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform observability"
+    },
+    "PostDatasetImportFromCampaignInSchema": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PostDatasetImportFromCampaignInSchema",
+      "file": "",
+      "schema": "PostDatasetImportFromCampaignInSchema",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 datasets"
+    },
+    "PostDatasetImportFromDatasetInSchema": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PostDatasetImportFromDatasetInSchema",
+      "file": "",
+      "schema": "PostDatasetImportFromDatasetInSchema",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 datasets"
+    },
+    "PostDatasetImportFromExplorerInSchema": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PostDatasetImportFromExplorerInSchema",
+      "file": "",
+      "schema": "PostDatasetImportFromExplorerInSchema",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 datasets"
+    },
+    "PostDatasetImportFromFileInSchema": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PostDatasetImportFromFileInSchema",
+      "file": "",
+      "schema": "PostDatasetImportFromFileInSchema",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 datasets"
+    },
+    "PostDatasetImportFromPlaygroundInSchema": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PostDatasetImportFromPlaygroundInSchema",
+      "file": "",
+      "schema": "PostDatasetImportFromPlaygroundInSchema",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 datasets"
+    },
+    "PostDatasetInSchema": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PostDatasetInSchema",
+      "file": "",
+      "schema": "PostDatasetInSchema",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 datasets"
+    },
+    "PostDatasetRecordInSchema": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PostDatasetRecordInSchema",
+      "file": "",
+      "schema": "PostDatasetRecordInSchema",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 datasets"
+    },
+    "PostDatasetRecordJudgingInSchema": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PostDatasetRecordJudgingInSchema",
+      "file": "",
+      "schema": "PostDatasetRecordJudgingInSchema",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 datasets"
+    },
+    "PostJudgeInSchema": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PostJudgeInSchema",
+      "file": "",
+      "schema": "PostJudgeInSchema",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 judges"
+    },
+    "PutDatasetRecordPayloadInSchema": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PutDatasetRecordPayloadInSchema",
+      "file": "",
+      "schema": "PutDatasetRecordPayloadInSchema",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 datasets"
+    },
+    "PutDatasetRecordPropertiesInSchema": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PutDatasetRecordPropertiesInSchema",
+      "file": "",
+      "schema": "PutDatasetRecordPropertiesInSchema",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 datasets"
+    },
+    "PutJudgeInSchema": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PutJudgeInSchema",
+      "file": "",
+      "schema": "PutJudgeInSchema",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal platform API \u2014 judges"
+    },
+    "ResourceLink": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ResourceLink",
+      "file": "",
+      "schema": "ResourceLink",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal MCP protocol type"
+    },
+    "ResourceVisibility": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ResourceVisibility",
+      "file": "",
+      "schema": "ResourceVisibility",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal MCP protocol type"
+    },
+    "TextContent": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "TextContent",
+      "file": "",
+      "schema": "TextContent",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal MCP protocol type"
+    },
+    "AudioContent": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "AudioContent",
+      "file": "",
+      "schema": "AudioContent",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal MCP protocol type"
+    },
+    "TextResourceContents": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "TextResourceContents",
+      "file": "",
+      "schema": "TextResourceContents",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal MCP protocol type"
+    },
+    "ValidationError": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ValidationError",
+      "file": "",
+      "schema": "ValidationError",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "HTTP validation error, not domain model"
+    },
+    "HTTPValidationError": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "HTTPValidationError",
+      "file": "",
+      "schema": "HTTPValidationError",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "HTTP validation error, not domain model"
+    },
+    "integrations__schemas__api__tool__Tool": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "integrations__schemas__api__tool__Tool",
+      "file": "",
+      "schema": "integrations__schemas__api__tool__Tool",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal integration schema"
+    },
+    "integrations__schemas__turbine__ToolLocale": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "integrations__schemas__turbine__ToolLocale",
+      "file": "",
+      "schema": "integrations__schemas__turbine__ToolLocale",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal integration schema"
     }
   }
 }

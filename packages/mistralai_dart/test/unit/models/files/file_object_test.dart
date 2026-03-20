@@ -37,12 +37,20 @@ void main() {
         numLines: 100,
         source: 'upload',
         deleted: false,
+        expiresAt: 1700000000,
+        visibility: FileVisibility.workspace,
+        mimetype: 'application/jsonl',
+        signature: 'abc123',
       );
 
       expect(file.sampleType, 'instruct');
       expect(file.numLines, 100);
       expect(file.source, 'upload');
       expect(file.deleted, false);
+      expect(file.expiresAt, 1700000000);
+      expect(file.visibility, FileVisibility.workspace);
+      expect(file.mimetype, 'application/jsonl');
+      expect(file.signature, 'abc123');
     });
 
     test('fromJson parses correctly', () {
@@ -57,6 +65,10 @@ void main() {
         'num_lines': 50,
         'source': 'repository',
         'deleted': true,
+        'expires_at': 1700000000,
+        'visibility': 'workspace',
+        'mimetype': 'application/pdf',
+        'signature': 'sig-abc',
       };
 
       final file = FileObject.fromJson(json);
@@ -71,6 +83,10 @@ void main() {
       expect(file.numLines, 50);
       expect(file.source, 'repository');
       expect(file.deleted, true);
+      expect(file.expiresAt, 1700000000);
+      expect(file.visibility, FileVisibility.workspace);
+      expect(file.mimetype, 'application/pdf');
+      expect(file.signature, 'sig-abc');
     });
 
     test('fromJson handles missing optional fields', () {
@@ -88,6 +104,10 @@ void main() {
       expect(file.purpose, FilePurpose.audio);
       expect(file.sampleType, isNull);
       expect(file.numLines, isNull);
+      expect(file.expiresAt, isNull);
+      expect(file.visibility, isNull);
+      expect(file.mimetype, isNull);
+      expect(file.signature, isNull);
     });
 
     test('fromJson provides defaults for missing required fields', () {
@@ -112,6 +132,10 @@ void main() {
         filename: 'test.jsonl',
         purpose: FilePurpose.fineTune,
         numLines: 200,
+        expiresAt: 1700000000,
+        visibility: FileVisibility.user,
+        mimetype: 'application/jsonl',
+        signature: 'sig-xyz',
       );
 
       final json = file.toJson();
@@ -124,6 +148,28 @@ void main() {
       expect(json['purpose'], 'fine-tune');
       expect(json['num_lines'], 200);
       expect(json.containsKey('sample_type'), isFalse);
+      expect(json['expires_at'], 1700000000);
+      expect(json['visibility'], 'user');
+      expect(json['mimetype'], 'application/jsonl');
+      expect(json['signature'], 'sig-xyz');
+    });
+
+    test('toJson omits null new fields', () {
+      const file = FileObject(
+        id: 'file-minimal',
+        object: 'file',
+        bytes: 512,
+        createdAt: 1699000003,
+        filename: 'test.jsonl',
+        purpose: FilePurpose.fineTune,
+      );
+
+      final json = file.toJson();
+
+      expect(json.containsKey('expires_at'), isFalse);
+      expect(json.containsKey('visibility'), isFalse);
+      expect(json.containsKey('mimetype'), isFalse);
+      expect(json.containsKey('signature'), isFalse);
     });
 
     test('equality works correctly', () {
@@ -170,6 +216,23 @@ void main() {
       expect(file.toString(), contains('FileObject'));
       expect(file.toString(), contains('file-str'));
       expect(file.toString(), contains('example.jsonl'));
+    });
+  });
+
+  group('FileVisibility', () {
+    test('has correct values', () {
+      expect(FileVisibility.workspace.value, 'workspace');
+      expect(FileVisibility.user.value, 'user');
+    });
+
+    test('fromString returns correct enum', () {
+      expect(FileVisibility.fromString('workspace'), FileVisibility.workspace);
+      expect(FileVisibility.fromString('user'), FileVisibility.user);
+    });
+
+    test('fromString returns null for unknown values', () {
+      expect(FileVisibility.fromString('unknown'), isNull);
+      expect(FileVisibility.fromString(null), isNull);
     });
   });
 

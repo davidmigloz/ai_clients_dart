@@ -6,6 +6,7 @@ import '../metadata/prediction.dart';
 import '../metadata/prompt_mode.dart';
 import '../metadata/response_format.dart';
 import '../metadata/stop_sequence.dart';
+import '../moderations/guardrail_config.dart';
 import '../tools/tool.dart';
 import '../tools/tool_choice.dart';
 import 'chat_message.dart';
@@ -95,6 +96,9 @@ class ChatCompletionRequest {
   /// mode where the model engages in deeper reasoning before responding.
   final MistralPromptMode? promptMode;
 
+  /// Guardrail configurations for content moderation.
+  final List<GuardrailConfig>? guardrails;
+
   /// Creates a [ChatCompletionRequest].
   const ChatCompletionRequest({
     required this.model,
@@ -116,6 +120,7 @@ class ChatCompletionRequest {
     this.metadata,
     this.prediction,
     this.promptMode,
+    this.guardrails,
   });
 
   /// Creates a [ChatCompletionRequest] from JSON.
@@ -158,6 +163,9 @@ class ChatCompletionRequest {
         promptMode: MistralPromptMode.fromString(
           json['prompt_mode'] as String?,
         ),
+        guardrails: (json['guardrails'] as List?)
+            ?.map((e) => GuardrailConfig.fromJson(e as Map<String, dynamic>))
+            .toList(),
       );
 
   /// Converts to JSON.
@@ -181,6 +189,8 @@ class ChatCompletionRequest {
     if (metadata != null) 'metadata': metadata,
     if (prediction != null) 'prediction': prediction!.toJson(),
     if (promptMode != null) 'prompt_mode': promptMode!.value,
+    if (guardrails != null)
+      'guardrails': guardrails!.map((e) => e.toJson()).toList(),
   };
 
   /// Creates a copy with replaced values.
@@ -204,6 +214,7 @@ class ChatCompletionRequest {
     Object? metadata = unsetCopyWithValue,
     Object? prediction = unsetCopyWithValue,
     Object? promptMode = unsetCopyWithValue,
+    Object? guardrails = unsetCopyWithValue,
   }) {
     return ChatCompletionRequest(
       model: model ?? this.model,
@@ -249,6 +260,9 @@ class ChatCompletionRequest {
       promptMode: promptMode == unsetCopyWithValue
           ? this.promptMode
           : promptMode as MistralPromptMode?,
+      guardrails: guardrails == unsetCopyWithValue
+          ? this.guardrails
+          : guardrails as List<GuardrailConfig>?,
     );
   }
 
@@ -261,6 +275,7 @@ class ChatCompletionRequest {
     // Compare lists with deep equality
     if (!listsEqual(messages, other.messages)) return false;
     if (!listsEqual(tools, other.tools)) return false;
+    if (!listsEqual(guardrails, other.guardrails)) return false;
 
     return model == other.model &&
         temperature == other.temperature &&
@@ -279,6 +294,7 @@ class ChatCompletionRequest {
         mapsEqual(metadata, other.metadata) &&
         prediction == other.prediction &&
         promptMode == other.promptMode;
+    // guardrails compared above via listsEqual
   }
 
   @override
@@ -301,7 +317,7 @@ class ChatCompletionRequest {
     safePrompt,
     mapHash(metadata),
     prediction,
-    promptMode,
+    Object.hash(promptMode, Object.hashAll(guardrails ?? [])),
   );
 
   @override
@@ -324,5 +340,6 @@ class ChatCompletionRequest {
       'safePrompt: $safePrompt, '
       'metadata: $metadata, '
       'prediction: $prediction, '
-      'promptMode: $promptMode)';
+      'promptMode: $promptMode, '
+      'guardrails: $guardrails)';
 }

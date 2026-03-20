@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import 'file_purpose.dart';
+import 'file_visibility.dart';
 
 /// Represents a file uploaded to the Mistral API.
 @immutable
@@ -35,6 +36,18 @@ class FileObject {
   /// Whether the file has been deleted.
   final bool? deleted;
 
+  /// Unix timestamp of when the file expires.
+  final int? expiresAt;
+
+  /// The visibility scope of the file.
+  final FileVisibility? visibility;
+
+  /// The MIME type of the file.
+  final String? mimetype;
+
+  /// The file signature.
+  final String? signature;
+
   /// Creates a [FileObject].
   const FileObject({
     required this.id,
@@ -47,6 +60,10 @@ class FileObject {
     this.numLines,
     this.source,
     this.deleted,
+    this.expiresAt,
+    this.visibility,
+    this.mimetype,
+    this.signature,
   });
 
   /// Creates a [FileObject] from JSON.
@@ -61,6 +78,10 @@ class FileObject {
     numLines: json['num_lines'] as int?,
     source: json['source'] as String?,
     deleted: json['deleted'] as bool?,
+    expiresAt: json['expires_at'] as int?,
+    visibility: FileVisibility.fromString(json['visibility'] as String?),
+    mimetype: json['mimetype'] as String?,
+    signature: json['signature'] as String?,
   );
 
   /// Converts to JSON.
@@ -75,6 +96,10 @@ class FileObject {
     if (numLines != null) 'num_lines': numLines,
     if (source != null) 'source': source,
     if (deleted != null) 'deleted': deleted,
+    if (expiresAt != null) 'expires_at': expiresAt,
+    if (visibility != null) 'visibility': visibility!.value,
+    if (mimetype != null) 'mimetype': mimetype,
+    if (signature != null) 'signature': signature,
   };
 
   @override

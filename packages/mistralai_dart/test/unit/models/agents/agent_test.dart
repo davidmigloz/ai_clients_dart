@@ -41,7 +41,7 @@ void main() {
             GuardrailConfig(
               blockOnError: true,
               moderationLlmV1: ModerationLLMV1Config(
-                action: ModerationLLMV1Action.block,
+                action: ModerationLLMAction.block,
               ),
             ),
           ],
@@ -61,7 +61,7 @@ void main() {
         expect(agent.guardrails!.first.blockOnError, isTrue);
         expect(
           agent.guardrails!.first.moderationLlmV1!.action,
-          ModerationLLMV1Action.block,
+          ModerationLLMAction.block,
         );
         expect(agent.versionMessage, 'Initial release');
         expect(agent.version, 2);
@@ -105,7 +105,7 @@ void main() {
             GuardrailConfig(
               blockOnError: true,
               moderationLlmV1: ModerationLLMV1Config(
-                action: ModerationLLMV1Action.block,
+                action: ModerationLLMAction.block,
               ),
             ),
           ],
@@ -181,7 +181,7 @@ void main() {
         expect(agent.guardrails!.first.blockOnError, isTrue);
         expect(
           agent.guardrails!.first.moderationLlmV1!.action,
-          ModerationLLMV1Action.block,
+          ModerationLLMAction.block,
         );
         expect(agent.versionMessage, 'Updated tools');
         expect(agent.version, 5);

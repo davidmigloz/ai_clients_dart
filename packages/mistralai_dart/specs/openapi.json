@@ -1,6 +1,28 @@
 {
   "components": {
     "schemas": {
+      "APIKeyAuth": {
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "default": "api-key",
+            "enum": [
+              "api-key"
+            ],
+            "title": "Type",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "title": "APIKeyAuth",
+        "type": "object"
+      },
       "Agent": {
         "additionalProperties": false,
         "properties": {
@@ -107,6 +129,7 @@
               "discriminator": {
                 "mapping": {
                   "code_interpreter": "#/components/schemas/CodeInterpreterTool",
+                  "connector": "#/components/schemas/CustomConnector",
                   "document_library": "#/components/schemas/DocumentLibraryTool",
                   "function": "#/components/schemas/FunctionTool",
                   "image_generation": "#/components/schemas/ImageGenerationTool",
@@ -133,6 +156,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/DocumentLibraryTool"
+                },
+                {
+                  "$ref": "#/components/schemas/CustomConnector"
                 }
               ]
             },
@@ -381,6 +407,7 @@
               "discriminator": {
                 "mapping": {
                   "code_interpreter": "#/components/schemas/CodeInterpreterTool",
+                  "connector": "#/components/schemas/CustomConnector",
                   "document_library": "#/components/schemas/DocumentLibraryTool",
                   "function": "#/components/schemas/FunctionTool",
                   "image_generation": "#/components/schemas/ImageGenerationTool",
@@ -407,6 +434,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/DocumentLibraryTool"
+                },
+                {
+                  "$ref": "#/components/schemas/CustomConnector"
                 }
               ]
             },
@@ -683,6 +713,7 @@
               "discriminator": {
                 "mapping": {
                   "code_interpreter": "#/components/schemas/CodeInterpreterTool",
+                  "connector": "#/components/schemas/CustomConnector",
                   "document_library": "#/components/schemas/DocumentLibraryTool",
                   "function": "#/components/schemas/FunctionTool",
                   "image_generation": "#/components/schemas/ImageGenerationTool",
@@ -709,6 +740,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/DocumentLibraryTool"
+                },
+                {
+                  "$ref": "#/components/schemas/CustomConnector"
                 }
               ]
             },
@@ -925,6 +959,44 @@
         "title": "AgentsCompletionRequest",
         "type": "object"
       },
+      "Annotations": {
+        "additionalProperties": true,
+        "properties": {
+          "audience": {
+            "anyOf": [
+              {
+                "items": {
+                  "enum": [
+                    "user",
+                    "assistant"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audience"
+          },
+          "priority": {
+            "anyOf": [
+              {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priority"
+          }
+        },
+        "title": "Annotations",
+        "type": "object"
+      },
       "ApiEndpoint": {
         "enum": [
           "/v1/chat/completions",
@@ -1043,6 +1115,54 @@
         "title": "AudioChunk",
         "type": "object"
       },
+      "AudioContent": {
+        "additionalProperties": true,
+        "description": "Audio content for a message.",
+        "properties": {
+          "_meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta"
+          },
+          "annotations": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Annotations"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "data": {
+            "title": "Data",
+            "type": "string"
+          },
+          "mimeType": {
+            "title": "Mimetype",
+            "type": "string"
+          },
+          "type": {
+            "const": "audio",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "data",
+          "mimeType"
+        ],
+        "title": "AudioContent",
+        "type": "object"
+      },
       "AudioEncoding": {
         "enum": [
           "pcm_s16le",
@@ -1076,6 +1196,16 @@
         "type": "object"
       },
       "AudioTranscriptionRequest": {
+        "$defs": {
+          "TimestampGranularity": {
+            "enum": [
+              "segment",
+              "word"
+            ],
+            "title": "TimestampGranularity",
+            "type": "string"
+          }
+        },
         "properties": {
           "context_bias": {
             "default": [],
@@ -1189,6 +1319,16 @@
         "type": "object"
       },
       "AudioTranscriptionRequestStream": {
+        "$defs": {
+          "TimestampGranularity": {
+            "enum": [
+              "segment",
+              "word"
+            ],
+            "title": "TimestampGranularity",
+            "type": "string"
+          }
+        },
         "properties": {
           "context_bias": {
             "default": [],
@@ -1296,6 +1436,97 @@
         "title": "AudioTranscriptionRequestStream",
         "type": "object"
       },
+      "AuthData": {
+        "properties": {
+          "client_id": {
+            "title": "Client Id",
+            "type": "string"
+          },
+          "client_secret": {
+            "title": "Client Secret",
+            "type": "string"
+          }
+        },
+        "required": [
+          "client_id",
+          "client_secret"
+        ],
+        "title": "AuthData",
+        "type": "object"
+      },
+      "BaseFieldDefinition": {
+        "properties": {
+          "group": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "supported_operators": {
+            "items": {
+              "enum": [
+                "lt",
+                "lte",
+                "gt",
+                "gte",
+                "startswith",
+                "istartswith",
+                "endswith",
+                "iendswith",
+                "contains",
+                "icontains",
+                "matches",
+                "notcontains",
+                "inotcontains",
+                "eq",
+                "neq",
+                "isnull",
+                "includes",
+                "excludes",
+                "len_eq"
+              ],
+              "type": "string"
+            },
+            "readOnly": true,
+            "title": "Supported Operators",
+            "type": "array"
+          },
+          "type": {
+            "enum": [
+              "ENUM",
+              "TEXT",
+              "INT",
+              "FLOAT",
+              "BOOL",
+              "TIMESTAMP",
+              "ARRAY"
+            ],
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "label",
+          "type",
+          "supported_operators"
+        ],
+        "title": "BaseFieldDefinition",
+        "type": "object"
+      },
       "BaseModelCard": {
         "properties": {
           "aliases": {
@@ -1401,6 +1632,20 @@
         ],
         "title": "BaseModelCard",
         "type": "object"
+      },
+      "BaseTaskStatus": {
+        "enum": [
+          "RUNNING",
+          "COMPLETED",
+          "FAILED",
+          "CANCELED",
+          "TERMINATED",
+          "CONTINUED_AS_NEW",
+          "TIMED_OUT",
+          "UNKNOWN"
+        ],
+        "title": "BaseTaskStatus",
+        "type": "string"
       },
       "BatchError": {
         "properties": {
@@ -1754,6 +1999,51 @@
         "title": "BatchRequest",
         "type": "object"
       },
+      "BlobResourceContents": {
+        "additionalProperties": true,
+        "description": "Binary contents of a resource.",
+        "properties": {
+          "_meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta"
+          },
+          "blob": {
+            "title": "Blob",
+            "type": "string"
+          },
+          "mimeType": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mimetype"
+          },
+          "uri": {
+            "format": "uri",
+            "minLength": 1,
+            "title": "Uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "uri",
+          "blob"
+        ],
+        "title": "BlobResourceContents",
+        "type": "object"
+      },
       "BuiltInConnectors": {
         "enum": [
           "web_search",
@@ -1764,6 +2054,116 @@
         ],
         "title": "BuiltInConnectors",
         "type": "string"
+      },
+      "CampaignPreview": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "deleted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted At"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "judge": {
+            "$ref": "#/components/schemas/JudgePreview"
+          },
+          "max_nb_events": {
+            "title": "Max Nb Events",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "owner_id": {
+            "format": "uuid",
+            "title": "Owner Id",
+            "type": "string"
+          },
+          "search_params": {
+            "$ref": "#/components/schemas/FilterPayload"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "updated_at",
+          "deleted_at",
+          "name",
+          "owner_id",
+          "workspace_id",
+          "description",
+          "max_nb_events",
+          "search_params",
+          "judge"
+        ],
+        "title": "CampaignPreview",
+        "type": "object"
+      },
+      "CampaignPreviews": {
+        "properties": {
+          "campaigns": {
+            "$ref": "#/components/schemas/PaginatedResult_CampaignPreview_"
+          }
+        },
+        "required": [
+          "campaigns"
+        ],
+        "title": "CampaignPreviews",
+        "type": "object"
+      },
+      "CampaignSelectedEvents": {
+        "properties": {
+          "completion_events": {
+            "$ref": "#/components/schemas/PaginatedResult_ChatCompletionEventPreview_"
+          }
+        },
+        "required": [
+          "completion_events"
+        ],
+        "title": "CampaignSelectedEvents",
+        "type": "object"
+      },
+      "CampaignStatus": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/BaseTaskStatus"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "CampaignStatus",
+        "type": "object"
       },
       "ChatClassificationRequest": {
         "additionalProperties": false,
@@ -1827,6 +2227,264 @@
         "title": "ChatCompletionChoice",
         "type": "object"
       },
+      "ChatCompletionEvent": {
+        "properties": {
+          "chat_transcription_events": {
+            "items": {
+              "$ref": "#/components/schemas/ChatTranscriptionEvent"
+            },
+            "title": "Chat Transcription Events",
+            "type": "array"
+          },
+          "correlation_id": {
+            "title": "Correlation Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "enabled_tools": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Enabled Tools",
+            "type": "array"
+          },
+          "event_id": {
+            "title": "Event Id",
+            "type": "string"
+          },
+          "extra_fields": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": "Extra Fields",
+            "type": "object"
+          },
+          "nb_input_tokens": {
+            "title": "Nb Input Tokens",
+            "type": "integer"
+          },
+          "nb_messages": {
+            "title": "Nb Messages",
+            "type": "integer"
+          },
+          "nb_output_tokens": {
+            "title": "Nb Output Tokens",
+            "type": "integer"
+          },
+          "request_messages": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Request Messages",
+            "type": "array"
+          },
+          "response_messages": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Response Messages",
+            "type": "array"
+          }
+        },
+        "required": [
+          "event_id",
+          "correlation_id",
+          "created_at",
+          "extra_fields",
+          "nb_input_tokens",
+          "nb_output_tokens",
+          "enabled_tools",
+          "request_messages",
+          "response_messages",
+          "nb_messages",
+          "chat_transcription_events"
+        ],
+        "title": "ChatCompletionEvent",
+        "type": "object"
+      },
+      "ChatCompletionEventIds": {
+        "properties": {
+          "completion_event_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Completion Event Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "completion_event_ids"
+        ],
+        "title": "ChatCompletionEventIds",
+        "type": "object"
+      },
+      "ChatCompletionEventPreview": {
+        "properties": {
+          "correlation_id": {
+            "title": "Correlation Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "event_id": {
+            "title": "Event Id",
+            "type": "string"
+          },
+          "extra_fields": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": "Extra Fields",
+            "type": "object"
+          },
+          "nb_input_tokens": {
+            "title": "Nb Input Tokens",
+            "type": "integer"
+          },
+          "nb_output_tokens": {
+            "title": "Nb Output Tokens",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "event_id",
+          "correlation_id",
+          "created_at",
+          "extra_fields",
+          "nb_input_tokens",
+          "nb_output_tokens"
+        ],
+        "title": "ChatCompletionEventPreview",
+        "type": "object"
+      },
+      "ChatCompletionEvents": {
+        "properties": {
+          "completion_events": {
+            "$ref": "#/components/schemas/FeedResult_ChatCompletionEventPreview_"
+          }
+        },
+        "required": [
+          "completion_events"
+        ],
+        "title": "ChatCompletionEvents",
+        "type": "object"
+      },
+      "ChatCompletionFieldOptions": {
+        "properties": {
+          "options": {
+            "anyOf": [
+              {
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Options"
+          }
+        },
+        "title": "ChatCompletionFieldOptions",
+        "type": "object"
+      },
+      "ChatCompletionFields": {
+        "properties": {
+          "field_definitions": {
+            "items": {
+              "$ref": "#/components/schemas/BaseFieldDefinition"
+            },
+            "title": "Field Definitions",
+            "type": "array"
+          },
+          "field_groups": {
+            "items": {
+              "$ref": "#/components/schemas/FieldGroup"
+            },
+            "title": "Field Groups",
+            "type": "array"
+          }
+        },
+        "required": [
+          "field_definitions",
+          "field_groups"
+        ],
+        "title": "ChatCompletionFields",
+        "type": "object"
+      },
       "ChatCompletionRequest": {
         "additionalProperties": false,
         "properties": {
@@ -1837,6 +2495,22 @@
             "minimum": -2,
             "title": "Frequency Penalty",
             "type": "number"
+          },
+          "guardrails": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GuardrailConfig"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "A list of guardrail configurations to apply to this request. Each guardrail specifies a moderation type, categories with thresholds to evaluate, and an action to take on violation.",
+            "title": "Guardrails"
           },
           "max_tokens": {
             "anyOf": [
@@ -2178,6 +2852,30 @@
           "model"
         ],
         "title": "ChatModerationRequest",
+        "type": "object"
+      },
+      "ChatTranscriptionEvent": {
+        "properties": {
+          "audio_url": {
+            "title": "Audio Url",
+            "type": "string"
+          },
+          "model": {
+            "title": "Model",
+            "type": "string"
+          },
+          "response_message": {
+            "additionalProperties": true,
+            "title": "Response Message",
+            "type": "object"
+          }
+        },
+        "required": [
+          "audio_url",
+          "model",
+          "response_message"
+        ],
+        "title": "ChatTranscriptionEvent",
         "type": "object"
       },
       "CheckpointOut": {
@@ -2844,7 +3542,7 @@
           "learning_rate": {
             "default": 0.0001,
             "maximum": 1,
-            "minimum": 1e-08,
+            "minimum": "1e-08",
             "title": "Learning Rate",
             "type": "number"
           },
@@ -2923,7 +3621,7 @@
             "default": 0.0001,
             "description": "A parameter describing how much to adjust the pre-trained model's weights in response to the estimated error each time the weights are updated during the fine-tuning process.",
             "maximum": 1,
-            "minimum": 1e-08,
+            "minimum": "1e-08",
             "title": "Learning Rate",
             "type": "number"
           },
@@ -3727,7 +4425,7 @@
           "learning_rate": {
             "default": 0.0001,
             "maximum": 1,
-            "minimum": 1e-08,
+            "minimum": "1e-08",
             "title": "Learning Rate",
             "type": "number"
           },
@@ -3820,7 +4518,7 @@
             "default": 0.0001,
             "description": "A parameter describing how much to adjust the pre-trained model's weights in response to the estimated error each time the weights are updated during the fine-tuning process.",
             "maximum": 1,
-            "minimum": 1e-08,
+            "minimum": "1e-08",
             "title": "Learning Rate",
             "type": "number"
           },
@@ -3881,6 +4579,318 @@
           }
         },
         "title": "CompletionTrainingParametersIn",
+        "type": "object"
+      },
+      "Connector": {
+        "properties": {
+          "auth_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auth Type"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "modified_at": {
+            "format": "date-time",
+            "title": "Modified At",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "server": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Server"
+          },
+          "tools": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/integrations__schemas__api__tool__Tool"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tools"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "created_at",
+          "modified_at"
+        ],
+        "title": "Connector",
+        "type": "object"
+      },
+      "ConnectorMCPCreate": {
+        "properties": {
+          "auth_data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AuthData"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional additional authentication data for the connector."
+          },
+          "description": {
+            "description": "The description of the connector.",
+            "title": "Description",
+            "type": "string"
+          },
+          "headers": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional organization-level headers to be sent with the request to the mcp server.",
+            "title": "Headers"
+          },
+          "icon_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The optional url of the icon you want to associate to the connector.",
+            "title": "Icon Url"
+          },
+          "name": {
+            "description": "The name of the connector. Should be 64 char length maximum, alphanumeric, only underscores/dashes.",
+            "title": "Name",
+            "type": "string"
+          },
+          "server": {
+            "description": "The url of the MCP server.",
+            "format": "uri",
+            "maxLength": 2083,
+            "minLength": 1,
+            "title": "Server",
+            "type": "string"
+          },
+          "system_prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional system prompt for the connector.",
+            "title": "System Prompt"
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/ResourceVisibility",
+            "default": "shared_org",
+            "description": "Visibility of the connector. Use 'shared_workspace' for workspace scoped connectors, or 'private' for private connectors."
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "server"
+        ],
+        "title": "ConnectorMCPCreate",
+        "type": "object"
+      },
+      "ConnectorMCPUpdate": {
+        "properties": {
+          "auth_data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AuthData"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "New authentication data for your mcp connector."
+          },
+          "connection_config": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional new connection config.",
+            "title": "Connection Config"
+          },
+          "connection_secrets": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional new connection secrets",
+            "title": "Connection Secrets"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The description of the connector.",
+            "title": "Description"
+          },
+          "headers": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "New headers for your mcp connector.",
+            "title": "Headers"
+          },
+          "icon_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The optional url of the icon you want to associate to the connector.",
+            "title": "Icon Url"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the connector.",
+            "title": "Name"
+          },
+          "server": {
+            "anyOf": [
+              {
+                "format": "uri",
+                "maxLength": 2083,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "New server url for your mcp connector.",
+            "title": "Server"
+          },
+          "system_prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional system prompt for the connector.",
+            "title": "System Prompt"
+          }
+        },
+        "title": "ConnectorMCPUpdate",
+        "type": "object"
+      },
+      "ConnectorSupportedLanguage": {
+        "enum": [
+          "en",
+          "fr",
+          "ar",
+          "es",
+          "de",
+          "pl",
+          "pt-BR",
+          "it",
+          "nl"
+        ],
+        "title": "ConnectorSupportedLanguage",
+        "type": "string"
+      },
+      "ConnectorsQueryFilters": {
+        "properties": {
+          "active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Filter for active connectors for a given user, workspace and organization.",
+            "title": "Active"
+          },
+          "fetch_connection_secrets": {
+            "default": false,
+            "description": "Fetch connection secrets.",
+            "title": "Fetch Connection Secrets",
+            "type": "boolean"
+          }
+        },
+        "title": "ConnectorsQueryFilters",
         "type": "object"
       },
       "ContentChunk": {
@@ -4155,6 +5165,25 @@
         "title": "ConversationMessages",
         "type": "object"
       },
+      "ConversationPayload": {
+        "additionalProperties": true,
+        "description": "",
+        "properties": {
+          "messages": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Messages",
+            "type": "array"
+          }
+        },
+        "required": [
+          "messages"
+        ],
+        "title": "ConversationPayload",
+        "type": "object"
+      },
       "ConversationRequest": {
         "allOf": [
           {
@@ -4332,42 +5361,53 @@
             "title": "Stream"
           },
           "tools": {
-            "description": "List of tools which are available to the model during the conversation.",
-            "items": {
-              "discriminator": {
-                "mapping": {
-                  "code_interpreter": "#/components/schemas/CodeInterpreterTool",
-                  "document_library": "#/components/schemas/DocumentLibraryTool",
-                  "function": "#/components/schemas/FunctionTool",
-                  "image_generation": "#/components/schemas/ImageGenerationTool",
-                  "web_search": "#/components/schemas/WebSearchTool",
-                  "web_search_premium": "#/components/schemas/WebSearchPremiumTool"
+            "anyOf": [
+              {
+                "items": {
+                  "discriminator": {
+                    "mapping": {
+                      "code_interpreter": "#/components/schemas/CodeInterpreterTool",
+                      "connector": "#/components/schemas/CustomConnector",
+                      "document_library": "#/components/schemas/DocumentLibraryTool",
+                      "function": "#/components/schemas/FunctionTool",
+                      "image_generation": "#/components/schemas/ImageGenerationTool",
+                      "web_search": "#/components/schemas/WebSearchTool",
+                      "web_search_premium": "#/components/schemas/WebSearchPremiumTool"
+                    },
+                    "propertyName": "type"
+                  },
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/FunctionTool"
+                    },
+                    {
+                      "$ref": "#/components/schemas/WebSearchTool"
+                    },
+                    {
+                      "$ref": "#/components/schemas/WebSearchPremiumTool"
+                    },
+                    {
+                      "$ref": "#/components/schemas/CodeInterpreterTool"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ImageGenerationTool"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DocumentLibraryTool"
+                    },
+                    {
+                      "$ref": "#/components/schemas/CustomConnector"
+                    }
+                  ]
                 },
-                "propertyName": "type"
+                "type": "array"
               },
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/FunctionTool"
-                },
-                {
-                  "$ref": "#/components/schemas/WebSearchTool"
-                },
-                {
-                  "$ref": "#/components/schemas/WebSearchPremiumTool"
-                },
-                {
-                  "$ref": "#/components/schemas/CodeInterpreterTool"
-                },
-                {
-                  "$ref": "#/components/schemas/ImageGenerationTool"
-                },
-                {
-                  "$ref": "#/components/schemas/DocumentLibraryTool"
-                }
-              ]
-            },
-            "title": "Tools",
-            "type": "array"
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Tools"
           }
         },
         "required": [
@@ -4558,6 +5598,16 @@
           }
         ]
       },
+      "ConversationSource": {
+        "enum": [
+          "EXPLORER",
+          "UPLOADED_FILE",
+          "DIRECT_INPUT",
+          "PLAYGROUND"
+        ],
+        "title": "ConversationSource",
+        "type": "string"
+      },
       "ConversationStreamRequest": {
         "allOf": [
           {
@@ -4576,41 +5626,6 @@
             "type": "object"
           }
         ]
-      },
-      "ConversationThinkChunk": {
-        "additionalProperties": false,
-        "properties": {
-          "closed": {
-            "default": true,
-            "title": "Closed",
-            "type": "boolean"
-          },
-          "thinking": {
-            "items": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/TextChunk"
-                },
-                {
-                  "$ref": "#/components/schemas/ToolReferenceChunk"
-                }
-              ]
-            },
-            "title": "Thinking",
-            "type": "array"
-          },
-          "type": {
-            "const": "thinking",
-            "default": "thinking",
-            "title": "Type",
-            "type": "string"
-          }
-        },
-        "required": [
-          "thinking"
-        ],
-        "title": "ConversationThinkChunk",
-        "type": "object"
       },
       "ConversationUsageInfo": {
         "additionalProperties": false,
@@ -4659,6 +5674,397 @@
           }
         },
         "title": "ConversationUsageInfo",
+        "type": "object"
+      },
+      "CustomConnector": {
+        "additionalProperties": false,
+        "properties": {
+          "authorization": {
+            "anyOf": [
+              {
+                "discriminator": {
+                  "mapping": {
+                    "api-key": "#/components/schemas/APIKeyAuth",
+                    "oauth2-token": "#/components/schemas/OAuth2TokenAuth"
+                  },
+                  "propertyName": "type"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OAuth2TokenAuth"
+                  },
+                  {
+                    "$ref": "#/components/schemas/APIKeyAuth"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Authorization"
+          },
+          "connector_id": {
+            "title": "Connector Id",
+            "type": "string"
+          },
+          "tool_configuration": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ToolConfiguration"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "default": "connector",
+            "enum": [
+              "connector"
+            ],
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "connector_id"
+        ],
+        "title": "CustomConnector",
+        "type": "object"
+      },
+      "Dataset": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "deleted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted At"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "owner_id": {
+            "format": "uuid",
+            "title": "Owner Id",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "updated_at",
+          "deleted_at",
+          "name",
+          "description",
+          "owner_id",
+          "workspace_id"
+        ],
+        "title": "Dataset",
+        "type": "object"
+      },
+      "DatasetExport": {
+        "properties": {
+          "file_url": {
+            "title": "File Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_url"
+        ],
+        "title": "DatasetExport",
+        "type": "object"
+      },
+      "DatasetImportTask": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "creator_id": {
+            "format": "uuid",
+            "title": "Creator Id",
+            "type": "string"
+          },
+          "dataset_id": {
+            "format": "uuid",
+            "title": "Dataset Id",
+            "type": "string"
+          },
+          "deleted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted At"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "progress": {
+            "anyOf": [
+              {
+                "maximum": 100,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress"
+          },
+          "status": {
+            "$ref": "#/components/schemas/BaseTaskStatus"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "updated_at",
+          "deleted_at",
+          "creator_id",
+          "dataset_id",
+          "workspace_id",
+          "status"
+        ],
+        "title": "DatasetImportTask",
+        "type": "object"
+      },
+      "DatasetImportTasks": {
+        "properties": {
+          "tasks": {
+            "$ref": "#/components/schemas/PaginatedResult_DatasetImportTask_"
+          }
+        },
+        "required": [
+          "tasks"
+        ],
+        "title": "DatasetImportTasks",
+        "type": "object"
+      },
+      "DatasetPreview": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "deleted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted At"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "owner_id": {
+            "format": "uuid",
+            "title": "Owner Id",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "updated_at",
+          "deleted_at",
+          "name",
+          "description",
+          "owner_id",
+          "workspace_id"
+        ],
+        "title": "DatasetPreview",
+        "type": "object"
+      },
+      "DatasetPreviews": {
+        "properties": {
+          "datasets": {
+            "$ref": "#/components/schemas/PaginatedResult_DatasetPreview_"
+          }
+        },
+        "required": [
+          "datasets"
+        ],
+        "title": "DatasetPreviews",
+        "type": "object"
+      },
+      "DatasetRecord": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "dataset_id": {
+            "format": "uuid",
+            "title": "Dataset Id",
+            "type": "string"
+          },
+          "deleted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted At"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/ConversationPayload"
+          },
+          "properties": {
+            "additionalProperties": true,
+            "title": "Properties",
+            "type": "object"
+          },
+          "source": {
+            "$ref": "#/components/schemas/ConversationSource"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "updated_at",
+          "deleted_at",
+          "dataset_id",
+          "payload",
+          "properties",
+          "source"
+        ],
+        "title": "DatasetRecord",
+        "type": "object"
+      },
+      "DatasetRecords": {
+        "properties": {
+          "records": {
+            "$ref": "#/components/schemas/PaginatedResult_DatasetRecord_"
+          }
+        },
+        "required": [
+          "records"
+        ],
+        "title": "DatasetRecords",
+        "type": "object"
+      },
+      "DeleteDatasetRecordsInSchema": {
+        "properties": {
+          "dataset_record_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 500,
+            "minItems": 1,
+            "title": "Dataset Record Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "dataset_record_ids"
+        ],
+        "title": "DeleteDatasetRecordsInSchema",
         "type": "object"
       },
       "DeleteFileOut": {
@@ -5119,6 +6525,56 @@
         "title": "DocumentUpdateIn",
         "type": "object"
       },
+      "EmbeddedResource": {
+        "additionalProperties": true,
+        "description": "The contents of a resource, embedded into a prompt or tool call result.\n\nIt is up to the client how best to render embedded resources for the benefit\nof the LLM and/or the user.",
+        "properties": {
+          "_meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta"
+          },
+          "annotations": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Annotations"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "resource": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TextResourceContents"
+              },
+              {
+                "$ref": "#/components/schemas/BlobResourceContents"
+              }
+            ],
+            "title": "Resource"
+          },
+          "type": {
+            "const": "resource",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "resource"
+        ],
+        "title": "EmbeddedResource",
+        "type": "object"
+      },
       "EmbeddingDtype": {
         "enum": [
           "float",
@@ -5320,6 +6776,21 @@
           "created_at"
         ],
         "title": "EventOut",
+        "type": "object"
+      },
+      "ExecutionConfig": {
+        "additionalProperties": true,
+        "description": "Not typed since mcp config can changed / not stable\nwe allow all extra fields and this is a dict\nTODO: once mcp is stable, we need to type this",
+        "properties": {
+          "type": {
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "ExecutionConfig",
         "type": "object"
       },
       "FIMCompletionRequest": {
@@ -5637,6 +7108,109 @@
         "title": "FTModelCard",
         "type": "object"
       },
+      "FeedResult_ChatCompletionEventPreview_": {
+        "properties": {
+          "cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cursor"
+          },
+          "next": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/ChatCompletionEventPreview"
+            },
+            "title": "Results",
+            "type": "array"
+          }
+        },
+        "title": "FeedResult[ChatCompletionEventPreview]",
+        "type": "object"
+      },
+      "FieldGroup": {
+        "properties": {
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "label"
+        ],
+        "title": "FieldGroup",
+        "type": "object"
+      },
+      "FieldOptionCountItem": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value",
+          "count"
+        ],
+        "title": "FieldOptionCountItem",
+        "type": "object"
+      },
+      "FieldOptionCounts": {
+        "properties": {
+          "counts": {
+            "items": {
+              "$ref": "#/components/schemas/FieldOptionCountItem"
+            },
+            "title": "Counts",
+            "type": "array"
+          }
+        },
+        "required": [
+          "counts"
+        ],
+        "title": "FieldOptionCounts",
+        "type": "object"
+      },
+      "FieldOptionCountsInSchema": {
+        "properties": {
+          "filter_params": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FilterPayload"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "FieldOptionCountsInSchema",
+        "type": "object"
+      },
       "File": {
         "description": "The File object (not file name) to be uploaded.\n To upload a file and specify a custom file name you should format your request as such:\n ```bash\n file=@path/to/your/file.jsonl;filename=custom_name.jsonl\n ```\n Otherwise, you can just keep the original file name:\n ```bash\n file=@path/to/your/file.jsonl\n ```",
         "format": "binary",
@@ -5690,6 +7264,17 @@
             ],
             "title": "Created At",
             "type": "integer"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
           },
           "filename": {
             "description": "The name of the uploaded file.",
@@ -5764,6 +7349,16 @@
           },
           "source": {
             "$ref": "#/components/schemas/Source"
+          },
+          "visibility": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FileVisibility"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -5790,6 +7385,128 @@
           "url"
         ],
         "title": "FileSignedURL",
+        "type": "object"
+      },
+      "FileVisibility": {
+        "enum": [
+          "workspace",
+          "user"
+        ],
+        "title": "FileVisibility",
+        "type": "string"
+      },
+      "FilterCondition": {
+        "properties": {
+          "field": {
+            "title": "Field",
+            "type": "string"
+          },
+          "op": {
+            "enum": [
+              "lt",
+              "lte",
+              "gt",
+              "gte",
+              "startswith",
+              "istartswith",
+              "endswith",
+              "iendswith",
+              "contains",
+              "icontains",
+              "matches",
+              "notcontains",
+              "inotcontains",
+              "eq",
+              "neq",
+              "isnull",
+              "includes",
+              "excludes",
+              "len_eq"
+            ],
+            "title": "Op",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value"
+          }
+        },
+        "required": [
+          "field",
+          "op",
+          "value"
+        ],
+        "title": "FilterCondition",
+        "type": "object"
+      },
+      "FilterGroup": {
+        "properties": {
+          "AND": {
+            "anyOf": [
+              {
+                "items": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/FilterGroup"
+                    },
+                    {
+                      "$ref": "#/components/schemas/FilterCondition"
+                    }
+                  ]
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "And"
+          },
+          "OR": {
+            "anyOf": [
+              {
+                "items": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/FilterGroup"
+                    },
+                    {
+                      "$ref": "#/components/schemas/FilterCondition"
+                    }
+                  ]
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Or"
+          }
+        },
+        "title": "FilterGroup",
+        "type": "object"
+      },
+      "FilterPayload": {
+        "properties": {
+          "filters": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FilterGroup"
+              },
+              {
+                "$ref": "#/components/schemas/FilterCondition"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filters"
+          }
+        },
+        "required": [
+          "filters"
+        ],
+        "title": "FilterPayload",
         "type": "object"
       },
       "FineTuneableModelType": {
@@ -6137,6 +7854,58 @@
         "title": "FunctionTool",
         "type": "object"
       },
+      "GetChatCompletionEventIdsInSchema": {
+        "properties": {
+          "extra_fields": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extra Fields"
+          },
+          "search_params": {
+            "$ref": "#/components/schemas/FilterPayload"
+          }
+        },
+        "required": [
+          "search_params"
+        ],
+        "title": "GetChatCompletionEventIdsInSchema",
+        "type": "object"
+      },
+      "GetChatCompletionEventsInSchema": {
+        "properties": {
+          "extra_fields": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extra Fields"
+          },
+          "search_params": {
+            "$ref": "#/components/schemas/FilterPayload"
+          }
+        },
+        "required": [
+          "search_params"
+        ],
+        "title": "GetChatCompletionEventsInSchema",
+        "type": "object"
+      },
       "GithubRepositoryIn": {
         "properties": {
           "name": {
@@ -6248,11 +8017,18 @@
                 "type": "null"
               }
             ]
+          },
+          "moderation_llm_v2": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ModerationLLMV2Config"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
-        "required": [
-          "moderation_llm_v1"
-        ],
         "title": "GuardrailConfig",
         "type": "object"
       },
@@ -6267,6 +8043,54 @@
           }
         },
         "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "ImageContent": {
+        "additionalProperties": true,
+        "description": "Image content for a message.",
+        "properties": {
+          "_meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta"
+          },
+          "annotations": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Annotations"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "data": {
+            "title": "Data",
+            "type": "string"
+          },
+          "mimeType": {
+            "title": "Mimetype",
+            "type": "string"
+          },
+          "type": {
+            "const": "image",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "data",
+          "mimeType"
+        ],
+        "title": "ImageContent",
         "type": "object"
       },
       "ImageDetail": {
@@ -6728,6 +8552,261 @@
         "title": "JsonSchema",
         "type": "object"
       },
+      "JudgeClassificationOutput": {
+        "properties": {
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/JudgeClassificationOutputOption"
+            },
+            "title": "Options",
+            "type": "array"
+          },
+          "type": {
+            "const": "CLASSIFICATION",
+            "default": "CLASSIFICATION",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "options"
+        ],
+        "title": "JudgeClassificationOutput",
+        "type": "object"
+      },
+      "JudgeClassificationOutputOption": {
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value",
+          "description"
+        ],
+        "title": "JudgeClassificationOutputOption",
+        "type": "object"
+      },
+      "JudgeOutput": {
+        "properties": {
+          "analysis": {
+            "title": "Analysis",
+            "type": "string"
+          },
+          "answer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "title": "Answer"
+          }
+        },
+        "required": [
+          "analysis",
+          "answer"
+        ],
+        "title": "JudgeOutput",
+        "type": "object"
+      },
+      "JudgeOutputType": {
+        "enum": [
+          "REGRESSION",
+          "CLASSIFICATION"
+        ],
+        "title": "JudgeOutputType",
+        "type": "string"
+      },
+      "JudgePreview": {
+        "properties": {
+          "base_revision": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Revision"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "deleted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted At"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "down_revision": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Down Revision"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "instructions": {
+            "title": "Instructions",
+            "type": "string"
+          },
+          "model_name": {
+            "title": "Model Name",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "output": {
+            "discriminator": {
+              "mapping": {
+                "CLASSIFICATION": "#/components/schemas/JudgeClassificationOutput",
+                "REGRESSION": "#/components/schemas/JudgeRegressionOutput"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/JudgeClassificationOutput"
+              },
+              {
+                "$ref": "#/components/schemas/JudgeRegressionOutput"
+              }
+            ],
+            "title": "Output"
+          },
+          "owner_id": {
+            "format": "uuid",
+            "title": "Owner Id",
+            "type": "string"
+          },
+          "tools": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tools",
+            "type": "array"
+          },
+          "up_revision": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Up Revision"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "updated_at",
+          "deleted_at",
+          "owner_id",
+          "workspace_id",
+          "name",
+          "description",
+          "model_name",
+          "output",
+          "instructions",
+          "tools"
+        ],
+        "title": "JudgePreview",
+        "type": "object"
+      },
+      "JudgePreviews": {
+        "properties": {
+          "judges": {
+            "$ref": "#/components/schemas/PaginatedResult_JudgePreview_"
+          }
+        },
+        "required": [
+          "judges"
+        ],
+        "title": "JudgePreviews",
+        "type": "object"
+      },
+      "JudgeRegressionOutput": {
+        "properties": {
+          "max": {
+            "default": 1,
+            "exclusiveMaximum": "1e+09",
+            "title": "Max",
+            "type": "number"
+          },
+          "max_description": {
+            "title": "Max Description",
+            "type": "string"
+          },
+          "min": {
+            "default": 0,
+            "minimum": 0,
+            "title": "Min",
+            "type": "number"
+          },
+          "min_description": {
+            "title": "Min Description",
+            "type": "string"
+          },
+          "type": {
+            "const": "REGRESSION",
+            "default": "REGRESSION",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "min_description",
+          "max_description"
+        ],
+        "title": "JudgeRegressionOutput",
+        "type": "object"
+      },
       "LegacyJobMetadataOut": {
         "properties": {
           "cost": {
@@ -7176,6 +9255,157 @@
         "title": "ListSharingOut",
         "type": "object"
       },
+      "MCPResultMetadata": {
+        "additionalProperties": true,
+        "description": "MCP-specific result metadata (isError, structuredContent, _meta).",
+        "properties": {
+          "_meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta"
+          },
+          "isError": {
+            "default": false,
+            "title": "Iserror",
+            "type": "boolean"
+          },
+          "structuredContent": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Structuredcontent"
+          }
+        },
+        "title": "MCPResultMetadata",
+        "type": "object"
+      },
+      "MCPServerIcon": {
+        "additionalProperties": true,
+        "description": "An icon for display in user interfaces.",
+        "properties": {
+          "mimeType": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mimetype"
+          },
+          "sizes": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sizes"
+          },
+          "src": {
+            "title": "Src",
+            "type": "string"
+          }
+        },
+        "required": [
+          "src"
+        ],
+        "title": "MCPServerIcon",
+        "type": "object"
+      },
+      "MCPToolCallMetadata": {
+        "additionalProperties": true,
+        "description": "Metadata wrapper for MCP tool call responses.\n\nNests MCP-specific fields under `mcp_meta` to avoid collisions with other\nmetadata keys (e.g. `tool_call_result`) in Harmattan's streaming deltas.",
+        "properties": {
+          "mcp_meta": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MCPResultMetadata"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "MCPToolCallMetadata",
+        "type": "object"
+      },
+      "MCPToolCallRequest": {
+        "description": "Request body for calling an MCP tool.",
+        "properties": {
+          "arguments": {
+            "additionalProperties": true,
+            "title": "Arguments",
+            "type": "object"
+          }
+        },
+        "title": "MCPToolCallRequest",
+        "type": "object"
+      },
+      "MCPToolCallResponse": {
+        "additionalProperties": true,
+        "description": "Response from calling an MCP tool.\n\nWe override mcp_types.CallToolResult because:\n- Models only support `content`, not `structuredContent` at top level\n- Downstream consumers (le-chat, etc.) need structuredContent/isError/_meta via metadata\n\nSYNC: Keep in sync with Harmattan (orchestrator) for harmonized tool result processing.",
+        "properties": {
+          "content": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/TextContent"
+                },
+                {
+                  "$ref": "#/components/schemas/ImageContent"
+                },
+                {
+                  "$ref": "#/components/schemas/AudioContent"
+                },
+                {
+                  "$ref": "#/components/schemas/ResourceLink"
+                },
+                {
+                  "$ref": "#/components/schemas/EmbeddedResource"
+                }
+              ]
+            },
+            "title": "Content",
+            "type": "array"
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MCPToolCallMetadata"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "content"
+        ],
+        "title": "MCPToolCallResponse",
+        "type": "object"
+      },
       "MessageEntries": {
         "items": {
           "anyOf": [
@@ -7206,7 +9436,7 @@
               "$ref": "#/components/schemas/DocumentURLChunk"
             },
             {
-              "$ref": "#/components/schemas/ConversationThinkChunk"
+              "$ref": "#/components/schemas/ThinkChunk"
             }
           ]
         },
@@ -7298,7 +9528,7 @@
               "$ref": "#/components/schemas/DocumentURLChunk"
             },
             {
-              "$ref": "#/components/schemas/ConversationThinkChunk"
+              "$ref": "#/components/schemas/ThinkChunk"
             },
             {
               "$ref": "#/components/schemas/ToolReferenceChunk"
@@ -7465,6 +9695,19 @@
           "content"
         ],
         "title": "MessageOutputEvent",
+        "type": "object"
+      },
+      "MessageResponse": {
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "title": "MessageResponse",
         "type": "object"
       },
       "MetadataDict": {
@@ -7670,6 +9913,7 @@
               "discriminator": {
                 "mapping": {
                   "code_interpreter": "#/components/schemas/CodeInterpreterTool",
+                  "connector": "#/components/schemas/CustomConnector",
                   "document_library": "#/components/schemas/DocumentLibraryTool",
                   "function": "#/components/schemas/FunctionTool",
                   "image_generation": "#/components/schemas/ImageGenerationTool",
@@ -7696,6 +9940,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/DocumentLibraryTool"
+                },
+                {
+                  "$ref": "#/components/schemas/CustomConnector"
                 }
               ]
             },
@@ -7749,12 +9996,12 @@
         "title": "ModelList",
         "type": "object"
       },
-      "ModerationLLMV1Action": {
+      "ModerationLLMAction": {
         "enum": [
           "none",
           "block"
         ],
-        "title": "ModerationLLMV1Action",
+        "title": "ModerationLLMAction",
         "type": "string"
       },
       "ModerationLLMV1CategoryThresholds": {
@@ -7865,7 +10112,7 @@
       "ModerationLLMV1Config": {
         "properties": {
           "action": {
-            "$ref": "#/components/schemas/ModerationLLMV1Action",
+            "$ref": "#/components/schemas/ModerationLLMAction",
             "default": "none",
             "description": "Action to take if any score is above the threshold for any category."
           },
@@ -7877,8 +10124,7 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "Override default thresholds for specific categories."
+            ]
           },
           "ignore_other_categories": {
             "default": false,
@@ -7894,6 +10140,166 @@
           }
         },
         "title": "ModerationLLMV1Config",
+        "type": "object"
+      },
+      "ModerationLLMV2CategoryThresholds": {
+        "properties": {
+          "criminal": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Criminal"
+          },
+          "dangerous": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dangerous"
+          },
+          "financial": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Financial"
+          },
+          "hate_and_discrimination": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hate And Discrimination"
+          },
+          "health": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Health"
+          },
+          "jailbreaking": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jailbreaking"
+          },
+          "law": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Law"
+          },
+          "pii": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pii"
+          },
+          "selfharm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Selfharm"
+          },
+          "sexual": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sexual"
+          },
+          "violence_and_threats": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Violence And Threats"
+          }
+        },
+        "title": "ModerationLLMV2CategoryThresholds",
+        "type": "object"
+      },
+      "ModerationLLMV2Config": {
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/ModerationLLMAction",
+            "default": "none",
+            "description": "Action to take if any score is above the threshold for any category."
+          },
+          "custom_category_thresholds": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ModerationLLMV2CategoryThresholds"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ignore_other_categories": {
+            "default": false,
+            "description": "If true, only evaluate categories in custom_category_thresholds; others are ignored.",
+            "title": "Ignore Other Categories",
+            "type": "boolean"
+          },
+          "model_name": {
+            "default": "mistral-moderation-2603",
+            "description": "Override model name. Should be omitted in general.",
+            "title": "Model Name",
+            "type": "string"
+          }
+        },
+        "title": "ModerationLLMV2Config",
         "type": "object"
       },
       "ModerationObject": {
@@ -7938,6 +10344,28 @@
           "results"
         ],
         "title": "ModerationResponse",
+        "type": "object"
+      },
+      "OAuth2TokenAuth": {
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "default": "oauth2-token",
+            "enum": [
+              "oauth2-token"
+            ],
+            "title": "Type",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "title": "OAuth2TokenAuth",
         "type": "object"
       },
       "OCRImageObject": {
@@ -8414,13 +10842,285 @@
             "$ref": "#/components/schemas/DocumentURLChunk"
           },
           {
-            "$ref": "#/components/schemas/ConversationThinkChunk"
+            "$ref": "#/components/schemas/ThinkChunk"
           },
           {
             "$ref": "#/components/schemas/ToolReferenceChunk"
           }
         ],
         "title": "OutputContentChunks"
+      },
+      "PaginatedConnectors": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/Connector"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationResponse"
+          }
+        },
+        "required": [
+          "items",
+          "pagination"
+        ],
+        "title": "PaginatedConnectors",
+        "type": "object"
+      },
+      "PaginatedResult_CampaignPreview_": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "next": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next"
+          },
+          "previous": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/CampaignPreview"
+            },
+            "title": "Results",
+            "type": "array"
+          }
+        },
+        "required": [
+          "count"
+        ],
+        "title": "PaginatedResult[CampaignPreview]",
+        "type": "object"
+      },
+      "PaginatedResult_ChatCompletionEventPreview_": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "next": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next"
+          },
+          "previous": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/ChatCompletionEventPreview"
+            },
+            "title": "Results",
+            "type": "array"
+          }
+        },
+        "required": [
+          "count"
+        ],
+        "title": "PaginatedResult[ChatCompletionEventPreview]",
+        "type": "object"
+      },
+      "PaginatedResult_DatasetImportTask_": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "next": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next"
+          },
+          "previous": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/DatasetImportTask"
+            },
+            "title": "Results",
+            "type": "array"
+          }
+        },
+        "required": [
+          "count"
+        ],
+        "title": "PaginatedResult[DatasetImportTask]",
+        "type": "object"
+      },
+      "PaginatedResult_DatasetPreview_": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "next": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next"
+          },
+          "previous": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/DatasetPreview"
+            },
+            "title": "Results",
+            "type": "array"
+          }
+        },
+        "required": [
+          "count"
+        ],
+        "title": "PaginatedResult[DatasetPreview]",
+        "type": "object"
+      },
+      "PaginatedResult_DatasetRecord_": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "next": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next"
+          },
+          "previous": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/DatasetRecord"
+            },
+            "title": "Results",
+            "type": "array"
+          }
+        },
+        "required": [
+          "count"
+        ],
+        "title": "PaginatedResult[DatasetRecord]",
+        "type": "object"
+      },
+      "PaginatedResult_JudgePreview_": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "next": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next"
+          },
+          "previous": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/JudgePreview"
+            },
+            "title": "Results",
+            "type": "array"
+          }
+        },
+        "required": [
+          "count"
+        ],
+        "title": "PaginatedResult[JudgePreview]",
+        "type": "object"
       },
       "PaginationInfo": {
         "properties": {
@@ -8453,6 +11153,297 @@
           "has_more"
         ],
         "title": "PaginationInfo",
+        "type": "object"
+      },
+      "PaginationResponse": {
+        "properties": {
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          },
+          "page_size": {
+            "title": "Page Size",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "page_size"
+        ],
+        "title": "PaginationResponse",
+        "type": "object"
+      },
+      "PatchDatasetInSchema": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          }
+        },
+        "title": "PatchDatasetInSchema",
+        "type": "object"
+      },
+      "PostCampaignInSchema": {
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "judge_id": {
+            "format": "uuid",
+            "title": "Judge Id",
+            "type": "string"
+          },
+          "max_nb_events": {
+            "exclusiveMinimum": 0,
+            "maximum": 10000,
+            "title": "Max Nb Events",
+            "type": "integer"
+          },
+          "name": {
+            "maxLength": 50,
+            "minLength": 5,
+            "title": "Name",
+            "type": "string"
+          },
+          "search_params": {
+            "$ref": "#/components/schemas/FilterPayload"
+          }
+        },
+        "required": [
+          "search_params",
+          "judge_id",
+          "name",
+          "description",
+          "max_nb_events"
+        ],
+        "title": "PostCampaignInSchema",
+        "type": "object"
+      },
+      "PostChatCompletionEventJudgingInSchema": {
+        "properties": {
+          "judge_definition": {
+            "$ref": "#/components/schemas/PostJudgeInSchema"
+          }
+        },
+        "required": [
+          "judge_definition"
+        ],
+        "title": "PostChatCompletionEventJudgingInSchema",
+        "type": "object"
+      },
+      "PostDatasetImportFromCampaignInSchema": {
+        "properties": {
+          "campaign_id": {
+            "format": "uuid",
+            "title": "Campaign Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "campaign_id"
+        ],
+        "title": "PostDatasetImportFromCampaignInSchema",
+        "type": "object"
+      },
+      "PostDatasetImportFromDatasetInSchema": {
+        "properties": {
+          "dataset_record_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 10000,
+            "minItems": 1,
+            "title": "Dataset Record Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "dataset_record_ids"
+        ],
+        "title": "PostDatasetImportFromDatasetInSchema",
+        "type": "object"
+      },
+      "PostDatasetImportFromExplorerInSchema": {
+        "properties": {
+          "completion_event_ids": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 500,
+            "title": "Completion Event Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "completion_event_ids"
+        ],
+        "title": "PostDatasetImportFromExplorerInSchema",
+        "type": "object"
+      },
+      "PostDatasetImportFromFileInSchema": {
+        "properties": {
+          "file_id": {
+            "title": "File Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_id"
+        ],
+        "title": "PostDatasetImportFromFileInSchema",
+        "type": "object"
+      },
+      "PostDatasetImportFromPlaygroundInSchema": {
+        "properties": {
+          "conversation_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Conversation Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "conversation_ids"
+        ],
+        "title": "PostDatasetImportFromPlaygroundInSchema",
+        "type": "object"
+      },
+      "PostDatasetInSchema": {
+        "properties": {
+          "description": {
+            "maxLength": 200,
+            "title": "Description",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 50,
+            "minLength": 5,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "description"
+        ],
+        "title": "PostDatasetInSchema",
+        "type": "object"
+      },
+      "PostDatasetRecordInSchema": {
+        "properties": {
+          "payload": {
+            "$ref": "#/components/schemas/ConversationPayload"
+          },
+          "properties": {
+            "additionalProperties": true,
+            "title": "Properties",
+            "type": "object"
+          }
+        },
+        "required": [
+          "payload",
+          "properties"
+        ],
+        "title": "PostDatasetRecordInSchema",
+        "type": "object"
+      },
+      "PostDatasetRecordJudgingInSchema": {
+        "properties": {
+          "judge_definition": {
+            "$ref": "#/components/schemas/PostJudgeInSchema"
+          }
+        },
+        "required": [
+          "judge_definition"
+        ],
+        "title": "PostDatasetRecordJudgingInSchema",
+        "type": "object"
+      },
+      "PostJudgeInSchema": {
+        "properties": {
+          "description": {
+            "maxLength": 500,
+            "title": "Description",
+            "type": "string"
+          },
+          "instructions": {
+            "maxLength": 10000,
+            "title": "Instructions",
+            "type": "string"
+          },
+          "model_name": {
+            "maxLength": 500,
+            "title": "Model Name",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 50,
+            "minLength": 5,
+            "title": "Name",
+            "type": "string"
+          },
+          "output": {
+            "discriminator": {
+              "mapping": {
+                "CLASSIFICATION": "#/components/schemas/JudgeClassificationOutput",
+                "REGRESSION": "#/components/schemas/JudgeRegressionOutput"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/JudgeClassificationOutput"
+              },
+              {
+                "$ref": "#/components/schemas/JudgeRegressionOutput"
+              }
+            ],
+            "title": "Output"
+          },
+          "tools": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tools",
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "model_name",
+          "output",
+          "instructions",
+          "tools"
+        ],
+        "title": "PostJudgeInSchema",
         "type": "object"
       },
       "Prediction": {
@@ -8510,6 +11501,92 @@
           "processing_status"
         ],
         "title": "ProcessingStatusOut",
+        "type": "object"
+      },
+      "PutDatasetRecordPayloadInSchema": {
+        "properties": {
+          "payload": {
+            "$ref": "#/components/schemas/ConversationPayload"
+          }
+        },
+        "required": [
+          "payload"
+        ],
+        "title": "PutDatasetRecordPayloadInSchema",
+        "type": "object"
+      },
+      "PutDatasetRecordPropertiesInSchema": {
+        "properties": {
+          "properties": {
+            "additionalProperties": true,
+            "title": "Properties",
+            "type": "object"
+          }
+        },
+        "required": [
+          "properties"
+        ],
+        "title": "PutDatasetRecordPropertiesInSchema",
+        "type": "object"
+      },
+      "PutJudgeInSchema": {
+        "properties": {
+          "description": {
+            "maxLength": 500,
+            "title": "Description",
+            "type": "string"
+          },
+          "instructions": {
+            "maxLength": 10000,
+            "title": "Instructions",
+            "type": "string"
+          },
+          "model_name": {
+            "maxLength": 500,
+            "title": "Model Name",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 50,
+            "minLength": 5,
+            "title": "Name",
+            "type": "string"
+          },
+          "output": {
+            "discriminator": {
+              "mapping": {
+                "CLASSIFICATION": "#/components/schemas/JudgeClassificationOutput",
+                "REGRESSION": "#/components/schemas/JudgeRegressionOutput"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/JudgeClassificationOutput"
+              },
+              {
+                "$ref": "#/components/schemas/JudgeRegressionOutput"
+              }
+            ],
+            "title": "Output"
+          },
+          "tools": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tools",
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "model_name",
+          "output",
+          "instructions",
+          "tools"
+        ],
+        "title": "PutJudgeInSchema",
         "type": "object"
       },
       "RealtimeTranscriptionClientMessage": {
@@ -8667,6 +11744,124 @@
           "agent_builder_v1"
         ],
         "title": "RequestSource",
+        "type": "string"
+      },
+      "ResourceLink": {
+        "additionalProperties": true,
+        "description": "A resource that the server is capable of reading, included in a prompt or tool call result.\n\nNote: resource links returned by tools are not guaranteed to appear in the results of `resources/list` requests.",
+        "properties": {
+          "_meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta"
+          },
+          "annotations": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Annotations"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "icons": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MCPServerIcon"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Icons"
+          },
+          "mimeType": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mimetype"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Size"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "type": {
+            "const": "resource_link",
+            "title": "Type",
+            "type": "string"
+          },
+          "uri": {
+            "format": "uri",
+            "minLength": 1,
+            "title": "Uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "uri",
+          "type"
+        ],
+        "title": "ResourceLink",
+        "type": "object"
+      },
+      "ResourceVisibility": {
+        "enum": [
+          "shared_global",
+          "shared_org",
+          "shared_workspace",
+          "private"
+        ],
+        "title": "ResourceVisibility",
         "type": "string"
       },
       "ResponseBase": {
@@ -8859,6 +12054,17 @@
             "title": "Deleted",
             "type": "boolean"
           },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
           "filename": {
             "description": "The name of the uploaded file.",
             "examples": [
@@ -8932,6 +12138,16 @@
           },
           "source": {
             "$ref": "#/components/schemas/Source"
+          },
+          "visibility": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FileVisibility"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -9180,6 +12396,94 @@
         "title": "TextChunk",
         "type": "object"
       },
+      "TextContent": {
+        "additionalProperties": true,
+        "description": "Text content for a message.",
+        "properties": {
+          "_meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta"
+          },
+          "annotations": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Annotations"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "type": {
+            "const": "text",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "text"
+        ],
+        "title": "TextContent",
+        "type": "object"
+      },
+      "TextResourceContents": {
+        "additionalProperties": true,
+        "description": "Text contents of a resource.",
+        "properties": {
+          "_meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta"
+          },
+          "mimeType": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mimetype"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "uri": {
+            "format": "uri",
+            "minLength": 1,
+            "title": "Uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "uri",
+          "text"
+        ],
+        "title": "TextResourceContents",
+        "type": "object"
+      },
       "ThinkChunk": {
         "additionalProperties": false,
         "properties": {
@@ -9193,10 +12497,13 @@
             "items": {
               "anyOf": [
                 {
-                  "$ref": "#/components/schemas/ReferenceChunk"
+                  "$ref": "#/components/schemas/TextChunk"
                 },
                 {
-                  "$ref": "#/components/schemas/TextChunk"
+                  "$ref": "#/components/schemas/ToolReferenceChunk"
+                },
+                {
+                  "$ref": "#/components/schemas/ReferenceChunk"
                 }
               ]
             },
@@ -10168,6 +13475,17 @@
             "title": "Created At",
             "type": "integer"
           },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
           "filename": {
             "description": "The name of the uploaded file.",
             "examples": [
@@ -10241,6 +13559,16 @@
           },
           "source": {
             "$ref": "#/components/schemas/Source"
+          },
+          "visibility": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FileVisibility"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -10329,6 +13657,13 @@
       },
       "ValidationError": {
         "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
           "loc": {
             "items": {
               "anyOf": [
@@ -10513,6 +13848,141 @@
           }
         },
         "title": "WebSearchTool",
+        "type": "object"
+      },
+      "integrations__schemas__api__tool__Tool": {
+        "properties": {
+          "active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "execution_config": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExecutionConfig"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "jsonschema": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jsonschema"
+          },
+          "locale": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/integrations__schemas__turbine__ToolLocale"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "modified_at": {
+            "format": "date-time",
+            "title": "Modified At",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "system_prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "System Prompt"
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/ResourceVisibility"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "execution_config",
+          "visibility",
+          "created_at",
+          "modified_at"
+        ],
+        "title": "Tool",
+        "type": "object"
+      },
+      "integrations__schemas__turbine__ToolLocale": {
+        "properties": {
+          "description": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "$ref": "#/components/schemas/ConnectorSupportedLanguage"
+            },
+            "title": "Description",
+            "type": "object"
+          },
+          "name": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "$ref": "#/components/schemas/ConnectorSupportedLanguage"
+            },
+            "title": "Name",
+            "type": "object"
+          },
+          "usage_sentence": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "$ref": "#/components/schemas/ConnectorSupportedLanguage"
+            },
+            "title": "Usage Sentence",
+            "type": "object"
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "usage_sentence"
+        ],
+        "title": "ToolLocale",
         "type": "object"
       }
     },
@@ -10705,6 +14175,7 @@
       "post": {
         "description": "Create a new agent giving it instructions, tools, description. The agent is then available to be used as a regular assistant in a conversation or as part of an agent pool from which it can be used.",
         "operationId": "agents_api_v1_agents_create",
+        "parameters": [],
         "requestBody": {
           "content": {
             "application/json": {
@@ -11524,6 +14995,7 @@
       "post": {
         "description": "Create a new batch job, it will be queued for processing.",
         "operationId": "jobs_api_routes_batch_create_batch_job",
+        "parameters": [],
         "requestBody": {
           "content": {
             "application/json": {
@@ -11927,6 +15399,7 @@
       "post": {
         "description": "Create a new conversation, using a base model or an agent and append entries. Completion and tool executions are run and the response is appended to the conversation.Use the returned conversation_id to continue the conversation.",
         "operationId": "agents_api_v1_conversations_start",
+        "parameters": [],
         "requestBody": {
           "content": {
             "application/json": {
@@ -11969,6 +15442,7 @@
       "post": {
         "description": "Create a new conversation, using a base model or an agent and append entries. Completion and tool executions are run and the response is appended to the conversation.Use the returned conversation_id to continue the conversation.",
         "operationId": "agents_api_v1_conversations_start_stream",
+        "parameters": [],
         "requestBody": {
           "content": {
             "application/json": {
@@ -12664,16 +16138,41 @@
       "post": {
         "description": "Upload a file that can be used across various endpoints.\n\nThe size of individual files can be a maximum of 512 MB. The Fine-tuning API only supports .jsonl files.\n\nPlease contact us if you need to increase these storage limits.",
         "operationId": "files_api_routes_upload_file",
+        "parameters": [],
         "requestBody": {
           "content": {
             "multipart/form-data": {
               "schema": {
                 "properties": {
+                  "expiry": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Expiry"
+                  },
                   "file": {
                     "$ref": "#/components/schemas/File"
                   },
                   "purpose": {
                     "$ref": "#/components/schemas/FilePurpose"
+                  },
+                  "visibility": {
+                    "allOf": [
+                      {
+                        "enum": [
+                          "workspace",
+                          "user"
+                        ],
+                        "title": "FileVisibility",
+                        "type": "string"
+                      }
+                    ],
+                    "default": "workspace"
                   }
                 },
                 "required": [
@@ -14480,6 +17979,40 @@
       "get": {
         "description": "List all models available to the user.",
         "operationId": "list_models_v1_models_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "provider",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Provider"
+            }
+          },
+          {
+            "in": "query",
+            "name": "model",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Model"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -14521,6 +18054,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "summary": "List Models",

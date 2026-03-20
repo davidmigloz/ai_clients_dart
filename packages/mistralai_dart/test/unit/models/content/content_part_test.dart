@@ -209,6 +209,298 @@ void main() {
     });
   });
 
+  group('DocumentUrlContentPart', () {
+    test('creates with required fields', () {
+      const part = DocumentUrlContentPart(
+        documentUrl: 'https://example.com/doc.pdf',
+      );
+      expect(part.type, 'document_url');
+      expect(part.documentUrl, 'https://example.com/doc.pdf');
+      expect(part.documentName, isNull);
+    });
+
+    test('creates with all fields', () {
+      const part = DocumentUrlContentPart(
+        documentUrl: 'https://example.com/doc.pdf',
+        documentName: 'My Document',
+      );
+      expect(part.documentUrl, 'https://example.com/doc.pdf');
+      expect(part.documentName, 'My Document');
+    });
+
+    test('serializes to JSON', () {
+      const part = DocumentUrlContentPart(
+        documentUrl: 'https://example.com/doc.pdf',
+        documentName: 'My Doc',
+      );
+      final json = part.toJson();
+      expect(json['type'], 'document_url');
+      expect(json['document_url'], 'https://example.com/doc.pdf');
+      expect(json['document_name'], 'My Doc');
+    });
+
+    test('omits null documentName in JSON', () {
+      const part = DocumentUrlContentPart(
+        documentUrl: 'https://example.com/doc.pdf',
+      );
+      final json = part.toJson();
+      expect(json.containsKey('document_name'), isFalse);
+    });
+
+    test('deserializes from JSON', () {
+      final part = ContentPart.fromJson(const {
+        'type': 'document_url',
+        'document_url': 'https://example.com/doc.pdf',
+        'document_name': 'My Doc',
+      });
+      expect(part, isA<DocumentUrlContentPart>());
+      final docPart = part as DocumentUrlContentPart;
+      expect(docPart.documentUrl, 'https://example.com/doc.pdf');
+      expect(docPart.documentName, 'My Doc');
+    });
+
+    test('equality works correctly', () {
+      const part1 = DocumentUrlContentPart(
+        documentUrl: 'https://example.com/doc.pdf',
+      );
+      const part2 = DocumentUrlContentPart(
+        documentUrl: 'https://example.com/doc.pdf',
+      );
+      const part3 = DocumentUrlContentPart(
+        documentUrl: 'https://example.com/other.pdf',
+      );
+
+      expect(part1, equals(part2));
+      expect(part1.hashCode, equals(part2.hashCode));
+      expect(part1, isNot(equals(part3)));
+    });
+
+    test('round-trip serialization', () {
+      const original = DocumentUrlContentPart(
+        documentUrl: 'https://example.com/doc.pdf',
+        documentName: 'My Doc',
+      );
+      final json = original.toJson();
+      final restored = ContentPart.fromJson(json) as DocumentUrlContentPart;
+      expect(restored, equals(original));
+    });
+  });
+
+  group('ReferenceContentPart', () {
+    test('creates with reference IDs', () {
+      const part = ReferenceContentPart(referenceIds: [1, 2, 3]);
+      expect(part.type, 'reference');
+      expect(part.referenceIds, [1, 2, 3]);
+    });
+
+    test('serializes to JSON', () {
+      const part = ReferenceContentPart(referenceIds: [1, 2]);
+      final json = part.toJson();
+      expect(json['type'], 'reference');
+      expect(json['reference_ids'], [1, 2]);
+    });
+
+    test('deserializes from JSON', () {
+      final part = ContentPart.fromJson(const {
+        'type': 'reference',
+        'reference_ids': [1, 2, 3],
+      });
+      expect(part, isA<ReferenceContentPart>());
+      expect((part as ReferenceContentPart).referenceIds, [1, 2, 3]);
+    });
+
+    test('equality works correctly', () {
+      const part1 = ReferenceContentPart(referenceIds: [1, 2]);
+      const part2 = ReferenceContentPart(referenceIds: [1, 2]);
+      const part3 = ReferenceContentPart(referenceIds: [3, 4]);
+
+      expect(part1, equals(part2));
+      expect(part1.hashCode, equals(part2.hashCode));
+      expect(part1, isNot(equals(part3)));
+    });
+
+    test('round-trip serialization', () {
+      const original = ReferenceContentPart(referenceIds: [1, 2, 3]);
+      final json = original.toJson();
+      final restored = ContentPart.fromJson(json) as ReferenceContentPart;
+      expect(restored, equals(original));
+    });
+  });
+
+  group('FileContentPart', () {
+    test('creates with file ID', () {
+      const part = FileContentPart(fileId: 'file-123');
+      expect(part.type, 'file');
+      expect(part.fileId, 'file-123');
+    });
+
+    test('serializes to JSON', () {
+      const part = FileContentPart(fileId: 'file-123');
+      final json = part.toJson();
+      expect(json['type'], 'file');
+      expect(json['file_id'], 'file-123');
+    });
+
+    test('deserializes from JSON', () {
+      final part = ContentPart.fromJson(const {
+        'type': 'file',
+        'file_id': 'file-123',
+      });
+      expect(part, isA<FileContentPart>());
+      expect((part as FileContentPart).fileId, 'file-123');
+    });
+
+    test('equality works correctly', () {
+      const part1 = FileContentPart(fileId: 'file-a');
+      const part2 = FileContentPart(fileId: 'file-a');
+      const part3 = FileContentPart(fileId: 'file-b');
+
+      expect(part1, equals(part2));
+      expect(part1.hashCode, equals(part2.hashCode));
+      expect(part1, isNot(equals(part3)));
+    });
+
+    test('round-trip serialization', () {
+      const original = FileContentPart(fileId: 'file-123');
+      final json = original.toJson();
+      final restored = ContentPart.fromJson(json) as FileContentPart;
+      expect(restored, equals(original));
+    });
+  });
+
+  group('AudioContentPart', () {
+    test('creates with input audio', () {
+      const part = AudioContentPart(inputAudio: 'base64audio');
+      expect(part.type, 'input_audio');
+      expect(part.inputAudio, 'base64audio');
+    });
+
+    test('serializes to JSON', () {
+      const part = AudioContentPart(inputAudio: 'base64audio');
+      final json = part.toJson();
+      expect(json['type'], 'input_audio');
+      expect(json['input_audio'], 'base64audio');
+    });
+
+    test('deserializes from JSON', () {
+      final part = ContentPart.fromJson(const {
+        'type': 'input_audio',
+        'input_audio': 'base64audio',
+      });
+      expect(part, isA<AudioContentPart>());
+      expect((part as AudioContentPart).inputAudio, 'base64audio');
+    });
+
+    test('equality works correctly', () {
+      const part1 = AudioContentPart(inputAudio: 'audio-a');
+      const part2 = AudioContentPart(inputAudio: 'audio-a');
+      const part3 = AudioContentPart(inputAudio: 'audio-b');
+
+      expect(part1, equals(part2));
+      expect(part1.hashCode, equals(part2.hashCode));
+      expect(part1, isNot(equals(part3)));
+    });
+
+    test('round-trip serialization', () {
+      const original = AudioContentPart(inputAudio: 'base64audio');
+      final json = original.toJson();
+      final restored = ContentPart.fromJson(json) as AudioContentPart;
+      expect(restored, equals(original));
+    });
+  });
+
+  group('ThinkContentPart', () {
+    test('creates with thinking content', () {
+      const part = ThinkContentPart(
+        thinking: [TextContentPart('reasoning')],
+        closed: true,
+      );
+      expect(part.type, 'thinking');
+      expect(part.thinking, hasLength(1));
+      expect(part.closed, true);
+    });
+
+    test('serializes to JSON', () {
+      const part = ThinkContentPart(
+        thinking: [TextContentPart('reasoning')],
+        closed: true,
+      );
+      final json = part.toJson();
+      expect(json['type'], 'thinking');
+      expect(json['thinking'], isList);
+      expect((json['thinking'] as List).length, 1);
+      expect(json['closed'], true);
+    });
+
+    test('deserializes from JSON', () {
+      final part = ContentPart.fromJson(const {
+        'type': 'thinking',
+        'thinking': [
+          {'type': 'text', 'text': 'reasoning'},
+        ],
+        'closed': true,
+      });
+      expect(part, isA<ThinkContentPart>());
+      final thinkPart = part as ThinkContentPart;
+      expect(thinkPart.thinking, hasLength(1));
+      expect((thinkPart.thinking.first as TextContentPart).text, 'reasoning');
+      expect(thinkPart.closed, true);
+    });
+
+    test('equality works correctly', () {
+      const part1 = ThinkContentPart(
+        thinking: [TextContentPart('a')],
+        closed: true,
+      );
+      const part2 = ThinkContentPart(
+        thinking: [TextContentPart('a')],
+        closed: true,
+      );
+      const part3 = ThinkContentPart(
+        thinking: [TextContentPart('b')],
+        closed: true,
+      );
+
+      expect(part1, equals(part2));
+      expect(part1.hashCode, equals(part2.hashCode));
+      expect(part1, isNot(equals(part3)));
+    });
+
+    test('round-trip serialization', () {
+      const original = ThinkContentPart(
+        thinking: [TextContentPart('deep thought')],
+        closed: false,
+      );
+      final json = original.toJson();
+      final restored = ContentPart.fromJson(json) as ThinkContentPart;
+      expect(restored, equals(original));
+    });
+  });
+
+  group('UnknownContentPart', () {
+    test('wraps unknown type', () {
+      final part = ContentPart.fromJson(const {
+        'type': 'future_type',
+        'data': 'some-data',
+      });
+      expect(part, isA<UnknownContentPart>());
+      expect(part.type, 'future_type');
+      expect((part as UnknownContentPart).raw['data'], 'some-data');
+    });
+
+    test('round-trips raw JSON', () {
+      const json = {'type': 'future_type', 'data': 'some-data'};
+      final part = ContentPart.fromJson(json);
+      expect(part.toJson(), json);
+    });
+
+    test('handles null type', () {
+      final part = ContentPart.fromJson(const {'text': 'Hello'});
+      expect(part, isA<UnknownContentPart>());
+      expect(part.type, 'unknown');
+    });
+  });
+
   group('ContentPart.fromJson', () {
     test('dispatches to TextContentPart for type "text"', () {
       final json = {'type': 'text', 'text': 'Hello'};
@@ -234,16 +526,20 @@ void main() {
       );
     });
 
-    test('throws FormatException for unknown type', () {
+    test('returns UnknownContentPart for unknown type', () {
       final json = {'type': 'audio', 'audio': 'data'};
 
-      expect(() => ContentPart.fromJson(json), throwsA(isA<FormatException>()));
+      final part = ContentPart.fromJson(json);
+
+      expect(part, isA<UnknownContentPart>());
     });
 
-    test('throws FormatException for null type', () {
+    test('returns UnknownContentPart for null type', () {
       final json = {'text': 'Hello'};
 
-      expect(() => ContentPart.fromJson(json), throwsA(isA<FormatException>()));
+      final part = ContentPart.fromJson(json);
+
+      expect(part, isA<UnknownContentPart>());
     });
   });
 

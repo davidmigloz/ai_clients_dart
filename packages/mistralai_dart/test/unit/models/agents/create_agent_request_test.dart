@@ -31,7 +31,7 @@ void main() {
             GuardrailConfig(
               blockOnError: true,
               moderationLlmV1: ModerationLLMV1Config(
-                action: ModerationLLMV1Action.block,
+                action: ModerationLLMAction.block,
               ),
             ),
           ],
@@ -47,7 +47,7 @@ void main() {
         expect(request.guardrails!.first.blockOnError, isTrue);
         expect(
           request.guardrails!.first.moderationLlmV1!.action,
-          ModerationLLMV1Action.block,
+          ModerationLLMAction.block,
         );
         expect(request.versionMessage, 'Initial version');
       });
@@ -136,7 +136,7 @@ void main() {
         expect(request.guardrails!.first.blockOnError, isTrue);
         expect(
           request.guardrails!.first.moderationLlmV1!.action,
-          ModerationLLMV1Action.block,
+          ModerationLLMAction.block,
         );
         expect(request.versionMessage, 'Complete version');
       });
