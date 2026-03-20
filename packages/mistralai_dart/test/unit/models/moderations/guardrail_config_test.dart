@@ -21,10 +21,7 @@ void main() {
         ModerationLLMAction.fromString('something_else'),
         ModerationLLMAction.unknown,
       );
-      expect(
-        ModerationLLMAction.fromString(null),
-        ModerationLLMAction.unknown,
-      );
+      expect(ModerationLLMAction.fromString(null), ModerationLLMAction.unknown);
     });
   });
 

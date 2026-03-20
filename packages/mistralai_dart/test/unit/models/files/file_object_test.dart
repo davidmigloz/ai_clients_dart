@@ -230,8 +230,11 @@ void main() {
       expect(FileVisibility.fromString('user'), FileVisibility.user);
     });
 
-    test('fromString returns null for unknown values', () {
-      expect(FileVisibility.fromString('unknown'), isNull);
+    test('fromString returns unknown for unrecognized values', () {
+      expect(
+        FileVisibility.fromString('something_new'),
+        FileVisibility.unknown,
+      );
       expect(FileVisibility.fromString(null), isNull);
     });
   });

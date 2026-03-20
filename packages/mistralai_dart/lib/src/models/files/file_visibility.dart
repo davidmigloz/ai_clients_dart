@@ -18,6 +18,7 @@ enum FileVisibility {
   static FileVisibility? fromString(String? value) => switch (value) {
     'workspace' => workspace,
     'user' => user,
-    _ => null,
+    null => null,
+    _ => unknown,
   };
 }

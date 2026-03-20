@@ -112,11 +112,33 @@ class FileObject {
           bytes == other.bytes &&
           createdAt == other.createdAt &&
           filename == other.filename &&
-          purpose == other.purpose;
+          purpose == other.purpose &&
+          sampleType == other.sampleType &&
+          numLines == other.numLines &&
+          source == other.source &&
+          deleted == other.deleted &&
+          expiresAt == other.expiresAt &&
+          visibility == other.visibility &&
+          mimetype == other.mimetype &&
+          signature == other.signature;
 
   @override
-  int get hashCode =>
-      Object.hash(id, object, bytes, createdAt, filename, purpose);
+  int get hashCode => Object.hash(
+    id,
+    object,
+    bytes,
+    createdAt,
+    filename,
+    purpose,
+    sampleType,
+    numLines,
+    source,
+    deleted,
+    expiresAt,
+    visibility,
+    mimetype,
+    signature,
+  );
 
   @override
   String toString() =>

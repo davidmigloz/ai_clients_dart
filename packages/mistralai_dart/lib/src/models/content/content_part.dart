@@ -332,7 +332,7 @@ class ThinkContentPart extends ContentPart {
                 ?.map((e) => ContentPart.fromJson(e as Map<String, dynamic>))
                 .toList() ??
             const <ContentPart>[],
-        closed: json['closed'] as bool? ?? false,
+        closed: json['closed'] as bool? ?? true,
       );
 
   @override
