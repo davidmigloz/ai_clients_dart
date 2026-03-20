@@ -191,7 +191,7 @@ class ThinkingAdaptive extends ThinkingConfig {
           display == other.display;
 
   @override
-  int get hashCode => display.hashCode;
+  int get hashCode => Object.hash(runtimeType, display);
 
   @override
   String toString() => 'ThinkingAdaptive(display: $display)';
