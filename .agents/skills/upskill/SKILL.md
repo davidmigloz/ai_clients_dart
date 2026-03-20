@@ -51,7 +51,8 @@ Perform all checks before proceeding. Fail fast with an actionable error message
    > **Note:** On the very first run, `last_run_date` will be `null`. In this case, rely solely on `last_checked_pr` to determine the PR range.
 2. If the file does not exist or is unreadable, default `last_checked_pr` to `0` and warn: "No state file found — this is a first run, scanning all merged PRs."
 3. If `--from N` was provided, override `last_checked_pr` with N.
-4. Record the starting PR number for the summary.
+4. Set `START_PR` to the effective starting PR number: use the `--from N` value if provided, otherwise `last_checked_pr` from state.
+5. Record the starting PR number for the summary.
 
 ---
 
