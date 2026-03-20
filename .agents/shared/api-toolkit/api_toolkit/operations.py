@@ -3927,7 +3927,25 @@ def command_fetch(args: Any) -> tuple[int, dict[str, Any]]:
         return EXIT_SUCCESS, payload
 
     if spec.fetch_mode == "remote":
+        # Auto-check preflight when a preflight config exists
+        preflight_info: dict[str, Any] | None = None
+        if config.preflight.get("stats_url"):
+            try:
+                preflight_info = _preflight_payload(config, spec_name, spec)
+                payload["preflight"] = preflight_info
+            except Exception:
+                preflight_info = None
+
         urls = [spec.url, *spec.fallback_urls]
+        # If preflight indicates a newer URL, try it first
+        if (
+            preflight_info
+            and preflight_info.get("outdated")
+            and preflight_info.get("latest_url")
+        ):
+            latest_url = preflight_info["latest_url"]
+            urls = [latest_url] + [u for u in urls if u != latest_url]
+
         last_error = None
         document = None
         for url in [candidate for candidate in urls if candidate]:
@@ -3948,6 +3966,15 @@ def command_fetch(args: Any) -> tuple[int, dict[str, Any]]:
             write_json(target, spec_payload)
             if payload.get("source_url"):
                 _write_spec_metadata(config, spec_name, spec_payload, payload["source_url"])
+                # Update pinned URL in specs.json if we fetched from a new URL
+                fetched_url = payload["source_url"]
+                if fetched_url != spec.url:
+                    specs_json_path = config.config_dir / "specs.json"
+                    specs_json = read_json_file(specs_json_path, {})
+                    spec_entry = specs_json.get("specs", {}).get(spec_name)
+                    if spec_entry is not None:
+                        spec_entry["url"] = fetched_url
+                        write_json(specs_json_path, specs_json)
     elif spec.fetch_mode == "local_file":
         if not spec.source_file:
             raise ToolkitError(f"Spec '{spec_name}' uses fetch_mode=local_file but no source_file is configured")
