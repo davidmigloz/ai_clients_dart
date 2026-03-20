@@ -48,6 +48,7 @@ Perform all checks before proceeding. Fail fast with an actionable error message
      "last_run_date": "2026-03-19"
    }
    ```
+   > **Note:** On the very first run, `last_run_date` will be `null`. If `last_run_date` is `null`, skip any date-based filtering and rely solely on `last_checked_pr` to determine the PR range.
 2. If the file does not exist or is unreadable, default `last_checked_pr` to `0` and warn: "No state file found — this is a first run, scanning all merged PRs."
 3. If `--from N` was provided, override `last_checked_pr` with N.
 4. Record the starting PR number for the summary.
@@ -84,12 +85,12 @@ Pipe into `jq -s` to merge all pages into one array so parent-comment lookup via
 
 ### Identification logic
 
-1. Find comments where `body` starts with `**Valid` **AND** `user` matches the PR author (only the PR author's acknowledgments count, not maintainer or bot follow-ups).
+1. Find comments where `body` starts with `**Valid.**` **AND** `user` matches the PR author (only the PR author's acknowledgments count, not maintainer or bot follow-ups).
 2. Verify the parent comment (matched via `in_reply_to_id`) has `user` different from the PR author (it should be a reviewer's comment, not a self-reply).
 3. Build a finding record for each match:
    - **PR number** and **file path** (`path` field)
    - **Reviewer comment**: the parent comment's `body` — describes the issue/bug found
-   - **Author acknowledgment**: the `**Valid` reply's `body` — may describe the fix or just confirm
+   - **Author acknowledgment**: the `**Valid.**` reply's `body` — may describe the fix or just confirm
    - **Commit diff context** (optional enrichment): if the acknowledgment references a commit hash, fetch the commit via `gh api repos/{owner}/{repo}/commits/{hash}` to get the actual fix. Otherwise, the reviewer's comment alone is sufficient — it describes what went wrong, which is what the skill files need to prevent.
 
 ### Scaling strategy
@@ -263,6 +264,6 @@ Suggest using `/create-pr` to push the changes.
 6. **`--plan` mode** → run through Step 6, display results, skip all edits (including config update).
    - **`--dry-run` mode** → run through Step 7 (show proposed updates), skip all file edits and config updates.
 7. **PR has 0 review comments** → skip that PR, continue to next.
-8. `**Not applicable.**` or other non-Valid replies → filter to `**Valid` prefix only.
+8. `**Not applicable.**` or other non-Valid replies → filter to `**Valid.**` prefix only.
 9. **> 20 PRs to process** → spawn single subagent for extraction to avoid context overflow.
 10. **Parent comment not found** → if `in_reply_to_id` points to a comment not in the fetched set (edge case with deleted comments), skip that finding and warn.
