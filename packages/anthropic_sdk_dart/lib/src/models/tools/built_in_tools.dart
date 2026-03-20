@@ -965,8 +965,10 @@ class WebFetchTool extends BuiltInTool {
 
   /// Creates a [WebFetchTool].
   ///
-  /// [useCache] is only supported for `web_fetch_20260309`.
-  const WebFetchTool({
+  /// [useCache] is only supported for `web_fetch_20260309` and is normalized
+  /// to `null` for other versions.
+  // ignore: prefer_const_constructors_in_immutables
+  WebFetchTool({
     String? type,
     this.allowedDomains,
     this.blockedDomains,
@@ -977,12 +979,11 @@ class WebFetchTool extends BuiltInTool {
     this.allowedCallers,
     this.deferLoading,
     this.strict,
-    this.useCache,
+    bool? useCache,
   }) : type = type ?? 'web_fetch_20260309',
-       assert(
-         useCache == null || type == null || type == 'web_fetch_20260309',
-         'useCache is only supported for web_fetch_20260309',
-       );
+       useCache = (type == null || type == 'web_fetch_20260309')
+           ? useCache
+           : null;
 
   /// Creates a [WebFetchTool] from JSON.
   factory WebFetchTool.fromJson(Map<String, dynamic> json) {

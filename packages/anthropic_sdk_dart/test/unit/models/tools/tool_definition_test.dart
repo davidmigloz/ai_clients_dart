@@ -301,7 +301,7 @@ void main() {
       });
 
       test('serializes BuiltInToolDefinition (WebFetchTool)', () {
-        const builtIn = WebFetchTool(maxUses: 1, maxContentTokens: 4096);
+        final builtIn = WebFetchTool(maxUses: 1, maxContentTokens: 4096);
         final definition = ToolDefinition.builtIn(builtIn);
 
         final json = definition.toJson();
@@ -313,7 +313,7 @@ void main() {
       });
 
       test('serializes WebFetchTool with useCache', () {
-        const builtIn = WebFetchTool(useCache: false);
+        final builtIn = WebFetchTool(useCache: false);
         final definition = ToolDefinition.builtIn(builtIn);
 
         final json = definition.toJson();
