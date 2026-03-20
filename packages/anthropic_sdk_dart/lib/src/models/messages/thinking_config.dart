@@ -12,7 +12,7 @@ enum ThinkingDisplayMode {
   omitted;
 
   /// Creates a [ThinkingDisplayMode] from a JSON string.
-  factory ThinkingDisplayMode.fromJson(String json) => switch (json) {
+  static ThinkingDisplayMode fromJson(String json) => switch (json) {
     'summarized' => ThinkingDisplayMode.summarized,
     'omitted' => ThinkingDisplayMode.omitted,
     _ => throw FormatException('Unknown ThinkingDisplayMode: $json'),

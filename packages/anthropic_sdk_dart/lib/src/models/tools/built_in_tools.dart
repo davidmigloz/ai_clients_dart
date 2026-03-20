@@ -967,8 +967,7 @@ class WebFetchTool extends BuiltInTool {
   ///
   /// [useCache] is only supported for `web_fetch_20260309` and is normalized
   /// to `null` for other versions.
-  // ignore: prefer_const_constructors_in_immutables
-  WebFetchTool({
+  const WebFetchTool({
     String? type,
     this.allowedDomains,
     this.blockedDomains,
