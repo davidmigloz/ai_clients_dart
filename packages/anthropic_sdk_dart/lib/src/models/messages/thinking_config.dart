@@ -4,10 +4,10 @@ import '../common/copy_with_sentinel.dart';
 
 /// Controls how thinking content appears in the response.
 enum ThinkingDisplayMode {
-  /// Thinking is returned normally.
+  /// Thinking is returned as a brief summary instead of the full reasoning.
   summarized,
 
-  /// Thinking content is redacted but a signature is returned
+  /// Thinking content is not returned, but a signature is included
   /// for multi-turn continuity.
   omitted;
 
