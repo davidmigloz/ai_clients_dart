@@ -7,10 +7,6 @@
       "title": "Anthropic API",
       "version_history": [
         {
-          "fetched_at": "2026-03-20T12:00:00Z",
-          "version": "ebeeaa9a9bf7603f0bbcce30389e27ca"
-        },
-        {
           "fetched_at": "2026-02-19T17:34:16Z",
           "version": "13d3d0a8e62a955b8b4df99c18d387d0"
         }

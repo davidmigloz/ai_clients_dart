@@ -3967,9 +3967,14 @@ def command_fetch(args: Any) -> tuple[int, dict[str, Any]]:
             write_json(target, spec_payload)
             if payload.get("source_url"):
                 _write_spec_metadata(config, spec_name, spec_payload, payload["source_url"])
-                # Update pinned URL in specs.json if we fetched from a new URL
+                # Update pinned URL in specs.json only when preflight discovered a newer URL
                 fetched_url = payload["source_url"]
-                if fetched_url != spec.url:
+                if (
+                    fetched_url != spec.url
+                    and preflight_info
+                    and preflight_info.get("outdated")
+                    and fetched_url == preflight_info.get("latest_url")
+                ):
                     specs_json_path = config.config_dir / "specs.json"
                     specs_json = read_json_file(specs_json_path, {})
                     spec_entry = specs_json.get("specs", {}).get(spec_name)
