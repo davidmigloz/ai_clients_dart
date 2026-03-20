@@ -1016,7 +1016,7 @@ class WebFetchTool extends BuiltInTool {
     if (allowedCallers != null) 'allowed_callers': allowedCallers,
     if (deferLoading != null) 'defer_loading': deferLoading,
     if (strict != null) 'strict': strict,
-    if (useCache != null) 'use_cache': useCache,
+    if (useCache != null && type == 'web_fetch_20260309') 'use_cache': useCache,
   };
 
   @override

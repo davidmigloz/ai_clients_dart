@@ -3933,7 +3933,8 @@ def command_fetch(args: Any) -> tuple[int, dict[str, Any]]:
             try:
                 preflight_info = _preflight_payload(config, spec_name, spec)
                 payload["preflight"] = preflight_info
-            except Exception:
+            except Exception as exc:
+                payload["preflight_error"] = str(exc)
                 preflight_info = None
 
         urls = [spec.url, *spec.fallback_urls]

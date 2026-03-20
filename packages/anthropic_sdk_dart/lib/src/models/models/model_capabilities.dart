@@ -165,9 +165,11 @@ class ContextManagementCapability {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
-    'clear_thinking_20251015': clearThinking20251015?.toJson(),
-    'clear_tool_uses_20250919': clearToolUses20250919?.toJson(),
-    'compact_20260112': compact20260112?.toJson(),
+    if (clearThinking20251015 != null)
+      'clear_thinking_20251015': clearThinking20251015!.toJson(),
+    if (clearToolUses20250919 != null)
+      'clear_tool_uses_20250919': clearToolUses20250919!.toJson(),
+    if (compact20260112 != null) 'compact_20260112': compact20260112!.toJson(),
     'supported': supported,
   };
 

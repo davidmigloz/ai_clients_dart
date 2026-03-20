@@ -12,8 +12,11 @@ enum ThinkingDisplayMode {
   omitted;
 
   /// Creates a [ThinkingDisplayMode] from a JSON string.
-  factory ThinkingDisplayMode.fromJson(String json) =>
-      ThinkingDisplayMode.values.byName(json);
+  factory ThinkingDisplayMode.fromJson(String json) => switch (json) {
+    'summarized' => ThinkingDisplayMode.summarized,
+    'omitted' => ThinkingDisplayMode.omitted,
+    _ => throw FormatException('Unknown ThinkingDisplayMode: $json'),
+  };
 
   /// Converts to a JSON string.
   String toJson() => name;

@@ -199,7 +199,7 @@ void main() {
       expect(json.containsKey('max_tokens'), isFalse);
     });
 
-    test('toJson includes capabilities when present', () {
+    test('toJson includes maxInputTokens and maxTokens when present', () {
       final model = ModelInfo(
         id: 'test',
         displayName: 'Test',
