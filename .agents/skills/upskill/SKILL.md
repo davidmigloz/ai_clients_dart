@@ -14,6 +14,7 @@ description: >-
 This skill automates the feedback loop from PR reviews to skill files. It extracts validated review findings (comments marked `**Valid.**` by the PR author), consolidates them into generalizable patterns, and updates the review checklists and implementation pattern files to prevent recurring issues.
 
 Parse `$ARGUMENTS` for options:
+- **`/upskill`** — Full apply mode (no flags). Runs the complete workflow (Steps 1–9), updating files and state after confirmation.
 - **`--plan`** — Extract and analyze findings without editing any files. Safe to run anytime.
 - **`--dry-run`** — Run the full apply workflow (extraction, consolidation, validation, proposed updates) but stop before actually editing files. Shows exactly what would change without changing anything.
 - **`--from N`** — Start after PR number N instead of the config's `last_checked_pr`.
@@ -27,6 +28,9 @@ Perform all checks before proceeding. Fail fast with an actionable error message
 1. **CLI availability**: `git`, `gh`, and `jq` must be on PATH.
 2. **GitHub auth**: `gh auth status` must show authenticated.
 3. **Repository root**: Use `git rev-parse --show-toplevel` to determine the repo root. All file paths are relative to this root.
+
+> **Note:** The Bash tool does not persist `cd` across calls. Prefix all shell commands with `cd "$REPO_ROOT" &&` or use absolute paths.
+
 4. **Rate limit**: Check remaining API calls:
    ```bash
    gh api rate_limit --jq '.rate.remaining'
@@ -259,6 +263,6 @@ Suggest using `/create-pr` to push the changes.
 6. **`--plan` mode** → run through Step 6, display results, skip all edits (including config update).
    - **`--dry-run` mode** → run through Step 7 (show proposed updates), skip all file edits and config updates.
 7. **PR has 0 review comments** → skip that PR, continue to next.
-8. **`**Not applicable.**` or other non-Valid replies** → filter to `**Valid` prefix only.
+8. `**Not applicable.**` or other non-Valid replies → filter to `**Valid` prefix only.
 9. **> 20 PRs to process** → spawn single subagent for extraction to avoid context overflow.
 10. **Parent comment not found** → if `in_reply_to_id` points to a comment not in the fetched set (edge case with deleted comments), skip that finding and warn.
