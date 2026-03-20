@@ -48,7 +48,7 @@ Perform all checks before proceeding. Fail fast with an actionable error message
      "last_run_date": "2026-03-19"
    }
    ```
-   > **Note:** On the very first run, `last_run_date` will be `null`. If `last_run_date` is `null`, skip any date-based filtering and rely solely on `last_checked_pr` to determine the PR range.
+   > **Note:** On the very first run, `last_run_date` will be `null`. In this case, rely solely on `last_checked_pr` to determine the PR range.
 2. If the file does not exist or is unreadable, default `last_checked_pr` to `0` and warn: "No state file found — this is a first run, scanning all merged PRs."
 3. If `--from N` was provided, override `last_checked_pr` with N.
 4. Record the starting PR number for the summary.
@@ -57,7 +57,13 @@ Perform all checks before proceeding. Fail fast with an actionable error message
 
 ## Step 3: Fetch Merged PRs
 
-Use the GitHub REST API with pagination to fetch all closed PRs, then filter to merged ones above the starting PR number:
+Use the GitHub REST API with pagination to fetch all closed PRs, then filter to merged ones above the starting PR number.
+
+> **Note:** All `gh api` examples below use `{owner}/{repo}` as a placeholder. Derive the actual value from the current repository:
+> ```bash
+> gh repo view --json nameWithOwner --jq '.nameWithOwner'
+> ```
+> Use the result (e.g., `davidmigloz/ai_clients_dart`) in place of `{owner}/{repo}` throughout. Similarly, `{N}` refers to the PR number being processed.
 
 ```bash
 gh api "repos/{owner}/{repo}/pulls?state=closed&per_page=100" --paginate \
@@ -85,8 +91,11 @@ Pipe into `jq -s` to merge all pages into one array so parent-comment lookup via
 
 ### Identification logic
 
-1. Find comments where `body` starts with `**Valid.**` **AND** `user` matches the PR author (only the PR author's acknowledgments count, not maintainer or bot follow-ups).
-2. Verify the parent comment (matched via `in_reply_to_id`) has `user` different from the PR author (it should be a reviewer's comment, not a self-reply).
+1. Find comments where:
+   - `body` starts with `**Valid.**`, **AND**
+   - `user` matches the PR author (only the PR author's acknowledgments count, not maintainer or bot follow-ups), **AND**
+   - `in_reply_to_id` is present and non-null (ignore top-level PR comments from the author that start with `**Valid.**` but have no parent).
+2. Using `in_reply_to_id`, look up the parent comment; if no parent is found, skip this `**Valid.**` comment. Verify the parent comment has `user` different from the PR author (it should be a reviewer's comment, not a self-reply).
 3. Build a finding record for each match:
    - **PR number** and **file path** (`path` field)
    - **Reviewer comment**: the parent comment's `body` — describes the issue/bug found
