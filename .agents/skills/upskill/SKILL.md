@@ -41,7 +41,7 @@ Perform all checks before proceeding. Fail fast with an actionable error message
 
 ## Step 2: Determine PR Range
 
-1. Read `config/state.json` from the skill directory (`.agents/skills/upskill/config/state.json`):
+1. Read `.agents/skills/upskill/config/state.json`:
    ```json
    {
      "last_checked_pr": 122,
@@ -110,7 +110,7 @@ Pipe into `jq -s` to merge all pages into one array so parent-comment lookup via
 
 ### Early exit
 
-- **0 findings across all PRs** → update `config/state.json` to advance the cursor to the highest PR number processed (unless in `--plan` or `--dry-run` mode), report "No valid findings in N PRs", and stop.
+- **0 findings across all PRs** → update `.agents/skills/upskill/config/state.json` to advance the cursor to the highest PR number processed (unless in `--plan` or `--dry-run` mode), report "No valid findings in N PRs", and stop.
 
 ---
 
@@ -267,8 +267,8 @@ Suggest using `/create-pr` to push the changes.
 ## Edge Cases
 
 1. **0 new PRs** → report "No new merged PRs since #{N}", stop.
-2. **0 findings** → update `config/state.json` to advance cursor (unless in `--plan` or `--dry-run` mode), report "No valid findings", stop.
-3. **All patterns already documented** → report, update config (unless in `--plan` or `--dry-run` mode), stop.
+2. **0 findings** → update `.agents/skills/upskill/config/state.json` to advance cursor (unless in `--plan` or `--dry-run` mode), report "No valid findings", stop.
+3. **All patterns already documented** → report, update `.agents/skills/upskill/config/state.json` (unless in `--plan` or `--dry-run` mode), stop.
 4. **No config file** → first run, default `--from 0`, warn user.
 5. **Rate limit < 100** → warn and stop before making API calls.
 6. **`--plan` mode** → run through Step 6, display results, skip all edits (including config update).
