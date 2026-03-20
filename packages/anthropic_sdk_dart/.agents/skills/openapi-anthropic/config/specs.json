@@ -2,7 +2,7 @@
   "specs": {
     "main": {
       "name": "Anthropic API",
-      "url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/anthropic%2Fanthropic-60fbf504538934c934f523d456bbf3cd99e7f1e2275041f74d5beb627bf38e19.yml",
+      "url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/anthropic%2Fanthropic-dd2dcd00a757075370a7e4a7f469a1e2d067c2118684c3b70d7906a8f5cf518b.yml",
       "local_file": "openapi.yaml",
       "requires_auth": false,
       "auth_env_vars": [],

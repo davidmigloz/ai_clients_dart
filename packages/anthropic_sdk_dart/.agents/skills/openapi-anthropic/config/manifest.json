@@ -854,6 +854,69 @@
       "schema": "ThinkingConfigAdaptive",
       "parent": "ThinkingConfig"
     },
+    "ThinkingDisplayMode": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ThinkingDisplayMode",
+      "file": "lib/src/models/messages/thinking_config.dart",
+      "schema": "ThinkingDisplayMode",
+      "tags": ["acknowledged"],
+      "note": "Enum for thinking display mode — used as optional field on ThinkingConfigEnabled and ThinkingConfigAdaptive"
+    },
+    "CapabilitySupport": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "CapabilitySupport",
+      "file": "lib/src/models/models/model_capabilities.dart",
+      "schema": "CapabilitySupport",
+      "tags": ["acknowledged"],
+      "note": "Simple helper type used within ModelCapabilities"
+    },
+    "ModelCapabilities": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ModelCapabilities",
+      "file": "lib/src/models/models/model_capabilities.dart",
+      "schema": "ModelCapabilities",
+      "tags": ["acknowledged"],
+      "note": "Model capability information returned on ModelInfo"
+    },
+    "ContextManagementCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ContextManagementCapability",
+      "file": "lib/src/models/models/model_capabilities.dart",
+      "schema": "ContextManagementCapability",
+      "tags": ["acknowledged"],
+      "note": "Context management strategies within ModelCapabilities"
+    },
+    "EffortCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "EffortCapability",
+      "file": "lib/src/models/models/model_capabilities.dart",
+      "schema": "EffortCapability",
+      "tags": ["acknowledged"],
+      "note": "Effort level support within ModelCapabilities"
+    },
+    "ThinkingCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ThinkingCapability",
+      "file": "lib/src/models/models/model_capabilities.dart",
+      "schema": "ThinkingCapability",
+      "tags": ["acknowledged"],
+      "note": "Thinking capability details within ModelCapabilities"
+    },
+    "ThinkingTypes": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ThinkingTypes",
+      "file": "lib/src/models/models/model_capabilities.dart",
+      "schema": "ThinkingTypes",
+      "tags": ["acknowledged"],
+      "note": "Thinking type configurations within ThinkingCapability"
+    },
     "ToolChoice": {
       "spec": "main",
       "kind": "sealed_parent",
@@ -976,7 +1039,7 @@
           "TextEditor20250429": "text_editor_20250429",
           "TextEditor20250728": "text_editor_20250728",
           "WebSearchTool20250305": "web_search_20250305, web_search_20260209",
-          "WebFetchTool20250910": "web_fetch_20250910, web_fetch_20260209",
+          "WebFetchTool20250910": "web_fetch_20250910, web_fetch_20260209, web_fetch_20260309",
           "MemoryTool20250818": "memory_20250818",
           "ToolSearchToolBm25": "tool_search_tool_bm25, tool_search_tool_bm25_20251119",
           "ToolSearchToolRegex": "tool_search_tool_regex, tool_search_tool_regex_20251119",
@@ -1048,7 +1111,7 @@
       "kind": "sealed_variant",
       "dart_class": "WebFetchTool",
       "file": "lib/src/models/tools/built_in_tools.dart",
-      "schema": "BetaWebFetchTool_20250910",
+      "schema": "WebFetchTool_20260309",
       "parent": "BuiltInTool",
       "excluded_properties": [
         "name"

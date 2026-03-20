@@ -100,6 +100,7 @@ export 'src/models/metadata/stop_reason.dart';
 export 'src/models/metadata/usage.dart';
 
 // Models - Models Domain
+export 'src/models/models/model_capabilities.dart';
 export 'src/models/models/model_info.dart';
 
 // Models - Skills (Beta)

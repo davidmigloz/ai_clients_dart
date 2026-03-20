@@ -138,6 +138,7 @@ sealed class BuiltInTool {
     List<String>? allowedCallers,
     bool? deferLoading,
     bool? strict,
+    bool? useCache,
   }) = WebFetchTool;
 
   /// Creates a memory tool.
@@ -209,6 +210,7 @@ sealed class BuiltInTool {
       'web_search_20260209' => WebSearchTool.fromJson(json),
       'web_fetch_20250910' => WebFetchTool.fromJson(json),
       'web_fetch_20260209' => WebFetchTool.fromJson(json),
+      'web_fetch_20260309' => WebFetchTool.fromJson(json),
       'memory_20250818' => MemoryTool.fromJson(json),
       'tool_search_tool_bm25' => ToolSearchToolBm25.fromJson(json),
       'tool_search_tool_bm25_20251119' => ToolSearchToolBm25.fromJson(json),
@@ -954,6 +956,13 @@ class WebFetchTool extends BuiltInTool {
   /// Whether strict schema validation is enabled.
   final bool? strict;
 
+  /// Whether to use cached content.
+  ///
+  /// Set to false to bypass the cache and fetch fresh content. Only set to
+  /// false when the user explicitly requests fresh content or when fetching
+  /// rapidly-changing sources.
+  final bool? useCache;
+
   /// Creates a [WebFetchTool].
   const WebFetchTool({
     String? type,
@@ -966,12 +975,13 @@ class WebFetchTool extends BuiltInTool {
     this.allowedCallers,
     this.deferLoading,
     this.strict,
-  }) : type = type ?? 'web_fetch_20260209';
+    this.useCache,
+  }) : type = type ?? 'web_fetch_20260309';
 
   /// Creates a [WebFetchTool] from JSON.
   factory WebFetchTool.fromJson(Map<String, dynamic> json) {
     return WebFetchTool(
-      type: json['type'] as String? ?? 'web_fetch_20260209',
+      type: json['type'] as String? ?? 'web_fetch_20260309',
       allowedDomains: (json['allowed_domains'] as List?)?.cast<String>(),
       blockedDomains: (json['blocked_domains'] as List?)?.cast<String>(),
       cacheControl: json['cache_control'] != null
@@ -989,6 +999,7 @@ class WebFetchTool extends BuiltInTool {
       allowedCallers: (json['allowed_callers'] as List?)?.cast<String>(),
       deferLoading: json['defer_loading'] as bool?,
       strict: json['strict'] as bool?,
+      useCache: json['use_cache'] as bool?,
     );
   }
 
@@ -1005,6 +1016,7 @@ class WebFetchTool extends BuiltInTool {
     if (allowedCallers != null) 'allowed_callers': allowedCallers,
     if (deferLoading != null) 'defer_loading': deferLoading,
     if (strict != null) 'strict': strict,
+    if (useCache != null) 'use_cache': useCache,
   };
 
   @override
@@ -1021,7 +1033,8 @@ class WebFetchTool extends BuiltInTool {
           citations == other.citations &&
           listsEqual(allowedCallers, other.allowedCallers) &&
           deferLoading == other.deferLoading &&
-          strict == other.strict;
+          strict == other.strict &&
+          useCache == other.useCache;
 
   /// Creates a copy with replaced values.
   WebFetchTool copyWith({
@@ -1035,6 +1048,7 @@ class WebFetchTool extends BuiltInTool {
     Object? allowedCallers = unsetCopyWithValue,
     Object? deferLoading = unsetCopyWithValue,
     Object? strict = unsetCopyWithValue,
+    Object? useCache = unsetCopyWithValue,
   }) {
     return WebFetchTool(
       type: type ?? this.type,
@@ -1061,6 +1075,9 @@ class WebFetchTool extends BuiltInTool {
           ? this.deferLoading
           : deferLoading as bool?,
       strict: strict == unsetCopyWithValue ? this.strict : strict as bool?,
+      useCache: useCache == unsetCopyWithValue
+          ? this.useCache
+          : useCache as bool?,
     );
   }
 
@@ -1076,6 +1093,7 @@ class WebFetchTool extends BuiltInTool {
     listHash(allowedCallers),
     deferLoading,
     strict,
+    useCache,
   );
 
   @override
@@ -1084,7 +1102,7 @@ class WebFetchTool extends BuiltInTool {
       'blockedDomains: $blockedDomains, cacheControl: $cacheControl, '
       'maxUses: $maxUses, maxContentTokens: $maxContentTokens, '
       'citations: $citations, allowedCallers: $allowedCallers, '
-      'deferLoading: $deferLoading, strict: $strict)';
+      'deferLoading: $deferLoading, strict: $strict, useCache: $useCache)';
 }
 
 /// Memory built-in tool.

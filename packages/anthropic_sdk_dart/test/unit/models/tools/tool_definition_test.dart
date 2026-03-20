@@ -147,6 +147,25 @@ void main() {
         expect(webFetch.maxContentTokens, 2048);
       });
 
+      test('parses web_fetch_20260309 built-in tool with use_cache', () {
+        final json = {
+          'type': 'web_fetch_20260309',
+          'name': 'web_fetch',
+          'use_cache': false,
+          'max_uses': 3,
+        };
+
+        final definition = ToolDefinition.fromJson(json);
+
+        expect(definition, isA<BuiltInToolDefinition>());
+        final builtIn = (definition as BuiltInToolDefinition).tool;
+        expect(builtIn, isA<WebFetchTool>());
+        final webFetch = builtIn as WebFetchTool;
+        expect(webFetch.type, 'web_fetch_20260309');
+        expect(webFetch.useCache, isFalse);
+        expect(webFetch.maxUses, 3);
+      });
+
       test('parses memory built-in tool', () {
         final json = {'type': 'memory_20250818', 'name': 'memory'};
 
@@ -287,10 +306,20 @@ void main() {
 
         final json = definition.toJson();
 
-        expect(json['type'], 'web_fetch_20260209');
+        expect(json['type'], 'web_fetch_20260309');
         expect(json['name'], 'web_fetch');
         expect(json['max_uses'], 1);
         expect(json['max_content_tokens'], 4096);
+      });
+
+      test('serializes WebFetchTool with useCache', () {
+        const builtIn = WebFetchTool(useCache: false);
+        final definition = ToolDefinition.builtIn(builtIn);
+
+        final json = definition.toJson();
+
+        expect(json['type'], 'web_fetch_20260309');
+        expect(json['use_cache'], false);
       });
     });
 

@@ -2,6 +2,116 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('CapabilitySupport', () {
+    test('fromJson and toJson round-trip', () {
+      final json = {'supported': true};
+      final cap = CapabilitySupport.fromJson(json);
+
+      expect(cap.supported, isTrue);
+      expect(cap.toJson(), json);
+    });
+
+    test('equality works', () {
+      const a = CapabilitySupport(supported: true);
+      const b = CapabilitySupport(supported: true);
+      const c = CapabilitySupport(supported: false);
+
+      expect(a, equals(b));
+      expect(a.hashCode, b.hashCode);
+      expect(a, isNot(equals(c)));
+    });
+  });
+
+  group('ModelCapabilities', () {
+    Map<String, dynamic> fullCapabilitiesJson() => {
+      'batch': {'supported': true},
+      'citations': {'supported': true},
+      'code_execution': {'supported': true},
+      'context_management': {
+        'clear_thinking_20251015': {'supported': true},
+        'clear_tool_uses_20250919': {'supported': true},
+        'compact_20260112': {'supported': true},
+        'supported': true,
+      },
+      'effort': {
+        'high': {'supported': true},
+        'low': {'supported': true},
+        'max': {'supported': true},
+        'medium': {'supported': true},
+        'supported': true,
+      },
+      'image_input': {'supported': true},
+      'pdf_input': {'supported': true},
+      'structured_outputs': {'supported': true},
+      'thinking': {
+        'supported': true,
+        'types': {
+          'adaptive': {'supported': true},
+          'enabled': {'supported': true},
+        },
+      },
+    };
+
+    test('fromJson deserializes all fields', () {
+      final json = fullCapabilitiesJson();
+      final caps = ModelCapabilities.fromJson(json);
+
+      expect(caps.batch.supported, isTrue);
+      expect(caps.citations.supported, isTrue);
+      expect(caps.codeExecution.supported, isTrue);
+      expect(caps.contextManagement.supported, isTrue);
+      expect(caps.contextManagement.clearThinking20251015?.supported, isTrue);
+      expect(caps.contextManagement.clearToolUses20250919?.supported, isTrue);
+      expect(caps.contextManagement.compact20260112?.supported, isTrue);
+      expect(caps.effort.supported, isTrue);
+      expect(caps.effort.high.supported, isTrue);
+      expect(caps.effort.low.supported, isTrue);
+      expect(caps.effort.max.supported, isTrue);
+      expect(caps.effort.medium.supported, isTrue);
+      expect(caps.imageInput.supported, isTrue);
+      expect(caps.pdfInput.supported, isTrue);
+      expect(caps.structuredOutputs.supported, isTrue);
+      expect(caps.thinking.supported, isTrue);
+      expect(caps.thinking.types.adaptive.supported, isTrue);
+      expect(caps.thinking.types.enabled.supported, isTrue);
+    });
+
+    test('toJson round-trip works', () {
+      final json = fullCapabilitiesJson();
+      final caps = ModelCapabilities.fromJson(json);
+      final roundTripped = ModelCapabilities.fromJson(caps.toJson());
+
+      expect(roundTripped, equals(caps));
+    });
+
+    test('equality works', () {
+      final json = fullCapabilitiesJson();
+      final a = ModelCapabilities.fromJson(json);
+      final b = ModelCapabilities.fromJson(json);
+
+      expect(a, equals(b));
+      expect(a.hashCode, b.hashCode);
+    });
+  });
+
+  group('ContextManagementCapability', () {
+    test('handles null strategy fields', () {
+      final json = {
+        'clear_thinking_20251015': null,
+        'clear_tool_uses_20250919': null,
+        'compact_20260112': {'supported': true},
+        'supported': true,
+      };
+
+      final cap = ContextManagementCapability.fromJson(json);
+
+      expect(cap.clearThinking20251015, isNull);
+      expect(cap.clearToolUses20250919, isNull);
+      expect(cap.compact20260112?.supported, isTrue);
+      expect(cap.supported, isTrue);
+    });
+  });
+
   group('ModelInfo', () {
     test('fromJson deserializes with all fields', () {
       final json = {
@@ -17,6 +127,58 @@ void main() {
       expect(model.type, 'model');
       expect(model.displayName, 'Claude Sonnet 4');
       expect(model.createdAt, DateTime.utc(2025, 5, 14));
+      expect(model.capabilities, isNull);
+      expect(model.maxInputTokens, isNull);
+      expect(model.maxTokens, isNull);
+    });
+
+    test('fromJson deserializes with capabilities', () {
+      final json = {
+        'id': 'claude-sonnet-4-5-20250929',
+        'type': 'model',
+        'display_name': 'Claude Sonnet 4.5',
+        'created_at': '2025-09-29T00:00:00Z',
+        'capabilities': {
+          'batch': {'supported': true},
+          'citations': {'supported': true},
+          'code_execution': {'supported': true},
+          'context_management': {
+            'clear_thinking_20251015': {'supported': true},
+            'clear_tool_uses_20250919': {'supported': true},
+            'compact_20260112': {'supported': true},
+            'supported': true,
+          },
+          'effort': {
+            'high': {'supported': true},
+            'low': {'supported': true},
+            'max': {'supported': false},
+            'medium': {'supported': true},
+            'supported': true,
+          },
+          'image_input': {'supported': true},
+          'pdf_input': {'supported': true},
+          'structured_outputs': {'supported': true},
+          'thinking': {
+            'supported': true,
+            'types': {
+              'adaptive': {'supported': true},
+              'enabled': {'supported': true},
+            },
+          },
+        },
+        'max_input_tokens': 200000,
+        'max_tokens': 16384,
+      };
+
+      final model = ModelInfo.fromJson(json);
+
+      expect(model.id, 'claude-sonnet-4-5-20250929');
+      expect(model.capabilities, isNotNull);
+      expect(model.capabilities!.batch.supported, isTrue);
+      expect(model.capabilities!.effort.max.supported, isFalse);
+      expect(model.capabilities!.thinking.types.adaptive.supported, isTrue);
+      expect(model.maxInputTokens, 200000);
+      expect(model.maxTokens, 16384);
     });
 
     test('toJson serializes correctly', () {
@@ -32,6 +194,24 @@ void main() {
       expect(json['type'], 'model');
       expect(json['display_name'], 'Claude 3 Opus');
       expect(json['created_at'], '2024-02-29T00:00:00.000Z');
+      expect(json.containsKey('capabilities'), isFalse);
+      expect(json.containsKey('max_input_tokens'), isFalse);
+      expect(json.containsKey('max_tokens'), isFalse);
+    });
+
+    test('toJson includes capabilities when present', () {
+      final model = ModelInfo(
+        id: 'test',
+        displayName: 'Test',
+        createdAt: DateTime.utc(2024),
+        maxInputTokens: 100000,
+        maxTokens: 8192,
+      );
+
+      final json = model.toJson();
+
+      expect(json['max_input_tokens'], 100000);
+      expect(json['max_tokens'], 8192);
     });
 
     test('round-trip serialization works', () {
@@ -69,6 +249,37 @@ void main() {
 
       expect(model1, equals(model2));
       expect(model1, isNot(equals(model3)));
+    });
+
+    test('equality considers new fields', () {
+      final model1 = ModelInfo(
+        id: 'test',
+        displayName: 'Test',
+        createdAt: DateTime.utc(2024),
+        maxInputTokens: 100000,
+      );
+      final model2 = ModelInfo(
+        id: 'test',
+        displayName: 'Test',
+        createdAt: DateTime.utc(2024),
+        maxInputTokens: 200000,
+      );
+
+      expect(model1, isNot(equals(model2)));
+    });
+
+    test('copyWith can set and clear new fields', () {
+      final original = ModelInfo(
+        id: 'test',
+        displayName: 'Test',
+        createdAt: DateTime.utc(2024),
+        maxInputTokens: 100000,
+      );
+
+      final modified = original.copyWith(maxInputTokens: null, maxTokens: 8192);
+
+      expect(modified.maxInputTokens, isNull);
+      expect(modified.maxTokens, 8192);
     });
   });
 
