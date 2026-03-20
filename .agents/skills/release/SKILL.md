@@ -202,10 +202,11 @@ Spawn a **single subagent** (using the Agent tool) with:
   1. **`## Summary`**: Extract the bullet points (up to the next `##` heading or end of body). This is the primary source for changelog entries.
   2. **`## Details`**: Extract the full content of this section. Contains extended context — API examples, architecture decisions, configuration changes — that enriches changelog summaries beyond what the bullets provide.
   3. **`## Breaking Changes`**: Extract this section if present. This is the most reliable signal for breaking changes — more precise than heuristic phrase matching in the general body. Contains migration paths and before/after code examples.
-  4. **Strip boilerplate**: Remove review tool badges, HTML comments (`<!-- ... -->`), `## Test Plan` sections, and other template noise.
-  5. **Fallback**: If no `## Summary` heading exists (older PRs or external contributors), use the first substantive paragraph of the PR body (skip blank lines, HTML comments, and badge images at the top). Wrap the paragraph as a single entry in `summary_bullets` so downstream handling is uniform.
-  6. **Error fallback**: If `gh pr view` fails for a PR (e.g., PR was from a fork, or was deleted), log a warning and skip that PR — do not fail the release.
-- Return a structured list: `[{pr: N, title: "...", summary_bullets: ["..."], details: "...", breaking_changes: "...", has_breaking_signals: true/false}]`
+  4. **`## References`**: Extract this section if present. Contains links to official announcements, blog posts, or documentation. Parse each markdown link into `{title, url, description}` triples. As a fallback for PRs without this section, scan `## Summary` and `## Details` for markdown links whose domains match known provider sites (blog.google, openai.com/blog, docs.anthropic.com, mistral.ai/news, ollama.com/blog, docs.trychroma.com).
+  5. **Strip boilerplate**: Remove review tool badges, HTML comments (`<!-- ... -->`), `## Test Plan` sections, and other template noise.
+  6. **Fallback**: If no `## Summary` heading exists (older PRs or external contributors), use the first substantive paragraph of the PR body (skip blank lines, HTML comments, and badge images at the top). Wrap the paragraph as a single entry in `summary_bullets` so downstream handling is uniform.
+  7. **Error fallback**: If `gh pr view` fails for a PR (e.g., PR was from a fork, or was deleted), log a warning and skip that PR — do not fail the release.
+- Return a structured list: `[{pr: N, title: "...", summary_bullets: ["..."], details: "...", breaking_changes: "...", has_breaking_signals: true/false, references: [{title: "...", url: "...", description: "..."}]}]`
   - `has_breaking_signals` is `true` if a `## Breaking Changes` section exists, OR if the body contains phrases like "breaking change", "migration required", "removed", "renamed", "changed signature", "no longer supports"
 
 **Why a single subagent**: PR bodies can be large and noisy. Fetching them in a subagent keeps that content out of the main context window. A single subagent (rather than one per PR) avoids spawn overhead while still isolating the data.
@@ -214,7 +215,7 @@ Spawn a **single subagent** (using the Agent tool) with:
 
 After the subagent returns, map each PR's summary to the packages it affects by matching PR numbers back to the per-package commit lists from Step 3. A PR that appears in commits for multiple packages should be available to all of them.
 
-Store the mapping (package → list of PR summaries) for use in Step 5.
+Store the mapping (package → list of PR summaries) for use in Steps 5 and 5b.
 
 ### Verify semver bumps against PR context
 
@@ -290,6 +291,13 @@ For each released package, **prepend** a new section to `packages/{pkg}/CHANGELO
    - Mention specific capabilities added or problems fixed, not just "updated X"
    - If a release includes breaking changes, call out what broke and what users need to do
 
+   **Announcement links**: If PR references include links to official
+   announcements or blog posts (from the `references` field collected in
+   Step 4b), weave them naturally into the summary prose using inline
+   markdown links — e.g., "Added [Gemini Embedding 2](https://blog.google/...)
+   support." Do not create a separate references list; embed the links where
+   they add context to the narrative.
+
    **Fallback**: If PR context is unavailable for some or all commits (e.g., Step 4b was skipped, PRs failed to fetch, or commits have no PR references), fall back to commit messages. Synthesize commit subjects into the best summary possible.
 
    **Before/after example** — commit-only summary (current quality):
@@ -308,6 +316,87 @@ Before writing a new changelog section, check if `## {new_version}` already exis
    2. **Append** a `### Commits` subsection at the end of the existing section with the auto-generated commit entries (using the standard formatting rules above). This preserves the hand-written narrative while adding the structured commit log.
    3. If the existing section lacks a breaking change note but the commits include breaking changes, add the `> Note: This release has breaking changes.` line at the top of the section (after the `## {version}` heading).
 3. **If the section does not exist**: Proceed with normal prepend behavior as described above.
+
+---
+
+## Step 5b: Update Migration Guides
+
+> **Skip this step if no packages in this release have breaking changes.**
+> **Also skip in `--plan` mode.**
+
+For each package with breaking changes, update `packages/{pkg}/MIGRATION.md`
+with migration instructions extracted from PR descriptions. This ensures
+consumers have a single, up-to-date document for navigating breaking changes
+across versions.
+
+### Source material
+
+Use the `breaking_changes` field from the PR summaries collected in Step 4b.
+This contains the `## Breaking Changes` section from the PR description,
+which includes migration paths with before/after code examples.
+
+If `breaking_changes` is empty for a package that has breaking commits (e.g.,
+older PRs without a `## Breaking Changes` section), synthesize migration
+content from commit messages and PR summaries — focus on what changed and
+what the consumer needs to update.
+
+### Entry format
+
+Prepend a new section after the `# Migration Guide` heading but before any
+existing `## Migrating from...` sections (reverse chronological — newest on
+top):
+
+    ## Migrating from v{prev}.x to v{new_version}
+
+    {1-3 sentence summary of what broke and why}
+
+    ### 1) {Breaking change title}
+
+    {Description and migration path, including before/after code examples}
+
+    ---
+
+Where `{prev}` is derived from the previous release tag version:
+- **Major version packages (>=1.0)**: Use the major version. E.g., if previous
+  tag was `1.3.0` and bumping to `2.0.0`: "Migrating from v1.x to v2.0.0"
+- **Pre-1.0 packages**: Use the major.minor version. E.g., if previous tag
+  was `0.3.2` and bumping to `0.4.0`: "Migrating from v0.3.x to v0.4.0"
+
+`{new_version}` is the version being released.
+
+### Handling multiple breaking PRs
+
+If multiple PRs contribute breaking changes to the same package, combine them
+into a single migration section with numbered subsections (one per distinct
+breaking change). Synthesize into a coherent guide rather than concatenating
+PR sections verbatim.
+
+### File does not exist
+
+If `packages/{pkg}/MIGRATION.md` does not exist, create it:
+
+    # Migration Guide
+
+    ## Migrating from v{prev}.x to v{new_version}
+
+    {content}
+
+    ---
+
+    For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
+
+Track newly created files so dry-run cleanup (Step 7) can remove them.
+
+### Pre-existing section
+
+If `## Migrating from v{prev}.x to v{new_version}` already exists
+(e.g., manually added), review and merge. Prefer the existing text where it
+conflicts but add any missing migration paths from the PR descriptions.
+
+### Quality check
+
+Verify that before/after code examples reference correct class names and
+method signatures from the actual released package version.
 
 ---
 
@@ -338,6 +427,9 @@ If there are **errors** (not warnings):
 ```bash
 git checkout HEAD -- packages/
 git clean -fdX packages/
+# Also revert or remove any MIGRATION.md files modified or created by Step 5b:
+# For newly created files (not in HEAD), git checkout will fail — remove them explicitly:
+rm -f packages/{pkg}/MIGRATION.md  # only for packages where the file was newly created
 ```
 
 ---
@@ -358,6 +450,8 @@ If any package **fails** to publish:
 3. **For unpublished packages**, restore their files from HEAD:
    ```bash
    git checkout HEAD -- packages/{pkg}/pubspec.yaml packages/{pkg}/CHANGELOG.md
+   # If MIGRATION.md was modified or newly created by Step 5b, revert or remove it:
+   git checkout HEAD -- packages/{pkg}/MIGRATION.md 2>/dev/null || rm -f packages/{pkg}/MIGRATION.md
    ```
 4. Only packages that were **successfully published** proceed to the commit/tag steps
 
@@ -396,12 +490,14 @@ If any package **fails** to publish:
 
 **Only in full release mode.**
 
-Create a single commit with all `pubspec.yaml` and `CHANGELOG.md` changes (only for successfully published packages):
+Create a single commit with all `pubspec.yaml`, `CHANGELOG.md`, and `MIGRATION.md` changes (only for successfully published packages):
 
 ```bash
 git add packages/{pkg1}/pubspec.yaml packages/{pkg1}/CHANGELOG.md \
        packages/{pkg2}/pubspec.yaml packages/{pkg2}/CHANGELOG.md \
        ...
+# Also include MIGRATION.md for packages that had breaking changes:
+git add packages/{pkg}/MIGRATION.md  # for each package with breaking changes
 ```
 
 Commit message format:
@@ -508,89 +604,15 @@ EOF
 12. **Commits without PR references** → use commit message only for that commit's contribution to the summary
 13. **PR covers multiple packages** → include its summary bullets in every relevant package's changelog summary
 14. **PR signals breaking but commits don't** → warn user and suggest bump upgrade; user decides
+15. **Breaking changes but no `## Breaking Changes` PR section** → Step 5b synthesizes migration content from commit messages and PR summaries
+16. **MIGRATION.md does not exist yet** → Step 5b creates it with standard structure
+17. **No announcement links in PR** → Step 5 writes summary without links (no degradation)
+18. **Pre-1.0 migration heading** → Use major.minor in the heading (e.g., "v0.3.x to v0.4.0") since breaking changes bump minor, not major
 
 ---
 
 ## Resuming an Interrupted Release
 
-If the release process is interrupted (e.g., context window exhausted, network failure, user abort), use the following guidance to determine current state and resume safely.
-
-### Determine current state
-
-Run these commands to assess where the release stopped:
-
-```bash
-# 1. Check for uncommitted release changes (pubspec.yaml, CHANGELOG.md edits)
-git status --porcelain
-
-# 2. Check for a release commit on HEAD
-git log -1 --oneline  # look for "chore(release): publish packages"
-
-# 3. Check for per-package tags on HEAD
-git tag --points-at HEAD
-
-# 4. Check if tags have been pushed
-git fetch origin --tags
-git log -1 --oneline origin/main  # compare with local HEAD
-
-# 5. Check for a GitHub release
-gh release list --limit 5
-
-# 6. Check pub.dev for published versions
-# For each package in the release plan:
-dart pub global activate pana  # if needed
-curl -s https://pub.dev/api/packages/{pkg} | grep '"version"' | head -1
-```
-
-### Progress checkpoints
-
-To enable safe resumption, write a progress file after each major step:
-
-```bash
-cat > /tmp/release-progress.md <<'EOF'
-# Release Progress — {date}
-
-## Plan
-| Package | Target Version | Status |
-|---------|----------------|--------|
-| foo_dart | 1.0.0 | published |
-| bar_dart | 2.1.0 | changelog written, not published |
-| baz_dart | 0.5.0 | pending |
-
-## Completed Steps
-- [x] Step 1: Environment validated
-- [x] Step 2-3: Changes detected, bumps computed
-- [x] Step 4: Plan displayed
-- [x] Step 4b: PR context fetched, semver verified, plan confirmed
-- [x] Step 5: Changelogs written (all packages)
-- [x] Step 6: pubspec.yaml updated (all packages)
-- [x] Step 7: Dry-run passed
-- [x] Step 8: Published foo_dart
-- [ ] Step 8: Publish bar_dart, baz_dart
-- [ ] Step 8b: Reconciliation
-- [ ] Step 9: Commit
-- [ ] Step 10: Tags
-- [ ] Step 11: GitHub release
-
-## Last Updated
-{timestamp}
-EOF
-```
-
-Update this file after completing each step. A new session can read it to resume.
-
-### Recovery table
-
-| Interrupted After | State | Recovery Procedure |
-|---|---|---|
-| **Step 4** (plan displayed) | No files modified yet. | Start fresh from Step 4b (PR context fetch and confirmation). |
-| **Step 4b** (plan confirmed) | No files modified yet. PR context fetched, semver verified. | Start fresh from Step 5. |
-| **Steps 5-6** (changelogs/pubspec written) | Working tree has uncommitted changes. | Verify the changes with `git diff`. Resume from Step 7 (dry-run publish). |
-| **Step 7** (dry-run passed) | Working tree has uncommitted changes, dry-run validated. | Resume from Step 8 (publish). |
-| **Step 8** (some packages published) | Some packages live on pub.dev, uncommitted changes in tree. | **Critical**: Check which packages are published (`curl -s https://pub.dev/api/packages/{pkg}`). For unpublished packages, revert their files (`git checkout HEAD -- packages/{pkg}/pubspec.yaml packages/{pkg}/CHANGELOG.md`). Resume from Step 8b with only the published packages. |
-| **Step 8b** (reconciliation done) | All publishes complete, user confirmed, uncommitted changes. | Resume from Step 9 (commit). |
-| **Step 9** (committed) | Release commit exists locally, not pushed. | Resume from Step 10 (create tags). |
-| **Step 10** (tags created) | Commit and tags exist locally, not pushed. | Resume from the push command in Step 10 (`git push origin main --tags`). Then proceed to Step 11. |
-| **Step 11** (GitHub release) | Everything done except GitHub release. | Check `gh release list`. If the release doesn't exist, create it per Step 11. If it exists but is incomplete, use `gh release edit` to update the body. |
-
-> **Critical rule**: If **any** packages have been published to pub.dev (Step 8), you **must** complete Steps 9-11 for those packages. Published packages without corresponding tags and commits leave the repository in an inconsistent state. Never abandon the process after a partial publish.
+If the release process is interrupted, see
+[references/resumption-guide.md](references/resumption-guide.md) for
+instructions on determining current state and resuming safely.

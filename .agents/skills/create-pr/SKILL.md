@@ -203,6 +203,13 @@ The PR description serves two audiences: **package consumers** who discover chan
   final name = collection.name;
   ```
 
+## References
+
+> Only include this section when there are official announcements, blog posts,
+> release pages, or documentation links that add context for package consumers.
+
+- [Link title](URL) — brief description of relevance
+
 ## Test Plan
 
 - [ ] Unit tests pass for affected packages
@@ -219,6 +226,13 @@ The PR description serves two audiences: **package consumers** who discover chan
 **`## Details`** — This is the extended changelog entry. When a consumer sees a changelog bullet and wants to know more, they open the PR and read this section. Include code examples showing how to use new APIs, explain non-obvious design decisions, and provide context that helps someone adopt the changes. This section is **optional for trivial changes** (typo fixes, dependency bumps) but **expected for features and breaking changes**.
 
 **`## Breaking Changes`** — Only present when commits include `!` or `BREAKING CHANGE:` footer. The release skill uses this section as a reliable signal for semver verification — it's more precise than heuristic phrase matching in the general body. Always include migration steps with before/after code.
+
+**`## References`** — Optional. Include when the PR relates to an official
+announcement, blog post, API release page, or documentation update from the
+upstream provider. The release skill uses these links to enrich changelog
+summaries (e.g., linking to a provider's blog post about a new model). Each
+entry should have a descriptive title, the URL, and a brief note on why it
+matters. If there are no relevant external links, omit the section entirely.
 
 **`## Test Plan`** — Checklist of what was tested or needs testing. Helps reviewers know what to verify. Check the boxes (`[x]`) for items you have already verified (e.g., tests you ran before creating the PR). Leave unchecked (`[ ]`) only items that still need verification.
 
