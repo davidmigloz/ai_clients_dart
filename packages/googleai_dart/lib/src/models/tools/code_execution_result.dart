@@ -17,7 +17,8 @@ enum Outcome {
 
 /// Result of executing the ExecutableCode.
 class CodeExecutionResult {
-  /// Optional unique ID of the code execution result.
+  /// Optional identifier of the corresponding [ExecutableCode] part, used to
+  /// match the result back to the code that produced it.
   final String? id;
 
   /// Outcome of the code execution.

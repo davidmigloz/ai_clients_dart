@@ -278,7 +278,7 @@
       "dart_class": "Annotation",
       "file": "lib/src/models/interactions/content/annotation.dart",
       "discriminator": {
-        "field": "key",
+        "field": "type",
         "mapping": {
           "url_citation": "#/components/schemas/UrlCitation",
           "file_citation": "#/components/schemas/FileCitation",

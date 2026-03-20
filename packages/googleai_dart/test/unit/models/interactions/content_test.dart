@@ -47,12 +47,11 @@ void main() {
           'text': 'Check this link',
           'annotations': [
             {
-              'url_citation': {
-                'url': 'https://example.com',
-                'title': 'Example',
-                'start_index': 0,
-                'end_index': 15,
-              },
+              'type': 'url_citation',
+              'url': 'https://example.com',
+              'title': 'Example',
+              'start_index': 0,
+              'end_index': 15,
             },
           ],
         };
@@ -76,13 +75,12 @@ void main() {
           'text': 'From the document',
           'annotations': [
             {
-              'file_citation': {
-                'file_name': 'doc.pdf',
-                'document_uri': 'gs://bucket/doc.pdf',
-                'source': 'file-123',
-                'start_index': 0,
-                'end_index': 17,
-              },
+              'type': 'file_citation',
+              'file_name': 'doc.pdf',
+              'document_uri': 'gs://bucket/doc.pdf',
+              'source': 'file-123',
+              'start_index': 0,
+              'end_index': 17,
             },
           ],
         };
@@ -102,20 +100,19 @@ void main() {
           'text': 'A great restaurant',
           'annotations': [
             {
-              'place_citation': {
-                'name': 'Pizza Place',
-                'place_id': 'ChIJ123',
-                'url': 'https://maps.google.com/place/123',
-                'start_index': 0,
-                'end_index': 18,
-                'review_snippets': [
-                  {
-                    'review_id': 'rev-1',
-                    'title': 'Great food',
-                    'url': 'https://maps.google.com/review/1',
-                  },
-                ],
-              },
+              'type': 'place_citation',
+              'name': 'Pizza Place',
+              'place_id': 'ChIJ123',
+              'url': 'https://maps.google.com/place/123',
+              'start_index': 0,
+              'end_index': 18,
+              'review_snippets': [
+                {
+                  'review_id': 'rev-1',
+                  'title': 'Great food',
+                  'url': 'https://maps.google.com/review/1',
+                },
+              ],
             },
           ],
         };

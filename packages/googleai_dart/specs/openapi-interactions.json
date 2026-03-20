@@ -2868,7 +2868,7 @@
           {
             "const": "gemini-3-pro-image-preview",
             "description": "State-of-the-art image generation and editing model.",
-            "x-stainless-nominal": "false`"
+            "x-stainless-nominal": false
           },
           {
             "const": "gemini-3-pro-preview",

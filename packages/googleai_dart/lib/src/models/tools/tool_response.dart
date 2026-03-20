@@ -3,7 +3,8 @@ import 'tool_type.dart';
 
 /// A tool response to send back to the model.
 class ToolResponse {
-  /// Optional unique ID of the tool response.
+  /// Optional identifier of the tool call this response corresponds to, used
+  /// to match [ToolCall.id] back to its response.
   final String? id;
 
   /// The response data.

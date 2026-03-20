@@ -10,20 +10,12 @@ sealed class Annotation {
 
   /// Creates an [Annotation] from JSON.
   factory Annotation.fromJson(Map<String, dynamic> json) {
-    if (json.containsKey('url_citation')) {
-      return UrlCitation.fromJson(json['url_citation'] as Map<String, dynamic>);
-    }
-    if (json.containsKey('file_citation')) {
-      return FileCitation.fromJson(
-        json['file_citation'] as Map<String, dynamic>,
-      );
-    }
-    if (json.containsKey('place_citation')) {
-      return PlaceCitation.fromJson(
-        json['place_citation'] as Map<String, dynamic>,
-      );
-    }
-    throw ArgumentError('Unknown annotation type: ${json.keys}');
+    return switch (json['type']) {
+      'url_citation' => UrlCitation.fromJson(json),
+      'file_citation' => FileCitation.fromJson(json),
+      'place_citation' => PlaceCitation.fromJson(json),
+      _ => throw ArgumentError('Unknown annotation type: ${json['type']}'),
+    };
   }
 
   /// Converts to JSON.
@@ -57,12 +49,11 @@ class UrlCitation extends Annotation {
 
   @override
   Map<String, dynamic> toJson() => {
-    'url_citation': {
-      if (startIndex != null) 'start_index': startIndex,
-      if (endIndex != null) 'end_index': endIndex,
-      if (title != null) 'title': title,
-      if (url != null) 'url': url,
-    },
+    'type': 'url_citation',
+    if (startIndex != null) 'start_index': startIndex,
+    if (endIndex != null) 'end_index': endIndex,
+    if (title != null) 'title': title,
+    if (url != null) 'url': url,
   };
 
   /// Creates a copy with replaced values.
@@ -122,13 +113,12 @@ class FileCitation extends Annotation {
 
   @override
   Map<String, dynamic> toJson() => {
-    'file_citation': {
-      if (startIndex != null) 'start_index': startIndex,
-      if (endIndex != null) 'end_index': endIndex,
-      if (fileName != null) 'file_name': fileName,
-      if (documentUri != null) 'document_uri': documentUri,
-      if (source != null) 'source': source,
-    },
+    'type': 'file_citation',
+    if (startIndex != null) 'start_index': startIndex,
+    if (endIndex != null) 'end_index': endIndex,
+    if (fileName != null) 'file_name': fileName,
+    if (documentUri != null) 'document_uri': documentUri,
+    if (source != null) 'source': source,
   };
 
   /// Creates a copy with replaced values.
@@ -203,15 +193,14 @@ class PlaceCitation extends Annotation {
 
   @override
   Map<String, dynamic> toJson() => {
-    'place_citation': {
-      if (startIndex != null) 'start_index': startIndex,
-      if (endIndex != null) 'end_index': endIndex,
-      if (name != null) 'name': name,
-      if (placeId != null) 'place_id': placeId,
-      if (url != null) 'url': url,
-      if (reviewSnippets != null)
-        'review_snippets': reviewSnippets!.map((e) => e.toJson()).toList(),
-    },
+    'type': 'place_citation',
+    if (startIndex != null) 'start_index': startIndex,
+    if (endIndex != null) 'end_index': endIndex,
+    if (name != null) 'name': name,
+    if (placeId != null) 'place_id': placeId,
+    if (url != null) 'url': url,
+    if (reviewSnippets != null)
+      'review_snippets': reviewSnippets!.map((e) => e.toJson()).toList(),
   };
 
   /// Creates a copy with replaced values.
