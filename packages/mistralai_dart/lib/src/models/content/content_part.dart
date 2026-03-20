@@ -377,13 +377,14 @@ class UnknownContentPart extends ContentPart {
   final Map<String, dynamic> _raw;
 
   /// Creates an [UnknownContentPart].
-  const UnknownContentPart(this._raw);
+  UnknownContentPart(Map<String, dynamic> raw)
+    : _raw = Map<String, dynamic>.unmodifiable(raw);
 
   /// The raw JSON data.
   Map<String, dynamic> get raw => _raw;
 
   @override
-  Map<String, dynamic> toJson() => _raw;
+  Map<String, dynamic> toJson() => Map<String, dynamic>.of(_raw);
 
   @override
   bool operator ==(Object other) =>

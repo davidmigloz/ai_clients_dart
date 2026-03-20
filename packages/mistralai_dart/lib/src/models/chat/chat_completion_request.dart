@@ -317,7 +317,8 @@ class ChatCompletionRequest {
     safePrompt,
     mapHash(metadata),
     prediction,
-    Object.hash(promptMode, Object.hashAll(guardrails ?? [])),
+    promptMode,
+    listHash(guardrails),
   );
 
   @override
