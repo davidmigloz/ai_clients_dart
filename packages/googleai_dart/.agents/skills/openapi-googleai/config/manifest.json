@@ -1363,7 +1363,7 @@
       "kind": "skip",
       "dart_class": "UrlCitation",
       "file": "lib/src/models/interactions/content/annotation.dart",
-      "note": "Type field handled by Annotation sealed class key-presence discriminator rather than explicit type property.",
+      "note": "Handled by Annotation sealed class with type discriminator; appears in JSON as { \"type\": \"<subtype>\", ... }.",
       "tags": [
         "acknowledged"
       ]
@@ -1375,7 +1375,7 @@
       "kind": "skip",
       "dart_class": "FileCitation",
       "file": "lib/src/models/interactions/content/annotation.dart",
-      "note": "Type field handled by Annotation sealed class key-presence discriminator rather than explicit type property.",
+      "note": "Handled by Annotation sealed class with type discriminator; appears in JSON as { \"type\": \"<subtype>\", ... }.",
       "tags": [
         "acknowledged"
       ]
@@ -1387,7 +1387,7 @@
       "kind": "skip",
       "dart_class": "PlaceCitation",
       "file": "lib/src/models/interactions/content/annotation.dart",
-      "note": "Type field handled by Annotation sealed class key-presence discriminator rather than explicit type property.",
+      "note": "Handled by Annotation sealed class with type discriminator; appears in JSON as { \"type\": \"<subtype>\", ... }.",
       "tags": [
         "acknowledged"
       ]
