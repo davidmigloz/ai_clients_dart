@@ -308,7 +308,7 @@ class ChatCompletionRequest {
     stop,
     randomSeed,
     responseFormat,
-    Object.hashAll(tools ?? []),
+    listHash(tools),
     toolChoice,
     presencePenalty,
     frequencyPenalty,
