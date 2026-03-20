@@ -14,8 +14,16 @@ class CodeExecutionCallDelta extends InteractionDelta {
   /// The code to execute.
   final String? code;
 
+  /// A signature for this tool call.
+  final String? signature;
+
   /// Creates a [CodeExecutionCallDelta] instance.
-  const CodeExecutionCallDelta({this.id, this.language, this.code});
+  const CodeExecutionCallDelta({
+    this.id,
+    this.language,
+    this.code,
+    this.signature,
+  });
 
   /// Creates a [CodeExecutionCallDelta] from JSON.
   factory CodeExecutionCallDelta.fromJson(Map<String, dynamic> json) {
@@ -24,6 +32,7 @@ class CodeExecutionCallDelta extends InteractionDelta {
       id: json['id'] as String?,
       language: arguments?['language'] as String?,
       code: arguments?['code'] as String?,
+      signature: json['signature'] as String?,
     );
   }
 
@@ -36,5 +45,6 @@ class CodeExecutionCallDelta extends InteractionDelta {
         if (language != null) 'language': language,
         if (code != null) 'code': code,
       },
+    if (signature != null) 'signature': signature,
   };
 }

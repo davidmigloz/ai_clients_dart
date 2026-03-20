@@ -11,8 +11,11 @@ class FileSearchResultContent extends InteractionContent {
   /// The results of the File Search.
   final List<FileSearchResult>? result;
 
+  /// The signature of the file search result.
+  final String? signature;
+
   /// Creates a [FileSearchResultContent] instance.
-  const FileSearchResultContent({this.callId, this.result});
+  const FileSearchResultContent({this.callId, this.result, this.signature});
 
   /// Creates a [FileSearchResultContent] from JSON.
   factory FileSearchResultContent.fromJson(Map<String, dynamic> json) =>
@@ -21,6 +24,7 @@ class FileSearchResultContent extends InteractionContent {
         result: (json['result'] as List<dynamic>?)
             ?.map((e) => FileSearchResult.fromJson(e as Map<String, dynamic>))
             .toList(),
+        signature: json['signature'] as String?,
       );
 
   @override
@@ -28,63 +32,37 @@ class FileSearchResultContent extends InteractionContent {
     'type': type,
     if (callId != null) 'call_id': callId,
     if (result != null) 'result': result!.map((e) => e.toJson()).toList(),
+    if (signature != null) 'signature': signature,
   };
 
   /// Creates a copy with replaced values.
   FileSearchResultContent copyWith({
     Object? callId = unsetCopyWithValue,
     Object? result = unsetCopyWithValue,
+    Object? signature = unsetCopyWithValue,
   }) {
     return FileSearchResultContent(
       callId: callId == unsetCopyWithValue ? this.callId : callId as String?,
       result: result == unsetCopyWithValue
           ? this.result
           : result as List<FileSearchResult>?,
+      signature: signature == unsetCopyWithValue
+          ? this.signature
+          : signature as String?,
     );
   }
 }
 
 /// A File Search result item.
 class FileSearchResult {
-  /// The title of the search result.
-  final String? title;
-
-  /// The text of the search result.
-  final String? text;
-
-  /// The name of the file search store.
-  final String? fileSearchStore;
-
   /// Creates a [FileSearchResult] instance.
-  const FileSearchResult({this.title, this.text, this.fileSearchStore});
+  const FileSearchResult();
 
   /// Creates a [FileSearchResult] from JSON.
+  // ignore: avoid_unused_constructor_parameters
   factory FileSearchResult.fromJson(Map<String, dynamic> json) =>
-      FileSearchResult(
-        title: json['title'] as String?,
-        text: json['text'] as String?,
-        fileSearchStore: json['file_search_store'] as String?,
-      );
+      const FileSearchResult();
 
   /// Converts to JSON.
-  Map<String, dynamic> toJson() => {
-    if (title != null) 'title': title,
-    if (text != null) 'text': text,
-    if (fileSearchStore != null) 'file_search_store': fileSearchStore,
-  };
-
-  /// Creates a copy with replaced values.
-  FileSearchResult copyWith({
-    Object? title = unsetCopyWithValue,
-    Object? text = unsetCopyWithValue,
-    Object? fileSearchStore = unsetCopyWithValue,
-  }) {
-    return FileSearchResult(
-      title: title == unsetCopyWithValue ? this.title : title as String?,
-      text: text == unsetCopyWithValue ? this.text : text as String?,
-      fileSearchStore: fileSearchStore == unsetCopyWithValue
-          ? this.fileSearchStore
-          : fileSearchStore as String?,
-    );
-  }
+  Map<String, dynamic> toJson() => {};
 }

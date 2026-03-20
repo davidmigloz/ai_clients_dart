@@ -1,37 +1,28 @@
 part of 'content.dart';
 
-/// A Google Search call content block.
-class GoogleSearchCallContent extends InteractionContent {
+/// A Google Maps call content block.
+class GoogleMapsCallContent extends InteractionContent {
   @override
-  String get type => 'google_search_call';
+  String get type => 'google_maps_call';
 
   /// A unique ID for this specific tool call.
   final String? id;
 
-  /// Web search queries for the following-up web search.
+  /// The queries for the Google Maps search.
   final List<String>? queries;
 
-  /// The type of search grounding enabled.
-  final String? searchType;
-
-  /// The signature of the Google Search call.
+  /// The signature of the Google Maps call.
   final String? signature;
 
-  /// Creates a [GoogleSearchCallContent] instance.
-  const GoogleSearchCallContent({
-    this.id,
-    this.queries,
-    this.searchType,
-    this.signature,
-  });
+  /// Creates a [GoogleMapsCallContent] instance.
+  const GoogleMapsCallContent({this.id, this.queries, this.signature});
 
-  /// Creates a [GoogleSearchCallContent] from JSON.
-  factory GoogleSearchCallContent.fromJson(Map<String, dynamic> json) {
+  /// Creates a [GoogleMapsCallContent] from JSON.
+  factory GoogleMapsCallContent.fromJson(Map<String, dynamic> json) {
     final arguments = json['arguments'] as Map<String, dynamic>?;
-    return GoogleSearchCallContent(
+    return GoogleMapsCallContent(
       id: json['id'] as String?,
       queries: (arguments?['queries'] as List<dynamic>?)?.cast<String>(),
-      searchType: json['search_type'] as String?,
       signature: json['signature'] as String?,
     );
   }
@@ -41,25 +32,20 @@ class GoogleSearchCallContent extends InteractionContent {
     'type': type,
     if (id != null) 'id': id,
     if (queries != null) 'arguments': {'queries': queries},
-    if (searchType != null) 'search_type': searchType,
     if (signature != null) 'signature': signature,
   };
 
   /// Creates a copy with replaced values.
-  GoogleSearchCallContent copyWith({
+  GoogleMapsCallContent copyWith({
     Object? id = unsetCopyWithValue,
     Object? queries = unsetCopyWithValue,
-    Object? searchType = unsetCopyWithValue,
     Object? signature = unsetCopyWithValue,
   }) {
-    return GoogleSearchCallContent(
+    return GoogleMapsCallContent(
       id: id == unsetCopyWithValue ? this.id : id as String?,
       queries: queries == unsetCopyWithValue
           ? this.queries
           : queries as List<String>?,
-      searchType: searchType == unsetCopyWithValue
-          ? this.searchType
-          : searchType as String?,
       signature: signature == unsetCopyWithValue
           ? this.signature
           : signature as String?,

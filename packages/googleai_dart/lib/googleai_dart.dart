@@ -229,7 +229,10 @@ export 'src/models/tools/google_search_retrieval.dart';
 export 'src/models/tools/mcp_server.dart';
 export 'src/models/tools/streamable_http_transport.dart';
 export 'src/models/tools/tool.dart';
+export 'src/models/tools/tool_call.dart';
 export 'src/models/tools/tool_config.dart';
+export 'src/models/tools/tool_response.dart';
+export 'src/models/tools/tool_type.dart';
 export 'src/models/tools/url_context.dart';
 // Utilities
 export 'src/utils/lro_poller.dart';

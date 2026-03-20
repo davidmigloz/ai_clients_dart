@@ -9,6 +9,8 @@ part 'file_search_call_delta.dart';
 part 'file_search_result_delta.dart';
 part 'function_call_delta.dart';
 part 'function_result_delta.dart';
+part 'google_maps_call_delta.dart';
+part 'google_maps_result_delta.dart';
 part 'google_search_call_delta.dart';
 part 'google_search_result_delta.dart';
 part 'image_delta.dart';
@@ -47,6 +49,8 @@ sealed class InteractionDelta {
       'code_execution_result' => CodeExecutionResultDelta.fromJson(json),
       'url_context_call' => UrlContextCallDelta.fromJson(json),
       'url_context_result' => UrlContextResultDelta.fromJson(json),
+      'google_maps_call' => GoogleMapsCallDelta.fromJson(json),
+      'google_maps_result' => GoogleMapsResultDelta.fromJson(json),
       'google_search_call' => GoogleSearchCallDelta.fromJson(json),
       'google_search_result' => GoogleSearchResultDelta.fromJson(json),
       'mcp_server_tool_call' => McpServerToolCallDelta.fromJson(json),

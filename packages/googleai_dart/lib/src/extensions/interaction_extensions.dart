@@ -49,4 +49,12 @@ extension InteractionExtensions on Interaction {
 
   /// True if the interaction has function calls.
   bool get hasFunctionCalls => functionCallOutputs.isNotEmpty;
+
+  /// All Google Maps call outputs.
+  List<GoogleMapsCallContent> get googleMapsCallOutputs =>
+      outputs?.whereType<GoogleMapsCallContent>().toList() ?? [];
+
+  /// All Google Maps result outputs.
+  List<GoogleMapsResultContent> get googleMapsResultOutputs =>
+      outputs?.whereType<GoogleMapsResultContent>().toList() ?? [];
 }

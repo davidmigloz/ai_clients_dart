@@ -44,22 +44,20 @@
       },
       "Annotation": {
         "description": "Citation information for model-generated content.",
-        "properties": {
-          "end_index": {
-            "description": "End of the attributed segment, exclusive.",
-            "format": "int32",
-            "type": "integer"
-          },
-          "source": {
-            "description": "Source attributed for a portion of the text. Could be a URL, title, or\nother identifier.",
-            "type": "string"
-          },
-          "start_index": {
-            "description": "Start of segment of the response that is attributed to this source.\n\nIndex indicates the start of the segment, measured in bytes.",
-            "format": "int32",
-            "type": "integer"
-          }
+        "discriminator": {
+          "propertyName": "type"
         },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/UrlCitation"
+          },
+          {
+            "$ref": "#/components/schemas/FileCitation"
+          },
+          {
+            "$ref": "#/components/schemas/PlaceCitation"
+          }
+        ],
         "type": "object"
       },
       "AudioContent": {
@@ -228,6 +226,11 @@
             "description": "A unique ID for this specific tool call.",
             "type": "string"
           },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
+          },
           "type": {
             "const": "code_execution_call"
           }
@@ -246,6 +249,11 @@
           },
           "id": {
             "description": "A unique ID for this specific tool call.",
+            "type": "string"
+          },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
             "type": "string"
           },
           "type": {
@@ -288,6 +296,7 @@
           },
           "signature": {
             "description": "A signature hash for backend validation.",
+            "format": "byte",
             "type": "string"
           },
           "type": {
@@ -295,6 +304,8 @@
           }
         },
         "required": [
+          "call_id",
+          "result",
           "type"
         ],
         "type": "object"
@@ -312,6 +323,8 @@
             "type": "string"
           },
           "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
             "type": "string"
           },
           "type": {
@@ -375,26 +388,6 @@
       "Content": {
         "description": "The content of the response.",
         "discriminator": {
-          "mapping": {
-            "audio": "#/components/schemas/AudioContent",
-            "code_execution_call": "#/components/schemas/CodeExecutionCallContent",
-            "code_execution_result": "#/components/schemas/CodeExecutionResultContent",
-            "document": "#/components/schemas/DocumentContent",
-            "file_search_call": "#/components/schemas/FileSearchCallContent",
-            "file_search_result": "#/components/schemas/FileSearchResultContent",
-            "function_call": "#/components/schemas/FunctionCallContent",
-            "function_result": "#/components/schemas/FunctionResultContent",
-            "google_search_call": "#/components/schemas/GoogleSearchCallContent",
-            "google_search_result": "#/components/schemas/GoogleSearchResultContent",
-            "image": "#/components/schemas/ImageContent",
-            "mcp_server_tool_call": "#/components/schemas/McpServerToolCallContent",
-            "mcp_server_tool_result": "#/components/schemas/McpServerToolResultContent",
-            "text": "#/components/schemas/TextContent",
-            "thought": "#/components/schemas/ThoughtContent",
-            "url_context_call": "#/components/schemas/UrlContextCallContent",
-            "url_context_result": "#/components/schemas/UrlContextResultContent",
-            "video": "#/components/schemas/VideoContent"
-          },
           "propertyName": "type"
         },
         "oneOf": [
@@ -451,6 +444,12 @@
           },
           {
             "$ref": "#/components/schemas/FileSearchResultContent"
+          },
+          {
+            "$ref": "#/components/schemas/GoogleMapsCallContent"
+          },
+          {
+            "$ref": "#/components/schemas/GoogleMapsResultContent"
           }
         ],
         "type": "object"
@@ -474,27 +473,6 @@
         "properties": {
           "delta": {
             "discriminator": {
-              "mapping": {
-                "audio": "#/components/schemas/AudioDelta",
-                "code_execution_call": "#/components/schemas/CodeExecutionCallDelta",
-                "code_execution_result": "#/components/schemas/CodeExecutionResultDelta",
-                "document": "#/components/schemas/DocumentDelta",
-                "file_search_call": "#/components/schemas/FileSearchCallDelta",
-                "file_search_result": "#/components/schemas/FileSearchResultDelta",
-                "function_call": "#/components/schemas/FunctionCallDelta",
-                "function_result": "#/components/schemas/FunctionResultDelta",
-                "google_search_call": "#/components/schemas/GoogleSearchCallDelta",
-                "google_search_result": "#/components/schemas/GoogleSearchResultDelta",
-                "image": "#/components/schemas/ImageDelta",
-                "mcp_server_tool_call": "#/components/schemas/McpServerToolCallDelta",
-                "mcp_server_tool_result": "#/components/schemas/McpServerToolResultDelta",
-                "text": "#/components/schemas/TextDelta",
-                "thought_signature": "#/components/schemas/ThoughtSignatureDelta",
-                "thought_summary": "#/components/schemas/ThoughtSummaryDelta",
-                "url_context_call": "#/components/schemas/UrlContextCallDelta",
-                "url_context_result": "#/components/schemas/UrlContextResultDelta",
-                "video": "#/components/schemas/VideoDelta"
-              },
               "propertyName": "type"
             },
             "oneOf": [
@@ -554,6 +532,12 @@
               },
               {
                 "$ref": "#/components/schemas/FileSearchResultDelta"
+              },
+              {
+                "$ref": "#/components/schemas/GoogleMapsCallDelta"
+              },
+              {
+                "$ref": "#/components/schemas/GoogleMapsResultDelta"
               }
             ]
           },
@@ -656,7 +640,7 @@
             "description": "The name of the `Agent` used for generating the interaction."
           },
           "agent_config": {
-            "description": "Configuration for the agent.",
+            "description": "Configuration parameters for the agent interaction.",
             "discriminator": {
               "propertyName": "type"
             },
@@ -686,29 +670,7 @@
             "type": "string"
           },
           "input": {
-            "description": "The inputs for the interaction.",
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "items": {
-                  "$ref": "#/components/schemas/Content"
-                },
-                "title": "ContentList",
-                "type": "array"
-              },
-              {
-                "items": {
-                  "$ref": "#/components/schemas/Turn"
-                },
-                "title": "TurnsList",
-                "type": "array"
-              },
-              {
-                "$ref": "#/components/schemas/Content"
-              }
-            ]
+            "$ref": "#/components/schemas/InteractionsInput"
           },
           "outputs": {
             "description": "Output only. Responses from the model.",
@@ -825,29 +787,7 @@
             "type": "string"
           },
           "input": {
-            "description": "The inputs for the interaction.",
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "items": {
-                  "$ref": "#/components/schemas/Content"
-                },
-                "title": "ContentList",
-                "type": "array"
-              },
-              {
-                "items": {
-                  "$ref": "#/components/schemas/Turn"
-                },
-                "title": "TurnsList",
-                "type": "array"
-              },
-              {
-                "$ref": "#/components/schemas/Content"
-              }
-            ]
+            "$ref": "#/components/schemas/InteractionsInput"
           },
           "model": {
             "$ref": "#/components/schemas/ModelOption",
@@ -1091,6 +1031,41 @@
         ],
         "type": "object"
       },
+      "FileCitation": {
+        "description": "A file citation annotation.",
+        "properties": {
+          "document_uri": {
+            "description": "The URI of the file.",
+            "type": "string"
+          },
+          "end_index": {
+            "description": "End of the attributed segment, exclusive.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "file_name": {
+            "description": "The name of the file.",
+            "type": "string"
+          },
+          "source": {
+            "description": "Source attributed for a portion of the text.",
+            "type": "string"
+          },
+          "start_index": {
+            "description": "Start of segment of the response that is attributed to this source.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "type": {
+            "const": "file_citation",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
       "FileSearch": {
         "description": "A tool that can be used by the model to search files.",
         "properties": {
@@ -1155,12 +1130,18 @@
             "description": "A unique ID for this specific tool call.",
             "type": "string"
           },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
+          },
           "type": {
             "const": "file_search_call"
           }
         },
         "required": [
-          "type"
+          "type",
+          "id"
         ],
         "type": "object"
       },
@@ -1168,6 +1149,11 @@
         "properties": {
           "id": {
             "description": "A unique ID for this specific tool call.",
+            "type": "string"
+          },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
             "type": "string"
           },
           "type": {
@@ -1182,20 +1168,6 @@
       },
       "FileSearchResult": {
         "description": "The result of the File Search.",
-        "properties": {
-          "file_search_store": {
-            "description": "The name of the file search store.",
-            "type": "string"
-          },
-          "text": {
-            "description": "The text of the search result.",
-            "type": "string"
-          },
-          "title": {
-            "description": "The title of the search result.",
-            "type": "string"
-          }
-        },
         "type": "object"
       },
       "FileSearchResultContent": {
@@ -1229,19 +1201,25 @@
             },
             "type": "array"
           },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
+          },
           "type": {
             "const": "file_search_result"
           }
         },
         "required": [
-          "type"
+          "type",
+          "call_id"
         ],
         "type": "object"
       },
       "FileSearchResultDelta": {
         "properties": {
           "call_id": {
-            "description": "The ID of the file search call.",
+            "description": "ID to match the ID from the function call block.",
             "type": "string"
           },
           "result": {
@@ -1249,6 +1227,11 @@
               "$ref": "#/components/schemas/FileSearchResult"
             },
             "type": "array"
+          },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
           },
           "type": {
             "const": "file_search_result"
@@ -1334,11 +1317,19 @@
             "description": "The name of the tool to call.",
             "type": "string"
           },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
+          },
           "type": {
             "const": "function_call"
           }
         },
         "required": [
+          "name",
+          "id",
+          "arguments",
           "type"
         ],
         "type": "object"
@@ -1356,6 +1347,11 @@
             "type": "string"
           },
           "name": {
+            "type": "string"
+          },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
             "type": "string"
           },
           "type": {
@@ -1407,36 +1403,32 @@
             "description": "The result of the tool call.",
             "oneOf": [
               {
-                "properties": {
-                  "items": {
-                    "items": {
-                      "oneOf": [
-                        {
-                          "$ref": "#/components/schemas/TextContent"
-                        },
-                        {
-                          "$ref": "#/components/schemas/ImageContent"
-                        }
-                      ]
-                    },
-                    "type": "array"
-                  }
-                },
                 "type": "object"
               },
               {
-                "type": "object"
+                "items": {
+                  "$ref": "#/components/schemas/FunctionResultSubcontent"
+                },
+                "title": "FunctionResultSubcontentList",
+                "type": "array"
               },
               {
                 "type": "string"
               }
             ]
           },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
+          },
           "type": {
             "const": "function_result"
           }
         },
         "required": [
+          "call_id",
+          "result",
           "type"
         ],
         "type": "object"
@@ -1482,6 +1474,11 @@
               }
             ]
           },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
+          },
           "type": {
             "const": "function_result"
           }
@@ -1490,6 +1487,20 @@
           "call_id",
           "result",
           "type"
+        ],
+        "type": "object"
+      },
+      "FunctionResultSubcontent": {
+        "discriminator": {
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/TextContent"
+          },
+          {
+            "$ref": "#/components/schemas/ImageContent"
+          }
         ],
         "type": "object"
       },
@@ -1554,6 +1565,222 @@
             "type": "number"
           }
         },
+        "type": "object"
+      },
+      "GoogleMaps": {
+        "description": "A tool that can be used by the model to call Google Maps.",
+        "properties": {
+          "enable_widget": {
+            "description": "Whether to return a widget context token in the tool call result of the\nresponse.",
+            "type": "boolean"
+          },
+          "latitude": {
+            "description": "The latitude of the user's location.",
+            "format": "double",
+            "type": "number"
+          },
+          "longitude": {
+            "description": "The longitude of the user's location.",
+            "format": "double",
+            "type": "number"
+          },
+          "type": {
+            "const": "google_maps",
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "x-codeSamples": [
+          {
+            "label": "google_maps",
+            "lang": "sh",
+            "source": "curl -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"model\": \"gemini-3-flash-preview\",\n    \"tools\": [{\n      \"type\": \"google_maps\",\n      \"latitude\": 37.7749,\n      \"longitude\": -122.4194\n    }],\n    \"input\": \"What is the best food near me?\"\n  }'\n"
+          },
+          {
+            "label": "google_maps",
+            "lang": "python",
+            "source": "from google import genai\n\nclient = genai.Client()\nresponse = client.interactions.create(\n    model=\"gemini-3-flash-preview\",\n    tools=[{\n        \"type\": \"google_maps\",\n        \"latitude\": 37.7749,\n        \"longitude\": -122.4194\n    }],\n    input=\"What is the best food near me?\"\n)\nprint(response.outputs[0])\n"
+          },
+          {
+            "label": "google_maps",
+            "lang": "javascript",
+            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\nconst interaction = await ai.interactions.create({\n    model: 'gemini-3-flash-preview',\n    tools: [{\n        type: 'google_maps',\n        latitude: 37.7749,\n        longitude: -122.4194\n    }],\n    input: 'What is the best food near me?'\n});\nconsole.log(interaction.outputs[0]);\n"
+          }
+        ]
+      },
+      "GoogleMapsCallArguments": {
+        "description": "The arguments to pass to the Google Maps tool.",
+        "properties": {
+          "queries": {
+            "description": "The queries to be executed.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleMapsCallContent": {
+        "description": "Google Maps content.",
+        "examples": [
+          {
+            "google_maps_call": {
+              "summary": "Google Maps Call",
+              "value": {
+                "arguments": {
+                  "query": "best food near me"
+                },
+                "id": "call_123456",
+                "type": "google_maps_call"
+              }
+            }
+          }
+        ],
+        "properties": {
+          "arguments": {
+            "$ref": "#/components/schemas/GoogleMapsCallArguments",
+            "description": "The arguments to pass to the Google Maps tool."
+          },
+          "id": {
+            "description": "A unique ID for this specific tool call.",
+            "type": "string"
+          },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
+          },
+          "type": {
+            "const": "google_maps_call"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "type": "object"
+      },
+      "GoogleMapsCallDelta": {
+        "properties": {
+          "arguments": {
+            "$ref": "#/components/schemas/GoogleMapsCallArguments",
+            "description": "The arguments to pass to the Google Maps tool."
+          },
+          "id": {
+            "description": "A unique ID for this specific tool call.",
+            "type": "string"
+          },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
+          },
+          "type": {
+            "const": "google_maps_call"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "type": "object"
+      },
+      "GoogleMapsResult": {
+        "description": "The result of the Google Maps.",
+        "properties": {
+          "places": {
+            "description": "The places that were found.",
+            "items": {
+              "$ref": "#/components/schemas/Places"
+            },
+            "type": "array"
+          },
+          "widget_context_token": {
+            "description": "Resource name of the Google Maps widget context token.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleMapsResultContent": {
+        "description": "Google Maps result content.",
+        "examples": [
+          {
+            "google_maps_result": {
+              "summary": "Google Maps Result",
+              "value": {
+                "call_id": "call_123456",
+                "result": [
+                  {
+                    "places": [
+                      {
+                        "name": "Tasty Restaurant",
+                        "url": "https://www.google.com/maps/search/best+food+near+me"
+                      }
+                    ]
+                  }
+                ],
+                "type": "google_maps_result"
+              }
+            }
+          }
+        ],
+        "properties": {
+          "call_id": {
+            "description": "ID to match the ID from the google maps call block.",
+            "type": "string"
+          },
+          "result": {
+            "description": "The results of the Google Maps.",
+            "items": {
+              "$ref": "#/components/schemas/GoogleMapsResult"
+            },
+            "type": "array"
+          },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
+          },
+          "type": {
+            "const": "google_maps_result"
+          }
+        },
+        "required": [
+          "type",
+          "call_id",
+          "result"
+        ],
+        "type": "object"
+      },
+      "GoogleMapsResultDelta": {
+        "properties": {
+          "call_id": {
+            "description": "ID to match the ID from the function call block.",
+            "type": "string"
+          },
+          "result": {
+            "description": "The results of the Google Maps.",
+            "items": {
+              "$ref": "#/components/schemas/GoogleMapsResult"
+            },
+            "type": "array"
+          },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
+          },
+          "type": {
+            "const": "google_maps_result"
+          }
+        },
+        "required": [
+          "type",
+          "call_id",
+          "result"
+        ],
         "type": "object"
       },
       "GoogleSearch": {
@@ -1653,6 +1880,11 @@
               "Setting this field enables image search. Image bytes are returned."
             ]
           },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
+          },
           "type": {
             "const": "google_search_call"
           }
@@ -1673,6 +1905,11 @@
             "description": "A unique ID for this specific tool call.",
             "type": "string"
           },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
+          },
           "type": {
             "const": "google_search_call"
           }
@@ -1687,16 +1924,8 @@
       "GoogleSearchResult": {
         "description": "The result of the Google Search.",
         "properties": {
-          "rendered_content": {
+          "search_suggestions": {
             "description": "Web content snippet that can be embedded in a web page or an app webview.",
-            "type": "string"
-          },
-          "title": {
-            "description": "Title of the search result.",
-            "type": "string"
-          },
-          "url": {
-            "description": "URI reference of the search result.",
             "type": "string"
           }
         },
@@ -1738,7 +1967,8 @@
             "type": "array"
           },
           "signature": {
-            "description": "The signature of the Google Search result.",
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
             "type": "string"
           },
           "type": {
@@ -1746,7 +1976,9 @@
           }
         },
         "required": [
-          "type"
+          "type",
+          "call_id",
+          "result"
         ],
         "type": "object"
       },
@@ -1766,6 +1998,8 @@
             "type": "array"
           },
           "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
             "type": "string"
           },
           "type": {
@@ -1964,7 +2198,7 @@
             "description": "The name of the `Agent` used for generating the interaction."
           },
           "agent_config": {
-            "description": "Configuration for the agent.",
+            "description": "Configuration parameters for the agent interaction.",
             "discriminator": {
               "propertyName": "type"
             },
@@ -1994,29 +2228,7 @@
             "type": "string"
           },
           "input": {
-            "description": "The inputs for the interaction.",
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "items": {
-                  "$ref": "#/components/schemas/Content"
-                },
-                "title": "ContentList",
-                "type": "array"
-              },
-              {
-                "items": {
-                  "$ref": "#/components/schemas/Turn"
-                },
-                "title": "TurnsList",
-                "type": "array"
-              },
-              {
-                "$ref": "#/components/schemas/Content"
-              }
-            ]
+            "$ref": "#/components/schemas/InteractionsInput"
           },
           "model": {
             "$ref": "#/components/schemas/ModelOption",
@@ -2279,6 +2491,31 @@
         ],
         "type": "object"
       },
+      "InteractionsInput": {
+        "description": "The input for the interaction.",
+        "oneOf": [
+          {
+            "items": {
+              "$ref": "#/components/schemas/Content"
+            },
+            "title": "ContentList",
+            "type": "array"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "items": {
+              "$ref": "#/components/schemas/Turn"
+            },
+            "title": "TurnList",
+            "type": "array"
+          },
+          {
+            "$ref": "#/components/schemas/Content"
+          }
+        ]
+      },
       "McpServer": {
         "description": "A MCPServer is a server that can be called by the model to perform actions.",
         "properties": {
@@ -2369,11 +2606,20 @@
             "description": "The name of the used MCP server.",
             "type": "string"
           },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
+          },
           "type": {
             "const": "mcp_server_tool_call"
           }
         },
         "required": [
+          "name",
+          "server_name",
+          "arguments",
+          "id",
           "type"
         ],
         "type": "object"
@@ -2394,6 +2640,11 @@
             "type": "string"
           },
           "server_name": {
+            "type": "string"
+          },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
             "type": "string"
           },
           "type": {
@@ -2435,28 +2686,17 @@
             "type": "string"
           },
           "result": {
-            "description": "The result of the tool call.",
+            "description": "The output from the MCP server call. Can be simple text or rich content.",
             "oneOf": [
               {
-                "properties": {
-                  "items": {
-                    "items": {
-                      "oneOf": [
-                        {
-                          "$ref": "#/components/schemas/TextContent"
-                        },
-                        {
-                          "$ref": "#/components/schemas/ImageContent"
-                        }
-                      ]
-                    },
-                    "type": "array"
-                  }
-                },
                 "type": "object"
               },
               {
-                "type": "object"
+                "items": {
+                  "$ref": "#/components/schemas/FunctionResultSubcontent"
+                },
+                "title": "FunctionResultSubcontentList",
+                "type": "array"
               },
               {
                 "type": "string"
@@ -2465,6 +2705,11 @@
           },
           "server_name": {
             "description": "The name of the used MCP server.",
+            "type": "string"
+          },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
             "type": "string"
           },
           "type": {
@@ -2517,6 +2762,11 @@
             ]
           },
           "server_name": {
+            "type": "string"
+          },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
             "type": "string"
           },
           "type": {
@@ -2618,7 +2868,7 @@
           {
             "const": "gemini-3-pro-image-preview",
             "description": "State-of-the-art image generation and editing model.",
-            "x-stainless-nominal": false
+            "x-stainless-nominal": "false`"
           },
           {
             "const": "gemini-3-pro-preview",
@@ -2639,6 +2889,72 @@
         "description": "The model that will complete your prompt.\\n\\nSee [models](https://ai.google.dev/gemini-api/docs/models) for additional details.",
         "title": "Model"
       },
+      "PlaceCitation": {
+        "description": "A place citation annotation.",
+        "properties": {
+          "end_index": {
+            "description": "End of the attributed segment, exclusive.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "description": "Title of the place.",
+            "type": "string"
+          },
+          "place_id": {
+            "description": "The ID of the place, in `places/{place_id}` format.",
+            "type": "string"
+          },
+          "review_snippets": {
+            "description": "Snippets of reviews that are used to generate answers about the\nfeatures of a given place in Google Maps.",
+            "items": {
+              "$ref": "#/components/schemas/ReviewSnippet"
+            },
+            "type": "array"
+          },
+          "start_index": {
+            "description": "Start of segment of the response that is attributed to this source.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "type": {
+            "const": "place_citation",
+            "type": "string"
+          },
+          "url": {
+            "description": "URI reference of the place.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "Places": {
+        "properties": {
+          "name": {
+            "description": "Title of the place.",
+            "type": "string"
+          },
+          "place_id": {
+            "description": "The ID of the place, in `places/{place_id}` format.",
+            "type": "string"
+          },
+          "review_snippets": {
+            "description": "Snippets of reviews that are used to generate answers about the\nfeatures of a given place in Google Maps.",
+            "items": {
+              "$ref": "#/components/schemas/ReviewSnippet"
+            },
+            "type": "array"
+          },
+          "url": {
+            "description": "URI reference of the place.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "ResponseModality": {
         "enum": [
           "text",
@@ -2651,6 +2967,24 @@
           "Indicates the model should return images.",
           "Indicates the model should return audio."
         ]
+      },
+      "ReviewSnippet": {
+        "description": "Encapsulates a snippet of a user review that answers a question about\nthe features of a specific place in Google Maps.",
+        "properties": {
+          "review_id": {
+            "description": "The ID of the review snippet.",
+            "type": "string"
+          },
+          "title": {
+            "description": "Title of the review.",
+            "type": "string"
+          },
+          "url": {
+            "description": "A link that corresponds to the user review on Google Maps.",
+            "type": "string"
+          }
+        },
+        "type": "object"
       },
       "SpeechConfig": {
         "description": "The configuration for speech interaction.",
@@ -2700,7 +3034,8 @@
           }
         },
         "required": [
-          "type"
+          "type",
+          "text"
         ],
         "type": "object"
       },
@@ -2778,8 +3113,11 @@
             "type": "string"
           },
           "summary": {
-            "$ref": "#/components/schemas/ThoughtSummary",
-            "description": "A summary of the thought."
+            "description": "A summary of the thought.",
+            "items": {
+              "$ref": "#/components/schemas/ThoughtSummaryContent"
+            },
+            "type": "array"
           },
           "type": {
             "const": "thought"
@@ -2806,37 +3144,25 @@
         ],
         "type": "object"
       },
-      "ThoughtSummary": {
-        "description": "A summary of the thought.",
-        "items": {
-          "discriminator": {
-            "propertyName": "type"
-          },
-          "oneOf": [
-            {
-              "$ref": "#/components/schemas/TextContent"
-            },
-            {
-              "$ref": "#/components/schemas/ImageContent"
-            }
-          ]
+      "ThoughtSummaryContent": {
+        "discriminator": {
+          "propertyName": "type"
         },
-        "type": "array"
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/TextContent"
+          },
+          {
+            "$ref": "#/components/schemas/ImageContent"
+          }
+        ],
+        "type": "object"
       },
       "ThoughtSummaryDelta": {
         "properties": {
           "content": {
-            "discriminator": {
-              "propertyName": "type"
-            },
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/TextContent"
-              },
-              {
-                "$ref": "#/components/schemas/ImageContent"
-              }
-            ]
+            "$ref": "#/components/schemas/ThoughtSummaryContent",
+            "description": "A new summary item to be added to the thought."
           },
           "type": {
             "const": "thought_summary"
@@ -2872,6 +3198,9 @@
           },
           {
             "$ref": "#/components/schemas/FileSearch"
+          },
+          {
+            "$ref": "#/components/schemas/GoogleMaps"
           }
         ],
         "type": "object"
@@ -2954,6 +3283,37 @@
         },
         "type": "object"
       },
+      "UrlCitation": {
+        "description": "A URL citation annotation.",
+        "properties": {
+          "end_index": {
+            "description": "End of the attributed segment, exclusive.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "start_index": {
+            "description": "Start of segment of the response that is attributed to this source.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "title": {
+            "description": "The title of the URL.",
+            "type": "string"
+          },
+          "type": {
+            "const": "url_citation",
+            "type": "string"
+          },
+          "url": {
+            "description": "The URL.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
       "UrlContext": {
         "description": "A tool that can be used by the model to fetch URL context.",
         "properties": {
@@ -3024,6 +3384,11 @@
             "description": "A unique ID for this specific tool call.",
             "type": "string"
           },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
+          },
           "type": {
             "const": "url_context_call"
           }
@@ -3042,6 +3407,11 @@
           },
           "id": {
             "description": "A unique ID for this specific tool call.",
+            "type": "string"
+          },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
             "type": "string"
           },
           "type": {
@@ -3091,7 +3461,7 @@
                 "call_id": "call_123456",
                 "result": [
                   {
-                    "status": "success",
+                    "status": "SUCCESS",
                     "url": "https://www.example.com"
                   }
                 ],
@@ -3117,7 +3487,8 @@
             "type": "array"
           },
           "signature": {
-            "description": "The signature of the URL context result.",
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
             "type": "string"
           },
           "type": {
@@ -3125,7 +3496,9 @@
           }
         },
         "required": [
-          "type"
+          "type",
+          "call_id",
+          "result"
         ],
         "type": "object"
       },
@@ -3145,6 +3518,8 @@
             "type": "array"
           },
           "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
             "type": "string"
           },
           "type": {
@@ -3908,6 +4283,110 @@
             "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\nconst interaction = await ai.interactions.cancel('v1_ChdPU0F4YWFtNkFwS2kxZThQZ05lbXdROBIXT1NBeGFhbTZBcEtpMWU4UGdOZW13UTg');\nconsole.log(interaction.status);\n"
           }
         ]
+      }
+    },
+    "/{api_version}/interactions?agent": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/api_version"
+        }
+      ],
+      "post": {
+        "description": "Creates a new interaction.",
+        "operationId": "CreateInteraction",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAgentInteractionParams"
+              }
+            }
+          },
+          "description": "The request body.",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Interaction"
+                }
+              }
+            },
+            "description": "Successful operation"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "$ref": "#/components/schemas/Error"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Error creating interaction"
+          }
+        },
+        "security": [],
+        "summary": "Creating an interaction"
+      }
+    },
+    "/{api_version}/interactions?model": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/api_version"
+        }
+      ],
+      "post": {
+        "description": "Creates a new interaction.",
+        "operationId": "CreateInteraction",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateModelInteractionParams"
+              }
+            }
+          },
+          "description": "The request body.",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Interaction"
+                }
+              }
+            },
+            "description": "Successful operation"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "$ref": "#/components/schemas/Error"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Error creating interaction"
+          }
+        },
+        "security": [],
+        "summary": "Creating an interaction"
       }
     }
   },

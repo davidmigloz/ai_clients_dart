@@ -67,36 +67,31 @@ class GoogleSearchResultContent extends InteractionContent {
 
 /// A Google Search result item.
 class GoogleSearchResult {
-  /// The URL of the search result.
-  final String? url;
-
-  /// The title of the search result.
-  final String? title;
+  /// Search suggestions text.
+  final String? searchSuggestions;
 
   /// Creates a [GoogleSearchResult] instance.
-  const GoogleSearchResult({this.url, this.title});
+  const GoogleSearchResult({this.searchSuggestions});
 
   /// Creates a [GoogleSearchResult] from JSON.
   factory GoogleSearchResult.fromJson(Map<String, dynamic> json) =>
       GoogleSearchResult(
-        url: json['url'] as String?,
-        title: json['title'] as String?,
+        searchSuggestions: json['search_suggestions'] as String?,
       );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
-    if (url != null) 'url': url,
-    if (title != null) 'title': title,
+    if (searchSuggestions != null) 'search_suggestions': searchSuggestions,
   };
 
   /// Creates a copy with replaced values.
   GoogleSearchResult copyWith({
-    Object? url = unsetCopyWithValue,
-    Object? title = unsetCopyWithValue,
+    Object? searchSuggestions = unsetCopyWithValue,
   }) {
     return GoogleSearchResult(
-      url: url == unsetCopyWithValue ? this.url : url as String?,
-      title: title == unsetCopyWithValue ? this.title : title as String?,
+      searchSuggestions: searchSuggestions == unsetCopyWithValue
+          ? this.searchSuggestions
+          : searchSuggestions as String?,
     );
   }
 }

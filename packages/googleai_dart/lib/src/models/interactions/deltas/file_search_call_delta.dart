@@ -8,13 +8,23 @@ class FileSearchCallDelta extends InteractionDelta {
   /// A unique ID for this specific tool call.
   final String? id;
 
+  /// A signature for this tool call.
+  final String? signature;
+
   /// Creates a [FileSearchCallDelta] instance.
-  const FileSearchCallDelta({this.id});
+  const FileSearchCallDelta({this.id, this.signature});
 
   /// Creates a [FileSearchCallDelta] from JSON.
   factory FileSearchCallDelta.fromJson(Map<String, dynamic> json) =>
-      FileSearchCallDelta(id: json['id'] as String?);
+      FileSearchCallDelta(
+        id: json['id'] as String?,
+        signature: json['signature'] as String?,
+      );
 
   @override
-  Map<String, dynamic> toJson() => {'type': type, if (id != null) 'id': id};
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    if (id != null) 'id': id,
+    if (signature != null) 'signature': signature,
+  };
 }

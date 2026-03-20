@@ -274,9 +274,17 @@
     "Annotation": {
       "spec": "interactions",
       "schema": "Annotation",
-      "kind": "object",
+      "kind": "sealed_parent",
       "dart_class": "Annotation",
-      "file": "lib/src/models/interactions/content/annotation.dart"
+      "file": "lib/src/models/interactions/content/annotation.dart",
+      "discriminator": {
+        "field": "key",
+        "mapping": {
+          "url_citation": "#/components/schemas/UrlCitation",
+          "file_citation": "#/components/schemas/FileCitation",
+          "place_citation": "#/components/schemas/PlaceCitation"
+        }
+      }
     },
     "AudioContent": {
       "spec": "interactions",
@@ -446,6 +454,8 @@
           "code_execution_result": "#/components/schemas/CodeExecutionResultContent",
           "url_context_call": "#/components/schemas/UrlContextCallContent",
           "url_context_result": "#/components/schemas/UrlContextResultContent",
+          "google_maps_call": "#/components/schemas/GoogleMapsCallContent",
+          "google_maps_result": "#/components/schemas/GoogleMapsResultContent",
           "google_search_call": "#/components/schemas/GoogleSearchCallContent",
           "google_search_result": "#/components/schemas/GoogleSearchResultContent",
           "mcp_server_tool_call": "#/components/schemas/McpServerToolCallContent",
@@ -988,6 +998,7 @@
         "field": "type",
         "mapping": {
           "function": "#/components/schemas/Function",
+          "google_maps": "#/components/schemas/GoogleMaps",
           "google_search": "#/components/schemas/GoogleSearch",
           "code_execution": "#/components/schemas/CodeExecution",
           "url_context": "#/components/schemas/UrlContext",
@@ -1233,6 +1244,183 @@
       "file": "lib/src/models/content/media_resolution.dart",
       "schema": "MediaResolution",
       "note": "Retained for compatibility with python-genai and js-genai SDKs; numTokens field added to match PartMediaResolution in reference SDKs.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "ToolType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ToolType",
+      "file": "lib/src/models/tools/tool_type.dart",
+      "schema": "ToolType"
+    },
+    "ToolCall": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ToolCall",
+      "file": "lib/src/models/tools/tool_call.dart",
+      "schema": "ToolCall"
+    },
+    "ToolResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ToolResponse",
+      "file": "lib/src/models/tools/tool_response.dart",
+      "schema": "ToolResponse"
+    },
+    "interactions:GoogleMaps": {
+      "spec": "interactions",
+      "schema": "GoogleMaps",
+      "dart_class": "GoogleMapsTool",
+      "file": "lib/src/models/interactions/tools/google_maps_tool.dart",
+      "kind": "skip",
+      "parent": "InteractionTool",
+      "note": "Skipped: interactions tool types use sealed_variant pattern via InteractionTool sealed class.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "GoogleMapsCallArguments": {
+      "spec": "interactions",
+      "schema": "GoogleMapsCallArguments",
+      "kind": "skip",
+      "file": "lib/src/models/interactions/content/google_maps_call_content.dart",
+      "dart_class": "GoogleMapsCallArguments",
+      "note": "This arguments shape is flattened into the enclosing content model rather than represented as a standalone Dart type.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "GoogleMapsCallContent": {
+      "spec": "interactions",
+      "schema": "GoogleMapsCallContent",
+      "parent": "InteractionContent",
+      "kind": "skip",
+      "dart_class": "GoogleMapsCallContent",
+      "file": "lib/src/models/interactions/content/google_maps_call_content.dart",
+      "note": "Arguments shape is flattened into content model; fields nullable for content.start events.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "GoogleMapsCallDelta": {
+      "spec": "interactions",
+      "schema": "GoogleMapsCallDelta",
+      "dart_class": "GoogleMapsCallDelta",
+      "file": "lib/src/models/interactions/deltas/google_maps_call_delta.dart",
+      "kind": "skip",
+      "note": "Delta type tracked as sealed variant of InteractionDelta.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "GoogleMapsResult": {
+      "spec": "interactions",
+      "schema": "GoogleMapsResult",
+      "kind": "object",
+      "dart_class": "GoogleMapsResult",
+      "file": "lib/src/models/interactions/content/google_maps_result_content.dart"
+    },
+    "GoogleMapsResultContent": {
+      "spec": "interactions",
+      "schema": "GoogleMapsResultContent",
+      "parent": "InteractionContent",
+      "kind": "sealed_variant",
+      "dart_class": "GoogleMapsResultContent",
+      "file": "lib/src/models/interactions/content/google_maps_result_content.dart"
+    },
+    "GoogleMapsResultDelta": {
+      "spec": "interactions",
+      "schema": "GoogleMapsResultDelta",
+      "dart_class": "GoogleMapsResultDelta",
+      "file": "lib/src/models/interactions/deltas/google_maps_result_delta.dart",
+      "kind": "skip",
+      "note": "Delta type tracked as sealed variant of InteractionDelta.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "Places": {
+      "spec": "interactions",
+      "schema": "Places",
+      "kind": "object",
+      "dart_class": "Places",
+      "file": "lib/src/models/interactions/content/google_maps_result_content.dart"
+    },
+    "InteractionReviewSnippet": {
+      "spec": "interactions",
+      "schema": "ReviewSnippet",
+      "kind": "object",
+      "dart_class": "InteractionReviewSnippet",
+      "file": "lib/src/models/interactions/content/google_maps_result_content.dart",
+      "note": "Named InteractionReviewSnippet to avoid collision with metadata ReviewSnippet (different JSON key casing)."
+    },
+    "UrlCitation": {
+      "spec": "interactions",
+      "schema": "UrlCitation",
+      "parent": "Annotation",
+      "kind": "skip",
+      "dart_class": "UrlCitation",
+      "file": "lib/src/models/interactions/content/annotation.dart",
+      "note": "Type field handled by Annotation sealed class key-presence discriminator rather than explicit type property.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "FileCitation": {
+      "spec": "interactions",
+      "schema": "FileCitation",
+      "parent": "Annotation",
+      "kind": "skip",
+      "dart_class": "FileCitation",
+      "file": "lib/src/models/interactions/content/annotation.dart",
+      "note": "Type field handled by Annotation sealed class key-presence discriminator rather than explicit type property.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "PlaceCitation": {
+      "spec": "interactions",
+      "schema": "PlaceCitation",
+      "parent": "Annotation",
+      "kind": "skip",
+      "dart_class": "PlaceCitation",
+      "file": "lib/src/models/interactions/content/annotation.dart",
+      "note": "Type field handled by Annotation sealed class key-presence discriminator rather than explicit type property.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "ThoughtSummaryContent": {
+      "spec": "interactions",
+      "schema": "ThoughtSummaryContent",
+      "kind": "skip",
+      "dart_class": "ThoughtSummaryContent",
+      "file": "lib/src/models/interactions/content/thought_content.dart",
+      "note": "Represented as ThoughtContent.summary field rather than standalone type.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "FunctionResultSubcontent": {
+      "spec": "interactions",
+      "schema": "FunctionResultSubcontent",
+      "kind": "skip",
+      "dart_class": "FunctionResultSubcontent",
+      "file": "lib/src/models/interactions/content/function_result_content.dart",
+      "note": "Flattened into FunctionResultContent rather than standalone type.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "InteractionsInput": {
+      "spec": "interactions",
+      "schema": "InteractionsInput",
+      "kind": "skip",
+      "dart_class": "InteractionInput",
+      "file": "lib/src/models/interactions/interaction_input.dart",
+      "note": "Mapped to InteractionInput; schema name differs from Dart class.",
       "tags": [
         "acknowledged"
       ]

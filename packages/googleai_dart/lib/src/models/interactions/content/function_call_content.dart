@@ -14,8 +14,16 @@ class FunctionCallContent extends InteractionContent {
   /// The arguments to pass to the function.
   final Map<String, dynamic>? arguments;
 
+  /// The signature of the function call.
+  final String? signature;
+
   /// Creates a [FunctionCallContent] instance.
-  const FunctionCallContent({this.id, this.name, this.arguments});
+  const FunctionCallContent({
+    this.id,
+    this.name,
+    this.arguments,
+    this.signature,
+  });
 
   /// Creates a [FunctionCallContent] from JSON.
   factory FunctionCallContent.fromJson(Map<String, dynamic> json) =>
@@ -23,6 +31,7 @@ class FunctionCallContent extends InteractionContent {
         id: json['id'] as String?,
         name: json['name'] as String?,
         arguments: json['arguments'] as Map<String, dynamic>?,
+        signature: json['signature'] as String?,
       );
 
   @override
@@ -31,6 +40,7 @@ class FunctionCallContent extends InteractionContent {
     if (id != null) 'id': id,
     if (name != null) 'name': name,
     if (arguments != null) 'arguments': arguments,
+    if (signature != null) 'signature': signature,
   };
 
   /// Creates a copy with replaced values.
@@ -38,6 +48,7 @@ class FunctionCallContent extends InteractionContent {
     Object? id = unsetCopyWithValue,
     Object? name = unsetCopyWithValue,
     Object? arguments = unsetCopyWithValue,
+    Object? signature = unsetCopyWithValue,
   }) {
     return FunctionCallContent(
       id: id == unsetCopyWithValue ? this.id : id as String?,
@@ -45,6 +56,9 @@ class FunctionCallContent extends InteractionContent {
       arguments: arguments == unsetCopyWithValue
           ? this.arguments
           : arguments as Map<String, dynamic>?,
+      signature: signature == unsetCopyWithValue
+          ? this.signature
+          : signature as String?,
     );
   }
 }

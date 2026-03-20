@@ -635,6 +635,10 @@
       "CodeExecutionResult": {
         "description": "Result of executing the `ExecutableCode`.\n\nGenerated only when the `CodeExecution` tool is used.",
         "properties": {
+          "id": {
+            "description": "Optional. The identifier of the `ExecutableCode` part this result is for.\nOnly populated if the corresponding `ExecutableCode` has an id.",
+            "type": "string"
+          },
           "outcome": {
             "description": "Required. Outcome of the code execution.",
             "enum": [
@@ -1451,6 +1455,10 @@
         "properties": {
           "code": {
             "description": "Required. The code to be executed.",
+            "type": "string"
+          },
+          "id": {
+            "description": "Optional. Unique identifier of the `ExecutableCode` part.\nThe server returns the `CodeExecutionResult` with the matching `id`.",
             "type": "string"
           },
           "language": {
@@ -3919,6 +3927,22 @@
             "format": "byte",
             "type": "string"
           },
+          "toolCall": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ToolCall"
+              }
+            ],
+            "description": "Server-side tool call. This field is populated when the model\npredicts a tool invocation that should be executed on the server.\nThe client is expected to echo this message back to the API."
+          },
+          "toolResponse": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ToolResponse"
+              }
+            ],
+            "description": "The output from a server-side `ToolCall` execution. This field is\npopulated by the client with the results of executing the\ncorresponding `ToolCall`."
+          },
           "videoMetadata": {
             "allOf": [
               {
@@ -4861,6 +4885,34 @@
         },
         "type": "object"
       },
+      "ToolCall": {
+        "description": "A predicted server-side `ToolCall` returned from the model. This message\ncontains information about a tool that the model wants to invoke.\nThe client is NOT expected to execute this `ToolCall`. Instead, the\nclient should pass this `ToolCall` back to the API in a subsequent turn\nwithin a `Content` message, along with the corresponding `ToolResponse`.",
+        "properties": {
+          "args": {
+            "additionalProperties": {
+              "description": "Properties of the object."
+            },
+            "description": "Optional. The tool call arguments.\nExample: {\"arg1\" : \"value1\", \"arg2\" : \"value2\" , ...}",
+            "type": "object"
+          },
+          "id": {
+            "description": "Optional. Unique identifier of the tool call.\nThe server returns the tool response with the matching `id`.",
+            "type": "string"
+          },
+          "toolType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ToolType"
+              }
+            ],
+            "description": "Required. The type of tool that was called."
+          }
+        },
+        "required": [
+          "toolType"
+        ],
+        "type": "object"
+      },
       "ToolConfig": {
         "description": "The Tool configuration containing parameters for specifying `Tool` use\nin the request.",
         "properties": {
@@ -4872,6 +4924,10 @@
             ],
             "description": "Optional. Function calling config."
           },
+          "includeServerSideToolInvocations": {
+            "description": "Optional. If true, the API response will include the server-side tool calls and\nresponses within the `Content` message. This allows clients to\nobserve the server's tool interactions.",
+            "type": "boolean"
+          },
           "retrievalConfig": {
             "allOf": [
               {
@@ -4882,6 +4938,53 @@
           }
         },
         "type": "object"
+      },
+      "ToolResponse": {
+        "description": "The output from a server-side `ToolCall` execution. This message contains\nthe results of a tool invocation that was initiated by a `ToolCall`\nfrom the model. The client should pass this `ToolResponse` back to the API\nin a subsequent turn within a `Content` message, along with the corresponding\n`ToolCall`.",
+        "properties": {
+          "id": {
+            "description": "Optional. The identifier of the tool call this response is for.",
+            "type": "string"
+          },
+          "response": {
+            "additionalProperties": {
+              "description": "Properties of the object."
+            },
+            "description": "Optional. The tool response.",
+            "type": "object"
+          },
+          "toolType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ToolType"
+              }
+            ],
+            "description": "Required. The type of tool that was called, matching the `tool_type` in the\ncorresponding `ToolCall`."
+          }
+        },
+        "required": [
+          "toolType"
+        ],
+        "type": "object"
+      },
+      "ToolType": {
+        "enum": [
+          "TOOL_TYPE_UNSPECIFIED",
+          "GOOGLE_SEARCH_WEB",
+          "GOOGLE_SEARCH_IMAGE",
+          "URL_CONTEXT",
+          "GOOGLE_MAPS",
+          "FILE_SEARCH"
+        ],
+        "type": "string",
+        "x-google-enum-descriptions": [
+          "Unspecified tool type.",
+          "Google search tool, maps to Tool.google_search.search_types.web_search.",
+          "Image search tool, maps to Tool.google_search.search_types.image_search.",
+          "URL context tool, maps to Tool.url_context.",
+          "Google maps tool, maps to Tool.google_maps.",
+          "File search tool, maps to Tool.file_search."
+        ]
       },
       "TopCandidates": {
         "description": "Candidates with top log probabilities at each decoding step.",
@@ -5489,7 +5592,7 @@
     "description": "The Gemini API allows developers to build generative AI applications using Gemini models. Gemini is our most capable model, built from the ground up to be multimodal. It can generalize and seamlessly understand, operate across, and combine different types of information including language, images, audio, video, and code. You can use the Gemini API for use cases like reasoning across text and images, content generation, dialogue agents, summarization and classification systems, and more.",
     "title": "Generative Language API",
     "version": "v1beta",
-    "x-google-revision": "20260310"
+    "x-google-revision": "20260319"
   },
   "openapi": "3.0.3",
   "paths": {

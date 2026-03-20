@@ -41,7 +41,7 @@ void main() {
         expect((restored as TextContent).text, original.text);
       });
 
-      test('with annotations', () {
+      test('with url_citation annotation', () {
         final json = {
           'type': 'text',
           'text': 'Check this link',
@@ -50,6 +50,8 @@ void main() {
               'url_citation': {
                 'url': 'https://example.com',
                 'title': 'Example',
+                'start_index': 0,
+                'end_index': 15,
               },
             },
           ],
@@ -60,6 +62,92 @@ void main() {
         final textContent = content as TextContent;
         expect(textContent.annotations, isNotNull);
         expect(textContent.annotations!.length, 1);
+        expect(textContent.annotations![0], isA<UrlCitation>());
+        final citation = textContent.annotations![0] as UrlCitation;
+        expect(citation.url, 'https://example.com');
+        expect(citation.title, 'Example');
+        expect(citation.startIndex, 0);
+        expect(citation.endIndex, 15);
+      });
+
+      test('with file_citation annotation', () {
+        final json = {
+          'type': 'text',
+          'text': 'From the document',
+          'annotations': [
+            {
+              'file_citation': {
+                'file_name': 'doc.pdf',
+                'document_uri': 'gs://bucket/doc.pdf',
+                'source': 'file-123',
+                'start_index': 0,
+                'end_index': 17,
+              },
+            },
+          ],
+        };
+
+        final content = InteractionContent.fromJson(json);
+        final textContent = content as TextContent;
+        expect(textContent.annotations![0], isA<FileCitation>());
+        final citation = textContent.annotations![0] as FileCitation;
+        expect(citation.fileName, 'doc.pdf');
+        expect(citation.documentUri, 'gs://bucket/doc.pdf');
+        expect(citation.source, 'file-123');
+      });
+
+      test('with place_citation annotation', () {
+        final json = {
+          'type': 'text',
+          'text': 'A great restaurant',
+          'annotations': [
+            {
+              'place_citation': {
+                'name': 'Pizza Place',
+                'place_id': 'ChIJ123',
+                'url': 'https://maps.google.com/place/123',
+                'start_index': 0,
+                'end_index': 18,
+                'review_snippets': [
+                  {
+                    'review_id': 'rev-1',
+                    'title': 'Great food',
+                    'url': 'https://maps.google.com/review/1',
+                  },
+                ],
+              },
+            },
+          ],
+        };
+
+        final content = InteractionContent.fromJson(json);
+        final textContent = content as TextContent;
+        expect(textContent.annotations![0], isA<PlaceCitation>());
+        final citation = textContent.annotations![0] as PlaceCitation;
+        expect(citation.name, 'Pizza Place');
+        expect(citation.placeId, 'ChIJ123');
+        expect(citation.reviewSnippets, hasLength(1));
+        expect(citation.reviewSnippets![0].reviewId, 'rev-1');
+      });
+
+      test('annotation roundtrip serialization', () {
+        const original = TextContent(
+          text: 'Test',
+          annotations: [
+            UrlCitation(
+              url: 'https://example.com',
+              title: 'Example',
+              startIndex: 0,
+              endIndex: 4,
+            ),
+          ],
+        );
+        final json = original.toJson();
+        final restored = InteractionContent.fromJson(json) as TextContent;
+        expect(restored.annotations, hasLength(1));
+        expect(restored.annotations![0], isA<UrlCitation>());
+        final citation = restored.annotations![0] as UrlCitation;
+        expect(citation.url, 'https://example.com');
       });
     });
 
@@ -399,13 +487,101 @@ void main() {
         final json = {
           'type': 'file_search_result',
           'call_id': 'call_123',
-          'result': [
-            {'text': 'Relevant content', 'file_search_store': 'store1'},
-          ],
+          'result': [<String, dynamic>{}],
         };
         final content = InteractionContent.fromJson(json);
         expect(content, isA<FileSearchResultContent>());
         expect((content as FileSearchResultContent).callId, 'call_123');
+      });
+    });
+
+    group('GoogleMapsCallContent', () {
+      test('deserializes from JSON', () {
+        final json = {
+          'type': 'google_maps_call',
+          'id': 'call-maps-1',
+          'arguments': {
+            'queries': ['pizza near me'],
+          },
+          'signature': 'sig123',
+        };
+        final content = InteractionContent.fromJson(json);
+        expect(content, isA<GoogleMapsCallContent>());
+        final maps = content as GoogleMapsCallContent;
+        expect(maps.id, 'call-maps-1');
+        expect(maps.queries, ['pizza near me']);
+        expect(maps.signature, 'sig123');
+      });
+
+      test('roundtrip serialization', () {
+        const original = GoogleMapsCallContent(
+          id: 'mc-1',
+          queries: ['restaurants'],
+          signature: 'sig',
+        );
+        final json = original.toJson();
+        final restored =
+            InteractionContent.fromJson(json) as GoogleMapsCallContent;
+        expect(restored.id, original.id);
+        expect(restored.queries, original.queries);
+        expect(restored.signature, original.signature);
+      });
+    });
+
+    group('GoogleMapsResultContent', () {
+      test('deserializes from JSON', () {
+        final json = {
+          'type': 'google_maps_result',
+          'call_id': 'call-maps-1',
+          'result': [
+            {
+              'places': [
+                {
+                  'name': 'Pizza Place',
+                  'place_id': 'ChIJ123',
+                  'url': 'https://maps.google.com',
+                  'review_snippets': [
+                    {
+                      'review_id': 'rev-1',
+                      'title': 'Great',
+                      'url': 'https://maps.google.com/review/1',
+                    },
+                  ],
+                },
+              ],
+              'widget_context_token': 'token123',
+            },
+          ],
+          'signature': 'sig456',
+        };
+        final content = InteractionContent.fromJson(json);
+        expect(content, isA<GoogleMapsResultContent>());
+        final maps = content as GoogleMapsResultContent;
+        expect(maps.callId, 'call-maps-1');
+        expect(maps.signature, 'sig456');
+        expect(maps.result, hasLength(1));
+        expect(maps.result![0].places, hasLength(1));
+        expect(maps.result![0].places![0].name, 'Pizza Place');
+        expect(maps.result![0].places![0].placeId, 'ChIJ123');
+        expect(maps.result![0].places![0].reviewSnippets, hasLength(1));
+        expect(maps.result![0].widgetContextToken, 'token123');
+      });
+
+      test('roundtrip serialization', () {
+        const original = GoogleMapsResultContent(
+          callId: 'mc-1',
+          result: [
+            GoogleMapsResult(
+              places: [Places(name: 'Test Place', placeId: 'p1')],
+            ),
+          ],
+          signature: 'sig',
+        );
+        final json = original.toJson();
+        final restored =
+            InteractionContent.fromJson(json) as GoogleMapsResultContent;
+        expect(restored.callId, original.callId);
+        expect(restored.result![0].places![0].name, 'Test Place');
       });
     });
 
@@ -418,7 +594,7 @@ void main() {
         );
       });
 
-      test('all 18 content variants can be deserialized', () {
+      test('all 20 content variants can be deserialized', () {
         final variants = <Map<String, dynamic>>[
           {'type': 'text', 'text': 'test'},
           {'type': 'image', 'data': 'data'},
@@ -461,6 +637,8 @@ void main() {
             'call_id': 'id',
             'result': <dynamic>[],
           },
+          {'type': 'google_maps_call', 'id': 'id'},
+          {'type': 'google_maps_result', 'call_id': 'id'},
           {
             'type': 'mcp_server_tool_call',
             'id': 'id',
@@ -485,7 +663,7 @@ void main() {
         }
       });
 
-      test('all 18 content variants handle partial JSON (content.start)', () {
+      test('all 20 content variants handle partial JSON (content.start)', () {
         // content.start events send only {"type": "..."} without data fields
         final types = [
           'text',
@@ -502,6 +680,8 @@ void main() {
           'url_context_result',
           'google_search_call',
           'google_search_result',
+          'google_maps_call',
+          'google_maps_result',
           'mcp_server_tool_call',
           'mcp_server_tool_result',
           'file_search_call',

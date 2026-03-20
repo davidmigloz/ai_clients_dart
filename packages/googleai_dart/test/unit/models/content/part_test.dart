@@ -870,13 +870,117 @@ void main() {
       });
     });
 
+    group('ToolCallPart', () {
+      test('creates with ToolCall', () {
+        const call = ToolCall(toolType: ToolType.googleSearchWeb);
+        const part = ToolCallPart(call);
+        expect(part.toolCall, equals(call));
+      });
+
+      test('serializes to JSON', () {
+        const part = ToolCallPart(
+          ToolCall(
+            toolType: ToolType.googleMaps,
+            args: {'q': 'pizza'},
+            id: 'tc-1',
+          ),
+        );
+        final json = part.toJson();
+        expect(json.containsKey('toolCall'), isTrue);
+        expect(json['toolCall']['toolType'], equals('GOOGLE_MAPS'));
+      });
+
+      test('deserializes from JSON', () {
+        final json = {
+          'toolCall': {
+            'toolType': 'FILE_SEARCH',
+            'args': {'query': 'test'},
+            'id': 'tc-2',
+          },
+        };
+        final part = Part.fromJson(json);
+        expect(part, isA<ToolCallPart>());
+        expect(
+          (part as ToolCallPart).toolCall.toolType,
+          equals(ToolType.fileSearch),
+        );
+      });
+
+      test('roundtrip serialization', () {
+        const original = ToolCallPart(
+          ToolCall(
+            toolType: ToolType.urlContext,
+            args: {'url': 'https://example.com'},
+          ),
+        );
+        final json = original.toJson();
+        final deserialized = Part.fromJson(json);
+        expect(deserialized, isA<ToolCallPart>());
+        expect(
+          (deserialized as ToolCallPart).toolCall.toolType,
+          equals(original.toolCall.toolType),
+        );
+      });
+    });
+
+    group('ToolResponsePart', () {
+      test('creates with ToolResponse', () {
+        const resp = ToolResponse(toolType: ToolType.googleSearchWeb);
+        const part = ToolResponsePart(resp);
+        expect(part.toolResponse, equals(resp));
+      });
+
+      test('serializes to JSON', () {
+        const part = ToolResponsePart(
+          ToolResponse(
+            toolType: ToolType.fileSearch,
+            response: {'data': 'test'},
+          ),
+        );
+        final json = part.toJson();
+        expect(json.containsKey('toolResponse'), isTrue);
+        expect(json['toolResponse']['toolType'], equals('FILE_SEARCH'));
+      });
+
+      test('deserializes from JSON', () {
+        final json = {
+          'toolResponse': {
+            'toolType': 'GOOGLE_MAPS',
+            'response': {'places': <dynamic>[]},
+          },
+        };
+        final part = Part.fromJson(json);
+        expect(part, isA<ToolResponsePart>());
+        expect(
+          (part as ToolResponsePart).toolResponse.toolType,
+          equals(ToolType.googleMaps),
+        );
+      });
+
+      test('roundtrip serialization', () {
+        const original = ToolResponsePart(
+          ToolResponse(
+            toolType: ToolType.urlContext,
+            response: {'content': 'page text'},
+          ),
+        );
+        final json = original.toJson();
+        final deserialized = Part.fromJson(json);
+        expect(deserialized, isA<ToolResponsePart>());
+        expect(
+          (deserialized as ToolResponsePart).toolResponse.toolType,
+          equals(original.toolResponse.toolType),
+        );
+      });
+    });
+
     group('Exhaustive Matching', () {
       test('throws FormatException for unknown Part type', () {
         final json = {'unknownField': 'value'};
         expect(() => Part.fromJson(json), throwsA(isA<FormatException>()));
       });
 
-      test('all 11 Part variants can be deserialized', () {
+      test('all 13 Part variants can be deserialized', () {
         final variants = <Map<String, dynamic>>[
           {'text': 'test'},
           {
@@ -899,6 +1003,12 @@ void main() {
           },
           {
             'codeExecutionResult': {'outcome': 'OUTCOME_OK', 'output': 'ok'},
+          },
+          {
+            'toolCall': {'toolType': 'GOOGLE_SEARCH_WEB'},
+          },
+          {
+            'toolResponse': {'toolType': 'FILE_SEARCH'},
           },
           {
             'videoMetadata': {'videoDuration': '10s'},
@@ -982,6 +1092,32 @@ void main() {
         expect(responsePart.functionResponse.id, 'call-123');
       });
 
+      test('Part.toolCall creates ToolCallPart', () {
+        final part = Part.toolCall(
+          ToolType.googleSearchWeb,
+          args: {'q': 'test'},
+          id: 'tc-1',
+        );
+        expect(part, isA<ToolCallPart>());
+        final callPart = part as ToolCallPart;
+        expect(callPart.toolCall.toolType, ToolType.googleSearchWeb);
+        expect(callPart.toolCall.args, {'q': 'test'});
+        expect(callPart.toolCall.id, 'tc-1');
+      });
+
+      test('Part.toolResponse creates ToolResponsePart', () {
+        final part = Part.toolResponse(
+          ToolType.fileSearch,
+          response: {'data': 'test'},
+          id: 'tr-1',
+        );
+        expect(part, isA<ToolResponsePart>());
+        final respPart = part as ToolResponsePart;
+        expect(respPart.toolResponse.toolType, ToolType.fileSearch);
+        expect(respPart.toolResponse.response, {'data': 'test'});
+        expect(respPart.toolResponse.id, 'tr-1');
+      });
+
       test('factory constructors roundtrip through JSON', () {
         // Test Part.text
         final textPart = Part.text('Test');
@@ -1007,6 +1143,16 @@ void main() {
         final responsePart = Part.functionResponse('fn', {'b': 2});
         final responseJson = responsePart.toJson();
         expect(Part.fromJson(responseJson), isA<FunctionResponsePart>());
+
+        // Test Part.toolCall
+        final toolCallPart = Part.toolCall(ToolType.googleMaps);
+        final toolCallJson = toolCallPart.toJson();
+        expect(Part.fromJson(toolCallJson), isA<ToolCallPart>());
+
+        // Test Part.toolResponse
+        final toolRespPart = Part.toolResponse(ToolType.urlContext);
+        final toolRespJson = toolRespPart.toJson();
+        expect(Part.fromJson(toolRespJson), isA<ToolResponsePart>());
       });
     });
   });

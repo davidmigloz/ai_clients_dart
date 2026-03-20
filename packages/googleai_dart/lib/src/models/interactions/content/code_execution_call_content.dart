@@ -14,8 +14,16 @@ class CodeExecutionCallContent extends InteractionContent {
   /// The code to execute.
   final String? code;
 
+  /// The signature of the code execution call.
+  final String? signature;
+
   /// Creates a [CodeExecutionCallContent] instance.
-  const CodeExecutionCallContent({this.id, this.language, this.code});
+  const CodeExecutionCallContent({
+    this.id,
+    this.language,
+    this.code,
+    this.signature,
+  });
 
   /// Creates a [CodeExecutionCallContent] from JSON.
   factory CodeExecutionCallContent.fromJson(Map<String, dynamic> json) {
@@ -24,6 +32,7 @@ class CodeExecutionCallContent extends InteractionContent {
       id: json['id'] as String?,
       language: arguments?['language'] as String?,
       code: arguments?['code'] as String?,
+      signature: json['signature'] as String?,
     );
   }
 
@@ -36,6 +45,7 @@ class CodeExecutionCallContent extends InteractionContent {
         if (language != null) 'language': language,
         if (code != null) 'code': code,
       },
+    if (signature != null) 'signature': signature,
   };
 
   /// Creates a copy with replaced values.
@@ -43,6 +53,7 @@ class CodeExecutionCallContent extends InteractionContent {
     Object? id = unsetCopyWithValue,
     Object? language = unsetCopyWithValue,
     Object? code = unsetCopyWithValue,
+    Object? signature = unsetCopyWithValue,
   }) {
     return CodeExecutionCallContent(
       id: id == unsetCopyWithValue ? this.id : id as String?,
@@ -50,6 +61,9 @@ class CodeExecutionCallContent extends InteractionContent {
           ? this.language
           : language as String?,
       code: code == unsetCopyWithValue ? this.code : code as String?,
+      signature: signature == unsetCopyWithValue
+          ? this.signature
+          : signature as String?,
     );
   }
 }

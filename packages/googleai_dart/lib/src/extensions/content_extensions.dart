@@ -54,4 +54,12 @@ extension ContentExtensions on Content {
   /// All code execution result parts.
   List<CodeExecutionResultPart> get codeExecutionResultParts =>
       parts.whereType<CodeExecutionResultPart>().toList();
+
+  /// All tool call parts.
+  List<ToolCallPart> get toolCallParts =>
+      parts.whereType<ToolCallPart>().toList();
+
+  /// All tool response parts.
+  List<ToolResponsePart> get toolResponseParts =>
+      parts.whereType<ToolResponsePart>().toList();
 }

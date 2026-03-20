@@ -8,8 +8,14 @@ class FileSearchResultDelta extends InteractionDelta {
   /// The results of the File Search.
   final List<FileSearchResult>? result;
 
+  /// A signature for this tool call.
+  final String? signature;
+
+  /// The ID of the tool call that produced this result.
+  final String? callId;
+
   /// Creates a [FileSearchResultDelta] instance.
-  const FileSearchResultDelta({this.result});
+  const FileSearchResultDelta({this.result, this.signature, this.callId});
 
   /// Creates a [FileSearchResultDelta] from JSON.
   factory FileSearchResultDelta.fromJson(Map<String, dynamic> json) =>
@@ -17,11 +23,15 @@ class FileSearchResultDelta extends InteractionDelta {
         result: (json['result'] as List<dynamic>?)
             ?.map((e) => FileSearchResult.fromJson(e as Map<String, dynamic>))
             .toList(),
+        signature: json['signature'] as String?,
+        callId: json['call_id'] as String?,
       );
 
   @override
   Map<String, dynamic> toJson() => {
     'type': type,
     if (result != null) 'result': result!.map((e) => e.toJson()).toList(),
+    if (signature != null) 'signature': signature,
+    if (callId != null) 'call_id': callId,
   };
 }

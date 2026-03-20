@@ -11,8 +11,11 @@ class UrlContextCallContent extends InteractionContent {
   /// The URLs to fetch.
   final List<String>? urls;
 
+  /// The signature of the URL context call.
+  final String? signature;
+
   /// Creates a [UrlContextCallContent] instance.
-  const UrlContextCallContent({this.id, this.urls});
+  const UrlContextCallContent({this.id, this.urls, this.signature});
 
   /// Creates a [UrlContextCallContent] from JSON.
   factory UrlContextCallContent.fromJson(Map<String, dynamic> json) {
@@ -20,6 +23,7 @@ class UrlContextCallContent extends InteractionContent {
     return UrlContextCallContent(
       id: json['id'] as String?,
       urls: (arguments?['urls'] as List<dynamic>?)?.cast<String>(),
+      signature: json['signature'] as String?,
     );
   }
 
@@ -28,16 +32,21 @@ class UrlContextCallContent extends InteractionContent {
     'type': type,
     if (id != null) 'id': id,
     if (urls != null) 'arguments': {'urls': urls},
+    if (signature != null) 'signature': signature,
   };
 
   /// Creates a copy with replaced values.
   UrlContextCallContent copyWith({
     Object? id = unsetCopyWithValue,
     Object? urls = unsetCopyWithValue,
+    Object? signature = unsetCopyWithValue,
   }) {
     return UrlContextCallContent(
       id: id == unsetCopyWithValue ? this.id : id as String?,
       urls: urls == unsetCopyWithValue ? this.urls : urls as List<String>?,
+      signature: signature == unsetCopyWithValue
+          ? this.signature
+          : signature as String?,
     );
   }
 }

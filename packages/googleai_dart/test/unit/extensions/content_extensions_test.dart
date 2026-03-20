@@ -195,5 +195,31 @@ void main() {
         expect(content.codeExecutionResultParts, hasLength(2));
       });
     });
+
+    group('toolCallParts', () {
+      test('returns all tool call parts', () {
+        const content = Content(
+          parts: [
+            ToolCallPart(ToolCall(toolType: ToolType.googleSearchWeb)),
+            TextPart('Text'),
+            ToolCallPart(ToolCall(toolType: ToolType.fileSearch)),
+          ],
+        );
+        expect(content.toolCallParts, hasLength(2));
+      });
+    });
+
+    group('toolResponseParts', () {
+      test('returns all tool response parts', () {
+        const content = Content(
+          parts: [
+            ToolResponsePart(ToolResponse(toolType: ToolType.googleMaps)),
+            TextPart('Text'),
+            ToolResponsePart(ToolResponse(toolType: ToolType.urlContext)),
+          ],
+        );
+        expect(content.toolResponseParts, hasLength(2));
+      });
+    });
   });
 }

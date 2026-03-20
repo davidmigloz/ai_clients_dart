@@ -17,6 +17,9 @@ enum Outcome {
 
 /// Result of executing the ExecutableCode.
 class CodeExecutionResult {
+  /// Optional unique ID of the code execution result.
+  final String? id;
+
   /// Outcome of the code execution.
   final Outcome outcome;
 
@@ -25,27 +28,35 @@ class CodeExecutionResult {
   final String output;
 
   /// Creates a [CodeExecutionResult].
-  const CodeExecutionResult({required this.outcome, required this.output});
+  const CodeExecutionResult({
+    this.id,
+    required this.outcome,
+    required this.output,
+  });
 
   /// Creates a [CodeExecutionResult] from JSON.
   factory CodeExecutionResult.fromJson(Map<String, dynamic> json) =>
       CodeExecutionResult(
+        id: json['id'] as String?,
         outcome: _outcomeFromString(json['outcome'] as String?),
         output: json['output'] as String,
       );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (id != null) 'id': id,
     'outcome': _outcomeToString(outcome),
     'output': output,
   };
 
   /// Creates a copy with replaced values.
   CodeExecutionResult copyWith({
+    Object? id = unsetCopyWithValue,
     Object? outcome = unsetCopyWithValue,
     Object? output = unsetCopyWithValue,
   }) {
     return CodeExecutionResult(
+      id: id == unsetCopyWithValue ? this.id : id as String?,
       outcome: outcome == unsetCopyWithValue
           ? this.outcome
           : outcome! as Outcome,

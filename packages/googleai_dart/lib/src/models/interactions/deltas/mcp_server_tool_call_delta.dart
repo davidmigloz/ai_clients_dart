@@ -17,12 +17,16 @@ class McpServerToolCallDelta extends InteractionDelta {
   /// The arguments for the tool call.
   final Map<String, dynamic>? arguments;
 
+  /// A signature for this tool call.
+  final String? signature;
+
   /// Creates a [McpServerToolCallDelta] instance.
   const McpServerToolCallDelta({
     this.id,
     this.name,
     this.serverName,
     this.arguments,
+    this.signature,
   });
 
   /// Creates a [McpServerToolCallDelta] from JSON.
@@ -32,6 +36,7 @@ class McpServerToolCallDelta extends InteractionDelta {
         name: json['name'] as String?,
         serverName: json['server_name'] as String?,
         arguments: json['arguments'] as Map<String, dynamic>?,
+        signature: json['signature'] as String?,
       );
 
   @override
@@ -41,5 +46,6 @@ class McpServerToolCallDelta extends InteractionDelta {
     if (name != null) 'name': name,
     if (serverName != null) 'server_name': serverName,
     if (arguments != null) 'arguments': arguments,
+    if (signature != null) 'signature': signature,
   };
 }

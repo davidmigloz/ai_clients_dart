@@ -1,26 +1,26 @@
 part of 'deltas.dart';
 
-/// A Google Search call delta update.
-class GoogleSearchCallDelta extends InteractionDelta {
+/// A Google Maps call delta update.
+class GoogleMapsCallDelta extends InteractionDelta {
   @override
-  String get type => 'google_search_call';
+  String get type => 'google_maps_call';
 
   /// A unique ID for this specific tool call.
   final String? id;
 
-  /// Web search queries.
+  /// The queries for the Google Maps search.
   final List<String>? queries;
 
-  /// A signature for this tool call.
+  /// The signature of the Google Maps call.
   final String? signature;
 
-  /// Creates a [GoogleSearchCallDelta] instance.
-  const GoogleSearchCallDelta({this.id, this.queries, this.signature});
+  /// Creates a [GoogleMapsCallDelta] instance.
+  const GoogleMapsCallDelta({this.id, this.queries, this.signature});
 
-  /// Creates a [GoogleSearchCallDelta] from JSON.
-  factory GoogleSearchCallDelta.fromJson(Map<String, dynamic> json) {
+  /// Creates a [GoogleMapsCallDelta] from JSON.
+  factory GoogleMapsCallDelta.fromJson(Map<String, dynamic> json) {
     final arguments = json['arguments'] as Map<String, dynamic>?;
-    return GoogleSearchCallDelta(
+    return GoogleMapsCallDelta(
       id: json['id'] as String?,
       queries: (arguments?['queries'] as List<dynamic>?)?.cast<String>(),
       signature: json['signature'] as String?,

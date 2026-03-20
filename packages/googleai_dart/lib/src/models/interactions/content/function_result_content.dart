@@ -17,12 +17,16 @@ class FunctionResultContent extends InteractionContent {
   /// Whether the tool call resulted in an error.
   final bool? isError;
 
+  /// The signature of the function result.
+  final String? signature;
+
   /// Creates a [FunctionResultContent] instance.
   const FunctionResultContent({
     this.callId,
     this.result,
     this.name,
     this.isError,
+    this.signature,
   });
 
   /// Creates a [FunctionResultContent] from JSON.
@@ -34,6 +38,7 @@ class FunctionResultContent extends InteractionContent {
             : null,
         name: json['name'] as String?,
         isError: json['is_error'] as bool?,
+        signature: json['signature'] as String?,
       );
 
   @override
@@ -43,6 +48,7 @@ class FunctionResultContent extends InteractionContent {
     if (result != null) 'result': result!.toJson(),
     if (name != null) 'name': name,
     if (isError != null) 'is_error': isError,
+    if (signature != null) 'signature': signature,
   };
 
   /// Creates a copy with replaced values.
@@ -51,6 +57,7 @@ class FunctionResultContent extends InteractionContent {
     Object? result = unsetCopyWithValue,
     Object? name = unsetCopyWithValue,
     Object? isError = unsetCopyWithValue,
+    Object? signature = unsetCopyWithValue,
   }) {
     return FunctionResultContent(
       callId: callId == unsetCopyWithValue ? this.callId : callId as String?,
@@ -59,6 +66,9 @@ class FunctionResultContent extends InteractionContent {
           : result as ToolResult?,
       name: name == unsetCopyWithValue ? this.name : name as String?,
       isError: isError == unsetCopyWithValue ? this.isError : isError as bool?,
+      signature: signature == unsetCopyWithValue
+          ? this.signature
+          : signature as String?,
     );
   }
 }

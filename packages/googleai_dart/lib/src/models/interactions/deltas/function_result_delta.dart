@@ -14,8 +14,20 @@ class FunctionResultDelta extends InteractionDelta {
   /// Whether the function call resulted in an error.
   final bool? isError;
 
+  /// A signature for this tool call.
+  final String? signature;
+
+  /// The ID of the tool call that produced this result.
+  final String? callId;
+
   /// Creates a [FunctionResultDelta] instance.
-  const FunctionResultDelta({this.name, this.result, this.isError});
+  const FunctionResultDelta({
+    this.name,
+    this.result,
+    this.isError,
+    this.signature,
+    this.callId,
+  });
 
   /// Creates a [FunctionResultDelta] from JSON.
   factory FunctionResultDelta.fromJson(Map<String, dynamic> json) =>
@@ -25,6 +37,8 @@ class FunctionResultDelta extends InteractionDelta {
             ? ToolResult.fromJson(json['result'] as Object)
             : null,
         isError: json['is_error'] as bool?,
+        signature: json['signature'] as String?,
+        callId: json['call_id'] as String?,
       );
 
   @override
@@ -33,5 +47,7 @@ class FunctionResultDelta extends InteractionDelta {
     if (name != null) 'name': name,
     if (result != null) 'result': result!.toJson(),
     if (isError != null) 'is_error': isError,
+    if (signature != null) 'signature': signature,
+    if (callId != null) 'call_id': callId,
   };
 }

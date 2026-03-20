@@ -20,6 +20,9 @@ class McpServerToolResultContent extends InteractionContent {
   /// Whether the tool call resulted in an error.
   final bool? isError;
 
+  /// The signature of the MCP server tool result.
+  final String? signature;
+
   /// Creates a [McpServerToolResultContent] instance.
   const McpServerToolResultContent({
     this.callId,
@@ -27,6 +30,7 @@ class McpServerToolResultContent extends InteractionContent {
     this.serverName,
     this.result,
     this.isError,
+    this.signature,
   });
 
   /// Creates a [McpServerToolResultContent] from JSON.
@@ -39,6 +43,7 @@ class McpServerToolResultContent extends InteractionContent {
             ? ToolResult.fromJson(json['result'] as Object)
             : null,
         isError: json['is_error'] as bool?,
+        signature: json['signature'] as String?,
       );
 
   @override
@@ -49,6 +54,7 @@ class McpServerToolResultContent extends InteractionContent {
     if (serverName != null) 'server_name': serverName,
     if (result != null) 'result': result!.toJson(),
     if (isError != null) 'is_error': isError,
+    if (signature != null) 'signature': signature,
   };
 
   /// Creates a copy with replaced values.
@@ -58,6 +64,7 @@ class McpServerToolResultContent extends InteractionContent {
     Object? serverName = unsetCopyWithValue,
     Object? result = unsetCopyWithValue,
     Object? isError = unsetCopyWithValue,
+    Object? signature = unsetCopyWithValue,
   }) {
     return McpServerToolResultContent(
       callId: callId == unsetCopyWithValue ? this.callId : callId as String?,
@@ -69,6 +76,9 @@ class McpServerToolResultContent extends InteractionContent {
           ? this.result
           : result as ToolResult?,
       isError: isError == unsetCopyWithValue ? this.isError : isError as bool?,
+      signature: signature == unsetCopyWithValue
+          ? this.signature
+          : signature as String?,
     );
   }
 }

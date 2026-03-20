@@ -10,6 +10,8 @@ part 'file_search_call_content.dart';
 part 'file_search_result_content.dart';
 part 'function_call_content.dart';
 part 'function_result_content.dart';
+part 'google_maps_call_content.dart';
+part 'google_maps_result_content.dart';
 part 'google_search_call_content.dart';
 part 'google_search_result_content.dart';
 part 'image_content.dart';
@@ -23,7 +25,7 @@ part 'video_content.dart';
 
 /// The content of an interaction response.
 ///
-/// This is a sealed class with 18 subtypes representing different content
+/// This is a sealed class with 20 subtypes representing different content
 /// types in the Interactions API.
 sealed class InteractionContent {
   /// The type discriminator for this content.
@@ -47,6 +49,8 @@ sealed class InteractionContent {
       'code_execution_result' => CodeExecutionResultContent.fromJson(json),
       'url_context_call' => UrlContextCallContent.fromJson(json),
       'url_context_result' => UrlContextResultContent.fromJson(json),
+      'google_maps_call' => GoogleMapsCallContent.fromJson(json),
+      'google_maps_result' => GoogleMapsResultContent.fromJson(json),
       'google_search_call' => GoogleSearchCallContent.fromJson(json),
       'google_search_result' => GoogleSearchResultContent.fromJson(json),
       'mcp_server_tool_call' => McpServerToolCallContent.fromJson(json),

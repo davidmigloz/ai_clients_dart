@@ -4,6 +4,7 @@ part 'code_execution_tool.dart';
 part 'computer_use_tool.dart';
 part 'file_search_tool.dart';
 part 'function_tool.dart';
+part 'google_maps_tool.dart';
 part 'google_search_tool.dart';
 part 'mcp_server_tool.dart';
 part 'url_context_tool.dart';
@@ -22,6 +23,7 @@ sealed class InteractionTool {
     final type = json['type'] as String?;
     return switch (type) {
       'function' => FunctionTool.fromJson(json),
+      'google_maps' => GoogleMapsTool.fromJson(json),
       'google_search' => GoogleSearchTool.fromJson(json),
       'code_execution' => CodeExecutionTool.fromJson(json),
       'url_context' => UrlContextTool.fromJson(json),

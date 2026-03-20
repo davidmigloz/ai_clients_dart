@@ -6,6 +6,9 @@ import '../tools/code_execution_result.dart';
 import '../tools/executable_code.dart';
 import '../tools/function_call.dart';
 import '../tools/function_response.dart';
+import '../tools/tool_call.dart';
+import '../tools/tool_response.dart';
+import '../tools/tool_type.dart';
 import 'blob.dart';
 import 'file_data.dart';
 import 'media_resolution.dart';
@@ -88,6 +91,32 @@ sealed class Part {
     FunctionResponse(name: name, response: response, id: id),
   );
 
+  /// Creates a tool call part.
+  ///
+  /// Example:
+  /// ```dart
+  /// final part = Part.toolCall(ToolType.googleSearchWeb, args: {'q': 'test'});
+  /// ```
+  factory Part.toolCall(
+    ToolType toolType, {
+    Map<String, dynamic>? args,
+    String? id,
+  }) => ToolCallPart(ToolCall(toolType: toolType, args: args, id: id));
+
+  /// Creates a tool response part.
+  ///
+  /// Example:
+  /// ```dart
+  /// final part = Part.toolResponse(ToolType.googleSearchWeb, response: {'results': []});
+  /// ```
+  factory Part.toolResponse(
+    ToolType toolType, {
+    Map<String, dynamic>? response,
+    String? id,
+  }) => ToolResponsePart(
+    ToolResponse(toolType: toolType, response: response, id: id),
+  );
+
   /// Creates a [Part] from JSON.
   factory Part.fromJson(Map<String, dynamic> json) {
     // `text` must be checked before the standalone `thought` and
@@ -150,6 +179,16 @@ sealed class Part {
         CodeExecutionResult.fromJson(
           json['codeExecutionResult'] as Map<String, dynamic>,
         ),
+      );
+    }
+    if (json.containsKey('toolCall')) {
+      return ToolCallPart(
+        ToolCall.fromJson(json['toolCall'] as Map<String, dynamic>),
+      );
+    }
+    if (json.containsKey('toolResponse')) {
+      return ToolResponsePart(
+        ToolResponse.fromJson(json['toolResponse'] as Map<String, dynamic>),
       );
     }
     if (json.containsKey('videoMetadata')) {
@@ -477,6 +516,46 @@ class ThoughtSignaturePart extends Part {
       thoughtSignature == unsetCopyWithValue
           ? this.thoughtSignature
           : thoughtSignature! as List<int>,
+    );
+  }
+}
+
+/// Server-side tool call.
+class ToolCallPart extends Part {
+  /// Tool call.
+  final ToolCall toolCall;
+
+  /// Creates a [ToolCallPart].
+  const ToolCallPart(this.toolCall);
+
+  @override
+  Map<String, dynamic> toJson() => {'toolCall': toolCall.toJson()};
+
+  /// Creates a copy with replaced values.
+  ToolCallPart copyWith({Object? toolCall = unsetCopyWithValue}) {
+    return ToolCallPart(
+      toolCall == unsetCopyWithValue ? this.toolCall : toolCall! as ToolCall,
+    );
+  }
+}
+
+/// Server-side tool response.
+class ToolResponsePart extends Part {
+  /// Tool response.
+  final ToolResponse toolResponse;
+
+  /// Creates a [ToolResponsePart].
+  const ToolResponsePart(this.toolResponse);
+
+  @override
+  Map<String, dynamic> toJson() => {'toolResponse': toolResponse.toJson()};
+
+  /// Creates a copy with replaced values.
+  ToolResponsePart copyWith({Object? toolResponse = unsetCopyWithValue}) {
+    return ToolResponsePart(
+      toolResponse == unsetCopyWithValue
+          ? this.toolResponse
+          : toolResponse! as ToolResponse,
     );
   }
 }

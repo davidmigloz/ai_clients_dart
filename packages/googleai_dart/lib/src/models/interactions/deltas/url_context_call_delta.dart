@@ -11,8 +11,11 @@ class UrlContextCallDelta extends InteractionDelta {
   /// The URLs to fetch.
   final List<String>? urls;
 
+  /// A signature for this tool call.
+  final String? signature;
+
   /// Creates a [UrlContextCallDelta] instance.
-  const UrlContextCallDelta({this.id, this.urls});
+  const UrlContextCallDelta({this.id, this.urls, this.signature});
 
   /// Creates a [UrlContextCallDelta] from JSON.
   factory UrlContextCallDelta.fromJson(Map<String, dynamic> json) {
@@ -20,6 +23,7 @@ class UrlContextCallDelta extends InteractionDelta {
     return UrlContextCallDelta(
       id: json['id'] as String?,
       urls: (arguments?['urls'] as List<dynamic>?)?.cast<String>(),
+      signature: json['signature'] as String?,
     );
   }
 
@@ -28,5 +32,6 @@ class UrlContextCallDelta extends InteractionDelta {
     'type': type,
     if (id != null) 'id': id,
     if (urls != null) 'arguments': {'urls': urls},
+    if (signature != null) 'signature': signature,
   };
 }

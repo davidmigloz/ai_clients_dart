@@ -230,5 +230,46 @@ void main() {
         expect(interaction.hasFunctionCalls, isFalse);
       });
     });
+
+    group('googleMapsCallOutputs', () {
+      test('returns all Google Maps call outputs', () {
+        const interaction = Interaction(
+          id: 'test-id',
+          status: InteractionStatus.completed,
+          outputs: [
+            GoogleMapsCallContent(id: 'mc-1', queries: ['pizza']),
+            TextContent(text: 'Text'),
+            GoogleMapsCallContent(id: 'mc-2', queries: ['sushi']),
+          ],
+        );
+        expect(interaction.googleMapsCallOutputs, hasLength(2));
+        expect(interaction.googleMapsCallOutputs[0].id, 'mc-1');
+        expect(interaction.googleMapsCallOutputs[1].id, 'mc-2');
+      });
+
+      test('returns empty list when no Google Maps calls', () {
+        const interaction = Interaction(
+          id: 'test-id',
+          status: InteractionStatus.completed,
+          outputs: [TextContent(text: 'Text')],
+        );
+        expect(interaction.googleMapsCallOutputs, isEmpty);
+      });
+    });
+
+    group('googleMapsResultOutputs', () {
+      test('returns all Google Maps result outputs', () {
+        const interaction = Interaction(
+          id: 'test-id',
+          status: InteractionStatus.completed,
+          outputs: [
+            GoogleMapsResultContent(callId: 'mc-1'),
+            TextContent(text: 'Text'),
+            GoogleMapsResultContent(callId: 'mc-2'),
+          ],
+        );
+        expect(interaction.googleMapsResultOutputs, hasLength(2));
+      });
+    });
   });
 }

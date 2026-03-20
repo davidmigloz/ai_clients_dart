@@ -17,12 +17,16 @@ class McpServerToolCallContent extends InteractionContent {
   /// The JSON object of arguments for the function.
   final Map<String, dynamic>? arguments;
 
+  /// The signature of the MCP server tool call.
+  final String? signature;
+
   /// Creates a [McpServerToolCallContent] instance.
   const McpServerToolCallContent({
     this.id,
     this.name,
     this.serverName,
     this.arguments,
+    this.signature,
   });
 
   /// Creates a [McpServerToolCallContent] from JSON.
@@ -32,6 +36,7 @@ class McpServerToolCallContent extends InteractionContent {
         name: json['name'] as String?,
         serverName: json['server_name'] as String?,
         arguments: json['arguments'] as Map<String, dynamic>?,
+        signature: json['signature'] as String?,
       );
 
   @override
@@ -41,6 +46,7 @@ class McpServerToolCallContent extends InteractionContent {
     if (name != null) 'name': name,
     if (serverName != null) 'server_name': serverName,
     if (arguments != null) 'arguments': arguments,
+    if (signature != null) 'signature': signature,
   };
 
   /// Creates a copy with replaced values.
@@ -49,6 +55,7 @@ class McpServerToolCallContent extends InteractionContent {
     Object? name = unsetCopyWithValue,
     Object? serverName = unsetCopyWithValue,
     Object? arguments = unsetCopyWithValue,
+    Object? signature = unsetCopyWithValue,
   }) {
     return McpServerToolCallContent(
       id: id == unsetCopyWithValue ? this.id : id as String?,
@@ -59,6 +66,9 @@ class McpServerToolCallContent extends InteractionContent {
       arguments: arguments == unsetCopyWithValue
           ? this.arguments
           : arguments as Map<String, dynamic>?,
+      signature: signature == unsetCopyWithValue
+          ? this.signature
+          : signature as String?,
     );
   }
 }

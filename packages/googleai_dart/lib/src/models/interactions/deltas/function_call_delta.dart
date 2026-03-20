@@ -14,8 +14,11 @@ class FunctionCallDelta extends InteractionDelta {
   /// The arguments to pass to the function.
   final Map<String, dynamic>? arguments;
 
+  /// A signature for this tool call.
+  final String? signature;
+
   /// Creates a [FunctionCallDelta] instance.
-  const FunctionCallDelta({this.id, this.name, this.arguments});
+  const FunctionCallDelta({this.id, this.name, this.arguments, this.signature});
 
   /// Creates a [FunctionCallDelta] from JSON.
   factory FunctionCallDelta.fromJson(Map<String, dynamic> json) =>
@@ -23,6 +26,7 @@ class FunctionCallDelta extends InteractionDelta {
         id: json['id'] as String?,
         name: json['name'] as String?,
         arguments: json['arguments'] as Map<String, dynamic>?,
+        signature: json['signature'] as String?,
       );
 
   @override
@@ -31,5 +35,6 @@ class FunctionCallDelta extends InteractionDelta {
     if (id != null) 'id': id,
     if (name != null) 'name': name,
     if (arguments != null) 'arguments': arguments,
+    if (signature != null) 'signature': signature,
   };
 }
