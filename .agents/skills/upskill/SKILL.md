@@ -231,7 +231,7 @@ If `implementation-patterns-core.md` gains a new section and the file has a tabl
 
 ### Update state
 
-Write `config/state.json` with the highest PR number processed and today's date:
+Write `.agents/skills/upskill/config/state.json` with the highest PR number processed and today's date:
 
 ```json
 {
