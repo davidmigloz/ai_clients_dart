@@ -27,9 +27,9 @@ melos bootstrap   # Install dependencies and link local packages
 Use CLI commands with quiet flags to minimize context noise. Run in this order — `dart fix` auto-fixes analyzer issues before `dart analyze` surfaces only those needing manual attention:
 
 ```bash
-dart format --show=none --summary=line .   # Format; only prints summary
+dart format .                              # Format all Dart files
 dart fix --apply                           # Auto-fix analyzer issues with quick fixes
-dart analyze .                             # Only shows issues needing manual attention
+dart analyze --fatal-infos .               # Matches CI; treats infos as fatal
 ```
 
 ### Testing
