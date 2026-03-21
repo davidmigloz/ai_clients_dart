@@ -29,7 +29,7 @@ Use CLI commands with quiet flags to minimize context noise. Run in this order â
 ```bash
 dart format --show=none --summary=line .   # Format; only prints summary
 dart fix --apply                           # Auto-fix analyzer issues with quick fixes
-dart analyze --fatal-infos .               # Matches CI; treats infos as fatal
+dart analyze .                             # Only shows issues needing manual attention
 ```
 
 ### Testing
