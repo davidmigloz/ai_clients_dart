@@ -14,6 +14,7 @@ class ProviderConfig {
   final AuthProvider? authProvider;
   final String model;
   final String? envKeyName;
+  final bool supportsVision;
 
   const ProviderConfig({
     required this.name,
@@ -21,6 +22,7 @@ class ProviderConfig {
     this.authProvider,
     required this.model,
     this.envKeyName,
+    this.supportsVision = false,
   });
 
   bool get isAvailable {
@@ -77,6 +79,7 @@ void main() {
           : null,
       model: 'gpt-4o-mini',
       envKeyName: 'OPENAI_API_KEY',
+      supportsVision: true,
     ),
     ProviderConfig(
       name: 'Ollama',
@@ -254,6 +257,7 @@ void main() {
                 input: const ResponseTextInput(
                   "What's the weather like in San Francisco?",
                 ),
+                toolChoice: const ToolChoiceRequired(),
                 tools: const [
                   FunctionTool(
                     name: 'get_weather',
@@ -292,30 +296,36 @@ void main() {
 
         // IMAGE-001: Image input in user message
         // (CLI test: image-input — sends image URL in user content)
-        test('IMAGE-001: Accepts image input in user message', () async {
-          final response = await client.responses.create(
-            CreateResponseRequest(
-              model: provider.model,
-              input: ResponseItemsInput([
-                MessageItem.user([
-                  InputContent.text(
-                    'What do you see in this image? Answer in one sentence.',
-                  ),
-                  InputContent.imageUrl(
-                    // 1x1 red PNG pixel as a minimal valid image
-                    'data:image/png;base64,'
-                    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlE'
-                    'QVQIW2P4z8BQDwAEgAF/pooBPQAAAABJRU5ErkJggg==',
-                  ),
+        test(
+          'IMAGE-001: Accepts image input in user message',
+          skip: provider.supportsVision
+              ? null
+              : 'Provider ${provider.name} does not support vision',
+          () async {
+            final response = await client.responses.create(
+              CreateResponseRequest(
+                model: provider.model,
+                input: ResponseItemsInput([
+                  MessageItem.user([
+                    InputContent.text(
+                      'What do you see in this image? Answer in one sentence.',
+                    ),
+                    InputContent.imageUrl(
+                      // 1x1 red PNG pixel as a minimal valid image
+                      'data:image/png;base64,'
+                      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlE'
+                      'QVQIW2P4z8BQDwAEgAF/pooBPQAAAABJRU5ErkJggg==',
+                    ),
+                  ]),
                 ]),
-              ]),
-            ),
-          );
+              ),
+            );
 
-          expect(response.status, ResponseStatus.completed);
-          expect(response.output, isNotEmpty);
-          expect(response.outputText, isNotNull);
-        });
+            expect(response.status, ResponseStatus.completed);
+            expect(response.output, isNotEmpty);
+            expect(response.outputText, isNotNull);
+          },
+        );
 
         // EXT-001: Response extensions work
         test('EXT-001: Response extensions work correctly', () async {

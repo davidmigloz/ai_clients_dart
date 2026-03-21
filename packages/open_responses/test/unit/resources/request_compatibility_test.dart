@@ -130,7 +130,7 @@ void main() {
                   'description': 'The city and state, e.g. San Francisco, CA',
                 },
               },
-              'required': <dynamic>['location'],
+              'required': <String>['location'],
             },
           ),
         ],
