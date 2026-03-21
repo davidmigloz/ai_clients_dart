@@ -15,19 +15,6 @@ ai_clients_dart/
 
 ## Development Commands
 
-### MCP Tools Setup
-
-**IMPORTANT**: Before using Dart MCP tools, you must register the workspace root:
-
-```txt
-// In Claude Code, run this first to enable MCP tools
-mcp__dart__add_roots(roots: [
-  {uri: "file:///path/to/repository"}
-])
-```
-
-**MCP Tools provide enhanced error handling, integrated results, and better reliability compared to CLI commands. Use MCP tools whenever available, with CLI fallbacks only when necessary.**
-
 ### Dart Monorepo Setup
 
 ```bash
@@ -35,44 +22,52 @@ mcp__dart__add_roots(roots: [
 melos bootstrap   # Install dependencies and link local packages
 ```
 
-**Using MCP Tools (Preferred):**
+### Code Quality
 
-```txt
-# Code quality (use MCP tools)
-# First ensure workspace root is registered with mcp__dart__add_roots
-mcp__dart__dart_format()             # Format all Dart files
-mcp__dart__analyze_files()           # Run Dart analyzer with zero warnings
-mcp__dart__dart_fix()                # Apply automated fixes
+Use CLI commands with quiet flags to minimize context noise. Run in this order — `dart fix` auto-fixes analyzer issues before `dart analyze` surfaces only those needing manual attention:
 
-# Testing (use MCP tools)
-mcp__dart__run_tests()               # Run all tests with enhanced reporting
-# For specific test configurations, use testRunnerArgs parameter:
-# mcp__dart__run_tests(testRunnerArgs: {name: ["test description"]})
-
-# Dependency management (use MCP tools)
-mcp__dart__pub(command: "get")       # Get dependencies
-mcp__dart__pub(command: "upgrade")   # Upgrade dependencies
-mcp__dart__pub(command: "outdated")  # Check outdated dependencies
+```bash
+dart format --show=none --summary=line .   # Format; only prints summary
+dart fix --apply                           # Auto-fix analyzer issues with quick fixes
+dart analyze .                             # Only shows issues needing manual attention
 ```
 
-**IMPORTANT**: Never run integration tests (which hit live APIs) unless explicitly requested by the user — they are expensive. Only run unit tests by default by targeting `test/unit/` directories (e.g., `mcp__dart__run_tests` with paths `["packages/foo/test/unit"]`).
+### Testing
+
+```bash
+dart test --reporter=failures-only test/unit/   # Only prints failures
+```
+
+**IMPORTANT**: Never run integration tests (which hit live APIs) unless explicitly requested by the user — they are expensive. Only run unit tests by default by targeting `test/unit/` directories (e.g., `dart test --reporter=failures-only packages/foo/test/unit/`).
 
 **Test placement rules:**
 - `test/integration/` — Tests that hit **live external APIs** (require API keys, network access). Must be tagged with `@Tags(['integration'])` and include a `library;` directive so CI can exclude them.
 - `test/unit/` — All other tests, including tests with local `HttpServer`, `MockClient`, or any self-contained test that does not call external services. These run in CI by default.
 
-**Using CLI (Fallback):**
+### Dependency Management
 
 ```bash
-# Individual commands
-dart fix --apply
-dart format .
-dart analyze .
-
-# Testing
-melos run test              # Run all tests
-melos run test:diff         # Run tests only on changed packages (vs main)
+dart pub get
+dart pub upgrade
+dart pub outdated
 ```
+
+### MCP Tools
+
+Before using Dart MCP tools, register the workspace root:
+
+```txt
+mcp__dart__add_roots(roots: [
+  {uri: "file:///path/to/repository"}
+])
+```
+
+**Static analysis** — `mcp__dart__analyze_files()` provides structured, LLM-friendly output and can be used as an alternative to `dart analyze`.
+
+**Code navigation** (semantic Dart understanding — uses the Dart Analysis Server):
+- **`mcp__dart__hover(uri, line, column)`** — Type info and documentation at a file position (zero-based line/column). Use to understand a type or API without reading the full source.
+- **`mcp__dart__signature_help(uri, line, column)`** — Function/constructor signatures at a call site (zero-based line/column). Use to check exact parameters when writing code.
+- **`mcp__dart__resolve_workspace_symbol(query)`** — Fuzzy symbol lookup by name. **Caution:** returns results from all dependencies (including `.pub-cache`), which can be very noisy. Prefer `Grep`/`Glob` for searching within the project.
 
 ## Versioning
 
