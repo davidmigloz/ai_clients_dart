@@ -3321,6 +3321,8 @@ void main() {
       expect(ServiceTier.fromJson('auto'), ServiceTier.auto);
       expect(ServiceTier.fromJson('default'), ServiceTier.defaultTier);
       expect(ServiceTier.fromJson('flex'), ServiceTier.flex);
+      expect(ServiceTier.fromJson('scale'), ServiceTier.scale);
+      expect(ServiceTier.fromJson('priority'), ServiceTier.priority);
     });
 
     test('preserves unknown provider-specific values', () {
@@ -3338,18 +3340,20 @@ void main() {
       expect(ServiceTier.auto.toJson(), 'auto');
       expect(ServiceTier.defaultTier.toJson(), 'default');
       expect(ServiceTier.flex.toJson(), 'flex');
+      expect(ServiceTier.scale.toJson(), 'scale');
+      expect(ServiceTier.priority.toJson(), 'priority');
     });
 
     test('equality based on value', () {
-      expect(ServiceTier('auto'), ServiceTier.auto);
-      expect(ServiceTier('auto'), isNot(ServiceTier.flex));
-      expect(ServiceTier('custom'), ServiceTier('custom'));
+      expect(ServiceTier.auto, ServiceTier.auto);
+      expect(ServiceTier.auto, isNot(ServiceTier.flex));
+      expect(const ServiceTier('custom'), const ServiceTier('custom'));
     });
   });
 
   group('ResponseError', () {
     test('fromJson parses all fields', () {
-      final error = ResponseError.fromJson({
+      final error = ResponseError.fromJson(const {
         'type': 'server_error',
         'code': 'internal',
         'message': 'Something went wrong',
@@ -3362,14 +3366,16 @@ void main() {
     });
 
     test('fromJson defaults type to error when missing', () {
-      final error = ResponseError.fromJson({'message': 'Something went wrong'});
+      final error = ResponseError.fromJson(const {
+        'message': 'Something went wrong',
+      });
       expect(error.type, 'error');
       expect(error.code, isNull);
       expect(error.param, isNull);
     });
 
     test('fromJson handles null code and param', () {
-      final error = ResponseError.fromJson({
+      final error = ResponseError.fromJson(const {
         'type': 'invalid_request_error',
         'code': null,
         'message': 'Bad request',

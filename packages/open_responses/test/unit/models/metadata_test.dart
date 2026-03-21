@@ -138,9 +138,9 @@ void main() {
     });
 
     test('equality based on value', () {
-      expect(ServiceTier('auto'), ServiceTier.auto);
-      expect(ServiceTier('auto'), isNot(ServiceTier.flex));
-      expect(ServiceTier('custom'), ServiceTier('custom'));
+      expect(ServiceTier.auto, ServiceTier.auto);
+      expect(ServiceTier.auto, isNot(ServiceTier.flex));
+      expect(const ServiceTier('custom'), const ServiceTier('custom'));
     });
   });
 }

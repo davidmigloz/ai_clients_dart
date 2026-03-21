@@ -3,7 +3,8 @@ import 'package:meta/meta.dart';
 /// Service tier for request processing.
 ///
 /// Known tiers are available as static constants (e.g., [ServiceTier.auto],
-/// [ServiceTier.defaultTier], [ServiceTier.flex]). Providers may define
+/// [ServiceTier.defaultTier], [ServiceTier.flex], [ServiceTier.priority]).
+/// Providers may define
 /// additional tiers; use the [ServiceTier.new] constructor for custom values
 /// (e.g., `ServiceTier('batch')`).
 @immutable
@@ -16,6 +17,12 @@ class ServiceTier {
 
   /// Flex tier for cost-effective processing.
   static const flex = ServiceTier('flex');
+
+  /// Scale tier.
+  static const scale = ServiceTier('scale');
+
+  /// Priority tier (higher priority).
+  static const priority = ServiceTier('priority');
 
   /// The raw string value for this tier.
   final String value;
