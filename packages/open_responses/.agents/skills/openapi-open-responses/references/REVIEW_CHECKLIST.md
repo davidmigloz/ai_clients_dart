@@ -17,6 +17,11 @@ dart format --set-exit-if-changed .
 dart test test/unit/
 ```
 
+## Compliance Test Alignment
+
+- [ ] Check if [openresponses/openresponses](https://github.com/openresponses/openresponses) has added new compliance test templates since last sync (see `src/lib/compliance-tests.ts`). Align our compliance tests in `test/integration/compliance_test.dart` if needed.
+- [ ] Run `dart test test/unit/resources/request_compatibility_test.dart` to verify request shape compatibility with the CLI.
+
 ## Implementation Review
 
 Read and apply the [core review checklist](../../../../../../.agents/shared/api-toolkit/references/REVIEW_CHECKLIST-core.md) — it contains the full implementation review checklist applicable to all packages.
