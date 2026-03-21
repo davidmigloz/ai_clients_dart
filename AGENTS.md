@@ -35,7 +35,7 @@ dart analyze .                             # Only shows issues needing manual at
 ### Testing
 
 ```bash
-dart test --reporter=failures-only test/unit/   # Only prints failures
+dart test --reporter=failures-only packages/foo/test/unit/   # Only prints failures
 ```
 
 **IMPORTANT**: Never run integration tests (which hit live APIs) unless explicitly requested by the user — they are expensive. Only run unit tests by default by targeting `test/unit/` directories (e.g., `dart test --reporter=failures-only packages/foo/test/unit/`).
