@@ -110,4 +110,37 @@ void main() {
       expect(parsed, equals(original));
     });
   });
+
+  group('ServiceTier', () {
+    test('known values match static constants', () {
+      expect(ServiceTier.fromJson('auto'), ServiceTier.auto);
+      expect(ServiceTier.fromJson('default'), ServiceTier.defaultTier);
+      expect(ServiceTier.fromJson('flex'), ServiceTier.flex);
+      expect(ServiceTier.fromJson('priority'), ServiceTier.priority);
+    });
+
+    test('preserves unknown provider-specific values', () {
+      final tier = ServiceTier.fromJson('batch');
+      expect(tier.value, 'batch');
+      expect(tier.toJson(), 'batch');
+    });
+
+    test('round-trip preserves custom values', () {
+      final tier = ServiceTier.fromJson('my-custom-tier');
+      expect(ServiceTier.fromJson(tier.toJson()), tier);
+    });
+
+    test('toJson returns correct string', () {
+      expect(ServiceTier.auto.toJson(), 'auto');
+      expect(ServiceTier.defaultTier.toJson(), 'default');
+      expect(ServiceTier.flex.toJson(), 'flex');
+      expect(ServiceTier.priority.toJson(), 'priority');
+    });
+
+    test('equality based on value', () {
+      expect(ServiceTier('auto'), ServiceTier.auto);
+      expect(ServiceTier('auto'), isNot(ServiceTier.flex));
+      expect(ServiceTier('custom'), ServiceTier('custom'));
+    });
+  });
 }

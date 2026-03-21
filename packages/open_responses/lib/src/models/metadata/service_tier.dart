@@ -1,33 +1,53 @@
-/// Service tier for request processing.
-enum ServiceTier {
-  /// Unknown service tier (fallback for unrecognized values).
-  unknown('unknown'),
+import 'package:meta/meta.dart';
 
+/// Service tier for request processing.
+///
+/// Known tiers are available as static constants (e.g., [ServiceTier.auto],
+/// [ServiceTier.defaultTier], [ServiceTier.flex], [ServiceTier.priority]).
+/// Providers may define additional tiers; use the [ServiceTier.new] constructor
+/// for custom values (e.g., `ServiceTier('batch')`).
+@immutable
+class ServiceTier {
   /// Automatic tier selection.
-  auto('auto'),
+  static const auto = ServiceTier('auto');
 
   /// Default tier.
-  defaultTier('default'),
+  static const defaultTier = ServiceTier('default');
 
   /// Flex tier (lower priority, lower cost).
-  flex('flex'),
+  static const flex = ServiceTier('flex');
 
   /// Priority tier (higher priority).
-  priority('priority');
+  static const priority = ServiceTier('priority');
 
-  /// The JSON value for this service tier.
+  /// The raw string value for this tier.
   final String value;
 
+  /// Creates a [ServiceTier] with the given [value].
+  ///
+  /// Use static constants for well-known tiers (e.g., [ServiceTier.auto]).
+  /// Use this constructor for provider-specific tiers:
+  /// ```dart
+  /// const customTier = ServiceTier('batch');
+  /// ```
   const ServiceTier(this.value);
 
   /// Creates a [ServiceTier] from a JSON value.
-  factory ServiceTier.fromJson(String json) {
-    return ServiceTier.values.firstWhere(
-      (e) => e.value == json,
-      orElse: () => ServiceTier.unknown,
-    );
-  }
+  factory ServiceTier.fromJson(String json) => ServiceTier(json);
 
   /// Converts to JSON value.
   String toJson() => value;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ServiceTier &&
+          runtimeType == other.runtimeType &&
+          value == other.value;
+
+  @override
+  int get hashCode => value.hashCode;
+
+  @override
+  String toString() => 'ServiceTier($value)';
 }

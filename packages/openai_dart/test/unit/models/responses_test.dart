@@ -3315,4 +3315,140 @@ void main() {
       expect(response.computerCalls, hasLength(1));
     });
   });
+
+  group('ServiceTier', () {
+    test('known values match static constants', () {
+      expect(ServiceTier.fromJson('auto'), ServiceTier.auto);
+      expect(ServiceTier.fromJson('default'), ServiceTier.defaultTier);
+      expect(ServiceTier.fromJson('flex'), ServiceTier.flex);
+    });
+
+    test('preserves unknown provider-specific values', () {
+      final tier = ServiceTier.fromJson('batch');
+      expect(tier.value, 'batch');
+      expect(tier.toJson(), 'batch');
+    });
+
+    test('round-trip preserves custom values', () {
+      final tier = ServiceTier.fromJson('my-custom-tier');
+      expect(ServiceTier.fromJson(tier.toJson()), tier);
+    });
+
+    test('toJson returns correct string', () {
+      expect(ServiceTier.auto.toJson(), 'auto');
+      expect(ServiceTier.defaultTier.toJson(), 'default');
+      expect(ServiceTier.flex.toJson(), 'flex');
+    });
+
+    test('equality based on value', () {
+      expect(ServiceTier('auto'), ServiceTier.auto);
+      expect(ServiceTier('auto'), isNot(ServiceTier.flex));
+      expect(ServiceTier('custom'), ServiceTier('custom'));
+    });
+  });
+
+  group('ResponseError', () {
+    test('fromJson parses all fields', () {
+      final error = ResponseError.fromJson({
+        'type': 'server_error',
+        'code': 'internal',
+        'message': 'Something went wrong',
+        'param': 'model',
+      });
+      expect(error.type, 'server_error');
+      expect(error.code, 'internal');
+      expect(error.message, 'Something went wrong');
+      expect(error.param, 'model');
+    });
+
+    test('fromJson defaults type to error when missing', () {
+      final error = ResponseError.fromJson({'message': 'Something went wrong'});
+      expect(error.type, 'error');
+      expect(error.code, isNull);
+      expect(error.param, isNull);
+    });
+
+    test('fromJson handles null code and param', () {
+      final error = ResponseError.fromJson({
+        'type': 'invalid_request_error',
+        'code': null,
+        'message': 'Bad request',
+        'param': null,
+      });
+      expect(error.type, 'invalid_request_error');
+      expect(error.code, isNull);
+      expect(error.message, 'Bad request');
+      expect(error.param, isNull);
+    });
+
+    test('toJson includes all fields and omits nulls', () {
+      const error = ResponseError(
+        type: 'server_error',
+        code: 'rate_limit',
+        message: 'Too many requests',
+        param: 'input',
+      );
+      expect(error.toJson(), {
+        'type': 'server_error',
+        'code': 'rate_limit',
+        'message': 'Too many requests',
+        'param': 'input',
+      });
+
+      const errorNoOptionals = ResponseError(
+        type: 'error',
+        message: 'Something failed',
+      );
+      expect(errorNoOptionals.toJson(), {
+        'type': 'error',
+        'message': 'Something failed',
+      });
+    });
+
+    test('round-trip serialization', () {
+      const original = ResponseError(
+        type: 'server_error',
+        code: 'internal',
+        message: 'Error',
+        param: 'model',
+      );
+      final json = original.toJson();
+      final parsed = ResponseError.fromJson(json);
+      expect(parsed, original);
+    });
+
+    test('equality', () {
+      const a = ResponseError(type: 'error', message: 'msg');
+      const b = ResponseError(type: 'error', message: 'msg');
+      const c = ResponseError(type: 'error', message: 'other');
+      expect(a, b);
+      expect(a, isNot(c));
+    });
+
+    test('copyWith works correctly', () {
+      const error = ResponseError(
+        type: 'server_error',
+        code: 'internal',
+        message: 'Error',
+        param: 'model',
+      );
+      final updated = error.copyWith(message: 'New message');
+      expect(updated.type, 'server_error');
+      expect(updated.code, 'internal');
+      expect(updated.message, 'New message');
+      expect(updated.param, 'model');
+    });
+
+    test('copyWith can set nullable fields to null', () {
+      const error = ResponseError(
+        type: 'error',
+        code: 'some_code',
+        message: 'msg',
+        param: 'some_param',
+      );
+      final updated = error.copyWith(code: null, param: null);
+      expect(updated.code, isNull);
+      expect(updated.param, isNull);
+    });
+  });
 }
