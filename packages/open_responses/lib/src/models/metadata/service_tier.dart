@@ -33,7 +33,13 @@ class ServiceTier {
   const ServiceTier(this.value);
 
   /// Creates a [ServiceTier] from a JSON value.
-  factory ServiceTier.fromJson(String json) => ServiceTier(json);
+  factory ServiceTier.fromJson(String json) => switch (json) {
+    'auto' => auto,
+    'default' => defaultTier,
+    'flex' => flex,
+    'priority' => priority,
+    _ => ServiceTier(json),
+  };
 
   /// Converts to JSON value.
   String toJson() => value;

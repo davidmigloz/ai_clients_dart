@@ -27,10 +27,9 @@ class ResponseError {
 
   /// Creates a [ResponseError] from JSON.
   ///
-  /// The OpenAI spec defines `code` and `message` as required fields. The
-  /// `type` and `param` fields are included for compatibility with the
-  /// OpenResponses spec and streaming error events. When `type` is absent,
-  /// defaults to `'error'`.
+  /// This follows the OpenAI / OpenResponses error payload shape where
+  /// `message` is required, `type` may be omitted and defaults to `'error'`,
+  /// and `code` / `param` may be null or absent.
   factory ResponseError.fromJson(Map<String, dynamic> json) {
     return ResponseError(
       type: json['type'] as String? ?? 'error',
