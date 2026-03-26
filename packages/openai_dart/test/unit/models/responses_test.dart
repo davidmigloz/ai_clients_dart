@@ -2476,20 +2476,6 @@ void main() {
     });
   });
 
-  group('FileInputDetail', () {
-    test('round-trip all non-unknown values', () {
-      for (final v in FileInputDetail.values.where(
-        (v) => v != FileInputDetail.unknown,
-      )) {
-        expect(FileInputDetail.fromJson(v.toJson()), v);
-      }
-    });
-
-    test('unknown fallback', () {
-      expect(FileInputDetail.fromJson('auto'), FileInputDetail.unknown);
-    });
-  });
-
   group('PromptCacheRetention', () {
     test('round-trip all non-unknown values', () {
       for (final v in PromptCacheRetention.values.where(
@@ -3165,27 +3151,6 @@ void main() {
 
       final restored = Item.fromJson(tso.toJson());
       expect(restored, equals(tso));
-    });
-  });
-
-  group('InputFileContent with detail', () {
-    test('round-trip with detail', () {
-      const content = InputFileContent.url(
-        'https://example.com/file.pdf',
-        detail: FileInputDetail.high,
-      );
-
-      final json = content.toJson();
-      expect(json['detail'], 'high');
-
-      final restored = InputFileContent.fromJson(json);
-      expect(restored.detail, FileInputDetail.high);
-      expect(restored, equals(content));
-    });
-
-    test('omits detail when null', () {
-      const content = InputFileContent.url('https://example.com/file.pdf');
-      expect(content.toJson().containsKey('detail'), isFalse);
     });
   });
 

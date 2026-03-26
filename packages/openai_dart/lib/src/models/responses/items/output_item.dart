@@ -35,6 +35,8 @@ import 'item.dart';
 /// - [ToolSearchCallOutputItem] - Tool search calls
 /// - [ToolSearchOutputItem] - Tool search results
 /// - [ComputerCallOutputItem] - Computer use tool calls
+/// - [CustomToolCallItem] - Custom tool calls
+/// - [CustomToolCallOutputItem] - Custom tool call outputs
 sealed class OutputItem {
   /// Creates an [OutputItem].
   const OutputItem();
@@ -61,6 +63,8 @@ sealed class OutputItem {
       'tool_search_call' => ToolSearchCallOutputItem.fromJson(json),
       'tool_search_output' => ToolSearchOutputItem.fromJson(json),
       'computer_call' => ComputerCallOutputItem.fromJson(json),
+      'custom_tool_call' => CustomToolCallItem.fromJson(json),
+      'custom_tool_call_output' => CustomToolCallOutputItem.fromJson(json),
       _ => throw FormatException('Unknown OutputItem type: $type'),
     };
   }
@@ -178,6 +182,9 @@ class FunctionCallOutputItemResponse extends OutputItem {
   /// The namespace this function call belongs to.
   final String? namespace;
 
+  /// The identifier of the actor that created the item.
+  final String? createdBy;
+
   /// Creates a [FunctionCallOutputItemResponse].
   const FunctionCallOutputItemResponse({
     required this.id,
@@ -186,6 +193,7 @@ class FunctionCallOutputItemResponse extends OutputItem {
     required this.arguments,
     this.status,
     this.namespace,
+    this.createdBy,
   });
 
   /// Creates a [FunctionCallOutputItemResponse] from JSON.
@@ -199,6 +207,7 @@ class FunctionCallOutputItemResponse extends OutputItem {
           ? ItemStatus.fromJson(json['status'] as String)
           : null,
       namespace: json['namespace'] as String?,
+      createdBy: json['created_by'] as String?,
     );
   }
 
@@ -211,6 +220,7 @@ class FunctionCallOutputItemResponse extends OutputItem {
     'arguments': arguments,
     if (status != null) 'status': status!.toJson(),
     if (namespace != null) 'namespace': namespace,
+    if (createdBy != null) 'created_by': createdBy,
   };
 
   /// Converts to a [FunctionCallItem] for use as input.
@@ -233,15 +243,16 @@ class FunctionCallOutputItemResponse extends OutputItem {
           name == other.name &&
           arguments == other.arguments &&
           status == other.status &&
-          namespace == other.namespace;
+          namespace == other.namespace &&
+          createdBy == other.createdBy;
 
   @override
   int get hashCode =>
-      Object.hash(id, callId, name, arguments, status, namespace);
+      Object.hash(id, callId, name, arguments, status, namespace, createdBy);
 
   @override
   String toString() =>
-      'FunctionCallOutputItemResponse(id: $id, callId: $callId, name: $name, arguments: $arguments, status: $status, namespace: $namespace)';
+      'FunctionCallOutputItemResponse(id: $id, callId: $callId, name: $name, arguments: $arguments, status: $status, namespace: $namespace, createdBy: $createdBy)';
 }
 
 /// A reasoning item from reasoning models.
@@ -352,10 +363,14 @@ class CompactionOutputItem extends OutputItem {
   /// Encrypted compaction payload.
   final String encryptedContent;
 
+  /// The identifier of the actor that created the item.
+  final String? createdBy;
+
   /// Creates a [CompactionOutputItem].
   const CompactionOutputItem({
     required this.id,
     required this.encryptedContent,
+    this.createdBy,
   });
 
   /// Creates a [CompactionOutputItem] from JSON.
@@ -363,6 +378,7 @@ class CompactionOutputItem extends OutputItem {
     return CompactionOutputItem(
       id: json['id'] as String,
       encryptedContent: json['encrypted_content'] as String,
+      createdBy: json['created_by'] as String?,
     );
   }
 
@@ -371,6 +387,7 @@ class CompactionOutputItem extends OutputItem {
     'type': 'compaction',
     'id': id,
     'encrypted_content': encryptedContent,
+    if (createdBy != null) 'created_by': createdBy,
   };
 
   @override
@@ -379,14 +396,15 @@ class CompactionOutputItem extends OutputItem {
       other is CompactionOutputItem &&
           runtimeType == other.runtimeType &&
           id == other.id &&
-          encryptedContent == other.encryptedContent;
+          encryptedContent == other.encryptedContent &&
+          createdBy == other.createdBy;
 
   @override
-  int get hashCode => Object.hash(id, encryptedContent);
+  int get hashCode => Object.hash(id, encryptedContent, createdBy);
 
   @override
   String toString() =>
-      'CompactionOutputItem(id: $id, encryptedContent: ${encryptedContent.length} chars)';
+      'CompactionOutputItem(id: $id, encryptedContent: ${encryptedContent.length} chars, createdBy: $createdBy)';
 }
 
 // ============================================================
@@ -1660,6 +1678,9 @@ class ComputerCallOutputItem extends OutputItem {
   /// Item status.
   final ItemStatus? status;
 
+  /// The identifier of the actor that created the item.
+  final String? createdBy;
+
   /// Creates a [ComputerCallOutputItem].
   const ComputerCallOutputItem({
     required this.id,
@@ -1668,6 +1689,7 @@ class ComputerCallOutputItem extends OutputItem {
     this.actions,
     this.pendingSafetyChecks,
     this.status,
+    this.createdBy,
   }) : assert(
          action == null || actions == null,
          'Only one of action or actions may be set, not both.',
@@ -1693,6 +1715,7 @@ class ComputerCallOutputItem extends OutputItem {
       status: json['status'] != null
           ? ItemStatus.fromJson(json['status'] as String)
           : null,
+      createdBy: json['created_by'] as String?,
     );
   }
 
@@ -1706,6 +1729,7 @@ class ComputerCallOutputItem extends OutputItem {
     if (pendingSafetyChecks != null)
       'pending_safety_checks': pendingSafetyChecks,
     if (status != null) 'status': status!.toJson(),
+    if (createdBy != null) 'created_by': createdBy,
   };
 
   @override
@@ -1718,7 +1742,8 @@ class ComputerCallOutputItem extends OutputItem {
           action == other.action &&
           listsEqual(actions, other.actions) &&
           listOfMapsDeepEqual(pendingSafetyChecks, other.pendingSafetyChecks) &&
-          status == other.status;
+          status == other.status &&
+          createdBy == other.createdBy;
 
   @override
   int get hashCode => Object.hash(
@@ -1728,9 +1753,163 @@ class ComputerCallOutputItem extends OutputItem {
     actions != null ? Object.hashAll(actions!) : null,
     listOfMapsHashCode(pendingSafetyChecks),
     status,
+    createdBy,
   );
 
   @override
   String toString() =>
-      'ComputerCallOutputItem(id: $id, callId: $callId, action: $action, actions: $actions, status: $status)';
+      'ComputerCallOutputItem(id: $id, callId: $callId, action: $action, actions: $actions, status: $status, createdBy: $createdBy)';
+}
+
+/// A custom tool call output item.
+@immutable
+class CustomToolCallItem extends OutputItem {
+  /// Unique identifier.
+  final String id;
+
+  /// The call ID for this custom tool call.
+  final String callId;
+
+  /// The name of the custom tool being called.
+  final String name;
+
+  /// The input for the custom tool call generated by the model.
+  final String input;
+
+  /// The namespace of the custom tool being called.
+  final String? namespace;
+
+  /// Item status.
+  final ItemStatus? status;
+
+  /// The identifier of the actor that created the item.
+  final String? createdBy;
+
+  /// Creates a [CustomToolCallItem].
+  const CustomToolCallItem({
+    required this.id,
+    required this.callId,
+    required this.name,
+    required this.input,
+    this.namespace,
+    this.status,
+    this.createdBy,
+  });
+
+  /// Creates a [CustomToolCallItem] from JSON.
+  factory CustomToolCallItem.fromJson(Map<String, dynamic> json) {
+    return CustomToolCallItem(
+      id: json['id'] as String,
+      callId: json['call_id'] as String,
+      name: json['name'] as String,
+      input: json['input'] as String,
+      namespace: json['namespace'] as String?,
+      status: json['status'] != null
+          ? ItemStatus.fromJson(json['status'] as String)
+          : null,
+      createdBy: json['created_by'] as String?,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'custom_tool_call',
+    'id': id,
+    'call_id': callId,
+    'name': name,
+    'input': input,
+    if (namespace != null) 'namespace': namespace,
+    if (status != null) 'status': status!.toJson(),
+    if (createdBy != null) 'created_by': createdBy,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CustomToolCallItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          callId == other.callId &&
+          name == other.name &&
+          input == other.input &&
+          namespace == other.namespace &&
+          status == other.status &&
+          createdBy == other.createdBy;
+
+  @override
+  int get hashCode =>
+      Object.hash(id, callId, name, input, namespace, status, createdBy);
+
+  @override
+  String toString() =>
+      'CustomToolCallItem(id: $id, callId: $callId, name: $name, input: $input, namespace: $namespace, status: $status)';
+}
+
+/// A custom tool call output item.
+@immutable
+class CustomToolCallOutputItem extends OutputItem {
+  /// Unique identifier.
+  final String id;
+
+  /// The call ID for this custom tool call output.
+  final String callId;
+
+  /// The output from the custom tool call.
+  final FunctionCallOutput output;
+
+  /// The status of the item.
+  final FunctionCallOutputStatus? status;
+
+  /// The identifier of the actor that created the item.
+  final String? createdBy;
+
+  /// Creates a [CustomToolCallOutputItem].
+  const CustomToolCallOutputItem({
+    required this.id,
+    required this.callId,
+    required this.output,
+    this.status,
+    this.createdBy,
+  });
+
+  /// Creates a [CustomToolCallOutputItem] from JSON.
+  factory CustomToolCallOutputItem.fromJson(Map<String, dynamic> json) {
+    return CustomToolCallOutputItem(
+      id: json['id'] as String,
+      callId: json['call_id'] as String,
+      output: FunctionCallOutput.fromJson(json['output']),
+      status: json['status'] != null
+          ? FunctionCallOutputStatus.fromJson(json['status'] as String)
+          : null,
+      createdBy: json['created_by'] as String?,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'custom_tool_call_output',
+    'id': id,
+    'call_id': callId,
+    'output': output.toJson(),
+    if (status != null) 'status': status!.toJson(),
+    if (createdBy != null) 'created_by': createdBy,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CustomToolCallOutputItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          callId == other.callId &&
+          output == other.output &&
+          status == other.status &&
+          createdBy == other.createdBy;
+
+  @override
+  int get hashCode => Object.hash(id, callId, output, status, createdBy);
+
+  @override
+  String toString() =>
+      'CustomToolCallOutputItem(id: $id, callId: $callId, output: $output, status: $status)';
 }

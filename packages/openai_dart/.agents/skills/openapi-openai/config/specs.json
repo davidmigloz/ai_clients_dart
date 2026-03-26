@@ -1,19 +1,16 @@
 {
+  "output_dir": "/tmp/openapi-openai-dart",
+  "preflight": {
+    "stats_field": "openapi_spec_url",
+    "stats_url": "https://raw.githubusercontent.com/openai/openai-python/refs/heads/main/.stats.yml"
+  },
   "specs": {
     "main": {
-      "name": "OpenAI API",
-      "url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/openai%2Fopenai-9c802d45a9bf2a896b5fd22ac22bba185e8a145bd40ed242df9bb87a05e954eb.yml",
-      "local_file": "openapi.json",
-      "requires_auth": false,
-      "auth_env_vars": [],
-      "description": "OpenAI API for GPT, DALL-E, Whisper, and more",
-      "fetch_mode": "remote",
       "audit": {
         "excluded_schemas": [],
-        "schema_aliases": {},
         "reference_impl": {
-          "repo": "openai/openai-python",
           "ref": "main",
+          "repo": "openai/openai-python",
           "resources": {
             "adapter": "python_stainless_resources",
             "path": "src/openai/resources"
@@ -22,14 +19,17 @@
             "adapter": "python_init_exports",
             "path": "src/openai/types/__init__.py"
           }
-        }
-      }
+        },
+        "schema_aliases": {}
+      },
+      "auth_env_vars": [],
+      "description": "OpenAI API for GPT, DALL-E, Whisper, and more",
+      "fetch_mode": "remote",
+      "local_file": "openapi.json",
+      "name": "OpenAI API",
+      "requires_auth": false,
+      "url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/openai%2Fopenai-00994178cc8e20d71754b00c54b0e4f5b4128e1c1cce765e9b7d696bd8c80d33.yml"
     }
   },
-  "preflight": {
-    "stats_url": "https://raw.githubusercontent.com/openai/openai-python/refs/heads/main/.stats.yml",
-    "stats_field": "openapi_spec_url"
-  },
-  "specs_dir": "packages/openai_dart/specs",
-  "output_dir": "/tmp/openapi-openai-dart"
+  "specs_dir": "packages/openai_dart/specs"
 }

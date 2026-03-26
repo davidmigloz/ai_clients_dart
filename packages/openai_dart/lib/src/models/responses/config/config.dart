@@ -3,7 +3,6 @@ library;
 
 export 'click_button.dart';
 export 'context_management.dart';
-export 'file_input_detail.dart';
 export 'function_call_output_status.dart';
 export 'function_call_status.dart';
 export 'include.dart';

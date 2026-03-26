@@ -811,6 +811,285 @@
       "file": "lib/src/models/threads/message.dart",
       "schema": "MessageContentTextAnnotationsFilePathObject",
       "parent": "TextAnnotation"
+    },
+    "ChatModel": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "ChatModel",
+      "tags": ["acknowledged"],
+      "note": "Package uses String for model IDs, not an enum type."
+    },
+    "ClickParam": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ClickAction",
+      "file": "lib/src/models/responses/tools/computer_action.dart",
+      "schema": "ClickParam",
+      "tags": ["acknowledged"],
+      "note": "Spec ClickParam maps to Dart ClickAction. Keys property added."
+    },
+    "ComputerCallOutputStatus": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ItemStatus",
+      "file": "lib/src/models/responses/config/item_status.dart",
+      "schema": "ComputerCallOutputStatus",
+      "tags": ["acknowledged"],
+      "note": "Spec enum maps to existing ItemStatus enum with same values."
+    },
+    "ComputerToolCallOutputResource": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ComputerCallOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "ComputerToolCallOutputResource",
+      "tags": ["acknowledged"],
+      "note": "Spec resource maps to Dart ComputerCallOutputItem. createdBy added."
+    },
+    "ConversationItem": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ConversationItem",
+      "file": "lib/src/models/conversations/conversation_item.dart",
+      "schema": null,
+      "tags": ["acknowledged"],
+      "note": "Sealed parent with different naming convention. CompactionBody variant added."
+    },
+    "CreateVideoBody": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "CreateVideoBody",
+      "tags": ["acknowledged"],
+      "note": "Removed from spec. Replaced by CreateVideoJsonBody/CreateVideoMultipartBody."
+    },
+    "CreateVideoCharacterBody": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": "lib/src/resources/videos_resource.dart",
+      "schema": "CreateVideoCharacterBody",
+      "tags": ["acknowledged"],
+      "note": "Multipart upload handled directly in resource method."
+    },
+    "CreateVideoEditJsonBody": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "CreateVideoEditRequest",
+      "file": "lib/src/models/videos/video_request.dart",
+      "schema": "CreateVideoEditJsonBody",
+      "tags": ["acknowledged"],
+      "note": "Spec JSON body maps to Dart CreateVideoEditRequest."
+    },
+    "CreateVideoEditMultipartBody": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "CreateVideoEditMultipartBody",
+      "tags": ["acknowledged"],
+      "note": "Multipart variant deferred; JSON variant covers primary use case."
+    },
+    "CreateVideoExtendJsonBody": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "CreateVideoExtendRequest",
+      "file": "lib/src/models/videos/video_request.dart",
+      "schema": "CreateVideoExtendJsonBody",
+      "tags": ["acknowledged"],
+      "note": "Spec JSON body maps to Dart CreateVideoExtendRequest."
+    },
+    "CreateVideoExtendMultipartBody": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "CreateVideoExtendMultipartBody",
+      "tags": ["acknowledged"],
+      "note": "Multipart variant deferred; JSON variant covers primary use case."
+    },
+    "CreateVideoJsonBody": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "CreateVideoRequest",
+      "file": "lib/src/models/videos/video_request.dart",
+      "schema": "CreateVideoJsonBody",
+      "tags": ["acknowledged"],
+      "note": "Spec JSON body maps to Dart CreateVideoRequest. inputReference added."
+    },
+    "CreateVideoMultipartBody": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "CreateVideoMultipartBody",
+      "tags": ["acknowledged"],
+      "note": "Multipart variant deferred; JSON variant covers primary use case."
+    },
+    "CustomToolCallOutputResource": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "CustomToolCallOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "CustomToolCallOutputResource",
+      "tags": ["acknowledged"],
+      "note": "Spec resource maps to Dart CustomToolCallOutputItem."
+    },
+    "CustomToolCallResource": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "CustomToolCallItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "CustomToolCallResource",
+      "tags": ["acknowledged"],
+      "note": "Spec resource maps to Dart CustomToolCallItem."
+    },
+    "DoubleClickAction": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "DoubleClickAction",
+      "file": "lib/src/models/responses/tools/computer_action.dart",
+      "schema": "DoubleClickAction",
+      "tags": ["acknowledged"],
+      "note": "Keys property added."
+    },
+    "DragParam": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "DragAction",
+      "file": "lib/src/models/responses/tools/computer_action.dart",
+      "schema": "DragParam",
+      "tags": ["acknowledged"],
+      "note": "Spec DragParam maps to Dart DragAction. Keys property added."
+    },
+    "FileDetailEnum": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "FileDetailEnum",
+      "tags": ["acknowledged"],
+      "note": "Removed from spec and Dart. Was FileInputDetail enum."
+    },
+    "FileInputDetail": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "FileInputDetail",
+      "tags": ["acknowledged"],
+      "note": "Removed from spec and Dart."
+    },
+    "FunctionToolCallOutputResource": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "FunctionCallOutputItemResponse",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "FunctionToolCallOutputResource",
+      "tags": ["acknowledged"],
+      "note": "Spec resource maps to existing Dart type. createdBy added."
+    },
+    "FunctionToolCallResource": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "FunctionCallOutputItemResponse",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "FunctionToolCallResource",
+      "tags": ["acknowledged"],
+      "note": "Spec resource maps to existing function call output item. createdBy added."
+    },
+    "FunctionToolParam": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "FunctionTool",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "schema": "FunctionToolParam",
+      "tags": ["acknowledged"],
+      "note": "defer_loading already implemented in FunctionTool."
+    },
+    "InputFileContent": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "InputFileContent",
+      "file": "lib/src/models/responses/content/input_content.dart",
+      "schema": "InputFileContent",
+      "tags": ["acknowledged"],
+      "note": "detail property removed per spec change."
+    },
+    "InputFileContentParam": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "InputFileContent",
+      "file": "lib/src/models/responses/content/input_content.dart",
+      "schema": "InputFileContentParam",
+      "tags": ["acknowledged"],
+      "note": "No separate Param class; InputFileContent serves both roles."
+    },
+    "ItemResource": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": null,
+      "tags": ["acknowledged"],
+      "note": "Sealed parent union of output items. Custom tool variants added."
+    },
+    "MoveParam": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "MoveAction",
+      "file": "lib/src/models/responses/tools/computer_action.dart",
+      "schema": "MoveParam",
+      "tags": ["acknowledged"],
+      "note": "Spec MoveParam maps to Dart MoveAction. Keys property added."
+    },
+    "OutputItem": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "OutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": null,
+      "tags": ["acknowledged"],
+      "note": "Sealed parent. Custom tool variants added."
+    },
+    "ScrollParam": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ScrollAction",
+      "file": "lib/src/models/responses/tools/computer_action.dart",
+      "schema": "ScrollParam",
+      "tags": ["acknowledged"],
+      "note": "Spec ScrollParam maps to Dart ScrollAction. Keys property added."
+    },
+    "VideoCharacterResource": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "VideoCharacter",
+      "file": "lib/src/models/videos/video.dart",
+      "schema": "VideoCharacterResource",
+      "tags": ["acknowledged"],
+      "note": "Spec resource maps to Dart VideoCharacter."
+    },
+    "VideoReferenceInputParam": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "VideoReferenceInputParam",
+      "tags": ["acknowledged"],
+      "note": "Video ID passed as String in request types, no separate class."
+    },
+    "VoiceIdsOrCustomVoice": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "VoiceIdsOrCustomVoice",
+      "tags": ["acknowledged"],
+      "note": "Deferred. Current voice enums sufficient for known voice IDs."
     }
   }
 }

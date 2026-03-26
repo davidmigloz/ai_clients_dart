@@ -300,6 +300,51 @@ class VideoError {
   String toString() => 'VideoError(message: $message)';
 }
 
+/// A video character created from an uploaded video.
+@immutable
+class VideoCharacter {
+  /// Unix timestamp (in seconds) when the character was created.
+  final int createdAt;
+
+  /// Unique identifier for the character.
+  final String id;
+
+  /// Display name for the character.
+  final String? name;
+
+  /// Creates a [VideoCharacter].
+  const VideoCharacter({required this.createdAt, required this.id, this.name});
+
+  /// Creates a [VideoCharacter] from JSON.
+  factory VideoCharacter.fromJson(Map<String, dynamic> json) {
+    return VideoCharacter(
+      createdAt: json['created_at'] as int,
+      id: json['id'] as String,
+      name: json['name'] as String?,
+    );
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    'created_at': createdAt,
+    'id': id,
+    if (name != null) 'name': name,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is VideoCharacter &&
+          runtimeType == other.runtimeType &&
+          id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+
+  @override
+  String toString() => 'VideoCharacter(id: $id, name: $name)';
+}
+
 /// Current lifecycle status of a video job.
 enum VideoStatus {
   /// Video is queued for processing.
@@ -375,7 +420,13 @@ enum VideoSeconds {
   s8._('8'),
 
   /// 12 seconds.
-  s12._('12');
+  s12._('12'),
+
+  /// 16 seconds.
+  s16._('16'),
+
+  /// 20 seconds.
+  s20._('20');
 
   const VideoSeconds._(this._value);
 

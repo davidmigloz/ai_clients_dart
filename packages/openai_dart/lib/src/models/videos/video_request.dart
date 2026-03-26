@@ -24,6 +24,7 @@ class CreateVideoRequest {
     this.model,
     this.seconds,
     this.size,
+    this.inputReference,
   });
 
   /// Text prompt that describes the video to generate.
@@ -39,7 +40,7 @@ class CreateVideoRequest {
 
   /// Clip duration in seconds.
   ///
-  /// Allowed values: 4, 8, 12.
+  /// Allowed values: 4, 8, 12, 16, 20.
   /// Defaults to 4 seconds.
   final VideoSeconds? seconds;
 
@@ -48,12 +49,18 @@ class CreateVideoRequest {
   /// Defaults to 720x1280.
   final VideoSize? size;
 
+  /// Optional reference image that guides generation.
+  ///
+  /// Can be an image URL or uploaded file ID.
+  final String? inputReference;
+
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'prompt': prompt,
     if (model != null) 'model': model,
     if (seconds != null) 'seconds': seconds!.toJson(),
     if (size != null) 'size': size!.toJson(),
+    if (inputReference != null) 'input_reference': inputReference,
   };
 
   @override
@@ -64,10 +71,11 @@ class CreateVideoRequest {
           prompt == other.prompt &&
           model == other.model &&
           seconds == other.seconds &&
-          size == other.size;
+          size == other.size &&
+          inputReference == other.inputReference;
 
   @override
-  int get hashCode => Object.hash(prompt, model, seconds, size);
+  int get hashCode => Object.hash(prompt, model, seconds, size, inputReference);
 
   @override
   String toString() =>
@@ -114,4 +122,108 @@ class CreateVideoRemixRequest {
   @override
   String toString() =>
       'CreateVideoRemixRequest(prompt: ${prompt.length > 50 ? '${prompt.substring(0, 50)}...' : prompt})';
+}
+
+/// Request to create a video edit.
+///
+/// Edits an existing completed video using a text prompt.
+///
+/// ## Example
+///
+/// ```dart
+/// final edited = await client.videos.createEdit(
+///   CreateVideoEditRequest(
+///     prompt: 'Add a sunset in the background',
+///     videoId: 'video-abc123',
+///   ),
+/// );
+/// ```
+@immutable
+class CreateVideoEditRequest {
+  /// Creates a [CreateVideoEditRequest].
+  const CreateVideoEditRequest({required this.prompt, required this.videoId});
+
+  /// Text prompt describing how to edit the video.
+  final String prompt;
+
+  /// The ID of the completed video to edit.
+  final String videoId;
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    'prompt': prompt,
+    'video': {'id': videoId},
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CreateVideoEditRequest &&
+          runtimeType == other.runtimeType &&
+          prompt == other.prompt &&
+          videoId == other.videoId;
+
+  @override
+  int get hashCode => Object.hash(prompt, videoId);
+
+  @override
+  String toString() =>
+      'CreateVideoEditRequest(prompt: ${prompt.length > 50 ? '${prompt.substring(0, 50)}...' : prompt})';
+}
+
+/// Request to extend a completed video.
+///
+/// Creates an extension of an existing completed video.
+///
+/// ## Example
+///
+/// ```dart
+/// final extended = await client.videos.createExtension(
+///   CreateVideoExtendRequest(
+///     prompt: 'Continue the scene with a slow zoom out',
+///     videoId: 'video-abc123',
+///     seconds: VideoSeconds.s8,
+///   ),
+/// );
+/// ```
+@immutable
+class CreateVideoExtendRequest {
+  /// Creates a [CreateVideoExtendRequest].
+  const CreateVideoExtendRequest({
+    required this.prompt,
+    required this.videoId,
+    this.seconds,
+  });
+
+  /// Text prompt directing the extension generation.
+  final String prompt;
+
+  /// The ID of the completed video to extend.
+  final String videoId;
+
+  /// Length of the extension in seconds (allowed: 4, 8, 12, 16, 20).
+  final VideoSeconds? seconds;
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    'prompt': prompt,
+    'video': {'id': videoId},
+    if (seconds != null) 'seconds': seconds!.toJson(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CreateVideoExtendRequest &&
+          runtimeType == other.runtimeType &&
+          prompt == other.prompt &&
+          videoId == other.videoId &&
+          seconds == other.seconds;
+
+  @override
+  int get hashCode => Object.hash(prompt, videoId, seconds);
+
+  @override
+  String toString() =>
+      'CreateVideoExtendRequest(prompt: ${prompt.length > 50 ? '${prompt.substring(0, 50)}...' : prompt})';
 }

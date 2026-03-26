@@ -53,8 +53,16 @@ class ClickAction extends ComputerAction {
   /// The y coordinate.
   final int y;
 
+  /// The keys being held while performing the action.
+  final List<String>? keys;
+
   /// Creates a [ClickAction].
-  const ClickAction({required this.button, required this.x, required this.y});
+  const ClickAction({
+    required this.button,
+    required this.x,
+    required this.y,
+    this.keys,
+  });
 
   /// Creates a [ClickAction] from JSON.
   factory ClickAction.fromJson(Map<String, dynamic> json) {
@@ -62,6 +70,7 @@ class ClickAction extends ComputerAction {
       button: ClickButton.fromJson(json['button'] as String),
       x: json['x'] as int,
       y: json['y'] as int,
+      keys: (json['keys'] as List?)?.cast<String>(),
     );
   }
 
@@ -71,6 +80,7 @@ class ClickAction extends ComputerAction {
     'button': button.toJson(),
     'x': x,
     'y': y,
+    if (keys != null) 'keys': keys,
   };
 
   @override
@@ -80,13 +90,16 @@ class ClickAction extends ComputerAction {
           runtimeType == other.runtimeType &&
           button == other.button &&
           x == other.x &&
-          y == other.y;
+          y == other.y &&
+          listsEqual(keys, other.keys);
 
   @override
-  int get hashCode => Object.hash(button, x, y);
+  int get hashCode =>
+      Object.hash(button, x, y, keys != null ? Object.hashAll(keys!) : null);
 
   @override
-  String toString() => 'ClickAction(button: $button, x: $x, y: $y)';
+  String toString() =>
+      'ClickAction(button: $button, x: $x, y: $y, keys: $keys)';
 }
 
 /// A double-click action at specific coordinates.
@@ -98,16 +111,28 @@ class DoubleClickAction extends ComputerAction {
   /// The y coordinate.
   final int y;
 
+  /// The keys being held while performing the action.
+  final List<String>? keys;
+
   /// Creates a [DoubleClickAction].
-  const DoubleClickAction({required this.x, required this.y});
+  const DoubleClickAction({required this.x, required this.y, this.keys});
 
   /// Creates a [DoubleClickAction] from JSON.
   factory DoubleClickAction.fromJson(Map<String, dynamic> json) {
-    return DoubleClickAction(x: json['x'] as int, y: json['y'] as int);
+    return DoubleClickAction(
+      x: json['x'] as int,
+      y: json['y'] as int,
+      keys: (json['keys'] as List?)?.cast<String>(),
+    );
   }
 
   @override
-  Map<String, dynamic> toJson() => {'type': 'double_click', 'x': x, 'y': y};
+  Map<String, dynamic> toJson() => {
+    'type': 'double_click',
+    'x': x,
+    'y': y,
+    if (keys != null) 'keys': keys,
+  };
 
   @override
   bool operator ==(Object other) =>
@@ -115,13 +140,15 @@ class DoubleClickAction extends ComputerAction {
       other is DoubleClickAction &&
           runtimeType == other.runtimeType &&
           x == other.x &&
-          y == other.y;
+          y == other.y &&
+          listsEqual(keys, other.keys);
 
   @override
-  int get hashCode => Object.hash(x, y);
+  int get hashCode =>
+      Object.hash(x, y, keys != null ? Object.hashAll(keys!) : null);
 
   @override
-  String toString() => 'DoubleClickAction(x: $x, y: $y)';
+  String toString() => 'DoubleClickAction(x: $x, y: $y, keys: $keys)';
 }
 
 /// A drag action along a path of coordinates.
@@ -130,8 +157,11 @@ class DragAction extends ComputerAction {
   /// The path of coordinates to drag along.
   final List<Map<String, dynamic>> path;
 
+  /// The keys being held while performing the action.
+  final List<String>? keys;
+
   /// Creates a [DragAction].
-  const DragAction({required this.path});
+  const DragAction({required this.path, this.keys});
 
   /// Creates a [DragAction] from JSON.
   factory DragAction.fromJson(Map<String, dynamic> json) {
@@ -139,24 +169,33 @@ class DragAction extends ComputerAction {
       path: (json['path'] as List)
           .map((e) => e as Map<String, dynamic>)
           .toList(),
+      keys: (json['keys'] as List?)?.cast<String>(),
     );
   }
 
   @override
-  Map<String, dynamic> toJson() => {'type': 'drag', 'path': path};
+  Map<String, dynamic> toJson() => {
+    'type': 'drag',
+    'path': path,
+    if (keys != null) 'keys': keys,
+  };
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is DragAction &&
           runtimeType == other.runtimeType &&
-          listOfMapsDeepEqual(path, other.path);
+          listOfMapsDeepEqual(path, other.path) &&
+          listsEqual(keys, other.keys);
 
   @override
-  int get hashCode => listOfMapsHashCode(path);
+  int get hashCode => Object.hash(
+    listOfMapsHashCode(path),
+    keys != null ? Object.hashAll(keys!) : null,
+  );
 
   @override
-  String toString() => 'DragAction(path: $path)';
+  String toString() => 'DragAction(path: $path, keys: $keys)';
 }
 
 /// A keypress action to press keyboard keys.
@@ -199,16 +238,28 @@ class MoveAction extends ComputerAction {
   /// The y coordinate.
   final int y;
 
+  /// The keys being held while performing the action.
+  final List<String>? keys;
+
   /// Creates a [MoveAction].
-  const MoveAction({required this.x, required this.y});
+  const MoveAction({required this.x, required this.y, this.keys});
 
   /// Creates a [MoveAction] from JSON.
   factory MoveAction.fromJson(Map<String, dynamic> json) {
-    return MoveAction(x: json['x'] as int, y: json['y'] as int);
+    return MoveAction(
+      x: json['x'] as int,
+      y: json['y'] as int,
+      keys: (json['keys'] as List?)?.cast<String>(),
+    );
   }
 
   @override
-  Map<String, dynamic> toJson() => {'type': 'move', 'x': x, 'y': y};
+  Map<String, dynamic> toJson() => {
+    'type': 'move',
+    'x': x,
+    'y': y,
+    if (keys != null) 'keys': keys,
+  };
 
   @override
   bool operator ==(Object other) =>
@@ -216,13 +267,15 @@ class MoveAction extends ComputerAction {
       other is MoveAction &&
           runtimeType == other.runtimeType &&
           x == other.x &&
-          y == other.y;
+          y == other.y &&
+          listsEqual(keys, other.keys);
 
   @override
-  int get hashCode => Object.hash(x, y);
+  int get hashCode =>
+      Object.hash(x, y, keys != null ? Object.hashAll(keys!) : null);
 
   @override
-  String toString() => 'MoveAction(x: $x, y: $y)';
+  String toString() => 'MoveAction(x: $x, y: $y, keys: $keys)';
 }
 
 /// A screenshot action to capture the current screen.
@@ -260,12 +313,16 @@ class ScrollAction extends ComputerAction {
   /// The vertical scroll amount.
   final int scrollY;
 
+  /// The keys being held while performing the action.
+  final List<String>? keys;
+
   /// Creates a [ScrollAction].
   const ScrollAction({
     required this.x,
     required this.y,
     required this.scrollX,
     required this.scrollY,
+    this.keys,
   });
 
   /// Creates a [ScrollAction] from JSON.
@@ -275,6 +332,7 @@ class ScrollAction extends ComputerAction {
       y: json['y'] as int,
       scrollX: json['scroll_x'] as int,
       scrollY: json['scroll_y'] as int,
+      keys: (json['keys'] as List?)?.cast<String>(),
     );
   }
 
@@ -285,6 +343,7 @@ class ScrollAction extends ComputerAction {
     'y': y,
     'scroll_x': scrollX,
     'scroll_y': scrollY,
+    if (keys != null) 'keys': keys,
   };
 
   @override
@@ -295,14 +354,21 @@ class ScrollAction extends ComputerAction {
           x == other.x &&
           y == other.y &&
           scrollX == other.scrollX &&
-          scrollY == other.scrollY;
+          scrollY == other.scrollY &&
+          listsEqual(keys, other.keys);
 
   @override
-  int get hashCode => Object.hash(x, y, scrollX, scrollY);
+  int get hashCode => Object.hash(
+    x,
+    y,
+    scrollX,
+    scrollY,
+    keys != null ? Object.hashAll(keys!) : null,
+  );
 
   @override
   String toString() =>
-      'ScrollAction(x: $x, y: $y, scrollX: $scrollX, scrollY: $scrollY)';
+      'ScrollAction(x: $x, y: $y, scrollX: $scrollX, scrollY: $scrollY, keys: $keys)';
 }
 
 /// A type action to type text.

@@ -52,6 +52,10 @@ sealed class ConversationItem {
       ),
       'tool_search_call' => ConversationToolSearchCallItem.fromJson(json),
       'tool_search_output' => ConversationToolSearchOutputItem.fromJson(json),
+      'compaction' => ConversationCompactionItem.fromJson(json),
+      'custom_tool_call' => ConversationCustomToolCallItem.fromJson(json),
+      'custom_tool_call_output' =>
+        ConversationCustomToolCallOutputItem.fromJson(json),
       _ => ConversationUnknownItem(type: type, data: json),
     };
   }
@@ -1246,6 +1250,199 @@ class ConversationToolSearchOutputItem extends ConversationItem {
   @override
   String toString() =>
       'ConversationToolSearchOutputItem(id: $id, callId: $callId, execution: $execution, status: $status)';
+}
+
+/// A compaction item in a conversation.
+@immutable
+class ConversationCompactionItem extends ConversationItem {
+  /// Unique identifier.
+  final String id;
+
+  /// Encrypted compaction payload.
+  final String encryptedContent;
+
+  /// The identifier of the actor that created the item.
+  final String? createdBy;
+
+  /// Creates a [ConversationCompactionItem].
+  const ConversationCompactionItem({
+    required this.id,
+    required this.encryptedContent,
+    this.createdBy,
+  });
+
+  /// Creates a [ConversationCompactionItem] from JSON.
+  factory ConversationCompactionItem.fromJson(Map<String, dynamic> json) {
+    return ConversationCompactionItem(
+      id: json['id'] as String,
+      encryptedContent: json['encrypted_content'] as String,
+      createdBy: json['created_by'] as String?,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'compaction',
+    'id': id,
+    'encrypted_content': encryptedContent,
+    if (createdBy != null) 'created_by': createdBy,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ConversationCompactionItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          encryptedContent == other.encryptedContent &&
+          createdBy == other.createdBy;
+
+  @override
+  int get hashCode => Object.hash(id, encryptedContent, createdBy);
+
+  @override
+  String toString() =>
+      'ConversationCompactionItem(id: $id, encryptedContent: ${encryptedContent.length} chars)';
+}
+
+/// A custom tool call item in a conversation.
+@immutable
+class ConversationCustomToolCallItem extends ConversationItem {
+  /// Unique identifier.
+  final String id;
+
+  /// The call ID for this custom tool call.
+  final String callId;
+
+  /// The name of the custom tool being called.
+  final String name;
+
+  /// The input for the custom tool call.
+  final String input;
+
+  /// The namespace of the custom tool.
+  final String? namespace;
+
+  /// Item status.
+  final ItemStatus? status;
+
+  /// Creates a [ConversationCustomToolCallItem].
+  const ConversationCustomToolCallItem({
+    required this.id,
+    required this.callId,
+    required this.name,
+    required this.input,
+    this.namespace,
+    this.status,
+  });
+
+  /// Creates a [ConversationCustomToolCallItem] from JSON.
+  factory ConversationCustomToolCallItem.fromJson(Map<String, dynamic> json) {
+    return ConversationCustomToolCallItem(
+      id: json['id'] as String,
+      callId: json['call_id'] as String,
+      name: json['name'] as String,
+      input: json['input'] as String,
+      namespace: json['namespace'] as String?,
+      status: json['status'] != null
+          ? ItemStatus.fromJson(json['status'] as String)
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'custom_tool_call',
+    'id': id,
+    'call_id': callId,
+    'name': name,
+    'input': input,
+    if (namespace != null) 'namespace': namespace,
+    if (status != null) 'status': status!.toJson(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ConversationCustomToolCallItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          callId == other.callId &&
+          name == other.name &&
+          input == other.input &&
+          namespace == other.namespace &&
+          status == other.status;
+
+  @override
+  int get hashCode => Object.hash(id, callId, name, input, namespace, status);
+
+  @override
+  String toString() =>
+      'ConversationCustomToolCallItem(id: $id, callId: $callId, name: $name, status: $status)';
+}
+
+/// A custom tool call output item in a conversation.
+@immutable
+class ConversationCustomToolCallOutputItem extends ConversationItem {
+  /// Unique identifier.
+  final String id;
+
+  /// The call ID this output corresponds to.
+  final String callId;
+
+  /// The output from the custom tool call.
+  final Object output;
+
+  /// The status of the item.
+  final ItemStatus? status;
+
+  /// Creates a [ConversationCustomToolCallOutputItem].
+  const ConversationCustomToolCallOutputItem({
+    required this.id,
+    required this.callId,
+    required this.output,
+    this.status,
+  });
+
+  /// Creates a [ConversationCustomToolCallOutputItem] from JSON.
+  factory ConversationCustomToolCallOutputItem.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return ConversationCustomToolCallOutputItem(
+      id: json['id'] as String,
+      callId: json['call_id'] as String,
+      output: json['output'] as Object,
+      status: json['status'] != null
+          ? ItemStatus.fromJson(json['status'] as String)
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'custom_tool_call_output',
+    'id': id,
+    'call_id': callId,
+    'output': output,
+    if (status != null) 'status': status!.toJson(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ConversationCustomToolCallOutputItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          callId == other.callId &&
+          output == other.output &&
+          status == other.status;
+
+  @override
+  int get hashCode => Object.hash(id, callId, output, status);
+
+  @override
+  String toString() =>
+      'ConversationCustomToolCallOutputItem(id: $id, callId: $callId, status: $status)';
 }
 
 /// An unknown item type (for forward compatibility).

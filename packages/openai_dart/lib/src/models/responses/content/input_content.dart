@@ -1,7 +1,6 @@
 import 'package:meta/meta.dart';
 
 import '../../chat/content_part.dart' show ImageDetail;
-import '../config/file_input_detail.dart';
 
 /// Input content for messages.
 ///
@@ -39,25 +38,16 @@ sealed class InputContent {
       InputImageContent.file;
 
   /// Creates an [InputFileContent] from a URL.
-  const factory InputContent.fileUrl(
-    String url, {
-    String? filename,
-    FileInputDetail? detail,
-  }) = InputFileContent.url;
+  const factory InputContent.fileUrl(String url, {String? filename}) =
+      InputFileContent.url;
 
   /// Creates an [InputFileContent] from a file ID.
-  const factory InputContent.fileId(
-    String id, {
-    String? filename,
-    FileInputDetail? detail,
-  }) = InputFileContent.file;
+  const factory InputContent.fileId(String id, {String? filename}) =
+      InputFileContent.file;
 
   /// Creates an [InputFileContent] from base64-encoded data.
-  const factory InputContent.fileData(
-    String data, {
-    String? filename,
-    FileInputDetail? detail,
-  }) = InputFileContent.data;
+  const factory InputContent.fileData(String data, {String? filename}) =
+      InputFileContent.data;
 
   /// Creates an [InputContent] from JSON.
   factory InputContent.fromJson(Map<String, dynamic> json) {
@@ -227,32 +217,28 @@ class InputFileContent extends InputContent {
   /// The filename.
   final String? filename;
 
-  /// The detail level for file processing.
-  final FileInputDetail? detail;
-
   /// Creates an [InputFileContent].
   const InputFileContent({
     this.fileUrl,
     this.fileId,
     this.fileData,
     this.filename,
-    this.detail,
   });
 
   /// Creates an [InputFileContent] from a URL.
-  const InputFileContent.url(String url, {this.filename, this.detail})
+  const InputFileContent.url(String url, {this.filename})
     : fileUrl = url,
       fileId = null,
       fileData = null;
 
   /// Creates an [InputFileContent] from a file ID.
-  const InputFileContent.file(String id, {this.filename, this.detail})
+  const InputFileContent.file(String id, {this.filename})
     : fileUrl = null,
       fileId = id,
       fileData = null;
 
   /// Creates an [InputFileContent] from base64-encoded data.
-  const InputFileContent.data(String data, {this.filename, this.detail})
+  const InputFileContent.data(String data, {this.filename})
     : fileUrl = null,
       fileId = null,
       fileData = data;
@@ -264,9 +250,6 @@ class InputFileContent extends InputContent {
       fileId: json['file_id'] as String?,
       fileData: json['file_data'] as String?,
       filename: json['filename'] as String?,
-      detail: json['detail'] != null
-          ? FileInputDetail.fromJson(json['detail'] as String)
-          : null,
     );
   }
 
@@ -277,7 +260,6 @@ class InputFileContent extends InputContent {
     if (fileId != null) 'file_id': fileId,
     if (fileData != null) 'file_data': fileData,
     if (filename != null) 'filename': filename,
-    if (detail != null) 'detail': detail!.toJson(),
   };
 
   @override
@@ -288,15 +270,14 @@ class InputFileContent extends InputContent {
           fileUrl == other.fileUrl &&
           fileId == other.fileId &&
           fileData == other.fileData &&
-          filename == other.filename &&
-          detail == other.detail;
+          filename == other.filename;
 
   @override
-  int get hashCode => Object.hash(fileUrl, fileId, fileData, filename, detail);
+  int get hashCode => Object.hash(fileUrl, fileId, fileData, filename);
 
   @override
   String toString() =>
-      'InputFileContent(fileUrl: $fileUrl, fileId: $fileId, fileData: $fileData, filename: $filename, detail: $detail)';
+      'InputFileContent(fileUrl: $fileUrl, fileId: $fileId, fileData: $fileData, filename: $filename)';
 }
 
 /// Video content via URL.

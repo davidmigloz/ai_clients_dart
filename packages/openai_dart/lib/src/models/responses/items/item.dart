@@ -20,6 +20,7 @@ import '../tools/response_tool.dart';
 /// - [FunctionCallItem] - A function call from the model
 /// - [FunctionCallOutputItem] - Output from a function call
 /// - [ItemReference] - A reference to another item
+/// - [CustomToolCallOutputInputItem] - Output from a custom tool call
 /// - [ToolSearchCallItemParam] - A tool search call
 /// - [ToolSearchOutputItemParam] - Tool search results
 sealed class Item {
@@ -33,6 +34,7 @@ sealed class Item {
       'message' => MessageItem.fromJson(json),
       'function_call' => FunctionCallItem.fromJson(json),
       'function_call_output' => FunctionCallOutputItem.fromJson(json),
+      'custom_tool_call_output' => CustomToolCallOutputInputItem.fromJson(json),
       'item_reference' => ItemReference.fromJson(json),
       'tool_search_call' => ToolSearchCallItemParam.fromJson(json),
       'tool_search_output' => ToolSearchOutputItemParam.fromJson(json),
@@ -451,6 +453,59 @@ class ItemReference extends Item {
 
   @override
   String toString() => 'ItemReference(id: $id)';
+}
+
+/// A custom tool call output input item.
+@immutable
+class CustomToolCallOutputInputItem extends Item {
+  /// Unique identifier.
+  final String? id;
+
+  /// The call ID this output corresponds to.
+  final String callId;
+
+  /// The output from the custom tool call.
+  final FunctionCallOutput output;
+
+  /// Creates a [CustomToolCallOutputInputItem].
+  const CustomToolCallOutputInputItem({
+    this.id,
+    required this.callId,
+    required this.output,
+  });
+
+  /// Creates a [CustomToolCallOutputInputItem] from JSON.
+  factory CustomToolCallOutputInputItem.fromJson(Map<String, dynamic> json) {
+    return CustomToolCallOutputInputItem(
+      id: json['id'] as String?,
+      callId: json['call_id'] as String,
+      output: FunctionCallOutput.fromJson(json['output']),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'custom_tool_call_output',
+    if (id != null) 'id': id,
+    'call_id': callId,
+    'output': output.toJson(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CustomToolCallOutputInputItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          callId == other.callId &&
+          output == other.output;
+
+  @override
+  int get hashCode => Object.hash(id, callId, output);
+
+  @override
+  String toString() =>
+      'CustomToolCallOutputInputItem(id: $id, callId: $callId, output: $output)';
 }
 
 /// A tool search call input item.
