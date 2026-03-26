@@ -230,7 +230,7 @@ class CreateVideoExtendRequest {
 
 /// Reference image that guides video generation.
 ///
-/// Provide either [imageUrl] or [fileId] (not both).
+/// Provide [imageUrl] or [fileId] to reference an image.
 @immutable
 class VideoInputReference {
   /// A fully qualified URL or base64-encoded data URL.

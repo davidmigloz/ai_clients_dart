@@ -1842,7 +1842,7 @@ class CustomToolCallItem extends OutputItem {
 
   @override
   String toString() =>
-      'CustomToolCallItem(id: $id, callId: $callId, name: $name, input: $input, namespace: $namespace, status: $status)';
+      'CustomToolCallItem(id: $id, callId: $callId, name: $name, input: $input, namespace: $namespace, status: $status, createdBy: $createdBy)';
 }
 
 /// A custom tool call output item.
@@ -1911,5 +1911,5 @@ class CustomToolCallOutputItem extends OutputItem {
 
   @override
   String toString() =>
-      'CustomToolCallOutputItem(id: $id, callId: $callId, output: $output, status: $status)';
+      'CustomToolCallOutputItem(id: $id, callId: $callId, output: $output, status: $status, createdBy: $createdBy)';
 }
