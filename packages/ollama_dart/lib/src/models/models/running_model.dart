@@ -6,7 +6,7 @@ import '../common/equality_helpers.dart';
 /// Information about a currently running model.
 @immutable
 class RunningModel {
-  /// Display name including tag (e.g., `llama3.2:latest`).
+  /// Display name of the running model (may include a tag, e.g., `llama3.2:latest`).
   final String? name;
 
   /// Model identifier used in API requests.
