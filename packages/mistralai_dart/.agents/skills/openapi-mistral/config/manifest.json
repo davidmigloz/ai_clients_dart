@@ -1502,6 +1502,134 @@
         "acknowledged"
       ],
       "note": "Internal integration schema"
+    },
+    "AgentsCompletionRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentCompletionRequest",
+      "file": "lib/src/models/agents/agent_completion_request.dart",
+      "schema": "AgentsCompletionRequest",
+      "tags": []
+    },
+    "UsageInfo": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UsageInfo",
+      "file": "lib/src/models/metadata/usage_info.dart",
+      "schema": "UsageInfo",
+      "tags": []
+    },
+    "PromptTokensDetails": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PromptTokensDetails",
+      "file": "lib/src/models/metadata/prompt_tokens_details.dart",
+      "schema": "PromptTokensDetails",
+      "tags": []
+    },
+    "ReasoningEffort": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ReasoningEffort",
+      "file": "lib/src/models/metadata/reasoning_effort.dart",
+      "schema": null,
+      "note": "Inline enum used by ChatCompletionRequest and AgentsCompletionRequest"
+    },
+    "SpeechOutputFormat": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "SpeechOutputFormat",
+      "file": "lib/src/models/audio/speech_output_format.dart",
+      "schema": "SpeechOutputFormat"
+    },
+    "SpeechRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SpeechRequest",
+      "file": "lib/src/models/audio/speech_request.dart",
+      "schema": "SpeechRequest",
+      "tags": []
+    },
+    "SpeechResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SpeechResponse",
+      "file": "lib/src/models/audio/speech_response.dart",
+      "schema": "SpeechResponse",
+      "tags": []
+    },
+    "SpeechStreamEvent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "SpeechStreamEvent",
+      "file": "lib/src/models/audio/speech_stream_event.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "SpeechStreamAudioDelta": "speech.audio.delta",
+          "SpeechStreamDone": "speech.audio.done"
+        }
+      }
+    },
+    "SpeechStreamAudioDelta": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SpeechStreamAudioDelta",
+      "file": "lib/src/models/audio/speech_stream_event.dart",
+      "schema": "SpeechStreamAudioDelta",
+      "parent": "SpeechStreamEvent"
+    },
+    "SpeechStreamDone": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SpeechStreamDone",
+      "file": "lib/src/models/audio/speech_stream_event.dart",
+      "schema": "SpeechStreamDone",
+      "parent": "SpeechStreamEvent"
+    },
+    "SpeechStreamEvents": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "SpeechStreamEvents",
+      "file": "",
+      "schema": "SpeechStreamEvents",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "SSE transport wrapper; data variants modeled as SpeechStreamEvent sealed class"
+    },
+    "VoiceResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VoiceResponse",
+      "file": "lib/src/models/audio/voice_response.dart",
+      "schema": "VoiceResponse",
+      "tags": []
+    },
+    "VoiceListResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VoiceListResponse",
+      "file": "lib/src/models/audio/voice_list_response.dart",
+      "schema": "VoiceListResponse",
+      "tags": []
+    },
+    "VoiceCreateRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VoiceCreateRequest",
+      "file": "lib/src/models/audio/voice_create_request.dart",
+      "schema": "VoiceCreateRequest",
+      "tags": []
+    },
+    "VoiceUpdateRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VoiceUpdateRequest",
+      "file": "lib/src/models/audio/voice_update_request.dart",
+      "schema": "VoiceUpdateRequest",
+      "tags": []
     }
   }
 }

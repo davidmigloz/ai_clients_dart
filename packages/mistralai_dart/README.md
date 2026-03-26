@@ -18,7 +18,7 @@ A comprehensive, type-safe Dart client for the [Mistral AI API](https://docs.mis
 - **Moderations** - Content moderation for safety
 - **Classifications** - Text classification (spam, topic, sentiment)
 - **OCR** - Extract text from documents and images
-- **Audio** - Speech-to-text transcription with streaming
+- **Audio** - Speech-to-text transcription, text-to-speech synthesis, and voice management
 
 ### Beta APIs
 - **Agents** - Pre-configured AI assistants with tools and instructions
@@ -493,6 +493,48 @@ await for (final event in stream) {
 }
 ```
 
+### Speech (Text-to-Speech)
+
+```dart
+// Generate speech
+final response = await client.audio.speech.create(
+  request: SpeechRequest(
+    input: 'Hello, world!',
+    voiceId: 'voice-id',
+  ),
+);
+print('Audio data: ${response.audioData.length} chars');
+
+// Stream speech
+final stream = client.audio.speech.createStream(
+  request: SpeechRequest(input: 'Hello!'),
+);
+await for (final event in stream) {
+  if (event is SpeechStreamAudioDelta) {
+    // Process audio chunk
+  }
+}
+```
+
+### Voices
+
+```dart
+// List voices
+final voices = await client.audio.voices.list();
+for (final voice in voices.items) {
+  print('${voice.name}: ${voice.id}');
+}
+
+// Create a custom voice
+final voice = await client.audio.voices.create(
+  request: VoiceCreateRequest(
+    name: 'My Voice',
+    sampleAudio: base64EncodedAudio,
+  ),
+);
+print('Created voice: ${voice.id}');
+```
+
 ### Agents (Beta)
 
 ```dart
@@ -818,6 +860,13 @@ This client implements the Mistral AI REST API:
 
 - **transcriptions.create** - Transcribe audio to text
 - **transcriptions.createStream** - Stream transcription results
+- **speech.create** - Generate speech from text
+- **speech.createStream** - Stream speech audio chunks
+- **voices.list** - List available voices
+- **voices.create** - Create a custom voice
+- **voices.retrieve** - Get voice details
+- **voices.update** - Update voice metadata
+- **voices.delete** - Delete a custom voice
 
 ### Agents Resource (`client.agents`) - Beta
 

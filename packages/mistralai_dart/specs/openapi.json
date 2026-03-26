@@ -886,7 +886,7 @@
                 "type": "null"
               }
             ],
-            "description": "Allows toggling between the reasoning mode and no system prompt. When set to `reasoning` the system prompt for reasoning models will be used."
+            "description": "Allows toggling between the reasoning mode and no system prompt. When set to `reasoning` the system prompt for reasoning models will be used. **Deprecated for reasoning models - use `reasoning_effort` parameter instead.**"
           },
           "random_seed": {
             "anyOf": [
@@ -900,6 +900,14 @@
             ],
             "description": "The seed to use for random sampling. If set, different calls will generate deterministic results.",
             "title": "Random Seed"
+          },
+          "reasoning_effort": {
+            "description": "Controls the reasoning effort level for reasoning models. \"high\" enables comprehensive reasoning traces, \"none\" disables reasoning effort.",
+            "enum": [
+              "high",
+              "none"
+            ],
+            "type": "string"
           },
           "response_format": {
             "$ref": "#/components/schemas/ResponseFormat"
@@ -2627,7 +2635,7 @@
                 "type": "null"
               }
             ],
-            "description": "Allows toggling between the reasoning mode and no system prompt. When set to `reasoning` the system prompt for reasoning models will be used."
+            "description": "Allows toggling between the reasoning mode and no system prompt. When set to `reasoning` the system prompt for reasoning models will be used. **Deprecated for reasoning models - use `reasoning_effort` parameter instead.**"
           },
           "random_seed": {
             "anyOf": [
@@ -2641,6 +2649,14 @@
             ],
             "description": "The seed to use for random sampling. If set, different calls will generate deterministic results.",
             "title": "Random Seed"
+          },
+          "reasoning_effort": {
+            "description": "Controls the reasoning effort level for reasoning models. \"high\" enables comprehensive reasoning traces, \"none\" disables reasoning effort.",
+            "enum": [
+              "high",
+              "none"
+            ],
+            "type": "string"
           },
           "response_format": {
             "$ref": "#/components/schemas/ResponseFormat"
@@ -3772,6 +3788,21 @@
               }
             ],
             "title": "Random Seed"
+          },
+          "reasoning_effort": {
+            "anyOf": [
+              {
+                "enum": [
+                  "high",
+                  "none"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Controls the reasoning effort level for reasoning models. \"high\" enables comprehensive reasoning traces, \"none\" disables reasoning effort."
           },
           "response_format": {
             "anyOf": [
@@ -11503,6 +11534,19 @@
         "title": "ProcessingStatusOut",
         "type": "object"
       },
+      "PromptTokensDetails": {
+        "additionalProperties": false,
+        "description": "Token usage details for the prompt.",
+        "properties": {
+          "cached_tokens": {
+            "default": 0,
+            "title": "Cached Tokens",
+            "type": "integer"
+          }
+        },
+        "title": "PromptTokensDetails",
+        "type": "object"
+      },
       "PutDatasetRecordPayloadInSchema": {
         "properties": {
           "payload": {
@@ -12327,6 +12371,168 @@
         ],
         "title": "Source",
         "type": "string"
+      },
+      "SpeechOutputFormat": {
+        "enum": [
+          "pcm",
+          "wav",
+          "mp3",
+          "flac",
+          "opus"
+        ],
+        "title": "SpeechOutputFormat",
+        "type": "string"
+      },
+      "SpeechRequest": {
+        "additionalProperties": true,
+        "properties": {
+          "input": {
+            "description": "Text to generate speech from.",
+            "title": "Input",
+            "type": "string"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "ref_audio": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The base64-encoded audio reference for zero-shot voice cloning.",
+            "title": "Ref Audio"
+          },
+          "response_format": {
+            "$ref": "#/components/schemas/SpeechOutputFormat",
+            "default": "mp3",
+            "description": "Output audio format. Defaults to mp3."
+          },
+          "stream": {
+            "default": false,
+            "title": "Stream",
+            "type": "boolean"
+          },
+          "voice_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The preset or custom voice to use for generating the speech.",
+            "title": "Voice Id"
+          }
+        },
+        "required": [
+          "input"
+        ],
+        "title": "SpeechRequest",
+        "type": "object"
+      },
+      "SpeechResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "audio_data": {
+            "description": "Base64 encoded audio data",
+            "title": "Audio Data",
+            "type": "string"
+          }
+        },
+        "required": [
+          "audio_data"
+        ],
+        "title": "SpeechResponse",
+        "type": "object"
+      },
+      "SpeechStreamAudioDelta": {
+        "additionalProperties": false,
+        "properties": {
+          "audio_data": {
+            "title": "Audio Data",
+            "type": "string"
+          },
+          "type": {
+            "const": "speech.audio.delta",
+            "default": "speech.audio.delta",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "audio_data"
+        ],
+        "title": "SpeechStreamAudioDelta",
+        "type": "object"
+      },
+      "SpeechStreamDone": {
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "const": "speech.audio.done",
+            "default": "speech.audio.done",
+            "title": "Type",
+            "type": "string"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/UsageInfo"
+          }
+        },
+        "required": [
+          "usage"
+        ],
+        "title": "SpeechStreamDone",
+        "type": "object"
+      },
+      "SpeechStreamEvents": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "discriminator": {
+              "mapping": {
+                "speech.audio.delta": "#/components/schemas/SpeechStreamAudioDelta",
+                "speech.audio.done": "#/components/schemas/SpeechStreamDone"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SpeechStreamAudioDelta"
+              },
+              {
+                "$ref": "#/components/schemas/SpeechStreamDone"
+              }
+            ],
+            "title": "Data"
+          },
+          "event": {
+            "enum": [
+              "speech.audio.delta",
+              "speech.audio.done"
+            ],
+            "title": "Event",
+            "type": "string"
+          }
+        },
+        "required": [
+          "event",
+          "data"
+        ],
+        "title": "SpeechStreamEvents",
+        "type": "object"
       },
       "SystemMessage": {
         "additionalProperties": false,
@@ -13592,6 +13798,17 @@
             "title": "Completion Tokens",
             "type": "integer"
           },
+          "num_cached_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Num Cached Tokens"
+          },
           "prompt_audio_seconds": {
             "anyOf": [
               {
@@ -13603,10 +13820,30 @@
             ],
             "title": "Prompt Audio Seconds"
           },
+          "prompt_token_details": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PromptTokensDetails"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "prompt_tokens": {
             "default": 0,
             "title": "Prompt Tokens",
             "type": "integer"
+          },
+          "prompt_tokens_details": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PromptTokensDetails"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "total_tokens": {
             "default": 0,
@@ -13693,6 +13930,323 @@
           "type"
         ],
         "title": "ValidationError",
+        "type": "object"
+      },
+      "VoiceCreateRequest": {
+        "description": "Request model for creating a new voice with base64 audio.",
+        "properties": {
+          "age": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age"
+          },
+          "color": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color"
+          },
+          "gender": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender"
+          },
+          "languages": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Languages",
+            "type": "array"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "retention_notice": {
+            "default": 30,
+            "title": "Retention Notice",
+            "type": "integer"
+          },
+          "sample_audio": {
+            "description": "Base64-encoded audio file",
+            "title": "Sample Audio",
+            "type": "string"
+          },
+          "sample_filename": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Original filename for extension detection",
+            "title": "Sample Filename"
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tags"
+          }
+        },
+        "required": [
+          "name",
+          "sample_audio"
+        ],
+        "title": "VoiceCreateRequest",
+        "type": "object"
+      },
+      "VoiceListResponse": {
+        "description": "Schema for voice list response",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/VoiceResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "page_size": {
+            "title": "Page Size",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          },
+          "total_pages": {
+            "title": "Total Pages",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "page_size",
+          "total_pages"
+        ],
+        "title": "VoiceListResponse",
+        "type": "object"
+      },
+      "VoiceResponse": {
+        "description": "Schema for voice response",
+        "properties": {
+          "age": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age"
+          },
+          "color": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "gender": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "languages": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Languages",
+            "type": "array"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "retention_notice": {
+            "default": 30,
+            "title": "Retention Notice",
+            "type": "integer"
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tags"
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id"
+          }
+        },
+        "required": [
+          "name",
+          "id",
+          "created_at",
+          "user_id"
+        ],
+        "title": "VoiceResponse",
+        "type": "object"
+      },
+      "VoiceUpdateRequest": {
+        "description": "Request model for partially updating voice metadata.",
+        "properties": {
+          "age": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age"
+          },
+          "gender": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender"
+          },
+          "languages": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Languages"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tags"
+          }
+        },
+        "title": "VoiceUpdateRequest",
         "type": "object"
       },
       "WandbIntegration": {
@@ -14216,6 +14770,7 @@
     },
     "/v1/agents/completions": {
       "post": {
+        "deprecated": true,
         "operationId": "agents_completion_v1_agents_completions_post",
         "requestBody": {
           "content": {
@@ -14279,7 +14834,7 @@
         },
         "summary": "Agents Completion",
         "tags": [
-          "agents"
+          "deprecated.agents"
         ]
       }
     },
@@ -14762,6 +15317,53 @@
         ]
       }
     },
+    "/v1/audio/speech": {
+      "post": {
+        "description": "Generate speech from text using a saved voice or a reference audio clip.",
+        "operationId": "speech_v1_audio_speech_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SpeechRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpeechResponse"
+                }
+              },
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpeechStreamEvents"
+                }
+              }
+            },
+            "description": "Speech audio data."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Speech",
+        "tags": [
+          "audio.speech"
+        ]
+      }
+    },
     "/v1/audio/transcriptions": {
       "post": {
         "operationId": "audio_api_v1_transcriptions_post",
@@ -14837,6 +15439,286 @@
         "summary": "Create Streaming Transcription (SSE)",
         "tags": [
           "audio.transcriptions"
+        ]
+      }
+    },
+    "/v1/audio/voices": {
+      "get": {
+        "description": "List all voices (excluding sample data)",
+        "operationId": "list_voices_v1_audio_voices_get",
+        "parameters": [
+          {
+            "description": "Maximum number of voices to return",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "description": "Maximum number of voices to return",
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Offset for pagination",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "description": "Offset for pagination",
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoiceListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List all voices",
+        "tags": [
+          "audio.voices"
+        ]
+      },
+      "post": {
+        "description": "Create a new voice with a base64-encoded audio sample",
+        "operationId": "create_voice_v1_audio_voices_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoiceCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoiceResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create a new voice",
+        "tags": [
+          "audio.voices"
+        ]
+      }
+    },
+    "/v1/audio/voices/{voice_id}": {
+      "delete": {
+        "description": "Delete a custom voice",
+        "operationId": "delete_voice_v1_audio_voices__voice_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "voice_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Voice Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoiceResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete a custom voice",
+        "tags": [
+          "audio.voices"
+        ]
+      },
+      "get": {
+        "description": "Get voice details (excluding sample)",
+        "operationId": "get_voice_v1_audio_voices__voice_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "voice_id",
+            "required": true,
+            "schema": {
+              "title": "Voice Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoiceResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get voice details",
+        "tags": [
+          "audio.voices"
+        ]
+      },
+      "patch": {
+        "description": "Update voice metadata (name, gender, languages, age, tags).",
+        "operationId": "update_voice_v1_audio_voices__voice_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "voice_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Voice Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoiceUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoiceResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update voice metadata",
+        "tags": [
+          "audio.voices"
+        ]
+      }
+    },
+    "/v1/audio/voices/{voice_id}/sample": {
+      "get": {
+        "description": "Get the audio sample for a voice",
+        "operationId": "get_voice_sample_audio_v1_audio_voices__voice_id__sample_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "voice_id",
+            "required": true,
+            "schema": {
+              "title": "Voice Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Get Voice Sample Audio V1 Audio Voices Voice Id Sample Get",
+                  "type": "string"
+                }
+              },
+              "audio/wav": {}
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get voice sample audio",
+        "tags": [
+          "audio.voices"
         ]
       }
     },
@@ -18484,6 +19366,11 @@
       "x-displayName": "Files"
     },
     {
+      "description": "(deprecated) Agents completion API",
+      "name": "deprecated.agents",
+      "x-displayName": "(deprecated) Agents"
+    },
+    {
       "description": "(deprecated) Fine-tuning API",
       "name": "deprecated.fine-tuning",
       "x-displayName": "(deprecated) Fine Tuning"
@@ -18507,6 +19394,16 @@
       "description": "API for audio transcription.",
       "name": "audio.transcriptions",
       "x-displayName": "Transcriptions API"
+    },
+    {
+      "description": "API for text-to-speech generation.",
+      "name": "audio.speech",
+      "x-displayName": "Speech API"
+    },
+    {
+      "description": "API for managing custom voice profiles.",
+      "name": "audio.voices",
+      "x-displayName": "Voices API"
     },
     {
       "description": "(beta) Agents API",

@@ -36,7 +36,7 @@
 /// - **Fine-tuning**: Train custom models
 /// - **Batch**: Asynchronous large-scale processing
 /// - **OCR**: Extract text from documents and images
-/// - **Audio**: Speech-to-text transcription with streaming
+/// - **Audio**: Speech-to-text transcription, text-to-speech synthesis, and voice management
 /// - **Agents** (Beta): Pre-configured AI assistants
 /// - **Conversations** (Beta): Flexible multi-turn interactions
 /// - **Libraries** (Beta): Document storage for RAG
@@ -70,11 +70,19 @@ export 'src/models/agents/agent_list.dart';
 export 'src/models/agents/create_agent_request.dart';
 export 'src/models/agents/update_agent_request.dart';
 // --- Models: Audio ---
+export 'src/models/audio/speech_output_format.dart';
+export 'src/models/audio/speech_request.dart';
+export 'src/models/audio/speech_response.dart';
+export 'src/models/audio/speech_stream_event.dart';
 export 'src/models/audio/transcription_request.dart';
 export 'src/models/audio/transcription_response.dart';
 export 'src/models/audio/transcription_segment.dart';
 export 'src/models/audio/transcription_stream_event.dart';
 export 'src/models/audio/transcription_word.dart';
+export 'src/models/audio/voice_create_request.dart';
+export 'src/models/audio/voice_list_response.dart';
+export 'src/models/audio/voice_response.dart';
+export 'src/models/audio/voice_update_request.dart';
 // --- Models: Batch ---
 export 'src/models/batch/batch_error.dart';
 export 'src/models/batch/batch_job.dart';
@@ -151,6 +159,8 @@ export 'src/models/libraries/sharing_response.dart';
 export 'src/models/metadata/finish_reason.dart';
 export 'src/models/metadata/prediction.dart';
 export 'src/models/metadata/prompt_mode.dart';
+export 'src/models/metadata/prompt_tokens_details.dart';
+export 'src/models/metadata/reasoning_effort.dart';
 export 'src/models/metadata/response_format.dart';
 export 'src/models/metadata/stop_sequence.dart';
 export 'src/models/metadata/usage_info.dart';

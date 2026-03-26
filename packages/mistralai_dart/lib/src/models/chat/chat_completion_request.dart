@@ -4,6 +4,7 @@ import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../metadata/prediction.dart';
 import '../metadata/prompt_mode.dart';
+import '../metadata/reasoning_effort.dart';
 import '../metadata/response_format.dart';
 import '../metadata/stop_sequence.dart';
 import '../moderations/guardrail_config.dart';
@@ -96,6 +97,12 @@ class ChatCompletionRequest {
   /// mode where the model engages in deeper reasoning before responding.
   final MistralPromptMode? promptMode;
 
+  /// Controls the reasoning effort level for reasoning models.
+  ///
+  /// [ReasoningEffort.high] enables comprehensive reasoning traces,
+  /// [ReasoningEffort.none] disables reasoning effort.
+  final ReasoningEffort? reasoningEffort;
+
   /// Guardrail configurations for content moderation.
   final List<GuardrailConfig>? guardrails;
 
@@ -120,6 +127,7 @@ class ChatCompletionRequest {
     this.metadata,
     this.prediction,
     this.promptMode,
+    this.reasoningEffort,
     this.guardrails,
   });
 
@@ -163,6 +171,9 @@ class ChatCompletionRequest {
         promptMode: MistralPromptMode.fromString(
           json['prompt_mode'] as String?,
         ),
+        reasoningEffort: ReasoningEffort.fromString(
+          json['reasoning_effort'] as String?,
+        ),
         guardrails: (json['guardrails'] as List?)
             ?.map((e) => GuardrailConfig.fromJson(e as Map<String, dynamic>))
             .toList(),
@@ -189,6 +200,7 @@ class ChatCompletionRequest {
     if (metadata != null) 'metadata': metadata,
     if (prediction != null) 'prediction': prediction!.toJson(),
     if (promptMode != null) 'prompt_mode': promptMode!.value,
+    if (reasoningEffort != null) 'reasoning_effort': reasoningEffort!.value,
     if (guardrails != null)
       'guardrails': guardrails!.map((e) => e.toJson()).toList(),
   };
@@ -214,6 +226,7 @@ class ChatCompletionRequest {
     Object? metadata = unsetCopyWithValue,
     Object? prediction = unsetCopyWithValue,
     Object? promptMode = unsetCopyWithValue,
+    Object? reasoningEffort = unsetCopyWithValue,
     Object? guardrails = unsetCopyWithValue,
   }) {
     return ChatCompletionRequest(
@@ -260,6 +273,9 @@ class ChatCompletionRequest {
       promptMode: promptMode == unsetCopyWithValue
           ? this.promptMode
           : promptMode as MistralPromptMode?,
+      reasoningEffort: reasoningEffort == unsetCopyWithValue
+          ? this.reasoningEffort
+          : reasoningEffort as ReasoningEffort?,
       guardrails: guardrails == unsetCopyWithValue
           ? this.guardrails
           : guardrails as List<GuardrailConfig>?,
@@ -293,7 +309,8 @@ class ChatCompletionRequest {
         safePrompt == other.safePrompt &&
         mapsEqual(metadata, other.metadata) &&
         prediction == other.prediction &&
-        promptMode == other.promptMode;
+        promptMode == other.promptMode &&
+        reasoningEffort == other.reasoningEffort;
     // guardrails compared above via listsEqual
   }
 
@@ -316,8 +333,7 @@ class ChatCompletionRequest {
     parallelToolCalls,
     safePrompt,
     mapHash(metadata),
-    prediction,
-    promptMode,
+    Object.hash(prediction, promptMode, reasoningEffort),
     listHash(guardrails),
   );
 
@@ -342,5 +358,6 @@ class ChatCompletionRequest {
       'metadata: $metadata, '
       'prediction: $prediction, '
       'promptMode: $promptMode, '
+      'reasoningEffort: $reasoningEffort, '
       'guardrails: $guardrails)';
 }

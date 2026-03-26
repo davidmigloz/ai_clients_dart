@@ -277,6 +277,64 @@ void main() {
       });
     });
 
+    group('with reasoning effort', () {
+      test('creates request with reasoning effort', () {
+        final request = ChatCompletionRequest(
+          model: 'mistral-large-latest',
+          messages: [ChatMessage.user('Think carefully')],
+          reasoningEffort: ReasoningEffort.high,
+        );
+
+        expect(request.reasoningEffort, ReasoningEffort.high);
+      });
+
+      test('serializes reasoning effort to JSON', () {
+        final request = ChatCompletionRequest(
+          model: 'mistral-large-latest',
+          messages: [ChatMessage.user('Test')],
+          reasoningEffort: ReasoningEffort.none,
+        );
+        final json = request.toJson();
+
+        expect(json['reasoning_effort'], 'none');
+      });
+
+      test('omits null reasoning effort in JSON', () {
+        final request = ChatCompletionRequest(
+          model: 'mistral-small-latest',
+          messages: [ChatMessage.user('Hello')],
+        );
+        final json = request.toJson();
+        expect(json.containsKey('reasoning_effort'), isFalse);
+      });
+
+      test('deserializes reasoning effort from JSON', () {
+        final json = {
+          'model': 'mistral-large-latest',
+          'messages': [
+            {'role': 'user', 'content': 'Hello'},
+          ],
+          'reasoning_effort': 'high',
+        };
+        final request = ChatCompletionRequest.fromJson(json);
+
+        expect(request.reasoningEffort, ReasoningEffort.high);
+      });
+
+      test('copyWith reasoning effort', () {
+        final original = ChatCompletionRequest(
+          model: 'mistral-large-latest',
+          messages: [ChatMessage.user('Test')],
+          reasoningEffort: ReasoningEffort.high,
+        );
+        final copied = original.copyWith(reasoningEffort: ReasoningEffort.none);
+        expect(copied.reasoningEffort, ReasoningEffort.none);
+
+        final cleared = original.copyWith(reasoningEffort: null);
+        expect(cleared.reasoningEffort, isNull);
+      });
+    });
+
     group('toString', () {
       test('includes all fields', () {
         final request = ChatCompletionRequest(
@@ -306,6 +364,7 @@ void main() {
         expect(str, contains('metadata: null'));
         expect(str, contains('prediction: null'));
         expect(str, contains('promptMode: null'));
+        expect(str, contains('reasoningEffort: null'));
         expect(str, contains('guardrails: null'));
       });
     });
