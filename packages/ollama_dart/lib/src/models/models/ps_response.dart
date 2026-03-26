@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 import 'running_model.dart';
 
 /// Response containing currently running models.
@@ -36,10 +37,12 @@ class PsResponse {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is PsResponse && runtimeType == other.runtimeType;
+      other is PsResponse &&
+          runtimeType == other.runtimeType &&
+          listsEqual(models, other.models);
 
   @override
-  int get hashCode => models.hashCode;
+  int get hashCode => listHash(models);
 
   @override
   String toString() =>
