@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality_helpers.dart';
 import '../metadata/usage_info.dart';
 
 /// A streaming event from the speech synthesis API.
@@ -133,29 +134,36 @@ class SpeechStreamDone extends SpeechStreamEvent {
 }
 
 /// Fallback for unrecognized speech stream event types.
+///
+/// Wraps the raw JSON map when the event type is not recognized.
 @immutable
 class UnknownSpeechStreamEvent extends SpeechStreamEvent {
-  /// The raw JSON data.
-  final Map<String, dynamic> raw;
+  final Map<String, dynamic> _raw;
 
   /// Creates an [UnknownSpeechStreamEvent].
-  const UnknownSpeechStreamEvent({required this.raw});
+  UnknownSpeechStreamEvent(Map<String, dynamic> raw)
+    : _raw = Map<String, dynamic>.unmodifiable(raw);
+
+  /// The raw JSON data.
+  Map<String, dynamic> get raw => _raw;
 
   /// Creates an [UnknownSpeechStreamEvent] from JSON.
   factory UnknownSpeechStreamEvent.fromJson(Map<String, dynamic> json) =>
-      UnknownSpeechStreamEvent(raw: json);
+      UnknownSpeechStreamEvent(json);
 
   @override
-  Map<String, dynamic> toJson() => raw;
+  Map<String, dynamic> toJson() => Map<String, dynamic>.of(_raw);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is UnknownSpeechStreamEvent && runtimeType == other.runtimeType;
+      other is UnknownSpeechStreamEvent &&
+          runtimeType == other.runtimeType &&
+          mapsDeepEqual(_raw, other._raw);
 
   @override
-  int get hashCode => runtimeType.hashCode;
+  int get hashCode => mapDeepHashCode(_raw);
 
   @override
-  String toString() => 'UnknownSpeechStreamEvent(raw: $raw)';
+  String toString() => 'UnknownSpeechStreamEvent(raw: $_raw)';
 }

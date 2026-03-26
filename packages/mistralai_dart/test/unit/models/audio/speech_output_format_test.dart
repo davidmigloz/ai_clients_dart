@@ -23,6 +23,11 @@ void main() {
       expect(SpeechOutputFormat.fromString(null), isNull);
     });
 
+    test('fromString returns null for unknown value', () {
+      expect(SpeechOutputFormat.fromString('aac'), isNull);
+      expect(SpeechOutputFormat.fromString('unknown'), isNull);
+    });
+
     test('value round-trips through fromString', () {
       for (final format in SpeechOutputFormat.values) {
         expect(SpeechOutputFormat.fromString(format.value), format);

@@ -17,12 +17,12 @@ enum ReasoningEffort {
 
   /// Creates from a JSON string value.
   ///
-  /// Returns null if [value] is null.
+  /// Returns null if [value] is null or does not match any known value.
   static ReasoningEffort? fromString(String? value) {
     if (value == null) return null;
-    return ReasoningEffort.values.firstWhere(
-      (e) => e.value == value,
-      orElse: () => ReasoningEffort.high,
-    );
+    for (final effort in ReasoningEffort.values) {
+      if (effort.value == value) return effort;
+    }
+    return null;
   }
 }

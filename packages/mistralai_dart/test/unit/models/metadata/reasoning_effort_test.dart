@@ -21,6 +21,11 @@ void main() {
       expect(ReasoningEffort.fromString(null), isNull);
     });
 
+    test('fromString returns null for unknown value', () {
+      expect(ReasoningEffort.fromString('medium'), isNull);
+      expect(ReasoningEffort.fromString('unknown'), isNull);
+    });
+
     test('value round-trip', () {
       expect(ReasoningEffort.high.value, 'high');
       expect(ReasoningEffort.none.value, 'none');

@@ -25,12 +25,12 @@ enum SpeechOutputFormat {
 
   /// Creates from a JSON string value.
   ///
-  /// Returns null if [value] is null.
+  /// Returns null if [value] is null or does not match any known value.
   static SpeechOutputFormat? fromString(String? value) {
     if (value == null) return null;
-    return SpeechOutputFormat.values.firstWhere(
-      (e) => e.value == value,
-      orElse: () => SpeechOutputFormat.mp3,
-    );
+    for (final format in SpeechOutputFormat.values) {
+      if (format.value == value) return format;
+    }
+    return null;
   }
 }

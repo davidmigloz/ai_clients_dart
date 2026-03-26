@@ -60,9 +60,12 @@ class SpeechResource extends ResourceBase with StreamingResource {
       additionalHeaders: {'Content-Type': 'application/json'},
     );
 
+    // Ensure stream is false for non-streaming
+    final requestData = request.copyWith(stream: false);
+
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
+      ..body = jsonEncode(requestData.toJson());
 
     final response = await interceptorChain.execute(httpRequest);
 

@@ -142,6 +142,26 @@ void main() {
         expect(unknown.raw['type'], 'speech.audio.unknown');
         expect(unknown.raw['data'], 'something');
       });
+
+      test('UnknownSpeechStreamEvent equality uses deep map comparison', () {
+        final a = UnknownSpeechStreamEvent(const {'type': 'x', 'data': 'a'});
+        final b = UnknownSpeechStreamEvent(const {'type': 'x', 'data': 'a'});
+        final c = UnknownSpeechStreamEvent(const {'type': 'x', 'data': 'b'});
+        expect(a, equals(b));
+        expect(a.hashCode, b.hashCode);
+        expect(a, isNot(equals(c)));
+      });
+
+      test('UnknownSpeechStreamEvent raw is unmodifiable', () {
+        final event = UnknownSpeechStreamEvent(const {
+          'type': 'x',
+          'data': 'a',
+        });
+        expect(
+          () => event.raw['new_key'] = 'value',
+          throwsA(isA<UnsupportedError>()),
+        );
+      });
     });
   });
 }
