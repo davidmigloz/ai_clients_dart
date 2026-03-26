@@ -336,10 +336,12 @@ class VideoCharacter {
       identical(this, other) ||
       other is VideoCharacter &&
           runtimeType == other.runtimeType &&
-          id == other.id;
+          createdAt == other.createdAt &&
+          id == other.id &&
+          name == other.name;
 
   @override
-  int get hashCode => id.hashCode;
+  int get hashCode => Object.hash(createdAt, id, name);
 
   @override
   String toString() => 'VideoCharacter(id: $id, name: $name)';
