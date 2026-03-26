@@ -156,6 +156,9 @@ class VideosResource extends ResourceBase {
   }
 
   /// Creates a new video edit from an existing video.
+  ///
+  /// References an existing video by ID. Direct video file uploads via
+  /// multipart are not yet supported.
   Future<Video> createEdit(CreateVideoEditRequest request) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('$_endpoint/edits');
@@ -168,6 +171,9 @@ class VideosResource extends ResourceBase {
   }
 
   /// Creates an extension of a completed video.
+  ///
+  /// References an existing video by ID. Direct video file uploads via
+  /// multipart are not yet supported.
   Future<Video> createExtension(CreateVideoExtendRequest request) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('$_endpoint/extensions');

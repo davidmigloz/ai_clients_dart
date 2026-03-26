@@ -474,6 +474,19 @@ class CustomToolCallOutputInputItem extends Item {
     required this.output,
   });
 
+  /// Creates a [CustomToolCallOutputInputItem] with a simple string output.
+  factory CustomToolCallOutputInputItem.string({
+    String? id,
+    required String callId,
+    required String output,
+  }) {
+    return CustomToolCallOutputInputItem(
+      id: id,
+      callId: callId,
+      output: FunctionCallOutputString(output),
+    );
+  }
+
   /// Creates a [CustomToolCallOutputInputItem] from JSON.
   factory CustomToolCallOutputInputItem.fromJson(Map<String, dynamic> json) {
     return CustomToolCallOutputInputItem(

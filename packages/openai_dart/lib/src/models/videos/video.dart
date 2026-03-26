@@ -328,7 +328,7 @@ class VideoCharacter {
   Map<String, dynamic> toJson() => {
     'created_at': createdAt,
     'id': id,
-    if (name != null) 'name': name,
+    'name': name,
   };
 
   @override
@@ -422,10 +422,10 @@ enum VideoSeconds {
   /// 12 seconds.
   s12._('12'),
 
-  /// 16 seconds.
+  /// 16 seconds (extensions only).
   s16._('16'),
 
-  /// 20 seconds.
+  /// 20 seconds (extensions only).
   s20._('20');
 
   const VideoSeconds._(this._value);

@@ -40,7 +40,7 @@ class CreateVideoRequest {
 
   /// Clip duration in seconds.
   ///
-  /// Allowed values: 4, 8, 12, 16, 20.
+  /// Allowed values: 4, 8, 12.
   /// Defaults to 4 seconds.
   final VideoSeconds? seconds;
 
