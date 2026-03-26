@@ -834,4 +834,138 @@ void main() {
       expect(a, isNot(equals(b)));
     });
   });
+
+  group('ConversationCompactionItem', () {
+    test('round-trip JSON serialization', () {
+      final json = {
+        'type': 'compaction',
+        'id': 'comp_1',
+        'encrypted_content': 'encrypted_data_here',
+        'created_by': 'agent_1',
+      };
+      final item =
+          ConversationItem.fromJson(json) as ConversationCompactionItem;
+      expect(item.id, 'comp_1');
+      expect(item.encryptedContent, 'encrypted_data_here');
+      expect(item.createdBy, 'agent_1');
+      expect(item.toJson(), json);
+    });
+
+    test('equality', () {
+      final json = {
+        'type': 'compaction',
+        'id': 'comp_2',
+        'encrypted_content': 'data',
+      };
+      final a =
+          ConversationItem.fromJson(json) as ConversationCompactionItem;
+      final b =
+          ConversationItem.fromJson(json) as ConversationCompactionItem;
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+    });
+  });
+
+  group('ConversationCustomToolCallItem', () {
+    test('round-trip JSON serialization', () {
+      final json = {
+        'type': 'custom_tool_call',
+        'id': 'ct_1',
+        'call_id': 'call_ct1',
+        'name': 'my_tool',
+        'input': '{"key": "value"}',
+        'namespace': 'ns1',
+        'status': 'completed',
+      };
+      final item =
+          ConversationItem.fromJson(json) as ConversationCustomToolCallItem;
+      expect(item.id, 'ct_1');
+      expect(item.callId, 'call_ct1');
+      expect(item.name, 'my_tool');
+      expect(item.input, '{"key": "value"}');
+      expect(item.namespace, 'ns1');
+      expect(item.status, ItemStatus.completed);
+      expect(item.toJson(), json);
+    });
+
+    test('round-trip without optional fields', () {
+      final json = {
+        'type': 'custom_tool_call',
+        'call_id': 'call_ct2',
+        'name': 'tool2',
+        'input': 'data',
+      };
+      final item =
+          ConversationItem.fromJson(json) as ConversationCustomToolCallItem;
+      expect(item.id, isNull);
+      expect(item.namespace, isNull);
+      expect(item.status, isNull);
+      expect(item.toJson(), json);
+    });
+
+    test('equality', () {
+      final json = {
+        'type': 'custom_tool_call',
+        'id': 'ct_3',
+        'call_id': 'call_ct3',
+        'name': 'tool3',
+        'input': 'data',
+        'status': 'in_progress',
+      };
+      final a =
+          ConversationItem.fromJson(json) as ConversationCustomToolCallItem;
+      final b =
+          ConversationItem.fromJson(json) as ConversationCustomToolCallItem;
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+    });
+  });
+
+  group('ConversationCustomToolCallOutputItem', () {
+    test('round-trip JSON serialization with string output', () {
+      final json = {
+        'type': 'custom_tool_call_output',
+        'id': 'cto_1',
+        'call_id': 'call_cto1',
+        'output': 'result string',
+        'status': 'completed',
+      };
+      final item = ConversationItem.fromJson(json)
+          as ConversationCustomToolCallOutputItem;
+      expect(item.id, 'cto_1');
+      expect(item.callId, 'call_cto1');
+      expect(item.output, isA<FunctionCallOutputString>());
+      expect(item.status, ItemStatus.completed);
+      expect(item.toJson(), json);
+    });
+
+    test('round-trip without optional id', () {
+      final json = {
+        'type': 'custom_tool_call_output',
+        'call_id': 'call_cto2',
+        'output': 'data',
+      };
+      final item = ConversationItem.fromJson(json)
+          as ConversationCustomToolCallOutputItem;
+      expect(item.id, isNull);
+      expect(item.status, isNull);
+      expect(item.toJson(), json);
+    });
+
+    test('equality with string output', () {
+      final json = {
+        'type': 'custom_tool_call_output',
+        'id': 'cto_3',
+        'call_id': 'call_cto3',
+        'output': 'same result',
+        'status': 'in_progress',
+      };
+      final a = ConversationItem.fromJson(json)
+          as ConversationCustomToolCallOutputItem;
+      final b = ConversationItem.fromJson(json)
+          as ConversationCustomToolCallOutputItem;
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+    });
+  });
 }

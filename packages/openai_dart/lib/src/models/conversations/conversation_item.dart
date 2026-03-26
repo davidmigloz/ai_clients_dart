@@ -4,6 +4,7 @@ import '../common/equality_helpers.dart';
 import '../responses/config/function_call_status.dart';
 import '../responses/config/item_status.dart';
 import '../responses/config/tool_search_execution_type.dart';
+import '../responses/items/item.dart' show FunctionCallOutput;
 import '../responses/tools/response_tool.dart';
 import 'conversation_content.dart';
 import 'conversation_message.dart';
@@ -1309,7 +1310,7 @@ class ConversationCompactionItem extends ConversationItem {
 @immutable
 class ConversationCustomToolCallItem extends ConversationItem {
   /// Unique identifier.
-  final String id;
+  final String? id;
 
   /// The call ID for this custom tool call.
   final String callId;
@@ -1328,7 +1329,7 @@ class ConversationCustomToolCallItem extends ConversationItem {
 
   /// Creates a [ConversationCustomToolCallItem].
   const ConversationCustomToolCallItem({
-    required this.id,
+    this.id,
     required this.callId,
     required this.name,
     required this.input,
@@ -1339,7 +1340,7 @@ class ConversationCustomToolCallItem extends ConversationItem {
   /// Creates a [ConversationCustomToolCallItem] from JSON.
   factory ConversationCustomToolCallItem.fromJson(Map<String, dynamic> json) {
     return ConversationCustomToolCallItem(
-      id: json['id'] as String,
+      id: json['id'] as String?,
       callId: json['call_id'] as String,
       name: json['name'] as String,
       input: json['input'] as String,
@@ -1353,7 +1354,7 @@ class ConversationCustomToolCallItem extends ConversationItem {
   @override
   Map<String, dynamic> toJson() => {
     'type': 'custom_tool_call',
-    'id': id,
+    if (id != null) 'id': id,
     'call_id': callId,
     'name': name,
     'input': input,
@@ -1385,20 +1386,20 @@ class ConversationCustomToolCallItem extends ConversationItem {
 @immutable
 class ConversationCustomToolCallOutputItem extends ConversationItem {
   /// Unique identifier.
-  final String id;
+  final String? id;
 
   /// The call ID this output corresponds to.
   final String callId;
 
   /// The output from the custom tool call.
-  final Object output;
+  final FunctionCallOutput output;
 
   /// The status of the item.
   final ItemStatus? status;
 
   /// Creates a [ConversationCustomToolCallOutputItem].
   const ConversationCustomToolCallOutputItem({
-    required this.id,
+    this.id,
     required this.callId,
     required this.output,
     this.status,
@@ -1409,9 +1410,9 @@ class ConversationCustomToolCallOutputItem extends ConversationItem {
     Map<String, dynamic> json,
   ) {
     return ConversationCustomToolCallOutputItem(
-      id: json['id'] as String,
+      id: json['id'] as String?,
       callId: json['call_id'] as String,
-      output: json['output'] as Object,
+      output: FunctionCallOutput.fromJson(json['output']),
       status: json['status'] != null
           ? ItemStatus.fromJson(json['status'] as String)
           : null,
@@ -1421,9 +1422,9 @@ class ConversationCustomToolCallOutputItem extends ConversationItem {
   @override
   Map<String, dynamic> toJson() => {
     'type': 'custom_tool_call_output',
-    'id': id,
+    if (id != null) 'id': id,
     'call_id': callId,
-    'output': output,
+    'output': output.toJson(),
     if (status != null) 'status': status!.toJson(),
   };
 

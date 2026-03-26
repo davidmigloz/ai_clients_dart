@@ -51,8 +51,8 @@ class CreateVideoRequest {
 
   /// Optional reference image that guides generation.
   ///
-  /// Can be an image URL or uploaded file ID.
-  final String? inputReference;
+  /// Provide a [VideoInputReference] with either an image URL or file ID.
+  final VideoInputReference? inputReference;
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
@@ -60,7 +60,7 @@ class CreateVideoRequest {
     if (model != null) 'model': model,
     if (seconds != null) 'seconds': seconds!.toJson(),
     if (size != null) 'size': size!.toJson(),
-    if (inputReference != null) 'input_reference': inputReference,
+    if (inputReference != null) 'input_reference': inputReference!.toJson(),
   };
 
   @override
@@ -192,7 +192,7 @@ class CreateVideoExtendRequest {
   const CreateVideoExtendRequest({
     required this.prompt,
     required this.videoId,
-    this.seconds,
+    required this.seconds,
   });
 
   /// Text prompt directing the extension generation.
@@ -202,13 +202,13 @@ class CreateVideoExtendRequest {
   final String videoId;
 
   /// Length of the extension in seconds (allowed: 4, 8, 12, 16, 20).
-  final VideoSeconds? seconds;
+  final VideoSeconds seconds;
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'prompt': prompt,
     'video': {'id': videoId},
-    if (seconds != null) 'seconds': seconds!.toJson(),
+    'seconds': seconds.toJson(),
   };
 
   @override
@@ -226,4 +226,57 @@ class CreateVideoExtendRequest {
   @override
   String toString() =>
       'CreateVideoExtendRequest(prompt: ${prompt.length > 50 ? '${prompt.substring(0, 50)}...' : prompt})';
+}
+
+/// Reference image that guides video generation.
+///
+/// Provide either [imageUrl] or [fileId] (not both).
+@immutable
+class VideoInputReference {
+  /// A fully qualified URL or base64-encoded data URL.
+  final String? imageUrl;
+
+  /// The ID of an uploaded file.
+  final String? fileId;
+
+  /// Creates a [VideoInputReference].
+  const VideoInputReference({this.imageUrl, this.fileId});
+
+  /// Creates a [VideoInputReference] from a URL.
+  const VideoInputReference.url(String url)
+    : imageUrl = url,
+      fileId = null;
+
+  /// Creates a [VideoInputReference] from a file ID.
+  const VideoInputReference.file(String id)
+    : imageUrl = null,
+      fileId = id;
+
+  /// Creates a [VideoInputReference] from JSON.
+  factory VideoInputReference.fromJson(Map<String, dynamic> json) {
+    return VideoInputReference(
+      imageUrl: json['image_url'] as String?,
+      fileId: json['file_id'] as String?,
+    );
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    if (imageUrl != null) 'image_url': imageUrl,
+    if (fileId != null) 'file_id': fileId,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is VideoInputReference &&
+          runtimeType == other.runtimeType &&
+          imageUrl == other.imageUrl &&
+          fileId == other.fileId;
+
+  @override
+  int get hashCode => Object.hash(imageUrl, fileId);
+
+  @override
+  String toString() => 'VideoInputReference(imageUrl: $imageUrl, fileId: $fileId)';
 }

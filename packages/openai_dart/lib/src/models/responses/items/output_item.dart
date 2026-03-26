@@ -1761,7 +1761,7 @@ class ComputerCallOutputItem extends OutputItem {
       'ComputerCallOutputItem(id: $id, callId: $callId, action: $action, actions: $actions, status: $status, createdBy: $createdBy)';
 }
 
-/// A custom tool call output item.
+/// A custom tool call item.
 @immutable
 class CustomToolCallItem extends OutputItem {
   /// Unique identifier.
