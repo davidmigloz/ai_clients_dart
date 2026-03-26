@@ -56,6 +56,7 @@ export 'src/models/common/model_status.dart';
 export 'src/models/common/register_files_request.dart';
 export 'src/models/common/register_files_response.dart';
 export 'src/models/common/search_types.dart';
+export 'src/models/common/service_tier.dart';
 export 'src/models/common/speech_config.dart';
 export 'src/models/common/voice_config.dart';
 export 'src/models/common/web_search.dart';

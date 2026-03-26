@@ -158,6 +158,17 @@
         "critical"
       ]
     },
+    "GenerateContentRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GenerateContentRequest",
+      "file": "lib/src/models/generation/generate_content_request.dart",
+      "schema": "GenerateContentRequest",
+      "note": "Excludes model (only used in endpoint URL path, not serialized in the body)",
+      "excluded_properties": [
+        "model"
+      ]
+    },
     "GenerationConfig": {
       "spec": "main",
       "kind": "object",
@@ -1215,6 +1226,13 @@
       "dart_class": "ModelStage",
       "file": "lib/src/models/common/model_stage.dart",
       "schema": "ModelStage"
+    },
+    "ServiceTier": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ServiceTier",
+      "file": "lib/src/models/common/service_tier.dart",
+      "schema": "ServiceTier"
     },
     "ModelStatus": {
       "spec": "main",

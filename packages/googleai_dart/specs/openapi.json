@@ -2103,6 +2103,14 @@
             },
             "type": "array"
           },
+          "serviceTier": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ServiceTier"
+              }
+            ],
+            "description": "Optional. The service tier of the request."
+          },
           "store": {
             "description": "Optional. Configures the logging behavior for a given request. If set, it takes\nprecedence over the project-level logging config.",
             "type": "boolean"
@@ -4594,6 +4602,21 @@
         ],
         "type": "object"
       },
+      "ServiceTier": {
+        "enum": [
+          "unspecified",
+          "standard",
+          "flex",
+          "priority"
+        ],
+        "type": "string",
+        "x-google-enum-descriptions": [
+          "Default service tier, which is standard.",
+          "Standard service tier.",
+          "Flex service tier.",
+          "Priority service tier."
+        ]
+      },
       "SpeakerVoiceConfig": {
         "description": "The configuration for a single speaker in a multi speaker setup.",
         "properties": {
@@ -5592,7 +5615,7 @@
     "description": "The Gemini API allows developers to build generative AI applications using Gemini models. Gemini is our most capable model, built from the ground up to be multimodal. It can generalize and seamlessly understand, operate across, and combine different types of information including language, images, audio, video, and code. You can use the Gemini API for use cases like reasoning across text and images, content generation, dialogue agents, summarization and classification systems, and more.",
     "title": "Generative Language API",
     "version": "v1beta",
-    "x-google-revision": "20260319"
+    "x-google-revision": "20260325"
   },
   "openapi": "3.0.3",
   "paths": {

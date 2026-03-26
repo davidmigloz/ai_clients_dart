@@ -1,3 +1,4 @@
+import '../common/service_tier.dart';
 import '../content/content.dart';
 import '../copy_with_sentinel.dart';
 import '../safety/safety_setting.dart';
@@ -33,6 +34,9 @@ class GenerateContentRequest {
   /// logging configuration.
   final bool? store;
 
+  /// Optional. The service tier of the request.
+  final ServiceTier? serviceTier;
+
   /// Creates a [GenerateContentRequest].
   const GenerateContentRequest({
     required this.contents,
@@ -43,6 +47,7 @@ class GenerateContentRequest {
     this.generationConfig,
     this.cachedContent,
     this.store,
+    this.serviceTier,
   });
 
   /// Creates a [GenerateContentRequest] from JSON.
@@ -76,6 +81,9 @@ class GenerateContentRequest {
             : null,
         cachedContent: json['cachedContent'] as String?,
         store: json['store'] as bool?,
+        serviceTier: json['serviceTier'] != null
+            ? serviceTierFromString(json['serviceTier'] as String)
+            : null,
       );
 
   /// Converts to JSON.
@@ -91,6 +99,7 @@ class GenerateContentRequest {
       'generationConfig': generationConfig!.toJson(),
     if (cachedContent != null) 'cachedContent': cachedContent,
     if (store != null) 'store': store,
+    if (serviceTier != null) 'serviceTier': serviceTierToString(serviceTier!),
   };
 
   /// Creates a copy with replaced values.
@@ -103,6 +112,7 @@ class GenerateContentRequest {
     Object? generationConfig = unsetCopyWithValue,
     Object? cachedContent = unsetCopyWithValue,
     Object? store = unsetCopyWithValue,
+    Object? serviceTier = unsetCopyWithValue,
   }) {
     return GenerateContentRequest(
       contents: contents == unsetCopyWithValue
@@ -125,6 +135,9 @@ class GenerateContentRequest {
           ? this.cachedContent
           : cachedContent as String?,
       store: store == unsetCopyWithValue ? this.store : store as bool?,
+      serviceTier: serviceTier == unsetCopyWithValue
+          ? this.serviceTier
+          : serviceTier as ServiceTier?,
     );
   }
 }
