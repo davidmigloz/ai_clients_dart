@@ -15,14 +15,14 @@ enum ServiceTier {
 
 /// Parses a [ServiceTier] from its string representation.
 ///
-/// Unrecognized values return `null`.
-ServiceTier? serviceTierFromString(String? value) {
+/// Unrecognized values map to [ServiceTier.unspecified].
+ServiceTier serviceTierFromString(String? value) {
   return switch (value) {
     'unspecified' => ServiceTier.unspecified,
     'standard' => ServiceTier.standard,
     'flex' => ServiceTier.flex,
     'priority' => ServiceTier.priority,
-    _ => null,
+    _ => ServiceTier.unspecified,
   };
 }
 
