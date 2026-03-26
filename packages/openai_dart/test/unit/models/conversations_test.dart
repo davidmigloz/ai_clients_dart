@@ -857,10 +857,8 @@ void main() {
         'id': 'comp_2',
         'encrypted_content': 'data',
       };
-      final a =
-          ConversationItem.fromJson(json) as ConversationCompactionItem;
-      final b =
-          ConversationItem.fromJson(json) as ConversationCompactionItem;
+      final a = ConversationItem.fromJson(json) as ConversationCompactionItem;
+      final b = ConversationItem.fromJson(json) as ConversationCompactionItem;
       expect(a, equals(b));
       expect(a.hashCode, equals(b.hashCode));
     });
@@ -930,8 +928,9 @@ void main() {
         'output': 'result string',
         'status': 'completed',
       };
-      final item = ConversationItem.fromJson(json)
-          as ConversationCustomToolCallOutputItem;
+      final item =
+          ConversationItem.fromJson(json)
+              as ConversationCustomToolCallOutputItem;
       expect(item.id, 'cto_1');
       expect(item.callId, 'call_cto1');
       expect(item.output, isA<FunctionCallOutputString>());
@@ -945,8 +944,9 @@ void main() {
         'call_id': 'call_cto2',
         'output': 'data',
       };
-      final item = ConversationItem.fromJson(json)
-          as ConversationCustomToolCallOutputItem;
+      final item =
+          ConversationItem.fromJson(json)
+              as ConversationCustomToolCallOutputItem;
       expect(item.id, isNull);
       expect(item.status, isNull);
       expect(item.toJson(), json);
@@ -960,10 +960,12 @@ void main() {
         'output': 'same result',
         'status': 'in_progress',
       };
-      final a = ConversationItem.fromJson(json)
-          as ConversationCustomToolCallOutputItem;
-      final b = ConversationItem.fromJson(json)
-          as ConversationCustomToolCallOutputItem;
+      final a =
+          ConversationItem.fromJson(json)
+              as ConversationCustomToolCallOutputItem;
+      final b =
+          ConversationItem.fromJson(json)
+              as ConversationCustomToolCallOutputItem;
       expect(a, equals(b));
       expect(a.hashCode, equals(b.hashCode));
     });

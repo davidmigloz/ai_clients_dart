@@ -243,14 +243,10 @@ class VideoInputReference {
   const VideoInputReference({this.imageUrl, this.fileId});
 
   /// Creates a [VideoInputReference] from a URL.
-  const VideoInputReference.url(String url)
-    : imageUrl = url,
-      fileId = null;
+  const VideoInputReference.url(String url) : imageUrl = url, fileId = null;
 
   /// Creates a [VideoInputReference] from a file ID.
-  const VideoInputReference.file(String id)
-    : imageUrl = null,
-      fileId = id;
+  const VideoInputReference.file(String id) : imageUrl = null, fileId = id;
 
   /// Creates a [VideoInputReference] from JSON.
   factory VideoInputReference.fromJson(Map<String, dynamic> json) {
@@ -278,5 +274,6 @@ class VideoInputReference {
   int get hashCode => Object.hash(imageUrl, fileId);
 
   @override
-  String toString() => 'VideoInputReference(imageUrl: $imageUrl, fileId: $fileId)';
+  String toString() =>
+      'VideoInputReference(imageUrl: $imageUrl, fileId: $fileId)';
 }
