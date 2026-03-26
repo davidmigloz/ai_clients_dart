@@ -7,6 +7,9 @@ import '../common/equality_helpers.dart';
 @immutable
 class RunningModel {
   /// Name of the running model.
+  final String? name;
+
+  /// Name of the running model.
   final String? model;
 
   /// Size of the model in bytes.
@@ -29,6 +32,7 @@ class RunningModel {
 
   /// Creates a [RunningModel].
   const RunningModel({
+    this.name,
     this.model,
     this.size,
     this.digest,
@@ -40,6 +44,7 @@ class RunningModel {
 
   /// Creates a [RunningModel] from JSON.
   factory RunningModel.fromJson(Map<String, dynamic> json) => RunningModel(
+    name: json['name'] as String?,
     model: json['model'] as String?,
     size: json['size'] as int?,
     digest: json['digest'] as String?,
@@ -51,6 +56,7 @@ class RunningModel {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    if (name != null) 'name': name,
     if (model != null) 'model': model,
     if (size != null) 'size': size,
     if (digest != null) 'digest': digest,
@@ -62,6 +68,7 @@ class RunningModel {
 
   /// Creates a copy with replaced values.
   RunningModel copyWith({
+    Object? name = unsetCopyWithValue,
     Object? model = unsetCopyWithValue,
     Object? size = unsetCopyWithValue,
     Object? digest = unsetCopyWithValue,
@@ -71,6 +78,7 @@ class RunningModel {
     Object? contextLength = unsetCopyWithValue,
   }) {
     return RunningModel(
+      name: name == unsetCopyWithValue ? this.name : name as String?,
       model: model == unsetCopyWithValue ? this.model : model as String?,
       size: size == unsetCopyWithValue ? this.size : size as int?,
       digest: digest == unsetCopyWithValue ? this.digest : digest as String?,
@@ -94,6 +102,7 @@ class RunningModel {
       identical(this, other) ||
       other is RunningModel &&
           runtimeType == other.runtimeType &&
+          name == other.name &&
           model == other.model &&
           size == other.size &&
           digest == other.digest &&
@@ -104,6 +113,7 @@ class RunningModel {
 
   @override
   int get hashCode => Object.hash(
+    name,
     model,
     size,
     digest,
@@ -116,6 +126,7 @@ class RunningModel {
   @override
   String toString() =>
       'RunningModel('
+      'name: $name, '
       'model: $model, '
       'size: $size, '
       'digest: $digest, '

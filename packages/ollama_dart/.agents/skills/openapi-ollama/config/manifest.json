@@ -283,6 +283,14 @@
       "schema": "ModelSummary",
       "tags": []
     },
+    "Ps": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RunningModel",
+      "file": "lib/src/models/models/running_model.dart",
+      "schema": "Ps",
+      "tags": []
+    },
     "ShowResponse": {
       "spec": "main",
       "kind": "object",
