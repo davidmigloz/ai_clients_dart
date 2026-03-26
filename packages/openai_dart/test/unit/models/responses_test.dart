@@ -2712,6 +2712,24 @@ void main() {
       expect(restored, equals(action));
     });
 
+    test('ClickAction with keys round-trip', () {
+      const action = ClickAction(
+        button: ClickButton.left,
+        x: 100,
+        y: 200,
+        keys: ['ctrl', 'shift'],
+      );
+      final json = action.toJson();
+      expect(json['type'], 'click');
+      expect(json['keys'], ['ctrl', 'shift']);
+
+      final restored = ComputerAction.fromJson(json);
+      expect(restored, isA<ClickAction>());
+      final click = restored as ClickAction;
+      expect(click.keys, ['ctrl', 'shift']);
+      expect(restored, equals(action));
+    });
+
     test('DoubleClickAction round-trip', () {
       const action = DoubleClickAction(x: 50, y: 75);
       final json = action.toJson();
@@ -2775,6 +2793,25 @@ void main() {
       final json = action.toJson();
       final restored = ComputerAction.fromJson(json);
       expect(restored, isA<ScrollAction>());
+      expect(restored, equals(action));
+    });
+
+    test('ScrollAction with keys round-trip', () {
+      const action = ScrollAction(
+        x: 50,
+        y: 50,
+        scrollX: 0,
+        scrollY: -100,
+        keys: ['alt'],
+      );
+      final json = action.toJson();
+      expect(json['type'], 'scroll');
+      expect(json['keys'], ['alt']);
+
+      final restored = ComputerAction.fromJson(json);
+      expect(restored, isA<ScrollAction>());
+      final scroll = restored as ScrollAction;
+      expect(scroll.keys, ['alt']);
       expect(restored, equals(action));
     });
 
@@ -2952,6 +2989,85 @@ void main() {
       final item = OutputItem.fromJson(json) as ComputerCallOutputItem;
       expect(item.action, isNull);
       expect(item.actions, hasLength(1));
+    });
+  });
+
+  group('CustomToolCallItem', () {
+    test('round-trip with all fields including createdBy', () {
+      final json = {
+        'type': 'custom_tool_call',
+        'id': 'ct_1',
+        'call_id': 'call_1',
+        'name': 'my_tool',
+        'input': '{"key": "value"}',
+        'namespace': 'tools_ns',
+        'status': 'completed',
+        'created_by': 'system',
+      };
+
+      final item = OutputItem.fromJson(json);
+      expect(item, isA<CustomToolCallItem>());
+      final ct = item as CustomToolCallItem;
+      expect(ct.id, 'ct_1');
+      expect(ct.callId, 'call_1');
+      expect(ct.name, 'my_tool');
+      expect(ct.input, '{"key": "value"}');
+      expect(ct.namespace, 'tools_ns');
+      expect(ct.status, ItemStatus.completed);
+      expect(ct.createdBy, 'system');
+
+      final restored = OutputItem.fromJson(ct.toJson());
+      expect(restored, isA<CustomToolCallItem>());
+      expect(restored, equals(ct));
+    });
+  });
+
+  group('CustomToolCallOutputItem', () {
+    test('round-trip with string output', () {
+      final json = {
+        'type': 'custom_tool_call_output',
+        'id': 'cto_1',
+        'call_id': 'call_1',
+        'output': 'result text',
+        'status': 'completed',
+        'created_by': 'user',
+      };
+
+      final item = OutputItem.fromJson(json);
+      expect(item, isA<CustomToolCallOutputItem>());
+      final cto = item as CustomToolCallOutputItem;
+      expect(cto.id, 'cto_1');
+      expect(cto.callId, 'call_1');
+      expect(cto.output, isA<FunctionCallOutputString>());
+      expect((cto.output as FunctionCallOutputString).value, 'result text');
+      expect(cto.status, FunctionCallOutputStatus.completed);
+      expect(cto.createdBy, 'user');
+
+      final restored = OutputItem.fromJson(cto.toJson());
+      expect(restored, isA<CustomToolCallOutputItem>());
+      expect(restored, equals(cto));
+    });
+
+    test('round-trip with list output (content list)', () {
+      final json = {
+        'type': 'custom_tool_call_output',
+        'id': 'cto_2',
+        'call_id': 'call_2',
+        'output': [
+          {'type': 'input_text', 'text': 'hello'},
+        ],
+      };
+
+      final item = OutputItem.fromJson(json);
+      expect(item, isA<CustomToolCallOutputItem>());
+      final cto = item as CustomToolCallOutputItem;
+      expect(cto.output, isA<FunctionCallOutputContent>());
+      final content = cto.output as FunctionCallOutputContent;
+      expect(content.content, hasLength(1));
+
+      final restored = OutputItem.fromJson(cto.toJson());
+      expect(restored, isA<CustomToolCallOutputItem>());
+      expect(restored, equals(cto));
     });
   });
 

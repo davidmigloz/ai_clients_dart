@@ -307,19 +307,19 @@ class VideoCharacter {
   final int createdAt;
 
   /// Unique identifier for the character.
-  final String id;
+  final String? id;
 
   /// Display name for the character.
   final String? name;
 
   /// Creates a [VideoCharacter].
-  const VideoCharacter({required this.createdAt, required this.id, this.name});
+  const VideoCharacter({required this.createdAt, this.id, this.name});
 
   /// Creates a [VideoCharacter] from JSON.
   factory VideoCharacter.fromJson(Map<String, dynamic> json) {
     return VideoCharacter(
       createdAt: json['created_at'] as int,
-      id: json['id'] as String,
+      id: json['id'] as String?,
       name: json['name'] as String?,
     );
   }

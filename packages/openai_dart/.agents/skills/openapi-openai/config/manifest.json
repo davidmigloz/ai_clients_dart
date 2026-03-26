@@ -870,10 +870,10 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": null,
-      "file": "lib/src/resources/videos_resource.dart",
+      "file": null,
       "schema": "CreateVideoCharacterBody",
       "tags": ["acknowledged"],
-      "note": "Multipart upload handled directly in resource method."
+      "note": "Multipart upload deferred; not currently implemented in VideosResource."
     },
     "CreateVideoEditJsonBody": {
       "spec": "main",
