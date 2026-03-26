@@ -1,4 +1,4 @@
-import 'package:googleai_dart/src/models/common/service_tier.dart';
+import 'package:googleai_dart/googleai_dart.dart';
 import 'package:test/test.dart';
 
 void main() {

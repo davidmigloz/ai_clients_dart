@@ -15,7 +15,7 @@ enum ServiceTier {
 
 /// Parses a [ServiceTier] from its string representation.
 ///
-/// Unrecognized values map to [ServiceTier.unspecified].
+/// `null` and unrecognized values map to [ServiceTier.unspecified].
 ServiceTier serviceTierFromString(String? value) {
   return switch (value) {
     'unspecified' => ServiceTier.unspecified,
