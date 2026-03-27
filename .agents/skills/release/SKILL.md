@@ -197,7 +197,8 @@ From the commits parsed in Step 3, extract unique PR numbers. PR references appe
 Spawn a **single subagent** (using the Agent tool) with:
 
 - The deduplicated list of PR numbers
-- Instructions to run `gh pr view {N} --json title,body` for each PR
+- Instructions to run `gh pr view {N} --json title,body,author` for each PR
+- For each PR, extract the author's GitHub login from `author.login`
 - For each PR body, extract the structured sections created by the `/create-pr` skill:
   1. **`## Summary`**: Extract the bullet points (up to the next `##` heading or end of body). This is the primary source for changelog entries.
   2. **`## Details`**: Extract the full content of this section. Contains extended context — API examples, architecture decisions, configuration changes — that enriches changelog summaries beyond what the bullets provide.
@@ -206,7 +207,7 @@ Spawn a **single subagent** (using the Agent tool) with:
   5. **Strip boilerplate**: Remove review tool badges, HTML comments (`<!-- ... -->`), `## Test Plan` sections, and other template noise.
   6. **Fallback**: If no `## Summary` heading exists (older PRs or external contributors), use the first substantive paragraph of the PR body (skip blank lines, HTML comments, and badge images at the top). Wrap the paragraph as a single entry in `summary_bullets` so downstream handling is uniform.
   7. **Error fallback**: If `gh pr view` fails for a PR (e.g., PR was from a fork, or was deleted), log a warning and skip that PR — do not fail the release.
-- Return a structured list: `[{pr: N, title: "...", summary_bullets: ["..."], details: "...", breaking_changes: "...", has_breaking_signals: true/false, references: [{title: "...", url: "...", description: "..."}]}]`
+- Return a structured list: `[{pr: N, title: "...", author_login: "...", summary_bullets: ["..."], details: "...", breaking_changes: "...", has_breaking_signals: true/false, references: [{title: "...", url: "...", description: "..."}]}]`
   - `has_breaking_signals` is `true` if a `## Breaking Changes` section exists, OR if the body contains phrases like "breaking change", "migration required", "removed", "renamed", "changed signature", "no longer supports"
 
 **Why a single subagent**: PR bodies can be large and noisy. Fetching them in a subagent keeps that content out of the main context window. A single subagent (rather than one per PR) avoids spawn overhead while still isolating the data.
@@ -215,7 +216,7 @@ Spawn a **single subagent** (using the Agent tool) with:
 
 After the subagent returns, map each PR's summary to the packages it affects by matching PR numbers back to the per-package commit lists from Step 3. A PR that appears in commits for multiple packages should be available to all of them.
 
-Store the mapping (package → list of PR summaries) for use in Steps 5 and 5b.
+Store the mapping (package → list of PR summaries) for use in Steps 5 and 5b. Also preserve the full PR list (including `author_login` fields) for use in Step 11's Contributors section.
 
 ### Verify semver bumps against PR context
 
@@ -255,7 +256,7 @@ For each released package, **prepend** a new section to `packages/{pkg}/CHANGELO
 ```markdown
 ## {new_version}
 
-> Note: This release has breaking changes.          ← only if breaking
+> Note: This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.          ← only if breaking
 
 {AI-written summary of main changes, 1-3 sentences}
 
@@ -281,7 +282,7 @@ For each released package, **prepend** a new section to `packages/{pkg}/CHANGELO
    - Within each type group, sort by **commit date descending** (newest first)
 6. **All links in new changelog entries** must point to `https://github.com/davidmigloz/ai_clients_dart` (older historical entries may still reference `davidmigloz/langchain_dart` — leave those as-is)
 7. **Standard markdown list**: `- **TYPE**: ...` (no leading space)
-8. **Breaking note**: Only include `> Note: This release has breaking changes.` if there are breaking changes
+8. **Breaking note**: Only include `> Note: This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.` if there are breaking changes
 9. **AI summary**: Write 1-3 sentences summarizing the main changes in plain English. Place it between the breaking note (if any) and the entry list.
 
    **Primary source**: Use the PR summaries collected in Step 4b as the primary source for writing the summary. PR descriptions contain the rationale, scope, and user-facing impact that commit subjects lack. Synthesize across multiple PRs into a coherent narrative — do not simply parrot PR titles or concatenate bullet points.
@@ -377,13 +378,17 @@ If `packages/{pkg}/MIGRATION.md` does not exist, create it:
 
     # Migration Guide
 
+    This guide covers breaking changes between major versions of `{pkg}`.
+
+    For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
+
+    ---
+
     ## Migrating from v{prev}.x to v{new_version}
 
     {content}
 
     ---
-
-    For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 Track newly created files so dry-run cleanup (Step 7) can remove them.
 
@@ -403,6 +408,19 @@ method signatures from the actual released package version.
 ## Step 6: Update pubspec.yaml Versions
 
 For each released package, update the `version:` field in `packages/{pkg}/pubspec.yaml` to the new version.
+
+---
+
+## Step 6b: Update README Quickstart Versions
+
+For each released package, update the version in the Quickstart pubspec snippet in `packages/{pkg}/README.md`. Find the `dependencies:` block inside the `## Quickstart` section and replace the version constraint:
+
+```
+dependencies:
+  {pkg}: ^{new_version}
+```
+
+This keeps the README install snippet in sync with the published version.
 
 ---
 
@@ -492,11 +510,11 @@ If any package **fails** to publish:
 
 **Only in full release mode.**
 
-Create a single commit with all `pubspec.yaml`, `CHANGELOG.md`, and `MIGRATION.md` changes (only for successfully published packages):
+Create a single commit with all `pubspec.yaml`, `CHANGELOG.md`, `README.md`, and `MIGRATION.md` changes (only for successfully published packages):
 
 ```bash
-git add packages/{pkg1}/pubspec.yaml packages/{pkg1}/CHANGELOG.md \
-       packages/{pkg2}/pubspec.yaml packages/{pkg2}/CHANGELOG.md \
+git add packages/{pkg1}/pubspec.yaml packages/{pkg1}/CHANGELOG.md packages/{pkg1}/README.md \
+       packages/{pkg2}/pubspec.yaml packages/{pkg2}/CHANGELOG.md packages/{pkg2}/README.md \
        ...
 # Also include MIGRATION.md for packages that had breaking changes:
 git add packages/{pkg}/MIGRATION.md  # for each package with breaking changes
@@ -576,7 +594,22 @@ Body format:
 ## pkg2 v2.0.0
 
 {changelog content for pkg2}
+
+---
+
+## Contributors
+
+@bazz333 and @alfredobs97                          ← only if external contributors exist
 ```
+
+### Assemble the Contributors section
+
+Before creating the release, build the contributor list from the PR data collected in Step 4b:
+
+1. **Collect** all unique `author_login` values from the PR entries included in this release.
+2. **Filter bots**: Exclude any login that contains `[bot]` or matches known bot accounts (`dependabot`, `renovate`, `github-actions`).
+3. **Conditional display**: If the only remaining contributor is the repo owner (`davidmigloz`), **omit** the Contributors section entirely — it adds no value on solo releases. If at least one non-owner contributor exists, include the section with **all** non-bot contributors (including the owner).
+4. **Format**: Sort logins alphabetically (case-insensitive) and join with natural language: `@a` for one, `@a and @b` for two, `@a, @b, and @c` for three or more. Prefix each login with `@` so GitHub renders them as clickable profile links.
 
 Create the release:
 ```bash
@@ -610,6 +643,8 @@ EOF
 16. **MIGRATION.md does not exist yet** → Step 5b creates it with standard structure
 17. **No announcement links in PR** → Step 5 writes summary without links (no degradation)
 18. **Pre-1.0 migration heading** → Use major.minor in the heading (e.g., "v0.3.x to v0.4.0") since breaking changes bump minor, not major
+19. **Solo release (only repo owner contributed)** → omit the Contributors section entirely
+20. **Contributors from failed PR fetches or commits without PR references** → contributor info is silently lost; the Contributors section is best-effort (consistent with edge cases #11 and #12)
 
 ---
 

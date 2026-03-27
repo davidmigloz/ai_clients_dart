@@ -14,6 +14,12 @@ from api_toolkit.config import EXIT_FAILURE, ToolkitError
 
 
 class CliTests(unittest.TestCase):
+    def test_main_routes_generate_llms_txt_command(self) -> None:
+        with patch("api_toolkit.cli.command_generate_llms_txt", return_value=(0, {"command": "generate-llms-txt"})):
+            exit_code = main(["generate-llms-txt", "--repo-root", "/tmp"])
+
+        self.assertEqual(exit_code, 0)
+
     def test_main_routes_audit_command(self) -> None:
         with patch("api_toolkit.cli.command_audit", return_value=(0, {"command": "audit"})):
             exit_code = main(["audit", "--config-dir", "/tmp"])

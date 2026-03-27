@@ -12,6 +12,7 @@ from .operations import (
     command_create,
     command_describe,
     command_fetch,
+    command_generate_llms_txt,
     command_review,
     command_scaffold,
     command_verify,
@@ -86,12 +87,19 @@ def build_parser() -> argparse.ArgumentParser:
     verify_parser = subparsers.add_parser("verify", help="Run toolkit verification checks")
     verify_parser.add_argument("--config-dir", type=Path, required=True)
     verify_parser.add_argument("--spec-name")
-    verify_parser.add_argument("--checks", default="all", choices=["implementation", "exports", "docs", "consistency", "all"])
+    verify_parser.add_argument("--checks", default="all", choices=["implementation", "exports", "docs", "readme", "consistency", "all"])
     verify_parser.add_argument("--scope", default="all", choices=["changed", "critical", "all", "type"])
     verify_parser.add_argument("--type-name")
     verify_parser.add_argument("--baseline", type=Path)
     verify_parser.add_argument("--git-ref")
     _add_common_output_args(verify_parser, include_fields=True)
+
+    llms_parser = subparsers.add_parser("generate-llms-txt", help="Generate llms.txt outputs for packages or the repo")
+    llms_target_group = llms_parser.add_mutually_exclusive_group(required=True)
+    llms_target_group.add_argument("--config-dir", type=Path)
+    llms_target_group.add_argument("--repo-root", type=Path)
+    llms_parser.add_argument("--dry-run", action="store_true")
+    _add_common_output_args(llms_parser, include_fields=True)
 
     return parser
 
@@ -147,6 +155,8 @@ def main(argv: list[str] | None = None) -> int:
             exit_code, payload = command_audit(args)
         elif args.command == "verify":
             exit_code, payload = command_verify(args)
+        elif args.command == "generate-llms-txt":
+            exit_code, payload = command_generate_llms_txt(args)
         else:  # pragma: no cover - argparse prevents this
             raise ToolkitError(f"Unknown command '{args.command}'")
         _emit(payload, output_format, getattr(args, "fields", None))

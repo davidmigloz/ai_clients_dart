@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ast
+import functools
 import inspect
 import json
 import os
@@ -18,6 +19,7 @@ from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
+from . import config as toolkit_config
 from .config import (
     AuthConfig,
     EXIT_FAILURE,
@@ -74,6 +76,38 @@ WORKSPACE_BLOCK_RE = re.compile(r"workspace:\n((?:\s+- .+\n)+)")
 DART_EXPORT_DIRECTIVE_RE = re.compile(r"\bexport\b[\s\S]*?;")
 DART_QUOTED_PATH_RE = re.compile(r"""(['"])([^'"]+\.dart)\1""")
 DART_RESOURCE_GETTER_RE = re.compile(r"\b([A-Z]\w*Resource)\??\s+get\s+(\w+)\s*(?:=>|{)")
+README_HEADING_RE = re.compile(r"^(#{1,3})\s+(.+?)\s*$")
+README_FENCE_RE = re.compile(r"^```")
+README_EXAMPLE_LINK_RE = re.compile(r"\[[^\]]+\]\(((?:\./)?example/[^)\n]+\.dart)\)")
+README_CODE_BLOCK_RE = re.compile(r"```([^\n`]*)\n([\s\S]*?)\n```")
+README_EMOJI_RE = re.compile(r"[\U0001F300-\U0001FAFF]")
+README_LLMS_LINK_RE = re.compile(r"\[llms\.txt\]\(\./llms\.txt\)", re.IGNORECASE)
+MARKDOWN_LINK_RE = re.compile(r"!\[[^\]]*\]\([^)]+\)|\[(?P<label>[^\]]+)\]\([^)]+\)")
+MARKDOWN_DECORATION_RE = re.compile(r"[*`]+")
+MARKDOWN_ATX_HEADING_RE = re.compile(r"^(#{1,6})(\s+.*)$")
+HTML_TAG_RE = re.compile(r"<[^>]+>")
+PUBSPEC_FIELD_RE = re.compile(r"^(?P<indent>\s*)(?P<key>[A-Za-z_][\w-]*):(?:\s*(?P<value>.+?)\s*)?$")
+PACKAGE_LLMS_CALLOUT = (
+    "> [!TIP]\n"
+    "> Coding agents: start with [llms.txt](./llms.txt). "
+    "It links to the package docs, examples, and optional references in a compact format.\n"
+)
+SPONSOR_PARAGRAPH = (
+    "If these packages are useful to you or your company, please consider "
+    "[sponsoring the project](https://github.com/sponsors/davidmigloz). "
+    "Development and maintenance are provided to the community for free, "
+    "but integration tests against real APIs and the tooling required to "
+    "build and verify releases still have real costs. Your support, at any "
+    "level, helps keep these packages maintained and free for the Dart & "
+    "Flutter community."
+)
+SPONSOR_WIDGET = (
+    "<p align=\"center\">\n"
+    "  <a href=\"https://github.com/sponsors/davidmigloz\">\n"
+    "    <img src='https://raw.githubusercontent.com/davidmigloz/sponsors/main/sponsors.svg'/>\n"
+    "  </a>\n"
+    "</p>"
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -2014,6 +2048,328 @@ def _verify_docs(config: ToolkitConfig) -> tuple[int, dict[str, Any]]:
     }
 
 
+def _strip_fenced_code_blocks(markdown: str) -> str:
+    stripped_lines: list[str] = []
+    in_fence = False
+    for line in markdown.splitlines():
+        if README_FENCE_RE.match(line.strip()):
+            in_fence = not in_fence
+            stripped_lines.append("")
+            continue
+        stripped_lines.append("" if in_fence else line)
+    return "\n".join(stripped_lines)
+
+
+def _readme_headings(markdown: str) -> list[dict[str, Any]]:
+    headings: list[dict[str, Any]] = []
+    stripped = _strip_fenced_code_blocks(markdown)
+    for line_number, line in enumerate(stripped.splitlines(), start=1):
+        match = README_HEADING_RE.match(line)
+        if not match:
+            continue
+        headings.append(
+            {
+                "level": len(match.group(1)),
+                "title": match.group(2).strip(),
+                "line": line_number,
+            }
+        )
+    return headings
+
+
+def _section_from_heading(markdown: str, headings: list[dict[str, Any]], title: str, level: int = 2) -> str:
+    matching = [
+        (index, heading)
+        for index, heading in enumerate(headings)
+        if heading["level"] == level and heading["title"] == title
+    ]
+    if not matching:
+        return ""
+    index, heading = matching[0]
+    lines = markdown.splitlines()
+    end_line = len(lines) + 1
+    for next_heading in headings[index + 1 :]:
+        if next_heading["level"] <= level:
+            end_line = next_heading["line"]
+            break
+    return "\n".join(lines[heading["line"] - 1 : end_line - 1])
+
+
+def _extract_opening_paragraph(markdown: str) -> str:
+    lines = markdown.splitlines()
+    saw_h1 = False
+    paragraph: list[str] = []
+    for line in lines:
+        stripped = line.strip()
+        if not saw_h1:
+            if stripped.startswith("# "):
+                saw_h1 = True
+            continue
+        if not stripped:
+            if paragraph:
+                break
+            continue
+        if stripped.startswith("[") or stripped.startswith("!["):
+            if not paragraph:
+                continue
+        if stripped.startswith(">") or stripped.startswith("<details>"):
+            if paragraph:
+                break
+            continue
+        paragraph.append(stripped)
+    return " ".join(paragraph)
+
+
+def _section_has_code_block(section: str) -> bool:
+    return bool(README_CODE_BLOCK_RE.search(section))
+
+
+def _readme_example_links(section: str) -> list[str]:
+    return [match.group(1).removeprefix("./") for match in README_EXAMPLE_LINK_RE.finditer(section)]
+
+
+def _readme_top_matter(markdown: str, headings: list[dict[str, Any]], *, before_h2_titles: tuple[str, ...]) -> str:
+    lines = markdown.splitlines()
+    end_line = len(lines) + 1
+    title_set = set(before_h2_titles)
+    for heading in headings:
+        if heading["level"] == 2 and heading["title"] in title_set:
+            end_line = heading["line"]
+            break
+    return "\n".join(lines[: end_line - 1])
+
+
+def _is_readme_badge_line(line: str) -> bool:
+    stripped = line.strip()
+    return stripped.startswith("[![") or stripped.startswith("![")
+
+
+def _readme_has_leading_llms_callout(markdown: str) -> bool:
+    lines = markdown.splitlines()
+    h1_line = next((heading["line"] for heading in _readme_headings(markdown) if heading["level"] == 1), None)
+    if h1_line is None:
+        return False
+
+    index = h1_line
+    while index < len(lines):
+        stripped = lines[index].strip()
+        if not stripped or _is_readme_badge_line(stripped):
+            index += 1
+            continue
+        if stripped != "> [!TIP]":
+            return False
+
+        block: list[str] = []
+        while index < len(lines) and lines[index].lstrip().startswith(">"):
+            block.append(lines[index])
+            index += 1
+        return README_LLMS_LINK_RE.search("\n".join(block)) is not None
+    return False
+
+
+def _verify_readme(config: ToolkitConfig) -> tuple[int, dict[str, Any]]:
+    readme_path = config.package_root / "README.md"
+    if not readme_path.exists():
+        raise ToolkitError(f"README.md not found in {config.package_root}")
+
+    readme = read_text(readme_path)
+    headings = _readme_headings(readme)
+    issues: list[dict[str, Any]] = []
+    required_h2 = [
+        "Features",
+        "Why choose this client?",
+        "Quickstart",
+        "Configuration",
+        "Usage",
+        "Error Handling",
+        "Examples",
+        "API Coverage",
+        "Official Documentation",
+        "Sponsor",
+        "License",
+    ]
+
+    for heading in headings:
+        if README_EMOJI_RE.search(heading["title"]):
+            issues.append(
+                _type_issue(
+                    "warning",
+                    heading["title"],
+                    f"Heading contains emoji on line {heading['line']}",
+                    file="README.md",
+                )
+            )
+
+    current_h2: str | None = None
+    for heading in headings:
+        if heading["level"] == 2:
+            current_h2 = heading["title"]
+        elif heading["level"] == 3 and current_h2 is None:
+            issues.append(
+                _type_issue(
+                    "warning",
+                    heading["title"],
+                    f"H3 heading appears before any H2 on line {heading['line']}",
+                    file="README.md",
+                )
+            )
+
+    h2_positions: dict[str, int] = {}
+    for heading in headings:
+        if heading["level"] == 2 and heading["title"] not in h2_positions:
+            h2_positions[heading["title"]] = heading["line"]
+
+    for title in required_h2:
+        if title not in h2_positions:
+            issues.append(
+                _type_issue(
+                    "warning",
+                    title,
+                    "Required H2 section is missing",
+                    file="README.md",
+                )
+            )
+
+    existing_positions = [h2_positions[title] for title in required_h2 if title in h2_positions]
+    if existing_positions != sorted(existing_positions):
+        issues.append(
+            _type_issue(
+                "warning",
+                "section-order",
+                "Required H2 sections are not in canonical order",
+                file="README.md",
+            )
+        )
+
+    opening_paragraph = _extract_opening_paragraph(readme)
+    if "dart" not in opening_paragraph.lower():
+        issues.append(
+            _type_issue(
+                "warning",
+                "opening-paragraph",
+                "Opening paragraph should mention Dart",
+                file="README.md",
+            )
+        )
+    if opening_paragraph.lower().startswith("unofficial"):
+        issues.append(
+            _type_issue(
+                "warning",
+                "opening-paragraph",
+                "Opening paragraph should not start with 'Unofficial'",
+                file="README.md",
+            )
+        )
+
+    top_matter = _readme_top_matter(readme, headings, before_h2_titles=(required_h2[0],))
+    if not README_LLMS_LINK_RE.search(top_matter):
+        issues.append(
+            _type_issue(
+                "warning",
+                "llms.txt",
+                "README should link to ./llms.txt before the first required H2 section",
+                file="README.md",
+            )
+        )
+    elif not _readme_has_leading_llms_callout(readme):
+        issues.append(
+            _type_issue(
+                "warning",
+                "llms.txt",
+                "README should place the ./llms.txt callout immediately below the H1 before the opening paragraph, notes, or Table of Contents",
+                file="README.md",
+            )
+        )
+
+    quickstart_section = _section_from_heading(readme, headings, "Quickstart")
+    if quickstart_section and not _section_has_code_block(quickstart_section):
+        issues.append(
+            _type_issue(
+                "warning",
+                "Quickstart",
+                "Quickstart section should contain a code block",
+                file="README.md",
+            )
+        )
+
+    features_section = _section_from_heading(readme, headings, "Features")
+    if features_section and "coverage" not in features_section.lower():
+        issues.append(
+            _type_issue(
+                "warning",
+                "Features",
+                "Features section should include a coverage note",
+                file="README.md",
+            )
+        )
+
+    usage_h3_headings: list[dict[str, Any]] = []
+    in_usage = False
+    for heading in headings:
+        if heading["level"] == 2:
+            in_usage = heading["title"] == "Usage"
+            continue
+        if in_usage and heading["level"] == 3:
+            usage_h3_headings.append(heading)
+
+    lines = readme.splitlines()
+    for index, heading in enumerate(usage_h3_headings):
+        end_line = len(lines) + 1
+        for next_heading in usage_h3_headings[index + 1 :]:
+            if next_heading["line"] > heading["line"]:
+                end_line = next_heading["line"]
+                break
+        for next_h2 in headings:
+            if next_h2["level"] == 2 and next_h2["line"] > heading["line"]:
+                end_line = min(end_line, next_h2["line"])
+                break
+        subsection = "\n".join(lines[heading["line"] - 1 : end_line - 1])
+        if not _section_has_code_block(subsection):
+            issues.append(
+                _type_issue(
+                    "warning",
+                    heading["title"],
+                    "Usage subsection should contain a code block",
+                    file="README.md",
+                )
+            )
+        example_links = _readme_example_links(subsection)
+        if not example_links:
+            issues.append(
+                _type_issue(
+                    "warning",
+                    heading["title"],
+                    "Usage subsection should link to an example file",
+                    file="README.md",
+                )
+            )
+        else:
+            for example_link in example_links:
+                if not (config.package_root / example_link).exists():
+                    issues.append(
+                        _type_issue(
+                            "error",
+                            heading["title"],
+                            f"Usage subsection links to missing example file '{example_link}'",
+                            file="README.md",
+                        )
+                    )
+                    break
+
+    exit_code = EXIT_FAILURE if any(issue["level"] == "error" for issue in issues) else EXIT_SUCCESS
+    return exit_code, {
+        "command": "verify",
+        "check": "readme",
+        "issues": issues,
+        "summary": {
+            "errors": sum(1 for issue in issues if issue["level"] == "error"),
+            "warnings": sum(1 for issue in issues if issue["level"] == "warning"),
+            "headings": len(headings),
+            "usage_subsections": len(usage_h3_headings),
+        },
+    }
+
+
 class _ReferenceUnavailableError(RuntimeError):
     pass
 
@@ -3613,6 +3969,599 @@ def _creation_plan(package_name: str, display_name: str, shortname: str, manifes
     return "\n".join(lines) + "\n"
 
 
+def _load_shared_readme_template() -> str:
+    template_path = Path(__file__).resolve().parents[2] / "readme-template.md"
+    if not template_path.exists():
+        raise ToolkitError(f"Shared README template not found at {template_path}")
+    return template_path.read_text()
+
+
+def _readme_api_url(spec_url: str | None) -> str | None:
+    return spec_url if spec_url else None
+
+
+def _render_example_scaffold(package_name: str) -> str:
+    return (
+        "Future<void> main() async {\n"
+        f"  print('Replace this placeholder with a {package_name} example.');\n"
+        "}\n"
+    )
+
+
+def _render_readme_scaffold(
+    repo_root: Path,
+    *,
+    package_name: str,
+    display_name: str,
+    version: str,
+    api_url: str | None,
+) -> str:
+    del repo_root  # Shared template is sourced from the toolkit checkout.
+    # Ensure the shared template is present without coupling scaffolding to its headings.
+    _load_shared_readme_template()
+
+    api_identity = f"**[{display_name}]({api_url})**" if api_url else f"**{display_name}**"
+
+    return (
+        f"# {display_name} Dart Client\n\n"
+        f"{PACKAGE_LLMS_CALLOUT}\n"
+        f"[![{package_name}](https://img.shields.io/pub/v/{package_name}.svg)](https://pub.dev/packages/{package_name})\n"
+        f"[![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](../../LICENSE)\n\n"
+        f"Dart client for the {api_identity} API. "
+        "Works with Dart and Flutter on iOS, Android, macOS, Windows, Linux, Web, and server-side Dart.\n\n"
+        "<details>\n"
+        "<summary><b>Table of Contents</b></summary>\n\n"
+        "- [Features](#features)\n"
+        "- [Why choose this client?](#why-choose-this-client)\n"
+        "- [Quickstart](#quickstart)\n"
+        "- [Platform Support](#platform-support)\n"
+        "- [Configuration](#configuration)\n"
+        "- [Usage](#usage)\n"
+        "- [Error Handling](#error-handling)\n"
+        "- [Sponsor](#sponsor)\n"
+        "- [License](#license)\n\n"
+        "</details>\n\n"
+        "## Features\n\n"
+        f"Coverage: `{package_name}` covers the primary {display_name} workflows for Dart and Flutter applications.\n\n"
+        "### Core API surface\n\n"
+        "- TODO: summarize the main resources exposed by the client\n"
+        "- TODO: summarize streaming, tool calling, or multimodal support\n\n"
+        "## Why choose this client?\n\n"
+        "- Pure Dart client with no Flutter dependency\n"
+        "- Type-safe request and response models\n"
+        "- Multi-platform support for Dart and Flutter projects\n\n"
+        "## Quickstart\n\n"
+        "```yaml\n"
+        "dependencies:\n"
+        f"  {package_name}: ^{version}\n"
+        "```\n\n"
+        "```dart\n"
+        f"import 'package:{package_name}/{package_name}.dart';\n\n"
+        "Future<void> main() async {\n"
+        "  // TODO: initialize the client and make a first request.\n"
+        "}\n"
+        "```\n\n"
+        "## Platform Support\n\n"
+        "| Platform | Status |\n"
+        "| --- | --- |\n"
+        "| Dart VM | ✅ Full support |\n"
+        "| Flutter (iOS/Android) | ✅ Full support |\n"
+        "| Flutter Web | ✅ Full support |\n"
+        "| macOS, Windows, Linux | ✅ Full support |\n\n"
+        "## Configuration\n\n"
+        "<details>\n"
+        "<summary><b>Configuration options</b></summary>\n\n"
+        "Document environment variables, base URLs, auth providers, and retry settings here.\n\n"
+        "</details>\n\n"
+        "## Usage\n\n"
+        "### How do I make my first request?\n\n"
+        "<details>\n"
+        "<summary><b>Show example</b></summary>\n\n"
+        "```dart\n"
+        f"import 'package:{package_name}/{package_name}.dart';\n\n"
+        "Future<void> main() async {\n"
+        "  // TODO: add a self-contained example.\n"
+        "}\n"
+        "```\n\n"
+        "→ [Full example](example/example.dart)\n\n"
+        "</details>\n\n"
+        "## Error Handling\n\n"
+        "<details>\n"
+        "<summary><b>Handle API and transport failures</b></summary>\n\n"
+        "```dart\n"
+        f"import 'package:{package_name}/{package_name}.dart';\n\n"
+        "Future<void> main() async {\n"
+        "  // TODO: document the package-specific exception types.\n"
+        "}\n"
+        "```\n\n"
+        "</details>\n\n"
+        "## Sponsor\n\n"
+        f"{SPONSOR_PARAGRAPH}\n\n"
+        f"{SPONSOR_WIDGET}\n\n"
+        "## License\n\n"
+        "This package is licensed under the [MIT License](../../LICENSE).\n\n"
+        f"This is a community-maintained package and is not affiliated with or endorsed by {display_name}.\n"
+    )
+
+
+def _normalize_llms_text(text: str) -> str:
+    normalized = MARKDOWN_LINK_RE.sub(
+        lambda match: match.group("label") or "",
+        text,
+    )
+    normalized = MARKDOWN_DECORATION_RE.sub("", normalized)
+    normalized = HTML_TAG_RE.sub("", normalized)
+    normalized = re.sub(r"\s+", " ", normalized).strip()
+    normalized = re.sub(r"(?i)^unofficial\b[\s:,-]*", "", normalized).strip()
+    if normalized and normalized[0].islower():
+        normalized = normalized[0].upper() + normalized[1:]
+    return normalized
+
+
+
+def _first_sentence(text: str) -> str:
+    normalized = re.sub(r"\s+", " ", text).strip()
+    if not normalized:
+        return ""
+    match = re.search(r"(.+?\.)\s", normalized)
+    return match.group(1) if match else normalized
+
+
+def _ensure_sentence(text: str) -> str:
+    normalized = text.strip()
+    if not normalized:
+        return ""
+    if normalized.endswith((".", "!", "?")):
+        return normalized
+    return f"{normalized}."
+
+
+def _parse_pubspec_scalar(value: str) -> str:
+    normalized = value.strip()
+    if not normalized:
+        return ""
+    if normalized[0] in {'"', "'"} and normalized[-1] == normalized[0]:
+        try:
+            parsed = ast.literal_eval(normalized)
+        except (SyntaxError, ValueError):
+            return normalized[1:-1]
+        return parsed if isinstance(parsed, str) else str(parsed)
+    return normalized
+
+
+def _read_pubspec_metadata(path: Path) -> dict[str, str]:
+    if toolkit_config.HAS_YAML and toolkit_config.yaml is not None:
+        pubspec = read_structured_file(path)
+        if not isinstance(pubspec, dict):
+            raise ToolkitError(f"pubspec.yaml at {path} must parse to an object")
+        melos = pubspec.get("melos", {})
+        melos_repository = str(melos.get("repository", "")).strip() if isinstance(melos, dict) else ""
+        return {
+            "name": str(pubspec.get("name", "")).strip(),
+            "description": str(pubspec.get("description", "")).strip(),
+            "repository": str(pubspec.get("repository", "")).strip(),
+            "homepage": str(pubspec.get("homepage", "")).strip(),
+            "melos_repository": melos_repository,
+        }
+
+    metadata = {
+        "name": "",
+        "description": "",
+        "repository": "",
+        "homepage": "",
+        "melos_repository": "",
+    }
+    melos_indent: int | None = None
+    for raw_line in path.read_text().splitlines():
+        stripped = raw_line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        match = PUBSPEC_FIELD_RE.match(raw_line)
+        if not match:
+            continue
+        indent = len(match.group("indent"))
+        key = match.group("key")
+        value = match.group("value")
+
+        if melos_indent is not None and indent <= melos_indent:
+            melos_indent = None
+
+        if indent == 0:
+            if key == "melos" and not value:
+                melos_indent = indent
+                continue
+            if key in metadata and value is not None:
+                metadata[key] = _parse_pubspec_scalar(value)
+            continue
+
+        if melos_indent is not None and key == "repository" and value is not None:
+            metadata["melos_repository"] = _parse_pubspec_scalar(value)
+
+    return metadata
+
+
+@functools.lru_cache(maxsize=None)
+def _repo_metadata(repo_root: Path) -> dict[str, str]:
+    pubspec = _read_pubspec_metadata(repo_root / "pubspec.yaml")
+    repository = pubspec["melos_repository"]
+    if not repository:
+        repository = pubspec["repository"] or pubspec["homepage"]
+    if not repository:
+        raise ToolkitError("Workspace pubspec.yaml must define a repository URL for llms.txt generation")
+
+    base_url = repository.rstrip("/")
+    for marker in ("/tree/", "/blob/"):
+        if marker in base_url:
+            base_url = base_url.split(marker, 1)[0]
+            break
+
+    return {
+        "description": pubspec["description"],
+        "repository": base_url,
+        "blob_base": f"{base_url}/blob/main",
+        "tree_base": f"{base_url}/tree/main",
+    }
+
+
+def _blob_url(repo_root: Path, path: Path) -> str:
+    metadata = _repo_metadata(repo_root)
+    return f"{metadata['blob_base']}/{path.relative_to(repo_root).as_posix()}"
+
+
+def _tree_url(repo_root: Path, path: Path) -> str:
+    metadata = _repo_metadata(repo_root)
+    return f"{metadata['tree_base']}/{path.relative_to(repo_root).as_posix()}"
+
+
+def _example_heading_for_line(headings: list[dict[str, Any]], line_number: int) -> dict[str, Any] | None:
+    previous: dict[str, Any] | None = None
+    for heading in headings:
+        if heading["line"] > line_number:
+            break
+        previous = heading
+    return previous
+
+
+def _example_description_from_filename(filename: str, package_name: str) -> str:
+    stem = Path(filename).stem
+    if stem in {package_name, f"{package_name}_example"}:
+        return "Package overview example."
+    cleaned = stem.removesuffix("_example").replace("_", " ").strip()
+    if not cleaned:
+        return "Example."
+    return _ensure_sentence(f"{cleaned.capitalize()} example")
+
+
+def _table_cell_description(readme: str, match: re.Match[str]) -> str | None:
+    """Extract a description from the table cell following the link match.
+
+    Looks for ``| link | description |`` patterns and returns the trimmed
+    description text, or *None* when the match is not inside a table row or
+    no meaningful description follows the link cell.
+    """
+    line_start = readme.rfind("\n", 0, match.start()) + 1
+    line_end = readme.find("\n", match.end())
+    if line_end == -1:
+        line_end = len(readme)
+    line = readme[line_start:line_end]
+    if not line.lstrip().startswith("|"):
+        return None
+    # Split on '|' and find the cell after the link.
+    after_link = line[match.end() - line_start :]
+    parts = after_link.split("|")
+    # parts[0] is remainder of the link cell, parts[1] is the description cell
+    if len(parts) < 2:
+        return None
+    desc = parts[1].strip()
+    if not desc or desc == "---" or set(desc) <= {"-", " "}:
+        return None
+    return desc
+
+
+def _readme_example_entries(readme: str, headings: list[dict[str, Any]]) -> list[dict[str, str]]:
+    examples: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for match in README_EXAMPLE_LINK_RE.finditer(readme):
+        example_path = match.group(1).removeprefix("./")
+        if example_path in seen:
+            continue
+        seen.add(example_path)
+        # Prefer table-cell description over heading-based fallback.
+        table_desc = _table_cell_description(readme, match)
+        if table_desc:
+            description = _ensure_sentence(table_desc)
+        else:
+            line_number = readme.count("\n", 0, match.start()) + 1
+            heading = _example_heading_for_line(headings, line_number)
+            description = "Example."
+            if heading is not None:
+                description = _ensure_sentence(_normalize_llms_text(heading["title"]))
+        examples.append({"path": example_path, "description": description})
+    return examples
+
+
+def _render_link_sections(sections: list[tuple[str, list[dict[str, str]]]]) -> list[str]:
+    lines: list[str] = []
+    for title, items in sections:
+        if not items:
+            continue
+        lines.extend([f"## {title}", ""])
+        for item in items:
+            line = f"- [{item['label']}]({item['url']})"
+            if item.get("description"):
+                line += f": {item['description']}"
+            lines.append(line)
+        lines.append("")
+    return lines
+
+
+def _render_llms_document(
+    *,
+    title: str,
+    summary: str,
+    sections: list[tuple[str, list[dict[str, str]]]],
+    intro: str | None = None,
+) -> str:
+    lines = [f"# {title}", "", f"> {summary}", ""]
+    if intro:
+        lines.extend([intro, ""])
+    lines.extend(_render_link_sections(sections))
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _shift_markdown_headings(markdown: str, *, level_delta: int) -> str:
+    shifted_lines: list[str] = []
+    in_fence = False
+    for line in markdown.splitlines():
+        stripped = line.strip()
+        if README_FENCE_RE.match(stripped):
+            in_fence = not in_fence
+            shifted_lines.append(line)
+            continue
+        if in_fence:
+            shifted_lines.append(line)
+            continue
+        match = MARKDOWN_ATX_HEADING_RE.match(line)
+        if not match:
+            shifted_lines.append(line)
+            continue
+        level = max(1, min(len(match.group(1)) + level_delta, 6))
+        shifted_lines.append(f"{'#' * level}{match.group(2)}")
+    return "\n".join(shifted_lines)
+
+
+def _render_llms_context_file(
+    *,
+    title: str,
+    intro: str,
+    sources: list[dict[str, Any]],
+) -> str:
+    lines = [f"# {title}", "", intro, ""]
+    for source in sources:
+        content = _shift_markdown_headings(source["content"].strip(), level_delta=2).strip()
+        if not content:
+            continue
+        lines.extend(
+            [
+                f"## Source: {source['path']}",
+                "",
+                f"Canonical URL: {source['url']}",
+                "",
+                content,
+                "",
+            ]
+        )
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _package_snapshot(repo_root: Path, package_root: Path) -> dict[str, Any]:
+    pubspec_path = package_root / "pubspec.yaml"
+    pubspec = _read_pubspec_metadata(pubspec_path)
+    package_name = pubspec["name"] or package_root.name
+    package_description = pubspec["description"]
+
+    readme_path = package_root / "README.md"
+    readme = read_text(readme_path) if readme_path.exists() else ""
+    headings = _readme_headings(readme) if readme else []
+    h1_title = next((heading["title"] for heading in headings if heading["level"] == 1), package_name)
+    summary_source = _extract_opening_paragraph(readme) or package_description
+    summary = _ensure_sentence(_first_sentence(_normalize_llms_text(summary_source or package_description)))
+
+    docs: list[dict[str, str]] = []
+    if readme_path.exists():
+        docs.append(
+            {
+                "label": "README",
+                "url": _blob_url(repo_root, readme_path),
+                "description": "Primary package documentation with installation, configuration, and usage examples.",
+            }
+        )
+    changelog_path = package_root / "CHANGELOG.md"
+    if changelog_path.exists():
+        docs.append(
+            {
+                "label": "CHANGELOG",
+                "url": _blob_url(repo_root, changelog_path),
+                "description": "Release history and version-by-version changes.",
+            }
+        )
+    migration_path = package_root / "MIGRATION.md"
+    if migration_path.exists():
+        docs.append(
+            {
+                "label": "MIGRATION",
+                "url": _blob_url(repo_root, migration_path),
+                "description": "Upgrade notes and breaking-change guidance.",
+            }
+        )
+
+    examples: list[dict[str, str]] = []
+    for example in _readme_example_entries(readme, headings):
+        example_path = package_root / example["path"]
+        if not example_path.exists():
+            continue
+        examples.append(
+            {
+                "label": Path(example["path"]).name,
+                "url": _blob_url(repo_root, example_path),
+                "description": example["description"],
+            }
+        )
+    if not examples:
+        examples_dir = package_root / "example"
+        if examples_dir.exists():
+            for example_path in sorted(examples_dir.glob("*.dart")):
+                examples.append(
+                    {
+                        "label": example_path.name,
+                        "url": _blob_url(repo_root, example_path),
+                        "description": _example_description_from_filename(example_path.name, package_name),
+                    }
+                )
+
+    optional = [
+        {
+            "label": "Package directory",
+            "url": _tree_url(repo_root, package_root),
+            "description": "Source tree, pubspec, and package-local files.",
+        }
+    ]
+
+    return {
+        "name": package_name,
+        "display_name": h1_title,
+        "description": package_description,
+        "repository": pubspec["repository"],
+        "package_root": package_root,
+        "readme_path": readme_path,
+        "readme_url": _blob_url(repo_root, readme_path) if readme_path.exists() else "",
+        "readme_content": readme,
+        "summary": summary or _ensure_sentence(_normalize_llms_text(package_description)) or package_name,
+        "docs": docs,
+        "examples": examples,
+        "optional": optional,
+    }
+
+
+def _render_package_llms_txt(repo_root: Path, package_info: dict[str, Any]) -> str:
+    del repo_root  # Package links are precomputed in package_info.
+    return _render_llms_document(
+        title=package_info["display_name"],
+        summary=package_info["summary"],
+        sections=[
+            ("Docs", package_info["docs"]),
+            ("Examples", package_info["examples"]),
+            ("Optional", package_info["optional"]),
+        ],
+    )
+
+
+def _package_llms_output(repo_root: Path, package_info: dict[str, Any]) -> dict[str, Any]:
+    path = package_info["package_root"] / "llms.txt"
+    return {
+        "label": package_info["name"],
+        "path": path,
+        "url": _blob_url(repo_root, path),
+        "content": _render_package_llms_txt(repo_root, package_info),
+        "description": package_info["summary"],
+    }
+
+
+def _discover_repo_packages(repo_root: Path) -> list[dict[str, Any]]:
+    packages_dir = repo_root / "packages"
+    if not packages_dir.exists():
+        raise ToolkitError(f"Repo root does not contain a packages directory: {repo_root}")
+    snapshots = [
+        _package_snapshot(repo_root, path.parent)
+        for path in sorted(packages_dir.glob("*/pubspec.yaml"))
+    ]
+    return sorted(snapshots, key=lambda item: item["name"])
+
+
+def _render_root_llms_txt(
+    repo_root: Path,
+    package_llms_outputs: list[dict[str, Any]],
+) -> str:
+    metadata = _repo_metadata(repo_root)
+    readme_path = repo_root / "README.md"
+    package_links = [
+        {
+            "label": package_output["label"],
+            "url": package_output["url"],
+            "description": package_output["description"],
+        }
+        for package_output in package_llms_outputs
+    ]
+    optional_links: list[dict[str, str]] = []
+    if readme_path.exists():
+        optional_links.append(
+            {
+                "label": "Repository README",
+                "url": _blob_url(repo_root, readme_path),
+                "description": "Workspace overview, package comparison, and ecosystem guidance.",
+            }
+        )
+    return _render_llms_document(
+        title="AI Clients Dart",
+        summary=_ensure_sentence(_normalize_llms_text(metadata["description"])),
+        intro=(
+            "Start with the package llms.txt hub that matches your provider or runtime. "
+            "Each linked hub points to the package docs, examples, and optional references."
+        ),
+        sections=[
+            ("Packages", package_links),
+            ("Optional", optional_links),
+        ],
+    )
+
+
+def _render_root_llms_ctx_txt(
+    repo_root: Path,
+    package_llms_outputs: list[dict[str, Any]],
+) -> str:
+    sources = [
+        {
+            "path": package_output["path"].relative_to(repo_root).as_posix(),
+            "url": package_output["url"],
+            "content": package_output["content"],
+        }
+        for package_output in package_llms_outputs
+    ]
+    return _render_llms_context_file(
+        title="AI Clients Dart Context",
+        intro="This file concatenates the non-optional markdown sources linked from llms.txt in link order.",
+        sources=sources,
+    )
+
+
+def _render_root_llms_ctx_full_txt(
+    repo_root: Path,
+    package_llms_outputs: list[dict[str, Any]],
+) -> str:
+    sources = [
+        {
+            "path": package_output["path"].relative_to(repo_root).as_posix(),
+            "url": package_output["url"],
+            "content": package_output["content"],
+        }
+        for package_output in package_llms_outputs
+    ]
+    readme_path = repo_root / "README.md"
+    if readme_path.exists():
+        sources.append(
+            {
+                "path": readme_path.relative_to(repo_root).as_posix(),
+                "url": _blob_url(repo_root, readme_path),
+                "content": read_text(readme_path),
+            }
+        )
+    return _render_llms_context_file(
+        title="AI Clients Dart Full Context",
+        intro="This file concatenates all markdown sources linked from llms.txt, including Optional links, in link order.",
+        sources=sources,
+    )
+
+
 def _metadata_path(config: ToolkitConfig) -> Path:
     return config.specs_dir / "spec_metadata.json"
 
@@ -3814,11 +4763,19 @@ def command_create(args: Any) -> tuple[int, dict[str, Any]]:
     spec_source_path = specs_dir / ("openapi.source.json" if args.spec_file else "openapi.json")
     canonical_spec_path = specs_dir / "openapi.json"
     license_content = "" if args.dry_run else (repo_root / "LICENSE").read_text()
+    package_description = f"Dart client for the {args.display_name} API."
+    readme_content = _render_readme_scaffold(
+        repo_root,
+        package_name=args.package_name,
+        display_name=args.display_name,
+        version="0.1.0",
+        api_url=_readme_api_url(args.spec_url),
+    )
 
     writes = {
         package_root / "pubspec.yaml": (
             f"name: {args.package_name}\n"
-            f"description: Dart client for the {args.display_name} API.\n"
+            f"description: {package_description}\n"
             "version: 0.1.0\n"
             f"repository: https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/{args.package_name}\n"
             f"issue_tracker: https://github.com/davidmigloz/ai_clients_dart/issues?q=label:p:{args.package_name}\n"
@@ -3835,9 +4792,10 @@ def command_create(args: Any) -> tuple[int, dict[str, Any]]:
             "  mocktail: ^1.0.4\n"
             "  coverage: ^1.15.0\n"
         ),
-        package_root / "README.md": f"# {args.display_name} Dart Client\n\nDart client for the {args.display_name} API.\n",
+        package_root / "README.md": readme_content,
         package_root / "CHANGELOG.md": "## 0.1.0\n\n- Initial bootstrap.\n",
         package_root / "dart_test.yaml": "tags:\n  integration:\n    description: >\n      Register the integration tag to suppress warnings. Integration tests\n      require API keys. Run with: dart test --tags integration\n",
+        package_root / "example" / "example.dart": _render_example_scaffold(args.package_name),
         package_root / "lib" / f"{args.package_name}.dart": "library;\n",
         config_dir / "package.json": json.dumps(package_json, indent=2) + "\n",
         config_dir / "specs.json": json.dumps(specs_json, indent=2) + "\n",
@@ -4194,7 +5152,7 @@ def command_verify(args: Any) -> tuple[int, dict[str, Any]]:
     config = load_toolkit_config(args.config_dir)
     type_name = args.type_name if args.scope == "type" else None
     spec_name = _resolve_selected_spec_name(config, args.spec_name, type_name=type_name)
-    checks = ["implementation", "exports", "docs", "consistency"] if args.checks == "all" else [args.checks]
+    checks = ["implementation", "exports", "docs", "readme", "consistency"] if args.checks == "all" else [args.checks]
 
     results = {}
     exit_code = EXIT_SUCCESS
@@ -4212,6 +5170,8 @@ def command_verify(args: Any) -> tuple[int, dict[str, Any]]:
             result_exit, payload = _verify_exports(config)
         elif check == "docs":
             result_exit, payload = _verify_docs(config)
+        elif check == "readme":
+            result_exit, payload = _verify_readme(config)
         elif check == "consistency":
             result_exit, payload = _verify_consistency(
                 config,
@@ -4248,3 +5208,76 @@ def command_verify(args: Any) -> tuple[int, dict[str, Any]]:
         },
     }
     return exit_code, payload
+
+
+def command_generate_llms_txt(args: Any) -> tuple[int, dict[str, Any]]:
+    if getattr(args, "config_dir", None):
+        config = load_toolkit_config(args.config_dir)
+        package_info = _package_snapshot(config.repo_root, config.package_root)
+        output_path = config.package_root / "llms.txt"
+        content = _render_package_llms_txt(config.repo_root, package_info)
+        if not args.dry_run:
+            _write_file(output_path, content)
+        return EXIT_SUCCESS, {
+            "command": "generate-llms-txt",
+            "mode": "package",
+            "package": package_info["name"],
+            "output": str(output_path),
+            "dry_run": args.dry_run,
+            "preview": content if args.dry_run else None,
+        }
+
+    if not getattr(args, "repo_root", None):
+        raise ToolkitError("Provide either --config-dir or --repo-root")
+
+    repo_root = Path(args.repo_root).resolve()
+    if not (repo_root / "pubspec.yaml").exists():
+        raise ToolkitError(f"Repo root does not contain pubspec.yaml: {repo_root}")
+
+    packages = _discover_repo_packages(repo_root)
+    root_llms_path = repo_root / "llms.txt"
+    root_llms_ctx_path = repo_root / "llms-ctx.txt"
+    root_llms_ctx_full_path = repo_root / "llms-ctx-full.txt"
+    package_llms_outputs = [_package_llms_output(repo_root, package) for package in packages]
+    root_content = _render_root_llms_txt(repo_root, package_llms_outputs)
+    ctx_content = _render_root_llms_ctx_txt(repo_root, package_llms_outputs)
+    ctx_full_content = _render_root_llms_ctx_full_txt(repo_root, package_llms_outputs)
+    package_outputs = {
+        package_output["label"]: {
+            "path": str(package_output["path"]),
+            "content": package_output["content"],
+        }
+        for package_output in package_llms_outputs
+    }
+    if not args.dry_run:
+        _write_file(root_llms_path, root_content)
+        _write_file(root_llms_ctx_path, ctx_content)
+        _write_file(root_llms_ctx_full_path, ctx_full_content)
+        for package_output in package_outputs.values():
+            _write_file(Path(package_output["path"]), package_output["content"])
+        legacy_path = repo_root / "llms-full.txt"
+        if legacy_path.exists():
+            legacy_path.unlink()
+
+    return EXIT_SUCCESS, {
+        "command": "generate-llms-txt",
+        "mode": "repo",
+        "repo_root": str(repo_root),
+        "outputs": [
+            str(root_llms_path),
+            str(root_llms_ctx_path),
+            str(root_llms_ctx_full_path),
+            *(package_output["path"] for package_output in package_outputs.values()),
+        ],
+        "package_count": len(packages),
+        "dry_run": args.dry_run,
+        "preview": {
+            "llms.txt": root_content if args.dry_run else None,
+            "llms-ctx.txt": ctx_content if args.dry_run else None,
+            "llms-ctx-full.txt": ctx_full_content if args.dry_run else None,
+            "packages": {
+                package_name: package_output["content"] if args.dry_run else None
+                for package_name, package_output in package_outputs.items()
+            },
+        },
+    }

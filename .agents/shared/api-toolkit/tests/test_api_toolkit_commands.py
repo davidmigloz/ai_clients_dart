@@ -21,6 +21,7 @@ from api_toolkit.operations import (
     command_create,
     command_describe,
     command_fetch,
+    command_generate_llms_txt,
     command_review,
     command_scaffold,
     command_verify,
@@ -37,6 +38,145 @@ class ApiToolkitCommandTests(unittest.TestCase):
             "workspace:\n"
             "  - packages/existing\n"
         )
+
+    def _write_llms_workspace(self, root: Path) -> None:
+        (root / "pubspec.yaml").write_text(
+            "name: workspace\n"
+            "description: Workspace summary for llms.txt generation.\n"
+            "publish_to: none\n"
+            "workspace:\n"
+            "  - packages/existing\n"
+            "melos:\n"
+            "  repository: https://github.com/example/ai_clients_dart\n"
+        )
+
+    def _write_llms_package(
+        self,
+        root: Path,
+        *,
+        name: str,
+        description: str,
+        readme: str,
+        example_files: dict[str, str],
+        include_changelog: bool = False,
+        include_migration: bool = False,
+    ) -> Path:
+        package_root = root / "packages" / name
+        (package_root / "example").mkdir(parents=True)
+        (package_root / "pubspec.yaml").write_text(
+            f"name: {name}\n"
+            f"description: {description}\n"
+            "version: 0.1.0\n"
+            f"repository: https://github.com/example/ai_clients_dart/tree/main/packages/{name}\n"
+        )
+        (package_root / "README.md").write_text(readme)
+        for filename, content in example_files.items():
+            (package_root / "example" / filename).write_text(content)
+        if include_changelog:
+            (package_root / "CHANGELOG.md").write_text("## 0.1.0\n\n- Initial release.\n")
+        if include_migration:
+            (package_root / "MIGRATION.md").write_text("# Migration\n\nUpgrade notes.\n")
+        return package_root
+
+    def _write_canonical_readme(
+        self,
+        package_root: Path,
+        *,
+        include_examples: bool = True,
+        llms_callout_position: str = "top",
+    ) -> None:
+        llms_callout = (
+            "> [!TIP]\n"
+            "> Coding agents: start with [llms.txt](./llms.txt). It links to the package docs, examples, and optional references in a compact format.\n\n"
+        )
+        sections = [
+            "# Sample Dart Client\n\n",
+        ]
+        if llms_callout_position == "top":
+            sections.append(llms_callout)
+        sections.extend(
+            [
+                "[![sample_dart](https://img.shields.io/pub/v/sample_dart.svg)](https://pub.dev/packages/sample_dart)\n\n",
+                "Dart client for the **Sample API** API. Works with Dart and Flutter on iOS, Android, macOS, Windows, Linux, Web, and server-side Dart.\n\n",
+                "<details>\n"
+                "<summary><b>Table of Contents</b></summary>\n\n"
+                "- [Features](#features)\n"
+                "- [Why choose this client?](#why-choose-this-client)\n"
+                "- [Quickstart](#quickstart)\n"
+                "- [Configuration](#configuration)\n"
+                "- [Usage](#usage)\n"
+                "- [Error Handling](#error-handling)\n"
+                "- [Examples](#examples)\n"
+                "- [API Coverage](#api-coverage)\n"
+                "- [Official Documentation](#official-documentation)\n"
+                "- [Sponsor](#sponsor)\n"
+                "- [License](#license)\n\n"
+                "</details>\n\n",
+            ]
+        )
+        if llms_callout_position == "after_intro":
+            sections.append(llms_callout)
+        sections.extend(
+            [
+                "## Features\n\n"
+                "Coverage: `sample_dart` covers the primary Sample workflows for Dart and Flutter applications.\n\n",
+                "## Why choose this client?\n\n"
+                "- Pure Dart client\n\n",
+                "## Quickstart\n\n"
+                "```yaml\n"
+                "dependencies:\n"
+                "  sample_dart: ^0.1.0\n"
+                "```\n\n"
+                "```dart\n"
+                "Future<void> main() async {}\n"
+                "```\n\n",
+            ]
+        )
+        sections.extend(
+            [
+                "## Configuration\n\n"
+                "<details>\n"
+                "<summary><b>Configuration options</b></summary>\n\n"
+                "Document environment variables here.\n\n"
+                "</details>\n\n",
+                "## Usage\n\n"
+                "### How do I make my first request?\n\n"
+                "```dart\n"
+                "Future<void> main() async {}\n"
+                "```\n\n"
+                "→ [Full example](example/example.dart)\n\n",
+                "## Error Handling\n\n"
+                "```dart\n"
+                "Future<void> main() async {}\n"
+                "```\n\n",
+            ]
+        )
+        if include_examples:
+            sections.extend(
+                [
+                    "## Examples\n\n"
+                    "| Example | Description |\n"
+                    "|---------|-------------|\n"
+                    "| [`example.dart`](example/example.dart) | Package overview example |\n\n",
+                    "## API Coverage\n\n"
+                    "| API | Status |\n"
+                    "|-----|--------|\n"
+                    "| Sample | ✅ Full |\n\n",
+                    "## Official Documentation\n\n"
+                    "- [Sample API Reference](https://example.com/docs)\n\n",
+                ]
+            )
+        sections.extend(
+            [
+                f"## Sponsor\n\n{toolkit_operations.SPONSOR_PARAGRAPH}\n\n",
+                "## License\n\n"
+                "This package is licensed under the [MIT License](../../LICENSE).\n\n",
+            ]
+        )
+        if llms_callout_position == "after_toc":
+            sections.insert(4, llms_callout)
+        (package_root / "README.md").write_text("".join(sections))
+        (package_root / "example" / "example.dart").write_text("void main() {}\n")
 
     def _create_openapi_config(self, root: Path, *, package_name: str = "sample_dart") -> tuple[Path, Path]:
         package_root = root / "packages" / package_name
@@ -1299,6 +1439,50 @@ class ApiToolkitCommandTests(unittest.TestCase):
                 toolkit_config.AuthConfig(location="header", name="Authorization", prefix="Bearer "),
             )
 
+    def test_create_succeeds_when_shared_template_headings_change(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            spec_file = root / "spec.json"
+            spec_file.write_text(
+                json.dumps(
+                    {
+                        "openapi": "3.1.0",
+                        "info": {"title": "Template API", "version": "1"},
+                        "paths": {},
+                        "components": {"schemas": {}},
+                    }
+                )
+            )
+            previous_cwd = Path.cwd()
+            try:
+                os.chdir(root)
+                with patch.object(
+                    toolkit_operations,
+                    "_load_shared_readme_template",
+                    return_value="# arbitrary template\n",
+                ):
+                    exit_code, _ = command_create(
+                        SimpleNamespace(
+                            package_name="template_client_dart",
+                            display_name="Template Client",
+                            spec_url=None,
+                            spec_file=spec_file,
+                            shortname=None,
+                            auth_env_var=[],
+                            repo_root=None,
+                            output_root="packages",
+                            dry_run=False,
+                        )
+                    )
+            finally:
+                os.chdir(previous_cwd)
+
+            self.assertEqual(exit_code, 0)
+            readme_text = (root / "packages" / "template_client_dart" / "README.md").read_text()
+            self.assertIn("# Template Client Dart Client", readme_text)
+
     def test_create_writes_bootstrap_files_and_workspace_entry(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
@@ -1356,6 +1540,15 @@ class ApiToolkitCommandTests(unittest.TestCase):
             self.assertIn("logging: ^1.3.0", pubspec_text)
             self.assertIn("meta: ^1.16.0", pubspec_text)
             self.assertIn("mocktail: ^1.0.4", pubspec_text)
+            readme_text = (package_root / "README.md").read_text()
+            self.assertIn("- [Platform Support](#platform-support)", readme_text)
+            self.assertIn("## Platform Support", readme_text)
+            self.assertIn("[llms.txt](./llms.txt)", readme_text)
+            self.assertLess(readme_text.index("# Bootstrap Client Dart Client"), readme_text.index("[llms.txt](./llms.txt)"))
+            self.assertLess(readme_text.index("[llms.txt](./llms.txt)"), readme_text.index("[![bootstrap_client_dart]"))
+            self.assertLess(readme_text.index("[llms.txt](./llms.txt)"), readme_text.index("## Features"))
+            self.assertIn(toolkit_operations.SPONSOR_PARAGRAPH, readme_text)
+            self.assertIn(toolkit_operations.SPONSOR_WIDGET, readme_text)
             workspace_text = (root / "pubspec.yaml").read_text()
             self.assertIn("  - packages/bootstrap_client_dart\n", workspace_text)
             self.assertIn("creation-plan.md", payload["creation_plan"])
@@ -4308,6 +4501,415 @@ class ApiToolkitCommandTests(unittest.TestCase):
             docs_issues = payload["results"]["docs"]["issues"]
             stale_warnings = [i for i in docs_issues if i.get("level") == "warning" and "stale" in i.get("message", "").lower()]
             self.assertEqual(stale_warnings, [], f"Unexpected stale-reference warnings: {stale_warnings}")
+
+    def test_verify_readme_reports_missing_examples_section(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {
+                        "main": {
+                            "name": "Sample API",
+                            "local_file": "openapi.json",
+                            "fetch_mode": "local_file",
+                            "source_file": "specs/openapi.json",
+                        }
+                    },
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(root / "tmp" / "sample"),
+                },
+            )
+            self._write_canonical_readme(package_root, include_examples=False)
+
+            exit_code, payload = command_verify(
+                SimpleNamespace(
+                    config_dir=config_dir,
+                    spec_name=None,
+                    checks="readme",
+                    scope="all",
+                    type_name=None,
+                    baseline=None,
+                    git_ref=None,
+                )
+            )
+
+            self.assertEqual(exit_code, 0)
+            issues = payload["results"]["readme"]["issues"]
+            missing_names = [i["name"] for i in issues if "missing" in i["message"].lower()]
+            self.assertIn("Examples", missing_names, issues)
+            self.assertIn("API Coverage", missing_names, issues)
+            self.assertIn("Official Documentation", missing_names, issues)
+
+    def test_verify_readme_reports_missing_llms_link(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {
+                        "main": {
+                            "name": "Sample API",
+                            "local_file": "openapi.json",
+                            "fetch_mode": "local_file",
+                            "source_file": "specs/openapi.json",
+                        }
+                    },
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(root / "tmp" / "sample"),
+                },
+            )
+            self._write_canonical_readme(package_root, llms_callout_position="missing")
+
+            exit_code, payload = command_verify(
+                SimpleNamespace(
+                    config_dir=config_dir,
+                    spec_name=None,
+                    checks="readme",
+                    scope="all",
+                    type_name=None,
+                    baseline=None,
+                    git_ref=None,
+                )
+            )
+
+            self.assertEqual(exit_code, 0)
+            issues = payload["results"]["readme"]["issues"]
+            self.assertTrue(
+                any(issue["name"] == "llms.txt" and "./llms.txt" in issue["message"] for issue in issues),
+                issues,
+            )
+
+    def test_verify_readme_passes_with_all_required_sections(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {
+                        "main": {
+                            "name": "Sample API",
+                            "local_file": "openapi.json",
+                            "fetch_mode": "local_file",
+                            "source_file": "specs/openapi.json",
+                        }
+                    },
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(root / "tmp" / "sample"),
+                },
+            )
+            self._write_canonical_readme(package_root)
+
+            exit_code, payload = command_verify(
+                SimpleNamespace(
+                    config_dir=config_dir,
+                    spec_name=None,
+                    checks="readme",
+                    scope="all",
+                    type_name=None,
+                    baseline=None,
+                    git_ref=None,
+                )
+            )
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["results"]["readme"]["issues"], [])
+
+    def test_verify_readme_reports_llms_callout_after_intro(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {
+                        "main": {
+                            "name": "Sample API",
+                            "local_file": "openapi.json",
+                            "fetch_mode": "local_file",
+                            "source_file": "specs/openapi.json",
+                        }
+                    },
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(root / "tmp" / "sample"),
+                },
+            )
+            self._write_canonical_readme(package_root, llms_callout_position="after_intro")
+
+            exit_code, payload = command_verify(
+                SimpleNamespace(
+                    config_dir=config_dir,
+                    spec_name=None,
+                    checks="readme",
+                    scope="all",
+                    type_name=None,
+                    baseline=None,
+                    git_ref=None,
+                )
+            )
+
+            self.assertEqual(exit_code, 0)
+            issues = payload["results"]["readme"]["issues"]
+            self.assertTrue(
+                any(
+                    issue["name"] == "llms.txt"
+                    and "immediately below the h1" in issue["message"].lower()
+                    for issue in issues
+                ),
+                issues,
+            )
+
+    def test_generate_llms_txt_package_mode_emits_link_hub_and_preserves_identifiers(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_llms_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {
+                        "main": {
+                            "name": "Sample API",
+                            "local_file": "openapi.json",
+                            "fetch_mode": "local_file",
+                            "source_file": "specs/openapi.json",
+                        }
+                    },
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(root / "tmp" / "sample"),
+                },
+            )
+            (package_root / "specs" / "openapi.json").write_text(
+                json.dumps({"openapi": "3.1.0", "info": {"title": "Sample", "version": "1"}, "paths": {}, "components": {"schemas": {}}})
+            )
+            (package_root / "pubspec.yaml").write_text(
+                "name: sample_dart\n"
+                "description: Package for anthropic_sdk_dart and OPENAI_API_KEY examples.\n"
+                "version: 0.1.0\n"
+                "repository: https://github.com/example/ai_clients_dart/tree/main/packages/sample_dart\n"
+            )
+            (package_root / "README.md").write_text(
+                "# Sample Dart Client\n\n"
+                "Dart client for `anthropic_sdk_dart` workflows that rely on `OPENAI_API_KEY`.\n\n"
+                "## Usage\n\n"
+                "### How do I stream events?\n\n"
+                "→ [Full example](example/streaming_example.dart)\n"
+            )
+            (package_root / "CHANGELOG.md").write_text("## 0.1.0\n\n- Initial release.\n")
+            (package_root / "MIGRATION.md").write_text("# Migration\n\nUpgrade notes.\n")
+            (package_root / "example" / "streaming_example.dart").write_text("void main() {}\n")
+
+            with patch.object(toolkit_config, "yaml", None), patch.object(toolkit_config, "HAS_YAML", False):
+                exit_code, payload = command_generate_llms_txt(
+                    SimpleNamespace(config_dir=config_dir, repo_root=None, dry_run=True)
+                )
+
+            self.assertEqual(exit_code, 0)
+            preview = payload["preview"]
+            self.assertTrue(preview.startswith("# Sample Dart Client\n\n> Dart client for anthropic_sdk_dart workflows"))
+            self.assertIn("anthropic_sdk_dart", preview)
+            self.assertIn("OPENAI_API_KEY", preview)
+            self.assertIn("## Docs", preview)
+            self.assertIn("## Examples", preview)
+            self.assertIn("## Optional", preview)
+            self.assertIn(
+                "[README](https://github.com/example/ai_clients_dart/blob/main/packages/sample_dart/README.md)",
+                preview,
+            )
+            self.assertIn(
+                "[CHANGELOG](https://github.com/example/ai_clients_dart/blob/main/packages/sample_dart/CHANGELOG.md)",
+                preview,
+            )
+            self.assertIn(
+                "[MIGRATION](https://github.com/example/ai_clients_dart/blob/main/packages/sample_dart/MIGRATION.md)",
+                preview,
+            )
+            self.assertIn(
+                "[streaming_example.dart](https://github.com/example/ai_clients_dart/blob/main/packages/sample_dart/example/streaming_example.dart)",
+                preview,
+            )
+            self.assertIn("[Package directory](https://github.com/example/ai_clients_dart/tree/main/packages/sample_dart)", preview)
+            self.assertNotIn("```", preview)
+            self.assertNotIn("Platforms:", preview)
+            self.assertNotIn("Quickstart entry point:", preview)
+
+    def test_generate_llms_txt_repo_mode_builds_ctx_files_and_fallback_examples(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_llms_workspace(root)
+            self._write_repo_license(root)
+            (root / "README.md").write_text(
+                "# Workspace README\n\n"
+                "Repository overview for optional context.\n\n"
+                "## Usage\n\n"
+                "```md\n"
+                "# Literal code heading\n"
+                "## Another literal code heading\n"
+                "```\n"
+            )
+            self._write_llms_package(
+                root,
+                name="alpha_dart",
+                description="Alpha package.",
+                readme=(
+                    "# Alpha Dart Client\n\n"
+                    "Dart client for alpha provider flows.\n\n"
+                    "## Usage\n\n"
+                    "### How do I send alpha requests?\n\n"
+                    "→ [Full example](example/alpha_example.dart)\n"
+                ),
+                example_files={"alpha_example.dart": "void main() {}\n"},
+                include_changelog=True,
+            )
+            self._write_llms_package(
+                root,
+                name="beta_dart",
+                description="Beta package.",
+                readme="# Beta Dart Client\n\nDart client for beta provider flows.\n",
+                example_files={"fallback_demo.dart": "void main() {}\n"},
+            )
+
+            with patch.object(toolkit_config, "yaml", None), patch.object(toolkit_config, "HAS_YAML", False):
+                exit_code, payload = command_generate_llms_txt(
+                    SimpleNamespace(config_dir=None, repo_root=root, dry_run=True)
+                )
+
+            self.assertEqual(exit_code, 0)
+            root_preview = payload["preview"]["llms.txt"]
+            ctx_preview = payload["preview"]["llms-ctx.txt"]
+            ctx_full_preview = payload["preview"]["llms-ctx-full.txt"]
+            alpha_preview = payload["preview"]["packages"]["alpha_dart"]
+            beta_preview = payload["preview"]["packages"]["beta_dart"]
+
+            self.assertTrue(root_preview.startswith("# AI Clients Dart\n\n> Workspace summary for llms.txt generation."))
+            self.assertIn("## Packages", root_preview)
+            self.assertIn("## Optional", root_preview)
+            self.assertIn(
+                "[alpha_dart](https://github.com/example/ai_clients_dart/blob/main/packages/alpha_dart/llms.txt)",
+                root_preview,
+            )
+            self.assertIn(
+                "[Repository README](https://github.com/example/ai_clients_dart/blob/main/README.md)",
+                root_preview,
+            )
+            self.assertNotIn("###", root_preview)
+            self.assertNotIn("```", root_preview)
+            self.assertNotIn("Platforms:", root_preview)
+            self.assertNotIn("Quickstart entry point:", root_preview)
+
+            self.assertIn("Start with the package llms.txt hub that matches your provider or runtime.", root_preview)
+            self.assertIn("## Source: packages/alpha_dart/llms.txt", ctx_preview)
+            self.assertIn("## Source: packages/beta_dart/llms.txt", ctx_preview)
+            self.assertNotIn("Repository overview for optional context.", ctx_preview)
+            self.assertIn("Repository overview for optional context.", ctx_full_preview)
+            self.assertIn("Canonical URL: https://github.com/example/ai_clients_dart/blob/main/packages/alpha_dart/llms.txt", ctx_preview)
+            self.assertIn("### Alpha Dart Client", ctx_preview)
+            self.assertIn("#### Docs", ctx_preview)
+            self.assertIn("[README](https://github.com/example/ai_clients_dart/blob/main/packages/alpha_dart/README.md)", ctx_preview)
+            self.assertNotIn("## Usage", ctx_preview)
+            self.assertIn("### Workspace README", ctx_full_preview)
+            self.assertIn("#### Usage", ctx_full_preview)
+            self.assertIn("```md\n# Literal code heading\n## Another literal code heading\n```", ctx_full_preview)
+
+            self.assertIn("## Examples", alpha_preview)
+            self.assertIn(
+                "[alpha_example.dart](https://github.com/example/ai_clients_dart/blob/main/packages/alpha_dart/example/alpha_example.dart)",
+                alpha_preview,
+            )
+            self.assertIn("How do I send alpha requests?", alpha_preview)
+            self.assertIn(
+                "[fallback_demo.dart](https://github.com/example/ai_clients_dart/blob/main/packages/beta_dart/example/fallback_demo.dart)",
+                beta_preview,
+            )
+            self.assertIn("Fallback demo example.", beta_preview)
+
+    def test_generate_llms_txt_repo_mode_skips_missing_root_readme(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_llms_workspace(root)
+            self._write_repo_license(root)
+            self._write_llms_package(
+                root,
+                name="delta_dart",
+                description="Delta package.",
+                readme="# Delta Dart Client\n\nDart client for delta provider flows.\n",
+                example_files={"delta_example.dart": "void main() {}\n"},
+            )
+
+            exit_code, payload = command_generate_llms_txt(
+                SimpleNamespace(config_dir=None, repo_root=root, dry_run=True)
+            )
+
+            self.assertEqual(exit_code, 0)
+            root_preview = payload["preview"]["llms.txt"]
+            ctx_full_preview = payload["preview"]["llms-ctx-full.txt"]
+
+            self.assertNotIn("Repository README", root_preview)
+            self.assertNotIn("## Optional", root_preview)
+            self.assertNotIn("## Source: README.md", ctx_full_preview)
+
+    def test_generate_llms_txt_repo_mode_writes_outputs_and_removes_legacy_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_llms_workspace(root)
+            self._write_repo_license(root)
+            (root / "README.md").write_text("# Workspace README\n\nRepository overview for optional context.\n")
+            self._write_llms_package(
+                root,
+                name="gamma_dart",
+                description="Gamma package.",
+                readme="# Gamma Dart Client\n\nDart client for gamma provider flows.\n",
+                example_files={"gamma_example.dart": "void main() {}\n"},
+            )
+            (root / "llms-full.txt").write_text("legacy\n")
+
+            exit_code, payload = command_generate_llms_txt(
+                SimpleNamespace(config_dir=None, repo_root=root, dry_run=False)
+            )
+
+            self.assertEqual(exit_code, 0)
+            self.assertFalse((root / "llms-full.txt").exists())
+            self.assertTrue((root / "llms.txt").exists())
+            self.assertTrue((root / "llms-ctx.txt").exists())
+            self.assertTrue((root / "llms-ctx-full.txt").exists())
+            self.assertTrue((root / "packages" / "gamma_dart" / "llms.txt").exists())
+            self.assertIn(str((root / "packages" / "gamma_dart" / "llms.txt").resolve()), payload["outputs"])
+            generated_root_llms = (root / "llms.txt").read_text()
+            generated_ctx_llms = (root / "llms-ctx.txt").read_text()
+            generated_package_llms = (root / "packages" / "gamma_dart" / "llms.txt").read_text()
+            self.assertIn(
+                "[gamma_dart](https://github.com/example/ai_clients_dart/blob/main/packages/gamma_dart/llms.txt)",
+                generated_root_llms,
+            )
+            self.assertIn("## Source: packages/gamma_dart/llms.txt", generated_ctx_llms)
+            self.assertIn("### Gamma Dart Client", generated_ctx_llms)
+            self.assertIn("## Docs", generated_package_llms)
+            self.assertIn("## Examples", generated_package_llms)
+            self.assertIn("## Optional", generated_package_llms)
+
+    def test_blob_url_rejects_path_outside_repo(self) -> None:
+        from api_toolkit.operations import _blob_url, _tree_url
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_llms_workspace(root)
+            outside = root.parent / "outside.txt"
+            with self.assertRaises(ValueError):
+                _blob_url(root, outside)
+            with self.assertRaises(ValueError):
+                _tree_url(root, outside)
 
     def test_selected_assets_use_local_sentinel_pattern(self) -> None:
         toolkit_root = Path(__file__).resolve().parents[1]
