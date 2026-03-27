@@ -31,5 +31,5 @@ __pycache__/
 *.pyc
 
 # Claude Code
-.claude/scheduled_tasks.lock
+**/.claude/scheduled_tasks.lock
 .claude/worktrees/
