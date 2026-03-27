@@ -604,7 +604,7 @@ Body format:
 
 ## Contributors
 
-@bazz333 and @alfredobs97                          ← only if external contributors exist
+@contributor1 and @contributor2                     ← only if external contributors exist; use actual logins from PR data
 ```
 
 ### Assemble the Contributors section
