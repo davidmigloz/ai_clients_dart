@@ -4532,7 +4532,7 @@ def _render_root_llms_ctx_txt(
     ]
     return _render_llms_context_file(
         title="AI Clients Dart Context",
-        intro="This file concatenates the non-optional markdown sources linked from llms.txt in link order.",
+        intro="This file concatenates the per-package llms.txt sources linked from llms.txt in link order.",
         sources=sources,
     )
 

@@ -1,6 +1,6 @@
 # AI Clients Dart Context
 
-This file concatenates the non-optional markdown sources linked from llms.txt in link order.
+This file concatenates the per-package llms.txt sources linked from llms.txt in link order.
 
 ## Source: packages/anthropic_sdk_dart/llms.txt
 
