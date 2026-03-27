@@ -1,44 +1,174 @@
 # AI Clients Dart
 
-Pure Dart client libraries for popular AI provider APIs, vector databases, and search services. They are designed for Flutter apps, backends, CLIs, and other Dart runtimes across iOS, Android, macOS, Windows, Linux, and Web.
+[![tests](https://img.shields.io/github/actions/workflow/status/davidmigloz/ai_clients_dart/test.yaml?logo=github&label=tests)](https://github.com/davidmigloz/ai_clients_dart/actions/workflows/test.yaml)
+[![Discord](https://img.shields.io/discord/1123158322812555295?label=discord)](https://discord.gg/x4qbhqecVR)
+[![MIT](https://img.shields.io/badge/license-MIT-purple.svg)](https://github.com/davidmigloz/ai_clients_dart/blob/main/LICENSE)
 
-> [!TIP]
-> Coding agents: use [llms.txt](./llms.txt) for package hubs, [llms-ctx.txt](./llms-ctx.txt) for the non-optional concatenated context bundle, and [llms-ctx-full.txt](./llms-ctx-full.txt) for the full bundle including optional sources.
+Type-safe Dart clients for OpenAI, Anthropic, Google Gemini, Mistral, Ollama, and more — all sharing a consistent API shape. Built for Flutter apps, backends, CLIs, and server-side Dart across every platform.
 
-## Which package should I use?
+<details>
+<summary><b>Table of Contents</b></summary>
 
-- `openai_dart` for the full [OpenAI API](https://platform.openai.com/docs/api-reference) in Dart, including Responses, Chat Completions, audio, images, videos, custom tools, evals, and realtime WebSocket/WebRTC workflows.
-- `anthropic_sdk_dart` for the [Anthropic API](https://docs.anthropic.com/en/api), including Claude messages, streaming, tool calling, extended thinking, files, skills, and batch workflows.
-- `googleai_dart` for Gemini on [Google AI](https://ai.google.dev/) and [Vertex AI](https://cloud.google.com/vertex-ai), including generation, embeddings, grounding tools, files, and Live API WebSocket sessions.
-- `mistralai_dart` for the [Mistral AI API](https://docs.mistral.ai/api), including chat, embeddings, OCR, TTS, voice management, reasoning effort, audio transcription, fine-tuning, and beta agent workflows.
-- `ollama_dart` for local and self-hosted [Ollama](https://ollama.com/) deployments, including chat, streaming, embeddings, tool calling, and model lifecycle operations.
-- `open_responses` when you want a Dart client for the [OpenResponses](https://www.openresponses.org/) specification, which brings one typed responses interface to multiple supported providers.
-- `chromadb` for [ChromaDB](https://trychroma.com/) collections, vector search, multi-tenant storage, and RAG pipelines.
-- `openai_realtime_dart` for a smaller, lower-level [OpenAI Realtime API](https://platform.openai.com/docs/guides/realtime) client focused on direct WebSocket sessions.
-- `tavily_dart` for [Tavily](https://tavily.com/) web search and research APIs in agent and RAG workflows.
+- [Quickstart](#quickstart)
+- [Packages](#packages)
+- [Why choose these clients?](#why-choose-these-clients)
+- [Used By](#used-by)
+- [For Coding Agents](#for-coding-agents)
+- [Sponsor](#sponsor)
+- [License](#license)
 
-## Key Features
+</details>
 
-- Type-safe request and response models with sealed classes and ergonomic helpers.
-- Pure Dart implementations that work in Flutter apps, backends, CLIs, and other non-Flutter runtimes.
-- Minimal first-party dependencies (`http`, `logging`, `meta`, and, where needed, `web_socket`).
-- Documentation optimized for coding agents through `llms.txt`, `llms-ctx.txt`, and `llms-ctx-full.txt`.
-- Streaming support, tool calling, retries, interceptors, and multimodal APIs across multiple providers.
-- Consistent package structure with examples, tests, and platform-aware client configuration.
+## Quickstart
+
+Every client follows the same shape — pick a provider and start with a few lines:
+
+<details open>
+<summary><b>OpenAI</b></summary>
+
+```yaml
+dependencies:
+  openai_dart: ^3.0.0
+```
+
+```dart
+import 'package:openai_dart/openai_dart.dart';
+
+Future<void> main() async {
+  final client = OpenAIClient.fromEnvironment();
+
+  try {
+    final response = await client.responses.create(
+      CreateResponseRequest(
+        model: 'gpt-5.4',
+        input: ResponseInput.text('What is the capital of France?'),
+      ),
+    );
+
+    print(response.outputText);
+  } finally {
+    client.close();
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><b>Anthropic</b></summary>
+
+```yaml
+dependencies:
+  anthropic_sdk_dart: ^1.4.0
+```
+
+```dart
+import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
+
+Future<void> main() async {
+  final client = AnthropicClient.fromEnvironment();
+
+  try {
+    final response = await client.messages.create(
+      MessageCreateRequest(
+        model: 'claude-sonnet-4-6',
+        maxTokens: 1024,
+        messages: [InputMessage.user('What is the capital of France?')],
+      ),
+    );
+
+    print(response.text);
+  } finally {
+    client.close();
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><b>Google Gemini</b></summary>
+
+```yaml
+dependencies:
+  googleai_dart: ^4.0.0
+```
+
+```dart
+import 'package:googleai_dart/googleai_dart.dart';
+
+Future<void> main() async {
+  final client = GoogleAIClient.fromEnvironment();
+
+  try {
+    final response = await client.models.generateContent(
+      model: 'gemini-2.5-flash',
+      request: GenerateContentRequest(
+        contents: [Content.text('Explain why Dart works well for APIs.')],
+      ),
+    );
+
+    print(response.text);
+  } finally {
+    client.close();
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><b>Ollama</b></summary>
+
+```yaml
+dependencies:
+  ollama_dart: ^2.0.0
+```
+
+```dart
+import 'package:ollama_dart/ollama_dart.dart';
+
+Future<void> main() async {
+  final client = OllamaClient();
+
+  try {
+    final response = await client.chat.create(
+      request: ChatRequest(
+        model: 'gpt-oss',
+        messages: [ChatMessage.user('Explain what Dart isolates do.')],
+      ),
+    );
+
+    print(response.message?.content);
+  } finally {
+    client.close();
+  }
+}
+```
+
+</details>
 
 ## Packages
 
-| Package | Version | Downloads |
-| --- | --- | --- |
-| [anthropic_sdk_dart](https://pub.dev/packages/anthropic_sdk_dart) | [![anthropic_sdk_dart](https://img.shields.io/pub/v/anthropic_sdk_dart.svg)](https://pub.dev/packages/anthropic_sdk_dart) | ![anthropic_sdk_dart monthly downloads](https://img.shields.io/pub/dm/anthropic_sdk_dart) |
-| [chromadb](https://pub.dev/packages/chromadb) | [![chromadb](https://img.shields.io/pub/v/chromadb.svg)](https://pub.dev/packages/chromadb) | ![chromadb monthly downloads](https://img.shields.io/pub/dm/chromadb) |
-| [googleai_dart](https://pub.dev/packages/googleai_dart) | [![googleai_dart](https://img.shields.io/pub/v/googleai_dart.svg)](https://pub.dev/packages/googleai_dart) | ![googleai_dart monthly downloads](https://img.shields.io/pub/dm/googleai_dart) |
-| [mistralai_dart](https://pub.dev/packages/mistralai_dart) | [![mistralai_dart](https://img.shields.io/pub/v/mistralai_dart.svg)](https://pub.dev/packages/mistralai_dart) | ![mistralai_dart monthly downloads](https://img.shields.io/pub/dm/mistralai_dart) |
-| [ollama_dart](https://pub.dev/packages/ollama_dart) | [![ollama_dart](https://img.shields.io/pub/v/ollama_dart.svg)](https://pub.dev/packages/ollama_dart) | ![ollama_dart monthly downloads](https://img.shields.io/pub/dm/ollama_dart) |
-| [open_responses](https://pub.dev/packages/open_responses) | [![open_responses](https://img.shields.io/pub/v/open_responses.svg)](https://pub.dev/packages/open_responses) | ![open_responses monthly downloads](https://img.shields.io/pub/dm/open_responses) |
-| [openai_dart](https://pub.dev/packages/openai_dart) | [![openai_dart](https://img.shields.io/pub/v/openai_dart.svg)](https://pub.dev/packages/openai_dart) | ![openai_dart monthly downloads](https://img.shields.io/pub/dm/openai_dart) |
-| [openai_realtime_dart](https://pub.dev/packages/openai_realtime_dart) | [![openai_realtime_dart](https://img.shields.io/pub/v/openai_realtime_dart.svg)](https://pub.dev/packages/openai_realtime_dart) | ![openai_realtime_dart monthly downloads](https://img.shields.io/pub/dm/openai_realtime_dart) |
-| [tavily_dart](https://pub.dev/packages/tavily_dart) | [![tavily_dart](https://img.shields.io/pub/v/tavily_dart.svg)](https://pub.dev/packages/tavily_dart) | ![tavily_dart monthly downloads](https://img.shields.io/pub/dm/tavily_dart) |
+| Package | Description | Version | Downloads |
+| --- | --- | --- | --- |
+| [openai_dart](https://pub.dev/packages/openai_dart) | [OpenAI](https://platform.openai.com/docs/api-reference) — Responses, Chat Completions, images, audio, realtime | [![openai_dart](https://img.shields.io/pub/v/openai_dart.svg)](https://pub.dev/packages/openai_dart) | ![openai_dart monthly downloads](https://img.shields.io/pub/dm/openai_dart) |
+| [anthropic_sdk_dart](https://pub.dev/packages/anthropic_sdk_dart) | [Anthropic](https://docs.anthropic.com/en/api) — Claude messages, streaming, tools, extended thinking | [![anthropic_sdk_dart](https://img.shields.io/pub/v/anthropic_sdk_dart.svg)](https://pub.dev/packages/anthropic_sdk_dart) | ![anthropic_sdk_dart monthly downloads](https://img.shields.io/pub/dm/anthropic_sdk_dart) |
+| [googleai_dart](https://pub.dev/packages/googleai_dart) | [Google AI](https://ai.google.dev/) / [Vertex AI](https://cloud.google.com/vertex-ai) — Gemini generation, embeddings, Live API | [![googleai_dart](https://img.shields.io/pub/v/googleai_dart.svg)](https://pub.dev/packages/googleai_dart) | ![googleai_dart monthly downloads](https://img.shields.io/pub/dm/googleai_dart) |
+| [mistralai_dart](https://pub.dev/packages/mistralai_dart) | [Mistral AI](https://docs.mistral.ai/api) — chat, embeddings, OCR, TTS, reasoning, agents | [![mistralai_dart](https://img.shields.io/pub/v/mistralai_dart.svg)](https://pub.dev/packages/mistralai_dart) | ![mistralai_dart monthly downloads](https://img.shields.io/pub/dm/mistralai_dart) |
+| [ollama_dart](https://pub.dev/packages/ollama_dart) | [Ollama](https://ollama.com/) — local chat, streaming, embeddings, tool calling | [![ollama_dart](https://img.shields.io/pub/v/ollama_dart.svg)](https://pub.dev/packages/ollama_dart) | ![ollama_dart monthly downloads](https://img.shields.io/pub/dm/ollama_dart) |
+| [open_responses](https://pub.dev/packages/open_responses) | [OpenResponses](https://www.openresponses.org/) — one typed interface, multiple providers | [![open_responses](https://img.shields.io/pub/v/open_responses.svg)](https://pub.dev/packages/open_responses) | ![open_responses monthly downloads](https://img.shields.io/pub/dm/open_responses) |
+| [chromadb](https://pub.dev/packages/chromadb) | [ChromaDB](https://trychroma.com/) — vector search, collections, multi-tenant RAG | [![chromadb](https://img.shields.io/pub/v/chromadb.svg)](https://pub.dev/packages/chromadb) | ![chromadb monthly downloads](https://img.shields.io/pub/dm/chromadb) |
+| [openai_realtime_dart](https://pub.dev/packages/openai_realtime_dart) | [OpenAI Realtime](https://platform.openai.com/docs/guides/realtime) — lower-level WebSocket sessions | [![openai_realtime_dart](https://img.shields.io/pub/v/openai_realtime_dart.svg)](https://pub.dev/packages/openai_realtime_dart) | ![openai_realtime_dart monthly downloads](https://img.shields.io/pub/dm/openai_realtime_dart) |
+| [tavily_dart](https://pub.dev/packages/tavily_dart) | [Tavily](https://tavily.com/) — web search and research for agents and RAG | [![tavily_dart](https://img.shields.io/pub/v/tavily_dart.svg)](https://pub.dev/packages/tavily_dart) | ![tavily_dart monthly downloads](https://img.shields.io/pub/dm/tavily_dart) |
+
+## Why choose these clients?
+
+- **Pure Dart** — works everywhere: Flutter apps, backends, CLIs, and server-side Dart across iOS, Android, macOS, Windows, Linux, and Web.
+- **Type-safe** — sealed classes, typed request/response models, and ergonomic helpers.
+- **Consistent shape** — same `fromEnvironment()` → `create()` → `close()` pattern across all providers.
+- **Minimal dependencies** — just `http`, `logging`, `meta`, and where needed `web_socket`.
+- **Strict semver** — follows [semver.org](https://semver.org/) so downstream packages can depend on stable, predictable version ranges.
 
 ## Used By
 
@@ -46,15 +176,23 @@ These open-source packages and apps use one or more clients from this repo. For 
 
 ### Packages
 
-- [langchain_dart](https://github.com/davidmigloz/langchain_dart) ![langchain monthly downloads](https://img.shields.io/pub/dm/langchain)
-- [dartantic](https://github.com/csells/dartantic) ![dartantic monthly downloads](https://img.shields.io/pub/dm/dartantic_ai)
-- [genkit-dart](https://github.com/genkit-ai/genkit-dart) ![genkit monthly downloads](https://img.shields.io/pub/dm/genkit)
+| Package | Downloads |
+| --- | --- |
+| [langchain_dart](https://github.com/davidmigloz/langchain_dart) | ![langchain monthly downloads](https://img.shields.io/pub/dm/langchain) |
+| [dartantic](https://github.com/csells/dartantic) | ![dartantic monthly downloads](https://img.shields.io/pub/dm/dartantic_ai) |
+| [genkit-dart](https://github.com/genkit-ai/genkit-dart) | ![genkit monthly downloads](https://img.shields.io/pub/dm/genkit) |
 
 ### Apps
 
-- [Anx Reader](https://github.com/Anxcye/anx-reader) ![Anx Reader stars](https://img.shields.io/github/stars/Anxcye/anx-reader)
-- [ApiDash](https://github.com/foss42/apidash) ![ApiDash stars](https://img.shields.io/github/stars/foss42/apidash)
-- [Lotti](https://github.com/matthiasn/lotti) ![Lotti stars](https://img.shields.io/github/stars/matthiasn/lotti)
+| App | Stars |
+| --- | --- |
+| [Anx Reader](https://github.com/Anxcye/anx-reader) | ![Anx Reader stars](https://img.shields.io/github/stars/Anxcye/anx-reader) |
+| [ApiDash](https://github.com/foss42/apidash) | ![ApiDash stars](https://img.shields.io/github/stars/foss42/apidash) |
+| [Lotti](https://github.com/matthiasn/lotti) | ![Lotti stars](https://img.shields.io/github/stars/matthiasn/lotti) |
+
+## For Coding Agents
+
+Use [llms.txt](./llms.txt) for package hubs, [llms-ctx.txt](./llms-ctx.txt) for the non-optional concatenated context bundle, and [llms-ctx-full.txt](./llms-ctx-full.txt) for the full bundle including optional sources.
 
 ## Sponsor
 
