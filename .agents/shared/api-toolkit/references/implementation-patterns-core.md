@@ -1,6 +1,6 @@
 # Core Implementation Patterns
 
-**Contents:** [Manifest Kinds](#manifest-kind-values) · [Type Safety](#type-safety-patterns) · [toString](#tostring-convention) · [Equality & Hashing](#equality-and-hashing) · [fromJson Patterns](#fromjson-defensive-patterns) · [Nullable Serialization](#nullable-field-serialization) · [HTTP Client](#http-client-patterns) · [DateTime](#datetime-handling) · [Security](#security) · [JSON](#json-serialization) · [SSE Parsing](#sse-parser-correctness) · [API Design](#api-design)
+**Contents:** [Manifest Kinds](#manifest-kind-values) · [Type Safety](#type-safety-patterns) · [toString](#tostring-convention) · [Equality & Hashing](#equality-and-hashing) · [Immutability](#immutability-enforcement) · [fromJson Patterns](#fromjson-defensive-patterns) · [Nullable Serialization](#nullable-field-serialization) · [HTTP Client](#http-client-patterns) · [DateTime](#datetime-handling) · [Security](#security) · [JSON](#json-serialization) · [SSE Parsing](#sse-parser-correctness) · [API Design](#api-design)
 
 - Keep specs checked in under package `specs/` and compare them against fetched scratch specs.
 - Keep Dart serialization handwritten and deterministic.
@@ -95,6 +95,32 @@ When adding a field to a model class, update **all four**:
 2. `hashCode` — include the field
 3. `toString` — print the field
 4. `copyWith` — expose the field
+
+## Immutability Enforcement
+
+Classes annotated `@immutable` must store deeply unmodifiable copies of mutable
+collections. Accepting a raw `Map` or `List` constructor parameter and storing
+it directly allows callers to mutate the object after construction:
+
+```dart
+// WRONG — stores mutable reference
+@immutable
+class SchemaFormat {
+  const SchemaFormat({required this.properties});
+  final Map<String, dynamic> properties; // caller can modify after construction
+}
+
+// CORRECT — store unmodifiable copy
+@immutable
+class SchemaFormat {
+  SchemaFormat({required Map<String, dynamic> properties})
+      : properties = Map.unmodifiable(properties);
+  final Map<String, dynamic> properties;
+}
+```
+
+For deeply nested structures (`Map<String, List<String>>`), use recursive
+unmodifiable wrappers or document that inner collections must not be mutated.
 
 ## fromJson Defensive Patterns
 
@@ -245,6 +271,21 @@ Always redact credential-bearing query parameters (`key`, `access_token`,
 `api_key`) before logging URLs. Use a redaction utility — never log raw
 `request.url` when credentials may be in the query string.
 
+### toString Credential Safety
+
+Never include authentication tokens verbatim in `toString()` output. Credentials
+can leak via logs, exception messages, and debug output:
+
+```dart
+// WRONG — full token exposed
+@override
+String toString() => 'Config(token: $authorizationToken, ...)';
+
+// CORRECT — redacted
+@override
+String toString() => 'Config(token: ${authorizationToken.substring(0, 4)}***, ...)';
+```
+
 ## JSON Serialization
 
 Always use `jsonEncode()` for JSON serialization — never `.toString()` on maps
@@ -277,6 +318,29 @@ currentEvent = null;  // always reset on blank line
 
 Multiple `data:` lines for the same event must be joined with `\n` per the SSE
 specification.
+
+### `[DONE]` Termination
+
+When the SSE stream sends `data: [DONE]`, the parser must flush any buffered
+event data and terminate cleanly. Do not attempt to JSON-parse `[DONE]` as a
+data payload.
+
+### Synthetic Error Map Completeness
+
+When constructing synthetic error event maps from HTTP error responses, always
+include a `type` field so consumers dispatching on event type can handle errors:
+
+```dart
+// WRONG — no type field, consumer switch/case falls through
+yield {'error': {'message': body}};
+
+// CORRECT — includes type for dispatch
+yield {'type': 'error', 'error': {'message': body}};
+```
+
+When implementing `withoutEventType()` or similar event-stripping helpers,
+preserve `_rawData` so error event consumers can still access the original
+payload.
 
 ### Streaming Field Nullability
 
