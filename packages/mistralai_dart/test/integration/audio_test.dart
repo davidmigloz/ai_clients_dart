@@ -35,18 +35,17 @@ String _resolveSamplesDir() {
 /// These tests require a real API key set in the MISTRAL_API_KEY
 /// environment variable. If the key is not present, all tests are skipped.
 void main() {
-  String? apiKey;
   MistralClient? client;
 
   setUpAll(() {
-    apiKey = io.Platform.environment[apiKeyEnvVar];
-    if (apiKey == null || apiKey!.isEmpty) {
+    final apiKey = io.Platform.environment[apiKeyEnvVar];
+    if (apiKey == null || apiKey.isEmpty) {
       print(
         '⚠️  $apiKeyEnvVar not set. Integration tests will be skipped.\n'
         '   To run these tests, export $apiKeyEnvVar=your_api_key',
       );
     } else {
-      client = MistralClient.withApiKey(apiKey!);
+      client = MistralClient.withApiKey(apiKey);
     }
   });
 
@@ -66,14 +65,14 @@ void main() {
       'generates speech from text',
       timeout: const Timeout(Duration(minutes: 2)),
       () async {
-        if (apiKey == null) {
+        if (client == null) {
           markTestSkipped('API key not available');
           return;
         }
 
         final response = await client!.audio.speech.create(
           request: SpeechRequest(
-            model: defaultTTSModel,
+            model: defaultTtsModel,
             input: 'Hello, this is a test of Voxtral text-to-speech.',
             refAudio: refAudioB64,
           ),
@@ -87,14 +86,14 @@ void main() {
       'generates speech in WAV format',
       timeout: const Timeout(Duration(minutes: 2)),
       () async {
-        if (apiKey == null) {
+        if (client == null) {
           markTestSkipped('API key not available');
           return;
         }
 
         final response = await client!.audio.speech.create(
           request: SpeechRequest(
-            model: defaultTTSModel,
+            model: defaultTtsModel,
             input: 'The quick brown fox jumps over the lazy dog.',
             refAudio: refAudioB64,
             responseFormat: SpeechOutputFormat.wav,
@@ -109,14 +108,14 @@ void main() {
       'streams speech from text',
       timeout: const Timeout(Duration(minutes: 2)),
       () async {
-        if (apiKey == null) {
+        if (client == null) {
           markTestSkipped('API key not available');
           return;
         }
 
         final stream = client!.audio.speech.createStream(
           request: SpeechRequest(
-            model: defaultTTSModel,
+            model: defaultTtsModel,
             input: 'Streaming makes voice agents feel more responsive.',
             refAudio: refAudioB64,
             responseFormat: SpeechOutputFormat.pcm,
@@ -142,7 +141,7 @@ void main() {
       'lists available voices',
       timeout: const Timeout(Duration(minutes: 1)),
       () async {
-        if (apiKey == null) {
+        if (client == null) {
           markTestSkipped('API key not available');
           return;
         }

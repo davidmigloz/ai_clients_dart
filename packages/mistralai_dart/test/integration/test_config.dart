@@ -20,7 +20,7 @@ const defaultFimModel = 'codestral-latest';
 const defaultModerationModel = 'mistral-moderation-latest';
 
 /// The default TTS model to use for text-to-speech tests.
-const defaultTTSModel = 'voxtral-mini-tts-2603';
+const defaultTtsModel = 'voxtral-mini-tts-2603';
 
 /// The environment variable name for the Mistral API key.
 const apiKeyEnvVar = 'MISTRAL_API_KEY';
