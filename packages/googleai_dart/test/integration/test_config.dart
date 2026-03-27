@@ -16,7 +16,7 @@ const defaultInteractionsModel = 'gemini-3-flash-preview';
 
 /// The default model to use for Live API WebSocket streaming tests.
 /// Note: This is a preview model - ID may change.
-const defaultLiveModel = 'gemini-2.5-flash-native-audio-preview-12-2025';
+const defaultLiveModel = 'gemini-3.1-flash-live-preview';
 
 /// The default model to use for TTS (Text-to-Speech) tests.
 /// Note: This is a preview model - ID may change.

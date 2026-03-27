@@ -227,13 +227,18 @@ void main() {
 
       // Should receive response
       var receivedContent = false;
-      await for (final message in session.messages) {
-        if (message is BidiGenerateContentServerContent) {
-          receivedContent = true;
-          if (message.turnComplete ?? false) {
-            break;
+      try {
+        await for (final message in session.messages) {
+          if (message is BidiGenerateContentServerContent) {
+            receivedContent = true;
+            if (message.turnComplete ?? false) {
+              break;
+            }
           }
         }
+      } on LiveSessionClosedException {
+        markTestSkipped('Model does not support manual VAD');
+        return;
       }
 
       expect(receivedContent, isTrue);
