@@ -201,7 +201,8 @@ class LiveClient {
 
       case ApiMode.vertexAI:
         // Vertex AI endpoint
-        // wss://{location}-aiplatform.googleapis.com/ws/google.cloud.aiplatform.v1beta1.PredictionService.BidiGenerateContent
+        // wss://{location}-aiplatform.googleapis.com/ws/...
+        // ('global' uses aiplatform.googleapis.com without location prefix)
         final location = _config.location ?? 'us-central1';
         final projectId = _config.projectId;
 
@@ -211,7 +212,7 @@ class LiveClient {
           );
         }
 
-        final host = '$location-aiplatform.googleapis.com';
+        final host = GoogleAIConfig.vertexAIHost(location);
         final version = _config.apiVersion == ApiVersion.v1 ? 'v1' : 'v1beta1';
 
         queryParams['project'] = projectId;

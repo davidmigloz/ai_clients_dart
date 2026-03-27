@@ -8,7 +8,7 @@ import 'dart:io';
 /// | Feature | Google AI | Vertex AI |
 /// |---------|-----------|-----------|
 /// | Authentication | API Key | OAuth 2.0 with service accounts |
-/// | Endpoint | generativelanguage.googleapis.com | {location}-aiplatform.googleapis.com |
+/// | Endpoint | generativelanguage.googleapis.com | aiplatform.googleapis.com (varies by location) |
 /// | Use Case | Quick prototyping | Enterprise apps with advanced controls |
 /// | Enterprise Features | None | VPC controls, CMEK, data residency, HIPAA |
 ///

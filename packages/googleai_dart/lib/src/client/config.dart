@@ -23,6 +23,7 @@ enum ApiMode {
   googleAI,
 
   /// Vertex AI - Uses {location}-aiplatform.googleapis.com with GCP project
+  /// (`aiplatform.googleapis.com` for the `global` location).
   vertexAI,
 }
 
@@ -181,6 +182,11 @@ class GoogleAIConfig {
   /// Requires [projectId] and [location] for GCP integration.
   /// Authentication must use OAuth 2.0 with service account credentials.
   ///
+  /// The [location] determines the API endpoint:
+  /// - `'global'` → `https://aiplatform.googleapis.com`
+  /// - Other values (e.g. `'us-central1'`) →
+  ///   `https://{location}-aiplatform.googleapis.com`
+  ///
   /// Example:
   /// ```dart
   /// final config = GoogleAIConfig.vertexAI(
@@ -213,9 +219,7 @@ class GoogleAIConfig {
       'access_token', // Ephemeral token query param
     ],
   }) : this(
-         baseUrl: location == 'global'
-             ? 'https://aiplatform.googleapis.com'
-             : 'https://$location-aiplatform.googleapis.com',
+         baseUrl: vertexAIBaseUrl(location),
          apiMode: ApiMode.vertexAI,
          apiVersion: apiVersion,
          projectId: projectId,
@@ -255,6 +259,25 @@ class GoogleAIConfig {
       timeout: timeout,
       retryPolicy: retryPolicy,
     );
+  }
+
+  /// Returns the Vertex AI hostname for the given [location].
+  ///
+  /// - `'global'` → `aiplatform.googleapis.com`
+  /// - Other values → `{location}-aiplatform.googleapis.com`
+  static String vertexAIHost(String location) {
+    if (location == 'global') {
+      return 'aiplatform.googleapis.com';
+    }
+    return '$location-aiplatform.googleapis.com';
+  }
+
+  /// Returns the Vertex AI base URL for the given [location].
+  ///
+  /// - `'global'` → `https://aiplatform.googleapis.com`
+  /// - Other values → `https://{location}-aiplatform.googleapis.com`
+  static String vertexAIBaseUrl(String location) {
+    return 'https://${vertexAIHost(location)}';
   }
 
   /// Creates a copy with overridden values.
