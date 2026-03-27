@@ -10,10 +10,10 @@ funding:
   - https://github.com/sponsors/davidmigloz
 
 topics:
-  - nlp
   - gen-ai
   - llms
   - openresponses
+  - responses-api
 
 environment:
   sdk: ">=3.9.0 <4.0.0"

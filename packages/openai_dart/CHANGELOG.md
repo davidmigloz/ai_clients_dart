@@ -1,6 +1,6 @@
 ## 2.0.0
 
-> Note: This release has breaking changes.
+> Note: This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
 
 Made non-streaming response parsing robust for third-party OpenAI-compatible providers (AWS Bedrock proxies, Ollama, vLLM, TogetherAI, OpenRouter, etc.) by relaxing strict casts in `fromJson` while keeping constructor invariants strict. Added `ResponseStreamExtensions` for convenient stream event filtering/mapping, `copyWith` methods to all `ResponseStreamEvent` subtypes and `ChatMessage`/`ContentPart`, and updated `RunStep`, `Message`, `Tool`, and `EmbeddingRequest` models with additional fields from the latest API spec.
 
@@ -54,7 +54,7 @@ Fixed Responses API model types to align with the latest OpenAI spec.
 
 ## 1.0.0
 
-> Note: This release has breaking changes.
+> Note: This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
 
 **TL;DR**: Complete reimplementation with a new architecture, minimal dependencies, resource-based API, and improved developer experience. Hand-crafted models (no code generation), interceptor-driven architecture, comprehensive error handling, full OpenAI API coverage, and alignment with the latest OpenAI OpenAPI (2026-02-19).
 
@@ -182,7 +182,7 @@ See **[MIGRATION.md](MIGRATION.md)** for step-by-step examples and mapping table
 
 ## 0.6.0
 
-> Note: This release has breaking changes.
+> Note: This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
 
 - **FIX**: Correct text content serialization in CreateMessageRequest ([#805](https://github.com/davidmigloz/langchain_dart/issues/805)). ([e4569c96](https://github.com/davidmigloz/langchain_dart/commit/e4569c96ede23223ca23711579d2415bd05b4e27))
 - **FIX**: Handle optional space after colon in SSE parser ([#779](https://github.com/davidmigloz/langchain_dart/issues/779)). ([9defa827](https://github.com/davidmigloz/langchain_dart/commit/9defa827ce145533a85ead2bccfc25f5fa069358))
@@ -315,7 +315,7 @@ See **[MIGRATION.md](MIGRATION.md)** for step-by-step examples and mapping table
 
 ## 0.3.0
 
-> Note: This release has breaking changes.  
+> Note: This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
 > If you are using the Assistants API v1, please refer to the [OpenAI docs](https://platform.openai.com/docs/api-reference/assistants) to see how to migrate to v2.
 
 - **BREAKING** **FEAT**: Migrate OpenAI Assistants API to v2 and add support for vector stores ([#402](https://github.com/davidmigloz/langchain_dart/issues/402)). ([45de29a1](https://github.com/davidmigloz/langchain_dart/commit/45de29a1957caf2ef05c91e4c99144a4e73ceb91))
@@ -401,7 +401,7 @@ See **[MIGRATION.md](MIGRATION.md)** for step-by-step examples and mapping table
 
 ## 0.1.0
 
-> Note: This release has breaking changes.
+> Note: This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
 > Migration guides: [new factories](https://github.com/davidmigloz/langchain_dart/issues/215) and [multi-modal](https://github.com/davidmigloz/langchain_dart/issues/218)
 
 - **BREAKING** **FEAT**: Add multi-modal support ([#218](https://github.com/davidmigloz/langchain_dart/issues/218)). ([14c8e7ef](https://github.com/davidmigloz/langchain_dart/commit/14c8e7ef7194400057d40422822df1127c4cb131))

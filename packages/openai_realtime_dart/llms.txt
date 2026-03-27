@@ -1,0 +1,16 @@
+# OpenAI Realtime API Dart Client
+
+> Strongly-typed Dart client for the OpenAI Realtime API, a stateful, event-based API that communicates over a WebSocket for voice and text interactions in Dart and Flutter apps.
+
+## Docs
+
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_realtime_dart/README.md): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_realtime_dart/CHANGELOG.md): Release history and version-by-version changes.
+
+## Examples
+
+- [openai_realtime_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_realtime_dart/example/openai_realtime_dart_example.dart): Package overview example.
+
+## Optional
+
+- [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/openai_realtime_dart): Source tree, pubspec, and package-local files.

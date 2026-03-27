@@ -1,5 +1,13 @@
 # Migration Guide
 
+This guide covers breaking changes between major versions of `ollama_dart`.
+
+For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
+
+---
+
+## Migrating from v0.x to v1.0.0
+
 This guide helps you migrate from the old `ollama_dart` client (v0.x) to the new **v1.0.0** (complete rewrite with resource-based organization and improved architecture).
 
 ## Overview of Changes
@@ -673,13 +681,3 @@ Available values:
 - `MessageRole.user`
 - `MessageRole.assistant`
 - `MessageRole.tool`
-
-## Getting Help
-
-* Browse the [examples](example/)
-* Check the [API docs](https://pub.dev/documentation/ollama_dart/latest/)
-* Open an issue: [https://github.com/davidmigloz/ai_clients_dart/issues](https://github.com/davidmigloz/ai_clients_dart/issues)
-
----
-
-For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).

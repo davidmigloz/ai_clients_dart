@@ -57,7 +57,7 @@ Added thoughtSignature support for FunctionCallPart and ThoughtPart, pre-release
 
 ## 3.0.0
 
-> Note: This release has breaking changes.
+> Note: This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
 
 - **FEAT**: add convenience helpers for improved DX ([#924](https://github.com/davidmigloz/langchain_dart/issues/924)). ([634b4f97](https://github.com/davidmigloz/langchain_dart/commit/634b4f970ec3264cddaa6e42d7d03fc8af3593ff))
 - **FEAT**: Update default models to Gemini 3 family ([#922](https://github.com/davidmigloz/langchain_dart/issues/922)). ([62bca9da](https://github.com/davidmigloz/langchain_dart/commit/62bca9da1abc4a64267c2d3085ad969cad33f4d6))
@@ -72,7 +72,7 @@ Added thoughtSignature support for FunctionCallPart and ThoughtPart, pre-release
 
 ## 2.0.0
 
-> Note: This release has breaking changes.
+> Note: This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
 
 - **BREAKING** **FEAT**: Remove deprecated schema fields ([#848](https://github.com/davidmigloz/langchain_dart/issues/848)). ([e6d07ec4](https://github.com/davidmigloz/langchain_dart/commit/e6d07ec4a94d1b09e9dbd71f30904d510fb749c6))
 - **BREAKING** **FEAT**: Remove deprecated Chunks and query APIs ([#847](https://github.com/davidmigloz/langchain_dart/issues/847)). ([9cae76d5](https://github.com/davidmigloz/langchain_dart/commit/9cae76d534d45bcd36622216a0926bfbc8800d86))
@@ -101,7 +101,7 @@ Added thoughtSignature support for FunctionCallPart and ThoughtPart, pre-release
 
 ## 1.0.0
 
-> Note: This release has breaking changes.
+> Note: This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
 
 **TL;DR**: Complete reimplementation with a new architecture, minimal dependencies, unified resource-based API, and full Gemini API coverage. Includes new Files, Batches, Caching, Corpora/RAG, RAG Stores, Dynamic Content, Permissions, Tuned Models, and Prediction (Veo) support.
 

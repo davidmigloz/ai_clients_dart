@@ -4,478 +4,458 @@
 [![open_responses](https://img.shields.io/pub/v/open_responses.svg)](https://pub.dev/packages/open_responses)
 [![MIT](https://img.shields.io/badge/license-MIT-purple.svg)](https://github.com/davidmigloz/ai_clients_dart/blob/main/LICENSE)
 
-Dart client for the [OpenResponses](https://www.openresponses.org/) API specification.
+Dart client for the **[OpenResponses specification](https://www.openresponses.org/)** with streaming, tool calling, structured output, and multi-turn responses across multiple providers. It gives Dart and Flutter applications a pure Dart, type-safe client across iOS, Android, macOS, Windows, Linux, Web, and server-side Dart.
 
-OpenResponses is an open-source specification that provides a unified interface for interacting with multiple LLM providers. This package implements the OpenResponses spec in Dart, enabling you to write code once and deploy across various model providers with minimal changes.
+> [!TIP]
+> Coding agents: start with [llms.txt](./llms.txt). It links to the package docs, examples, and optional references in a compact format.
 
 <details>
 <summary><b>Table of Contents</b></summary>
 
 - [Features](#features)
 - [Why choose this client?](#why-choose-this-client)
-- [Supported Providers](#supported-providers)
-- [Installation](#installation)
-- [Quick Start](#quick-start)
-- [Usage](#usage)
-- [Convenience Extensions](#convenience-extensions)
-- [Message Items](#message-items)
-- [Error Handling](#error-handling)
+- [Quickstart](#quickstart)
 - [Configuration](#configuration)
+- [Usage](#usage)
+- [Error Handling](#error-handling)
 - [Examples](#examples)
 - [API Coverage](#api-coverage)
-- [Platform Support](#platform-support)
-- [Development](#development)
-- [Documentation](#documentation)
+- [Official Documentation](#official-documentation)
+- [Sponsor](#sponsor)
 - [License](#license)
 
 </details>
 
 ## Features
 
-- **Single Endpoint API**: Simple `POST /v1/responses` for all interactions
-- **Streaming Support**: Real-time Server-Sent Events (SSE) streaming
-- **Multi-modal Content**: Text, images, files, and video support
-- **Tool/Function Calling**: Define and invoke custom functions
-- **MCP Tools**: Remote Model Context Protocol tool integration
-- **Reasoning Models**: Support for o1 and other reasoning models
-- **Structured Output**: JSON Schema response format
-- **Multi-turn Conversations**: Context preservation with `previousResponseId`
-- **Type-safe API**: Full Dart null safety
+### Core response workflows
+
+- Single typed responses endpoint for text, multimodal input, and reasoning models
+- SSE streaming with incremental text and event handling
+- Tool calling, MCP tools, and structured outputs with JSON schema
+- Multi-turn conversations through `previousResponseId`
+
+### Provider portability
+
+- Works with OpenAI-compatible services, local runtimes, and custom gateways
+- Pure Dart client surface for backends, CLIs, and Flutter apps
+- Interceptors, retries, and typed metadata across providers
+
+### Supported providers
+
+`open_responses` works with any service that implements the OpenResponses or OpenAI-compatible response shape.
+
+| Provider | Base URL | Auth | Typical use case |
+| --- | --- | --- | --- |
+| OpenAI | `https://api.openai.com/v1` | Bearer token | Hosted production models |
+| Ollama | `http://localhost:11434/v1` | None by default | Local models and offline development |
+| Hugging Face Spaces | Custom Space URL | Bearer token | Hosted open models |
+| OpenRouter | `https://openrouter.ai/api/v1` | Bearer token | Multi-provider routing |
+| [Vercel AI Gateway](https://vercel.com/docs/ai-gateway/sdks-and-apis/openresponses) | `https://ai-gateway.vercel.sh/v1` | Bearer token | Edge-deployed AI gateway |
+| [Databricks](https://docs.databricks.com/aws/en/machine-learning/model-serving/score-model-serving-endpoints) | `https://<host>.databricks.com/serving-endpoints` | Bearer token | Enterprise model serving |
+| [vLLM](https://docs.vllm.ai/en/latest/examples/online_serving/openai_responses_client/) | `http://localhost:8000/v1` | None by default | High-throughput local inference |
+| LM Studio | `http://localhost:1234/v1` | None by default | Desktop local inference |
 
 ## Why choose this client?
 
-- ✅ Type-safe with sealed classes
-- ✅ Minimal dependencies (http, logging only)
-- ✅ Works on all compilation targets (native, web, WASM)
-- ✅ Interceptor-driven architecture
-- ✅ Comprehensive error handling
-- ✅ Automatic retry with exponential backoff
-- ✅ SSE streaming support
-- ✅ Multi-provider compatible (OpenAI, Ollama, HuggingFace, etc.)
+- Pure Dart with no Flutter dependency — works in mobile apps, backends, and CLIs.
+- Type-safe request and response models with minimal dependencies (`http`, `logging`, `meta`).
+- Streaming, retries, interceptors, and error handling built into the client.
+- One request format works across providers, reducing migration cost and vendor lock-in.
 
-## Supported Providers
-
-The OpenResponses specification is supported by multiple providers:
-
-| Provider | Base URL | Auth | Features |
-|----------|----------|------|----------|
-| **OpenAI** | `https://api.openai.com/v1` | Bearer token | Full support including multi-turn |
-| **Ollama** | `http://localhost:11434/v1` | None (local) | Local models |
-| **Hugging Face** | Custom Space URL | Bearer token | Various models |
-| **OpenRouter** | `https://openrouter.ai/api/v1` | Bearer token | Multiple providers |
-| **LM Studio** | `http://localhost:1234/v1` | None (local) | Local models |
-
-## Installation
-
-Add `open_responses` to your `pubspec.yaml`:
+## Quickstart
 
 ```yaml
 dependencies:
-  open_responses: ^x.y.z
+  open_responses: ^0.1.5
 ```
-
-Then run:
-
-```bash
-dart pub get
-```
-
-## Quick Start
 
 ```dart
 import 'package:open_responses/open_responses.dart';
 
-void main() async {
+Future<void> main() async {
   final client = OpenResponsesClient(
     config: OpenResponsesConfig(
       baseUrl: 'https://api.openai.com/v1',
-      authProvider: BearerTokenProvider('your-api-key'),
+      authProvider: BearerTokenProvider('YOUR_API_KEY'),
     ),
   );
 
-  final response = await client.responses.create(
-    CreateResponseRequest.text(
-      model: 'gpt-4o',
-      input: 'What is the capital of France?',
+  try {
+    final response = await client.responses.create(
+      CreateResponseRequest.text(
+        model: 'gpt-4o',
+        input: 'What is the capital of France?',
+      ),
+    );
+
+    print(response.outputText);
+  } finally {
+    client.close();
+  }
+}
+```
+
+## Configuration
+
+<details>
+<summary><b>Configure provider URLs, auth, and retries</b></summary>
+
+Use `OpenResponsesClient.fromEnvironment()` for OpenAI-style defaults, or provide `OpenResponsesConfig` directly when you target another provider. This keeps provider switching explicit and easy to test.
+
+```dart
+import 'package:open_responses/open_responses.dart';
+
+Future<void> main() async {
+  final client = OpenResponsesClient(
+    config: OpenResponsesConfig(
+      baseUrl: 'http://localhost:11434/v1',
+      timeout: const Duration(minutes: 5),
+      retryPolicy: RetryPolicy(
+        maxRetries: 3,
+        initialDelay: Duration(seconds: 1),
+      ),
     ),
   );
-
-  print(response.outputText); // Paris is the capital of France.
 
   client.close();
 }
 ```
 
-Or use environment variables (`OPENAI_API_KEY` and optionally `OPENAI_BASE_URL`):
+Environment variables:
 
-```dart
-// From environment variables (reads OPENAI_API_KEY and OPENAI_BASE_URL)
-final client = OpenResponsesClient.fromEnvironment();
-```
+- `OPENAI_API_KEY`
+- `OPENAI_BASE_URL`
+
+Use explicit configuration on web builds where runtime environment variables are not available.
+
+</details>
 
 ## Usage
 
-### Basic Usage
+### How do I create a response?
 
 <details>
-<summary><b>Basic Usage Example</b></summary>
+<summary><b>Show example</b></summary>
+
+The `CreateResponseRequest.text(...)` helper keeps simple requests short, while the full request type remains available for advanced configurations. `response.outputText` is the fastest path for text-first integrations.
 
 ```dart
 import 'package:open_responses/open_responses.dart';
 
-final client = OpenResponsesClient(
-  config: OpenResponsesConfig(
-    baseUrl: 'https://api.openai.com/v1',
-    authProvider: BearerTokenProvider('your-api-key'),
-  ),
-);
-
-final response = await client.responses.create(
-  CreateResponseRequest.text(
-    model: 'gpt-4o',
-    input: 'What is the capital of France?',
-  ),
-);
-
-print(response.outputText); // Paris is the capital of France.
-
-client.close();
-```
-
-</details>
-
-### Streaming
-
-<details>
-<summary><b>Streaming Example</b></summary>
-
-```dart
-// Using the builder pattern
-final runner = client.responses.stream(
-  CreateResponseRequest.text(
-    model: 'gpt-4o',
-    input: 'Write a haiku about programming.',
-  ),
-)..onTextDelta(stdout.write);
-
-final response = await runner.finalResponse;
-print('\nDone!');
-
-// Or iterate events manually
-await for (final event in client.responses.createStream(request)) {
-  if (event is OutputTextDeltaEvent) {
-    stdout.write(event.delta);
-  }
-}
-```
-
-</details>
-
-### Tool Calling
-
-<details>
-<summary><b>Tool Calling Example</b></summary>
-
-```dart
-final response = await client.responses.create(
-  CreateResponseRequest(
-    model: 'gpt-4o',
-    input: ResponseTextInput('What is the weather in San Francisco?'),
-    tools: [
-      FunctionTool(
-        name: 'get_weather',
-        description: 'Get the current weather',
-        parameters: {
-          'type': 'object',
-          'properties': {
-            'location': {'type': 'string'},
-          },
-          'required': ['location'],
-        },
-      ),
-    ],
-  ),
-);
-
-if (response.hasToolCalls) {
-  for (final call in response.functionCalls) {
-    print('Function: ${call.name}');
-    print('Arguments: ${call.arguments}');
-  }
-}
-```
-
-</details>
-
-### Multi-turn Conversations
-
-<details>
-<summary><b>Multi-turn Conversation Example</b></summary>
-
-```dart
-// First turn
-final response1 = await client.responses.create(
-  CreateResponseRequest.text(
-    model: 'gpt-4o',
-    input: 'My name is Alice.',
-  ),
-);
-
-// Second turn - model remembers context
-final response2 = await client.responses.create(
-  CreateResponseRequest(
-    model: 'gpt-4o',
-    input: ResponseTextInput('What is my name?'),
-    previousResponseId: response1.id,
-  ),
-);
-
-print(response2.outputText); // Your name is Alice.
-```
-
-</details>
-
-### Structured Output
-
-<details>
-<summary><b>Structured Output Example</b></summary>
-
-```dart
-final response = await client.responses.create(
-  CreateResponseRequest(
-    model: 'gpt-4o',
-    input: ResponseTextInput('List 3 fruits with their colors.'),
-    text: TextConfig(
-      format: JsonSchemaFormat(
-        name: 'fruits',
-        schema: {
-          'type': 'object',
-          'properties': {
-            'fruits': {
-              'type': 'array',
-              'items': {
-                'type': 'object',
-                'properties': {
-                  'name': {'type': 'string'},
-                  'color': {'type': 'string'},
-                },
-                'required': ['name', 'color'],
-              },
-            },
-          },
-          'required': ['fruits'],
-        },
-        strict: true,
-      ),
+Future<void> main() async {
+  final client = OpenResponsesClient(
+    config: OpenResponsesConfig(
+      baseUrl: 'https://api.openai.com/v1',
+      authProvider: BearerTokenProvider('YOUR_API_KEY'),
     ),
-  ),
-);
+  );
 
-final data = jsonDecode(response.outputText!);
+  try {
+    final response = await client.responses.create(
+      CreateResponseRequest.text(
+        model: 'gpt-4o',
+        input: 'Summarize why provider portability matters.',
+      ),
+    );
+
+    print(response.outputText);
+  } finally {
+    client.close();
+  }
+}
 ```
+
+→ [Full example](example/create_response_example.dart)
 
 </details>
 
-### Using with Different Providers
+### How do I stream events?
 
 <details>
-<summary><b>Multiple Providers Example</b></summary>
+<summary><b>Show example</b></summary>
+
+Streaming works through a runner helper or manual event iteration. That makes it easy to bind partial text updates to a CLI, server-sent event bridge, or Flutter state notifier.
 
 ```dart
-// OpenAI
-final openaiClient = OpenResponsesClient(
-  config: OpenResponsesConfig(
-    baseUrl: 'https://api.openai.com/v1',
-    authProvider: BearerTokenProvider(Platform.environment['OPENAI_API_KEY']!),
-  ),
-);
+import 'dart:io';
 
-// Ollama (local)
-final ollamaClient = OpenResponsesClient(
-  config: const OpenResponsesConfig(
-    baseUrl: 'http://localhost:11434/v1',
-    // No auth needed for local Ollama
-  ),
-);
+import 'package:open_responses/open_responses.dart';
 
-// Hugging Face
-final hfClient = OpenResponsesClient(
-  config: OpenResponsesConfig(
-    baseUrl: 'https://your-space.hf.space/v1',
-    authProvider: BearerTokenProvider(Platform.environment['HF_API_KEY']!),
-  ),
-);
+Future<void> main() async {
+  final client = OpenResponsesClient.fromEnvironment();
+
+  try {
+    final runner = client.responses.stream(
+      CreateResponseRequest.text(
+        model: 'gpt-4o',
+        input: 'Write a short note about Flutter desktop.',
+      ),
+    )..onTextDelta(stdout.write);
+
+    await runner.finalResponse;
+  } finally {
+    client.close();
+  }
+}
 ```
+
+→ [Full example](example/streaming_example.dart)
 
 </details>
 
-## Convenience Extensions
-
-The client provides useful extension methods on `ResponseResource`:
+### How do I use tool calling?
 
 <details>
-<summary><b>Response Extensions</b></summary>
+<summary><b>Show example</b></summary>
+
+Tool calling is declared in the request, which keeps the provider-neutral contract intact. This is useful when you want one agent loop that can run against hosted or local providers.
 
 ```dart
-// Get concatenated text output
-response.outputText
+import 'package:open_responses/open_responses.dart';
 
-// Get all function calls
-response.functionCalls
+Future<void> main() async {
+  final client = OpenResponsesClient.fromEnvironment();
 
-// Get reasoning items (for o1 models)
-response.reasoningItems
+  try {
+    final response = await client.responses.create(
+      CreateResponseRequest(
+        model: 'gpt-4o',
+        input: const ResponseTextInput('What is the weather in Berlin?'),
+        tools: [
+          FunctionTool(
+            name: 'get_weather',
+            description: 'Get the current weather',
+            parameters: const {
+              'type': 'object',
+              'properties': {
+                'location': {'type': 'string'},
+              },
+              'required': ['location'],
+            },
+          ),
+        ],
+      ),
+    );
 
-// Check response status
-response.isCompleted
-response.isFailed
-response.hasToolCalls
+    print(response.functionCalls.length);
+  } finally {
+    client.close();
+  }
+}
 ```
+
+→ [Full example](example/tool_calling_example.dart)
 
 </details>
 
+### How do I keep a multi-turn conversation?
+
 <details>
-<summary><b>Streaming Extensions</b></summary>
+<summary><b>Show example</b></summary>
+
+OpenResponses keeps follow-up turns provider-neutral through `previousResponseId`. That is the main portability feature when you need stateful assistants without rewriting request history handling for each backend.
 
 ```dart
-// Get text delta from event
-event.textDelta
+import 'package:open_responses/open_responses.dart';
 
-// Check if event is terminal
-event.isFinal
+Future<void> main() async {
+  final client = OpenResponsesClient.fromEnvironment();
 
-// Accumulate text from stream
-final text = await stream.text;
+  try {
+    final first = await client.responses.create(
+      CreateResponseRequest.text(
+        model: 'gpt-4o',
+        input: 'My name is Alice.',
+      ),
+    );
 
-// Get final response from stream
-final response = await stream.finalResponse;
+    final second = await client.responses.create(
+      CreateResponseRequest(
+        model: 'gpt-4o',
+        input: const ResponseTextInput('What is my name?'),
+        previousResponseId: first.id,
+      ),
+    );
+
+    print(second.outputText);
+  } finally {
+    client.close();
+  }
+}
 ```
+
+→ [Full example](example/multi_turn_example.dart)
 
 </details>
 
-## Message Items
-
-Build complex inputs with message items:
+### How do I request structured output?
 
 <details>
-<summary><b>Message Items Example</b></summary>
+<summary><b>Show example</b></summary>
+
+Structured output uses the same response surface and adds a JSON schema under `text.format`. That keeps extraction workflows consistent even when you swap providers behind the same Dart code.
 
 ```dart
-final response = await client.responses.create(
-  CreateResponseRequest(
-    model: 'gpt-4o',
-    input: ResponseItemsInput([
-      MessageItem.systemText('You are a helpful assistant.'),
-      MessageItem.userText('Hello!'),
-      MessageItem.assistantText('Hi there! How can I help?'),
-      MessageItem.userText('What can you do?'),
-    ]),
-  ),
-);
+import 'package:open_responses/open_responses.dart';
+
+Future<void> main() async {
+  final client = OpenResponsesClient.fromEnvironment();
+
+  try {
+    final response = await client.responses.create(
+      CreateResponseRequest(
+        model: 'gpt-4o',
+        input: const ResponseTextInput('List three fruits and their colors.'),
+        text: TextConfig(
+          format: JsonSchemaFormat(
+            name: 'fruits',
+            schema: const {
+              'type': 'object',
+              'properties': {
+                'fruits': {
+                  'type': 'array',
+                  'items': {
+                    'type': 'object',
+                    'properties': {
+                      'name': {'type': 'string'},
+                      'color': {'type': 'string'},
+                    },
+                    'required': ['name', 'color'],
+                  },
+                },
+              },
+              'required': ['fruits'],
+            },
+          ),
+        ),
+      ),
+    );
+
+    print(response.outputText);
+  } finally {
+    client.close();
+  }
+}
 ```
+
+→ [Full example](example/structured_output_example.dart)
+
+</details>
+
+### How do I switch providers without changing my app code?
+
+<details>
+<summary><b>Show example</b></summary>
+
+The provider switch happens in `OpenResponsesConfig`, not in the request body. That keeps your higher-level application logic independent from the underlying deployment target.
+
+```dart
+import 'package:open_responses/open_responses.dart';
+
+Future<void> main() async {
+  final client = OpenResponsesClient(
+    config: const OpenResponsesConfig(
+      baseUrl: 'http://localhost:11434/v1',
+    ),
+  );
+
+  try {
+    final response = await client.responses.create(
+      CreateResponseRequest.text(
+        model: 'llama3.2',
+        input: 'Explain what hot reload means.',
+      ),
+    );
+
+    print(response.outputText);
+  } finally {
+    client.close();
+  }
+}
+```
+
+→ [Full example](example/provider_switch_example.dart)
 
 </details>
 
 ## Error Handling
 
 <details>
-<summary><b>Error Handling Example</b></summary>
+<summary><b>Handle provider errors, retries, and validation failures</b></summary>
+
+`open_responses` throws typed exceptions so provider differences do not collapse into raw HTTP status handling. Catch `ApiException` first, then fall back to `OpenResponsesException` for transport or client-side failures.
 
 ```dart
-try {
-  final response = await client.responses.create(request);
-} on AuthenticationException catch (e) {
-  print('Authentication failed: ${e.message}');
-} on RateLimitException catch (e) {
-  print('Rate limited. Retry after: ${e.retryAfter}');
-} on ValidationException catch (e) {
-  print('Invalid request: ${e.message}');
-} on ApiException catch (e) {
-  print('API error: ${e.statusCode} - ${e.message}');
+import 'dart:io';
+
+import 'package:open_responses/open_responses.dart';
+
+Future<void> main() async {
+  final client = OpenResponsesClient.fromEnvironment();
+
+  try {
+    await client.responses.create(
+      CreateResponseRequest.text(
+        model: 'gpt-4o',
+        input: 'Ping',
+      ),
+    );
+  } on RateLimitException catch (error) {
+    stderr.writeln('Retry after: ${error.retryAfter}');
+  } on ApiException catch (error) {
+    stderr.writeln('Provider API error ${error.statusCode}: ${error.message}');
+  } on OpenResponsesException catch (error) {
+    stderr.writeln('OpenResponses client error: $error');
+  } finally {
+    client.close();
+  }
 }
 ```
 
-</details>
-
-## Configuration
-
-<details>
-<summary><b>Configuration Options</b></summary>
-
-```dart
-final client = OpenResponsesClient(
-  config: OpenResponsesConfig(
-    baseUrl: 'https://api.openai.com/v1',
-    authProvider: BearerTokenProvider('your-api-key'),
-    timeout: const Duration(seconds: 60),
-    defaultHeaders: {'X-Custom-Header': 'value'},
-    retryPolicy: RetryPolicy(
-      maxRetries: 3,
-      initialDelay: const Duration(seconds: 1),
-    ),
-  ),
-);
-```
+→ [Full example](example/error_handling_example.dart)
 
 </details>
 
 ## Examples
 
-See the [`example/`](example/) directory for comprehensive examples:
+See the [example/](example/) directory for complete examples:
 
 | Example | Description |
 |---------|-------------|
-| [create_response_example.dart](example/create_response_example.dart) | Basic usage |
-| [streaming_example.dart](example/streaming_example.dart) | Streaming responses |
-| [tool_calling_example.dart](example/tool_calling_example.dart) | Function calling |
-| [multi_turn_example.dart](example/multi_turn_example.dart) | Multi-turn conversations |
-| [reasoning_example.dart](example/reasoning_example.dart) | Reasoning models |
-| [structured_output_example.dart](example/structured_output_example.dart) | JSON Schema output |
-| [mcp_tools_example.dart](example/mcp_tools_example.dart) | MCP tools |
+| [`create_response_example.dart`](example/create_response_example.dart) | Basic response creation |
+| [`streaming_example.dart`](example/streaming_example.dart) | Streaming events |
+| [`tool_calling_example.dart`](example/tool_calling_example.dart) | Tool calling |
+| [`multi_turn_example.dart`](example/multi_turn_example.dart) | Multi-turn conversations |
+| [`structured_output_example.dart`](example/structured_output_example.dart) | Structured output with JSON schema |
+| [`provider_switch_example.dart`](example/provider_switch_example.dart) | Switching providers |
+| [`mcp_tools_example.dart`](example/mcp_tools_example.dart) | MCP tool integration |
+| [`reasoning_example.dart`](example/reasoning_example.dart) | Reasoning models |
+| [`error_handling_example.dart`](example/error_handling_example.dart) | Exception handling patterns |
 
 ## API Coverage
 
-### Responses Resource (`client.responses`)
+| API | Status |
+|-----|--------|
+| Responses | ✅ Full |
 
-| Method | Description |
-|--------|-------------|
-| `create` | Create a response (non-streaming) |
-| `createStream` | Create a streaming response (SSE) |
-| `stream` | Create streaming response with builder pattern |
+## Official Documentation
 
-## Platform Support
-
-| Feature | iOS | Android | macOS | Windows | Linux | Web |
-|---------|-----|---------|-------|---------|-------|-----|
-| Basic requests | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Streaming | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Tool calling | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-
-## Development
-
-```bash
-# Install dependencies
-dart pub get
-
-# Run tests
-dart test
-
-# Format code
-dart format .
-
-# Analyze
-dart analyze
-```
-
-## Documentation
-
-- [OpenResponses Specification](https://www.openresponses.org/)
-- [API Reference](https://pub.dev/documentation/open_responses/latest/)
+- [API reference](https://pub.dev/documentation/open_responses/latest/)
+- [OpenResponses specification](https://www.openresponses.org/)
 
 ## Sponsor
 
-If these packages are useful to you or your company, please [sponsor the project](https://github.com/sponsors/davidmigloz). Development and maintenance are provided to the community for free, but integration tests against real APIs and the tooling required to build and verify releases still have real costs. Your support, at any level, helps keep these packages maintained and free for the Dart & Flutter community.
+If these packages are useful to you or your company, please consider [sponsoring the project](https://github.com/sponsors/davidmigloz). Development and maintenance are provided to the community for free, but integration tests against real APIs and the tooling required to build and verify releases still have real costs. Your support, at any level, helps keep these packages maintained and free for the Dart & Flutter community.
+
+<p align="center">
+  <a href="https://github.com/sponsors/davidmigloz">
+    <img src='https://raw.githubusercontent.com/davidmigloz/sponsors/main/sponsors.svg'/>
+  </a>
+</p>
 
 ## License
 
-`open_responses` is licensed under the [MIT License](https://github.com/davidmigloz/ai_clients_dart/blob/main/LICENSE).
+This package is licensed under the [MIT License](../../LICENSE).
+
+This is a community-maintained package and is not affiliated with or endorsed by the OpenResponses project.

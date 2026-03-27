@@ -3,58 +3,68 @@
 [![pub package](https://img.shields.io/pub/v/mistralai_dart.svg)](https://pub.dev/packages/mistralai_dart)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A comprehensive, type-safe Dart client for the [Mistral AI API](https://docs.mistral.ai/). This library provides a resource-based interface to all Mistral AI capabilities, with full support for streaming, tool calling, and multimodal inputs.
+Dart client for the **[Mistral AI API](https://docs.mistral.ai/)** with chat completions, streaming, tool calling, multimodal inputs, TTS, voice management, reasoning effort, embeddings, OCR, and more. It gives Dart and Flutter applications a pure Dart, type-safe client across iOS, Android, macOS, Windows, Linux, Web, and server-side Dart.
+
+> [!TIP]
+> Coding agents: start with [llms.txt](./llms.txt). It links to the package docs, examples, and optional references in a compact format.
+
+<details>
+<summary><b>Table of Contents</b></summary>
+
+- [Features](#features)
+- [Why choose this client?](#why-choose-this-client)
+- [Quickstart](#quickstart)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [Error Handling](#error-handling)
+- [Examples](#examples)
+- [API Coverage](#api-coverage)
+- [Official Documentation](#official-documentation)
+- [Sponsor](#sponsor)
+- [License](#license)
+
+</details>
 
 ## Features
 
-### Stable APIs
-- **Chat Completions** - Conversational AI with streaming, tool calling, and JSON mode
-- **Embeddings** - Text embeddings for semantic search and clustering
-- **Models** - List and retrieve available models
-- **FIM** - Fill-in-the-Middle code completions with Codestral
-- **Files** - Upload and manage files for fine-tuning and batch processing
-- **Fine-tuning** - Train custom models on your data
-- **Batch** - Asynchronous large-scale processing
-- **Moderations** - Content moderation for safety
-- **Classifications** - Text classification (spam, topic, sentiment)
-- **OCR** - Extract text from documents and images
-- **Audio** - Speech-to-text transcription, text-to-speech synthesis, and voice management
+### Generation and streaming
 
-### Beta APIs
-- **Agents** - Pre-configured AI assistants with tools and instructions
-- **Conversations** - Stateful multi-turn conversations
-- **Libraries** - Document storage and retrieval for RAG
+- Chat completions with streaming, tool calling, vision, JSON mode, and structured output
+- Embeddings, FIM code completions, and reasoning effort control
+- Model management and discovery
 
-### Additional Features
-- Full streaming support via Server-Sent Events (SSE)
-- Multimodal inputs (text + images)
-- Function/tool calling with parallel execution
-- JSON schema validation for structured output
-- Built-in web search, code interpreter, and document tools
-- Extension methods for convenient response access
-- Pagination and job polling utilities
-- Comprehensive error handling
+### Tools and media
 
-## Installation
+- Built-in web search, code interpreter, and document library tools
+- Audio transcription, text-to-speech, and voice management
+- OCR, moderations, and classifications
 
-Add `mistralai_dart` to your `pubspec.yaml`:
+### Operational APIs
+
+- Files, fine-tuning, and batch processing
+- Agents, conversations, and libraries (beta)
+
+## Why choose this client?
+
+- Pure Dart with no Flutter dependency — works in mobile apps, backends, and CLIs.
+- Type-safe request and response models with minimal dependencies (`http`, `logging`, `meta`).
+- Streaming, retries, interceptors, and error handling built into the client.
+- Covers the full Mistral AI API surface, including beta agents, conversations, and libraries.
+
+## Quickstart
 
 ```yaml
 dependencies:
-  mistralai_dart: ^x.y.z
+  mistralai_dart: ^1.3.0
 ```
-
-## Quick Start
 
 ```dart
 import 'package:mistralai_dart/mistralai_dart.dart';
 
-void main() async {
-  // Create client with API key
-  final client = MistralClient.withApiKey('your-api-key');
+Future<void> main() async {
+  final client = MistralClient.fromEnvironment();
 
   try {
-    // Simple chat completion
     final response = await client.chat.create(
       request: ChatCompletionRequest(
         model: 'mistral-small-latest',
@@ -64,16 +74,19 @@ void main() async {
       ),
     );
 
-    print(response.text); // Extension method for easy access
+    print(response.text);
   } finally {
     client.close();
   }
 }
 ```
 
-## Usage
+## Configuration
 
-### Client Configuration
+<details>
+<summary><b>Configure auth, retries, and custom endpoints</b></summary>
+
+Use `MistralClient.fromEnvironment()` when `MISTRAL_API_KEY` is available. Switch to `MistralConfig` when you need a proxy, custom timeout, or a non-default retry policy.
 
 ```dart
 // Simple API key authentication
@@ -92,7 +105,7 @@ final client = MistralClient.withBaseUrl(
 final client = MistralClient(
   config: MistralConfig(
     authProvider: ApiKeyProvider('your-api-key'),
-    baseUrl: 'https://api.mistral.ai/v1',
+    baseUrl: 'https://api.mistral.ai',
     retryPolicy: RetryPolicy(
       maxRetries: 3,
       initialDelay: Duration(seconds: 1),
@@ -104,7 +117,23 @@ final client = MistralClient(
 client.close();
 ```
 
-### Chat Completions
+Environment variables:
+
+- `MISTRAL_API_KEY`
+- `MISTRAL_BASE_URL`
+
+Use explicit configuration on web builds where runtime environment variables are not available.
+
+</details>
+
+## Usage
+
+### How do I use chat completions?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.chat.create(...)` to send messages and receive a completion. Set `reasoningEffort` on reasoning-capable models to control how deeply the model thinks.
 
 ```dart
 // Basic chat
@@ -123,7 +152,31 @@ final response = await client.chat.create(
 print(response.text);
 ```
 
-### Streaming
+```dart
+// Control reasoning depth for reasoning-capable models
+final response = await client.chat.create(
+  request: ChatCompletionRequest(
+    model: 'mistral-large-latest',
+    messages: [
+      ChatMessage.user('Solve this step by step: what is 23 * 47?'),
+    ],
+    reasoningEffort: ReasoningEffort.high,
+  ),
+);
+
+print(response.text);
+```
+
+→ [Full example](example/chat_example.dart)
+
+</details>
+
+### How do I stream responses?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.chat.createStream(...)` to receive tokens as they are generated via SSE. Each chunk exposes a `text` extension for easy access.
 
 ```dart
 final stream = client.chat.createStream(
@@ -142,7 +195,16 @@ await for (final chunk in stream) {
 }
 ```
 
-### Vision (Multimodal)
+→ [Full example](example/streaming_example.dart)
+
+</details>
+
+### How do I use vision?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Pass multimodal content parts (text + image URLs or base64 data URLs) using `ChatMessage.userMultimodal(...)` with a vision-capable model like Pixtral.
 
 ```dart
 final response = await client.chat.create(
@@ -160,7 +222,16 @@ final response = await client.chat.create(
 );
 ```
 
-### Tool Calling
+→ [Full example](example/vision_example.dart)
+
+</details>
+
+### How do I use tool calling?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Define custom tools with JSON Schema parameters, or use built-in tools like web search, code interpreter, and document library. Send tool results back in a follow-up message turn.
 
 ```dart
 // Define tools
@@ -215,8 +286,6 @@ if (response.hasToolCalls) {
 }
 ```
 
-### Built-in Tools
-
 ```dart
 // Web search tool
 final webTool = Tool.webSearch();
@@ -240,7 +309,16 @@ final response = await client.chat.create(
 );
 ```
 
-### JSON Mode and Structured Output
+→ [Full example](example/tool_calling_example.dart)
+
+</details>
+
+### How do I use structured output?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `ResponseFormatJsonObject` for simple JSON mode or `ResponseFormatJsonSchema` to enforce a specific schema on the response.
 
 ```dart
 // Simple JSON mode
@@ -276,7 +354,16 @@ final response = await client.chat.create(
 );
 ```
 
-### Embeddings
+→ [Full example](example/json_mode_example.dart)
+
+</details>
+
+### How do I create embeddings?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.embeddings.create(...)` with a single text or a batch of texts. The response contains embedding vectors you can use for search, clustering, or classification.
 
 ```dart
 // Single text
@@ -297,7 +384,16 @@ final response = await client.embeddings.create(
 );
 ```
 
-### FIM (Fill-in-the-Middle) Code Completion
+→ [Full example](example/embeddings_example.dart)
+
+</details>
+
+### How do I use code completions?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.fim.create(...)` for fill-in-the-middle code completion with Codestral. Provide a `prompt` and optional `suffix` to generate the middle portion.
 
 ```dart
 final response = await client.fim.create(
@@ -321,7 +417,16 @@ final stream = client.fim.createStream(
 );
 ```
 
-### Files API
+→ [Full example](example/fim_example.dart)
+
+</details>
+
+### How do I manage files?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.files` to upload, list, download, and delete files. File-path uploads are native-only; on web, use byte-based uploads instead.
 
 > **Note**: File-path based uploads (`filePath`) are only available on native platforms. On web, use byte-based uploads (`bytes`) instead. Other file operations (list, retrieve, download, delete) are supported on all platforms.
 
@@ -342,7 +447,16 @@ final content = await client.files.download(fileId: file.id);
 await client.files.delete(fileId: file.id);
 ```
 
-### Fine-tuning
+→ [Full example](example/files_example.dart)
+
+</details>
+
+### How do I fine-tune and batch?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.fineTuning.jobs` to create and monitor fine-tuning jobs, and `client.batch.jobs` for batch processing. Both support polling helpers for long-running operations.
 
 ```dart
 // Create a fine-tuning job
@@ -377,8 +491,6 @@ await for (final job in paginator.items()) {
 }
 ```
 
-### Batch Processing
-
 ```dart
 // Create batch job
 final job = await client.batch.jobs.create(
@@ -397,7 +509,16 @@ final completed = await poller.poll();
 final results = await client.files.download(fileId: completed.outputFile!);
 ```
 
-### Moderations
+→ [Full example](example/fine_tuning_example.dart)
+
+</details>
+
+### How do I moderate content?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.moderations` for text and chat-aware content moderation, and `client.classifications` for text classification. Both flag content categories automatically.
 
 ```dart
 // Text moderation
@@ -426,8 +547,6 @@ final result = await client.moderations.createChat(
 );
 ```
 
-### Classifications
-
 ```dart
 final result = await client.classifications.create(
   request: ClassificationRequest(
@@ -441,7 +560,16 @@ for (final item in result.results) {
 }
 ```
 
-### OCR (Optical Character Recognition)
+→ [Full example](example/moderation_example.dart)
+
+</details>
+
+### How do I extract text from documents?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.ocr.process(...)` to extract text from documents and images. Supports both URL and base64-encoded inputs, and returns markdown per page.
 
 ```dart
 // From URL
@@ -465,7 +593,16 @@ final result = await client.ocr.process(
 );
 ```
 
-### Audio Transcription
+→ [Full example](example/ocr_example.dart)
+
+</details>
+
+### How do I use audio?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.audio.transcriptions` for speech-to-text, `client.audio.speech` for text-to-speech, and `client.audio.voices` to manage custom voices. Both transcription and speech support streaming.
 
 ```dart
 // Upload audio file first, then transcribe using file ID
@@ -493,8 +630,6 @@ await for (final event in stream) {
 }
 ```
 
-### Speech (Text-to-Speech)
-
 ```dart
 // Generate speech
 final response = await client.audio.speech.create(
@@ -516,8 +651,6 @@ await for (final event in stream) {
 }
 ```
 
-### Voices
-
 ```dart
 // List voices
 final voices = await client.audio.voices.list();
@@ -535,7 +668,16 @@ final voice = await client.audio.voices.create(
 print('Created voice: ${voice.id}');
 ```
 
-### Agents (Beta)
+→ [Full example](example/audio_example.dart)
+
+</details>
+
+### How do I use agents?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.agents` to create, list, update, and delete agents. Agents can use tools and follow custom instructions. Use `complete(...)` to chat with an agent.
 
 ```dart
 // Create an agent
@@ -555,6 +697,7 @@ final response = await client.agents.complete(
     messages: [ChatMessage.user('Search for latest AI papers')],
   ),
 );
+print(response.text); // Extension for output text content
 
 // List agents
 final agents = await client.agents.list();
@@ -569,7 +712,16 @@ await client.agents.update(
 await client.agents.delete(agentId: agent.id);
 ```
 
-### Conversations (Beta)
+→ [Full example](example/agents_example.dart)
+
+</details>
+
+### How do I use conversations?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.conversations` to manage stateful multi-turn conversations with agents. The server maintains conversation history so you do not have to resend it.
 
 ```dart
 // Start a conversation
@@ -594,7 +746,16 @@ final details = await client.conversations.retrieve(
 );
 ```
 
-### Libraries (Beta)
+→ [Full example](example/conversations_example.dart)
+
+</details>
+
+### How do I use libraries?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.libraries` to create document libraries for RAG. Upload files first, add them as documents, then reference the library in chat via `Tool.documentLibrary(...)`.
 
 ```dart
 // Create a library
@@ -624,299 +785,118 @@ final response = await client.chat.create(
 await client.libraries.delete(libraryId: library.id);
 ```
 
-### Models
+→ [Full example](example/libraries_example.dart)
 
-```dart
-// List all models
-final models = await client.models.list();
-
-for (final model in models.data) {
-  print('${model.id}');
-  print('  Description: ${model.description}');
-  print('  Context: ${model.maxContextLength} tokens');
-  if (model.capabilities != null) {
-    print('  Vision: ${model.capabilities!.vision}');
-    print('  Function calling: ${model.capabilities!.functionCalling}');
-  }
-}
-
-// Get specific model
-final model = await client.models.get('mistral-large-latest');
-```
-
-## Extension Methods
-
-The library provides convenient extension methods for common operations:
-
-```dart
-// ChatCompletionResponse extensions
-response.text           // First choice message content
-response.hasToolCalls   // Check if tool calls present
-response.toolCalls      // Get tool calls list
-
-// ChatCompletionStreamResponse extensions
-chunk.text              // Delta content from streaming
-
-// AgentCompletionResponse extensions
-agentResponse.text      // Output text content
-
-// ConversationResponse extensions
-conversation.text       // Output message content
-```
-
-## Utility Classes
-
-### Paginator
-
-For iterating through paginated results:
-
-```dart
-final paginator = Paginator<Model, ModelList>(
-  fetcher: (page, size) => client.models.list(page: page, pageSize: size),
-  getItems: (response) => response.data,
-  pageSize: 20,
-);
-
-// As stream
-await for (final model in paginator.items()) {
-  print(model.id);
-}
-
-// Collect all
-final allModels = await paginator.items().toList();
-```
-
-### Job Poller
-
-For polling long-running jobs:
-
-```dart
-// Fine-tuning
-final poller = FineTuningJobPoller(
-  client: client,
-  jobId: jobId,
-  pollInterval: Duration(seconds: 30),
-  timeout: Duration(hours: 2),
-);
-final job = await poller.poll();
-
-// Batch
-final batchPoller = BatchJobPoller(client: client, jobId: jobId);
-final batchJob = await batchPoller.poll();
-```
+</details>
 
 ## Error Handling
 
+<details>
+<summary><b>Handle retries, validation failures, and request aborts</b></summary>
+
+`mistralai_dart` throws typed exceptions so retry logic and validation handling stay explicit. Catch `ApiException` and its subclasses first, then fall back to `MistralException` for other transport or parsing failures.
+
 ```dart
-try {
-  final response = await client.chat.create(...);
-} on RateLimitException catch (e) {
-  print('Rate limited. Retry after: ${e.retryAfter}');
-} on ValidationException catch (e) {
-  print('Invalid request: ${e.message}');
-  print('Details: ${e.details}');
-} on AuthenticationException catch (e) {
-  print('Auth failed: ${e.message}');
-} on ApiException catch (e) {
-  print('API error ${e.statusCode}: ${e.message}');
-} on TimeoutException catch (e) {
-  print('Timeout: ${e.message}');
-} on AbortedException catch (e) {
-  print('Aborted: ${e.message}');
-} on MistralException catch (e) {
-  print('General error: $e');
+import 'dart:io';
+
+import 'package:mistralai_dart/mistralai_dart.dart';
+
+Future<void> main() async {
+  final client = MistralClient.fromEnvironment();
+
+  try {
+    await client.chat.create(
+      request: ChatCompletionRequest(
+        model: 'mistral-small-latest',
+        messages: [ChatMessage.user('Ping')],
+      ),
+    );
+  } on RateLimitException catch (error) {
+    stderr.writeln('Retry after: ${error.retryAfter}');
+  } on ApiException catch (error) {
+    stderr.writeln('Mistral API error ${error.statusCode}: ${error.message}');
+  } on MistralException catch (error) {
+    stderr.writeln('Mistral client error: $error');
+  } finally {
+    client.close();
+  }
 }
 ```
 
-## Available Models
+→ [Full example](example/error_handling_example.dart)
 
-| Model | Type | Description |
-|-------|------|-------------|
-| `mistral-small-latest` | Chat | Fast, cost-effective |
-| `mistral-medium-latest` | Chat | Balanced performance |
-| `mistral-large-latest` | Chat | Most capable |
-| `pixtral-12b-2409` | Vision | Multimodal (text + images) |
-| `pixtral-large-latest` | Vision | Large vision model |
-| `codestral-latest` | Code | Code generation and FIM |
-| `mistral-embed` | Embeddings | Text embeddings |
-| `mistral-moderation-latest` | Moderation | Content safety |
-| `mistral-ocr-latest` | OCR | Document text extraction |
-| `mistral-stt-latest` | Audio | Speech-to-text |
-
-See the [Mistral AI documentation](https://docs.mistral.ai/getting-started/models/) for a complete list.
-
-## Platform Support
-
-| Feature | iOS | Android | macOS | Windows | Linux | Web |
-|---------|-----|---------|-------|---------|-------|-----|
-| Chat | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Streaming | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Embeddings | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Files API | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ |
-| Audio | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-
-> **Note**: On web, file uploads only support byte-based uploads (`bytes` parameter); file-path uploads are native-only. Other file operations (list, retrieve, download, delete) work on all platforms. Audio APIs require native platform support and are not available on web.
+</details>
 
 ## Examples
 
-See the [example](example/) directory for comprehensive examples:
+See the [example/](example/) directory for complete examples:
 
-- [Chat](example/chat_example.dart) - Basic chat completions
-- [Streaming](example/streaming_example.dart) - Real-time streaming
-- [Tool Calling](example/tool_calling_example.dart) - Function/tool calling
-- [JSON Mode](example/json_mode_example.dart) - Structured output
-- [Vision](example/vision_example.dart) - Multimodal inputs
-- [Embeddings](example/embeddings_example.dart) - Text embeddings
-- [Semantic Search](example/semantic_search_example.dart) - Similarity search
-- [RAG](example/rag_example.dart) - Retrieval augmented generation
-- [FIM](example/fim_example.dart) - Code completion
-- [Files](example/files_example.dart) - File management
-- [Fine-tuning](example/fine_tuning_example.dart) - Model training
-- [Batch](example/batch_example.dart) - Batch processing
-- [Moderation](example/moderation_example.dart) - Content safety
-- [Classification](example/classification_example.dart) - Text classification
-- [OCR](example/ocr_example.dart) - Document extraction
-- [Audio](example/audio_example.dart) - Speech-to-text
-- [Agents](example/agents_example.dart) - AI assistants
-- [Conversations](example/conversations_example.dart) - Multi-turn conversations
-- [Libraries](example/libraries_example.dart) - Document storage
-- [Models](example/models_example.dart) - Model listing
-- [Multi-turn](example/multi_turn_example.dart) - Conversation management
-- [System Messages](example/system_message_example.dart) - Persona control
-- [Error Handling](example/error_handling_example.dart) - Error patterns
-- [Configuration](example/config_example.dart) - Client setup
-- [Parallel Requests](example/parallel_requests_example.dart) - Concurrent calls
+| Example | Description |
+|---------|-------------|
+| [`chat_example.dart`](example/chat_example.dart) | Basic chat completions |
+| [`streaming_example.dart`](example/streaming_example.dart) | Streaming responses |
+| [`tool_calling_example.dart`](example/tool_calling_example.dart) | Tool calling |
+| [`json_mode_example.dart`](example/json_mode_example.dart) | Structured output |
+| [`vision_example.dart`](example/vision_example.dart) | Multimodal inputs |
+| [`embeddings_example.dart`](example/embeddings_example.dart) | Text embeddings |
+| [`fim_example.dart`](example/fim_example.dart) | Code completion |
+| [`files_example.dart`](example/files_example.dart) | File management |
+| [`fine_tuning_example.dart`](example/fine_tuning_example.dart) | Model training |
+| [`batch_example.dart`](example/batch_example.dart) | Batch processing |
+| [`moderation_example.dart`](example/moderation_example.dart) | Content moderation |
+| [`classification_example.dart`](example/classification_example.dart) | Text classification |
+| [`ocr_example.dart`](example/ocr_example.dart) | Document text extraction |
+| [`audio_example.dart`](example/audio_example.dart) | Audio transcription and TTS |
+| [`agents_example.dart`](example/agents_example.dart) | AI agents (beta) |
+| [`conversations_example.dart`](example/conversations_example.dart) | Multi-turn conversations (beta) |
+| [`libraries_example.dart`](example/libraries_example.dart) | Document storage (beta) |
+| [`models_example.dart`](example/models_example.dart) | Model listing |
+| [`error_handling_example.dart`](example/error_handling_example.dart) | Exception handling patterns |
+| [`config_example.dart`](example/config_example.dart) | Client configuration options |
+| [`multi_turn_example.dart`](example/multi_turn_example.dart) | Multi-turn conversation management |
+| [`parallel_requests_example.dart`](example/parallel_requests_example.dart) | Parallel and concurrent requests |
+| [`rag_example.dart`](example/rag_example.dart) | Retrieval Augmented Generation |
+| [`semantic_search_example.dart`](example/semantic_search_example.dart) | Semantic search with embeddings |
+| [`system_message_example.dart`](example/system_message_example.dart) | System message patterns |
 
 ## API Coverage
 
-This client implements the Mistral AI REST API:
+| API | Status |
+|-----|--------|
+| Chat | ✅ Full |
+| Embeddings | ✅ Full |
+| Models | ✅ Full |
+| FIM | ✅ Full |
+| Files | ✅ Full |
+| Fine-tuning | ✅ Full |
+| Batch | ✅ Full |
+| Moderations | ✅ Full |
+| Classifications | ✅ Full |
+| OCR | ✅ Full |
+| Audio (Transcription, Speech, Voices) | ✅ Full |
+| Agents (Beta) | ✅ Full |
+| Conversations (Beta) | ✅ Full |
+| Libraries (Beta) | ✅ Full |
 
-### Chat Resource (`client.chat`)
+## Official Documentation
 
-- **create** - Create a chat completion
-- **createStream** - Create a streaming chat completion (SSE)
-
-### Embeddings Resource (`client.embeddings`)
-
-- **create** - Generate embeddings for text
-
-### Models Resource (`client.models`)
-
-- **list** - List available models
-- **get** - Retrieve a model by ID
-- **delete** - Delete a fine-tuned model
-
-### FIM Resource (`client.fim`)
-
-- **create** - Create a fill-in-the-middle completion
-- **createStream** - Create a streaming FIM completion (SSE)
-
-### Files Resource (`client.files`)
-
-- **upload** - Upload a file
-- **list** - List files
-- **retrieve** - Get file metadata
-- **delete** - Delete a file
-- **download** - Download file content
-
-### FineTuning Resource (`client.fineTuning`)
-
-`client.fineTuning.jobs`:
-
-- **jobs.create** - Create a fine-tuning job
-- **jobs.list** - List fine-tuning jobs
-- **jobs.retrieve** - Get job status
-- **jobs.cancel** - Cancel a job
-- **jobs.start** - Start a job
-
-`client.fineTuning.models`:
-
-- **models.archive** - Archive a fine-tuned model
-- **models.unarchive** - Unarchive a fine-tuned model
-- **models.update** - Update a fine-tuned model
-
-### Batch Resource (`client.batch`)
-
-- **jobs.create** - Create a batch job
-- **jobs.list** - List batch jobs
-- **jobs.retrieve** - Get job status
-- **jobs.cancel** - Cancel a job
-
-### Moderations Resource (`client.moderations`)
-
-- **create** - Moderate text content
-- **createChat** - Moderate chat messages
-
-### Classifications Resource (`client.classifications`)
-
-- **create** - Classify text content
-- **createChat** - Classify chat messages
-
-### OCR Resource (`client.ocr`)
-
-- **process** - Extract text from documents/images
-
-### Audio Resource (`client.audio`)
-
-- **transcriptions.create** - Transcribe audio to text
-- **transcriptions.createStream** - Stream transcription results
-- **speech.create** - Generate speech from text
-- **speech.createStream** - Stream speech audio chunks
-- **voices.list** - List available voices
-- **voices.create** - Create a custom voice
-- **voices.retrieve** - Get voice details
-- **voices.update** - Update voice metadata
-- **voices.delete** - Delete a custom voice
-
-### Agents Resource (`client.agents`) - Beta
-
-- **create** - Create an agent
-- **list** - List agents
-- **retrieve** - Get an agent
-- **update** - Update an agent
-- **delete** - Delete an agent
-- **updateVersion** - Update active version
-- **complete** - Generate completion with agent
-- **completeStream** - Stream completion with agent
-
-### Conversations Resource (`client.conversations`) - Beta
-
-- **start** - Start a new conversation
-- **append** - Append entries to a conversation
-- **getEntries** - Get all entries in a conversation
-- **restart** - Restart from a specific entry
-- **list** - List conversations
-- **retrieve** - Get a conversation
-- **delete** - Delete a conversation
-- **sendMessage** - Send a message (convenience)
-- **sendFunctionResult** - Send function result (convenience)
-
-### Libraries Resource (`client.libraries`) - Beta
-
-- **create** - Create a document library
-- **list** - List libraries
-- **retrieve** - Get a library
-- **update** - Update a library
-- **delete** - Delete a library
-- **documents.create** - Add a document to a library
-- **documents.list** - List documents in a library
-- **documents.retrieve** - Get document metadata
-- **documents.update** - Update document metadata
-- **documents.delete** - Delete a document
-
-## Documentation
-
-- [Mistral AI API Documentation](https://docs.mistral.ai/)
-- [API Reference](https://pub.dev/documentation/mistralai_dart/latest/)
-
-## Contributing
-
-Contributions are welcome! Please read our [contributing guidelines](../../CONTRIBUTING.md) before submitting PRs.
+- [API reference](https://pub.dev/documentation/mistralai_dart/latest/)
+- [Mistral AI API docs](https://docs.mistral.ai/)
+- [Mistral AI Python SDK](https://github.com/mistralai/client-python)
+- [Mistral AI JS SDK](https://github.com/mistralai/client-js)
 
 ## Sponsor
 
-If these packages are useful to you or your company, please [sponsor the project](https://github.com/sponsors/davidmigloz). Development and maintenance are provided to the community for free, but integration tests against real APIs and the tooling required to build and verify releases still have real costs. Your support, at any level, helps keep these packages maintained and free for the Dart & Flutter community.
+If these packages are useful to you or your company, please consider [sponsoring the project](https://github.com/sponsors/davidmigloz). Development and maintenance are provided to the community for free, but integration tests against real APIs and the tooling required to build and verify releases still have real costs. Your support, at any level, helps keep these packages maintained and free for the Dart & Flutter community.
+
+<p align="center">
+  <a href="https://github.com/sponsors/davidmigloz">
+    <img src='https://raw.githubusercontent.com/davidmigloz/sponsors/main/sponsors.svg'/>
+  </a>
+</p>
 
 ## License
 
-Licensed under the MIT License. See [LICENSE](LICENSE) for details.
+This package is licensed under the [MIT License](../../LICENSE).
+
+This is a community-maintained package and is not affiliated with or endorsed by Mistral AI.

@@ -1,0 +1,29 @@
+# ChromaDB Dart Client
+
+> Dart client for ChromaDB with collections, vector search, multi-tenant storage, embeddings, and RAG pipelines.
+
+## Docs
+
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/README.md): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/CHANGELOG.md): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/MIGRATION.md): Upgrade notes and breaking-change guidance.
+
+## Examples
+
+- [collections_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/collections_example.dart): How do I manage collections?
+- [records_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/records_example.dart): How do I add records?
+- [embedding_function_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/embedding_function_example.dart): How do I auto-embed data?
+- [query_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/query_example.dart): How do I query similar records?
+- [metadata_filtering_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/metadata_filtering_example.dart): How do I filter by metadata?
+- [multi_tenant_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/multi_tenant_example.dart): How do I work with tenants and databases?
+- [health_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/health_example.dart): How do I check server health?
+- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/error_handling_example.dart): Error Handling.
+- [functions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/functions_example.dart): Embedding functions.
+- [databases_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/databases_example.dart): Database management.
+- [auth_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/auth_example.dart): Authentication.
+- [chromadb_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/chromadb_example.dart): Quick-start overview.
+- [tenants_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/tenants_example.dart): Tenant management.
+
+## Optional
+
+- [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/chromadb): Source tree, pubspec, and package-local files.

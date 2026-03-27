@@ -31,7 +31,7 @@ Added `withApiKey` convenience constructor and replaced `Object? stop` with a ty
 
 ## 1.0.0
 
-> Note: This release has breaking changes.
+> Note: This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
 
 **TL;DR**: Complete reimplementation with a new architecture, minimal dependencies, resource-based API, and improved developer experience. Hand-crafted models (no code generation), interceptor-driven architecture, comprehensive error handling, and full Mistral AI API coverage including stable and beta endpoints.
 
@@ -111,7 +111,7 @@ See **[MIGRATION.md](MIGRATION.md)** for step-by-step examples and mapping table
 
 ## 0.1.0
 
-> Note: This release has breaking changes.
+> Note: This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
 
 - **FIX**: Add missing usage field to ChatCompletionStreamResponse in mistralai_dart ([#795](https://github.com/davidmigloz/langchain_dart/issues/795)). ([4da75561](https://github.com/davidmigloz/langchain_dart/commit/4da75561b173313479f50441bf318bd4b948032d))
 - **FIX**: Handle optional space after colon in SSE parser in mistralai_dart ([#791](https://github.com/davidmigloz/langchain_dart/issues/791)). ([cefb1d2f](https://github.com/davidmigloz/langchain_dart/commit/cefb1d2f124ba64da60e3f33ec16672542cae28c))

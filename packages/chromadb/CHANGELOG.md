@@ -27,7 +27,7 @@ Unified equality helpers across packages and updated dependencies.
 
 ## 1.0.0
 
-> Note: This release has breaking changes.
+> Note: This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
 
 **TL;DR**: Complete reimplementation with a new architecture, minimal dependencies, unified resource-based API, and full ChromaDB v2 API coverage. Includes new Search API, Functions, multi-tenant management, automatic retry, and comprehensive exception handling.
 
@@ -91,7 +91,7 @@ See **[MIGRATION.md](MIGRATION.md)** for step-by-step examples and mapping table
 
 ## 0.3.0
 
-> Note: This release has breaking changes.
+> Note: This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
 
 - **FEAT**: Upgrade to http v1.5.0 ([#785](https://github.com/davidmigloz/langchain_dart/issues/785)). ([f7c87790](https://github.com/davidmigloz/langchain_dart/commit/f7c8779011015b5a4a7f3a07dca32bde1bb2ea88))
 - **BREAKING** **BUILD**: Require Dart >=3.8.0 ([#792](https://github.com/davidmigloz/langchain_dart/issues/792)). ([b887f5c6](https://github.com/davidmigloz/langchain_dart/commit/b887f5c62e307b3a510c5049e3d1fbe7b7b4f4c9))
@@ -145,7 +145,7 @@ See **[MIGRATION.md](MIGRATION.md)** for step-by-step examples and mapping table
 
 ## 0.1.0
 
-> Note: This release has breaking changes.
+> Note: This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
 
 - **BREAKING** **FEAT**: Multi-modal and tenants support ([#210](https://github.com/davidmigloz/langchain_dart/issues/210)). ([bfb0d89c](https://github.com/davidmigloz/langchain_dart/commit/bfb0d89cf82881090f6a50ee4d70b70f62e4302e))
 

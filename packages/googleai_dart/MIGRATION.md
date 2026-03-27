@@ -1,5 +1,11 @@
 # Migration Guide
 
+This guide covers breaking changes between major versions of `googleai_dart`.
+
+For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
+
+---
+
 ## Migrating from v2.x to v3.0.0
 
 v3.0.0 introduces strongly-typed lists, updated Gemini 3.1 defaults, convenience helpers, and automatic batch model population.
@@ -459,13 +465,3 @@ final client = GoogleAIClient(
   * The client throws `UnsupportedError` with guidance when you call unsupported features.
 * **Default API version**:
   * If the default is `v1beta`, outputs/limits may differ from `v1`.
-
-## Getting Help
-
-* Browse the [examples](example/)
-* Check the [API docs](https://pub.dev/documentation/googleai_dart/latest/)
-* Open an issue: [https://github.com/davidmigloz/ai_clients_dart/issues](https://github.com/davidmigloz/ai_clients_dart/issues)
-
----
-
-For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).

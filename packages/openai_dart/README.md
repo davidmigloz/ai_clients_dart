@@ -5,7 +5,10 @@
 ![Discord](https://img.shields.io/discord/1123158322812555295?label=discord)
 [![MIT](https://img.shields.io/badge/license-MIT-purple.svg)](https://github.com/davidmigloz/ai_clients_dart/blob/main/LICENSE)
 
-Unofficial Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-reference)** to build with GPT-5.2, Responses API, GPT Image 1.5, Sora, Whisper, Embeddings, and more.
+Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-reference)** with Responses API, Chat Completions, images, videos, audio, custom tools, embeddings, evals, realtime, and more. It gives Dart and Flutter applications a pure Dart, type-safe client across iOS, Android, macOS, Windows, Linux, Web, and server-side Dart.
+
+> [!TIP]
+> Coding agents: start with [llms.txt](./llms.txt). It links to the package docs, examples, and optional references in a compact format.
 
 <details>
 <summary><b>Table of Contents</b></summary>
@@ -13,254 +16,95 @@ Unofficial Dart client for the **[OpenAI API](https://platform.openai.com/docs/a
 - [Features](#features)
 - [Why choose this client?](#why-choose-this-client)
 - [Quickstart](#quickstart)
-- [Installation](#installation)
-- [Import Structure](#import-structure)
 - [Configuration](#configuration)
 - [Usage](#usage)
+- [Error Handling](#error-handling)
 - [Examples](#examples)
 - [API Coverage](#api-coverage)
+- [Official Documentation](#official-documentation)
+- [Sponsor](#sponsor)
 - [License](#license)
 
 </details>
 
 ## Features
 
-### Responses API
+### Generation and streaming
 
-- Response creation (`responses.create`)
-- Streaming support (`responses.createStream`) with SSE
-- Built-in tools (web search, file search, code interpreter, computer use)
-- Multi-turn conversations with `previousResponseId`
-- Structured output and JSON schema
-- Background mode and reasoning
+- Responses API with streaming, multi-turn conversations, structured output, and background mode
+- Chat Completions with tool calling, vision, structured output, and streaming
+- Images, videos, audio (TTS, transcription, translation), and embeddings
+- Realtime API via WebSocket and WebRTC with audio streaming
+- Input token counting for cost estimation
 
-### Chat Completions
+### Tools
 
-- Chat completion creation (`chat.completions.create`)
-- Streaming support (`chat.completions.createStream`) with SSE
-- Multi-turn conversations
-- System messages and developer messages
-- JSON mode and structured output
+- Web search, file search, code interpreter, computer use, and custom tools
 
-### Tool Use
+### Operational APIs
 
-- Custom function/tool calling
-- Tool choice modes (auto, none, required, function)
-- Parallel tool calls
-- Tool call streaming with delta accumulation
-
-### Vision
-
-- Image analysis with vision-capable models
-- Base64 images (PNG, JPEG, GIF, WebP)
-- URL images
-- Multiple images in a single request
-
-### Audio
-
-- Text-to-speech (`audio.speech.create`)
-- Speech-to-text (`audio.transcriptions.create`)
-- Audio translation (`audio.translations.create`)
-- Multiple voices and formats
-
-### Images (GPT Image)
-
-- Image generation (`images.generate`) with GPT Image 1.5
-- Image editing with masks (`images.edit`)
-- Image variations (`images.createVariation`)
-- Multiple sizes and formats
-
-### Embeddings
-
-- Embedding creation (`embeddings.create`)
-- Batch embeddings
-- Dimension control (for text-embedding-3 models)
-
-### Files & Uploads
-
-- File upload for fine-tuning and assistants
-- Large file uploads with multipart support
-- File listing and retrieval
-
-### Batches
-
-- Batch request creation
-- Batch status monitoring
-- Batch result retrieval
-
-### Fine-tuning
-
-- Fine-tuning job creation
-- Job monitoring and cancellation
-- Checkpoint management
-
-### Moderations
-
-- Content moderation
-- Text and image moderation
-- Category-specific scores
-
-### Realtime API
-
-- WebSocket-based real-time conversations
-- WebRTC support via HTTP SDP signaling (`realtimeSessions.calls`)
-- Call management (create, accept, reject, refer, hangup)
-- Audio input/output streaming
-- Server and client events
-
-### Evals API
-
-- Evaluation creation and management
-- Multiple grader types (string check, text similarity, label model, score model, python)
-- Run management with data sources (JSONL, completions, responses)
-- Output item analysis with pass/fail results
-- Status polling helpers
-
-### Videos API (Sora)
-
-- Video generation (`videos.create`)
-- Video status polling (`videos.retrieve`)
-- Content download (video, thumbnail, spritesheet)
-- Video remix (`videos.remix`)
-
-### Conversations API
-
-- Server-side conversation state management
-- Long-term storage (no 30-day TTL)
-- Integration with Responses API
-- Items management (add, list, retrieve, delete)
-
-### Containers API
-
-- Isolated execution environments
-- Container file management
-- File upload and content retrieval
-
-### ChatKit API (Beta)
-
-- Chat UI toolkit powered by workflows
-- Session management with client secrets
-- Thread and item management
-
-### Assistants API (Deprecated)
-
-> **Deprecated**: Use the Responses API instead. Import from `package:openai_dart/openai_dart_assistants.dart`.
-
-- Assistant creation and management
-- Thread management
-- Messages and runs
-- Streaming run events
-- Tool integration (code interpreter, file search)
-
-### Vector Stores (Deprecated)
-
-> **Deprecated**: Part of Assistants API. Import from `package:openai_dart/openai_dart_assistants.dart`.
-
-- Vector store management
-- File batch processing
-- File search integration
+- Files, uploads, batches, fine-tuning, moderations, evals, and model management
+- Conversations, containers, ChatKit, and skills
+- Assistants and vector stores (deprecated — use Responses API instead)
 
 ## Why choose this client?
 
-- Type-safe with sealed classes
-- Minimal dependencies (http, logging, meta, web_socket only)
-- Works on all compilation targets (native, web, WASM)
-- Interceptor-driven architecture
-- Comprehensive error handling
-- Automatic retry with exponential backoff
-- SSE streaming support
+- Pure Dart with no Flutter dependency — works in mobile apps, backends, and CLIs.
+- Type-safe request and response models with minimal dependencies (`http`, `logging`, `meta`).
+- Streaming, retries, interceptors, and error handling built into the client.
+- Covers the full OpenAI API surface, including Responses, Realtime, and legacy Assistants.
 - Resource-based API design matching official SDKs
 
 ## Quickstart
 
+```yaml
+dependencies:
+  openai_dart: ^2.0.0
+```
+
 ```dart
 import 'package:openai_dart/openai_dart.dart';
 
-void main() async {
-  final client = OpenAIClient.withApiKey('YOUR_API_KEY');
+Future<void> main() async {
+  final client = OpenAIClient.fromEnvironment();
 
-  final response = await client.responses.create(
-    CreateResponseRequest(
-      model: 'gpt-5.2',
-      input: ResponseInput.text('What is the capital of France?'),
-    ),
-  );
+  try {
+    final response = await client.responses.create(
+      CreateResponseRequest(
+        model: 'gpt-5.4',
+        input: ResponseInput.text('What is the capital of France?'),
+      ),
+    );
 
-  print(response.outputText); // Paris is the capital of France.
-
-  client.close();
+    print(response.outputText);
+  } finally {
+    client.close();
+  }
 }
 ```
 
-## Installation
-
-```yaml
-dependencies:
-  openai_dart: ^x.y.z
-```
-
-## Platform Support
-
-| Platform | Status |
-|----------|--------|
-| Dart VM | ✅ Full support |
-| Flutter (iOS/Android) | ✅ Full support |
-| Flutter Web | ✅ Full support |
-| WASM | ✅ Full support |
-
-## Import Structure
+### Import structure
 
 The package provides multiple entry points for different APIs:
 
-### Main Entry Point (Recommended)
-
 ```dart
+// Main entry point (recommended) — includes Chat Completions, Responses API,
+// Embeddings, Images, Videos, Audio, Files, Batches, Fine-tuning, and more.
 import 'package:openai_dart/openai_dart.dart';
-```
 
-Includes: Chat Completions, Responses API, Embeddings, Images, Videos, Audio, Files, Batches, Fine-tuning, Moderations, Evals, Conversations, Containers, ChatKit.
-
-### Assistants API (Deprecated)
-
-```dart
+// Assistants API (deprecated — use Responses API instead)
 import 'package:openai_dart/openai_dart_assistants.dart' as assistants;
-```
 
-Includes: Assistants, Threads, Messages, Runs, Vector Stores.
-
-> **Note**: The Assistants API is being deprecated by OpenAI. Use the Responses API instead.
-
-### Realtime API
-
-```dart
+// Realtime API — WebSocket and WebRTC sessions
 import 'package:openai_dart/openai_dart_realtime.dart' as realtime;
-```
-
-Includes: Real-time conversations via WebSocket (audio streaming) and WebRTC (HTTP-based SDP signaling).
-
-### Handling Name Conflicts
-
-When using multiple entry points, use import prefixes to avoid naming conflicts:
-
-```dart
-import 'package:openai_dart/openai_dart.dart';
-import 'package:openai_dart/openai_dart_assistants.dart' as assistants;
-import 'package:openai_dart/openai_dart_realtime.dart' as realtime;
-
-// Responses API types (modern, recommended)
-final tool = CodeInterpreterTool();
-
-// Assistants API types (deprecated)
-final assistantTool = assistants.CodeInterpreterTool();
-
-// Realtime API types
-final rtEvent = realtime.ResponseCreatedEvent(...);
 ```
 
 ## Configuration
 
 <details>
-<summary><b>Configuration Options</b></summary>
+<summary><b>Configure auth, retries, and custom endpoints</b></summary>
+
+Use `OpenAIClient.fromEnvironment()` for the default `OPENAI_API_KEY` workflow. Switch to `OpenAIConfig` when you need a proxy, custom timeout, or a non-default retry policy.
 
 ```dart
 import 'package:openai_dart/openai_dart.dart';
@@ -270,6 +114,7 @@ final client = OpenAIClient(
     authProvider: ApiKeyProvider('YOUR_API_KEY'),
     baseUrl: 'https://api.openai.com/v1', // Default
     timeout: Duration(minutes: 10),
+    connectTimeout: Duration(seconds: 30),
     retryPolicy: RetryPolicy(maxRetries: 3),
     organization: 'org-xxx', // Optional
     project: 'proj-xxx', // Optional
@@ -305,10 +150,12 @@ final client = OpenAIClient(
 
 ## Usage
 
-### Responses API
+### How do I create a response?
 
 <details>
-<summary><b>Responses API Example</b></summary>
+<summary><b>Show example</b></summary>
+
+The Responses API is the recommended way to generate text. Pass a model and input, and access the result via `response.outputText`.
 
 ```dart
 import 'package:openai_dart/openai_dart.dart';
@@ -317,7 +164,7 @@ final client = OpenAIClient.fromEnvironment();
 
 final response = await client.responses.create(
   CreateResponseRequest(
-    model: 'gpt-5.2',
+    model: 'gpt-5.4',
     input: ResponseInput.text('What is the capital of France?'),
   ),
 );
@@ -328,12 +175,16 @@ print('Usage: ${response.usage}');
 client.close();
 ```
 
+→ [Full example](example/responses_example.dart)
+
 </details>
 
-### Basic Chat Completion
+### How do I use chat completions?
 
 <details>
-<summary><b>Chat Completion Example</b></summary>
+<summary><b>Show example</b></summary>
+
+Use `client.chat.completions.create(...)` for multi-turn conversations. The `response.text` convenience getter returns the first choice's message content.
 
 ```dart
 import 'package:openai_dart/openai_dart.dart';
@@ -342,7 +193,7 @@ final client = OpenAIClient.fromEnvironment();
 
 final response = await client.chat.completions.create(
   ChatCompletionCreateRequest(
-    model: 'gpt-5.2',
+    model: 'gpt-5.4',
     messages: [
       ChatMessage.system('You are a helpful assistant.'),
       ChatMessage.user('What is the capital of France?'),
@@ -351,44 +202,70 @@ final response = await client.chat.completions.create(
   ),
 );
 
+// response.text is a convenience extension for the first choice's message content
 print('Response: ${response.text}');
 print('Finish reason: ${response.choices.first.finishReason}');
 print('Usage: ${response.usage?.promptTokens} in, ${response.usage?.completionTokens} out');
 
+// Build message lists fluently with extension methods
+final messages = <ChatMessage>[]
+  .withSystemMessage('You are helpful')
+  .withUserMessage('Hello!');
+
 client.close();
 ```
 
+→ [Full example](example/chat_example.dart)
+
 </details>
 
-### Streaming
+### How do I stream responses?
 
 <details>
-<summary><b>Streaming Example</b></summary>
+<summary><b>Show example</b></summary>
+
+Streaming returns token-by-token deltas as they arrive. You can iterate text deltas directly, collect all text at once, or accumulate chunks into a complete response object.
 
 ```dart
 final stream = client.chat.completions.createStream(
   ChatCompletionCreateRequest(
-    model: 'gpt-5.2',
+    model: 'gpt-5.4',
     messages: [ChatMessage.user('Tell me a story')],
   ),
 );
 
-await for (final event in stream) {
-  stdout.write(event.textDelta ?? '');
+// Iterate text deltas directly
+await for (final delta in stream.textDeltas()) {
+  stdout.write(delta);
 }
+
+// Or collect all text at once
+final text = await stream.collectText();
+
+// Or accumulate chunks into a complete ChatCompletion
+final accumulator = ChatStreamAccumulator();
+await for (final event in stream) {
+  accumulator.add(event);
+}
+final completion = accumulator.toChatCompletion();
+print(completion.text);
 ```
+
+→ [Full example](example/streaming_example.dart)
 
 </details>
 
-### Tool Calling
+### How do I use tool calling?
 
 <details>
-<summary><b>Tool Calling Example</b></summary>
+<summary><b>Show example</b></summary>
+
+Define tools with JSON Schema parameters and pass them in the request. The response indicates when the model wants to call a tool, and you can inspect the function name and arguments.
 
 ```dart
 final response = await client.chat.completions.create(
   ChatCompletionCreateRequest(
-    model: 'gpt-5.2',
+    model: 'gpt-5.4',
     messages: [
       ChatMessage.user("What's the weather in Tokyo?"),
     ],
@@ -416,17 +293,21 @@ if (response.hasToolCalls) {
 }
 ```
 
+→ [Full example](example/tool_calling_example.dart)
+
 </details>
 
-### Vision
+### How do I analyze images?
 
 <details>
-<summary><b>Vision Example</b></summary>
+<summary><b>Show example</b></summary>
+
+Pass image URLs or base64-encoded images as content parts alongside text in a user message.
 
 ```dart
 final response = await client.chat.completions.create(
   ChatCompletionCreateRequest(
-    model: 'gpt-5.2',
+    model: 'gpt-5.4',
     messages: [
       ChatMessage.user([
         ContentPart.text('What is in this image?'),
@@ -439,12 +320,16 @@ final response = await client.chat.completions.create(
 print(response.text);
 ```
 
+→ [Full example](example/vision_example.dart)
+
 </details>
 
-### Embeddings
+### How do I create embeddings?
 
 <details>
-<summary><b>Embeddings Example</b></summary>
+<summary><b>Show example</b></summary>
+
+Use `client.embeddings.create(...)` to generate vector representations of text. You can optionally reduce dimensions for smaller storage.
 
 ```dart
 final response = await client.embeddings.create(
@@ -459,12 +344,16 @@ final vector = response.firstEmbedding;
 print('Embedding dimensions: ${vector.length}');
 ```
 
+→ [Full example](example/embeddings_example.dart)
+
 </details>
 
-### Image Generation
+### How do I generate images?
 
 <details>
-<summary><b>Image Generation Example</b></summary>
+<summary><b>Show example</b></summary>
+
+Use `client.images.generate(...)` to create images from text prompts. Configure size, quality, and other options as needed.
 
 ```dart
 final response = await client.images.generate(
@@ -479,12 +368,18 @@ final response = await client.images.generate(
 print('Image URL: ${response.data.first.url}');
 ```
 
+→ [Full example](example/images_example.dart)
+
 </details>
 
-### Audio
+### How do I use audio?
 
 <details>
-<summary><b>Text-to-Speech Example</b></summary>
+<summary><b>Show example</b></summary>
+
+The audio API supports both text-to-speech and speech-to-text. Use `client.audio.speech.create(...)` for TTS and `client.audio.transcriptions.create(...)` for transcription.
+
+**Text-to-Speech:**
 
 ```dart
 final audioBytes = await client.audio.speech.create(
@@ -498,10 +393,7 @@ final audioBytes = await client.audio.speech.create(
 File('output.mp3').writeAsBytesSync(audioBytes);
 ```
 
-</details>
-
-<details>
-<summary><b>Speech-to-Text Example</b></summary>
+**Speech-to-Text:**
 
 ```dart
 final response = await client.audio.transcriptions.create(
@@ -515,12 +407,18 @@ final response = await client.audio.transcriptions.create(
 print('Transcription: ${response.text}');
 ```
 
+→ [Full example](example/audio_example.dart)
+
 </details>
 
-### Realtime API
+### How do I use the Realtime API?
 
 <details>
-<summary><b>WebSocket Connection Example</b></summary>
+<summary><b>Show example</b></summary>
+
+The Realtime API supports two transports: WebSocket for persistent bidirectional streaming, and WebRTC for browser-friendly audio sessions.
+
+**WebSocket:**
 
 ```dart
 import 'package:openai_dart/openai_dart.dart';
@@ -559,10 +457,7 @@ await for (final event in session.events) {
 client.close();
 ```
 
-</details>
-
-<details>
-<summary><b>WebRTC Call Example</b></summary>
+**WebRTC:**
 
 > **Note:** For WebRTC peer connections in Flutter, use the
 > [`flutter_webrtc`](https://pub.dev/packages/flutter_webrtc) package.
@@ -609,30 +504,43 @@ await client.realtimeSessions.calls.reject(
 client.close();
 ```
 
+→ [Full example](example/realtime_example.dart)
+
 </details>
 
-### Completions (Legacy)
+### How do I generate videos?
 
 <details>
-<summary><b>Completions Example</b></summary>
+<summary><b>Show example</b></summary>
+
+Use `client.videos.create(...)` to generate videos from text prompts with Sora. Poll with `retrieve` until the video is complete, then download the content.
 
 ```dart
-final completion = await client.completions.create(
-  CompletionRequest(
-    model: 'gpt-3.5-turbo-instruct',
-    prompt: CompletionPrompt.text('Say this is a test'),
-    maxTokens: 10,
+final video = await client.videos.create(
+  CreateVideoRequest(
+    prompt: 'A cat playing piano in a jazz club',
+    model: 'sora-2',
+    size: VideoSize.size1280x720,
+    seconds: VideoSeconds.s8,
   ),
 );
-print(completion.text);
+
+final status = await client.videos.retrieve(video.id);
+if (status.isCompleted) {
+  final content = await client.videos.retrieveContent(video.id);
+}
 ```
+
+→ [Full example](example/videos_example.dart)
 
 </details>
 
-### Files
+### How do I manage files?
 
 <details>
-<summary><b>Files Example</b></summary>
+<summary><b>Show example</b></summary>
+
+Use the files API to upload, list, and retrieve file content. Files are used for fine-tuning, batches, and other workflows.
 
 ```dart
 final file = await client.files.upload(
@@ -645,38 +553,39 @@ final files = await client.files.list();
 final content = await client.files.retrieveContent(file.id);
 ```
 
+→ [Full example](example/files_example.dart)
+
 </details>
 
-### Uploads
+### How do I fine-tune a model?
 
 <details>
-<summary><b>Uploads Example</b></summary>
+<summary><b>Show example</b></summary>
+
+Create a fine-tuning job by specifying a base model and a training file. Poll the job status to monitor progress and retrieve the fine-tuned model name when complete.
 
 ```dart
-// Create an upload for a large file
-final upload = await client.uploads.create(
-  CreateUploadRequest(
-    filename: 'large-file.jsonl',
-    purpose: FilePurpose.fineTune,
-    bytes: fileSize,
-    mimeType: 'application/jsonl',
+final job = await client.fineTuning.jobs.create(
+  CreateFineTuningJobRequest(
+    model: 'gpt-4o-mini-2024-07-18',
+    trainingFile: 'file-abc123',
   ),
 );
 
-// Add parts and complete
-final part = await client.uploads.addPart(upload.id, data: chunkBytes);
-final completed = await client.uploads.complete(
-  upload.id,
-  partIds: [part.id],
-);
+final status = await client.fineTuning.jobs.retrieve(job.id);
+print('Fine-tuned model: ${status.fineTunedModel}');
 ```
+
+→ [Full example](example/fine_tuning_example.dart)
 
 </details>
 
-### Batches
+### How do I use batch processing?
 
 <details>
-<summary><b>Batches Example</b></summary>
+<summary><b>Show example</b></summary>
+
+Batches let you queue many requests for asynchronous processing at lower cost. Create a batch from an input file and poll for completion.
 
 ```dart
 final batch = await client.batches.create(
@@ -691,63 +600,16 @@ final status = await client.batches.retrieve(batch.id);
 print('Status: ${status.status}');
 ```
 
-</details>
-
-### Models
-
-<details>
-<summary><b>Models Example</b></summary>
-
-```dart
-final models = await client.models.list();
-for (final model in models.data) {
-  print(model.id);
-}
-
-final gpt4o = await client.models.retrieve('gpt-4o');
-```
+→ [Full example](example/batches_example.dart)
 
 </details>
 
-### Moderations
+### How do I evaluate models?
 
 <details>
-<summary><b>Moderations Example</b></summary>
+<summary><b>Show example</b></summary>
 
-```dart
-final result = await client.moderations.create(
-  ModerationRequest(
-    input: ModerationInput.text('Check this text'),
-  ),
-);
-print('Flagged: ${result.results.first.flagged}');
-```
-
-</details>
-
-### Fine-tuning
-
-<details>
-<summary><b>Fine-tuning Example</b></summary>
-
-```dart
-final job = await client.fineTuning.jobs.create(
-  CreateFineTuningJobRequest(
-    model: 'gpt-4o-mini-2024-07-18',
-    trainingFile: 'file-abc123',
-  ),
-);
-
-final status = await client.fineTuning.jobs.retrieve(job.id);
-print('Fine-tuned model: ${status.fineTunedModel}');
-```
-
-</details>
-
-### Evals
-
-<details>
-<summary><b>Evals Example</b></summary>
+Use the evals API to create evaluation definitions with grading criteria, then run them against test data to measure model performance.
 
 ```dart
 final eval = await client.evals.create(
@@ -783,149 +645,67 @@ final run = await client.evals.runs.create(
 );
 ```
 
+→ [Full example](example/evals_example.dart)
+
 </details>
 
-### Videos (Sora)
+### How do I moderate content?
 
 <details>
-<summary><b>Videos Example</b></summary>
+<summary><b>Show example</b></summary>
+
+Use the moderations API to check whether text violates content policies. The result indicates whether the input was flagged.
 
 ```dart
-final video = await client.videos.create(
-  CreateVideoRequest(
-    prompt: 'A cat playing piano in a jazz club',
-    model: 'sora-2',
-    size: VideoSize.size1280x720,
-    seconds: VideoSeconds.s8,
+final result = await client.moderations.create(
+  ModerationRequest(
+    input: ModerationInput.text('Check this text'),
   ),
 );
+print('Flagged: ${result.results.first.flagged}');
+```
 
-final status = await client.videos.retrieve(video.id);
-if (status.isCompleted) {
-  final content = await client.videos.retrieveContent(video.id);
+→ [Full example](example/moderation_example.dart)
+
+</details>
+
+## Error Handling
+
+<details>
+<summary><b>Handle retries, validation failures, and request aborts</b></summary>
+
+`openai_dart` throws typed exceptions so retry logic and validation handling stay explicit. Catch `ApiException` and its subclasses first, then fall back to `OpenAIException` for other transport or parsing failures.
+
+```dart
+import 'dart:io';
+
+import 'package:openai_dart/openai_dart.dart';
+
+Future<void> main() async {
+  final client = OpenAIClient.fromEnvironment();
+
+  try {
+    await client.responses.create(
+      CreateResponseRequest(
+        model: 'gpt-5.4',
+        input: ResponseInput.text('Ping'),
+      ),
+    );
+  } on RateLimitException catch (error) {
+    stderr.writeln('Retry after: ${error.retryAfter}');
+  } on ApiException catch (error) {
+    stderr.writeln('OpenAI API error ${error.statusCode}: ${error.message}');
+  } on OpenAIException catch (error) {
+    stderr.writeln('OpenAI client error: $error');
+  } finally {
+    client.close();
+  }
 }
 ```
 
-</details>
-
-### Conversations
-
-<details>
-<summary><b>Conversations Example</b></summary>
-
-```dart
-final conversation = await client.conversations.create(
-  ConversationCreateRequest(
-    items: [MessageItem.userText('Hello!')],
-  ),
-);
-
-final items = await client.conversations.items.list(conversation.id);
-await client.conversations.delete(conversation.id);
-```
+→ [Full example](example/error_handling_example.dart)
 
 </details>
-
-### Containers
-
-<details>
-<summary><b>Containers Example</b></summary>
-
-```dart
-final container = await client.containers.create(
-  CreateContainerRequest(name: 'my-container'),
-);
-
-final files = await client.containers.files.list(container.id);
-await client.containers.delete(container.id);
-```
-
-</details>
-
-### ChatKit (Beta)
-
-<details>
-<summary><b>ChatKit Example</b></summary>
-
-```dart
-final session = await client.chatkit.sessions.create(
-  CreateChatSessionRequest(
-    workflow: WorkflowParam(id: 'workflow-abc'),
-    user: 'user-123',
-  ),
-);
-
-final threads = await client.chatkit.threads.list();
-```
-
-</details>
-
-### Skills
-
-<details>
-<summary><b>Skills Example</b></summary>
-
-```dart
-final skills = await client.skills.list();
-final skill = await client.skills.retrieve('skill-abc123');
-final versions = await client.skills.versions.list('skill-abc123');
-```
-
-</details>
-
-### Input Tokens
-
-<details>
-<summary><b>Input Tokens Example</b></summary>
-
-```dart
-final tokenCount = await client.responses.inputTokens.count(
-  model: 'gpt-4o',
-  input: ResponseInput.text('Hello, how are you?'),
-);
-print('Input tokens: ${tokenCount.inputTokens}');
-```
-
-</details>
-
-## Extension Methods
-
-The package provides convenient extension methods for common operations:
-
-### Stream Extensions
-
-```dart
-// Collect all text from a streaming response
-final text = await stream.collectText();
-
-// Iterate only text deltas
-await for (final delta in stream.textDeltas()) {
-  stdout.write(delta);
-}
-
-// Accumulate streaming chunks into a complete response
-await for (final accumulated in stream.accumulate()) {
-  print('Content so far: ${accumulated.content}');
-}
-
-// Or use ChatStreamAccumulator directly for full control
-final accumulator = ChatStreamAccumulator();
-await for (final event in stream) {
-  accumulator.add(event);
-}
-// Build a ChatCompletion from the accumulated stream data
-final completion = accumulator.toChatCompletion();
-print(completion.text);
-```
-
-### Message List Extensions
-
-```dart
-// Build message lists fluently
-final messages = <ChatMessage>[]
-  .withSystemMessage('You are helpful')
-  .withUserMessage('Hello!');
-```
 
 ## Examples
 
@@ -940,7 +720,7 @@ See the [example/](example/) directory for complete examples:
 | [`responses_example.dart`](example/responses_example.dart) | Responses API with built-in tools |
 | [`embeddings_example.dart`](example/embeddings_example.dart) | Text embeddings with dimension control |
 | [`images_example.dart`](example/images_example.dart) | GPT Image generation |
-| [`videos_example.dart`](example/videos_example.dart) | Sora video generation |
+| [`videos_example.dart`](example/videos_example.dart) | Sora video generation, editing, and extension |
 | [`audio_example.dart`](example/audio_example.dart) | Text-to-speech and transcription |
 | [`files_example.dart`](example/files_example.dart) | File upload and management |
 | [`conversations_example.dart`](example/conversations_example.dart) | Conversations API for state management |
@@ -959,6 +739,7 @@ See the [example/](example/) directory for complete examples:
 | [`uploads_example.dart`](example/uploads_example.dart) | Large file multipart uploads |
 | [`skills_example.dart`](example/skills_example.dart) | Skills management |
 | [`input_tokens_example.dart`](example/input_tokens_example.dart) | Input token counting |
+| [`openai_dart_example.dart`](example/openai_dart_example.dart) | Quick-start overview |
 
 ## API Coverage
 
@@ -988,10 +769,25 @@ See the [example/](example/) directory for complete examples:
 | Vector Stores (Deprecated) | ✅ Full (separate import) |
 | Completions (Legacy) | ✅ Full |
 
+## Official Documentation
+
+- [API reference](https://pub.dev/documentation/openai_dart/latest/)
+- [OpenAI API docs](https://platform.openai.com/docs/api-reference)
+- [OpenAI Python SDK](https://github.com/openai/openai-python)
+- [OpenAI Node.js SDK](https://github.com/openai/openai-node)
+
 ## Sponsor
 
-If these packages are useful to you or your company, please [sponsor the project](https://github.com/sponsors/davidmigloz). Development and maintenance are provided to the community for free, but integration tests against real APIs and the tooling required to build and verify releases still have real costs. Your support, at any level, helps keep these packages maintained and free for the Dart & Flutter community.
+If these packages are useful to you or your company, please consider [sponsoring the project](https://github.com/sponsors/davidmigloz). Development and maintenance are provided to the community for free, but integration tests against real APIs and the tooling required to build and verify releases still have real costs. Your support, at any level, helps keep these packages maintained and free for the Dart & Flutter community.
+
+<p align="center">
+  <a href="https://github.com/sponsors/davidmigloz">
+    <img src='https://raw.githubusercontent.com/davidmigloz/sponsors/main/sponsors.svg'/>
+  </a>
+</p>
 
 ## License
 
-MIT License - see [LICENSE](../../LICENSE) for details.
+This package is licensed under the [MIT License](../../LICENSE).
+
+This is a community-maintained package and is not affiliated with or endorsed by OpenAI.

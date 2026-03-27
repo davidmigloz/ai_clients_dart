@@ -6,7 +6,6 @@ issue_tracker: https://github.com/davidmigloz/ai_clients_dart/issues?q=label:p:m
 homepage: https://github.com/davidmigloz/ai_clients_dart
 
 topics:
-  - api
   - nlp
   - gen-ai
   - llms

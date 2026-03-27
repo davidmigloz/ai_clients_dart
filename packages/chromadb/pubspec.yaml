@@ -4,6 +4,17 @@ version: 1.1.0
 repository: https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/chromadb
 issue_tracker: https://github.com/davidmigloz/ai_clients_dart/issues?q=label:p:chromadb
 homepage: https://github.com/davidmigloz/ai_clients_dart
+documentation: https://langchaindart.dev
+
+funding:
+  - https://github.com/sponsors/davidmigloz
+
+topics:
+  - gen-ai
+  - vector-database
+  - embeddings
+  - rag
+  - chromadb
 
 environment:
   sdk: ">=3.9.0 <4.0.0"

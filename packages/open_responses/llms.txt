@@ -1,0 +1,25 @@
+# OpenResponses Dart Client
+
+> Dart client for the OpenResponses specification with streaming, tool calling, structured output, and multi-turn responses across multiple providers.
+
+## Docs
+
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/README.md): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/CHANGELOG.md): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/MIGRATION.md): Upgrade notes and breaking-change guidance.
+
+## Examples
+
+- [create_response_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/create_response_example.dart): How do I create a response?
+- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/streaming_example.dart): How do I stream events?
+- [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/tool_calling_example.dart): How do I use tool calling?
+- [multi_turn_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/multi_turn_example.dart): How do I keep a multi-turn conversation?
+- [structured_output_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/structured_output_example.dart): How do I request structured output?
+- [provider_switch_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/provider_switch_example.dart): How do I switch providers without changing my app code?
+- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/error_handling_example.dart): Error Handling.
+- [mcp_tools_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/mcp_tools_example.dart): MCP tool integration.
+- [reasoning_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/reasoning_example.dart): Reasoning models.
+
+## Optional
+
+- [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/open_responses): Source tree, pubspec, and package-local files.

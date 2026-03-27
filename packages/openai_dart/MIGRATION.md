@@ -1,5 +1,13 @@
 # Migration Guide
 
+This guide covers breaking changes between major versions of `openai_dart`.
+
+For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
+
+---
+
+## Migrating from v0.x to v1.0.0
+
 This guide helps you migrate from the previous code-generated openai_dart package to the new hand-crafted v1.0.0 client.
 
 ## Overview
@@ -1285,11 +1293,3 @@ final response = await client.chat.completions.create(
 // Access OpenRouter-specific response fields
 print('Provider: ${response.provider}');
 ```
-
-## Getting Help
-
-If you encounter issues migrating:
-
-1. Check the [API documentation](https://platform.openai.com/docs/api-reference)
-2. Review the [examples](./example/)
-3. Open an issue on [GitHub](https://github.com/davidmigloz/ai_clients_dart/issues)

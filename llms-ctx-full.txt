@@ -1,0 +1,424 @@
+# AI Clients Dart Full Context
+
+This file concatenates all markdown sources linked from llms.txt, including Optional links, in link order.
+
+## Source: packages/anthropic_sdk_dart/llms.txt
+
+Canonical URL: https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/llms.txt
+
+### Anthropic Dart Client
+
+> Dart client for the Anthropic API to build with Claude — messages, streaming, tool calling, extended thinking, multimodal prompts, files, skills, and batches.
+
+#### Docs
+
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/README.md): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/CHANGELOG.md): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/MIGRATION.md): Upgrade notes and breaking-change guidance.
+
+#### Examples
+
+- [messages_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/messages_example.dart): How do I send a Claude message?
+- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/streaming_example.dart): How do I stream Claude responses?
+- [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/tool_calling_example.dart): How do I use tool calling?
+- [thinking_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/thinking_example.dart): How do I enable extended thinking?
+- [vision_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/vision_example.dart): How do I send images or documents?
+- [token_counting_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/token_counting_example.dart): How do I count tokens?
+- [message_batches_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/message_batches_example.dart): How do I run message batches?
+- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/error_handling_example.dart): Error Handling.
+- [web_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/web_search_example.dart): Web search tool.
+- [computer_use_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/computer_use_example.dart): Computer use tool.
+- [document_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/document_example.dart): Document inputs with citations.
+- [files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/files_example.dart): File management (beta).
+- [skills_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/skills_example.dart): Skills management (beta).
+- [mcp_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/mcp_example.dart): MCP tool integration.
+- [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/models_example.dart): Model listing.
+- [anthropic_sdk_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/anthropic_sdk_dart_example.dart): Quick-start overview.
+
+#### Optional
+
+- [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/anthropic_sdk_dart): Source tree, pubspec, and package-local files.
+
+## Source: packages/chromadb/llms.txt
+
+Canonical URL: https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/llms.txt
+
+### ChromaDB Dart Client
+
+> Dart client for ChromaDB with collections, vector search, multi-tenant storage, embeddings, and RAG pipelines.
+
+#### Docs
+
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/README.md): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/CHANGELOG.md): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/MIGRATION.md): Upgrade notes and breaking-change guidance.
+
+#### Examples
+
+- [collections_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/collections_example.dart): How do I manage collections?
+- [records_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/records_example.dart): How do I add records?
+- [embedding_function_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/embedding_function_example.dart): How do I auto-embed data?
+- [query_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/query_example.dart): How do I query similar records?
+- [metadata_filtering_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/metadata_filtering_example.dart): How do I filter by metadata?
+- [multi_tenant_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/multi_tenant_example.dart): How do I work with tenants and databases?
+- [health_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/health_example.dart): How do I check server health?
+- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/error_handling_example.dart): Error Handling.
+- [functions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/functions_example.dart): Embedding functions.
+- [databases_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/databases_example.dart): Database management.
+- [auth_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/auth_example.dart): Authentication.
+- [chromadb_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/chromadb_example.dart): Quick-start overview.
+- [tenants_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/tenants_example.dart): Tenant management.
+
+#### Optional
+
+- [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/chromadb): Source tree, pubspec, and package-local files.
+
+## Source: packages/googleai_dart/llms.txt
+
+Canonical URL: https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/llms.txt
+
+### Google AI & Vertex AI Gemini API Dart Client
+
+> Dart client for the Google AI Gemini Developer API and Vertex AI Gemini API with text generation, image generation, tool calling, grounding tools, Live API WebSocket sessions, service tier routing, and embeddings.
+
+#### Docs
+
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/README.md): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/CHANGELOG.md): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/MIGRATION.md): Upgrade notes and breaking-change guidance.
+
+#### Examples
+
+- [generate_content.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/generate_content.dart): How do I generate text with Gemini?
+- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/streaming_example.dart): How do I stream Gemini output?
+- [image_generation_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/image_generation_example.dart): How do I generate images?
+- [function_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/function_calling_example.dart): How do I use tool calling?
+- [google_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/google_search_example.dart): How do I ground responses with Google data?
+- [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/embeddings_example.dart): How do I create embeddings?
+- [files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/files_example.dart): How do I upload files for prompts?
+- [live_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/live_example.dart): How do I use the Live API?
+- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/error_handling_example.dart): Error Handling.
+- [abort_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/abort_example.dart): Request cancellation with abort triggers.
+- [api_versions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/api_versions_example.dart): API version selection (v1 vs v1beta).
+- [auth_tokens_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/auth_tokens_example.dart): Ephemeral token authentication.
+- [batch_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/batch_example.dart): Batch operations.
+- [batches_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/batches_example.dart): Batch resource management.
+- [cached_contents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/cached_contents_example.dart): Context caching.
+- [caching_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/caching_example.dart): Context caching API usage.
+- [complete_api_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/complete_api_example.dart): Complete API coverage demo.
+- [corpora_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/corpora_example.dart): Corpus management for semantic retrieval.
+- [documents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/documents_example.dart): Document management within corpora.
+- [example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/example.dart): Quick-start usage.
+- [file_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/file_search_example.dart): File search with semantic retrieval.
+- [file_search_stores_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/file_search_stores_example.dart): File search store management.
+- [generate_answer_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/generate_answer_example.dart): Grounded question answering (RAG).
+- [generated_files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/generated_files_example.dart): Generated files for video outputs.
+- [google_maps_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/google_maps_example.dart): Google Maps grounding.
+- [interactions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/interactions_example.dart): Server-side conversation state management.
+- [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/models_example.dart): List and inspect models.
+- [oauth_refresh_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/oauth_refresh_example.dart): OAuth token refresh during retries.
+- [operations_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/operations_example.dart): Long-running operations management.
+- [pagination_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/pagination_example.dart): Paginated list results.
+- [permissions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/permissions_example.dart): Permission management for resources.
+- [prediction_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/prediction_example.dart): Video generation with Veo model.
+- [tuned_model_generation_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/tuned_model_generation_example.dart): Generate content with tuned models.
+- [tuned_models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/tuned_models_example.dart): Tuned model workflows.
+- [url_context_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/url_context_example.dart): URL content fetching and analysis.
+- [vertex_ai_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/vertex_ai_example.dart): Vertex AI configuration.
+
+#### Optional
+
+- [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/googleai_dart): Source tree, pubspec, and package-local files.
+
+## Source: packages/mistralai_dart/llms.txt
+
+Canonical URL: https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/llms.txt
+
+### Mistral AI Dart Client
+
+> Dart client for the Mistral AI API with chat completions, streaming, tool calling, multimodal inputs, TTS, voice management, reasoning effort, embeddings, OCR, and more.
+
+#### Docs
+
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/README.md): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/CHANGELOG.md): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/MIGRATION.md): Upgrade notes and breaking-change guidance.
+
+#### Examples
+
+- [chat_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/chat_example.dart): How do I use chat completions?
+- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/streaming_example.dart): How do I stream responses?
+- [vision_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/vision_example.dart): How do I use vision?
+- [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/tool_calling_example.dart): How do I use tool calling?
+- [json_mode_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/json_mode_example.dart): How do I use structured output?
+- [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/embeddings_example.dart): How do I create embeddings?
+- [fim_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/fim_example.dart): How do I use code completions?
+- [files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/files_example.dart): How do I manage files?
+- [fine_tuning_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/fine_tuning_example.dart): How do I fine-tune and batch?
+- [moderation_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/moderation_example.dart): How do I moderate content?
+- [ocr_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/ocr_example.dart): How do I extract text from documents?
+- [audio_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/audio_example.dart): How do I use audio?
+- [agents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/agents_example.dart): How do I use agents?
+- [conversations_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/conversations_example.dart): How do I use conversations?
+- [libraries_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/libraries_example.dart): How do I use libraries?
+- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/error_handling_example.dart): Error Handling.
+- [batch_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/batch_example.dart): Batch processing.
+- [classification_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/classification_example.dart): Text classification.
+- [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/models_example.dart): Model listing.
+- [config_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/config_example.dart): Client configuration options.
+- [multi_turn_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/multi_turn_example.dart): Multi-turn conversation management.
+- [parallel_requests_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/parallel_requests_example.dart): Parallel and concurrent requests.
+- [rag_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/rag_example.dart): Retrieval Augmented Generation.
+- [semantic_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/semantic_search_example.dart): Semantic search with embeddings.
+- [system_message_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/system_message_example.dart): System message patterns.
+
+#### Optional
+
+- [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/mistralai_dart): Source tree, pubspec, and package-local files.
+
+## Source: packages/ollama_dart/llms.txt
+
+Canonical URL: https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/llms.txt
+
+### Ollama Dart Client
+
+> Dart client for the Ollama API to run local and self-hosted models — chat, streaming, tool calling, embeddings, and model management.
+
+#### Docs
+
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/README.md): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/CHANGELOG.md): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/MIGRATION.md): Upgrade notes and breaking-change guidance.
+
+#### Examples
+
+- [chat_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/chat_example.dart): How do I run a chat completion?
+- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/streaming_example.dart): How do I stream local model output?
+- [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/tool_calling_example.dart): How do I use tool calling?
+- [completions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/completions_example.dart): How do I generate plain text?
+- [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/embeddings_example.dart): How do I create embeddings?
+- [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/models_example.dart): How do I manage local models?
+- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/error_handling_example.dart): Error Handling.
+- [version_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/version_example.dart): Server version.
+- [ollama_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/ollama_dart_example.dart): Quick-start overview.
+
+#### Optional
+
+- [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/ollama_dart): Source tree, pubspec, and package-local files.
+
+## Source: packages/open_responses/llms.txt
+
+Canonical URL: https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/llms.txt
+
+### OpenResponses Dart Client
+
+> Dart client for the OpenResponses specification with streaming, tool calling, structured output, and multi-turn responses across multiple providers.
+
+#### Docs
+
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/README.md): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/CHANGELOG.md): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/MIGRATION.md): Upgrade notes and breaking-change guidance.
+
+#### Examples
+
+- [create_response_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/create_response_example.dart): How do I create a response?
+- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/streaming_example.dart): How do I stream events?
+- [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/tool_calling_example.dart): How do I use tool calling?
+- [multi_turn_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/multi_turn_example.dart): How do I keep a multi-turn conversation?
+- [structured_output_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/structured_output_example.dart): How do I request structured output?
+- [provider_switch_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/provider_switch_example.dart): How do I switch providers without changing my app code?
+- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/error_handling_example.dart): Error Handling.
+- [mcp_tools_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/mcp_tools_example.dart): MCP tool integration.
+- [reasoning_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/reasoning_example.dart): Reasoning models.
+
+#### Optional
+
+- [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/open_responses): Source tree, pubspec, and package-local files.
+
+## Source: packages/openai_dart/llms.txt
+
+Canonical URL: https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/llms.txt
+
+### OpenAI Dart Client
+
+> Dart client for the OpenAI API with Responses API, Chat Completions, images, videos, audio, custom tools, embeddings, evals, realtime, and more.
+
+#### Docs
+
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/CHANGELOG.md): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/MIGRATION.md): Upgrade notes and breaking-change guidance.
+
+#### Examples
+
+- [responses_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/responses_example.dart): How do I create a response?
+- [chat_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/chat_example.dart): How do I use chat completions?
+- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/streaming_example.dart): How do I stream responses?
+- [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/tool_calling_example.dart): How do I use tool calling?
+- [vision_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/vision_example.dart): How do I analyze images?
+- [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/embeddings_example.dart): How do I create embeddings?
+- [images_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/images_example.dart): How do I generate images?
+- [audio_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/audio_example.dart): How do I use audio?
+- [realtime_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/realtime_example.dart): How do I use the Realtime API?
+- [videos_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/videos_example.dart): How do I generate videos?
+- [files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/files_example.dart): How do I manage files?
+- [fine_tuning_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/fine_tuning_example.dart): How do I fine-tune a model?
+- [batches_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/batches_example.dart): How do I use batch processing?
+- [evals_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/evals_example.dart): How do I evaluate models?
+- [moderation_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/moderation_example.dart): How do I moderate content?
+- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/error_handling_example.dart): Error Handling.
+- [conversations_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/conversations_example.dart): Conversations API for state management.
+- [containers_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/containers_example.dart): Containers for isolated execution.
+- [chatkit_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/chatkit_example.dart): ChatKit sessions and threads.
+- [assistants_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/assistants_example.dart): Assistants API (deprecated).
+- [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/models_example.dart): Model listing and retrieval.
+- [web_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/web_search_example.dart): Web search with Responses API.
+- [completions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/completions_example.dart): Legacy completions API.
+- [uploads_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/uploads_example.dart): Large file multipart uploads.
+- [skills_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/skills_example.dart): Skills management.
+- [input_tokens_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/input_tokens_example.dart): Input token counting.
+- [openai_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/openai_dart_example.dart): Quick-start overview.
+
+#### Optional
+
+- [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/openai_dart): Source tree, pubspec, and package-local files.
+
+## Source: packages/openai_realtime_dart/llms.txt
+
+Canonical URL: https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_realtime_dart/llms.txt
+
+### OpenAI Realtime API Dart Client
+
+> Strongly-typed Dart client for the OpenAI Realtime API, a stateful, event-based API that communicates over a WebSocket for voice and text interactions in Dart and Flutter apps.
+
+#### Docs
+
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_realtime_dart/README.md): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_realtime_dart/CHANGELOG.md): Release history and version-by-version changes.
+
+#### Examples
+
+- [openai_realtime_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_realtime_dart/example/openai_realtime_dart_example.dart): Package overview example.
+
+#### Optional
+
+- [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/openai_realtime_dart): Source tree, pubspec, and package-local files.
+
+## Source: packages/tavily_dart/llms.txt
+
+Canonical URL: https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/tavily_dart/llms.txt
+
+### Tavily Dart Client
+
+> Dart client for the Tavily API, a search engine optimized for LLMs, RAG pipelines, and AI agent workflows in Dart and Flutter apps.
+
+#### Docs
+
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/tavily_dart/README.md): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/tavily_dart/CHANGELOG.md): Release history and version-by-version changes.
+
+#### Examples
+
+- [tavily_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/tavily_dart/example/tavily_dart_example.dart): Package overview example.
+
+#### Optional
+
+- [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/tavily_dart): Source tree, pubspec, and package-local files.
+
+## Source: packages/vertex_ai/llms.txt
+
+Canonical URL: https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/vertex_ai/llms.txt
+
+### Vertex AI Dart Client
+
+> Deprecated Dart client for the Vertex AI API — use googleai_dart for new projects.
+
+#### Docs
+
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/vertex_ai/README.md): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/vertex_ai/CHANGELOG.md): Release history and version-by-version changes.
+
+#### Examples
+
+- [vertex_ai_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/vertex_ai/example/vertex_ai_example.dart): Package overview example.
+
+#### Optional
+
+- [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/vertex_ai): Source tree, pubspec, and package-local files.
+
+## Source: README.md
+
+Canonical URL: https://github.com/davidmigloz/ai_clients_dart/blob/main/README.md
+
+### AI Clients Dart
+
+Pure Dart client libraries for popular AI provider APIs, vector databases, and search services. They are designed for Flutter apps, backends, CLIs, and other Dart runtimes across iOS, Android, macOS, Windows, Linux, and Web.
+
+> [!TIP]
+> Coding agents: use [llms.txt](./llms.txt) for package hubs, [llms-ctx.txt](./llms-ctx.txt) for the non-optional concatenated context bundle, and [llms-ctx-full.txt](./llms-ctx-full.txt) for the full bundle including optional sources.
+
+#### Which package should I use?
+
+- `openai_dart` for the full [OpenAI API](https://platform.openai.com/docs/api-reference) in Dart, including Responses, Chat Completions, audio, images, videos, custom tools, evals, and realtime WebSocket/WebRTC workflows.
+- `anthropic_sdk_dart` for the [Anthropic API](https://docs.anthropic.com/en/api), including Claude messages, streaming, tool calling, extended thinking, files, skills, and batch workflows.
+- `googleai_dart` for Gemini on [Google AI](https://ai.google.dev/) and [Vertex AI](https://cloud.google.com/vertex-ai), including generation, embeddings, grounding tools, files, and Live API WebSocket sessions.
+- `mistralai_dart` for the [Mistral AI API](https://docs.mistral.ai/api), including chat, embeddings, OCR, TTS, voice management, reasoning effort, audio transcription, fine-tuning, and beta agent workflows.
+- `ollama_dart` for local and self-hosted [Ollama](https://ollama.com/) deployments, including chat, streaming, embeddings, tool calling, and model lifecycle operations.
+- `open_responses` when you want a Dart client for the [OpenResponses](https://www.openresponses.org/) specification, which brings one typed responses interface to multiple supported providers.
+- `chromadb` for [ChromaDB](https://trychroma.com/) collections, vector search, multi-tenant storage, and RAG pipelines.
+- `openai_realtime_dart` for a smaller, lower-level [OpenAI Realtime API](https://platform.openai.com/docs/guides/realtime) client focused on direct WebSocket sessions.
+- `tavily_dart` for [Tavily](https://tavily.com/) web search and research APIs in agent and RAG workflows.
+
+#### Key Features
+
+- Type-safe request and response models with sealed classes and ergonomic helpers.
+- Pure Dart implementations that work in Flutter apps, backends, CLIs, and other non-Flutter runtimes.
+- Minimal first-party dependencies (`http`, `logging`, `meta`, and, where needed, `web_socket`).
+- Documentation optimized for coding agents through `llms.txt`, `llms-ctx.txt`, and `llms-ctx-full.txt`.
+- Streaming support, tool calling, retries, interceptors, and multimodal APIs across multiple providers.
+- Consistent package structure with examples, tests, and platform-aware client configuration.
+
+#### Packages
+
+| Package | Version | Downloads |
+| --- | --- | --- |
+| [anthropic_sdk_dart](https://pub.dev/packages/anthropic_sdk_dart) | [![anthropic_sdk_dart](https://img.shields.io/pub/v/anthropic_sdk_dart.svg)](https://pub.dev/packages/anthropic_sdk_dart) | ![anthropic_sdk_dart monthly downloads](https://img.shields.io/pub/dm/anthropic_sdk_dart) |
+| [chromadb](https://pub.dev/packages/chromadb) | [![chromadb](https://img.shields.io/pub/v/chromadb.svg)](https://pub.dev/packages/chromadb) | ![chromadb monthly downloads](https://img.shields.io/pub/dm/chromadb) |
+| [googleai_dart](https://pub.dev/packages/googleai_dart) | [![googleai_dart](https://img.shields.io/pub/v/googleai_dart.svg)](https://pub.dev/packages/googleai_dart) | ![googleai_dart monthly downloads](https://img.shields.io/pub/dm/googleai_dart) |
+| [mistralai_dart](https://pub.dev/packages/mistralai_dart) | [![mistralai_dart](https://img.shields.io/pub/v/mistralai_dart.svg)](https://pub.dev/packages/mistralai_dart) | ![mistralai_dart monthly downloads](https://img.shields.io/pub/dm/mistralai_dart) |
+| [ollama_dart](https://pub.dev/packages/ollama_dart) | [![ollama_dart](https://img.shields.io/pub/v/ollama_dart.svg)](https://pub.dev/packages/ollama_dart) | ![ollama_dart monthly downloads](https://img.shields.io/pub/dm/ollama_dart) |
+| [open_responses](https://pub.dev/packages/open_responses) | [![open_responses](https://img.shields.io/pub/v/open_responses.svg)](https://pub.dev/packages/open_responses) | ![open_responses monthly downloads](https://img.shields.io/pub/dm/open_responses) |
+| [openai_dart](https://pub.dev/packages/openai_dart) | [![openai_dart](https://img.shields.io/pub/v/openai_dart.svg)](https://pub.dev/packages/openai_dart) | ![openai_dart monthly downloads](https://img.shields.io/pub/dm/openai_dart) |
+| [openai_realtime_dart](https://pub.dev/packages/openai_realtime_dart) | [![openai_realtime_dart](https://img.shields.io/pub/v/openai_realtime_dart.svg)](https://pub.dev/packages/openai_realtime_dart) | ![openai_realtime_dart monthly downloads](https://img.shields.io/pub/dm/openai_realtime_dart) |
+| [tavily_dart](https://pub.dev/packages/tavily_dart) | [![tavily_dart](https://img.shields.io/pub/v/tavily_dart.svg)](https://pub.dev/packages/tavily_dart) | ![tavily_dart monthly downloads](https://img.shields.io/pub/dm/tavily_dart) |
+
+#### Used By
+
+These open-source packages and apps use one or more clients from this repo. For more, see the [GitHub dependents graph](https://github.com/davidmigloz/ai_clients_dart/network/dependents).
+
+##### Packages
+
+- [langchain_dart](https://github.com/davidmigloz/langchain_dart) ![langchain monthly downloads](https://img.shields.io/pub/dm/langchain)
+- [dartantic](https://github.com/csells/dartantic) ![dartantic monthly downloads](https://img.shields.io/pub/dm/dartantic_ai)
+- [genkit-dart](https://github.com/genkit-ai/genkit-dart) ![genkit monthly downloads](https://img.shields.io/pub/dm/genkit)
+
+##### Apps
+
+- [Anx Reader](https://github.com/Anxcye/anx-reader) ![Anx Reader stars](https://img.shields.io/github/stars/Anxcye/anx-reader)
+- [ApiDash](https://github.com/foss42/apidash) ![ApiDash stars](https://img.shields.io/github/stars/foss42/apidash)
+- [Lotti](https://github.com/matthiasn/lotti) ![Lotti stars](https://img.shields.io/github/stars/matthiasn/lotti)
+
+#### Sponsor
+
+If these packages are useful to you or your company, please consider [sponsoring the project](https://github.com/sponsors/davidmigloz). Development and maintenance are provided to the community for free, but integration tests against real APIs and the tooling required to build and verify releases still have real costs. Your support, at any level, helps keep these packages maintained and free for the Dart & Flutter community.
+
+<p align="center">
+  <a href="https://github.com/sponsors/davidmigloz">
+    <img src='https://raw.githubusercontent.com/davidmigloz/sponsors/main/sponsors.svg'/>
+  </a>
+</p>
+
+#### License
+
+AI Clients Dart is licensed under the [MIT License](LICENSE).

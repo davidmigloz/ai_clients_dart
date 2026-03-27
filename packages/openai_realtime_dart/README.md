@@ -5,9 +5,13 @@
 ![Discord](https://img.shields.io/discord/1123158322812555295?label=discord)
 [![MIT](https://img.shields.io/badge/license-MIT-purple.svg)](https://github.com/davidmigloz/ai_clients_dart/blob/main/LICENSE)
 
-Unofficial strongly-typed Dart client for the [OpenAI Realtime API](https://platform.openai.com/docs/guides/realtime), a stateful, event-based API that communicates over a WebSocket.
+Strongly-typed Dart client for the [OpenAI Realtime API](https://platform.openai.com/docs/guides/realtime), a stateful, event-based API that communicates over a WebSocket for voice and text interactions in Dart and Flutter apps.
 
-> Note: If you are looking for a client for the [REST OpenAI API](https://platform.openai.com/docs/api-reference), please check the [openai_dart](https://pub.dev/packages/openai_dart) package.
+> [!NOTE]
+> The [`openai_dart`](https://pub.dev/packages/openai_dart) package is now the recommended client for the OpenAI API, including the Realtime API (WebSocket and WebRTC). This package remains available as a lower-level alternative for direct WebSocket session management.
+
+> [!TIP]
+> Coding agents: start with [llms.txt](./llms.txt). It links to the package docs, examples, and optional references in a compact format.
 
 ## Table of contents
 
@@ -351,8 +355,16 @@ This package is based on the [OpenAI Realtime API Reference Client](https://gith
 
 ## Sponsor
 
-If these packages are useful to you or your company, please [sponsor the project](https://github.com/sponsors/davidmigloz). Development and maintenance are provided to the community for free, but integration tests against real APIs and the tooling required to build and verify releases still have real costs. Your support, at any level, helps keep these packages maintained and free for the Dart & Flutter community.
+If these packages are useful to you or your company, please consider [sponsoring the project](https://github.com/sponsors/davidmigloz). Development and maintenance are provided to the community for free, but integration tests against real APIs and the tooling required to build and verify releases still have real costs. Your support, at any level, helps keep these packages maintained and free for the Dart & Flutter community.
+
+<p align="center">
+  <a href="https://github.com/sponsors/davidmigloz">
+    <img src='https://raw.githubusercontent.com/davidmigloz/sponsors/main/sponsors.svg'/>
+  </a>
+</p>
 
 ## License
 
-OpenAI Realtime API Dart Client is licensed under the [MIT License](https://github.com/davidmigloz/ai_clients_dart/blob/main/LICENSE).
+This package is licensed under the [MIT License](../../LICENSE).
+
+This is a community-maintained package and is not affiliated with or endorsed by OpenAI.

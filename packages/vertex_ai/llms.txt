@@ -1,0 +1,16 @@
+# Vertex AI Dart Client
+
+> Deprecated Dart client for the Vertex AI API — use googleai_dart for new projects.
+
+## Docs
+
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/vertex_ai/README.md): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/vertex_ai/CHANGELOG.md): Release history and version-by-version changes.
+
+## Examples
+
+- [vertex_ai_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/vertex_ai/example/vertex_ai_example.dart): Package overview example.
+
+## Optional
+
+- [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/vertex_ai): Source tree, pubspec, and package-local files.

@@ -1,0 +1,43 @@
+# OpenAI Dart Client
+
+> Dart client for the OpenAI API with Responses API, Chat Completions, images, videos, audio, custom tools, embeddings, evals, realtime, and more.
+
+## Docs
+
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/CHANGELOG.md): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/MIGRATION.md): Upgrade notes and breaking-change guidance.
+
+## Examples
+
+- [responses_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/responses_example.dart): How do I create a response?
+- [chat_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/chat_example.dart): How do I use chat completions?
+- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/streaming_example.dart): How do I stream responses?
+- [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/tool_calling_example.dart): How do I use tool calling?
+- [vision_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/vision_example.dart): How do I analyze images?
+- [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/embeddings_example.dart): How do I create embeddings?
+- [images_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/images_example.dart): How do I generate images?
+- [audio_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/audio_example.dart): How do I use audio?
+- [realtime_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/realtime_example.dart): How do I use the Realtime API?
+- [videos_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/videos_example.dart): How do I generate videos?
+- [files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/files_example.dart): How do I manage files?
+- [fine_tuning_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/fine_tuning_example.dart): How do I fine-tune a model?
+- [batches_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/batches_example.dart): How do I use batch processing?
+- [evals_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/evals_example.dart): How do I evaluate models?
+- [moderation_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/moderation_example.dart): How do I moderate content?
+- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/error_handling_example.dart): Error Handling.
+- [conversations_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/conversations_example.dart): Conversations API for state management.
+- [containers_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/containers_example.dart): Containers for isolated execution.
+- [chatkit_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/chatkit_example.dart): ChatKit sessions and threads.
+- [assistants_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/assistants_example.dart): Assistants API (deprecated).
+- [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/models_example.dart): Model listing and retrieval.
+- [web_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/web_search_example.dart): Web search with Responses API.
+- [completions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/completions_example.dart): Legacy completions API.
+- [uploads_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/uploads_example.dart): Large file multipart uploads.
+- [skills_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/skills_example.dart): Skills management.
+- [input_tokens_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/input_tokens_example.dart): Input token counting.
+- [openai_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/openai_dart_example.dart): Quick-start overview.
+
+## Optional
+
+- [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/openai_dart): Source tree, pubspec, and package-local files.

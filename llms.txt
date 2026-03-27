@@ -1,0 +1,22 @@
+# AI Clients Dart
+
+> A collection of Dart client libraries for popular AI APIs. Provides type-safe, well-documented, and idiomatic interfaces to OpenAI, Anthropic, Google AI (Gemini), Mistral, Ollama, and other providers. Ready for Dart and Flutter.
+
+Start with the package llms.txt hub that matches your provider or runtime. Each linked hub points to the package docs, examples, and optional references.
+
+## Packages
+
+- [anthropic_sdk_dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/llms.txt): Dart client for the Anthropic API to build with Claude — messages, streaming, tool calling, extended thinking, multimodal prompts, files, skills, and batches.
+- [chromadb](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/llms.txt): Dart client for ChromaDB with collections, vector search, multi-tenant storage, embeddings, and RAG pipelines.
+- [googleai_dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/llms.txt): Dart client for the Google AI Gemini Developer API and Vertex AI Gemini API with text generation, image generation, tool calling, grounding tools, Live API WebSocket sessions, service tier routing, and embeddings.
+- [mistralai_dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/llms.txt): Dart client for the Mistral AI API with chat completions, streaming, tool calling, multimodal inputs, TTS, voice management, reasoning effort, embeddings, OCR, and more.
+- [ollama_dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/llms.txt): Dart client for the Ollama API to run local and self-hosted models — chat, streaming, tool calling, embeddings, and model management.
+- [open_responses](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/llms.txt): Dart client for the OpenResponses specification with streaming, tool calling, structured output, and multi-turn responses across multiple providers.
+- [openai_dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/llms.txt): Dart client for the OpenAI API with Responses API, Chat Completions, images, videos, audio, custom tools, embeddings, evals, realtime, and more.
+- [openai_realtime_dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_realtime_dart/llms.txt): Strongly-typed Dart client for the OpenAI Realtime API, a stateful, event-based API that communicates over a WebSocket for voice and text interactions in Dart and Flutter apps.
+- [tavily_dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/tavily_dart/llms.txt): Dart client for the Tavily API, a search engine optimized for LLMs, RAG pipelines, and AI agent workflows in Dart and Flutter apps.
+- [vertex_ai](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/vertex_ai/llms.txt): Deprecated Dart client for the Vertex AI API — use googleai_dart for new projects.
+
+## Optional
+
+- [Repository README](https://github.com/davidmigloz/ai_clients_dart/blob/main/README.md): Workspace overview, package comparison, and ecosystem guidance.

@@ -10,9 +10,10 @@ funding:
   - https://github.com/sponsors/davidmigloz
 
 topics:
-  - ai
+  - gen-ai
   - llms
   - openai
+  - realtime
 
 environment:
   sdk: ">=3.9.0 <4.0.0"

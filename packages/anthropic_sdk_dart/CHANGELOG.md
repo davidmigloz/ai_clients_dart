@@ -44,7 +44,7 @@ Added `withApiKey` convenience constructors for simplified client initialization
 
 ## 1.0.0
 
-> Note: This release has breaking changes.
+> Note: This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
 
 **TL;DR**: Complete reimplementation with a new architecture, minimal dependencies, resource-based API, and improved developer experience. Hand-crafted models (no code generation), interceptor-driven architecture, comprehensive error handling, full Anthropic API coverage, and alignment with the latest Anthropic OpenAPI (2026-02-19).
 
@@ -148,7 +148,7 @@ See **[MIGRATION.md](MIGRATION.md)** for step-by-step examples and mapping table
 
 ## 0.3.0
 
-> Note: This release has breaking changes.
+> Note: This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
 
 - **FIX**: Handle optional space after colon in SSE parser ([#790](https://github.com/davidmigloz/langchain_dart/issues/790)). ([b31fbead](https://github.com/davidmigloz/langchain_dart/commit/b31fbead3ad4cb3ca9aabd6d8fee5e523df82d65))
 - **FEAT**: Add extended thinking support ([#803](https://github.com/davidmigloz/langchain_dart/issues/803)). ([1ccb74a6](https://github.com/davidmigloz/langchain_dart/commit/1ccb74a639d63325a7fcac8474ed0500dedd657e))
@@ -176,7 +176,7 @@ See **[MIGRATION.md](MIGRATION.md)** for step-by-step examples and mapping table
 
 ## 0.2.0
 
-> Note: This release has breaking changes, check the relevant issues for more details on how to migrate.
+> Note: This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
 
 - **FEAT**: Add support for Message Batches ([#585](https://github.com/davidmigloz/langchain_dart/issues/585)). ([a41270a0](https://github.com/davidmigloz/langchain_dart/commit/a41270a06135112afce0fa4da985c92e2282ba08))
 - **FEAT**: Add claude-3-5-sonnet-20241022 to model catalog ([#583](https://github.com/davidmigloz/langchain_dart/issues/583)). ([0cc59e13](https://github.com/davidmigloz/langchain_dart/commit/0cc59e137b69b19c31eeefdad28e5cf757abe8d3))
