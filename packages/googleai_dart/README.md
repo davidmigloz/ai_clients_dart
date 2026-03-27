@@ -59,6 +59,7 @@ Dart client for the **[Google AI Gemini Developer API](https://ai.google.dev/gem
 - Type-safe request and response models with minimal dependencies (`http`, `logging`, `meta`).
 - Streaming, retries, interceptors, and error handling built into the client.
 - One package supports both Google AI and Vertex AI without duplicated abstractions.
+- Strict [semver](https://semver.org/) versioning so downstream packages can depend on stable, predictable version ranges.
 
 ## Quickstart
 

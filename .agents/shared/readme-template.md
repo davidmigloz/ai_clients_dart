@@ -120,6 +120,7 @@ Dart client for the **[{API Name}]({API_URL})** {value clause with current model
 - {Type-safe differentiator}
 - {Platform differentiator}
 - {Streaming/tool calling differentiator}
+- Strict [semver](https://semver.org/) versioning so downstream packages can depend on stable, predictable version ranges.
 
 ## Quickstart
 

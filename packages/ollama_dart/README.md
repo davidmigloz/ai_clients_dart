@@ -49,6 +49,7 @@ Dart client for the **[Ollama API](https://ollama.com/)** to run local and self-
 - Type-safe request and response models with minimal dependencies (`http`, `logging`, `meta`).
 - Streaming, retries, interceptors, and error handling built into the client.
 - Mirrors the Ollama API closely, including model management endpoints most wrappers skip.
+- Strict [semver](https://semver.org/) versioning so downstream packages can depend on stable, predictable version ranges.
 
 ## Quickstart
 

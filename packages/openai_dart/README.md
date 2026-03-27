@@ -54,6 +54,7 @@ Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-referenc
 - Streaming, retries, interceptors, and error handling built into the client.
 - Covers the full OpenAI API surface, including Responses, Realtime, and legacy Assistants.
 - Resource-based API design matching official SDKs
+- Strict [semver](https://semver.org/) versioning so downstream packages can depend on stable, predictable version ranges.
 
 ## Quickstart
 

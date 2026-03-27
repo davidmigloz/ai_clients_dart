@@ -47,6 +47,7 @@ Dart client for **[ChromaDB](https://www.trychroma.com/)** with collections, vec
 - Type-safe request and response models with minimal dependencies (`http`, `logging`, `meta`).
 - Retries, interceptors, and error handling built into the client.
 - Includes both low-level resources and a high-level `ChromaCollection` wrapper for auto-embedding workflows.
+- Strict [semver](https://semver.org/) versioning so downstream packages can depend on stable, predictable version ranges.
 
 ## Quickstart
 
