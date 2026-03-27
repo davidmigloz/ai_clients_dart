@@ -281,6 +281,10 @@ class GoogleAIConfig {
   }
 
   /// Creates a copy with overridden values.
+  ///
+  /// If [location] is changed without an explicit [baseUrl], and the config
+  /// uses [ApiMode.vertexAI], the base URL is automatically recalculated
+  /// from the new location.
   GoogleAIConfig copyWith({
     String? baseUrl,
     ApiMode? apiMode,
@@ -295,12 +299,20 @@ class GoogleAIConfig {
     Level? logLevel,
     List<String>? redactionList,
   }) {
+    final effectiveMode = apiMode ?? this.apiMode;
+    final effectiveLocation = location ?? this.location;
+    var effectiveBaseUrl = baseUrl ?? this.baseUrl;
+    if (baseUrl == null &&
+        location != null &&
+        effectiveMode == ApiMode.vertexAI) {
+      effectiveBaseUrl = vertexAIBaseUrl(location);
+    }
     return GoogleAIConfig(
-      baseUrl: baseUrl ?? this.baseUrl,
-      apiMode: apiMode ?? this.apiMode,
+      baseUrl: effectiveBaseUrl,
+      apiMode: effectiveMode,
       apiVersion: apiVersion ?? this.apiVersion,
       projectId: projectId ?? this.projectId,
-      location: location ?? this.location,
+      location: effectiveLocation,
       authProvider: authProvider ?? this.authProvider,
       defaultHeaders: defaultHeaders ?? this.defaultHeaders,
       defaultQueryParams: defaultQueryParams ?? this.defaultQueryParams,

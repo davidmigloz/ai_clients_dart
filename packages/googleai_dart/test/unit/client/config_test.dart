@@ -46,6 +46,46 @@ void main() {
 
       expect(updated.timeout, const Duration(seconds: 45));
     });
+
+    test(
+      'copyWith recalculates baseUrl when location changes on Vertex AI',
+      () {
+        final original = GoogleAIConfig.vertexAI(
+          projectId: 'test-project',
+          location: 'us-central1',
+          authProvider: const ApiKeyProvider('test-key'),
+        );
+        expect(
+          original.baseUrl,
+          'https://us-central1-aiplatform.googleapis.com',
+        );
+
+        final updated = original.copyWith(location: 'global');
+        expect(updated.baseUrl, 'https://aiplatform.googleapis.com');
+        expect(updated.location, 'global');
+
+        final regional = original.copyWith(location: 'europe-west1');
+        expect(
+          regional.baseUrl,
+          'https://europe-west1-aiplatform.googleapis.com',
+        );
+      },
+    );
+
+    test('copyWith preserves explicit baseUrl even when location changes', () {
+      final original = GoogleAIConfig.vertexAI(
+        projectId: 'test-project',
+        location: 'us-central1',
+        authProvider: const ApiKeyProvider('test-key'),
+      );
+
+      final updated = original.copyWith(
+        baseUrl: 'https://custom.endpoint.com',
+        location: 'global',
+      );
+      expect(updated.baseUrl, 'https://custom.endpoint.com');
+      expect(updated.location, 'global');
+    });
   });
 
   group('GoogleAIConfig.vertexAI', () {
