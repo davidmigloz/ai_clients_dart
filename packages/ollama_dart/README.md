@@ -291,10 +291,10 @@ Future<void> main() async {
   final client = OllamaClient();
 
   try {
-    final response = await client.embeddings.generate(
-      request: EmbedRequest(
+    final response = await client.embeddings.create(
+      request: const EmbedRequest(
         model: 'nomic-embed-text',
-        input: const ['Dart', 'Flutter'],
+        input: EmbedInput.list(['Dart', 'Flutter']),
       ),
     );
 
