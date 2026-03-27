@@ -213,7 +213,9 @@ class GoogleAIConfig {
       'access_token', // Ephemeral token query param
     ],
   }) : this(
-         baseUrl: 'https://$location-aiplatform.googleapis.com',
+         baseUrl: location == 'global'
+             ? 'https://aiplatform.googleapis.com'
+             : 'https://$location-aiplatform.googleapis.com',
          apiMode: ApiMode.vertexAI,
          apiVersion: apiVersion,
          projectId: projectId,
