@@ -98,7 +98,7 @@ When adding a field to a model class, update **all four**:
 
 ## Immutability Enforcement
 
-Classes annotated `@immutable` must store deeply unmodifiable copies of mutable
+Classes annotated `@immutable` must store unmodifiable copies of mutable
 collections. Accepting a raw `Map` or `List` constructor parameter and storing
 it directly allows callers to mutate the object after construction:
 
@@ -281,9 +281,14 @@ can leak via logs, exception messages, and debug output:
 @override
 String toString() => 'Config(token: $authorizationToken, ...)';
 
-// CORRECT — redacted
+// CORRECT — redacted with safe prefix length
 @override
-String toString() => 'Config(token: ${authorizationToken.substring(0, 4)}***, ...)';
+String toString() {
+  final prefix = authorizationToken.length >= 4
+      ? authorizationToken.substring(0, 4)
+      : authorizationToken;
+  return 'Config(token: $prefix***, ...)';
+}
 ```
 
 ## JSON Serialization
