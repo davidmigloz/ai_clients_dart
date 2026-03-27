@@ -21,7 +21,7 @@ Type-safe Dart clients for OpenAI, Anthropic, Google Gemini, Mistral, Ollama, an
 
 ## Quickstart
 
-Every client follows the same shape — pick a provider and start with a few lines:
+The AI provider clients share a consistent shape — pick one and start with a few lines:
 
 <details open>
 <summary><b>OpenAI</b></summary>
@@ -158,7 +158,7 @@ Future<void> main() async {
 | [mistralai_dart](https://pub.dev/packages/mistralai_dart) | [Mistral AI](https://docs.mistral.ai/api) — chat, embeddings, OCR, TTS, reasoning, agents | [![mistralai_dart](https://img.shields.io/pub/v/mistralai_dart.svg)](https://pub.dev/packages/mistralai_dart) | ![mistralai_dart monthly downloads](https://img.shields.io/pub/dm/mistralai_dart) |
 | [ollama_dart](https://pub.dev/packages/ollama_dart) | [Ollama](https://ollama.com/) — local chat, streaming, embeddings, tool calling | [![ollama_dart](https://img.shields.io/pub/v/ollama_dart.svg)](https://pub.dev/packages/ollama_dart) | ![ollama_dart monthly downloads](https://img.shields.io/pub/dm/ollama_dart) |
 | [open_responses](https://pub.dev/packages/open_responses) | [OpenResponses](https://www.openresponses.org/) — one typed interface, multiple providers | [![open_responses](https://img.shields.io/pub/v/open_responses.svg)](https://pub.dev/packages/open_responses) | ![open_responses monthly downloads](https://img.shields.io/pub/dm/open_responses) |
-| [chromadb](https://pub.dev/packages/chromadb) | [ChromaDB](https://trychroma.com/) — vector search, collections, multi-tenant RAG | [![chromadb](https://img.shields.io/pub/v/chromadb.svg)](https://pub.dev/packages/chromadb) | ![chromadb monthly downloads](https://img.shields.io/pub/dm/chromadb) |
+| [chromadb](https://pub.dev/packages/chromadb) | [ChromaDB](https://www.trychroma.com/) — vector search, collections, multi-tenant RAG | [![chromadb](https://img.shields.io/pub/v/chromadb.svg)](https://pub.dev/packages/chromadb) | ![chromadb monthly downloads](https://img.shields.io/pub/dm/chromadb) |
 | [openai_realtime_dart](https://pub.dev/packages/openai_realtime_dart) | [OpenAI Realtime](https://platform.openai.com/docs/guides/realtime) — lower-level WebSocket sessions | [![openai_realtime_dart](https://img.shields.io/pub/v/openai_realtime_dart.svg)](https://pub.dev/packages/openai_realtime_dart) | ![openai_realtime_dart monthly downloads](https://img.shields.io/pub/dm/openai_realtime_dart) |
 | [tavily_dart](https://pub.dev/packages/tavily_dart) | [Tavily](https://tavily.com/) — web search and research for agents and RAG | [![tavily_dart](https://img.shields.io/pub/v/tavily_dart.svg)](https://pub.dev/packages/tavily_dart) | ![tavily_dart monthly downloads](https://img.shields.io/pub/dm/tavily_dart) |
 
@@ -166,7 +166,7 @@ Future<void> main() async {
 
 - **Pure Dart** — works everywhere: Flutter apps, backends, CLIs, and server-side Dart across iOS, Android, macOS, Windows, Linux, and Web.
 - **Type-safe** — sealed classes, typed request/response models, and ergonomic helpers.
-- **Consistent shape** — same `fromEnvironment()` → `create()` → `close()` pattern across all providers.
+- **Consistent shape** — AI provider clients share `fromEnvironment()` for config, similar resource methods, and `close()` for cleanup.
 - **Minimal dependencies** — just `http`, `logging`, `meta`, and where needed `web_socket`.
 - **Strict semver** — follows [semver.org](https://semver.org/) so downstream packages can depend on stable, predictable version ranges.
 
