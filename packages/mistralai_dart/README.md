@@ -96,9 +96,9 @@ final client = MistralClient.withApiKey('your-api-key');
 final client = MistralClient.fromEnvironment();
 
 // Custom base URL (for proxies or self-hosted)
-final client = MistralClient.withBaseUrl(
-  apiKey: 'your-api-key',
-  baseUrl: 'https://my-proxy.example.com/v1',
+final client = MistralClient.withApiKey(
+  'your-api-key',
+  baseUrl: 'https://my-proxy.example.com',
 );
 
 // Full configuration

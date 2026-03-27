@@ -10,14 +10,14 @@
 
 ## Examples
 
-- [collections_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/collections_example.dart): How do I manage collections?
-- [records_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/records_example.dart): How do I add records?
-- [embedding_function_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/embedding_function_example.dart): How do I auto-embed data?
-- [query_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/query_example.dart): How do I query similar records?
-- [metadata_filtering_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/metadata_filtering_example.dart): How do I filter by metadata?
-- [multi_tenant_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/multi_tenant_example.dart): How do I work with tenants and databases?
-- [health_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/health_example.dart): How do I check server health?
-- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/error_handling_example.dart): Error Handling.
+- [collections_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/collections_example.dart): Collection management.
+- [records_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/records_example.dart): Record operations.
+- [embedding_function_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/embedding_function_example.dart): Auto-embedding workflows.
+- [query_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/query_example.dart): Similarity queries.
+- [metadata_filtering_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/metadata_filtering_example.dart): Metadata filtering.
+- [multi_tenant_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/multi_tenant_example.dart): Multi-tenant deployments.
+- [health_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/health_example.dart): Server health checks.
+- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/error_handling_example.dart): Exception handling patterns.
 - [functions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/functions_example.dart): Embedding functions.
 - [databases_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/databases_example.dart): Database management.
 - [auth_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/auth_example.dart): Authentication.

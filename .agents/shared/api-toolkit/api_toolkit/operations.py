@@ -4260,14 +4260,16 @@ def _table_cell_description(readme: str, match: re.Match[str]) -> str | None:
 
 def _readme_example_entries(readme: str, headings: list[dict[str, Any]]) -> list[dict[str, str]]:
     examples: list[dict[str, str]] = []
-    seen: set[str] = set()
+    seen: dict[str, int] = {}  # path -> index in examples list
     for match in README_EXAMPLE_LINK_RE.finditer(readme):
         example_path = match.group(1).removeprefix("./")
-        if example_path in seen:
-            continue
-        seen.add(example_path)
-        # Prefer table-cell description over heading-based fallback.
         table_desc = _table_cell_description(readme, match)
+        if example_path in seen:
+            # Upgrade to table-cell description if the earlier entry used a
+            # heading-based fallback (table descriptions are more specific).
+            if table_desc:
+                examples[seen[example_path]]["description"] = _ensure_sentence(table_desc)
+            continue
         if table_desc:
             description = _ensure_sentence(table_desc)
         else:
@@ -4276,6 +4278,7 @@ def _readme_example_entries(readme: str, headings: list[dict[str, Any]]) -> list
             description = "Example."
             if heading is not None:
                 description = _ensure_sentence(_normalize_llms_text(heading["title"]))
+        seen[example_path] = len(examples)
         examples.append({"path": example_path, "description": description})
     return examples
 
