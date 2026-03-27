@@ -9,9 +9,9 @@ Use this H2 order for every package README. Optional and package-specific sectio
 ```md
 # {Provider} Dart Client
 [badges]
+[llms.txt callout]
 [opening paragraph]
 [optional note or caution block]
-[llms.txt callout]
 <details>Table of Contents</details>
 
 ## Features
@@ -82,13 +82,13 @@ Required H2 sections:
 [![{package_name}](...)](...)
 [![MIT](...)](...)
 
+> [!TIP]
+> Coding agents: start with [llms.txt](./llms.txt). It links to the package docs, examples, and optional references in a compact format.
+
 Dart client for the **[{API Name}]({API_URL})** {value clause with current models or capabilities}. It gives Dart and Flutter applications a pure Dart, type-safe client for {primary use cases} across iOS, Android, macOS, Windows, Linux, Web, and server-side Dart.
 
 > [!NOTE]
 > {Optional ecosystem context, migration advice, or deprecation warning. Omit if unnecessary.}
-
-> [!TIP]
-> Coding agents: start with [llms.txt](./llms.txt). It links to the package docs, examples, and optional references in a compact format.
 
 <details>
 <summary><b>Table of Contents</b></summary>
