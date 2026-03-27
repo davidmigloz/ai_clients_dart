@@ -237,6 +237,7 @@ void main() {
           }
         }
       } on LiveSessionClosedException {
+        await session.close();
         markTestSkipped('Model does not support manual VAD');
         return;
       }
