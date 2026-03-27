@@ -10,12 +10,10 @@ import 'package:test/test.dart';
 
 import 'test_config.dart';
 
-/// Path to the test samples directory.
+/// Resolves the test samples directory.
 ///
 /// Tests may run from the workspace root or the package directory,
 /// so we check both known locations.
-final String _samplesDir = _resolveSamplesDir();
-
 String _resolveSamplesDir() {
   const candidates = [
     'packages/mistralai_dart/test/samples', // workspace root
@@ -35,9 +33,12 @@ String _resolveSamplesDir() {
 /// These tests require a real API key set in the MISTRAL_API_KEY
 /// environment variable. If the key is not present, all tests are skipped.
 void main() {
+  late String samplesDir;
   MistralClient? client;
 
   setUpAll(() {
+    samplesDir = _resolveSamplesDir();
+
     final apiKey = io.Platform.environment[apiKeyEnvVar];
     if (apiKey == null || apiKey.isEmpty) {
       print(
@@ -57,7 +58,7 @@ void main() {
     late String refAudioB64;
 
     setUpAll(() {
-      final wavBytes = io.File('$_samplesDir/harvard.wav').readAsBytesSync();
+      final wavBytes = io.File('$samplesDir/harvard.wav').readAsBytesSync();
       refAudioB64 = base64Encode(wavBytes);
     });
 
@@ -101,6 +102,14 @@ void main() {
         );
 
         expect(response.audioData, isNotEmpty);
+
+        // Decode and validate WAV header.
+        final audioBytes = base64Decode(response.audioData);
+        expect(audioBytes.length, greaterThan(12));
+        final riffHeader = String.fromCharCodes(audioBytes.sublist(0, 4));
+        expect(riffHeader, equals('RIFF'));
+        final waveHeader = String.fromCharCodes(audioBytes.sublist(8, 12));
+        expect(waveHeader, equals('WAVE'));
       },
     );
 
@@ -150,6 +159,13 @@ void main() {
 
         expect(response, isA<VoiceListResponse>());
         expect(response.total, greaterThanOrEqualTo(0));
+        expect(response.total, greaterThanOrEqualTo(response.items.length));
+
+        // Validate key fields on any returned voices.
+        for (final voice in response.items) {
+          expect(voice.id, isNotEmpty);
+          expect(voice.name, isNotEmpty);
+        }
       },
     );
   });
