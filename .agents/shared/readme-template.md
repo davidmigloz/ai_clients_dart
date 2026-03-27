@@ -249,7 +249,7 @@ If these packages are useful to you or your company, please consider [sponsoring
 
 ## License
 
-This package is licensed under the [MIT License](../../LICENSE).
+This package is licensed under the [MIT License](LICENSE).
 
 This is a community-maintained package and is not affiliated with or endorsed by {Provider}.
 ```

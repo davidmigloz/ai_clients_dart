@@ -170,7 +170,7 @@ class ApiToolkitCommandTests(unittest.TestCase):
             [
                 f"## Sponsor\n\n{toolkit_operations.SPONSOR_PARAGRAPH}\n\n",
                 "## License\n\n"
-                "This package is licensed under the [MIT License](../../LICENSE).\n\n",
+                "This package is licensed under the [MIT License](LICENSE).\n\n",
             ]
         )
         if llms_callout_position == "after_toc":

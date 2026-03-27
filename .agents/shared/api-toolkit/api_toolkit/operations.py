@@ -4006,7 +4006,7 @@ def _render_readme_scaffold(
         f"# {display_name} Dart Client\n\n"
         f"{PACKAGE_LLMS_CALLOUT}\n"
         f"[![{package_name}](https://img.shields.io/pub/v/{package_name}.svg)](https://pub.dev/packages/{package_name})\n"
-        f"[![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](../../LICENSE)\n\n"
+        f"[![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)\n\n"
         f"Dart client for the {api_identity} API. "
         "Works with Dart and Flutter on iOS, Android, macOS, Windows, Linux, Web, and server-side Dart.\n\n"
         "<details>\n"
@@ -4079,7 +4079,7 @@ def _render_readme_scaffold(
         f"{SPONSOR_PARAGRAPH}\n\n"
         f"{SPONSOR_WIDGET}\n\n"
         "## License\n\n"
-        "This package is licensed under the [MIT License](../../LICENSE).\n\n"
+        "This package is licensed under the [MIT License](LICENSE).\n\n"
         f"This is a community-maintained package and is not affiliated with or endorsed by {display_name}.\n"
     )
 
