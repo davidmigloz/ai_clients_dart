@@ -1361,4 +1361,64 @@ void main() {
       },
     );
   });
+
+  group('File Input', () {
+    test(
+      'creates response with file content part (PDF)',
+      timeout: const Timeout(Duration(minutes: 2)),
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        // Download a small test PDF and base64-encode it.
+        final httpClient = HttpClient();
+        try {
+          final request = await httpClient.getUrl(
+            Uri.parse(
+              'https://s29.q4cdn.com/175625835/files/doc_downloads/test.pdf',
+            ),
+          );
+          final httpResponse = await request.close();
+          if (httpResponse.statusCode != 200) {
+            markTestSkipped(
+              'Failed to download test PDF '
+              '(status ${httpResponse.statusCode})',
+            );
+            return;
+          }
+          final bytes = await httpResponse.fold<List<int>>(
+            <int>[],
+            (prev, chunk) => prev..addAll(chunk),
+          );
+          final base64Pdf = base64Encode(bytes);
+
+          final response = await client!.responses.create(
+            CreateResponseRequest(
+              model: 'gpt-4o-mini',
+              input: ResponseInput.items([
+                MessageItem.user([
+                  const InputContent.text(
+                    'What is the title of this PDF document? '
+                    'Reply with just the title.',
+                  ),
+                  InputContent.fileData(
+                    base64Pdf,
+                    mediaType: 'application/pdf',
+                    filename: 'test.pdf',
+                  ),
+                ]),
+              ]),
+            ),
+          );
+
+          expect(response.status, ResponseStatus.completed);
+          expect(response.outputText, isNotEmpty);
+        } finally {
+          httpClient.close();
+        }
+      },
+    );
+  });
 }
