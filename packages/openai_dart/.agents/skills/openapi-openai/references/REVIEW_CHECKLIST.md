@@ -21,4 +21,5 @@ dart test test/unit/
 
 Read and apply the [core review checklist](../../../../../../.agents/shared/api-toolkit/references/REVIEW_CHECKLIST-core.md) — it contains the full implementation review checklist applicable to all packages. The following items are OpenAI-specific:
 
+- [ ] **Base64 data URL format**: Convenience factories for binary data fields must construct data URLs (`data:<mediaType>;base64,<data>`), not pass raw base64. Verify with an integration test.
 - [ ] **Multi-model response shapes**: When OpenAI has multiple model families (e.g., `text-moderation-*` vs `omni-moderation-*`), fields only returned by newer models must be nullable.

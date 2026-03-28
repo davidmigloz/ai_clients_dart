@@ -6,6 +6,32 @@
 
 ## OpenAI-Specific Patterns
 
+### Base64 Fields Require Data URL Format
+
+OpenAI API fields that accept inline binary data (e.g., `file_data`,
+`image_url` with base64) require **data URL format**, not raw base64 strings.
+The spec descriptions are misleading — they say "base64 encoded data" but the
+API rejects raw base64 and expects `data:<mediaType>;base64,<data>`.
+
+When adding convenience factories for binary data fields, follow the existing
+`ContentPart.imageBase64()` pattern:
+
+```dart
+// WRONG — raw base64, API returns 400
+static ContentPart fileData({required String data, ...}) =>
+    FileContentPart(fileData: data, ...);
+
+// CORRECT — data URL with MIME type
+static ContentPart fileData({
+  required String data,
+  required String mediaType,
+  ...
+}) => FileContentPart(fileData: 'data:$mediaType;base64,$data', ...);
+```
+
+Always run an integration test when adding new binary data factories to catch
+spec-vs-reality mismatches.
+
 ### Multi-Model Response Shapes
 
 The OpenAI API has multiple model families that return different response shapes
