@@ -270,6 +270,13 @@ void main() {
             ),
           );
           final httpResponse = await request.close();
+          if (httpResponse.statusCode != 200) {
+            markTestSkipped(
+              'Failed to download test PDF '
+              '(status ${httpResponse.statusCode})',
+            );
+            return;
+          }
           final bytes = await httpResponse.fold<List<int>>(
             <int>[],
             (prev, chunk) => prev..addAll(chunk),

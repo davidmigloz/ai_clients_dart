@@ -274,7 +274,9 @@ class FileContentPart extends ContentPart {
   /// The ID of an uploaded file to use as input.
   final String? fileId;
 
-  /// The base64-encoded file data.
+  /// The file data as a data URL (e.g., `data:application/pdf;base64,<data>`).
+  ///
+  /// Use [ContentPart.fileData] to construct this from raw base64 bytes.
   final String? fileData;
 
   /// The name of the file.
