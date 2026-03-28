@@ -2,6 +2,7 @@
 @Tags(['integration'])
 library;
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:openai_dart/openai_dart.dart';
@@ -248,6 +249,58 @@ void main() {
 
         expect(text, isNotEmpty);
         expect(text.toLowerCase(), contains('hello'));
+      },
+    );
+
+    test(
+      'creates chat completion with file content part (PDF)',
+      timeout: const Timeout(Duration(minutes: 2)),
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        // Download a small test PDF and base64-encode it.
+        final httpClient = HttpClient();
+        try {
+          final request = await httpClient.getUrl(
+            Uri.parse(
+              'https://s29.q4cdn.com/175625835/files/doc_downloads/test.pdf',
+            ),
+          );
+          final httpResponse = await request.close();
+          final bytes = await httpResponse.fold<List<int>>(
+            <int>[],
+            (prev, chunk) => prev..addAll(chunk),
+          );
+          final base64Pdf = base64Encode(bytes);
+
+          final response = await client!.chat.completions.create(
+            ChatCompletionCreateRequest(
+              model: 'gpt-4o-mini',
+              messages: [
+                ChatMessage.user([
+                  ContentPart.text(
+                    'What is the title of this PDF document? '
+                    'Reply with just the title.',
+                  ),
+                  ContentPart.fileData(
+                    data: base64Pdf,
+                    mediaType: 'application/pdf',
+                    filename: 'test.pdf',
+                  ),
+                ]),
+              ],
+              maxTokens: 50,
+            ),
+          );
+
+          expect(response.choices.first.message.content, isNotNull);
+          expect(response.choices.first.finishReason, FinishReason.stop);
+        } finally {
+          httpClient.close();
+        }
       },
     );
   });

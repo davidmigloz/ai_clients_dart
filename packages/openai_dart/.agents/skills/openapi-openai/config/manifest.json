@@ -436,7 +436,9 @@
         "mapping": {
           "ChatCompletionRequestMessageContentPartText": "text",
           "ChatCompletionRequestMessageContentPartImage": "image_url",
-          "ChatCompletionRequestMessageContentPartAudio": "input_audio"
+          "ChatCompletionRequestMessageContentPartAudio": "input_audio",
+          "ChatCompletionRequestMessageContentPartFile": "file",
+          "ChatCompletionRequestMessageContentPartRefusal": "refusal"
         }
       },
       "note": null
@@ -466,6 +468,23 @@
       "schema": "ChatCompletionRequestMessageContentPartAudio",
       "parent": "ContentPart",
       "excluded_properties": ["input_audio"]
+    },
+    "ChatCompletionRequestMessageContentPartFile": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "FileContentPart",
+      "file": "lib/src/models/chat/content_part.dart",
+      "schema": "ChatCompletionRequestMessageContentPartFile",
+      "parent": "ContentPart",
+      "excluded_properties": ["file"]
+    },
+    "ChatCompletionRequestMessageContentPartRefusal": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "RefusalContentPart",
+      "file": "lib/src/models/chat/content_part.dart",
+      "schema": "ChatCompletionRequestMessageContentPartRefusal",
+      "parent": "ContentPart"
     },
     "ChatStreamEvent": {
       "spec": "main",

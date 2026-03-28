@@ -1217,4 +1217,342 @@ void main() {
       });
     });
   });
+
+  group('ContentPart', () {
+    group('TextContentPart', () {
+      test('text() factory creates TextContentPart', () {
+        final part = ContentPart.text('Hello');
+        expect(part, isA<TextContentPart>());
+        expect((part as TextContentPart).text, 'Hello');
+        expect(part.type, 'text');
+      });
+
+      test('fromJson/toJson round-trip', () {
+        final json = {'type': 'text', 'text': 'Hello'};
+        final part = ContentPart.fromJson(json);
+        expect(part, isA<TextContentPart>());
+        expect(part.toJson(), json);
+      });
+
+      test('equality', () {
+        expect(
+          const TextContentPart(text: 'a'),
+          equals(const TextContentPart(text: 'a')),
+        );
+        expect(
+          const TextContentPart(text: 'a'),
+          isNot(equals(const TextContentPart(text: 'b'))),
+        );
+      });
+    });
+
+    group('ImageContentPart', () {
+      test('imageUrl() factory creates ImageContentPart', () {
+        final part = ContentPart.imageUrl('https://example.com/img.jpg');
+        expect(part, isA<ImageContentPart>());
+        expect((part as ImageContentPart).url, 'https://example.com/img.jpg');
+        expect(part.detail, isNull);
+        expect(part.type, 'image_url');
+      });
+
+      test('imageBase64() factory creates data URL', () {
+        final part = ContentPart.imageBase64(
+          data: 'abc123',
+          mediaType: 'image/png',
+        );
+        expect(part, isA<ImageContentPart>());
+        expect((part as ImageContentPart).url, 'data:image/png;base64,abc123');
+      });
+
+      test('fromJson/toJson round-trip with detail', () {
+        final json = {
+          'type': 'image_url',
+          'image_url': {'url': 'https://example.com/img.jpg', 'detail': 'high'},
+        };
+        final part = ContentPart.fromJson(json);
+        expect(part, isA<ImageContentPart>());
+        expect((part as ImageContentPart).detail, ImageDetail.high);
+        expect(part.toJson(), json);
+      });
+
+      test('toJson omits null detail', () {
+        final part = ContentPart.imageUrl('https://example.com/img.jpg');
+        final json = part.toJson();
+        expect(
+          (json['image_url'] as Map<String, dynamic>).containsKey('detail'),
+          isFalse,
+        );
+      });
+    });
+
+    group('AudioContentPart', () {
+      test('inputAudio() factory creates AudioContentPart', () {
+        final part = ContentPart.inputAudio(
+          data: 'base64data',
+          format: AudioFormat.wav,
+        );
+        expect(part, isA<AudioContentPart>());
+        expect((part as AudioContentPart).data, 'base64data');
+        expect(part.format, AudioFormat.wav);
+        expect(part.type, 'input_audio');
+      });
+
+      test('fromJson/toJson round-trip', () {
+        final json = {
+          'type': 'input_audio',
+          'input_audio': {'data': 'base64data', 'format': 'mp3'},
+        };
+        final part = ContentPart.fromJson(json);
+        expect(part, isA<AudioContentPart>());
+        expect(part.toJson(), json);
+      });
+    });
+
+    group('FileContentPart', () {
+      test('file() factory creates FileContentPart with fileId', () {
+        final part = ContentPart.file(fileId: 'file-123');
+        expect(part, isA<FileContentPart>());
+        expect((part as FileContentPart).fileId, 'file-123');
+        expect(part.fileData, isNull);
+        expect(part.filename, isNull);
+        expect(part.type, 'file');
+      });
+
+      test('file() factory accepts optional filename', () {
+        final part = ContentPart.file(fileId: 'file-123', filename: 'doc.pdf');
+        expect(part, isA<FileContentPart>());
+        expect((part as FileContentPart).fileId, 'file-123');
+        expect(part.filename, 'doc.pdf');
+      });
+
+      test('fileData() factory creates FileContentPart with data URL', () {
+        final part = ContentPart.fileData(
+          data: 'base64pdf',
+          mediaType: 'application/pdf',
+          filename: 'test.pdf',
+        );
+        expect(part, isA<FileContentPart>());
+        expect(
+          (part as FileContentPart).fileData,
+          'data:application/pdf;base64,base64pdf',
+        );
+        expect(part.filename, 'test.pdf');
+        expect(part.fileId, isNull);
+      });
+
+      test('fromJson with all fields', () {
+        final json = {
+          'type': 'file',
+          'file': {
+            'file_id': 'file-123',
+            'file_data': 'base64data',
+            'filename': 'test.pdf',
+          },
+        };
+        final part = ContentPart.fromJson(json);
+        expect(part, isA<FileContentPart>());
+        final file = part as FileContentPart;
+        expect(file.fileId, 'file-123');
+        expect(file.fileData, 'base64data');
+        expect(file.filename, 'test.pdf');
+      });
+
+      test('fromJson with only file_id', () {
+        final json = {
+          'type': 'file',
+          'file': {'file_id': 'file-456'},
+        };
+        final part = ContentPart.fromJson(json) as FileContentPart;
+        expect(part.fileId, 'file-456');
+        expect(part.fileData, isNull);
+        expect(part.filename, isNull);
+      });
+
+      test('fromJson with file_data and filename', () {
+        final json = {
+          'type': 'file',
+          'file': {'file_data': 'base64data', 'filename': 'doc.pdf'},
+        };
+        final part = ContentPart.fromJson(json) as FileContentPart;
+        expect(part.fileId, isNull);
+        expect(part.fileData, 'base64data');
+        expect(part.filename, 'doc.pdf');
+      });
+
+      test('toJson round-trip with all fields', () {
+        final json = {
+          'type': 'file',
+          'file': {
+            'file_id': 'file-123',
+            'file_data': 'base64data',
+            'filename': 'test.pdf',
+          },
+        };
+        final part = ContentPart.fromJson(json);
+        expect(part.toJson(), json);
+      });
+
+      test('toJson omits null fields', () {
+        const part = FileContentPart(fileId: 'file-123');
+        final json = part.toJson();
+        final file = json['file'] as Map<String, dynamic>;
+        expect(file.containsKey('file_id'), isTrue);
+        expect(file.containsKey('file_data'), isFalse);
+        expect(file.containsKey('filename'), isFalse);
+      });
+
+      test('copyWith replaces fields', () {
+        const original = FileContentPart(fileId: 'file-1', filename: 'a.pdf');
+        final copy = original.copyWith(fileId: 'file-2');
+        expect(copy.fileId, 'file-2');
+        expect(copy.filename, 'a.pdf'); // unchanged
+      });
+
+      test('copyWith sets field to null', () {
+        const original = FileContentPart(fileId: 'file-1', filename: 'a.pdf');
+        final copy = original.copyWith(filename: null);
+        expect(copy.fileId, 'file-1');
+        expect(copy.filename, isNull);
+      });
+
+      test('equality', () {
+        expect(
+          const FileContentPart(fileId: 'f1', filename: 'a.pdf'),
+          equals(const FileContentPart(fileId: 'f1', filename: 'a.pdf')),
+        );
+        expect(
+          const FileContentPart(fileId: 'f1'),
+          isNot(equals(const FileContentPart(fileId: 'f2'))),
+        );
+      });
+
+      test('hashCode is consistent with equality', () {
+        const a = FileContentPart(fileId: 'f1', filename: 'a.pdf');
+        const b = FileContentPart(fileId: 'f1', filename: 'a.pdf');
+        expect(a.hashCode, b.hashCode);
+      });
+
+      test('toString omits fileData', () {
+        const part = FileContentPart(
+          fileId: 'file-1',
+          fileData: 'long-base64',
+          filename: 'doc.pdf',
+        );
+        final str = part.toString();
+        expect(str, contains('file-1'));
+        expect(str, contains('doc.pdf'));
+        expect(str, isNot(contains('long-base64')));
+      });
+    });
+
+    group('RefusalContentPart', () {
+      test('refusal() factory creates RefusalContentPart', () {
+        final part = ContentPart.refusal('I cannot help with that');
+        expect(part, isA<RefusalContentPart>());
+        expect((part as RefusalContentPart).refusal, 'I cannot help with that');
+        expect(part.type, 'refusal');
+      });
+
+      test('fromJson/toJson round-trip', () {
+        final json = {'type': 'refusal', 'refusal': 'Declined'};
+        final part = ContentPart.fromJson(json);
+        expect(part, isA<RefusalContentPart>());
+        expect(part.toJson(), json);
+      });
+
+      test('copyWith', () {
+        const original = RefusalContentPart(refusal: 'a');
+        final copy = original.copyWith(refusal: 'b');
+        expect(copy.refusal, 'b');
+      });
+
+      test('equality', () {
+        expect(
+          const RefusalContentPart(refusal: 'a'),
+          equals(const RefusalContentPart(refusal: 'a')),
+        );
+        expect(
+          const RefusalContentPart(refusal: 'a'),
+          isNot(equals(const RefusalContentPart(refusal: 'b'))),
+        );
+      });
+    });
+
+    group('fromJson dispatch', () {
+      test('routes text', () {
+        expect(
+          ContentPart.fromJson(const {'type': 'text', 'text': 'hi'}),
+          isA<TextContentPart>(),
+        );
+      });
+
+      test('routes image_url', () {
+        expect(
+          ContentPart.fromJson(const {
+            'type': 'image_url',
+            'image_url': {'url': 'https://x.com/img.jpg'},
+          }),
+          isA<ImageContentPart>(),
+        );
+      });
+
+      test('routes input_audio', () {
+        expect(
+          ContentPart.fromJson(const {
+            'type': 'input_audio',
+            'input_audio': {'data': 'd', 'format': 'wav'},
+          }),
+          isA<AudioContentPart>(),
+        );
+      });
+
+      test('routes file', () {
+        expect(
+          ContentPart.fromJson(const {
+            'type': 'file',
+            'file': {'file_id': 'f1'},
+          }),
+          isA<FileContentPart>(),
+        );
+      });
+
+      test('routes refusal', () {
+        expect(
+          ContentPart.fromJson(const {'type': 'refusal', 'refusal': 'no'}),
+          isA<RefusalContentPart>(),
+        );
+      });
+
+      test('throws on unknown type', () {
+        expect(
+          () => ContentPart.fromJson(const {'type': 'unknown'}),
+          throwsFormatException,
+        );
+      });
+    });
+
+    group('ImageDetail', () {
+      test('fromJson/toJson round-trip', () {
+        for (final detail in ImageDetail.values) {
+          expect(ImageDetail.fromJson(detail.toJson()), detail);
+        }
+      });
+
+      test('throws on unknown value', () {
+        expect(() => ImageDetail.fromJson('unknown'), throwsFormatException);
+      });
+    });
+
+    group('AudioFormat', () {
+      test('fromJson/toJson round-trip', () {
+        for (final format in AudioFormat.values) {
+          expect(AudioFormat.fromJson(format.toJson()), format);
+        }
+      });
+
+      test('throws on unknown value', () {
+        expect(() => AudioFormat.fromJson('unknown'), throwsFormatException);
+      });
+    });
+  });
 }
