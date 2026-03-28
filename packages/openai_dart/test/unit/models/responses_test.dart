@@ -1001,10 +1001,16 @@ void main() {
     });
 
     test('creates file content from base64 data', () {
-      const content = InputContent.fileData('base64data==');
+      final content = InputContent.fileData(
+        'base64data==',
+        mediaType: 'application/pdf',
+      );
 
       expect(content, isA<InputFileContent>());
-      expect((content as InputFileContent).fileData, equals('base64data=='));
+      expect(
+        (content as InputFileContent).fileData,
+        equals('data:application/pdf;base64,base64data=='),
+      );
     });
   });
 

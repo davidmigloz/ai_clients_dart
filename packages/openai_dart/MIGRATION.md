@@ -673,7 +673,7 @@ InputImageContent.url(url, detail: detail)
 InputImageContent.file(fileId)
 InputFileContent.url(url, filename: name)
 InputFileContent.file(fileId, filename: name)
-InputFileContent.data(data, filename: name)
+InputFileContent.data(data, mediaType: mimeType, filename: name)
 ```
 
 **InputContent convenience factories** — the sealed class provides factories as
@@ -686,7 +686,7 @@ InputContent.imageUrl(url, detail: detail)
 InputContent.imageFile(fileId)
 InputContent.fileUrl(url, filename: name)
 InputContent.fileId(fileId)
-InputContent.fileData(data, filename: name)
+InputContent.fileData(data, mediaType: mimeType, filename: name)
 InputContent.video(videoUrl)
 ```
 

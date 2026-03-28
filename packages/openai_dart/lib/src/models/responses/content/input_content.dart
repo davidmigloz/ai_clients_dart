@@ -46,8 +46,16 @@ sealed class InputContent {
       InputFileContent.file;
 
   /// Creates an [InputFileContent] from base64-encoded data.
-  const factory InputContent.fileData(String data, {String? filename}) =
-      InputFileContent.data;
+  ///
+  /// The [data] should be raw base64-encoded bytes. The [mediaType] specifies
+  /// the MIME type (e.g., `'application/pdf'`). These are combined into a
+  /// data URL (`data:<mediaType>;base64,<data>`) as required by the API.
+  // ignore: prefer_const_constructors_in_immutables
+  factory InputContent.fileData(
+    String data, {
+    required String mediaType,
+    String? filename,
+  }) = InputFileContent.data;
 
   /// Creates an [InputContent] from JSON.
   factory InputContent.fromJson(Map<String, dynamic> json) {
@@ -211,7 +219,10 @@ class InputFileContent extends InputContent {
   /// The file ID.
   final String? fileId;
 
-  /// Base64-encoded file content.
+  /// The file data as a data URL (e.g., `data:application/pdf;base64,<data>`).
+  ///
+  /// Use [InputContent.fileData] or [InputFileContent.data] to construct this
+  /// from raw base64 bytes.
   final String? fileData;
 
   /// The filename.
@@ -238,10 +249,15 @@ class InputFileContent extends InputContent {
       fileData = null;
 
   /// Creates an [InputFileContent] from base64-encoded data.
-  const InputFileContent.data(String data, {this.filename})
+  ///
+  /// The [data] should be raw base64-encoded bytes. The [mediaType] specifies
+  /// the MIME type (e.g., `'application/pdf'`). These are combined into a
+  /// data URL (`data:<mediaType>;base64,<data>`) as required by the API.
+  // ignore: prefer_const_constructors_in_immutables
+  InputFileContent.data(String data, {required String mediaType, this.filename})
     : fileUrl = null,
       fileId = null,
-      fileData = data;
+      fileData = 'data:$mediaType;base64,$data';
 
   /// Creates an [InputFileContent] from JSON.
   factory InputFileContent.fromJson(Map<String, dynamic> json) {

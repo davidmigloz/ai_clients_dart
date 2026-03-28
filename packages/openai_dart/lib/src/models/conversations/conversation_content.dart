@@ -126,7 +126,7 @@ class ConversationInputFileContent extends ConversationContent {
   /// The filename.
   final String? filename;
 
-  /// The file data (base64 encoded).
+  /// The file data as a data URL (e.g., `data:application/pdf;base64,<data>`).
   final String? fileData;
 
   /// Creates a [ConversationInputFileContent].
