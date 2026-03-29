@@ -1422,15 +1422,25 @@ def _verify_sealed_parent_variant_coverage(
         while current.parent and current.parent not in visited:
             visited.add(current.parent)
             parent_entry = all_types.get(current.parent)
-            if not parent_entry or not parent_entry.discriminator:
+            # Stop only if the parent entry cannot be resolved; otherwise continue
+            # walking up the chain, even if this particular parent lacks a discriminator.
+            if not parent_entry:
                 break
-            parent_mapping = parent_entry.discriminator.get("mapping", {})
-            for key, value in parent_mapping.items():
-                if isinstance(value, str):
-                    if value.startswith("#/"):
-                        mapped_schemas.add(_resolve_ref(value))
-                    else:
-                        mapped_schemas.add(key)
+            if parent_entry.discriminator:
+                # Build dart_to_schema for this ancestor's children.
+                ancestor_dart_to_schema: dict[str, str] = {}
+                for e in all_types.values():
+                    if e.parent == parent_entry.key and e.dart_class and e.schema:
+                        ancestor_dart_to_schema[e.dart_class] = e.schema
+                parent_mapping = parent_entry.discriminator.get("mapping", {})
+                for key, value in parent_mapping.items():
+                    if isinstance(value, str):
+                        if value.startswith("#/"):
+                            mapped_schemas.add(_resolve_ref(value))
+                        else:
+                            mapped_schemas.add(key)
+                            if key in ancestor_dart_to_schema:
+                                mapped_schemas.add(ancestor_dart_to_schema[key])
             current = parent_entry
 
     if not mapped_schemas:
@@ -1467,7 +1477,11 @@ def _verify_sealed_parent_variant_coverage(
                 # participate in an object-field discriminator.
                 member_schema = all_schemas.get(member, {})
                 member_type = member_schema.get("type")
-                if member_type and member_type != "object":
+                # In OpenAPI 3.1, type can be an array (e.g., ["object", "null"]).
+                if isinstance(member_type, list):
+                    if "object" not in member_type:
+                        continue
+                elif member_type and member_type != "object":
                     continue
                 issues.append(
                     _type_issue(
