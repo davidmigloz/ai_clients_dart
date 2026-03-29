@@ -376,7 +376,8 @@
           "ChatCompletionRequestUserMessage": "user",
           "ChatCompletionRequestAssistantMessage": "assistant",
           "ChatCompletionRequestToolMessage": "tool",
-          "ChatCompletionRequestDeveloperMessage": "developer"
+          "ChatCompletionRequestDeveloperMessage": "developer",
+          "ChatCompletionRequestFunctionMessage": "function"
         }
       },
       "note": null,
@@ -424,6 +425,15 @@
       "file": "lib/src/models/chat/chat_message.dart",
       "schema": "ChatCompletionRequestDeveloperMessage",
       "parent": "ChatMessage"
+    },
+    "ChatCompletionRequestFunctionMessage": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "ChatCompletionRequestFunctionMessage",
+      "tags": ["acknowledged"],
+      "note": "Deprecated in spec. The 'function' role is superseded by 'tool' messages. Not implemented in Dart."
     },
     "ContentPart": {
       "spec": "main",
@@ -522,7 +532,8 @@
         "mapping": {
           "ResponseFormatText": "text",
           "ResponseFormatJsonObject": "json_object",
-          "ResponseFormatJsonSchema": "json_schema"
+          "ResponseFormatJsonSchema": "json_schema",
+          "TextResponseFormatJsonSchema": "json_schema"
         }
       },
       "note": null
@@ -552,6 +563,16 @@
       "parent": "ResponseFormat",
       "excluded_properties": ["json_schema"]
     },
+    "TextResponseFormatJsonSchema": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "JsonSchemaResponseFormat",
+      "file": "lib/src/models/common/response_format.dart",
+      "schema": "TextResponseFormatJsonSchema",
+      "parent": "ResponseFormat",
+      "tags": ["acknowledged"],
+      "note": "Shares discriminator value 'json_schema' with ResponseFormatJsonSchema. Both handled by JsonSchemaResponseFormat. TextResponseFormatJsonSchema has flat properties while ResponseFormatJsonSchema nests under json_schema key."
+    },
     "ToolChoice": {
       "spec": "main",
       "kind": "sealed_parent",
@@ -561,10 +582,12 @@
       "discriminator": {
         "field": null,
         "mapping": {
-          "ChatCompletionNamedToolChoice": "function"
+          "ChatCompletionNamedToolChoice": "function",
+          "ChatCompletionAllowedToolsChoice": "allowed_tools",
+          "ChatCompletionNamedToolChoiceCustom": "custom"
         }
       },
-      "note": "Uses string values ('auto', 'none', 'required') or object for function choice"
+      "note": "Uses string values ('auto', 'none', 'required') or object with type field for function/allowed_tools/custom choice"
     },
     "ToolChoice:ToolChoiceAuto": {
       "spec": "main",
@@ -599,6 +622,26 @@
       "dart_class": "ToolChoiceFunction",
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": "ChatCompletionNamedToolChoice",
+      "parent": "ToolChoice",
+      "tags": ["acknowledged"],
+      "note": "toJson() returns Object instead of Map<String, dynamic> because parent sealed class uses string values for other variants. Verifier cannot inspect non-Map toJson."
+    },
+    "ChatCompletionAllowedToolsChoice": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolChoiceAllowedTools",
+      "file": "lib/src/models/tools/tool_choice.dart",
+      "schema": "ChatCompletionAllowedToolsChoice",
+      "parent": "ToolChoice",
+      "tags": ["acknowledged"],
+      "note": "toJson() returns Object instead of Map<String, dynamic> because parent sealed class uses string values for other variants. Verifier cannot inspect non-Map toJson."
+    },
+    "ChatCompletionNamedToolChoiceCustom": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolChoiceCustom",
+      "file": "lib/src/models/tools/tool_choice.dart",
+      "schema": "ChatCompletionNamedToolChoiceCustom",
       "parent": "ToolChoice",
       "tags": ["acknowledged"],
       "note": "toJson() returns Object instead of Map<String, dynamic> because parent sealed class uses string values for other variants. Verifier cannot inspect non-Map toJson."

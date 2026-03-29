@@ -35,7 +35,7 @@ Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-referenc
 - Chat Completions with tool calling, vision, structured output, and streaming
 - Images, videos, audio (TTS, transcription, translation), and embeddings
 - Realtime API via WebSocket and WebRTC with audio streaming
-- Input token counting for cost estimation
+- Input token counting via `inputTokens` for cost estimation
 
 ### Tools
 
@@ -763,7 +763,7 @@ See the [example/](example/) directory for complete examples:
 | Evals | ✅ Full |
 | Conversations | ✅ Full |
 | Containers | ✅ Full |
-| ChatKit (Beta) | ✅ Full |
+| ChatKit Beta | ✅ Full |
 | Realtime | ✅ Full (separate import) |
 | Assistants (Deprecated) | ✅ Full (separate import) |
 | Threads (Deprecated) | ✅ Full (separate import) |

@@ -166,5 +166,160 @@ void main() {
       expect(choice, isA<ToolChoiceFunction>());
       expect((choice as ToolChoiceFunction).name, 'my_func');
     });
+
+    test('allowedTools factory creates correct choice', () {
+      final choice = ToolChoice.allowedTools(
+        mode: 'auto',
+        tools: [
+          {
+            'type': 'function',
+            'function': {'name': 'get_weather'},
+          },
+        ],
+      );
+
+      expect(choice, isA<ToolChoiceAllowedTools>());
+      final allowed = choice as ToolChoiceAllowedTools;
+      expect(allowed.mode, 'auto');
+      expect(allowed.tools, hasLength(1));
+    });
+
+    test('allowedTools toJson serializes correctly', () {
+      final tools = [
+        {
+          'type': 'function',
+          'function': {'name': 'get_weather'},
+        },
+      ];
+      final choice = ToolChoice.allowedTools(mode: 'required', tools: tools);
+      final json = choice.toJson() as Map<String, dynamic>;
+
+      expect(json['type'], 'allowed_tools');
+      final allowedTools = json['allowed_tools'] as Map<String, dynamic>;
+      expect(allowedTools['mode'], 'required');
+      expect(allowedTools['tools'], tools);
+    });
+
+    test('fromJson parses allowed_tools choice', () {
+      final json = {
+        'type': 'allowed_tools',
+        'allowed_tools': {
+          'mode': 'auto',
+          'tools': [
+            {
+              'type': 'function',
+              'function': {'name': 'my_func'},
+            },
+          ],
+        },
+      };
+
+      final choice = ToolChoice.fromJson(json);
+      expect(choice, isA<ToolChoiceAllowedTools>());
+      final allowed = choice as ToolChoiceAllowedTools;
+      expect(allowed.mode, 'auto');
+      expect(allowed.tools, hasLength(1));
+      expect(allowed.tools[0]['type'], 'function');
+    });
+
+    test('allowedTools equality', () {
+      final tools = [
+        {
+          'type': 'function',
+          'function': {'name': 'get_weather'},
+        },
+      ];
+      final a = ToolChoice.allowedTools(mode: 'auto', tools: tools);
+      final b = ToolChoice.allowedTools(mode: 'auto', tools: tools);
+      final c = ToolChoice.allowedTools(mode: 'required', tools: tools);
+
+      expect(a, equals(b));
+      expect(a, isNot(equals(c)));
+      expect(a.hashCode, b.hashCode);
+    });
+
+    test('allowedTools copyWith', () {
+      const choice = ToolChoiceAllowedTools(
+        mode: 'auto',
+        tools: [
+          {
+            'type': 'function',
+            'function': {'name': 'a'},
+          },
+        ],
+      );
+      final copied = choice.copyWith(mode: 'required');
+
+      expect(copied.mode, 'required');
+      expect(copied.tools, choice.tools);
+    });
+
+    test('custom factory creates correct choice', () {
+      final choice = ToolChoice.custom('my_tool');
+
+      expect(choice, isA<ToolChoiceCustom>());
+      expect((choice as ToolChoiceCustom).name, 'my_tool');
+    });
+
+    test('custom toJson serializes correctly', () {
+      final choice = ToolChoice.custom('my_tool');
+      final json = choice.toJson() as Map<String, dynamic>;
+
+      expect(json['type'], 'custom');
+      final custom = json['custom'] as Map<String, dynamic>;
+      expect(custom['name'], 'my_tool');
+    });
+
+    test('fromJson parses custom choice', () {
+      final json = {
+        'type': 'custom',
+        'custom': {'name': 'my_tool'},
+      };
+
+      final choice = ToolChoice.fromJson(json);
+      expect(choice, isA<ToolChoiceCustom>());
+      expect((choice as ToolChoiceCustom).name, 'my_tool');
+    });
+
+    test('custom equality', () {
+      final a = ToolChoice.custom('my_tool');
+      final b = ToolChoice.custom('my_tool');
+      final c = ToolChoice.custom('other_tool');
+
+      expect(a, equals(b));
+      expect(a, isNot(equals(c)));
+      expect(a.hashCode, b.hashCode);
+    });
+
+    test('custom copyWith', () {
+      const choice = ToolChoiceCustom(name: 'original');
+      final copied = choice.copyWith(name: 'renamed');
+
+      expect(copied.name, 'renamed');
+    });
+
+    test('fromJson/toJson roundtrip for all variants', () {
+      final choices = [
+        ToolChoice.auto(),
+        ToolChoice.none(),
+        ToolChoice.required(),
+        ToolChoice.function('get_weather'),
+        ToolChoice.allowedTools(
+          mode: 'auto',
+          tools: [
+            {
+              'type': 'function',
+              'function': {'name': 'get_weather'},
+            },
+          ],
+        ),
+        ToolChoice.custom('my_tool'),
+      ];
+
+      for (final choice in choices) {
+        final roundtripped = ToolChoice.fromJson(choice.toJson());
+        expect(roundtripped, equals(choice));
+      }
+    });
   });
 }
