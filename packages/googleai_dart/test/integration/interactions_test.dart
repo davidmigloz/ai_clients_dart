@@ -305,7 +305,7 @@ void main() {
         expect(functionCalls.first.name, equals('get_weather'));
         expect(functionCalls.first.arguments, isNotNull);
         expect(
-          functionCalls.first.arguments!['location'].toString().toLowerCase(),
+          functionCalls.first.arguments['location'].toString().toLowerCase(),
           contains('paris'),
         );
       },

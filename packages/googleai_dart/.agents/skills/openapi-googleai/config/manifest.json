@@ -450,6 +450,11 @@
       "tags": [
         "acknowledged"
       ],
+      "excluded_properties": [
+        "name",
+        "server_name",
+        "result"
+      ],
       "discriminator": {
         "field": "type",
         "mapping": {
@@ -476,6 +481,39 @@
         }
       },
       "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "ContentDeltaData": {
+      "spec": "interactions",
+      "schema": "ContentDeltaData",
+      "kind": "sealed_parent",
+      "dart_class": "InteractionDelta",
+      "file": "lib/src/models/interactions/deltas/deltas.dart",
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "text": "#/components/schemas/TextDelta",
+          "image": "#/components/schemas/ImageDelta",
+          "audio": "#/components/schemas/AudioDelta",
+          "document": "#/components/schemas/DocumentDelta",
+          "video": "#/components/schemas/VideoDelta",
+          "thought_summary": "#/components/schemas/ThoughtSummaryDelta",
+          "thought_signature": "#/components/schemas/ThoughtSignatureDelta",
+          "function_call": "#/components/schemas/FunctionCallDelta",
+          "function_result": "#/components/schemas/FunctionResultDelta",
+          "code_execution_call": "#/components/schemas/CodeExecutionCallDelta",
+          "code_execution_result": "#/components/schemas/CodeExecutionResultDelta",
+          "url_context_call": "#/components/schemas/UrlContextCallDelta",
+          "url_context_result": "#/components/schemas/UrlContextResultDelta",
+          "google_search_call": "#/components/schemas/GoogleSearchCallDelta",
+          "google_search_result": "#/components/schemas/GoogleSearchResultDelta",
+          "google_maps_call": "#/components/schemas/GoogleMapsCallDelta",
+          "google_maps_result": "#/components/schemas/GoogleMapsResultDelta",
+          "mcp_server_tool_call": "#/components/schemas/McpServerToolCallDelta",
+          "mcp_server_tool_result": "#/components/schemas/McpServerToolResultDelta",
+          "file_search_call": "#/components/schemas/FileSearchCallDelta",
+          "file_search_result": "#/components/schemas/FileSearchResultDelta"
+        }
+      }
     },
     "ContentDelta": {
       "spec": "interactions",
@@ -870,10 +908,10 @@
     "interactions:MediaResolution": {
       "spec": "interactions",
       "schema": "MediaResolution",
-      "dart_class": "MediaResolution",
-      "file": "lib/src/models/content/media_resolution.dart",
+      "dart_class": "InteractionMediaResolution",
+      "file": "lib/src/models/interactions/media_resolution.dart",
       "kind": "skip",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
+      "note": "Dart enum with helper functions follows the ResponseModality pattern. Named InteractionMediaResolution to avoid conflict with main spec's MediaResolution class.",
       "tags": [
         "acknowledged"
       ]

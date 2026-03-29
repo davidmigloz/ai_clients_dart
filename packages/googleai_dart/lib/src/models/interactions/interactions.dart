@@ -6,6 +6,7 @@ export 'events/events.dart';
 export 'generation_config.dart';
 export 'interaction.dart';
 export 'interaction_status.dart';
+export 'media_resolution.dart';
 export 'modality_tokens.dart';
 export 'response_modality.dart';
 export 'speech_config.dart';

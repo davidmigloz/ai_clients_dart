@@ -15,7 +15,7 @@ class VideoDelta extends InteractionDelta {
   final String? mimeType;
 
   /// The resolution of the media.
-  final String? resolution;
+  final InteractionMediaResolution? resolution;
 
   /// Creates a [VideoDelta] instance.
   const VideoDelta({this.data, this.uri, this.mimeType, this.resolution});
@@ -25,7 +25,9 @@ class VideoDelta extends InteractionDelta {
     data: json['data'] as String?,
     uri: json['uri'] as String?,
     mimeType: json['mime_type'] as String?,
-    resolution: json['resolution'] as String?,
+    resolution: json['resolution'] != null
+        ? interactionMediaResolutionFromString(json['resolution'] as String?)
+        : null,
   );
 
   @override
@@ -34,6 +36,7 @@ class VideoDelta extends InteractionDelta {
     if (data != null) 'data': data,
     if (uri != null) 'uri': uri,
     if (mimeType != null) 'mime_type': mimeType,
-    if (resolution != null) 'resolution': resolution,
+    if (resolution != null)
+      'resolution': interactionMediaResolutionToString(resolution!),
   };
 }

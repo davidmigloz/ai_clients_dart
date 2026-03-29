@@ -6,7 +6,7 @@ class GoogleMapsCallContent extends InteractionContent {
   String get type => 'google_maps_call';
 
   /// A unique ID for this specific tool call.
-  final String? id;
+  final String id;
 
   /// The queries for the Google Maps search.
   final List<String>? queries;
@@ -15,13 +15,15 @@ class GoogleMapsCallContent extends InteractionContent {
   final String? signature;
 
   /// Creates a [GoogleMapsCallContent] instance.
-  const GoogleMapsCallContent({this.id, this.queries, this.signature});
+  const GoogleMapsCallContent({required this.id, this.queries, this.signature});
 
   /// Creates a [GoogleMapsCallContent] from JSON.
+  ///
+  /// The [id] field defaults to `''` when absent (e.g. content.start events).
   factory GoogleMapsCallContent.fromJson(Map<String, dynamic> json) {
     final arguments = json['arguments'] as Map<String, dynamic>?;
     return GoogleMapsCallContent(
-      id: json['id'] as String?,
+      id: json['id'] as String? ?? '',
       queries: (arguments?['queries'] as List<dynamic>?)?.cast<String>(),
       signature: json['signature'] as String?,
     );
@@ -30,7 +32,7 @@ class GoogleMapsCallContent extends InteractionContent {
   @override
   Map<String, dynamic> toJson() => {
     'type': type,
-    if (id != null) 'id': id,
+    'id': id,
     if (queries != null) 'arguments': {'queries': queries},
     if (signature != null) 'signature': signature,
   };
@@ -42,7 +44,7 @@ class GoogleMapsCallContent extends InteractionContent {
     Object? signature = unsetCopyWithValue,
   }) {
     return GoogleMapsCallContent(
-      id: id == unsetCopyWithValue ? this.id : id as String?,
+      id: id == unsetCopyWithValue ? this.id : id! as String,
       queries: queries == unsetCopyWithValue
           ? this.queries
           : queries as List<String>?,

@@ -136,6 +136,7 @@ export 'src/models/interactions/image_config.dart';
 export 'src/models/interactions/interaction.dart';
 export 'src/models/interactions/interaction_input.dart';
 export 'src/models/interactions/interaction_status.dart';
+export 'src/models/interactions/media_resolution.dart';
 export 'src/models/interactions/modality_tokens.dart';
 export 'src/models/interactions/response_modality.dart';
 export 'src/models/interactions/speech_config.dart';

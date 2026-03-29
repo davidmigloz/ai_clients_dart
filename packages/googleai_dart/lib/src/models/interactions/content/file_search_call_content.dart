@@ -6,25 +6,27 @@ class FileSearchCallContent extends InteractionContent {
   String get type => 'file_search_call';
 
   /// A unique ID for this specific tool call.
-  final String? id;
+  final String id;
 
   /// The signature of the file search call.
   final String? signature;
 
   /// Creates a [FileSearchCallContent] instance.
-  const FileSearchCallContent({this.id, this.signature});
+  const FileSearchCallContent({required this.id, this.signature});
 
   /// Creates a [FileSearchCallContent] from JSON.
+  ///
+  /// The [id] field defaults to `''` when absent (e.g. content.start events).
   factory FileSearchCallContent.fromJson(Map<String, dynamic> json) =>
       FileSearchCallContent(
-        id: json['id'] as String?,
+        id: json['id'] as String? ?? '',
         signature: json['signature'] as String?,
       );
 
   @override
   Map<String, dynamic> toJson() => {
     'type': type,
-    if (id != null) 'id': id,
+    'id': id,
     if (signature != null) 'signature': signature,
   };
 
@@ -34,7 +36,7 @@ class FileSearchCallContent extends InteractionContent {
     Object? signature = unsetCopyWithValue,
   }) {
     return FileSearchCallContent(
-      id: id == unsetCopyWithValue ? this.id : id as String?,
+      id: id == unsetCopyWithValue ? this.id : id! as String,
       signature: signature == unsetCopyWithValue
           ? this.signature
           : signature as String?,

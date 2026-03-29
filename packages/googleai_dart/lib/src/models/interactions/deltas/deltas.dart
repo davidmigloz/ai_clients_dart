@@ -1,4 +1,5 @@
 import '../content/content.dart';
+import '../media_resolution.dart';
 import '../tool_result.dart';
 
 part 'audio_delta.dart';

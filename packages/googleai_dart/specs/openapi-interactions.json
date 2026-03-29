@@ -88,7 +88,9 @@
               "audio/aiff",
               "audio/aac",
               "audio/ogg",
-              "audio/flac"
+              "audio/flac",
+              "audio/mpeg",
+              "audio/m4a"
             ],
             "type": "string",
             "x-google-enum-descriptions": [
@@ -97,7 +99,9 @@
               "AIFF audio format",
               "AAC audio format",
               "OGG audio format",
-              "FLAC audio format"
+              "FLAC audio format",
+              "MPEG audio format",
+              "M4A audio format"
             ]
           },
           "type": {
@@ -126,7 +130,9 @@
               "audio/aiff",
               "audio/aac",
               "audio/ogg",
-              "audio/flac"
+              "audio/flac",
+              "audio/mpeg",
+              "audio/m4a"
             ],
             "type": "string",
             "x-google-enum-descriptions": [
@@ -135,7 +141,9 @@
               "AIFF audio format",
               "AAC audio format",
               "OGG audio format",
-              "FLAC audio format"
+              "FLAC audio format",
+              "MPEG audio format",
+              "M4A audio format"
             ]
           },
           "type": {
@@ -154,8 +162,7 @@
         "description": "A tool that can be used by the model to execute code.",
         "properties": {
           "type": {
-            "const": "code_execution",
-            "type": "string"
+            "const": "code_execution"
           }
         },
         "required": [
@@ -220,10 +227,10 @@
         "properties": {
           "arguments": {
             "$ref": "#/components/schemas/CodeExecutionCallArguments",
-            "description": "The arguments to pass to the code execution."
+            "description": "Required. The arguments to pass to the code execution."
           },
           "id": {
-            "description": "A unique ID for this specific tool call.",
+            "description": "Required. A unique ID for this specific tool call.",
             "type": "string"
           },
           "signature": {
@@ -236,9 +243,9 @@
           }
         },
         "required": [
-          "id",
+          "type",
           "arguments",
-          "type"
+          "id"
         ],
         "type": "object"
       },
@@ -248,7 +255,7 @@
             "$ref": "#/components/schemas/CodeExecutionCallArguments"
           },
           "id": {
-            "description": "A unique ID for this specific tool call.",
+            "description": "Required. A unique ID for this specific tool call.",
             "type": "string"
           },
           "signature": {
@@ -261,9 +268,9 @@
           }
         },
         "required": [
-          "id",
+          "type",
           "arguments",
-          "type"
+          "id"
         ],
         "type": "object"
       },
@@ -283,7 +290,7 @@
         ],
         "properties": {
           "call_id": {
-            "description": "ID to match the ID from the code execution call block.",
+            "description": "Required. ID to match the ID from the function call block.",
             "type": "string"
           },
           "is_error": {
@@ -291,7 +298,7 @@
             "type": "boolean"
           },
           "result": {
-            "description": "The output of the code execution.",
+            "description": "Required. The output of the code execution.",
             "type": "string"
           },
           "signature": {
@@ -304,16 +311,16 @@
           }
         },
         "required": [
-          "call_id",
+          "type",
           "result",
-          "type"
+          "call_id"
         ],
         "type": "object"
       },
       "CodeExecutionResultDelta": {
         "properties": {
           "call_id": {
-            "description": "ID to match the ID from the function call block.",
+            "description": "Required. ID to match the ID from the function call block.",
             "type": "string"
           },
           "is_error": {
@@ -332,9 +339,9 @@
           }
         },
         "required": [
-          "call_id",
+          "type",
           "result",
-          "type"
+          "call_id"
         ],
         "type": "object"
       },
@@ -359,8 +366,7 @@
             "type": "array"
           },
           "type": {
-            "const": "computer_use",
-            "type": "string"
+            "const": "computer_use"
           }
         },
         "required": [
@@ -413,40 +419,40 @@
             "$ref": "#/components/schemas/FunctionCallContent"
           },
           {
-            "$ref": "#/components/schemas/FunctionResultContent"
-          },
-          {
             "$ref": "#/components/schemas/CodeExecutionCallContent"
-          },
-          {
-            "$ref": "#/components/schemas/CodeExecutionResultContent"
           },
           {
             "$ref": "#/components/schemas/UrlContextCallContent"
           },
           {
-            "$ref": "#/components/schemas/UrlContextResultContent"
+            "$ref": "#/components/schemas/McpServerToolCallContent"
           },
           {
             "$ref": "#/components/schemas/GoogleSearchCallContent"
           },
           {
-            "$ref": "#/components/schemas/GoogleSearchResultContent"
+            "$ref": "#/components/schemas/FileSearchCallContent"
           },
           {
-            "$ref": "#/components/schemas/McpServerToolCallContent"
+            "$ref": "#/components/schemas/GoogleMapsCallContent"
+          },
+          {
+            "$ref": "#/components/schemas/FunctionResultContent"
+          },
+          {
+            "$ref": "#/components/schemas/CodeExecutionResultContent"
+          },
+          {
+            "$ref": "#/components/schemas/UrlContextResultContent"
+          },
+          {
+            "$ref": "#/components/schemas/GoogleSearchResultContent"
           },
           {
             "$ref": "#/components/schemas/McpServerToolResultContent"
           },
           {
-            "$ref": "#/components/schemas/FileSearchCallContent"
-          },
-          {
             "$ref": "#/components/schemas/FileSearchResultContent"
-          },
-          {
-            "$ref": "#/components/schemas/GoogleMapsCallContent"
           },
           {
             "$ref": "#/components/schemas/GoogleMapsResultContent"
@@ -472,82 +478,14 @@
         ],
         "properties": {
           "delta": {
-            "discriminator": {
-              "propertyName": "type"
-            },
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/TextDelta"
-              },
-              {
-                "$ref": "#/components/schemas/ImageDelta"
-              },
-              {
-                "$ref": "#/components/schemas/AudioDelta"
-              },
-              {
-                "$ref": "#/components/schemas/DocumentDelta"
-              },
-              {
-                "$ref": "#/components/schemas/VideoDelta"
-              },
-              {
-                "$ref": "#/components/schemas/ThoughtSummaryDelta"
-              },
-              {
-                "$ref": "#/components/schemas/ThoughtSignatureDelta"
-              },
-              {
-                "$ref": "#/components/schemas/FunctionCallDelta"
-              },
-              {
-                "$ref": "#/components/schemas/FunctionResultDelta"
-              },
-              {
-                "$ref": "#/components/schemas/CodeExecutionCallDelta"
-              },
-              {
-                "$ref": "#/components/schemas/CodeExecutionResultDelta"
-              },
-              {
-                "$ref": "#/components/schemas/UrlContextCallDelta"
-              },
-              {
-                "$ref": "#/components/schemas/UrlContextResultDelta"
-              },
-              {
-                "$ref": "#/components/schemas/GoogleSearchCallDelta"
-              },
-              {
-                "$ref": "#/components/schemas/GoogleSearchResultDelta"
-              },
-              {
-                "$ref": "#/components/schemas/McpServerToolCallDelta"
-              },
-              {
-                "$ref": "#/components/schemas/McpServerToolResultDelta"
-              },
-              {
-                "$ref": "#/components/schemas/FileSearchCallDelta"
-              },
-              {
-                "$ref": "#/components/schemas/FileSearchResultDelta"
-              },
-              {
-                "$ref": "#/components/schemas/GoogleMapsCallDelta"
-              },
-              {
-                "$ref": "#/components/schemas/GoogleMapsResultDelta"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentDeltaData"
           },
           "event_id": {
-            "description": "The event_id token to be used to resume the interaction stream, from this event.",
+            "description": "The event_id token to be used to resume the interaction stream, from\nthis event.",
             "type": "string"
           },
           "event_type": {
-            "const": "content.delta",
-            "type": "string"
+            "const": "content.delta"
           },
           "index": {
             "format": "int32",
@@ -558,6 +496,78 @@
           "event_type",
           "index",
           "delta"
+        ],
+        "type": "object"
+      },
+      "ContentDeltaData": {
+        "description": "The delta content data for a content block.",
+        "discriminator": {
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/TextDelta"
+          },
+          {
+            "$ref": "#/components/schemas/ImageDelta"
+          },
+          {
+            "$ref": "#/components/schemas/AudioDelta"
+          },
+          {
+            "$ref": "#/components/schemas/DocumentDelta"
+          },
+          {
+            "$ref": "#/components/schemas/VideoDelta"
+          },
+          {
+            "$ref": "#/components/schemas/ThoughtSummaryDelta"
+          },
+          {
+            "$ref": "#/components/schemas/ThoughtSignatureDelta"
+          },
+          {
+            "$ref": "#/components/schemas/FunctionCallDelta"
+          },
+          {
+            "$ref": "#/components/schemas/CodeExecutionCallDelta"
+          },
+          {
+            "$ref": "#/components/schemas/UrlContextCallDelta"
+          },
+          {
+            "$ref": "#/components/schemas/GoogleSearchCallDelta"
+          },
+          {
+            "$ref": "#/components/schemas/McpServerToolCallDelta"
+          },
+          {
+            "$ref": "#/components/schemas/FileSearchCallDelta"
+          },
+          {
+            "$ref": "#/components/schemas/GoogleMapsCallDelta"
+          },
+          {
+            "$ref": "#/components/schemas/FunctionResultDelta"
+          },
+          {
+            "$ref": "#/components/schemas/CodeExecutionResultDelta"
+          },
+          {
+            "$ref": "#/components/schemas/UrlContextResultDelta"
+          },
+          {
+            "$ref": "#/components/schemas/GoogleSearchResultDelta"
+          },
+          {
+            "$ref": "#/components/schemas/McpServerToolResultDelta"
+          },
+          {
+            "$ref": "#/components/schemas/FileSearchResultDelta"
+          },
+          {
+            "$ref": "#/components/schemas/GoogleMapsResultDelta"
+          }
         ],
         "type": "object"
       },
@@ -581,12 +591,11 @@
             "$ref": "#/components/schemas/Content"
           },
           "event_id": {
-            "description": "The event_id token to be used to resume the interaction stream, from this event.",
+            "description": "The event_id token to be used to resume the interaction stream, from\nthis event.",
             "type": "string"
           },
           "event_type": {
-            "const": "content.start",
-            "type": "string"
+            "const": "content.start"
           },
           "index": {
             "format": "int32",
@@ -614,12 +623,11 @@
         ],
         "properties": {
           "event_id": {
-            "description": "The event_id token to be used to resume the interaction stream, from this event.",
+            "description": "The event_id token to be used to resume the interaction stream, from\nthis event.",
             "type": "string"
           },
           "event_type": {
-            "const": "content.stop",
-            "type": "string"
+            "const": "content.stop"
           },
           "index": {
             "format": "int32",
@@ -659,13 +667,13 @@
             "writeOnly": true
           },
           "created": {
-            "description": "Output only. The time at which the response was created in ISO 8601 format\n(YYYY-MM-DDThh:mm:ssZ).",
+            "description": "Required. Output only. The time at which the response was created in ISO 8601 format\n(YYYY-MM-DDThh:mm:ssZ).",
             "format": "date-time",
             "readOnly": true,
             "type": "string"
           },
           "id": {
-            "description": "Output only. A unique identifier for the interaction completion.",
+            "description": "Required. Output only. A unique identifier for the interaction completion.",
             "readOnly": true,
             "type": "string"
           },
@@ -704,7 +712,7 @@
             "type": "string"
           },
           "status": {
-            "description": "Output only. The status of the interaction.",
+            "description": "Required. Output only. The status of the interaction.",
             "enum": [
               "in_progress",
               "requires_action",
@@ -746,7 +754,7 @@
             "type": "array"
           },
           "updated": {
-            "description": "Output only. The time at which the response was last updated in ISO 8601 format\n(YYYY-MM-DDThh:mm:ssZ).",
+            "description": "Required. Output only. The time at which the response was last updated in ISO 8601 format\n(YYYY-MM-DDThh:mm:ssZ).",
             "format": "date-time",
             "readOnly": true,
             "type": "string"
@@ -771,7 +779,7 @@
             "writeOnly": true
           },
           "created": {
-            "description": "Output only. The time at which the response was created in ISO 8601 format\n(YYYY-MM-DDThh:mm:ssZ).",
+            "description": "Required. Output only. The time at which the response was created in ISO 8601 format\n(YYYY-MM-DDThh:mm:ssZ).",
             "format": "date-time",
             "readOnly": true,
             "type": "string"
@@ -782,7 +790,7 @@
             "writeOnly": true
           },
           "id": {
-            "description": "Output only. A unique identifier for the interaction completion.",
+            "description": "Required. Output only. A unique identifier for the interaction completion.",
             "readOnly": true,
             "type": "string"
           },
@@ -825,7 +833,7 @@
             "type": "string"
           },
           "status": {
-            "description": "Output only. The status of the interaction.",
+            "description": "Required. Output only. The status of the interaction.",
             "enum": [
               "in_progress",
               "requires_action",
@@ -867,7 +875,7 @@
             "type": "array"
           },
           "updated": {
-            "description": "Output only. The time at which the response was last updated in ISO 8601 format\n(YYYY-MM-DDThh:mm:ssZ).",
+            "description": "Required. Output only. The time at which the response was last updated in ISO 8601 format\n(YYYY-MM-DDThh:mm:ssZ).",
             "format": "date-time",
             "readOnly": true,
             "type": "string"
@@ -971,7 +979,7 @@
       },
       "DynamicAgentConfig": {
         "additionalProperties": {
-          "description": "Additional properties for the dynamic agent."
+          "description": "For agents that are not supported statically in the API definition."
         },
         "description": "Configuration for dynamic agents.",
         "properties": {
@@ -1018,12 +1026,11 @@
             "$ref": "#/components/schemas/Error"
           },
           "event_id": {
-            "description": "The event_id token to be used to resume the interaction stream, from this event.",
+            "description": "The event_id token to be used to resume the interaction stream, from\nthis event.",
             "type": "string"
           },
           "event_type": {
-            "const": "error",
-            "type": "string"
+            "const": "error"
           }
         },
         "required": [
@@ -1052,13 +1059,12 @@
             "type": "string"
           },
           "start_index": {
-            "description": "Start of segment of the response that is attributed to this source.",
+            "description": "Start of segment of the response that is attributed to this source.\n\nIndex indicates the start of the segment, measured in bytes.",
             "format": "int32",
             "type": "integer"
           },
           "type": {
-            "const": "file_citation",
-            "type": "string"
+            "const": "file_citation"
           }
         },
         "required": [
@@ -1086,8 +1092,7 @@
             "type": "integer"
           },
           "type": {
-            "const": "file_search",
-            "type": "string"
+            "const": "file_search"
           }
         },
         "required": [
@@ -1127,7 +1132,7 @@
         ],
         "properties": {
           "id": {
-            "description": "A unique ID for this specific tool call.",
+            "description": "Required. A unique ID for this specific tool call.",
             "type": "string"
           },
           "signature": {
@@ -1148,7 +1153,7 @@
       "FileSearchCallDelta": {
         "properties": {
           "id": {
-            "description": "A unique ID for this specific tool call.",
+            "description": "Required. A unique ID for this specific tool call.",
             "type": "string"
           },
           "signature": {
@@ -1168,6 +1173,15 @@
       },
       "FileSearchResult": {
         "description": "The result of the File Search.",
+        "properties": {
+          "custom_metadata": {
+            "description": "User provided metadata about the FileSearchResult.",
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
         "type": "object"
       },
       "FileSearchResultContent": {
@@ -1191,11 +1205,11 @@
         ],
         "properties": {
           "call_id": {
-            "description": "ID to match the ID from the file search call block.",
+            "description": "Required. ID to match the ID from the function call block.",
             "type": "string"
           },
           "result": {
-            "description": "The results of the File Search.",
+            "description": "Required. The results of the File Search.",
             "items": {
               "$ref": "#/components/schemas/FileSearchResult"
             },
@@ -1212,6 +1226,7 @@
         },
         "required": [
           "type",
+          "result",
           "call_id"
         ],
         "type": "object"
@@ -1219,7 +1234,7 @@
       "FileSearchResultDelta": {
         "properties": {
           "call_id": {
-            "description": "ID to match the ID from the function call block.",
+            "description": "Required. ID to match the ID from the function call block.",
             "type": "string"
           },
           "result": {
@@ -1239,6 +1254,7 @@
         },
         "required": [
           "type",
+          "result",
           "call_id"
         ],
         "type": "object"
@@ -1258,8 +1274,7 @@
             "description": "The JSON Schema for the function's parameters."
           },
           "type": {
-            "const": "function",
-            "type": "string"
+            "const": "function"
           }
         },
         "required": [
@@ -1306,15 +1321,15 @@
             "additionalProperties": {
               "description": "Properties of the object."
             },
-            "description": "The arguments to pass to the function.",
+            "description": "Required. The arguments to pass to the function.",
             "type": "object"
           },
           "id": {
-            "description": "A unique ID for this specific tool call.",
+            "description": "Required. A unique ID for this specific tool call.",
             "type": "string"
           },
           "name": {
-            "description": "The name of the tool to call.",
+            "description": "Required. The name of the tool to call.",
             "type": "string"
           },
           "signature": {
@@ -1327,10 +1342,10 @@
           }
         },
         "required": [
+          "type",
           "name",
-          "id",
           "arguments",
-          "type"
+          "id"
         ],
         "type": "object"
       },
@@ -1343,7 +1358,7 @@
             "type": "object"
           },
           "id": {
-            "description": "A unique ID for this specific tool call.",
+            "description": "Required. A unique ID for this specific tool call.",
             "type": "string"
           },
           "name": {
@@ -1359,10 +1374,10 @@
           }
         },
         "required": [
+          "type",
           "name",
-          "id",
           "arguments",
-          "type"
+          "id"
         ],
         "type": "object"
       },
@@ -1388,7 +1403,7 @@
         ],
         "properties": {
           "call_id": {
-            "description": "ID to match the ID from the function call block.",
+            "description": "Required. ID to match the ID from the function call block.",
             "type": "string"
           },
           "is_error": {
@@ -1427,16 +1442,16 @@
           }
         },
         "required": [
+          "type",
           "call_id",
-          "result",
-          "type"
+          "result"
         ],
         "type": "object"
       },
       "FunctionResultDelta": {
         "properties": {
           "call_id": {
-            "description": "ID to match the ID from the function call block.",
+            "description": "Required. ID to match the ID from the function call block.",
             "type": "string"
           },
           "is_error": {
@@ -1446,28 +1461,16 @@
             "type": "string"
           },
           "result": {
-            "description": "Tool call result delta.",
             "oneOf": [
               {
-                "properties": {
-                  "items": {
-                    "items": {
-                      "oneOf": [
-                        {
-                          "$ref": "#/components/schemas/TextContent"
-                        },
-                        {
-                          "$ref": "#/components/schemas/ImageContent"
-                        }
-                      ]
-                    },
-                    "type": "array"
-                  }
-                },
                 "type": "object"
               },
               {
-                "type": "object"
+                "items": {
+                  "$ref": "#/components/schemas/FunctionResultSubcontent"
+                },
+                "title": "FunctionResultSubcontentList",
+                "type": "array"
               },
               {
                 "type": "string"
@@ -1484,9 +1487,9 @@
           }
         },
         "required": [
+          "type",
           "call_id",
-          "result",
-          "type"
+          "result"
         ],
         "type": "object"
       },
@@ -1549,7 +1552,7 @@
             "description": "Whether to include thought summaries in the response."
           },
           "tool_choice": {
-            "description": "The tool choice for the interaction.",
+            "description": "The tool choice configuration.",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/ToolChoiceType"
@@ -1585,10 +1588,12 @@
             "type": "number"
           },
           "type": {
-            "const": "google_maps",
-            "type": "string"
+            "const": "google_maps"
           }
         },
+        "required": [
+          "type"
+        ],
         "type": "object",
         "x-codeSamples": [
           {
@@ -1643,7 +1648,7 @@
             "description": "The arguments to pass to the Google Maps tool."
           },
           "id": {
-            "description": "A unique ID for this specific tool call.",
+            "description": "Required. A unique ID for this specific tool call.",
             "type": "string"
           },
           "signature": {
@@ -1668,7 +1673,7 @@
             "description": "The arguments to pass to the Google Maps tool."
           },
           "id": {
-            "description": "A unique ID for this specific tool call.",
+            "description": "Required. A unique ID for this specific tool call.",
             "type": "string"
           },
           "signature": {
@@ -1728,11 +1733,11 @@
         ],
         "properties": {
           "call_id": {
-            "description": "ID to match the ID from the google maps call block.",
+            "description": "Required. ID to match the ID from the function call block.",
             "type": "string"
           },
           "result": {
-            "description": "The results of the Google Maps.",
+            "description": "Required. The results of the Google Maps.",
             "items": {
               "$ref": "#/components/schemas/GoogleMapsResult"
             },
@@ -1749,15 +1754,15 @@
         },
         "required": [
           "type",
-          "call_id",
-          "result"
+          "result",
+          "call_id"
         ],
         "type": "object"
       },
       "GoogleMapsResultDelta": {
         "properties": {
           "call_id": {
-            "description": "ID to match the ID from the function call block.",
+            "description": "Required. ID to match the ID from the function call block.",
             "type": "string"
           },
           "result": {
@@ -1778,8 +1783,7 @@
         },
         "required": [
           "type",
-          "call_id",
-          "result"
+          "call_id"
         ],
         "type": "object"
       },
@@ -1802,8 +1806,7 @@
             "type": "array"
           },
           "type": {
-            "const": "google_search",
-            "type": "string"
+            "const": "google_search"
           }
         },
         "required": [
@@ -1862,10 +1865,10 @@
         "properties": {
           "arguments": {
             "$ref": "#/components/schemas/GoogleSearchCallArguments",
-            "description": "The arguments to pass to Google Search."
+            "description": "Required. The arguments to pass to Google Search."
           },
           "id": {
-            "description": "A unique ID for this specific tool call.",
+            "description": "Required. A unique ID for this specific tool call.",
             "type": "string"
           },
           "search_type": {
@@ -1891,8 +1894,8 @@
         },
         "required": [
           "type",
-          "id",
-          "arguments"
+          "arguments",
+          "id"
         ],
         "type": "object"
       },
@@ -1902,7 +1905,7 @@
             "$ref": "#/components/schemas/GoogleSearchCallArguments"
           },
           "id": {
-            "description": "A unique ID for this specific tool call.",
+            "description": "Required. A unique ID for this specific tool call.",
             "type": "string"
           },
           "signature": {
@@ -1916,8 +1919,8 @@
         },
         "required": [
           "type",
-          "id",
-          "arguments"
+          "arguments",
+          "id"
         ],
         "type": "object"
       },
@@ -1952,7 +1955,7 @@
         ],
         "properties": {
           "call_id": {
-            "description": "ID to match the ID from the google search call block.",
+            "description": "Required. ID to match the ID from the function call block.",
             "type": "string"
           },
           "is_error": {
@@ -1960,7 +1963,7 @@
             "type": "boolean"
           },
           "result": {
-            "description": "The results of the Google Search.",
+            "description": "Required. The results of the Google Search.",
             "items": {
               "$ref": "#/components/schemas/GoogleSearchResult"
             },
@@ -1977,15 +1980,15 @@
         },
         "required": [
           "type",
-          "call_id",
-          "result"
+          "result",
+          "call_id"
         ],
         "type": "object"
       },
       "GoogleSearchResultDelta": {
         "properties": {
           "call_id": {
-            "description": "ID to match the ID from the function call block.",
+            "description": "Required. ID to match the ID from the function call block.",
             "type": "string"
           },
           "is_error": {
@@ -2008,8 +2011,8 @@
         },
         "required": [
           "type",
-          "call_id",
-          "result"
+          "result",
+          "call_id"
         ],
         "type": "object"
       },
@@ -2094,7 +2097,11 @@
               "image/jpeg",
               "image/webp",
               "image/heic",
-              "image/heif"
+              "image/heif",
+              "image/jpg",
+              "image/gif",
+              "image/bmp",
+              "image/tiff"
             ],
             "type": "string",
             "x-google-enum-descriptions": [
@@ -2102,7 +2109,11 @@
               "JPEG image format",
               "WebP image format",
               "HEIC image format",
-              "HEIF image format"
+              "HEIF image format",
+              "JPG image format",
+              "GIF image format",
+              "BMP image format",
+              "TIFF image format"
             ]
           },
           "resolution": {
@@ -2134,7 +2145,11 @@
               "image/jpeg",
               "image/webp",
               "image/heic",
-              "image/heif"
+              "image/heif",
+              "image/jpg",
+              "image/gif",
+              "image/bmp",
+              "image/tiff"
             ],
             "type": "string",
             "x-google-enum-descriptions": [
@@ -2142,7 +2157,11 @@
               "JPEG image format",
               "WebP image format",
               "HEIC image format",
-              "HEIF image format"
+              "HEIF image format",
+              "JPG image format",
+              "GIF image format",
+              "BMP image format",
+              "TIFF image format"
             ]
           },
           "resolution": {
@@ -2212,7 +2231,7 @@
             ]
           },
           "created": {
-            "description": "Output only. The time at which the response was created in ISO 8601 format\n(YYYY-MM-DDThh:mm:ssZ).",
+            "description": "Required. Output only. The time at which the response was created in ISO 8601 format\n(YYYY-MM-DDThh:mm:ssZ).",
             "format": "date-time",
             "readOnly": true,
             "type": "string"
@@ -2223,7 +2242,7 @@
             "writeOnly": true
           },
           "id": {
-            "description": "Output only. A unique identifier for the interaction completion.",
+            "description": "Required. Output only. A unique identifier for the interaction completion.",
             "readOnly": true,
             "type": "string"
           },
@@ -2266,7 +2285,7 @@
             "type": "string"
           },
           "status": {
-            "description": "Output only. The status of the interaction.",
+            "description": "Required. Output only. The status of the interaction.",
             "enum": [
               "in_progress",
               "requires_action",
@@ -2298,7 +2317,7 @@
             "type": "array"
           },
           "updated": {
-            "description": "Output only. The time at which the response was last updated in ISO 8601 format\n(YYYY-MM-DDThh:mm:ssZ).",
+            "description": "Required. Output only. The time at which the response was last updated in ISO 8601 format\n(YYYY-MM-DDThh:mm:ssZ).",
             "format": "date-time",
             "readOnly": true,
             "type": "string"
@@ -2352,18 +2371,15 @@
         ],
         "properties": {
           "event_id": {
-            "description": "The event_id token to be used to resume the interaction stream, from this event.",
+            "description": "The event_id token to be used to resume the interaction stream, from\nthis event.",
             "type": "string"
           },
           "event_type": {
-            "enum": [
-              "interaction.complete"
-            ],
-            "type": "string"
+            "const": "interaction.complete"
           },
           "interaction": {
             "$ref": "#/components/schemas/Interaction",
-            "description": "The completed interaction with empty outputs to reduce the payload size.\nUse the preceding ContentDelta events for the actual output."
+            "description": "Required. The completed interaction with empty outputs to reduce the payload size.\nUse the preceding ContentDelta events for the actual output."
           }
         },
         "required": [
@@ -2420,14 +2436,11 @@
         ],
         "properties": {
           "event_id": {
-            "description": "The event_id token to be used to resume the interaction stream, from this event.",
+            "description": "The event_id token to be used to resume the interaction stream, from\nthis event.",
             "type": "string"
           },
           "event_type": {
-            "enum": [
-              "interaction.start"
-            ],
-            "type": "string"
+            "const": "interaction.start"
           },
           "interaction": {
             "$ref": "#/components/schemas/Interaction"
@@ -2454,12 +2467,11 @@
         ],
         "properties": {
           "event_id": {
-            "description": "The event_id token to be used to resume the interaction stream, from this event.",
+            "description": "The event_id token to be used to resume the interaction stream, from\nthis event.",
             "type": "string"
           },
           "event_type": {
-            "const": "interaction.status_update",
-            "type": "string"
+            "const": "interaction.status_update"
           },
           "interaction_id": {
             "type": "string"
@@ -2538,8 +2550,7 @@
             "type": "string"
           },
           "type": {
-            "const": "mcp_server",
-            "type": "string"
+            "const": "mcp_server"
           },
           "url": {
             "description": "The full URL for the MCPServer endpoint.\nExample: \"https://api.example.com/mcp\"",
@@ -2591,19 +2602,19 @@
             "additionalProperties": {
               "description": "Properties of the object."
             },
-            "description": "The JSON object of arguments for the function.",
+            "description": "Required. The JSON object of arguments for the function.",
             "type": "object"
           },
           "id": {
-            "description": "A unique ID for this specific tool call.",
+            "description": "Required. A unique ID for this specific tool call.",
             "type": "string"
           },
           "name": {
-            "description": "The name of the tool which was called.",
+            "description": "Required. The name of the tool which was called.",
             "type": "string"
           },
           "server_name": {
-            "description": "The name of the used MCP server.",
+            "description": "Required. The name of the used MCP server.",
             "type": "string"
           },
           "signature": {
@@ -2616,11 +2627,11 @@
           }
         },
         "required": [
+          "type",
           "name",
           "server_name",
           "arguments",
-          "id",
-          "type"
+          "id"
         ],
         "type": "object"
       },
@@ -2633,7 +2644,7 @@
             "type": "object"
           },
           "id": {
-            "description": "A unique ID for this specific tool call.",
+            "description": "Required. A unique ID for this specific tool call.",
             "type": "string"
           },
           "name": {
@@ -2652,11 +2663,11 @@
           }
         },
         "required": [
+          "type",
           "name",
           "server_name",
           "arguments",
-          "id",
-          "type"
+          "id"
         ],
         "type": "object"
       },
@@ -2678,7 +2689,7 @@
         ],
         "properties": {
           "call_id": {
-            "description": "ID to match the ID from the MCP server tool call block.",
+            "description": "Required. ID to match the ID from the function call block.",
             "type": "string"
           },
           "name": {
@@ -2717,44 +2728,32 @@
           }
         },
         "required": [
+          "type",
           "call_id",
-          "result",
-          "type"
+          "result"
         ],
         "type": "object"
       },
       "McpServerToolResultDelta": {
         "properties": {
           "call_id": {
-            "description": "ID to match the ID from the function call block.",
+            "description": "Required. ID to match the ID from the function call block.",
             "type": "string"
           },
           "name": {
             "type": "string"
           },
           "result": {
-            "description": "Tool call result delta.",
             "oneOf": [
               {
-                "properties": {
-                  "items": {
-                    "items": {
-                      "oneOf": [
-                        {
-                          "$ref": "#/components/schemas/TextContent"
-                        },
-                        {
-                          "$ref": "#/components/schemas/ImageContent"
-                        }
-                      ]
-                    },
-                    "type": "array"
-                  }
-                },
                 "type": "object"
               },
               {
-                "type": "object"
+                "items": {
+                  "$ref": "#/components/schemas/FunctionResultSubcontent"
+                },
+                "title": "FunctionResultSubcontentList",
+                "type": "array"
               },
               {
                 "type": "string"
@@ -2774,9 +2773,9 @@
           }
         },
         "required": [
+          "type",
           "call_id",
-          "result",
-          "type"
+          "result"
         ],
         "type": "object"
       },
@@ -2868,7 +2867,7 @@
           {
             "const": "gemini-3-pro-image-preview",
             "description": "State-of-the-art image generation and editing model.",
-            "x-stainless-nominal": false
+            "x-stainless-nominal": "false`"
           },
           {
             "const": "gemini-3-pro-preview",
@@ -2913,13 +2912,12 @@
             "type": "array"
           },
           "start_index": {
-            "description": "Start of segment of the response that is attributed to this source.",
+            "description": "Start of segment of the response that is attributed to this source.\n\nIndex indicates the start of the segment, measured in bytes.",
             "format": "int32",
             "type": "integer"
           },
           "type": {
-            "const": "place_citation",
-            "type": "string"
+            "const": "place_citation"
           },
           "url": {
             "description": "URI reference of the place.",
@@ -3026,7 +3024,7 @@
             "type": "array"
           },
           "text": {
-            "description": "The text content.",
+            "description": "Required. The text content.",
             "type": "string"
           },
           "type": {
@@ -3174,15 +3172,13 @@
         "type": "object"
       },
       "Tool": {
+        "description": "A tool that can be used by the model.",
         "discriminator": {
           "propertyName": "type"
         },
         "oneOf": [
           {
             "$ref": "#/components/schemas/Function"
-          },
-          {
-            "$ref": "#/components/schemas/GoogleSearch"
           },
           {
             "$ref": "#/components/schemas/CodeExecution"
@@ -3195,6 +3191,9 @@
           },
           {
             "$ref": "#/components/schemas/McpServer"
+          },
+          {
+            "$ref": "#/components/schemas/GoogleSearch"
           },
           {
             "$ref": "#/components/schemas/FileSearch"
@@ -3263,16 +3262,16 @@
         ],
         "properties": {
           "content": {
-            "description": "The content of the turn.",
             "oneOf": [
-              {
-                "type": "string"
-              },
               {
                 "items": {
                   "$ref": "#/components/schemas/Content"
                 },
+                "title": "ContentList",
                 "type": "array"
+              },
+              {
+                "type": "string"
               }
             ]
           },
@@ -3292,7 +3291,7 @@
             "type": "integer"
           },
           "start_index": {
-            "description": "Start of segment of the response that is attributed to this source.",
+            "description": "Start of segment of the response that is attributed to this source.\n\nIndex indicates the start of the segment, measured in bytes.",
             "format": "int32",
             "type": "integer"
           },
@@ -3301,8 +3300,7 @@
             "type": "string"
           },
           "type": {
-            "const": "url_citation",
-            "type": "string"
+            "const": "url_citation"
           },
           "url": {
             "description": "The URL.",
@@ -3318,8 +3316,7 @@
         "description": "A tool that can be used by the model to fetch URL context.",
         "properties": {
           "type": {
-            "const": "url_context",
-            "type": "string"
+            "const": "url_context"
           }
         },
         "required": [
@@ -3378,10 +3375,10 @@
         "properties": {
           "arguments": {
             "$ref": "#/components/schemas/UrlContextCallArguments",
-            "description": "The arguments to pass to the URL context."
+            "description": "Required. The arguments to pass to the URL context."
           },
           "id": {
-            "description": "A unique ID for this specific tool call.",
+            "description": "Required. A unique ID for this specific tool call.",
             "type": "string"
           },
           "signature": {
@@ -3394,9 +3391,9 @@
           }
         },
         "required": [
-          "id",
           "type",
-          "arguments"
+          "arguments",
+          "id"
         ],
         "type": "object"
       },
@@ -3406,7 +3403,7 @@
             "$ref": "#/components/schemas/UrlContextCallArguments"
           },
           "id": {
-            "description": "A unique ID for this specific tool call.",
+            "description": "Required. A unique ID for this specific tool call.",
             "type": "string"
           },
           "signature": {
@@ -3419,9 +3416,9 @@
           }
         },
         "required": [
-          "id",
           "type",
-          "arguments"
+          "arguments",
+          "id"
         ],
         "type": "object"
       },
@@ -3472,7 +3469,7 @@
         ],
         "properties": {
           "call_id": {
-            "description": "ID to match the ID from the url context call block.",
+            "description": "Required. ID to match the ID from the function call block.",
             "type": "string"
           },
           "is_error": {
@@ -3480,7 +3477,7 @@
             "type": "boolean"
           },
           "result": {
-            "description": "The results of the URL context.",
+            "description": "Required. The results of the URL context.",
             "items": {
               "$ref": "#/components/schemas/UrlContextResult"
             },
@@ -3497,15 +3494,15 @@
         },
         "required": [
           "type",
-          "call_id",
-          "result"
+          "result",
+          "call_id"
         ],
         "type": "object"
       },
       "UrlContextResultDelta": {
         "properties": {
           "call_id": {
-            "description": "ID to match the ID from the function call block.",
+            "description": "Required. ID to match the ID from the function call block.",
             "type": "string"
           },
           "is_error": {
@@ -3528,8 +3525,8 @@
         },
         "required": [
           "type",
-          "call_id",
-          "result"
+          "result",
+          "call_id"
         ],
         "type": "object"
       },
@@ -4334,7 +4331,8 @@
           }
         },
         "security": [],
-        "summary": "Creating an interaction"
+        "summary": "Creating an interaction",
+        "x-internal": true
       }
     },
     "/{api_version}/interactions?model": {
@@ -4386,7 +4384,8 @@
           }
         },
         "security": [],
-        "summary": "Creating an interaction"
+        "summary": "Creating an interaction",
+        "x-internal": true
       }
     }
   },

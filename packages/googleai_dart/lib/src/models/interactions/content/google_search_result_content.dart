@@ -6,10 +6,10 @@ class GoogleSearchResultContent extends InteractionContent {
   String get type => 'google_search_result';
 
   /// ID to match the ID from the Google Search call block.
-  final String? callId;
+  final String callId;
 
   /// The results of the Google Search.
-  final List<GoogleSearchResult>? result;
+  final List<GoogleSearchResult> result;
 
   /// Whether the Google Search resulted in an error.
   final bool? isError;
@@ -19,19 +19,26 @@ class GoogleSearchResultContent extends InteractionContent {
 
   /// Creates a [GoogleSearchResultContent] instance.
   const GoogleSearchResultContent({
-    this.callId,
-    this.result,
+    required this.callId,
+    required this.result,
     this.isError,
     this.signature,
   });
 
   /// Creates a [GoogleSearchResultContent] from JSON.
+  ///
+  /// Required fields default to empty values when absent
+  /// (e.g. content.start events).
   factory GoogleSearchResultContent.fromJson(Map<String, dynamic> json) =>
       GoogleSearchResultContent(
-        callId: json['call_id'] as String?,
-        result: (json['result'] as List<dynamic>?)
-            ?.map((e) => GoogleSearchResult.fromJson(e as Map<String, dynamic>))
-            .toList(),
+        callId: json['call_id'] as String? ?? '',
+        result:
+            (json['result'] as List<dynamic>?)
+                ?.map(
+                  (e) => GoogleSearchResult.fromJson(e as Map<String, dynamic>),
+                )
+                .toList() ??
+            const [],
         isError: json['is_error'] as bool?,
         signature: json['signature'] as String?,
       );
@@ -39,8 +46,8 @@ class GoogleSearchResultContent extends InteractionContent {
   @override
   Map<String, dynamic> toJson() => {
     'type': type,
-    if (callId != null) 'call_id': callId,
-    if (result != null) 'result': result!.map((e) => e.toJson()).toList(),
+    'call_id': callId,
+    'result': result.map((e) => e.toJson()).toList(),
     if (isError != null) 'is_error': isError,
     if (signature != null) 'signature': signature,
   };
@@ -53,10 +60,10 @@ class GoogleSearchResultContent extends InteractionContent {
     Object? signature = unsetCopyWithValue,
   }) {
     return GoogleSearchResultContent(
-      callId: callId == unsetCopyWithValue ? this.callId : callId as String?,
+      callId: callId == unsetCopyWithValue ? this.callId : callId! as String,
       result: result == unsetCopyWithValue
           ? this.result
-          : result as List<GoogleSearchResult>?,
+          : result! as List<GoogleSearchResult>,
       isError: isError == unsetCopyWithValue ? this.isError : isError as bool?,
       signature: signature == unsetCopyWithValue
           ? this.signature

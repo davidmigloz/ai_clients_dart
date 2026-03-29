@@ -6,7 +6,7 @@ class McpServerToolResultContent extends InteractionContent {
   String get type => 'mcp_server_tool_result';
 
   /// ID to match the ID from the MCP server tool call block.
-  final String? callId;
+  final String callId;
 
   /// Name of the tool which is called for this specific tool call.
   final String? name;
@@ -15,7 +15,7 @@ class McpServerToolResultContent extends InteractionContent {
   final String? serverName;
 
   /// The result of the tool call.
-  final ToolResult? result;
+  final ToolResult result;
 
   /// Whether the tool call resulted in an error.
   final bool? isError;
@@ -25,23 +25,26 @@ class McpServerToolResultContent extends InteractionContent {
 
   /// Creates a [McpServerToolResultContent] instance.
   const McpServerToolResultContent({
-    this.callId,
+    required this.callId,
+    required this.result,
     this.name,
     this.serverName,
-    this.result,
     this.isError,
     this.signature,
   });
 
   /// Creates a [McpServerToolResultContent] from JSON.
+  ///
+  /// Required fields default to empty values when absent
+  /// (e.g. content.start events).
   factory McpServerToolResultContent.fromJson(Map<String, dynamic> json) =>
       McpServerToolResultContent(
-        callId: json['call_id'] as String?,
+        callId: json['call_id'] as String? ?? '',
         name: json['name'] as String?,
         serverName: json['server_name'] as String?,
         result: json['result'] != null
             ? ToolResult.fromJson(json['result'] as Object)
-            : null,
+            : const ToolResultText(''),
         isError: json['is_error'] as bool?,
         signature: json['signature'] as String?,
       );
@@ -49,10 +52,10 @@ class McpServerToolResultContent extends InteractionContent {
   @override
   Map<String, dynamic> toJson() => {
     'type': type,
-    if (callId != null) 'call_id': callId,
+    'call_id': callId,
     if (name != null) 'name': name,
     if (serverName != null) 'server_name': serverName,
-    if (result != null) 'result': result!.toJson(),
+    'result': result.toJson(),
     if (isError != null) 'is_error': isError,
     if (signature != null) 'signature': signature,
   };
@@ -67,14 +70,14 @@ class McpServerToolResultContent extends InteractionContent {
     Object? signature = unsetCopyWithValue,
   }) {
     return McpServerToolResultContent(
-      callId: callId == unsetCopyWithValue ? this.callId : callId as String?,
+      callId: callId == unsetCopyWithValue ? this.callId : callId! as String,
       name: name == unsetCopyWithValue ? this.name : name as String?,
       serverName: serverName == unsetCopyWithValue
           ? this.serverName
           : serverName as String?,
       result: result == unsetCopyWithValue
           ? this.result
-          : result as ToolResult?,
+          : result! as ToolResult,
       isError: isError == unsetCopyWithValue ? this.isError : isError as bool?,
       signature: signature == unsetCopyWithValue
           ? this.signature

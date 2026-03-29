@@ -6,10 +6,10 @@ class CodeExecutionResultContent extends InteractionContent {
   String get type => 'code_execution_result';
 
   /// ID to match the ID from the code execution call block.
-  final String? callId;
+  final String callId;
 
   /// The output of the code execution.
-  final String? result;
+  final String result;
 
   /// Whether the code execution resulted in an error.
   final bool? isError;
@@ -19,17 +19,20 @@ class CodeExecutionResultContent extends InteractionContent {
 
   /// Creates a [CodeExecutionResultContent] instance.
   const CodeExecutionResultContent({
-    this.callId,
-    this.result,
+    required this.callId,
+    required this.result,
     this.isError,
     this.signature,
   });
 
   /// Creates a [CodeExecutionResultContent] from JSON.
+  ///
+  /// Required fields default to empty values when absent
+  /// (e.g. content.start events).
   factory CodeExecutionResultContent.fromJson(Map<String, dynamic> json) =>
       CodeExecutionResultContent(
-        callId: json['call_id'] as String?,
-        result: json['result'] as String?,
+        callId: json['call_id'] as String? ?? '',
+        result: json['result'] as String? ?? '',
         isError: json['is_error'] as bool?,
         signature: json['signature'] as String?,
       );
@@ -37,8 +40,8 @@ class CodeExecutionResultContent extends InteractionContent {
   @override
   Map<String, dynamic> toJson() => {
     'type': type,
-    if (callId != null) 'call_id': callId,
-    if (result != null) 'result': result,
+    'call_id': callId,
+    'result': result,
     if (isError != null) 'is_error': isError,
     if (signature != null) 'signature': signature,
   };
@@ -51,8 +54,8 @@ class CodeExecutionResultContent extends InteractionContent {
     Object? signature = unsetCopyWithValue,
   }) {
     return CodeExecutionResultContent(
-      callId: callId == unsetCopyWithValue ? this.callId : callId as String?,
-      result: result == unsetCopyWithValue ? this.result : result as String?,
+      callId: callId == unsetCopyWithValue ? this.callId : callId! as String,
+      result: result == unsetCopyWithValue ? this.result : result! as String,
       isError: isError == unsetCopyWithValue ? this.isError : isError as bool?,
       signature: signature == unsetCopyWithValue
           ? this.signature

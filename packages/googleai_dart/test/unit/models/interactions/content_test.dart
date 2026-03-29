@@ -30,7 +30,7 @@ void main() {
         final json = {'type': 'text'};
         final content = InteractionContent.fromJson(json);
         expect(content, isA<TextContent>());
-        expect((content as TextContent).text, isNull);
+        expect((content as TextContent).text, '');
       });
 
       test('roundtrip serialization', () {
@@ -335,7 +335,7 @@ void main() {
           result: ToolResultObject({'temp': 72}),
         );
         expect(content.result, isA<ToolResultObject>());
-        expect((content.result! as ToolResultObject).value, {'temp': 72});
+        expect((content.result as ToolResultObject).value, {'temp': 72});
         expect(content.callId, 'call-123');
         expect(content.type, 'function_result');
       });
@@ -557,11 +557,11 @@ void main() {
         expect(maps.callId, 'call-maps-1');
         expect(maps.signature, 'sig456');
         expect(maps.result, hasLength(1));
-        expect(maps.result![0].places, hasLength(1));
-        expect(maps.result![0].places![0].name, 'Pizza Place');
-        expect(maps.result![0].places![0].placeId, 'ChIJ123');
-        expect(maps.result![0].places![0].reviewSnippets, hasLength(1));
-        expect(maps.result![0].widgetContextToken, 'token123');
+        expect(maps.result[0].places, hasLength(1));
+        expect(maps.result[0].places![0].name, 'Pizza Place');
+        expect(maps.result[0].places![0].placeId, 'ChIJ123');
+        expect(maps.result[0].places![0].reviewSnippets, hasLength(1));
+        expect(maps.result[0].widgetContextToken, 'token123');
       });
 
       test('roundtrip serialization', () {
@@ -578,7 +578,7 @@ void main() {
         final restored =
             InteractionContent.fromJson(json) as GoogleMapsResultContent;
         expect(restored.callId, original.callId);
-        expect(restored.result![0].places![0].name, 'Test Place');
+        expect(restored.result[0].places![0].name, 'Test Place');
       });
     });
 

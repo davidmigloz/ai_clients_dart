@@ -15,7 +15,7 @@ class VideoContent extends InteractionContent {
   final String? mimeType;
 
   /// The resolution of the media.
-  final String? resolution;
+  final InteractionMediaResolution? resolution;
 
   /// Creates a [VideoContent] instance.
   const VideoContent({this.data, this.uri, this.mimeType, this.resolution});
@@ -25,7 +25,9 @@ class VideoContent extends InteractionContent {
     data: json['data'] as String?,
     uri: json['uri'] as String?,
     mimeType: json['mime_type'] as String?,
-    resolution: json['resolution'] as String?,
+    resolution: json['resolution'] != null
+        ? interactionMediaResolutionFromString(json['resolution'] as String?)
+        : null,
   );
 
   @override
@@ -34,7 +36,8 @@ class VideoContent extends InteractionContent {
     if (data != null) 'data': data,
     if (uri != null) 'uri': uri,
     if (mimeType != null) 'mime_type': mimeType,
-    if (resolution != null) 'resolution': resolution,
+    if (resolution != null)
+      'resolution': interactionMediaResolutionToString(resolution!),
   };
 
   /// Creates a copy with replaced values.
@@ -52,7 +55,7 @@ class VideoContent extends InteractionContent {
           : mimeType as String?,
       resolution: resolution == unsetCopyWithValue
           ? this.resolution
-          : resolution as String?,
+          : resolution as InteractionMediaResolution?,
     );
   }
 }

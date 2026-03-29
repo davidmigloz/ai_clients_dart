@@ -6,17 +6,19 @@ class TextContent extends InteractionContent {
   String get type => 'text';
 
   /// The text content.
-  final String? text;
+  final String text;
 
   /// Citation information for model-generated content.
   final List<Annotation>? annotations;
 
   /// Creates a [TextContent] instance.
-  const TextContent({this.text, this.annotations});
+  const TextContent({required this.text, this.annotations});
 
   /// Creates a [TextContent] from JSON.
+  ///
+  /// The [text] field defaults to `''` when absent (e.g. content.start events).
   factory TextContent.fromJson(Map<String, dynamic> json) => TextContent(
-    text: json['text'] as String?,
+    text: json['text'] as String? ?? '',
     annotations: (json['annotations'] as List<dynamic>?)
         ?.map((e) => Annotation.fromJson(e as Map<String, dynamic>))
         .toList(),
@@ -25,7 +27,7 @@ class TextContent extends InteractionContent {
   @override
   Map<String, dynamic> toJson() => {
     'type': type,
-    if (text != null) 'text': text,
+    'text': text,
     if (annotations != null)
       'annotations': annotations!.map((e) => e.toJson()).toList(),
   };
@@ -36,7 +38,7 @@ class TextContent extends InteractionContent {
     Object? annotations = unsetCopyWithValue,
   }) {
     return TextContent(
-      text: text == unsetCopyWithValue ? this.text : text as String?,
+      text: text == unsetCopyWithValue ? this.text : text! as String,
       annotations: annotations == unsetCopyWithValue
           ? this.annotations
           : annotations as List<Annotation>?,

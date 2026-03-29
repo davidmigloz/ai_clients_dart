@@ -6,7 +6,7 @@ class GoogleSearchCallContent extends InteractionContent {
   String get type => 'google_search_call';
 
   /// A unique ID for this specific tool call.
-  final String? id;
+  final String id;
 
   /// Web search queries for the following-up web search.
   final List<String>? queries;
@@ -19,17 +19,19 @@ class GoogleSearchCallContent extends InteractionContent {
 
   /// Creates a [GoogleSearchCallContent] instance.
   const GoogleSearchCallContent({
-    this.id,
+    required this.id,
     this.queries,
     this.searchType,
     this.signature,
   });
 
   /// Creates a [GoogleSearchCallContent] from JSON.
+  ///
+  /// The [id] field defaults to `''` when absent (e.g. content.start events).
   factory GoogleSearchCallContent.fromJson(Map<String, dynamic> json) {
     final arguments = json['arguments'] as Map<String, dynamic>?;
     return GoogleSearchCallContent(
-      id: json['id'] as String?,
+      id: json['id'] as String? ?? '',
       queries: (arguments?['queries'] as List<dynamic>?)?.cast<String>(),
       searchType: json['search_type'] as String?,
       signature: json['signature'] as String?,
@@ -39,7 +41,7 @@ class GoogleSearchCallContent extends InteractionContent {
   @override
   Map<String, dynamic> toJson() => {
     'type': type,
-    if (id != null) 'id': id,
+    'id': id,
     if (queries != null) 'arguments': {'queries': queries},
     if (searchType != null) 'search_type': searchType,
     if (signature != null) 'signature': signature,
@@ -53,7 +55,7 @@ class GoogleSearchCallContent extends InteractionContent {
     Object? signature = unsetCopyWithValue,
   }) {
     return GoogleSearchCallContent(
-      id: id == unsetCopyWithValue ? this.id : id as String?,
+      id: id == unsetCopyWithValue ? this.id : id! as String,
       queries: queries == unsetCopyWithValue
           ? this.queries
           : queries as List<String>?,

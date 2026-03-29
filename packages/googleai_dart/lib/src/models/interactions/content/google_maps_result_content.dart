@@ -6,32 +6,43 @@ class GoogleMapsResultContent extends InteractionContent {
   String get type => 'google_maps_result';
 
   /// ID to match the ID from the Google Maps call block.
-  final String? callId;
+  final String callId;
 
   /// The results of the Google Maps search.
-  final List<GoogleMapsResult>? result;
+  final List<GoogleMapsResult> result;
 
   /// The signature of the Google Maps result.
   final String? signature;
 
   /// Creates a [GoogleMapsResultContent] instance.
-  const GoogleMapsResultContent({this.callId, this.result, this.signature});
+  const GoogleMapsResultContent({
+    required this.callId,
+    required this.result,
+    this.signature,
+  });
 
   /// Creates a [GoogleMapsResultContent] from JSON.
+  ///
+  /// Required fields default to empty values when absent
+  /// (e.g. content.start events).
   factory GoogleMapsResultContent.fromJson(Map<String, dynamic> json) =>
       GoogleMapsResultContent(
-        callId: json['call_id'] as String?,
-        result: (json['result'] as List<dynamic>?)
-            ?.map((e) => GoogleMapsResult.fromJson(e as Map<String, dynamic>))
-            .toList(),
+        callId: json['call_id'] as String? ?? '',
+        result:
+            (json['result'] as List<dynamic>?)
+                ?.map(
+                  (e) => GoogleMapsResult.fromJson(e as Map<String, dynamic>),
+                )
+                .toList() ??
+            const [],
         signature: json['signature'] as String?,
       );
 
   @override
   Map<String, dynamic> toJson() => {
     'type': type,
-    if (callId != null) 'call_id': callId,
-    if (result != null) 'result': result!.map((e) => e.toJson()).toList(),
+    'call_id': callId,
+    'result': result.map((e) => e.toJson()).toList(),
     if (signature != null) 'signature': signature,
   };
 
@@ -42,10 +53,10 @@ class GoogleMapsResultContent extends InteractionContent {
     Object? signature = unsetCopyWithValue,
   }) {
     return GoogleMapsResultContent(
-      callId: callId == unsetCopyWithValue ? this.callId : callId as String?,
+      callId: callId == unsetCopyWithValue ? this.callId : callId! as String,
       result: result == unsetCopyWithValue
           ? this.result
-          : result as List<GoogleMapsResult>?,
+          : result! as List<GoogleMapsResult>,
       signature: signature == unsetCopyWithValue
           ? this.signature
           : signature as String?,

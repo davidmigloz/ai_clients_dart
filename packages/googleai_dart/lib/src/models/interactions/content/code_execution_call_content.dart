@@ -6,7 +6,7 @@ class CodeExecutionCallContent extends InteractionContent {
   String get type => 'code_execution_call';
 
   /// A unique ID for this specific tool call.
-  final String? id;
+  final String id;
 
   /// The programming language of the code.
   final String? language;
@@ -19,17 +19,19 @@ class CodeExecutionCallContent extends InteractionContent {
 
   /// Creates a [CodeExecutionCallContent] instance.
   const CodeExecutionCallContent({
-    this.id,
+    required this.id,
     this.language,
     this.code,
     this.signature,
   });
 
   /// Creates a [CodeExecutionCallContent] from JSON.
+  ///
+  /// The [id] field defaults to `''` when absent (e.g. content.start events).
   factory CodeExecutionCallContent.fromJson(Map<String, dynamic> json) {
     final arguments = json['arguments'] as Map<String, dynamic>?;
     return CodeExecutionCallContent(
-      id: json['id'] as String?,
+      id: json['id'] as String? ?? '',
       language: arguments?['language'] as String?,
       code: arguments?['code'] as String?,
       signature: json['signature'] as String?,
@@ -39,7 +41,7 @@ class CodeExecutionCallContent extends InteractionContent {
   @override
   Map<String, dynamic> toJson() => {
     'type': type,
-    if (id != null) 'id': id,
+    'id': id,
     if (language != null || code != null)
       'arguments': {
         if (language != null) 'language': language,
@@ -56,7 +58,7 @@ class CodeExecutionCallContent extends InteractionContent {
     Object? signature = unsetCopyWithValue,
   }) {
     return CodeExecutionCallContent(
-      id: id == unsetCopyWithValue ? this.id : id as String?,
+      id: id == unsetCopyWithValue ? this.id : id! as String,
       language: language == unsetCopyWithValue
           ? this.language
           : language as String?,

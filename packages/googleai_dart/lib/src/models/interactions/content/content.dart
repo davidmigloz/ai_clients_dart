@@ -1,4 +1,5 @@
 import '../../copy_with_sentinel.dart';
+import '../media_resolution.dart';
 import '../tool_result.dart';
 
 part 'annotation.dart';
