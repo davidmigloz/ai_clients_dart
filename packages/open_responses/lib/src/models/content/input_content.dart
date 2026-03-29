@@ -178,8 +178,9 @@ class InputFileContent extends InputContent {
   /// that support file uploads.
   final String? fileId;
 
-  /// Base64-encoded file content.
+  /// The file data as a data URL (e.g., `data:application/pdf;base64,<data>`).
   ///
+  /// Use [InputFileContent.data] to construct this from a base64-encoded string.
   /// Maximum length: 33554432 characters.
   final String? fileData;
 
@@ -207,10 +208,18 @@ class InputFileContent extends InputContent {
       fileData = null;
 
   /// Creates an [InputFileContent] from base64-encoded data.
-  const InputFileContent.data(String data, {this.filename})
-    : fileUrl = null,
-      fileId = null,
-      fileData = data;
+  ///
+  /// The [data] should be a base64-encoded string representing the file bytes.
+  /// The [mediaType] specifies the MIME type (e.g., `'application/pdf'`).
+  /// These are combined into a data URL (`data:<mediaType>;base64,<data>`) as
+  /// required by the API.
+  const InputFileContent.data(
+    String data, {
+    required String mediaType,
+    this.filename,
+  }) : fileUrl = null,
+       fileId = null,
+       fileData = 'data:$mediaType;base64,$data';
 
   /// Creates an [InputFileContent] from JSON.
   factory InputFileContent.fromJson(Map<String, dynamic> json) {
