@@ -549,8 +549,9 @@ void main() {
         expect(content.result[1].customMetadata, isNull);
 
         // Roundtrip
-        final restored = InteractionContent.fromJson(content.toJson())
-            as FileSearchResultContent;
+        final restored =
+            InteractionContent.fromJson(content.toJson())
+                as FileSearchResultContent;
         expect(restored.result[0].customMetadata, hasLength(2));
         expect(restored.result[0].customMetadata![0]['key'], 'author');
         expect(restored.result[1].customMetadata, isNull);
