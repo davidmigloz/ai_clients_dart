@@ -23,6 +23,22 @@ sealed class InputContent {
   static InputContent fileUrl(String url, {String? filename}) =>
       InputFileContent.url(url, filename: filename);
 
+  /// Creates a file input content from a file ID.
+  static InputContent fileId(String id, {String? filename}) =>
+      InputFileContent.file(id, filename: filename);
+
+  /// Creates a file input content from base64-encoded data.
+  ///
+  /// The [data] should be a base64-encoded string representing the file bytes.
+  /// The [mediaType] specifies the MIME type (e.g., `'application/pdf'`).
+  /// These are combined into a data URL (`data:<mediaType>;base64,<data>`) as
+  /// required by the API.
+  static InputContent fileData(
+    String data, {
+    required String mediaType,
+    String? filename,
+  }) => InputFileContent.data(data, mediaType: mediaType, filename: filename);
+
   /// Creates a video input content from a URL.
   static InputContent videoUrl(String videoUrl) =>
       InputVideoContent(videoUrl: videoUrl);
