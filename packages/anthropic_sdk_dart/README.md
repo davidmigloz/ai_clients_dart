@@ -398,6 +398,102 @@ Future<void> main() async {
 
 </details>
 
+### How do I list available models?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.models.list()` and `client.models.retrieve(...)` to discover available Claude models and inspect their metadata.
+
+```dart
+import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
+
+Future<void> main() async {
+  final client = AnthropicClient.fromEnvironment();
+
+  try {
+    final response = await client.models.list();
+
+    for (final model in response.data) {
+      print('${model.id} — ${model.displayName}');
+    }
+  } finally {
+    client.close();
+  }
+}
+```
+
+→ [Full example](example/models_example.dart)
+
+</details>
+
+### How do I manage files?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.files` to upload, list, download, and delete files. This beta API lets you attach stored files to messages without re-uploading each time.
+
+```dart
+import 'dart:typed_data';
+
+import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
+
+Future<void> main() async {
+  final client = AnthropicClient.fromEnvironment();
+
+  try {
+    final uploaded = await client.files.uploadBytes(
+      bytes: Uint8List.fromList([0x48, 0x65, 0x6C, 0x6C, 0x6F]),
+      fileName: 'hello.txt',
+      mimeType: 'text/plain',
+    );
+
+    print('Uploaded: ${uploaded.id}');
+
+    final files = await client.files.list(limit: 10);
+    print('Total files: ${files.data.length}');
+
+    await client.files.deleteFile(fileId: uploaded.id);
+  } finally {
+    client.close();
+  }
+}
+```
+
+→ [Full example](example/files_example.dart)
+
+</details>
+
+### How do I manage skills?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.skills` to create, list, version, and delete reusable skills. This beta API lets you package prompts and tools into versioned units that Claude can invoke.
+
+```dart
+import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
+
+Future<void> main() async {
+  final client = AnthropicClient.fromEnvironment();
+
+  try {
+    final response = await client.skills.list(limit: 10);
+
+    for (final skill in response.data) {
+      print('${skill.id}: ${skill.displayTitle ?? "untitled"}');
+    }
+  } finally {
+    client.close();
+  }
+}
+```
+
+→ [Full example](example/skills_example.dart)
+
+</details>
+
 ## Error Handling
 
 <details>
