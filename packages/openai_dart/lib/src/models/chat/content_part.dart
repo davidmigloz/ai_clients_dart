@@ -4,8 +4,9 @@ import '../common/copy_with_sentinel.dart';
 
 /// A part of a multimodal message content.
 ///
-/// Content parts allow user messages to contain multiple types of content,
-/// including text, images, audio, and files.
+/// Content parts allow messages to contain multiple types of content.
+/// User messages support text, images, audio, and files.
+/// Assistant messages support text and refusal.
 ///
 /// ## Example
 ///

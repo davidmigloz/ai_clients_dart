@@ -1001,7 +1001,7 @@ void main() {
     });
 
     test('creates file content from base64 data', () {
-      final content = InputContent.fileData(
+      const content = InputContent.fileData(
         'base64data==',
         mediaType: 'application/pdf',
       );

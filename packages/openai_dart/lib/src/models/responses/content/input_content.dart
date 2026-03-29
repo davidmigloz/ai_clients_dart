@@ -51,7 +51,7 @@ sealed class InputContent {
   /// The [mediaType] specifies the MIME type (e.g., `'application/pdf'`).
   /// These are combined into a data URL (`data:<mediaType>;base64,<data>`) as
   /// required by the API.
-  factory InputContent.fileData(
+  const factory InputContent.fileData(
     String data, {
     required String mediaType,
     String? filename,
