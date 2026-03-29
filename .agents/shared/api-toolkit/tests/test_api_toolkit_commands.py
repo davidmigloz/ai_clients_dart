@@ -3102,6 +3102,43 @@ class ApiToolkitCommandTests(unittest.TestCase):
             self.assertTrue(any(issue["level"] == "warning" and "documentation.json excludes" in issue["message"] for issue in result["issues"]))
             self.assertEqual(payload["summary"]["warning_checks"], ["docs"])
 
+    def test_verify_docs_resource_in_readme_display_name_fallback(self) -> None:
+        """Resource mentioned by display name in prose (not client.X) should not be flagged as missing."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample API", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(root / "tmp" / "sample"),
+                },
+            )
+            (package_root / "specs" / "openapi.json").write_text(
+                json.dumps({"openapi": "3.1.0", "info": {"title": "Sample", "version": "1"}, "paths": {}, "components": {"schemas": {}}})
+            )
+            # Create a resource discovered from lib/src/resources/
+            (package_root / "lib" / "src" / "resources" / "cached_contents_resource.dart").write_text("class CachedContentsResource {}\n")
+            # README mentions the resource via display name (space-separated) but NOT via client.cachedContents
+            self._write_canonical_readme(package_root)
+            readme = (package_root / "README.md").read_text()
+            readme += "\n## API Coverage\n\n| API | Status |\n|-----|--------|\n| Cached contents | ✅ Full |\n\n"
+            (package_root / "README.md").write_text(readme)
+
+            exit_code, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="docs", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+
+            issues = payload["results"]["docs"]["issues"]
+            # The display-name fallback should match "cached contents" in the table.
+            self.assertFalse(
+                any("cached_contents" in issue.get("name", "") and "missing from README" in issue.get("message", "") for issue in issues),
+                f"Expected no 'missing from README' error for cached_contents, got: {issues}",
+            )
+
     def test_verify_changed_scope_checks_parent_for_changed_skipped_variant(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
