@@ -403,7 +403,7 @@ Future<void> main() async {
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.models.list()` and `client.models.retrieve(...)` to discover available Claude models and inspect their metadata.
+Use `client.models.list()` to discover available Claude models and inspect their metadata.
 
 ```dart
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
@@ -432,7 +432,7 @@ Future<void> main() async {
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.files` to upload, list, download, and delete files. This beta API lets you attach stored files to messages without re-uploading each time.
+Use `client.files` to upload, list, and delete files. This beta API lets you attach stored files to messages without re-uploading each time.
 
 ```dart
 import 'dart:typed_data';
@@ -470,7 +470,7 @@ Future<void> main() async {
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.skills` to create, list, version, and delete reusable skills. This beta API lets you package prompts and tools into versioned units that Claude can invoke.
+Use `client.skills` to list reusable skills. The full API also lets you create, version, and delete skills, packaging prompts and tools into versioned units that Claude can invoke.
 
 ```dart
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';

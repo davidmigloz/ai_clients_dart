@@ -2413,7 +2413,7 @@ def _verify_readme(config: ToolkitConfig) -> tuple[int, dict[str, Any]]:
             _type_issue(
                 "warning",
                 "llms.txt",
-                "README should place the ./llms.txt callout immediately below the H1 before the opening paragraph, notes, or Table of Contents",
+                "README should include a > [!TIP] callout linking to ./llms.txt in the top matter, before the first H2 section",
                 file="README.md",
             )
         )
