@@ -47,9 +47,9 @@ sealed class ToolChoice {
       };
     }
     if (json is Map<String, dynamic>) {
-      final type = json['type'] as String;
+      final type = json['type'] as String?;
       return switch (type) {
-        'function' => ToolChoiceFunction.fromJson(json),
+        'function' || null => ToolChoiceFunction.fromJson(json),
         'allowed_tools' => ToolChoiceAllowedTools.fromJson(json),
         'custom' => ToolChoiceCustom.fromJson(json),
         _ => throw FormatException('Unknown tool choice type: $type'),

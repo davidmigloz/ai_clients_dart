@@ -167,6 +167,17 @@ void main() {
       expect((choice as ToolChoiceFunction).name, 'my_func');
     });
 
+    test('fromJson parses function choice without type field', () {
+      // Legacy format: maps without 'type' fall back to ToolChoiceFunction
+      final json = {
+        'function': {'name': 'legacy_func'},
+      };
+
+      final choice = ToolChoice.fromJson(json);
+      expect(choice, isA<ToolChoiceFunction>());
+      expect((choice as ToolChoiceFunction).name, 'legacy_func');
+    });
+
     test('allowedTools factory creates correct choice', () {
       final choice = ToolChoice.allowedTools(
         mode: 'auto',
