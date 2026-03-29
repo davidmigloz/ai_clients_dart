@@ -1376,6 +1376,67 @@ def _verify_sealed_parent(config: ToolkitConfig, entry: ManifestEntry, variants:
     return issues
 
 
+def _verify_sealed_parent_variant_coverage(
+    entry: ManifestEntry,
+    spec_payload: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Check that all spec union members referencing this sealed parent's variants are covered in the mapping."""
+    mapping = (entry.discriminator or {}).get("mapping", {}) if entry.discriminator else {}
+    if not mapping:
+        return []
+
+    # Collect all schema names referenced in the manifest mapping.
+    # The mapping can be in raw OpenAPI format ({value: $ref}) or normalized ({schema: value}).
+    mapped_schemas: set[str] = set()
+    for key, value in mapping.items():
+        if isinstance(value, str):
+            if value.startswith("#/"):
+                mapped_schemas.add(_resolve_ref(value))
+            else:
+                mapped_schemas.add(key)
+
+    if not mapped_schemas:
+        return []
+
+    all_schemas = spec_payload.get("components", {}).get("schemas", {})
+    issues: list[dict[str, Any]] = []
+
+    # Scan all spec schemas for anyOf/oneOf unions that reference any of the mapped schemas.
+    for schema_name, schema_def in all_schemas.items():
+        for union_key in ("oneOf", "anyOf"):
+            union_items = schema_def.get(union_key, [])
+            if not union_items:
+                continue
+
+            # Extract all $ref members from this union.
+            union_members: set[str] = set()
+            for item in union_items:
+                if "$ref" in item:
+                    union_members.add(_resolve_ref(item["$ref"]))
+
+            if not union_members:
+                continue
+
+            # Check if this union references any of the sealed parent's mapped schemas.
+            overlap = union_members & mapped_schemas
+            if not overlap:
+                continue
+
+            # This union is related to our sealed parent — check for missing members.
+            missing = union_members - mapped_schemas
+            for member in sorted(missing):
+                issues.append(
+                    _type_issue(
+                        "warning",
+                        entry.key,
+                        f"Spec union '{schema_name}' has member '{member}' "
+                        f"not in '{entry.key}' discriminator mapping",
+                    )
+                )
+
+    return issues
+
+
 def _sealed_parent_reference_map(entries_for_spec: list[ManifestEntry]) -> dict[str, ManifestEntry]:
     references: dict[str, ManifestEntry] = {}
     for entry in entries_for_spec:
@@ -1513,6 +1574,7 @@ def _verify_implementation(
 
     for parent in parents:
         issues.extend(_verify_sealed_parent(config, parent, by_parent.get(parent.key, [])))
+        issues.extend(_verify_sealed_parent_variant_coverage(parent, spec_payload))
 
     coverage_gaps = []
     if config.manifest.surface == "openapi" and scope in {"changed", "all"}:

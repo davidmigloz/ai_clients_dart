@@ -15,9 +15,10 @@ if str(ROOT) not in os.sys.path:
 
 import api_toolkit.config as toolkit_config
 import api_toolkit.operations as toolkit_operations
-from api_toolkit.config import ToolkitError, load_toolkit_config
+from api_toolkit.config import ManifestEntry, ToolkitError, load_toolkit_config
 from api_toolkit.operations import (
     _verify_sealed_parent,
+    _verify_sealed_parent_variant_coverage,
     command_create,
     command_describe,
     command_fetch,
@@ -4280,6 +4281,161 @@ class ApiToolkitCommandTests(unittest.TestCase):
                     for issue in issues
                 )
             )
+
+    def test_verify_sealed_parent_variant_coverage_complete(self) -> None:
+        """When all spec union members are in the mapping, no warnings."""
+        entry = ManifestEntry(
+            key="ContentPart",
+            spec="main",
+            kind="sealed_parent",
+            dart_class="ContentPart",
+            file="lib/src/models/chat/content_part.dart",
+            schema=None,
+            discriminator={
+                "field": "type",
+                "mapping": {
+                    "TextPart": "text",
+                    "ImagePart": "image_url",
+                },
+            },
+        )
+        spec_payload = {
+            "components": {
+                "schemas": {
+                    "UserContentPart": {
+                        "anyOf": [
+                            {"$ref": "#/components/schemas/TextPart"},
+                            {"$ref": "#/components/schemas/ImagePart"},
+                        ],
+                    },
+                    "TextPart": {"type": "object", "properties": {}},
+                    "ImagePart": {"type": "object", "properties": {}},
+                }
+            }
+        }
+        issues = _verify_sealed_parent_variant_coverage(entry, spec_payload)
+        self.assertEqual(issues, [])
+
+    def test_verify_sealed_parent_variant_coverage_missing_member(self) -> None:
+        """When a spec union member is missing from the mapping, emit a warning."""
+        entry = ManifestEntry(
+            key="ContentPart",
+            spec="main",
+            kind="sealed_parent",
+            dart_class="ContentPart",
+            file="lib/src/models/chat/content_part.dart",
+            schema=None,
+            discriminator={
+                "field": "type",
+                "mapping": {
+                    "TextPart": "text",
+                    "ImagePart": "image_url",
+                },
+            },
+        )
+        spec_payload = {
+            "components": {
+                "schemas": {
+                    "UserContentPart": {
+                        "anyOf": [
+                            {"$ref": "#/components/schemas/TextPart"},
+                            {"$ref": "#/components/schemas/ImagePart"},
+                            {"$ref": "#/components/schemas/FilePart"},
+                        ],
+                    },
+                    "TextPart": {"type": "object", "properties": {}},
+                    "ImagePart": {"type": "object", "properties": {}},
+                    "FilePart": {"type": "object", "properties": {}},
+                }
+            }
+        }
+        issues = _verify_sealed_parent_variant_coverage(entry, spec_payload)
+        self.assertEqual(len(issues), 1)
+        self.assertEqual(issues[0]["level"], "warning")
+        self.assertIn("FilePart", issues[0]["message"])
+        self.assertIn("UserContentPart", issues[0]["message"])
+        self.assertIn("ContentPart", issues[0]["name"])
+
+    def test_verify_sealed_parent_variant_coverage_multiple_unions(self) -> None:
+        """When multiple spec unions reference the mapping, all are checked."""
+        entry = ManifestEntry(
+            key="ContentPart",
+            spec="main",
+            kind="sealed_parent",
+            dart_class="ContentPart",
+            file="lib/src/models/chat/content_part.dart",
+            schema=None,
+            discriminator={
+                "field": "type",
+                "mapping": {
+                    "TextPart": "text",
+                },
+            },
+        )
+        spec_payload = {
+            "components": {
+                "schemas": {
+                    "UserContentPart": {
+                        "anyOf": [
+                            {"$ref": "#/components/schemas/TextPart"},
+                            {"$ref": "#/components/schemas/FilePart"},
+                        ],
+                    },
+                    "AssistantContentPart": {
+                        "anyOf": [
+                            {"$ref": "#/components/schemas/TextPart"},
+                            {"$ref": "#/components/schemas/RefusalPart"},
+                        ],
+                    },
+                    "TextPart": {"type": "object", "properties": {}},
+                    "FilePart": {"type": "object", "properties": {}},
+                    "RefusalPart": {"type": "object", "properties": {}},
+                }
+            }
+        }
+        issues = _verify_sealed_parent_variant_coverage(entry, spec_payload)
+        # Should warn about FilePart (from UserContentPart) and RefusalPart (from AssistantContentPart)
+        self.assertEqual(len(issues), 2)
+        messages = {issue["message"] for issue in issues}
+        self.assertTrue(any("FilePart" in m for m in messages))
+        self.assertTrue(any("RefusalPart" in m for m in messages))
+
+    def test_verify_sealed_parent_variant_coverage_raw_openapi_mapping(self) -> None:
+        """Works with raw OpenAPI-style mapping ({value: $ref})."""
+        entry = ManifestEntry(
+            key="ContentPart",
+            spec="main",
+            kind="sealed_parent",
+            dart_class="ContentPart",
+            file="lib/src/models/chat/content_part.dart",
+            schema=None,
+            discriminator={
+                "field": "type",
+                "mapping": {
+                    "text": "#/components/schemas/TextPart",
+                    "image_url": "#/components/schemas/ImagePart",
+                },
+            },
+        )
+        spec_payload = {
+            "components": {
+                "schemas": {
+                    "ContentPartUnion": {
+                        "anyOf": [
+                            {"$ref": "#/components/schemas/TextPart"},
+                            {"$ref": "#/components/schemas/ImagePart"},
+                            {"$ref": "#/components/schemas/AudioPart"},
+                        ],
+                    },
+                    "TextPart": {"type": "object", "properties": {}},
+                    "ImagePart": {"type": "object", "properties": {}},
+                    "AudioPart": {"type": "object", "properties": {}},
+                }
+            }
+        }
+        issues = _verify_sealed_parent_variant_coverage(entry, spec_payload)
+        self.assertEqual(len(issues), 1)
+        self.assertIn("AudioPart", issues[0]["message"])
 
     def test_verify_docs_respects_nested_short_key_exclusions(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
