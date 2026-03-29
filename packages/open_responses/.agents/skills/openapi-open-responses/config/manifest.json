@@ -417,6 +417,7 @@
         "field": "type",
         "mapping": {
           "SpecificFunctionParam": "function",
+          "SpecificToolChoiceParam": "function",
           "AllowedToolsParam": "allowed_tools"
         }
       }
@@ -631,6 +632,11 @@
         "field": "type",
         "mapping": {
           "MessageItem": "message",
+          "UserMessageItemParam": "message",
+          "SystemMessageItemParam": "message",
+          "DeveloperMessageItemParam": "message",
+          "AssistantMessageItemParam": "message",
+          "ReasoningItemParam": "reasoning",
           "FunctionCallItemParam": "function_call",
           "FunctionCallOutputItemParam": "function_call_output",
           "ItemReferenceParam": "item_reference"
@@ -718,6 +724,15 @@
       "file": "lib/src/models/items/item.dart",
       "schema": "ItemReferenceParam",
       "parent": "Item"
+    },
+    "ReasoningItemParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ReasoningInputItem",
+      "file": "lib/src/models/items/item.dart",
+      "schema": "ReasoningItemParam",
+      "parent": "Item",
+      "excluded_properties": ["content"]
     },
     "OutputItem": {
       "spec": "main",

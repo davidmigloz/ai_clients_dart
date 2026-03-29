@@ -1013,6 +1013,21 @@ class ReasoningInputItem extends Item {
     if (encryptedContent != null) 'encrypted_content': encryptedContent,
   };
 
+  /// Creates a copy with replaced values.
+  ReasoningInputItem copyWith({
+    Object? id = unsetCopyWithValue,
+    List<ReasoningSummaryContent>? summary,
+    Object? encryptedContent = unsetCopyWithValue,
+  }) {
+    return ReasoningInputItem(
+      id: id == unsetCopyWithValue ? this.id : id as String?,
+      summary: summary ?? this.summary,
+      encryptedContent: encryptedContent == unsetCopyWithValue
+          ? this.encryptedContent
+          : encryptedContent as String?,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
