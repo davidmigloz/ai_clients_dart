@@ -33,6 +33,9 @@ Use this checklist during code review and before finalizing changes. For detaile
 ### API Design
 - [ ] **Name conflicts**: Avoid class names that conflict with Flutter/`dart:ui` types (`Image`, `Text`, `Color`, `Container`). Prefer domain-prefixed names. When renaming, add `@Deprecated` typedef for the old name.
 - [ ] **Convenience factory defaults**: Factories that set default values (e.g., `role: 'user'`) must document those defaults and not be used in contexts where the defaults are invalid (e.g., system instructions where roles are forbidden).
+- [ ] **Factory parameter optionality**: Convenience factory required/optional parameters should match the spec's field requiredness — don't make optional spec fields required in factories.
+- [ ] **Resource parameter types**: Verify resource parameters use types from the correct API surface (e.g., Responses API resources should use Responses API types, not Chat Completions types).
+- [ ] **Const preservation**: When modifying constructors or factories, verify `const` is preserved if the target constructor supports it. String interpolation with constructor parameters is valid in `const` initializer lists.
 
 ### fromJson / toJson
 - [ ] **Discriminator validation**: Sealed subtype `fromJson` must validate the discriminator field matches the expected value.
@@ -63,6 +66,10 @@ Use this checklist during code review and before finalizing changes. For detaile
 - [ ] **SSE parser boundaries**: Blank lines must unconditionally reset ALL event state (type, data buffer, metadata). Multi-`data:` lines for the same event must be joined with `\n` per the SSE spec. `data: [DONE]` must flush any buffered event and terminate.
 - [ ] **SSE error events**: Synthetic error maps must include a `type` field for consumer dispatch. `withoutEventType()` must preserve `_rawData` for error event consumers.
 - [ ] **Error consistency**: Streaming and non-streaming paths must map the same HTTP status codes to the same exception types.
+
+### Cross-Cutting
+- [ ] **Cross-package patterns**: When fixing a bug, `grep -r '<pattern>' packages/` for the same issue in sibling packages that share API types.
+- [ ] **Integration tests for binary data**: Run integration tests for any new factory that handles base64/binary data before merging — spec descriptions can be misleading about expected formats.
 
 ### Cleanup
 - [ ] **Dead code**: Run `dart analyze --fatal-infos` after refactoring to catch unused imports, variables, and classes.

@@ -23,3 +23,4 @@ Read and apply the [core review checklist](../../../../../../.agents/shared/api-
 
 - [ ] **Base64 data URL format**: Convenience factories for binary data fields must construct data URLs (`data:<mediaType>;base64,<data>`), not pass raw base64. Verify with an integration test.
 - [ ] **Multi-model response shapes**: When OpenAI has multiple model families (e.g., `text-moderation-*` vs `omni-moderation-*`), fields only returned by newer models must be nullable.
+- [ ] **Sibling package check**: When modifying shared patterns (e.g., file content, tool choice), check `open_responses` for the same pattern.

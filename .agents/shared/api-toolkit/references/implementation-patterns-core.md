@@ -380,6 +380,14 @@ sealed class MessageContent {
 }
 ```
 
+Note: string interpolation with constructor parameters is valid in `const`
+initializer lists. This compiles:
+
+```dart
+const MyClass.data(String data, {required String mediaType})
+    : value = 'data:$mediaType;base64,$data'; // valid const
+```
+
 ### Convenience Factory Defaults
 
 Factories that set default values (e.g., `Content.text()` setting
