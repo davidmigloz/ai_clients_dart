@@ -42,7 +42,7 @@ class GoogleSearchCallContent extends InteractionContent {
   Map<String, dynamic> toJson() => {
     'type': type,
     'id': id,
-    if (queries != null) 'arguments': {'queries': queries},
+    'arguments': {if (queries != null) 'queries': queries},
     if (searchType != null) 'search_type': searchType,
     if (signature != null) 'signature': signature,
   };

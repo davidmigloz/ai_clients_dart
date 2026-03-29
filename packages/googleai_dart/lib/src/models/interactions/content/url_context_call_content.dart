@@ -33,7 +33,7 @@ class UrlContextCallContent extends InteractionContent {
   Map<String, dynamic> toJson() => {
     'type': type,
     'id': id,
-    if (urls != null) 'arguments': {'urls': urls},
+    'arguments': {if (urls != null) 'urls': urls},
     if (signature != null) 'signature': signature,
   };
 

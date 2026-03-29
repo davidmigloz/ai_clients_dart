@@ -33,7 +33,7 @@ class GoogleMapsCallContent extends InteractionContent {
   Map<String, dynamic> toJson() => {
     'type': type,
     'id': id,
-    if (queries != null) 'arguments': {'queries': queries},
+    'arguments': {if (queries != null) 'queries': queries},
     if (signature != null) 'signature': signature,
   };
 

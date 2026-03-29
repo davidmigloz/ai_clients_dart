@@ -42,11 +42,10 @@ class CodeExecutionCallContent extends InteractionContent {
   Map<String, dynamic> toJson() => {
     'type': type,
     'id': id,
-    if (language != null || code != null)
-      'arguments': {
-        if (language != null) 'language': language,
-        if (code != null) 'code': code,
-      },
+    'arguments': {
+      if (language != null) 'language': language,
+      if (code != null) 'code': code,
+    },
     if (signature != null) 'signature': signature,
   };
 

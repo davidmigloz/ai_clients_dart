@@ -45,6 +45,32 @@ void main() {
         expect(interaction.text, 'Hello World');
       });
 
+      test('returns null for only empty TextContent outputs', () {
+        const interaction = Interaction(
+          id: 'test-id',
+          status: InteractionStatus.completed,
+          outputs: [
+            TextContent(text: ''),
+            TextContent(text: ''),
+          ],
+        );
+        expect(interaction.text, isNull);
+      });
+
+      test('skips empty TextContent when concatenating', () {
+        const interaction = Interaction(
+          id: 'test-id',
+          status: InteractionStatus.completed,
+          outputs: [
+            TextContent(text: ''),
+            TextContent(text: 'Hello'),
+            TextContent(text: ''),
+            TextContent(text: ' World'),
+          ],
+        );
+        expect(interaction.text, 'Hello World');
+      });
+
       test('skips non-text outputs', () {
         const interaction = Interaction(
           id: 'test-id',
