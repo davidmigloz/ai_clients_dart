@@ -88,7 +88,7 @@ class InputTokensResource extends ResourceBase {
     Map<String, dynamic>? conversation,
     Map<String, dynamic>? reasoning,
     Map<String, dynamic>? text,
-    Object? toolChoice,
+    ResponseToolChoice? toolChoice,
     bool? parallelToolCalls,
     String? truncation,
     Future<void>? abortTrigger,
@@ -114,13 +114,7 @@ class InputTokensResource extends ResourceBase {
     if (text != null) body['text'] = text;
 
     if (toolChoice != null) {
-      if (toolChoice is String) {
-        body['tool_choice'] = toolChoice;
-      } else if (toolChoice is ResponseToolChoice) {
-        body['tool_choice'] = toolChoice.toJson();
-      } else {
-        body['tool_choice'] = toolChoice;
-      }
+      body['tool_choice'] = toolChoice.toJson();
     }
 
     if (parallelToolCalls != null) {
