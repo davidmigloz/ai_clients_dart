@@ -125,8 +125,12 @@ class RealtimeAPI extends RealtimeEventHandler {
       _logSubscription = logger.onRecord.listen((record) {
         if (record.level >= Level.INFO) {
           developer.log(
-            '[${record.loggerName}/${record.time.toIso8601String()}]: '
-            '${record.message} ${record.error ?? ""}',
+            record.message,
+            name: record.loggerName,
+            level: record.level.value,
+            error: record.error,
+            stackTrace: record.stackTrace,
+            time: record.time,
           );
         }
       });
