@@ -178,6 +178,27 @@ void main() {
         const content = ImageContent(uri: 'gs://bucket/image.png');
         expect(content.uri, 'gs://bucket/image.png');
       });
+
+      test('roundtrip MediaResolution enum', () {
+        const content = ImageContent(
+          data: 'img',
+          resolution: InteractionMediaResolution.ultraHigh,
+        );
+        final json = content.toJson();
+        expect(json['resolution'], 'ultra_high');
+
+        final restored = InteractionContent.fromJson(json) as ImageContent;
+        expect(restored.resolution, InteractionMediaResolution.ultraHigh);
+      });
+
+      test('all MediaResolution values roundtrip', () {
+        for (final value in InteractionMediaResolution.values) {
+          final content = ImageContent(data: 'x', resolution: value);
+          final restored =
+              InteractionContent.fromJson(content.toJson()) as ImageContent;
+          expect(restored.resolution, value);
+        }
+      });
     });
 
     group('AudioContent', () {
@@ -219,6 +240,18 @@ void main() {
         };
         final content = InteractionContent.fromJson(json);
         expect(content, isA<VideoContent>());
+      });
+
+      test('roundtrip MediaResolution enum', () {
+        const content = VideoContent(
+          data: 'vid',
+          resolution: InteractionMediaResolution.high,
+        );
+        final json = content.toJson();
+        expect(json['resolution'], 'high');
+
+        final restored = InteractionContent.fromJson(json) as VideoContent;
+        expect(restored.resolution, InteractionMediaResolution.high);
       });
     });
 
@@ -489,6 +522,38 @@ void main() {
         final content = InteractionContent.fromJson(json);
         expect(content, isA<FileSearchResultContent>());
         expect((content as FileSearchResultContent).callId, 'call_123');
+      });
+
+      test('roundtrip customMetadata on FileSearchResult', () {
+        final json = {
+          'type': 'file_search_result',
+          'call_id': 'call_456',
+          'result': [
+            {
+              'custom_metadata': [
+                {'key': 'author', 'value': 'Alice'},
+                {'key': 'date', 'value': '2025-01-01'},
+              ],
+            },
+            <String, dynamic>{},
+          ],
+          'signature': 'sig789',
+        };
+        final content =
+            InteractionContent.fromJson(json) as FileSearchResultContent;
+        expect(content.callId, 'call_456');
+        expect(content.result, hasLength(2));
+        expect(content.result[0].customMetadata, hasLength(2));
+        expect(content.result[0].customMetadata![0]['key'], 'author');
+        expect(content.result[0].customMetadata![1]['value'], '2025-01-01');
+        expect(content.result[1].customMetadata, isNull);
+
+        // Roundtrip
+        final restored = InteractionContent.fromJson(content.toJson())
+            as FileSearchResultContent;
+        expect(restored.result[0].customMetadata, hasLength(2));
+        expect(restored.result[0].customMetadata![0]['key'], 'author');
+        expect(restored.result[1].customMetadata, isNull);
       });
     });
 
