@@ -1,5 +1,3 @@
-// ignore_for_file: unnecessary_async
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -89,15 +87,9 @@ class RealtimeClient extends RealtimeEventHandler {
   void _addApiEventHandlers() {
     realtime
       ..on(RealtimeEventType.sessionCreated, (_) => sessionCreated = true)
-      ..on(
-        RealtimeEventType.all,
-        ((e) async => dispatch(RealtimeEventType.all, e)),
-      );
+      ..on(RealtimeEventType.all, ((e) => dispatch(RealtimeEventType.all, e)));
 
-    Future<EventHandlerResult> handler(
-      RealtimeEvent event, [
-      dynamic args,
-    ]) async {
+    FutureOr<EventHandlerResult> handler(RealtimeEvent event, [dynamic args]) {
       return conversation.processEvent(event, args);
     }
 
@@ -133,7 +125,7 @@ class RealtimeClient extends RealtimeEventHandler {
       })
       ..on(
         RealtimeEventType.inputAudioBufferSpeechStopped,
-        (event) async => handler(event, inputAudioBuffer),
+        (event) => handler(event, inputAudioBuffer),
       )
       ..on(RealtimeEventType.conversationItemCreated, (event) async {
         final result = await handlerWithDispatch(event);

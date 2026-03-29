@@ -1,8 +1,9 @@
-// ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
+import 'package:meta/meta.dart';
 
 import '../copy_with_sentinel.dart';
 
 /// Request to transfer ownership of a resource.
+@immutable
 class TransferOwnershipRequest {
   /// The email address of the new owner.
   final String emailAddress;

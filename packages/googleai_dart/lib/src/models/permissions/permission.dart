@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
+import 'package:meta/meta.dart';
 
 import '../copy_with_sentinel.dart';
 import 'grantee_type.dart';
@@ -11,6 +11,7 @@ import 'permission_role.dart';
 /// - Reader can use the resource for inference
 /// - Writer has reader's permissions and can additionally edit and share
 /// - Owner has writer's permissions and can additionally delete
+@immutable
 class Permission {
   /// The permission name. Format:
   /// - `tunedModels/{tuned_model}/permissions/{permission}`

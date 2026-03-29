@@ -52,30 +52,30 @@ void main() {
 
       test('parses grantee type correctly', () {
         expect(
-          Permission.fromJson({'granteeType': 'USER'}).granteeType,
+          Permission.fromJson(const {'granteeType': 'USER'}).granteeType,
           GranteeType.user,
         );
         expect(
-          Permission.fromJson({'granteeType': 'GROUP'}).granteeType,
+          Permission.fromJson(const {'granteeType': 'GROUP'}).granteeType,
           GranteeType.group,
         );
         expect(
-          Permission.fromJson({'granteeType': 'EVERYONE'}).granteeType,
+          Permission.fromJson(const {'granteeType': 'EVERYONE'}).granteeType,
           GranteeType.everyone,
         );
       });
 
       test('parses role correctly', () {
         expect(
-          Permission.fromJson({'role': 'OWNER'}).role,
+          Permission.fromJson(const {'role': 'OWNER'}).role,
           PermissionRole.owner,
         );
         expect(
-          Permission.fromJson({'role': 'WRITER'}).role,
+          Permission.fromJson(const {'role': 'WRITER'}).role,
           PermissionRole.writer,
         );
         expect(
-          Permission.fromJson({'role': 'READER'}).role,
+          Permission.fromJson(const {'role': 'READER'}).role,
           PermissionRole.reader,
         );
       });
