@@ -1432,7 +1432,7 @@ void main() {
         expect(a.hashCode, b.hashCode);
       });
 
-      test('toString omits fileData', () {
+      test('toString shows hasFileData indicator', () {
         const part = FileContentPart(
           fileId: 'file-1',
           fileData: 'long-base64',
@@ -1441,7 +1441,13 @@ void main() {
         final str = part.toString();
         expect(str, contains('file-1'));
         expect(str, contains('doc.pdf'));
+        expect(str, contains('hasFileData: true'));
         expect(str, isNot(contains('long-base64')));
+      });
+
+      test('toString shows hasFileData false when null', () {
+        const part = FileContentPart(fileId: 'file-1');
+        expect(part.toString(), contains('hasFileData: false'));
       });
     });
 

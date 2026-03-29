@@ -63,13 +63,14 @@ sealed class ContentPart {
 
   /// Creates a file content part from base64-encoded file data.
   ///
-  /// The [data] should be raw base64-encoded bytes. The [mediaType] specifies
-  /// the MIME type (e.g., `'application/pdf'`). These are combined into a
-  /// data URL (`data:<mediaType>;base64,<data>`) as required by the API.
+  /// The [data] should be a base64-encoded string representing the file bytes.
+  /// The [mediaType] specifies the MIME type (e.g., `'application/pdf'`).
+  /// These are combined into a data URL (`data:<mediaType>;base64,<data>`) as
+  /// required by the API.
   static ContentPart fileData({
     required String data,
     required String mediaType,
-    required String filename,
+    String? filename,
   }) => FileContentPart(
     fileData: 'data:$mediaType;base64,$data',
     filename: filename,
@@ -325,7 +326,8 @@ class FileContentPart extends ContentPart {
   int get hashCode => Object.hash(fileId, fileData, filename);
 
   @override
-  String toString() => 'ContentPart.file(fileId: $fileId, filename: $filename)';
+  String toString() =>
+      'ContentPart.file(fileId: $fileId, hasFileData: ${fileData != null}, filename: $filename)';
 }
 
 /// A refusal content part indicating the model declined to respond.

@@ -47,9 +47,10 @@ sealed class InputContent {
 
   /// Creates an [InputFileContent] from base64-encoded data.
   ///
-  /// The [data] should be raw base64-encoded bytes. The [mediaType] specifies
-  /// the MIME type (e.g., `'application/pdf'`). These are combined into a
-  /// data URL (`data:<mediaType>;base64,<data>`) as required by the API.
+  /// The [data] should be a base64-encoded string representing the file bytes.
+  /// The [mediaType] specifies the MIME type (e.g., `'application/pdf'`).
+  /// These are combined into a data URL (`data:<mediaType>;base64,<data>`) as
+  /// required by the API.
   // ignore: prefer_const_constructors_in_immutables
   factory InputContent.fileData(
     String data, {
@@ -250,9 +251,10 @@ class InputFileContent extends InputContent {
 
   /// Creates an [InputFileContent] from base64-encoded data.
   ///
-  /// The [data] should be raw base64-encoded bytes. The [mediaType] specifies
-  /// the MIME type (e.g., `'application/pdf'`). These are combined into a
-  /// data URL (`data:<mediaType>;base64,<data>`) as required by the API.
+  /// The [data] should be a base64-encoded string representing the file bytes.
+  /// The [mediaType] specifies the MIME type (e.g., `'application/pdf'`).
+  /// These are combined into a data URL (`data:<mediaType>;base64,<data>`) as
+  /// required by the API.
   // ignore: prefer_const_constructors_in_immutables
   InputFileContent.data(String data, {required String mediaType, this.filename})
     : fileUrl = null,
