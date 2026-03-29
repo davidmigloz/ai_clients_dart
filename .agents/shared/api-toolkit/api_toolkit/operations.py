@@ -2299,7 +2299,9 @@ def _readme_has_leading_llms_callout(markdown: str) -> bool:
             while index < len(lines) and lines[index].lstrip().startswith(">"):
                 block.append(lines[index])
                 index += 1
-            return README_LLMS_LINK_RE.search("\n".join(block)) is not None
+            if README_LLMS_LINK_RE.search("\n".join(block)) is not None:
+                return True
+            continue
         index += 1
     return False
 

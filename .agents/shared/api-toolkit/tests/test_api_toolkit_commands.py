@@ -5243,13 +5243,9 @@ class ApiToolkitCommandTests(unittest.TestCase):
 
             self.assertEqual(exit_code, 0)
             issues = payload["results"]["readme"]["issues"]
-            self.assertTrue(
-                any(
-                    issue["name"] == "llms.txt"
-                    and "immediately below the h1" in issue["message"].lower()
-                    for issue in issues
-                ),
-                issues,
+            self.assertFalse(
+                any(issue["name"] == "llms.txt" for issue in issues),
+                "llms.txt callout after intro should be accepted",
             )
 
     def test_generate_llms_txt_package_mode_emits_link_hub_and_preserves_identifiers(self) -> None:
