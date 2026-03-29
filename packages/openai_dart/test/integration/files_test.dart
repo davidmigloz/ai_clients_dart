@@ -64,8 +64,7 @@ void main() {
               {'role': 'assistant', 'content': 'I am doing well!'},
             ],
           },
-          // ignore: unnecessary_lambdas
-        ].map((e) => jsonEncode(e)).join('\n');
+        ].map(jsonEncode).join('\n');
 
         final bytes = utf8.encode(content);
 

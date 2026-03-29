@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import '../models/responses/input_token_count.dart';
 import '../models/responses/response_input.dart';
 import '../models/responses/tools/response_tool.dart';
+import '../models/tools/tool_choice.dart';
 import 'base_resource.dart';
 
 /// Resource for input tokens counting operations.
@@ -112,18 +113,13 @@ class InputTokensResource extends ResourceBase {
     if (reasoning != null) body['reasoning'] = reasoning;
     if (text != null) body['text'] = text;
 
-    // Handle toolChoice (can be String or object)
     if (toolChoice != null) {
       if (toolChoice is String) {
         body['tool_choice'] = toolChoice;
+      } else if (toolChoice is ToolChoice) {
+        body['tool_choice'] = toolChoice.toJson();
       } else {
-        try {
-          // ignore: avoid_dynamic_calls
-          body['tool_choice'] =
-              (toolChoice as dynamic).toJson() as Map<String, dynamic>;
-        } catch (_) {
-          body['tool_choice'] = toolChoice;
-        }
+        body['tool_choice'] = toolChoice;
       }
     }
 

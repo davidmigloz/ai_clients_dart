@@ -1,5 +1,11 @@
 import 'dart:async'
-    show Completer, Stream, StreamController, TimeoutException, runZonedGuarded;
+    show
+        Completer,
+        Stream,
+        StreamController,
+        TimeoutException,
+        runZonedGuarded,
+        unawaited;
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -87,12 +93,9 @@ void main() {
 
       // Responses mock (different format)
       final responsesMockClient = MockClient.streaming((request, _) async {
-        // ignore: missing_whitespace_between_adjacent_strings
-        const responseData =
-            'data: {"type":"response.completed","response": '
-            '{"id":"resp_123","object":"response","created_at":1234567890,'
-            '"model":"gpt-4","status":"completed","output":[],'
-            '"parallel_tool_calls":true,"tool_choice":"auto"}}\n\n';
+        const responseData = 'data: {"type":"response.completed","response": '
+            '{"id":"resp_123","object":"response","created_at":1234567890,"model":"gpt-4",'
+            '"status":"completed","output":[],"parallel_tool_calls":true,"tool_choice":"auto"}}\n\n';
         return http.StreamedResponse(
           Stream.fromIterable([utf8.encode(responseData)]),
           200,
@@ -650,10 +653,10 @@ void main() {
             clientClosed = true;
             // Simulate connection reset when client is closed
             if (!sourceController.isClosed) {
-              sourceController
-                ..addError(Exception('Connection closed by client'))
-                // ignore: discarded_futures
-                ..close();
+              sourceController.addError(
+                Exception('Connection closed by client'),
+              );
+              unawaited(sourceController.close());
             }
           },
         );
@@ -734,10 +737,8 @@ void main() {
               mockStreamClient,
               onClose: () {
                 if (!sourceController.isClosed) {
-                  sourceController
-                    ..addError(Exception('Connection closed'))
-                    // ignore: discarded_futures
-                    ..close();
+                  sourceController.addError(Exception('Connection closed'));
+                  unawaited(sourceController.close());
                 }
               },
             );
