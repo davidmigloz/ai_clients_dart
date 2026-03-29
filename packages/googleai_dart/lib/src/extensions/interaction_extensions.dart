@@ -16,7 +16,7 @@ extension InteractionExtensions on Interaction {
     final buffer = StringBuffer();
     var hasText = false;
     for (final output in outputs ?? <InteractionContent>[]) {
-      if (output is TextContent) {
+      if (output is TextContent && output.text.isNotEmpty) {
         buffer.write(output.text);
         hasText = true;
       }
