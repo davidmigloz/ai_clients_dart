@@ -115,6 +115,48 @@ void main() {
       expect(restored, equals(original));
     });
 
+    test('fileId() creates InputFileContent with file ID', () {
+      final content = InputContent.fileId('file_123', filename: 'doc.pdf');
+      expect(content, isA<InputFileContent>());
+      final file = content as InputFileContent;
+      expect(file.fileId, 'file_123');
+      expect(file.filename, 'doc.pdf');
+      expect(file.fileUrl, isNull);
+      expect(file.fileData, isNull);
+    });
+
+    test('fileId() round-trip', () {
+      final original = InputContent.fileId('file_123', filename: 'doc.pdf');
+      final json = original.toJson();
+      final restored = InputContent.fromJson(json);
+      expect(restored, equals(original));
+    });
+
+    test('fileData() creates InputFileContent with data URL', () {
+      final content = InputContent.fileData(
+        'base64data',
+        mediaType: 'application/pdf',
+        filename: 'doc.pdf',
+      );
+      expect(content, isA<InputFileContent>());
+      final file = content as InputFileContent;
+      expect(file.fileData, 'data:application/pdf;base64,base64data');
+      expect(file.filename, 'doc.pdf');
+      expect(file.fileUrl, isNull);
+      expect(file.fileId, isNull);
+    });
+
+    test('fileData() round-trip', () {
+      final original = InputContent.fileData(
+        'base64data',
+        mediaType: 'application/pdf',
+        filename: 'doc.pdf',
+      );
+      final json = original.toJson();
+      final restored = InputContent.fromJson(json);
+      expect(restored, equals(original));
+    });
+
     test('videoUrl() creates InputVideoContent', () {
       final content = InputContent.videoUrl('https://example.com/vid.mp4');
       expect(content, isA<InputVideoContent>());
