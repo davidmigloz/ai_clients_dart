@@ -39,11 +39,18 @@
     "assistants",
     "base_resource",
     "beta",
+    "chatkit",
+    "completions",
+    "containers",
+    "conversations",
     "inputTokens",
     "messages",
+    "models",
     "runs",
+    "skills",
     "streaming",
     "threads",
+    "uploads",
     "vectorStores"
   ],
   "resource_to_example": {
