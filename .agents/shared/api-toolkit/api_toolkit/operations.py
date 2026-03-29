@@ -1431,6 +1431,7 @@ def _verify_sealed_parent_variant_coverage(
                         entry.key,
                         f"Spec union '{schema_name}' has member '{member}' "
                         f"not in '{entry.key}' discriminator mapping",
+                        file=entry.file,
                     )
                 )
 
