@@ -3,7 +3,7 @@ import 'package:meta/meta.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 
-/// Sealed class for content parts in user and assistant messages.
+/// Sealed class for content parts in chat messages.
 ///
 /// Supports multimodal content including text, images, documents, files,
 /// audio, references, thinking, and tool output content.
