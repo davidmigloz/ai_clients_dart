@@ -222,7 +222,7 @@ class InputFileContent extends InputContent {
   /// The file data as a data URL (e.g., `data:application/pdf;base64,<data>`).
   ///
   /// Use [InputContent.fileData] or [InputFileContent.data] to construct this
-  /// from raw base64 bytes.
+  /// from a base64-encoded string.
   final String? fileData;
 
   /// The filename.
