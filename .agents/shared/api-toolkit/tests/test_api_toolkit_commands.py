@@ -4490,10 +4490,10 @@ class ApiToolkitCommandTests(unittest.TestCase):
                 }
             }
         }
-        # Without variants, mapping keys (Dart class names) don't match $ref schema names.
+        # Without variants, mapping keys (Dart class names) don't match $ref schema names,
+        # so the function finds no overlap and produces 0 warnings (false negative).
         issues_without = _verify_sealed_parent_variant_coverage(entry, spec_payload)
-        # The function should find no overlap because TextBlock != ResponseTextBlock.
-        # (This is the bug scenario — it produces 0 warnings when it should produce 1.)
+        self.assertEqual(issues_without, [])
 
         # With variants, Dart class names are cross-referenced to schema names.
         issues_with = _verify_sealed_parent_variant_coverage(entry, spec_payload, variants)
