@@ -477,6 +477,234 @@ void main() {
     });
   });
 
+  group('ToolFileContentPart', () {
+    test('creates with required fields', () {
+      const part = ToolFileContentPart(tool: 'code_interpreter', fileId: 'f-1');
+      expect(part.type, 'tool_file');
+      expect(part.tool, 'code_interpreter');
+      expect(part.fileId, 'f-1');
+      expect(part.fileName, isNull);
+      expect(part.fileType, isNull);
+    });
+
+    test('creates with all fields', () {
+      const part = ToolFileContentPart(
+        tool: 'code_interpreter',
+        fileId: 'f-1',
+        fileName: 'output.png',
+        fileType: 'image/png',
+      );
+      expect(part.fileName, 'output.png');
+      expect(part.fileType, 'image/png');
+    });
+
+    test('serializes to JSON', () {
+      const part = ToolFileContentPart(
+        tool: 'code_interpreter',
+        fileId: 'f-1',
+        fileName: 'output.png',
+        fileType: 'image/png',
+      );
+      final json = part.toJson();
+      expect(json['type'], 'tool_file');
+      expect(json['tool'], 'code_interpreter');
+      expect(json['file_id'], 'f-1');
+      expect(json['file_name'], 'output.png');
+      expect(json['file_type'], 'image/png');
+    });
+
+    test('omits null optional fields in JSON', () {
+      const part = ToolFileContentPart(tool: 'code_interpreter', fileId: 'f-1');
+      final json = part.toJson();
+      expect(json.containsKey('file_name'), isFalse);
+      expect(json.containsKey('file_type'), isFalse);
+    });
+
+    test('deserializes from JSON', () {
+      final part = ContentPart.fromJson(const {
+        'type': 'tool_file',
+        'tool': 'code_interpreter',
+        'file_id': 'f-1',
+        'file_name': 'output.png',
+      });
+      expect(part, isA<ToolFileContentPart>());
+      final toolFile = part as ToolFileContentPart;
+      expect(toolFile.tool, 'code_interpreter');
+      expect(toolFile.fileId, 'f-1');
+      expect(toolFile.fileName, 'output.png');
+      expect(toolFile.fileType, isNull);
+    });
+
+    test('copyWith preserves values when no arguments', () {
+      const part = ToolFileContentPart(
+        tool: 'code_interpreter',
+        fileId: 'f-1',
+        fileName: 'output.png',
+      );
+      final copy = part.copyWith();
+      expect(copy, equals(part));
+    });
+
+    test('copyWith replaces values', () {
+      const part = ToolFileContentPart(
+        tool: 'code_interpreter',
+        fileId: 'f-1',
+        fileName: 'output.png',
+      );
+      final copy = part.copyWith(fileId: 'f-2', fileName: null);
+      expect(copy.fileId, 'f-2');
+      expect(copy.fileName, isNull);
+    });
+
+    test('equality works correctly', () {
+      const part1 = ToolFileContentPart(tool: 'ci', fileId: 'f-1');
+      const part2 = ToolFileContentPart(tool: 'ci', fileId: 'f-1');
+      const part3 = ToolFileContentPart(tool: 'ci', fileId: 'f-2');
+
+      expect(part1, equals(part2));
+      expect(part1.hashCode, equals(part2.hashCode));
+      expect(part1, isNot(equals(part3)));
+    });
+
+    test('round-trip serialization', () {
+      const original = ToolFileContentPart(
+        tool: 'code_interpreter',
+        fileId: 'f-1',
+        fileName: 'output.png',
+        fileType: 'image/png',
+      );
+      final json = original.toJson();
+      final restored = ContentPart.fromJson(json) as ToolFileContentPart;
+      expect(restored, equals(original));
+    });
+  });
+
+  group('ToolReferenceContentPart', () {
+    test('creates with required fields', () {
+      const part = ToolReferenceContentPart(
+        tool: 'web_search',
+        title: 'Example',
+      );
+      expect(part.type, 'tool_reference');
+      expect(part.tool, 'web_search');
+      expect(part.title, 'Example');
+      expect(part.url, isNull);
+      expect(part.description, isNull);
+      expect(part.favicon, isNull);
+    });
+
+    test('creates with all fields', () {
+      const part = ToolReferenceContentPart(
+        tool: 'web_search',
+        title: 'Example',
+        url: 'https://example.com',
+        description: 'A description',
+        favicon: 'https://example.com/favicon.ico',
+      );
+      expect(part.url, 'https://example.com');
+      expect(part.description, 'A description');
+      expect(part.favicon, 'https://example.com/favicon.ico');
+    });
+
+    test('serializes to JSON', () {
+      const part = ToolReferenceContentPart(
+        tool: 'web_search',
+        title: 'Example',
+        url: 'https://example.com',
+        description: 'A description',
+        favicon: 'https://example.com/favicon.ico',
+      );
+      final json = part.toJson();
+      expect(json['type'], 'tool_reference');
+      expect(json['tool'], 'web_search');
+      expect(json['title'], 'Example');
+      expect(json['url'], 'https://example.com');
+      expect(json['description'], 'A description');
+      expect(json['favicon'], 'https://example.com/favicon.ico');
+    });
+
+    test('omits null optional fields in JSON', () {
+      const part = ToolReferenceContentPart(
+        tool: 'web_search',
+        title: 'Example',
+      );
+      final json = part.toJson();
+      expect(json.containsKey('url'), isFalse);
+      expect(json.containsKey('description'), isFalse);
+      expect(json.containsKey('favicon'), isFalse);
+    });
+
+    test('deserializes from JSON', () {
+      final part = ContentPart.fromJson(const {
+        'type': 'tool_reference',
+        'tool': 'web_search',
+        'title': 'Example',
+        'url': 'https://example.com',
+      });
+      expect(part, isA<ToolReferenceContentPart>());
+      final toolRef = part as ToolReferenceContentPart;
+      expect(toolRef.tool, 'web_search');
+      expect(toolRef.title, 'Example');
+      expect(toolRef.url, 'https://example.com');
+      expect(toolRef.description, isNull);
+    });
+
+    test('copyWith preserves values when no arguments', () {
+      const part = ToolReferenceContentPart(
+        tool: 'web_search',
+        title: 'Example',
+        url: 'https://example.com',
+      );
+      final copy = part.copyWith();
+      expect(copy, equals(part));
+    });
+
+    test('copyWith replaces values and clears nullable fields', () {
+      const part = ToolReferenceContentPart(
+        tool: 'web_search',
+        title: 'Example',
+        url: 'https://example.com',
+        description: 'desc',
+      );
+      final copy = part.copyWith(title: 'New', url: null, description: null);
+      expect(copy.title, 'New');
+      expect(copy.url, isNull);
+      expect(copy.description, isNull);
+    });
+
+    test('equality works correctly', () {
+      const part1 = ToolReferenceContentPart(
+        tool: 'web_search',
+        title: 'A',
+      );
+      const part2 = ToolReferenceContentPart(
+        tool: 'web_search',
+        title: 'A',
+      );
+      const part3 = ToolReferenceContentPart(
+        tool: 'web_search',
+        title: 'B',
+      );
+
+      expect(part1, equals(part2));
+      expect(part1.hashCode, equals(part2.hashCode));
+      expect(part1, isNot(equals(part3)));
+    });
+
+    test('round-trip serialization', () {
+      const original = ToolReferenceContentPart(
+        tool: 'web_search',
+        title: 'Example',
+        url: 'https://example.com',
+        description: 'A description',
+        favicon: 'https://example.com/favicon.ico',
+      );
+      final json = original.toJson();
+      final restored = ContentPart.fromJson(json) as ToolReferenceContentPart;
+      expect(restored, equals(original));
+    });
+  });
+
   group('UnknownContentPart', () {
     test('wraps unknown type', () {
       final part = ContentPart.fromJson(const {
