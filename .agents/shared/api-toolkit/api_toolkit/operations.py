@@ -1379,21 +1379,33 @@ def _verify_sealed_parent(config: ToolkitConfig, entry: ManifestEntry, variants:
 def _verify_sealed_parent_variant_coverage(
     entry: ManifestEntry,
     spec_payload: dict[str, Any],
+    variants: list[ManifestEntry] | None = None,
 ) -> list[dict[str, Any]]:
     """Check that all spec union members referencing this sealed parent's variants are covered in the mapping."""
     mapping = (entry.discriminator or {}).get("mapping", {}) if entry.discriminator else {}
     if not mapping:
         return []
 
+    # Build a lookup from Dart class names to schema names for cross-referencing.
+    dart_to_schema: dict[str, str] = {}
+    if variants:
+        for v in variants:
+            if v.dart_class and v.schema:
+                dart_to_schema[v.dart_class] = v.schema
+
     # Collect all schema names referenced in the manifest mapping.
-    # The mapping can be in raw OpenAPI format ({value: $ref}) or normalized ({schema: value}).
+    # The mapping can be in raw OpenAPI format ({value: $ref}) or normalized ({schema/dart_class: value}).
     mapped_schemas: set[str] = set()
     for key, value in mapping.items():
         if isinstance(value, str):
             if value.startswith("#/"):
                 mapped_schemas.add(_resolve_ref(value))
             else:
+                # Key could be a schema name or a Dart class name.
                 mapped_schemas.add(key)
+                # Also add the schema name if the key is a Dart class name.
+                if key in dart_to_schema:
+                    mapped_schemas.add(dart_to_schema[key])
 
     if not mapped_schemas:
         return []
@@ -1575,7 +1587,7 @@ def _verify_implementation(
 
     for parent in parents:
         issues.extend(_verify_sealed_parent(config, parent, by_parent.get(parent.key, [])))
-        issues.extend(_verify_sealed_parent_variant_coverage(parent, spec_payload))
+        issues.extend(_verify_sealed_parent_variant_coverage(parent, spec_payload, by_parent.get(parent.key, [])))
 
     coverage_gaps = []
     if config.manifest.surface == "openapi" and scope in {"changed", "all"}:

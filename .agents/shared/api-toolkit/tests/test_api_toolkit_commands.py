@@ -4437,6 +4437,70 @@ class ApiToolkitCommandTests(unittest.TestCase):
         self.assertEqual(len(issues), 1)
         self.assertIn("AudioPart", issues[0]["message"])
 
+    def test_verify_sealed_parent_variant_coverage_dart_class_keys(self) -> None:
+        """When mapping keys are Dart class names, cross-reference via variants to find schema names."""
+        entry = ManifestEntry(
+            key="ContentBlock",
+            spec="main",
+            kind="sealed_parent",
+            dart_class="ContentBlock",
+            file="lib/src/models/content_block.dart",
+            schema=None,
+            discriminator={
+                "field": "type",
+                "mapping": {
+                    "TextBlock": "text",
+                    "ImageBlock": "image",
+                },
+            },
+        )
+        variants = [
+            ManifestEntry(
+                key="ResponseTextBlock",
+                spec="main",
+                kind="sealed_variant",
+                dart_class="TextBlock",
+                file="lib/src/models/content_block.dart",
+                schema="ResponseTextBlock",
+                parent="ContentBlock",
+            ),
+            ManifestEntry(
+                key="ResponseImageBlock",
+                spec="main",
+                kind="sealed_variant",
+                dart_class="ImageBlock",
+                file="lib/src/models/content_block.dart",
+                schema="ResponseImageBlock",
+                parent="ContentBlock",
+            ),
+        ]
+        spec_payload = {
+            "components": {
+                "schemas": {
+                    "ContentBlockUnion": {
+                        "anyOf": [
+                            {"$ref": "#/components/schemas/ResponseTextBlock"},
+                            {"$ref": "#/components/schemas/ResponseImageBlock"},
+                            {"$ref": "#/components/schemas/ResponseToolBlock"},
+                        ],
+                    },
+                    "ResponseTextBlock": {"type": "object", "properties": {}},
+                    "ResponseImageBlock": {"type": "object", "properties": {}},
+                    "ResponseToolBlock": {"type": "object", "properties": {}},
+                }
+            }
+        }
+        # Without variants, mapping keys (Dart class names) don't match $ref schema names.
+        issues_without = _verify_sealed_parent_variant_coverage(entry, spec_payload)
+        # The function should find no overlap because TextBlock != ResponseTextBlock.
+        # (This is the bug scenario — it produces 0 warnings when it should produce 1.)
+
+        # With variants, Dart class names are cross-referenced to schema names.
+        issues_with = _verify_sealed_parent_variant_coverage(entry, spec_payload, variants)
+        # Now it should detect ResponseToolBlock is missing.
+        self.assertEqual(len(issues_with), 1)
+        self.assertIn("ResponseToolBlock", issues_with[0]["message"])
+
     def test_verify_docs_respects_nested_short_key_exclusions(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
