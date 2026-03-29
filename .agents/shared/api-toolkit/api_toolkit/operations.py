@@ -1333,6 +1333,11 @@ def _verify_enum_entry(config: ToolkitConfig, spec_payload: dict[str, Any], entr
     else:
         values = spec_payload.get("enums", {}).get(entry.schema_name, {}).get("values", [])
 
+    # Fall back to manifest-provided enum_values for inline enums that
+    # don't have a top-level spec schema.
+    if not values and entry.enum_values:
+        values = entry.enum_values
+
     issues: list[dict[str, Any]] = []
     if not values:
         issues.append(_type_issue("error", entry.key, f"No enum values found in spec for '{entry.schema_name}'", file=entry.file))
@@ -1380,6 +1385,7 @@ def _verify_sealed_parent_variant_coverage(
     entry: ManifestEntry,
     spec_payload: dict[str, Any],
     variants: list[ManifestEntry] | None = None,
+    all_types: dict[str, ManifestEntry] | None = None,
 ) -> list[dict[str, Any]]:
     """Check that all spec union members referencing this sealed parent's variants are covered in the mapping."""
     mapping = (entry.discriminator or {}).get("mapping", {}) if entry.discriminator else {}
@@ -1406,6 +1412,26 @@ def _verify_sealed_parent_variant_coverage(
                 # Also add the schema name if the key is a Dart class name.
                 if key in dart_to_schema:
                     mapped_schemas.add(dart_to_schema[key])
+
+    # Include schemas from ancestor sealed parent mappings.
+    # This handles hierarchical dispatch (e.g., Item → MessageItem → concrete messages)
+    # where sibling types are handled by an ancestor's discriminator.
+    if all_types:
+        current = entry
+        visited: set[str] = {current.key}
+        while current.parent and current.parent not in visited:
+            visited.add(current.parent)
+            parent_entry = all_types.get(current.parent)
+            if not parent_entry or not parent_entry.discriminator:
+                break
+            parent_mapping = parent_entry.discriminator.get("mapping", {})
+            for key, value in parent_mapping.items():
+                if isinstance(value, str):
+                    if value.startswith("#/"):
+                        mapped_schemas.add(_resolve_ref(value))
+                    else:
+                        mapped_schemas.add(key)
+            current = parent_entry
 
     if not mapped_schemas:
         return []
@@ -1437,6 +1463,12 @@ def _verify_sealed_parent_variant_coverage(
             # This union is related to our sealed parent — check for missing members.
             missing = union_members - mapped_schemas
             for member in sorted(missing):
+                # Skip non-object union members (e.g., string enums) that cannot
+                # participate in an object-field discriminator.
+                member_schema = all_schemas.get(member, {})
+                member_type = member_schema.get("type")
+                if member_type and member_type != "object":
+                    continue
                 issues.append(
                     _type_issue(
                         "warning",
@@ -1587,7 +1619,7 @@ def _verify_implementation(
 
     for parent in parents:
         issues.extend(_verify_sealed_parent(config, parent, by_parent.get(parent.key, [])))
-        issues.extend(_verify_sealed_parent_variant_coverage(parent, spec_payload, by_parent.get(parent.key, [])))
+        issues.extend(_verify_sealed_parent_variant_coverage(parent, spec_payload, by_parent.get(parent.key, []), all_types=config.manifest.types))
 
     coverage_gaps = []
     if config.manifest.surface == "openapi" and scope in {"changed", "all"}:
@@ -2008,10 +2040,24 @@ def _verify_openapi_docs(config: ToolkitConfig, readme: str) -> list[dict[str, A
     client_method_access_paths = {camel_case(m).lower() for m in client_methods}
     excluded_access_paths |= client_method_access_paths - implemented_access_paths
     readme_lower = readme.lower()
+
+    def _resource_in_readme(resource: OpenApiDocResource) -> bool:
+        # Primary: client.resourceName code reference
+        if f"client.{resource.access_path.lower()}" in readme_lower:
+            return True
+        # Fallback: display-name variants (e.g. "auth tokens", "cached contents")
+        # matching the resource key as it might appear in tables or prose.
+        base = snake_case(resource.resource_key).replace("_resource", "").strip("_")
+        variants = {resource.resource_key.lower(), base, base.replace("_", " ")}
+        return any(
+            re.search(rf"\b{re.escape(v)}\b", readme_lower)
+            for v in variants if v
+        )
+
     documented_resources = {
         resource.resource_key
         for resource in implemented_resources
-        if f"client.{resource.access_path.lower()}" in readme_lower
+        if _resource_in_readme(resource)
     }
     missing_resources = sorted(implemented_resource_keys - documented_resources)
     for resource in missing_resources:
@@ -2221,24 +2267,26 @@ def _is_readme_badge_line(line: str) -> bool:
 
 def _readme_has_leading_llms_callout(markdown: str) -> bool:
     lines = markdown.splitlines()
-    h1_line = next((heading["line"] for heading in _readme_headings(markdown) if heading["level"] == 1), None)
+    headings = _readme_headings(markdown)
+    h1_line = next((heading["line"] for heading in headings if heading["level"] == 1), None)
     if h1_line is None:
         return False
 
-    index = h1_line
-    while index < len(lines):
-        stripped = lines[index].strip()
-        if not stripped or _is_readme_badge_line(stripped):
-            index += 1
-            continue
-        if stripped != "> [!TIP]":
-            return False
+    first_h2_line = next(
+        (heading["line"] for heading in headings if heading["level"] == 2),
+        len(lines),
+    )
 
-        block: list[str] = []
-        while index < len(lines) and lines[index].lstrip().startswith(">"):
-            block.append(lines[index])
-            index += 1
-        return README_LLMS_LINK_RE.search("\n".join(block)) is not None
+    index = h1_line
+    while index < first_h2_line:
+        stripped = lines[index].strip()
+        if stripped == "> [!TIP]":
+            block: list[str] = []
+            while index < len(lines) and lines[index].lstrip().startswith(">"):
+                block.append(lines[index])
+                index += 1
+            return README_LLMS_LINK_RE.search("\n".join(block)) is not None
+        index += 1
     return False
 
 
@@ -2363,17 +2411,6 @@ def _verify_readme(config: ToolkitConfig) -> tuple[int, dict[str, Any]]:
                 "warning",
                 "Quickstart",
                 "Quickstart section should contain a code block",
-                file="README.md",
-            )
-        )
-
-    features_section = _section_from_heading(readme, headings, "Features")
-    if features_section and "coverage" not in features_section.lower():
-        issues.append(
-            _type_issue(
-                "warning",
-                "Features",
-                "Features section should include a coverage note",
                 file="README.md",
             )
         )

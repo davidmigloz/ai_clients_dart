@@ -145,6 +145,7 @@ class ManifestEntry:
     discriminator: dict[str, Any] | None = None
     tags: list[str] = field(default_factory=list)
     excluded_properties: list[str] = field(default_factory=list)
+    enum_values: list[str] = field(default_factory=list)
     note: str | None = None
 
     @property
@@ -501,6 +502,7 @@ def load_toolkit_config(config_dir: Path) -> ToolkitConfig:
             discriminator=raw.get("discriminator"),
             tags=raw.get("tags", []),
             excluded_properties=raw.get("excluded_properties", []),
+            enum_values=raw.get("enum_values", []),
             note=raw.get("note"),
         )
 
@@ -562,6 +564,8 @@ def dump_manifest(config: ToolkitConfig) -> dict[str, Any]:
             payload["types"][key]["tags"] = entry.tags
         if entry.excluded_properties:
             payload["types"][key]["excluded_properties"] = entry.excluded_properties
+        if entry.enum_values:
+            payload["types"][key]["enum_values"] = entry.enum_values
         if entry.note:
             payload["types"][key]["note"] = entry.note
     return payload
