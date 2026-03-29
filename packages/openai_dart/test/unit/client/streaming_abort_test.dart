@@ -93,7 +93,8 @@ void main() {
 
       // Responses mock (different format)
       final responsesMockClient = MockClient.streaming((request, _) async {
-        const responseData = 'data: {"type":"response.completed","response": '
+        const responseData =
+            'data: {"type":"response.completed","response": '
             '{"id":"resp_123","object":"response","created_at":1234567890,"model":"gpt-4",'
             '"status":"completed","output":[],"parallel_tool_calls":true,"tool_choice":"auto"}}\n\n';
         return http.StreamedResponse(
