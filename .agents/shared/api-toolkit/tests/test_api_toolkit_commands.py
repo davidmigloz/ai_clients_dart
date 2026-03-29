@@ -2751,6 +2751,67 @@ class ApiToolkitCommandTests(unittest.TestCase):
             self.assertEqual(exit_code, 1)
             self.assertTrue(any("Enum fallback value" in issue["message"] for issue in payload["results"]["implementation"]["issues"]))
 
+    def test_verify_enum_inline_fallback_via_enum_values(self) -> None:
+        """When spec has no schema for an inline enum, manifest enum_values are used."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            (package_root / "specs" / "openapi.json").write_text(
+                json.dumps(
+                    {
+                        "openapi": "3.1.0",
+                        "info": {"title": "Sample", "version": "1"},
+                        "paths": {},
+                        "components": {"schemas": {}},
+                    }
+                )
+            )
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(root / "tmp" / "sample"),
+                },
+                manifest_payload={
+                    "surface": "openapi",
+                    "type_mappings": {},
+                    "placement": {"categories": {}, "default_category": "common", "parent_model_patterns": {}},
+                    "coverage": {},
+                    "types": {
+                        "InlineRole": {
+                            "spec": "main",
+                            "kind": "enum",
+                            "dart_class": "InlineRole",
+                            "file": "lib/src/models/common/inline_role.dart",
+                            "schema": "InlineRole",
+                            "enum_values": ["user", "assistant"],
+                        }
+                    },
+                },
+            )
+            (package_root / "lib" / "src" / "models" / "common" / "inline_role.dart").write_text(
+                "enum InlineRole {\n"
+                "  user,\n"
+                "  assistant,\n"
+                "  unknown,\n"
+                "}\n"
+            )
+
+            exit_code, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+
+            issues = payload["results"]["implementation"]["issues"]
+            # Should NOT have "No enum values found" error (fallback to enum_values).
+            self.assertFalse(
+                any("No enum values found" in issue["message"] for issue in issues),
+                f"Expected no 'No enum values found' error, got: {issues}",
+            )
+            self.assertEqual(exit_code, 0)
+
     def test_verify_coverage_gap_is_blocking(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)

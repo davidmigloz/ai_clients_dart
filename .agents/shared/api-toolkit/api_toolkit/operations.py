@@ -2294,13 +2294,16 @@ def _readme_has_leading_llms_callout(markdown: str) -> bool:
     index = h1_line
     while index < first_h2_line:
         stripped = lines[index].strip()
-        if stripped == "> [!TIP]":
-            block: list[str] = []
-            while index < len(lines) and lines[index].lstrip().startswith(">"):
-                block.append(lines[index])
-                index += 1
-            return README_LLMS_LINK_RE.search("\n".join(block)) is not None
-        index += 1
+        if not stripped or _is_readme_badge_line(stripped):
+            index += 1
+            continue
+        if stripped != "> [!TIP]":
+            return False
+        block: list[str] = []
+        while index < len(lines) and lines[index].lstrip().startswith(">"):
+            block.append(lines[index])
+            index += 1
+        return README_LLMS_LINK_RE.search("\n".join(block)) is not None
     return False
 
 
