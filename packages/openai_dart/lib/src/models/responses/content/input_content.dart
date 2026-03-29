@@ -51,7 +51,6 @@ sealed class InputContent {
   /// The [mediaType] specifies the MIME type (e.g., `'application/pdf'`).
   /// These are combined into a data URL (`data:<mediaType>;base64,<data>`) as
   /// required by the API.
-  // ignore: prefer_const_constructors_in_immutables
   factory InputContent.fileData(
     String data, {
     required String mediaType,
@@ -255,11 +254,13 @@ class InputFileContent extends InputContent {
   /// The [mediaType] specifies the MIME type (e.g., `'application/pdf'`).
   /// These are combined into a data URL (`data:<mediaType>;base64,<data>`) as
   /// required by the API.
-  // ignore: prefer_const_constructors_in_immutables
-  InputFileContent.data(String data, {required String mediaType, this.filename})
-    : fileUrl = null,
-      fileId = null,
-      fileData = 'data:$mediaType;base64,$data';
+  const InputFileContent.data(
+    String data, {
+    required String mediaType,
+    this.filename,
+  }) : fileUrl = null,
+       fileId = null,
+       fileData = 'data:$mediaType;base64,$data';
 
   /// Creates an [InputFileContent] from JSON.
   factory InputFileContent.fromJson(Map<String, dynamic> json) {
