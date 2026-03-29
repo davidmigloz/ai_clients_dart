@@ -673,18 +673,9 @@ void main() {
     });
 
     test('equality works correctly', () {
-      const part1 = ToolReferenceContentPart(
-        tool: 'web_search',
-        title: 'A',
-      );
-      const part2 = ToolReferenceContentPart(
-        tool: 'web_search',
-        title: 'A',
-      );
-      const part3 = ToolReferenceContentPart(
-        tool: 'web_search',
-        title: 'B',
-      );
+      const part1 = ToolReferenceContentPart(tool: 'web_search', title: 'A');
+      const part2 = ToolReferenceContentPart(tool: 'web_search', title: 'A');
+      const part3 = ToolReferenceContentPart(tool: 'web_search', title: 'B');
 
       expect(part1, equals(part2));
       expect(part1.hashCode, equals(part2.hashCode));
