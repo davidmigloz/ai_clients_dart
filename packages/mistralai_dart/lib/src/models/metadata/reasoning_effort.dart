@@ -8,21 +8,24 @@ enum ReasoningEffort {
   high('high'),
 
   /// Disable reasoning effort.
-  none('none');
+  none('none'),
+
+  /// Unknown reasoning effort (forward compatibility).
+  unknown('unknown');
 
   const ReasoningEffort(this.value);
 
   /// The string value used in the API.
   final String value;
 
-  /// Creates from a JSON string value.
+  /// Creates from a string value.
   ///
-  /// Returns null if [value] is null or does not match any known value.
-  static ReasoningEffort? fromString(String? value) {
-    if (value == null) return null;
-    for (final effort in ReasoningEffort.values) {
-      if (effort.value == value) return effort;
-    }
-    return null;
-  }
+  /// Returns null if [value] is null.
+  /// Returns [unknown] if [value] does not match any known value.
+  static ReasoningEffort? fromString(String? value) => switch (value) {
+    'high' => high,
+    'none' => none,
+    null => null,
+    _ => unknown,
+  };
 }

@@ -3,10 +3,10 @@ import 'package:meta/meta.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 
-/// Sealed class for content parts in user messages.
+/// Sealed class for content parts in user and assistant messages.
 ///
 /// Supports multimodal content including text, images, documents, files,
-/// audio, references, and thinking.
+/// audio, references, thinking, and tool output content.
 ///
 /// Variants:
 /// - [TextContentPart] — Text content.
@@ -16,6 +16,8 @@ import '../common/equality_helpers.dart';
 /// - [FileContentPart] — File content by ID.
 /// - [AudioContentPart] — Audio input content.
 /// - [ThinkContentPart] — Thinking/reasoning content.
+/// - [ToolFileContentPart] — File produced by a built-in tool.
+/// - [ToolReferenceContentPart] — Reference produced by a built-in tool.
 /// - [UnknownContentPart] — Unknown content type (forward compatibility).
 sealed class ContentPart {
   const ContentPart();
@@ -33,6 +35,8 @@ sealed class ContentPart {
       'file' => FileContentPart.fromJson(json),
       'input_audio' => AudioContentPart.fromJson(json),
       'thinking' => ThinkContentPart.fromJson(json),
+      'tool_file' => ToolFileContentPart.fromJson(json),
+      'tool_reference' => ToolReferenceContentPart.fromJson(json),
       _ => UnknownContentPart(json),
     };
   }
@@ -363,6 +367,173 @@ class ThinkContentPart extends ContentPart {
   @override
   String toString() =>
       'ThinkContentPart(thinking: ${thinking.length} parts, closed: $closed)';
+}
+
+/// File content part produced by a built-in tool (e.g. code interpreter).
+@immutable
+class ToolFileContentPart extends ContentPart {
+  @override
+  String get type => 'tool_file';
+
+  /// The built-in tool that produced this file (e.g. "code_interpreter").
+  final String tool;
+
+  /// The file identifier.
+  final String fileId;
+
+  /// An optional file name.
+  final String? fileName;
+
+  /// An optional file MIME type.
+  final String? fileType;
+
+  /// Creates a [ToolFileContentPart].
+  const ToolFileContentPart({
+    required this.tool,
+    required this.fileId,
+    this.fileName,
+    this.fileType,
+  });
+
+  /// Creates a [ToolFileContentPart] from JSON.
+  factory ToolFileContentPart.fromJson(Map<String, dynamic> json) =>
+      ToolFileContentPart(
+        tool: json['tool'] as String? ?? '',
+        fileId: json['file_id'] as String? ?? '',
+        fileName: json['file_name'] as String?,
+        fileType: json['file_type'] as String?,
+      );
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'tool': tool,
+    'file_id': fileId,
+    if (fileName != null) 'file_name': fileName,
+    if (fileType != null) 'file_type': fileType,
+  };
+
+  /// Creates a copy with the given fields replaced.
+  ToolFileContentPart copyWith({
+    String? tool,
+    String? fileId,
+    Object? fileName = unsetCopyWithValue,
+    Object? fileType = unsetCopyWithValue,
+  }) => ToolFileContentPart(
+    tool: tool ?? this.tool,
+    fileId: fileId ?? this.fileId,
+    fileName: fileName == unsetCopyWithValue
+        ? this.fileName
+        : fileName as String?,
+    fileType: fileType == unsetCopyWithValue
+        ? this.fileType
+        : fileType as String?,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ToolFileContentPart &&
+          runtimeType == other.runtimeType &&
+          tool == other.tool &&
+          fileId == other.fileId &&
+          fileName == other.fileName &&
+          fileType == other.fileType;
+
+  @override
+  int get hashCode => Object.hash(type, tool, fileId, fileName, fileType);
+
+  @override
+  String toString() =>
+      'ToolFileContentPart(tool: $tool, fileId: $fileId, '
+      'fileName: $fileName, fileType: $fileType)';
+}
+
+/// Reference content part produced by a built-in tool (e.g. web search).
+@immutable
+class ToolReferenceContentPart extends ContentPart {
+  @override
+  String get type => 'tool_reference';
+
+  /// The built-in tool that produced this reference (e.g. "web_search").
+  final String tool;
+
+  /// The title of the reference.
+  final String title;
+
+  /// An optional URL for the reference.
+  final String? url;
+
+  /// An optional description of the reference.
+  final String? description;
+
+  /// An optional favicon URL.
+  final String? favicon;
+
+  /// Creates a [ToolReferenceContentPart].
+  const ToolReferenceContentPart({
+    required this.tool,
+    required this.title,
+    this.url,
+    this.description,
+    this.favicon,
+  });
+
+  /// Creates a [ToolReferenceContentPart] from JSON.
+  factory ToolReferenceContentPart.fromJson(Map<String, dynamic> json) =>
+      ToolReferenceContentPart(
+        tool: json['tool'] as String? ?? '',
+        title: json['title'] as String? ?? '',
+        url: json['url'] as String?,
+        description: json['description'] as String?,
+        favicon: json['favicon'] as String?,
+      );
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'tool': tool,
+    'title': title,
+    if (url != null) 'url': url,
+    if (description != null) 'description': description,
+    if (favicon != null) 'favicon': favicon,
+  };
+
+  /// Creates a copy with the given fields replaced.
+  ToolReferenceContentPart copyWith({
+    String? tool,
+    String? title,
+    Object? url = unsetCopyWithValue,
+    Object? description = unsetCopyWithValue,
+    Object? favicon = unsetCopyWithValue,
+  }) => ToolReferenceContentPart(
+    tool: tool ?? this.tool,
+    title: title ?? this.title,
+    url: url == unsetCopyWithValue ? this.url : url as String?,
+    description: description == unsetCopyWithValue
+        ? this.description
+        : description as String?,
+    favicon: favicon == unsetCopyWithValue ? this.favicon : favicon as String?,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ToolReferenceContentPart &&
+          runtimeType == other.runtimeType &&
+          tool == other.tool &&
+          title == other.title &&
+          url == other.url &&
+          description == other.description &&
+          favicon == other.favicon;
+
+  @override
+  int get hashCode => Object.hash(type, tool, title, url, description, favicon);
+
+  @override
+  String toString() =>
+      'ToolReferenceContentPart(tool: $tool, title: $title, '
+      'url: $url, description: $description, favicon: $favicon)';
 }
 
 /// Unknown content part for forward compatibility.

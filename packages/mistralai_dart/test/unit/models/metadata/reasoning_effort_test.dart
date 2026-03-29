@@ -4,9 +4,10 @@ import 'package:test/test.dart';
 void main() {
   group('ReasoningEffort', () {
     test('has expected values', () {
-      expect(ReasoningEffort.values, hasLength(2));
+      expect(ReasoningEffort.values, hasLength(3));
       expect(ReasoningEffort.high.value, 'high');
       expect(ReasoningEffort.none.value, 'none');
+      expect(ReasoningEffort.unknown.value, 'unknown');
     });
 
     test('fromString returns high for "high"', () {
@@ -21,9 +22,8 @@ void main() {
       expect(ReasoningEffort.fromString(null), isNull);
     });
 
-    test('fromString returns null for unknown value', () {
-      expect(ReasoningEffort.fromString('medium'), isNull);
-      expect(ReasoningEffort.fromString('unknown'), isNull);
+    test('fromString returns unknown for unrecognized value', () {
+      expect(ReasoningEffort.fromString('medium'), ReasoningEffort.unknown);
     });
 
     test('value round-trip', () {

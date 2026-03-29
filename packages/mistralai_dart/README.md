@@ -1,12 +1,12 @@
 # Mistral AI Dart Client
 
+> [!TIP]
+> Coding agents: start with [llms.txt](./llms.txt). It links to the package docs, examples, and optional references in a compact format.
+
 [![pub package](https://img.shields.io/pub/v/mistralai_dart.svg)](https://pub.dev/packages/mistralai_dart)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Dart client for the **[Mistral AI API](https://docs.mistral.ai/)** with chat completions, streaming, tool calling, multimodal inputs, TTS, voice management, reasoning effort, embeddings, OCR, and more. It gives Dart and Flutter applications a pure Dart, type-safe client across iOS, Android, macOS, Windows, Linux, Web, and server-side Dart.
-
-> [!TIP]
-> Coding agents: start with [llms.txt](./llms.txt). It links to the package docs, examples, and optional references in a compact format.
 
 <details>
 <summary><b>Table of Contents</b></summary>
@@ -26,6 +26,8 @@ Dart client for the **[Mistral AI API](https://docs.mistral.ai/)** with chat com
 </details>
 
 ## Features
+
+> **Coverage:** This client covers the full Mistral AI API surface. See [API Coverage](#api-coverage) for details.
 
 ### Generation and streaming
 
@@ -419,6 +421,51 @@ final stream = client.fim.createStream(
 ```
 
 → [Full example](example/fim_example.dart)
+
+</details>
+
+### How do I list and manage models?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.models` to list, retrieve, and delete models. Use `client.fineTuning.models` to update, archive, and unarchive fine-tuned models.
+
+```dart
+// List all models
+final models = await client.models.list();
+for (final model in models.data) {
+  print('${model.id}: ${model.name}');
+}
+
+// Get a specific model
+final model = await client.models.get('mistral-small-latest');
+print('Max context: ${model.maxContextLength}');
+
+// Delete a fine-tuned model
+await client.models.delete('ft:mistral-small:my-model:xyz');
+```
+
+```dart
+// Update a fine-tuned model's metadata
+final updated = await client.fineTuning.models.update(
+  modelId: 'ft:mistral-small:my-model:xyz',
+  name: 'My Improved Model',
+  description: 'Fine-tuned for customer support',
+);
+
+// Archive a model
+final archived = await client.fineTuning.models.archive(
+  modelId: 'ft:mistral-small:my-model:xyz',
+);
+
+// Unarchive a model
+await client.fineTuning.models.unarchive(
+  modelId: 'ft:mistral-small:my-model:xyz',
+);
+```
+
+→ [Full example](example/models_example.dart)
 
 </details>
 
