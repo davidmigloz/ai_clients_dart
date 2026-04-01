@@ -22,7 +22,7 @@ void main() {
     print('   Generated files are created when using video generation:');
     print('   ```dart');
     print('   final operation = await client.models.predictLongRunning(');
-    print('     model: "veo-3.0-generate-001",');
+    print('     model: "veo-3.1-lite-generate-preview",');
     print('     instances: [');
     print('       {"prompt": "A cat playing piano"},');
     print('     ],');

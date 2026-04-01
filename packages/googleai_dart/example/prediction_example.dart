@@ -16,7 +16,7 @@ void main() async {
     print('=== Synchronous Prediction ===\n');
 
     final predictResponse = await client.models.predict(
-      model: 'veo-3.0-generate-001',
+      model: 'veo-3.1-lite-generate-preview',
       instances: [
         {'prompt': 'A cat playing piano in a jazz club'},
       ],
@@ -31,7 +31,7 @@ void main() async {
     print('\n=== Long-Running Prediction (Video Generation) ===\n');
 
     final operation = await client.models.predictLongRunning(
-      model: 'veo-3.0-generate-001',
+      model: 'veo-3.1-lite-generate-preview',
       instances: [
         {'prompt': 'A golden retriever running on a beach at sunset'},
       ],
@@ -91,7 +91,7 @@ void main() async {
     print('\n=== Batch Video Generation ===\n');
 
     final batchOperation = await client.models.predictLongRunning(
-      model: 'veo-3.0-generate-001',
+      model: 'veo-3.1-lite-generate-preview',
       instances: [
         {'prompt': 'A bird flying through clouds'},
         {'prompt': 'Ocean waves crashing on rocks'},

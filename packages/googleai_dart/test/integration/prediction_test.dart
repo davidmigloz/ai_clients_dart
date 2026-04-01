@@ -48,7 +48,7 @@ void main() {
         // or if the API key doesn't have access to prediction endpoints
         try {
           final operation = await client.models.predictLongRunning(
-            model: 'veo-3.0-generate-001',
+            model: 'veo-3.1-lite-generate-preview',
             instances: [
               {'prompt': 'A dog running on the beach'},
             ],
@@ -95,7 +95,7 @@ void main() {
 
         try {
           final operation = await client.models.predictLongRunning(
-            model: 'veo-3.0-generate-001',
+            model: 'veo-3.1-lite-generate-preview',
             instances: [
               {'prompt': 'A sunset over mountains'},
             ],
