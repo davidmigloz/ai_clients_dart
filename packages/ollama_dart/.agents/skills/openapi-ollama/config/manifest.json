@@ -301,11 +301,12 @@
     },
     "ModelOptions": {
       "spec": "main",
-      "kind": "object",
+      "kind": "skip",
       "dart_class": "ModelOptions",
       "file": "lib/src/models/metadata/model_options.dart",
       "schema": "ModelOptions",
-      "tags": []
+      "tags": ["acknowledged"],
+      "note": "Spec has additionalProperties: true with only 8 fields; Dart class intentionally declares 30 typed fields covering all known Ollama options for type safety"
     }
   }
 }
