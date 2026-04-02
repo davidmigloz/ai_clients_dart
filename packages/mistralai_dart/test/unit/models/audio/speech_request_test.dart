@@ -220,36 +220,21 @@ void main() {
       });
 
       test('copyWith clears extra to null', () {
-        const request = SpeechRequest(
-          input: 'Hello',
-          extra: {'speed': 1.5},
-        );
+        const request = SpeechRequest(input: 'Hello', extra: {'speed': 1.5});
         final copy = request.copyWith(extra: null);
         expect(copy.extra, isNull);
       });
 
       test('copyWith preserves extra when not specified', () {
-        const request = SpeechRequest(
-          input: 'Hello',
-          extra: {'speed': 1.5},
-        );
+        const request = SpeechRequest(input: 'Hello', extra: {'speed': 1.5});
         final copy = request.copyWith(input: 'Goodbye');
         expect(copy.extra, {'speed': 1.5});
       });
 
       test('equality includes extra', () {
-        const a = SpeechRequest(
-          input: 'Hello',
-          extra: {'speed': 1.5},
-        );
-        const b = SpeechRequest(
-          input: 'Hello',
-          extra: {'speed': 1.5},
-        );
-        const c = SpeechRequest(
-          input: 'Hello',
-          extra: {'speed': 2.0},
-        );
+        const a = SpeechRequest(input: 'Hello', extra: {'speed': 1.5});
+        const b = SpeechRequest(input: 'Hello', extra: {'speed': 1.5});
+        const c = SpeechRequest(input: 'Hello', extra: {'speed': 2.0});
         expect(a, equals(b));
         expect(a.hashCode, b.hashCode);
         expect(a, isNot(equals(c)));
