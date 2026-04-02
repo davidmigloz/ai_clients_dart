@@ -1,19 +1,16 @@
 {
+  "output_dir": "/tmp/openapi-anthropic-dart",
+  "preflight": {
+    "stats_field": "openapi_spec_url",
+    "stats_url": "https://raw.githubusercontent.com/anthropics/anthropic-sdk-python/refs/heads/main/.stats.yml"
+  },
   "specs": {
     "main": {
-      "name": "Anthropic API",
-      "url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/anthropic%2Fanthropic-dd2dcd00a757075370a7e4a7f469a1e2d067c2118684c3b70d7906a8f5cf518b.yml",
-      "local_file": "openapi.yaml",
-      "requires_auth": false,
-      "auth_env_vars": [],
-      "description": "Anthropic API for Claude models",
-      "fetch_mode": "remote",
       "audit": {
         "excluded_schemas": [],
-        "schema_aliases": {},
         "reference_impl": {
-          "repo": "anthropics/anthropic-sdk-python",
           "ref": "main",
+          "repo": "anthropics/anthropic-sdk-python",
           "resources": {
             "adapter": "python_stainless_resources",
             "path": "src/anthropic/resources"
@@ -22,14 +19,17 @@
             "adapter": "python_init_exports",
             "path": "src/anthropic/types/__init__.py"
           }
-        }
-      }
+        },
+        "schema_aliases": {}
+      },
+      "auth_env_vars": [],
+      "description": "Anthropic API for Claude models",
+      "fetch_mode": "remote",
+      "local_file": "openapi.yaml",
+      "name": "Anthropic API",
+      "requires_auth": false,
+      "url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/anthropic%2Fanthropic-efe26b096126c693462514b8cbd3ec3e376569232becbfb730cd26fb31c7c7e3.yml"
     }
   },
-  "preflight": {
-    "stats_url": "https://raw.githubusercontent.com/anthropics/anthropic-sdk-python/refs/heads/main/.stats.yml",
-    "stats_field": "openapi_spec_url"
-  },
-  "specs_dir": "packages/anthropic_sdk_dart/specs",
-  "output_dir": "/tmp/openapi-anthropic-dart"
+  "specs_dir": "packages/anthropic_sdk_dart/specs"
 }
