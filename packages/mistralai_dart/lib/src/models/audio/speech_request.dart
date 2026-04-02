@@ -1,9 +1,13 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 import 'speech_output_format.dart';
 
 /// Request for speech synthesis (text-to-speech).
+///
+/// The [extra] field holds additional properties beyond the declared fields,
+/// as the Mistral API spec allows `additionalProperties` on this type.
 @immutable
 class SpeechRequest {
   /// Text to generate speech from.
@@ -24,6 +28,9 @@ class SpeechRequest {
   /// Whether to stream the response.
   final bool? stream;
 
+  /// Additional properties not covered by the named fields.
+  final Map<String, dynamic>? extra;
+
   /// Creates a [SpeechRequest].
   const SpeechRequest({
     required this.input,
@@ -32,22 +39,42 @@ class SpeechRequest {
     this.refAudio,
     this.responseFormat,
     this.stream,
+    this.extra,
   });
 
   /// Creates a [SpeechRequest] from JSON.
-  factory SpeechRequest.fromJson(Map<String, dynamic> json) => SpeechRequest(
-    input: json['input'] as String? ?? '',
-    model: json['model'] as String?,
-    voiceId: json['voice_id'] as String?,
-    refAudio: json['ref_audio'] as String?,
-    responseFormat: SpeechOutputFormat.fromString(
-      json['response_format'] as String?,
-    ),
-    stream: json['stream'] as bool?,
-  );
+  factory SpeechRequest.fromJson(Map<String, dynamic> json) {
+    const knownKeys = {
+      'input',
+      'model',
+      'voice_id',
+      'ref_audio',
+      'response_format',
+      'stream',
+    };
+    final extraEntries = {
+      for (final entry in json.entries)
+        if (!knownKeys.contains(entry.key)) entry.key: entry.value,
+    };
+    return SpeechRequest(
+      input: json['input'] as String? ?? '',
+      model: json['model'] as String?,
+      voiceId: json['voice_id'] as String?,
+      refAudio: json['ref_audio'] as String?,
+      responseFormat: SpeechOutputFormat.fromString(
+        json['response_format'] as String?,
+      ),
+      stream: json['stream'] as bool?,
+      extra: extraEntries.isEmpty ? null : extraEntries,
+    );
+  }
 
   /// Converts to JSON.
+  ///
+  /// [extra] is spread first; known keys are written after, so typed fields
+  /// always take precedence on key collision.
   Map<String, dynamic> toJson() => {
+    if (extra != null) ...extra!,
     'input': input,
     if (model != null) 'model': model,
     if (voiceId != null) 'voice_id': voiceId,
@@ -64,6 +91,7 @@ class SpeechRequest {
     Object? refAudio = unsetCopyWithValue,
     Object? responseFormat = unsetCopyWithValue,
     Object? stream = unsetCopyWithValue,
+    Object? extra = unsetCopyWithValue,
   }) {
     return SpeechRequest(
       input: input ?? this.input,
@@ -78,6 +106,9 @@ class SpeechRequest {
           ? this.responseFormat
           : responseFormat as SpeechOutputFormat?,
       stream: stream == unsetCopyWithValue ? this.stream : stream as bool?,
+      extra: extra == unsetCopyWithValue
+          ? this.extra
+          : extra as Map<String, dynamic>?,
     );
   }
 
@@ -91,11 +122,19 @@ class SpeechRequest {
           voiceId == other.voiceId &&
           refAudio == other.refAudio &&
           responseFormat == other.responseFormat &&
-          stream == other.stream;
+          stream == other.stream &&
+          mapsDeepEqual(extra, other.extra);
 
   @override
-  int get hashCode =>
-      Object.hash(input, model, voiceId, refAudio, responseFormat, stream);
+  int get hashCode => Object.hash(
+    input,
+    model,
+    voiceId,
+    refAudio,
+    responseFormat,
+    stream,
+    mapDeepHashCode(extra),
+  );
 
   @override
   String toString() =>
@@ -104,5 +143,6 @@ class SpeechRequest {
       'voiceId: $voiceId, '
       'refAudio: ${refAudio != null ? '${refAudio!.length} chars' : null}, '
       'responseFormat: $responseFormat, '
-      'stream: $stream)';
+      'stream: $stream, '
+      'extra: $extra)';
 }
