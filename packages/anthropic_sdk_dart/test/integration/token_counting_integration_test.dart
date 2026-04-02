@@ -144,6 +144,7 @@ void main() {
               },
             },
             required: ['location'],
+            extra: {'additionalProperties': false},
           ),
         );
 

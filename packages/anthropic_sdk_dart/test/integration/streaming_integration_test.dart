@@ -100,6 +100,7 @@ void main() {
               'b': {'type': 'number'},
             },
             required: ['operation', 'a', 'b'],
+            extra: {'additionalProperties': false},
           ),
         );
 

@@ -221,6 +221,7 @@ Future<void> main() async {
                 'location': {'type': 'string'},
               },
               required: ['location'],
+              extra: {'additionalProperties': false},
             ),
           ),
         ],

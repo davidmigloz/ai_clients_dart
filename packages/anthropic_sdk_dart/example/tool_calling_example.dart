@@ -31,6 +31,7 @@ void main() async {
           },
         },
         required: ['location'],
+        extra: {'additionalProperties': false},
       ),
     );
 

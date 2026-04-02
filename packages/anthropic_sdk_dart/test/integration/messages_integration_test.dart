@@ -149,6 +149,7 @@ void main() {
               'location': {'type': 'string', 'description': 'The city name'},
             },
             required: ['location'],
+            extra: {'additionalProperties': false},
           ),
         );
 

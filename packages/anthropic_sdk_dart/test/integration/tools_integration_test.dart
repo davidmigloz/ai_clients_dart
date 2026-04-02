@@ -46,6 +46,7 @@ void main() {
               'b': {'type': 'number', 'description': 'Second number'},
             },
             required: ['a', 'b'],
+            extra: {'additionalProperties': false},
           ),
         );
 
@@ -96,6 +97,7 @@ void main() {
               'location': {'type': 'string', 'description': 'City name'},
             },
             required: ['location'],
+            extra: {'additionalProperties': false},
           ),
         );
 
@@ -196,6 +198,7 @@ void main() {
               'min': {'type': 'integer'},
               'max': {'type': 'integer'},
             },
+            extra: {'additionalProperties': false},
           ),
         );
 
@@ -235,6 +238,7 @@ void main() {
               'query': {'type': 'string'},
             },
             required: ['query'],
+            extra: {'additionalProperties': false},
           ),
         );
 

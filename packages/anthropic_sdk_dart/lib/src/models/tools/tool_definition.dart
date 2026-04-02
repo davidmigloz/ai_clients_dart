@@ -20,6 +20,7 @@ import 'tool.dart';
 ///           'location': {'type': 'string', 'description': 'City name'},
 ///         },
 ///         required: ['location'],
+///         extra: {'additionalProperties': false},
 ///       ),
 ///     ),
 ///   ),
