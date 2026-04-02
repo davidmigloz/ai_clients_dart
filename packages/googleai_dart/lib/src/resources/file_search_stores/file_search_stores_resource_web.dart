@@ -139,9 +139,7 @@ class FileSearchStoresResource extends ResourceBase {
   Future<void> delete({required String name, bool? force}) async {
     _validateGoogleAIOnly();
 
-    final queryParams = <String, String>{
-      if (force ?? false) 'force': 'true',
-    };
+    final queryParams = <String, String>{if (force ?? false) 'force': 'true'};
 
     final url = requestBuilder.buildUrl(
       '/{version}/$name',
@@ -404,9 +402,7 @@ class FileSearchStoresResource extends ResourceBase {
   Future<void> deleteDocument({required String name, bool? force}) async {
     _validateGoogleAIOnly();
 
-    final queryParams = <String, String>{
-      if (force ?? false) 'force': 'true',
-    };
+    final queryParams = <String, String>{if (force ?? false) 'force': 'true'};
 
     final url = requestBuilder.buildUrl(
       '/{version}/$name',
