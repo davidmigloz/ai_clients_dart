@@ -144,5 +144,5 @@ class SpeechRequest {
       'refAudio: ${refAudio != null ? '${refAudio!.length} chars' : null}, '
       'responseFormat: $responseFormat, '
       'stream: $stream, '
-      'extra: $extra)';
+      'extra: ${extra != null ? '${extra!.length} entries' : null})';
 }
