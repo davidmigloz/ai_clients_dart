@@ -3434,6 +3434,8 @@ class ApiToolkitCommandTests(unittest.TestCase):
                 SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
             )
 
+            # Endpoint-action mismatches are warnings, so exit_code is still 0
+            self.assertEqual(exit_code, 0)
             impl = payload["results"]["implementation"]
             self.assertTrue(impl["endpoint_action_mismatches"])
             self.assertTrue(
@@ -3477,6 +3479,7 @@ class ApiToolkitCommandTests(unittest.TestCase):
                 SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
             )
 
+            self.assertEqual(exit_code, 0)
             impl = payload["results"]["implementation"]
             self.assertEqual(impl["endpoint_action_mismatches"], [])
 
@@ -3515,6 +3518,8 @@ class ApiToolkitCommandTests(unittest.TestCase):
                 SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
             )
 
+            # Coverage gaps cause exit_code=1
+            self.assertEqual(exit_code, 1)
             impl = payload["results"]["implementation"]
             self.assertEqual(impl["endpoint_action_mismatches"], [])
             # But coverage_gaps should catch it
@@ -7944,6 +7949,7 @@ class ApiToolkitCommandTests(unittest.TestCase):
                 )
             )
 
+            self.assertEqual(exit_code, 0)
             issues = payload["results"]["implementation"]["issues"]
             overflow_issues = [i for i in issues if "no overflow field" in i.get("message", "")]
             self.assertEqual(overflow_issues, [], f"Expected no overflow errors, got: {overflow_issues}")
@@ -8021,10 +8027,10 @@ class ApiToolkitCommandTests(unittest.TestCase):
                 )
             )
 
+            self.assertEqual(exit_code, 0)
             issues = payload["results"]["implementation"]["issues"]
             overflow_issues = [i for i in issues if "no overflow field" in i.get("message", "")]
             self.assertEqual(overflow_issues, [], f"Expected no overflow errors, got: {overflow_issues}")
-
 
     def test_scaffold_open_object_includes_extra_field(self) -> None:
         """_scaffold_class_source with is_open=True generates an extra field with full support."""

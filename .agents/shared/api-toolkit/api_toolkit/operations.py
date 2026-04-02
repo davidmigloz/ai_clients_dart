@@ -700,12 +700,7 @@ def _endpoint_action_issues(
             continue
         action = last_segment.split(":")[-1]
 
-        # Check that at least one HTTP method exists (skip path-level params-only entries)
-        has_method = any(method in path_payload for method in HTTP_METHODS)
-        if not has_method:
-            continue
-
-        # Check tag exclusions — skip only if ALL operations are excluded
+        # Collect operations (skip path-level params-only entries with no methods)
         operations = [path_payload[method] for method in HTTP_METHODS if method in path_payload]
         if not operations:
             continue
@@ -725,7 +720,7 @@ def _endpoint_action_issues(
 
         # Resolve resource aliases and find matching files
         implemented_name = resource_aliases.get(resource, resource)
-        candidates = {implemented_name, implemented_name.rstrip("s"), f"{implemented_name}s"}
+        candidates = {implemented_name, implemented_name.removesuffix("s"), f"{implemented_name}s"}
         matched_files: list[Path] = []
         for candidate in candidates:
             matched_files.extend(resource_files.get(candidate, []))
@@ -1432,7 +1427,8 @@ def _verify_object_entry(config: ToolkitConfig, spec_payload: dict[str, Any], en
     is_open = additional_props is True or isinstance(additional_props, dict)
     if is_open and config.manifest.surface == "openapi":
         overflow_field_names = {"extra", "additionalProperties", "overflow"}
-        has_overflow = bool(overflow_field_names & set(fields.keys()))
+        all_field_names = set(fields.keys()) | inherited_fields | constant_fields
+        has_overflow = bool(overflow_field_names & all_field_names)
         if not has_overflow:
             issues.append(_type_issue(
                 "error",
