@@ -71,8 +71,8 @@ class SpeechRequest {
 
   /// Converts to JSON.
   ///
-  /// [extra] is spread first; known keys are written after, so typed fields
-  /// always take precedence on key collision.
+  /// [extra] is spread first; non-null typed fields are written after, so they
+  /// take precedence on key collision.
   Map<String, dynamic> toJson() => {
     if (extra != null) ...extra!,
     'input': input,

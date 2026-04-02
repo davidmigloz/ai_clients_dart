@@ -162,5 +162,111 @@ void main() {
       expect(str, contains('Hello'));
       expect(str, contains('model-1'));
     });
+
+    group('extra field', () {
+      test('fromJson collects unknown keys into extra', () {
+        final request = SpeechRequest.fromJson(const {
+          'input': 'Hello',
+          'model': 'mistral-tts-latest',
+          'custom_param': 'value',
+          'speed': 1.5,
+        });
+        expect(request.input, 'Hello');
+        expect(request.model, 'mistral-tts-latest');
+        expect(request.extra, {'custom_param': 'value', 'speed': 1.5});
+      });
+
+      test('fromJson returns null extra when only known keys', () {
+        final request = SpeechRequest.fromJson(const {
+          'input': 'Hello',
+          'model': 'mistral-tts-latest',
+        });
+        expect(request.extra, isNull);
+      });
+
+      test('toJson includes extra as top-level keys', () {
+        const request = SpeechRequest(
+          input: 'Hello',
+          extra: {'custom_param': 'value', 'speed': 1.5},
+        );
+        final json = request.toJson();
+        expect(json['input'], 'Hello');
+        expect(json['custom_param'], 'value');
+        expect(json['speed'], 1.5);
+        expect(json.containsKey('extra'), isFalse);
+      });
+
+      test('toJson without extra produces no extra keys', () {
+        const request = SpeechRequest(input: 'Hello');
+        final json = request.toJson();
+        expect(json.keys, ['input']);
+      });
+
+      test('round-trip preserves extra keys', () {
+        final original = {
+          'input': 'Hello',
+          'model': 'mistral-tts-latest',
+          'custom_param': 'value',
+        };
+        final request = SpeechRequest.fromJson(original);
+        final json = request.toJson();
+        expect(json, original);
+      });
+
+      test('copyWith sets extra', () {
+        const request = SpeechRequest(input: 'Hello');
+        final copy = request.copyWith(extra: {'speed': 1.5});
+        expect(copy.extra, {'speed': 1.5});
+      });
+
+      test('copyWith clears extra to null', () {
+        const request = SpeechRequest(
+          input: 'Hello',
+          extra: {'speed': 1.5},
+        );
+        final copy = request.copyWith(extra: null);
+        expect(copy.extra, isNull);
+      });
+
+      test('copyWith preserves extra when not specified', () {
+        const request = SpeechRequest(
+          input: 'Hello',
+          extra: {'speed': 1.5},
+        );
+        final copy = request.copyWith(input: 'Goodbye');
+        expect(copy.extra, {'speed': 1.5});
+      });
+
+      test('equality includes extra', () {
+        const a = SpeechRequest(
+          input: 'Hello',
+          extra: {'speed': 1.5},
+        );
+        const b = SpeechRequest(
+          input: 'Hello',
+          extra: {'speed': 1.5},
+        );
+        const c = SpeechRequest(
+          input: 'Hello',
+          extra: {'speed': 2.0},
+        );
+        expect(a, equals(b));
+        expect(a.hashCode, b.hashCode);
+        expect(a, isNot(equals(c)));
+      });
+
+      test('toString shows extra entry count', () {
+        const request = SpeechRequest(
+          input: 'Hello',
+          extra: {'speed': 1.5, 'custom': true},
+        );
+        expect(request.toString(), contains('extra: 2 entries'));
+      });
+
+      test('toString shows null for missing extra', () {
+        const request = SpeechRequest(input: 'Hello');
+        expect(request.toString(), contains('extra: null'));
+      });
+    });
   });
 }
