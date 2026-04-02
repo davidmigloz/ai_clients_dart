@@ -2,6 +2,7 @@
 @Tags(['integration'])
 library;
 
+import 'dart:convert' show utf8;
 import 'dart:io' as io;
 import 'package:googleai_dart/googleai_dart.dart';
 import 'package:test/test.dart';
@@ -16,8 +17,9 @@ void main() {
   String? storeName;
 
   setUpAll(() {
-    apiKey = io.Platform.environment['GEMINI_API_KEY'];
-    if (apiKey == null || apiKey!.isEmpty) {
+    final key = io.Platform.environment['GEMINI_API_KEY'];
+    apiKey = (key != null && key.isNotEmpty) ? key : null;
+    if (apiKey == null) {
       print(
         '  GEMINI_API_KEY not set. Integration tests will be skipped.\n'
         '   To run these tests, export GEMINI_API_KEY=your_api_key',
@@ -103,7 +105,7 @@ void main() {
           'Dart is a client-optimized language for fast apps '
           'on any platform. It is developed by Google and used to build '
           'mobile, desktop, server, and web applications.';
-      final bytes = content.codeUnits;
+      final bytes = utf8.encode(content);
 
       final response = await client!.fileSearchStores.upload(
         parent: storeName!,
