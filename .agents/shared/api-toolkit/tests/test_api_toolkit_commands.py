@@ -3396,6 +3396,130 @@ class ApiToolkitCommandTests(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["results"]["implementation"]["coverage_gaps"], [])
 
+    def test_verify_endpoint_action_mismatch(self) -> None:
+        """Resource file exists but does not contain the spec's action suffix."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            (package_root / "specs" / "openapi.json").write_text(
+                json.dumps(
+                    {
+                        "openapi": "3.1.0",
+                        "info": {"title": "Sample", "version": "1"},
+                        "paths": {
+                            "/v1/widgets/{widget}:uploadToWidget": {
+                                "post": {"operationId": "uploadToWidget"},
+                            },
+                        },
+                        "components": {"schemas": {}},
+                    }
+                )
+            )
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(root / "tmp" / "sample"),
+                },
+            )
+            # Resource file exists but uses wrong action
+            (package_root / "lib" / "src" / "resources" / "widgets_resource.dart").write_text(
+                "class WidgetsResource { void upload() {} }\n"
+            )
+
+            exit_code, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+
+            impl = payload["results"]["implementation"]
+            self.assertTrue(impl["endpoint_action_mismatches"])
+            self.assertTrue(
+                any("uploadToWidget" in issue["message"] for issue in impl["endpoint_action_mismatches"])
+            )
+
+    def test_verify_endpoint_action_match(self) -> None:
+        """Resource file contains the spec's action suffix — no issue."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            (package_root / "specs" / "openapi.json").write_text(
+                json.dumps(
+                    {
+                        "openapi": "3.1.0",
+                        "info": {"title": "Sample", "version": "1"},
+                        "paths": {
+                            "/v1/widgets/{widget}:generateContent": {
+                                "post": {"operationId": "generateContent"},
+                            },
+                        },
+                        "components": {"schemas": {}},
+                    }
+                )
+            )
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(root / "tmp" / "sample"),
+                },
+            )
+            (package_root / "lib" / "src" / "resources" / "widgets_resource.dart").write_text(
+                "class WidgetsResource { void doStuff() { buildUrl(':generateContent'); } }\n"
+            )
+
+            exit_code, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+
+            impl = payload["results"]["implementation"]
+            self.assertEqual(impl["endpoint_action_mismatches"], [])
+
+    def test_verify_endpoint_action_no_resource_file(self) -> None:
+        """No resource file for the endpoint — skip (coverage_gaps handles it)."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            (package_root / "specs" / "openapi.json").write_text(
+                json.dumps(
+                    {
+                        "openapi": "3.1.0",
+                        "info": {"title": "Sample", "version": "1"},
+                        "paths": {
+                            "/v1/missing/{id}:doSomething": {
+                                "post": {"operationId": "doSomething"},
+                            },
+                        },
+                        "components": {"schemas": {}},
+                    }
+                )
+            )
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(root / "tmp" / "sample"),
+                },
+            )
+            # No resource file at all — endpoint_action_issues should not flag this
+
+            exit_code, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+
+            impl = payload["results"]["implementation"]
+            self.assertEqual(impl["endpoint_action_mismatches"], [])
+            # But coverage_gaps should catch it
+            self.assertTrue(impl["coverage_gaps"])
+
     def test_review_summary_counts_implementation_warnings(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
@@ -7664,6 +7788,278 @@ class ApiToolkitCommandTests(unittest.TestCase):
         props = {"item": {"ref": "Foo", "required": True, "nullable": True}}
         source = _scaffold_class_source("Example", props, type_mappings)
         self.assertIn("?.toJson()", source, f"class toJson should use ?.toJson() for required+nullable ref: {source}")
+
+
+    def test_verify_open_object_errors_missing_overflow_field(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            specs_dir = package_root / "specs"
+            output_dir = root / "tmp" / "sample"
+            output_dir.mkdir(parents=True)
+            spec_payload = {
+                "openapi": "3.1.0",
+                "info": {"title": "Sample", "version": "1"},
+                "paths": {},
+                "components": {
+                    "schemas": {
+                        "Example": {
+                            "type": "object",
+                            "additionalProperties": True,
+                            "properties": {
+                                "id": {"type": "string"},
+                            },
+                            "required": ["id"],
+                        }
+                    }
+                },
+            }
+            (specs_dir / "openapi.json").write_text(json.dumps(spec_payload))
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample API", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(output_dir),
+                },
+                manifest_payload={
+                    "surface": "openapi",
+                    "type_mappings": {},
+                    "placement": {"categories": {}, "default_category": "common", "parent_model_patterns": {}},
+                    "coverage": {},
+                    "types": {
+                        "Example": {
+                            "spec": "main",
+                            "kind": "object",
+                            "dart_class": "Example",
+                            "file": "lib/src/models/common/example.dart",
+                            "schema": "Example",
+                            "tags": ["critical"],
+                        }
+                    },
+                },
+            )
+            (package_root / "lib" / "src" / "models" / "common" / "example.dart").write_text(
+                "class Example {\n"
+                "  final String id;\n\n"
+                "  const Example({required this.id});\n"
+                "  factory Example.fromJson(Map<String, dynamic> json) => Example(id: json['id'] as String);\n"
+                "  Map<String, dynamic> toJson() => {'id': id};\n"
+                "  Example copyWith({String? id}) => Example(id: id ?? this.id);\n"
+                "}\n"
+            )
+
+            exit_code, payload = command_verify(
+                SimpleNamespace(
+                    config_dir=config_dir,
+                    spec_name=None,
+                    checks="implementation",
+                    scope="all",
+                    type_name=None,
+                    baseline=None,
+                    git_ref=None,
+                )
+            )
+
+            self.assertEqual(exit_code, 1)
+            issues = payload["results"]["implementation"]["issues"]
+            self.assertTrue(
+                any("no overflow field" in issue["message"] for issue in issues),
+                f"Expected overflow field error, got: {issues}",
+            )
+
+    def test_verify_open_object_no_error_with_extra_field(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            specs_dir = package_root / "specs"
+            output_dir = root / "tmp" / "sample"
+            output_dir.mkdir(parents=True)
+            spec_payload = {
+                "openapi": "3.1.0",
+                "info": {"title": "Sample", "version": "1"},
+                "paths": {},
+                "components": {
+                    "schemas": {
+                        "Example": {
+                            "type": "object",
+                            "additionalProperties": True,
+                            "properties": {
+                                "id": {"type": "string"},
+                            },
+                            "required": ["id"],
+                        }
+                    }
+                },
+            }
+            (specs_dir / "openapi.json").write_text(json.dumps(spec_payload))
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample API", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(output_dir),
+                },
+                manifest_payload={
+                    "surface": "openapi",
+                    "type_mappings": {},
+                    "placement": {"categories": {}, "default_category": "common", "parent_model_patterns": {}},
+                    "coverage": {},
+                    "types": {
+                        "Example": {
+                            "spec": "main",
+                            "kind": "object",
+                            "dart_class": "Example",
+                            "file": "lib/src/models/common/example.dart",
+                            "schema": "Example",
+                            "tags": ["critical"],
+                        }
+                    },
+                },
+            )
+            (package_root / "lib" / "src" / "models" / "common" / "example.dart").write_text(
+                "class Example {\n"
+                "  final String id;\n"
+                "  final Map<String, dynamic>? extra;\n\n"
+                "  const Example({required this.id, this.extra});\n"
+                "  factory Example.fromJson(Map<String, dynamic> json) => Example(id: json['id'] as String, extra: json);\n"
+                "  Map<String, dynamic> toJson() => {'id': id};\n"
+                "  Example copyWith({String? id, Map<String, dynamic>? extra}) => Example(id: id ?? this.id, extra: extra ?? this.extra);\n"
+                "}\n"
+            )
+
+            exit_code, payload = command_verify(
+                SimpleNamespace(
+                    config_dir=config_dir,
+                    spec_name=None,
+                    checks="implementation",
+                    scope="all",
+                    type_name=None,
+                    baseline=None,
+                    git_ref=None,
+                )
+            )
+
+            issues = payload["results"]["implementation"]["issues"]
+            overflow_issues = [i for i in issues if "no overflow field" in i.get("message", "")]
+            self.assertEqual(overflow_issues, [], f"Expected no overflow errors, got: {overflow_issues}")
+
+    def test_verify_closed_object_no_overflow_error(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            specs_dir = package_root / "specs"
+            output_dir = root / "tmp" / "sample"
+            output_dir.mkdir(parents=True)
+            spec_payload = {
+                "openapi": "3.1.0",
+                "info": {"title": "Sample", "version": "1"},
+                "paths": {},
+                "components": {
+                    "schemas": {
+                        "Example": {
+                            "type": "object",
+                            "additionalProperties": False,
+                            "properties": {
+                                "id": {"type": "string"},
+                            },
+                            "required": ["id"],
+                        }
+                    }
+                },
+            }
+            (specs_dir / "openapi.json").write_text(json.dumps(spec_payload))
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample API", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(output_dir),
+                },
+                manifest_payload={
+                    "surface": "openapi",
+                    "type_mappings": {},
+                    "placement": {"categories": {}, "default_category": "common", "parent_model_patterns": {}},
+                    "coverage": {},
+                    "types": {
+                        "Example": {
+                            "spec": "main",
+                            "kind": "object",
+                            "dart_class": "Example",
+                            "file": "lib/src/models/common/example.dart",
+                            "schema": "Example",
+                            "tags": ["critical"],
+                        }
+                    },
+                },
+            )
+            (package_root / "lib" / "src" / "models" / "common" / "example.dart").write_text(
+                "class Example {\n"
+                "  final String id;\n\n"
+                "  const Example({required this.id});\n"
+                "  factory Example.fromJson(Map<String, dynamic> json) => Example(id: json['id'] as String);\n"
+                "  Map<String, dynamic> toJson() => {'id': id};\n"
+                "  Example copyWith({String? id}) => Example(id: id ?? this.id);\n"
+                "}\n"
+            )
+
+            exit_code, payload = command_verify(
+                SimpleNamespace(
+                    config_dir=config_dir,
+                    spec_name=None,
+                    checks="implementation",
+                    scope="all",
+                    type_name=None,
+                    baseline=None,
+                    git_ref=None,
+                )
+            )
+
+            issues = payload["results"]["implementation"]["issues"]
+            overflow_issues = [i for i in issues if "no overflow field" in i.get("message", "")]
+            self.assertEqual(overflow_issues, [], f"Expected no overflow errors, got: {overflow_issues}")
+
+
+    def test_scaffold_open_object_includes_extra_field(self) -> None:
+        """_scaffold_class_source with is_open=True generates an extra field with full support."""
+        from api_toolkit.operations import _scaffold_class_source
+        type_mappings = {"string": "String", "integer": "int"}
+        props = {
+            "id": {"type": "string", "required": True},
+            "name": {"type": "string", "required": False},
+        }
+
+        # is_open=True must include extra field and supporting code
+        source_open = _scaffold_class_source("Example", props, type_mappings, is_open=True)
+        self.assertIn("Map<String, dynamic>? extra", source_open,
+                       f"Expected extra field declaration in open source: {source_open}")
+        self.assertIn("this.extra", source_open,
+                       f"Expected this.extra in constructor: {source_open}")
+        self.assertIn("_knownKeys", source_open,
+                       f"Expected _knownKeys in fromJson: {source_open}")
+        self.assertIn("...extra!", source_open,
+                       f"Expected ...extra! spread in toJson: {source_open}")
+        self.assertIn("Object? extra = _unsetCopyWithValue", source_open,
+                       f"Expected extra in copyWith parameters: {source_open}")
+        self.assertIn("extra: extra == _unsetCopyWithValue", source_open,
+                       f"Expected extra in copyWith body: {source_open}")
+        self.assertIn("extra: $extra", source_open,
+                       f"Expected extra in toString: {source_open}")
+
+        # is_open=False (default) must NOT include any extra field
+        source_closed = _scaffold_class_source("Example", props, type_mappings)
+        self.assertNotIn("Map<String, dynamic>? extra", source_closed,
+                         f"Closed source should not have extra field: {source_closed}")
+        self.assertNotIn("_knownKeys", source_closed,
+                         f"Closed source should not have _knownKeys: {source_closed}")
+        self.assertNotIn("...extra!", source_closed,
+                         f"Closed source should not have ...extra!: {source_closed}")
 
 
 if __name__ == "__main__":

@@ -23,6 +23,7 @@ Use this checklist during code review and before finalizing changes. For detaile
 - [ ] **Nullable field serialization**: Optional-nullable fields use `if (field != null) 'key': field` (scalars) or `if (field != null) 'key': field!.toJson()` (nested models) to omit nulls. Required-nullable fields always emit the key. Distinguish required vs optional from the OpenAPI spec — see [implementation-patterns-core.md](implementation-patterns-core.md#nullable-field-serialization) for the full decision table.
 - [ ] **Model-variant nullability**: Fields only returned by a subset of API models must be nullable so all model variants parse without throwing. In streaming APIs, all non-discriminator fields on content/delta types must also be nullable since partial events may only include the `type` field.
 - [ ] **Spec type fidelity**: Verify field types match the OpenAPI spec exactly — array fields use `List<T>`, string parameters use `String` even for numeric-looking values. Never model a spec `type: array` field as a single object; check the spec for `items` to determine the list element type.
+- [ ] **Open object handling**: Schemas with `additionalProperties: true` must have an overflow field (e.g., `Map<String, dynamic>? extra`) that preserves and round-trips unknown keys via `fromJson`/`toJson`. The toolkit verifier flags missing overflow fields as errors (blocking).
 
 ### Sealed Classes
 - [ ] **Doc comment subtypes**: Sealed class doc comments must enumerate all subtypes. Update the parent's doc comment when adding a variant.
@@ -42,6 +43,7 @@ Use this checklist during code review and before finalizing changes. For detaile
 - [ ] **Constructor validation parity**: Validation constraints in constructors (asserts, mutual exclusivity) must also be enforced in `fromJson`.
 - [ ] **JSON encoding**: Always use `jsonEncode()` for serialization — never `.toString()` on maps/objects.
 - [ ] **Parameter placement**: Query parameters per spec → URL query string; body parameters per spec → request body. Don't mix them.
+- [ ] **Endpoint URL path**: Resource methods that construct URLs manually (especially upload endpoints bypassing `requestBuilder.buildUrl`) must match the OpenAPI spec path exactly — including action suffixes (e.g., `:uploadToFileSearchStore`, not `:upload`). The toolkit `verify --checks implementation` flags missing action suffixes.
 
 ### Documentation
 - [ ] **Method/path name accuracy**: After renaming methods, files, or config paths, search all docs, error messages, and examples for references to the old names/paths and update them.

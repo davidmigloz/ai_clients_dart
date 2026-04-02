@@ -1,6 +1,6 @@
 # Core Implementation Patterns
 
-**Contents:** [Manifest Kinds](#manifest-kind-values) · [Type Safety](#type-safety-patterns) · [toString](#tostring-convention) · [Equality & Hashing](#equality-and-hashing) · [Immutability](#immutability-enforcement) · [fromJson Patterns](#fromjson-defensive-patterns) · [Nullable Serialization](#nullable-field-serialization) · [HTTP Client](#http-client-patterns) · [DateTime](#datetime-handling) · [Security](#security) · [JSON](#json-serialization) · [SSE Parsing](#sse-parser-correctness) · [API Design](#api-design)
+**Contents:** [Manifest Kinds](#manifest-kind-values) · [Type Safety](#type-safety-patterns) · [toString](#tostring-convention) · [Equality & Hashing](#equality-and-hashing) · [Immutability](#immutability-enforcement) · [fromJson Patterns](#fromjson-defensive-patterns) · [Nullable Serialization](#nullable-field-serialization) · [Open Objects](#open-object-schemas) · [HTTP Client](#http-client-patterns) · [DateTime](#datetime-handling) · [Security](#security) · [JSON](#json-serialization) · [SSE Parsing](#sse-parser-correctness) · [API Design](#api-design)
 
 - Keep specs checked in under package `specs/` and compare them against fetched scratch specs.
 - Keep Dart serialization handwritten and deterministic.
@@ -213,6 +213,69 @@ Map<String, dynamic> toJson() => {
 Confusing optional vs required, or scalars vs models, is a common source of
 bugs — always check the OpenAPI spec.
 
+## Open Object Schemas
+
+When an OpenAPI schema has `"additionalProperties": true`, the object is *open* —
+it can carry arbitrary keys beyond the declared `properties`. This is common for
+JSON Schema pass-through types (e.g., tool input schemas) where the user defines
+the shape.
+
+### Dart Implementation
+
+Add a `Map<String, dynamic>? extra` field to capture undeclared keys:
+
+```dart
+@immutable
+class InputSchema {
+  final String type;
+  final Map<String, dynamic>? properties;
+  final List<String>? required;
+  final Map<String, dynamic>? extra;
+
+  const InputSchema({
+    this.type = 'object',
+    this.properties,
+    this.required,
+    this.extra,
+  });
+
+  factory InputSchema.fromJson(Map<String, dynamic> json) {
+    const knownKeys = {'type', 'properties', 'required'};
+    final extraEntries = {
+      for (final entry in json.entries)
+        if (!knownKeys.contains(entry.key)) entry.key: entry.value,
+    };
+    return InputSchema(
+      type: json['type'] as String? ?? 'object',
+      properties: json['properties'] as Map<String, dynamic>?,
+      required: (json['required'] as List?)?.cast<String>(),
+      extra: extraEntries.isEmpty ? null : extraEntries,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    if (extra != null) ...extra!,  // spread first
+    'type': type,                   // known keys win on collision
+    if (properties != null) 'properties': properties,
+    if (required != null) 'required': required,
+  };
+}
+```
+
+### Key Design Decisions
+
+- **Spread order**: `extra` spreads first in `toJson()`, known keys overwrite after — prevents `extra` from corrupting typed fields
+- **Null vs empty map**: `fromJson` returns `null` for `extra` when no unknown keys exist, matching the constructor default
+- **Equality**: Use `mapsDeepEqual`/`mapDeepHashCode` since `extra` may contain nested structures
+- **Const compatibility**: `const InputSchema(extra: {'additionalProperties': false})` works because `false` is a compile-time constant
+
+### Toolkit Detection
+
+The verifier (`verify --checks implementation`) **errors** when a schema with
+`additionalProperties: true` lacks an overflow field — this is blocking, not
+advisory, because a missing overflow silently drops user data (see issue #165).
+The scaffold generates the `extra` field automatically for open schemas.
+
 ## HTTP Client Patterns
 
 ### Header Merge Precedence
@@ -227,6 +290,21 @@ headers.addAll(defaultHeaders);            // lowest priority
 headers.addAll(authHeaders);               // auth overrides defaults
 headers.addAll(userHeaders);               // user overrides auth + defaults
 headers['Accept'] = 'text/event-stream';   // protocol-critical — never overridable
+```
+
+### Upload Endpoint URLs
+
+Google APIs use a separate `/upload/` prefix for media upload endpoints. When
+constructing upload URLs manually (bypassing `requestBuilder.buildUrl`), always
+verify the full path — including the action suffix — against the OpenAPI spec.
+Do not assume the action name matches a shortened version:
+
+```dart
+// WRONG — shortened action name, causes 404
+'${config.baseUrl}/upload/${config.apiVersion.value}/$parent:upload'
+
+// CORRECT — exact spec path action
+'${config.baseUrl}/upload/${config.apiVersion.value}/$parent:uploadToFileSearchStore'
 ```
 
 ### Request Object Finalization

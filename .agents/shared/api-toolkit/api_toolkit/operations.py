@@ -649,6 +649,109 @@ def _resource_name_for_path(path: str) -> str:
     return _normalize_coverage_resource_name(parts[0]) if parts else "root"
 
 
+def _endpoint_action_issues(
+    config: ToolkitConfig,
+    spec: dict[str, Any],
+    *,
+    resource_filter: set[str] | None = None,
+) -> list[dict[str, Any]]:
+    """Verify that spec action suffixes appear in corresponding resource files.
+
+    For each OpenAPI path with an action suffix (e.g. ``:generateContent``),
+    checks that the action string appears in at least one resource file for the
+    matching resource.  Missing resource files are ignored — they are already
+    caught by :func:`_coverage_gaps`.
+    """
+    resources_dir = config.package_root / config.package.resources_dir
+    if not resources_dir.exists():
+        return []
+
+    excluded_paths = config.manifest.coverage.get("excluded_paths", [])
+    excluded_tags = set(config.manifest.coverage.get("excluded_tags", []))
+    excluded_resources = {
+        _normalize_coverage_resource_name(item)
+        for item in config.manifest.coverage.get("excluded_resources", [])
+    }
+    resource_aliases = {
+        _normalize_coverage_resource_name(resource): _normalize_coverage_resource_name(alias)
+        for resource, alias in config.manifest.coverage.get("resource_aliases", {}).items()
+    }
+
+    # Build map: normalized resource name -> list of resource file paths
+    resource_files: dict[str, list[Path]] = defaultdict(list)
+    for path in resources_dir.glob("**/*_resource*.dart"):
+        stem = path.stem
+        # Strip platform suffixes and _resource to get the base name
+        base = re.sub(r"_resource(_io|_web|_stub)?$", "", stem)
+        resource_files[_normalize_coverage_resource_name(base)].append(path)
+
+    issues: list[dict[str, Any]] = []
+    # Cache file contents to avoid re-reading the same file for multiple actions
+    file_contents: dict[Path, str] = {}
+
+    for spec_path, path_payload in spec.get("paths", {}).items():
+        if any(_match_excluded_path(pattern, spec_path) for pattern in excluded_paths):
+            continue
+
+        # Extract action suffix from the last path segment
+        segments = spec_path.strip("/").split("/")
+        last_segment = segments[-1] if segments else ""
+        if ":" not in last_segment:
+            continue
+        action = last_segment.split(":")[-1]
+
+        # Check that at least one HTTP method exists (skip path-level params-only entries)
+        has_method = any(method in path_payload for method in HTTP_METHODS)
+        if not has_method:
+            continue
+
+        # Check tag exclusions
+        for method in HTTP_METHODS:
+            if method in path_payload:
+                operation = path_payload[method]
+                if excluded_tags and any(tag in excluded_tags for tag in operation.get("tags", [])):
+                    continue
+
+        resource = _resource_name_for_path(spec_path)
+        if resource_filter is not None and resource not in resource_filter:
+            continue
+        if resource in excluded_resources:
+            continue
+
+        # Resolve resource aliases and find matching files
+        implemented_name = resource_aliases.get(resource, resource)
+        candidates = {implemented_name, implemented_name.rstrip("s"), f"{implemented_name}s"}
+        matched_files: list[Path] = []
+        for candidate in candidates:
+            matched_files.extend(resource_files.get(candidate, []))
+
+        if not matched_files:
+            continue  # No resource file — _coverage_gaps handles this
+
+        # Check if any resource file contains the action string
+        found = False
+        for file_path in matched_files:
+            if file_path not in file_contents:
+                try:
+                    file_contents[file_path] = file_path.read_text()
+                except OSError:
+                    continue
+            if action in file_contents[file_path]:
+                found = True
+                break
+
+        if not found:
+            issues.append(
+                _type_issue(
+                    "warning",
+                    resource,
+                    f"Spec action ':{action}' (path: {spec_path}) not found in any resource file for '{resource}'",
+                )
+            )
+
+    return issues
+
+
 def _changed_openapi_resources(diff: dict[str, Any]) -> set[str]:
     resources: set[str] = set()
     for endpoint in diff["endpoints"]["added"]:
@@ -1315,6 +1418,26 @@ def _verify_object_entry(config: ToolkitConfig, spec_payload: dict[str, Any], en
                 ))
 
     issues.extend(_check_field_methods(entry, file_path, expected_field_names, constant_fields))
+
+    # Check open-object handling: schemas with additionalProperties: true
+    # must have an overflow field to preserve extra keys.
+    all_schemas = spec_payload.get("components", {}).get("schemas", {})
+    raw_schema = all_schemas.get(entry.schema_name, {})
+    additional_props = raw_schema.get("additionalProperties")
+    is_open = additional_props is True or isinstance(additional_props, dict)
+    if is_open and config.manifest.surface == "openapi":
+        overflow_field_names = {"extra", "additionalProperties", "overflow"}
+        has_overflow = bool(overflow_field_names & set(fields.keys()))
+        if not has_overflow:
+            issues.append(_type_issue(
+                "error",
+                entry.key,
+                f"Schema '{entry.schema_name}' has additionalProperties: true "
+                f"but Dart class '{entry.dart_class}' has no overflow field "
+                f"(expected one of: {', '.join(sorted(overflow_field_names))})",
+                file=entry.file,
+            ))
+
     return issues
 
 
@@ -1636,11 +1759,14 @@ def _verify_implementation(
         issues.extend(_verify_sealed_parent_variant_coverage(parent, spec_payload, by_parent.get(parent.key, []), all_types=config.manifest.types))
 
     coverage_gaps = []
+    endpoint_action_mismatches: list[dict[str, Any]] = []
     if config.manifest.surface == "openapi" and scope in {"changed", "all"}:
         resource_filter = _changed_openapi_resources(diff) if scope == "changed" else None
         coverage_gaps = _coverage_gaps(config, spec_payload, resource_filter=resource_filter)
         for gap in coverage_gaps:
             issues.append(_type_issue("error", gap["resource"], gap["reason"]))
+        endpoint_action_mismatches = _endpoint_action_issues(config, spec_payload, resource_filter=resource_filter)
+        issues.extend(endpoint_action_mismatches)
 
     exit_code = EXIT_SUCCESS
     if any(issue["level"] == "error" for issue in issues):
@@ -1652,6 +1778,7 @@ def _verify_implementation(
         "scope": scope,
         "selected_types": [entry.key for entry in selected],
         "coverage_gaps": coverage_gaps,
+        "endpoint_action_mismatches": endpoint_action_mismatches,
         "coverage_summary": coverage_summary,
         "issues": issues,
         "summary": {
@@ -3781,7 +3908,7 @@ def _scaffold_nullable_to_json_expression(field_name: str, json_value: str) -> s
     return json_value
 
 
-def _scaffold_class_source(class_name: str, props: dict[str, dict[str, Any]], type_mappings: dict[str, str]) -> str:
+def _scaffold_class_source(class_name: str, props: dict[str, dict[str, Any]], type_mappings: dict[str, str], is_open: bool = False) -> str:
     lines = [
         "const Object _unsetCopyWithValue = _UnsetCopyWithSentinel();",
         "",
@@ -3795,22 +3922,34 @@ def _scaffold_class_source(class_name: str, props: dict[str, dict[str, Any]], ty
         dart_type = _dart_type_from_prop(type_mappings, prop)
         suffix = "" if _is_scaffold_nonnull(prop) else "?"
         lines.append(f"  final {dart_type}{suffix} {camel_case(name)};")
+    if is_open:
+        lines.append("  final Map<String, dynamic>? extra;")
     lines.append("")
     lines.append(f"  const {class_name}({{")
     for name, prop in props.items():
         qualifier = "required " if prop.get("required") else ""
         lines.append(f"    {qualifier}this.{camel_case(name)},")
+    if is_open:
+        lines.append("    this.extra,")
     lines.append("  });")
     lines.append("")
     lines.append(f"  factory {class_name}.fromJson(Map<String, dynamic> json) {{")
+    if is_open:
+        known_keys = ", ".join(f"'{n}'" for n in props)
+        lines.append(f"    final _knownKeys = {{{known_keys}}};")
+        lines.append("    final _extraEntries = { for (final e in json.entries) if (!_knownKeys.contains(e.key)) e.key: e.value };")
     lines.append(f"    return {class_name}(")
     for name, prop in props.items():
         field = camel_case(name)
         lines.append(f"      {field}: {_scaffold_from_json_expression(name, prop, type_mappings)},")
+    if is_open:
+        lines.append("      extra: _extraEntries.isEmpty ? null : _extraEntries,")
     lines.append("    );")
     lines.append("  }")
     lines.append("")
     lines.append("  Map<String, dynamic> toJson() => {")
+    if is_open:
+        lines.append("    if (extra != null) ...extra!,")
     for name, prop in props.items():
         field = camel_case(name)
         json_value = _scaffold_to_json_expression(name, prop, type_mappings)
@@ -3829,6 +3968,8 @@ def _scaffold_class_source(class_name: str, props: dict[str, dict[str, Any]], ty
     lines.append(f"  {class_name} copyWith({{")
     for name, prop in props.items():
         lines.append(f"    Object? {camel_case(name)} = _unsetCopyWithValue,")
+    if is_open:
+        lines.append("    Object? extra = _unsetCopyWithValue,")
     lines.append("  }) {")
     lines.append(f"    return {class_name}(")
     for name, prop in props.items():
@@ -3842,12 +3983,17 @@ def _scaffold_class_source(class_name: str, props: dict[str, dict[str, Any]], ty
             lines.append(
                 f"      {field}: {field} == _unsetCopyWithValue ? this.{field} : {field} as {dart_type}?,"
             )
+    if is_open:
+        lines.append("      extra: extra == _unsetCopyWithValue ? this.extra : extra as Map<String, dynamic>?,")
     lines.append("    );")
     lines.append("  }")
     lines.append("")
     lines.append("  @override")
     lines.append("  String toString() =>")
-    lines.append(f"      '{class_name}(" + ", ".join(f"{camel_case(name)}: ${camel_case(name)}" for name in props) + ")';")
+    toString_parts = [f"{camel_case(name)}: ${camel_case(name)}" for name in props]
+    if is_open:
+        toString_parts.append("extra: $extra")
+    lines.append(f"      '{class_name}(" + ", ".join(toString_parts) + ")';")
     lines.append("}")
     return "\n".join(lines) + "\n"
 
@@ -3871,8 +4017,11 @@ def _render_scaffold(config: ToolkitConfig, target: str, spec_name: str, name: s
             if not schema:
                 raise ToolkitError(f"Unknown schema '{schema_name}'")
             props = _openapi_property_info(spec_payload, schema_name)
+            raw_schema = spec_payload.get("components", {}).get("schemas", {}).get(schema_name, {})
+            additional_props = raw_schema.get("additionalProperties")
+            is_open = additional_props is True or isinstance(additional_props, dict)
             class_name = entry.dart_class if entry else ManifestEntry(schema_name, spec_name, "object", schema_name, "").dart_class
-            return _scaffold_class_source(class_name, props, config.manifest.type_mappings), class_name
+            return _scaffold_class_source(class_name, props, config.manifest.type_mappings, is_open=is_open), class_name
     else:
         if target == "enum":
             enum_values = spec_payload.get("enums", {}).get(schema_name, {}).get("values")
