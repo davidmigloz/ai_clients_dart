@@ -705,16 +705,17 @@ def _endpoint_action_issues(
         if not has_method:
             continue
 
-        # Check tag exclusions
-        tag_excluded = False
-        for method in HTTP_METHODS:
-            if method in path_payload:
-                operation = path_payload[method]
-                if excluded_tags and any(tag in excluded_tags for tag in operation.get("tags", [])):
-                    tag_excluded = True
-                    break
-        if tag_excluded:
+        # Check tag exclusions — skip only if ALL operations are excluded
+        operations = [path_payload[method] for method in HTTP_METHODS if method in path_payload]
+        if not operations:
             continue
+        if excluded_tags:
+            has_included_operation = any(
+                not any(tag in excluded_tags for tag in operation.get("tags", []))
+                for operation in operations
+            )
+            if not has_included_operation:
+                continue
 
         resource = _resource_name_for_path(spec_path)
         if resource_filter is not None and resource not in resource_filter:
@@ -1436,7 +1437,7 @@ def _verify_object_entry(config: ToolkitConfig, spec_payload: dict[str, Any], en
             issues.append(_type_issue(
                 "error",
                 entry.key,
-                f"Schema '{entry.schema_name}' has additionalProperties: true "
+                f"Schema '{entry.schema_name}' allows additionalProperties "
                 f"but Dart class '{entry.dart_class}' has no overflow field "
                 f"(expected one of: {', '.join(sorted(overflow_field_names))})",
                 file=entry.file,
