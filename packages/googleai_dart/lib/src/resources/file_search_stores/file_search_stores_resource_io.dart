@@ -133,11 +133,22 @@ class FileSearchStoresResource extends ResourceBase {
   /// The [name] is the resource name of the store to delete
   /// (e.g., "fileSearchStores/my-store-123").
   ///
+  /// If [force] is true, any documents and related objects will also be
+  /// deleted. If false (default), a `FAILED_PRECONDITION` error is returned
+  /// if the store contains any documents.
+  ///
   /// DELETE /v1beta/{name}
-  Future<void> delete({required String name}) async {
+  Future<void> delete({required String name, bool? force}) async {
     _validateGoogleAIOnly();
 
-    final url = requestBuilder.buildUrl('/{version}/$name');
+    final queryParams = <String, String>{
+      if (force ?? false) 'force': 'true',
+    };
+
+    final url = requestBuilder.buildUrl(
+      '/{version}/$name',
+      queryParams: queryParams,
+    );
 
     final headers = requestBuilder.buildHeaders();
 
@@ -188,7 +199,7 @@ class FileSearchStoresResource extends ResourceBase {
   ///
   /// The [mimeType] specifies the MIME type of the content.
   ///
-  /// POST /v1beta/{parent}:upload (resumable upload)
+  /// POST /v1beta/{parent}:uploadToFileSearchStore (resumable upload)
   Future<UploadToFileSearchStoreResponse> upload({
     required String parent,
     String? filePath,
@@ -270,7 +281,7 @@ class FileSearchStoresResource extends ResourceBase {
     // FileSearchStores uses resumable upload protocol
     // Step 1: Initiate the upload and get upload URL
     final uploadUrl = Uri.parse(
-      '${config.baseUrl}/upload/${config.apiVersion.value}/$parent:upload',
+      '${config.baseUrl}/upload/${config.apiVersion.value}/$parent:uploadToFileSearchStore',
     );
 
     final initiationHeaders = <String, String>{
@@ -445,11 +456,22 @@ class FileSearchStoresResource extends ResourceBase {
   /// The [name] is the resource name of the document to delete
   /// (e.g., "fileSearchStores/my-store-123/documents/doc-456").
   ///
+  /// If [force] is true, any chunks and related objects will also be deleted.
+  /// If false (default), a `FAILED_PRECONDITION` error is returned if the
+  /// document contains any chunks.
+  ///
   /// DELETE /v1beta/{name}
-  Future<void> deleteDocument({required String name}) async {
+  Future<void> deleteDocument({required String name, bool? force}) async {
     _validateGoogleAIOnly();
 
-    final url = requestBuilder.buildUrl('/{version}/$name');
+    final queryParams = <String, String>{
+      if (force ?? false) 'force': 'true',
+    };
+
+    final url = requestBuilder.buildUrl(
+      '/{version}/$name',
+      queryParams: queryParams,
+    );
 
     final headers = requestBuilder.buildHeaders();
 

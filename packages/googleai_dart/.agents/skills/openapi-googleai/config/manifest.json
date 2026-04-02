@@ -107,7 +107,16 @@
     }
   },
   "coverage": {
-    "excluded_paths": [],
+    "excluded_paths": [
+      "/v1beta/models/{model}:batchEmbedText",
+      "/v1beta/models/{model}:countMessageTokens",
+      "/v1beta/models/{model}:countTextTokens",
+      "/v1beta/models/{model}:embedText",
+      "/v1beta/models/{model}:generateMessage",
+      "/v1beta/models/{model}:generateText",
+      "/v1beta/tunedModels/{tunedModel}:generateText",
+      "/v1beta/tunedModels/{tunedModel}:transferOwnership"
+    ],
     "excluded_tags": [],
     "priority_resources": [
       "models",
