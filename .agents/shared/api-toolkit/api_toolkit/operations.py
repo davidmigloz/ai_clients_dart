@@ -706,11 +706,15 @@ def _endpoint_action_issues(
             continue
 
         # Check tag exclusions
+        tag_excluded = False
         for method in HTTP_METHODS:
             if method in path_payload:
                 operation = path_payload[method]
                 if excluded_tags and any(tag in excluded_tags for tag in operation.get("tags", [])):
-                    continue
+                    tag_excluded = True
+                    break
+        if tag_excluded:
+            continue
 
         resource = _resource_name_for_path(spec_path)
         if resource_filter is not None and resource not in resource_filter:
