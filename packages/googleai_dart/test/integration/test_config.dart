@@ -24,3 +24,6 @@ const defaultTTSModel = 'gemini-2.5-flash-preview-tts';
 
 /// The default model to use for STT (Speech-to-Text) tests.
 const defaultSTTModel = 'gemini-3-flash-preview';
+
+/// The default Gemma model to use for open model tests.
+const defaultGemmaModel = 'gemma-4-26b-a4b-it';
