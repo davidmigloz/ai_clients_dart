@@ -116,5 +116,6 @@ class InputSchema {
   @override
   String toString() =>
       'InputSchema(type: $type, properties: $properties, '
-      'required: $required, extra: $extra)';
+      'required: $required, '
+      'extra: ${extra != null ? '${extra!.length} entries' : null})';
 }

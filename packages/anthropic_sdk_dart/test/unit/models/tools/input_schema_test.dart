@@ -258,11 +258,16 @@ void main() {
     });
 
     group('toString', () {
-      test('includes extra', () {
+      test('includes extra entry count', () {
         const schema = InputSchema(extra: {'additionalProperties': false});
         final str = schema.toString();
-        expect(str, contains('extra:'));
-        expect(str, contains('additionalProperties'));
+        expect(str, contains('extra: 1 entries'));
+      });
+
+      test('shows null for missing extra', () {
+        const schema = InputSchema();
+        final str = schema.toString();
+        expect(str, contains('extra: null'));
       });
     });
   });
