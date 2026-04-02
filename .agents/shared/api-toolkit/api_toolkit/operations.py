@@ -3941,7 +3941,7 @@ def _scaffold_class_source(class_name: str, props: dict[str, dict[str, Any]], ty
     lines.append(f"  factory {class_name}.fromJson(Map<String, dynamic> json) {{")
     if is_open:
         known_keys = ", ".join(f"'{n}'" for n in props)
-        lines.append(f"    final _knownKeys = {{{known_keys}}};")
+        lines.append(f"    final _knownKeys = <String>{{{known_keys}}};")
         lines.append("    final _extraEntries = { for (final e in json.entries) if (!_knownKeys.contains(e.key)) e.key: e.value };")
     lines.append(f"    return {class_name}(")
     for name, prop in props.items():
