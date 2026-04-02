@@ -101,14 +101,14 @@ class InputSchema {
       other is InputSchema &&
           runtimeType == other.runtimeType &&
           type == other.type &&
-          mapsEqual(properties, other.properties) &&
+          mapsDeepEqual(properties, other.properties) &&
           listsEqual(required, other.required) &&
           mapsDeepEqual(extra, other.extra);
 
   @override
   int get hashCode => Object.hash(
     type,
-    mapHash(properties),
+    mapDeepHashCode(properties),
     listHash(required),
     mapDeepHashCode(extra),
   );

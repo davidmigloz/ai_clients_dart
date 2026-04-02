@@ -213,15 +213,17 @@ Future<void> main() async {
         maxTokens: 512,
         messages: [InputMessage.user('What is the weather in Madrid?')],
         tools: [
-          Tool(
-            name: 'get_weather',
-            description: 'Get the current weather for a location',
-            inputSchema: const InputSchema(
-              properties: {
-                'location': {'type': 'string'},
-              },
-              required: ['location'],
-              extra: {'additionalProperties': false},
+          ToolDefinition.custom(
+            Tool(
+              name: 'get_weather',
+              description: 'Get the current weather for a location',
+              inputSchema: const InputSchema(
+                properties: {
+                  'location': {'type': 'string'},
+                },
+                required: ['location'],
+                extra: {'additionalProperties': false},
+              ),
             ),
           ),
         ],
@@ -243,7 +245,7 @@ final response = await client.messages.create(
     model: 'claude-sonnet-4-6',
     maxTokens: 1024,
     messages: [InputMessage.user('Find the latest Dart release notes')],
-    tools: [Tool.webSearch()],
+    tools: [ToolDefinition.builtIn(BuiltInTool.webSearch())],
   ),
 );
 ```
