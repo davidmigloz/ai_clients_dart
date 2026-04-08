@@ -57,6 +57,7 @@ class ExecutionsResource extends ResourceBase with StreamingResource {
     EventSource? eventSource,
     String? lastEventId,
   }) async* {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{};
     if (eventSource != null) {
       queryParams['event_source'] = eventSource.toJson();

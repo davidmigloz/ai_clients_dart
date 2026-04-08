@@ -35,7 +35,7 @@ sealed class JudgeOutputConfig {
       'REGRESSION' => JudgeOutputConfigRegression._(
         JudgeRegressionOutput.fromJson(json),
       ),
-      _ => JudgeOutputConfigRegression._(JudgeRegressionOutput.fromJson(json)),
+      _ => JudgeOutputConfigUnknown._(type ?? 'unknown', json),
     };
   }
 
@@ -110,4 +110,35 @@ class JudgeOutputConfigRegression extends JudgeOutputConfig {
   @override
   String toString() =>
       'JudgeOutputConfig.regression(${value.min}-${value.max})';
+}
+
+/// Unknown variant of [JudgeOutputConfig] for forward compatibility.
+///
+/// Returned when the API sends a discriminator value not yet supported
+/// by this client version. The raw JSON is preserved in [rawJson].
+@immutable
+class JudgeOutputConfigUnknown extends JudgeOutputConfig {
+  /// The unknown type discriminator value.
+  final String type;
+
+  /// The raw JSON for this config.
+  final Map<String, dynamic> rawJson;
+
+  const JudgeOutputConfigUnknown._(this.type, this.rawJson);
+
+  @override
+  Map<String, dynamic> toJson() => rawJson;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! JudgeOutputConfigUnknown) return false;
+    return type == other.type;
+  }
+
+  @override
+  int get hashCode => type.hashCode;
+
+  @override
+  String toString() => 'JudgeOutputConfig.unknown($type)';
 }

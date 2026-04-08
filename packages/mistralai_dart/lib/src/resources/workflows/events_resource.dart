@@ -76,6 +76,7 @@ class EventsResource extends ResourceBase with StreamingResource {
     List<WorkflowEventType>? workflowEventTypes,
     String? lastEventId,
   }) async* {
+    ensureNotClosed?.call();
     final queryParams = <String, String>{};
     if (scope != null) queryParams['scope'] = scope;
     if (activityName != null) queryParams['activity_name'] = activityName;
