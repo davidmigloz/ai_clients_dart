@@ -151,7 +151,8 @@ class MessageStreamAccumulator {
   /// The stop reason from the `message_delta` event.
   StopReason? get stopReason => _stopReason;
 
-  /// Structured information about why model output stopped.
+  /// Structured refusal details, only populated when
+  /// [stopReason] is [StopReason.refusal].
   RefusalStopDetails? get stopDetails => _stopDetails;
 
   /// The stop sequence from the `message_delta` event.
