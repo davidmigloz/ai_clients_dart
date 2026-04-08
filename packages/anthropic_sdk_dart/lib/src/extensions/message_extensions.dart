@@ -57,4 +57,7 @@ extension MessageExtensions on Message {
 
   /// Returns true if the message stopped for tool use.
   bool get isToolUse => stopReason == StopReason.toolUse;
+
+  /// Returns true if the message stopped due to a refusal.
+  bool get isRefusal => stopReason == StopReason.refusal;
 }

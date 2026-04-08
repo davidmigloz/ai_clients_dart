@@ -129,6 +129,8 @@ class FilesResource extends ResourceBase {
   /// default 20).
   /// The [beforeId] returns files before this ID (for pagination).
   /// The [afterId] returns files after this ID (for pagination).
+  /// The [scopeId] filters by scope ID, returning only files associated with
+  /// that scope (e.g., a session ID).
   ///
   /// Returns a [FileListResponse] with the list of files and pagination info.
   ///
