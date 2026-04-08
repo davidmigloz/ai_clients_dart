@@ -75,10 +75,7 @@
     "resource_aliases": {},
     "excluded_resources": [
       "complete",
-      "agents",
-      "environments",
-      "sessions",
-      "vaults"
+      "environments"
     ]
   },
   "types": {
@@ -107,8 +104,10 @@
       "file": "lib/src/models/tools/tool_definition.dart",
       "schema": "Tool",
       "parent": "ToolDefinition",
-      "tags": ["acknowledged"],
-      "note": "Wrapper class — CustomToolDefinition wraps the spec Tool schema with additional routing logic."
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Wrapper class \u2014 CustomToolDefinition wraps the spec Tool schema with additional routing logic."
     },
     "Usage": {
       "spec": "main",
@@ -183,11 +182,14 @@
     },
     "TextBlock": {
       "spec": "main",
-      "kind": "sealed_variant",
-      "dart_class": "TextBlock",
-      "file": "lib/src/models/content/content_block.dart",
-      "schema": "ResponseTextBlock",
-      "parent": "ContentBlock"
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsTextBlock",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Content block / API wrapper - used as Map<String, dynamic>"
     },
     "ThinkingBlock": {
       "spec": "main",
@@ -478,8 +480,10 @@
       "file": "lib/src/models/content/input_content_block.dart",
       "schema": "ToolResultBlockParamContentVariant0",
       "parent": "ToolResultContent",
-      "tags": ["acknowledged"],
-      "note": "Anonymous spec variant — not a named schema, represents text content within tool results."
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Anonymous spec variant \u2014 not a named schema, represents text content within tool results."
     },
     "ToolResultBlockParamContentVariant1": {
       "spec": "main",
@@ -488,8 +492,10 @@
       "file": "lib/src/models/content/input_content_block.dart",
       "schema": "ToolResultBlockParamContentVariant1",
       "parent": "ToolResultContent",
-      "tags": ["acknowledged"],
-      "note": "Anonymous spec variant — not a named schema, represents image/document content within tool results."
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Anonymous spec variant \u2014 not a named schema, represents image/document content within tool results."
     },
     "Citation": {
       "spec": "main",
@@ -574,7 +580,9 @@
       "file": "lib/src/models/content/content_block.dart",
       "schema": "array of ResponseWebSearchResultBlock",
       "parent": "WebSearchResult",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "content is anyOf: List<WebSearchResultItem> (success) or Map with type=web_search_tool_result_error (error). fromJson accepts Object, not Map."
     },
     "ResponseWebSearchToolResultError": {
@@ -584,55 +592,54 @@
       "file": "lib/src/models/content/content_block.dart",
       "schema": "ResponseWebSearchToolResultError",
       "parent": "WebSearchResult",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "content is anyOf: List<WebSearchResultItem> (success) or Map with type=web_search_tool_result_error (error). fromJson accepts Object, not Map."
     },
     "ImageSource": {
       "spec": "main",
-      "kind": "sealed_parent",
-      "dart_class": "ImageSource",
-      "file": "lib/src/models/sources/image_source.dart",
-      "schema": null,
-      "discriminator": {
-        "field": "type",
-        "mapping": {
-          "Base64ImageSource": "base64",
-          "URLImageSource": "url"
-        }
-      },
-      "note": null
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsImageSource",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Content block / API wrapper - used as Map<String, dynamic>"
     },
     "Base64ImageSource": {
       "spec": "main",
-      "kind": "sealed_variant",
-      "dart_class": "Base64ImageSource",
-      "file": "lib/src/models/sources/image_source.dart",
-      "schema": "Base64ImageSource",
-      "parent": "ImageSource"
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsBase64ImageSource",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Content block / API wrapper - used as Map<String, dynamic>"
     },
     "URLImageSource": {
       "spec": "main",
-      "kind": "sealed_variant",
-      "dart_class": "UrlImageSource",
-      "file": "lib/src/models/sources/image_source.dart",
-      "schema": "URLImageSource",
-      "parent": "ImageSource"
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsURLImageSource",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Content block / API wrapper - used as Map<String, dynamic>"
     },
     "DocumentSource": {
       "spec": "main",
-      "kind": "sealed_parent",
-      "dart_class": "DocumentSource",
-      "file": "lib/src/models/sources/document_source.dart",
-      "schema": null,
-      "discriminator": {
-        "field": "type",
-        "mapping": {
-          "Base64PDFSource": "base64",
-          "PlainTextSource": "text",
-          "URLPDFSource": "url"
-        }
-      },
-      "note": null
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsDocumentSource",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Content block / API wrapper - used as Map<String, dynamic>"
     },
     "Base64PDFSource": {
       "spec": "main",
@@ -738,8 +745,10 @@
       "file": "lib/src/models/streaming/message_stream_event.dart",
       "schema": "PingEvent",
       "parent": "MessageStreamEvent",
-      "tags": ["acknowledged"],
-      "note": "No named schema in spec — the ping event has no dedicated schema definition."
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "No named schema in spec \u2014 the ping event has no dedicated schema definition."
     },
     "ErrorEvent": {
       "spec": "main",
@@ -748,8 +757,10 @@
       "file": "lib/src/models/streaming/message_stream_event.dart",
       "schema": "ErrorEvent",
       "parent": "MessageStreamEvent",
-      "tags": ["acknowledged"],
-      "note": "No named schema in spec — the error event uses a non-standard nested error object structure."
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "No named schema in spec \u2014 the error event uses a non-standard nested error object structure."
     },
     "ContentBlockDelta": {
       "spec": "main",
@@ -864,8 +875,10 @@
       "dart_class": "ThinkingDisplayMode",
       "file": "lib/src/models/messages/thinking_config.dart",
       "schema": "ThinkingDisplayMode",
-      "tags": ["acknowledged"],
-      "note": "Enum for thinking display mode — used as optional field on ThinkingConfigEnabled and ThinkingConfigAdaptive"
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Enum for thinking display mode \u2014 used as optional field on ThinkingConfigEnabled and ThinkingConfigAdaptive"
     },
     "CapabilitySupport": {
       "spec": "main",
@@ -873,7 +886,9 @@
       "dart_class": "CapabilitySupport",
       "file": "lib/src/models/models/model_capabilities.dart",
       "schema": "CapabilitySupport",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Simple helper type used within ModelCapabilities"
     },
     "ModelCapabilities": {
@@ -882,7 +897,9 @@
       "dart_class": "ModelCapabilities",
       "file": "lib/src/models/models/model_capabilities.dart",
       "schema": "ModelCapabilities",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Model capability information returned on ModelInfo"
     },
     "ContextManagementCapability": {
@@ -891,7 +908,9 @@
       "dart_class": "ContextManagementCapability",
       "file": "lib/src/models/models/model_capabilities.dart",
       "schema": "ContextManagementCapability",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Context management strategies within ModelCapabilities"
     },
     "EffortCapability": {
@@ -900,7 +919,9 @@
       "dart_class": "EffortCapability",
       "file": "lib/src/models/models/model_capabilities.dart",
       "schema": "EffortCapability",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Effort level support within ModelCapabilities"
     },
     "ThinkingCapability": {
@@ -909,7 +930,9 @@
       "dart_class": "ThinkingCapability",
       "file": "lib/src/models/models/model_capabilities.dart",
       "schema": "ThinkingCapability",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Thinking capability details within ModelCapabilities"
     },
     "ThinkingTypes": {
@@ -918,7 +941,9 @@
       "dart_class": "ThinkingTypes",
       "file": "lib/src/models/models/model_capabilities.dart",
       "schema": "ThinkingTypes",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Thinking type configurations within ThinkingCapability"
     },
     "ToolChoice": {
@@ -991,8 +1016,10 @@
       "file": "lib/src/models/tools/tool_caller.dart",
       "schema": "DirectToolCaller",
       "parent": "ToolCaller",
-      "tags": ["acknowledged"],
-      "note": "No named schema in spec — DirectToolCaller is the default when type is absent."
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "No named schema in spec \u2014 DirectToolCaller is the default when type is absent."
     },
     "ServerToolCaller": {
       "spec": "main",
@@ -1016,8 +1043,10 @@
           "various built-in tool schemas": "versioned prefix"
         }
       },
-      "tags": ["acknowledged"],
-      "note": "Non-standard type_prefix discriminator — detects built-in vs custom by checking if type starts with known prefixes (bash_, web_search_, etc.)."
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Non-standard type_prefix discriminator \u2014 detects built-in vs custom by checking if type starts with known prefixes (bash_, web_search_, etc.)."
     },
     "various built-in tool schemas": {
       "spec": "main",
@@ -1026,8 +1055,10 @@
       "file": "lib/src/models/tools/tool_definition.dart",
       "schema": "various built-in tool schemas",
       "parent": "ToolDefinition",
-      "tags": ["acknowledged"],
-      "note": "Virtual grouping entry — individual built-in tool types are mapped separately."
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Virtual grouping entry \u2014 individual built-in tool types are mapped separately."
     },
     "BuiltInTool": {
       "spec": "main",
@@ -1052,8 +1083,10 @@
           "McpToolset (beta)": "mcp_* prefix"
         }
       },
-      "tags": ["acknowledged"],
-      "note": "Parent sealed class not a named schema in spec — built-in tools use versioned type strings as discriminators."
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Parent sealed class not a named schema in spec \u2014 built-in tools use versioned type strings as discriminators."
     },
     "BashTool20250124": {
       "spec": "main",
@@ -1253,7 +1286,7 @@
         "field": "runtime_type",
         "mapping": {}
       },
-      "note": "fromJson accepts dynamic: String → TextMessageContent, List → BlocksMessageContent."
+      "note": "fromJson accepts dynamic: String \u2192 TextMessageContent, List \u2192 BlocksMessageContent."
     },
     "MessageContent:TextMessageContent": {
       "spec": "main",
@@ -1262,7 +1295,7 @@
       "file": "lib/src/models/messages/input_message.dart",
       "schema": null,
       "parent": "MessageContent",
-      "note": "fromJson accepts dynamic: String → TextMessageContent, List → BlocksMessageContent."
+      "note": "fromJson accepts dynamic: String \u2192 TextMessageContent, List \u2192 BlocksMessageContent."
     },
     "MessageContent:BlocksMessageContent": {
       "spec": "main",
@@ -1271,7 +1304,7 @@
       "file": "lib/src/models/messages/input_message.dart",
       "schema": null,
       "parent": "MessageContent",
-      "note": "fromJson accepts dynamic: String → TextMessageContent, List → BlocksMessageContent."
+      "note": "fromJson accepts dynamic: String \u2192 TextMessageContent, List \u2192 BlocksMessageContent."
     },
     "SystemPrompt": {
       "spec": "main",
@@ -1283,7 +1316,7 @@
         "field": "runtime_type",
         "mapping": {}
       },
-      "note": "fromJson accepts dynamic: String → TextSystemPrompt, List → BlocksSystemPrompt."
+      "note": "fromJson accepts dynamic: String \u2192 TextSystemPrompt, List \u2192 BlocksSystemPrompt."
     },
     "SystemPrompt:TextSystemPrompt": {
       "spec": "main",
@@ -1292,7 +1325,7 @@
       "file": "lib/src/models/messages/message_create_request.dart",
       "schema": null,
       "parent": "SystemPrompt",
-      "note": "fromJson accepts dynamic: String → TextSystemPrompt, List → BlocksSystemPrompt."
+      "note": "fromJson accepts dynamic: String \u2192 TextSystemPrompt, List \u2192 BlocksSystemPrompt."
     },
     "SystemPrompt:BlocksSystemPrompt": {
       "spec": "main",
@@ -1301,7 +1334,7 @@
       "file": "lib/src/models/messages/message_create_request.dart",
       "schema": null,
       "parent": "SystemPrompt",
-      "note": "fromJson accepts dynamic: String → TextSystemPrompt, List → BlocksSystemPrompt."
+      "note": "fromJson accepts dynamic: String \u2192 TextSystemPrompt, List \u2192 BlocksSystemPrompt."
     },
     "RefusalStopDetails": {
       "spec": "main",
@@ -1316,8 +1349,10 @@
       "dart_class": "RefusalStopDetails",
       "file": "lib/src/models/metadata/stop_reason.dart",
       "schema": "BetaRefusalStopDetails",
-      "tags": ["acknowledged"],
-      "note": "Unified with non-beta RefusalStopDetails — identical schema."
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Unified with non-beta RefusalStopDetails \u2014 identical schema."
     },
     "FileScope": {
       "spec": "main",
@@ -1332,8 +1367,1256 @@
       "dart_class": "FileMetadata",
       "file": "lib/src/models/files/file_metadata.dart",
       "schema": "BetaFileMetadataSchema",
-      "tags": ["acknowledged"],
-      "note": "Unified with FileMetadata — scope field added."
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Unified with FileMetadata \u2014 scope field added."
+    },
+    "AddSessionResource": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsAddSessionResource",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Content block / API wrapper - used as Map<String, dynamic>"
+    },
+    "AddSessionResourceParams": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsAddSessionResourceParams",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Content block / API wrapper - used as Map<String, dynamic>"
+    },
+    "Agent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Agent",
+      "file": "lib/src/models/managed_agents/agents/agent.dart",
+      "schema": "BetaManagedAgentsAgent",
+      "excluded_properties": ["archived_at", "description", "system", "metadata"]
+    },
+    "AgentEvaluatedPermission": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AgentEvaluatedPermission",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsAgentEvaluatedPermission"
+    },
+    "AgentParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentParamsObject",
+      "file": "lib/src/models/managed_agents/sessions/create_session_params.dart",
+      "schema": "BetaManagedAgentsAgentParams",
+      "parent": "AgentParams"
+    },
+    "AgentTool": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentTool",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsAgentTool"
+    },
+    "AgentToolConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentToolConfig",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsAgentToolConfig"
+    },
+    "AgentToolConfigParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentToolConfigParams",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsAgentToolConfigParams"
+    },
+    "AgentToolName": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AgentToolName",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsAgentToolName"
+    },
+    "AgentToolParams": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentToolParams",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsAgentToolParams"
+    },
+    "AgentToolset20260401": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentToolset20260401",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsAgentToolset20260401",
+      "parent": "AgentTool"
+    },
+    "AgentToolset20260401Params": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentToolset20260401Params",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsAgentToolset20260401Params",
+      "parent": "AgentToolParams"
+    },
+    "AgentToolsetDefaultConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentToolsetDefaultConfig",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsAgentToolsetDefaultConfig"
+    },
+    "AgentToolsetDefaultConfigParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentToolsetDefaultConfigParams",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsAgentToolsetDefaultConfigParams"
+    },
+    "AgentUnionParams": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentParams",
+      "file": "lib/src/models/managed_agents/sessions/create_session_params.dart",
+      "schema": "BetaManagedAgentsAgentUnionParams"
+    },
+    "AlwaysAllowPolicy": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AlwaysAllowPolicy",
+      "file": "lib/src/models/managed_agents/config/permission_policy.dart",
+      "schema": "BetaManagedAgentsAlwaysAllowPolicy",
+      "parent": "PermissionPolicy"
+    },
+    "AlwaysAskPolicy": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AlwaysAskPolicy",
+      "file": "lib/src/models/managed_agents/config/permission_policy.dart",
+      "schema": "BetaManagedAgentsAlwaysAskPolicy",
+      "parent": "PermissionPolicy"
+    },
+    "AnthropicSkill": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AnthropicSkill",
+      "file": "lib/src/models/managed_agents/config/agent_skill.dart",
+      "schema": "BetaManagedAgentsAnthropicSkill",
+      "parent": "AgentSkill"
+    },
+    "AnthropicSkillParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AnthropicSkillParams",
+      "file": "lib/src/models/managed_agents/config/agent_skill.dart",
+      "schema": "BetaManagedAgentsAnthropicSkillParams",
+      "parent": "AgentSkillParams"
+    },
+    "Base64DocumentSource": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsBase64DocumentSource",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Content block / API wrapper - used as Map<String, dynamic>"
+    },
+    "BillingError": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "BillingError",
+      "file": "lib/src/models/managed_agents/errors/managed_agent_error.dart",
+      "schema": "BetaManagedAgentsBillingError"
+    },
+    "BranchCheckout": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "BranchCheckout",
+      "file": "lib/src/models/managed_agents/resources/session_resource_params.dart",
+      "schema": "BetaManagedAgentsBranchCheckout",
+      "parent": "RepositoryCheckout"
+    },
+    "CacheCreationUsage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CacheCreationUsage",
+      "file": "lib/src/models/managed_agents/events/telemetry.dart",
+      "schema": "BetaManagedAgentsCacheCreationUsage"
+    },
+    "CommitCheckout": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "CommitCheckout",
+      "file": "lib/src/models/managed_agents/resources/session_resource_params.dart",
+      "schema": "BetaManagedAgentsCommitCheckout",
+      "parent": "RepositoryCheckout"
+    },
+    "CreateAgentParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateAgentParams",
+      "file": "lib/src/models/managed_agents/agents/create_agent_params.dart",
+      "schema": "BetaManagedAgentsCreateAgentParams"
+    },
+    "CreateCredentialRequestBody": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateCredentialParams",
+      "file": "lib/src/models/managed_agents/credentials/create_credential_params.dart",
+      "schema": "BetaManagedAgentsCreateCredentialRequestBody"
+    },
+    "CreateSessionParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateSessionParams",
+      "file": "lib/src/models/managed_agents/sessions/create_session_params.dart",
+      "schema": "BetaManagedAgentsCreateSessionParams"
+    },
+    "CreateVaultRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateVaultParams",
+      "file": "lib/src/models/managed_agents/vaults/create_vault_params.dart",
+      "schema": "BetaManagedAgentsCreateVaultRequest"
+    },
+    "Credential": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Credential",
+      "file": "lib/src/models/managed_agents/credentials/credential.dart",
+      "schema": "BetaManagedAgentsCredential",
+      "excluded_properties": ["archived_at", "display_name"]
+    },
+    "CredentialAuth": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "CredentialAuth",
+      "file": "lib/src/models/managed_agents/credentials/credential_auth.dart",
+      "schema": "BetaManagedAgentsCredentialAuth"
+    },
+    "CredentialCreateAuth": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "CredentialCreateAuth",
+      "file": "lib/src/models/managed_agents/credentials/credential_auth.dart",
+      "schema": "BetaManagedAgentsCredentialCreateAuth"
+    },
+    "CredentialUpdateAuth": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "CredentialUpdateAuth",
+      "file": "lib/src/models/managed_agents/credentials/credential_auth.dart",
+      "schema": "BetaManagedAgentsCredentialUpdateAuth"
+    },
+    "CustomSkill": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "CustomSkill",
+      "file": "lib/src/models/managed_agents/config/agent_skill.dart",
+      "schema": "BetaManagedAgentsCustomSkill",
+      "parent": "AgentSkill"
+    },
+    "CustomSkillParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "CustomSkillParams",
+      "file": "lib/src/models/managed_agents/config/agent_skill.dart",
+      "schema": "BetaManagedAgentsCustomSkillParams",
+      "parent": "AgentSkillParams"
+    },
+    "CustomTool": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "CustomTool",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsCustomTool",
+      "parent": "AgentTool"
+    },
+    "CustomToolInputSchema": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CustomToolInputSchema",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsCustomToolInputSchema"
+    },
+    "CustomToolParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "CustomToolParams",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsCustomToolParams",
+      "parent": "AgentToolParams"
+    },
+    "DeleteSessionResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeletedSessionResource",
+      "file": "lib/src/models/managed_agents/resources/session_resource.dart",
+      "schema": "BetaManagedAgentsDeleteSessionResource"
+    },
+    "DeletedCredential": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeletedCredential",
+      "file": "lib/src/models/managed_agents/credentials/credential.dart",
+      "schema": "BetaManagedAgentsDeletedCredential"
+    },
+    "DeletedSession": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeletedSession",
+      "file": "lib/src/models/managed_agents/sessions/session.dart",
+      "schema": "BetaManagedAgentsDeletedSession"
+    },
+    "DeletedVault": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeletedVault",
+      "file": "lib/src/models/managed_agents/vaults/vault.dart",
+      "schema": "BetaManagedAgentsDeletedVault"
+    },
+    "DocumentBlock": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsDocumentBlock",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Content block / API wrapper - used as Map<String, dynamic>"
+    },
+    "EventParams": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "EventParams",
+      "file": "lib/src/models/managed_agents/events/send_event_params.dart",
+      "schema": "BetaManagedAgentsEventParams"
+    },
+    "FileDocumentSource": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsFileDocumentSource",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Content block / API wrapper - used as Map<String, dynamic>"
+    },
+    "FileImageSource": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsFileImageSource",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Content block / API wrapper - used as Map<String, dynamic>"
+    },
+    "FileResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "FileResource",
+      "file": "lib/src/models/managed_agents/resources/session_resource.dart",
+      "schema": "BetaManagedAgentsFileResource",
+      "parent": "SessionResource"
+    },
+    "FileResourceParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "FileResourceParams",
+      "file": "lib/src/models/managed_agents/resources/session_resource_params.dart",
+      "schema": "BetaManagedAgentsFileResourceParams",
+      "parent": "SessionResourceParams"
+    },
+    "GetSessionResource": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsGetSessionResource",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Content block / API wrapper - used as Map<String, dynamic>"
+    },
+    "GitHubRepositoryResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "GitHubRepositoryResource",
+      "file": "lib/src/models/managed_agents/resources/session_resource.dart",
+      "schema": "BetaManagedAgentsGitHubRepositoryResource",
+      "parent": "SessionResource"
+    },
+    "GitHubRepositoryResourceParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "GitHubRepositoryResourceParams",
+      "file": "lib/src/models/managed_agents/resources/session_resource_params.dart",
+      "schema": "BetaManagedAgentsGitHubRepositoryResourceParams",
+      "parent": "SessionResourceParams"
+    },
+    "ImageBlock": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsImageBlock",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Content block / API wrapper - used as Map<String, dynamic>"
+    },
+    "InputEvent": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsInputEvent",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Content block / API wrapper - used as Map<String, dynamic>"
+    },
+    "ListAgentVersions": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ListAgentVersionsResponse",
+      "file": "lib/src/models/managed_agents/agents/agent_list_response.dart",
+      "schema": "BetaManagedAgentsListAgentVersions"
+    },
+    "ListAgents": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ListAgentsResponse",
+      "file": "lib/src/models/managed_agents/agents/agent_list_response.dart",
+      "schema": "BetaManagedAgentsListAgents"
+    },
+    "ListCredentialsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ListCredentialsResponse",
+      "file": "lib/src/models/managed_agents/credentials/credential_list_response.dart",
+      "schema": "BetaManagedAgentsListCredentialsResponse"
+    },
+    "ListOrder": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ListOrder",
+      "file": "lib/src/models/managed_agents/common/list_order.dart",
+      "schema": "BetaManagedAgentsListOrder"
+    },
+    "ListSessionEvents": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ListSessionEventsResponse",
+      "file": "lib/src/models/managed_agents/events/session_event_list_response.dart",
+      "schema": "BetaManagedAgentsListSessionEvents"
+    },
+    "ListSessionResources": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ListSessionResourcesResponse",
+      "file": "lib/src/models/managed_agents/resources/session_resource.dart",
+      "schema": "BetaManagedAgentsListSessionResources",
+      "excluded_properties": ["data"]
+    },
+    "ListSessions": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ListSessionsResponse",
+      "file": "lib/src/models/managed_agents/sessions/session_list_response.dart",
+      "schema": "BetaManagedAgentsListSessions"
+    },
+    "ListVaultsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ListVaultsResponse",
+      "file": "lib/src/models/managed_agents/vaults/vault_list_response.dart",
+      "schema": "BetaManagedAgentsListVaultsResponse"
+    },
+    "MCPServer": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "MCPServer",
+      "file": "lib/src/models/managed_agents/config/mcp_server.dart",
+      "schema": "BetaManagedAgentsMCPServer"
+    },
+    "MCPServerParams": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "MCPServerParams",
+      "file": "lib/src/models/managed_agents/config/mcp_server.dart",
+      "schema": "BetaManagedAgentsMCPServerParams"
+    },
+    "MCPServerURLDefinition": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "MCPServerURLDefinition",
+      "file": "lib/src/models/managed_agents/config/mcp_server.dart",
+      "schema": "BetaManagedAgentsMCPServerURLDefinition",
+      "parent": "MCPServer"
+    },
+    "MCPToolConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "MCPToolConfig",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsMCPToolConfig"
+    },
+    "MCPToolConfigParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "MCPToolConfigParams",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsMCPToolConfigParams"
+    },
+    "MCPToolset": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "MCPToolset",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsMCPToolset",
+      "parent": "AgentTool"
+    },
+    "MCPToolsetDefaultConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "MCPToolsetDefaultConfig",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsMCPToolsetDefaultConfig"
+    },
+    "MCPToolsetDefaultConfigParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "MCPToolsetDefaultConfigParams",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsMCPToolsetDefaultConfigParams"
+    },
+    "MCPToolsetParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "MCPToolsetParams",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
+      "schema": "BetaManagedAgentsMCPToolsetParams",
+      "parent": "AgentToolParams"
+    },
+    "McpAuthenticationFailedError": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "McpAuthenticationFailedError",
+      "file": "lib/src/models/managed_agents/errors/managed_agent_error.dart",
+      "schema": "BetaManagedAgentsMcpAuthenticationFailedError"
+    },
+    "McpConnectionFailedError": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "McpConnectionFailedError",
+      "file": "lib/src/models/managed_agents/errors/managed_agent_error.dart",
+      "schema": "BetaManagedAgentsMcpConnectionFailedError"
+    },
+    "McpOauthAuthResponse": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpOauthAuthResponse",
+      "file": "lib/src/models/managed_agents/credentials/credential_auth.dart",
+      "schema": "BetaManagedAgentsMcpOauthAuthResponse",
+      "parent": "CredentialAuth"
+    },
+    "McpOauthCreateParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpOauthCreateParams",
+      "file": "lib/src/models/managed_agents/credentials/credential_auth.dart",
+      "schema": "BetaManagedAgentsMcpOauthCreateParams",
+      "parent": "CredentialCreateAuth"
+    },
+    "McpOauthRefreshParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "McpOauthRefreshParams",
+      "file": "lib/src/models/managed_agents/credentials/credential_auth.dart",
+      "schema": "BetaManagedAgentsMcpOauthRefreshParams"
+    },
+    "McpOauthRefreshResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "McpOauthRefreshResponse",
+      "file": "lib/src/models/managed_agents/credentials/credential_auth.dart",
+      "schema": "BetaManagedAgentsMcpOauthRefreshResponse"
+    },
+    "McpOauthRefreshUpdateParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "McpOauthRefreshUpdateParams",
+      "file": "lib/src/models/managed_agents/credentials/credential_auth.dart",
+      "schema": "BetaManagedAgentsMcpOauthRefreshUpdateParams"
+    },
+    "McpOauthUpdateParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpOauthUpdateParams",
+      "file": "lib/src/models/managed_agents/credentials/credential_auth.dart",
+      "schema": "BetaManagedAgentsMcpOauthUpdateParams",
+      "parent": "CredentialUpdateAuth"
+    },
+    "Model": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsModel",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Content block / API wrapper - used as Map<String, dynamic>"
+    },
+    "ModelConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ModelConfig",
+      "file": "lib/src/models/managed_agents/config/model_config.dart",
+      "schema": "BetaManagedAgentsModelConfig"
+    },
+    "ModelConfigParams": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsModelConfigParams",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Content block / API wrapper - used as Map<String, dynamic>"
+    },
+    "ModelOverloadedError": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ModelOverloadedError",
+      "file": "lib/src/models/managed_agents/errors/managed_agent_error.dart",
+      "schema": "BetaManagedAgentsModelOverloadedError"
+    },
+    "ModelParams": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ModelParams",
+      "file": "lib/src/models/managed_agents/config/model_config.dart",
+      "schema": "BetaManagedAgentsModelParams"
+    },
+    "ModelRateLimitedError": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ModelRateLimitedError",
+      "file": "lib/src/models/managed_agents/errors/managed_agent_error.dart",
+      "schema": "BetaManagedAgentsModelRateLimitedError"
+    },
+    "ModelRequestFailedError": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ModelRequestFailedError",
+      "file": "lib/src/models/managed_agents/errors/managed_agent_error.dart",
+      "schema": "BetaManagedAgentsModelRequestFailedError"
+    },
+    "PermissionPolicy": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "PermissionPolicy",
+      "file": "lib/src/models/managed_agents/config/permission_policy.dart",
+      "schema": "BetaManagedAgentsPermissionPolicy"
+    },
+    "PlainTextDocumentSource": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsPlainTextDocumentSource",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Content block / API wrapper - used as Map<String, dynamic>"
+    },
+    "RepositoryCheckout": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "RepositoryCheckout",
+      "file": "lib/src/models/managed_agents/resources/session_resource_params.dart",
+      "schema": "BetaManagedAgentsRepositoryCheckout"
+    },
+    "RetryStatus": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "RetryStatus",
+      "file": "lib/src/models/managed_agents/events/telemetry.dart",
+      "schema": "BetaManagedAgentsRetryStatus"
+    },
+    "RetryStatusExhausted": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "RetryStatusExhausted",
+      "file": "lib/src/models/managed_agents/events/telemetry.dart",
+      "schema": "BetaManagedAgentsRetryStatusExhausted",
+      "parent": "RetryStatus"
+    },
+    "RetryStatusRetrying": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "RetryStatusRetrying",
+      "file": "lib/src/models/managed_agents/events/telemetry.dart",
+      "schema": "BetaManagedAgentsRetryStatusRetrying",
+      "parent": "RetryStatus"
+    },
+    "RetryStatusTerminal": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "RetryStatusTerminal",
+      "file": "lib/src/models/managed_agents/events/telemetry.dart",
+      "schema": "BetaManagedAgentsRetryStatusTerminal",
+      "parent": "RetryStatus"
+    },
+    "SendSessionEvents": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SendSessionEventsResponse",
+      "file": "lib/src/models/managed_agents/events/session_event_list_response.dart",
+      "schema": "BetaManagedAgentsSendSessionEvents"
+    },
+    "SendSessionEventsParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SendSessionEventsParams",
+      "file": "lib/src/models/managed_agents/events/send_event_params.dart",
+      "schema": "BetaManagedAgentsSendSessionEventsParams"
+    },
+    "Session": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Session",
+      "file": "lib/src/models/managed_agents/sessions/session.dart",
+      "schema": "BetaManagedAgentsSession",
+      "excluded_properties": ["archived_at"]
+    },
+    "SessionAgent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SessionAgent",
+      "file": "lib/src/models/managed_agents/sessions/session.dart",
+      "schema": "BetaManagedAgentsSessionAgent",
+      "excluded_properties": ["description", "system"]
+    },
+    "SessionEndTurn": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SessionEndTurn",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsSessionEndTurn",
+      "parent": "StopReason"
+    },
+    "SessionEvent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "SessionEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsSessionEvent"
+    },
+    "SessionRequiresAction": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SessionRequiresAction",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsSessionRequiresAction",
+      "parent": "StopReason"
+    },
+    "SessionResource": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "SessionResource",
+      "file": "lib/src/models/managed_agents/resources/session_resource.dart",
+      "schema": "BetaManagedAgentsSessionResource"
+    },
+    "SessionResourceParams": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "SessionResourceParams",
+      "file": "lib/src/models/managed_agents/resources/session_resource_params.dart",
+      "schema": "BetaManagedAgentsSessionResourceParams"
+    },
+    "SessionRetriesExhausted": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SessionRetriesExhausted",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsSessionRetriesExhausted",
+      "parent": "StopReason"
+    },
+    "SessionStats": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SessionStats",
+      "file": "lib/src/models/managed_agents/sessions/session.dart",
+      "schema": "BetaManagedAgentsSessionStats"
+    },
+    "SessionStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "SessionStatus",
+      "file": "lib/src/models/managed_agents/sessions/session.dart",
+      "schema": "BetaManagedAgentsSessionStatus"
+    },
+    "SessionUsage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SessionUsage",
+      "file": "lib/src/models/managed_agents/sessions/session.dart",
+      "schema": "BetaManagedAgentsSessionUsage"
+    },
+    "Skill": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSkill",
+      "file": "lib/src/models/managed_agents/config/agent_skill.dart",
+      "schema": "BetaManagedAgentsSkill"
+    },
+    "SkillParams": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AgentSkillParams",
+      "file": "lib/src/models/managed_agents/config/agent_skill.dart",
+      "schema": "BetaManagedAgentsSkillParams"
+    },
+    "SpanModelUsage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SpanModelUsage",
+      "file": "lib/src/models/managed_agents/events/telemetry.dart",
+      "schema": "BetaManagedAgentsSpanModelUsage"
+    },
+    "Speed": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AgentSpeed",
+      "file": "lib/src/models/managed_agents/config/model_config.dart",
+      "schema": "BetaManagedAgentsSpeed"
+    },
+    "StaticBearerAuthResponse": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "StaticBearerAuthResponse",
+      "file": "lib/src/models/managed_agents/credentials/credential_auth.dart",
+      "schema": "BetaManagedAgentsStaticBearerAuthResponse",
+      "parent": "CredentialAuth"
+    },
+    "StaticBearerCreateParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "StaticBearerCreateParams",
+      "file": "lib/src/models/managed_agents/credentials/credential_auth.dart",
+      "schema": "BetaManagedAgentsStaticBearerCreateParams",
+      "parent": "CredentialCreateAuth"
+    },
+    "StaticBearerUpdateParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "StaticBearerUpdateParams",
+      "file": "lib/src/models/managed_agents/credentials/credential_auth.dart",
+      "schema": "BetaManagedAgentsStaticBearerUpdateParams",
+      "parent": "CredentialUpdateAuth"
+    },
+    "StreamSessionEvents": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "SessionEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsStreamSessionEvents"
+    },
+    "Struct": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsStruct",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Content block / API wrapper - used as Map<String, dynamic>"
+    },
+    "TokenEndpointAuthBasicParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "TokenEndpointAuthBasicParam",
+      "file": "lib/src/models/managed_agents/credentials/credential_auth.dart",
+      "schema": "BetaManagedAgentsTokenEndpointAuthBasicParam",
+      "parent": "TokenEndpointAuthParam"
+    },
+    "TokenEndpointAuthBasicResponse": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "TokenEndpointAuthBasicResponse",
+      "file": "lib/src/models/managed_agents/credentials/credential_auth.dart",
+      "schema": "BetaManagedAgentsTokenEndpointAuthBasicResponse",
+      "parent": "TokenEndpointAuthResponse"
+    },
+    "TokenEndpointAuthNoneParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "TokenEndpointAuthNoneParam",
+      "file": "lib/src/models/managed_agents/credentials/credential_auth.dart",
+      "schema": "BetaManagedAgentsTokenEndpointAuthNoneParam",
+      "parent": "TokenEndpointAuthParam"
+    },
+    "TokenEndpointAuthNoneResponse": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "TokenEndpointAuthNoneResponse",
+      "file": "lib/src/models/managed_agents/credentials/credential_auth.dart",
+      "schema": "BetaManagedAgentsTokenEndpointAuthNoneResponse",
+      "parent": "TokenEndpointAuthResponse"
+    },
+    "TokenEndpointAuthPostParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "TokenEndpointAuthPostParam",
+      "file": "lib/src/models/managed_agents/credentials/credential_auth.dart",
+      "schema": "BetaManagedAgentsTokenEndpointAuthPostParam",
+      "parent": "TokenEndpointAuthParam"
+    },
+    "TokenEndpointAuthPostResponse": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "TokenEndpointAuthPostResponse",
+      "file": "lib/src/models/managed_agents/credentials/credential_auth.dart",
+      "schema": "BetaManagedAgentsTokenEndpointAuthPostResponse",
+      "parent": "TokenEndpointAuthResponse"
+    },
+    "ToolResultContentBlock": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsToolResultContentBlock",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Content block / API wrapper - used as Map<String, dynamic>"
+    },
+    "URLDocumentSource": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsURLDocumentSource",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Content block / API wrapper - used as Map<String, dynamic>"
+    },
+    "URLMCPServerParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "URLMCPServerParams",
+      "file": "lib/src/models/managed_agents/config/mcp_server.dart",
+      "schema": "BetaManagedAgentsURLMCPServerParams",
+      "parent": "MCPServerParams"
+    },
+    "UnknownError": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UnknownManagedAgentError",
+      "file": "lib/src/models/managed_agents/errors/managed_agent_error.dart",
+      "schema": "BetaManagedAgentsUnknownError"
+    },
+    "UpdateAgentParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateAgentParams",
+      "file": "lib/src/models/managed_agents/agents/update_agent_params.dart",
+      "schema": "BetaManagedAgentsUpdateAgentParams"
+    },
+    "UpdateCredentialRequestBody": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateCredentialParams",
+      "file": "lib/src/models/managed_agents/credentials/update_credential_params.dart",
+      "schema": "BetaManagedAgentsUpdateCredentialRequestBody"
+    },
+    "UpdateSessionParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateSessionParams",
+      "file": "lib/src/models/managed_agents/sessions/update_session_params.dart",
+      "schema": "BetaManagedAgentsUpdateSessionParams"
+    },
+    "UpdateSessionResource": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsUpdateSessionResource",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Content block / API wrapper - used as Map<String, dynamic>"
+    },
+    "UpdateSessionResourceParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateSessionResourceParams",
+      "file": "lib/src/models/managed_agents/resources/session_resource_params.dart",
+      "schema": "BetaManagedAgentsUpdateSessionResourceParams"
+    },
+    "UpdateVaultRequestBody": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateVaultParams",
+      "file": "lib/src/models/managed_agents/vaults/update_vault_params.dart",
+      "schema": "BetaManagedAgentsUpdateVaultRequestBody"
+    },
+    "UserContentBlock": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsUserContentBlock",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Content block / API wrapper - used as Map<String, dynamic>"
+    },
+    "Vault": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Vault",
+      "file": "lib/src/models/managed_agents/vaults/vault.dart",
+      "schema": "BetaManagedAgentsVault",
+      "excluded_properties": ["archived_at"]
+    },
+    "AgentCustomToolUseEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentCustomToolUseEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsAgentCustomToolUseEvent",
+      "parent": "SessionEvent"
+    },
+    "AgentMcpToolResultEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentMcpToolResultEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsAgentMcpToolResultEvent",
+      "parent": "SessionEvent"
+    },
+    "AgentMcpToolUseEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentMcpToolUseEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsAgentMcpToolUseEvent",
+      "parent": "SessionEvent"
+    },
+    "AgentMessageEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentMessageEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsAgentMessageEvent",
+      "parent": "SessionEvent"
+    },
+    "AgentThinkingEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentThinkingEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsAgentThinkingEvent",
+      "parent": "SessionEvent"
+    },
+    "AgentThreadContextCompactedEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentThreadContextCompactedEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsAgentThreadContextCompactedEvent",
+      "parent": "SessionEvent"
+    },
+    "AgentToolResultEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentToolResultEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsAgentToolResultEvent",
+      "parent": "SessionEvent"
+    },
+    "AgentToolUseEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentToolUseEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsAgentToolUseEvent",
+      "parent": "SessionEvent"
+    },
+    "SessionDeletedEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SessionDeletedEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsSessionDeletedEvent",
+      "parent": "SessionEvent"
+    },
+    "SessionErrorEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SessionErrorEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsSessionErrorEvent",
+      "parent": "SessionEvent"
+    },
+    "SessionStatusIdleEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SessionStatusIdleEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsSessionStatusIdleEvent",
+      "parent": "SessionEvent"
+    },
+    "SessionStatusRescheduledEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SessionStatusRescheduledEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsSessionStatusRescheduledEvent",
+      "parent": "SessionEvent"
+    },
+    "SessionStatusRunningEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SessionStatusRunningEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsSessionStatusRunningEvent",
+      "parent": "SessionEvent"
+    },
+    "SessionStatusTerminatedEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SessionStatusTerminatedEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsSessionStatusTerminatedEvent",
+      "parent": "SessionEvent"
+    },
+    "SpanModelRequestEndEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SpanModelRequestEndEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsSpanModelRequestEndEvent",
+      "parent": "SessionEvent",
+      "excluded_properties": ["model_usage"]
+    },
+    "SpanModelRequestStartEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SpanModelRequestStartEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsSpanModelRequestStartEvent",
+      "parent": "SessionEvent"
+    },
+    "TokenEndpointAuthBasicUpdateParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "TokenEndpointAuthBasicUpdateParam",
+      "file": "lib/src/models/managed_agents/credentials/credential_auth.dart",
+      "schema": "BetaManagedAgentsTokenEndpointAuthBasicUpdateParam",
+      "parent": "TokenEndpointAuthUpdateParam"
+    },
+    "TokenEndpointAuthPostUpdateParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "TokenEndpointAuthPostUpdateParam",
+      "file": "lib/src/models/managed_agents/credentials/credential_auth.dart",
+      "schema": "BetaManagedAgentsTokenEndpointAuthPostUpdateParam",
+      "parent": "TokenEndpointAuthUpdateParam"
+    },
+    "UserCustomToolResultEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "UserCustomToolResultEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsUserCustomToolResultEvent",
+      "parent": "SessionEvent"
+    },
+    "UserCustomToolResultEventParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "UserCustomToolResultEventParams",
+      "file": "lib/src/models/managed_agents/events/send_event_params.dart",
+      "schema": "BetaManagedAgentsUserCustomToolResultEventParams",
+      "parent": "EventParams"
+    },
+    "UserInterruptEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "UserInterruptEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsUserInterruptEvent",
+      "parent": "SessionEvent"
+    },
+    "UserInterruptEventParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "UserInterruptEventParams",
+      "file": "lib/src/models/managed_agents/events/send_event_params.dart",
+      "schema": "BetaManagedAgentsUserInterruptEventParams",
+      "parent": "EventParams"
+    },
+    "UserMessageEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "UserMessageEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsUserMessageEvent",
+      "parent": "SessionEvent"
+    },
+    "UserMessageEventParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "UserMessageEventParams",
+      "file": "lib/src/models/managed_agents/events/send_event_params.dart",
+      "schema": "BetaManagedAgentsUserMessageEventParams",
+      "parent": "EventParams"
+    },
+    "UserToolConfirmationEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "UserToolConfirmationEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsUserToolConfirmationEvent",
+      "parent": "SessionEvent"
+    },
+    "UserToolConfirmationEventParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "UserToolConfirmationEventParams",
+      "file": "lib/src/models/managed_agents/events/send_event_params.dart",
+      "schema": "BetaManagedAgentsUserToolConfirmationEventParams",
+      "parent": "EventParams"
+    },
+    "UserToolConfirmationResult": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "UserToolConfirmationResult",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsUserToolConfirmationResult"
     }
   }
 }

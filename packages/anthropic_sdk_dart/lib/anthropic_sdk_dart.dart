@@ -83,6 +83,46 @@ export 'src/models/files/file_delete_response.dart';
 export 'src/models/files/file_list_response.dart';
 export 'src/models/files/file_metadata.dart';
 
+// Models - Managed Agents (Beta)
+export 'src/models/managed_agents/agents/agent.dart';
+export 'src/models/managed_agents/agents/agent_list_response.dart';
+export 'src/models/managed_agents/agents/agent_version.dart';
+export 'src/models/managed_agents/agents/create_agent_params.dart';
+export 'src/models/managed_agents/agents/update_agent_params.dart';
+export 'src/models/managed_agents/common/list_order.dart';
+export 'src/models/managed_agents/config/agent_skill.dart';
+export 'src/models/managed_agents/config/agent_tool.dart';
+export 'src/models/managed_agents/config/mcp_server.dart';
+export 'src/models/managed_agents/config/model_config.dart';
+export 'src/models/managed_agents/config/permission_policy.dart';
+export 'src/models/managed_agents/credentials/create_credential_params.dart';
+export 'src/models/managed_agents/credentials/credential.dart';
+export 'src/models/managed_agents/credentials/credential_auth.dart';
+export 'src/models/managed_agents/credentials/credential_list_response.dart';
+export 'src/models/managed_agents/credentials/update_credential_params.dart';
+export 'src/models/managed_agents/errors/managed_agent_error.dart'
+    hide
+        RetryStatus,
+        RetryStatusExhausted,
+        RetryStatusRetrying,
+        RetryStatusTerminal,
+        UnknownRetryStatus;
+export 'src/models/managed_agents/events/send_event_params.dart';
+export 'src/models/managed_agents/events/session_event.dart'
+    hide AgentEvaluatedPermission, StopReason;
+export 'src/models/managed_agents/events/session_event_list_response.dart';
+export 'src/models/managed_agents/events/telemetry.dart';
+export 'src/models/managed_agents/resources/session_resource.dart';
+export 'src/models/managed_agents/resources/session_resource_params.dart';
+export 'src/models/managed_agents/sessions/create_session_params.dart';
+export 'src/models/managed_agents/sessions/session.dart';
+export 'src/models/managed_agents/sessions/session_list_response.dart';
+export 'src/models/managed_agents/sessions/update_session_params.dart';
+export 'src/models/managed_agents/vaults/create_vault_params.dart';
+export 'src/models/managed_agents/vaults/update_vault_params.dart';
+export 'src/models/managed_agents/vaults/vault.dart';
+export 'src/models/managed_agents/vaults/vault_list_response.dart';
+
 // Models - Messages
 export 'src/models/messages/input_message.dart';
 export 'src/models/messages/message.dart';
@@ -131,11 +171,17 @@ export 'src/models/tools/tool_choice.dart';
 export 'src/models/tools/tool_definition.dart';
 
 // Resources
+export 'src/resources/agents_resource.dart';
 export 'src/resources/files_resource.dart';
 export 'src/resources/message_batches_resource.dart';
 export 'src/resources/messages_resource.dart';
 export 'src/resources/models_resource.dart';
+export 'src/resources/session_events_resource.dart';
+export 'src/resources/session_resources_resource.dart';
+export 'src/resources/sessions_resource.dart';
 export 'src/resources/skills_resource.dart';
+export 'src/resources/vault_credentials_resource.dart';
+export 'src/resources/vaults_resource.dart';
 
 // Utilities
 export 'src/utils/streaming_parser.dart' show SseEventExtension, SseParser;

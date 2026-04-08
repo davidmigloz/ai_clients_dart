@@ -5,11 +5,14 @@ import '../interceptors/auth_interceptor.dart';
 import '../interceptors/error_interceptor.dart';
 import '../interceptors/interceptor.dart';
 import '../interceptors/logging_interceptor.dart';
+import '../resources/agents_resource.dart';
 import '../resources/files_resource.dart';
 import '../resources/message_batches_resource.dart';
 import '../resources/messages_resource.dart';
 import '../resources/models_resource.dart';
+import '../resources/sessions_resource.dart';
 import '../resources/skills_resource.dart';
+import '../resources/vaults_resource.dart';
 import 'config.dart';
 import 'interceptor_chain.dart';
 import 'request_builder.dart';
@@ -76,6 +79,15 @@ class AnthropicClient {
 
   /// Resource for the Skills API (Beta).
   late final SkillsResource skills;
+
+  /// Resource for the Agents API (Beta).
+  late final AgentsResource agents;
+
+  /// Resource for the Sessions API (Beta).
+  late final SessionsResource sessions;
+
+  /// Resource for the Vaults API (Beta).
+  late final VaultsResource vaults;
 
   /// Creates an [AnthropicClient].
   ///
@@ -176,6 +188,27 @@ class AnthropicClient {
       ensureNotClosed: _ensureNotClosed,
     );
     skills = SkillsResource(
+      config: config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+    agents = AgentsResource(
+      config: config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+    sessions = SessionsResource(
+      config: config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+    vaults = VaultsResource(
       config: config,
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,

@@ -137,6 +137,69 @@ mixin StreamingResource on ResourceBase {
     }
   }
 
+  /// Makes a streaming GET request.
+  ///
+  /// Returns a stream of parsed SSE events as JSON maps.
+  /// The optional [abortTrigger] allows canceling the stream.
+  Stream<Map<String, dynamic>> getStream(
+    String path, {
+    Map<String, dynamic>? queryParams,
+    Map<String, String>? headers,
+    Future<void>? abortTrigger,
+  }) async* {
+    ensureNotClosed?.call();
+    final uri = requestBuilder.buildUrl(path, queryParams: queryParams);
+    final request = http.Request('GET', uri)
+      ..headers.addAll(requestBuilder.buildHeaders(additionalHeaders: headers));
+
+    // Add authentication header if auth provider is configured
+    await _applyAuthentication(request);
+
+    final correlationId =
+        request.headers['X-Request-ID'] ?? generateRequestId();
+
+    // Send the request
+    final streamedResponse = await httpClient.send(request);
+
+    // Check for errors
+    if (streamedResponse.statusCode >= 400) {
+      final responseBody = await streamedResponse.stream.bytesToString();
+      throw _createStreamException(
+        streamedResponse.statusCode,
+        responseBody,
+        correlationId,
+      );
+    }
+
+    // Parse SSE stream
+    final parser = SseParser();
+    final eventStream = parser.parse(streamedResponse.stream);
+
+    // Handle abort during streaming
+    if (abortTrigger != null) {
+      var aborted = false;
+
+      // Listen for abort signal
+      abortTrigger.then((_) {
+        aborted = true;
+      }).ignore();
+
+      await for (final event in eventStream) {
+        if (aborted) {
+          throw AbortedException(
+            message: 'Stream aborted by user',
+            correlationId: correlationId,
+            timestamp: DateTime.now(),
+            stage: AbortionStage.duringStream,
+          );
+        }
+        yield event;
+      }
+    } else {
+      yield* eventStream;
+    }
+  }
+
   /// Applies authentication to a request.
   Future<void> _applyAuthentication(http.Request request) async {
     final provider = config.authProvider;
