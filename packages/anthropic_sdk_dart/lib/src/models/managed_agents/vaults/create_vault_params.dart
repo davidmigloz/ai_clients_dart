@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
 
 /// Request parameters for creating a vault.
@@ -33,11 +34,13 @@ class CreateVaultParams {
   /// Creates a copy with replaced values.
   CreateVaultParams copyWith({
     String? displayName,
-    Map<String, String>? metadata,
+    Object? metadata = unsetCopyWithValue,
   }) {
     return CreateVaultParams(
       displayName: displayName ?? this.displayName,
-      metadata: metadata ?? this.metadata,
+      metadata: metadata == unsetCopyWithValue
+          ? this.metadata
+          : metadata as Map<String, String>?,
     );
   }
 
