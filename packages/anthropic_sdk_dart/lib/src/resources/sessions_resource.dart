@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../models/managed_agents/common/list_order.dart';
 import '../models/managed_agents/sessions/create_session_params.dart';
 import '../models/managed_agents/sessions/session.dart';
 import '../models/managed_agents/sessions/session_list_response.dart';
@@ -81,7 +82,7 @@ class SessionsResource extends ResourceBase {
   /// Parameters:
   /// - [agentId]: Filter sessions by agent ID.
   /// - [agentVersion]: Filter sessions by agent version.
-  /// - [order]: Sort order ('asc' or 'desc').
+  /// - [order]: Sort order.
   /// - [limit]: Maximum number of sessions to return.
   /// - [page]: Pagination token from a previous response.
   /// - [createdAtGt]: Filter sessions created after this ISO 8601 timestamp.
@@ -93,7 +94,7 @@ class SessionsResource extends ResourceBase {
   Future<ListSessionsResponse> list({
     String? agentId,
     int? agentVersion,
-    String? order,
+    ListOrder? order,
     int? limit,
     String? page,
     String? createdAtGt,
@@ -107,7 +108,7 @@ class SessionsResource extends ResourceBase {
     final queryParams = <String, dynamic>{
       'agent_id': ?agentId,
       'agent_version': ?agentVersion?.toString(),
-      'order': ?order,
+      'order': ?order?.toJson(),
       'limit': ?limit?.toString(),
       'page': ?page,
       'created_at[gt]': ?createdAtGt,

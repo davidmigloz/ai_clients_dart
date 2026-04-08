@@ -1350,10 +1350,12 @@ class UnknownStopReason extends StopReason {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is UnknownStopReason && runtimeType == other.runtimeType;
+      other is UnknownStopReason &&
+          runtimeType == other.runtimeType &&
+          mapsDeepEqual(rawJson, other.rawJson);
 
   @override
-  int get hashCode => runtimeType.hashCode;
+  int get hashCode => mapDeepHashCode(rawJson);
 
   @override
   String toString() => 'UnknownStopReason(rawJson: $rawJson)';

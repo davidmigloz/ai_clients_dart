@@ -7,88 +7,145 @@ import '../config/agent_tool.dart';
 import '../config/mcp_server.dart';
 import '../config/model_config.dart';
 
+/// Private sentinel to distinguish "not provided" from explicit `null`.
+const Object _notSet = Object();
+
 /// Request parameters for updating an agent.
 ///
 /// Omit a field to preserve its current value.
+/// Pass `null` explicitly to clear a clearable field.
 @immutable
 class UpdateAgentParams {
   /// The agent's current version — for optimistic concurrency.
   final int version;
 
   /// Human-readable name. Omit to preserve.
-  final String? name;
+  String? get name => _name == _notSet ? null : _name as String?;
+  final Object? _name;
 
   /// Description. Omit to preserve; send null to clear.
-  final String? description;
+  String? get description =>
+      _description == _notSet ? null : _description as String?;
+  final Object? _description;
 
   /// System prompt. Omit to preserve; send null to clear.
-  final String? system;
+  String? get system => _system == _notSet ? null : _system as String?;
+  final Object? _system;
 
   /// Model identifier. Omit to preserve.
-  final ModelParams? model;
+  ModelParams? get model => _model == _notSet ? null : _model as ModelParams?;
+  final Object? _model;
 
   /// Tool configurations. Full replacement. Omit to preserve; send null to
   /// clear.
-  final List<AgentToolParams>? tools;
+  List<AgentToolParams>? get tools =>
+      _tools == _notSet ? null : _tools as List<AgentToolParams>?;
+  final Object? _tools;
 
   /// MCP servers. Full replacement. Omit to preserve; send null to clear.
-  final List<MCPServerParams>? mcpServers;
+  List<MCPServerParams>? get mcpServers =>
+      _mcpServers == _notSet ? null : _mcpServers as List<MCPServerParams>?;
+  final Object? _mcpServers;
 
   /// Skills. Full replacement. Omit to preserve; send null to clear.
-  final List<AgentSkillParams>? skills;
+  List<AgentSkillParams>? get skills =>
+      _skills == _notSet ? null : _skills as List<AgentSkillParams>?;
+  final Object? _skills;
 
   /// Metadata patch. Set a key to a string to upsert it, or to null to
   /// delete it. Omit the field to preserve.
-  final Map<String, String?>? metadata;
+  Map<String, String?>? get metadata =>
+      _metadata == _notSet ? null : _metadata as Map<String, String?>?;
+  final Object? _metadata;
 
   /// Creates an [UpdateAgentParams].
+  ///
+  /// Omit a field to preserve its current value on the server.
+  /// Pass `null` explicitly to clear a clearable field.
   const UpdateAgentParams({
     required this.version,
-    this.name,
-    this.description,
-    this.system,
-    this.model,
-    this.tools,
-    this.mcpServers,
-    this.skills,
-    this.metadata,
-  });
+    Object? name = _notSet,
+    Object? description = _notSet,
+    Object? system = _notSet,
+    Object? model = _notSet,
+    Object? tools = _notSet,
+    Object? mcpServers = _notSet,
+    Object? skills = _notSet,
+    Object? metadata = _notSet,
+  }) : _name = name,
+       _description = description,
+       _system = system,
+       _model = model,
+       _tools = tools,
+       _mcpServers = mcpServers,
+       _skills = skills,
+       _metadata = metadata;
 
   /// Creates an [UpdateAgentParams] from JSON.
   factory UpdateAgentParams.fromJson(Map<String, dynamic> json) {
     return UpdateAgentParams(
       version: json['version'] as int,
-      name: json['name'] as String?,
-      description: json['description'] as String?,
-      system: json['system'] as String?,
-      model: json['model'] != null
-          ? ModelParams.fromJson(json['model'] as Object)
-          : null,
-      tools: (json['tools'] as List?)
-          ?.map((e) => AgentToolParams.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      mcpServers: (json['mcp_servers'] as List?)
-          ?.map((e) => MCPServerParams.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      skills: (json['skills'] as List?)
-          ?.map((e) => AgentSkillParams.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      metadata: (json['metadata'] as Map?)?.cast<String, String?>(),
+      name: json.containsKey('name') ? json['name'] as String? : _notSet,
+      description: json.containsKey('description')
+          ? json['description'] as String?
+          : _notSet,
+      system: json.containsKey('system') ? json['system'] as String? : _notSet,
+      model: json.containsKey('model')
+          ? json['model'] != null
+                ? ModelParams.fromJson(json['model'] as Object)
+                : null
+          : _notSet,
+      tools: json.containsKey('tools')
+          ? (json['tools'] as List?)
+                ?.map(
+                  (e) => AgentToolParams.fromJson(e as Map<String, dynamic>),
+                )
+                .toList()
+          : _notSet,
+      mcpServers: json.containsKey('mcp_servers')
+          ? (json['mcp_servers'] as List?)
+                ?.map(
+                  (e) => MCPServerParams.fromJson(e as Map<String, dynamic>),
+                )
+                .toList()
+          : _notSet,
+      skills: json.containsKey('skills')
+          ? (json['skills'] as List?)
+                ?.map(
+                  (e) => AgentSkillParams.fromJson(e as Map<String, dynamic>),
+                )
+                .toList()
+          : _notSet,
+      metadata: json.containsKey('metadata')
+          ? (json['metadata'] as Map?)?.cast<String, String?>()
+          : _notSet,
     );
   }
 
   /// Converts to JSON.
+  ///
+  /// Fields that were not set (left as default) are omitted.
+  /// Fields explicitly set to `null` are included as `null` to clear
+  /// the value on the server.
   Map<String, dynamic> toJson() => {
     'version': version,
-    if (name != null) 'name': name,
-    if (description != null) 'description': description,
-    if (system != null) 'system': system,
-    if (model != null) 'model': model!.toJson(),
-    if (tools != null) 'tools': tools!.map((e) => e.toJson()).toList(),
-    if (mcpServers != null)
-      'mcp_servers': mcpServers!.map((e) => e.toJson()).toList(),
-    if (skills != null) 'skills': skills!.map((e) => e.toJson()).toList(),
-    if (metadata != null) 'metadata': metadata,
+    if (_name != _notSet) 'name': _name,
+    if (_description != _notSet) 'description': _description,
+    if (_system != _notSet) 'system': _system,
+    if (_model != _notSet) 'model': (_model as ModelParams?)?.toJson(),
+    if (_tools != _notSet)
+      'tools': (_tools as List<AgentToolParams>?)
+          ?.map((e) => e.toJson())
+          .toList(),
+    if (_mcpServers != _notSet)
+      'mcp_servers': (_mcpServers as List<MCPServerParams>?)
+          ?.map((e) => e.toJson())
+          .toList(),
+    if (_skills != _notSet)
+      'skills': (_skills as List<AgentSkillParams>?)
+          ?.map((e) => e.toJson())
+          .toList(),
+    if (_metadata != _notSet) 'metadata': _metadata,
   };
 
   /// Creates a copy with replaced values.
@@ -105,24 +162,16 @@ class UpdateAgentParams {
   }) {
     return UpdateAgentParams(
       version: version ?? this.version,
-      name: name == unsetCopyWithValue ? this.name : name as String?,
+      name: name == unsetCopyWithValue ? _name : name,
       description: description == unsetCopyWithValue
-          ? this.description
-          : description as String?,
-      system: system == unsetCopyWithValue ? this.system : system as String?,
-      model: model == unsetCopyWithValue ? this.model : model as ModelParams?,
-      tools: tools == unsetCopyWithValue
-          ? this.tools
-          : tools as List<AgentToolParams>?,
-      mcpServers: mcpServers == unsetCopyWithValue
-          ? this.mcpServers
-          : mcpServers as List<MCPServerParams>?,
-      skills: skills == unsetCopyWithValue
-          ? this.skills
-          : skills as List<AgentSkillParams>?,
-      metadata: metadata == unsetCopyWithValue
-          ? this.metadata
-          : metadata as Map<String, String?>?,
+          ? _description
+          : description,
+      system: system == unsetCopyWithValue ? _system : system,
+      model: model == unsetCopyWithValue ? _model : model,
+      tools: tools == unsetCopyWithValue ? _tools : tools,
+      mcpServers: mcpServers == unsetCopyWithValue ? _mcpServers : mcpServers,
+      skills: skills == unsetCopyWithValue ? _skills : skills,
+      metadata: metadata == unsetCopyWithValue ? _metadata : metadata,
     );
   }
 
@@ -132,26 +181,26 @@ class UpdateAgentParams {
       other is UpdateAgentParams &&
           runtimeType == other.runtimeType &&
           version == other.version &&
-          name == other.name &&
-          description == other.description &&
-          system == other.system &&
-          model == other.model &&
-          listsEqual(tools, other.tools) &&
-          listsEqual(mcpServers, other.mcpServers) &&
-          listsEqual(skills, other.skills) &&
-          mapsEqual(metadata, other.metadata);
+          _name == other._name &&
+          _description == other._description &&
+          _system == other._system &&
+          _model == other._model &&
+          _listsEqualOrBothSentinel(_tools, other._tools) &&
+          _listsEqualOrBothSentinel(_mcpServers, other._mcpServers) &&
+          _listsEqualOrBothSentinel(_skills, other._skills) &&
+          _mapsEqualOrBothSentinel(_metadata, other._metadata);
 
   @override
   int get hashCode => Object.hash(
     version,
-    name,
-    description,
-    system,
-    model,
-    listHash(tools),
-    listHash(mcpServers),
-    listHash(skills),
-    mapHash(metadata),
+    _name,
+    _description,
+    _system,
+    _model,
+    _tools == _notSet ? _notSet : listHash(tools),
+    _mcpServers == _notSet ? _notSet : listHash(mcpServers),
+    _skills == _notSet ? _notSet : listHash(skills),
+    _metadata == _notSet ? _notSet : mapHash(metadata),
   );
 
   @override
@@ -166,4 +215,16 @@ class UpdateAgentParams {
       'mcpServers: $mcpServers, '
       'skills: $skills, '
       'metadata: $metadata)';
+}
+
+bool _listsEqualOrBothSentinel(Object? a, Object? b) {
+  if (identical(a, _notSet) && identical(b, _notSet)) return true;
+  if (identical(a, _notSet) || identical(b, _notSet)) return false;
+  return listsEqual(a as List?, b as List?);
+}
+
+bool _mapsEqualOrBothSentinel(Object? a, Object? b) {
+  if (identical(a, _notSet) && identical(b, _notSet)) return true;
+  if (identical(a, _notSet) || identical(b, _notSet)) return false;
+  return mapsEqual(a as Map?, b as Map?);
 }

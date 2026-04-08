@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../models/managed_agents/common/list_order.dart';
 import '../models/managed_agents/events/send_event_params.dart';
 import '../models/managed_agents/events/session_event.dart';
 import '../models/managed_agents/events/session_event_list_response.dart';
@@ -32,19 +33,19 @@ class SessionEventsResource extends ResourceBase with StreamingResource {
   ///
   /// Parameters:
   /// - [limit]: Maximum number of events to return.
-  /// - [order]: Sort order ('asc' or 'desc').
+  /// - [order]: Sort order.
   /// - [page]: Pagination token from a previous response.
   /// - [abortTrigger]: Allows canceling the request.
   Future<ListSessionEventsResponse> list({
     int? limit,
-    String? order,
+    ListOrder? order,
     String? page,
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
     final queryParams = <String, dynamic>{
       'limit': ?limit?.toString(),
-      'order': ?order,
+      'order': ?order?.toJson(),
       'page': ?page,
     };
 

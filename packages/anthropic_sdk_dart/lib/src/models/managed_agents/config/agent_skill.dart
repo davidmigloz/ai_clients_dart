@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../../common/copy_with_sentinel.dart';
+import '../../common/equality_helpers.dart';
 
 /// Resolved skill as returned in API responses.
 ///
@@ -166,13 +167,14 @@ class UnknownAgentSkill extends AgentSkill {
       identical(this, other) ||
       other is UnknownAgentSkill &&
           runtimeType == other.runtimeType &&
-          type == other.type;
+          type == other.type &&
+          mapsDeepEqual(raw, other.raw);
 
   @override
-  int get hashCode => type.hashCode;
+  int get hashCode => Object.hash(type, mapDeepHashCode(raw));
 
   @override
-  String toString() => 'UnknownAgentSkill(type: $type)';
+  String toString() => 'UnknownAgentSkill(type: $type, raw: $raw)';
 }
 
 /// Skill parameter for create/update requests.
@@ -351,11 +353,12 @@ class UnknownAgentSkillParams extends AgentSkillParams {
       identical(this, other) ||
       other is UnknownAgentSkillParams &&
           runtimeType == other.runtimeType &&
-          type == other.type;
+          type == other.type &&
+          mapsDeepEqual(raw, other.raw);
 
   @override
-  int get hashCode => type.hashCode;
+  int get hashCode => Object.hash(type, mapDeepHashCode(raw));
 
   @override
-  String toString() => 'UnknownAgentSkillParams(type: $type)';
+  String toString() => 'UnknownAgentSkillParams(type: $type, raw: $raw)';
 }

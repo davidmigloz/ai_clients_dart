@@ -399,6 +399,43 @@ void main() {
       expect(request.url.path, '/v1/sessions/session_test123/events');
       expect(request.method, 'POST');
     });
+
+    test('stream sends correct request and parses SSE events', () async {
+      mockHttpClient.queueStreamingResponse([
+        {
+          'type': 'user.message',
+          'id': 'event_001',
+          'content': [
+            {'type': 'text', 'text': 'Hello'},
+          ],
+          'processed_at': '2026-04-01T00:00:00Z',
+        },
+        {
+          'type': 'agent.message',
+          'id': 'event_002',
+          'content': [
+            {'type': 'text', 'text': 'Hi there!'},
+          ],
+          'processed_at': '2026-04-01T00:00:01Z',
+        },
+      ]);
+
+      final events = await client.sessions
+          .events('session_test123')
+          .stream()
+          .toList();
+
+      expect(events, hasLength(2));
+      expect(events[0], isA<UserMessageEvent>());
+      expect((events[0] as UserMessageEvent).id, 'event_001');
+      expect(events[1], isA<AgentMessageEvent>());
+      expect((events[1] as AgentMessageEvent).id, 'event_002');
+
+      final request = mockHttpClient.lastRequest!;
+      expect(request.url.path, '/v1/sessions/session_test123/events/stream');
+      expect(request.method, 'GET');
+      expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
+    });
   });
 
   group('SessionResourcesResource', () {

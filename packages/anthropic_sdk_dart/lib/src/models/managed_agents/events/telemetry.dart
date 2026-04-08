@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../../common/copy_with_sentinel.dart';
+import '../../common/equality_helpers.dart';
 
 /// Token usage for a single model request.
 @immutable
@@ -310,10 +311,12 @@ class UnknownRetryStatus extends RetryStatus {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is UnknownRetryStatus && runtimeType == other.runtimeType;
+      other is UnknownRetryStatus &&
+          runtimeType == other.runtimeType &&
+          mapsDeepEqual(rawJson, other.rawJson);
 
   @override
-  int get hashCode => runtimeType.hashCode;
+  int get hashCode => mapDeepHashCode(rawJson);
 
   @override
   String toString() => 'UnknownRetryStatus(rawJson: $rawJson)';

@@ -100,13 +100,7 @@ export 'src/models/managed_agents/credentials/credential.dart';
 export 'src/models/managed_agents/credentials/credential_auth.dart';
 export 'src/models/managed_agents/credentials/credential_list_response.dart';
 export 'src/models/managed_agents/credentials/update_credential_params.dart';
-export 'src/models/managed_agents/errors/managed_agent_error.dart'
-    hide
-        RetryStatus,
-        RetryStatusExhausted,
-        RetryStatusRetrying,
-        RetryStatusTerminal,
-        UnknownRetryStatus;
+export 'src/models/managed_agents/errors/managed_agent_error.dart';
 export 'src/models/managed_agents/events/send_event_params.dart';
 export 'src/models/managed_agents/events/session_event.dart'
     hide AgentEvaluatedPermission, StopReason;
