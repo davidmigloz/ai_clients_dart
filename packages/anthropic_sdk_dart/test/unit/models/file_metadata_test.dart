@@ -81,6 +81,66 @@ void main() {
       expect(json['downloadable'], isTrue);
     });
 
+    test('fromJson parses file with scope', () {
+      final json = {
+        'id': 'file_scoped',
+        'type': 'file',
+        'filename': 'output.txt',
+        'mime_type': 'text/plain',
+        'size_bytes': 256,
+        'created_at': '2025-06-01T00:00:00Z',
+        'downloadable': true,
+        'scope': {'id': 'sess_abc123', 'type': 'session'},
+      };
+
+      final file = FileMetadata.fromJson(json);
+
+      expect(file.scope, isNotNull);
+      expect(file.scope!.id, 'sess_abc123');
+      expect(file.scope!.type, 'session');
+    });
+
+    test('fromJson handles missing scope', () {
+      final json = {
+        'id': 'file_noscope',
+        'type': 'file',
+        'filename': 'test.txt',
+        'mime_type': 'text/plain',
+        'size_bytes': 100,
+        'created_at': '2025-01-01T00:00:00Z',
+      };
+
+      final file = FileMetadata.fromJson(json);
+      expect(file.scope, isNull);
+    });
+
+    test('toJson omits scope when null', () {
+      final file = FileMetadata(
+        id: 'file_test',
+        filename: 'test.txt',
+        mimeType: 'text/plain',
+        sizeBytes: 100,
+        createdAt: DateTime.utc(2025, 1, 1),
+      );
+
+      final json = file.toJson();
+      expect(json.containsKey('scope'), isFalse);
+    });
+
+    test('toJson includes scope when present', () {
+      final file = FileMetadata(
+        id: 'file_test',
+        filename: 'test.txt',
+        mimeType: 'text/plain',
+        sizeBytes: 100,
+        createdAt: DateTime.utc(2025, 1, 1),
+        scope: const FileScope(id: 'sess_xyz'),
+      );
+
+      final json = file.toJson();
+      expect(json['scope'], {'id': 'sess_xyz', 'type': 'session'});
+    });
+
     test('equality works correctly', () {
       final file1 = FileMetadata(
         id: 'file_1',
@@ -233,6 +293,40 @@ void main() {
 
       expect(response1, equals(response2));
       expect(response1, isNot(equals(response3)));
+    });
+  });
+
+  group('FileScope', () {
+    test('fromJson parses correctly', () {
+      final json = {'id': 'sess_123', 'type': 'session'};
+
+      final scope = FileScope.fromJson(json);
+
+      expect(scope.id, 'sess_123');
+      expect(scope.type, 'session');
+    });
+
+    test('toJson round-trip', () {
+      const scope = FileScope(id: 'sess_abc');
+
+      final roundTripped = FileScope.fromJson(scope.toJson());
+
+      expect(roundTripped, scope);
+    });
+
+    test('equality', () {
+      const a = FileScope(id: 'sess_1');
+      const b = FileScope(id: 'sess_1');
+      const c = FileScope(id: 'sess_2');
+
+      expect(a, equals(b));
+      expect(a, isNot(equals(c)));
+      expect(a.hashCode, b.hashCode);
+    });
+
+    test('defaults type to session', () {
+      const scope = FileScope(id: 'sess_x');
+      expect(scope.type, 'session');
     });
   });
 }

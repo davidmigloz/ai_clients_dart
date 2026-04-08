@@ -51,6 +51,7 @@ class FilesResource {
     int? limit,
     String? beforeId,
     String? afterId,
+    String? scopeId,
   }) {
     throw UnsupportedError(
       'Files API is not supported on this platform. '

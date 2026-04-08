@@ -50,6 +50,7 @@ Map<String, dynamic> _contentBlockStopJson(int index) => {
 
 Map<String, dynamic> _messageDeltaJson({
   String? stopReason,
+  Map<String, dynamic>? stopDetails,
   String? stopSequence,
   Map<String, dynamic>? container,
   int outputTokens = 50,
@@ -57,6 +58,7 @@ Map<String, dynamic> _messageDeltaJson({
 }) {
   final delta = <String, dynamic>{
     'stop_reason': ?stopReason,
+    'stop_details': ?stopDetails,
     'stop_sequence': ?stopSequence,
     'container': ?container,
   };
@@ -652,6 +654,47 @@ void main() {
           _messageStopJson,
         ]);
         expect(toolUseAcc.isToolUse, isTrue);
+
+        final refusalAcc = _accumulate([
+          _messageStartJson(),
+          _messageDeltaJson(
+            stopReason: 'refusal',
+            stopDetails: {
+              'type': 'refusal',
+              'category': 'cyber',
+              'explanation': 'Blocked.',
+            },
+          ),
+          _messageStopJson,
+        ]);
+        expect(refusalAcc.isRefusal, isTrue);
+        expect(refusalAcc.stopDetails, isNotNull);
+        expect(refusalAcc.stopDetails!.category, RefusalCategory.cyber);
+        expect(refusalAcc.stopDetails!.explanation, 'Blocked.');
+      });
+
+      test('stopDetails flows through to toMessage', () {
+        final acc = _accumulate([
+          _messageStartJson(),
+          _contentBlockStartJson(0, _textBlockJson()),
+          _contentBlockDeltaJson(0, _textDeltaJson('')),
+          _contentBlockStopJson(0),
+          _messageDeltaJson(
+            stopReason: 'refusal',
+            stopDetails: {
+              'type': 'refusal',
+              'category': 'bio',
+              'explanation': 'Bio refusal.',
+            },
+          ),
+          _messageStopJson,
+        ]);
+
+        final message = acc.toMessage();
+        expect(message.stopReason, StopReason.refusal);
+        expect(message.stopDetails, isNotNull);
+        expect(message.stopDetails!.category, RefusalCategory.bio);
+        expect(message.stopDetails!.explanation, 'Bio refusal.');
       });
     });
 

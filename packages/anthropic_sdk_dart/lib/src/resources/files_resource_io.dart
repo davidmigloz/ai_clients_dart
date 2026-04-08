@@ -143,12 +143,14 @@ class FilesResource extends ResourceBase {
     int? limit,
     String? beforeId,
     String? afterId,
+    String? scopeId,
   }) async {
     ensureNotClosed?.call();
     final queryParams = <String, dynamic>{
       'limit': ?limit?.toString(),
       'before_id': ?beforeId,
       'after_id': ?afterId,
+      'scope_id': ?scopeId,
     };
 
     final url = requestBuilder.buildUrl(

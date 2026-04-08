@@ -28,7 +28,8 @@
       "local_file": "openapi.yaml",
       "name": "Anthropic API",
       "requires_auth": false,
-      "url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/anthropic%2Fanthropic-efe26b096126c693462514b8cbd3ec3e376569232becbfb730cd26fb31c7c7e3.yml"
+      "url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/anthropic%2Fanthropic-69486316563eb49043ec1ef0b8e1d4164b6fadb58c7ae27477f9971448ede066.yml",
+      "pinned_hash": "69486316563eb49043ec1ef0b8e1d4164b6fadb58c7ae27477f9971448ede066"
     }
   },
   "specs_dir": "packages/anthropic_sdk_dart/specs"

@@ -106,6 +106,55 @@ void main() {
       expect(thinking.signature, 'sig123');
     });
 
+    test('fromJson parses message with refusal stop_details', () {
+      final json = {
+        'id': 'msg_refusal',
+        'type': 'message',
+        'role': 'assistant',
+        'model': 'claude-sonnet-4-20250514',
+        'content': [
+          {'type': 'text', 'text': ''},
+        ],
+        'stop_reason': 'refusal',
+        'stop_details': {
+          'type': 'refusal',
+          'category': 'cyber',
+          'explanation': 'This request was refused.',
+        },
+        'stop_sequence': null,
+        'usage': {'input_tokens': 10, 'output_tokens': 1},
+      };
+
+      final message = Message.fromJson(json);
+
+      expect(message.stopReason, StopReason.refusal);
+      expect(message.stopDetails, isNotNull);
+      expect(message.stopDetails!.type, 'refusal');
+      expect(message.stopDetails!.category, RefusalCategory.cyber);
+      expect(message.stopDetails!.explanation, 'This request was refused.');
+    });
+
+    test('fromJson parses message with null stop_details', () {
+      final json = {
+        'id': 'msg_normal',
+        'type': 'message',
+        'role': 'assistant',
+        'model': 'claude-sonnet-4-20250514',
+        'content': [
+          {'type': 'text', 'text': 'Hello!'},
+        ],
+        'stop_reason': 'end_turn',
+        'stop_details': null,
+        'stop_sequence': null,
+        'usage': {'input_tokens': 10, 'output_tokens': 5},
+      };
+
+      final message = Message.fromJson(json);
+
+      expect(message.stopReason, StopReason.endTurn);
+      expect(message.stopDetails, isNull);
+    });
+
     test('fromJson parses model_context_window_exceeded stop reason', () {
       final json = {
         'id': 'msg_ctx',
@@ -145,6 +194,44 @@ void main() {
         ((json['content'] as List)[0] as Map<String, dynamic>)['type'],
         'text',
       );
+    });
+
+    test('toJson includes stop_details when present', () {
+      const message = Message(
+        id: 'msg_test',
+        role: MessageRole.assistant,
+        content: [TextBlock(text: 'Refused')],
+        model: 'claude-sonnet-4-20250514',
+        stopReason: StopReason.refusal,
+        stopDetails: RefusalStopDetails(
+          category: RefusalCategory.bio,
+          explanation: 'Refused for bio reasons.',
+        ),
+        usage: Usage(inputTokens: 5, outputTokens: 1),
+      );
+
+      final json = message.toJson();
+
+      expect(json['stop_reason'], 'refusal');
+      expect(json['stop_details'], isA<Map<String, dynamic>>());
+      final details = json['stop_details'] as Map<String, dynamic>;
+      expect(details['type'], 'refusal');
+      expect(details['category'], 'bio');
+      expect(details['explanation'], 'Refused for bio reasons.');
+    });
+
+    test('toJson omits stop_details when null', () {
+      const message = Message(
+        id: 'msg_test',
+        role: MessageRole.assistant,
+        content: [TextBlock(text: 'Test')],
+        model: 'claude-sonnet-4-20250514',
+        stopReason: StopReason.endTurn,
+        usage: Usage(inputTokens: 5, outputTokens: 3),
+      );
+
+      final json = message.toJson();
+      expect(json.containsKey('stop_details'), isFalse);
     });
 
     test('copyWith creates a modified copy', () {
@@ -279,6 +366,92 @@ void main() {
     test('value property returns correct string', () {
       expect(MessageRole.user.value, 'user');
       expect(MessageRole.assistant.value, 'assistant');
+    });
+  });
+
+  group('RefusalCategory', () {
+    test('fromJson parses known values', () {
+      expect(RefusalCategory.fromJson('cyber'), RefusalCategory.cyber);
+      expect(RefusalCategory.fromJson('bio'), RefusalCategory.bio);
+    });
+
+    test('fromJson returns unknown for unrecognized values', () {
+      expect(RefusalCategory.fromJson('new_policy'), RefusalCategory.unknown);
+      expect(RefusalCategory.fromJson(''), RefusalCategory.unknown);
+    });
+
+    test('round-trip preserves value', () {
+      for (final value in RefusalCategory.values) {
+        expect(RefusalCategory.fromJson(value.toJson()), value);
+      }
+    });
+  });
+
+  group('RefusalStopDetails', () {
+    test('fromJson parses all fields', () {
+      final json = {
+        'type': 'refusal',
+        'category': 'cyber',
+        'explanation': 'Content blocked.',
+      };
+
+      final details = RefusalStopDetails.fromJson(json);
+
+      expect(details.type, 'refusal');
+      expect(details.category, RefusalCategory.cyber);
+      expect(details.explanation, 'Content blocked.');
+    });
+
+    test('fromJson handles null category and explanation', () {
+      final json = {'type': 'refusal', 'category': null, 'explanation': null};
+
+      final details = RefusalStopDetails.fromJson(json);
+
+      expect(details.type, 'refusal');
+      expect(details.category, isNull);
+      expect(details.explanation, isNull);
+    });
+
+    test('toJson always emits category and explanation', () {
+      const details = RefusalStopDetails();
+
+      final json = details.toJson();
+
+      expect(json['type'], 'refusal');
+      expect(json.containsKey('category'), isTrue);
+      expect(json['category'], isNull);
+      expect(json.containsKey('explanation'), isTrue);
+      expect(json['explanation'], isNull);
+    });
+
+    test('toJson round-trip', () {
+      const details = RefusalStopDetails(
+        category: RefusalCategory.bio,
+        explanation: 'Bio content.',
+      );
+
+      final roundTripped = RefusalStopDetails.fromJson(details.toJson());
+
+      expect(roundTripped, details);
+    });
+
+    test('equality', () {
+      const a = RefusalStopDetails(
+        category: RefusalCategory.cyber,
+        explanation: 'Blocked.',
+      );
+      const b = RefusalStopDetails(
+        category: RefusalCategory.cyber,
+        explanation: 'Blocked.',
+      );
+      const c = RefusalStopDetails(
+        category: RefusalCategory.bio,
+        explanation: 'Different.',
+      );
+
+      expect(a, equals(b));
+      expect(a, isNot(equals(c)));
+      expect(a.hashCode, b.hashCode);
     });
   });
 }

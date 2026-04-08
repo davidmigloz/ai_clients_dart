@@ -74,7 +74,11 @@
     },
     "resource_aliases": {},
     "excluded_resources": [
-      "complete"
+      "complete",
+      "agents",
+      "environments",
+      "sessions",
+      "vaults"
     ]
   },
   "types": {
@@ -1298,6 +1302,38 @@
       "schema": null,
       "parent": "SystemPrompt",
       "note": "fromJson accepts dynamic: String → TextSystemPrompt, List → BlocksSystemPrompt."
+    },
+    "RefusalStopDetails": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RefusalStopDetails",
+      "file": "lib/src/models/metadata/stop_reason.dart",
+      "schema": "RefusalStopDetails"
+    },
+    "BetaRefusalStopDetails": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "RefusalStopDetails",
+      "file": "lib/src/models/metadata/stop_reason.dart",
+      "schema": "BetaRefusalStopDetails",
+      "tags": ["acknowledged"],
+      "note": "Unified with non-beta RefusalStopDetails — identical schema."
+    },
+    "FileScope": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "FileScope",
+      "file": "lib/src/models/files/file_metadata.dart",
+      "schema": "BetaFileScope"
+    },
+    "BetaFileMetadataSchema": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "FileMetadata",
+      "file": "lib/src/models/files/file_metadata.dart",
+      "schema": "BetaFileMetadataSchema",
+      "tags": ["acknowledged"],
+      "note": "Unified with FileMetadata — scope field added."
     }
   }
 }

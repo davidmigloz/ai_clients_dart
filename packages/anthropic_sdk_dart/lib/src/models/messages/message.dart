@@ -29,6 +29,11 @@ class Message {
   /// The reason the model stopped generating.
   final StopReason? stopReason;
 
+  /// Structured information about why model output stopped.
+  ///
+  /// This is non-null when [stopReason] is [StopReason.refusal].
+  final RefusalStopDetails? stopDetails;
+
   /// The stop sequence that caused generation to stop, if any.
   final String? stopSequence;
 
@@ -46,6 +51,7 @@ class Message {
     required this.content,
     required this.model,
     this.stopReason,
+    this.stopDetails,
     this.stopSequence,
     required this.usage,
     this.container,
@@ -66,6 +72,11 @@ class Message {
       stopReason: json['stop_reason'] != null
           ? StopReason.fromJson(json['stop_reason'] as String)
           : null,
+      stopDetails: json['stop_details'] != null
+          ? RefusalStopDetails.fromJson(
+              json['stop_details'] as Map<String, dynamic>,
+            )
+          : null,
       stopSequence: json['stop_sequence'] as String?,
       usage: Usage.fromJson(json['usage'] as Map<String, dynamic>),
       container: json['container'] != null
@@ -82,6 +93,7 @@ class Message {
     'content': content.map((e) => e.toJson()).toList(),
     'model': model,
     if (stopReason != null) 'stop_reason': stopReason!.toJson(),
+    if (stopDetails != null) 'stop_details': stopDetails!.toJson(),
     if (stopSequence != null) 'stop_sequence': stopSequence,
     'usage': usage.toJson(),
     if (container != null) 'container': container!.toJson(),
@@ -95,6 +107,7 @@ class Message {
     List<ContentBlock>? content,
     String? model,
     Object? stopReason = unsetCopyWithValue,
+    Object? stopDetails = unsetCopyWithValue,
     Object? stopSequence = unsetCopyWithValue,
     Usage? usage,
     Object? container = unsetCopyWithValue,
@@ -108,6 +121,9 @@ class Message {
       stopReason: stopReason == unsetCopyWithValue
           ? this.stopReason
           : stopReason as StopReason?,
+      stopDetails: stopDetails == unsetCopyWithValue
+          ? this.stopDetails
+          : stopDetails as RefusalStopDetails?,
       stopSequence: stopSequence == unsetCopyWithValue
           ? this.stopSequence
           : stopSequence as String?,
@@ -129,6 +145,7 @@ class Message {
           listsEqual(content, other.content) &&
           model == other.model &&
           stopReason == other.stopReason &&
+          stopDetails == other.stopDetails &&
           stopSequence == other.stopSequence &&
           usage == other.usage &&
           container == other.container;
@@ -141,6 +158,7 @@ class Message {
     listHash(content),
     model,
     stopReason,
+    stopDetails,
     stopSequence,
     usage,
     container,
@@ -150,5 +168,6 @@ class Message {
   String toString() =>
       'Message(id: $id, type: $type, role: $role, '
       'content: $content, model: $model, stopReason: $stopReason, '
-      'stopSequence: $stopSequence, usage: $usage, container: $container)';
+      'stopDetails: $stopDetails, stopSequence: $stopSequence, '
+      'usage: $usage, container: $container)';
 }

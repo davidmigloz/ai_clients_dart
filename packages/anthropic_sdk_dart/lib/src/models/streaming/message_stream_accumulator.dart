@@ -52,6 +52,7 @@ class MessageStreamAccumulator {
   MessageRole? _role;
   Usage? _usage;
   StopReason? _stopReason;
+  RefusalStopDetails? _stopDetails;
   String? _stopSequence;
   Container? _container;
   final List<_AccumulatedContentBlock> _blocks = [];
@@ -74,6 +75,7 @@ class MessageStreamAccumulator {
         break;
       case MessageDeltaEvent(:final delta, :final usage):
         _stopReason = delta.stopReason ?? _stopReason;
+        _stopDetails = delta.stopDetails ?? _stopDetails;
         _stopSequence = delta.stopSequence ?? _stopSequence;
         _container = delta.container ?? _container;
         _mergeUsage(usage);
@@ -149,6 +151,9 @@ class MessageStreamAccumulator {
   /// The stop reason from the `message_delta` event.
   StopReason? get stopReason => _stopReason;
 
+  /// Structured information about why model output stopped.
+  RefusalStopDetails? get stopDetails => _stopDetails;
+
   /// The stop sequence from the `message_delta` event.
   String? get stopSequence => _stopSequence;
 
@@ -222,6 +227,9 @@ class MessageStreamAccumulator {
   /// Returns `true` if the stop reason is [StopReason.toolUse].
   bool get isToolUse => _stopReason == StopReason.toolUse;
 
+  /// Returns `true` if the stop reason is [StopReason.refusal].
+  bool get isRefusal => _stopReason == StopReason.refusal;
+
   /// Returns all accumulated content blocks.
   List<ContentBlock> get contentBlocks {
     return [for (final block in _blocks) _buildBlock(block)];
@@ -248,6 +256,7 @@ class MessageStreamAccumulator {
       role: _role ?? MessageRole.assistant,
       content: contentBlocks,
       stopReason: _stopReason,
+      stopDetails: _stopDetails,
       stopSequence: _stopSequence,
       usage: _usage!,
       container: _container,
@@ -261,6 +270,7 @@ class MessageStreamAccumulator {
     _role = null;
     _usage = null;
     _stopReason = null;
+    _stopDetails = null;
     _stopSequence = null;
     _container = null;
     _blocks.clear();

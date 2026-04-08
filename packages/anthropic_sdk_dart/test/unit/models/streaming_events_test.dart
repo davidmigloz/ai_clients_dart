@@ -182,6 +182,31 @@ void main() {
       expect(deltaEvent.delta.stopReason, StopReason.compaction);
     });
 
+    test('parses message_delta event with refusal stop_details', () {
+      final json = {
+        'type': 'message_delta',
+        'delta': {
+          'stop_reason': 'refusal',
+          'stop_details': {
+            'type': 'refusal',
+            'category': 'cyber',
+            'explanation': 'Refused.',
+          },
+          'stop_sequence': null,
+        },
+        'usage': {'output_tokens': 1},
+      };
+
+      final event = MessageStreamEvent.fromJson(json);
+
+      expect(event, isA<MessageDeltaEvent>());
+      final deltaEvent = event as MessageDeltaEvent;
+      expect(deltaEvent.delta.stopReason, StopReason.refusal);
+      expect(deltaEvent.delta.stopDetails, isNotNull);
+      expect(deltaEvent.delta.stopDetails!.category, RefusalCategory.cyber);
+      expect(deltaEvent.delta.stopDetails!.explanation, 'Refused.');
+    });
+
     test('parses message_stop event', () {
       final json = {'type': 'message_stop'};
 

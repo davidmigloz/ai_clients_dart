@@ -1,5 +1,50 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
+
+/// The scope of a file, indicating the context in which it was created.
+@immutable
+class FileScope {
+  /// The ID of the scoping resource (e.g., the session ID).
+  final String id;
+
+  /// The type of scope. Currently always "session".
+  final String type;
+
+  /// Creates a [FileScope].
+  const FileScope({required this.id, this.type = 'session'});
+
+  /// Creates a [FileScope] from JSON.
+  factory FileScope.fromJson(Map<String, dynamic> json) {
+    return FileScope(
+      id: json['id'] as String,
+      type: json['type'] as String? ?? 'session',
+    );
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {'id': id, 'type': type};
+
+  /// Creates a copy with replaced values.
+  FileScope copyWith({String? id, String? type}) {
+    return FileScope(id: id ?? this.id, type: type ?? this.type);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FileScope &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          type == other.type;
+
+  @override
+  int get hashCode => Object.hash(id, type);
+
+  @override
+  String toString() => 'FileScope(id: $id, type: $type)';
+}
+
 /// Metadata for a file uploaded to Anthropic.
 @immutable
 class FileMetadata {
@@ -26,6 +71,9 @@ class FileMetadata {
   /// Whether the file can be downloaded.
   final bool downloadable;
 
+  /// The scope of this file, indicating the context in which it was created.
+  final FileScope? scope;
+
   /// Creates a [FileMetadata].
   const FileMetadata({
     required this.id,
@@ -35,6 +83,7 @@ class FileMetadata {
     required this.createdAt,
     this.type = 'file',
     this.downloadable = false,
+    this.scope,
   });
 
   /// Creates a [FileMetadata] from JSON.
@@ -47,6 +96,9 @@ class FileMetadata {
       createdAt: DateTime.parse(json['created_at'] as String),
       type: json['type'] as String? ?? 'file',
       downloadable: json['downloadable'] as bool? ?? false,
+      scope: json['scope'] != null
+          ? FileScope.fromJson(json['scope'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -59,6 +111,7 @@ class FileMetadata {
     'created_at': createdAt.toUtc().toIso8601String(),
     'type': type,
     'downloadable': downloadable,
+    if (scope != null) 'scope': scope!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -70,6 +123,7 @@ class FileMetadata {
     DateTime? createdAt,
     String? type,
     bool? downloadable,
+    Object? scope = unsetCopyWithValue,
   }) {
     return FileMetadata(
       id: id ?? this.id,
@@ -79,6 +133,7 @@ class FileMetadata {
       createdAt: createdAt ?? this.createdAt,
       type: type ?? this.type,
       downloadable: downloadable ?? this.downloadable,
+      scope: scope == unsetCopyWithValue ? this.scope : scope as FileScope?,
     );
   }
 
@@ -93,7 +148,8 @@ class FileMetadata {
           sizeBytes == other.sizeBytes &&
           createdAt == other.createdAt &&
           type == other.type &&
-          downloadable == other.downloadable;
+          downloadable == other.downloadable &&
+          scope == other.scope;
 
   @override
   int get hashCode => Object.hash(
@@ -104,6 +160,7 @@ class FileMetadata {
     createdAt,
     type,
     downloadable,
+    scope,
   );
 
   @override
@@ -115,5 +172,6 @@ class FileMetadata {
       'sizeBytes: $sizeBytes, '
       'createdAt: $createdAt, '
       'type: $type, '
-      'downloadable: $downloadable)';
+      'downloadable: $downloadable, '
+      'scope: $scope)';
 }
