@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import '../common/equality_helpers.dart';
 import '../responses/config/function_call_status.dart';
 import '../responses/config/item_status.dart';
+import '../responses/config/message_phase.dart';
 import '../responses/config/tool_search_execution_type.dart';
 import '../responses/items/item.dart' show FunctionCallOutput;
 import '../responses/tools/response_tool.dart';
@@ -80,12 +81,16 @@ class ConversationMessageItem extends ConversationItem {
   /// Item status.
   final ItemStatus? status;
 
+  /// The phase of the message.
+  final MessagePhase? phase;
+
   /// Creates a [ConversationMessageItem].
   const ConversationMessageItem({
     required this.id,
     required this.role,
     required this.content,
     this.status,
+    this.phase,
   });
 
   /// Creates a [ConversationMessageItem] from JSON.
@@ -99,6 +104,9 @@ class ConversationMessageItem extends ConversationItem {
       status: json['status'] != null
           ? ItemStatus.fromJson(json['status'] as String)
           : null,
+      phase: json['phase'] != null
+          ? MessagePhase.fromJson(json['phase'] as String)
+          : null,
     );
   }
 
@@ -109,6 +117,7 @@ class ConversationMessageItem extends ConversationItem {
     'role': role.toJson(),
     'content': content.map((e) => e.toJson()).toList(),
     if (status != null) 'status': status!.toJson(),
+    if (phase != null) 'phase': phase!.toJson(),
   };
 
   @override
@@ -119,14 +128,16 @@ class ConversationMessageItem extends ConversationItem {
           id == other.id &&
           role == other.role &&
           listsEqual(content, other.content) &&
-          status == other.status;
+          status == other.status &&
+          phase == other.phase;
 
   @override
-  int get hashCode => Object.hash(id, role, Object.hashAll(content), status);
+  int get hashCode =>
+      Object.hash(id, role, Object.hashAll(content), status, phase);
 
   @override
   String toString() =>
-      'ConversationMessageItem(id: $id, role: $role, content: $content, status: $status)';
+      'ConversationMessageItem(id: $id, role: $role, content: $content, status: $status, phase: $phase)';
 }
 
 /// A function call item in a conversation.

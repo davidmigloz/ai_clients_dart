@@ -1,5 +1,6 @@
 import 'package:openai_dart/src/models/conversations/conversations.dart';
 import 'package:openai_dart/src/models/responses/config/item_status.dart';
+import 'package:openai_dart/src/models/responses/config/message_phase.dart';
 import 'package:openai_dart/src/models/responses/config/tool_search_execution_type.dart';
 import 'package:openai_dart/src/models/responses/items/item.dart';
 import 'package:openai_dart/src/models/responses/tools/response_tool.dart';
@@ -692,6 +693,36 @@ void main() {
 
       expect(item1, equals(item2));
       expect(item1, isNot(equals(item3)));
+    });
+
+    test('round-trip with phase', () {
+      final json = {
+        'type': 'message',
+        'id': 'item_456',
+        'role': 'assistant',
+        'content': [
+          {'type': 'output_text', 'text': 'Hello!'},
+        ],
+        'status': 'completed',
+        'phase': 'commentary',
+      };
+
+      final item = ConversationMessageItem.fromJson(json);
+      expect(item.phase, equals(MessagePhase.commentary));
+
+      final output = item.toJson();
+      expect(output['phase'], equals('commentary'));
+    });
+
+    test('phase omitted when null', () {
+      const item = ConversationMessageItem(
+        id: 'item_789',
+        role: ConversationRole.user,
+        content: [ConversationInputTextContent(text: 'Hi')],
+      );
+
+      final json = item.toJson();
+      expect(json.containsKey('phase'), isFalse);
     });
   });
 

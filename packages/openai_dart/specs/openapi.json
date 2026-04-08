@@ -11198,7 +11198,7 @@
             "$ref": "#/components/schemas/ChunkingStrategyRequestParam"
           },
           "file_ids": {
-            "description": "A list of [File](https://platform.openai.com/docs/api-reference/files) IDs that the vector store should use. Useful for tools like `file_search` that can access files.  If `attributes` or `chunking_strategy` are provided, they will be  applied to all files in the batch. The maximum batch size is 2000 files. Mutually exclusive with `files`.",
+            "description": "A list of [File](https://platform.openai.com/docs/api-reference/files) IDs that the vector store should use. Useful for tools like `file_search` that can access files.  If `attributes` or `chunking_strategy` are provided, they will be  applied to all files in the batch. The maximum batch size is 2000 files. This endpoint is recommended for multi-file ingestion and helps reduce per-vector-store write request pressure. Mutually exclusive with `files`.",
             "items": {
               "type": "string"
             },
@@ -11207,7 +11207,7 @@
             "type": "array"
           },
           "files": {
-            "description": "A list of objects that each include a `file_id` plus optional `attributes` or `chunking_strategy`. Use this when you need to override metadata for specific files. The global `attributes` or `chunking_strategy` will be ignored and must be specified for each file. The maximum batch size is 2000 files. Mutually exclusive with `file_ids`.",
+            "description": "A list of objects that each include a `file_id` plus optional `attributes` or `chunking_strategy`. Use this when you need to override metadata for specific files. The global `attributes` or `chunking_strategy` will be ignored and must be specified for each file. The maximum batch size is 2000 files. This endpoint is recommended for multi-file ingestion and helps reduce per-vector-store write request pressure. Mutually exclusive with `file_ids`.",
             "items": {
               "$ref": "#/components/schemas/CreateVectorStoreFileRequest"
             },
@@ -11228,7 +11228,7 @@
             "$ref": "#/components/schemas/ChunkingStrategyRequestParam"
           },
           "file_id": {
-            "description": "A [File](https://platform.openai.com/docs/api-reference/files) ID that the vector store should use. Useful for tools like `file_search` that can access files.",
+            "description": "A [File](https://platform.openai.com/docs/api-reference/files) ID that the vector store should use. Useful for tools like `file_search` that can access files. For multi-file ingestion, we recommend [`file_batches`](https://platform.openai.com/docs/api-reference/vector-stores-file-batches/createBatch) to minimize per-vector-store write requests.",
             "type": "string"
           }
         },
@@ -20158,6 +20158,17 @@
             "description": "The unique ID of the message.",
             "type": "string"
           },
+          "phase": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MessagePhase-2",
+                "description": "Labels an `assistant` message as intermediate commentary (`commentary`) or the final answer (`final_answer`). For models like `gpt-5.3-codex` and beyond, when sending follow-up requests, preserve and resend phase on all assistant messages \u2014 dropping it can degrade performance. Not used for user messages."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "role": {
             "$ref": "#/components/schemas/MessageRole",
             "description": "The role of the message. One of `unknown`, `user`, `assistant`, `system`, `critic`, `discriminator`, `developer`, or `tool`."
@@ -20937,6 +20948,13 @@
         ],
         "type": "string"
       },
+      "MessagePhase-2": {
+        "enum": [
+          "commentary",
+          "final_answer"
+        ],
+        "type": "string"
+      },
       "MessageRequestContentTextObject": {
         "description": "The text content that is part of a message.",
         "properties": {
@@ -21687,6 +21705,19 @@
           "far_field"
         ],
         "type": "string"
+      },
+      "OAuthErrorCode": {
+        "anyOf": [
+          {
+            "enum": [
+              "invalid_grant",
+              "invalid_subject_token"
+            ]
+          },
+          {
+            "type": "string"
+          }
+        ]
       },
       "OpenAIFile": {
         "description": "The `File` object represents a document that has been uploaded to OpenAI.",
@@ -29862,7 +29893,7 @@
                 "type": "object"
               }
             ],
-            "description": "Realtime API can write session traces to the [Traces Dashboard](/logs?api=traces). Set to null to disable tracing. Once\ntracing is enabled for a session, the configuration cannot be modified.\n\n`auto` will create a trace for the session with default values for the\nworkflow name, group id, and metadata.\n",
+            "description": "Realtime API can write session traces to the [Traces Dashboard](https://platform.openai.com/logs?api=traces). Set to null to disable tracing. Once\ntracing is enabled for a session, the configuration cannot be modified.\n\n`auto` will create a trace for the session with default values for the\nworkflow name, group id, and metadata.\n",
             "nullable": true,
             "title": "Tracing Configuration"
           },
@@ -30289,7 +30320,7 @@
                     "type": "object"
                   }
                 ],
-                "description": "Realtime API can write session traces to the [Traces Dashboard](/logs?api=traces). Set to null to disable tracing. Once\ntracing is enabled for a session, the configuration cannot be modified.\n\n`auto` will create a trace for the session with default values for the\nworkflow name, group id, and metadata.\n",
+                "description": "Realtime API can write session traces to the [Traces Dashboard](https://platform.openai.com/logs?api=traces). Set to null to disable tracing. Once\ntracing is enabled for a session, the configuration cannot be modified.\n\n`auto` will create a trace for the session with default values for the\nworkflow name, group id, and metadata.\n",
                 "title": "Tracing Configuration"
               },
               {
@@ -55701,6 +55732,7 @@
           "Vector stores"
         ],
         "x-oaiMeta": {
+          "description": "Attaches multiple files to a vector store in one request. This is the recommended approach for multi-file ingestion, especially because per-vector-store file attach writes are rate-limited (300 requests/minute shared with `/vector_stores/{vector_store_id}/files`).\n",
           "examples": {
             "request": {
               "curl": "curl https://api.openai.com/v1/vector_stores/vs_abc123/file_batches \\\n    -H \"Authorization: Bearer $OPENAI_API_KEY\" \\\n    -H \"Content-Type: application/json \\\n    -H \"OpenAI-Beta: assistants=v2\" \\\n    -d '{\n      \"files\": [\n        {\n          \"file_id\": \"file-abc123\",\n          \"attributes\": {\"category\": \"finance\"}\n        },\n        {\n          \"file_id\": \"file-abc456\",\n          \"chunking_strategy\": {\n            \"type\": \"static\",\n            \"max_chunk_size_tokens\": 1200,\n            \"chunk_overlap_tokens\": 200\n          }\n        }\n      ]\n    }'\n",
@@ -56070,6 +56102,7 @@
           "Vector stores"
         ],
         "x-oaiMeta": {
+          "description": "Attaches one file to a vector store. File attach writes are rate-limited per vector store (300 requests/minute shared with `/vector_stores/{vector_store_id}/file_batches`), so use file batches when uploading multiple files.\n",
           "examples": {
             "request": {
               "curl": "curl https://api.openai.com/v1/vector_stores/vs_abc123/files \\\n    -H \"Authorization: Bearer $OPENAI_API_KEY\" \\\n    -H \"Content-Type: application/json\" \\\n    -H \"OpenAI-Beta: assistants=v2\" \\\n    -d '{\n      \"file_id\": \"file-abc123\"\n    }'\n",

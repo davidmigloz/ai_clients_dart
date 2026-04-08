@@ -1152,6 +1152,31 @@
       "schema": "VoiceIdsOrCustomVoice",
       "tags": ["acknowledged"],
       "note": "Deferred. Current voice enums sufficient for known voice IDs."
+    },
+    "Message": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "Message",
+      "tags": ["acknowledged"],
+      "note": "Maps to multiple Dart classes: MessageItem (responses input), MessageOutputItem (responses output), ConversationMessageItem (conversations). Not a single verifiable object."
+    },
+    "MessagePhase-2": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "MessagePhase",
+      "file": "lib/src/models/responses/config/message_phase.dart",
+      "schema": "MessagePhase-2"
+    },
+    "OAuthErrorCode": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "OAuthErrorCode",
+      "tags": ["acknowledged"],
+      "note": "Orphan schema used only on OAuthError exception in Python SDK. No endpoint or request/response model references it. OAuth error handling not yet in Dart."
     }
   }
 }
