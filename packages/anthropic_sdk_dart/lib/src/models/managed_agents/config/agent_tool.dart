@@ -675,13 +675,14 @@ class UnknownAgentTool extends AgentTool {
       identical(this, other) ||
       other is UnknownAgentTool &&
           runtimeType == other.runtimeType &&
-          type == other.type;
+          type == other.type &&
+          mapsDeepEqual(raw, other.raw);
 
   @override
-  int get hashCode => type.hashCode;
+  int get hashCode => Object.hash(type, mapDeepHashCode(raw));
 
   @override
-  String toString() => 'UnknownAgentTool(type: $type)';
+  String toString() => 'UnknownAgentTool(type: $type, raw: $raw)';
 }
 
 /// Unrecognised agent tool params type — preserves the raw JSON.
@@ -703,13 +704,14 @@ class UnknownAgentToolParams extends AgentToolParams {
       identical(this, other) ||
       other is UnknownAgentToolParams &&
           runtimeType == other.runtimeType &&
-          type == other.type;
+          type == other.type &&
+          mapsDeepEqual(raw, other.raw);
 
   @override
-  int get hashCode => type.hashCode;
+  int get hashCode => Object.hash(type, mapDeepHashCode(raw));
 
   @override
-  String toString() => 'UnknownAgentToolParams(type: $type)';
+  String toString() => 'UnknownAgentToolParams(type: $type, raw: $raw)';
 }
 
 // ---------------------------------------------------------------------------

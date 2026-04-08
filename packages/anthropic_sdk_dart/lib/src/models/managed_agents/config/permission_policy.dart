@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../../common/equality_helpers.dart';
+
 /// Permission policy for tool execution.
 ///
 /// Variants:
@@ -114,11 +116,12 @@ class UnknownPermissionPolicy extends PermissionPolicy {
       identical(this, other) ||
       other is UnknownPermissionPolicy &&
           runtimeType == other.runtimeType &&
-          type == other.type;
+          type == other.type &&
+          mapsEqual(raw, other.raw);
 
   @override
-  int get hashCode => type.hashCode;
+  int get hashCode => Object.hash(type, mapHash(raw));
 
   @override
-  String toString() => 'UnknownPermissionPolicy(type: $type)';
+  String toString() => 'UnknownPermissionPolicy(type: $type, raw: $raw)';
 }

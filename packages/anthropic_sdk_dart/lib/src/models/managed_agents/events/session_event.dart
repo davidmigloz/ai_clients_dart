@@ -2,38 +2,8 @@ import 'package:meta/meta.dart';
 
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
+import '../config/agent_tool.dart' show AgentEvaluatedPermission;
 import 'telemetry.dart';
-
-/// Evaluated permission for a tool invocation.
-enum AgentEvaluatedPermission {
-  /// Tool is allowed to execute.
-  allow('allow'),
-
-  /// Tool requires user confirmation.
-  ask('ask'),
-
-  /// Tool is denied.
-  deny('deny'),
-
-  /// Unknown permission — preserves the raw value.
-  unknown('unknown');
-
-  const AgentEvaluatedPermission(this.value);
-
-  /// JSON value for this permission.
-  final String value;
-
-  /// Parses an [AgentEvaluatedPermission] from JSON.
-  static AgentEvaluatedPermission fromJson(String value) => switch (value) {
-    'allow' => AgentEvaluatedPermission.allow,
-    'ask' => AgentEvaluatedPermission.ask,
-    'deny' => AgentEvaluatedPermission.deny,
-    _ => AgentEvaluatedPermission.unknown,
-  };
-
-  /// Converts to JSON.
-  String toJson() => value;
-}
 
 /// Server-sent event in a managed agents session.
 ///
@@ -1217,18 +1187,18 @@ class SessionStatusRunningEvent extends SessionEvent {
 /// - [SessionEndTurn] — agent completed its turn naturally.
 /// - [SessionRequiresAction] — agent is waiting on blocking user input.
 /// - [SessionRetriesExhausted] — turn ended because retry budget exhausted.
-/// - [UnknownStopReason] — unrecognized stop reason.
-sealed class StopReason {
-  const StopReason();
+/// - [UnknownSessionStopReason] — unrecognized stop reason.
+sealed class SessionStopReason {
+  const SessionStopReason();
 
-  /// Creates a [StopReason] from JSON.
-  factory StopReason.fromJson(Map<String, dynamic> json) {
+  /// Creates a [SessionStopReason] from JSON.
+  factory SessionStopReason.fromJson(Map<String, dynamic> json) {
     final type = json['type'] as String;
     return switch (type) {
       'end_turn' => SessionEndTurn.fromJson(json),
       'requires_action' => SessionRequiresAction.fromJson(json),
       'retries_exhausted' => SessionRetriesExhausted.fromJson(json),
-      _ => UnknownStopReason(rawJson: json),
+      _ => UnknownSessionStopReason(rawJson: json),
     };
   }
 
@@ -1238,7 +1208,7 @@ sealed class StopReason {
 
 /// The agent completed its turn naturally.
 @immutable
-class SessionEndTurn extends StopReason {
+class SessionEndTurn extends SessionStopReason {
   /// The type, always 'end_turn'.
   String get type => 'end_turn';
 
@@ -1267,7 +1237,7 @@ class SessionEndTurn extends StopReason {
 
 /// The agent is idle waiting on blocking user-input events.
 @immutable
-class SessionRequiresAction extends StopReason {
+class SessionRequiresAction extends SessionStopReason {
   /// The type, always 'requires_action'.
   String get type => 'requires_action';
 
@@ -1308,7 +1278,7 @@ class SessionRequiresAction extends StopReason {
 
 /// The turn ended because the retry budget was exhausted.
 @immutable
-class SessionRetriesExhausted extends StopReason {
+class SessionRetriesExhausted extends SessionStopReason {
   /// The type, always 'retries_exhausted'.
   String get type => 'retries_exhausted';
 
@@ -1337,12 +1307,12 @@ class SessionRetriesExhausted extends StopReason {
 
 /// Unrecognized stop reason — preserves raw JSON.
 @immutable
-class UnknownStopReason extends StopReason {
+class UnknownSessionStopReason extends SessionStopReason {
   /// The raw JSON.
   final Map<String, dynamic> rawJson;
 
-  /// Creates an [UnknownStopReason].
-  const UnknownStopReason({required this.rawJson});
+  /// Creates an [UnknownSessionStopReason].
+  const UnknownSessionStopReason({required this.rawJson});
 
   @override
   Map<String, dynamic> toJson() => rawJson;
@@ -1350,7 +1320,7 @@ class UnknownStopReason extends StopReason {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is UnknownStopReason &&
+      other is UnknownSessionStopReason &&
           runtimeType == other.runtimeType &&
           mapsDeepEqual(rawJson, other.rawJson);
 
@@ -1358,7 +1328,7 @@ class UnknownStopReason extends StopReason {
   int get hashCode => mapDeepHashCode(rawJson);
 
   @override
-  String toString() => 'UnknownStopReason(rawJson: $rawJson)';
+  String toString() => 'UnknownSessionStopReason(rawJson: $rawJson)';
 }
 
 /// Session is idle, awaiting user input.
@@ -1371,7 +1341,7 @@ class SessionStatusIdleEvent extends SessionEvent {
   final String id;
 
   /// The reason the session transitioned to idle.
-  final StopReason stopReason;
+  final SessionStopReason stopReason;
 
   /// Timestamp of status change.
   final DateTime processedAt;
@@ -1387,7 +1357,7 @@ class SessionStatusIdleEvent extends SessionEvent {
   factory SessionStatusIdleEvent.fromJson(Map<String, dynamic> json) {
     return SessionStatusIdleEvent(
       id: json['id'] as String,
-      stopReason: StopReason.fromJson(
+      stopReason: SessionStopReason.fromJson(
         json['stop_reason'] as Map<String, dynamic>,
       ),
       processedAt: DateTime.parse(json['processed_at'] as String),
@@ -1405,7 +1375,7 @@ class SessionStatusIdleEvent extends SessionEvent {
   /// Creates a copy with replaced values.
   SessionStatusIdleEvent copyWith({
     String? id,
-    StopReason? stopReason,
+    SessionStopReason? stopReason,
     DateTime? processedAt,
   }) {
     return SessionStatusIdleEvent(

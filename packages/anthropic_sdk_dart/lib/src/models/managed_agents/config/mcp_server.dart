@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../../common/equality_helpers.dart';
+
 /// MCP server connection definition as returned in API responses.
 ///
 /// Variants:
@@ -97,13 +99,14 @@ class UnknownMCPServer extends MCPServer {
       identical(this, other) ||
       other is UnknownMCPServer &&
           runtimeType == other.runtimeType &&
-          type == other.type;
+          type == other.type &&
+          mapsEqual(raw, other.raw);
 
   @override
-  int get hashCode => type.hashCode;
+  int get hashCode => Object.hash(type, mapHash(raw));
 
   @override
-  String toString() => 'UnknownMCPServer(type: $type)';
+  String toString() => 'UnknownMCPServer(type: $type, raw: $raw)';
 }
 
 /// MCP server connection parameter for create/update requests.
@@ -203,11 +206,12 @@ class UnknownMCPServerParams extends MCPServerParams {
       identical(this, other) ||
       other is UnknownMCPServerParams &&
           runtimeType == other.runtimeType &&
-          type == other.type;
+          type == other.type &&
+          mapsEqual(raw, other.raw);
 
   @override
-  int get hashCode => type.hashCode;
+  int get hashCode => Object.hash(type, mapHash(raw));
 
   @override
-  String toString() => 'UnknownMCPServerParams(type: $type)';
+  String toString() => 'UnknownMCPServerParams(type: $type, raw: $raw)';
 }

@@ -102,8 +102,7 @@ export 'src/models/managed_agents/credentials/credential_list_response.dart';
 export 'src/models/managed_agents/credentials/update_credential_params.dart';
 export 'src/models/managed_agents/errors/managed_agent_error.dart';
 export 'src/models/managed_agents/events/send_event_params.dart';
-export 'src/models/managed_agents/events/session_event.dart'
-    hide AgentEvaluatedPermission, StopReason;
+export 'src/models/managed_agents/events/session_event.dart';
 export 'src/models/managed_agents/events/session_event_list_response.dart';
 export 'src/models/managed_agents/events/telemetry.dart';
 export 'src/models/managed_agents/resources/session_resource.dart';
