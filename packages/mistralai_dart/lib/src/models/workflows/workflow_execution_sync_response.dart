@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality_helpers.dart';
+
 /// Synchronous response for a workflow execution.
 @immutable
 class WorkflowExecutionSyncResponse {
@@ -54,11 +56,12 @@ class WorkflowExecutionSyncResponse {
     if (runtimeType != other.runtimeType) return false;
     return workflowName == other.workflowName &&
         executionId == other.executionId &&
-        result == other.result;
+        valuesDeepEqual(result, other.result);
   }
 
   @override
-  int get hashCode => Object.hash(workflowName, executionId, result);
+  int get hashCode =>
+      Object.hash(workflowName, executionId, valueDeepHashCode(result));
 
   @override
   String toString() =>

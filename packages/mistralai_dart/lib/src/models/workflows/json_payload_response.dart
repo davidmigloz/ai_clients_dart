@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality_helpers.dart';
+
 /// A JSON payload response.
 @immutable
 class JSONPayloadResponse {
@@ -35,11 +37,11 @@ class JSONPayloadResponse {
     if (identical(this, other)) return true;
     if (other is! JSONPayloadResponse) return false;
     if (runtimeType != other.runtimeType) return false;
-    return type == other.type && value == other.value;
+    return type == other.type && valuesDeepEqual(value, other.value);
   }
 
   @override
-  int get hashCode => Object.hash(type, value);
+  int get hashCode => Object.hash(type, valueDeepHashCode(value));
 
   @override
   String toString() => 'JSONPayloadResponse(type: $type, value: $value)';

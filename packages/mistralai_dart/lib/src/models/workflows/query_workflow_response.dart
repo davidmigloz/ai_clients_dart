@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality_helpers.dart';
+
 /// Response for a workflow query.
 @immutable
 class QueryWorkflowResponse {
@@ -35,11 +37,12 @@ class QueryWorkflowResponse {
     if (identical(this, other)) return true;
     if (other is! QueryWorkflowResponse) return false;
     if (runtimeType != other.runtimeType) return false;
-    return queryName == other.queryName && result == other.result;
+    return queryName == other.queryName &&
+        valuesDeepEqual(result, other.result);
   }
 
   @override
-  int get hashCode => Object.hash(queryName, result);
+  int get hashCode => Object.hash(queryName, valueDeepHashCode(result));
 
   @override
   String toString() =>

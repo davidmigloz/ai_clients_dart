@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality_helpers.dart';
+
 /// A JSON patch add operation.
 @immutable
 class JSONPatchAdd {
@@ -43,11 +45,13 @@ class JSONPatchAdd {
     if (identical(this, other)) return true;
     if (other is! JSONPatchAdd) return false;
     if (runtimeType != other.runtimeType) return false;
-    return op == other.op && path == other.path && value == other.value;
+    return op == other.op &&
+        path == other.path &&
+        valuesDeepEqual(value, other.value);
   }
 
   @override
-  int get hashCode => Object.hash(op, path, value);
+  int get hashCode => Object.hash(op, path, valueDeepHashCode(value));
 
   @override
   String toString() => 'JSONPatchAdd(op: $op, path: $path, value: $value)';

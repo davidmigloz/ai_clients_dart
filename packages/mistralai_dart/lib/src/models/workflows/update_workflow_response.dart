@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality_helpers.dart';
+
 /// Response for a workflow execution update.
 @immutable
 class UpdateWorkflowResponse {
@@ -41,11 +43,12 @@ class UpdateWorkflowResponse {
     if (identical(this, other)) return true;
     if (other is! UpdateWorkflowResponse) return false;
     if (runtimeType != other.runtimeType) return false;
-    return updateName == other.updateName && result == other.result;
+    return updateName == other.updateName &&
+        valuesDeepEqual(result, other.result);
   }
 
   @override
-  int get hashCode => Object.hash(updateName, result);
+  int get hashCode => Object.hash(updateName, valueDeepHashCode(result));
 
   @override
   String toString() =>

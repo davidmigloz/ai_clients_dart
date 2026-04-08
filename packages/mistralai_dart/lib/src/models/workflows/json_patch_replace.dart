@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality_helpers.dart';
+
 /// A JSON patch replace operation.
 @immutable
 class JSONPatchReplace {
@@ -44,11 +46,13 @@ class JSONPatchReplace {
     if (identical(this, other)) return true;
     if (other is! JSONPatchReplace) return false;
     if (runtimeType != other.runtimeType) return false;
-    return op == other.op && path == other.path && value == other.value;
+    return op == other.op &&
+        path == other.path &&
+        valuesDeepEqual(value, other.value);
   }
 
   @override
-  int get hashCode => Object.hash(op, path, value);
+  int get hashCode => Object.hash(op, path, valueDeepHashCode(value));
 
   @override
   String toString() => 'JSONPatchReplace(op: $op, path: $path, value: $value)';

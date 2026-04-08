@@ -52,12 +52,13 @@ bool mapsDeepEqual(Map<String, dynamic>? a, Map<String, dynamic>? b) {
   if (a.length != b.length) return false;
   for (final key in a.keys) {
     if (!b.containsKey(key)) return false;
-    if (!_valuesDeepEqual(a[key], b[key])) return false;
+    if (!valuesDeepEqual(a[key], b[key])) return false;
   }
   return true;
 }
 
-bool _valuesDeepEqual(dynamic a, dynamic b) {
+/// Compares two dynamic values for deep equality (handles nested maps and lists).
+bool valuesDeepEqual(dynamic a, dynamic b) {
   if (a is Map<String, dynamic> && b is Map<String, dynamic>) {
     return mapsDeepEqual(a, b);
   } else if (a is List && b is List) {
@@ -69,7 +70,7 @@ bool _valuesDeepEqual(dynamic a, dynamic b) {
 bool _listsDeepEqual(List<dynamic> a, List<dynamic> b) {
   if (a.length != b.length) return false;
   for (var i = 0; i < a.length; i++) {
-    if (!_valuesDeepEqual(a[i], b[i])) return false;
+    if (!valuesDeepEqual(a[i], b[i])) return false;
   }
   return true;
 }
@@ -114,15 +115,16 @@ int mapDeepHashCode(Map<String, dynamic>? map) {
   if (map == null) return null.hashCode;
   final sortedKeys = map.keys.toList()..sort();
   return Object.hashAll(
-    sortedKeys.map((k) => Object.hash(k, _valueDeepHashCode(map[k]))),
+    sortedKeys.map((k) => Object.hash(k, valueDeepHashCode(map[k]))),
   );
 }
 
-int _valueDeepHashCode(dynamic value) {
+/// Computes a deep hash code for a dynamic value (handles nested maps and lists).
+int valueDeepHashCode(dynamic value) {
   if (value is Map<String, dynamic>) {
     return mapDeepHashCode(value);
   } else if (value is List) {
-    return Object.hashAll(value.map(_valueDeepHashCode));
+    return Object.hashAll(value.map(valueDeepHashCode));
   }
   return value.hashCode;
 }

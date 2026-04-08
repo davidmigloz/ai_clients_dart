@@ -152,7 +152,7 @@ class ScheduleDefinition {
     if (!listsEqual(intervals, other.intervals)) return false;
     if (!listsEqual(cronExpressions, other.cronExpressions)) return false;
     if (!listsEqual(skip, other.skip)) return false;
-    return input == other.input &&
+    return valuesDeepEqual(input, other.input) &&
         scheduleId == other.scheduleId &&
         startAt == other.startAt &&
         endAt == other.endAt &&
@@ -163,7 +163,7 @@ class ScheduleDefinition {
 
   @override
   int get hashCode => Object.hash(
-    input,
+    valueDeepHashCode(input),
     scheduleId,
     listHash(calendars),
     listHash(intervals),

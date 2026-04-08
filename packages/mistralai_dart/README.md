@@ -848,8 +848,8 @@ Use `client.observability` to manage campaigns, datasets, dataset records, judge
 
 ```dart
 // List datasets
-final datasets = await client.observability.datasets.list();
-for (final dataset in datasets.items) {
+final datasetList = await client.observability.datasets.list();
+for (final dataset in datasetList.datasets.results) {
   print('${dataset.name}: ${dataset.id}');
 }
 
@@ -890,15 +890,15 @@ Use `client.workflows` to manage and execute workflows via the workflowCore reso
 ```dart
 // List registered workflows
 final workflows = await client.workflows.registrations.list();
-for (final wf in workflows.registrations) {
-  print('${wf.workflowName}: ${wf.workflowId}');
+for (final wf in workflows.workflowRegistrations) {
+  print('${wf.workflow?.name}: ${wf.workflowId}');
 }
 
 // Execute a workflow
-final result = await client.workflows.core.execute(
+final result = await client.workflows.core.executeAsync(
   workflowIdentifier: 'my-workflow',
   request: WorkflowExecutionRequest(
-    inputs: {'key': 'value'},
+    input: {'key': 'value'},
   ),
 );
 print('Execution: ${result.executionId}');
