@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../models/collections/collection.dart';
+import '../models/collections/fork_count_response.dart';
 import 'base_resource.dart';
 
 /// Resource for collection management endpoints.
@@ -270,5 +271,31 @@ class CollectionsResource extends ResourceBase {
       ..body = jsonEncode({'new_name': newName});
     final response = await interceptorChain.execute(httpRequest);
     return Collection.fromJson(parseJson(response));
+  }
+
+  /// Gets the fork count for a collection.
+  ///
+  /// [collectionId] - The ID of the collection to get fork count for.
+  /// [tenant] - The tenant containing the database.
+  ///   Defaults to the client's configured tenant.
+  /// [database] - The database containing the collection.
+  ///   Defaults to the client's configured database.
+  ///
+  /// Returns a [ForkCountResponse] containing the number of forks.
+  ///
+  /// Endpoint: `GET /api/v2/tenants/{tenant}/databases/{database}/collections/{id}/fork_count`
+  Future<ForkCountResponse> forkCount({
+    required String collectionId,
+    String? tenant,
+    String? database,
+  }) async {
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(
+      '${_basePath(tenant: tenant, database: database)}/${Uri.encodeComponent(collectionId)}/fork_count',
+    );
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return ForkCountResponse.fromJson(parseJson(response));
   }
 }

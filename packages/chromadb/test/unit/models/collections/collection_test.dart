@@ -474,6 +474,58 @@ void main() {
     });
   });
 
+  group('ForkCountResponse', () {
+    test('fromJson creates response with count', () {
+      final json = {'count': 5};
+      final response = ForkCountResponse.fromJson(json);
+      expect(response.count, 5);
+    });
+
+    test('fromJson handles zero count', () {
+      final json = {'count': 0};
+      final response = ForkCountResponse.fromJson(json);
+      expect(response.count, 0);
+    });
+
+    test('toJson converts response correctly', () {
+      const response = ForkCountResponse(count: 3);
+      final json = response.toJson();
+      expect(json, {'count': 3});
+    });
+
+    test('copyWith replaces count', () {
+      const original = ForkCountResponse(count: 5);
+      final copy = original.copyWith(count: 10);
+      expect(copy.count, 10);
+    });
+
+    test('copyWith preserves count when not specified', () {
+      const original = ForkCountResponse(count: 5);
+      final copy = original.copyWith();
+      expect(copy.count, 5);
+    });
+
+    test('equality works correctly', () {
+      const r1 = ForkCountResponse(count: 5);
+      const r2 = ForkCountResponse(count: 5);
+      const r3 = ForkCountResponse(count: 3);
+      expect(r1, equals(r2));
+      expect(r1, isNot(equals(r3)));
+    });
+
+    test('hashCode is consistent with equality', () {
+      const r1 = ForkCountResponse(count: 5);
+      const r2 = ForkCountResponse(count: 5);
+      expect(r1.hashCode, equals(r2.hashCode));
+    });
+
+    test('toString returns readable representation', () {
+      const response = ForkCountResponse(count: 7);
+      expect(response.toString(), contains('ForkCountResponse'));
+      expect(response.toString(), contains('7'));
+    });
+  });
+
   group('CollectionSchema', () {
     test('fromJson creates schema with all fields', () {
       final json = {

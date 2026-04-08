@@ -490,6 +490,9 @@
         },
         "type": "object"
       },
+      "DeleteCollectionResponse": {
+        "type": "object"
+      },
       "DeleteDatabaseResponse": {
         "type": "object"
       },
@@ -673,6 +676,20 @@
         },
         "required": [
           "new_name"
+        ],
+        "type": "object"
+      },
+      "ForkCountResponse": {
+        "description": "Response containing the fork count for a collection.",
+        "properties": {
+          "count": {
+            "description": "The number of forks for this collection.",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "count"
         ],
         "type": "object"
       },
@@ -3523,7 +3540,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UpdateCollectionResponse"
+                  "$ref": "#/components/schemas/DeleteCollectionResponse"
                 }
               }
             },
@@ -4352,6 +4369,106 @@
             "label": "Fork collection",
             "lang": "rust",
             "source": "let forked = collection.fork(\"forked_collection\").await?;"
+          }
+        ]
+      }
+    },
+    "/api/v2/tenants/{tenant}/databases/{database}/collections/{collection_id}/fork_count": {
+      "get": {
+        "description": "Returns the number of forks for a collection.",
+        "operationId": "fork_count",
+        "parameters": [
+          {
+            "description": "Tenant UUID",
+            "example": "1e30d217-3d78-4f8c-b244-79381dc6a254",
+            "in": "path",
+            "name": "tenant",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Database name",
+            "in": "path",
+            "name": "database",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Collection UUID",
+            "example": "1e30d217-3d78-4f8c-b244-79381dc6a254",
+            "in": "path",
+            "name": "collection_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForkCountResponse"
+                }
+              }
+            },
+            "description": "Fork count retrieved successfully"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Collection not found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Server error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Get fork count",
+        "tags": [
+          "Collection"
+        ],
+        "x-codeSamples": [
+          {
+            "label": "Get fork count",
+            "lang": "typescript",
+            "source": "const count = await collection.forkCount();"
+          },
+          {
+            "label": "Get fork count",
+            "lang": "python",
+            "source": "count = collection.fork_count()"
           }
         ]
       }

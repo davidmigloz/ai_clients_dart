@@ -77,6 +77,7 @@ export 'src/models/collections/collection.dart';
 export 'src/models/collections/collection_configuration.dart';
 export 'src/models/collections/collection_schema.dart';
 export 'src/models/collections/create_collection_request.dart';
+export 'src/models/collections/fork_count_response.dart';
 export 'src/models/collections/quantization.dart';
 export 'src/models/collections/spann_index_config.dart';
 export 'src/models/collections/update_collection_request.dart';

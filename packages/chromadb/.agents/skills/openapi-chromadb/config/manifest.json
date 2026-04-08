@@ -176,6 +176,23 @@
       "file": "lib/src/models/collections/spann_index_config.dart",
       "schema": "SpannIndexConfig",
       "tags": []
+    },
+    "DeleteCollectionResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "DeleteCollectionResponse",
+      "tags": ["acknowledged"],
+      "note": "Empty response object — deleteByName() returns Future<void>, no Dart model needed."
+    },
+    "ForkCountResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ForkCountResponse",
+      "file": "lib/src/models/collections/fork_count_response.dart",
+      "schema": "ForkCountResponse",
+      "tags": []
     }
   }
 }
