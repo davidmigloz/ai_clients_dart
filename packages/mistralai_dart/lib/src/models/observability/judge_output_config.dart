@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality_helpers.dart';
 import 'judge_classification_output.dart';
 import 'judge_classification_output_option.dart';
 import 'judge_regression_output.dart';
@@ -133,11 +134,11 @@ class JudgeOutputConfigUnknown extends JudgeOutputConfig {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! JudgeOutputConfigUnknown) return false;
-    return type == other.type;
+    return type == other.type && mapsDeepEqual(rawJson, other.rawJson);
   }
 
   @override
-  int get hashCode => type.hashCode;
+  int get hashCode => Object.hash(type, mapDeepHashCode(rawJson));
 
   @override
   String toString() => 'JudgeOutputConfig.unknown($type)';
