@@ -24,7 +24,7 @@ class JSONPatchRemove {
       JSONPatchRemove(
         op: json['op'] as String? ?? 'remove',
         path: json['path'] as String? ?? '',
-        value: json['value'] ?? Object(),
+        value: json['value'] ?? const <String, dynamic>{},
       );
 
   /// Converts to JSON.

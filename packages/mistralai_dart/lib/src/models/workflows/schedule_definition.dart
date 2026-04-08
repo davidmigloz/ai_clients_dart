@@ -60,7 +60,7 @@ class ScheduleDefinition {
   /// Creates a [ScheduleDefinition] from JSON.
   factory ScheduleDefinition.fromJson(Map<String, dynamic> json) =>
       ScheduleDefinition(
-        input: json['input'] ?? Object(),
+        input: json['input'] ?? const <String, dynamic>{},
         scheduleId: json['schedule_id'] as String?,
         calendars: (json['calendars'] as List?)
             ?.map((e) => ScheduleCalendar.fromJson(e as Map<String, dynamic>))

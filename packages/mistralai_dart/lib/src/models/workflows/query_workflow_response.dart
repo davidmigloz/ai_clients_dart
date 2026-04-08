@@ -16,7 +16,7 @@ class QueryWorkflowResponse {
   factory QueryWorkflowResponse.fromJson(Map<String, dynamic> json) =>
       QueryWorkflowResponse(
         queryName: json['query_name'] as String? ?? '',
-        result: json['result'] ?? Object(),
+        result: json['result'] ?? const <String, dynamic>{},
       );
 
   /// Converts to JSON.

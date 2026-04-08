@@ -16,7 +16,7 @@ class JSONPayloadResponse {
   factory JSONPayloadResponse.fromJson(Map<String, dynamic> json) =>
       JSONPayloadResponse(
         type: json['type'] as String? ?? 'json',
-        value: json['value'] ?? Object(),
+        value: json['value'] ?? const <String, dynamic>{},
       );
 
   /// Converts to JSON.

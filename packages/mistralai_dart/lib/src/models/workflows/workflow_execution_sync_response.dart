@@ -24,7 +24,7 @@ class WorkflowExecutionSyncResponse {
       WorkflowExecutionSyncResponse(
         workflowName: json['workflow_name'] as String? ?? '',
         executionId: json['execution_id'] as String? ?? '',
-        result: json['result'] ?? Object(),
+        result: json['result'] ?? const <String, dynamic>{},
       );
 
   /// Converts to JSON.

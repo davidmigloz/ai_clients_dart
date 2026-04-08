@@ -19,7 +19,7 @@ class UpdateWorkflowResponse {
   factory UpdateWorkflowResponse.fromJson(Map<String, dynamic> json) =>
       UpdateWorkflowResponse(
         updateName: json['update_name'] as String? ?? '',
-        result: json['result'] ?? Object(),
+        result: json['result'] ?? const <String, dynamic>{},
       );
 
   /// Converts to JSON.

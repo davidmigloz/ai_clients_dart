@@ -30,19 +30,22 @@ void main() async {
     print('=== List Workflows ===\n');
 
     final workflowList = await client.workflows.core.list();
-    final workflows = workflowList.workflows;
+    final registrations = workflowList.workflowRegistrations;
 
-    if (workflows == null || workflows.isEmpty) {
+    if (registrations.isEmpty) {
       print('No workflows found.');
       print('Create a workflow in the Mistral console to get started.');
     } else {
-      print('Found ${workflows.length} workflow(s):');
-      for (final workflow in workflows) {
-        print('  - ${workflow.displayName} (${workflow.id})');
-        print('    Name: ${workflow.name}');
-        print('    Archived: ${workflow.archived}');
-        if (workflow.description != null) {
-          print('    Description: ${workflow.description}');
+      print('Found ${registrations.length} registration(s):');
+      for (final reg in registrations) {
+        print('  - Registration ID: ${reg.id}');
+        print('    Workflow ID: ${reg.workflowId}');
+        print('    Task queue: ${reg.taskQueue}');
+        if (reg.workflow != null) {
+          print('    Name: ${reg.workflow!.displayName}');
+          if (reg.workflow!.description != null) {
+            print('    Description: ${reg.workflow!.description}');
+          }
         }
       }
     }

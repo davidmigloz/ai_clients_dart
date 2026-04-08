@@ -24,7 +24,7 @@ class JSONPatchReplace {
       JSONPatchReplace(
         op: json['op'] as String? ?? 'replace',
         path: json['path'] as String? ?? '',
-        value: json['value'] ?? Object(),
+        value: json['value'] ?? const <String, dynamic>{},
       );
 
   /// Converts to JSON.

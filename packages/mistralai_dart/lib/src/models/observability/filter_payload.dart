@@ -30,11 +30,10 @@ class FilterPayload {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
-    'filters': filters == null
-        ? null
-        : filters is FilterCondition
-        ? (filters! as FilterCondition).toJson()
-        : (filters! as FilterGroup).toJson(),
+    if (filters != null)
+      'filters': filters is FilterCondition
+          ? (filters! as FilterCondition).toJson()
+          : (filters! as FilterGroup).toJson(),
   };
 
   @override

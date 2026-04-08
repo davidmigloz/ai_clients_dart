@@ -855,7 +855,10 @@ for (final dataset in datasets.items) {
 
 // Create a dataset
 final dataset = await client.observability.datasets.create(
-  request: PostDatasetInSchema(name: 'My Dataset'),
+  request: PostDatasetInSchema(
+    name: 'My Dataset',
+    description: 'A sample dataset',
+  ),
 );
 
 // Manage dataset records

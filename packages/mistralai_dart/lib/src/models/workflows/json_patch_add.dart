@@ -23,7 +23,7 @@ class JSONPatchAdd {
   factory JSONPatchAdd.fromJson(Map<String, dynamic> json) => JSONPatchAdd(
     op: json['op'] as String? ?? 'add',
     path: json['path'] as String? ?? '',
-    value: json['value'] ?? Object(),
+    value: json['value'] ?? const <String, dynamic>{},
   );
 
   /// Converts to JSON.

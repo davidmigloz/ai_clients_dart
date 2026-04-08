@@ -7,7 +7,7 @@ import '../../models/workflows/workflow_execution_request.dart';
 import '../../models/workflows/workflow_execution_response.dart';
 import '../../models/workflows/workflow_execution_sync_response.dart';
 import '../../models/workflows/workflow_get_response.dart';
-import '../../models/workflows/workflow_list_response.dart';
+import '../../models/workflows/workflow_registration_list_response.dart';
 import '../../models/workflows/workflow_unarchive_response.dart';
 import '../../models/workflows/workflow_update_request.dart';
 import '../../models/workflows/workflow_update_response.dart';
@@ -31,7 +31,7 @@ class WorkflowCoreResource extends ResourceBase {
   ///
   /// Use [archived] to filter by archive status, [search] for text search,
   /// and [cursor]/[limit] for pagination.
-  Future<WorkflowListResponse> list({
+  Future<WorkflowRegistrationListResponse> list({
     bool? archived,
     String? search,
     int? limit,
@@ -52,7 +52,7 @@ class WorkflowCoreResource extends ResourceBase {
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(httpRequest);
     final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
-    return WorkflowListResponse.fromJson(responseBody);
+    return WorkflowRegistrationListResponse.fromJson(responseBody);
   }
 
   /// Gets a workflow by identifier.

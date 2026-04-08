@@ -60,7 +60,7 @@ class ScheduleDefinitionOutput {
   /// Creates a [ScheduleDefinitionOutput] from JSON.
   factory ScheduleDefinitionOutput.fromJson(Map<String, dynamic> json) =>
       ScheduleDefinitionOutput(
-        input: json['input'] ?? Object(),
+        input: json['input'] ?? const <String, dynamic>{},
         scheduleId: json['schedule_id'] as String? ?? '',
         calendars: (json['calendars'] as List?)
             ?.map((e) => ScheduleCalendar.fromJson(e as Map<String, dynamic>))
