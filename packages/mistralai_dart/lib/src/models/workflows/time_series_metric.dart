@@ -34,12 +34,11 @@ class TimeSeriesMetric {
     if (identical(this, other)) return true;
     if (other is! TimeSeriesMetric) return false;
     if (runtimeType != other.runtimeType) return false;
-    if (!listsEqual(value, other.value)) return false;
-    return true;
+    return valuesDeepEqual(value, other.value);
   }
 
   @override
-  int get hashCode => listHash(value).hashCode;
+  int get hashCode => valueDeepHashCode(value);
 
   @override
   String toString() => 'TimeSeriesMetric(value: ${value.length})';
