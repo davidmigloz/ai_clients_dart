@@ -81,6 +81,7 @@ export 'src/models/embeddings/batch_embed_contents_response.dart';
 export 'src/models/embeddings/content_embedding.dart';
 export 'src/models/embeddings/embed_content_request.dart';
 export 'src/models/embeddings/embed_content_response.dart';
+export 'src/models/embeddings/embedding_usage_metadata.dart';
 export 'src/models/embeddings/task_type.dart';
 // Models - Files API
 export 'src/models/files/chunking_config.dart';

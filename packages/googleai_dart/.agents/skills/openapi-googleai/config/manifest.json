@@ -140,6 +140,30 @@
     ]
   },
   "types": {
+    "EmbeddingUsageMetadata": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EmbeddingUsageMetadata",
+      "file": "lib/src/models/embeddings/embedding_usage_metadata.dart",
+      "schema": "EmbeddingUsageMetadata",
+      "tags": []
+    },
+    "EmbedContentResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EmbedContentResponse",
+      "file": "lib/src/models/embeddings/embed_content_response.dart",
+      "schema": "EmbedContentResponse",
+      "tags": []
+    },
+    "BatchEmbedContentsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "BatchEmbedContentsResponse",
+      "file": "lib/src/models/embeddings/batch_embed_contents_response.dart",
+      "schema": "BatchEmbedContentsResponse",
+      "tags": []
+    },
     "Tool": {
       "spec": "main",
       "kind": "object",

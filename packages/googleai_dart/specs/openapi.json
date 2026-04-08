@@ -177,6 +177,15 @@
             },
             "readOnly": true,
             "type": "array"
+          },
+          "usageMetadata": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EmbeddingUsageMetadata"
+              }
+            ],
+            "description": "Output only. The usage metadata for the request.",
+            "readOnly": true
           }
         },
         "type": "object"
@@ -1370,6 +1379,15 @@
             ],
             "description": "Output only. The embedding generated from the input content.",
             "readOnly": true
+          },
+          "usageMetadata": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EmbeddingUsageMetadata"
+              }
+            ],
+            "description": "Output only. The usage metadata for the request.",
+            "readOnly": true
           }
         },
         "type": "object"
@@ -1415,6 +1433,26 @@
               "format": "float",
               "type": "number"
             },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "EmbeddingUsageMetadata": {
+        "description": "Metadata on the usage of the embedding request.",
+        "properties": {
+          "promptTokenCount": {
+            "description": "Output only. Number of tokens in the prompt.",
+            "format": "int32",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "promptTokenDetails": {
+            "description": "Output only. List of modalities that were processed in the request input.",
+            "items": {
+              "$ref": "#/components/schemas/ModalityTokenCount"
+            },
+            "readOnly": true,
             "type": "array"
           }
         },
@@ -2996,7 +3034,7 @@
         "type": "object"
       },
       "ImportFileRequest": {
-        "description": "Request for `ImportFile` to import a File API file with a `FileSearchStore`.\nLINT.IfChange(ImportFileRequest)",
+        "description": "Request for `ImportFile` to import a File API file with a `FileSearchStore`.",
         "properties": {
           "chunkingConfig": {
             "allOf": [
@@ -5615,7 +5653,7 @@
     "description": "The Gemini API allows developers to build generative AI applications using Gemini models. Gemini is our most capable model, built from the ground up to be multimodal. It can generalize and seamlessly understand, operate across, and combine different types of information including language, images, audio, video, and code. You can use the Gemini API for use cases like reasoning across text and images, content generation, dialogue agents, summarization and classification systems, and more.",
     "title": "Generative Language API",
     "version": "v1beta",
-    "x-google-revision": "20260325"
+    "x-google-revision": "20260407"
   },
   "openapi": "3.0.3",
   "paths": {
@@ -5986,7 +6024,21 @@
             "description": "Successful operation"
           }
         },
-        "security": [],
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
         "tags": [
           "generativelanguage"
         ]
@@ -6031,7 +6083,21 @@
             "description": "Successful operation"
           }
         },
-        "security": [],
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
         "tags": [
           "generativelanguage"
         ]
@@ -6064,7 +6130,21 @@
             "description": "Successful operation"
           }
         },
-        "security": [],
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
         "tags": [
           "generativelanguage"
         ]
@@ -6095,7 +6175,21 @@
             "description": "Successful operation"
           }
         },
-        "security": [],
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
         "tags": [
           "generativelanguage"
         ]
@@ -6160,7 +6254,21 @@
             "description": "Successful operation"
           }
         },
-        "security": [],
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
         "tags": [
           "generativelanguage"
         ]
@@ -7283,7 +7391,21 @@
             "description": "Successful operation"
           }
         },
-        "security": [],
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
         "tags": [
           "generativelanguage"
         ],
@@ -7341,7 +7463,21 @@
             "description": "Successful operation"
           }
         },
-        "security": [],
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
         "tags": [
           "generativelanguage"
         ],
@@ -7383,7 +7519,21 @@
             "description": "Successful operation"
           }
         },
-        "security": [],
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
         "tags": [
           "generativelanguage"
         ]
@@ -7428,7 +7578,21 @@
             "description": "Successful operation"
           }
         },
-        "security": [],
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
         "tags": [
           "generativelanguage"
         ]
@@ -7461,7 +7625,21 @@
             "description": "Successful operation"
           }
         },
-        "security": [],
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
         "tags": [
           "generativelanguage"
         ]
@@ -7492,7 +7670,21 @@
             "description": "Successful operation"
           }
         },
-        "security": [],
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
         "tags": [
           "generativelanguage"
         ]
@@ -7539,7 +7731,21 @@
             "description": "Successful operation"
           }
         },
-        "security": [],
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
         "tags": [
           "generativelanguage"
         ]
@@ -7655,7 +7861,21 @@
             "description": "Successful operation"
           }
         },
-        "security": [],
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
         "tags": [
           "generativelanguage"
         ]
@@ -7702,7 +7922,21 @@
             "description": "Successful operation"
           }
         },
-        "security": [],
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/devstorage.read_only"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
         "tags": [
           "generativelanguage"
         ]
