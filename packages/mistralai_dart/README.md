@@ -45,13 +45,15 @@ Dart client for the **[Mistral AI API](https://docs.mistral.ai/)** with chat com
 
 - Files, fine-tuning, and batch processing
 - Agents, conversations, and libraries (beta)
+- Observability: campaigns, datasets, judges, and chat completion events (beta)
+- Workflows: execution, scheduling, deployments, and management (beta)
 
 ## Why choose this client?
 
 - Pure Dart with no Flutter dependency — works in mobile apps, backends, and CLIs.
 - Type-safe request and response models with minimal dependencies (`http`, `logging`, `meta`).
 - Streaming, retries, interceptors, and error handling built into the client.
-- Covers the full Mistral AI API surface, including beta agents, conversations, and libraries.
+- Covers the full Mistral AI API surface, including beta agents, conversations, libraries, observability, and workflows.
 - Strict [semver](https://semver.org/) versioning so downstream packages can depend on stable, predictable version ranges.
 
 ## Quickstart
@@ -837,6 +839,90 @@ await client.libraries.delete(libraryId: library.id);
 
 </details>
 
+### How do I use observability?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.observability` to manage campaigns, datasets, dataset records, judges, chat completion events, and chat completion fields. These APIs help you monitor and evaluate your Mistral AI usage.
+
+```dart
+// List datasets
+final datasets = await client.observability.datasets.list();
+for (final dataset in datasets.items) {
+  print('${dataset.name}: ${dataset.id}');
+}
+
+// Create a dataset
+final dataset = await client.observability.datasets.create(
+  request: PostDatasetInSchema(name: 'My Dataset'),
+);
+
+// Manage dataset records
+final records = await client.observability.datasets.listRecords(
+  datasetId: dataset.id,
+);
+
+// List judges
+final judges = await client.observability.judges.list();
+
+// List campaigns
+final campaigns = await client.observability.campaigns.list();
+
+// Browse chat completion fields
+final fields = await client.observability.chatCompletionFields.list();
+```
+
+→ [Full example](example/observability_example.dart)
+
+</details>
+
+### How do I use workflows?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.workflows` to manage and execute workflows via the workflowCore resource, check execution status, monitor runs, view metrics, inspect workers, and configure schedules.
+
+```dart
+// List registered workflows
+final workflows = await client.workflows.registrations.list();
+for (final wf in workflows.registrations) {
+  print('${wf.workflowName}: ${wf.workflowId}');
+}
+
+// Execute a workflow
+final result = await client.workflows.core.execute(
+  workflowIdentifier: 'my-workflow',
+  request: WorkflowExecutionRequest(
+    inputs: {'key': 'value'},
+  ),
+);
+print('Execution: ${result.executionId}');
+
+// Get execution status
+final execution = await client.workflows.executions.get(
+  executionId: result.executionId,
+);
+print('Status: ${execution.status}');
+
+// List runs and check metrics
+final runs = await client.workflows.runs.list();
+final metrics = await client.workflows.metrics.get(
+  workflowName: 'my-workflow',
+);
+
+// Check worker status
+final worker = await client.workflows.workers.whoami();
+
+// List schedules
+final schedules = await client.workflows.schedules.list();
+```
+
+→ [Full example](example/workflows_example.dart)
+
+</details>
+
 ## Error Handling
 
 <details>
@@ -898,6 +984,8 @@ See the [example/](example/) directory for complete examples:
 | [`agents_example.dart`](example/agents_example.dart) | AI agents (beta) |
 | [`conversations_example.dart`](example/conversations_example.dart) | Multi-turn conversations (beta) |
 | [`libraries_example.dart`](example/libraries_example.dart) | Document storage (beta) |
+| [`observability_example.dart`](example/observability_example.dart) | Observability: datasets, judges, campaigns (beta) |
+| [`workflows_example.dart`](example/workflows_example.dart) | Workflow execution and scheduling (beta) |
 | [`models_example.dart`](example/models_example.dart) | Model listing |
 | [`error_handling_example.dart`](example/error_handling_example.dart) | Exception handling patterns |
 | [`config_example.dart`](example/config_example.dart) | Client configuration options |
@@ -925,6 +1013,8 @@ See the [example/](example/) directory for complete examples:
 | Agents (Beta) | ✅ Full |
 | Conversations (Beta) | ✅ Full |
 | Libraries (Beta) | ✅ Full |
+| Observability (Beta) | ✅ Full |
+| Workflows (Beta) | ✅ Full |
 
 ## Official Documentation
 

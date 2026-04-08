@@ -18,7 +18,9 @@ import '../resources/fine_tuning/fine_tuning_resource.dart';
 import '../resources/libraries/libraries_resource.dart';
 import '../resources/models_resource.dart';
 import '../resources/moderations_resource.dart';
+import '../resources/observability/observability_resource.dart';
 import '../resources/ocr_resource.dart';
+import '../resources/workflows/workflows_resource.dart';
 import 'config.dart';
 import 'interceptor_chain.dart';
 import 'request_builder.dart';
@@ -44,6 +46,8 @@ import 'retry_wrapper.dart';
 /// - [agents] - AI agents (Beta)
 /// - [conversations] - Conversations (Beta)
 /// - [libraries] - Document libraries for RAG (Beta)
+/// - [observability] - Observability: campaigns, datasets, judges (Beta)
+/// - [workflows] - Workflow execution, scheduling, management (Beta)
 /// - [models] - Model listing and management
 /// - [moderations] - Content moderation
 ///
@@ -158,6 +162,12 @@ class MistralClient {
 
   /// Resource for document libraries (Beta).
   late final LibrariesResource libraries;
+
+  /// Resource for observability operations (Beta).
+  late final ObservabilityResource observability;
+
+  /// Resource for workflow operations (Beta).
+  late final WorkflowsResource workflows;
 
   /// Creates a [MistralClient].
   ///
@@ -309,6 +319,22 @@ class MistralClient {
     );
 
     libraries = LibrariesResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+
+    observability = ObservabilityResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+
+    workflows = WorkflowsResource(
       config: this.config,
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,

@@ -69,6 +69,38 @@
           "prediction"
         ],
         "directory": "metadata"
+      },
+      "observability": {
+        "patterns": [
+          "campaign",
+          "dataset",
+          "judge",
+          "chatcompletionevent",
+          "observability"
+        ],
+        "directory": "observability"
+      },
+      "workflows": {
+        "patterns": [
+          "workflow",
+          "execution",
+          "deployment",
+          "registration",
+          "schedule",
+          "activity",
+          "signal",
+          "tempo",
+          "worker",
+          "failure",
+          "jsonpatch",
+          "jsonpayload",
+          "encoded",
+          "network",
+          "scalar",
+          "timeseries",
+          "batch_execution"
+        ],
+        "directory": "workflows"
       }
     },
     "default_category": "common",
@@ -102,252 +134,6 @@
     "excluded_resources": []
   },
   "types": {
-    "ChatCompletionRequest": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "ChatCompletionRequest",
-      "file": "lib/src/models/chat/chat_completion_request.dart",
-      "schema": "ChatCompletionRequest",
-      "tags": [
-        "critical"
-      ]
-    },
-    "ChatCompletionResponse": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "ChatCompletionResponse",
-      "file": "lib/src/models/chat/chat_completion_response.dart",
-      "schema": "ChatCompletionResponse",
-      "tags": []
-    },
-    "EmbeddingRequest": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "EmbeddingRequest",
-      "file": "lib/src/models/embeddings/embedding_request.dart",
-      "schema": "EmbeddingRequest",
-      "tags": [
-        "critical"
-      ]
-    },
-    "EmbeddingResponse": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "EmbeddingResponse",
-      "file": "lib/src/models/embeddings/embedding_response.dart",
-      "schema": "EmbeddingResponse",
-      "tags": []
-    },
-    "ModelCard": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "Model",
-      "file": "lib/src/models/models/model.dart",
-      "schema": "BaseModelCard",
-      "tags": [],
-      "excluded_properties": [
-        "deprecation",
-        "deprecation_replacement_model"
-      ]
-    },
-    "ChatMessage": {
-      "spec": "main",
-      "kind": "sealed_parent",
-      "dart_class": "ChatMessage",
-      "file": "lib/src/models/chat/chat_message.dart",
-      "schema": null,
-      "discriminator": {
-        "field": "role",
-        "mapping": {
-          "SystemMessage": "system",
-          "UserMessage": "user",
-          "AssistantMessage": "assistant",
-          "ToolMessage": "tool"
-        }
-      },
-      "excluded_properties": [
-        "content"
-      ],
-      "note": "content nullability intentionally differs: non-nullable in SystemMessage (system prompts must have content), nullable in others (e.g. assistant tool-call-only messages)."
-    },
-    "SystemMessage": {
-      "spec": "main",
-      "kind": "sealed_variant",
-      "dart_class": "SystemMessage",
-      "file": "lib/src/models/chat/chat_message.dart",
-      "schema": "SystemMessage",
-      "parent": "ChatMessage"
-    },
-    "UserMessage": {
-      "spec": "main",
-      "kind": "sealed_variant",
-      "dart_class": "UserMessage",
-      "file": "lib/src/models/chat/chat_message.dart",
-      "schema": "UserMessage",
-      "parent": "ChatMessage"
-    },
-    "AssistantMessage": {
-      "spec": "main",
-      "kind": "sealed_variant",
-      "dart_class": "AssistantMessage",
-      "file": "lib/src/models/chat/chat_message.dart",
-      "schema": "AssistantMessage",
-      "parent": "ChatMessage"
-    },
-    "ToolMessage": {
-      "spec": "main",
-      "kind": "sealed_variant",
-      "dart_class": "ToolMessage",
-      "file": "lib/src/models/chat/chat_message.dart",
-      "schema": "ToolMessage",
-      "parent": "ChatMessage"
-    },
-    "ContentPart": {
-      "spec": "main",
-      "kind": "sealed_parent",
-      "dart_class": "ContentPart",
-      "file": "lib/src/models/content/content_part.dart",
-      "schema": null,
-      "excluded_properties": [
-        "url"
-      ],
-      "discriminator": {
-        "field": "type",
-        "mapping": {
-          "TextChunk": "text",
-          "ImageURLChunk": "image_url",
-          "DocumentURLChunk": "document_url",
-          "ReferenceChunk": "reference",
-          "FileChunk": "file",
-          "AudioChunk": "input_audio",
-          "ThinkChunk": "thinking",
-          "ToolFileChunk": "tool_file",
-          "ToolReferenceChunk": "tool_reference"
-        }
-      },
-      "note": null
-    },
-    "TextChunk": {
-      "spec": "main",
-      "kind": "sealed_variant",
-      "dart_class": "TextContentPart",
-      "file": "lib/src/models/content/content_part.dart",
-      "schema": "TextChunk",
-      "parent": "ContentPart"
-    },
-    "ImageURLChunk": {
-      "spec": "main",
-      "kind": "sealed_variant",
-      "dart_class": "ImageUrlContentPart",
-      "file": "lib/src/models/content/content_part.dart",
-      "schema": "ImageURLChunk",
-      "parent": "ContentPart",
-      "excluded_properties": [
-        "image_url"
-      ]
-    },
-    "DocumentURLChunk": {
-      "spec": "main",
-      "kind": "sealed_variant",
-      "dart_class": "DocumentUrlContentPart",
-      "file": "lib/src/models/content/content_part.dart",
-      "schema": "DocumentURLChunk",
-      "parent": "ContentPart"
-    },
-    "ReferenceChunk": {
-      "spec": "main",
-      "kind": "sealed_variant",
-      "dart_class": "ReferenceContentPart",
-      "file": "lib/src/models/content/content_part.dart",
-      "schema": "ReferenceChunk",
-      "parent": "ContentPart"
-    },
-    "FileChunk": {
-      "spec": "main",
-      "kind": "sealed_variant",
-      "dart_class": "FileContentPart",
-      "file": "lib/src/models/content/content_part.dart",
-      "schema": "FileChunk",
-      "parent": "ContentPart"
-    },
-    "AudioChunk": {
-      "spec": "main",
-      "kind": "sealed_variant",
-      "dart_class": "AudioContentPart",
-      "file": "lib/src/models/content/content_part.dart",
-      "schema": "AudioChunk",
-      "parent": "ContentPart"
-    },
-    "ThinkChunk": {
-      "spec": "main",
-      "kind": "sealed_variant",
-      "dart_class": "ThinkContentPart",
-      "file": "lib/src/models/content/content_part.dart",
-      "schema": "ThinkChunk",
-      "parent": "ContentPart"
-    },
-    "ToolFileChunk": {
-      "spec": "main",
-      "kind": "sealed_variant",
-      "dart_class": "ToolFileContentPart",
-      "file": "lib/src/models/content/content_part.dart",
-      "schema": "ToolFileChunk",
-      "parent": "ContentPart"
-    },
-    "ToolReferenceChunk": {
-      "spec": "main",
-      "kind": "sealed_variant",
-      "dart_class": "ToolReferenceContentPart",
-      "file": "lib/src/models/content/content_part.dart",
-      "schema": "ToolReferenceChunk",
-      "parent": "ContentPart"
-    },
-    "Tool": {
-      "spec": "main",
-      "kind": "sealed_parent",
-      "dart_class": "Tool",
-      "file": "lib/src/models/tools/tool.dart",
-      "schema": null,
-      "discriminator": {
-        "field": "type",
-        "mapping": {
-          "FunctionTool": "function",
-          "CustomConnector": "connector"
-        }
-      },
-      "note": null
-    },
-    "FunctionTool": {
-      "spec": "main",
-      "kind": "sealed_variant",
-      "dart_class": "FunctionTool",
-      "file": "lib/src/models/tools/tool.dart",
-      "schema": "FunctionTool",
-      "parent": "Tool"
-    },
-    "CustomConnector": {
-      "spec": "main",
-      "kind": "sealed_variant",
-      "dart_class": "CustomConnectorTool",
-      "file": "lib/src/models/tools/tool.dart",
-      "schema": "CustomConnector",
-      "parent": "Tool"
-    },
-    "ConnectorAuth": {
-      "spec": "main",
-      "kind": "sealed_parent",
-      "dart_class": "ConnectorAuth",
-      "file": "lib/src/models/tools/connector_auth.dart",
-      "schema": null,
-      "discriminator": {
-        "field": "type",
-        "mapping": {
-          "APIKeyAuth": "api-key",
-          "OAuth2TokenAuth": "oauth2-token"
-        }
-      },
-      "note": null
-    },
     "APIKeyAuth": {
       "spec": "main",
       "kind": "sealed_variant",
@@ -356,117 +142,77 @@
       "schema": "APIKeyAuth",
       "parent": "ConnectorAuth"
     },
-    "OAuth2TokenAuth": {
-      "spec": "main",
-      "kind": "sealed_variant",
-      "dart_class": "OAuth2TokenAuth",
-      "file": "lib/src/models/tools/connector_auth.dart",
-      "schema": "OAuth2TokenAuth",
-      "parent": "ConnectorAuth"
-    },
-    "ModerationLLMAction": {
-      "spec": "main",
-      "kind": "enum",
-      "dart_class": "ModerationLLMAction",
-      "file": "lib/src/models/moderations/guardrail_config.dart",
-      "schema": "ModerationLLMAction"
-    },
-    "ModerationLLMV2Config": {
+    "ActivityTaskCompletedAttributesResponse": {
       "spec": "main",
       "kind": "object",
-      "dart_class": "ModerationLLMV2Config",
-      "file": "lib/src/models/moderations/guardrail_config.dart",
-      "schema": "ModerationLLMV2Config"
+      "dart_class": "ActivityTaskCompletedAttributesResponse",
+      "file": "lib/src/models/workflows/activity_task_completed_attributes_response.dart",
+      "schema": "ActivityTaskCompletedAttributesResponse",
+      "tags": []
     },
-    "ModerationLLMV2CategoryThresholds": {
+    "ActivityTaskCompletedResponse": {
       "spec": "main",
       "kind": "object",
-      "dart_class": "ModerationLLMV2CategoryThresholds",
-      "file": "lib/src/models/moderations/guardrail_config.dart",
-      "schema": "ModerationLLMV2CategoryThresholds"
+      "dart_class": "ActivityTaskCompletedResponse",
+      "file": "lib/src/models/workflows/activity_task_completed_response.dart",
+      "schema": "ActivityTaskCompletedResponse",
+      "tags": []
     },
-    "FileVisibility": {
+    "ActivityTaskFailedAttributes": {
       "spec": "main",
-      "kind": "enum",
-      "dart_class": "FileVisibility",
-      "file": "lib/src/models/files/file_visibility.dart",
-      "schema": "FileVisibility"
+      "kind": "object",
+      "dart_class": "ActivityTaskFailedAttributes",
+      "file": "lib/src/models/workflows/activity_task_failed_attributes.dart",
+      "schema": "ActivityTaskFailedAttributes",
+      "tags": []
     },
-    "ToolChoice": {
+    "ActivityTaskFailedResponse": {
       "spec": "main",
-      "kind": "sealed_parent",
-      "dart_class": "ToolChoice",
-      "file": "lib/src/models/tools/tool_choice.dart",
-      "schema": null,
-      "discriminator": {
-        "field": null,
-        "mapping": {
-          "FunctionName": "function"
-        }
-      },
-      "note": "Uses string values or object for discrimination"
+      "kind": "object",
+      "dart_class": "ActivityTaskFailedResponse",
+      "file": "lib/src/models/workflows/activity_task_failed_response.dart",
+      "schema": "ActivityTaskFailedResponse",
+      "tags": []
     },
-    "ToolChoice:ToolChoiceAuto": {
+    "ActivityTaskRetryingAttributes": {
       "spec": "main",
-      "kind": "extension",
-      "dart_class": "ToolChoiceAuto",
-      "file": "lib/src/models/tools/tool_choice.dart",
-      "schema": null,
-      "parent": "ToolChoice",
-      "note": "Uses string values or object for discrimination"
+      "kind": "object",
+      "dart_class": "ActivityTaskRetryingAttributes",
+      "file": "lib/src/models/workflows/activity_task_retrying_attributes.dart",
+      "schema": "ActivityTaskRetryingAttributes",
+      "tags": []
     },
-    "ToolChoice:ToolChoiceNone": {
+    "ActivityTaskRetryingResponse": {
       "spec": "main",
-      "kind": "extension",
-      "dart_class": "ToolChoiceNone",
-      "file": "lib/src/models/tools/tool_choice.dart",
-      "schema": null,
-      "parent": "ToolChoice",
-      "note": "Uses string values or object for discrimination"
+      "kind": "object",
+      "dart_class": "ActivityTaskRetryingResponse",
+      "file": "lib/src/models/workflows/activity_task_retrying_response.dart",
+      "schema": "ActivityTaskRetryingResponse",
+      "tags": []
     },
-    "ToolChoice:ToolChoiceAny": {
+    "ActivityTaskStartedAttributesResponse": {
       "spec": "main",
-      "kind": "extension",
-      "dart_class": "ToolChoiceAny",
-      "file": "lib/src/models/tools/tool_choice.dart",
-      "schema": null,
-      "parent": "ToolChoice",
-      "note": "Uses string values or object for discrimination"
+      "kind": "object",
+      "dart_class": "ActivityTaskStartedAttributesResponse",
+      "file": "lib/src/models/workflows/activity_task_started_attributes_response.dart",
+      "schema": "ActivityTaskStartedAttributesResponse",
+      "tags": []
     },
-    "FunctionName": {
+    "ActivityTaskStartedResponse": {
       "spec": "main",
-      "kind": "sealed_variant",
-      "dart_class": "ToolChoiceFunction",
-      "file": "lib/src/models/tools/tool_choice.dart",
-      "schema": "FunctionName",
-      "parent": "ToolChoice"
+      "kind": "object",
+      "dart_class": "ActivityTaskStartedResponse",
+      "file": "lib/src/models/workflows/activity_task_started_response.dart",
+      "schema": "ActivityTaskStartedResponse",
+      "tags": []
     },
-    "ResponseFormat:ResponseFormatJsonObject": {
+    "AgentsCompletionRequest": {
       "spec": "main",
-      "kind": "extension",
-      "dart_class": "ResponseFormatJsonObject",
-      "file": "lib/src/models/metadata/response_format.dart",
-      "schema": null,
-      "parent": "ResponseFormat",
-      "note": null
-    },
-    "ResponseFormat:ResponseFormatJsonSchema": {
-      "spec": "main",
-      "kind": "extension",
-      "dart_class": "ResponseFormatJsonSchema",
-      "file": "lib/src/models/metadata/response_format.dart",
-      "schema": null,
-      "parent": "ResponseFormat",
-      "note": null
-    },
-    "ResponseFormat:ResponseFormatText": {
-      "spec": "main",
-      "kind": "extension",
-      "dart_class": "ResponseFormatText",
-      "file": "lib/src/models/metadata/response_format.dart",
-      "schema": null,
-      "parent": "ResponseFormat",
-      "note": null
+      "kind": "object",
+      "dart_class": "AgentCompletionRequest",
+      "file": "lib/src/models/agents/agent_completion_request.dart",
+      "schema": "AgentsCompletionRequest",
+      "tags": []
     },
     "Annotations": {
       "spec": "main",
@@ -490,6 +236,33 @@
       ],
       "note": "Internal platform API"
     },
+    "AssistantMessage": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AssistantMessage",
+      "file": "lib/src/models/chat/chat_message.dart",
+      "schema": "AssistantMessage",
+      "parent": "ChatMessage"
+    },
+    "AudioChunk": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AudioContentPart",
+      "file": "lib/src/models/content/content_part.dart",
+      "schema": "AudioChunk",
+      "parent": "ContentPart"
+    },
+    "AudioContent": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "AudioContent",
+      "file": "",
+      "schema": "AudioContent",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal MCP protocol type"
+    },
     "AuthData": {
       "spec": "main",
       "kind": "skip",
@@ -505,7 +278,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "BaseFieldDefinition",
-      "file": "",
+      "file": "lib/src/models/observability/base_field_definition.dart",
       "schema": "BaseFieldDefinition",
       "tags": [
         "acknowledged"
@@ -516,12 +289,36 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "BaseTaskStatus",
-      "file": "",
+      "file": "lib/src/models/observability/base_task_status.dart",
       "schema": "BaseTaskStatus",
       "tags": [
         "acknowledged"
       ],
       "note": "Internal platform API"
+    },
+    "BatchExecutionBody": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "BatchExecutionBody",
+      "file": "lib/src/models/workflows/batch_execution_body.dart",
+      "schema": "BatchExecutionBody",
+      "tags": []
+    },
+    "BatchExecutionResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "BatchExecutionResponse",
+      "file": "lib/src/models/workflows/batch_execution_response.dart",
+      "schema": "BatchExecutionResponse",
+      "tags": []
+    },
+    "BatchExecutionResult": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "BatchExecutionResult",
+      "file": "lib/src/models/workflows/batch_execution_result.dart",
+      "schema": "BatchExecutionResult",
+      "tags": []
     },
     "BlobResourceContents": {
       "spec": "main",
@@ -549,7 +346,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "CampaignPreview",
-      "file": "",
+      "file": "lib/src/models/observability/campaign_preview.dart",
       "schema": "CampaignPreview",
       "tags": [
         "acknowledged"
@@ -560,7 +357,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "CampaignPreviews",
-      "file": "",
+      "file": "lib/src/models/observability/campaign_previews.dart",
       "schema": "CampaignPreviews",
       "tags": [
         "acknowledged"
@@ -571,7 +368,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "CampaignSelectedEvents",
-      "file": "",
+      "file": "lib/src/models/observability/campaign_selected_events.dart",
       "schema": "CampaignSelectedEvents",
       "tags": [
         "acknowledged"
@@ -582,7 +379,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "CampaignStatus",
-      "file": "",
+      "file": "lib/src/models/observability/campaign_status.dart",
       "schema": "CampaignStatus",
       "tags": [
         "acknowledged"
@@ -593,7 +390,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "ChatCompletionEvent",
-      "file": "",
+      "file": "lib/src/models/observability/chat_completion_event.dart",
       "schema": "ChatCompletionEvent",
       "tags": [
         "acknowledged"
@@ -604,7 +401,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "ChatCompletionEventIds",
-      "file": "",
+      "file": "lib/src/models/observability/chat_completion_event_ids.dart",
       "schema": "ChatCompletionEventIds",
       "tags": [
         "acknowledged"
@@ -615,7 +412,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "ChatCompletionEventPreview",
-      "file": "",
+      "file": "lib/src/models/observability/chat_completion_event_preview.dart",
       "schema": "ChatCompletionEventPreview",
       "tags": [
         "acknowledged"
@@ -626,7 +423,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "ChatCompletionEvents",
-      "file": "",
+      "file": "lib/src/models/observability/chat_completion_events.dart",
       "schema": "ChatCompletionEvents",
       "tags": [
         "acknowledged"
@@ -637,7 +434,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "ChatCompletionFieldOptions",
-      "file": "",
+      "file": "lib/src/models/observability/chat_completion_field_options.dart",
       "schema": "ChatCompletionFieldOptions",
       "tags": [
         "acknowledged"
@@ -648,18 +445,56 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "ChatCompletionFields",
-      "file": "",
+      "file": "lib/src/models/observability/chat_completion_fields.dart",
       "schema": "ChatCompletionFields",
       "tags": [
         "acknowledged"
       ],
       "note": "Internal platform observability"
     },
+    "ChatCompletionRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ChatCompletionRequest",
+      "file": "lib/src/models/chat/chat_completion_request.dart",
+      "schema": "ChatCompletionRequest",
+      "tags": [
+        "critical"
+      ]
+    },
+    "ChatCompletionResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ChatCompletionResponse",
+      "file": "lib/src/models/chat/chat_completion_response.dart",
+      "schema": "ChatCompletionResponse",
+      "tags": []
+    },
+    "ChatMessage": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ChatMessage",
+      "file": "lib/src/models/chat/chat_message.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "role",
+        "mapping": {
+          "SystemMessage": "system",
+          "UserMessage": "user",
+          "AssistantMessage": "assistant",
+          "ToolMessage": "tool"
+        }
+      },
+      "excluded_properties": [
+        "content"
+      ],
+      "note": "content nullability intentionally differs: non-nullable in SystemMessage (system prompts must have content), nullable in others (e.g. assistant tool-call-only messages)."
+    },
     "ChatTranscriptionEvent": {
       "spec": "main",
       "kind": "skip",
       "dart_class": "ChatTranscriptionEvent",
-      "file": "",
+      "file": "lib/src/models/observability/chat_transcription_event.dart",
       "schema": "ChatTranscriptionEvent",
       "tags": [
         "acknowledged"
@@ -698,6 +533,21 @@
         "acknowledged"
       ],
       "note": "Internal connector management API"
+    },
+    "ConnectorAuth": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ConnectorAuth",
+      "file": "lib/src/models/tools/connector_auth.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "APIKeyAuth": "api-key",
+          "OAuth2TokenAuth": "oauth2-token"
+        }
+      },
+      "note": null
     },
     "ConnectorMCPCreate": {
       "spec": "main",
@@ -743,11 +593,36 @@
       ],
       "note": "Internal connector management API"
     },
+    "ContentPart": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ContentPart",
+      "file": "lib/src/models/content/content_part.dart",
+      "schema": null,
+      "excluded_properties": [
+        "url"
+      ],
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "TextChunk": "text",
+          "ImageURLChunk": "image_url",
+          "DocumentURLChunk": "document_url",
+          "ReferenceChunk": "reference",
+          "FileChunk": "file",
+          "AudioChunk": "input_audio",
+          "ThinkChunk": "thinking",
+          "ToolFileChunk": "tool_file",
+          "ToolReferenceChunk": "tool_reference"
+        }
+      },
+      "note": null
+    },
     "ConversationPayload": {
       "spec": "main",
       "kind": "skip",
       "dart_class": "ConversationPayload",
-      "file": "",
+      "file": "lib/src/models/observability/conversation_payload.dart",
       "schema": "ConversationPayload",
       "tags": [
         "acknowledged"
@@ -758,18 +633,122 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "ConversationSource",
-      "file": "",
+      "file": "lib/src/models/observability/conversation_source.dart",
       "schema": "ConversationSource",
       "tags": [
         "acknowledged"
       ],
       "note": "Internal platform API"
     },
+    "CustomConnector": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "CustomConnectorTool",
+      "file": "lib/src/models/tools/tool.dart",
+      "schema": "CustomConnector",
+      "parent": "Tool"
+    },
+    "CustomTaskCanceledAttributes": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CustomTaskCanceledAttributes",
+      "file": "lib/src/models/workflows/custom_task_canceled_attributes.dart",
+      "schema": "CustomTaskCanceledAttributes",
+      "tags": []
+    },
+    "CustomTaskCanceledResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CustomTaskCanceledResponse",
+      "file": "lib/src/models/workflows/custom_task_canceled_response.dart",
+      "schema": "CustomTaskCanceledResponse",
+      "tags": []
+    },
+    "CustomTaskCompletedAttributesResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CustomTaskCompletedAttributesResponse",
+      "file": "lib/src/models/workflows/custom_task_completed_attributes_response.dart",
+      "schema": "CustomTaskCompletedAttributesResponse",
+      "tags": []
+    },
+    "CustomTaskCompletedResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CustomTaskCompletedResponse",
+      "file": "lib/src/models/workflows/custom_task_completed_response.dart",
+      "schema": "CustomTaskCompletedResponse",
+      "tags": []
+    },
+    "CustomTaskFailedAttributes": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CustomTaskFailedAttributes",
+      "file": "lib/src/models/workflows/custom_task_failed_attributes.dart",
+      "schema": "CustomTaskFailedAttributes",
+      "tags": []
+    },
+    "CustomTaskFailedResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CustomTaskFailedResponse",
+      "file": "lib/src/models/workflows/custom_task_failed_response.dart",
+      "schema": "CustomTaskFailedResponse",
+      "tags": []
+    },
+    "CustomTaskInProgressAttributesResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CustomTaskInProgressAttributesResponse",
+      "file": "lib/src/models/workflows/custom_task_in_progress_attributes_response.dart",
+      "schema": "CustomTaskInProgressAttributesResponse",
+      "tags": []
+    },
+    "CustomTaskInProgressResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CustomTaskInProgressResponse",
+      "file": "lib/src/models/workflows/custom_task_in_progress_response.dart",
+      "schema": "CustomTaskInProgressResponse",
+      "tags": []
+    },
+    "CustomTaskStartedAttributesResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CustomTaskStartedAttributesResponse",
+      "file": "lib/src/models/workflows/custom_task_started_attributes_response.dart",
+      "schema": "CustomTaskStartedAttributesResponse",
+      "tags": []
+    },
+    "CustomTaskStartedResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CustomTaskStartedResponse",
+      "file": "lib/src/models/workflows/custom_task_started_response.dart",
+      "schema": "CustomTaskStartedResponse",
+      "tags": []
+    },
+    "CustomTaskTimedOutAttributes": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CustomTaskTimedOutAttributes",
+      "file": "lib/src/models/workflows/custom_task_timed_out_attributes.dart",
+      "schema": "CustomTaskTimedOutAttributes",
+      "tags": []
+    },
+    "CustomTaskTimedOutResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CustomTaskTimedOutResponse",
+      "file": "lib/src/models/workflows/custom_task_timed_out_response.dart",
+      "schema": "CustomTaskTimedOutResponse",
+      "tags": []
+    },
     "Dataset": {
       "spec": "main",
       "kind": "skip",
       "dart_class": "Dataset",
-      "file": "",
+      "file": "lib/src/models/observability/dataset.dart",
       "schema": "Dataset",
       "tags": [
         "acknowledged"
@@ -780,7 +759,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "DatasetExport",
-      "file": "",
+      "file": "lib/src/models/observability/dataset_export.dart",
       "schema": "DatasetExport",
       "tags": [
         "acknowledged"
@@ -791,7 +770,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "DatasetImportTask",
-      "file": "",
+      "file": "lib/src/models/observability/dataset_import_task.dart",
       "schema": "DatasetImportTask",
       "tags": [
         "acknowledged"
@@ -802,7 +781,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "DatasetImportTasks",
-      "file": "",
+      "file": "lib/src/models/observability/dataset_import_tasks.dart",
       "schema": "DatasetImportTasks",
       "tags": [
         "acknowledged"
@@ -813,7 +792,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "DatasetPreview",
-      "file": "",
+      "file": "lib/src/models/observability/dataset_preview.dart",
       "schema": "DatasetPreview",
       "tags": [
         "acknowledged"
@@ -824,7 +803,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "DatasetPreviews",
-      "file": "",
+      "file": "lib/src/models/observability/dataset_previews.dart",
       "schema": "DatasetPreviews",
       "tags": [
         "acknowledged"
@@ -835,7 +814,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "DatasetRecord",
-      "file": "",
+      "file": "lib/src/models/observability/dataset_record.dart",
       "schema": "DatasetRecord",
       "tags": [
         "acknowledged"
@@ -846,7 +825,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "DatasetRecords",
-      "file": "",
+      "file": "lib/src/models/observability/dataset_records.dart",
       "schema": "DatasetRecords",
       "tags": [
         "acknowledged"
@@ -857,12 +836,52 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "DeleteDatasetRecordsInSchema",
-      "file": "",
+      "file": "lib/src/models/observability/delete_dataset_records_in_schema.dart",
       "schema": "DeleteDatasetRecordsInSchema",
       "tags": [
         "acknowledged"
       ],
       "note": "Internal platform API \u2014 datasets"
+    },
+    "DeploymentDetailResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeploymentDetailResponse",
+      "file": "lib/src/models/workflows/deployment_detail_response.dart",
+      "schema": "DeploymentDetailResponse",
+      "tags": []
+    },
+    "DeploymentListResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeploymentListResponse",
+      "file": "lib/src/models/workflows/deployment_list_response.dart",
+      "schema": "DeploymentListResponse",
+      "tags": []
+    },
+    "DeploymentResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeploymentResponse",
+      "file": "lib/src/models/workflows/deployment_response.dart",
+      "schema": "DeploymentResponse",
+      "tags": []
+    },
+    "DeploymentWorkerResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeploymentWorkerResponse",
+      "file": "lib/src/models/workflows/deployment_worker_response.dart",
+      "schema": "DeploymentWorkerResponse",
+      "tags": []
+    },
+    "DocumentURLChunk": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "DocumentUrlContentPart",
+      "file": "lib/src/models/content/content_part.dart",
+      "schema": "DocumentURLChunk",
+      "parent": "ContentPart"
     },
     "EmbeddedResource": {
       "spec": "main",
@@ -875,6 +894,56 @@
       ],
       "note": "Internal MCP protocol type"
     },
+    "EmbeddingRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EmbeddingRequest",
+      "file": "lib/src/models/embeddings/embedding_request.dart",
+      "schema": "EmbeddingRequest",
+      "tags": [
+        "critical"
+      ]
+    },
+    "EmbeddingResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EmbeddingResponse",
+      "file": "lib/src/models/embeddings/embedding_response.dart",
+      "schema": "EmbeddingResponse",
+      "tags": []
+    },
+    "EncodedPayloadOptions": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "EncodedPayloadOptions",
+      "file": "lib/src/models/workflows/encoded_payload_options.dart",
+      "schema": "EncodedPayloadOptions",
+      "tags": []
+    },
+    "EventProgressStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "EventProgressStatus",
+      "file": "lib/src/models/workflows/event_progress_status.dart",
+      "schema": "EventProgressStatus",
+      "tags": []
+    },
+    "EventSource": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "EventSource",
+      "file": "lib/src/models/workflows/event_source.dart",
+      "schema": "EventSource",
+      "tags": []
+    },
+    "EventType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "EventType",
+      "file": "lib/src/models/workflows/event_type.dart",
+      "schema": "EventType",
+      "tags": []
+    },
     "ExecutionConfig": {
       "spec": "main",
       "kind": "skip",
@@ -886,11 +955,19 @@
       ],
       "note": "Internal platform API"
     },
+    "Failure": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Failure",
+      "file": "lib/src/models/workflows/failure.dart",
+      "schema": "Failure",
+      "tags": []
+    },
     "FeedResult_ChatCompletionEventPreview_": {
       "spec": "main",
       "kind": "skip",
       "dart_class": "FeedResult_ChatCompletionEventPreview_",
-      "file": "",
+      "file": "lib/src/models/observability/feed_result.dart",
       "schema": "FeedResult_ChatCompletionEventPreview_",
       "tags": [
         "acknowledged"
@@ -901,7 +978,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "FieldGroup",
-      "file": "",
+      "file": "lib/src/models/observability/field_group.dart",
       "schema": "FieldGroup",
       "tags": [
         "acknowledged"
@@ -912,7 +989,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "FieldOptionCountItem",
-      "file": "",
+      "file": "lib/src/models/observability/field_option_count_item.dart",
       "schema": "FieldOptionCountItem",
       "tags": [
         "acknowledged"
@@ -923,7 +1000,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "FieldOptionCounts",
-      "file": "",
+      "file": "lib/src/models/observability/field_option_counts.dart",
       "schema": "FieldOptionCounts",
       "tags": [
         "acknowledged"
@@ -934,18 +1011,33 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "FieldOptionCountsInSchema",
-      "file": "",
+      "file": "lib/src/models/observability/field_option_counts_in_schema.dart",
       "schema": "FieldOptionCountsInSchema",
       "tags": [
         "acknowledged"
       ],
       "note": "Internal platform API \u2014 filtering"
     },
+    "FileChunk": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "FileContentPart",
+      "file": "lib/src/models/content/content_part.dart",
+      "schema": "FileChunk",
+      "parent": "ContentPart"
+    },
+    "FileVisibility": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "FileVisibility",
+      "file": "lib/src/models/files/file_visibility.dart",
+      "schema": "FileVisibility"
+    },
     "FilterCondition": {
       "spec": "main",
       "kind": "skip",
       "dart_class": "FilterCondition",
-      "file": "",
+      "file": "lib/src/models/observability/filter_condition.dart",
       "schema": "FilterCondition",
       "tags": [
         "acknowledged"
@@ -956,7 +1048,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "FilterGroup",
-      "file": "",
+      "file": "lib/src/models/observability/filter_group.dart",
       "schema": "FilterGroup",
       "tags": [
         "acknowledged"
@@ -967,18 +1059,34 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "FilterPayload",
-      "file": "",
+      "file": "lib/src/models/observability/filter_payload.dart",
       "schema": "FilterPayload",
       "tags": [
         "acknowledged"
       ],
       "note": "Internal platform API \u2014 filtering"
     },
+    "FunctionName": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ToolChoiceFunction",
+      "file": "lib/src/models/tools/tool_choice.dart",
+      "schema": "FunctionName",
+      "parent": "ToolChoice"
+    },
+    "FunctionTool": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "FunctionTool",
+      "file": "lib/src/models/tools/tool.dart",
+      "schema": "FunctionTool",
+      "parent": "Tool"
+    },
     "GetChatCompletionEventIdsInSchema": {
       "spec": "main",
       "kind": "skip",
       "dart_class": "GetChatCompletionEventIdsInSchema",
-      "file": "",
+      "file": "lib/src/models/observability/get_chat_completion_event_ids_in_schema.dart",
       "schema": "GetChatCompletionEventIdsInSchema",
       "tags": [
         "acknowledged"
@@ -989,12 +1097,23 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "GetChatCompletionEventsInSchema",
-      "file": "",
+      "file": "lib/src/models/observability/get_chat_completion_events_in_schema.dart",
       "schema": "GetChatCompletionEventsInSchema",
       "tags": [
         "acknowledged"
       ],
       "note": "Internal platform observability"
+    },
+    "HTTPValidationError": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "HTTPValidationError",
+      "file": "",
+      "schema": "HTTPValidationError",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "HTTP validation error, not domain model"
     },
     "ImageContent": {
       "spec": "main",
@@ -1007,11 +1126,70 @@
       ],
       "note": "Internal MCP protocol type"
     },
+    "ImageURLChunk": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ImageUrlContentPart",
+      "file": "lib/src/models/content/content_part.dart",
+      "schema": "ImageURLChunk",
+      "parent": "ContentPart",
+      "excluded_properties": [
+        "image_url"
+      ]
+    },
+    "JSONPatchAdd": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "JSONPatchAdd",
+      "file": "lib/src/models/workflows/json_patch_add.dart",
+      "schema": "JSONPatchAdd",
+      "tags": []
+    },
+    "JSONPatchAppend": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "JSONPatchAppend",
+      "file": "lib/src/models/workflows/json_patch_append.dart",
+      "schema": "JSONPatchAppend",
+      "tags": []
+    },
+    "JSONPatchPayloadResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "JSONPatchPayloadResponse",
+      "file": "lib/src/models/workflows/json_patch_payload_response.dart",
+      "schema": "JSONPatchPayloadResponse",
+      "tags": []
+    },
+    "JSONPatchRemove": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "JSONPatchRemove",
+      "file": "lib/src/models/workflows/json_patch_remove.dart",
+      "schema": "JSONPatchRemove",
+      "tags": []
+    },
+    "JSONPatchReplace": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "JSONPatchReplace",
+      "file": "lib/src/models/workflows/json_patch_replace.dart",
+      "schema": "JSONPatchReplace",
+      "tags": []
+    },
+    "JSONPayloadResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "JSONPayloadResponse",
+      "file": "lib/src/models/workflows/json_payload_response.dart",
+      "schema": "JSONPayloadResponse",
+      "tags": []
+    },
     "JudgeClassificationOutput": {
       "spec": "main",
       "kind": "skip",
       "dart_class": "JudgeClassificationOutput",
-      "file": "",
+      "file": "lib/src/models/observability/judge_classification_output.dart",
       "schema": "JudgeClassificationOutput",
       "tags": [
         "acknowledged"
@@ -1022,18 +1200,26 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "JudgeClassificationOutputOption",
-      "file": "",
+      "file": "lib/src/models/observability/judge_classification_output_option.dart",
       "schema": "JudgeClassificationOutputOption",
       "tags": [
         "acknowledged"
       ],
       "note": "Internal platform API \u2014 judges"
     },
+    "JudgeConversationRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "JudgeConversationRequest",
+      "file": "lib/src/models/observability/judge_conversation_request.dart",
+      "schema": "JudgeConversationRequest",
+      "tags": []
+    },
     "JudgeOutput": {
       "spec": "main",
       "kind": "skip",
       "dart_class": "JudgeOutput",
-      "file": "",
+      "file": "lib/src/models/observability/judge_output.dart",
       "schema": "JudgeOutput",
       "tags": [
         "acknowledged"
@@ -1044,7 +1230,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "JudgeOutputType",
-      "file": "",
+      "file": "lib/src/models/observability/judge_output_type.dart",
       "schema": "JudgeOutputType",
       "tags": [
         "acknowledged"
@@ -1055,7 +1241,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "JudgePreview",
-      "file": "",
+      "file": "lib/src/models/observability/judge_preview.dart",
       "schema": "JudgePreview",
       "tags": [
         "acknowledged"
@@ -1066,7 +1252,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "JudgePreviews",
-      "file": "",
+      "file": "lib/src/models/observability/judge_previews.dart",
       "schema": "JudgePreviews",
       "tags": [
         "acknowledged"
@@ -1077,12 +1263,20 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "JudgeRegressionOutput",
-      "file": "",
+      "file": "lib/src/models/observability/judge_regression_output.dart",
       "schema": "JudgeRegressionOutput",
       "tags": [
         "acknowledged"
       ],
       "note": "Internal platform API \u2014 judges"
+    },
+    "ListWorkflowEventResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ListWorkflowEventResponse",
+      "file": "lib/src/models/workflows/list_workflow_event_response.dart",
+      "schema": "ListWorkflowEventResponse",
+      "tags": []
     },
     "MCPResultMetadata": {
       "spec": "main",
@@ -1150,6 +1344,79 @@
       ],
       "note": "Internal platform API"
     },
+    "ModelCard": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Model",
+      "file": "lib/src/models/models/model.dart",
+      "schema": "BaseModelCard",
+      "tags": [],
+      "excluded_properties": [
+        "deprecation",
+        "deprecation_replacement_model"
+      ]
+    },
+    "ModerationLLMAction": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ModerationLLMAction",
+      "file": "lib/src/models/moderations/guardrail_config.dart",
+      "schema": "ModerationLLMAction"
+    },
+    "ModerationLLMV2CategoryThresholds": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ModerationLLMV2CategoryThresholds",
+      "file": "lib/src/models/moderations/guardrail_config.dart",
+      "schema": "ModerationLLMV2CategoryThresholds"
+    },
+    "ModerationLLMV2Config": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ModerationLLMV2Config",
+      "file": "lib/src/models/moderations/guardrail_config.dart",
+      "schema": "ModerationLLMV2Config"
+    },
+    "NetworkEncodedInput": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "NetworkEncodedInput",
+      "file": "lib/src/models/workflows/network_encoded_input.dart",
+      "schema": "NetworkEncodedInput",
+      "tags": []
+    },
+    "OAuth2TokenAuth": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "OAuth2TokenAuth",
+      "file": "lib/src/models/tools/connector_auth.dart",
+      "schema": "OAuth2TokenAuth",
+      "parent": "ConnectorAuth"
+    },
+    "ObservabilityError": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ObservabilityError",
+      "file": "lib/src/models/observability/observability_error.dart",
+      "schema": "ObservabilityError",
+      "tags": []
+    },
+    "ObservabilityErrorCode": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ObservabilityErrorCode",
+      "file": "lib/src/models/observability/observability_error_code.dart",
+      "schema": "ObservabilityErrorCode",
+      "tags": []
+    },
+    "ObservabilityErrorDetail": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ObservabilityErrorDetail",
+      "file": "lib/src/models/observability/observability_error_detail.dart",
+      "schema": "ObservabilityErrorDetail",
+      "tags": []
+    },
     "OutputContentChunks": {
       "spec": "main",
       "kind": "skip",
@@ -1176,7 +1443,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "PaginatedResult_CampaignPreview_",
-      "file": "",
+      "file": "lib/src/models/observability/paginated_result.dart",
       "schema": "PaginatedResult_CampaignPreview_",
       "tags": [
         "acknowledged"
@@ -1187,7 +1454,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "PaginatedResult_ChatCompletionEventPreview_",
-      "file": "",
+      "file": "lib/src/models/observability/paginated_result.dart",
       "schema": "PaginatedResult_ChatCompletionEventPreview_",
       "tags": [
         "acknowledged"
@@ -1198,7 +1465,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "PaginatedResult_DatasetImportTask_",
-      "file": "",
+      "file": "lib/src/models/observability/paginated_result.dart",
       "schema": "PaginatedResult_DatasetImportTask_",
       "tags": [
         "acknowledged"
@@ -1209,7 +1476,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "PaginatedResult_DatasetPreview_",
-      "file": "",
+      "file": "lib/src/models/observability/paginated_result.dart",
       "schema": "PaginatedResult_DatasetPreview_",
       "tags": [
         "acknowledged"
@@ -1220,7 +1487,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "PaginatedResult_DatasetRecord_",
-      "file": "",
+      "file": "lib/src/models/observability/paginated_result.dart",
       "schema": "PaginatedResult_DatasetRecord_",
       "tags": [
         "acknowledged"
@@ -1231,7 +1498,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "PaginatedResult_JudgePreview_",
-      "file": "",
+      "file": "lib/src/models/observability/paginated_result.dart",
       "schema": "PaginatedResult_JudgePreview_",
       "tags": [
         "acknowledged"
@@ -1242,7 +1509,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "PaginationInfo",
-      "file": "",
+      "file": "lib/src/models/observability/pagination_info.dart",
       "schema": "PaginationInfo",
       "tags": [
         "acknowledged"
@@ -1264,7 +1531,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "PatchDatasetInSchema",
-      "file": "",
+      "file": "lib/src/models/observability/patch_dataset_in_schema.dart",
       "schema": "PatchDatasetInSchema",
       "tags": [
         "acknowledged"
@@ -1275,7 +1542,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "PostCampaignInSchema",
-      "file": "",
+      "file": "lib/src/models/observability/post_campaign_in_schema.dart",
       "schema": "PostCampaignInSchema",
       "tags": [
         "acknowledged"
@@ -1286,7 +1553,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "PostChatCompletionEventJudgingInSchema",
-      "file": "",
+      "file": "lib/src/models/observability/post_chat_completion_event_judging_in_schema.dart",
       "schema": "PostChatCompletionEventJudgingInSchema",
       "tags": [
         "acknowledged"
@@ -1297,7 +1564,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "PostDatasetImportFromCampaignInSchema",
-      "file": "",
+      "file": "lib/src/models/observability/post_dataset_import_from_campaign_in_schema.dart",
       "schema": "PostDatasetImportFromCampaignInSchema",
       "tags": [
         "acknowledged"
@@ -1308,7 +1575,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "PostDatasetImportFromDatasetInSchema",
-      "file": "",
+      "file": "lib/src/models/observability/post_dataset_import_from_dataset_in_schema.dart",
       "schema": "PostDatasetImportFromDatasetInSchema",
       "tags": [
         "acknowledged"
@@ -1319,7 +1586,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "PostDatasetImportFromExplorerInSchema",
-      "file": "",
+      "file": "lib/src/models/observability/post_dataset_import_from_explorer_in_schema.dart",
       "schema": "PostDatasetImportFromExplorerInSchema",
       "tags": [
         "acknowledged"
@@ -1330,7 +1597,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "PostDatasetImportFromFileInSchema",
-      "file": "",
+      "file": "lib/src/models/observability/post_dataset_import_from_file_in_schema.dart",
       "schema": "PostDatasetImportFromFileInSchema",
       "tags": [
         "acknowledged"
@@ -1341,7 +1608,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "PostDatasetImportFromPlaygroundInSchema",
-      "file": "",
+      "file": "lib/src/models/observability/post_dataset_import_from_playground_in_schema.dart",
       "schema": "PostDatasetImportFromPlaygroundInSchema",
       "tags": [
         "acknowledged"
@@ -1352,7 +1619,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "PostDatasetInSchema",
-      "file": "",
+      "file": "lib/src/models/observability/post_dataset_in_schema.dart",
       "schema": "PostDatasetInSchema",
       "tags": [
         "acknowledged"
@@ -1363,7 +1630,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "PostDatasetRecordInSchema",
-      "file": "",
+      "file": "lib/src/models/observability/post_dataset_record_in_schema.dart",
       "schema": "PostDatasetRecordInSchema",
       "tags": [
         "acknowledged"
@@ -1374,7 +1641,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "PostDatasetRecordJudgingInSchema",
-      "file": "",
+      "file": "lib/src/models/observability/post_dataset_record_judging_in_schema.dart",
       "schema": "PostDatasetRecordJudgingInSchema",
       "tags": [
         "acknowledged"
@@ -1385,18 +1652,26 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "PostJudgeInSchema",
-      "file": "",
+      "file": "lib/src/models/observability/post_judge_in_schema.dart",
       "schema": "PostJudgeInSchema",
       "tags": [
         "acknowledged"
       ],
       "note": "Internal platform API \u2014 judges"
     },
+    "PromptTokensDetails": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PromptTokensDetails",
+      "file": "lib/src/models/metadata/prompt_tokens_details.dart",
+      "schema": "PromptTokensDetails",
+      "tags": []
+    },
     "PutDatasetRecordPayloadInSchema": {
       "spec": "main",
       "kind": "skip",
       "dart_class": "PutDatasetRecordPayloadInSchema",
-      "file": "",
+      "file": "lib/src/models/observability/put_dataset_record_payload_in_schema.dart",
       "schema": "PutDatasetRecordPayloadInSchema",
       "tags": [
         "acknowledged"
@@ -1407,7 +1682,7 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "PutDatasetRecordPropertiesInSchema",
-      "file": "",
+      "file": "lib/src/models/observability/put_dataset_record_properties_in_schema.dart",
       "schema": "PutDatasetRecordPropertiesInSchema",
       "tags": [
         "acknowledged"
@@ -1418,12 +1693,64 @@
       "spec": "main",
       "kind": "skip",
       "dart_class": "PutJudgeInSchema",
-      "file": "",
+      "file": "lib/src/models/observability/put_judge_in_schema.dart",
       "schema": "PutJudgeInSchema",
       "tags": [
         "acknowledged"
       ],
       "note": "Internal platform API \u2014 judges"
+    },
+    "QueryDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "QueryDefinition",
+      "file": "lib/src/models/workflows/query_definition.dart",
+      "schema": "QueryDefinition",
+      "tags": []
+    },
+    "QueryInvocationBody": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "QueryInvocationBody",
+      "file": "lib/src/models/workflows/query_invocation_body.dart",
+      "schema": "QueryInvocationBody",
+      "tags": []
+    },
+    "QueryWorkflowResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "QueryWorkflowResponse",
+      "file": "lib/src/models/workflows/query_workflow_response.dart",
+      "schema": "QueryWorkflowResponse",
+      "tags": []
+    },
+    "ReasoningEffort": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ReasoningEffort",
+      "file": "lib/src/models/metadata/reasoning_effort.dart",
+      "schema": null,
+      "enum_values": [
+        "high",
+        "none"
+      ],
+      "note": "Inline enum used by ChatCompletionRequest and AgentsCompletionRequest"
+    },
+    "ReferenceChunk": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ReferenceContentPart",
+      "file": "lib/src/models/content/content_part.dart",
+      "schema": "ReferenceChunk",
+      "parent": "ContentPart"
+    },
+    "ResetInvocationBody": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResetInvocationBody",
+      "file": "lib/src/models/workflows/reset_invocation_body.dart",
+      "schema": "ResetInvocationBody",
+      "tags": []
     },
     "ResourceLink": {
       "spec": "main",
@@ -1447,118 +1774,120 @@
       ],
       "note": "Internal MCP protocol type"
     },
-    "TextContent": {
+    "ResponseFormat:ResponseFormatJsonObject": {
       "spec": "main",
-      "kind": "skip",
-      "dart_class": "TextContent",
-      "file": "",
-      "schema": "TextContent",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Internal MCP protocol type"
+      "kind": "extension",
+      "dart_class": "ResponseFormatJsonObject",
+      "file": "lib/src/models/metadata/response_format.dart",
+      "schema": null,
+      "parent": "ResponseFormat",
+      "note": null
     },
-    "AudioContent": {
+    "ResponseFormat:ResponseFormatJsonSchema": {
       "spec": "main",
-      "kind": "skip",
-      "dart_class": "AudioContent",
-      "file": "",
-      "schema": "AudioContent",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Internal MCP protocol type"
+      "kind": "extension",
+      "dart_class": "ResponseFormatJsonSchema",
+      "file": "lib/src/models/metadata/response_format.dart",
+      "schema": null,
+      "parent": "ResponseFormat",
+      "note": null
     },
-    "TextResourceContents": {
+    "ResponseFormat:ResponseFormatText": {
       "spec": "main",
-      "kind": "skip",
-      "dart_class": "TextResourceContents",
-      "file": "",
-      "schema": "TextResourceContents",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Internal MCP protocol type"
+      "kind": "extension",
+      "dart_class": "ResponseFormatText",
+      "file": "lib/src/models/metadata/response_format.dart",
+      "schema": null,
+      "parent": "ResponseFormat",
+      "note": null
     },
-    "ValidationError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": "ValidationError",
-      "file": "",
-      "schema": "ValidationError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "HTTP validation error, not domain model"
-    },
-    "HTTPValidationError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": "HTTPValidationError",
-      "file": "",
-      "schema": "HTTPValidationError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "HTTP validation error, not domain model"
-    },
-    "integrations__schemas__api__tool__Tool": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": "integrations__schemas__api__tool__Tool",
-      "file": "",
-      "schema": "integrations__schemas__api__tool__Tool",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Internal integration schema"
-    },
-    "integrations__schemas__turbine__ToolLocale": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": "integrations__schemas__turbine__ToolLocale",
-      "file": "",
-      "schema": "integrations__schemas__turbine__ToolLocale",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Internal integration schema"
-    },
-    "AgentsCompletionRequest": {
+    "ScalarMetric": {
       "spec": "main",
       "kind": "object",
-      "dart_class": "AgentCompletionRequest",
-      "file": "lib/src/models/agents/agent_completion_request.dart",
-      "schema": "AgentsCompletionRequest",
+      "dart_class": "ScalarMetric",
+      "file": "lib/src/models/workflows/scalar_metric.dart",
+      "schema": "ScalarMetric",
       "tags": []
     },
-    "UsageInfo": {
+    "ScheduleCalendar": {
       "spec": "main",
       "kind": "object",
-      "dart_class": "UsageInfo",
-      "file": "lib/src/models/metadata/usage_info.dart",
-      "schema": "UsageInfo",
+      "dart_class": "ScheduleCalendar",
+      "file": "lib/src/models/workflows/schedule_calendar.dart",
+      "schema": "ScheduleCalendar",
       "tags": []
     },
-    "PromptTokensDetails": {
+    "ScheduleDefinition": {
       "spec": "main",
       "kind": "object",
-      "dart_class": "PromptTokensDetails",
-      "file": "lib/src/models/metadata/prompt_tokens_details.dart",
-      "schema": "PromptTokensDetails",
+      "dart_class": "ScheduleDefinition",
+      "file": "lib/src/models/workflows/schedule_definition.dart",
+      "schema": "ScheduleDefinition",
       "tags": []
     },
-    "ReasoningEffort": {
+    "ScheduleDefinitionOutput": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ScheduleDefinitionOutput",
+      "file": "lib/src/models/workflows/schedule_definition_output.dart",
+      "schema": "ScheduleDefinitionOutput",
+      "tags": []
+    },
+    "ScheduleInterval": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ScheduleInterval",
+      "file": "lib/src/models/workflows/schedule_interval.dart",
+      "schema": "ScheduleInterval",
+      "tags": []
+    },
+    "ScheduleOverlapPolicy": {
       "spec": "main",
       "kind": "enum",
-      "dart_class": "ReasoningEffort",
-      "file": "lib/src/models/metadata/reasoning_effort.dart",
-      "schema": null,
-      "enum_values": [
-        "high",
-        "none"
-      ],
-      "note": "Inline enum used by ChatCompletionRequest and AgentsCompletionRequest"
+      "dart_class": "ScheduleOverlapPolicy",
+      "file": "lib/src/models/workflows/schedule_overlap_policy.dart",
+      "schema": "ScheduleOverlapPolicy",
+      "tags": []
+    },
+    "SchedulePolicy": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SchedulePolicy",
+      "file": "lib/src/models/workflows/schedule_policy.dart",
+      "schema": "SchedulePolicy",
+      "tags": []
+    },
+    "ScheduleRange": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ScheduleRange",
+      "file": "lib/src/models/workflows/schedule_range.dart",
+      "schema": "ScheduleRange",
+      "tags": []
+    },
+    "SignalDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SignalDefinition",
+      "file": "lib/src/models/workflows/signal_definition.dart",
+      "schema": "SignalDefinition",
+      "tags": []
+    },
+    "SignalInvocationBody": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SignalInvocationBody",
+      "file": "lib/src/models/workflows/signal_invocation_body.dart",
+      "schema": "SignalInvocationBody",
+      "tags": []
+    },
+    "SignalWorkflowResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SignalWorkflowResponse",
+      "file": "lib/src/models/workflows/signal_workflow_response.dart",
+      "schema": "SignalWorkflowResponse",
+      "tags": []
     },
     "SpeechOutputFormat": {
       "spec": "main",
@@ -1583,20 +1912,6 @@
       "schema": "SpeechResponse",
       "tags": []
     },
-    "SpeechStreamEvent": {
-      "spec": "main",
-      "kind": "sealed_parent",
-      "dart_class": "SpeechStreamEvent",
-      "file": "lib/src/models/audio/speech_stream_event.dart",
-      "schema": null,
-      "discriminator": {
-        "field": "type",
-        "mapping": {
-          "SpeechStreamAudioDelta": "speech.audio.delta",
-          "SpeechStreamDone": "speech.audio.done"
-        }
-      }
-    },
     "SpeechStreamAudioDelta": {
       "spec": "main",
       "kind": "sealed_variant",
@@ -1613,6 +1928,20 @@
       "schema": "SpeechStreamDone",
       "parent": "SpeechStreamEvent"
     },
+    "SpeechStreamEvent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "SpeechStreamEvent",
+      "file": "lib/src/models/audio/speech_stream_event.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "SpeechStreamAudioDelta": "speech.audio.delta",
+          "SpeechStreamDone": "speech.audio.done"
+        }
+      }
+    },
     "SpeechStreamEvents": {
       "spec": "main",
       "kind": "skip",
@@ -1624,12 +1953,309 @@
       ],
       "note": "SSE transport wrapper; data variants modeled as SpeechStreamEvent sealed class"
     },
-    "VoiceResponse": {
+    "StreamEventSsePayload": {
       "spec": "main",
       "kind": "object",
-      "dart_class": "VoiceResponse",
-      "file": "lib/src/models/audio/voice_response.dart",
-      "schema": "VoiceResponse",
+      "dart_class": "StreamEventSsePayload",
+      "file": "lib/src/models/workflows/stream_event_sse_payload.dart",
+      "schema": "StreamEventSsePayload",
+      "tags": []
+    },
+    "StreamEventWorkflowContext": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "StreamEventWorkflowContext",
+      "file": "lib/src/models/workflows/stream_event_workflow_context.dart",
+      "schema": "StreamEventWorkflowContext",
+      "tags": []
+    },
+    "SystemMessage": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SystemMessage",
+      "file": "lib/src/models/chat/chat_message.dart",
+      "schema": "SystemMessage",
+      "parent": "ChatMessage"
+    },
+    "TempoGetTraceResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TempoGetTraceResponse",
+      "file": "lib/src/models/workflows/tempo_get_trace_response.dart",
+      "schema": "TempoGetTraceResponse",
+      "tags": []
+    },
+    "TempoTraceAttribute": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TempoTraceAttribute",
+      "file": "lib/src/models/workflows/tempo_trace_attribute.dart",
+      "schema": "TempoTraceAttribute",
+      "tags": []
+    },
+    "TempoTraceAttributeBoolValue": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TempoTraceAttributeBoolValue",
+      "file": "lib/src/models/workflows/tempo_trace_attribute_bool_value.dart",
+      "schema": "TempoTraceAttributeBoolValue",
+      "tags": []
+    },
+    "TempoTraceAttributeIntValue": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TempoTraceAttributeIntValue",
+      "file": "lib/src/models/workflows/tempo_trace_attribute_int_value.dart",
+      "schema": "TempoTraceAttributeIntValue",
+      "tags": []
+    },
+    "TempoTraceAttributeStringValue": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TempoTraceAttributeStringValue",
+      "file": "lib/src/models/workflows/tempo_trace_attribute_string_value.dart",
+      "schema": "TempoTraceAttributeStringValue",
+      "tags": []
+    },
+    "TempoTraceBatch": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TempoTraceBatch",
+      "file": "lib/src/models/workflows/tempo_trace_batch.dart",
+      "schema": "TempoTraceBatch",
+      "tags": []
+    },
+    "TempoTraceEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TempoTraceEvent",
+      "file": "lib/src/models/workflows/tempo_trace_event.dart",
+      "schema": "TempoTraceEvent",
+      "tags": []
+    },
+    "TempoTraceResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TempoTraceResource",
+      "file": "lib/src/models/workflows/tempo_trace_resource.dart",
+      "schema": "TempoTraceResource",
+      "tags": []
+    },
+    "TempoTraceScope": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TempoTraceScope",
+      "file": "lib/src/models/workflows/tempo_trace_scope.dart",
+      "schema": "TempoTraceScope",
+      "tags": []
+    },
+    "TempoTraceScopeKind": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "TempoTraceScopeKind",
+      "file": "lib/src/models/workflows/tempo_trace_scope_kind.dart",
+      "schema": "TempoTraceScopeKind",
+      "tags": []
+    },
+    "TempoTraceScopeSpan": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TempoTraceScopeSpan",
+      "file": "lib/src/models/workflows/tempo_trace_scope_span.dart",
+      "schema": "TempoTraceScopeSpan",
+      "tags": []
+    },
+    "TempoTraceSpan": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TempoTraceSpan",
+      "file": "lib/src/models/workflows/tempo_trace_span.dart",
+      "schema": "TempoTraceSpan",
+      "tags": []
+    },
+    "TextChunk": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "TextContentPart",
+      "file": "lib/src/models/content/content_part.dart",
+      "schema": "TextChunk",
+      "parent": "ContentPart"
+    },
+    "TextContent": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "TextContent",
+      "file": "",
+      "schema": "TextContent",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal MCP protocol type"
+    },
+    "TextResourceContents": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "TextResourceContents",
+      "file": "",
+      "schema": "TextResourceContents",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal MCP protocol type"
+    },
+    "ThinkChunk": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ThinkContentPart",
+      "file": "lib/src/models/content/content_part.dart",
+      "schema": "ThinkChunk",
+      "parent": "ContentPart"
+    },
+    "TimeSeriesMetric": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TimeSeriesMetric",
+      "file": "lib/src/models/workflows/time_series_metric.dart",
+      "schema": "TimeSeriesMetric",
+      "tags": []
+    },
+    "Tool": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "Tool",
+      "file": "lib/src/models/tools/tool.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "FunctionTool": "function",
+          "CustomConnector": "connector"
+        }
+      },
+      "note": null
+    },
+    "ToolChoice": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ToolChoice",
+      "file": "lib/src/models/tools/tool_choice.dart",
+      "schema": null,
+      "discriminator": {
+        "field": null,
+        "mapping": {
+          "FunctionName": "function"
+        }
+      },
+      "note": "Uses string values or object for discrimination"
+    },
+    "ToolChoice:ToolChoiceAny": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ToolChoiceAny",
+      "file": "lib/src/models/tools/tool_choice.dart",
+      "schema": null,
+      "parent": "ToolChoice",
+      "note": "Uses string values or object for discrimination"
+    },
+    "ToolChoice:ToolChoiceAuto": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ToolChoiceAuto",
+      "file": "lib/src/models/tools/tool_choice.dart",
+      "schema": null,
+      "parent": "ToolChoice",
+      "note": "Uses string values or object for discrimination"
+    },
+    "ToolChoice:ToolChoiceNone": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "ToolChoiceNone",
+      "file": "lib/src/models/tools/tool_choice.dart",
+      "schema": null,
+      "parent": "ToolChoice",
+      "note": "Uses string values or object for discrimination"
+    },
+    "ToolFileChunk": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ToolFileContentPart",
+      "file": "lib/src/models/content/content_part.dart",
+      "schema": "ToolFileChunk",
+      "parent": "ContentPart"
+    },
+    "ToolMessage": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ToolMessage",
+      "file": "lib/src/models/chat/chat_message.dart",
+      "schema": "ToolMessage",
+      "parent": "ChatMessage"
+    },
+    "ToolReferenceChunk": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ToolReferenceContentPart",
+      "file": "lib/src/models/content/content_part.dart",
+      "schema": "ToolReferenceChunk",
+      "parent": "ContentPart"
+    },
+    "UpdateDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateDefinition",
+      "file": "lib/src/models/workflows/update_definition.dart",
+      "schema": "UpdateDefinition",
+      "tags": []
+    },
+    "UpdateInvocationBody": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateInvocationBody",
+      "file": "lib/src/models/workflows/update_invocation_body.dart",
+      "schema": "UpdateInvocationBody",
+      "tags": []
+    },
+    "UpdateWorkflowResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateWorkflowResponse",
+      "file": "lib/src/models/workflows/update_workflow_response.dart",
+      "schema": "UpdateWorkflowResponse",
+      "tags": []
+    },
+    "UsageInfo": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UsageInfo",
+      "file": "lib/src/models/metadata/usage_info.dart",
+      "schema": "UsageInfo",
+      "tags": []
+    },
+    "UserMessage": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "UserMessage",
+      "file": "lib/src/models/chat/chat_message.dart",
+      "schema": "UserMessage",
+      "parent": "ChatMessage"
+    },
+    "ValidationError": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ValidationError",
+      "file": "",
+      "schema": "ValidationError",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "HTTP validation error, not domain model"
+    },
+    "VoiceCreateRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VoiceCreateRequest",
+      "file": "lib/src/models/audio/voice_create_request.dart",
+      "schema": "VoiceCreateRequest",
       "tags": []
     },
     "VoiceListResponse": {
@@ -1640,12 +2266,12 @@
       "schema": "VoiceListResponse",
       "tags": []
     },
-    "VoiceCreateRequest": {
+    "VoiceResponse": {
       "spec": "main",
       "kind": "object",
-      "dart_class": "VoiceCreateRequest",
-      "file": "lib/src/models/audio/voice_create_request.dart",
-      "schema": "VoiceCreateRequest",
+      "dart_class": "VoiceResponse",
+      "file": "lib/src/models/audio/voice_response.dart",
+      "schema": "VoiceResponse",
       "tags": []
     },
     "VoiceUpdateRequest": {
@@ -1655,6 +2281,423 @@
       "file": "lib/src/models/audio/voice_update_request.dart",
       "schema": "VoiceUpdateRequest",
       "tags": []
+    },
+    "WorkerInfo": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkerInfo",
+      "file": "lib/src/models/workflows/worker_info.dart",
+      "schema": "WorkerInfo",
+      "tags": []
+    },
+    "Workflow": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Workflow",
+      "file": "lib/src/models/workflows/workflow.dart",
+      "schema": "Workflow",
+      "tags": []
+    },
+    "WorkflowArchiveResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowArchiveResponse",
+      "file": "lib/src/models/workflows/workflow_archive_response.dart",
+      "schema": "WorkflowArchiveResponse",
+      "tags": []
+    },
+    "WorkflowBasicDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowBasicDefinition",
+      "file": "lib/src/models/workflows/workflow_basic_definition.dart",
+      "schema": "WorkflowBasicDefinition",
+      "tags": []
+    },
+    "WorkflowCodeDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowCodeDefinition",
+      "file": "lib/src/models/workflows/workflow_code_definition.dart",
+      "schema": "WorkflowCodeDefinition",
+      "tags": []
+    },
+    "WorkflowEventType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "WorkflowEventType",
+      "file": "lib/src/models/workflows/workflow_event_type.dart",
+      "schema": "WorkflowEventType",
+      "tags": []
+    },
+    "WorkflowExecutionCanceledAttributes": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowExecutionCanceledAttributes",
+      "file": "lib/src/models/workflows/workflow_execution_canceled_attributes.dart",
+      "schema": "WorkflowExecutionCanceledAttributes",
+      "tags": []
+    },
+    "WorkflowExecutionCanceledResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowExecutionCanceledResponse",
+      "file": "lib/src/models/workflows/workflow_execution_canceled_response.dart",
+      "schema": "WorkflowExecutionCanceledResponse",
+      "tags": []
+    },
+    "WorkflowExecutionCompletedAttributesResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowExecutionCompletedAttributesResponse",
+      "file": "lib/src/models/workflows/workflow_execution_completed_attributes_response.dart",
+      "schema": "WorkflowExecutionCompletedAttributesResponse",
+      "tags": []
+    },
+    "WorkflowExecutionCompletedResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowExecutionCompletedResponse",
+      "file": "lib/src/models/workflows/workflow_execution_completed_response.dart",
+      "schema": "WorkflowExecutionCompletedResponse",
+      "tags": []
+    },
+    "WorkflowExecutionContinuedAsNewAttributesResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowExecutionContinuedAsNewAttributesResponse",
+      "file": "lib/src/models/workflows/workflow_execution_continued_as_new_attributes_response.dart",
+      "schema": "WorkflowExecutionContinuedAsNewAttributesResponse",
+      "tags": []
+    },
+    "WorkflowExecutionContinuedAsNewResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowExecutionContinuedAsNewResponse",
+      "file": "lib/src/models/workflows/workflow_execution_continued_as_new_response.dart",
+      "schema": "WorkflowExecutionContinuedAsNewResponse",
+      "tags": []
+    },
+    "WorkflowExecutionFailedAttributes": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowExecutionFailedAttributes",
+      "file": "lib/src/models/workflows/workflow_execution_failed_attributes.dart",
+      "schema": "WorkflowExecutionFailedAttributes",
+      "tags": []
+    },
+    "WorkflowExecutionFailedResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowExecutionFailedResponse",
+      "file": "lib/src/models/workflows/workflow_execution_failed_response.dart",
+      "schema": "WorkflowExecutionFailedResponse",
+      "tags": []
+    },
+    "WorkflowExecutionListResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowExecutionListResponse",
+      "file": "lib/src/models/workflows/workflow_execution_list_response.dart",
+      "schema": "WorkflowExecutionListResponse",
+      "tags": []
+    },
+    "WorkflowExecutionProgressTraceEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowExecutionProgressTraceEvent",
+      "file": "lib/src/models/workflows/workflow_execution_progress_trace_event.dart",
+      "schema": "WorkflowExecutionProgressTraceEvent",
+      "tags": []
+    },
+    "WorkflowExecutionRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowExecutionRequest",
+      "file": "lib/src/models/workflows/workflow_execution_request.dart",
+      "schema": "WorkflowExecutionRequest",
+      "tags": []
+    },
+    "WorkflowExecutionResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowExecutionResponse",
+      "file": "lib/src/models/workflows/workflow_execution_response.dart",
+      "schema": "WorkflowExecutionResponse",
+      "tags": []
+    },
+    "WorkflowExecutionStartedAttributesResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowExecutionStartedAttributesResponse",
+      "file": "lib/src/models/workflows/workflow_execution_started_attributes_response.dart",
+      "schema": "WorkflowExecutionStartedAttributesResponse",
+      "tags": []
+    },
+    "WorkflowExecutionStartedResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowExecutionStartedResponse",
+      "file": "lib/src/models/workflows/workflow_execution_started_response.dart",
+      "schema": "WorkflowExecutionStartedResponse",
+      "tags": []
+    },
+    "WorkflowExecutionStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "WorkflowExecutionStatus",
+      "file": "lib/src/models/workflows/workflow_execution_status.dart",
+      "schema": "WorkflowExecutionStatus",
+      "tags": []
+    },
+    "WorkflowExecutionSyncResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowExecutionSyncResponse",
+      "file": "lib/src/models/workflows/workflow_execution_sync_response.dart",
+      "schema": "WorkflowExecutionSyncResponse",
+      "tags": []
+    },
+    "WorkflowExecutionTraceEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowExecutionTraceEvent",
+      "file": "lib/src/models/workflows/workflow_execution_trace_event.dart",
+      "schema": "WorkflowExecutionTraceEvent",
+      "tags": []
+    },
+    "WorkflowExecutionTraceEventsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowExecutionTraceEventsResponse",
+      "file": "lib/src/models/workflows/workflow_execution_trace_events_response.dart",
+      "schema": "WorkflowExecutionTraceEventsResponse",
+      "tags": []
+    },
+    "WorkflowExecutionTraceOTelResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowExecutionTraceOTelResponse",
+      "file": "lib/src/models/workflows/workflow_execution_trace_o_tel_response.dart",
+      "schema": "WorkflowExecutionTraceOTelResponse",
+      "tags": []
+    },
+    "WorkflowExecutionTraceSummaryAttributesValues": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "WorkflowExecutionTraceSummaryAttributesValues",
+      "file": "",
+      "schema": "WorkflowExecutionTraceSummaryAttributesValues",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Union type - values handled inline"
+    },
+    "WorkflowExecutionTraceSummaryResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowExecutionTraceSummaryResponse",
+      "file": "lib/src/models/workflows/workflow_execution_trace_summary_response.dart",
+      "schema": "WorkflowExecutionTraceSummaryResponse",
+      "tags": []
+    },
+    "WorkflowExecutionTraceSummarySpan": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowExecutionTraceSummarySpan",
+      "file": "lib/src/models/workflows/workflow_execution_trace_summary_span.dart",
+      "schema": "WorkflowExecutionTraceSummarySpan",
+      "tags": []
+    },
+    "WorkflowExecutionWithoutResultResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowExecutionWithoutResultResponse",
+      "file": "lib/src/models/workflows/workflow_execution_without_result_response.dart",
+      "schema": "WorkflowExecutionWithoutResultResponse",
+      "tags": []
+    },
+    "WorkflowGetResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowGetResponse",
+      "file": "lib/src/models/workflows/workflow_get_response.dart",
+      "schema": "WorkflowGetResponse",
+      "tags": []
+    },
+    "WorkflowListResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowListResponse",
+      "file": "lib/src/models/workflows/workflow_list_response.dart",
+      "schema": "WorkflowListResponse",
+      "tags": []
+    },
+    "WorkflowMetadata": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowMetadata",
+      "file": "lib/src/models/workflows/workflow_metadata.dart",
+      "schema": "WorkflowMetadata",
+      "tags": []
+    },
+    "WorkflowMetrics": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowMetrics",
+      "file": "lib/src/models/workflows/workflow_metrics.dart",
+      "schema": "WorkflowMetrics",
+      "tags": []
+    },
+    "WorkflowRegistration": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowRegistration",
+      "file": "lib/src/models/workflows/workflow_registration.dart",
+      "schema": "WorkflowRegistration",
+      "tags": []
+    },
+    "WorkflowRegistrationGetResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowRegistrationGetResponse",
+      "file": "lib/src/models/workflows/workflow_registration_get_response.dart",
+      "schema": "WorkflowRegistrationGetResponse",
+      "tags": []
+    },
+    "WorkflowRegistrationListResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowRegistrationListResponse",
+      "file": "lib/src/models/workflows/workflow_registration_list_response.dart",
+      "schema": "WorkflowRegistrationListResponse",
+      "tags": []
+    },
+    "WorkflowRegistrationWithWorkerStatus": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowRegistrationWithWorkerStatus",
+      "file": "lib/src/models/workflows/workflow_registration_with_worker_status.dart",
+      "schema": "WorkflowRegistrationWithWorkerStatus",
+      "tags": []
+    },
+    "WorkflowScheduleListResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowScheduleListResponse",
+      "file": "lib/src/models/workflows/workflow_schedule_list_response.dart",
+      "schema": "WorkflowScheduleListResponse",
+      "tags": []
+    },
+    "WorkflowScheduleRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowScheduleRequest",
+      "file": "lib/src/models/workflows/workflow_schedule_request.dart",
+      "schema": "WorkflowScheduleRequest",
+      "tags": []
+    },
+    "WorkflowScheduleResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowScheduleResponse",
+      "file": "lib/src/models/workflows/workflow_schedule_response.dart",
+      "schema": "WorkflowScheduleResponse",
+      "tags": []
+    },
+    "WorkflowTaskFailedAttributes": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowTaskFailedAttributes",
+      "file": "lib/src/models/workflows/workflow_task_failed_attributes.dart",
+      "schema": "WorkflowTaskFailedAttributes",
+      "tags": []
+    },
+    "WorkflowTaskFailedResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowTaskFailedResponse",
+      "file": "lib/src/models/workflows/workflow_task_failed_response.dart",
+      "schema": "WorkflowTaskFailedResponse",
+      "tags": []
+    },
+    "WorkflowTaskTimedOutAttributes": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowTaskTimedOutAttributes",
+      "file": "lib/src/models/workflows/workflow_task_timed_out_attributes.dart",
+      "schema": "WorkflowTaskTimedOutAttributes",
+      "tags": []
+    },
+    "WorkflowTaskTimedOutResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowTaskTimedOutResponse",
+      "file": "lib/src/models/workflows/workflow_task_timed_out_response.dart",
+      "schema": "WorkflowTaskTimedOutResponse",
+      "tags": []
+    },
+    "WorkflowType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "WorkflowType",
+      "file": "lib/src/models/workflows/workflow_type.dart",
+      "schema": "WorkflowType",
+      "tags": []
+    },
+    "WorkflowUnarchiveResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowUnarchiveResponse",
+      "file": "lib/src/models/workflows/workflow_unarchive_response.dart",
+      "schema": "WorkflowUnarchiveResponse",
+      "tags": []
+    },
+    "WorkflowUpdateRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowUpdateRequest",
+      "file": "lib/src/models/workflows/workflow_update_request.dart",
+      "schema": "WorkflowUpdateRequest",
+      "tags": []
+    },
+    "WorkflowUpdateResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowUpdateResponse",
+      "file": "lib/src/models/workflows/workflow_update_response.dart",
+      "schema": "WorkflowUpdateResponse",
+      "tags": []
+    },
+    "WorkflowWithWorkerStatus": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowWithWorkerStatus",
+      "file": "lib/src/models/workflows/workflow_with_worker_status.dart",
+      "schema": "WorkflowWithWorkerStatus",
+      "tags": []
+    },
+    "integrations__schemas__api__tool__Tool": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "integrations__schemas__api__tool__Tool",
+      "file": "",
+      "schema": "integrations__schemas__api__tool__Tool",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal integration schema"
+    },
+    "integrations__schemas__turbine__ToolLocale": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "integrations__schemas__turbine__ToolLocale",
+      "file": "",
+      "schema": "integrations__schemas__turbine__ToolLocale",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal integration schema"
     }
   }
 }

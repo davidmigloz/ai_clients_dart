@@ -1,6 +1,6 @@
 # Mistral AI Dart Client
 
-> Dart client for the Mistral AI API with chat completions, streaming, tool calling, multimodal inputs, TTS, voice management, reasoning effort, embeddings, OCR, and more.
+> Dart client for the Mistral AI API with chat completions, streaming, tool calling, multimodal inputs, TTS, voice management, reasoning effort, embeddings, OCR, observability, workflows, and more.
 
 ## Docs
 
@@ -25,6 +25,8 @@
 - [agents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/agents_example.dart): AI agents (beta).
 - [conversations_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/conversations_example.dart): Multi-turn conversations (beta).
 - [libraries_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/libraries_example.dart): Document storage (beta).
+- [observability_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/observability_example.dart): Observability: datasets, judges, campaigns (beta).
+- [workflows_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/workflows_example.dart): Workflow execution and scheduling (beta).
 - [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/error_handling_example.dart): Exception handling patterns.
 - [batch_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/batch_example.dart): Batch processing.
 - [classification_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/classification_example.dart): Text classification.
