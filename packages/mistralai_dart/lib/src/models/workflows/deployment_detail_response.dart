@@ -25,14 +25,14 @@ class DeploymentDetailResponse {
   final List<DeploymentWorkerResponse> workers;
 
   /// Creates a [DeploymentDetailResponse].
-  const DeploymentDetailResponse({
+  DeploymentDetailResponse({
     required this.id,
     required this.name,
     required this.isActive,
     required this.createdAt,
     required this.updatedAt,
-    required this.workers,
-  });
+    required List<DeploymentWorkerResponse> workers,
+  }) : workers = List.unmodifiable(workers);
 
   /// Creates a [DeploymentDetailResponse] from JSON.
   factory DeploymentDetailResponse.fromJson(Map<String, dynamic> json) =>

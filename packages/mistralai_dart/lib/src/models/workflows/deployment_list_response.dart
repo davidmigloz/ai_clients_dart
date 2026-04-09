@@ -10,7 +10,8 @@ class DeploymentListResponse {
   final List<DeploymentResponse> deployments;
 
   /// Creates a [DeploymentListResponse].
-  const DeploymentListResponse({required this.deployments});
+  DeploymentListResponse({required List<DeploymentResponse> deployments})
+    : deployments = List.unmodifiable(deployments);
 
   /// Creates a [DeploymentListResponse] from JSON.
   factory DeploymentListResponse.fromJson(Map<String, dynamic> json) =>
@@ -44,7 +45,7 @@ class DeploymentListResponse {
   }
 
   @override
-  int get hashCode => listHash(deployments).hashCode;
+  int get hashCode => listHash(deployments);
 
   @override
   String toString() =>

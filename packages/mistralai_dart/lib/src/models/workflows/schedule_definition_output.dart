@@ -43,19 +43,24 @@ class ScheduleDefinitionOutput {
   final List<ScheduleCalendar>? skip;
 
   /// Creates a [ScheduleDefinitionOutput].
-  const ScheduleDefinitionOutput({
+  ScheduleDefinitionOutput({
     required this.input,
     required this.scheduleId,
-    this.calendars,
-    this.intervals,
-    this.cronExpressions,
+    List<ScheduleCalendar>? calendars,
+    List<ScheduleInterval>? intervals,
+    List<String>? cronExpressions,
     this.startAt,
     this.endAt,
     this.jitter,
     this.timeZoneName,
     this.policy,
-    this.skip,
-  });
+    List<ScheduleCalendar>? skip,
+  }) : calendars = calendars != null ? List.unmodifiable(calendars) : null,
+       intervals = intervals != null ? List.unmodifiable(intervals) : null,
+       cronExpressions = cronExpressions != null
+           ? List.unmodifiable(cronExpressions)
+           : null,
+       skip = skip != null ? List.unmodifiable(skip) : null;
 
   /// Creates a [ScheduleDefinitionOutput] from JSON.
   factory ScheduleDefinitionOutput.fromJson(Map<String, dynamic> json) =>

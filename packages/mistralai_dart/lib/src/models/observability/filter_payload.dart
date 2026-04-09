@@ -1,7 +1,6 @@
 import 'package:meta/meta.dart';
 
-import 'filter_condition.dart';
-import 'filter_group.dart';
+import 'filter_node.dart';
 
 /// Payload containing filter parameters for observability queries.
 ///
@@ -10,7 +9,7 @@ import 'filter_group.dart';
 @immutable
 class FilterPayload {
   /// The filter to apply. Can be a [FilterGroup] or [FilterCondition].
-  final Object? filters;
+  final FilterNode? filters;
 
   /// Creates a [FilterPayload].
   const FilterPayload({this.filters});
@@ -21,19 +20,14 @@ class FilterPayload {
     if (filtersJson == null) {
       return const FilterPayload();
     }
-    final map = filtersJson as Map<String, dynamic>;
-    if (map.containsKey('field') && map.containsKey('op')) {
-      return FilterPayload(filters: FilterCondition.fromJson(map));
-    }
-    return FilterPayload(filters: FilterGroup.fromJson(map));
+    return FilterPayload(
+      filters: FilterNode.fromJson(filtersJson as Map<String, dynamic>),
+    );
   }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
-    if (filters != null)
-      'filters': filters is FilterCondition
-          ? (filters! as FilterCondition).toJson()
-          : (filters! as FilterGroup).toJson(),
+    if (filters != null) 'filters': filters!.toJson(),
   };
 
   @override

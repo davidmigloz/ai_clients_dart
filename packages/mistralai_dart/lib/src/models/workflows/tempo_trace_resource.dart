@@ -11,7 +11,8 @@ class TempoTraceResource {
   final List<TempoTraceAttribute>? attributes;
 
   /// Creates a [TempoTraceResource].
-  const TempoTraceResource({this.attributes});
+  TempoTraceResource({List<TempoTraceAttribute>? attributes})
+    : attributes = attributes != null ? List.unmodifiable(attributes) : null;
 
   /// Creates a [TempoTraceResource] from JSON.
   factory TempoTraceResource.fromJson(Map<String, dynamic> json) =>
@@ -48,7 +49,7 @@ class TempoTraceResource {
   }
 
   @override
-  int get hashCode => listHash(attributes).hashCode;
+  int get hashCode => listHash(attributes);
 
   @override
   String toString() =>

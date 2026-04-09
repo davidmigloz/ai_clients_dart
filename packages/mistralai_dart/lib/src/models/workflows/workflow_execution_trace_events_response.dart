@@ -38,7 +38,7 @@ class WorkflowExecutionTraceEventsResponse {
   final int? totalDurationMs;
 
   /// Creates a [WorkflowExecutionTraceEventsResponse].
-  const WorkflowExecutionTraceEventsResponse({
+  WorkflowExecutionTraceEventsResponse({
     required this.workflowName,
     required this.executionId,
     required this.rootExecutionId,
@@ -46,10 +46,10 @@ class WorkflowExecutionTraceEventsResponse {
     required this.startTime,
     required this.endTime,
     required this.result,
-    this.events,
+    List<Map<String, dynamic>>? events,
     this.parentExecutionId,
     this.totalDurationMs,
-  });
+  }) : events = events != null ? List.unmodifiable(events) : null;
 
   /// Creates a [WorkflowExecutionTraceEventsResponse] from JSON.
   factory WorkflowExecutionTraceEventsResponse.fromJson(

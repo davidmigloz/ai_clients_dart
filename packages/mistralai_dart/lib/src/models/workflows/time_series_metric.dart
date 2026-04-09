@@ -9,7 +9,8 @@ class TimeSeriesMetric {
   final List<List<dynamic>> value;
 
   /// Creates a [TimeSeriesMetric].
-  const TimeSeriesMetric({required this.value});
+  TimeSeriesMetric({required List<List<dynamic>> value})
+    : value = List.unmodifiable(value);
 
   /// Creates a [TimeSeriesMetric] from JSON.
   factory TimeSeriesMetric.fromJson(Map<String, dynamic> json) =>

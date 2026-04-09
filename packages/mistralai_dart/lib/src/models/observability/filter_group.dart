@@ -1,22 +1,22 @@
 import 'package:meta/meta.dart';
 
 import '../common/equality_helpers.dart';
-import 'filter_condition.dart';
+import 'filter_node.dart';
 
 /// A group of filters combined with AND/OR logic.
 ///
 /// Filters can be nested: each element in [and] or [or] can itself be
 /// a [FilterGroup] or a [FilterCondition].
 @immutable
-class FilterGroup {
+class FilterGroup extends FilterNode {
   /// Conditions combined with AND logic.
-  final List<Object>? and;
+  final List<FilterNode>? and;
 
   /// Conditions combined with OR logic.
-  final List<Object>? or;
+  final List<FilterNode>? or;
 
   /// Creates a [FilterGroup].
-  FilterGroup({List<Object>? and, List<Object>? or})
+  FilterGroup({List<FilterNode>? and, List<FilterNode>? or})
     : and = and != null ? List.unmodifiable(and) : null,
       or = or != null ? List.unmodifiable(or) : null;
 
@@ -26,31 +26,17 @@ class FilterGroup {
     or: _parseFilterList(json['OR'] as List?),
   );
 
-  static List<Object>? _parseFilterList(List<dynamic>? list) {
+  static List<FilterNode>? _parseFilterList(List<dynamic>? list) {
     if (list == null) return null;
-    return list.map((e) {
-      final map = e as Map<String, dynamic>;
-      if (map.containsKey('field') && map.containsKey('op')) {
-        return FilterCondition.fromJson(map);
-      }
-      return FilterGroup.fromJson(map);
-    }).toList();
+    return list
+        .map((e) => FilterNode.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
-  /// Converts to JSON.
+  @override
   Map<String, dynamic> toJson() => {
-    if (and != null)
-      'AND': and!.map((e) {
-        if (e is FilterCondition) return e.toJson();
-        if (e is FilterGroup) return e.toJson();
-        return e;
-      }).toList(),
-    if (or != null)
-      'OR': or!.map((e) {
-        if (e is FilterCondition) return e.toJson();
-        if (e is FilterGroup) return e.toJson();
-        return e;
-      }).toList(),
+    if (and != null) 'AND': and!.map((e) => e.toJson()).toList(),
+    if (or != null) 'OR': or!.map((e) => e.toJson()).toList(),
   };
 
   @override

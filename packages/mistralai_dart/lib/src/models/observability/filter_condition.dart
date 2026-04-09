@@ -1,8 +1,10 @@
 import 'package:meta/meta.dart';
 
+import 'filter_node.dart';
+
 /// A single filter condition for observability queries.
 @immutable
-class FilterCondition {
+class FilterCondition extends FilterNode {
   /// The field name to filter on.
   final String field;
 
@@ -27,7 +29,7 @@ class FilterCondition {
         value: json['value'] ?? '',
       );
 
-  /// Converts to JSON.
+  @override
   Map<String, dynamic> toJson() => {'field': field, 'op': op, 'value': value};
 
   @override

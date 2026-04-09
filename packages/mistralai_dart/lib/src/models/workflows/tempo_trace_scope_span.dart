@@ -15,7 +15,8 @@ class TempoTraceScopeSpan {
   final List<TempoTraceSpan>? spans;
 
   /// Creates a [TempoTraceScopeSpan].
-  const TempoTraceScopeSpan({required this.scope, this.spans});
+  TempoTraceScopeSpan({required this.scope, List<TempoTraceSpan>? spans})
+    : spans = spans != null ? List.unmodifiable(spans) : null;
 
   /// Creates a [TempoTraceScopeSpan] from JSON.
   factory TempoTraceScopeSpan.fromJson(Map<String, dynamic> json) =>

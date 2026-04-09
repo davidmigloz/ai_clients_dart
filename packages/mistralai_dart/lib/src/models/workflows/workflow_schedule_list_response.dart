@@ -10,7 +10,9 @@ class WorkflowScheduleListResponse {
   final List<ScheduleDefinitionOutput> schedules;
 
   /// Creates a [WorkflowScheduleListResponse].
-  const WorkflowScheduleListResponse({required this.schedules});
+  WorkflowScheduleListResponse({
+    required List<ScheduleDefinitionOutput> schedules,
+  }) : schedules = List.unmodifiable(schedules);
 
   /// Creates a [WorkflowScheduleListResponse] from JSON.
   factory WorkflowScheduleListResponse.fromJson(Map<String, dynamic> json) =>
@@ -48,7 +50,7 @@ class WorkflowScheduleListResponse {
   }
 
   @override
-  int get hashCode => listHash(schedules).hashCode;
+  int get hashCode => listHash(schedules);
 
   @override
   String toString() =>

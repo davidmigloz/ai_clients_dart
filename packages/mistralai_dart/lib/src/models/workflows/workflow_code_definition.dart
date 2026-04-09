@@ -31,15 +31,17 @@ class WorkflowCodeDefinition {
   final List<UpdateDefinition>? updates;
 
   /// Creates a [WorkflowCodeDefinition].
-  const WorkflowCodeDefinition({
+  WorkflowCodeDefinition({
     required this.inputSchema,
     this.outputSchema,
     this.enforceDeterminism = false,
     this.executionTimeout,
-    this.queries,
-    this.signals,
-    this.updates,
-  });
+    List<QueryDefinition>? queries,
+    List<SignalDefinition>? signals,
+    List<UpdateDefinition>? updates,
+  }) : queries = queries != null ? List.unmodifiable(queries) : null,
+       signals = signals != null ? List.unmodifiable(signals) : null,
+       updates = updates != null ? List.unmodifiable(updates) : null;
 
   /// Creates a [WorkflowCodeDefinition] from JSON.
   factory WorkflowCodeDefinition.fromJson(Map<String, dynamic> json) =>

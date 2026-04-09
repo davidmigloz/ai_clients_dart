@@ -32,16 +32,22 @@ class ScheduleCalendar {
   final List<ScheduleRange>? year;
 
   /// Creates a [ScheduleCalendar].
-  const ScheduleCalendar({
+  ScheduleCalendar({
     this.comment,
-    this.dayOfMonth,
-    this.dayOfWeek,
-    this.hour,
-    this.minute,
-    this.month,
-    this.second,
-    this.year,
-  });
+    List<ScheduleRange>? dayOfMonth,
+    List<ScheduleRange>? dayOfWeek,
+    List<ScheduleRange>? hour,
+    List<ScheduleRange>? minute,
+    List<ScheduleRange>? month,
+    List<ScheduleRange>? second,
+    List<ScheduleRange>? year,
+  }) : dayOfMonth = dayOfMonth != null ? List.unmodifiable(dayOfMonth) : null,
+       dayOfWeek = dayOfWeek != null ? List.unmodifiable(dayOfWeek) : null,
+       hour = hour != null ? List.unmodifiable(hour) : null,
+       minute = minute != null ? List.unmodifiable(minute) : null,
+       month = month != null ? List.unmodifiable(month) : null,
+       second = second != null ? List.unmodifiable(second) : null,
+       year = year != null ? List.unmodifiable(year) : null;
 
   /// Creates a [ScheduleCalendar] from JSON.
   factory ScheduleCalendar.fromJson(Map<String, dynamic> json) =>

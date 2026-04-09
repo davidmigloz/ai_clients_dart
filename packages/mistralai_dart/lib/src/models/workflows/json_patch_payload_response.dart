@@ -12,10 +12,10 @@ class JSONPatchPayloadResponse {
   final List<Map<String, dynamic>> value;
 
   /// Creates a [JSONPatchPayloadResponse].
-  const JSONPatchPayloadResponse({
+  JSONPatchPayloadResponse({
     this.type = 'json_patch',
-    required this.value,
-  });
+    required List<Map<String, dynamic>> value,
+  }) : value = List.unmodifiable(value);
 
   /// Creates a [JSONPatchPayloadResponse] from JSON.
   factory JSONPatchPayloadResponse.fromJson(Map<String, dynamic> json) =>

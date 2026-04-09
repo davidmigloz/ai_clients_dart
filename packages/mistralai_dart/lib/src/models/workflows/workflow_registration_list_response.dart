@@ -17,11 +17,12 @@ class WorkflowRegistrationListResponse {
   final List<WorkflowRegistration> workflowVersions;
 
   /// Creates a [WorkflowRegistrationListResponse].
-  const WorkflowRegistrationListResponse({
-    required this.workflowRegistrations,
+  WorkflowRegistrationListResponse({
+    required List<WorkflowRegistration> workflowRegistrations,
     required this.nextCursor,
-    required this.workflowVersions,
-  });
+    required List<WorkflowRegistration> workflowVersions,
+  }) : workflowRegistrations = List.unmodifiable(workflowRegistrations),
+       workflowVersions = List.unmodifiable(workflowVersions);
 
   /// Creates a [WorkflowRegistrationListResponse] from JSON.
   factory WorkflowRegistrationListResponse.fromJson(

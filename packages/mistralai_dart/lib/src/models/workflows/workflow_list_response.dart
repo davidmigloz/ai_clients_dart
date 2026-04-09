@@ -14,7 +14,10 @@ class WorkflowListResponse {
   final String? nextCursor;
 
   /// Creates a [WorkflowListResponse].
-  const WorkflowListResponse({this.workflows, required this.nextCursor});
+  WorkflowListResponse({
+    List<WorkflowBasicDefinition>? workflows,
+    required this.nextCursor,
+  }) : workflows = workflows != null ? List.unmodifiable(workflows) : null;
 
   /// Creates a [WorkflowListResponse] from JSON.
   factory WorkflowListResponse.fromJson(Map<String, dynamic> json) =>

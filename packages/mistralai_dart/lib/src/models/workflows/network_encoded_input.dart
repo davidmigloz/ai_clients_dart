@@ -17,11 +17,13 @@ class NetworkEncodedInput {
   final List<EncodedPayloadOptions>? encodingOptions;
 
   /// Creates a [NetworkEncodedInput].
-  const NetworkEncodedInput({
+  NetworkEncodedInput({
     required this.b64payload,
     this.empty,
-    this.encodingOptions,
-  });
+    List<EncodedPayloadOptions>? encodingOptions,
+  }) : encodingOptions = encodingOptions != null
+           ? List.unmodifiable(encodingOptions)
+           : null;
 
   /// Creates a [NetworkEncodedInput] from JSON.
   factory NetworkEncodedInput.fromJson(Map<String, dynamic> json) =>

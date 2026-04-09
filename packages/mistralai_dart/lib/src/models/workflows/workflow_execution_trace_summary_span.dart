@@ -29,15 +29,16 @@ class WorkflowExecutionTraceSummarySpan {
   final List<WorkflowExecutionTraceSummarySpan>? children;
 
   /// Creates a [WorkflowExecutionTraceSummarySpan].
-  const WorkflowExecutionTraceSummarySpan({
+  WorkflowExecutionTraceSummarySpan({
     required this.spanId,
     required this.name,
     required this.startTimeUnixNano,
     required this.endTimeUnixNano,
     required this.attributes,
-    required this.events,
-    this.children,
-  });
+    required List<WorkflowExecutionTraceEvent> events,
+    List<WorkflowExecutionTraceSummarySpan>? children,
+  }) : events = List.unmodifiable(events),
+       children = children != null ? List.unmodifiable(children) : null;
 
   /// Creates a [WorkflowExecutionTraceSummarySpan] from JSON.
   factory WorkflowExecutionTraceSummarySpan.fromJson(

@@ -17,10 +17,11 @@ class ConversationPayload {
   /// Creates a [ConversationPayload].
   ConversationPayload({
     required List<Map<String, dynamic>> messages,
-    this.extra,
+    Map<String, dynamic>? extra,
   }) : messages = List.unmodifiable(
          messages.map(Map<String, dynamic>.unmodifiable),
-       );
+       ),
+       extra = extra != null ? Map.unmodifiable(extra) : null;
 
   /// Creates a [ConversationPayload] from JSON.
   factory ConversationPayload.fromJson(Map<String, dynamic> json) {

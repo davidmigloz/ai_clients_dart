@@ -37,7 +37,7 @@ class TempoTraceSpan {
   final List<TempoTraceEvent>? events;
 
   /// Creates a [TempoTraceSpan].
-  const TempoTraceSpan({
+  TempoTraceSpan({
     required this.traceId,
     required this.spanId,
     required this.name,
@@ -45,9 +45,10 @@ class TempoTraceSpan {
     required this.startTimeUnixNano,
     required this.endTimeUnixNano,
     this.parentSpanId,
-    this.attributes,
-    this.events,
-  });
+    List<TempoTraceAttribute>? attributes,
+    List<TempoTraceEvent>? events,
+  }) : attributes = attributes != null ? List.unmodifiable(attributes) : null,
+       events = events != null ? List.unmodifiable(events) : null;
 
   /// Creates a [TempoTraceSpan] from JSON.
   factory TempoTraceSpan.fromJson(Map<String, dynamic> json) => TempoTraceSpan(

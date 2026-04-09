@@ -13,7 +13,10 @@ class ListWorkflowEventResponse {
   final String? nextCursor;
 
   /// Creates a [ListWorkflowEventResponse].
-  const ListWorkflowEventResponse({required this.events, this.nextCursor});
+  ListWorkflowEventResponse({
+    required List<Map<String, dynamic>> events,
+    this.nextCursor,
+  }) : events = List.unmodifiable(events);
 
   /// Creates a [ListWorkflowEventResponse] from JSON.
   factory ListWorkflowEventResponse.fromJson(Map<String, dynamic> json) =>

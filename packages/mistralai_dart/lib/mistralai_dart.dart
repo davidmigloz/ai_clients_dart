@@ -208,6 +208,7 @@ export 'src/models/observability/field_option_counts.dart';
 export 'src/models/observability/field_option_counts_in_schema.dart';
 export 'src/models/observability/filter_condition.dart';
 export 'src/models/observability/filter_group.dart';
+export 'src/models/observability/filter_node.dart';
 export 'src/models/observability/filter_payload.dart';
 export 'src/models/observability/get_chat_completion_event_ids_in_schema.dart';
 export 'src/models/observability/get_chat_completion_events_in_schema.dart';

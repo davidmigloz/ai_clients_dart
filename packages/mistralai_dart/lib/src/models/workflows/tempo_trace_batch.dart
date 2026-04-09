@@ -15,7 +15,10 @@ class TempoTraceBatch {
   final List<TempoTraceScopeSpan>? scopeSpans;
 
   /// Creates a [TempoTraceBatch].
-  const TempoTraceBatch({required this.resource, this.scopeSpans});
+  TempoTraceBatch({
+    required this.resource,
+    List<TempoTraceScopeSpan>? scopeSpans,
+  }) : scopeSpans = scopeSpans != null ? List.unmodifiable(scopeSpans) : null;
 
   /// Creates a [TempoTraceBatch] from JSON.
   factory TempoTraceBatch.fromJson(Map<String, dynamic> json) =>

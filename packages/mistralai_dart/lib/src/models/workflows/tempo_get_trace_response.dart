@@ -11,7 +11,8 @@ class TempoGetTraceResponse {
   final List<TempoTraceBatch>? batches;
 
   /// Creates a [TempoGetTraceResponse].
-  const TempoGetTraceResponse({this.batches});
+  TempoGetTraceResponse({List<TempoTraceBatch>? batches})
+    : batches = batches != null ? List.unmodifiable(batches) : null;
 
   /// Creates a [TempoGetTraceResponse] from JSON.
   factory TempoGetTraceResponse.fromJson(Map<String, dynamic> json) =>
@@ -45,7 +46,7 @@ class TempoGetTraceResponse {
   }
 
   @override
-  int get hashCode => listHash(batches).hashCode;
+  int get hashCode => listHash(batches);
 
   @override
   String toString() =>

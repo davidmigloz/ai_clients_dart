@@ -889,7 +889,7 @@ Use `client.workflows` to manage and execute workflows via the workflowCore reso
 
 ```dart
 // List registered workflows
-final workflows = await client.workflows.registrations.list();
+final workflows = await client.workflows.core.list();
 for (final wf in workflows.workflowRegistrations) {
   print('${wf.workflow?.name}: ${wf.workflowId}');
 }

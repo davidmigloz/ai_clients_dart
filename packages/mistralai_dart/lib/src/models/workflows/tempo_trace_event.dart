@@ -17,11 +17,11 @@ class TempoTraceEvent {
   final List<TempoTraceAttribute>? attributes;
 
   /// Creates a [TempoTraceEvent].
-  const TempoTraceEvent({
+  TempoTraceEvent({
     required this.name,
     required this.timeUnixNano,
-    this.attributes,
-  });
+    List<TempoTraceAttribute>? attributes,
+  }) : attributes = attributes != null ? List.unmodifiable(attributes) : null;
 
   /// Creates a [TempoTraceEvent] from JSON.
   factory TempoTraceEvent.fromJson(Map<String, dynamic> json) =>

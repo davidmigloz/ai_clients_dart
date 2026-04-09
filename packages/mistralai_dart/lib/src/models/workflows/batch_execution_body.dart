@@ -9,7 +9,8 @@ class BatchExecutionBody {
   final List<String> executionIds;
 
   /// Creates a [BatchExecutionBody].
-  const BatchExecutionBody({required this.executionIds});
+  BatchExecutionBody({required List<String> executionIds})
+    : executionIds = List.unmodifiable(executionIds);
 
   /// Creates a [BatchExecutionBody] from JSON.
   factory BatchExecutionBody.fromJson(Map<String, dynamic> json) =>
@@ -35,7 +36,7 @@ class BatchExecutionBody {
   }
 
   @override
-  int get hashCode => listHash(executionIds).hashCode;
+  int get hashCode => listHash(executionIds);
 
   @override
   String toString() =>

@@ -14,10 +14,10 @@ class WorkflowExecutionListResponse {
   final String? nextPageToken;
 
   /// Creates a [WorkflowExecutionListResponse].
-  const WorkflowExecutionListResponse({
-    required this.executions,
+  WorkflowExecutionListResponse({
+    required List<WorkflowExecutionWithoutResultResponse> executions,
     this.nextPageToken,
-  });
+  }) : executions = List.unmodifiable(executions);
 
   /// Creates a [WorkflowExecutionListResponse] from JSON.
   factory WorkflowExecutionListResponse.fromJson(Map<String, dynamic> json) =>
