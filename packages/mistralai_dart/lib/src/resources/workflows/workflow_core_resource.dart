@@ -40,7 +40,7 @@ class WorkflowCoreResource extends ResourceBase {
     ensureNotClosed?.call();
     final queryParams = <String, String>{};
     if (archived != null) queryParams['archived'] = archived.toString();
-    if (search != null) queryParams['search'] = search;
+    if (search != null) queryParams['workflow_search'] = search;
     if (limit != null) queryParams['limit'] = limit.toString();
     if (cursor != null) queryParams['cursor'] = cursor;
 
