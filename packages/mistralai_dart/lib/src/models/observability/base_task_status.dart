@@ -29,6 +29,9 @@ enum BaseTaskStatus {
   /// The string value of this status.
   final String value;
 
+  /// Converts to a JSON value.
+  String toJson() => value;
+
   /// Creates a [BaseTaskStatus] from a JSON value.
   static BaseTaskStatus fromJson(String? value) => fromString(value);
 

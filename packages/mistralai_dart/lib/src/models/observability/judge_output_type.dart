@@ -14,6 +14,9 @@ enum JudgeOutputType {
   /// The string value of this type.
   final String value;
 
+  /// Converts to a JSON value.
+  String toJson() => value;
+
   /// Creates a [JudgeOutputType] from a JSON value.
   static JudgeOutputType fromJson(String? value) => fromString(value);
 

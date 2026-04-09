@@ -20,6 +20,9 @@ enum ConversationSource {
   /// The string value of this source.
   final String value;
 
+  /// Converts to a JSON value.
+  String toJson() => value;
+
   /// Creates a [ConversationSource] from a JSON value.
   static ConversationSource fromJson(String? value) => fromString(value);
 

@@ -141,6 +141,9 @@ enum ObservabilityErrorCode {
   /// The string value of this error code.
   final String value;
 
+  /// Converts to a JSON value.
+  String toJson() => value;
+
   /// Creates an [ObservabilityErrorCode] from a JSON value.
   static ObservabilityErrorCode fromJson(String? value) => fromString(value);
 
