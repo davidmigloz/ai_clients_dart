@@ -38,7 +38,7 @@ class BatchExecutionResponse {
   }
 
   @override
-  int get hashCode => mapDeepHashCode(results).hashCode;
+  int get hashCode => mapDeepHashCode(results);
 
   @override
   String toString() =>

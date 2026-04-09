@@ -132,7 +132,7 @@ class WorkflowExecutionTraceEventsResponse {
         status == other.status &&
         startTime == other.startTime &&
         endTime == other.endTime &&
-        result == other.result &&
+        valuesDeepEqual(result, other.result) &&
         parentExecutionId == other.parentExecutionId &&
         totalDurationMs == other.totalDurationMs;
   }
@@ -145,7 +145,7 @@ class WorkflowExecutionTraceEventsResponse {
     status,
     startTime,
     endTime,
-    result,
+    valueDeepHashCode(result),
     listOfMapsHashCode(events),
     parentExecutionId,
     totalDurationMs,

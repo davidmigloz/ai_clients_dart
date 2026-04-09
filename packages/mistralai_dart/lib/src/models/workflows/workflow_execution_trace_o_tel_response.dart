@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 import 'tempo_get_trace_response.dart';
 import 'workflow_execution_status.dart';
 
@@ -153,7 +154,7 @@ class WorkflowExecutionTraceOTelResponse {
         status == other.status &&
         startTime == other.startTime &&
         endTime == other.endTime &&
-        result == other.result &&
+        valuesDeepEqual(result, other.result) &&
         dataSource == other.dataSource &&
         otelTraceData == other.otelTraceData &&
         otelTraceId == other.otelTraceId &&
@@ -169,7 +170,7 @@ class WorkflowExecutionTraceOTelResponse {
     status,
     startTime,
     endTime,
-    result,
+    valueDeepHashCode(result),
     dataSource,
     otelTraceData,
     otelTraceId,

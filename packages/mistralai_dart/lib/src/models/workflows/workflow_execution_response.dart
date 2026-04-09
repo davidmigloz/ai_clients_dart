@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 import 'workflow_execution_status.dart';
 
 /// Response for a workflow execution.
@@ -119,7 +120,7 @@ class WorkflowExecutionResponse {
         status == other.status &&
         startTime == other.startTime &&
         endTime == other.endTime &&
-        result == other.result &&
+        valuesDeepEqual(result, other.result) &&
         parentExecutionId == other.parentExecutionId &&
         totalDurationMs == other.totalDurationMs;
   }
@@ -132,7 +133,7 @@ class WorkflowExecutionResponse {
     status,
     startTime,
     endTime,
-    result,
+    valueDeepHashCode(result),
     parentExecutionId,
     totalDurationMs,
   );
