@@ -37,12 +37,12 @@ class TempoTraceAttribute {
     if (identical(this, other)) return true;
     if (other is! TempoTraceAttribute) return false;
     if (runtimeType != other.runtimeType) return false;
-    if (!mapsEqual(value, other.value)) return false;
+    if (!mapsDeepEqual(value, other.value)) return false;
     return key == other.key;
   }
 
   @override
-  int get hashCode => Object.hash(key, mapHash(value));
+  int get hashCode => Object.hash(key, mapDeepHashCode(value));
 
   @override
   String toString() => 'TempoTraceAttribute(key: $key, value: ${value.length})';

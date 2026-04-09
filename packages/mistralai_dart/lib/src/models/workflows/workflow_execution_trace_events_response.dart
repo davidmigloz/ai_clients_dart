@@ -125,7 +125,7 @@ class WorkflowExecutionTraceEventsResponse {
     if (identical(this, other)) return true;
     if (other is! WorkflowExecutionTraceEventsResponse) return false;
     if (runtimeType != other.runtimeType) return false;
-    if (!listOfMapsEqual(events, other.events)) return false;
+    if (!listOfMapsDeepEqual(events, other.events)) return false;
     return workflowName == other.workflowName &&
         executionId == other.executionId &&
         rootExecutionId == other.rootExecutionId &&
@@ -146,7 +146,7 @@ class WorkflowExecutionTraceEventsResponse {
     startTime,
     endTime,
     result,
-    listOfMapsHash(events),
+    listOfMapsHashCode(events),
     parentExecutionId,
     totalDurationMs,
   );

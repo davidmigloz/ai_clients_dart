@@ -124,7 +124,7 @@ class WorkflowExecutionProgressTraceEvent {
     if (identical(this, other)) return true;
     if (other is! WorkflowExecutionProgressTraceEvent) return false;
     if (runtimeType != other.runtimeType) return false;
-    if (!mapsEqual(attributes, other.attributes)) return false;
+    if (!mapsDeepEqual(attributes, other.attributes)) return false;
     return name == other.name &&
         id == other.id &&
         timestampUnixNano == other.timestampUnixNano &&
@@ -141,7 +141,7 @@ class WorkflowExecutionProgressTraceEvent {
     name,
     id,
     timestampUnixNano,
-    mapHash(attributes),
+    mapDeepHashCode(attributes),
     startTimeUnixMs,
     endTimeUnixMs,
     error,

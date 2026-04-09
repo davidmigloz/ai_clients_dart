@@ -33,12 +33,12 @@ class BatchExecutionResponse {
     if (identical(this, other)) return true;
     if (other is! BatchExecutionResponse) return false;
     if (runtimeType != other.runtimeType) return false;
-    if (!mapsEqual(results, other.results)) return false;
+    if (!mapsDeepEqual(results, other.results)) return false;
     return true;
   }
 
   @override
-  int get hashCode => mapHash(results).hashCode;
+  int get hashCode => mapDeepHashCode(results).hashCode;
 
   @override
   String toString() =>

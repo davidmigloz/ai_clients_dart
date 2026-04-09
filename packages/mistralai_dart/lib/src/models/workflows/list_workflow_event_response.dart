@@ -46,12 +46,12 @@ class ListWorkflowEventResponse {
     if (identical(this, other)) return true;
     if (other is! ListWorkflowEventResponse) return false;
     if (runtimeType != other.runtimeType) return false;
-    if (!listOfMapsEqual(events, other.events)) return false;
+    if (!listOfMapsDeepEqual(events, other.events)) return false;
     return nextCursor == other.nextCursor;
   }
 
   @override
-  int get hashCode => Object.hash(listOfMapsHash(events), nextCursor);
+  int get hashCode => Object.hash(listOfMapsHashCode(events), nextCursor);
 
   @override
   String toString() =>

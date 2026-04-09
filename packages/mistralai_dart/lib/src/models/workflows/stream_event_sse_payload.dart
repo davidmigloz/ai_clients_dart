@@ -86,8 +86,8 @@ class StreamEventSsePayload {
     if (identical(this, other)) return true;
     if (other is! StreamEventSsePayload) return false;
     if (runtimeType != other.runtimeType) return false;
-    if (!mapsEqual(data, other.data)) return false;
-    if (!mapsEqual(metadata, other.metadata)) return false;
+    if (!mapsDeepEqual(data, other.data)) return false;
+    if (!mapsDeepEqual(metadata, other.metadata)) return false;
     return stream == other.stream &&
         workflowContext == other.workflowContext &&
         brokerSequence == other.brokerSequence &&
@@ -97,10 +97,10 @@ class StreamEventSsePayload {
   @override
   int get hashCode => Object.hash(
     stream,
-    mapHash(data),
+    mapDeepHashCode(data),
     workflowContext,
     brokerSequence,
-    mapHash(metadata),
+    mapDeepHashCode(metadata),
     timestamp,
   );
 

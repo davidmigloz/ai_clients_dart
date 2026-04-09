@@ -57,12 +57,13 @@ class SignalDefinition {
     if (identical(this, other)) return true;
     if (other is! SignalDefinition) return false;
     if (runtimeType != other.runtimeType) return false;
-    if (!mapsEqual(inputSchema, other.inputSchema)) return false;
+    if (!mapsDeepEqual(inputSchema, other.inputSchema)) return false;
     return name == other.name && description == other.description;
   }
 
   @override
-  int get hashCode => Object.hash(name, mapHash(inputSchema), description);
+  int get hashCode =>
+      Object.hash(name, mapDeepHashCode(inputSchema), description);
 
   @override
   String toString() =>

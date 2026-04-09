@@ -107,7 +107,7 @@ class WorkflowExecutionTraceSummarySpan {
     if (identical(this, other)) return true;
     if (other is! WorkflowExecutionTraceSummarySpan) return false;
     if (runtimeType != other.runtimeType) return false;
-    if (!mapsEqual(attributes, other.attributes)) return false;
+    if (!mapsDeepEqual(attributes, other.attributes)) return false;
     if (!listsEqual(events, other.events)) return false;
     if (!listsEqual(children, other.children)) return false;
     return spanId == other.spanId &&
@@ -122,7 +122,7 @@ class WorkflowExecutionTraceSummarySpan {
     name,
     startTimeUnixNano,
     endTimeUnixNano,
-    mapHash(attributes),
+    mapDeepHashCode(attributes),
     listHash(events),
     listHash(children),
   );

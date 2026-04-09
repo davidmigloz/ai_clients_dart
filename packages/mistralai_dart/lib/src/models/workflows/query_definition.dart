@@ -67,16 +67,16 @@ class QueryDefinition {
     if (identical(this, other)) return true;
     if (other is! QueryDefinition) return false;
     if (runtimeType != other.runtimeType) return false;
-    if (!mapsEqual(inputSchema, other.inputSchema)) return false;
-    if (!mapsEqual(outputSchema, other.outputSchema)) return false;
+    if (!mapsDeepEqual(inputSchema, other.inputSchema)) return false;
+    if (!mapsDeepEqual(outputSchema, other.outputSchema)) return false;
     return name == other.name && description == other.description;
   }
 
   @override
   int get hashCode => Object.hash(
     name,
-    mapHash(inputSchema),
-    mapHash(outputSchema),
+    mapDeepHashCode(inputSchema),
+    mapDeepHashCode(outputSchema),
     description,
   );
 

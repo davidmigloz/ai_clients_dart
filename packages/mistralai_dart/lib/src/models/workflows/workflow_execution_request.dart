@@ -118,8 +118,11 @@ class WorkflowExecutionRequest {
     if (identical(this, other)) return true;
     if (other is! WorkflowExecutionRequest) return false;
     if (runtimeType != other.runtimeType) return false;
-    if (!mapsEqual(input, other.input)) return false;
-    if (!mapsEqual(customTracingAttributes, other.customTracingAttributes)) {
+    if (!mapsDeepEqual(input, other.input)) return false;
+    if (!mapsDeepEqual(
+      customTracingAttributes,
+      other.customTracingAttributes,
+    )) {
       return false;
     }
     return encodedInput == other.encodedInput &&
@@ -132,14 +135,14 @@ class WorkflowExecutionRequest {
 
   @override
   int get hashCode => Object.hash(
-    mapHash(input),
+    mapDeepHashCode(input),
     encodedInput,
     executionId,
     deploymentName,
     taskQueue,
     timeoutSeconds,
     waitForResult,
-    mapHash(customTracingAttributes),
+    mapDeepHashCode(customTracingAttributes),
   );
 
   @override

@@ -43,12 +43,12 @@ class JSONPatchPayloadResponse {
     if (identical(this, other)) return true;
     if (other is! JSONPatchPayloadResponse) return false;
     if (runtimeType != other.runtimeType) return false;
-    if (!listOfMapsEqual(value, other.value)) return false;
+    if (!listOfMapsDeepEqual(value, other.value)) return false;
     return type == other.type;
   }
 
   @override
-  int get hashCode => Object.hash(type, listOfMapsHash(value));
+  int get hashCode => Object.hash(type, listOfMapsHashCode(value));
 
   @override
   String toString() =>

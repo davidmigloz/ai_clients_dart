@@ -55,14 +55,14 @@ class CustomTaskInProgressAttributesResponse {
     if (identical(this, other)) return true;
     if (other is! CustomTaskInProgressAttributesResponse) return false;
     if (runtimeType != other.runtimeType) return false;
-    if (!mapsEqual(payload, other.payload)) return false;
+    if (!mapsDeepEqual(payload, other.payload)) return false;
     return customTaskId == other.customTaskId &&
         customTaskType == other.customTaskType;
   }
 
   @override
   int get hashCode =>
-      Object.hash(customTaskId, customTaskType, mapHash(payload));
+      Object.hash(customTaskId, customTaskType, mapDeepHashCode(payload));
 
   @override
   String toString() =>

@@ -108,8 +108,8 @@ class WorkflowCodeDefinition {
     if (identical(this, other)) return true;
     if (other is! WorkflowCodeDefinition) return false;
     if (runtimeType != other.runtimeType) return false;
-    if (!mapsEqual(inputSchema, other.inputSchema)) return false;
-    if (!mapsEqual(outputSchema, other.outputSchema)) return false;
+    if (!mapsDeepEqual(inputSchema, other.inputSchema)) return false;
+    if (!mapsDeepEqual(outputSchema, other.outputSchema)) return false;
     if (!listsEqual(queries, other.queries)) return false;
     if (!listsEqual(signals, other.signals)) return false;
     if (!listsEqual(updates, other.updates)) return false;
@@ -119,8 +119,8 @@ class WorkflowCodeDefinition {
 
   @override
   int get hashCode => Object.hash(
-    mapHash(inputSchema),
-    mapHash(outputSchema),
+    mapDeepHashCode(inputSchema),
+    mapDeepHashCode(outputSchema),
     enforceDeterminism,
     executionTimeout,
     listHash(queries),
