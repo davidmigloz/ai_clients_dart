@@ -1,7 +1,5 @@
 import 'package:meta/meta.dart';
 
-import '../common/copy_with_sentinel.dart';
-
 /// Information about a workflow worker.
 @immutable
 class WorkerInfo {
@@ -36,15 +34,11 @@ class WorkerInfo {
   };
 
   /// Creates a copy with replaced values.
-  WorkerInfo copyWith({
-    String? schedulerUrl,
-    String? namespace,
-    Object? tls = unsetCopyWithValue,
-  }) {
+  WorkerInfo copyWith({String? schedulerUrl, String? namespace, bool? tls}) {
     return WorkerInfo(
       schedulerUrl: schedulerUrl ?? this.schedulerUrl,
       namespace: namespace ?? this.namespace,
-      tls: tls == unsetCopyWithValue ? this.tls : tls! as bool,
+      tls: tls ?? this.tls,
     );
   }
 
