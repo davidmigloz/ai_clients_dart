@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 
 /// Body for sending a workflow signal.
 @immutable
@@ -43,11 +44,11 @@ class SignalInvocationBody {
     if (identical(this, other)) return true;
     if (other is! SignalInvocationBody) return false;
     if (runtimeType != other.runtimeType) return false;
-    return name == other.name && input == other.input;
+    return name == other.name && valuesDeepEqual(input, other.input);
   }
 
   @override
-  int get hashCode => Object.hash(name, input);
+  int get hashCode => Object.hash(name, valueDeepHashCode(input));
 
   @override
   String toString() => 'SignalInvocationBody(name: $name, input: $input)';
