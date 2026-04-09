@@ -6,7 +6,7 @@ enum ListOrder {
   /// Descending order (newest first).
   desc('desc'),
 
-  /// Unknown order — preserves the raw value.
+  /// Unknown order — fallback for unrecognized values.
   unknown('unknown');
 
   const ListOrder(this.value);

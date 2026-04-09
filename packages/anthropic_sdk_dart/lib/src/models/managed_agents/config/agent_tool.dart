@@ -34,7 +34,7 @@ enum AgentToolName {
   /// Web search tool.
   webSearch('web_search'),
 
-  /// Unknown tool name — preserves the raw value.
+  /// Unknown tool name — fallback for unrecognized values.
   unknown('unknown');
 
   const AgentToolName(this.value);
@@ -70,7 +70,7 @@ enum AgentEvaluatedPermission {
   /// The tool call is denied.
   deny('deny'),
 
-  /// Unknown permission — preserves the raw value.
+  /// Unknown permission — fallback for unrecognized values.
   unknown('unknown');
 
   const AgentEvaluatedPermission(this.value);

@@ -10,7 +10,7 @@ enum AgentSpeed {
   /// Fast mode (premium pricing).
   fast('fast'),
 
-  /// Unknown speed mode — preserves the raw value.
+  /// Unknown speed mode — fallback for unrecognized values.
   unknown('unknown');
 
   const AgentSpeed(this.value);

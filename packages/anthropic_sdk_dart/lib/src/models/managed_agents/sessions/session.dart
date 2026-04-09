@@ -19,7 +19,7 @@ enum SessionStatus {
   /// Session has terminated.
   terminated('terminated'),
 
-  /// Unknown status — preserves the raw value.
+  /// Unknown status — fallback for unrecognized values.
   unknown('unknown');
 
   const SessionStatus(this.value);

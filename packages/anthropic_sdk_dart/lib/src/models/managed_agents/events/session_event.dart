@@ -900,7 +900,7 @@ enum UserToolConfirmationResult {
   /// Tool execution is denied.
   deny('deny'),
 
-  /// Unknown result — preserves the raw value.
+  /// Unknown result — fallback for unrecognized values.
   unknown('unknown');
 
   const UserToolConfirmationResult(this.value);
