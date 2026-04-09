@@ -13,9 +13,11 @@ void main() {
   AnthropicClient? client;
 
   setUpAll(() {
-    apiKey = Platform.environment['ANTHROPIC_API_KEY'];
-    environmentId = Platform.environment['ANTHROPIC_ENVIRONMENT_ID'];
-    if (apiKey == null || apiKey!.isEmpty) {
+    final key = Platform.environment['ANTHROPIC_API_KEY'];
+    final envId = Platform.environment['ANTHROPIC_ENVIRONMENT_ID'];
+    apiKey = (key != null && key.isNotEmpty) ? key : null;
+    environmentId = (envId != null && envId.isNotEmpty) ? envId : null;
+    if (apiKey == null) {
       print('ANTHROPIC_API_KEY not set. Integration tests will be skipped.');
     } else {
       client = AnthropicClient(
