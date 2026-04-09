@@ -117,10 +117,10 @@ class UnknownPermissionPolicy extends PermissionPolicy {
       other is UnknownPermissionPolicy &&
           runtimeType == other.runtimeType &&
           type == other.type &&
-          mapsEqual(raw, other.raw);
+          mapsDeepEqual(raw, other.raw);
 
   @override
-  int get hashCode => Object.hash(type, mapHash(raw));
+  int get hashCode => Object.hash(type, mapDeepHashCode(raw));
 
   @override
   String toString() => 'UnknownPermissionPolicy(type: $type, raw: $raw)';

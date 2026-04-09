@@ -100,10 +100,10 @@ class UnknownMCPServer extends MCPServer {
       other is UnknownMCPServer &&
           runtimeType == other.runtimeType &&
           type == other.type &&
-          mapsEqual(raw, other.raw);
+          mapsDeepEqual(raw, other.raw);
 
   @override
-  int get hashCode => Object.hash(type, mapHash(raw));
+  int get hashCode => Object.hash(type, mapDeepHashCode(raw));
 
   @override
   String toString() => 'UnknownMCPServer(type: $type, raw: $raw)';
@@ -207,10 +207,10 @@ class UnknownMCPServerParams extends MCPServerParams {
       other is UnknownMCPServerParams &&
           runtimeType == other.runtimeType &&
           type == other.type &&
-          mapsEqual(raw, other.raw);
+          mapsDeepEqual(raw, other.raw);
 
   @override
-  int get hashCode => Object.hash(type, mapHash(raw));
+  int get hashCode => Object.hash(type, mapDeepHashCode(raw));
 
   @override
   String toString() => 'UnknownMCPServerParams(type: $type, raw: $raw)';
