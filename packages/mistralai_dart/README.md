@@ -885,7 +885,7 @@ final fields = await client.observability.chatCompletionFields.list();
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.workflows` to manage and execute workflows via the workflowCore resource, check execution status, monitor runs, view metrics, inspect workers, and configure schedules.
+Use `client.workflows` to manage and execute workflows via the workflowCore resource, check execution status, list registrations, monitor runs, view metrics, inspect workers, and configure schedules.
 
 ```dart
 // List registered workflows
@@ -917,6 +917,9 @@ final metrics = await client.workflows.metrics.get(
 
 // Check worker status
 final worker = await client.workflows.workers.whoami();
+
+// List registrations
+final registrations = await client.workflows.registrations.list();
 
 // List schedules
 final schedules = await client.workflows.schedules.list();
