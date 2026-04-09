@@ -1400,13 +1400,18 @@
       "dart_class": "Agent",
       "file": "lib/src/models/managed_agents/agents/agent.dart",
       "schema": "BetaManagedAgentsAgent",
-      "excluded_properties": ["archived_at", "description", "system", "metadata"]
+      "excluded_properties": [
+        "archived_at",
+        "description",
+        "system",
+        "metadata"
+      ]
     },
     "AgentEvaluatedPermission": {
       "spec": "main",
       "kind": "enum",
       "dart_class": "AgentEvaluatedPermission",
-      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "file": "lib/src/models/managed_agents/config/agent_tool.dart",
       "schema": "BetaManagedAgentsAgentEvaluatedPermission"
     },
     "AgentParams": {
@@ -1596,7 +1601,10 @@
       "dart_class": "Credential",
       "file": "lib/src/models/managed_agents/credentials/credential.dart",
       "schema": "BetaManagedAgentsCredential",
-      "excluded_properties": ["archived_at", "display_name"]
+      "excluded_properties": [
+        "archived_at",
+        "display_name"
+      ]
     },
     "CredentialAuth": {
       "spec": "main",
@@ -1832,7 +1840,9 @@
       "dart_class": "ListSessionResourcesResponse",
       "file": "lib/src/models/managed_agents/resources/session_resource.dart",
       "schema": "BetaManagedAgentsListSessionResources",
-      "excluded_properties": ["data"]
+      "excluded_properties": [
+        "data"
+      ]
     },
     "ListSessions": {
       "spec": "main",
@@ -2106,7 +2116,9 @@
       "dart_class": "Session",
       "file": "lib/src/models/managed_agents/sessions/session.dart",
       "schema": "BetaManagedAgentsSession",
-      "excluded_properties": ["archived_at"]
+      "excluded_properties": [
+        "archived_at"
+      ]
     },
     "SessionAgent": {
       "spec": "main",
@@ -2114,7 +2126,10 @@
       "dart_class": "SessionAgent",
       "file": "lib/src/models/managed_agents/sessions/session.dart",
       "schema": "BetaManagedAgentsSessionAgent",
-      "excluded_properties": ["description", "system"]
+      "excluded_properties": [
+        "description",
+        "system"
+      ]
     },
     "SessionEndTurn": {
       "spec": "main",
@@ -2122,7 +2137,7 @@
       "dart_class": "SessionEndTurn",
       "file": "lib/src/models/managed_agents/events/session_event.dart",
       "schema": "BetaManagedAgentsSessionEndTurn",
-      "parent": "StopReason"
+      "parent": "SessionStopReason"
     },
     "SessionEvent": {
       "spec": "main",
@@ -2137,7 +2152,7 @@
       "dart_class": "SessionRequiresAction",
       "file": "lib/src/models/managed_agents/events/session_event.dart",
       "schema": "BetaManagedAgentsSessionRequiresAction",
-      "parent": "StopReason"
+      "parent": "SessionStopReason"
     },
     "SessionResource": {
       "spec": "main",
@@ -2159,7 +2174,7 @@
       "dart_class": "SessionRetriesExhausted",
       "file": "lib/src/models/managed_agents/events/session_event.dart",
       "schema": "BetaManagedAgentsSessionRetriesExhausted",
-      "parent": "StopReason"
+      "parent": "SessionStopReason"
     },
     "SessionStats": {
       "spec": "main",
@@ -2400,7 +2415,9 @@
       "dart_class": "Vault",
       "file": "lib/src/models/managed_agents/vaults/vault.dart",
       "schema": "BetaManagedAgentsVault",
-      "excluded_properties": ["archived_at"]
+      "excluded_properties": [
+        "archived_at"
+      ]
     },
     "AgentCustomToolUseEvent": {
       "spec": "main",
@@ -2521,7 +2538,9 @@
       "file": "lib/src/models/managed_agents/events/session_event.dart",
       "schema": "BetaManagedAgentsSpanModelRequestEndEvent",
       "parent": "SessionEvent",
-      "excluded_properties": ["model_usage"]
+      "excluded_properties": [
+        "model_usage"
+      ]
     },
     "SpanModelRequestStartEvent": {
       "spec": "main",

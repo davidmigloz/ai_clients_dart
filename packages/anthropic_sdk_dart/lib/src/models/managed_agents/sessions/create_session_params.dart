@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
+import '../resources/session_resource_params.dart';
 
 /// Agent parameter — either a plain agent ID string or an object with id,
 /// type, and optional version.
@@ -137,7 +138,7 @@ class CreateSessionParams {
   final List<String>? vaultIds;
 
   /// Resources to mount into the session's container.
-  final List<Map<String, dynamic>>? resources;
+  final List<SessionResourceParams>? resources;
 
   /// Creates a [CreateSessionParams].
   const CreateSessionParams({
@@ -160,7 +161,9 @@ class CreateSessionParams {
       ),
       vaultIds: (json['vault_ids'] as List?)?.map((e) => e as String).toList(),
       resources: (json['resources'] as List?)
-          ?.map((e) => e as Map<String, dynamic>)
+          ?.map(
+            (e) => SessionResourceParams.fromJson(e as Map<String, dynamic>),
+          )
           .toList(),
     );
   }
@@ -172,7 +175,8 @@ class CreateSessionParams {
     if (title != null) 'title': title,
     if (metadata != null) 'metadata': metadata,
     if (vaultIds != null) 'vault_ids': vaultIds,
-    if (resources != null) 'resources': resources,
+    if (resources != null)
+      'resources': resources!.map((e) => e.toJson()).toList(),
   };
 
   /// Creates a copy with replaced values.
@@ -196,7 +200,7 @@ class CreateSessionParams {
           : vaultIds as List<String>?,
       resources: resources == unsetCopyWithValue
           ? this.resources
-          : resources as List<Map<String, dynamic>>?,
+          : resources as List<SessionResourceParams>?,
     );
   }
 
@@ -210,7 +214,7 @@ class CreateSessionParams {
           title == other.title &&
           mapsEqual(metadata, other.metadata) &&
           listsEqual(vaultIds, other.vaultIds) &&
-          listOfMapsDeepEqual(resources, other.resources);
+          listsEqual(resources, other.resources);
 
   @override
   int get hashCode => Object.hash(
@@ -219,7 +223,7 @@ class CreateSessionParams {
     title,
     mapHash(metadata),
     listHash(vaultIds),
-    listOfMapsHashCode(resources),
+    listHash(resources),
   );
 
   @override

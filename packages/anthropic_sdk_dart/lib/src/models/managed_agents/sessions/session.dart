@@ -2,8 +2,12 @@ import 'package:meta/meta.dart';
 
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
+import '../config/agent_skill.dart';
+import '../config/agent_tool.dart';
+import '../config/mcp_server.dart';
 import '../config/model_config.dart';
 import '../events/telemetry.dart';
+import '../resources/session_resource.dart';
 
 /// Session status.
 enum SessionStatus {
@@ -65,7 +69,7 @@ class Session {
   final Map<String, String>? metadata;
 
   /// Resources mounted into the session.
-  final List<Map<String, dynamic>>? resources;
+  final List<SessionResource>? resources;
 
   /// Vault IDs attached to the session.
   final List<String>? vaultIds;
@@ -116,7 +120,7 @@ class Session {
         (k, v) => MapEntry(k, v as String),
       ),
       resources: (json['resources'] as List?)
-          ?.map((e) => e as Map<String, dynamic>)
+          ?.map((e) => SessionResource.fromJson(e as Map<String, dynamic>))
           .toList(),
       vaultIds: (json['vault_ids'] as List?)?.map((e) => e as String).toList(),
       stats: json['stats'] != null
@@ -142,7 +146,8 @@ class Session {
     if (environmentId != null) 'environment_id': environmentId,
     'title': title,
     if (metadata != null) 'metadata': metadata,
-    if (resources != null) 'resources': resources,
+    if (resources != null)
+      'resources': resources!.map((e) => e.toJson()).toList(),
     if (vaultIds != null) 'vault_ids': vaultIds,
     if (stats != null) 'stats': stats!.toJson(),
     if (usage != null) 'usage': usage!.toJson(),
@@ -182,7 +187,7 @@ class Session {
           : metadata as Map<String, String>?,
       resources: resources == unsetCopyWithValue
           ? this.resources
-          : resources as List<Map<String, dynamic>>?,
+          : resources as List<SessionResource>?,
       vaultIds: vaultIds == unsetCopyWithValue
           ? this.vaultIds
           : vaultIds as List<String>?,
@@ -208,7 +213,7 @@ class Session {
           environmentId == other.environmentId &&
           title == other.title &&
           mapsEqual(metadata, other.metadata) &&
-          listOfMapsDeepEqual(resources, other.resources) &&
+          listsEqual(resources, other.resources) &&
           listsEqual(vaultIds, other.vaultIds) &&
           stats == other.stats &&
           usage == other.usage &&
@@ -225,7 +230,7 @@ class Session {
     environmentId,
     title,
     mapHash(metadata),
-    listOfMapsHashCode(resources),
+    listHash(resources),
     listHash(vaultIds),
     stats,
     usage,
@@ -278,13 +283,13 @@ class SessionAgent {
   final ModelConfig model;
 
   /// MCP servers connected to this agent.
-  final List<Map<String, dynamic>> mcpServers;
+  final List<MCPServer> mcpServers;
 
   /// Skills attached to this agent.
-  final List<Map<String, dynamic>> skills;
+  final List<AgentSkill> skills;
 
   /// Tool configurations for this agent.
-  final List<Map<String, dynamic>> tools;
+  final List<AgentTool> tools;
 
   /// Creates a [SessionAgent].
   const SessionAgent({
@@ -310,15 +315,21 @@ class SessionAgent {
       description: json['description'] as String?,
       system: json['system'] as String?,
       model: ModelConfig.fromJson(json['model'] as Map<String, dynamic>),
-      mcpServers: (json['mcp_servers'] as List)
-          .map((e) => e as Map<String, dynamic>)
-          .toList(),
-      skills: (json['skills'] as List)
-          .map((e) => e as Map<String, dynamic>)
-          .toList(),
-      tools: (json['tools'] as List)
-          .map((e) => e as Map<String, dynamic>)
-          .toList(),
+      mcpServers:
+          (json['mcp_servers'] as List?)
+              ?.map((e) => MCPServer.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      skills:
+          (json['skills'] as List?)
+              ?.map((e) => AgentSkill.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      tools:
+          (json['tools'] as List?)
+              ?.map((e) => AgentTool.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
   }
 
@@ -331,9 +342,9 @@ class SessionAgent {
     'description': description,
     'system': system,
     'model': model.toJson(),
-    'mcp_servers': mcpServers,
-    'skills': skills,
-    'tools': tools,
+    'mcp_servers': mcpServers.map((e) => e.toJson()).toList(),
+    'skills': skills.map((e) => e.toJson()).toList(),
+    'tools': tools.map((e) => e.toJson()).toList(),
   };
 
   /// Creates a copy with replaced values.
@@ -345,9 +356,9 @@ class SessionAgent {
     Object? description = unsetCopyWithValue,
     Object? system = unsetCopyWithValue,
     ModelConfig? model,
-    List<Map<String, dynamic>>? mcpServers,
-    List<Map<String, dynamic>>? skills,
-    List<Map<String, dynamic>>? tools,
+    List<MCPServer>? mcpServers,
+    List<AgentSkill>? skills,
+    List<AgentTool>? tools,
   }) {
     return SessionAgent(
       id: id ?? this.id,
@@ -377,9 +388,9 @@ class SessionAgent {
           description == other.description &&
           system == other.system &&
           model == other.model &&
-          listOfMapsDeepEqual(mcpServers, other.mcpServers) &&
-          listOfMapsDeepEqual(skills, other.skills) &&
-          listOfMapsDeepEqual(tools, other.tools);
+          listsEqual(mcpServers, other.mcpServers) &&
+          listsEqual(skills, other.skills) &&
+          listsEqual(tools, other.tools);
 
   @override
   int get hashCode => Object.hash(
@@ -390,9 +401,9 @@ class SessionAgent {
     description,
     system,
     model,
-    listOfMapsHashCode(mcpServers),
-    listOfMapsHashCode(skills),
-    listOfMapsHashCode(tools),
+    listHash(mcpServers),
+    listHash(skills),
+    listHash(tools),
   );
 
   @override
