@@ -15,10 +15,11 @@ class JudgeConversationRequest {
   /// Creates a [JudgeConversationRequest].
   JudgeConversationRequest({
     required List<Map<String, dynamic>> messages,
-    this.properties,
+    Map<String, dynamic>? properties,
   }) : messages = List.unmodifiable(
          messages.map(Map<String, dynamic>.unmodifiable),
-       );
+       ),
+       properties = properties != null ? Map.unmodifiable(properties) : null;
 
   /// Creates a [JudgeConversationRequest] from JSON.
   factory JudgeConversationRequest.fromJson(Map<String, dynamic> json) =>

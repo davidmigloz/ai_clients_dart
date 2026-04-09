@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality_helpers.dart';
 import 'filter_node.dart';
 
 /// A single filter condition for observability queries.
@@ -37,11 +38,13 @@ class FilterCondition extends FilterNode {
     if (identical(this, other)) return true;
     if (other is! FilterCondition) return false;
     if (runtimeType != other.runtimeType) return false;
-    return field == other.field && op == other.op && value == other.value;
+    return field == other.field &&
+        op == other.op &&
+        valuesDeepEqual(value, other.value);
   }
 
   @override
-  int get hashCode => Object.hash(field, op, value);
+  int get hashCode => Object.hash(field, op, valueDeepHashCode(value));
 
   @override
   String toString() => 'FilterCondition(field: $field, op: $op, value: $value)';

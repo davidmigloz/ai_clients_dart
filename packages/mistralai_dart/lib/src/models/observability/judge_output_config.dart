@@ -125,7 +125,8 @@ class JudgeOutputConfigUnknown extends JudgeOutputConfig {
   /// The raw JSON for this config.
   final Map<String, dynamic> rawJson;
 
-  const JudgeOutputConfigUnknown._(this.type, this.rawJson);
+  JudgeOutputConfigUnknown._(this.type, Map<String, dynamic> rawJson)
+    : rawJson = Map.unmodifiable(rawJson);
 
   @override
   Map<String, dynamic> toJson() => rawJson;
