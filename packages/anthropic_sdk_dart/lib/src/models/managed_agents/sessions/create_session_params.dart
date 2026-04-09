@@ -210,7 +210,7 @@ class CreateSessionParams {
           title == other.title &&
           mapsEqual(metadata, other.metadata) &&
           listsEqual(vaultIds, other.vaultIds) &&
-          listsEqual(resources, other.resources);
+          listOfMapsDeepEqual(resources, other.resources);
 
   @override
   int get hashCode => Object.hash(
@@ -219,7 +219,7 @@ class CreateSessionParams {
     title,
     mapHash(metadata),
     listHash(vaultIds),
-    listHash(resources),
+    listOfMapsHashCode(resources),
   );
 
   @override

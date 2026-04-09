@@ -208,7 +208,7 @@ class Session {
           environmentId == other.environmentId &&
           title == other.title &&
           mapsEqual(metadata, other.metadata) &&
-          listsEqual(resources, other.resources) &&
+          listOfMapsDeepEqual(resources, other.resources) &&
           listsEqual(vaultIds, other.vaultIds) &&
           stats == other.stats &&
           usage == other.usage &&
@@ -225,7 +225,7 @@ class Session {
     environmentId,
     title,
     mapHash(metadata),
-    listHash(resources),
+    listOfMapsHashCode(resources),
     listHash(vaultIds),
     stats,
     usage,

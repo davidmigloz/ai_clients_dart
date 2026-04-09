@@ -29,7 +29,7 @@ class ListAgentsResponse {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'data': data.map((e) => e.toJson()).toList(),
-    'next_page': nextPage,
+    if (nextPage != null) 'next_page': nextPage,
   };
 
   /// Creates a copy with replaced values.
@@ -85,7 +85,7 @@ class ListAgentVersionsResponse {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'data': data.map((e) => e.toJson()).toList(),
-    'next_page': nextPage,
+    if (nextPage != null) 'next_page': nextPage,
   };
 
   /// Creates a copy with replaced values.
