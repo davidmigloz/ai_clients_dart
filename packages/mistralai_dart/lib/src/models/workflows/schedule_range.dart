@@ -1,7 +1,5 @@
 import 'package:meta/meta.dart';
 
-import '../common/copy_with_sentinel.dart';
-
 /// A range specification for schedule calendars.
 @immutable
 class ScheduleRange {
@@ -28,15 +26,11 @@ class ScheduleRange {
   Map<String, dynamic> toJson() => {'start': start, 'end': end, 'step': step};
 
   /// Creates a copy with replaced values.
-  ScheduleRange copyWith({
-    int? start,
-    Object? end = unsetCopyWithValue,
-    Object? step = unsetCopyWithValue,
-  }) {
+  ScheduleRange copyWith({int? start, int? end, int? step}) {
     return ScheduleRange(
       start: start ?? this.start,
-      end: end == unsetCopyWithValue ? this.end : end! as int,
-      step: step == unsetCopyWithValue ? this.step : step! as int,
+      end: end ?? this.end,
+      step: step ?? this.step,
     );
   }
 

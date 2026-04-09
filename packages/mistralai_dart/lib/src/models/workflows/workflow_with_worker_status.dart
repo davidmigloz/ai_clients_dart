@@ -102,9 +102,9 @@ class WorkflowWithWorkerStatus {
     String? workspaceId,
     bool? active,
     Object? description = unsetCopyWithValue,
-    Object? archived = unsetCopyWithValue,
-    Object? availableInChatAssistant = unsetCopyWithValue,
-    Object? isTechnical = unsetCopyWithValue,
+    bool? archived,
+    bool? availableInChatAssistant,
+    bool? isTechnical,
     Object? sharedNamespace = unsetCopyWithValue,
   }) {
     return WorkflowWithWorkerStatus(
@@ -118,15 +118,10 @@ class WorkflowWithWorkerStatus {
       description: description == unsetCopyWithValue
           ? this.description
           : description as String?,
-      archived: archived == unsetCopyWithValue
-          ? this.archived
-          : archived! as bool,
-      availableInChatAssistant: availableInChatAssistant == unsetCopyWithValue
-          ? this.availableInChatAssistant
-          : availableInChatAssistant! as bool,
-      isTechnical: isTechnical == unsetCopyWithValue
-          ? this.isTechnical
-          : isTechnical! as bool,
+      archived: archived ?? this.archived,
+      availableInChatAssistant:
+          availableInChatAssistant ?? this.availableInChatAssistant,
+      isTechnical: isTechnical ?? this.isTechnical,
       sharedNamespace: sharedNamespace == unsetCopyWithValue
           ? this.sharedNamespace
           : sharedNamespace as String?,

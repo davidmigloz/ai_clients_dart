@@ -76,7 +76,7 @@ class WorkflowCodeDefinition {
   WorkflowCodeDefinition copyWith({
     Map<String, dynamic>? inputSchema,
     Object? outputSchema = unsetCopyWithValue,
-    Object? enforceDeterminism = unsetCopyWithValue,
+    bool? enforceDeterminism,
     Object? executionTimeout = unsetCopyWithValue,
     Object? queries = unsetCopyWithValue,
     Object? signals = unsetCopyWithValue,
@@ -87,9 +87,7 @@ class WorkflowCodeDefinition {
       outputSchema: outputSchema == unsetCopyWithValue
           ? this.outputSchema
           : outputSchema as Map<String, dynamic>?,
-      enforceDeterminism: enforceDeterminism == unsetCopyWithValue
-          ? this.enforceDeterminism
-          : enforceDeterminism! as bool,
+      enforceDeterminism: enforceDeterminism ?? this.enforceDeterminism,
       executionTimeout: executionTimeout == unsetCopyWithValue
           ? this.executionTimeout
           : executionTimeout as double?,

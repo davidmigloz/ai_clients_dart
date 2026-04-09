@@ -1,7 +1,5 @@
 import 'package:meta/meta.dart';
 
-import '../common/copy_with_sentinel.dart';
-
 /// Response for a workflow signal.
 @immutable
 class SignalWorkflowResponse {
@@ -21,12 +19,8 @@ class SignalWorkflowResponse {
   Map<String, dynamic> toJson() => {'message': message};
 
   /// Creates a copy with replaced values.
-  SignalWorkflowResponse copyWith({Object? message = unsetCopyWithValue}) {
-    return SignalWorkflowResponse(
-      message: message == unsetCopyWithValue
-          ? this.message
-          : message! as String,
-    );
+  SignalWorkflowResponse copyWith({String? message}) {
+    return SignalWorkflowResponse(message: message ?? this.message);
   }
 
   @override

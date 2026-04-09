@@ -45,18 +45,14 @@ class ResetInvocationBody {
   /// Creates a copy with replaced values.
   ResetInvocationBody copyWith({
     int? eventId,
-    Object? excludeSignals = unsetCopyWithValue,
-    Object? excludeUpdates = unsetCopyWithValue,
+    bool? excludeSignals,
+    bool? excludeUpdates,
     Object? reason = unsetCopyWithValue,
   }) {
     return ResetInvocationBody(
       eventId: eventId ?? this.eventId,
-      excludeSignals: excludeSignals == unsetCopyWithValue
-          ? this.excludeSignals
-          : excludeSignals! as bool,
-      excludeUpdates: excludeUpdates == unsetCopyWithValue
-          ? this.excludeUpdates
-          : excludeUpdates! as bool,
+      excludeSignals: excludeSignals ?? this.excludeSignals,
+      excludeUpdates: excludeUpdates ?? this.excludeUpdates,
       reason: reason == unsetCopyWithValue ? this.reason : reason as String?,
     );
   }

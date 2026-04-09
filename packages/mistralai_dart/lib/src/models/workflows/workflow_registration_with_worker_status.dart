@@ -75,7 +75,7 @@ class WorkflowRegistrationWithWorkerStatus {
     WorkflowCodeDefinition? definition,
     String? workflowId,
     bool? active,
-    Object? compatibleWithChatAssistant = unsetCopyWithValue,
+    bool? compatibleWithChatAssistant,
     Object? workflow = unsetCopyWithValue,
   }) {
     return WorkflowRegistrationWithWorkerStatus(
@@ -85,9 +85,7 @@ class WorkflowRegistrationWithWorkerStatus {
       workflowId: workflowId ?? this.workflowId,
       active: active ?? this.active,
       compatibleWithChatAssistant:
-          compatibleWithChatAssistant == unsetCopyWithValue
-          ? this.compatibleWithChatAssistant
-          : compatibleWithChatAssistant! as bool,
+          compatibleWithChatAssistant ?? this.compatibleWithChatAssistant,
       workflow: workflow == unsetCopyWithValue
           ? this.workflow
           : workflow as Workflow?,

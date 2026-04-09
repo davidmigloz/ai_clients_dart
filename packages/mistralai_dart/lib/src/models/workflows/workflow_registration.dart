@@ -67,7 +67,7 @@ class WorkflowRegistration {
     String? taskQueue,
     WorkflowCodeDefinition? definition,
     String? workflowId,
-    Object? compatibleWithChatAssistant = unsetCopyWithValue,
+    bool? compatibleWithChatAssistant,
     Object? workflow = unsetCopyWithValue,
   }) {
     return WorkflowRegistration(
@@ -76,9 +76,7 @@ class WorkflowRegistration {
       definition: definition ?? this.definition,
       workflowId: workflowId ?? this.workflowId,
       compatibleWithChatAssistant:
-          compatibleWithChatAssistant == unsetCopyWithValue
-          ? this.compatibleWithChatAssistant
-          : compatibleWithChatAssistant! as bool,
+          compatibleWithChatAssistant ?? this.compatibleWithChatAssistant,
       workflow: workflow == unsetCopyWithValue
           ? this.workflow
           : workflow as Workflow?,

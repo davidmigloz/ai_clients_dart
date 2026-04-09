@@ -97,7 +97,7 @@ class WorkflowExecutionProgressTraceEvent {
     Object? error = unsetCopyWithValue,
     Object? type = unsetCopyWithValue,
     Object? status = unsetCopyWithValue,
-    Object? internal = unsetCopyWithValue,
+    bool? internal,
   }) {
     return WorkflowExecutionProgressTraceEvent(
       name: name ?? this.name,
@@ -113,9 +113,7 @@ class WorkflowExecutionProgressTraceEvent {
       status: status == unsetCopyWithValue
           ? this.status
           : status as EventProgressStatus?,
-      internal: internal == unsetCopyWithValue
-          ? this.internal
-          : internal! as bool,
+      internal: internal ?? this.internal,
     );
   }
 

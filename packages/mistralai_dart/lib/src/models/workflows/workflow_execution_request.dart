@@ -82,7 +82,7 @@ class WorkflowExecutionRequest {
     Object? deploymentName = unsetCopyWithValue,
     Object? taskQueue = unsetCopyWithValue,
     Object? timeoutSeconds = unsetCopyWithValue,
-    Object? waitForResult = unsetCopyWithValue,
+    bool? waitForResult,
     Object? customTracingAttributes = unsetCopyWithValue,
   }) {
     return WorkflowExecutionRequest(
@@ -104,9 +104,7 @@ class WorkflowExecutionRequest {
       timeoutSeconds: timeoutSeconds == unsetCopyWithValue
           ? this.timeoutSeconds
           : timeoutSeconds as double?,
-      waitForResult: waitForResult == unsetCopyWithValue
-          ? this.waitForResult
-          : waitForResult! as bool,
+      waitForResult: waitForResult ?? this.waitForResult,
       customTracingAttributes: customTracingAttributes == unsetCopyWithValue
           ? this.customTracingAttributes
           : customTracingAttributes as Map<String, dynamic>?,

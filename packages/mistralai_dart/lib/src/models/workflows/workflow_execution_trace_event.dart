@@ -65,7 +65,7 @@ class WorkflowExecutionTraceEvent {
     int? timestampUnixNano,
     Map<String, dynamic>? attributes,
     Object? type = unsetCopyWithValue,
-    Object? internal = unsetCopyWithValue,
+    bool? internal,
   }) {
     return WorkflowExecutionTraceEvent(
       name: name ?? this.name,
@@ -73,9 +73,7 @@ class WorkflowExecutionTraceEvent {
       timestampUnixNano: timestampUnixNano ?? this.timestampUnixNano,
       attributes: attributes ?? this.attributes,
       type: type == unsetCopyWithValue ? this.type : type as EventType?,
-      internal: internal == unsetCopyWithValue
-          ? this.internal
-          : internal! as bool,
+      internal: internal ?? this.internal,
     );
   }
 
