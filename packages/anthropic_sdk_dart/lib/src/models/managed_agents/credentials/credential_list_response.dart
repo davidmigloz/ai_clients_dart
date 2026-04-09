@@ -8,41 +8,39 @@ import 'credential.dart';
 @immutable
 class ListCredentialsResponse {
   /// List of credentials.
-  final List<Credential>? data;
+  final List<Credential> data;
 
   /// Pagination token for the next page, or null if no more results.
   final String? nextPage;
 
   /// Creates a [ListCredentialsResponse].
-  const ListCredentialsResponse({this.data, this.nextPage});
+  const ListCredentialsResponse({required this.data, this.nextPage});
 
   /// Creates a [ListCredentialsResponse] from JSON.
   factory ListCredentialsResponse.fromJson(Map<String, dynamic> json) {
     return ListCredentialsResponse(
-      data: (json['data'] as List?)
-          ?.map((e) => Credential.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      data:
+          (json['data'] as List?)
+              ?.map((e) => Credential.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
       nextPage: json['next_page'] as String?,
     );
   }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
-    if (data != null) 'data': data!.map((e) => e.toJson()).toList(),
+    'data': data.map((e) => e.toJson()).toList(),
     if (nextPage != null) 'next_page': nextPage,
   };
 
   /// Creates a copy with replaced values.
-  ///
-  /// For nullable fields ([data], [nextPage]), pass the sentinel value
-  /// [unsetCopyWithValue] (or omit) to keep the original value, or pass
-  /// `null` explicitly to set the field to null.
   ListCredentialsResponse copyWith({
-    Object? data = unsetCopyWithValue,
+    List<Credential>? data,
     Object? nextPage = unsetCopyWithValue,
   }) {
     return ListCredentialsResponse(
-      data: data == unsetCopyWithValue ? this.data : data as List<Credential>?,
+      data: data ?? this.data,
       nextPage: nextPage == unsetCopyWithValue
           ? this.nextPage
           : nextPage as String?,

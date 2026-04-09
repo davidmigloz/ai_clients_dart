@@ -102,7 +102,7 @@ class ManagedAgentsFixtures {
       'content': [
         {'type': 'text', 'text': 'Hello'},
       ],
-      'created_at': '2026-04-01T00:00:00Z',
+      'processed_at': '2026-04-01T00:00:00Z',
     };
   }
 }
@@ -374,7 +374,7 @@ void main() {
             'content': [
               {'type': 'text', 'text': 'Hello'},
             ],
-            'created_at': '2026-04-01T00:00:00Z',
+            'processed_at': '2026-04-01T00:00:00Z',
           },
         ],
       });
@@ -486,6 +486,66 @@ void main() {
       expect(request.method, 'GET');
     });
 
+    test('retrieve sends correct request and parses response', () async {
+      mockHttpClient.queueJsonResponse({
+        'type': 'file',
+        'id': 'res_123',
+        'file_id': 'file_abc',
+        'mount_path': '/workspace/data.csv',
+        'created_at': '2026-04-01T00:00:00Z',
+        'updated_at': '2026-04-01T00:00:00Z',
+      });
+
+      final resource = await client.sessions
+          .resources('session_test123')
+          .retrieve('res_123');
+
+      expect(resource, isA<FileResource>());
+      expect((resource as FileResource).id, 'res_123');
+      expect(resource.fileId, 'file_abc');
+
+      final request = mockHttpClient.lastRequest!;
+      expect(
+        request.url.path,
+        '/v1/sessions/session_test123/resources/res_123',
+      );
+      expect(request.method, 'GET');
+      expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
+    });
+
+    test('update sends correct request and parses response', () async {
+      mockHttpClient.queueJsonResponse({
+        'type': 'github_repository',
+        'id': 'res_456',
+        'url': 'https://github.com/example/repo',
+        'mount_path': '/workspace/repo',
+        'created_at': '2026-04-01T00:00:00Z',
+        'updated_at': '2026-04-01T00:00:00Z',
+      });
+
+      final resource = await client.sessions
+          .resources('session_test123')
+          .update(
+            'res_456',
+            const UpdateSessionResourceParams(authorizationToken: 'new-token'),
+          );
+
+      expect(resource, isA<GitHubRepositoryResource>());
+      expect((resource as GitHubRepositoryResource).id, 'res_456');
+
+      final request = mockHttpClient.lastRequest!;
+      expect(
+        request.url.path,
+        '/v1/sessions/session_test123/resources/res_456',
+      );
+      expect(request.method, 'POST');
+      expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
+
+      final body =
+          jsonDecode((request as dynamic).body) as Map<String, dynamic>;
+      expect(body['authorization_token'], 'new-token');
+    });
+
     test('delete sends correct request', () async {
       mockHttpClient.queueJsonResponse({
         'id': 'res_123',
@@ -547,6 +607,29 @@ void main() {
 
       final request = mockHttpClient.lastRequest!;
       expect(request.url.path, '/v1/vaults/vault_test123');
+    });
+
+    test('update sends correct request and parses response', () async {
+      mockHttpClient.queueJsonResponse(
+        ManagedAgentsFixtures.vault(displayName: 'Updated Vault'),
+      );
+
+      final vault = await client.vaults.update(
+        'vault_test123',
+        const UpdateVaultParams(displayName: 'Updated Vault'),
+      );
+
+      expect(vault.id, 'vault_test123');
+      expect(vault.displayName, 'Updated Vault');
+
+      final request = mockHttpClient.lastRequest!;
+      expect(request.url.path, '/v1/vaults/vault_test123');
+      expect(request.method, 'POST');
+      expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
+
+      final body =
+          jsonDecode((request as dynamic).body) as Map<String, dynamic>;
+      expect(body['display_name'], 'Updated Vault');
     });
 
     test('delete sends correct request', () async {
@@ -632,6 +715,31 @@ void main() {
         request.url.path,
         '/v1/vaults/vault_test123/credentials/cred_test123',
       );
+    });
+
+    test('update sends correct request and parses response', () async {
+      mockHttpClient.queueJsonResponse(ManagedAgentsFixtures.credential());
+
+      final credential = await client.vaults
+          .credentials('vault_test123')
+          .update(
+            'cred_test123',
+            const UpdateCredentialParams(displayName: 'Updated Credential'),
+          );
+
+      expect(credential.id, 'cred_test123');
+
+      final request = mockHttpClient.lastRequest!;
+      expect(
+        request.url.path,
+        '/v1/vaults/vault_test123/credentials/cred_test123',
+      );
+      expect(request.method, 'POST');
+      expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
+
+      final body =
+          jsonDecode((request as dynamic).body) as Map<String, dynamic>;
+      expect(body['display_name'], 'Updated Credential');
     });
 
     test('delete sends correct request', () async {

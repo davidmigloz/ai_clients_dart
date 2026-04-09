@@ -322,43 +322,39 @@ class DeletedSessionResource {
 @immutable
 class ListSessionResourcesResponse {
   /// Resources for the session, ordered by `created_at`.
-  final List<SessionResource>? data;
+  final List<SessionResource> data;
 
   /// Opaque cursor for the next page. Null when no more results.
   final String? nextPage;
 
   /// Creates a [ListSessionResourcesResponse].
-  const ListSessionResourcesResponse({this.data, this.nextPage});
+  const ListSessionResourcesResponse({required this.data, this.nextPage});
 
   /// Creates a [ListSessionResourcesResponse] from JSON.
   factory ListSessionResourcesResponse.fromJson(Map<String, dynamic> json) {
     return ListSessionResourcesResponse(
-      data: (json['data'] as List?)
-          ?.map((e) => SessionResource.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      data:
+          (json['data'] as List?)
+              ?.map((e) => SessionResource.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
       nextPage: json['next_page'] as String?,
     );
   }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
-    if (data != null) 'data': data!.map((e) => e.toJson()).toList(),
+    'data': data.map((e) => e.toJson()).toList(),
     if (nextPage != null) 'next_page': nextPage,
   };
 
   /// Creates a copy with replaced values.
-  ///
-  /// For nullable fields ([data], [nextPage]), pass the sentinel value
-  /// [unsetCopyWithValue] (or omit) to keep the original value, or pass
-  /// `null` explicitly to set the field to null.
   ListSessionResourcesResponse copyWith({
-    Object? data = unsetCopyWithValue,
+    List<SessionResource>? data,
     Object? nextPage = unsetCopyWithValue,
   }) {
     return ListSessionResourcesResponse(
-      data: data == unsetCopyWithValue
-          ? this.data
-          : data as List<SessionResource>?,
+      data: data ?? this.data,
       nextPage: nextPage == unsetCopyWithValue
           ? this.nextPage
           : nextPage as String?,
