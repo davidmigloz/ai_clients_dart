@@ -14,8 +14,8 @@ Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-referenc
 <summary><b>Table of Contents</b></summary>
 
 - [Features](#features)
-- [Why choose this client?](#why-choose-this-client)
 - [Quickstart](#quickstart)
+- [Why choose this client?](#why-choose-this-client)
 - [Configuration](#configuration)
 - [Usage](#usage)
 - [Error Handling](#error-handling)
@@ -48,15 +48,6 @@ Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-referenc
 - Assistants and vector stores (deprecated — use Responses API instead)
 
 See [API Coverage](#api-coverage) for the full coverage table.
-
-## Why choose this client?
-
-- Pure Dart with no Flutter dependency — works in mobile apps, backends, and CLIs.
-- Type-safe request and response models with minimal dependencies (`http`, `logging`, `meta`).
-- Streaming, retries, interceptors, and error handling built into the client.
-- Covers the full OpenAI API surface, including Responses, Realtime, and legacy Assistants.
-- Resource-based API design matching official SDKs
-- Strict [semver](https://semver.org/) versioning so downstream packages can depend on stable, predictable version ranges.
 
 ## Quickstart
 
@@ -101,6 +92,15 @@ import 'package:openai_dart/openai_dart_assistants.dart' as assistants;
 // Realtime API — WebSocket and WebRTC sessions
 import 'package:openai_dart/openai_dart_realtime.dart' as realtime;
 ```
+
+## Why choose this client?
+
+- Pure Dart with no Flutter dependency — works in mobile apps, backends, and CLIs.
+- Type-safe request and response models with minimal dependencies (`http`, `logging`, `meta`).
+- Streaming, retries, interceptors, and error handling built into the client.
+- Covers the full OpenAI API surface, including Responses, Realtime, and legacy Assistants.
+- Resource-based API design matching official SDKs
+- Strict [semver](https://semver.org/) versioning so downstream packages can depend on stable, predictable version ranges.
 
 ## Configuration
 
