@@ -11,7 +11,8 @@ def _get_encoder() -> Any:
     except ImportError as exc:  # pragma: no cover - import guard
         raise RuntimeError(
             "tiktoken is required for llms.txt generation. "
-            "Install it via: pip install tiktoken"
+            "Install toolkit dependencies via: "
+            "pip install -r .agents/shared/api-toolkit/requirements.txt"
         ) from exc
     return tiktoken.get_encoding("o200k_base")
 

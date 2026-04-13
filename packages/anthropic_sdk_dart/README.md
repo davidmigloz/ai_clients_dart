@@ -79,7 +79,7 @@ Future<void> main() async {
 
 - Pure Dart with no Flutter dependency — works in mobile apps, backends, and CLIs.
 - Type-safe request and response models with minimal dependencies (`http`, `logging`, `meta`).
-- Streaming, retries, interceptors, and cancelation built into the client.
+- Streaming, retries, interceptors, and cancellation built into the client.
 - Follows Anthropic resource naming closely, so official docs translate directly into Dart code.
 - Strict [semver](https://semver.org/) versioning so downstream packages can depend on stable, predictable version ranges.
 

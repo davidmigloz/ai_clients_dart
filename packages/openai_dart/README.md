@@ -99,7 +99,7 @@ import 'package:openai_dart/openai_dart_realtime.dart' as realtime;
 - Type-safe request and response models with minimal dependencies (`http`, `logging`, `meta`).
 - Streaming, retries, interceptors, and error handling built into the client.
 - Covers the full OpenAI API surface, including Responses, Realtime, and legacy Assistants.
-- Resource-based API design matching official SDKs
+- Resource-based API design matching official SDKs.
 - Strict [semver](https://semver.org/) versioning so downstream packages can depend on stable, predictable version ranges.
 
 ## Configuration
