@@ -29,6 +29,8 @@ doc/api/
 # Python
 __pycache__/
 *.pyc
+.venv/
+.pytest_cache/
 
 # Claude Code
 **/.claude/scheduled_tasks.lock

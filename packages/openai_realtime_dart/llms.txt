@@ -4,13 +4,15 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_realtime_dart/README.md): Primary package documentation with installation, configuration, and usage examples.
-- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_realtime_dart/CHANGELOG.md): Release history and version-by-version changes.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_realtime_dart/README.md) (~3.2k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_realtime_dart/CHANGELOG.md) (~2.9k tokens): Release history and version-by-version changes.
 
 ## Examples
 
-- [openai_realtime_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_realtime_dart/example/openai_realtime_dart_example.dart): Package overview example.
+- [openai_realtime_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_realtime_dart/example/openai_realtime_dart_example.dart) (~306 tokens): Package overview example.
 
 ## Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/openai_realtime_dart): Source tree, pubspec, and package-local files.
+
+**Total: ~6.4k tokens**

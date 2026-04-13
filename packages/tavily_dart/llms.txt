@@ -4,13 +4,15 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/tavily_dart/README.md): Primary package documentation with installation, configuration, and usage examples.
-- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/tavily_dart/CHANGELOG.md): Release history and version-by-version changes.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/tavily_dart/README.md) (~1.1k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/tavily_dart/CHANGELOG.md) (~1.5k tokens): Release history and version-by-version changes.
 
 ## Examples
 
-- [tavily_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/tavily_dart/example/tavily_dart_example.dart): Package overview example.
+- [tavily_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/tavily_dart/example/tavily_dart_example.dart) (~165 tokens): Package overview example.
 
 ## Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/tavily_dart): Source tree, pubspec, and package-local files.
+
+**Total: ~2.8k tokens**

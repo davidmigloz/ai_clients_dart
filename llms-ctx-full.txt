@@ -12,32 +12,34 @@ Canonical URL: https://github.com/davidmigloz/ai_clients_dart/blob/main/packages
 
 #### Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/README.md): Primary package documentation with installation, configuration, and usage examples.
-- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/CHANGELOG.md): Release history and version-by-version changes.
-- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/MIGRATION.md): Upgrade notes and breaking-change guidance.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/README.md) (~4k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/CHANGELOG.md) (~6.9k tokens): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/MIGRATION.md) (~4.1k tokens): Upgrade notes and breaking-change guidance.
 
 #### Examples
 
-- [messages_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/messages_example.dart): Basic message creation.
-- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/streaming_example.dart): Streaming responses.
-- [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/tool_calling_example.dart): Tool calling with schemas.
-- [thinking_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/thinking_example.dart): Extended thinking.
-- [vision_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/vision_example.dart): Image and document inputs.
-- [token_counting_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/token_counting_example.dart): Token counting.
-- [message_batches_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/message_batches_example.dart): Batch processing.
-- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/error_handling_example.dart): Exception handling patterns.
-- [web_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/web_search_example.dart): Web search tool.
-- [computer_use_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/computer_use_example.dart): Computer use tool.
-- [document_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/document_example.dart): Document inputs with citations.
-- [files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/files_example.dart): File management (beta).
-- [skills_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/skills_example.dart): Skills management (beta).
-- [mcp_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/mcp_example.dart): MCP tool integration.
-- [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/models_example.dart): Model listing.
-- [anthropic_sdk_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/anthropic_sdk_dart_example.dart): Quick-start overview.
+- [messages_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/messages_example.dart) (~833 tokens): Basic message creation.
+- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/streaming_example.dart) (~1.3k tokens): Streaming responses.
+- [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/tool_calling_example.dart) (~781 tokens): Tool calling with schemas.
+- [thinking_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/thinking_example.dart) (~943 tokens): Extended thinking.
+- [vision_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/vision_example.dart) (~1.2k tokens): Image and document inputs.
+- [token_counting_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/token_counting_example.dart) (~1.1k tokens): Token counting.
+- [message_batches_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/message_batches_example.dart) (~863 tokens): Batch processing.
+- [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/models_example.dart) (~473 tokens): Model listing.
+- [files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/files_example.dart) (~842 tokens): File management (beta).
+- [skills_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/skills_example.dart) (~1k tokens): Skills management (beta).
+- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/error_handling_example.dart) (~640 tokens): Exception handling patterns.
+- [web_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/web_search_example.dart) (~795 tokens): Web search tool.
+- [computer_use_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/computer_use_example.dart) (~868 tokens): Computer use tool.
+- [document_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/document_example.dart) (~945 tokens): Document inputs with citations.
+- [mcp_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/mcp_example.dart) (~906 tokens): MCP tool integration.
+- [anthropic_sdk_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/anthropic_sdk_dart_example.dart) (~678 tokens): Quick-start overview.
 
 #### Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/anthropic_sdk_dart): Source tree, pubspec, and package-local files.
+
+**Total: ~29.2k tokens**
 
 ## Source: packages/chromadb/llms.txt
 
@@ -49,29 +51,31 @@ Canonical URL: https://github.com/davidmigloz/ai_clients_dart/blob/main/packages
 
 #### Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/README.md): Primary package documentation with installation, configuration, and usage examples.
-- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/CHANGELOG.md): Release history and version-by-version changes.
-- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/MIGRATION.md): Upgrade notes and breaking-change guidance.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/README.md) (~2.9k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/CHANGELOG.md) (~4.3k tokens): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/MIGRATION.md) (~5.5k tokens): Upgrade notes and breaking-change guidance.
 
 #### Examples
 
-- [collections_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/collections_example.dart): Collection management.
-- [records_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/records_example.dart): Record operations.
-- [embedding_function_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/embedding_function_example.dart): Auto-embedding workflows.
-- [query_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/query_example.dart): Similarity queries.
-- [metadata_filtering_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/metadata_filtering_example.dart): Metadata filtering.
-- [multi_tenant_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/multi_tenant_example.dart): Multi-tenant deployments.
-- [health_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/health_example.dart): Server health checks.
-- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/error_handling_example.dart): Exception handling patterns.
-- [functions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/functions_example.dart): Embedding functions.
-- [databases_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/databases_example.dart): Database management.
-- [auth_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/auth_example.dart): Authentication.
-- [chromadb_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/chromadb_example.dart): Quick-start overview.
-- [tenants_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/tenants_example.dart): Tenant management.
+- [collections_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/collections_example.dart) (~397 tokens): Collection management.
+- [records_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/records_example.dart) (~774 tokens): Record operations.
+- [embedding_function_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/embedding_function_example.dart) (~1.1k tokens): Auto-embedding workflows.
+- [query_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/query_example.dart) (~1.1k tokens): Similarity queries.
+- [metadata_filtering_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/metadata_filtering_example.dart) (~1.6k tokens): Metadata filtering.
+- [multi_tenant_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/multi_tenant_example.dart) (~960 tokens): Multi-tenant deployments.
+- [health_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/health_example.dart) (~409 tokens): Server health checks.
+- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/error_handling_example.dart) (~1k tokens): Exception handling patterns.
+- [functions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/functions_example.dart) (~513 tokens): Embedding functions.
+- [databases_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/databases_example.dart) (~692 tokens): Database management.
+- [auth_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/auth_example.dart) (~656 tokens): Authentication.
+- [chromadb_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/chromadb_example.dart) (~497 tokens): Quick-start overview.
+- [tenants_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/tenants_example.dart) (~519 tokens): Tenant management.
 
 #### Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/chromadb): Source tree, pubspec, and package-local files.
+
+**Total: ~23.1k tokens**
 
 ## Source: packages/googleai_dart/llms.txt
 
@@ -83,52 +87,54 @@ Canonical URL: https://github.com/davidmigloz/ai_clients_dart/blob/main/packages
 
 #### Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/README.md): Primary package documentation with installation, configuration, and usage examples.
-- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/CHANGELOG.md): Release history and version-by-version changes.
-- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/MIGRATION.md): Upgrade notes and breaking-change guidance.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/README.md) (~4.6k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/CHANGELOG.md) (~8.6k tokens): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/MIGRATION.md) (~5k tokens): Upgrade notes and breaking-change guidance.
 
 #### Examples
 
-- [generate_content.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/generate_content.dart): Basic text generation.
-- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/streaming_example.dart): Streaming responses.
-- [image_generation_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/image_generation_example.dart): Image generation.
-- [function_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/function_calling_example.dart): Tool calling.
-- [google_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/google_search_example.dart): Grounding with Google Search.
-- [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/embeddings_example.dart): Text embeddings.
-- [files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/files_example.dart): File uploads for prompts.
-- [live_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/live_example.dart): Live API WebSocket sessions.
-- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/error_handling_example.dart): Exception handling patterns.
-- [abort_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/abort_example.dart): Request cancellation with abort triggers.
-- [api_versions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/api_versions_example.dart): API version selection (v1 vs v1beta).
-- [auth_tokens_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/auth_tokens_example.dart): Ephemeral token authentication.
-- [batch_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/batch_example.dart): Batch operations.
-- [batches_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/batches_example.dart): Batch resource management.
-- [cached_contents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/cached_contents_example.dart): Context caching.
-- [caching_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/caching_example.dart): Context caching API usage.
-- [complete_api_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/complete_api_example.dart): Complete API coverage demo.
-- [corpora_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/corpora_example.dart): Corpus management for semantic retrieval.
-- [documents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/documents_example.dart): Document management within corpora.
-- [example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/example.dart): Quick-start usage.
-- [file_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/file_search_example.dart): File search with semantic retrieval.
-- [file_search_stores_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/file_search_stores_example.dart): File search store management.
-- [generate_answer_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/generate_answer_example.dart): Grounded question answering (RAG).
-- [generated_files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/generated_files_example.dart): Generated files for video outputs.
-- [google_maps_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/google_maps_example.dart): Google Maps grounding.
-- [interactions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/interactions_example.dart): Server-side conversation state management.
-- [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/models_example.dart): List and inspect models.
-- [oauth_refresh_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/oauth_refresh_example.dart): OAuth token refresh during retries.
-- [operations_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/operations_example.dart): Long-running operations management.
-- [pagination_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/pagination_example.dart): Paginated list results.
-- [permissions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/permissions_example.dart): Permission management for resources.
-- [prediction_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/prediction_example.dart): Video generation with Veo model.
-- [tuned_model_generation_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/tuned_model_generation_example.dart): Generate content with tuned models.
-- [tuned_models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/tuned_models_example.dart): Tuned model workflows.
-- [url_context_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/url_context_example.dart): URL content fetching and analysis.
-- [vertex_ai_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/vertex_ai_example.dart): Vertex AI configuration.
+- [generate_content.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/generate_content.dart) (~194 tokens): Basic text generation.
+- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/streaming_example.dart) (~224 tokens): Streaming responses.
+- [image_generation_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/image_generation_example.dart) (~1.2k tokens): Image generation.
+- [function_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/function_calling_example.dart) (~578 tokens): Tool calling.
+- [google_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/google_search_example.dart) (~1k tokens): Grounding with Google Search.
+- [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/embeddings_example.dart) (~490 tokens): Text embeddings.
+- [files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/files_example.dart) (~1.5k tokens): File uploads for prompts.
+- [live_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/live_example.dart) (~1.2k tokens): Live API WebSocket sessions.
+- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/error_handling_example.dart) (~644 tokens): Exception handling patterns.
+- [abort_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/abort_example.dart) (~626 tokens): Request cancellation with abort triggers.
+- [api_versions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/api_versions_example.dart) (~1.1k tokens): API version selection (v1 vs v1beta).
+- [auth_tokens_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/auth_tokens_example.dart) (~742 tokens): Ephemeral token authentication.
+- [batch_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/batch_example.dart) (~1.7k tokens): Batch operations.
+- [batches_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/batches_example.dart) (~721 tokens): Batch resource management.
+- [cached_contents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/cached_contents_example.dart) (~1k tokens): Context caching.
+- [caching_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/caching_example.dart) (~1.2k tokens): Context caching API usage.
+- [complete_api_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/complete_api_example.dart) (~1k tokens): Complete API coverage demo.
+- [corpora_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/corpora_example.dart) (~908 tokens): Corpus management for semantic retrieval.
+- [documents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/documents_example.dart) (~889 tokens): Document management within corpora.
+- [example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/example.dart) (~326 tokens): Quick-start usage.
+- [file_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/file_search_example.dart) (~1.6k tokens): File search with semantic retrieval.
+- [file_search_stores_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/file_search_stores_example.dart) (~1k tokens): File search store management.
+- [generate_answer_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/generate_answer_example.dart) (~1.3k tokens): Grounded question answering (RAG).
+- [generated_files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/generated_files_example.dart) (~714 tokens): Generated files for video outputs.
+- [google_maps_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/google_maps_example.dart) (~1.1k tokens): Google Maps grounding.
+- [interactions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/interactions_example.dart) (~1.2k tokens): Server-side conversation state management.
+- [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/models_example.dart) (~397 tokens): List and inspect models.
+- [oauth_refresh_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/oauth_refresh_example.dart) (~1.7k tokens): OAuth token refresh during retries.
+- [operations_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/operations_example.dart) (~1k tokens): Long-running operations management.
+- [pagination_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/pagination_example.dart) (~317 tokens): Paginated list results.
+- [permissions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/permissions_example.dart) (~1.4k tokens): Permission management for resources.
+- [prediction_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/prediction_example.dart) (~819 tokens): Video generation with Veo model.
+- [tuned_model_generation_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/tuned_model_generation_example.dart) (~968 tokens): Generate content with tuned models.
+- [tuned_models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/tuned_models_example.dart) (~952 tokens): Tuned model workflows.
+- [url_context_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/url_context_example.dart) (~926 tokens): URL content fetching and analysis.
+- [vertex_ai_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/vertex_ai_example.dart) (~1.3k tokens): Vertex AI configuration.
 
 #### Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/googleai_dart): Source tree, pubspec, and package-local files.
+
+**Total: ~52.1k tokens**
 
 ## Source: packages/mistralai_dart/llms.txt
 
@@ -140,41 +146,45 @@ Canonical URL: https://github.com/davidmigloz/ai_clients_dart/blob/main/packages
 
 #### Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/README.md): Primary package documentation with installation, configuration, and usage examples.
-- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/CHANGELOG.md): Release history and version-by-version changes.
-- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/MIGRATION.md): Upgrade notes and breaking-change guidance.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/README.md) (~6.9k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/CHANGELOG.md) (~6.1k tokens): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/MIGRATION.md) (~4.9k tokens): Upgrade notes and breaking-change guidance.
 
 #### Examples
 
-- [chat_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/chat_example.dart): Basic chat completions.
-- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/streaming_example.dart): Streaming responses.
-- [vision_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/vision_example.dart): Multimodal inputs.
-- [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/tool_calling_example.dart): Tool calling.
-- [json_mode_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/json_mode_example.dart): Structured output.
-- [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/embeddings_example.dart): Text embeddings.
-- [fim_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/fim_example.dart): Code completion.
-- [files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/files_example.dart): File management.
-- [fine_tuning_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/fine_tuning_example.dart): Model training.
-- [moderation_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/moderation_example.dart): Content moderation.
-- [ocr_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/ocr_example.dart): Document text extraction.
-- [audio_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/audio_example.dart): Audio transcription and TTS.
-- [agents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/agents_example.dart): AI agents (beta).
-- [conversations_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/conversations_example.dart): Multi-turn conversations (beta).
-- [libraries_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/libraries_example.dart): Document storage (beta).
-- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/error_handling_example.dart): Exception handling patterns.
-- [batch_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/batch_example.dart): Batch processing.
-- [classification_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/classification_example.dart): Text classification.
-- [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/models_example.dart): Model listing.
-- [config_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/config_example.dart): Client configuration options.
-- [multi_turn_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/multi_turn_example.dart): Multi-turn conversation management.
-- [parallel_requests_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/parallel_requests_example.dart): Parallel and concurrent requests.
-- [rag_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/rag_example.dart): Retrieval Augmented Generation.
-- [semantic_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/semantic_search_example.dart): Semantic search with embeddings.
-- [system_message_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/system_message_example.dart): System message patterns.
+- [chat_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/chat_example.dart) (~444 tokens): Basic chat completions.
+- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/streaming_example.dart) (~267 tokens): Streaming responses.
+- [vision_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/vision_example.dart) (~476 tokens): Multimodal inputs.
+- [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/tool_calling_example.dart) (~1.3k tokens): Tool calling.
+- [json_mode_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/json_mode_example.dart) (~1.3k tokens): Structured output.
+- [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/embeddings_example.dart) (~705 tokens): Text embeddings.
+- [fim_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/fim_example.dart) (~749 tokens): Code completion.
+- [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/models_example.dart) (~892 tokens): Model listing.
+- [files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/files_example.dart) (~857 tokens): File management.
+- [fine_tuning_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/fine_tuning_example.dart) (~1.3k tokens): Model training.
+- [moderation_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/moderation_example.dart) (~879 tokens): Content moderation.
+- [ocr_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/ocr_example.dart) (~1.4k tokens): Document text extraction.
+- [audio_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/audio_example.dart) (~1.6k tokens): Audio transcription and TTS.
+- [agents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/agents_example.dart) (~1.6k tokens): AI agents (beta).
+- [conversations_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/conversations_example.dart) (~1.7k tokens): Multi-turn conversations (beta).
+- [libraries_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/libraries_example.dart) (~2.2k tokens): Document storage (beta).
+- [observability_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/observability_example.dart) (~1.1k tokens): Observability: datasets, judges, campaigns (beta).
+- [workflows_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/workflows_example.dart) (~1.3k tokens): Workflow execution and scheduling (beta).
+- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/error_handling_example.dart) (~893 tokens): Exception handling patterns.
+- [batch_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/batch_example.dart) (~1.9k tokens): Batch processing.
+- [classification_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/classification_example.dart) (~942 tokens): Text classification.
+- [config_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/config_example.dart) (~844 tokens): Client configuration options.
+- [multi_turn_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/multi_turn_example.dart) (~1.3k tokens): Multi-turn conversation management.
+- [parallel_requests_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/parallel_requests_example.dart) (~1k tokens): Parallel and concurrent requests.
+- [rag_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/rag_example.dart) (~2.1k tokens): Retrieval Augmented Generation.
+- [semantic_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/semantic_search_example.dart) (~1.6k tokens): Semantic search with embeddings.
+- [system_message_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/mistralai_dart/example/system_message_example.dart) (~1.2k tokens): System message patterns.
 
 #### Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/mistralai_dart): Source tree, pubspec, and package-local files.
+
+**Total: ~49.6k tokens**
 
 ## Source: packages/ollama_dart/llms.txt
 
@@ -186,25 +196,27 @@ Canonical URL: https://github.com/davidmigloz/ai_clients_dart/blob/main/packages
 
 #### Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/README.md): Primary package documentation with installation, configuration, and usage examples.
-- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/CHANGELOG.md): Release history and version-by-version changes.
-- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/MIGRATION.md): Upgrade notes and breaking-change guidance.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/README.md) (~2.8k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/CHANGELOG.md) (~7.1k tokens): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/MIGRATION.md) (~5.1k tokens): Upgrade notes and breaking-change guidance.
 
 #### Examples
 
-- [chat_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/chat_example.dart): Chat completions.
-- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/streaming_example.dart): Streaming responses.
-- [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/tool_calling_example.dart): Tool calling.
-- [completions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/completions_example.dart): Plain text generation.
-- [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/embeddings_example.dart): Text embeddings.
-- [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/models_example.dart): Model management.
-- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/error_handling_example.dart): Exception handling patterns.
-- [version_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/version_example.dart): Server version.
-- [ollama_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/ollama_dart_example.dart): Quick-start overview.
+- [chat_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/chat_example.dart) (~529 tokens): Chat completions.
+- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/streaming_example.dart) (~366 tokens): Streaming responses.
+- [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/tool_calling_example.dart) (~709 tokens): Tool calling.
+- [completions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/completions_example.dart) (~918 tokens): Plain text generation.
+- [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/embeddings_example.dart) (~616 tokens): Text embeddings.
+- [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/models_example.dart) (~660 tokens): Model management.
+- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/error_handling_example.dart) (~240 tokens): Exception handling patterns.
+- [version_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/version_example.dart) (~303 tokens): Server version.
+- [ollama_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/ollama_dart_example.dart) (~405 tokens): Quick-start overview.
 
 #### Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/ollama_dart): Source tree, pubspec, and package-local files.
+
+**Total: ~19.7k tokens**
 
 ## Source: packages/open_responses/llms.txt
 
@@ -216,25 +228,27 @@ Canonical URL: https://github.com/davidmigloz/ai_clients_dart/blob/main/packages
 
 #### Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/README.md): Primary package documentation with installation, configuration, and usage examples.
-- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/CHANGELOG.md): Release history and version-by-version changes.
-- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/MIGRATION.md): Upgrade notes and breaking-change guidance.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/README.md) (~3.2k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/CHANGELOG.md) (~3k tokens): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/MIGRATION.md) (~423 tokens): Upgrade notes and breaking-change guidance.
 
 #### Examples
 
-- [create_response_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/create_response_example.dart): Basic response creation.
-- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/streaming_example.dart): Streaming events.
-- [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/tool_calling_example.dart): Tool calling.
-- [multi_turn_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/multi_turn_example.dart): Multi-turn conversations.
-- [structured_output_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/structured_output_example.dart): Structured output with JSON schema.
-- [provider_switch_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/provider_switch_example.dart): Switching providers.
-- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/error_handling_example.dart): Exception handling patterns.
-- [mcp_tools_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/mcp_tools_example.dart): MCP tool integration.
-- [reasoning_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/reasoning_example.dart): Reasoning models.
+- [create_response_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/create_response_example.dart) (~318 tokens): Basic response creation.
+- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/streaming_example.dart) (~551 tokens): Streaming events.
+- [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/tool_calling_example.dart) (~1.1k tokens): Tool calling.
+- [multi_turn_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/multi_turn_example.dart) (~822 tokens): Multi-turn conversations.
+- [structured_output_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/structured_output_example.dart) (~1.5k tokens): Structured output with JSON schema.
+- [provider_switch_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/provider_switch_example.dart) (~433 tokens): Switching providers.
+- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/error_handling_example.dart) (~287 tokens): Exception handling patterns.
+- [mcp_tools_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/mcp_tools_example.dart) (~1k tokens): MCP tool integration.
+- [reasoning_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/reasoning_example.dart) (~817 tokens): Reasoning models.
 
 #### Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/open_responses): Source tree, pubspec, and package-local files.
+
+**Total: ~13.4k tokens**
 
 ## Source: packages/openai_dart/llms.txt
 
@@ -246,43 +260,45 @@ Canonical URL: https://github.com/davidmigloz/ai_clients_dart/blob/main/packages
 
 #### Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md): Primary package documentation with installation, configuration, and usage examples.
-- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/CHANGELOG.md): Release history and version-by-version changes.
-- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/MIGRATION.md): Upgrade notes and breaking-change guidance.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/README.md) (~5.6k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/CHANGELOG.md) (~17.5k tokens): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/MIGRATION.md) (~9k tokens): Upgrade notes and breaking-change guidance.
 
 #### Examples
 
-- [responses_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/responses_example.dart): Responses API with built-in tools.
-- [chat_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/chat_example.dart): Basic chat completions with multi-turn conversations.
-- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/streaming_example.dart): Streaming responses with text deltas.
-- [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/tool_calling_example.dart): Function calling with tool definitions.
-- [vision_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/vision_example.dart): Image analysis with vision models.
-- [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/embeddings_example.dart): Text embeddings with dimension control.
-- [images_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/images_example.dart): GPT Image generation.
-- [audio_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/audio_example.dart): Text-to-speech and transcription.
-- [realtime_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/realtime_example.dart): Realtime API (WebSocket and WebRTC).
-- [videos_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/videos_example.dart): Sora video generation, editing, and extension.
-- [files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/files_example.dart): File upload and management.
-- [fine_tuning_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/fine_tuning_example.dart): Fine-tuning job management.
-- [batches_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/batches_example.dart): Batch processing for async jobs.
-- [evals_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/evals_example.dart): Model evaluation and testing.
-- [moderation_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/moderation_example.dart): Content moderation.
-- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/error_handling_example.dart): Exception handling patterns.
-- [conversations_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/conversations_example.dart): Conversations API for state management.
-- [containers_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/containers_example.dart): Containers for isolated execution.
-- [chatkit_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/chatkit_example.dart): ChatKit sessions and threads.
-- [assistants_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/assistants_example.dart): Assistants API (deprecated).
-- [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/models_example.dart): Model listing and retrieval.
-- [web_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/web_search_example.dart): Web search with Responses API.
-- [completions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/completions_example.dart): Legacy completions API.
-- [uploads_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/uploads_example.dart): Large file multipart uploads.
-- [skills_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/skills_example.dart): Skills management.
-- [input_tokens_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/input_tokens_example.dart): Input token counting.
-- [openai_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/openai_dart_example.dart): Quick-start overview.
+- [responses_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/responses_example.dart) (~870 tokens): Responses API with built-in tools.
+- [chat_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/chat_example.dart) (~432 tokens): Basic chat completions with multi-turn conversations.
+- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/streaming_example.dart) (~464 tokens): Streaming responses with text deltas.
+- [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/tool_calling_example.dart) (~742 tokens): Function calling with tool definitions.
+- [vision_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/vision_example.dart) (~840 tokens): Image analysis with vision models.
+- [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/embeddings_example.dart) (~837 tokens): Text embeddings with dimension control.
+- [images_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/images_example.dart) (~503 tokens): GPT Image generation.
+- [audio_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/audio_example.dart) (~1k tokens): Text-to-speech and transcription.
+- [realtime_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/realtime_example.dart) (~1.3k tokens): Realtime API (WebSocket and WebRTC).
+- [videos_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/videos_example.dart) (~1.6k tokens): Sora video generation, editing, and extension.
+- [files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/files_example.dart) (~1.1k tokens): File upload and management.
+- [fine_tuning_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/fine_tuning_example.dart) (~1.7k tokens): Fine-tuning job management.
+- [batches_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/batches_example.dart) (~1.5k tokens): Batch processing for async jobs.
+- [evals_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/evals_example.dart) (~1.7k tokens): Model evaluation and testing.
+- [moderation_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/moderation_example.dart) (~1.3k tokens): Content moderation.
+- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/error_handling_example.dart) (~1.2k tokens): Exception handling patterns.
+- [conversations_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/conversations_example.dart) (~1.5k tokens): Conversations API for state management.
+- [containers_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/containers_example.dart) (~1.4k tokens): Containers for isolated execution.
+- [chatkit_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/chatkit_example.dart) (~1.9k tokens): ChatKit sessions and threads.
+- [assistants_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/assistants_example.dart) (~1.3k tokens): Assistants API (deprecated).
+- [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/models_example.dart) (~794 tokens): Model listing and retrieval.
+- [web_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/web_search_example.dart) (~1.1k tokens): Web search with Responses API.
+- [completions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/completions_example.dart) (~327 tokens): Legacy completions API.
+- [uploads_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/uploads_example.dart) (~387 tokens): Large file multipart uploads.
+- [skills_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/skills_example.dart) (~346 tokens): Skills management.
+- [input_tokens_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/input_tokens_example.dart) (~356 tokens): Input token counting.
+- [openai_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/openai_dart_example.dart) (~577 tokens): Quick-start overview.
 
 #### Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/openai_dart): Source tree, pubspec, and package-local files.
+
+**Total: ~59.5k tokens**
 
 ## Source: packages/openai_realtime_dart/llms.txt
 
@@ -294,16 +310,18 @@ Canonical URL: https://github.com/davidmigloz/ai_clients_dart/blob/main/packages
 
 #### Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_realtime_dart/README.md): Primary package documentation with installation, configuration, and usage examples.
-- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_realtime_dart/CHANGELOG.md): Release history and version-by-version changes.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_realtime_dart/README.md) (~3.2k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_realtime_dart/CHANGELOG.md) (~2.9k tokens): Release history and version-by-version changes.
 
 #### Examples
 
-- [openai_realtime_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_realtime_dart/example/openai_realtime_dart_example.dart): Package overview example.
+- [openai_realtime_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_realtime_dart/example/openai_realtime_dart_example.dart) (~306 tokens): Package overview example.
 
 #### Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/openai_realtime_dart): Source tree, pubspec, and package-local files.
+
+**Total: ~6.4k tokens**
 
 ## Source: packages/tavily_dart/llms.txt
 
@@ -315,16 +333,18 @@ Canonical URL: https://github.com/davidmigloz/ai_clients_dart/blob/main/packages
 
 #### Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/tavily_dart/README.md): Primary package documentation with installation, configuration, and usage examples.
-- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/tavily_dart/CHANGELOG.md): Release history and version-by-version changes.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/tavily_dart/README.md) (~1.1k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/tavily_dart/CHANGELOG.md) (~1.5k tokens): Release history and version-by-version changes.
 
 #### Examples
 
-- [tavily_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/tavily_dart/example/tavily_dart_example.dart): Package overview example.
+- [tavily_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/tavily_dart/example/tavily_dart_example.dart) (~165 tokens): Package overview example.
 
 #### Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/tavily_dart): Source tree, pubspec, and package-local files.
+
+**Total: ~2.8k tokens**
 
 ## Source: packages/vertex_ai/llms.txt
 
@@ -336,16 +356,18 @@ Canonical URL: https://github.com/davidmigloz/ai_clients_dart/blob/main/packages
 
 #### Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/vertex_ai/README.md): Primary package documentation with installation, configuration, and usage examples.
-- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/vertex_ai/CHANGELOG.md): Release history and version-by-version changes.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/vertex_ai/README.md) (~3k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/vertex_ai/CHANGELOG.md) (~3.5k tokens): Release history and version-by-version changes.
 
 #### Examples
 
-- [vertex_ai_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/vertex_ai/example/vertex_ai_example.dart): Package overview example.
+- [vertex_ai_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/vertex_ai/example/vertex_ai_example.dart) (~207 tokens): Package overview example.
 
 #### Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/vertex_ai): Source tree, pubspec, and package-local files.
+
+**Total: ~6.7k tokens**
 
 ## Source: README.md
 
@@ -353,45 +375,175 @@ Canonical URL: https://github.com/davidmigloz/ai_clients_dart/blob/main/README.m
 
 ### AI Clients Dart
 
-Pure Dart client libraries for popular AI provider APIs, vector databases, and search services. They are designed for Flutter apps, backends, CLIs, and other Dart runtimes across iOS, Android, macOS, Windows, Linux, and Web.
+[![tests](https://img.shields.io/github/actions/workflow/status/davidmigloz/ai_clients_dart/test.yaml?logo=github&label=tests)](https://github.com/davidmigloz/ai_clients_dart/actions/workflows/test.yaml)
+[![Discord](https://img.shields.io/discord/1123158322812555295?label=discord)](https://discord.gg/x4qbhqecVR)
+[![MIT](https://img.shields.io/badge/license-MIT-purple.svg)](https://github.com/davidmigloz/ai_clients_dart/blob/main/LICENSE)
 
-> [!TIP]
-> Coding agents: use [llms.txt](./llms.txt) for package hubs, [llms-ctx.txt](./llms-ctx.txt) for the non-optional concatenated context bundle, and [llms-ctx-full.txt](./llms-ctx-full.txt) for the full bundle including optional sources.
+Type-safe Dart clients for OpenAI, Anthropic, Google Gemini, Mistral, Ollama, and more — all sharing a consistent API shape. Built for Flutter apps, backends, CLIs, and server-side Dart across every platform.
 
-#### Which package should I use?
+<details>
+<summary><b>Table of Contents</b></summary>
 
-- `openai_dart` for the full [OpenAI API](https://platform.openai.com/docs/api-reference) in Dart, including Responses, Chat Completions, audio, images, videos, custom tools, evals, and realtime WebSocket/WebRTC workflows.
-- `anthropic_sdk_dart` for the [Anthropic API](https://docs.anthropic.com/en/api), including Claude messages, streaming, tool calling, extended thinking, files, skills, and batch workflows.
-- `googleai_dart` for Gemini on [Google AI](https://ai.google.dev/) and [Vertex AI](https://cloud.google.com/vertex-ai), including generation, embeddings, grounding tools, files, and Live API WebSocket sessions.
-- `mistralai_dart` for the [Mistral AI API](https://docs.mistral.ai/api), including chat, embeddings, OCR, TTS, voice management, reasoning effort, audio transcription, fine-tuning, and beta agent workflows.
-- `ollama_dart` for local and self-hosted [Ollama](https://ollama.com/) deployments, including chat, streaming, embeddings, tool calling, and model lifecycle operations.
-- `open_responses` when you want a Dart client for the [OpenResponses](https://www.openresponses.org/) specification, which brings one typed responses interface to multiple supported providers.
-- `chromadb` for [ChromaDB](https://trychroma.com/) collections, vector search, multi-tenant storage, and RAG pipelines.
-- `openai_realtime_dart` for a smaller, lower-level [OpenAI Realtime API](https://platform.openai.com/docs/guides/realtime) client focused on direct WebSocket sessions.
-- `tavily_dart` for [Tavily](https://tavily.com/) web search and research APIs in agent and RAG workflows.
+- [Quickstart](#quickstart)
+- [Packages](#packages)
+- [Why choose these clients?](#why-choose-these-clients)
+- [Used By](#used-by)
+- [For Coding Agents](#for-coding-agents)
+- [Sponsor](#sponsor)
+- [License](#license)
 
-#### Key Features
+</details>
 
-- Type-safe request and response models with sealed classes and ergonomic helpers.
-- Pure Dart implementations that work in Flutter apps, backends, CLIs, and other non-Flutter runtimes.
-- Minimal first-party dependencies (`http`, `logging`, `meta`, and, where needed, `web_socket`).
-- Documentation optimized for coding agents through `llms.txt`, `llms-ctx.txt`, and `llms-ctx-full.txt`.
-- Streaming support, tool calling, retries, interceptors, and multimodal APIs across multiple providers.
-- Consistent package structure with examples, tests, and platform-aware client configuration.
+#### Quickstart
+
+The AI provider clients share a consistent shape — pick one and start with a few lines:
+
+<details open>
+<summary><b>OpenAI</b></summary>
+
+```yaml
+dependencies:
+  openai_dart: ^3.0.0
+```
+
+```dart
+import 'package:openai_dart/openai_dart.dart';
+
+Future<void> main() async {
+  final client = OpenAIClient.fromEnvironment();
+
+  try {
+    final response = await client.responses.create(
+      CreateResponseRequest(
+        model: 'gpt-5.4',
+        input: ResponseInput.text('What is the capital of France?'),
+      ),
+    );
+
+    print(response.outputText);
+  } finally {
+    client.close();
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><b>Anthropic</b></summary>
+
+```yaml
+dependencies:
+  anthropic_sdk_dart: ^1.4.0
+```
+
+```dart
+import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
+
+Future<void> main() async {
+  final client = AnthropicClient.fromEnvironment();
+
+  try {
+    final response = await client.messages.create(
+      MessageCreateRequest(
+        model: 'claude-sonnet-4-6',
+        maxTokens: 1024,
+        messages: [InputMessage.user('What is the capital of France?')],
+      ),
+    );
+
+    print(response.text);
+  } finally {
+    client.close();
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><b>Google Gemini</b></summary>
+
+```yaml
+dependencies:
+  googleai_dart: ^4.0.0
+```
+
+```dart
+import 'package:googleai_dart/googleai_dart.dart';
+
+Future<void> main() async {
+  final client = GoogleAIClient.fromEnvironment();
+
+  try {
+    final response = await client.models.generateContent(
+      model: 'gemini-2.5-flash',
+      request: GenerateContentRequest(
+        contents: [Content.text('Explain why Dart works well for APIs.')],
+      ),
+    );
+
+    print(response.text);
+  } finally {
+    client.close();
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><b>Ollama</b></summary>
+
+```yaml
+dependencies:
+  ollama_dart: ^2.0.0
+```
+
+```dart
+import 'package:ollama_dart/ollama_dart.dart';
+
+Future<void> main() async {
+  final client = OllamaClient();
+
+  try {
+    final response = await client.chat.create(
+      request: ChatRequest(
+        model: 'gpt-oss',
+        messages: [ChatMessage.user('Explain what Dart isolates do.')],
+      ),
+    );
+
+    print(response.message?.content);
+  } finally {
+    client.close();
+  }
+}
+```
+
+</details>
 
 #### Packages
 
-| Package | Version | Downloads |
-| --- | --- | --- |
-| [anthropic_sdk_dart](https://pub.dev/packages/anthropic_sdk_dart) | [![anthropic_sdk_dart](https://img.shields.io/pub/v/anthropic_sdk_dart.svg)](https://pub.dev/packages/anthropic_sdk_dart) | ![anthropic_sdk_dart monthly downloads](https://img.shields.io/pub/dm/anthropic_sdk_dart) |
-| [chromadb](https://pub.dev/packages/chromadb) | [![chromadb](https://img.shields.io/pub/v/chromadb.svg)](https://pub.dev/packages/chromadb) | ![chromadb monthly downloads](https://img.shields.io/pub/dm/chromadb) |
-| [googleai_dart](https://pub.dev/packages/googleai_dart) | [![googleai_dart](https://img.shields.io/pub/v/googleai_dart.svg)](https://pub.dev/packages/googleai_dart) | ![googleai_dart monthly downloads](https://img.shields.io/pub/dm/googleai_dart) |
-| [mistralai_dart](https://pub.dev/packages/mistralai_dart) | [![mistralai_dart](https://img.shields.io/pub/v/mistralai_dart.svg)](https://pub.dev/packages/mistralai_dart) | ![mistralai_dart monthly downloads](https://img.shields.io/pub/dm/mistralai_dart) |
-| [ollama_dart](https://pub.dev/packages/ollama_dart) | [![ollama_dart](https://img.shields.io/pub/v/ollama_dart.svg)](https://pub.dev/packages/ollama_dart) | ![ollama_dart monthly downloads](https://img.shields.io/pub/dm/ollama_dart) |
-| [open_responses](https://pub.dev/packages/open_responses) | [![open_responses](https://img.shields.io/pub/v/open_responses.svg)](https://pub.dev/packages/open_responses) | ![open_responses monthly downloads](https://img.shields.io/pub/dm/open_responses) |
-| [openai_dart](https://pub.dev/packages/openai_dart) | [![openai_dart](https://img.shields.io/pub/v/openai_dart.svg)](https://pub.dev/packages/openai_dart) | ![openai_dart monthly downloads](https://img.shields.io/pub/dm/openai_dart) |
-| [openai_realtime_dart](https://pub.dev/packages/openai_realtime_dart) | [![openai_realtime_dart](https://img.shields.io/pub/v/openai_realtime_dart.svg)](https://pub.dev/packages/openai_realtime_dart) | ![openai_realtime_dart monthly downloads](https://img.shields.io/pub/dm/openai_realtime_dart) |
-| [tavily_dart](https://pub.dev/packages/tavily_dart) | [![tavily_dart](https://img.shields.io/pub/v/tavily_dart.svg)](https://pub.dev/packages/tavily_dart) | ![tavily_dart monthly downloads](https://img.shields.io/pub/dm/tavily_dart) |
+| Package | Description | Version | Downloads |
+| --- | --- | --- | --- |
+| [openai_dart](https://pub.dev/packages/openai_dart) | [OpenAI](https://platform.openai.com/docs/api-reference) — Responses, Chat Completions, images, audio, realtime | [![openai_dart](https://img.shields.io/pub/v/openai_dart.svg)](https://pub.dev/packages/openai_dart) | ![openai_dart monthly downloads](https://img.shields.io/pub/dm/openai_dart) |
+| [anthropic_sdk_dart](https://pub.dev/packages/anthropic_sdk_dart) | [Anthropic](https://docs.anthropic.com/en/api) — Claude messages, streaming, tools, extended thinking | [![anthropic_sdk_dart](https://img.shields.io/pub/v/anthropic_sdk_dart.svg)](https://pub.dev/packages/anthropic_sdk_dart) | ![anthropic_sdk_dart monthly downloads](https://img.shields.io/pub/dm/anthropic_sdk_dart) |
+| [googleai_dart](https://pub.dev/packages/googleai_dart) | [Google AI](https://ai.google.dev/) / [Vertex AI](https://cloud.google.com/vertex-ai) — Gemini generation, embeddings, Live API | [![googleai_dart](https://img.shields.io/pub/v/googleai_dart.svg)](https://pub.dev/packages/googleai_dart) | ![googleai_dart monthly downloads](https://img.shields.io/pub/dm/googleai_dart) |
+| [mistralai_dart](https://pub.dev/packages/mistralai_dart) | [Mistral AI](https://docs.mistral.ai/api) — chat, embeddings, OCR, TTS, reasoning, agents | [![mistralai_dart](https://img.shields.io/pub/v/mistralai_dart.svg)](https://pub.dev/packages/mistralai_dart) | ![mistralai_dart monthly downloads](https://img.shields.io/pub/dm/mistralai_dart) |
+| [ollama_dart](https://pub.dev/packages/ollama_dart) | [Ollama](https://ollama.com/) — local chat, streaming, embeddings, tool calling | [![ollama_dart](https://img.shields.io/pub/v/ollama_dart.svg)](https://pub.dev/packages/ollama_dart) | ![ollama_dart monthly downloads](https://img.shields.io/pub/dm/ollama_dart) |
+| [open_responses](https://pub.dev/packages/open_responses) | [OpenResponses](https://www.openresponses.org/) — one typed interface, multiple providers | [![open_responses](https://img.shields.io/pub/v/open_responses.svg)](https://pub.dev/packages/open_responses) | ![open_responses monthly downloads](https://img.shields.io/pub/dm/open_responses) |
+| [chromadb](https://pub.dev/packages/chromadb) | [ChromaDB](https://www.trychroma.com/) — vector search, collections, multi-tenant RAG | [![chromadb](https://img.shields.io/pub/v/chromadb.svg)](https://pub.dev/packages/chromadb) | ![chromadb monthly downloads](https://img.shields.io/pub/dm/chromadb) |
+| [openai_realtime_dart](https://pub.dev/packages/openai_realtime_dart) | [OpenAI Realtime](https://platform.openai.com/docs/guides/realtime) — lower-level WebSocket sessions | [![openai_realtime_dart](https://img.shields.io/pub/v/openai_realtime_dart.svg)](https://pub.dev/packages/openai_realtime_dart) | ![openai_realtime_dart monthly downloads](https://img.shields.io/pub/dm/openai_realtime_dart) |
+| [tavily_dart](https://pub.dev/packages/tavily_dart) | [Tavily](https://tavily.com/) — web search and research for agents and RAG | [![tavily_dart](https://img.shields.io/pub/v/tavily_dart.svg)](https://pub.dev/packages/tavily_dart) | ![tavily_dart monthly downloads](https://img.shields.io/pub/dm/tavily_dart) |
+
+#### Why choose these clients?
+
+- **Pure Dart** — works everywhere: Flutter apps, backends, CLIs, and server-side Dart across iOS, Android, macOS, Windows, Linux, and Web.
+- **Type-safe** — sealed classes, typed request/response models, and ergonomic helpers.
+- **Consistent shape** — AI provider clients share `fromEnvironment()` for config, similar resource methods, and `close()` for cleanup.
+- **Minimal dependencies** — just `http`, `logging`, `meta`, and where needed `web_socket`.
+- **Strict semver** — follows [semver.org](https://semver.org/) so downstream packages can depend on stable, predictable version ranges.
 
 #### Used By
 
@@ -399,15 +551,23 @@ These open-source packages and apps use one or more clients from this repo. For 
 
 ##### Packages
 
-- [langchain_dart](https://github.com/davidmigloz/langchain_dart) ![langchain monthly downloads](https://img.shields.io/pub/dm/langchain)
-- [dartantic](https://github.com/csells/dartantic) ![dartantic monthly downloads](https://img.shields.io/pub/dm/dartantic_ai)
-- [genkit-dart](https://github.com/genkit-ai/genkit-dart) ![genkit monthly downloads](https://img.shields.io/pub/dm/genkit)
+| Package | Downloads |
+| --- | --- |
+| [langchain_dart](https://github.com/davidmigloz/langchain_dart) | ![langchain monthly downloads](https://img.shields.io/pub/dm/langchain) |
+| [dartantic](https://github.com/csells/dartantic) | ![dartantic monthly downloads](https://img.shields.io/pub/dm/dartantic_ai) |
+| [genkit-dart](https://github.com/genkit-ai/genkit-dart) | ![genkit monthly downloads](https://img.shields.io/pub/dm/genkit) |
 
 ##### Apps
 
-- [Anx Reader](https://github.com/Anxcye/anx-reader) ![Anx Reader stars](https://img.shields.io/github/stars/Anxcye/anx-reader)
-- [ApiDash](https://github.com/foss42/apidash) ![ApiDash stars](https://img.shields.io/github/stars/foss42/apidash)
-- [Lotti](https://github.com/matthiasn/lotti) ![Lotti stars](https://img.shields.io/github/stars/matthiasn/lotti)
+| App | Stars |
+| --- | --- |
+| [Anx Reader](https://github.com/Anxcye/anx-reader) | ![Anx Reader stars](https://img.shields.io/github/stars/Anxcye/anx-reader) |
+| [ApiDash](https://github.com/foss42/apidash) | ![ApiDash stars](https://img.shields.io/github/stars/foss42/apidash) |
+| [Lotti](https://github.com/matthiasn/lotti) | ![Lotti stars](https://img.shields.io/github/stars/matthiasn/lotti) |
+
+#### For Coding Agents
+
+Use [llms.txt](./llms.txt) for package hubs, [llms-ctx.txt](./llms-ctx.txt) for the non-optional concatenated context bundle, and [llms-ctx-full.txt](./llms-ctx-full.txt) for the full bundle including optional sources.
 
 #### Sponsor
 

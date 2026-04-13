@@ -20,6 +20,7 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 from . import config as toolkit_config
+from .tokens import count_tokens, format_token_count
 from .config import (
     AuthConfig,
     EXIT_FAILURE,
@@ -4566,7 +4567,7 @@ def _readme_example_entries(readme: str, headings: list[dict[str, Any]]) -> list
     return examples
 
 
-def _render_link_sections(sections: list[tuple[str, list[dict[str, str]]]]) -> list[str]:
+def _render_link_sections(sections: list[tuple[str, list[dict[str, Any]]]]) -> list[str]:
     lines: list[str] = []
     for title, items in sections:
         if not items:
@@ -4574,6 +4575,9 @@ def _render_link_sections(sections: list[tuple[str, list[dict[str, str]]]]) -> l
         lines.extend([f"## {title}", ""])
         for item in items:
             line = f"- [{item['label']}]({item['url']})"
+            tokens = item.get("tokens")
+            if isinstance(tokens, int) and tokens > 0:
+                line += f" ({format_token_count(tokens)} tokens)"
             if item.get("description"):
                 line += f": {item['description']}"
             lines.append(line)
@@ -4585,13 +4589,16 @@ def _render_llms_document(
     *,
     title: str,
     summary: str,
-    sections: list[tuple[str, list[dict[str, str]]]],
+    sections: list[tuple[str, list[dict[str, Any]]]],
     intro: str | None = None,
+    footer: str | None = None,
 ) -> str:
     lines = [f"# {title}", "", f"> {summary}", ""]
     if intro:
         lines.extend([intro, ""])
     lines.extend(_render_link_sections(sections))
+    if footer:
+        lines.extend([footer, ""])
     return "\n".join(lines).rstrip() + "\n"
 
 
@@ -4653,13 +4660,14 @@ def _package_snapshot(repo_root: Path, package_root: Path) -> dict[str, Any]:
     summary_source = _extract_opening_paragraph(readme) or package_description
     summary = _ensure_sentence(_first_sentence(_normalize_llms_text(summary_source or package_description)))
 
-    docs: list[dict[str, str]] = []
+    docs: list[dict[str, Any]] = []
     if readme_path.exists():
         docs.append(
             {
                 "label": "README",
                 "url": _blob_url(repo_root, readme_path),
                 "description": "Primary package documentation with installation, configuration, and usage examples.",
+                "tokens": count_tokens(readme),
             }
         )
     changelog_path = package_root / "CHANGELOG.md"
@@ -4669,6 +4677,7 @@ def _package_snapshot(repo_root: Path, package_root: Path) -> dict[str, Any]:
                 "label": "CHANGELOG",
                 "url": _blob_url(repo_root, changelog_path),
                 "description": "Release history and version-by-version changes.",
+                "tokens": count_tokens(read_text(changelog_path)),
             }
         )
     migration_path = package_root / "MIGRATION.md"
@@ -4678,10 +4687,11 @@ def _package_snapshot(repo_root: Path, package_root: Path) -> dict[str, Any]:
                 "label": "MIGRATION",
                 "url": _blob_url(repo_root, migration_path),
                 "description": "Upgrade notes and breaking-change guidance.",
+                "tokens": count_tokens(read_text(migration_path)),
             }
         )
 
-    examples: list[dict[str, str]] = []
+    examples: list[dict[str, Any]] = []
     for example in _readme_example_entries(readme, headings):
         example_path = package_root / example["path"]
         if not example_path.exists():
@@ -4691,6 +4701,7 @@ def _package_snapshot(repo_root: Path, package_root: Path) -> dict[str, Any]:
                 "label": Path(example["path"]).name,
                 "url": _blob_url(repo_root, example_path),
                 "description": example["description"],
+                "tokens": count_tokens(read_text(example_path)),
             }
         )
     if not examples:
@@ -4702,16 +4713,23 @@ def _package_snapshot(repo_root: Path, package_root: Path) -> dict[str, Any]:
                         "label": example_path.name,
                         "url": _blob_url(repo_root, example_path),
                         "description": _example_description_from_filename(example_path.name, package_name),
+                        "tokens": count_tokens(read_text(example_path)),
                     }
                 )
 
-    optional = [
+    optional: list[dict[str, Any]] = [
         {
             "label": "Package directory",
             "url": _tree_url(repo_root, package_root),
             "description": "Source tree, pubspec, and package-local files.",
         }
     ]
+
+    tokens_total = sum(
+        item["tokens"]
+        for item in (*docs, *examples)
+        if isinstance(item.get("tokens"), int)
+    )
 
     return {
         "name": package_name,
@@ -4726,11 +4744,18 @@ def _package_snapshot(repo_root: Path, package_root: Path) -> dict[str, Any]:
         "docs": docs,
         "examples": examples,
         "optional": optional,
+        "tokens_total": tokens_total,
     }
 
 
 def _render_package_llms_txt(repo_root: Path, package_info: dict[str, Any]) -> str:
     del repo_root  # Package links are precomputed in package_info.
+    tokens_total = package_info.get("tokens_total", 0)
+    footer = (
+        f"**Total: {format_token_count(tokens_total)} tokens**"
+        if isinstance(tokens_total, int) and tokens_total > 0
+        else None
+    )
     return _render_llms_document(
         title=package_info["display_name"],
         summary=package_info["summary"],
@@ -4739,6 +4764,7 @@ def _render_package_llms_txt(repo_root: Path, package_info: dict[str, Any]) -> s
             ("Examples", package_info["examples"]),
             ("Optional", package_info["optional"]),
         ],
+        footer=footer,
     )
 
 
@@ -4750,6 +4776,7 @@ def _package_llms_output(repo_root: Path, package_info: dict[str, Any]) -> dict[
         "url": _blob_url(repo_root, path),
         "content": _render_package_llms_txt(repo_root, package_info),
         "description": package_info["summary"],
+        "tokens": package_info.get("tokens_total", 0),
     }
 
 
@@ -4770,21 +4797,23 @@ def _render_root_llms_txt(
 ) -> str:
     metadata = _repo_metadata(repo_root)
     readme_path = repo_root / "README.md"
-    package_links = [
+    package_links: list[dict[str, Any]] = [
         {
             "label": package_output["label"],
             "url": package_output["url"],
             "description": package_output["description"],
+            "tokens": package_output.get("tokens", 0),
         }
         for package_output in package_llms_outputs
     ]
-    optional_links: list[dict[str, str]] = []
+    optional_links: list[dict[str, Any]] = []
     if readme_path.exists():
         optional_links.append(
             {
                 "label": "Repository README",
                 "url": _blob_url(repo_root, readme_path),
                 "description": "Workspace overview, package comparison, and ecosystem guidance.",
+                "tokens": count_tokens(read_text(readme_path)),
             }
         )
     return _render_llms_document(

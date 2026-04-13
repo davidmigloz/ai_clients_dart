@@ -8,6 +8,12 @@ Unified shared toolkit for OpenAPI and WebSocket package maintenance.
 python3 .agents/shared/api-toolkit/scripts/api_toolkit.py <command> ...
 ```
 
+Install Python dependencies first (required for `generate-llms-txt`):
+
+```bash
+pip install -r .agents/shared/api-toolkit/requirements.txt
+```
+
 Commands:
 - `create` - bootstrap a new OpenAPI package, skill config, and creation plan
 - `fetch` - fetch or copy the latest candidate spec/schema into scratch output

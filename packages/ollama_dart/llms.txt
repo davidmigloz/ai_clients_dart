@@ -4,22 +4,24 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/README.md): Primary package documentation with installation, configuration, and usage examples.
-- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/CHANGELOG.md): Release history and version-by-version changes.
-- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/MIGRATION.md): Upgrade notes and breaking-change guidance.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/README.md) (~2.8k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/CHANGELOG.md) (~7.1k tokens): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/MIGRATION.md) (~5.1k tokens): Upgrade notes and breaking-change guidance.
 
 ## Examples
 
-- [chat_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/chat_example.dart): Chat completions.
-- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/streaming_example.dart): Streaming responses.
-- [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/tool_calling_example.dart): Tool calling.
-- [completions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/completions_example.dart): Plain text generation.
-- [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/embeddings_example.dart): Text embeddings.
-- [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/models_example.dart): Model management.
-- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/error_handling_example.dart): Exception handling patterns.
-- [version_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/version_example.dart): Server version.
-- [ollama_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/ollama_dart_example.dart): Quick-start overview.
+- [chat_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/chat_example.dart) (~529 tokens): Chat completions.
+- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/streaming_example.dart) (~366 tokens): Streaming responses.
+- [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/tool_calling_example.dart) (~709 tokens): Tool calling.
+- [completions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/completions_example.dart) (~918 tokens): Plain text generation.
+- [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/embeddings_example.dart) (~616 tokens): Text embeddings.
+- [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/models_example.dart) (~660 tokens): Model management.
+- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/error_handling_example.dart) (~240 tokens): Exception handling patterns.
+- [version_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/version_example.dart) (~303 tokens): Server version.
+- [ollama_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/ollama_dart_example.dart) (~405 tokens): Quick-start overview.
 
 ## Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/ollama_dart): Source tree, pubspec, and package-local files.
+
+**Total: ~19.7k tokens**

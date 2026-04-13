@@ -4,22 +4,24 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/README.md): Primary package documentation with installation, configuration, and usage examples.
-- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/CHANGELOG.md): Release history and version-by-version changes.
-- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/MIGRATION.md): Upgrade notes and breaking-change guidance.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/README.md) (~3.2k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/CHANGELOG.md) (~3k tokens): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/MIGRATION.md) (~423 tokens): Upgrade notes and breaking-change guidance.
 
 ## Examples
 
-- [create_response_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/create_response_example.dart): Basic response creation.
-- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/streaming_example.dart): Streaming events.
-- [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/tool_calling_example.dart): Tool calling.
-- [multi_turn_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/multi_turn_example.dart): Multi-turn conversations.
-- [structured_output_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/structured_output_example.dart): Structured output with JSON schema.
-- [provider_switch_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/provider_switch_example.dart): Switching providers.
-- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/error_handling_example.dart): Exception handling patterns.
-- [mcp_tools_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/mcp_tools_example.dart): MCP tool integration.
-- [reasoning_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/reasoning_example.dart): Reasoning models.
+- [create_response_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/create_response_example.dart) (~318 tokens): Basic response creation.
+- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/streaming_example.dart) (~551 tokens): Streaming events.
+- [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/tool_calling_example.dart) (~1.1k tokens): Tool calling.
+- [multi_turn_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/multi_turn_example.dart) (~822 tokens): Multi-turn conversations.
+- [structured_output_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/structured_output_example.dart) (~1.5k tokens): Structured output with JSON schema.
+- [provider_switch_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/provider_switch_example.dart) (~433 tokens): Switching providers.
+- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/error_handling_example.dart) (~287 tokens): Exception handling patterns.
+- [mcp_tools_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/mcp_tools_example.dart) (~1k tokens): MCP tool integration.
+- [reasoning_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/open_responses/example/reasoning_example.dart) (~817 tokens): Reasoning models.
 
 ## Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/open_responses): Source tree, pubspec, and package-local files.
+
+**Total: ~13.4k tokens**

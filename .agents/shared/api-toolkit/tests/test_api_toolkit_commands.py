@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import tempfile
 import unittest
@@ -5605,6 +5606,60 @@ class ApiToolkitCommandTests(unittest.TestCase):
             self.assertIn("## Docs", generated_package_llms)
             self.assertIn("## Examples", generated_package_llms)
             self.assertIn("## Optional", generated_package_llms)
+
+    def test_generate_llms_txt_annotates_links_with_token_counts(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_llms_workspace(root)
+            self._write_repo_license(root)
+            (root / "README.md").write_text("# Workspace README\n\nRepository overview for optional context.\n")
+            self._write_llms_package(
+                root,
+                name="epsilon_dart",
+                description="Epsilon package.",
+                readme=(
+                    "# Epsilon Dart Client\n\n"
+                    "Dart client for epsilon provider flows.\n\n"
+                    "## Usage\n\n"
+                    "### How do I call epsilon?\n\n"
+                    "→ [Full example](example/epsilon_example.dart)\n"
+                ),
+                example_files={"epsilon_example.dart": "void main() {}\n"},
+                include_changelog=True,
+            )
+
+            exit_code, payload = command_generate_llms_txt(
+                SimpleNamespace(config_dir=None, repo_root=root, dry_run=True)
+            )
+
+            self.assertEqual(exit_code, 0)
+            root_preview = payload["preview"]["llms.txt"]
+            package_preview = payload["preview"]["packages"]["epsilon_dart"]
+
+            # Per-link token annotations on every link in the package llms.txt.
+            for label in ("README", "CHANGELOG", "epsilon_example.dart"):
+                self.assertRegex(
+                    package_preview,
+                    rf"\[{re.escape(label)}\]\([^)]+\) \(~\d+(?:\.\d+)?k? tokens\):",
+                )
+            # Package total footer.
+            self.assertRegex(package_preview, r"\n\*\*Total: ~\d+(?:\.\d+)?k? tokens\*\*\n")
+            # Directory links (the Package directory "Optional" link) are not annotated.
+            self.assertRegex(
+                package_preview,
+                r"\[Package directory\]\([^)]+\):",
+            )
+
+            # Root llms.txt annotates each package link with the package total,
+            # and the Repository README with its own count.
+            self.assertRegex(
+                root_preview,
+                r"\[epsilon_dart\]\([^)]+\) \(~\d+(?:\.\d+)?k? tokens\):",
+            )
+            self.assertRegex(
+                root_preview,
+                r"\[Repository README\]\([^)]+\) \(~\d+(?:\.\d+)?k? tokens\):",
+            )
 
     def test_blob_url_rejects_path_outside_repo(self) -> None:
         from api_toolkit.operations import _blob_url, _tree_url

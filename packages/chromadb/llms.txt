@@ -4,26 +4,28 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/README.md): Primary package documentation with installation, configuration, and usage examples.
-- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/CHANGELOG.md): Release history and version-by-version changes.
-- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/MIGRATION.md): Upgrade notes and breaking-change guidance.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/README.md) (~2.9k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/CHANGELOG.md) (~4.3k tokens): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/MIGRATION.md) (~5.5k tokens): Upgrade notes and breaking-change guidance.
 
 ## Examples
 
-- [collections_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/collections_example.dart): Collection management.
-- [records_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/records_example.dart): Record operations.
-- [embedding_function_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/embedding_function_example.dart): Auto-embedding workflows.
-- [query_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/query_example.dart): Similarity queries.
-- [metadata_filtering_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/metadata_filtering_example.dart): Metadata filtering.
-- [multi_tenant_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/multi_tenant_example.dart): Multi-tenant deployments.
-- [health_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/health_example.dart): Server health checks.
-- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/error_handling_example.dart): Exception handling patterns.
-- [functions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/functions_example.dart): Embedding functions.
-- [databases_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/databases_example.dart): Database management.
-- [auth_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/auth_example.dart): Authentication.
-- [chromadb_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/chromadb_example.dart): Quick-start overview.
-- [tenants_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/tenants_example.dart): Tenant management.
+- [collections_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/collections_example.dart) (~397 tokens): Collection management.
+- [records_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/records_example.dart) (~774 tokens): Record operations.
+- [embedding_function_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/embedding_function_example.dart) (~1.1k tokens): Auto-embedding workflows.
+- [query_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/query_example.dart) (~1.1k tokens): Similarity queries.
+- [metadata_filtering_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/metadata_filtering_example.dart) (~1.6k tokens): Metadata filtering.
+- [multi_tenant_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/multi_tenant_example.dart) (~960 tokens): Multi-tenant deployments.
+- [health_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/health_example.dart) (~409 tokens): Server health checks.
+- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/error_handling_example.dart) (~1k tokens): Exception handling patterns.
+- [functions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/functions_example.dart) (~513 tokens): Embedding functions.
+- [databases_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/databases_example.dart) (~692 tokens): Database management.
+- [auth_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/auth_example.dart) (~656 tokens): Authentication.
+- [chromadb_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/chromadb_example.dart) (~497 tokens): Quick-start overview.
+- [tenants_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/chromadb/example/tenants_example.dart) (~519 tokens): Tenant management.
 
 ## Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/chromadb): Source tree, pubspec, and package-local files.
+
+**Total: ~23.1k tokens**

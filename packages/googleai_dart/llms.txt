@@ -4,49 +4,51 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/README.md): Primary package documentation with installation, configuration, and usage examples.
-- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/CHANGELOG.md): Release history and version-by-version changes.
-- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/MIGRATION.md): Upgrade notes and breaking-change guidance.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/README.md) (~4.6k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/CHANGELOG.md) (~8.6k tokens): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/MIGRATION.md) (~5k tokens): Upgrade notes and breaking-change guidance.
 
 ## Examples
 
-- [generate_content.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/generate_content.dart): Basic text generation.
-- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/streaming_example.dart): Streaming responses.
-- [image_generation_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/image_generation_example.dart): Image generation.
-- [function_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/function_calling_example.dart): Tool calling.
-- [google_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/google_search_example.dart): Grounding with Google Search.
-- [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/embeddings_example.dart): Text embeddings.
-- [files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/files_example.dart): File uploads for prompts.
-- [live_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/live_example.dart): Live API WebSocket sessions.
-- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/error_handling_example.dart): Exception handling patterns.
-- [abort_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/abort_example.dart): Request cancellation with abort triggers.
-- [api_versions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/api_versions_example.dart): API version selection (v1 vs v1beta).
-- [auth_tokens_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/auth_tokens_example.dart): Ephemeral token authentication.
-- [batch_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/batch_example.dart): Batch operations.
-- [batches_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/batches_example.dart): Batch resource management.
-- [cached_contents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/cached_contents_example.dart): Context caching.
-- [caching_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/caching_example.dart): Context caching API usage.
-- [complete_api_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/complete_api_example.dart): Complete API coverage demo.
-- [corpora_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/corpora_example.dart): Corpus management for semantic retrieval.
-- [documents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/documents_example.dart): Document management within corpora.
-- [example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/example.dart): Quick-start usage.
-- [file_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/file_search_example.dart): File search with semantic retrieval.
-- [file_search_stores_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/file_search_stores_example.dart): File search store management.
-- [generate_answer_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/generate_answer_example.dart): Grounded question answering (RAG).
-- [generated_files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/generated_files_example.dart): Generated files for video outputs.
-- [google_maps_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/google_maps_example.dart): Google Maps grounding.
-- [interactions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/interactions_example.dart): Server-side conversation state management.
-- [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/models_example.dart): List and inspect models.
-- [oauth_refresh_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/oauth_refresh_example.dart): OAuth token refresh during retries.
-- [operations_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/operations_example.dart): Long-running operations management.
-- [pagination_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/pagination_example.dart): Paginated list results.
-- [permissions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/permissions_example.dart): Permission management for resources.
-- [prediction_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/prediction_example.dart): Video generation with Veo model.
-- [tuned_model_generation_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/tuned_model_generation_example.dart): Generate content with tuned models.
-- [tuned_models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/tuned_models_example.dart): Tuned model workflows.
-- [url_context_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/url_context_example.dart): URL content fetching and analysis.
-- [vertex_ai_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/vertex_ai_example.dart): Vertex AI configuration.
+- [generate_content.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/generate_content.dart) (~194 tokens): Basic text generation.
+- [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/streaming_example.dart) (~224 tokens): Streaming responses.
+- [image_generation_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/image_generation_example.dart) (~1.2k tokens): Image generation.
+- [function_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/function_calling_example.dart) (~578 tokens): Tool calling.
+- [google_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/google_search_example.dart) (~1k tokens): Grounding with Google Search.
+- [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/embeddings_example.dart) (~490 tokens): Text embeddings.
+- [files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/files_example.dart) (~1.5k tokens): File uploads for prompts.
+- [live_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/live_example.dart) (~1.2k tokens): Live API WebSocket sessions.
+- [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/error_handling_example.dart) (~644 tokens): Exception handling patterns.
+- [abort_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/abort_example.dart) (~626 tokens): Request cancellation with abort triggers.
+- [api_versions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/api_versions_example.dart) (~1.1k tokens): API version selection (v1 vs v1beta).
+- [auth_tokens_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/auth_tokens_example.dart) (~742 tokens): Ephemeral token authentication.
+- [batch_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/batch_example.dart) (~1.7k tokens): Batch operations.
+- [batches_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/batches_example.dart) (~721 tokens): Batch resource management.
+- [cached_contents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/cached_contents_example.dart) (~1k tokens): Context caching.
+- [caching_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/caching_example.dart) (~1.2k tokens): Context caching API usage.
+- [complete_api_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/complete_api_example.dart) (~1k tokens): Complete API coverage demo.
+- [corpora_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/corpora_example.dart) (~908 tokens): Corpus management for semantic retrieval.
+- [documents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/documents_example.dart) (~889 tokens): Document management within corpora.
+- [example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/example.dart) (~326 tokens): Quick-start usage.
+- [file_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/file_search_example.dart) (~1.6k tokens): File search with semantic retrieval.
+- [file_search_stores_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/file_search_stores_example.dart) (~1k tokens): File search store management.
+- [generate_answer_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/generate_answer_example.dart) (~1.3k tokens): Grounded question answering (RAG).
+- [generated_files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/generated_files_example.dart) (~714 tokens): Generated files for video outputs.
+- [google_maps_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/google_maps_example.dart) (~1.1k tokens): Google Maps grounding.
+- [interactions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/interactions_example.dart) (~1.2k tokens): Server-side conversation state management.
+- [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/models_example.dart) (~397 tokens): List and inspect models.
+- [oauth_refresh_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/oauth_refresh_example.dart) (~1.7k tokens): OAuth token refresh during retries.
+- [operations_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/operations_example.dart) (~1k tokens): Long-running operations management.
+- [pagination_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/pagination_example.dart) (~317 tokens): Paginated list results.
+- [permissions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/permissions_example.dart) (~1.4k tokens): Permission management for resources.
+- [prediction_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/prediction_example.dart) (~819 tokens): Video generation with Veo model.
+- [tuned_model_generation_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/tuned_model_generation_example.dart) (~968 tokens): Generate content with tuned models.
+- [tuned_models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/tuned_models_example.dart) (~952 tokens): Tuned model workflows.
+- [url_context_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/url_context_example.dart) (~926 tokens): URL content fetching and analysis.
+- [vertex_ai_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/vertex_ai_example.dart) (~1.3k tokens): Vertex AI configuration.
 
 ## Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/googleai_dart): Source tree, pubspec, and package-local files.
+
+**Total: ~52.1k tokens**
