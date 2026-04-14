@@ -696,17 +696,39 @@ void main() {
     test('AdvisorToolResultError equality', () {
       const a = AdvisorToolResultError(
         errorCode: AdvisorToolResultErrorCode.overloaded,
+        rawErrorCode: 'overloaded',
       );
       const b = AdvisorToolResultError(
         errorCode: AdvisorToolResultErrorCode.overloaded,
+        rawErrorCode: 'overloaded',
       );
       const c = AdvisorToolResultError(
         errorCode: AdvisorToolResultErrorCode.unavailable,
+        rawErrorCode: 'unavailable',
       );
 
       expect(a, equals(b));
       expect(a.hashCode, equals(b.hashCode));
       expect(a, isNot(equals(c)));
+    });
+
+    test('AdvisorToolResultError round-trips unknown error code', () {
+      final json = {
+        'type': 'advisor_tool_result',
+        'tool_use_id': 'srvtoolu_future',
+        'content': {
+          'type': 'advisor_tool_result_error',
+          'error_code': 'some_future_error_code',
+        },
+      };
+      final block = ContentBlock.fromJson(json) as AdvisorToolResultBlock;
+      final error = block.content as AdvisorToolResultError;
+
+      expect(error.errorCode, AdvisorToolResultErrorCode.unknown);
+      expect(error.rawErrorCode, 'some_future_error_code');
+
+      // Round-trip must preserve the original error code string
+      expect(block.toJson(), json);
     });
 
     test('AdvisorToolResultUnknown equality', () {

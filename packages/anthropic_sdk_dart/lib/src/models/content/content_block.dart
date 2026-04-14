@@ -1538,11 +1538,20 @@ class AdvisorRedactedResult extends AdvisorToolResultContent {
 /// Advisor tool result error.
 @immutable
 class AdvisorToolResultError extends AdvisorToolResultContent {
-  /// The error code.
+  /// The parsed error code.
   final AdvisorToolResultErrorCode errorCode;
 
+  /// The raw error code string from the API.
+  ///
+  /// Preserved for round-trip fidelity — unrecognized codes are stored
+  /// verbatim and serialized back unchanged.
+  final String rawErrorCode;
+
   /// Creates an [AdvisorToolResultError].
-  const AdvisorToolResultError({required this.errorCode});
+  const AdvisorToolResultError({
+    required this.errorCode,
+    required this.rawErrorCode,
+  });
 
   /// Creates an [AdvisorToolResultError] from JSON.
   factory AdvisorToolResultError.fromJson(Map<String, dynamic> json) {
@@ -1552,31 +1561,45 @@ class AdvisorToolResultError extends AdvisorToolResultContent {
         'Expected type "advisor_tool_result_error", got "$type"',
       );
     }
+    final raw = json['error_code'] as String;
     return AdvisorToolResultError(
-      errorCode: AdvisorToolResultErrorCode.fromJson(
-        json['error_code'] as String,
-      ),
+      errorCode: AdvisorToolResultErrorCode.fromJson(raw),
+      rawErrorCode: raw,
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
     'type': 'advisor_tool_result_error',
-    'error_code': errorCode.toJson(),
+    'error_code': rawErrorCode,
   };
+
+  /// Creates a copy with replaced values.
+  AdvisorToolResultError copyWith({
+    AdvisorToolResultErrorCode? errorCode,
+    String? rawErrorCode,
+  }) {
+    return AdvisorToolResultError(
+      errorCode: errorCode ?? this.errorCode,
+      rawErrorCode: rawErrorCode ?? this.rawErrorCode,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is AdvisorToolResultError &&
           runtimeType == other.runtimeType &&
-          errorCode == other.errorCode;
+          errorCode == other.errorCode &&
+          rawErrorCode == other.rawErrorCode;
 
   @override
-  int get hashCode => errorCode.hashCode;
+  int get hashCode => Object.hash(errorCode, rawErrorCode);
 
   @override
-  String toString() => 'AdvisorToolResultError(errorCode: $errorCode)';
+  String toString() =>
+      'AdvisorToolResultError(errorCode: $errorCode, '
+      'rawErrorCode: $rawErrorCode)';
 }
 
 /// Forward-compatible fallback for unknown advisor result content types.
