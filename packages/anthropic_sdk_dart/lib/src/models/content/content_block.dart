@@ -1683,7 +1683,11 @@ enum AdvisorToolResultErrorCode {
     _ => unknown,
   };
 
-  /// Converts to JSON.
+  /// Converts to a known JSON string.
+  ///
+  /// Returns `'unknown'` for [unknown] — this is lossy for unrecognized codes.
+  /// For round-trip serialization, use [AdvisorToolResultError.rawErrorCode]
+  /// instead of `errorCode.toJson()`.
   String toJson() => switch (this) {
     executionTimeExceeded => 'execution_time_exceeded',
     maxUsesExceeded => 'max_uses_exceeded',

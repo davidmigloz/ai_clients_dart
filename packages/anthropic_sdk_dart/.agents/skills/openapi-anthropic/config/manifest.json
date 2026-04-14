@@ -1083,7 +1083,7 @@
           "CodeExecutionTool20250522": "code_execution_20250522, code_execution_20250825, code_execution_20260120",
           "ComputerUseTool (beta)": "computer_* prefix",
           "McpToolset (beta)": "mcp_* prefix",
-          "AdvisorTool (beta)": "advisor_20260301"
+          "AdvisorTool (beta)": "advisor_* prefix"
         }
       },
       "tags": [
@@ -1250,10 +1250,7 @@
       "dart_class": "AdvisorToolResultBlock",
       "file": "lib/src/models/content/content_block.dart",
       "schema": "BetaResponseAdvisorToolResultBlock",
-      "parent": "ContentBlock",
-      "excluded_properties": [
-        "caller"
-      ]
+      "parent": "ContentBlock"
     },
     "RequestAdvisorToolResultBlockParam": {
       "spec": "main",

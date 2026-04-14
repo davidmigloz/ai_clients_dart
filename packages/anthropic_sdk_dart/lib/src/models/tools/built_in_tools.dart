@@ -232,7 +232,9 @@ sealed class BuiltInTool {
       'code_execution_20250825' => CodeExecutionBuiltInTool.fromJson(json),
       'code_execution_20260120' => CodeExecutionBuiltInTool.fromJson(json),
       // Beta tools
-      'advisor_20260301' => AdvisorTool.fromJson(json),
+      final String t when t.startsWith('advisor_') => AdvisorTool.fromJson(
+        json,
+      ),
       final String t when t.startsWith('computer_') => ComputerUseTool.fromJson(
         json,
       ),

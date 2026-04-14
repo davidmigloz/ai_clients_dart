@@ -102,6 +102,8 @@ class MessageStreamAccumulator {
         block.citations.add(citation);
       case CompactionDelta(:final content):
         if (content != null) block.compactionBuffer.write(content);
+      case UnknownContentBlockDelta():
+        break; // Unknown deltas are ignored during accumulation
     }
   }
 

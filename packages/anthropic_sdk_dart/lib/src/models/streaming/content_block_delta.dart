@@ -1,9 +1,13 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 import '../content/content_block.dart';
 
 /// Delta content for streaming content block updates.
+///
+/// Unknown delta types are preserved as [UnknownContentBlockDelta]
+/// for forward compatibility.
 sealed class ContentBlockDelta {
   const ContentBlockDelta();
 
@@ -35,7 +39,7 @@ sealed class ContentBlockDelta {
       'signature_delta' => SignatureDelta.fromJson(json),
       'citations_delta' => CitationsDelta.fromJson(json),
       'compaction_delta' => CompactionDelta.fromJson(json),
-      _ => throw FormatException('Unknown ContentBlockDelta type: $type'),
+      _ => UnknownContentBlockDelta.fromJson(json),
     };
   }
 
@@ -277,4 +281,38 @@ class CitationsDelta extends ContentBlockDelta {
 
   @override
   String toString() => 'CitationsDelta(citation: $citation)';
+}
+
+/// Forward-compatible fallback for unknown content block delta types.
+///
+/// Preserves the raw JSON so unrecognized deltas don't crash streaming.
+@immutable
+class UnknownContentBlockDelta extends ContentBlockDelta {
+  /// The raw JSON for this unknown delta.
+  final Map<String, dynamic> raw;
+
+  /// Creates an [UnknownContentBlockDelta].
+  UnknownContentBlockDelta({required Map<String, dynamic> raw})
+    : raw = Map.unmodifiable(raw);
+
+  /// Creates an [UnknownContentBlockDelta] from JSON.
+  factory UnknownContentBlockDelta.fromJson(Map<String, dynamic> json) {
+    return UnknownContentBlockDelta(raw: json);
+  }
+
+  @override
+  Map<String, dynamic> toJson() => Map<String, dynamic>.from(raw);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnknownContentBlockDelta &&
+          runtimeType == other.runtimeType &&
+          mapsDeepEqual(raw, other.raw);
+
+  @override
+  int get hashCode => mapDeepHashCode(raw);
+
+  @override
+  String toString() => 'UnknownContentBlockDelta(raw: ${raw.length} entries)';
 }
