@@ -22,7 +22,9 @@ Fetch writes the candidate spec to the configured `output_dir` as `latest-<spec>
 ```bash
 python3 .agents/shared/api-toolkit/scripts/api_toolkit.py review   --config-dir packages/anthropic_sdk_dart/.agents/skills/openapi-anthropic/config
 ```
-3. Implement with `scaffold` plus the package references, then promote the reviewed candidate from `output_dir/latest-<spec>.json` into `packages/anthropic_sdk_dart/specs/` before final verification.
+3. Implement with `scaffold` plus the package references, then promote the spec and update the pin:
+   - Copy the candidate into the package: `cp /tmp/openapi-anthropic-dart/latest-main.json packages/anthropic_sdk_dart/specs/openapi.yaml` (the canonical spec is JSON despite the `.yaml` extension).
+   - Update `pinned_hash` in `config/specs.json` to the new spec hash (visible in the fetch output's `latest_hash` field). If you skip this, the next `fetch` will still report `outdated: true`.
 4. Verify:
 ```bash
 python3 .agents/shared/api-toolkit/scripts/api_toolkit.py verify   --config-dir packages/anthropic_sdk_dart/.agents/skills/openapi-anthropic/config   --checks all --scope all
