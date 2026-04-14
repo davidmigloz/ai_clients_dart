@@ -56,7 +56,7 @@ class AdvisorTool extends BuiltInTool {
   /// Creates an [AdvisorTool] from JSON.
   factory AdvisorTool.fromJson(Map<String, dynamic> json) {
     return AdvisorTool(
-      type: json['type'] as String,
+      type: json['type'] as String? ?? 'advisor_20260301',
       model: json['model'] as String,
       maxUses: json['max_uses'] as int?,
       caching: json['caching'] != null

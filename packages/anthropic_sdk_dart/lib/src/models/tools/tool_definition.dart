@@ -56,7 +56,8 @@ sealed class ToolDefinition {
   Map<String, dynamic> toJson();
 
   static bool _isBuiltInType(String type) {
-    return type.startsWith('bash_') ||
+    return type.startsWith('advisor_') ||
+        type.startsWith('bash_') ||
         type.startsWith('text_editor_') ||
         type.startsWith('web_search_') ||
         type.startsWith('web_fetch_') ||

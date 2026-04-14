@@ -474,6 +474,42 @@ void main() {
     });
   });
 
+  group('UnknownContentBlock', () {
+    test('unknown type parses to UnknownContentBlock', () {
+      final json = {
+        'type': 'some_future_block',
+        'data': 'hello',
+        'nested': {'key': 'value'},
+      };
+      final block = ContentBlock.fromJson(json);
+
+      expect(block, isA<UnknownContentBlock>());
+      final unknown = block as UnknownContentBlock;
+      expect(unknown.raw['type'], 'some_future_block');
+      expect(unknown.raw['data'], 'hello');
+    });
+
+    test('round-trips raw JSON', () {
+      final json = {
+        'type': 'future_tool_result',
+        'tool_use_id': 'tu_123',
+        'payload': [1, 2, 3],
+      };
+      final block = ContentBlock.fromJson(json);
+      expect(block.toJson(), json);
+    });
+
+    test('equality', () {
+      final a = UnknownContentBlock(raw: const {'type': 'x', 'v': 1});
+      final b = UnknownContentBlock(raw: const {'type': 'x', 'v': 1});
+      final c = UnknownContentBlock(raw: const {'type': 'y'});
+
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+      expect(a, isNot(equals(c)));
+    });
+  });
+
   group('AdvisorToolResultBlock', () {
     test('fromJson parses advisor_result content', () {
       final json = {

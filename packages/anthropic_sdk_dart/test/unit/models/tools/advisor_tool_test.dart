@@ -137,5 +137,19 @@ void main() {
       expect(tool.toString(), contains('AdvisorTool'));
       expect(tool.toString(), contains('claude-opus-4-6'));
     });
+
+    test('ToolDefinition.fromJson routes advisor tool correctly', () {
+      final json = {
+        'type': 'advisor_20260301',
+        'name': 'advisor',
+        'model': 'claude-opus-4-6',
+      };
+      final toolDef = ToolDefinition.fromJson(json);
+
+      expect(toolDef, isA<BuiltInToolDefinition>());
+      final builtIn = (toolDef as BuiltInToolDefinition).tool;
+      expect(builtIn, isA<AdvisorTool>());
+      expect((builtIn as AdvisorTool).model, 'claude-opus-4-6');
+    });
   });
 }
