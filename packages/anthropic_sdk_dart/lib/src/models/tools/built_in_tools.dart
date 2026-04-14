@@ -5,6 +5,7 @@ import '../common/equality_helpers.dart';
 import '../metadata/cache_control.dart';
 
 // Include beta tools as part of this library to allow them to extend BuiltInTool
+part '../beta/tools/advisor_tool.dart';
 part '../beta/tools/computer_use_tool.dart';
 part '../beta/tools/mcp_toolset.dart';
 
@@ -188,6 +189,17 @@ sealed class BuiltInTool {
     CacheControlEphemeral? cacheControl,
   }) = ComputerUseTool;
 
+  /// Creates an advisor tool (Beta).
+  ///
+  /// Pairs an executor model with a stronger advisor model for
+  /// mid-generation strategic guidance.
+  factory BuiltInTool.advisor({
+    required String model,
+    int? maxUses,
+    CacheControlEphemeral? caching,
+    CacheControlEphemeral? cacheControl,
+  }) = AdvisorTool;
+
   /// Creates an MCP toolset (Beta).
   ///
   /// Connects Claude to external tool servers via MCP.
@@ -220,6 +232,7 @@ sealed class BuiltInTool {
       'code_execution_20250825' => CodeExecutionBuiltInTool.fromJson(json),
       'code_execution_20260120' => CodeExecutionBuiltInTool.fromJson(json),
       // Beta tools
+      'advisor_20260301' => AdvisorTool.fromJson(json),
       final String t when t.startsWith('computer_') => ComputerUseTool.fromJson(
         json,
       ),

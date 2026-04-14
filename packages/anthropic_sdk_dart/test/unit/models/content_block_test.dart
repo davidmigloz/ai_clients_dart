@@ -473,4 +473,250 @@ void main() {
       expect((restored as UrlImageSource).url, 'https://example.com/img.png');
     });
   });
+
+  group('AdvisorToolResultBlock', () {
+    test('fromJson parses advisor_result content', () {
+      final json = {
+        'type': 'advisor_tool_result',
+        'tool_use_id': 'srvtoolu_abc123',
+        'content': {
+          'type': 'advisor_result',
+          'text': 'Use a channel-based coordination pattern.',
+        },
+      };
+      final block = ContentBlock.fromJson(json);
+
+      expect(block, isA<AdvisorToolResultBlock>());
+      final advisor = block as AdvisorToolResultBlock;
+      expect(advisor.toolUseId, 'srvtoolu_abc123');
+      expect(advisor.content, isA<AdvisorResult>());
+      expect(
+        (advisor.content as AdvisorResult).text,
+        'Use a channel-based coordination pattern.',
+      );
+    });
+
+    test('fromJson parses advisor_redacted_result content', () {
+      final json = {
+        'type': 'advisor_tool_result',
+        'tool_use_id': 'srvtoolu_xyz',
+        'content': {
+          'type': 'advisor_redacted_result',
+          'encrypted_content': 'opaque-blob-data',
+        },
+      };
+      final block = ContentBlock.fromJson(json) as AdvisorToolResultBlock;
+
+      expect(block.content, isA<AdvisorRedactedResult>());
+      expect(
+        (block.content as AdvisorRedactedResult).encryptedContent,
+        'opaque-blob-data',
+      );
+    });
+
+    test('fromJson parses advisor_tool_result_error content', () {
+      final json = {
+        'type': 'advisor_tool_result',
+        'tool_use_id': 'srvtoolu_err',
+        'content': {
+          'type': 'advisor_tool_result_error',
+          'error_code': 'overloaded',
+        },
+      };
+      final block = ContentBlock.fromJson(json) as AdvisorToolResultBlock;
+
+      expect(block.content, isA<AdvisorToolResultError>());
+      expect(
+        (block.content as AdvisorToolResultError).errorCode,
+        AdvisorToolResultErrorCode.overloaded,
+      );
+    });
+
+    test('fromJson handles unknown content type as fallback', () {
+      final json = {
+        'type': 'advisor_tool_result',
+        'tool_use_id': 'srvtoolu_unknown',
+        'content': {'type': 'advisor_future_type', 'data': 'something new'},
+      };
+      final block = ContentBlock.fromJson(json) as AdvisorToolResultBlock;
+
+      expect(block.content, isA<AdvisorToolResultUnknown>());
+      final unknown = block.content as AdvisorToolResultUnknown;
+      expect(unknown.raw['type'], 'advisor_future_type');
+      expect(unknown.raw['data'], 'something new');
+    });
+
+    test('toJson round-trip for advisor_result', () {
+      final original = {
+        'type': 'advisor_tool_result',
+        'tool_use_id': 'srvtoolu_abc123',
+        'content': {'type': 'advisor_result', 'text': 'Use channels.'},
+      };
+      final block = ContentBlock.fromJson(original) as AdvisorToolResultBlock;
+      expect(block.toJson(), original);
+    });
+
+    test('toJson round-trip for advisor_redacted_result', () {
+      final original = {
+        'type': 'advisor_tool_result',
+        'tool_use_id': 'srvtoolu_red',
+        'content': {
+          'type': 'advisor_redacted_result',
+          'encrypted_content': 'encrypted-blob',
+        },
+      };
+      final block = ContentBlock.fromJson(original) as AdvisorToolResultBlock;
+      expect(block.toJson(), original);
+    });
+
+    test('toJson round-trip for advisor_tool_result_error', () {
+      final original = {
+        'type': 'advisor_tool_result',
+        'tool_use_id': 'srvtoolu_err',
+        'content': {
+          'type': 'advisor_tool_result_error',
+          'error_code': 'max_uses_exceeded',
+        },
+      };
+      final block = ContentBlock.fromJson(original) as AdvisorToolResultBlock;
+      expect(block.toJson(), original);
+    });
+
+    test('toJson round-trip for unknown content type', () {
+      final original = {
+        'type': 'advisor_tool_result',
+        'tool_use_id': 'srvtoolu_unk',
+        'content': {
+          'type': 'advisor_new_variant',
+          'payload': [1, 2, 3],
+        },
+      };
+      final block = ContentBlock.fromJson(original) as AdvisorToolResultBlock;
+      expect(block.toJson(), original);
+    });
+
+    test('equality', () {
+      const a = AdvisorToolResultBlock(
+        toolUseId: 'id1',
+        content: AdvisorResult(text: 'advice'),
+      );
+      const b = AdvisorToolResultBlock(
+        toolUseId: 'id1',
+        content: AdvisorResult(text: 'advice'),
+      );
+      const c = AdvisorToolResultBlock(
+        toolUseId: 'id1',
+        content: AdvisorResult(text: 'different'),
+      );
+
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+      expect(a, isNot(equals(c)));
+    });
+
+    test('copyWith', () {
+      const original = AdvisorToolResultBlock(
+        toolUseId: 'id1',
+        content: AdvisorResult(text: 'advice'),
+      );
+      final modified = original.copyWith(toolUseId: 'id2');
+      expect(modified.toolUseId, 'id2');
+      expect(modified.content, isA<AdvisorResult>());
+    });
+  });
+
+  group('AdvisorToolResultErrorCode', () {
+    test('all known error codes round-trip', () {
+      const codes = {
+        'execution_time_exceeded':
+            AdvisorToolResultErrorCode.executionTimeExceeded,
+        'max_uses_exceeded': AdvisorToolResultErrorCode.maxUsesExceeded,
+        'overloaded': AdvisorToolResultErrorCode.overloaded,
+        'prompt_too_long': AdvisorToolResultErrorCode.promptTooLong,
+        'too_many_requests': AdvisorToolResultErrorCode.tooManyRequests,
+        'unavailable': AdvisorToolResultErrorCode.unavailable,
+      };
+
+      for (final entry in codes.entries) {
+        final parsed = AdvisorToolResultErrorCode.fromJson(entry.key);
+        expect(parsed, entry.value, reason: 'Parsing ${entry.key}');
+        expect(parsed.toJson(), entry.key, reason: 'Serializing ${entry.key}');
+      }
+    });
+
+    test('unrecognized error code returns unknown fallback', () {
+      final code = AdvisorToolResultErrorCode.fromJson(
+        'some_future_error_code',
+      );
+      expect(code, AdvisorToolResultErrorCode.unknown);
+    });
+  });
+
+  group('AdvisorToolResultContent variants', () {
+    test('AdvisorResult validates type discriminator', () {
+      expect(
+        () => AdvisorResult.fromJson(const {
+          'type': 'wrong_type',
+          'text': 'hello',
+        }),
+        throwsFormatException,
+      );
+    });
+
+    test('AdvisorRedactedResult validates type discriminator', () {
+      expect(
+        () => AdvisorRedactedResult.fromJson(const {
+          'type': 'wrong_type',
+          'encrypted_content': 'data',
+        }),
+        throwsFormatException,
+      );
+    });
+
+    test('AdvisorToolResultError validates type discriminator', () {
+      expect(
+        () => AdvisorToolResultError.fromJson(const {
+          'type': 'wrong_type',
+          'error_code': 'overloaded',
+        }),
+        throwsFormatException,
+      );
+    });
+
+    test('AdvisorRedactedResult equality', () {
+      const a = AdvisorRedactedResult(encryptedContent: 'data');
+      const b = AdvisorRedactedResult(encryptedContent: 'data');
+      const c = AdvisorRedactedResult(encryptedContent: 'other');
+
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+      expect(a, isNot(equals(c)));
+    });
+
+    test('AdvisorToolResultError equality', () {
+      const a = AdvisorToolResultError(
+        errorCode: AdvisorToolResultErrorCode.overloaded,
+      );
+      const b = AdvisorToolResultError(
+        errorCode: AdvisorToolResultErrorCode.overloaded,
+      );
+      const c = AdvisorToolResultError(
+        errorCode: AdvisorToolResultErrorCode.unavailable,
+      );
+
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+      expect(a, isNot(equals(c)));
+    });
+
+    test('AdvisorToolResultUnknown equality', () {
+      final a = AdvisorToolResultUnknown(raw: const {'type': 'x', 'data': 1});
+      final b = AdvisorToolResultUnknown(raw: const {'type': 'x', 'data': 1});
+      final c = AdvisorToolResultUnknown(raw: const {'type': 'y'});
+
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+      expect(a, isNot(equals(c)));
+    });
+  });
 }

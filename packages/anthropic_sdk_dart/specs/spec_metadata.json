@@ -2,9 +2,9 @@
   "specs": {
     "main": {
       "current_version": "unknown",
-      "last_fetched": "2026-04-08T21:34:28.915130Z",
-      "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/anthropic%2Fanthropic-69486316563eb49043ec1ef0b8e1d4164b6fadb58c7ae27477f9971448ede066.yml",
-      "title": "Anthropic API + managed-agents",
+      "last_fetched": "2026-04-13T20:39:24.894396Z",
+      "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/anthropic%2Fanthropic-dfe504526eed07979685a729ac9afd45e59cc2879291714b9f4674f2ef1247c7.yml",
+      "title": "Anthropic API + advisor-tool",
       "version_history": [
         {
           "fetched_at": "2026-03-20T12:00:00Z",

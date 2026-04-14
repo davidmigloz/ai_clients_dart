@@ -172,7 +172,8 @@
           "ResponseTextEditorCodeExecutionToolResultBlock": "text_editor_code_execution_tool_result",
           "ResponseToolSearchToolResultBlock": "tool_search_tool_result",
           "ResponseContainerUploadBlock": "container_upload",
-          "ResponseCompactionBlock": "compaction"
+          "ResponseCompactionBlock": "compaction",
+          "BetaResponseAdvisorToolResultBlock": "advisor_tool_result"
         }
       },
       "note": null,
@@ -322,7 +323,8 @@
           "RequestToolSearchToolResultBlockParam": "tool_search_tool_result",
           "RequestContainerUploadBlockParam": "container_upload",
           "RequestCompactionBlockParam": "compaction",
-          "RequestToolReferenceBlockParam": "tool_reference"
+          "RequestToolReferenceBlockParam": "tool_reference",
+          "RequestAdvisorToolResultBlockParam": "advisor_tool_result"
         }
       },
       "note": null,
@@ -1080,7 +1082,8 @@
           "ToolSearchToolRegex": "tool_search_tool_regex, tool_search_tool_regex_20251119",
           "CodeExecutionTool20250522": "code_execution_20250522, code_execution_20250825, code_execution_20260120",
           "ComputerUseTool (beta)": "computer_* prefix",
-          "McpToolset (beta)": "mcp_* prefix"
+          "McpToolset (beta)": "mcp_* prefix",
+          "AdvisorTool (beta)": "advisor_20260301"
         }
       },
       "tags": [
@@ -1226,6 +1229,133 @@
         "default_config",
         "mcp_server_name"
       ]
+    },
+    "AdvisorTool (beta)": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AdvisorTool",
+      "file": "lib/src/models/beta/tools/advisor_tool.dart",
+      "schema": "BetaAdvisorTool_20260301",
+      "parent": "BuiltInTool",
+      "excluded_properties": [
+        "allowed_callers",
+        "defer_loading",
+        "name",
+        "strict"
+      ]
+    },
+    "BetaResponseAdvisorToolResultBlock": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AdvisorToolResultBlock",
+      "file": "lib/src/models/content/content_block.dart",
+      "schema": "BetaResponseAdvisorToolResultBlock",
+      "parent": "ContentBlock",
+      "excluded_properties": [
+        "caller"
+      ]
+    },
+    "RequestAdvisorToolResultBlockParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AdvisorToolResultInputBlock",
+      "file": "lib/src/models/content/input_content_block.dart",
+      "schema": "BetaRequestAdvisorToolResultBlock",
+      "parent": "InputContentBlock"
+    },
+    "AdvisorToolResultContent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "AdvisorToolResultContent",
+      "file": "lib/src/models/content/content_block.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "BetaResponseAdvisorResultBlock": "advisor_result",
+          "BetaResponseAdvisorRedactedResultBlock": "advisor_redacted_result",
+          "BetaResponseAdvisorToolResultError": "advisor_tool_result_error"
+        }
+      },
+      "note": "Discriminated union for advisor tool result content"
+    },
+    "BetaResponseAdvisorResultBlock": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AdvisorResult",
+      "file": "lib/src/models/content/content_block.dart",
+      "schema": "BetaResponseAdvisorResultBlock",
+      "parent": "AdvisorToolResultContent"
+    },
+    "BetaResponseAdvisorRedactedResultBlock": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AdvisorRedactedResult",
+      "file": "lib/src/models/content/content_block.dart",
+      "schema": "BetaResponseAdvisorRedactedResultBlock",
+      "parent": "AdvisorToolResultContent"
+    },
+    "BetaResponseAdvisorToolResultError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AdvisorToolResultError",
+      "file": "lib/src/models/content/content_block.dart",
+      "schema": "BetaResponseAdvisorToolResultError",
+      "parent": "AdvisorToolResultContent"
+    },
+    "BetaRequestAdvisorResultBlock": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "AdvisorResult",
+      "file": "lib/src/models/content/content_block.dart",
+      "schema": "BetaRequestAdvisorResultBlock",
+      "parent": "AdvisorToolResultContent",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Request variant maps to same Dart class as Response variant"
+    },
+    "BetaRequestAdvisorRedactedResultBlock": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "AdvisorRedactedResult",
+      "file": "lib/src/models/content/content_block.dart",
+      "schema": "BetaRequestAdvisorRedactedResultBlock",
+      "parent": "AdvisorToolResultContent",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Request variant maps to same Dart class as Response variant"
+    },
+    "BetaRequestAdvisorToolResultError": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "AdvisorToolResultError",
+      "file": "lib/src/models/content/content_block.dart",
+      "schema": "BetaRequestAdvisorToolResultError",
+      "parent": "AdvisorToolResultContent",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Request variant maps to same Dart class as Response variant"
+    },
+    "BetaAdvisorToolResultErrorCode": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AdvisorToolResultErrorCode",
+      "file": "lib/src/models/content/content_block.dart",
+      "schema": "BetaAdvisorToolResultErrorCode"
+    },
+    "BetaAdvisorMessageIterationUsage": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "IterationUsage",
+      "file": "lib/src/models/metadata/usage.dart",
+      "schema": "BetaAdvisorMessageIterationUsage",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Modeled as IterationUsage with optional model field; type discriminator 'advisor_message' is a string value, not a separate class"
     },
     "BatchResult": {
       "spec": "main",

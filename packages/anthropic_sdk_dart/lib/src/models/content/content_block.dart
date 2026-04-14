@@ -32,6 +32,7 @@ sealed class ContentBlock {
       'tool_search_tool_result' => ToolSearchToolResultBlock.fromJson(json),
       'container_upload' => ContainerUploadBlock.fromJson(json),
       'compaction' => CompactionBlock.fromJson(json),
+      'advisor_tool_result' => AdvisorToolResultBlock.fromJson(json),
       _ => throw FormatException('Unknown ContentBlock type: $type'),
     };
   }
@@ -1346,4 +1347,312 @@ class WebSearchResultLocationCitation extends Citation {
       'WebSearchResultLocationCitation(citedText: [${citedText.length} chars], '
       'encryptedIndex: [${encryptedIndex.length} chars], '
       'title: $title, url: $url)';
+}
+
+// ============================================================================
+// Advisor Tool Result
+// ============================================================================
+
+/// Advisor tool result block.
+///
+/// Contains the advisor model's response to a `server_tool_use` block
+/// with `name: "advisor"`. The [content] is a discriminated union of
+/// [AdvisorResult], [AdvisorRedactedResult], [AdvisorToolResultError],
+/// or [AdvisorToolResultUnknown] for forward compatibility.
+@immutable
+class AdvisorToolResultBlock extends ContentBlock {
+  /// The tool use ID this result corresponds to.
+  final String toolUseId;
+
+  /// The advisor's response content.
+  final AdvisorToolResultContent content;
+
+  /// Caller metadata for this tool result.
+  final ToolCaller? caller;
+
+  /// Creates an [AdvisorToolResultBlock].
+  const AdvisorToolResultBlock({
+    required this.toolUseId,
+    required this.content,
+    this.caller,
+  });
+
+  /// Creates an [AdvisorToolResultBlock] from JSON.
+  factory AdvisorToolResultBlock.fromJson(Map<String, dynamic> json) {
+    return AdvisorToolResultBlock(
+      toolUseId: json['tool_use_id'] as String,
+      content: AdvisorToolResultContent.fromJson(
+        json['content'] as Map<String, dynamic>,
+      ),
+      caller: json['caller'] != null
+          ? ToolCaller.fromJson(json['caller'] as Map<String, dynamic>)
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'advisor_tool_result',
+    'tool_use_id': toolUseId,
+    'content': content.toJson(),
+    if (caller != null) 'caller': caller!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  AdvisorToolResultBlock copyWith({
+    String? toolUseId,
+    AdvisorToolResultContent? content,
+    Object? caller = unsetCopyWithValue,
+  }) {
+    return AdvisorToolResultBlock(
+      toolUseId: toolUseId ?? this.toolUseId,
+      content: content ?? this.content,
+      caller: caller == unsetCopyWithValue
+          ? this.caller
+          : caller as ToolCaller?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AdvisorToolResultBlock &&
+          runtimeType == other.runtimeType &&
+          toolUseId == other.toolUseId &&
+          content == other.content &&
+          caller == other.caller;
+
+  @override
+  int get hashCode => Object.hash(toolUseId, content, caller);
+
+  @override
+  String toString() =>
+      'AdvisorToolResultBlock(toolUseId: $toolUseId, content: $content, '
+      'caller: $caller)';
+}
+
+/// Advisor tool result content.
+///
+/// A discriminated union keyed by `type`:
+/// - [AdvisorResult] — plaintext advice (`type: "advisor_result"`).
+/// - [AdvisorRedactedResult] — encrypted advice (`type: "advisor_redacted_result"`).
+/// - [AdvisorToolResultError] — error (`type: "advisor_tool_result_error"`).
+/// - [AdvisorToolResultUnknown] — forward-compatible fallback for unknown types.
+sealed class AdvisorToolResultContent {
+  const AdvisorToolResultContent();
+
+  /// Creates an [AdvisorToolResultContent] from JSON.
+  factory AdvisorToolResultContent.fromJson(Map<String, dynamic> json) {
+    final type = json['type'] as String;
+    return switch (type) {
+      'advisor_result' => AdvisorResult.fromJson(json),
+      'advisor_redacted_result' => AdvisorRedactedResult.fromJson(json),
+      'advisor_tool_result_error' => AdvisorToolResultError.fromJson(json),
+      _ => AdvisorToolResultUnknown.fromJson(json),
+    };
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson();
+}
+
+/// Plaintext advisor result.
+@immutable
+class AdvisorResult extends AdvisorToolResultContent {
+  /// The advisor's advice text.
+  final String text;
+
+  /// Creates an [AdvisorResult].
+  const AdvisorResult({required this.text});
+
+  /// Creates an [AdvisorResult] from JSON.
+  factory AdvisorResult.fromJson(Map<String, dynamic> json) {
+    final type = json['type'] as String?;
+    if (type != 'advisor_result') {
+      throw FormatException('Expected type "advisor_result", got "$type"');
+    }
+    return AdvisorResult(text: json['text'] as String);
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': 'advisor_result', 'text': text};
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AdvisorResult &&
+          runtimeType == other.runtimeType &&
+          text == other.text;
+
+  @override
+  int get hashCode => text.hashCode;
+
+  @override
+  String toString() => 'AdvisorResult(text: ${text.length} chars)';
+}
+
+/// Encrypted (redacted) advisor result.
+@immutable
+class AdvisorRedactedResult extends AdvisorToolResultContent {
+  /// The opaque encrypted content blob.
+  final String encryptedContent;
+
+  /// Creates an [AdvisorRedactedResult].
+  const AdvisorRedactedResult({required this.encryptedContent});
+
+  /// Creates an [AdvisorRedactedResult] from JSON.
+  factory AdvisorRedactedResult.fromJson(Map<String, dynamic> json) {
+    final type = json['type'] as String?;
+    if (type != 'advisor_redacted_result') {
+      throw FormatException(
+        'Expected type "advisor_redacted_result", got "$type"',
+      );
+    }
+    return AdvisorRedactedResult(
+      encryptedContent: json['encrypted_content'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'advisor_redacted_result',
+    'encrypted_content': encryptedContent,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AdvisorRedactedResult &&
+          runtimeType == other.runtimeType &&
+          encryptedContent == other.encryptedContent;
+
+  @override
+  int get hashCode => encryptedContent.hashCode;
+
+  @override
+  String toString() =>
+      'AdvisorRedactedResult(encryptedContent: '
+      '[${encryptedContent.length} chars])';
+}
+
+/// Advisor tool result error.
+@immutable
+class AdvisorToolResultError extends AdvisorToolResultContent {
+  /// The error code.
+  final AdvisorToolResultErrorCode errorCode;
+
+  /// Creates an [AdvisorToolResultError].
+  const AdvisorToolResultError({required this.errorCode});
+
+  /// Creates an [AdvisorToolResultError] from JSON.
+  factory AdvisorToolResultError.fromJson(Map<String, dynamic> json) {
+    final type = json['type'] as String?;
+    if (type != 'advisor_tool_result_error') {
+      throw FormatException(
+        'Expected type "advisor_tool_result_error", got "$type"',
+      );
+    }
+    return AdvisorToolResultError(
+      errorCode: AdvisorToolResultErrorCode.fromJson(
+        json['error_code'] as String,
+      ),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'advisor_tool_result_error',
+    'error_code': errorCode.toJson(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AdvisorToolResultError &&
+          runtimeType == other.runtimeType &&
+          errorCode == other.errorCode;
+
+  @override
+  int get hashCode => errorCode.hashCode;
+
+  @override
+  String toString() => 'AdvisorToolResultError(errorCode: $errorCode)';
+}
+
+/// Forward-compatible fallback for unknown advisor result content types.
+@immutable
+class AdvisorToolResultUnknown extends AdvisorToolResultContent {
+  /// The raw JSON for this unknown result type.
+  final Map<String, dynamic> raw;
+
+  /// Creates an [AdvisorToolResultUnknown].
+  AdvisorToolResultUnknown({required Map<String, dynamic> raw})
+    : raw = Map.unmodifiable(raw);
+
+  /// Creates an [AdvisorToolResultUnknown] from JSON.
+  factory AdvisorToolResultUnknown.fromJson(Map<String, dynamic> json) {
+    return AdvisorToolResultUnknown(raw: json);
+  }
+
+  @override
+  Map<String, dynamic> toJson() => Map<String, dynamic>.from(raw);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AdvisorToolResultUnknown &&
+          runtimeType == other.runtimeType &&
+          mapsEqual(raw, other.raw);
+
+  @override
+  int get hashCode => mapHash(raw);
+
+  @override
+  String toString() => 'AdvisorToolResultUnknown(raw: ${raw.length} entries)';
+}
+
+/// Error codes for advisor tool result errors.
+enum AdvisorToolResultErrorCode {
+  /// The advisor sub-inference timed out.
+  executionTimeExceeded,
+
+  /// The request reached the max_uses cap.
+  maxUsesExceeded,
+
+  /// The advisor sub-inference hit capacity limits.
+  overloaded,
+
+  /// The transcript exceeded the advisor model's context window.
+  promptTooLong,
+
+  /// The advisor sub-inference was rate-limited.
+  tooManyRequests,
+
+  /// Any other advisor failure.
+  unavailable,
+
+  /// Forward-compatible fallback for unrecognized error codes.
+  unknown;
+
+  /// Creates an [AdvisorToolResultErrorCode] from JSON.
+  factory AdvisorToolResultErrorCode.fromJson(String value) => switch (value) {
+    'execution_time_exceeded' => executionTimeExceeded,
+    'max_uses_exceeded' => maxUsesExceeded,
+    'overloaded' => overloaded,
+    'prompt_too_long' => promptTooLong,
+    'too_many_requests' => tooManyRequests,
+    'unavailable' => unavailable,
+    _ => unknown,
+  };
+
+  /// Converts to JSON.
+  String toJson() => switch (this) {
+    executionTimeExceeded => 'execution_time_exceeded',
+    maxUsesExceeded => 'max_uses_exceeded',
+    overloaded => 'overloaded',
+    promptTooLong => 'prompt_too_long',
+    tooManyRequests => 'too_many_requests',
+    unavailable => 'unavailable',
+    unknown => 'unknown',
+  };
 }

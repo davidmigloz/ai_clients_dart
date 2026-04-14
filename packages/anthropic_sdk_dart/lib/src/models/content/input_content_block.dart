@@ -94,6 +94,14 @@ sealed class InputContentBlock {
     CacheControlEphemeral? cacheControl,
   }) = CompactionInputBlock;
 
+  /// Creates an advisor tool result block (for multi-turn conversations).
+  factory InputContentBlock.advisorToolResult({
+    required String toolUseId,
+    required AdvisorToolResultContent content,
+    ToolCaller? caller,
+    CacheControlEphemeral? cacheControl,
+  }) = AdvisorToolResultInputBlock;
+
   /// Creates a tool reference block.
   factory InputContentBlock.toolReference({
     required String toolName,
@@ -124,6 +132,7 @@ sealed class InputContentBlock {
       'container_upload' => ContainerUploadInputBlock.fromJson(json),
       'compaction' => CompactionInputBlock.fromJson(json),
       'tool_reference' => ToolReferenceInputBlock.fromJson(json),
+      'advisor_tool_result' => AdvisorToolResultInputBlock.fromJson(json),
       _ => throw FormatException('Unknown InputContentBlock type: $type'),
     };
   }
@@ -1361,4 +1370,95 @@ class ToolReferenceInputBlock extends InputContentBlock {
   String toString() =>
       'ToolReferenceInputBlock(toolName: $toolName, '
       'cacheControl: $cacheControl)';
+}
+
+/// Advisor tool result block in input (for multi-turn conversations).
+///
+/// Pass advisor tool result blocks verbatim from the assistant's response
+/// back to the API on subsequent turns.
+@immutable
+class AdvisorToolResultInputBlock extends InputContentBlock {
+  /// The ID of the related tool use.
+  final String toolUseId;
+
+  /// The advisor's response content.
+  final AdvisorToolResultContent content;
+
+  /// Caller metadata.
+  final ToolCaller? caller;
+
+  /// Cache control for this block.
+  final CacheControlEphemeral? cacheControl;
+
+  /// Creates an [AdvisorToolResultInputBlock].
+  const AdvisorToolResultInputBlock({
+    required this.toolUseId,
+    required this.content,
+    this.caller,
+    this.cacheControl,
+  });
+
+  /// Creates an [AdvisorToolResultInputBlock] from JSON.
+  factory AdvisorToolResultInputBlock.fromJson(Map<String, dynamic> json) {
+    return AdvisorToolResultInputBlock(
+      toolUseId: json['tool_use_id'] as String,
+      content: AdvisorToolResultContent.fromJson(
+        json['content'] as Map<String, dynamic>,
+      ),
+      caller: json['caller'] != null
+          ? ToolCaller.fromJson(json['caller'] as Map<String, dynamic>)
+          : null,
+      cacheControl: json['cache_control'] != null
+          ? CacheControlEphemeral.fromJson(
+              json['cache_control'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'advisor_tool_result',
+    'tool_use_id': toolUseId,
+    'content': content.toJson(),
+    if (caller != null) 'caller': caller!.toJson(),
+    if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  AdvisorToolResultInputBlock copyWith({
+    String? toolUseId,
+    AdvisorToolResultContent? content,
+    Object? caller = unsetCopyWithValue,
+    Object? cacheControl = unsetCopyWithValue,
+  }) {
+    return AdvisorToolResultInputBlock(
+      toolUseId: toolUseId ?? this.toolUseId,
+      content: content ?? this.content,
+      caller: caller == unsetCopyWithValue
+          ? this.caller
+          : caller as ToolCaller?,
+      cacheControl: cacheControl == unsetCopyWithValue
+          ? this.cacheControl
+          : cacheControl as CacheControlEphemeral?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AdvisorToolResultInputBlock &&
+          runtimeType == other.runtimeType &&
+          toolUseId == other.toolUseId &&
+          content == other.content &&
+          caller == other.caller &&
+          cacheControl == other.cacheControl;
+
+  @override
+  int get hashCode => Object.hash(toolUseId, content, caller, cacheControl);
+
+  @override
+  String toString() =>
+      'AdvisorToolResultInputBlock(toolUseId: $toolUseId, '
+      'content: $content, caller: $caller, cacheControl: $cacheControl)';
 }

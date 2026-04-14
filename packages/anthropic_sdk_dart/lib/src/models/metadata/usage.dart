@@ -178,10 +178,16 @@ class ServerToolUsage {
       'webFetchRequests: $webFetchRequests)';
 }
 
-/// Token usage for a single iteration (message or compaction).
+/// Token usage for a single iteration.
+///
+/// The [type] field indicates the iteration kind:
+/// - `"message"` — executor model inference.
+/// - `"compaction"` — context compaction.
+/// - `"advisor_message"` — advisor sub-inference; [model] contains the
+///   advisor model ID and usage is billed at the advisor model's rates.
 @immutable
 class IterationUsage {
-  /// Iteration type (for example: "message" or "compaction").
+  /// Iteration type (e.g., "message", "compaction", or "advisor_message").
   final String type;
 
   /// Input tokens for this iteration.
@@ -199,6 +205,9 @@ class IterationUsage {
   /// Cache creation details by TTL.
   final CacheCreation? cacheCreation;
 
+  /// The model used for this iteration (present for `advisor_message`).
+  final String? model;
+
   /// Creates an [IterationUsage].
   const IterationUsage({
     required this.type,
@@ -207,6 +216,7 @@ class IterationUsage {
     this.cacheCreationInputTokens = 0,
     this.cacheReadInputTokens = 0,
     this.cacheCreation,
+    this.model,
   });
 
   /// Creates an [IterationUsage] from JSON.
@@ -223,6 +233,7 @@ class IterationUsage {
               json['cache_creation'] as Map<String, dynamic>,
             )
           : null,
+      model: json['model'] as String?,
     );
   }
 
@@ -234,6 +245,7 @@ class IterationUsage {
     'cache_creation_input_tokens': cacheCreationInputTokens,
     'cache_read_input_tokens': cacheReadInputTokens,
     if (cacheCreation != null) 'cache_creation': cacheCreation!.toJson(),
+    if (model != null) 'model': model,
   };
 
   /// Creates a copy with replaced values.
@@ -244,6 +256,7 @@ class IterationUsage {
     int? cacheCreationInputTokens,
     int? cacheReadInputTokens,
     Object? cacheCreation = unsetCopyWithValue,
+    Object? model = unsetCopyWithValue,
   }) {
     return IterationUsage(
       type: type ?? this.type,
@@ -255,6 +268,7 @@ class IterationUsage {
       cacheCreation: cacheCreation == unsetCopyWithValue
           ? this.cacheCreation
           : cacheCreation as CacheCreation?,
+      model: model == unsetCopyWithValue ? this.model : model as String?,
     );
   }
 
@@ -268,7 +282,8 @@ class IterationUsage {
           outputTokens == other.outputTokens &&
           cacheCreationInputTokens == other.cacheCreationInputTokens &&
           cacheReadInputTokens == other.cacheReadInputTokens &&
-          cacheCreation == other.cacheCreation;
+          cacheCreation == other.cacheCreation &&
+          model == other.model;
 
   @override
   int get hashCode => Object.hash(
@@ -278,6 +293,7 @@ class IterationUsage {
     cacheCreationInputTokens,
     cacheReadInputTokens,
     cacheCreation,
+    model,
   );
 
   @override
@@ -286,7 +302,7 @@ class IterationUsage {
       'outputTokens: $outputTokens, '
       'cacheCreationInputTokens: $cacheCreationInputTokens, '
       'cacheReadInputTokens: $cacheReadInputTokens, '
-      'cacheCreation: $cacheCreation)';
+      'cacheCreation: $cacheCreation, model: $model)';
 }
 
 /// Service tier used for the request.
