@@ -1380,10 +1380,10 @@ class UnknownContentBlock extends ContentBlock {
       identical(this, other) ||
       other is UnknownContentBlock &&
           runtimeType == other.runtimeType &&
-          mapsEqual(raw, other.raw);
+          mapsDeepEqual(raw, other.raw);
 
   @override
-  int get hashCode => mapHash(raw);
+  int get hashCode => mapDeepHashCode(raw);
 
   @override
   String toString() => 'UnknownContentBlock(raw: ${raw.length} entries)';
@@ -1651,10 +1651,10 @@ class AdvisorToolResultUnknown extends AdvisorToolResultContent {
       identical(this, other) ||
       other is AdvisorToolResultUnknown &&
           runtimeType == other.runtimeType &&
-          mapsEqual(raw, other.raw);
+          mapsDeepEqual(raw, other.raw);
 
   @override
-  int get hashCode => mapHash(raw);
+  int get hashCode => mapDeepHashCode(raw);
 
   @override
   String toString() => 'AdvisorToolResultUnknown(raw: ${raw.length} entries)';
