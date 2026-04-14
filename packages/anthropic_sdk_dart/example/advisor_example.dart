@@ -23,9 +23,7 @@ void main() async {
         model: 'claude-sonnet-4-6',
         maxTokens: 4096,
         tools: [
-          ToolDefinition.builtIn(
-            const AdvisorTool(model: 'claude-opus-4-6'),
-          ),
+          ToolDefinition.builtIn(const AdvisorTool(model: 'claude-opus-4-6')),
         ],
         messages: [
           InputMessage.user(
@@ -44,7 +42,9 @@ void main() async {
       if (block is AdvisorToolResultBlock) {
         switch (block.content) {
           case AdvisorResult(:final text):
-            print('Advisor advice: ${text.substring(0, 100)}...');
+            print(
+              'Advisor advice: ${text.length > 100 ? '${text.substring(0, 100)}...' : text}',
+            );
           case AdvisorRedactedResult():
             print('Advisor returned encrypted advice (for round-tripping)');
           case AdvisorToolResultError(:final errorCode):
@@ -54,7 +54,9 @@ void main() async {
         }
       }
       if (block is TextBlock) {
-        print('Executor response: ${block.text.substring(0, 100)}...');
+        print(
+          'Executor response: ${block.text.length > 100 ? '${block.text.substring(0, 100)}...' : block.text}',
+        );
       }
     }
 

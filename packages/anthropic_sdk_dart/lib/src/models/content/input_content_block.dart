@@ -132,7 +132,7 @@ sealed class InputContentBlock {
       'compaction' => CompactionInputBlock.fromJson(json),
       'tool_reference' => ToolReferenceInputBlock.fromJson(json),
       'advisor_tool_result' => AdvisorToolResultInputBlock.fromJson(json),
-      _ => throw FormatException('Unknown InputContentBlock type: $type'),
+      _ => UnknownInputContentBlock.fromJson(json),
     };
   }
 
@@ -1447,4 +1447,39 @@ class AdvisorToolResultInputBlock extends InputContentBlock {
   String toString() =>
       'AdvisorToolResultInputBlock(toolUseId: $toolUseId, '
       'content: $content, cacheControl: $cacheControl)';
+}
+
+/// Forward-compatible fallback for unknown input content block types.
+///
+/// Preserves the raw JSON so unrecognized blocks from assistant responses
+/// can be round-tripped back to the API without data loss.
+@immutable
+class UnknownInputContentBlock extends InputContentBlock {
+  /// The raw JSON for this unknown input content block.
+  final Map<String, dynamic> raw;
+
+  /// Creates an [UnknownInputContentBlock].
+  UnknownInputContentBlock({required Map<String, dynamic> raw})
+    : raw = Map.unmodifiable(raw);
+
+  /// Creates an [UnknownInputContentBlock] from JSON.
+  factory UnknownInputContentBlock.fromJson(Map<String, dynamic> json) {
+    return UnknownInputContentBlock(raw: json);
+  }
+
+  @override
+  Map<String, dynamic> toJson() => Map<String, dynamic>.from(raw);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnknownInputContentBlock &&
+          runtimeType == other.runtimeType &&
+          mapsDeepEqual(raw, other.raw);
+
+  @override
+  int get hashCode => mapDeepHashCode(raw);
+
+  @override
+  String toString() => 'UnknownInputContentBlock(raw: ${raw.length} entries)';
 }
