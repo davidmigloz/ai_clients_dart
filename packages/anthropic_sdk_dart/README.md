@@ -38,7 +38,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 ### Tools and multimodal
 
 - Custom tool calling with strict schemas and tool choice controls
-- Computer use, web search, code execution, and MCP tool integration
+- Computer use, web search, code execution, advisor, and MCP tool integration
 - Vision and document inputs with citations
 
 ### Operational APIs
@@ -546,6 +546,7 @@ See the [example/](example/) directory for complete examples:
 | [`streaming_example.dart`](example/streaming_example.dart) | Streaming responses |
 | [`tool_calling_example.dart`](example/tool_calling_example.dart) | Tool calling with schemas |
 | [`web_search_example.dart`](example/web_search_example.dart) | Web search tool |
+| [`advisor_example.dart`](example/advisor_example.dart) | Advisor tool (beta) |
 | [`computer_use_example.dart`](example/computer_use_example.dart) | Computer use tool |
 | [`thinking_example.dart`](example/thinking_example.dart) | Extended thinking |
 | [`vision_example.dart`](example/vision_example.dart) | Image and document inputs |
