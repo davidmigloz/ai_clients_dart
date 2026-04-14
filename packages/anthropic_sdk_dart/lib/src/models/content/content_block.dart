@@ -1564,20 +1564,18 @@ class AdvisorRedactedResult extends AdvisorToolResultContent {
 /// Advisor tool result error.
 @immutable
 class AdvisorToolResultError extends AdvisorToolResultContent {
-  /// The parsed error code.
-  final AdvisorToolResultErrorCode errorCode;
-
   /// The raw error code string from the API.
   ///
   /// Preserved for round-trip fidelity — unrecognized codes are stored
   /// verbatim and serialized back unchanged.
   final String rawErrorCode;
 
+  /// The parsed error code, derived from [rawErrorCode].
+  AdvisorToolResultErrorCode get errorCode =>
+      AdvisorToolResultErrorCode.fromJson(rawErrorCode);
+
   /// Creates an [AdvisorToolResultError].
-  const AdvisorToolResultError({
-    required this.errorCode,
-    required this.rawErrorCode,
-  });
+  const AdvisorToolResultError({required this.rawErrorCode});
 
   /// Creates an [AdvisorToolResultError] from JSON.
   factory AdvisorToolResultError.fromJson(Map<String, dynamic> json) {
@@ -1587,11 +1585,7 @@ class AdvisorToolResultError extends AdvisorToolResultContent {
         'Expected type "advisor_tool_result_error", got "$type"',
       );
     }
-    final raw = json['error_code'] as String;
-    return AdvisorToolResultError(
-      errorCode: AdvisorToolResultErrorCode.fromJson(raw),
-      rawErrorCode: raw,
-    );
+    return AdvisorToolResultError(rawErrorCode: json['error_code'] as String);
   }
 
   @override
@@ -1601,12 +1595,8 @@ class AdvisorToolResultError extends AdvisorToolResultContent {
   };
 
   /// Creates a copy with replaced values.
-  AdvisorToolResultError copyWith({
-    AdvisorToolResultErrorCode? errorCode,
-    String? rawErrorCode,
-  }) {
+  AdvisorToolResultError copyWith({String? rawErrorCode}) {
     return AdvisorToolResultError(
-      errorCode: errorCode ?? this.errorCode,
       rawErrorCode: rawErrorCode ?? this.rawErrorCode,
     );
   }
@@ -1616,11 +1606,10 @@ class AdvisorToolResultError extends AdvisorToolResultContent {
       identical(this, other) ||
       other is AdvisorToolResultError &&
           runtimeType == other.runtimeType &&
-          errorCode == other.errorCode &&
           rawErrorCode == other.rawErrorCode;
 
   @override
-  int get hashCode => Object.hash(errorCode, rawErrorCode);
+  int get hashCode => rawErrorCode.hashCode;
 
   @override
   String toString() =>
