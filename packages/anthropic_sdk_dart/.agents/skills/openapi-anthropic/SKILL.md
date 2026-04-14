@@ -40,6 +40,20 @@ python3 .agents/shared/api-toolkit/scripts/api_toolkit.py verify   --config-dir 
 - [references/implementation-patterns.md](references/implementation-patterns.md)
 - [references/REVIEW_CHECKLIST.md](references/REVIEW_CHECKLIST.md)
 
+## Documentation Artifacts
+
+After implementation and before opening a PR, update documentation to reflect new types:
+
+1. **Example** — add an `example/<feature>_example.dart` if the change introduces a new tool, content block type, or API surface. Follow the pattern of existing examples (e.g., `web_search_example.dart`). Verify with `dart analyze`.
+2. **README** — update `README.md`:
+   - Features section: mention the new capability in the relevant bullet.
+   - Examples table: add a row for the new example file.
+3. **llms.txt** — regenerate with the toolkit so the new example is indexed with its token count:
+   ```bash
+   python3 .agents/shared/api-toolkit/scripts/api_toolkit.py generate-llms-txt \
+     --config-dir packages/anthropic_sdk_dart/.agents/skills/openapi-anthropic/config
+   ```
+
 ## Separate Dart Quality Steps
 
 ```bash
