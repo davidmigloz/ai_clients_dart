@@ -46,12 +46,12 @@ class AdvisorTool extends BuiltInTool {
 
   /// Creates an [AdvisorTool].
   const AdvisorTool({
-    this.type = 'advisor_20260301',
+    String? type,
     required this.model,
     this.maxUses,
     this.caching,
     this.cacheControl,
-  });
+  }) : type = type ?? 'advisor_20260301';
 
   /// Creates an [AdvisorTool] from JSON.
   factory AdvisorTool.fromJson(Map<String, dynamic> json) {
