@@ -1367,14 +1367,10 @@ class AdvisorToolResultBlock extends ContentBlock {
   /// The advisor's response content.
   final AdvisorToolResultContent content;
 
-  /// Caller metadata for this tool result.
-  final ToolCaller? caller;
-
   /// Creates an [AdvisorToolResultBlock].
   const AdvisorToolResultBlock({
     required this.toolUseId,
     required this.content,
-    this.caller,
   });
 
   /// Creates an [AdvisorToolResultBlock] from JSON.
@@ -1384,9 +1380,6 @@ class AdvisorToolResultBlock extends ContentBlock {
       content: AdvisorToolResultContent.fromJson(
         json['content'] as Map<String, dynamic>,
       ),
-      caller: json['caller'] != null
-          ? ToolCaller.fromJson(json['caller'] as Map<String, dynamic>)
-          : null,
     );
   }
 
@@ -1395,21 +1388,16 @@ class AdvisorToolResultBlock extends ContentBlock {
     'type': 'advisor_tool_result',
     'tool_use_id': toolUseId,
     'content': content.toJson(),
-    if (caller != null) 'caller': caller!.toJson(),
   };
 
   /// Creates a copy with replaced values.
   AdvisorToolResultBlock copyWith({
     String? toolUseId,
     AdvisorToolResultContent? content,
-    Object? caller = unsetCopyWithValue,
   }) {
     return AdvisorToolResultBlock(
       toolUseId: toolUseId ?? this.toolUseId,
       content: content ?? this.content,
-      caller: caller == unsetCopyWithValue
-          ? this.caller
-          : caller as ToolCaller?,
     );
   }
 
@@ -1419,16 +1407,14 @@ class AdvisorToolResultBlock extends ContentBlock {
       other is AdvisorToolResultBlock &&
           runtimeType == other.runtimeType &&
           toolUseId == other.toolUseId &&
-          content == other.content &&
-          caller == other.caller;
+          content == other.content;
 
   @override
-  int get hashCode => Object.hash(toolUseId, content, caller);
+  int get hashCode => Object.hash(toolUseId, content);
 
   @override
   String toString() =>
-      'AdvisorToolResultBlock(toolUseId: $toolUseId, content: $content, '
-      'caller: $caller)';
+      'AdvisorToolResultBlock(toolUseId: $toolUseId, content: $content)';
 }
 
 /// Advisor tool result content.

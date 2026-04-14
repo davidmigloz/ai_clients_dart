@@ -98,7 +98,6 @@ sealed class InputContentBlock {
   factory InputContentBlock.advisorToolResult({
     required String toolUseId,
     required AdvisorToolResultContent content,
-    ToolCaller? caller,
     CacheControlEphemeral? cacheControl,
   }) = AdvisorToolResultInputBlock;
 
@@ -1384,9 +1383,6 @@ class AdvisorToolResultInputBlock extends InputContentBlock {
   /// The advisor's response content.
   final AdvisorToolResultContent content;
 
-  /// Caller metadata.
-  final ToolCaller? caller;
-
   /// Cache control for this block.
   final CacheControlEphemeral? cacheControl;
 
@@ -1394,7 +1390,6 @@ class AdvisorToolResultInputBlock extends InputContentBlock {
   const AdvisorToolResultInputBlock({
     required this.toolUseId,
     required this.content,
-    this.caller,
     this.cacheControl,
   });
 
@@ -1405,9 +1400,6 @@ class AdvisorToolResultInputBlock extends InputContentBlock {
       content: AdvisorToolResultContent.fromJson(
         json['content'] as Map<String, dynamic>,
       ),
-      caller: json['caller'] != null
-          ? ToolCaller.fromJson(json['caller'] as Map<String, dynamic>)
-          : null,
       cacheControl: json['cache_control'] != null
           ? CacheControlEphemeral.fromJson(
               json['cache_control'] as Map<String, dynamic>,
@@ -1421,7 +1413,6 @@ class AdvisorToolResultInputBlock extends InputContentBlock {
     'type': 'advisor_tool_result',
     'tool_use_id': toolUseId,
     'content': content.toJson(),
-    if (caller != null) 'caller': caller!.toJson(),
     if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
   };
 
@@ -1429,15 +1420,11 @@ class AdvisorToolResultInputBlock extends InputContentBlock {
   AdvisorToolResultInputBlock copyWith({
     String? toolUseId,
     AdvisorToolResultContent? content,
-    Object? caller = unsetCopyWithValue,
     Object? cacheControl = unsetCopyWithValue,
   }) {
     return AdvisorToolResultInputBlock(
       toolUseId: toolUseId ?? this.toolUseId,
       content: content ?? this.content,
-      caller: caller == unsetCopyWithValue
-          ? this.caller
-          : caller as ToolCaller?,
       cacheControl: cacheControl == unsetCopyWithValue
           ? this.cacheControl
           : cacheControl as CacheControlEphemeral?,
@@ -1451,14 +1438,13 @@ class AdvisorToolResultInputBlock extends InputContentBlock {
           runtimeType == other.runtimeType &&
           toolUseId == other.toolUseId &&
           content == other.content &&
-          caller == other.caller &&
           cacheControl == other.cacheControl;
 
   @override
-  int get hashCode => Object.hash(toolUseId, content, caller, cacheControl);
+  int get hashCode => Object.hash(toolUseId, content, cacheControl);
 
   @override
   String toString() =>
       'AdvisorToolResultInputBlock(toolUseId: $toolUseId, '
-      'content: $content, caller: $caller, cacheControl: $cacheControl)';
+      'content: $content, cacheControl: $cacheControl)';
 }
