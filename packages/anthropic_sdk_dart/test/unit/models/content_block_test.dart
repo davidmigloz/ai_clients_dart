@@ -341,8 +341,7 @@ void main() {
 
         final block = MCPToolResultBlock.fromJson(json);
         expect(block.content, isA<MCPToolResultBlocksContent>());
-        final blocks =
-            (block.content as MCPToolResultBlocksContent).blocks;
+        final blocks = (block.content as MCPToolResultBlocksContent).blocks;
         expect(blocks, hasLength(2));
         expect(blocks[0].text, 'block one');
         expect(blocks[1].text, 'block two');
@@ -651,10 +650,7 @@ void main() {
       });
 
       test('fromJson with minimal fields', () {
-        final json = {
-          'type': 'mcp_tool_result',
-          'tool_use_id': 'tu_mcp_1',
-        };
+        final json = {'type': 'mcp_tool_result', 'tool_use_id': 'tu_mcp_1'};
 
         final block = MCPToolResultInputBlock.fromJson(json);
         expect(block.toolUseId, 'tu_mcp_1');

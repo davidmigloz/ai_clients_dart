@@ -1404,9 +1404,7 @@ class TokenEndpointAuthPostUpdateParam extends TokenEndpointAuthUpdateParam {
   });
 
   /// Creates a [TokenEndpointAuthPostUpdateParam] from JSON.
-  factory TokenEndpointAuthPostUpdateParam.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory TokenEndpointAuthPostUpdateParam.fromJson(Map<String, dynamic> json) {
     return TokenEndpointAuthPostUpdateParam(
       type: json['type'] as String? ?? 'client_secret_post',
       clientSecret: json['client_secret'] as String?,

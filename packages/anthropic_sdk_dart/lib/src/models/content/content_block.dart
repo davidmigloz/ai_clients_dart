@@ -1451,9 +1451,7 @@ sealed class MCPToolResultContent {
     if (json is String) return MCPToolResultStringContent(json);
     if (json is List) {
       return MCPToolResultBlocksContent(
-        json
-            .map((e) => TextBlock.fromJson(e as Map<String, dynamic>))
-            .toList(),
+        json.map((e) => TextBlock.fromJson(e as Map<String, dynamic>)).toList(),
       );
     }
     throw FormatException(
@@ -1515,8 +1513,7 @@ class MCPToolResultBlocksContent extends MCPToolResultContent {
   int get hashCode => listHash(blocks);
 
   @override
-  String toString() =>
-      'MCPToolResultBlocksContent(${blocks.length} blocks)';
+  String toString() => 'MCPToolResultBlocksContent(${blocks.length} blocks)';
 }
 
 /// MCP tool result block in a response.

@@ -45,6 +45,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 
 - Message batches for large-scale offline processing
 - Model discovery, files (beta), and skills (beta)
+- Managed agents with sessions, vaults, and streaming events (beta)
 
 ## Quickstart
 
@@ -497,6 +498,61 @@ Future<void> main() async {
 
 </details>
 
+### How do I use managed agents?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.agents`, `client.sessions`, and `client.vaults` for the Managed Agents beta API. Create an agent configuration, start sessions to interact with Claude, and use vaults to securely store credentials.
+
+```dart
+import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
+
+Future<void> main() async {
+  final client = AnthropicClient.fromEnvironment();
+
+  try {
+    // Create an agent
+    final agent = await client.agents.create(
+      const CreateAgentParams(
+        name: 'My Agent',
+        model: ModelParamsId(id: 'claude-sonnet-4-6'),
+      ),
+    );
+
+    // Start a session and send a message
+    final session = await client.sessions.create(
+      CreateSessionParams(
+        agent: AgentParamsId(id: agent.id),
+        environmentId: 'default',
+      ),
+    );
+
+    final eventsResource = client.sessions.events(session.id);
+    await eventsResource.send(
+      const SendSessionEventsParams(
+        events: [
+          UserMessageEventParams(
+            content: [{'type': 'text', 'text': 'Hello, agent!'}],
+          ),
+        ],
+      ),
+    );
+
+    final events = await eventsResource.list();
+    for (final event in events.data) {
+      print('Event: ${event.runtimeType}');
+    }
+  } finally {
+    client.close();
+  }
+}
+```
+
+→ [Full example](example/managed_agents_example.dart)
+
+</details>
+
 ## Error Handling
 
 <details>
@@ -556,6 +612,7 @@ See the [example/](example/) directory for complete examples:
 | [`files_example.dart`](example/files_example.dart) | File management (beta) |
 | [`skills_example.dart`](example/skills_example.dart) | Skills management (beta) |
 | [`mcp_example.dart`](example/mcp_example.dart) | MCP tool integration |
+| [`managed_agents_example.dart`](example/managed_agents_example.dart) | Managed agents: agents, sessions, vaults (beta) |
 | [`models_example.dart`](example/models_example.dart) | Model listing |
 | [`error_handling_example.dart`](example/error_handling_example.dart) | Exception handling patterns |
 | [`anthropic_sdk_dart_example.dart`](example/anthropic_sdk_dart_example.dart) | Quick-start overview |
@@ -569,6 +626,9 @@ See the [example/](example/) directory for complete examples:
 | Models | ✅ Full |
 | Files (Beta) | ✅ Full |
 | Skills (Beta) | ✅ Full |
+| Agents (Beta) | ✅ Full |
+| Sessions (Beta) | ✅ Full |
+| Vaults (Beta) | ✅ Full |
 
 ## Official Documentation
 

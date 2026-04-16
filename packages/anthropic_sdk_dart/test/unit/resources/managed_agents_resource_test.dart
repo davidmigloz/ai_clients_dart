@@ -56,10 +56,7 @@ class ManagedAgentsFixtures {
       'metadata': <String, String>{},
       'resources': <Map<String, dynamic>>[],
       'vault_ids': <String>[],
-      'stats': {
-        'active_seconds': 0,
-        'duration_seconds': 0,
-      },
+      'stats': {'active_seconds': 0, 'duration_seconds': 0},
       'usage': {
         'input_tokens': 0,
         'output_tokens': 0,
@@ -797,7 +794,10 @@ void main() {
       final json = {
         'type': 'unknown_error',
         'message': 'Something went wrong',
-        'retry_status': {'type': 'retrying', 'retry_at': '2026-04-01T00:01:00Z'},
+        'retry_status': {
+          'type': 'retrying',
+          'retry_at': '2026-04-01T00:01:00Z',
+        },
       };
 
       final error = UnknownManagedAgentError.fromJson(json);
@@ -812,7 +812,10 @@ void main() {
       final json = {
         'type': 'unknown_error',
         'message': 'Something went wrong',
-        'retry_status': {'type': 'retrying', 'retry_at': '2026-04-01T00:01:00Z'},
+        'retry_status': {
+          'type': 'retrying',
+          'retry_at': '2026-04-01T00:01:00Z',
+        },
       };
 
       final error = UnknownManagedAgentError.fromJson(json);
