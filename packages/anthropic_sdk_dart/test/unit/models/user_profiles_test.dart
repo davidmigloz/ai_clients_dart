@@ -280,7 +280,9 @@ void main() {
     });
 
     test('handles missing data array', () {
-      final parsed = ListUserProfilesResponse.fromJson(const <String, dynamic>{});
+      final parsed = ListUserProfilesResponse.fromJson(
+        const <String, dynamic>{},
+      );
       expect(parsed.data, isEmpty);
       expect(parsed.nextPage, isNull);
     });
