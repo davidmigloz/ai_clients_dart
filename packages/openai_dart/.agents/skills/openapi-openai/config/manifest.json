@@ -580,7 +580,7 @@
       "file": null,
       "schema": "ResponseProperties",
       "tags": ["acknowledged"],
-      "note": "Spec helper schema; properties inlined on CreateResponseRequest and Response. max_output_tokens moved to inline."
+      "note": "Spec helper schema; properties inlined on CreateResponse and Response. max_output_tokens moved to inline."
     },
     "ToolChoice": {
       "spec": "main",
