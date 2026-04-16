@@ -1513,6 +1513,11 @@ class AdvisorResult extends AdvisorToolResultContent {
   @override
   int get hashCode => text.hashCode;
 
+  /// Creates a copy with replaced values.
+  AdvisorResult copyWith({String? text}) {
+    return AdvisorResult(text: text ?? this.text);
+  }
+
   @override
   String toString() => 'AdvisorResult(text: ${text.length} chars)';
 }
@@ -1554,6 +1559,13 @@ class AdvisorRedactedResult extends AdvisorToolResultContent {
 
   @override
   int get hashCode => encryptedContent.hashCode;
+
+  /// Creates a copy with replaced values.
+  AdvisorRedactedResult copyWith({String? encryptedContent}) {
+    return AdvisorRedactedResult(
+      encryptedContent: encryptedContent ?? this.encryptedContent,
+    );
+  }
 
   @override
   String toString() =>

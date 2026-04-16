@@ -864,5 +864,41 @@ void main() {
       expect(a.hashCode, equals(b.hashCode));
       expect(a, isNot(equals(c)));
     });
+
+    group('AdvisorResult copyWith', () {
+      test('creates modified copy', () {
+        const original = AdvisorResult(text: 'original advice');
+        final modified = original.copyWith(text: 'new advice');
+
+        expect(modified.text, 'new advice');
+        expect(original.text, 'original advice');
+      });
+
+      test('returns equal copy when no args', () {
+        const original = AdvisorResult(text: 'advice');
+        final copy = original.copyWith();
+
+        expect(copy, equals(original));
+        expect(copy.hashCode, equals(original.hashCode));
+      });
+    });
+
+    group('AdvisorRedactedResult copyWith', () {
+      test('creates modified copy', () {
+        const original = AdvisorRedactedResult(encryptedContent: 'enc1');
+        final modified = original.copyWith(encryptedContent: 'enc2');
+
+        expect(modified.encryptedContent, 'enc2');
+        expect(original.encryptedContent, 'enc1');
+      });
+
+      test('returns equal copy when no args', () {
+        const original = AdvisorRedactedResult(encryptedContent: 'enc');
+        final copy = original.copyWith();
+
+        expect(copy, equals(original));
+        expect(copy.hashCode, equals(original.hashCode));
+      });
+    });
   });
 }
