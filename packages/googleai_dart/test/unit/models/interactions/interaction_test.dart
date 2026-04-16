@@ -29,7 +29,7 @@ void main() {
         expect(interaction.status, InteractionStatus.completed);
         expect(interaction.created, DateTime.parse('2024-01-15T10:30:00Z'));
         expect(interaction.updated, DateTime.parse('2024-01-15T10:31:00Z'));
-        expect(interaction.serviceTier, 'standard');
+        expect(interaction.serviceTier, ServiceTier.standard);
         expect(interaction.usage, isNotNull);
         expect(interaction.usage!.totalInputTokens, 100);
         expect(interaction.outputs, isNotNull);
@@ -388,7 +388,7 @@ void main() {
       final json = {'model': 'gemini-2.0-flash', 'service_tier': 'priority'};
       final params = CreateModelInteractionParams.fromJson(json);
 
-      expect(params.serviceTier, 'priority');
+      expect(params.serviceTier, ServiceTier.priority);
 
       final toJson = params.toJson();
       expect(toJson['service_tier'], 'priority');

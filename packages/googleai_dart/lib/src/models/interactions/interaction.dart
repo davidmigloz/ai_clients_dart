@@ -1,3 +1,4 @@
+import '../common/service_tier.dart';
 import '../copy_with_sentinel.dart';
 import 'agent_config.dart';
 import 'content/content.dart';
@@ -72,7 +73,7 @@ class Interaction {
   final AgentConfig? agentConfig;
 
   /// The service tier for the interaction.
-  final String? serviceTier;
+  final ServiceTier? serviceTier;
 
   /// Creates an [Interaction] instance.
   const Interaction({
@@ -137,7 +138,9 @@ class Interaction {
     agentConfig: json['agent_config'] != null
         ? AgentConfig.fromJson(json['agent_config'] as Map<String, dynamic>)
         : null,
-    serviceTier: json['service_tier'] as String?,
+    serviceTier: json['service_tier'] != null
+        ? serviceTierFromString(json['service_tier'] as String?)
+        : null,
   );
 
   /// Converts to JSON.
@@ -165,7 +168,7 @@ class Interaction {
           .toList(),
     if (responseMimeType != null) 'response_mime_type': responseMimeType,
     if (agentConfig != null) 'agent_config': agentConfig!.toJson(),
-    if (serviceTier != null) 'service_tier': serviceTier,
+    if (serviceTier != null) 'service_tier': serviceTierToString(serviceTier!),
   };
 
   /// Creates a copy with replaced values.
@@ -237,7 +240,7 @@ class Interaction {
           : agentConfig as AgentConfig?,
       serviceTier: serviceTier == unsetCopyWithValue
           ? this.serviceTier
-          : serviceTier as String?,
+          : serviceTier as ServiceTier?,
     );
   }
 }
@@ -275,7 +278,7 @@ class CreateModelInteractionParams {
   final bool? background;
 
   /// The service tier for the interaction.
-  final String? serviceTier;
+  final ServiceTier? serviceTier;
 
   /// Creates a [CreateModelInteractionParams] instance.
   const CreateModelInteractionParams({
@@ -313,7 +316,9 @@ class CreateModelInteractionParams {
         responseMimeType: json['response_mime_type'] as String?,
         previousInteractionId: json['previous_interaction_id'] as String?,
         background: json['background'] as bool?,
-        serviceTier: json['service_tier'] as String?,
+        serviceTier: json['service_tier'] != null
+            ? serviceTierFromString(json['service_tier'] as String?)
+            : null,
       );
 
   /// Converts to JSON.
@@ -332,7 +337,7 @@ class CreateModelInteractionParams {
     if (previousInteractionId != null)
       'previous_interaction_id': previousInteractionId,
     if (background != null) 'background': background,
-    if (serviceTier != null) 'service_tier': serviceTier,
+    if (serviceTier != null) 'service_tier': serviceTierToString(serviceTier!),
   };
 }
 
@@ -354,7 +359,7 @@ class CreateAgentInteractionParams {
   final bool? background;
 
   /// The service tier for the interaction.
-  final String? serviceTier;
+  final ServiceTier? serviceTier;
 
   /// Creates a [CreateAgentInteractionParams] instance.
   const CreateAgentInteractionParams({
@@ -378,7 +383,9 @@ class CreateAgentInteractionParams {
             : null,
         previousInteractionId: json['previous_interaction_id'] as String?,
         background: json['background'] as bool?,
-        serviceTier: json['service_tier'] as String?,
+        serviceTier: json['service_tier'] != null
+            ? serviceTierFromString(json['service_tier'] as String?)
+            : null,
       );
 
   /// Converts to JSON.
@@ -389,6 +396,6 @@ class CreateAgentInteractionParams {
     if (previousInteractionId != null)
       'previous_interaction_id': previousInteractionId,
     if (background != null) 'background': background,
-    if (serviceTier != null) 'service_tier': serviceTier,
+    if (serviceTier != null) 'service_tier': serviceTierToString(serviceTier!),
   };
 }
