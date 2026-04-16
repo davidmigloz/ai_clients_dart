@@ -18,7 +18,7 @@ const Map<String, Object> _messageStartJson = {
     'type': 'message',
     'role': 'assistant',
     'content': <dynamic>[],
-    'model': 'claude-sonnet-4-20250514',
+    'model': 'claude-sonnet-4-6',
     'usage': {'input_tokens': 10, 'output_tokens': 0},
   },
 };

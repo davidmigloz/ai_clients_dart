@@ -27,7 +27,7 @@ void main() async {
     // Start a request that would take some time
     final requestFuture = client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         maxTokens: 4096,
         messages: [
           InputMessage.user(
@@ -66,7 +66,7 @@ void main() async {
     try {
       final response = await client.messages.create(
         MessageCreateRequest(
-          model: 'claude-sonnet-4-20250514',
+          model: 'claude-sonnet-4-6',
           maxTokens: 100,
           messages: [InputMessage.user('Say hello in 5 different languages.')],
         ),
@@ -84,7 +84,7 @@ void main() async {
 
     final stream = client.messages.createStream(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         maxTokens: 1024,
         messages: [InputMessage.user('Write a poem about the ocean.')],
       ),
@@ -119,7 +119,7 @@ void main() async {
     try {
       await client.messages.create(
         MessageCreateRequest(
-          model: 'claude-sonnet-4-20250514',
+          model: 'claude-sonnet-4-6',
           maxTokens: 100,
           messages: [InputMessage.user('Hello')],
         ),

@@ -23,7 +23,7 @@ void main() async {
     print('=== Image from URL ===');
     final urlResponse = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         maxTokens: 1024,
         messages: [
           InputMessage.userBlocks([
@@ -50,7 +50,7 @@ void main() async {
 
     final base64Response = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         maxTokens: 1024,
         messages: [
           InputMessage.userBlocks([
@@ -71,7 +71,7 @@ void main() async {
     print('\n=== Multiple Images ===');
     final multiResponse = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         maxTokens: 1024,
         messages: [
           InputMessage.userBlocks([
@@ -101,7 +101,7 @@ void main() async {
     print('\n=== Detailed Image Analysis ===');
     final detailResponse = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         maxTokens: 2048,
         messages: [
           InputMessage.userBlocks([
@@ -134,7 +134,7 @@ void main() async {
       final imageBytes = await localImageFile.readAsBytes();
       final localResponse = await client.messages.create(
         MessageCreateRequest(
-          model: 'claude-sonnet-4-20250514',
+          model: 'claude-sonnet-4-6',
           maxTokens: 1024,
           messages: [
             InputMessage.userBlocks([

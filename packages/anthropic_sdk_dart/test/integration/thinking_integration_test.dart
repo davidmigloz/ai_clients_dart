@@ -38,7 +38,7 @@ void main() {
 
         final response = await client!.messages.create(
           MessageCreateRequest(
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             maxTokens: 16000,
             thinking: const ThinkingEnabled(budgetTokens: 5000),
             messages: [
@@ -85,7 +85,7 @@ void main() {
 
         final stream = client!.messages.createStream(
           MessageCreateRequest(
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             maxTokens: 16000,
             thinking: const ThinkingEnabled(budgetTokens: 3000),
             messages: [
@@ -142,7 +142,7 @@ void main() {
 
         final response = await client!.messages.create(
           MessageCreateRequest(
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             maxTokens: 16000,
             thinking: const ThinkingEnabled(budgetTokens: 8000),
             messages: [
@@ -182,7 +182,7 @@ void main() {
 
         final response = await client!.messages.create(
           MessageCreateRequest(
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             maxTokens: 16000,
             thinking: const ThinkingEnabled(budgetTokens: 3000),
             messages: [InputMessage.user('What is 2 + 2? Think about it.')],

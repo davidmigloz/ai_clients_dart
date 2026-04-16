@@ -115,7 +115,7 @@ void main() {
   group('ModelInfo', () {
     test('fromJson deserializes with all fields', () {
       final json = {
-        'id': 'claude-sonnet-4-20250514',
+        'id': 'claude-sonnet-4-6',
         'type': 'model',
         'display_name': 'Claude Sonnet 4',
         'created_at': '2025-05-14T00:00:00Z',
@@ -123,7 +123,7 @@ void main() {
 
       final model = ModelInfo.fromJson(json);
 
-      expect(model.id, 'claude-sonnet-4-20250514');
+      expect(model.id, 'claude-sonnet-4-6');
       expect(model.type, 'model');
       expect(model.displayName, 'Claude Sonnet 4');
       expect(model.createdAt, DateTime.utc(2025, 5, 14));
@@ -288,25 +288,25 @@ void main() {
       final json = {
         'data': [
           {
-            'id': 'claude-sonnet-4-20250514',
+            'id': 'claude-sonnet-4-6',
             'type': 'model',
             'display_name': 'Claude Sonnet 4',
             'created_at': '2025-05-14T00:00:00Z',
           },
         ],
         'has_more': true,
-        'first_id': 'claude-sonnet-4-20250514',
-        'last_id': 'claude-sonnet-4-20250514',
+        'first_id': 'claude-sonnet-4-6',
+        'last_id': 'claude-sonnet-4-6',
       };
 
       final response = ModelListResponse.fromJson(json);
 
       expect(response.data, hasLength(1));
-      expect(response.data.first.id, 'claude-sonnet-4-20250514');
+      expect(response.data.first.id, 'claude-sonnet-4-6');
       expect(response.data.first.displayName, 'Claude Sonnet 4');
       expect(response.hasMore, isTrue);
-      expect(response.firstId, 'claude-sonnet-4-20250514');
-      expect(response.lastId, 'claude-sonnet-4-20250514');
+      expect(response.firstId, 'claude-sonnet-4-6');
+      expect(response.lastId, 'claude-sonnet-4-6');
     });
 
     test('fromJson deserializes with required fields only', () {
@@ -324,7 +324,7 @@ void main() {
       final json = {
         'data': [
           {
-            'id': 'claude-sonnet-4-20250514',
+            'id': 'claude-sonnet-4-6',
             'type': 'model',
             'display_name': 'Claude Sonnet 4',
             'created_at': '2025-05-14T00:00:00Z',
@@ -343,17 +343,17 @@ void main() {
           },
         ],
         'has_more': true,
-        'first_id': 'claude-sonnet-4-20250514',
+        'first_id': 'claude-sonnet-4-6',
         'last_id': 'claude-3-haiku-20240307',
       };
 
       final response = ModelListResponse.fromJson(json);
 
       expect(response.data, hasLength(3));
-      expect(response.data[0].id, 'claude-sonnet-4-20250514');
+      expect(response.data[0].id, 'claude-sonnet-4-6');
       expect(response.data[1].id, 'claude-3-5-haiku-20241022');
       expect(response.data[2].id, 'claude-3-haiku-20240307');
-      expect(response.firstId, 'claude-sonnet-4-20250514');
+      expect(response.firstId, 'claude-sonnet-4-6');
       expect(response.lastId, 'claude-3-haiku-20240307');
     });
 
@@ -361,14 +361,14 @@ void main() {
       final response = ModelListResponse(
         data: [
           ModelInfo(
-            id: 'claude-sonnet-4-20250514',
+            id: 'claude-sonnet-4-6',
             displayName: 'Claude Sonnet 4',
             createdAt: DateTime.utc(2025, 5, 14),
           ),
         ],
         hasMore: false,
-        firstId: 'claude-sonnet-4-20250514',
-        lastId: 'claude-sonnet-4-20250514',
+        firstId: 'claude-sonnet-4-6',
+        lastId: 'claude-sonnet-4-6',
       );
 
       final json = response.toJson();
@@ -377,11 +377,11 @@ void main() {
       final dataList = json['data'] as List<dynamic>;
       expect(
         (dataList.first as Map<String, dynamic>)['id'],
-        'claude-sonnet-4-20250514',
+        'claude-sonnet-4-6',
       );
       expect(json['has_more'], false);
-      expect(json['first_id'], 'claude-sonnet-4-20250514');
-      expect(json['last_id'], 'claude-sonnet-4-20250514');
+      expect(json['first_id'], 'claude-sonnet-4-6');
+      expect(json['last_id'], 'claude-sonnet-4-6');
     });
 
     test('toJson excludes null optional fields', () {

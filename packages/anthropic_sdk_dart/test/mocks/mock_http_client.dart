@@ -138,7 +138,7 @@ class MockResponses {
   /// Creates a successful message response.
   static Map<String, dynamic> message({
     String id = 'msg_test123',
-    String model = 'claude-sonnet-4-20250514',
+    String model = 'claude-sonnet-4-6',
     String text = 'Hello! How can I help you?',
     String stopReason = 'end_turn',
     int inputTokens = 10,
@@ -161,7 +161,7 @@ class MockResponses {
   /// Creates streaming events for a message.
   static List<Map<String, dynamic>> streamingEvents({
     String id = 'msg_test123',
-    String model = 'claude-sonnet-4-20250514',
+    String model = 'claude-sonnet-4-6',
     String text = 'Hello!',
     int inputTokens = 10,
     int outputTokens = 5,
@@ -208,7 +208,7 @@ class MockResponses {
           models ??
           [
             {
-              'id': 'claude-sonnet-4-20250514',
+              'id': 'claude-sonnet-4-6',
               'type': 'model',
               'display_name': 'Claude Sonnet 4',
               'created_at': '2025-05-14T00:00:00Z',
@@ -221,7 +221,7 @@ class MockResponses {
             },
           ],
       'has_more': false,
-      'first_id': 'claude-sonnet-4-20250514',
+      'first_id': 'claude-sonnet-4-6',
       'last_id': 'claude-3-5-haiku-20241022',
     };
   }

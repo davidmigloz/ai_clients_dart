@@ -30,7 +30,7 @@ void main() {
 
       final response = await client.messages.create(
         MessageCreateRequest(
-          model: 'claude-sonnet-4-20250514',
+          model: 'claude-sonnet-4-6',
           maxTokens: 1024,
           messages: [InputMessage.user('Hello!')],
         ),
@@ -57,7 +57,7 @@ void main() {
 
       await client.messages.create(
         MessageCreateRequest(
-          model: 'claude-sonnet-4-20250514',
+          model: 'claude-sonnet-4-6',
           maxTokens: 256,
           messages: [InputMessage.user('Hello!')],
         ),
@@ -80,7 +80,7 @@ void main() {
 
         final stream = client.messages.createStream(
           MessageCreateRequest(
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             maxTokens: 256,
             messages: [InputMessage.user('Hello!')],
           ),
@@ -107,7 +107,7 @@ void main() {
 
         await client.messages.countTokens(
           TokenCountRequest(
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             messages: [InputMessage.user('Count my tokens!')],
           ),
           betas: const ['fast-mode-2026-02-07'],
@@ -123,7 +123,7 @@ void main() {
         'id': 'msg_tools',
         'type': 'message',
         'role': 'assistant',
-        'model': 'claude-sonnet-4-20250514',
+        'model': 'claude-sonnet-4-6',
         'content': [
           {'type': 'text', 'text': 'Let me check the weather.'},
           {
@@ -140,7 +140,7 @@ void main() {
 
       final response = await client.messages.create(
         MessageCreateRequest(
-          model: 'claude-sonnet-4-20250514',
+          model: 'claude-sonnet-4-6',
           maxTokens: 1024,
           messages: [InputMessage.user('What is the weather in SF?')],
         ),
@@ -162,7 +162,7 @@ void main() {
 
       final response = await client.messages.countTokens(
         TokenCountRequest(
-          model: 'claude-sonnet-4-20250514',
+          model: 'claude-sonnet-4-6',
           messages: [InputMessage.user('Count my tokens!')],
         ),
       );
@@ -199,7 +199,7 @@ void main() {
       expect(
         () => client.messages.create(
           MessageCreateRequest(
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             maxTokens: 1024,
             messages: [InputMessage.user('Hello')],
           ),
@@ -218,7 +218,7 @@ void main() {
       expect(
         () => client.messages.create(
           MessageCreateRequest(
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             maxTokens: 1024,
             messages: [InputMessage.user('Hello')],
           ),
@@ -235,21 +235,21 @@ void main() {
       final response = await client.models.list();
 
       expect(response.data, hasLength(2));
-      expect(response.data.first.id, 'claude-sonnet-4-20250514');
+      expect(response.data.first.id, 'claude-sonnet-4-6');
       expect(response.data.first.displayName, 'Claude Sonnet 4');
     });
 
     test('retrieve returns single model', () async {
       mockHttpClient.queueJsonResponse({
-        'id': 'claude-sonnet-4-20250514',
+        'id': 'claude-sonnet-4-6',
         'type': 'model',
         'display_name': 'Claude Sonnet 4',
         'created_at': '2025-05-14T00:00:00Z',
       });
 
-      final response = await client.models.retrieve('claude-sonnet-4-20250514');
+      final response = await client.models.retrieve('claude-sonnet-4-6');
 
-      expect(response.id, 'claude-sonnet-4-20250514');
+      expect(response.id, 'claude-sonnet-4-6');
       expect(response.displayName, 'Claude Sonnet 4');
     });
   });
@@ -269,7 +269,7 @@ void main() {
             BatchRequestItem(
               customId: 'req_1',
               params: MessageCreateRequest(
-                model: 'claude-sonnet-4-20250514',
+                model: 'claude-sonnet-4-6',
                 maxTokens: 100,
                 messages: [InputMessage.user('Hello')],
               ),

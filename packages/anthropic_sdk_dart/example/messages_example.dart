@@ -20,7 +20,7 @@ void main() async {
     print('=== Simple Message ===');
     final simpleResponse = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         maxTokens: 1024,
         messages: [InputMessage.user('What is the capital of France?')],
       ),
@@ -35,7 +35,7 @@ void main() async {
     print('\n=== With System Prompt ===');
     final systemResponse = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         maxTokens: 1024,
         system: SystemPrompt.text(
           'You are a helpful assistant that speaks like a pirate. '
@@ -50,7 +50,7 @@ void main() async {
     print('\n=== Multi-turn Conversation ===');
     final conversationResponse = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         maxTokens: 1024,
         messages: [
           InputMessage.user('My name is Alice.'),
@@ -65,7 +65,7 @@ void main() async {
     print('\n=== Content Blocks ===');
     final contentBlockResponse = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         maxTokens: 1024,
         messages: [
           InputMessage.userBlocks([
@@ -83,7 +83,7 @@ void main() async {
     print('\n=== Stop Sequences ===');
     final stopResponse = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         maxTokens: 1024,
         stopSequences: const ['END'],
         messages: [InputMessage.user('Count from 1 to 10, say END after 5')],
@@ -96,7 +96,7 @@ void main() async {
     print('\n=== Temperature and Metadata ===');
     final tempResponse = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         maxTokens: 1024,
         temperature: 0.0, // Deterministic
         metadata: const Metadata(userId: 'example-user-123'),

@@ -53,7 +53,7 @@ void main() {
         // Send a message that should trigger tool use
         final response = await client!.messages.create(
           MessageCreateRequest(
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             maxTokens: 1024,
             tools: [ToolDefinition.custom(calculatorTool)],
             messages: [
@@ -104,7 +104,7 @@ void main() {
         // First turn - ask about weather
         final response1 = await client!.messages.create(
           MessageCreateRequest(
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             maxTokens: 1024,
             tools: [ToolDefinition.custom(weatherTool)],
             messages: [InputMessage.user('What is the weather in Paris?')],
@@ -123,7 +123,7 @@ void main() {
         // Second turn - provide tool result
         final response2 = await client!.messages.create(
           MessageCreateRequest(
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             maxTokens: 1024,
             tools: [ToolDefinition.custom(weatherTool)],
             messages: [
@@ -167,7 +167,7 @@ void main() {
         // With auto, model decides whether to use tools
         final response = await client!.messages.create(
           MessageCreateRequest(
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             maxTokens: 1024,
             tools: [ToolDefinition.custom(tool)],
             toolChoice: ToolChoice.auto(),
@@ -205,7 +205,7 @@ void main() {
         // Force use of specific tool
         final response = await client!.messages.create(
           MessageCreateRequest(
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             maxTokens: 1024,
             tools: [ToolDefinition.custom(tool)],
             toolChoice: ToolChoice.tool('random_number'),
@@ -244,7 +244,7 @@ void main() {
 
         final stream = client!.messages.createStream(
           MessageCreateRequest(
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             maxTokens: 1024,
             tools: [ToolDefinition.custom(tool)],
             messages: [

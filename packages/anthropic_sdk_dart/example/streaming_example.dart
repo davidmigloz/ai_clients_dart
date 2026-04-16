@@ -22,7 +22,7 @@ void main() async {
     print('=== Basic Streaming ===');
     final stream = client.messages.createStream(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         maxTokens: 1024,
         messages: [InputMessage.user('Write a haiku about programming')],
       ),
@@ -66,7 +66,7 @@ void main() async {
     final textBuffer = StringBuffer();
     final accStream = client.messages.createStream(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         maxTokens: 1024,
         messages: [
           InputMessage.user('What is the meaning of life in one sentence?'),
@@ -87,7 +87,7 @@ void main() async {
     print('\n=== Multi-turn Streaming ===');
     final conversationStream = client.messages.createStream(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         maxTokens: 1024,
         messages: [
           InputMessage.user('Hello!'),
@@ -113,7 +113,7 @@ void main() async {
 
     final usageStream = client.messages.createStream(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         maxTokens: 1024,
         messages: [InputMessage.user('Say "Hello, World!"')],
       ),
@@ -139,7 +139,7 @@ void main() async {
     final fullText = await client.messages
         .createStream(
           MessageCreateRequest(
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             maxTokens: 1024,
             messages: [InputMessage.user('What is 2+2?')],
           ),
@@ -152,7 +152,7 @@ void main() async {
     await client.messages
         .createStream(
           MessageCreateRequest(
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             maxTokens: 1024,
             messages: [InputMessage.user('Say hello!')],
           ),
@@ -164,7 +164,7 @@ void main() async {
     print('\n=== Message Stream Accumulator ===');
     final accumulatorStream = client.messages.createStream(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         maxTokens: 1024,
         messages: [InputMessage.user('Tell me a fun fact.')],
       ),

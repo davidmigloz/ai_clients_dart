@@ -26,7 +26,7 @@ void main() async {
           BatchRequestItem(
             customId: 'request-1',
             params: MessageCreateRequest(
-              model: 'claude-sonnet-4-20250514',
+              model: 'claude-sonnet-4-6',
               maxTokens: 100,
               messages: [InputMessage.user('What is 2 + 2?')],
             ),
@@ -34,7 +34,7 @@ void main() async {
           BatchRequestItem(
             customId: 'request-2',
             params: MessageCreateRequest(
-              model: 'claude-sonnet-4-20250514',
+              model: 'claude-sonnet-4-6',
               maxTokens: 100,
               messages: [InputMessage.user('What is the capital of France?')],
             ),
@@ -42,7 +42,7 @@ void main() async {
           BatchRequestItem(
             customId: 'request-3',
             params: MessageCreateRequest(
-              model: 'claude-sonnet-4-20250514',
+              model: 'claude-sonnet-4-6',
               maxTokens: 100,
               messages: [InputMessage.user('Write a haiku about coding.')],
             ),

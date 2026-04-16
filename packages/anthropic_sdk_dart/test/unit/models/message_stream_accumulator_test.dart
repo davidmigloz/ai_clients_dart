@@ -10,7 +10,7 @@ MessageStreamEvent _event(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _messageStartJson({
   String id = 'msg_123',
-  String model = 'claude-sonnet-4-20250514',
+  String model = 'claude-sonnet-4-6',
   int inputTokens = 100,
   int outputTokens = 0,
   Map<String, dynamic>? usageExtra,

@@ -20,7 +20,7 @@ void main() async {
     print('=== Basic Message ===');
     final response = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         maxTokens: 1024,
         messages: [InputMessage.user('What is the capital of France?')],
       ),
@@ -37,7 +37,7 @@ void main() async {
     print('\n=== Multi-turn Conversation ===');
     final conversation = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         maxTokens: 1024,
         messages: [
           InputMessage.user('My name is Alice.'),
@@ -52,7 +52,7 @@ void main() async {
     print('\n=== System Prompt ===');
     final pirate = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         maxTokens: 1024,
         system: SystemPrompt.text(
           'You are a friendly pirate. Respond in pirate speak.',
@@ -67,7 +67,7 @@ void main() async {
     stdout.write('Streaming response: ');
     final stream = client.messages.createStream(
       MessageCreateRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         maxTokens: 256,
         messages: [InputMessage.user('Count from 1 to 5 slowly.')],
       ),

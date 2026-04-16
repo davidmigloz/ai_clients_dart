@@ -12,7 +12,7 @@ void main() {
           'id': 'msg_123',
           'type': 'message',
           'role': 'assistant',
-          'model': 'claude-sonnet-4-20250514',
+          'model': 'claude-sonnet-4-6',
           'content': <Map<String, dynamic>>[],
           'stop_reason': null,
           'stop_sequence': null,
@@ -25,7 +25,7 @@ void main() {
       expect(event, isA<MessageStartEvent>());
       final messageStart = event as MessageStartEvent;
       expect(messageStart.message.id, 'msg_123');
-      expect(messageStart.message.model, 'claude-sonnet-4-20250514');
+      expect(messageStart.message.model, 'claude-sonnet-4-6');
     });
 
     test('parses content_block_start event with text block', () {
@@ -431,7 +431,7 @@ void main() {
             'id': 'msg_123',
             'type': 'message',
             'role': 'assistant',
-            'model': 'claude-sonnet-4-20250514',
+            'model': 'claude-sonnet-4-6',
             'content': <Map<String, dynamic>>[],
             'stop_reason': null,
             'stop_sequence': null,
@@ -489,7 +489,7 @@ void main() {
             'id': 'msg_456',
             'type': 'message',
             'role': 'assistant',
-            'model': 'claude-sonnet-4-20250514',
+            'model': 'claude-sonnet-4-6',
             'content': <Map<String, dynamic>>[],
             'stop_reason': null,
             'stop_sequence': null,

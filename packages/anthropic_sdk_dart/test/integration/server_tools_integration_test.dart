@@ -39,7 +39,7 @@ void main() {
 
         final response = await client!.messages.create(
           MessageCreateRequest(
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             maxTokens: 1024,
             tools: [ToolDefinition.builtIn(BuiltInTool.webSearch())],
             messages: [
@@ -78,7 +78,7 @@ void main() {
 
         final stream = client!.messages.createStream(
           MessageCreateRequest(
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             maxTokens: 1024,
             tools: [ToolDefinition.builtIn(BuiltInTool.webSearch())],
             messages: [

@@ -8,7 +8,7 @@ void main() {
         'id': 'msg_123',
         'type': 'message',
         'role': 'assistant',
-        'model': 'claude-sonnet-4-20250514',
+        'model': 'claude-sonnet-4-6',
         'content': [
           {'type': 'text', 'text': 'Hello, world!'},
         ],
@@ -30,7 +30,7 @@ void main() {
       expect(message.id, 'msg_123');
       expect(message.type, 'message');
       expect(message.role, MessageRole.assistant);
-      expect(message.model, 'claude-sonnet-4-20250514');
+      expect(message.model, 'claude-sonnet-4-6');
       expect(message.content, hasLength(1));
       expect(message.content.first, isA<TextBlock>());
       expect((message.content.first as TextBlock).text, 'Hello, world!');
@@ -48,7 +48,7 @@ void main() {
         'id': 'msg_456',
         'type': 'message',
         'role': 'assistant',
-        'model': 'claude-sonnet-4-20250514',
+        'model': 'claude-sonnet-4-6',
         'content': [
           {'type': 'text', 'text': 'Let me check the weather.'},
           {
@@ -81,7 +81,7 @@ void main() {
         'id': 'msg_think',
         'type': 'message',
         'role': 'assistant',
-        'model': 'claude-sonnet-4-20250514',
+        'model': 'claude-sonnet-4-6',
         'content': [
           {
             'type': 'thinking',
@@ -111,7 +111,7 @@ void main() {
         'id': 'msg_refusal',
         'type': 'message',
         'role': 'assistant',
-        'model': 'claude-sonnet-4-20250514',
+        'model': 'claude-sonnet-4-6',
         'content': [
           {'type': 'text', 'text': ''},
         ],
@@ -139,7 +139,7 @@ void main() {
         'id': 'msg_normal',
         'type': 'message',
         'role': 'assistant',
-        'model': 'claude-sonnet-4-20250514',
+        'model': 'claude-sonnet-4-6',
         'content': [
           {'type': 'text', 'text': 'Hello!'},
         ],
@@ -178,7 +178,7 @@ void main() {
         id: 'msg_test',
         role: MessageRole.assistant,
         content: [TextBlock(text: 'Test response')],
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         stopReason: StopReason.endTurn,
         usage: Usage(inputTokens: 5, outputTokens: 3),
       );
@@ -187,7 +187,7 @@ void main() {
 
       expect(json['id'], 'msg_test');
       expect(json['role'], 'assistant');
-      expect(json['model'], 'claude-sonnet-4-20250514');
+      expect(json['model'], 'claude-sonnet-4-6');
       expect(json['stop_reason'], 'end_turn');
       expect(json['content'], hasLength(1));
       expect(
@@ -201,7 +201,7 @@ void main() {
         id: 'msg_test',
         role: MessageRole.assistant,
         content: [TextBlock(text: 'Refused')],
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         stopReason: StopReason.refusal,
         stopDetails: RefusalStopDetails(
           category: RefusalCategory.bio,
@@ -225,7 +225,7 @@ void main() {
         id: 'msg_test',
         role: MessageRole.assistant,
         content: [TextBlock(text: 'Test')],
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         stopReason: StopReason.endTurn,
         usage: Usage(inputTokens: 5, outputTokens: 3),
       );
@@ -239,7 +239,7 @@ void main() {
         id: 'msg_orig',
         role: MessageRole.assistant,
         content: [TextBlock(text: 'Original')],
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         stopReason: StopReason.endTurn,
         usage: Usage(inputTokens: 10, outputTokens: 5),
       );
@@ -252,7 +252,7 @@ void main() {
       expect(modified.id, 'msg_copy');
       expect((modified.content.first as TextBlock).text, 'Modified');
       expect(modified.role, MessageRole.assistant); // Unchanged
-      expect(modified.model, 'claude-sonnet-4-20250514'); // Unchanged
+      expect(modified.model, 'claude-sonnet-4-6'); // Unchanged
     });
   });
 
@@ -265,7 +265,7 @@ void main() {
           TextBlock(text: 'Hello, '),
           TextBlock(text: 'world!'),
         ],
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         stopReason: StopReason.endTurn,
         usage: Usage(inputTokens: 5, outputTokens: 3),
       );
@@ -282,7 +282,7 @@ void main() {
           ToolUseBlock(id: 'tu_1', name: 'tool1', input: {}),
           ToolUseBlock(id: 'tu_2', name: 'tool2', input: {}),
         ],
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         stopReason: StopReason.toolUse,
         usage: Usage(inputTokens: 10, outputTokens: 20),
       );
@@ -300,7 +300,7 @@ void main() {
           TextBlock(text: 'Response'),
           ThinkingBlock(thinking: 'Thinking 2...', signature: 'sig2'),
         ],
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         stopReason: StopReason.endTurn,
         usage: Usage(inputTokens: 10, outputTokens: 20),
       );
@@ -315,7 +315,7 @@ void main() {
         id: 'msg_1',
         role: MessageRole.assistant,
         content: [TextBlock(text: 'Done')],
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         stopReason: StopReason.endTurn,
         usage: Usage(inputTokens: 5, outputTokens: 3),
       );
@@ -330,7 +330,7 @@ void main() {
         id: 'msg_1',
         role: MessageRole.assistant,
         content: [TextBlock(text: 'Truncated...')],
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         stopReason: StopReason.maxTokens,
         usage: Usage(inputTokens: 5, outputTokens: 100),
       );

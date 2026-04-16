@@ -34,7 +34,7 @@ void main() {
       final events = await client.messages
           .createStream(
             MessageCreateRequest(
-              model: 'claude-sonnet-4-20250514',
+              model: 'claude-sonnet-4-6',
               maxTokens: 256,
               messages: [InputMessage.user('Hi!')],
             ),
@@ -63,7 +63,7 @@ void main() {
         await client.messages
             .createStream(
               MessageCreateRequest(
-                model: 'claude-sonnet-4-20250514',
+                model: 'claude-sonnet-4-6',
                 maxTokens: 256,
                 messages: [InputMessage.user('Hi!')],
               ),
@@ -108,7 +108,7 @@ void main() {
         client.messages
             .createStream(
               MessageCreateRequest(
-                model: 'claude-sonnet-4-20250514',
+                model: 'claude-sonnet-4-6',
                 maxTokens: 256,
                 messages: [InputMessage.user('Hi!')],
               ),

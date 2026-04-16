@@ -30,7 +30,7 @@ void main() async {
 
     // Example 2: Retrieve a specific model
     print('\n=== Retrieve Model ===');
-    const modelId = 'claude-sonnet-4-20250514';
+    const modelId = 'claude-sonnet-4-6';
     final model = await client.models.retrieve(modelId);
 
     print('Model details:');

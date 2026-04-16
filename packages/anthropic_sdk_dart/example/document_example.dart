@@ -30,7 +30,7 @@ void main() async {
 
       final response = await client.messages.create(
         MessageCreateRequest(
-          model: 'claude-sonnet-4-20250514',
+          model: 'claude-sonnet-4-6',
           maxTokens: 4096,
           messages: [
             InputMessage.userBlocks([
@@ -66,7 +66,7 @@ To extract structured data from a document, you would use:
 
 final response = await client.messages.create(
   MessageCreateRequest(
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-6',
     maxTokens: 4096,
     messages: [
       InputMessage.userBlocks([
@@ -95,7 +95,7 @@ To compare multiple documents:
 
 final response = await client.messages.create(
   MessageCreateRequest(
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-6',
     maxTokens: 8192,
     messages: [
       InputMessage.userBlocks([
@@ -140,7 +140,7 @@ final messages = [
 
 final response = await client.messages.create(
   MessageCreateRequest(
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-6',
     maxTokens: 2048,
     messages: messages,
   ),

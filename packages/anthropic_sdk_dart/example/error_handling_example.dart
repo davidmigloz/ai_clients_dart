@@ -23,7 +23,7 @@ void main() async {
     try {
       await invalidClient.messages.create(
         MessageCreateRequest(
-          model: 'claude-sonnet-4-20250514',
+          model: 'claude-sonnet-4-6',
           maxTokens: 100,
           messages: [InputMessage.user('Hello')],
         ),
@@ -39,7 +39,7 @@ void main() async {
     try {
       await client.messages.create(
         MessageCreateRequest(
-          model: 'claude-sonnet-4-20250514',
+          model: 'claude-sonnet-4-6',
           maxTokens: -1, // Invalid: must be positive
           messages: [InputMessage.user('Hello')],
         ),
@@ -54,7 +54,7 @@ void main() async {
       // This would happen with too many requests
       await client.messages.create(
         MessageCreateRequest(
-          model: 'claude-sonnet-4-20250514',
+          model: 'claude-sonnet-4-6',
           maxTokens: 100,
           messages: [InputMessage.user('Hello')],
         ),
@@ -70,7 +70,7 @@ void main() async {
     try {
       await client.messages.create(
         MessageCreateRequest(
-          model: 'claude-sonnet-4-20250514',
+          model: 'claude-sonnet-4-6',
           maxTokens: 100,
           messages: [InputMessage.user('Hello')],
         ),

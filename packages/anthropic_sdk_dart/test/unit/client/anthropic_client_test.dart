@@ -118,7 +118,7 @@ void main() {
       await expectLater(
         client.messages.create(
           MessageCreateRequest(
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             maxTokens: 100,
             messages: [InputMessage.user('Hi')],
           ),

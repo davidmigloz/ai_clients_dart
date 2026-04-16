@@ -5,7 +5,7 @@ void main() {
   group('TokenCountRequest', () {
     test('fromJson deserializes with all fields', () {
       final json = {
-        'model': 'claude-sonnet-4-20250514',
+        'model': 'claude-sonnet-4-6',
         'messages': [
           {'role': 'user', 'content': 'Hello, Claude'},
         ],
@@ -42,7 +42,7 @@ void main() {
 
       final request = TokenCountRequest.fromJson(json);
 
-      expect(request.model, 'claude-sonnet-4-20250514');
+      expect(request.model, 'claude-sonnet-4-6');
       expect(request.messages, hasLength(1));
       expect(request.system, isNotNull);
       expect(request.toolChoice, isNotNull);
@@ -57,7 +57,7 @@ void main() {
 
     test('fromJson deserializes with required fields only', () {
       final json = {
-        'model': 'claude-sonnet-4-20250514',
+        'model': 'claude-sonnet-4-6',
         'messages': [
           {'role': 'user', 'content': 'Hello, Claude'},
         ],
@@ -65,7 +65,7 @@ void main() {
 
       final request = TokenCountRequest.fromJson(json);
 
-      expect(request.model, 'claude-sonnet-4-20250514');
+      expect(request.model, 'claude-sonnet-4-6');
       expect(request.messages, hasLength(1));
       expect(request.system, isNull);
       expect(request.toolChoice, isNull);
@@ -76,7 +76,7 @@ void main() {
 
     test('fromJson deserializes system as string', () {
       final json = {
-        'model': 'claude-sonnet-4-20250514',
+        'model': 'claude-sonnet-4-6',
         'messages': [
           {'role': 'user', 'content': 'Hello'},
         ],
@@ -92,7 +92,7 @@ void main() {
 
     test('fromJson deserializes system as array of blocks', () {
       final json = {
-        'model': 'claude-sonnet-4-20250514',
+        'model': 'claude-sonnet-4-6',
         'messages': [
           {'role': 'user', 'content': 'Hello'},
         ],
@@ -108,21 +108,21 @@ void main() {
 
     test('toJson serializes correctly', () {
       final request = TokenCountRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         messages: [InputMessage.user('Hello')],
         system: SystemPrompt.text('Be helpful'),
       );
 
       final json = request.toJson();
 
-      expect(json['model'], 'claude-sonnet-4-20250514');
+      expect(json['model'], 'claude-sonnet-4-6');
       expect(json['messages'], hasLength(1));
       expect(json['system'], 'Be helpful');
     });
 
     test('toJson serializes cache_control with TTL', () {
       final request = TokenCountRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         messages: [InputMessage.user('Hello')],
         cacheControl: const CacheControlEphemeral(ttl: CacheTtl.ttl5m),
       );
@@ -137,7 +137,7 @@ void main() {
 
     test('toJson serializes cache_control without TTL', () {
       final request = TokenCountRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         messages: [InputMessage.user('Hello')],
         cacheControl: const CacheControlEphemeral(),
       );
@@ -152,7 +152,7 @@ void main() {
 
     test('toJson excludes null optional fields', () {
       final request = TokenCountRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         messages: [InputMessage.user('Hello')],
       );
 
@@ -167,7 +167,7 @@ void main() {
 
     test('fromJson parses thinking config', () {
       final json = {
-        'model': 'claude-sonnet-4-20250514',
+        'model': 'claude-sonnet-4-6',
         'messages': [
           {'role': 'user', 'content': 'Hello'},
         ],
@@ -185,7 +185,7 @@ void main() {
   group('TokenCountRequest.fromMessageCreateRequest', () {
     test('copies shared fields', () {
       final request = MessageCreateRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         messages: [InputMessage.user('Hello')],
         maxTokens: 1024,
         system: SystemPrompt.text('Be helpful'),
@@ -220,7 +220,7 @@ void main() {
 
     test('omits fields not in TokenCountRequest', () {
       final request = MessageCreateRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         messages: [InputMessage.user('Hello')],
         maxTokens: 1024,
         metadata: const Metadata(userId: 'user-123'),
@@ -246,14 +246,14 @@ void main() {
 
     test('handles minimal request', () {
       final request = MessageCreateRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         messages: [InputMessage.user('Hi')],
         maxTokens: 100,
       );
 
       final tokenRequest = TokenCountRequest.fromMessageCreateRequest(request);
 
-      expect(tokenRequest.model, 'claude-sonnet-4-20250514');
+      expect(tokenRequest.model, 'claude-sonnet-4-6');
       expect(tokenRequest.messages, hasLength(1));
       expect(tokenRequest.system, isNull);
     });

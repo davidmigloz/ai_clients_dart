@@ -28,7 +28,7 @@ void main() async {
           BatchRequestItem(
             customId: 'greeting-1',
             params: MessageCreateRequest(
-              model: 'claude-sonnet-4-20250514',
+              model: 'claude-sonnet-4-6',
               maxTokens: 50,
               messages: [InputMessage.user('Say hello!')],
             ),
@@ -36,7 +36,7 @@ void main() async {
           BatchRequestItem(
             customId: 'greeting-2',
             params: MessageCreateRequest(
-              model: 'claude-sonnet-4-20250514',
+              model: 'claude-sonnet-4-6',
               maxTokens: 50,
               messages: [InputMessage.user('Say goodbye!')],
             ),

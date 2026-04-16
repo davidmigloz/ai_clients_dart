@@ -19,7 +19,7 @@ void main() async {
     print('=== Simple Token Count ===');
     final simpleCount = await client.messages.countTokens(
       TokenCountRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         messages: [InputMessage.user('Hello, how are you today?')],
       ),
     );
@@ -30,7 +30,7 @@ void main() async {
     print('\n=== With System Prompt ===');
     final systemCount = await client.messages.countTokens(
       TokenCountRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         system: SystemPrompt.text(
           'You are a helpful assistant that specializes in explaining '
           'complex topics in simple terms.',
@@ -45,7 +45,7 @@ void main() async {
     print('\n=== Multi-turn Conversation ===');
     final conversationCount = await client.messages.countTokens(
       TokenCountRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         messages: [
           InputMessage.user('What is machine learning?'),
           InputMessage.assistant(
@@ -71,14 +71,14 @@ void main() async {
 
     final shortMessage = await client.messages.countTokens(
       TokenCountRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         messages: [InputMessage.user('Hi!')],
       ),
     );
 
     final longMessage = await client.messages.countTokens(
       TokenCountRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         messages: [
           InputMessage.user(
             'Please provide a comprehensive analysis of the impact of '
@@ -129,7 +129,7 @@ void main() async {
 
     final toolsCount = await client.messages.countTokens(
       TokenCountRequest(
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         tools: [ToolDefinition.custom(weatherTool)],
         messages: [InputMessage.user("What's the weather in New York?")],
       ),

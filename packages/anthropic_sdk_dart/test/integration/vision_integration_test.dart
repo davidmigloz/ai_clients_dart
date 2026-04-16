@@ -40,7 +40,7 @@ void main() {
 
         final response = await client!.messages.create(
           MessageCreateRequest(
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             maxTokens: 1024,
             messages: [
               InputMessage.userBlocks([
@@ -94,7 +94,7 @@ void main() {
 
         final response = await client!.messages.create(
           MessageCreateRequest(
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             maxTokens: 1024,
             messages: [
               InputMessage.userBlocks([
@@ -129,7 +129,7 @@ void main() {
 
         final response = await client!.messages.create(
           MessageCreateRequest(
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             maxTokens: 1024,
             messages: [
               InputMessage.userBlocks([
@@ -176,7 +176,7 @@ void main() {
 
         final response = await client!.messages.create(
           MessageCreateRequest(
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             maxTokens: 2048,
             messages: [
               InputMessage.userBlocks([
@@ -216,7 +216,7 @@ void main() {
 
         final stream = client!.messages.createStream(
           MessageCreateRequest(
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             maxTokens: 1024,
             messages: [
               InputMessage.userBlocks([
