@@ -37,7 +37,7 @@ void main() {
             },
             {'index': 1, 'markdown': '# Page 2\n\nMore content.'},
           ],
-          'usage': {
+          'usage_info': {
             'prompt_tokens': 100,
             'completion_tokens': 200,
             'total_tokens': 300,
@@ -61,6 +61,34 @@ void main() {
         expect(response.totalPages, 5);
         expect(response.processedPages, 2);
         expect(response.createdAt, isNotNull);
+        expect(response.documentAnnotation, isNull);
+      });
+
+      test('parses response with document_annotation', () {
+        final json = {
+          'id': 'ocr-ann',
+          'model': 'mistral-ocr-latest',
+          'pages': <dynamic>[],
+          'document_annotation': '{"title": "Invoice", "total": 42.0}',
+        };
+
+        final response = OcrResponse.fromJson(json);
+
+        expect(response.documentAnnotation, isNotNull);
+        expect(response.documentAnnotation, contains('Invoice'));
+      });
+
+      test('parses usage from legacy "usage" key', () {
+        final json = {
+          'id': 'ocr-legacy',
+          'model': 'mistral-ocr-latest',
+          'pages': <dynamic>[],
+          'usage': {'prompt_tokens': 50, 'total_tokens': 50},
+        };
+
+        final response = OcrResponse.fromJson(json);
+
+        expect(response.usage, isNotNull);
       });
     });
 
@@ -93,9 +121,10 @@ void main() {
 
         final json = response.toJson();
 
-        expect(json.containsKey('usage'), isFalse);
+        expect(json.containsKey('usage_info'), isFalse);
         expect(json.containsKey('total_pages'), isFalse);
         expect(json.containsKey('created_at'), isFalse);
+        expect(json.containsKey('document_annotation'), isFalse);
       });
     });
 

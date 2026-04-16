@@ -30,6 +30,11 @@ class OcrResponse {
   /// Timestamp when processing was created.
   final DateTime? createdAt;
 
+  /// Formatted annotation response when `documentAnnotationFormat` is set.
+  ///
+  /// Contains the structured output as a JSON string.
+  final String? documentAnnotation;
+
   /// Creates an [OcrResponse].
   const OcrResponse({
     required this.id,
@@ -40,6 +45,7 @@ class OcrResponse {
     this.totalPages,
     this.processedPages,
     this.createdAt,
+    this.documentAnnotation,
   });
 
   /// Creates an [OcrResponse] from JSON.
@@ -52,14 +58,17 @@ class OcrResponse {
             ?.map((e) => OcrPage.fromJson(e as Map<String, dynamic>))
             .toList() ??
         [],
-    usage: json['usage'] != null
-        ? UsageInfo.fromJson(json['usage'] as Map<String, dynamic>)
-        : null,
+    usage: json['usage_info'] != null
+        ? UsageInfo.fromJson(json['usage_info'] as Map<String, dynamic>)
+        : json['usage'] != null
+            ? UsageInfo.fromJson(json['usage'] as Map<String, dynamic>)
+            : null,
     totalPages: json['total_pages'] as int?,
     processedPages: json['processed_pages'] as int?,
     createdAt: json['created_at'] != null
         ? DateTime.tryParse(json['created_at'].toString())
         : null,
+    documentAnnotation: json['document_annotation'] as String?,
   );
 
   /// Converts to JSON.
@@ -68,10 +77,12 @@ class OcrResponse {
     'object': object,
     'model': model,
     'pages': pages.map((e) => e.toJson()).toList(),
-    if (usage != null) 'usage': usage!.toJson(),
+    if (usage != null) 'usage_info': usage!.toJson(),
     if (totalPages != null) 'total_pages': totalPages,
     if (processedPages != null) 'processed_pages': processedPages,
     if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
+    if (documentAnnotation != null)
+      'document_annotation': documentAnnotation,
   };
 
   /// Gets all extracted text as a single string.
