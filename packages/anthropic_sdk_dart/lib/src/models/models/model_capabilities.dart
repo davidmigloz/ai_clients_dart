@@ -215,8 +215,8 @@ class EffortCapability {
 
   /// Whether the model supports xhigh effort level.
   ///
-  /// Required by the spec; value may be `null` when the model does not
-  /// expose xhigh support.
+  /// `null` when the model does not expose xhigh support. The `xhigh` key is
+  /// always present in serialized JSON (matching the upstream Python/TS SDKs).
   final CapabilitySupport? xhigh;
 
   /// Whether this capability is supported by the model.
@@ -228,7 +228,7 @@ class EffortCapability {
     required this.low,
     required this.max,
     required this.medium,
-    required this.xhigh,
+    this.xhigh,
     required this.supported,
   });
 
