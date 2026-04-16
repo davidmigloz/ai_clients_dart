@@ -27,9 +27,9 @@
       "fetch_mode": "remote",
       "local_file": "openapi.yaml",
       "name": "Anthropic API",
-      "pinned_hash": "dfe504526eed07979685a729ac9afd45e59cc2879291714b9f4674f2ef1247c7",
+      "pinned_hash": "f4d4f18820ecfbe244fb1bbc2232939afca73dfcb21ce23bc296571ee7320e3a",
       "requires_auth": false,
-      "url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/anthropic%2Fanthropic-dfe504526eed07979685a729ac9afd45e59cc2879291714b9f4674f2ef1247c7.yml"
+      "url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/anthropic%2Fanthropic-f4d4f18820ecfbe244fb1bbc2232939afca73dfcb21ce23bc296571ee7320e3a.yml"
     }
   },
   "specs_dir": "packages/anthropic_sdk_dart/specs"
