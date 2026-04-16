@@ -1862,6 +1862,24 @@
         "title": "AuthData",
         "type": "object"
       },
+      "AuthUrlResponse": {
+        "properties": {
+          "auth_url": {
+            "title": "Auth Url",
+            "type": "string"
+          },
+          "ttl": {
+            "title": "Ttl",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "auth_url",
+          "ttl"
+        ],
+        "title": "AuthUrlResponse",
+        "type": "object"
+      },
       "BaseFieldDefinition": {
         "properties": {
           "group": {
@@ -5143,6 +5161,18 @@
         "title": "Connector",
         "type": "object"
       },
+      "ConnectorCallToolRequest": {
+        "description": "Request body for calling an MCP tool.",
+        "properties": {
+          "arguments": {
+            "additionalProperties": true,
+            "title": "Arguments",
+            "type": "object"
+          }
+        },
+        "title": "ConnectorCallToolRequest",
+        "type": "object"
+      },
       "ConnectorMCPCreate": {
         "properties": {
           "auth_data": {
@@ -5358,6 +5388,240 @@
         ],
         "title": "ConnectorSupportedLanguage",
         "type": "string"
+      },
+      "ConnectorTool": {
+        "properties": {
+          "active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "execution_config": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExecutionConfig"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "jsonschema": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jsonschema"
+          },
+          "locale": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConnectorToolLocale"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "modified_at": {
+            "format": "date-time",
+            "title": "Modified At",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "system_prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "System Prompt"
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/ResourceVisibility"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "execution_config",
+          "visibility",
+          "created_at",
+          "modified_at"
+        ],
+        "title": "ConnectorTool",
+        "type": "object"
+      },
+      "ConnectorToolCallMetadata": {
+        "additionalProperties": true,
+        "description": "Metadata wrapper for MCP tool call responses.\n\nNests MCP-specific fields under `mcp_meta` to avoid collisions with other\nmetadata keys (e.g. `tool_call_result`) in Harmattan's streaming deltas.",
+        "properties": {
+          "mcp_meta": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConnectorToolResultMetadata"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "ConnectorToolCallMetadata",
+        "type": "object"
+      },
+      "ConnectorToolCallResponse": {
+        "additionalProperties": true,
+        "description": "Response from calling an MCP tool.\n\nWe override mcp_types.CallToolResult because:\n- Models only support `content`, not `structuredContent` at top level\n- Downstream consumers (le-chat, etc.) need structuredContent/isError/_meta via metadata\n\nSYNC: Keep in sync with Harmattan (orchestrator) for harmonized tool result processing.",
+        "properties": {
+          "content": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/TextContent"
+                },
+                {
+                  "$ref": "#/components/schemas/ImageContent"
+                },
+                {
+                  "$ref": "#/components/schemas/AudioContent"
+                },
+                {
+                  "$ref": "#/components/schemas/ResourceLink"
+                },
+                {
+                  "$ref": "#/components/schemas/EmbeddedResource"
+                }
+              ]
+            },
+            "title": "Content",
+            "type": "array"
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConnectorToolCallMetadata"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "content"
+        ],
+        "title": "ConnectorToolCallResponse",
+        "type": "object"
+      },
+      "ConnectorToolLocale": {
+        "properties": {
+          "description": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "$ref": "#/components/schemas/ConnectorSupportedLanguage"
+            },
+            "title": "Description",
+            "type": "object"
+          },
+          "name": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "$ref": "#/components/schemas/ConnectorSupportedLanguage"
+            },
+            "title": "Name",
+            "type": "object"
+          },
+          "usage_sentence": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "$ref": "#/components/schemas/ConnectorSupportedLanguage"
+            },
+            "title": "Usage Sentence",
+            "type": "object"
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "usage_sentence"
+        ],
+        "title": "ConnectorToolLocale",
+        "type": "object"
+      },
+      "ConnectorToolResultMetadata": {
+        "additionalProperties": true,
+        "description": "MCP-specific result metadata (isError, structuredContent, _meta).",
+        "properties": {
+          "_meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta"
+          },
+          "isError": {
+            "default": false,
+            "title": "Iserror",
+            "type": "boolean"
+          },
+          "structuredContent": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Structuredcontent"
+          }
+        },
+        "title": "ConnectorToolResultMetadata",
+        "type": "object"
       },
       "ConnectorsQueryFilters": {
         "properties": {
@@ -6164,6 +6428,88 @@
           }
         },
         "title": "ConversationUsageInfo",
+        "type": "object"
+      },
+      "CreateConnectorRequest": {
+        "properties": {
+          "auth_data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AuthData"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional additional authentication data for the connector."
+          },
+          "description": {
+            "description": "The description of the connector.",
+            "title": "Description",
+            "type": "string"
+          },
+          "headers": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional organization-level headers to be sent with the request to the mcp server.",
+            "title": "Headers"
+          },
+          "icon_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The optional url of the icon you want to associate to the connector.",
+            "title": "Icon Url"
+          },
+          "name": {
+            "description": "The name of the connector. Should be 64 char length maximum, alphanumeric, only underscores/dashes.",
+            "title": "Name",
+            "type": "string"
+          },
+          "server": {
+            "description": "The url of the MCP server.",
+            "format": "uri",
+            "maxLength": 2083,
+            "minLength": 1,
+            "title": "Server",
+            "type": "string"
+          },
+          "system_prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional system prompt for the connector.",
+            "title": "System Prompt"
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/ResourceVisibility",
+            "default": "shared_org",
+            "description": "Visibility of the connector. Use 'shared_workspace' for workspace scoped connectors, or 'private' for private connectors."
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "server"
+        ],
+        "title": "CreateConnectorRequest",
         "type": "object"
       },
       "CustomConnector": {
@@ -10902,6 +11248,119 @@
         "title": "MCPServerIcon",
         "type": "object"
       },
+      "MCPSupportedLanguage": {
+        "enum": [
+          "en",
+          "fr",
+          "de",
+          "es",
+          "pl",
+          "it",
+          "ar",
+          "pt-BR",
+          "nl"
+        ],
+        "title": "MCPSupportedLanguage",
+        "type": "string"
+      },
+      "MCPTool": {
+        "additionalProperties": true,
+        "properties": {
+          "_meta": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MCPToolMeta"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "annotations": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ToolAnnotations"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "execution": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ToolExecution"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "icons": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MCPServerIcon"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Icons"
+          },
+          "inputSchema": {
+            "additionalProperties": true,
+            "title": "Inputschema",
+            "type": "object"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "outputSchema": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outputschema"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          }
+        },
+        "required": [
+          "name",
+          "inputSchema"
+        ],
+        "title": "MCPTool",
+        "type": "object"
+      },
       "MCPToolCallMetadata": {
         "additionalProperties": true,
         "description": "Metadata wrapper for MCP tool call responses.\n\nNests MCP-specific fields under `mcp_meta` to avoid collisions with other\nmetadata keys (e.g. `tool_call_result`) in Harmattan's streaming deltas.",
@@ -10974,6 +11433,71 @@
           "content"
         ],
         "title": "MCPToolCallResponse",
+        "type": "object"
+      },
+      "MCPToolMeta": {
+        "additionalProperties": true,
+        "description": "Typed _meta for MCP tools.\n\nOnly the 'ui' field is typed. Other fields are allowed via extra=\"allow\".",
+        "properties": {
+          "ai.mistral/turbine": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TurbineToolMeta"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ui": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MCPUIToolMeta"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "MCPToolMeta",
+        "type": "object"
+      },
+      "MCPUIToolMeta": {
+        "additionalProperties": true,
+        "description": "UI metadata for tools that reference UI resources.",
+        "properties": {
+          "resourceUri": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resourceuri"
+          },
+          "visibility": {
+            "anyOf": [
+              {
+                "items": {
+                  "enum": [
+                    "model",
+                    "app"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visibility"
+          }
+        },
+        "title": "MCPUIToolMeta",
         "type": "object"
       },
       "MessageEntries": {
@@ -11967,6 +12491,36 @@
         "title": "OAuth2TokenAuth",
         "type": "object"
       },
+      "OCRConfidenceScore": {
+        "additionalProperties": false,
+        "properties": {
+          "confidence": {
+            "description": "Confidence score for the word, between 0 and 1.",
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Confidence",
+            "type": "number"
+          },
+          "start_index": {
+            "description": "Start index of the word in the markdown string.",
+            "minimum": 0,
+            "title": "Start Index",
+            "type": "integer"
+          },
+          "text": {
+            "description": "The word text.",
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "confidence",
+          "start_index",
+          "text"
+        ],
+        "title": "OCRConfidenceScore",
+        "type": "object"
+      },
       "OCRImageObject": {
         "additionalProperties": false,
         "properties": {
@@ -12062,6 +12616,46 @@
         "title": "OCRImageObject",
         "type": "object"
       },
+      "OCRPageConfidenceScores": {
+        "additionalProperties": false,
+        "properties": {
+          "average_page_confidence_score": {
+            "description": "Average confidence score across all words on the page, between 0 and 1.",
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Average Page Confidence Score",
+            "type": "number"
+          },
+          "minimum_page_confidence_score": {
+            "description": "Minimum confidence score across all words on the page, between 0 and 1.",
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Minimum Page Confidence Score",
+            "type": "number"
+          },
+          "word_confidence_scores": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/OCRConfidenceScore"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Per-word confidence scores. Returned when `confidence_scores_granularity` is set to `\"word\"`.",
+            "title": "Word Confidence Scores"
+          }
+        },
+        "required": [
+          "average_page_confidence_score",
+          "minimum_page_confidence_score"
+        ],
+        "title": "OCRPageConfidenceScores",
+        "type": "object"
+      },
       "OCRPageDimensions": {
         "additionalProperties": false,
         "properties": {
@@ -12095,6 +12689,17 @@
       "OCRPageObject": {
         "additionalProperties": false,
         "properties": {
+          "confidence_scores": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OCRPageConfidenceScores"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Confidence scores for the page. Populated when `confidence_scores_granularity` is set in the request."
+          },
           "dimensions": {
             "anyOf": [
               {
@@ -12188,6 +12793,22 @@
               }
             ],
             "description": "Structured output class for extracting useful information from each extracted bounding box / image from document. Only json_schema is valid for this field"
+          },
+          "confidence_scores_granularity": {
+            "anyOf": [
+              {
+                "enum": [
+                  "word",
+                  "page"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Granularity level for confidence scores. Set to `\"page\"` to get aggregate statistics (average and minimum) per page, or `\"word\"` to also get per-word scores on each page and table. Defaults to `null` (no confidence scores returned).",
+            "title": "Confidence Scores Granularity"
           },
           "document": {
             "anyOf": [
@@ -12388,6 +13009,21 @@
             "description": "Table ID for extracted table in a page",
             "title": "Id",
             "type": "string"
+          },
+          "word_confidence_scores": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/OCRConfidenceScore"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Per-word confidence scores. Returned when `confidence_scores_granularity` is set to `\"word\"`.",
+            "title": "Word Confidence Scores"
           }
         },
         "required": [
@@ -15484,6 +16120,69 @@
         "title": "Tool",
         "type": "object"
       },
+      "ToolAnnotations": {
+        "additionalProperties": true,
+        "description": "Additional properties describing a Tool to clients.\n\nNOTE: all properties in ToolAnnotations are **hints**.\nThey are not guaranteed to provide a faithful description of\ntool behavior (including descriptive properties like `title`).\n\nClients should never make tool use decisions based on ToolAnnotations\nreceived from untrusted servers.",
+        "properties": {
+          "destructiveHint": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Destructivehint"
+          },
+          "idempotentHint": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotenthint"
+          },
+          "openWorldHint": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Openworldhint"
+          },
+          "readOnlyHint": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Readonlyhint"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          }
+        },
+        "title": "ToolAnnotations",
+        "type": "object"
+      },
       "ToolCall": {
         "additionalProperties": false,
         "properties": {
@@ -15609,6 +16308,30 @@
           }
         },
         "title": "ToolConfiguration",
+        "type": "object"
+      },
+      "ToolExecution": {
+        "additionalProperties": true,
+        "description": "Execution-related properties for a tool.",
+        "properties": {
+          "taskSupport": {
+            "anyOf": [
+              {
+                "enum": [
+                  "forbidden",
+                  "optional",
+                  "required"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tasksupport"
+          }
+        },
+        "title": "ToolExecution",
         "type": "object"
       },
       "ToolExecutionDeltaEvent": {
@@ -16037,6 +16760,16 @@
         "title": "ToolReferenceChunk",
         "type": "object"
       },
+      "ToolType": {
+        "enum": [
+          "rag",
+          "image",
+          "code",
+          "event"
+        ],
+        "title": "ToolType",
+        "type": "string"
+      },
       "ToolTypes": {
         "enum": [
           "function"
@@ -16341,6 +17074,145 @@
         "title": "TranscriptionStreamTextDelta",
         "type": "object"
       },
+      "TurbineToolLocale": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "propertyNames": {
+                  "$ref": "#/components/schemas/MCPSupportedLanguage"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "done_description": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "propertyNames": {
+                  "$ref": "#/components/schemas/MCPSupportedLanguage"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Done Description"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "propertyNames": {
+                  "$ref": "#/components/schemas/MCPSupportedLanguage"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "usage_sentence": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "propertyNames": {
+                  "$ref": "#/components/schemas/MCPSupportedLanguage"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Usage Sentence"
+          },
+          "working_description": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "propertyNames": {
+                  "$ref": "#/components/schemas/MCPSupportedLanguage"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Working Description"
+          }
+        },
+        "title": "TurbineToolLocale",
+        "type": "object"
+      },
+      "TurbineToolMeta": {
+        "properties": {
+          "locale": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TurbineToolLocale"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "private_execution": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Private Execution"
+          },
+          "timeout": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timeout"
+          },
+          "tool_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ToolType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "TurbineToolMeta",
+        "type": "object"
+      },
       "UnarchiveFTModelOut": {
         "properties": {
           "archived": {
@@ -16363,6 +17235,125 @@
           "id"
         ],
         "title": "UnarchiveFTModelOut",
+        "type": "object"
+      },
+      "UpdateConnectorRequest": {
+        "properties": {
+          "auth_data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AuthData"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "New authentication data for your mcp connector."
+          },
+          "connection_config": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional new connection config.",
+            "title": "Connection Config"
+          },
+          "connection_secrets": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional new connection secrets",
+            "title": "Connection Secrets"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The description of the connector.",
+            "title": "Description"
+          },
+          "headers": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "New headers for your mcp connector.",
+            "title": "Headers"
+          },
+          "icon_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The optional url of the icon you want to associate to the connector.",
+            "title": "Icon Url"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the connector.",
+            "title": "Name"
+          },
+          "server": {
+            "anyOf": [
+              {
+                "format": "uri",
+                "maxLength": 2083,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "New server url for your mcp connector.",
+            "title": "Server"
+          },
+          "system_prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional system prompt for the connector.",
+            "title": "System Prompt"
+          }
+        },
+        "title": "UpdateConnectorRequest",
         "type": "object"
       },
       "UpdateDefinition": {
@@ -18898,7 +19889,7 @@
           }
         },
         "required": [
-          "beta.workflows",
+          "workflows",
           "next_cursor"
         ],
         "title": "WorkflowListResponse",
@@ -21382,6 +22373,528 @@
         "summary": "Classifications",
         "tags": [
           "classifiers"
+        ]
+      }
+    },
+    "/v1/connectors": {
+      "get": {
+        "description": "List all your custom connectors with keyset pagination and filters.",
+        "operationId": "connector_list_v1",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "query_filters",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ConnectorsQueryFilters",
+              "default": {
+                "fetch_connection_secrets": false,
+                "fetch_customer_data": false,
+                "fetch_execution_data": false,
+                "fetch_user_data": false
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedConnectors"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List all connectors.",
+        "tags": [
+          "beta.connectors"
+        ]
+      },
+      "post": {
+        "description": "Create a new MCP connector. You can customize its visibility, url and auth type.",
+        "operationId": "connector_create_v1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConnectorRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Connector"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create a new connector.",
+        "tags": [
+          "beta.connectors"
+        ]
+      }
+    },
+    "/v1/connectors/{connector_id_or_name}#idOrName": {
+      "get": {
+        "description": "Get a connector by its ID or name.",
+        "operationId": "connector_get_v1",
+        "parameters": [
+          {
+            "description": "Fetch the customer data associated with the connector (e.g. customer secrets / config).",
+            "in": "query",
+            "name": "fetch_customer_data",
+            "required": false,
+            "schema": {
+              "default": false,
+              "description": "Fetch the customer data associated with the connector (e.g. customer secrets / config).",
+              "title": "Fetch Customer Data",
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Fetch the general connection secrets associated with the connector.",
+            "in": "query",
+            "name": "fetch_connection_secrets",
+            "required": false,
+            "schema": {
+              "default": false,
+              "description": "Fetch the general connection secrets associated with the connector.",
+              "title": "Fetch Connection Secrets",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "path",
+            "name": "connector_id_or_name",
+            "required": true,
+            "schema": {
+              "title": "Connector Id Or Name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Connector"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get a connector.",
+        "tags": [
+          "beta.connectors"
+        ]
+      }
+    },
+    "/v1/connectors/{connector_id_or_name}/auth_url": {
+      "get": {
+        "description": "Get the OAuth2 authorization URL for a connector to initiate user authentication.",
+        "operationId": "connector_get_auth_url_v1",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "app_return_url",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "App Return Url"
+            }
+          },
+          {
+            "in": "path",
+            "name": "connector_id_or_name",
+            "required": true,
+            "schema": {
+              "title": "Connector Id Or Name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthUrlResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get the auth URL for a connector.",
+        "tags": [
+          "beta.connectors"
+        ]
+      }
+    },
+    "/v1/connectors/{connector_id_or_name}/tools": {
+      "get": {
+        "description": "List all tools available for an MCP connector.",
+        "operationId": "connector_list_tools_v1",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "refresh",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Refresh",
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Return a simplified payload with only name, description, annotations, and a compact inputSchema.",
+            "in": "query",
+            "name": "pretty",
+            "required": false,
+            "schema": {
+              "default": false,
+              "description": "Return a simplified payload with only name, description, annotations, and a compact inputSchema.",
+              "title": "Pretty",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "path",
+            "name": "connector_id_or_name",
+            "required": true,
+            "schema": {
+              "title": "Connector Id Or Name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "items": {
+                        "$ref": "#/components/schemas/ConnectorTool"
+                      },
+                      "type": "array"
+                    },
+                    {
+                      "items": {
+                        "$ref": "#/components/schemas/MCPTool"
+                      },
+                      "type": "array"
+                    },
+                    {
+                      "items": {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  ],
+                  "title": "Response Connector List Tools V1"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List tools for a connector.",
+        "tags": [
+          "beta.connectors"
+        ]
+      }
+    },
+    "/v1/connectors/{connector_id_or_name}/tools/{tool_name}/call": {
+      "post": {
+        "description": "Call a tool on an MCP connector.",
+        "operationId": "connector_call_tool_v1",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tool_name",
+            "required": true,
+            "schema": {
+              "title": "Tool Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "credentials_name",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Credentials Name"
+            }
+          },
+          {
+            "in": "path",
+            "name": "connector_id_or_name",
+            "required": true,
+            "schema": {
+              "title": "Connector Id Or Name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectorCallToolRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectorToolCallResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Call Connector Tool",
+        "tags": [
+          "beta.connectors"
+        ]
+      }
+    },
+    "/v1/connectors/{connector_id}#id": {
+      "delete": {
+        "description": "Delete a connector by its ID.",
+        "operationId": "connector_delete_v1",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "connector_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Connector Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete a connector.",
+        "tags": [
+          "beta.connectors"
+        ]
+      },
+      "patch": {
+        "description": "Update a connector by its ID.",
+        "operationId": "connector_update_v1",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "connector_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Connector Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateConnectorRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Connector"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update a connector.",
+        "tags": [
+          "beta.connectors"
         ]
       }
     },
@@ -28225,6 +29738,149 @@
         ]
       }
     },
+    "/v1/workflows": {
+      "get": {
+        "operationId": "get_workflows_v1_workflows_get",
+        "parameters": [
+          {
+            "description": "Whether to only return active workflows",
+            "in": "query",
+            "name": "active_only",
+            "required": false,
+            "schema": {
+              "default": false,
+              "description": "Whether to only return active workflows",
+              "title": "Active Only",
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Whether to include shared workflows",
+            "in": "query",
+            "name": "include_shared",
+            "required": false,
+            "schema": {
+              "default": true,
+              "description": "Whether to include shared workflows",
+              "title": "Include Shared",
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Whether to only return workflows compatible with chat assistant",
+            "in": "query",
+            "name": "available_in_chat_assistant",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Whether to only return workflows compatible with chat assistant",
+              "title": "Available In Chat Assistant"
+            }
+          },
+          {
+            "description": "Filter by archived state. False=exclude archived, True=only archived, None=include all",
+            "in": "query",
+            "name": "archived",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by archived state. False=exclude archived, True=only archived, None=include all",
+              "title": "Archived"
+            }
+          },
+          {
+            "description": "The cursor for pagination",
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The cursor for pagination",
+              "title": "Cursor"
+            }
+          },
+          {
+            "description": "The maximum number of workflows to return",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "description": "The maximum number of workflows to return",
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Workflows",
+        "tags": [
+          "workflows"
+        ],
+        "x-speakeasy-pagination": {
+          "inputs": [
+            {
+              "in": "parameters",
+              "name": "cursor",
+              "type": "cursor"
+            },
+            {
+              "in": "parameters",
+              "name": "limit",
+              "type": "limit"
+            }
+          ],
+          "outputs": {
+            "nextCursor": "$.next_cursor",
+            "results": "$.workflows"
+          },
+          "type": "cursor"
+        }
+      }
+    },
     "/v1/workflows/deployments": {
       "get": {
         "operationId": "list_deployments_v1_workflows_deployments_get",
@@ -28280,7 +29936,7 @@
         },
         "summary": "List Deployments",
         "tags": [
-          "beta.workflows.deployments"
+          "workflows.deployments"
         ]
       }
     },
@@ -28322,7 +29978,7 @@
         },
         "summary": "Get Deployment",
         "tags": [
-          "beta.workflows.deployments"
+          "workflows.deployments"
         ]
       }
     },
@@ -28439,7 +30095,7 @@
         },
         "summary": "Get Workflow Events",
         "tags": [
-          "beta.workflows.events"
+          "workflows.events"
         ]
       }
     },
@@ -28633,7 +30289,7 @@
         },
         "summary": "Get Stream Events",
         "tags": [
-          "beta.workflows.events"
+          "workflows.events"
         ]
       }
     },
@@ -28674,7 +30330,7 @@
         },
         "summary": "Batch Cancel Workflow Executions",
         "tags": [
-          "beta.workflows.executions"
+          "workflows.executions"
         ]
       }
     },
@@ -28715,7 +30371,7 @@
         },
         "summary": "Batch Terminate Workflow Executions",
         "tags": [
-          "beta.workflows.executions"
+          "workflows.executions"
         ]
       }
     },
@@ -28757,7 +30413,7 @@
         },
         "summary": "Get Workflow Execution",
         "tags": [
-          "beta.workflows.executions"
+          "workflows.executions"
         ]
       }
     },
@@ -28792,7 +30448,7 @@
         },
         "summary": "Cancel Workflow Execution",
         "tags": [
-          "beta.workflows.executions"
+          "workflows.executions"
         ]
       }
     },
@@ -28842,7 +30498,7 @@
         },
         "summary": "Get Workflow Execution History",
         "tags": [
-          "beta.workflows.executions"
+          "workflows.executions"
         ]
       }
     },
@@ -28894,7 +30550,7 @@
         },
         "summary": "Query Workflow Execution",
         "tags": [
-          "beta.workflows.executions"
+          "workflows.executions"
         ]
       }
     },
@@ -28939,7 +30595,7 @@
         },
         "summary": "Reset Workflow",
         "tags": [
-          "beta.workflows.executions"
+          "workflows.executions"
         ]
       }
     },
@@ -28991,7 +30647,7 @@
         },
         "summary": "Signal Workflow Execution",
         "tags": [
-          "beta.workflows.executions"
+          "workflows.executions"
         ]
       }
     },
@@ -29079,7 +30735,7 @@
         },
         "summary": "Stream",
         "tags": [
-          "beta.workflows.executions"
+          "workflows.executions"
         ]
       }
     },
@@ -29114,7 +30770,7 @@
         },
         "summary": "Terminate Workflow Execution",
         "tags": [
-          "beta.workflows.executions"
+          "workflows.executions"
         ]
       }
     },
@@ -29176,7 +30832,7 @@
         },
         "summary": "Get Workflow Execution Trace Events",
         "tags": [
-          "beta.workflows.executions"
+          "workflows.executions"
         ]
       }
     },
@@ -29218,7 +30874,7 @@
         },
         "summary": "Get Workflow Execution Trace Otel",
         "tags": [
-          "beta.workflows.executions"
+          "workflows.executions"
         ]
       }
     },
@@ -29260,7 +30916,7 @@
         },
         "summary": "Get Workflow Execution Trace Summary",
         "tags": [
-          "beta.workflows.executions"
+          "workflows.executions"
         ]
       }
     },
@@ -29312,7 +30968,7 @@
         },
         "summary": "Update Workflow Execution",
         "tags": [
-          "beta.workflows.executions"
+          "workflows.executions"
         ]
       }
     },
@@ -29503,7 +31159,7 @@
         },
         "summary": "Get Workflow Registrations",
         "tags": [
-          "beta.workflows"
+          "workflows"
         ]
       }
     },
@@ -29570,7 +31226,7 @@
         },
         "summary": "Get Workflow Registration",
         "tags": [
-          "beta.workflows"
+          "workflows"
         ]
       }
     },
@@ -29632,7 +31288,7 @@
         },
         "summary": "Execute Workflow Registration",
         "tags": [
-          "beta.workflows"
+          "workflows"
         ]
       }
     },
@@ -29757,7 +31413,7 @@
         },
         "summary": "List Runs",
         "tags": [
-          "beta.workflows.runs"
+          "workflows.runs"
         ],
         "x-speakeasy-pagination": {
           "inputs": [
@@ -29819,7 +31475,7 @@
         },
         "summary": "Get Run",
         "tags": [
-          "beta.workflows.runs"
+          "workflows.runs"
         ]
       }
     },
@@ -29870,7 +31526,7 @@
         },
         "summary": "Get Run History",
         "tags": [
-          "beta.workflows.runs"
+          "workflows.runs"
         ]
       }
     },
@@ -29891,7 +31547,7 @@
         },
         "summary": "Get Schedules",
         "tags": [
-          "beta.workflows.schedules"
+          "workflows.schedules"
         ]
       },
       "post": {
@@ -29930,7 +31586,7 @@
         },
         "summary": "Schedule Workflow",
         "tags": [
-          "beta.workflows.schedules"
+          "workflows.schedules"
         ]
       }
     },
@@ -29965,7 +31621,7 @@
         },
         "summary": "Unschedule Workflow",
         "tags": [
-          "beta.workflows.schedules"
+          "workflows.schedules"
         ]
       }
     },
@@ -29986,7 +31642,7 @@
         },
         "summary": "Get Worker Info",
         "tags": [
-          "beta.workflows.workers"
+          "workflows.workers"
         ]
       }
     },
@@ -30028,7 +31684,7 @@
         },
         "summary": "Get Workflow",
         "tags": [
-          "beta.workflows"
+          "workflows"
         ]
       },
       "put": {
@@ -30078,7 +31734,7 @@
         },
         "summary": "Update Workflow",
         "tags": [
-          "beta.workflows"
+          "workflows"
         ]
       }
     },
@@ -30120,7 +31776,7 @@
         },
         "summary": "Archive Workflow",
         "tags": [
-          "beta.workflows"
+          "workflows"
         ]
       }
     },
@@ -30180,7 +31836,7 @@
         },
         "summary": "Execute Workflow",
         "tags": [
-          "beta.workflows"
+          "workflows"
         ]
       }
     },
@@ -30222,7 +31878,7 @@
         },
         "summary": "Unarchive Workflow",
         "tags": [
-          "beta.workflows"
+          "workflows"
         ]
       }
     },
@@ -30303,7 +31959,7 @@
         },
         "summary": "Get Workflow Metrics",
         "tags": [
-          "beta.workflows.metrics"
+          "workflows.metrics"
         ]
       }
     }
@@ -30396,6 +32052,11 @@
       "x-displayName": "(beta) Agents API"
     },
     {
+      "description": "(beta) Connectors API to create, manage, and call tools on MCP connectors.",
+      "name": "beta.connectors",
+      "x-displayName": "(beta) Connectors API"
+    },
+    {
       "description": "(beta) Conversations API",
       "name": "beta.conversations",
       "x-displayName": "(beta) Conversations API"
@@ -30447,42 +32108,42 @@
     },
     {
       "description": "Workflow management API.",
-      "name": "beta.workflows",
+      "name": "workflows",
       "x-displayName": "Workflows"
     },
     {
       "description": "Trigger, monitor, and control workflow executions.",
-      "name": "beta.workflows.executions",
+      "name": "workflows.executions",
       "x-displayName": "Executions"
     },
     {
       "description": "List and inspect individual workflow runs.",
-      "name": "beta.workflows.runs",
+      "name": "workflows.runs",
       "x-displayName": "Runs"
     },
     {
       "description": "Create and manage workflow schedules.",
-      "name": "beta.workflows.schedules",
+      "name": "workflows.schedules",
       "x-displayName": "Schedules"
     },
     {
       "description": "List and inspect worker deployments.",
-      "name": "beta.workflows.deployments",
+      "name": "workflows.deployments",
       "x-displayName": "Deployments"
     },
     {
       "description": "Stream and list workflow execution events.",
-      "name": "beta.workflows.events",
+      "name": "workflows.events",
       "x-displayName": "Events"
     },
     {
       "description": "Get performance metrics for workflows.",
-      "name": "beta.workflows.metrics",
+      "name": "workflows.metrics",
       "x-displayName": "Metrics"
     },
     {
       "description": "Worker connection info.",
-      "name": "beta.workflows.workers",
+      "name": "workflows.workers",
       "x-displayName": "Workers"
     }
   ]

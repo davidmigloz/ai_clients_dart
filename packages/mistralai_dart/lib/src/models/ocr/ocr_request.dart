@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../metadata/response_format.dart';
 import 'ocr_document.dart';
 
 /// Request to process a document with OCR.
@@ -35,6 +36,30 @@ class OcrRequest {
   /// Custom prompt for document annotation.
   final String? documentAnnotationPrompt;
 
+  /// Granularity level for confidence scores.
+  ///
+  /// Set to `'page'` to get aggregate statistics (average and minimum) per
+  /// page, or `'word'` to also get per-word scores on each page and table.
+  /// Defaults to null (no confidence scores returned).
+  final String? confidenceScoresGranularity;
+
+  /// Format for extracted tables (`'markdown'` or `'html'`).
+  final String? tableFormat;
+
+  /// Whether to extract page headers.
+  final bool? extractHeader;
+
+  /// Whether to extract page footers.
+  final bool? extractFooter;
+
+  /// Structured output format for extracting information from each
+  /// extracted bounding box / image. Only json_schema is valid.
+  final ResponseFormat? bboxAnnotationFormat;
+
+  /// Structured output format for extracting information from the entire
+  /// document. Only json_schema is valid.
+  final ResponseFormat? documentAnnotationFormat;
+
   /// Creates an [OcrRequest].
   const OcrRequest({
     this.model = 'mistral-ocr-latest',
@@ -45,6 +70,12 @@ class OcrRequest {
     this.imageLimit,
     this.imageMinSize,
     this.documentAnnotationPrompt,
+    this.confidenceScoresGranularity,
+    this.tableFormat,
+    this.extractHeader,
+    this.extractFooter,
+    this.bboxAnnotationFormat,
+    this.documentAnnotationFormat,
   });
 
   /// Creates an [OcrRequest] from a URL.
@@ -54,12 +85,14 @@ class OcrRequest {
     String? id,
     List<int>? pages,
     bool? includeImageBase64,
+    String? confidenceScoresGranularity,
   }) => OcrRequest(
     model: model,
     document: OcrDocument.url(url),
     id: id,
     pages: pages,
     includeImageBase64: includeImageBase64,
+    confidenceScoresGranularity: confidenceScoresGranularity,
   );
 
   /// Creates an [OcrRequest] from a file ID.
@@ -69,12 +102,14 @@ class OcrRequest {
     String? id,
     List<int>? pages,
     bool? includeImageBase64,
+    String? confidenceScoresGranularity,
   }) => OcrRequest(
     model: model,
     document: OcrDocument.file(fileId),
     id: id,
     pages: pages,
     includeImageBase64: includeImageBase64,
+    confidenceScoresGranularity: confidenceScoresGranularity,
   );
 
   /// Creates an [OcrRequest] from base64-encoded data.
@@ -85,12 +120,14 @@ class OcrRequest {
     String? id,
     List<int>? pages,
     bool? includeImageBase64,
+    String? confidenceScoresGranularity,
   }) => OcrRequest(
     model: model,
     document: OcrDocument.base64(data: data, mimeType: mimeType),
     id: id,
     pages: pages,
     includeImageBase64: includeImageBase64,
+    confidenceScoresGranularity: confidenceScoresGranularity,
   );
 
   /// Creates an [OcrRequest] from JSON.
@@ -103,6 +140,21 @@ class OcrRequest {
     imageLimit: json['image_limit'] as int?,
     imageMinSize: json['image_min_size'] as int?,
     documentAnnotationPrompt: json['document_annotation_prompt'] as String?,
+    confidenceScoresGranularity:
+        json['confidence_scores_granularity'] as String?,
+    tableFormat: json['table_format'] as String?,
+    extractHeader: json['extract_header'] as bool?,
+    extractFooter: json['extract_footer'] as bool?,
+    bboxAnnotationFormat: json['bbox_annotation_format'] != null
+        ? ResponseFormat.fromJson(
+            json['bbox_annotation_format'] as Map<String, dynamic>,
+          )
+        : null,
+    documentAnnotationFormat: json['document_annotation_format'] != null
+        ? ResponseFormat.fromJson(
+            json['document_annotation_format'] as Map<String, dynamic>,
+          )
+        : null,
   );
 
   /// Converts to JSON.
@@ -116,6 +168,15 @@ class OcrRequest {
     if (imageMinSize != null) 'image_min_size': imageMinSize,
     if (documentAnnotationPrompt != null)
       'document_annotation_prompt': documentAnnotationPrompt,
+    if (confidenceScoresGranularity != null)
+      'confidence_scores_granularity': confidenceScoresGranularity,
+    if (tableFormat != null) 'table_format': tableFormat,
+    if (extractHeader != null) 'extract_header': extractHeader,
+    if (extractFooter != null) 'extract_footer': extractFooter,
+    if (bboxAnnotationFormat != null)
+      'bbox_annotation_format': bboxAnnotationFormat!.toJson(),
+    if (documentAnnotationFormat != null)
+      'document_annotation_format': documentAnnotationFormat!.toJson(),
   };
 
   /// Creates a copy with the specified fields replaced.
@@ -128,6 +189,12 @@ class OcrRequest {
     int? imageLimit,
     int? imageMinSize,
     String? documentAnnotationPrompt,
+    String? confidenceScoresGranularity,
+    String? tableFormat,
+    bool? extractHeader,
+    bool? extractFooter,
+    ResponseFormat? bboxAnnotationFormat,
+    ResponseFormat? documentAnnotationFormat,
   }) => OcrRequest(
     model: model ?? this.model,
     document: document ?? this.document,
@@ -138,6 +205,14 @@ class OcrRequest {
     imageMinSize: imageMinSize ?? this.imageMinSize,
     documentAnnotationPrompt:
         documentAnnotationPrompt ?? this.documentAnnotationPrompt,
+    confidenceScoresGranularity:
+        confidenceScoresGranularity ?? this.confidenceScoresGranularity,
+    tableFormat: tableFormat ?? this.tableFormat,
+    extractHeader: extractHeader ?? this.extractHeader,
+    extractFooter: extractFooter ?? this.extractFooter,
+    bboxAnnotationFormat: bboxAnnotationFormat ?? this.bboxAnnotationFormat,
+    documentAnnotationFormat:
+        documentAnnotationFormat ?? this.documentAnnotationFormat,
   );
 
   @override

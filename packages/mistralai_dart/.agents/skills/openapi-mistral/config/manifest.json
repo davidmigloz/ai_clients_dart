@@ -274,6 +274,17 @@
       ],
       "note": "Internal platform API"
     },
+    "AuthUrlResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "AuthUrlResponse",
+      "file": "",
+      "schema": "AuthUrlResponse",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal connector management API"
+    },
     "BaseFieldDefinition": {
       "spec": "main",
       "kind": "skip",
@@ -549,6 +560,17 @@
       },
       "note": null
     },
+    "ConnectorCallToolRequest": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ConnectorCallToolRequest",
+      "file": "",
+      "schema": "ConnectorCallToolRequest",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal connector management API"
+    },
     "ConnectorMCPCreate": {
       "spec": "main",
       "kind": "skip",
@@ -577,6 +599,61 @@
       "dart_class": "ConnectorSupportedLanguage",
       "file": "",
       "schema": "ConnectorSupportedLanguage",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal connector management API"
+    },
+    "ConnectorTool": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ConnectorTool",
+      "file": "",
+      "schema": "ConnectorTool",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal connector management API"
+    },
+    "ConnectorToolCallMetadata": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ConnectorToolCallMetadata",
+      "file": "",
+      "schema": "ConnectorToolCallMetadata",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal connector management API"
+    },
+    "ConnectorToolCallResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ConnectorToolCallResponse",
+      "file": "",
+      "schema": "ConnectorToolCallResponse",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal connector management API"
+    },
+    "ConnectorToolLocale": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ConnectorToolLocale",
+      "file": "",
+      "schema": "ConnectorToolLocale",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal connector management API"
+    },
+    "ConnectorToolResultMetadata": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ConnectorToolResultMetadata",
+      "file": "",
+      "schema": "ConnectorToolResultMetadata",
       "tags": [
         "acknowledged"
       ],
@@ -639,6 +716,17 @@
         "acknowledged"
       ],
       "note": "Internal platform API"
+    },
+    "CreateConnectorRequest": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "CreateConnectorRequest",
+      "file": "",
+      "schema": "CreateConnectorRequest",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal connector management API"
     },
     "CustomConnector": {
       "spec": "main",
@@ -1300,6 +1388,28 @@
       ],
       "note": "Internal MCP protocol type"
     },
+    "MCPSupportedLanguage": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "MCPSupportedLanguage",
+      "file": "",
+      "schema": "MCPSupportedLanguage",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal MCP protocol type"
+    },
+    "MCPTool": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "MCPTool",
+      "file": "",
+      "schema": "MCPTool",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal MCP protocol type"
+    },
     "MCPToolCallMetadata": {
       "spec": "main",
       "kind": "skip",
@@ -1328,6 +1438,28 @@
       "dart_class": "MCPToolCallResponse",
       "file": "",
       "schema": "MCPToolCallResponse",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal MCP protocol type"
+    },
+    "MCPToolMeta": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "MCPToolMeta",
+      "file": "",
+      "schema": "MCPToolMeta",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal MCP protocol type"
+    },
+    "MCPUIToolMeta": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "MCPUIToolMeta",
+      "file": "",
+      "schema": "MCPUIToolMeta",
       "tags": [
         "acknowledged"
       ],
@@ -1392,6 +1524,27 @@
       "file": "lib/src/models/tools/connector_auth.dart",
       "schema": "OAuth2TokenAuth",
       "parent": "ConnectorAuth"
+    },
+    "OCRConfidenceScore": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "OcrConfidenceScore",
+      "file": "lib/src/models/ocr/ocr_confidence_score.dart",
+      "schema": "OCRConfidenceScore"
+    },
+    "OCRPageConfidenceScores": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "OcrPageConfidenceScores",
+      "file": "lib/src/models/ocr/ocr_page_confidence_scores.dart",
+      "schema": "OCRPageConfidenceScores"
+    },
+    "OCRTableObject": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "OcrTable",
+      "file": "lib/src/models/ocr/ocr_table.dart",
+      "schema": "OCRTableObject"
     },
     "ObservabilityError": {
       "spec": "main",
@@ -2134,6 +2287,17 @@
       },
       "note": null
     },
+    "ToolAnnotations": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolAnnotations",
+      "file": "",
+      "schema": "ToolAnnotations",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal MCP/tool protocol type"
+    },
     "ToolChoice": {
       "spec": "main",
       "kind": "sealed_parent",
@@ -2175,6 +2339,17 @@
       "parent": "ToolChoice",
       "note": "Uses string values or object for discrimination"
     },
+    "ToolExecution": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolExecution",
+      "file": "",
+      "schema": "ToolExecution",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal MCP/tool protocol type"
+    },
     "ToolFileChunk": {
       "spec": "main",
       "kind": "sealed_variant",
@@ -2198,6 +2373,50 @@
       "file": "lib/src/models/content/content_part.dart",
       "schema": "ToolReferenceChunk",
       "parent": "ContentPart"
+    },
+    "ToolType": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolType",
+      "file": "",
+      "schema": "ToolType",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal MCP/tool protocol type"
+    },
+    "TurbineToolLocale": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "TurbineToolLocale",
+      "file": "",
+      "schema": "TurbineToolLocale",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal MCP/tool protocol type"
+    },
+    "TurbineToolMeta": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "TurbineToolMeta",
+      "file": "",
+      "schema": "TurbineToolMeta",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal MCP/tool protocol type"
+    },
+    "UpdateConnectorRequest": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "UpdateConnectorRequest",
+      "file": "",
+      "schema": "UpdateConnectorRequest",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Internal connector management API"
     },
     "UpdateDefinition": {
       "spec": "main",
