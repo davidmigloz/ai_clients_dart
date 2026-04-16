@@ -120,7 +120,7 @@ class CollectionsResource extends ResourceBase {
   ///
   /// Returns the [Collection] if found.
   ///
-  /// Throws [ChromaNotFoundException] if the collection does not exist.
+  /// Throws [NotFoundException] if the collection does not exist.
   ///
   /// Endpoint: `GET /api/v2/tenants/{tenant}/databases/{database}/collections/{name}`
   Future<Collection> getByName({
@@ -146,7 +146,7 @@ class CollectionsResource extends ResourceBase {
   ///
   /// Returns the [Collection] if found.
   ///
-  /// Throws [ChromaNotFoundException] if the collection does not exist.
+  /// Throws [NotFoundException] if the collection does not exist.
   ///
   /// Endpoint: `GET /api/v2/tenants/{tenant}/databases/{database}/collections/by-id/{collection_id}`
   Future<Collection> getById({

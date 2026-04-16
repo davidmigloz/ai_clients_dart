@@ -86,7 +86,7 @@ class DatabasesResource extends ResourceBase {
   ///
   /// Returns the [Database] if found.
   ///
-  /// Throws [ChromaNotFoundException] if the database does not exist.
+  /// Throws [NotFoundException] if the database does not exist.
   ///
   /// Endpoint: `GET /api/v2/tenants/{tenant}/databases/{database}`
   Future<Database> getByName({required String name, String? tenant}) async {

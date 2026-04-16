@@ -56,7 +56,7 @@ class TenantsResource extends ResourceBase {
   ///
   /// Returns the [Tenant] if found.
   ///
-  /// Throws [ChromaNotFoundException] if the tenant does not exist.
+  /// Throws [NotFoundException] if the tenant does not exist.
   ///
   /// Endpoint: `GET /api/v2/tenants/{tenant_name}`
   Future<Tenant> getByName({required String name}) async {
