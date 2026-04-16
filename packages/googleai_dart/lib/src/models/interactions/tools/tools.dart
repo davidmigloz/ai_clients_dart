@@ -1,4 +1,6 @@
+import '../../copy_with_sentinel.dart';
 import '../allowed_tools.dart';
+import 'vertex_ai_search_config.dart';
 
 part 'code_execution_tool.dart';
 part 'computer_use_tool.dart';
@@ -7,6 +9,7 @@ part 'function_tool.dart';
 part 'google_maps_tool.dart';
 part 'google_search_tool.dart';
 part 'mcp_server_tool.dart';
+part 'retrieval_tool.dart';
 part 'url_context_tool.dart';
 
 /// A tool that can be used by the model.
@@ -30,6 +33,7 @@ sealed class InteractionTool {
       'computer_use' => ComputerUseTool.fromJson(json),
       'mcp_server' => McpServerTool.fromJson(json),
       'file_search' => FileSearchTool.fromJson(json),
+      'retrieval' => RetrievalTool.fromJson(json),
       _ => throw ArgumentError('Unknown tool type: $type'),
     };
   }

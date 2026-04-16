@@ -11,6 +11,7 @@ void main() {
           'status': 'completed',
           'created': '2024-01-15T10:30:00Z',
           'updated': '2024-01-15T10:31:00Z',
+          'service_tier': 'standard',
           'usage': {
             'total_input_tokens': 100,
             'total_output_tokens': 50,
@@ -28,6 +29,7 @@ void main() {
         expect(interaction.status, InteractionStatus.completed);
         expect(interaction.created, DateTime.parse('2024-01-15T10:30:00Z'));
         expect(interaction.updated, DateTime.parse('2024-01-15T10:31:00Z'));
+        expect(interaction.serviceTier, 'standard');
         expect(interaction.usage, isNotNull);
         expect(interaction.usage!.totalInputTokens, 100);
         expect(interaction.outputs, isNotNull);
@@ -382,6 +384,16 @@ void main() {
   });
 
   group('CreateModelInteractionParams tools type safety', () {
+    test('parses serviceTier correctly', () {
+      final json = {'model': 'gemini-2.0-flash', 'service_tier': 'priority'};
+      final params = CreateModelInteractionParams.fromJson(json);
+
+      expect(params.serviceTier, 'priority');
+
+      final toJson = params.toJson();
+      expect(toJson['service_tier'], 'priority');
+    });
+
     test('parses GoogleSearchTool correctly', () {
       final json = {
         'model': 'gemini-2.0-flash',
@@ -459,6 +471,39 @@ void main() {
       expect(params.tools![0], isA<GoogleSearchTool>());
       expect(params.tools![1], isA<CodeExecutionTool>());
       expect(params.tools![2], isA<FunctionTool>());
+    });
+
+    test('parses RetrievalTool correctly', () {
+      final json = {
+        'model': 'gemini-2.0-flash',
+        'tools': [
+          {
+            'type': 'retrieval',
+            'retrieval_types': ['vertex_ai_search'],
+            'vertex_ai_search_config': {
+              'datastores': ['ds-1', 'ds-2'],
+              'engine': 'engine-1',
+            },
+          },
+        ],
+      };
+      final params = CreateModelInteractionParams.fromJson(json);
+
+      expect(params.tools, hasLength(1));
+      expect(params.tools!.first, isA<RetrievalTool>());
+      final tool = params.tools!.first as RetrievalTool;
+      expect(tool.retrievalTypes, ['vertex_ai_search']);
+      expect(tool.vertexAiSearchConfig, isNotNull);
+      expect(tool.vertexAiSearchConfig!.datastores, ['ds-1', 'ds-2']);
+      expect(tool.vertexAiSearchConfig!.engine, 'engine-1');
+
+      // Round-trip
+      final toolJson = tool.toJson();
+      expect(toolJson['type'], 'retrieval');
+      expect(toolJson['retrieval_types'], ['vertex_ai_search']);
+      final restored = RetrievalTool.fromJson(toolJson);
+      expect(restored.retrievalTypes, tool.retrievalTypes);
+      expect(restored.vertexAiSearchConfig!.engine, 'engine-1');
     });
 
     test('handles null tools', () {

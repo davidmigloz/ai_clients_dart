@@ -544,7 +544,8 @@
           "mcp_server_tool_call": "#/components/schemas/McpServerToolCallDelta",
           "mcp_server_tool_result": "#/components/schemas/McpServerToolResultDelta",
           "file_search_call": "#/components/schemas/FileSearchCallDelta",
-          "file_search_result": "#/components/schemas/FileSearchResultDelta"
+          "file_search_result": "#/components/schemas/FileSearchResultDelta",
+          "text_annotation": "#/components/schemas/TextAnnotationDelta"
         }
       }
     },
@@ -1045,6 +1046,14 @@
         "acknowledged"
       ]
     },
+    "TextAnnotationDelta": {
+      "spec": "interactions",
+      "schema": "TextAnnotationDelta",
+      "dart_class": "TextAnnotationDelta",
+      "file": "lib/src/models/interactions/deltas/text_annotation_delta.dart",
+      "kind": "sealed_variant",
+      "parent": "InteractionDelta"
+    },
     "ThoughtSummary": {
       "spec": "interactions",
       "schema": "ThoughtSummary",
@@ -1086,9 +1095,25 @@
           "url_context": "#/components/schemas/UrlContext",
           "computer_use": "#/components/schemas/ComputerUse",
           "mcp_server": "#/components/schemas/McpServer",
-          "file_search": "#/components/schemas/FileSearch"
+          "file_search": "#/components/schemas/FileSearch",
+          "retrieval": "#/components/schemas/Retrieval"
         }
       }
+    },
+    "interactions:Retrieval": {
+      "spec": "interactions",
+      "schema": "Retrieval",
+      "dart_class": "RetrievalTool",
+      "file": "lib/src/models/interactions/tools/retrieval_tool.dart",
+      "kind": "sealed_variant",
+      "parent": "InteractionTool"
+    },
+    "interactions:VertexAISearchConfig": {
+      "spec": "interactions",
+      "schema": "VertexAISearchConfig",
+      "dart_class": "VertexAISearchConfig",
+      "file": "lib/src/models/interactions/tools/vertex_ai_search_config.dart",
+      "kind": "object"
     },
     "ToolChoiceConfig": {
       "spec": "interactions",
@@ -1276,6 +1301,13 @@
       "file": "lib/src/models/common/grounding_chunk_custom_metadata.dart",
       "schema": "GroundingChunkCustomMetadata"
     },
+    "RetrievedContext": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RetrievedContext",
+      "file": "lib/src/models/metadata/retrieved_context.dart",
+      "schema": "RetrievedContext"
+    },
     "GroundingChunkStringList": {
       "spec": "main",
       "kind": "object",
@@ -1339,10 +1371,14 @@
     },
     "ToolType": {
       "spec": "main",
-      "kind": "enum",
+      "kind": "skip",
       "dart_class": "ToolType",
       "file": "lib/src/models/tools/tool_type.dart",
-      "schema": "ToolType"
+      "schema": "ToolType",
+      "note": "Removed from spec; kept for Part.toolCall()/toolResponse() convenience APIs",
+      "tags": [
+        "acknowledged"
+      ]
     },
     "ToolCall": {
       "spec": "main",

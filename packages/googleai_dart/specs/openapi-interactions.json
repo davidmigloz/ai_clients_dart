@@ -75,6 +75,11 @@
           }
         ],
         "properties": {
+          "channels": {
+            "description": "The number of audio channels.",
+            "format": "int32",
+            "type": "integer"
+          },
           "data": {
             "description": "The audio content.",
             "format": "byte",
@@ -90,7 +95,8 @@
               "audio/ogg",
               "audio/flac",
               "audio/mpeg",
-              "audio/m4a"
+              "audio/m4a",
+              "audio/l16"
             ],
             "type": "string",
             "x-google-enum-descriptions": [
@@ -101,8 +107,14 @@
               "OGG audio format",
               "FLAC audio format",
               "MPEG audio format",
-              "M4A audio format"
+              "M4A audio format",
+              "L16 audio format"
             ]
+          },
+          "rate": {
+            "description": "The sample rate of the audio.",
+            "format": "int32",
+            "type": "integer"
           },
           "type": {
             "const": "audio"
@@ -119,6 +131,11 @@
       },
       "AudioDelta": {
         "properties": {
+          "channels": {
+            "description": "The number of audio channels.",
+            "format": "int32",
+            "type": "integer"
+          },
           "data": {
             "format": "byte",
             "type": "string"
@@ -132,7 +149,8 @@
               "audio/ogg",
               "audio/flac",
               "audio/mpeg",
-              "audio/m4a"
+              "audio/m4a",
+              "audio/l16"
             ],
             "type": "string",
             "x-google-enum-descriptions": [
@@ -143,8 +161,14 @@
               "OGG audio format",
               "FLAC audio format",
               "MPEG audio format",
-              "M4A audio format"
+              "M4A audio format",
+              "L16 audio format"
             ]
+          },
+          "rate": {
+            "description": "The sample rate of the audio.",
+            "format": "int32",
+            "type": "integer"
           },
           "type": {
             "const": "audio"
@@ -567,6 +591,9 @@
           },
           {
             "$ref": "#/components/schemas/GoogleMapsResultDelta"
+          },
+          {
+            "$ref": "#/components/schemas/TextAnnotationDelta"
           }
         ],
         "type": "object"
@@ -711,6 +738,20 @@
             "readOnly": true,
             "type": "string"
           },
+          "service_tier": {
+            "description": "The service tier for the interaction.",
+            "enum": [
+              "flex",
+              "standard",
+              "priority"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Flex service tier.",
+              "Standard service tier.",
+              "Priority service tier."
+            ]
+          },
           "status": {
             "description": "Required. Output only. The status of the interaction.",
             "enum": [
@@ -831,6 +872,20 @@
             "description": "Output only. The role of the interaction.",
             "readOnly": true,
             "type": "string"
+          },
+          "service_tier": {
+            "description": "The service tier for the interaction.",
+            "enum": [
+              "flex",
+              "standard",
+              "priority"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Flex service tier.",
+              "Standard service tier.",
+              "Priority service tier."
+            ]
           },
           "status": {
             "description": "Required. Output only. The status of the interaction.",
@@ -1795,12 +1850,14 @@
             "items": {
               "enum": [
                 "web_search",
-                "image_search"
+                "image_search",
+                "enterprise_web_search"
               ],
               "type": "string",
               "x-google-enum-descriptions": [
                 "Setting this field enables web search. Only text results are returned.",
-                "Setting this field enables image search. Image bytes are returned."
+                "Setting this field enables image search. Image bytes are returned.",
+                "Setting this field enables enterprise web search."
               ]
             },
             "type": "array"
@@ -1875,12 +1932,14 @@
             "description": "The type of search grounding enabled.",
             "enum": [
               "web_search",
-              "image_search"
+              "image_search",
+              "enterprise_web_search"
             ],
             "type": "string",
             "x-google-enum-descriptions": [
               "Setting this field enables web search. Only text results are returned.",
-              "Setting this field enables image search. Image bytes are returned."
+              "Setting this field enables image search. Image bytes are returned.",
+              "Setting this field enables enterprise web search."
             ]
           },
           "signature": {
@@ -2098,7 +2157,6 @@
               "image/webp",
               "image/heic",
               "image/heif",
-              "image/jpg",
               "image/gif",
               "image/bmp",
               "image/tiff"
@@ -2110,7 +2168,6 @@
               "WebP image format",
               "HEIC image format",
               "HEIF image format",
-              "JPG image format",
               "GIF image format",
               "BMP image format",
               "TIFF image format"
@@ -2146,7 +2203,6 @@
               "image/webp",
               "image/heic",
               "image/heif",
-              "image/jpg",
               "image/gif",
               "image/bmp",
               "image/tiff"
@@ -2158,7 +2214,6 @@
               "WebP image format",
               "HEIC image format",
               "HEIF image format",
-              "JPG image format",
               "GIF image format",
               "BMP image format",
               "TIFF image format"
@@ -2283,6 +2338,20 @@
             "description": "Output only. The role of the interaction.",
             "readOnly": true,
             "type": "string"
+          },
+          "service_tier": {
+            "description": "The service tier for the interaction.",
+            "enum": [
+              "flex",
+              "standard",
+              "priority"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Flex service tier.",
+              "Standard service tier.",
+              "Priority service tier."
+            ]
           },
           "status": {
             "description": "Required. Output only. The status of the interaction.",
@@ -2815,6 +2884,11 @@
             "type": "string"
           },
           {
+            "const": "gemini-2.5-computer-use-preview-10-2025",
+            "description": "An agentic capability model designed for direct interface interaction, allowing Gemini to perceive and navigate digital environments.",
+            "x-stainless-nominal": false
+          },
+          {
             "const": "gemini-2.5-flash",
             "description": "Our first hybrid reasoning model which supports a 1M token context window and has thinking budgets.",
             "x-stainless-nominal": false
@@ -2882,6 +2956,21 @@
           {
             "const": "gemini-3.1-flash-image-preview",
             "description": "Pro-level visual intelligence with Flash-speed efficiency and reality-grounded generation capabilities.",
+            "x-stainless-nominal": false
+          },
+          {
+            "const": "gemini-3.1-flash-lite-preview",
+            "description": "Our most cost-efficient model, optimized for high-volume agentic tasks, translation, and simple data processing.",
+            "x-stainless-nominal": false
+          },
+          {
+            "const": "lyria-3-clip-preview",
+            "description": "Our low-latency, music generation model optimized for high-fidelity audio clips and precise rhythmic control.",
+            "x-stainless-nominal": false
+          },
+          {
+            "const": "lyria-3-pro-preview",
+            "description": "Our advanced, full-song generative model with deep compositional understanding, optimized for precise structural control and complex transitions across diverse musical styles.",
             "x-stainless-nominal": false
           }
         ],
@@ -2957,14 +3046,47 @@
         "enum": [
           "text",
           "image",
-          "audio"
+          "audio",
+          "video",
+          "document"
         ],
         "type": "string",
         "x-google-enum-descriptions": [
           "Indicates the model should return text.",
           "Indicates the model should return images.",
-          "Indicates the model should return audio."
+          "Indicates the model should return audio.",
+          "Indicates the model should return video.",
+          "Indicates the model should return documents."
         ]
+      },
+      "Retrieval": {
+        "description": "A tool that can be used by the model to retrieve files.",
+        "properties": {
+          "retrieval_types": {
+            "description": "The types of file retrieval to enable.",
+            "items": {
+              "enum": [
+                "vertex_ai_search"
+              ],
+              "type": "string",
+              "x-google-enum-descriptions": [
+                ""
+              ]
+            },
+            "type": "array"
+          },
+          "type": {
+            "const": "retrieval"
+          },
+          "vertex_ai_search_config": {
+            "$ref": "#/components/schemas/VertexAISearchConfig",
+            "description": "Used to specify configuration for VertexAISearch."
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
       },
       "ReviewSnippet": {
         "description": "Encapsulates a snippet of a user review that answers a question about\nthe features of a specific place in Google Maps.",
@@ -3000,6 +3122,24 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "TextAnnotationDelta": {
+        "properties": {
+          "annotations": {
+            "description": "Citation information for model-generated content.",
+            "items": {
+              "$ref": "#/components/schemas/Annotation"
+            },
+            "type": "array"
+          },
+          "type": {
+            "const": "text_annotation"
+          }
+        },
+        "required": [
+          "type"
+        ],
         "type": "object"
       },
       "TextContent": {
@@ -3039,13 +3179,6 @@
       },
       "TextDelta": {
         "properties": {
-          "annotations": {
-            "description": "Citation information for model-generated content.",
-            "items": {
-              "$ref": "#/components/schemas/Annotation"
-            },
-            "type": "array"
-          },
           "text": {
             "type": "string"
           },
@@ -3200,6 +3333,9 @@
           },
           {
             "$ref": "#/components/schemas/GoogleMaps"
+          },
+          {
+            "$ref": "#/components/schemas/Retrieval"
           }
         ],
         "type": "object"
@@ -3590,6 +3726,23 @@
             "description": "Number of tokens present in tool-use prompt(s).",
             "format": "int32",
             "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "VertexAISearchConfig": {
+        "description": "Used to specify configuration for VertexAISearch.",
+        "properties": {
+          "datastores": {
+            "description": "Optional. Used to specify Vertex AI Search datastores.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "engine": {
+            "description": "Optional. Used to specify Vertex AI Search engine.",
+            "type": "string"
           }
         },
         "type": "object"

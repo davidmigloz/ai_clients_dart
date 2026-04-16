@@ -219,6 +219,30 @@ void main() {
         expect((content as AudioContent).data, 'base64audio');
         expect(content.mimeType, 'audio/mp3');
       });
+
+      test('deserializes channels and rate from JSON', () {
+        final json = {
+          'type': 'audio',
+          'data': 'base64audio',
+          'mime_type': 'audio/l16',
+          'channels': 2,
+          'rate': 24000,
+        };
+        final content = InteractionContent.fromJson(json) as AudioContent;
+        expect(content.channels, 2);
+        expect(content.rate, 24000);
+
+        final toJson = content.toJson();
+        expect(toJson['channels'], 2);
+        expect(toJson['rate'], 24000);
+      });
+
+      test('copyWith preserves channels and rate', () {
+        const content = AudioContent(data: 'data', channels: 1, rate: 16000);
+        final copy = content.copyWith(rate: 24000);
+        expect(copy.channels, 1);
+        expect(copy.rate, 24000);
+      });
     });
 
     group('DocumentContent', () {

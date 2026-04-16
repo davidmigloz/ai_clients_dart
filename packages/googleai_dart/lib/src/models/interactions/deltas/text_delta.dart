@@ -8,25 +8,16 @@ class TextDelta extends InteractionDelta {
   /// The text content.
   final String? text;
 
-  /// Citation information for model-generated content.
-  final List<Annotation>? annotations;
-
   /// Creates a [TextDelta] instance.
-  const TextDelta({this.text, this.annotations});
+  const TextDelta({this.text});
 
   /// Creates a [TextDelta] from JSON.
-  factory TextDelta.fromJson(Map<String, dynamic> json) => TextDelta(
-    text: json['text'] as String?,
-    annotations: (json['annotations'] as List<dynamic>?)
-        ?.map((e) => Annotation.fromJson(e as Map<String, dynamic>))
-        .toList(),
-  );
+  factory TextDelta.fromJson(Map<String, dynamic> json) =>
+      TextDelta(text: json['text'] as String?);
 
   @override
   Map<String, dynamic> toJson() => {
     'type': type,
     if (text != null) 'text': text,
-    if (annotations != null)
-      'annotations': annotations!.map((e) => e.toJson()).toList(),
   };
 }

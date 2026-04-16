@@ -17,6 +17,9 @@ class RetrievedContext {
   /// Example: `fileSearchStores/123`
   final String? fileSearchStore;
 
+  /// Optional. Page number of the retrieved context, if applicable.
+  final int? pageNumber;
+
   /// Optional. Custom metadata associated with the retrieved context.
   final List<GroundingChunkCustomMetadata>? customMetadata;
 
@@ -26,6 +29,7 @@ class RetrievedContext {
     this.title,
     this.text,
     this.fileSearchStore,
+    this.pageNumber,
     this.customMetadata,
   });
 
@@ -36,6 +40,7 @@ class RetrievedContext {
         title: json['title'] as String?,
         text: json['text'] as String?,
         fileSearchStore: json['fileSearchStore'] as String?,
+        pageNumber: json['pageNumber'] as int?,
         customMetadata: (json['customMetadata'] as List?)
             ?.map(
               (e) => GroundingChunkCustomMetadata.fromJson(
@@ -51,6 +56,7 @@ class RetrievedContext {
     if (title != null) 'title': title,
     if (text != null) 'text': text,
     if (fileSearchStore != null) 'fileSearchStore': fileSearchStore,
+    if (pageNumber != null) 'pageNumber': pageNumber,
     if (customMetadata != null)
       'customMetadata': customMetadata!.map((e) => e.toJson()).toList(),
   };
@@ -61,6 +67,7 @@ class RetrievedContext {
     Object? title = unsetCopyWithValue,
     Object? text = unsetCopyWithValue,
     Object? fileSearchStore = unsetCopyWithValue,
+    Object? pageNumber = unsetCopyWithValue,
     Object? customMetadata = unsetCopyWithValue,
   }) {
     return RetrievedContext(
@@ -70,6 +77,9 @@ class RetrievedContext {
       fileSearchStore: fileSearchStore == unsetCopyWithValue
           ? this.fileSearchStore
           : fileSearchStore as String?,
+      pageNumber: pageNumber == unsetCopyWithValue
+          ? this.pageNumber
+          : pageNumber as int?,
       customMetadata: customMetadata == unsetCopyWithValue
           ? this.customMetadata
           : customMetadata as List<GroundingChunkCustomMetadata>?,
@@ -78,5 +88,5 @@ class RetrievedContext {
 
   @override
   String toString() =>
-      'RetrievedContext(uri: $uri, title: $title, text: $text, fileSearchStore: $fileSearchStore, customMetadata: $customMetadata)';
+      'RetrievedContext(uri: $uri, title: $title, text: $text, fileSearchStore: $fileSearchStore, pageNumber: $pageNumber, customMetadata: $customMetadata)';
 }

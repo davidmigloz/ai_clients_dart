@@ -71,6 +71,9 @@ class Interaction {
   /// Configuration for the agent.
   final AgentConfig? agentConfig;
 
+  /// The service tier for the interaction.
+  final String? serviceTier;
+
   /// Creates an [Interaction] instance.
   const Interaction({
     required this.id,
@@ -91,6 +94,7 @@ class Interaction {
     this.responseModalities,
     this.responseMimeType,
     this.agentConfig,
+    this.serviceTier,
   });
 
   /// Creates an [Interaction] from JSON.
@@ -133,6 +137,7 @@ class Interaction {
     agentConfig: json['agent_config'] != null
         ? AgentConfig.fromJson(json['agent_config'] as Map<String, dynamic>)
         : null,
+    serviceTier: json['service_tier'] as String?,
   );
 
   /// Converts to JSON.
@@ -160,6 +165,7 @@ class Interaction {
           .toList(),
     if (responseMimeType != null) 'response_mime_type': responseMimeType,
     if (agentConfig != null) 'agent_config': agentConfig!.toJson(),
+    if (serviceTier != null) 'service_tier': serviceTier,
   };
 
   /// Creates a copy with replaced values.
@@ -182,6 +188,7 @@ class Interaction {
     Object? responseModalities = unsetCopyWithValue,
     Object? responseMimeType = unsetCopyWithValue,
     Object? agentConfig = unsetCopyWithValue,
+    Object? serviceTier = unsetCopyWithValue,
   }) {
     return Interaction(
       id: id == unsetCopyWithValue ? this.id : id! as String,
@@ -228,6 +235,9 @@ class Interaction {
       agentConfig: agentConfig == unsetCopyWithValue
           ? this.agentConfig
           : agentConfig as AgentConfig?,
+      serviceTier: serviceTier == unsetCopyWithValue
+          ? this.serviceTier
+          : serviceTier as String?,
     );
   }
 }
@@ -264,6 +274,9 @@ class CreateModelInteractionParams {
   /// Whether to run the model interaction in the background.
   final bool? background;
 
+  /// The service tier for the interaction.
+  final String? serviceTier;
+
   /// Creates a [CreateModelInteractionParams] instance.
   const CreateModelInteractionParams({
     required this.model,
@@ -275,6 +288,7 @@ class CreateModelInteractionParams {
     this.responseMimeType,
     this.previousInteractionId,
     this.background,
+    this.serviceTier,
   });
 
   /// Creates from JSON.
@@ -299,6 +313,7 @@ class CreateModelInteractionParams {
         responseMimeType: json['response_mime_type'] as String?,
         previousInteractionId: json['previous_interaction_id'] as String?,
         background: json['background'] as bool?,
+        serviceTier: json['service_tier'] as String?,
       );
 
   /// Converts to JSON.
@@ -317,6 +332,7 @@ class CreateModelInteractionParams {
     if (previousInteractionId != null)
       'previous_interaction_id': previousInteractionId,
     if (background != null) 'background': background,
+    if (serviceTier != null) 'service_tier': serviceTier,
   };
 }
 
@@ -337,6 +353,9 @@ class CreateAgentInteractionParams {
   /// Whether to run the agent interaction in the background.
   final bool? background;
 
+  /// The service tier for the interaction.
+  final String? serviceTier;
+
   /// Creates a [CreateAgentInteractionParams] instance.
   const CreateAgentInteractionParams({
     required this.agent,
@@ -344,6 +363,7 @@ class CreateAgentInteractionParams {
     this.agentConfig,
     this.previousInteractionId,
     this.background,
+    this.serviceTier,
   });
 
   /// Creates from JSON.
@@ -358,6 +378,7 @@ class CreateAgentInteractionParams {
             : null,
         previousInteractionId: json['previous_interaction_id'] as String?,
         background: json['background'] as bool?,
+        serviceTier: json['service_tier'] as String?,
       );
 
   /// Converts to JSON.
@@ -368,5 +389,6 @@ class CreateAgentInteractionParams {
     if (previousInteractionId != null)
       'previous_interaction_id': previousInteractionId,
     if (background != null) 'background': background,
+    if (serviceTier != null) 'service_tier': serviceTier,
   };
 }

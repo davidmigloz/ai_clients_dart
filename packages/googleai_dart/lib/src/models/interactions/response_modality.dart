@@ -8,6 +8,12 @@ enum InteractionResponseModality {
 
   /// Audio response modality.
   audio,
+
+  /// Document response modality.
+  document,
+
+  /// Video response modality.
+  video,
 }
 
 /// Converts a string to [InteractionResponseModality].
@@ -18,6 +24,8 @@ InteractionResponseModality interactionResponseModalityFromString(
     'text' => InteractionResponseModality.text,
     'image' => InteractionResponseModality.image,
     'audio' => InteractionResponseModality.audio,
+    'document' => InteractionResponseModality.document,
+    'video' => InteractionResponseModality.video,
     _ => InteractionResponseModality.text,
   };
 }
@@ -30,5 +38,7 @@ String interactionResponseModalityToString(
     InteractionResponseModality.text => 'text',
     InteractionResponseModality.image => 'image',
     InteractionResponseModality.audio => 'audio',
+    InteractionResponseModality.document => 'document',
+    InteractionResponseModality.video => 'video',
   };
 }
