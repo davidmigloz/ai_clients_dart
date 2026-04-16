@@ -882,9 +882,9 @@ void main() {
     });
 
     test('copyWith creates modified copy', () {
-      const error = UnknownManagedAgentError(
+      final error = UnknownManagedAgentError(
         message: 'original',
-        retryStatus: RetryStatusTerminal(),
+        retryStatus: const RetryStatusTerminal(),
       );
       final modified = error.copyWith(message: 'updated');
 
@@ -894,17 +894,17 @@ void main() {
     });
 
     test('equality includes type and retryStatus', () {
-      const a = UnknownManagedAgentError(
+      final a = UnknownManagedAgentError(
         message: 'error',
-        retryStatus: RetryStatusTerminal(),
+        retryStatus: const RetryStatusTerminal(),
       );
-      const b = UnknownManagedAgentError(
+      final b = UnknownManagedAgentError(
         message: 'error',
-        retryStatus: RetryStatusTerminal(),
+        retryStatus: const RetryStatusTerminal(),
       );
-      const c = UnknownManagedAgentError(
+      final c = UnknownManagedAgentError(
         message: 'different',
-        retryStatus: RetryStatusTerminal(),
+        retryStatus: const RetryStatusTerminal(),
       );
 
       expect(a, equals(b));

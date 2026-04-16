@@ -461,12 +461,12 @@ class UnknownManagedAgentError {
   final Map<String, dynamic>? rawJson;
 
   /// Creates an [UnknownManagedAgentError].
-  const UnknownManagedAgentError({
+  UnknownManagedAgentError({
     this.type = 'unknown_error',
     required this.message,
     required this.retryStatus,
-    this.rawJson,
-  });
+    Map<String, dynamic>? rawJson,
+  }) : rawJson = rawJson != null ? Map.unmodifiable(rawJson) : null;
 
   /// Creates an [UnknownManagedAgentError] from JSON.
   factory UnknownManagedAgentError.fromJson(Map<String, dynamic> json) {
