@@ -20,7 +20,7 @@ const defaultLiveModel = 'gemini-3.1-flash-live-preview';
 
 /// The default model to use for TTS (Text-to-Speech) tests.
 /// Note: This is a preview model - ID may change.
-const defaultTTSModel = 'gemini-2.5-flash-preview-tts';
+const defaultTTSModel = 'gemini-3.1-flash-tts-preview';
 
 /// The default model to use for STT (Speech-to-Text) tests.
 const defaultSTTModel = 'gemini-3-flash-preview';

@@ -286,7 +286,7 @@ Future<void> main() async {
       request: GenerateContentRequest(
         contents: [Content.text('A clean geometric poster about Flutter')],
         generationConfig: const GenerationConfig(
-          responseModalities: ['TEXT', 'IMAGE'],
+          responseModalities: [ResponseModality.text, ResponseModality.image],
         ),
       ),
     );
@@ -302,6 +302,49 @@ Future<void> main() async {
 ```
 
 → [Full example](example/image_generation_example.dart)
+
+</details>
+
+### How do I generate speech?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Gemini TTS models reuse the same `generateContent` endpoint with `ResponseModality.audio` and a `SpeechConfig`. Use audio tags in square brackets (e.g. `[whispers]`, `[excited]`) to steer delivery. The response carries 24 kHz, 16-bit, mono PCM in `response.data` — wrap it in a WAV header before writing `.wav`.
+
+```dart
+import 'dart:convert';
+
+import 'package:googleai_dart/googleai_dart.dart';
+
+Future<void> main() async {
+  final client = GoogleAIClient.fromEnvironment();
+
+  try {
+    final response = await client.models.generateContent(
+      model: 'gemini-3.1-flash-tts-preview',
+      request: GenerateContentRequest(
+        contents: [
+          Content.text('[excited] Welcome to the show! [short pause] Let\'s begin.'),
+        ],
+        generationConfig: GenerationConfig(
+          responseModalities: const [ResponseModality.audio],
+          speechConfig: SpeechConfig.withVoice('Kore'),
+        ),
+      ),
+    );
+
+    final pcm = response.data;
+    if (pcm != null) {
+      print('Received ${base64Decode(pcm).length} bytes of PCM audio');
+    }
+  } finally {
+    client.close();
+  }
+}
+```
+
+→ [Full example](example/tts_example.dart)
 
 </details>
 
@@ -559,6 +602,7 @@ See the [example/](example/) directory for complete examples:
 | [`permissions_example.dart`](example/permissions_example.dart) | Permission management for resources |
 | [`prediction_example.dart`](example/prediction_example.dart) | Video generation with Veo model |
 | [`streaming_example.dart`](example/streaming_example.dart) | Streaming responses |
+| [`tts_example.dart`](example/tts_example.dart) | Text-to-speech with Gemini TTS models |
 | [`tuned_model_generation_example.dart`](example/tuned_model_generation_example.dart) | Generate content with tuned models |
 | [`tuned_models_example.dart`](example/tuned_models_example.dart) | Tuned model workflows |
 | [`url_context_example.dart`](example/url_context_example.dart) | URL content fetching and analysis |
