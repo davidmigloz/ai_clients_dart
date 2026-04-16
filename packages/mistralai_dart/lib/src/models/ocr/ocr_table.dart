@@ -30,14 +30,21 @@ class OcrTable {
   });
 
   /// Creates an [OcrTable] from JSON.
-  factory OcrTable.fromJson(Map<String, dynamic> json) => OcrTable(
-    id: json['id'] as String,
-    content: json['content'] as String,
-    format: OcrTableFormat.fromString(json['format'] as String?)!,
-    wordConfidenceScores: (json['word_confidence_scores'] as List?)
-        ?.map((e) => OcrConfidenceScore.fromJson(e as Map<String, dynamic>))
-        .toList(),
-  );
+  factory OcrTable.fromJson(Map<String, dynamic> json) {
+    final formatStr = json['format'] as String?;
+    final format = OcrTableFormat.fromString(formatStr);
+    if (format == null) {
+      throw FormatException('Unknown OcrTableFormat: "$formatStr"');
+    }
+    return OcrTable(
+      id: json['id'] as String,
+      content: json['content'] as String,
+      format: format,
+      wordConfidenceScores: (json['word_confidence_scores'] as List?)
+          ?.map((e) => OcrConfidenceScore.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
