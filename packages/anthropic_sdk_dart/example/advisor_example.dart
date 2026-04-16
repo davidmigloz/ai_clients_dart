@@ -23,7 +23,7 @@ void main() async {
         model: 'claude-sonnet-4-6',
         maxTokens: 4096,
         tools: [
-          ToolDefinition.builtIn(const AdvisorTool(model: 'claude-opus-4-6')),
+          ToolDefinition.builtIn(const AdvisorTool(model: 'claude-opus-4-7')),
         ],
         messages: [
           InputMessage.user(
@@ -80,7 +80,7 @@ For long agent loops, enable advisor-side caching to reduce costs:
 final tools = [
   ToolDefinition.builtIn(
     AdvisorTool(
-      model: 'claude-opus-4-6',
+      model: 'claude-opus-4-7',
       maxUses: 3,
       caching: CacheControlEphemeral(ttl: CacheTtl.ttl5m),
     ),
@@ -117,7 +117,7 @@ final response2 = await client.messages.create(
   MessageCreateRequest(
     model: 'claude-sonnet-4-6',
     maxTokens: 4096,
-    tools: [ToolDefinition.builtIn(AdvisorTool(model: 'claude-opus-4-6'))],
+    tools: [ToolDefinition.builtIn(AdvisorTool(model: 'claude-opus-4-7'))],
     messages: messages,
   ),
   betas: ['advisor-tool-2026-03-01'],

@@ -2763,6 +2763,75 @@
       "dart_class": "UserToolConfirmationResult",
       "file": "lib/src/models/managed_agents/events/session_event.dart",
       "schema": "BetaManagedAgentsUserToolConfirmationResult"
+    },
+    "BetaCreateMessageParams": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "MessageCreateRequest",
+      "file": "lib/src/models/messages/message_create_request.dart",
+      "schema": "BetaCreateMessageParams",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Beta variant of CreateMessageParams; MessageCreateRequest covers the shared surface. Beta-only fields (context_management, mcp_servers, output_format) are not yet implemented."
+    },
+    "OutputConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "OutputConfig",
+      "file": "lib/src/models/beta/config/output_config.dart",
+      "schema": "OutputConfig"
+    },
+    "BetaOutputConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "OutputConfig",
+      "file": "lib/src/models/beta/config/output_config.dart",
+      "schema": "BetaOutputConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Beta variant of OutputConfig; same Dart class covers both surfaces."
+    },
+    "TokenTaskBudget": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TokenTaskBudget",
+      "file": "lib/src/models/beta/config/token_task_budget.dart",
+      "schema": "BetaTokenTaskBudget"
+    },
+    "EffortLevel": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "EffortLevel",
+      "file": "lib/src/models/beta/config/output_config.dart",
+      "schema": "EffortLevel",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "EffortLevel enum uses strict fromJson (FormatException on unknown values) matching the convention of ServiceTier/Speed enums in this package."
+    },
+    "BetaEffortLevel": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "EffortLevel",
+      "file": "lib/src/models/beta/config/output_config.dart",
+      "schema": "BetaEffortLevel",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Beta variant of EffortLevel enum; same Dart enum covers both surfaces."
+    },
+    "BetaEffortCapability": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "EffortCapability",
+      "file": "lib/src/models/models/model_capabilities.dart",
+      "schema": "BetaEffortCapability",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Beta variant of EffortCapability within ModelCapabilities; same Dart class covers both surfaces."
     }
   }
 }

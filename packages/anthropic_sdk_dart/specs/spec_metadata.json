@@ -2,9 +2,9 @@
   "specs": {
     "main": {
       "current_version": "unknown",
-      "last_fetched": "2026-04-16T07:18:58.355996Z",
-      "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/anthropic%2Fanthropic-f4d4f18820ecfbe244fb1bbc2232939afca73dfcb21ce23bc296571ee7320e3a.yml",
-      "title": "Anthropic API + advisor-tool",
+      "last_fetched": "2026-04-16T20:34:31.482425Z",
+      "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/anthropic%2Fanthropic-e0696f59ae07dc1a9c5a8fc87a4eb05eb35afabaac0b5ff0ea38810fa9dd4a74.yml",
+      "title": "Anthropic API + model-launch-april",
       "version_history": [
         {
           "fetched_at": "2026-03-20T12:00:00Z",

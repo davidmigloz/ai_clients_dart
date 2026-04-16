@@ -68,6 +68,7 @@ void main() {
       expect(caps.effort.low.supported, isTrue);
       expect(caps.effort.max.supported, isTrue);
       expect(caps.effort.medium.supported, isTrue);
+      expect(caps.effort.xhigh, isNull);
       expect(caps.imageInput.supported, isTrue);
       expect(caps.pdfInput.supported, isTrue);
       expect(caps.structuredOutputs.supported, isTrue);
@@ -91,6 +92,32 @@ void main() {
 
       expect(a, equals(b));
       expect(a.hashCode, b.hashCode);
+    });
+
+    test('EffortCapability round-trips xhigh when present', () {
+      final json = fullCapabilitiesJson();
+      (json['effort'] as Map<String, dynamic>)['xhigh'] = {'supported': true};
+
+      final caps = ModelCapabilities.fromJson(json);
+      expect(caps.effort.xhigh?.supported, isTrue);
+
+      final roundTripped = ModelCapabilities.fromJson(caps.toJson());
+      expect(roundTripped.effort.xhigh?.supported, isTrue);
+    });
+
+    test('EffortCapability omits xhigh from JSON when null', () {
+      final json = fullCapabilitiesJson();
+      final caps = ModelCapabilities.fromJson(json);
+
+      final effortJson = caps.effort.toJson();
+      expect(effortJson.containsKey('xhigh'), isFalse);
+    });
+  });
+
+  group('EffortLevel', () {
+    test('xhigh round-trips', () {
+      expect(EffortLevel.fromJson('xhigh'), EffortLevel.xhigh);
+      expect(EffortLevel.xhigh.toJson(), 'xhigh');
     });
   });
 

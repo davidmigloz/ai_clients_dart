@@ -22,7 +22,7 @@ void main() {
     test('fromJson parses advisor_message iteration with model', () {
       final json = {
         'type': 'advisor_message',
-        'model': 'claude-opus-4-6',
+        'model': 'claude-opus-4-7',
         'input_tokens': 823,
         'output_tokens': 1612,
         'cache_creation_input_tokens': 0,
@@ -31,7 +31,7 @@ void main() {
       final usage = IterationUsage.fromJson(json);
 
       expect(usage.type, 'advisor_message');
-      expect(usage.model, 'claude-opus-4-6');
+      expect(usage.model, 'claude-opus-4-7');
       expect(usage.inputTokens, 823);
       expect(usage.outputTokens, 1612);
     });
@@ -41,12 +41,12 @@ void main() {
         type: 'advisor_message',
         inputTokens: 100,
         outputTokens: 200,
-        model: 'claude-opus-4-6',
+        model: 'claude-opus-4-7',
       );
       final json = usage.toJson();
 
       expect(json['type'], 'advisor_message');
-      expect(json['model'], 'claude-opus-4-6');
+      expect(json['model'], 'claude-opus-4-7');
     });
 
     test('toJson omits model when null', () {
@@ -63,7 +63,7 @@ void main() {
     test('round-trip advisor_message iteration', () {
       final original = {
         'type': 'advisor_message',
-        'model': 'claude-opus-4-6',
+        'model': 'claude-opus-4-7',
         'input_tokens': 823,
         'output_tokens': 1612,
         'cache_creation_input_tokens': 0,
@@ -78,13 +78,13 @@ void main() {
         type: 'advisor_message',
         inputTokens: 100,
         outputTokens: 200,
-        model: 'claude-opus-4-6',
+        model: 'claude-opus-4-7',
       );
       const b = IterationUsage(
         type: 'advisor_message',
         inputTokens: 100,
         outputTokens: 200,
-        model: 'claude-opus-4-6',
+        model: 'claude-opus-4-7',
       );
       const c = IterationUsage(
         type: 'advisor_message',
@@ -103,7 +103,7 @@ void main() {
         type: 'advisor_message',
         inputTokens: 100,
         outputTokens: 200,
-        model: 'claude-opus-4-6',
+        model: 'claude-opus-4-7',
       );
 
       final changed = original.copyWith(model: 'claude-sonnet-4-6');
@@ -129,7 +129,7 @@ void main() {
           },
           {
             'type': 'advisor_message',
-            'model': 'claude-opus-4-6',
+            'model': 'claude-opus-4-7',
             'input_tokens': 823,
             'output_tokens': 1612,
             'cache_creation_input_tokens': 0,
@@ -153,7 +153,7 @@ void main() {
       expect(usage.iterations![0].model, isNull);
 
       expect(usage.iterations![1].type, 'advisor_message');
-      expect(usage.iterations![1].model, 'claude-opus-4-6');
+      expect(usage.iterations![1].model, 'claude-opus-4-7');
       expect(usage.iterations![1].inputTokens, 823);
 
       expect(usage.iterations![2].type, 'message');

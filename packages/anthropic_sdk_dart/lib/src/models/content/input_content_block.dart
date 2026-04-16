@@ -1273,16 +1273,24 @@ class CompactionInputBlock extends InputContentBlock {
   /// When `null`, represents a failed compaction and is treated as a no-op.
   final String? content;
 
+  /// Encrypted compaction payload for server-side context restoration.
+  final String? encryptedContent;
+
   /// Cache control for this block.
   final CacheControlEphemeral? cacheControl;
 
   /// Creates a [CompactionInputBlock].
-  const CompactionInputBlock({required this.content, this.cacheControl});
+  const CompactionInputBlock({
+    required this.content,
+    this.encryptedContent,
+    this.cacheControl,
+  });
 
   /// Creates a [CompactionInputBlock] from JSON.
   factory CompactionInputBlock.fromJson(Map<String, dynamic> json) {
     return CompactionInputBlock(
       content: json['content'] as String?,
+      encryptedContent: json['encrypted_content'] as String?,
       cacheControl: json['cache_control'] != null
           ? CacheControlEphemeral.fromJson(
               json['cache_control'] as Map<String, dynamic>,
@@ -1295,18 +1303,23 @@ class CompactionInputBlock extends InputContentBlock {
   Map<String, dynamic> toJson() => {
     'type': 'compaction',
     'content': content,
+    if (encryptedContent != null) 'encrypted_content': encryptedContent,
     if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
   };
 
   /// Creates a copy with replaced values.
   CompactionInputBlock copyWith({
     Object? content = unsetCopyWithValue,
+    Object? encryptedContent = unsetCopyWithValue,
     Object? cacheControl = unsetCopyWithValue,
   }) {
     return CompactionInputBlock(
       content: content == unsetCopyWithValue
           ? this.content
           : content as String?,
+      encryptedContent: encryptedContent == unsetCopyWithValue
+          ? this.encryptedContent
+          : encryptedContent as String?,
       cacheControl: cacheControl == unsetCopyWithValue
           ? this.cacheControl
           : cacheControl as CacheControlEphemeral?,
@@ -1319,14 +1332,16 @@ class CompactionInputBlock extends InputContentBlock {
       other is CompactionInputBlock &&
           runtimeType == other.runtimeType &&
           content == other.content &&
+          encryptedContent == other.encryptedContent &&
           cacheControl == other.cacheControl;
 
   @override
-  int get hashCode => Object.hash(content, cacheControl);
+  int get hashCode => Object.hash(content, encryptedContent, cacheControl);
 
   @override
   String toString() =>
-      'CompactionInputBlock(content: $content, cacheControl: $cacheControl)';
+      'CompactionInputBlock(content: $content, '
+      'encryptedContent: $encryptedContent, cacheControl: $cacheControl)';
 }
 
 /// Tool reference block in input.

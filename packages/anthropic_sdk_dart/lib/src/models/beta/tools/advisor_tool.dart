@@ -16,7 +16,7 @@ part of '../../tools/built_in_tools.dart';
 ///     maxTokens: 4096,
 ///     tools: [
 ///       ToolDefinition.builtIn(
-///         AdvisorTool(model: 'claude-opus-4-6'),
+///         AdvisorTool(model: 'claude-opus-4-7'),
 ///       ),
 ///     ],
 ///     messages: [InputMessage.user('Plan a Go worker pool.')],
@@ -29,7 +29,7 @@ class AdvisorTool extends BuiltInTool {
   /// The tool type version.
   final String type;
 
-  /// The advisor model ID (e.g., `'claude-opus-4-6'`).
+  /// The advisor model ID (e.g., `'claude-opus-4-7'`).
   final String model;
 
   /// Maximum number of advisor calls allowed in a single request.

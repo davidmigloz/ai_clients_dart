@@ -213,6 +213,9 @@ class EffortCapability {
   /// Whether the model supports medium effort level.
   final CapabilitySupport medium;
 
+  /// Whether the model supports xhigh effort level.
+  final CapabilitySupport? xhigh;
+
   /// Whether this capability is supported by the model.
   final bool supported;
 
@@ -222,6 +225,7 @@ class EffortCapability {
     required this.low,
     required this.max,
     required this.medium,
+    this.xhigh,
     required this.supported,
   });
 
@@ -234,6 +238,9 @@ class EffortCapability {
       medium: CapabilitySupport.fromJson(
         json['medium'] as Map<String, dynamic>,
       ),
+      xhigh: json['xhigh'] != null
+          ? CapabilitySupport.fromJson(json['xhigh'] as Map<String, dynamic>)
+          : null,
       supported: json['supported'] as bool,
     );
   }
@@ -244,6 +251,7 @@ class EffortCapability {
     'low': low.toJson(),
     'max': max.toJson(),
     'medium': medium.toJson(),
+    if (xhigh != null) 'xhigh': xhigh!.toJson(),
     'supported': supported,
   };
 
@@ -256,15 +264,16 @@ class EffortCapability {
           low == other.low &&
           max == other.max &&
           medium == other.medium &&
+          xhigh == other.xhigh &&
           supported == other.supported;
 
   @override
-  int get hashCode => Object.hash(high, low, max, medium, supported);
+  int get hashCode => Object.hash(high, low, max, medium, xhigh, supported);
 
   @override
   String toString() =>
       'EffortCapability(high: $high, low: $low, max: $max, '
-      'medium: $medium, supported: $supported)';
+      'medium: $medium, xhigh: $xhigh, supported: $supported)';
 }
 
 /// Model capability information.

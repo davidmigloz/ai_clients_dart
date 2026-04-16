@@ -65,6 +65,7 @@ export 'src/models/batches/message_batch.dart';
 // Models - Beta Config
 export 'src/models/beta/config/container.dart';
 export 'src/models/beta/config/output_config.dart';
+export 'src/models/beta/config/token_task_budget.dart';
 
 // Models - Beta Tools
 // Note: ComputerUseTool and McpToolset are exported via built_in_tools.dart

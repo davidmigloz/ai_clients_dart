@@ -771,23 +771,39 @@ class CompactionBlock extends ContentBlock {
   /// When `null`, compaction failed and the block is a no-op if round-tripped.
   final String? content;
 
+  /// Encrypted compaction payload for server-side context restoration.
+  final String? encryptedContent;
+
   /// Creates a [CompactionBlock].
-  const CompactionBlock({required this.content});
+  const CompactionBlock({required this.content, this.encryptedContent});
 
   /// Creates a [CompactionBlock] from JSON.
   factory CompactionBlock.fromJson(Map<String, dynamic> json) {
-    return CompactionBlock(content: json['content'] as String?);
+    return CompactionBlock(
+      content: json['content'] as String?,
+      encryptedContent: json['encrypted_content'] as String?,
+    );
   }
 
   @override
-  Map<String, dynamic> toJson() => {'type': 'compaction', 'content': content};
+  Map<String, dynamic> toJson() => {
+    'type': 'compaction',
+    'content': content,
+    if (encryptedContent != null) 'encrypted_content': encryptedContent,
+  };
 
   /// Creates a copy with replaced values.
-  CompactionBlock copyWith({Object? content = unsetCopyWithValue}) {
+  CompactionBlock copyWith({
+    Object? content = unsetCopyWithValue,
+    Object? encryptedContent = unsetCopyWithValue,
+  }) {
     return CompactionBlock(
       content: content == unsetCopyWithValue
           ? this.content
           : content as String?,
+      encryptedContent: encryptedContent == unsetCopyWithValue
+          ? this.encryptedContent
+          : encryptedContent as String?,
     );
   }
 
@@ -796,13 +812,15 @@ class CompactionBlock extends ContentBlock {
       identical(this, other) ||
       other is CompactionBlock &&
           runtimeType == other.runtimeType &&
-          content == other.content;
+          content == other.content &&
+          encryptedContent == other.encryptedContent;
 
   @override
-  int get hashCode => content.hashCode;
+  int get hashCode => Object.hash(content, encryptedContent);
 
   @override
-  String toString() => 'CompactionBlock(content: $content)';
+  String toString() =>
+      'CompactionBlock(content: $content, encryptedContent: $encryptedContent)';
 }
 
 /// Web search result content.

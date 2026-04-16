@@ -212,6 +212,9 @@ class MessageCreateRequest {
   /// in the request.
   final CacheControlEphemeral? cacheControl;
 
+  /// Optional identifier of the end-user profile this request belongs to.
+  final String? userProfileId;
+
   /// Creates a [MessageCreateRequest].
   const MessageCreateRequest({
     required this.model,
@@ -233,6 +236,7 @@ class MessageCreateRequest {
     this.container,
     this.speed,
     this.cacheControl,
+    this.userProfileId,
   });
 
   /// Creates a [MessageCreateRequest] from JSON.
@@ -279,6 +283,7 @@ class MessageCreateRequest {
               json['cache_control'] as Map<String, dynamic>,
             )
           : null,
+      userProfileId: json['user_profile_id'] as String?,
     );
   }
 
@@ -303,6 +308,7 @@ class MessageCreateRequest {
     if (container != null) 'container': container,
     if (speed != null) 'speed': speed!.toJson(),
     if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
+    if (userProfileId != null) 'user_profile_id': userProfileId,
   };
 
   /// Creates a copy with replaced values.
@@ -326,6 +332,7 @@ class MessageCreateRequest {
     Object? container = unsetCopyWithValue,
     Object? speed = unsetCopyWithValue,
     Object? cacheControl = unsetCopyWithValue,
+    Object? userProfileId = unsetCopyWithValue,
   }) {
     return MessageCreateRequest(
       model: model ?? this.model,
@@ -371,6 +378,9 @@ class MessageCreateRequest {
       cacheControl: cacheControl == unsetCopyWithValue
           ? this.cacheControl
           : cacheControl as CacheControlEphemeral?,
+      userProfileId: userProfileId == unsetCopyWithValue
+          ? this.userProfileId
+          : userProfileId as String?,
     );
   }
 
@@ -397,7 +407,8 @@ class MessageCreateRequest {
           outputConfig == other.outputConfig &&
           container == other.container &&
           speed == other.speed &&
-          cacheControl == other.cacheControl;
+          cacheControl == other.cacheControl &&
+          userProfileId == other.userProfileId;
 
   @override
   int get hashCode => Object.hash(
@@ -420,6 +431,7 @@ class MessageCreateRequest {
     container,
     speed,
     cacheControl,
+    userProfileId,
   );
 
   @override
@@ -430,5 +442,6 @@ class MessageCreateRequest {
       'stream: $stream, temperature: $temperature, thinking: $thinking, '
       'toolChoice: $toolChoice, tools: $tools, topP: $topP, topK: $topK, '
       'inferenceGeo: $inferenceGeo, outputConfig: $outputConfig, '
-      'container: $container, speed: $speed, cacheControl: $cacheControl)';
+      'container: $container, speed: $speed, cacheControl: $cacheControl, '
+      'userProfileId: $userProfileId)';
 }
