@@ -102,8 +102,8 @@ for (final page in response.pages) {
   print('Page ${page.index}: ${page.images.length} images');
   for (final image in page.images) {
     print('  - Image ${image.id}');
-    if (image.boundingBox != null) {
-      print('    Bounding box: ${image.boundingBox}');
+    if (image.topLeftX != null) {
+      print('    Bounds: (${image.topLeftX}, ${image.topLeftY}) - (${image.bottomRightX}, ${image.bottomRightY})');
     }
     if (image.imageBase64 != null) {
       print('    Base64 data: ${image.imageBase64!.length} chars');
