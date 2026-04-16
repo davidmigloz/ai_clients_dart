@@ -240,6 +240,158 @@ void main() {
       });
     });
 
+    group('MCPToolUseBlock', () {
+      test('fromJson parses all fields', () {
+        final json = {
+          'type': 'mcp_tool_use',
+          'id': 'tu_mcp_1',
+          'name': 'read_file',
+          'server_name': 'filesystem',
+          'input': {'path': '/tmp/test.txt'},
+        };
+
+        final block = ContentBlock.fromJson(json);
+        expect(block, isA<MCPToolUseBlock>());
+        final mcp = block as MCPToolUseBlock;
+        expect(mcp.id, 'tu_mcp_1');
+        expect(mcp.name, 'read_file');
+        expect(mcp.serverName, 'filesystem');
+        expect(mcp.input, {'path': '/tmp/test.txt'});
+      });
+
+      test('toJson round-trips correctly', () {
+        const block = MCPToolUseBlock(
+          id: 'tu_1',
+          name: 'query',
+          serverName: 'db-server',
+          input: {'sql': 'SELECT 1'},
+        );
+
+        final json = block.toJson();
+        expect(json['type'], 'mcp_tool_use');
+        expect(json['server_name'], 'db-server');
+
+        final restored = MCPToolUseBlock.fromJson(json);
+        expect(restored, equals(block));
+      });
+
+      test('copyWith creates modified copy', () {
+        const block = MCPToolUseBlock(
+          id: 'tu_1',
+          name: 'tool_a',
+          serverName: 'server_a',
+          input: {'key': 'value'},
+        );
+
+        final modified = block.copyWith(name: 'tool_b');
+        expect(modified.name, 'tool_b');
+        expect(modified.id, 'tu_1');
+      });
+
+      test('equality uses content-based map comparison', () {
+        const a = MCPToolUseBlock(
+          id: 'tu_1',
+          name: 'tool',
+          serverName: 'srv',
+          input: {'k': 'v'},
+        );
+        const b = MCPToolUseBlock(
+          id: 'tu_1',
+          name: 'tool',
+          serverName: 'srv',
+          input: {'k': 'v'},
+        );
+
+        expect(a, equals(b));
+        expect(a.hashCode, equals(b.hashCode));
+      });
+    });
+
+    group('MCPToolResultBlock', () {
+      test('fromJson with string content', () {
+        final json = {
+          'type': 'mcp_tool_result',
+          'content': 'file contents here',
+          'is_error': false,
+          'tool_use_id': 'tu_mcp_1',
+        };
+
+        final block = ContentBlock.fromJson(json);
+        expect(block, isA<MCPToolResultBlock>());
+        final result = block as MCPToolResultBlock;
+        expect(result.content, isA<MCPToolResultStringContent>());
+        expect(
+          (result.content as MCPToolResultStringContent).text,
+          'file contents here',
+        );
+        expect(result.isError, false);
+        expect(result.toolUseId, 'tu_mcp_1');
+      });
+
+      test('fromJson with list content', () {
+        final json = {
+          'type': 'mcp_tool_result',
+          'content': [
+            {'type': 'text', 'text': 'block one'},
+            {'type': 'text', 'text': 'block two'},
+          ],
+          'is_error': false,
+          'tool_use_id': 'tu_mcp_2',
+        };
+
+        final block = MCPToolResultBlock.fromJson(json);
+        expect(block.content, isA<MCPToolResultBlocksContent>());
+        final blocks =
+            (block.content as MCPToolResultBlocksContent).blocks;
+        expect(blocks, hasLength(2));
+        expect(blocks[0].text, 'block one');
+        expect(blocks[1].text, 'block two');
+      });
+
+      test('isError defaults to false', () {
+        final json = {
+          'type': 'mcp_tool_result',
+          'content': 'ok',
+          'tool_use_id': 'tu_1',
+        };
+
+        final block = MCPToolResultBlock.fromJson(json);
+        expect(block.isError, false);
+      });
+
+      test('toJson round-trips string content', () {
+        final block = MCPToolResultBlock(
+          content: MCPToolResultContent.text('result'),
+          toolUseId: 'tu_1',
+        );
+
+        final json = block.toJson();
+        expect(json['type'], 'mcp_tool_result');
+        expect(json['content'], 'result');
+        expect(json['is_error'], false);
+
+        final restored = MCPToolResultBlock.fromJson(json);
+        expect(restored, equals(block));
+      });
+
+      test('toJson round-trips list content', () {
+        final block = MCPToolResultBlock(
+          content: MCPToolResultContent.blocks([
+            const TextBlock(text: 'hello'),
+          ]),
+          isError: true,
+          toolUseId: 'tu_1',
+        );
+
+        final json = block.toJson();
+        expect(json['is_error'], true);
+        expect(json['content'], isList);
+
+        final restored = MCPToolResultBlock.fromJson(json);
+        expect(restored, equals(block));
+      });
+    });
+
     group('Additional tool result blocks', () {
       test('parses web fetch tool result block', () {
         final json = {
@@ -429,6 +581,104 @@ void main() {
         final parsed = InputContentBlock.fromJson(json);
         expect(parsed, isA<CompactionInputBlock>());
         expect((parsed as CompactionInputBlock).content, 'Compacted summary');
+      });
+    });
+
+    group('MCPToolUseInputBlock', () {
+      test('fromJson parses all fields', () {
+        final json = {
+          'type': 'mcp_tool_use',
+          'id': 'tu_mcp_1',
+          'name': 'read_file',
+          'server_name': 'filesystem',
+          'input': {'path': '/tmp/test.txt'},
+          'cache_control': {'type': 'ephemeral'},
+        };
+
+        final block = InputContentBlock.fromJson(json);
+        expect(block, isA<MCPToolUseInputBlock>());
+        final mcp = block as MCPToolUseInputBlock;
+        expect(mcp.id, 'tu_mcp_1');
+        expect(mcp.serverName, 'filesystem');
+        expect(mcp.cacheControl, isNotNull);
+      });
+
+      test('toJson round-trips correctly', () {
+        const block = MCPToolUseInputBlock(
+          id: 'tu_1',
+          name: 'tool',
+          serverName: 'server',
+          input: {'k': 'v'},
+        );
+
+        final json = block.toJson();
+        expect(json['type'], 'mcp_tool_use');
+        expect(json['server_name'], 'server');
+        expect(json.containsKey('cache_control'), false);
+
+        final restored = MCPToolUseInputBlock.fromJson(json);
+        expect(restored, equals(block));
+      });
+
+      test('factory constructor works', () {
+        final block = InputContentBlock.mcpToolUse(
+          id: 'tu_1',
+          name: 'query',
+          serverName: 'db',
+          input: const {'sql': 'SELECT 1'},
+        );
+        expect(block, isA<MCPToolUseInputBlock>());
+      });
+    });
+
+    group('MCPToolResultInputBlock', () {
+      test('fromJson with all optional fields', () {
+        final json = {
+          'type': 'mcp_tool_result',
+          'tool_use_id': 'tu_mcp_1',
+          'content': 'result text',
+          'is_error': true,
+          'cache_control': {'type': 'ephemeral'},
+        };
+
+        final block = InputContentBlock.fromJson(json);
+        expect(block, isA<MCPToolResultInputBlock>());
+        final mcp = block as MCPToolResultInputBlock;
+        expect(mcp.toolUseId, 'tu_mcp_1');
+        expect(mcp.content, isA<MCPToolResultStringContent>());
+        expect(mcp.isError, true);
+        expect(mcp.cacheControl, isNotNull);
+      });
+
+      test('fromJson with minimal fields', () {
+        final json = {
+          'type': 'mcp_tool_result',
+          'tool_use_id': 'tu_mcp_1',
+        };
+
+        final block = MCPToolResultInputBlock.fromJson(json);
+        expect(block.toolUseId, 'tu_mcp_1');
+        expect(block.content, isNull);
+        expect(block.isError, isNull);
+      });
+
+      test('toJson omits null fields', () {
+        const block = MCPToolResultInputBlock(toolUseId: 'tu_1');
+        final json = block.toJson();
+
+        expect(json['type'], 'mcp_tool_result');
+        expect(json['tool_use_id'], 'tu_1');
+        expect(json.containsKey('content'), false);
+        expect(json.containsKey('is_error'), false);
+        expect(json.containsKey('cache_control'), false);
+      });
+
+      test('factory constructor works', () {
+        final block = InputContentBlock.mcpToolResult(
+          toolUseId: 'tu_1',
+          content: MCPToolResultContent.text('ok'),
+        );
+        expect(block, isA<MCPToolResultInputBlock>());
       });
     });
 

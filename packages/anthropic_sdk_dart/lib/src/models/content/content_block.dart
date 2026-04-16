@@ -33,6 +33,8 @@ sealed class ContentBlock {
       'tool_search_tool_result' => ToolSearchToolResultBlock.fromJson(json),
       'container_upload' => ContainerUploadBlock.fromJson(json),
       'compaction' => CompactionBlock.fromJson(json),
+      'mcp_tool_use' => MCPToolUseBlock.fromJson(json),
+      'mcp_tool_result' => MCPToolResultBlock.fromJson(json),
       'advisor_tool_result' => AdvisorToolResultBlock.fromJson(json),
       _ => UnknownContentBlock.fromJson(json),
     };
@@ -1348,6 +1350,242 @@ class WebSearchResultLocationCitation extends Citation {
       'WebSearchResultLocationCitation(citedText: [${citedText.length} chars], '
       'encryptedIndex: [${encryptedIndex.length} chars], '
       'title: $title, url: $url)';
+}
+
+// ============================================================================
+// MCP Tool Content Blocks
+// ============================================================================
+
+/// MCP tool use block in a response.
+///
+/// Represents a model-initiated tool call to an MCP server tool.
+@immutable
+class MCPToolUseBlock extends ContentBlock {
+  /// Unique identifier for this tool use.
+  final String id;
+
+  /// Name of the MCP tool being used.
+  final String name;
+
+  /// Name of the MCP server providing the tool.
+  final String serverName;
+
+  /// Input parameters for the tool.
+  final Map<String, dynamic> input;
+
+  /// Creates an [MCPToolUseBlock].
+  const MCPToolUseBlock({
+    required this.id,
+    required this.name,
+    required this.serverName,
+    required this.input,
+  });
+
+  /// Creates an [MCPToolUseBlock] from JSON.
+  factory MCPToolUseBlock.fromJson(Map<String, dynamic> json) {
+    return MCPToolUseBlock(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      serverName: json['server_name'] as String,
+      input: json['input'] as Map<String, dynamic>,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'mcp_tool_use',
+    'id': id,
+    'name': name,
+    'server_name': serverName,
+    'input': input,
+  };
+
+  /// Creates a copy with replaced values.
+  MCPToolUseBlock copyWith({
+    String? id,
+    String? name,
+    String? serverName,
+    Map<String, dynamic>? input,
+  }) {
+    return MCPToolUseBlock(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      serverName: serverName ?? this.serverName,
+      input: input ?? this.input,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MCPToolUseBlock &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name &&
+          serverName == other.serverName &&
+          mapsEqual(input, other.input);
+
+  @override
+  int get hashCode => Object.hash(id, name, serverName, mapHash(input));
+
+  @override
+  String toString() =>
+      'MCPToolUseBlock(id: $id, name: $name, '
+      'serverName: $serverName, input: $input)';
+}
+
+/// Content of an MCP tool result — either a plain string or a list of
+/// text blocks.
+sealed class MCPToolResultContent {
+  const MCPToolResultContent();
+
+  /// Creates from a plain string.
+  factory MCPToolResultContent.text(String text) = MCPToolResultStringContent;
+
+  /// Creates from a list of text blocks.
+  factory MCPToolResultContent.blocks(List<TextBlock> blocks) =
+      MCPToolResultBlocksContent;
+
+  /// Creates an [MCPToolResultContent] from JSON.
+  factory MCPToolResultContent.fromJson(Object json) {
+    if (json is String) return MCPToolResultStringContent(json);
+    if (json is List) {
+      return MCPToolResultBlocksContent(
+        json
+            .map((e) => TextBlock.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+    }
+    throw FormatException(
+      'Expected String or List for MCPToolResultContent, '
+      'got ${json.runtimeType}',
+    );
+  }
+
+  /// Converts to JSON.
+  Object toJson();
+}
+
+/// Plain string content for an MCP tool result.
+@immutable
+class MCPToolResultStringContent extends MCPToolResultContent {
+  /// The text content.
+  final String text;
+
+  /// Creates an [MCPToolResultStringContent].
+  const MCPToolResultStringContent(this.text);
+
+  @override
+  Object toJson() => text;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MCPToolResultStringContent &&
+          runtimeType == other.runtimeType &&
+          text == other.text;
+
+  @override
+  int get hashCode => text.hashCode;
+
+  @override
+  String toString() => 'MCPToolResultStringContent(${text.length} chars)';
+}
+
+/// List of text blocks content for an MCP tool result.
+@immutable
+class MCPToolResultBlocksContent extends MCPToolResultContent {
+  /// The text blocks.
+  final List<TextBlock> blocks;
+
+  /// Creates an [MCPToolResultBlocksContent].
+  const MCPToolResultBlocksContent(this.blocks);
+
+  @override
+  Object toJson() => blocks.map((b) => b.toJson()).toList();
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MCPToolResultBlocksContent &&
+          runtimeType == other.runtimeType &&
+          listsEqual(blocks, other.blocks);
+
+  @override
+  int get hashCode => listHash(blocks);
+
+  @override
+  String toString() =>
+      'MCPToolResultBlocksContent(${blocks.length} blocks)';
+}
+
+/// MCP tool result block in a response.
+///
+/// Contains the result of an MCP tool call.
+@immutable
+class MCPToolResultBlock extends ContentBlock {
+  /// The content of the tool result.
+  final MCPToolResultContent content;
+
+  /// Whether this result represents an error.
+  final bool isError;
+
+  /// The ID of the tool use this result corresponds to.
+  final String toolUseId;
+
+  /// Creates an [MCPToolResultBlock].
+  const MCPToolResultBlock({
+    required this.content,
+    this.isError = false,
+    required this.toolUseId,
+  });
+
+  /// Creates an [MCPToolResultBlock] from JSON.
+  factory MCPToolResultBlock.fromJson(Map<String, dynamic> json) {
+    return MCPToolResultBlock(
+      content: MCPToolResultContent.fromJson(json['content'] as Object),
+      isError: json['is_error'] as bool? ?? false,
+      toolUseId: json['tool_use_id'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'mcp_tool_result',
+    'content': content.toJson(),
+    'is_error': isError,
+    'tool_use_id': toolUseId,
+  };
+
+  /// Creates a copy with replaced values.
+  MCPToolResultBlock copyWith({
+    MCPToolResultContent? content,
+    bool? isError,
+    String? toolUseId,
+  }) {
+    return MCPToolResultBlock(
+      content: content ?? this.content,
+      isError: isError ?? this.isError,
+      toolUseId: toolUseId ?? this.toolUseId,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MCPToolResultBlock &&
+          runtimeType == other.runtimeType &&
+          content == other.content &&
+          isError == other.isError &&
+          toolUseId == other.toolUseId;
+
+  @override
+  int get hashCode => Object.hash(content, isError, toolUseId);
+
+  @override
+  String toString() =>
+      'MCPToolResultBlock(content: $content, '
+      'isError: $isError, toolUseId: $toolUseId)';
 }
 
 // ============================================================================

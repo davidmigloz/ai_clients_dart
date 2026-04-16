@@ -94,6 +94,23 @@ sealed class InputContentBlock {
     CacheControlEphemeral? cacheControl,
   }) = CompactionInputBlock;
 
+  /// Creates an MCP tool use block (for assistant messages).
+  factory InputContentBlock.mcpToolUse({
+    required String id,
+    required String name,
+    required String serverName,
+    required Map<String, dynamic> input,
+    CacheControlEphemeral? cacheControl,
+  }) = MCPToolUseInputBlock;
+
+  /// Creates an MCP tool result block (for user messages).
+  factory InputContentBlock.mcpToolResult({
+    required String toolUseId,
+    MCPToolResultContent? content,
+    bool? isError,
+    CacheControlEphemeral? cacheControl,
+  }) = MCPToolResultInputBlock;
+
   /// Creates an advisor tool result block (for multi-turn conversations).
   factory InputContentBlock.advisorToolResult({
     required String toolUseId,
@@ -131,6 +148,8 @@ sealed class InputContentBlock {
       'container_upload' => ContainerUploadInputBlock.fromJson(json),
       'compaction' => CompactionInputBlock.fromJson(json),
       'tool_reference' => ToolReferenceInputBlock.fromJson(json),
+      'mcp_tool_use' => MCPToolUseInputBlock.fromJson(json),
+      'mcp_tool_result' => MCPToolResultInputBlock.fromJson(json),
       'advisor_tool_result' => AdvisorToolResultInputBlock.fromJson(json),
       _ => UnknownInputContentBlock.fromJson(json),
     };
@@ -1447,6 +1466,190 @@ class AdvisorToolResultInputBlock extends InputContentBlock {
   String toString() =>
       'AdvisorToolResultInputBlock(toolUseId: $toolUseId, '
       'content: $content, cacheControl: $cacheControl)';
+}
+
+/// MCP tool use block for assistant messages in input.
+///
+/// Used when round-tripping an assistant message containing an MCP tool call.
+@immutable
+class MCPToolUseInputBlock extends InputContentBlock {
+  /// Unique identifier for this tool use.
+  final String id;
+
+  /// Name of the MCP tool being used.
+  final String name;
+
+  /// Name of the MCP server providing the tool.
+  final String serverName;
+
+  /// Input parameters for the tool.
+  final Map<String, dynamic> input;
+
+  /// Cache control for this block.
+  final CacheControlEphemeral? cacheControl;
+
+  /// Creates an [MCPToolUseInputBlock].
+  const MCPToolUseInputBlock({
+    required this.id,
+    required this.name,
+    required this.serverName,
+    required this.input,
+    this.cacheControl,
+  });
+
+  /// Creates an [MCPToolUseInputBlock] from JSON.
+  factory MCPToolUseInputBlock.fromJson(Map<String, dynamic> json) {
+    return MCPToolUseInputBlock(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      serverName: json['server_name'] as String,
+      input: (json['input'] as Map).cast<String, dynamic>(),
+      cacheControl: json['cache_control'] != null
+          ? CacheControlEphemeral.fromJson(
+              json['cache_control'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'mcp_tool_use',
+    'id': id,
+    'name': name,
+    'server_name': serverName,
+    'input': input,
+    if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  MCPToolUseInputBlock copyWith({
+    String? id,
+    String? name,
+    String? serverName,
+    Map<String, dynamic>? input,
+    Object? cacheControl = unsetCopyWithValue,
+  }) {
+    return MCPToolUseInputBlock(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      serverName: serverName ?? this.serverName,
+      input: input ?? this.input,
+      cacheControl: cacheControl == unsetCopyWithValue
+          ? this.cacheControl
+          : cacheControl as CacheControlEphemeral?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MCPToolUseInputBlock &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name &&
+          serverName == other.serverName &&
+          mapsEqual(input, other.input) &&
+          cacheControl == other.cacheControl;
+
+  @override
+  int get hashCode =>
+      Object.hash(id, name, serverName, mapHash(input), cacheControl);
+
+  @override
+  String toString() =>
+      'MCPToolUseInputBlock(id: $id, name: $name, '
+      'serverName: $serverName, input: $input, '
+      'cacheControl: $cacheControl)';
+}
+
+/// MCP tool result block for input messages.
+///
+/// Used when round-tripping a user message containing an MCP tool result.
+@immutable
+class MCPToolResultInputBlock extends InputContentBlock {
+  /// The ID of the tool use this result corresponds to.
+  final String toolUseId;
+
+  /// The content of the tool result.
+  final MCPToolResultContent? content;
+
+  /// Whether this result represents an error.
+  final bool? isError;
+
+  /// Cache control for this block.
+  final CacheControlEphemeral? cacheControl;
+
+  /// Creates an [MCPToolResultInputBlock].
+  const MCPToolResultInputBlock({
+    required this.toolUseId,
+    this.content,
+    this.isError,
+    this.cacheControl,
+  });
+
+  /// Creates an [MCPToolResultInputBlock] from JSON.
+  factory MCPToolResultInputBlock.fromJson(Map<String, dynamic> json) {
+    return MCPToolResultInputBlock(
+      toolUseId: json['tool_use_id'] as String,
+      content: json['content'] != null
+          ? MCPToolResultContent.fromJson(json['content'] as Object)
+          : null,
+      isError: json['is_error'] as bool?,
+      cacheControl: json['cache_control'] != null
+          ? CacheControlEphemeral.fromJson(
+              json['cache_control'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'mcp_tool_result',
+    'tool_use_id': toolUseId,
+    if (content != null) 'content': content!.toJson(),
+    if (isError != null) 'is_error': isError,
+    if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  MCPToolResultInputBlock copyWith({
+    String? toolUseId,
+    Object? content = unsetCopyWithValue,
+    Object? isError = unsetCopyWithValue,
+    Object? cacheControl = unsetCopyWithValue,
+  }) {
+    return MCPToolResultInputBlock(
+      toolUseId: toolUseId ?? this.toolUseId,
+      content: content == unsetCopyWithValue
+          ? this.content
+          : content as MCPToolResultContent?,
+      isError: isError == unsetCopyWithValue ? this.isError : isError as bool?,
+      cacheControl: cacheControl == unsetCopyWithValue
+          ? this.cacheControl
+          : cacheControl as CacheControlEphemeral?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MCPToolResultInputBlock &&
+          runtimeType == other.runtimeType &&
+          toolUseId == other.toolUseId &&
+          content == other.content &&
+          isError == other.isError &&
+          cacheControl == other.cacheControl;
+
+  @override
+  int get hashCode => Object.hash(toolUseId, content, isError, cacheControl);
+
+  @override
+  String toString() =>
+      'MCPToolResultInputBlock(toolUseId: $toolUseId, '
+      'content: $content, isError: $isError, '
+      'cacheControl: $cacheControl)';
 }
 
 /// Forward-compatible fallback for unknown input content block types.
