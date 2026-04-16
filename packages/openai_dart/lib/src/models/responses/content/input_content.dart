@@ -355,23 +355,27 @@ class InputVideoContent extends InputContent {
 /// Controls how the model processes file content. Use `low` for the default
 /// rendering behavior, or `high` to render the file at higher quality.
 enum FileInputDetail {
+  /// Unknown detail level (fallback for unrecognized values).
+  unknown('unknown'),
+
   /// High detail: more thorough processing.
   high('high'),
 
   /// Low detail: default processing.
   low('low');
 
-  const FileInputDetail(this.value);
-
   /// The JSON value for this detail level.
   final String value;
 
-  /// Creates a [FileInputDetail] from JSON.
-  static FileInputDetail fromJson(String value) => switch (value) {
-    'high' => FileInputDetail.high,
-    'low' => FileInputDetail.low,
-    _ => throw FormatException('Unknown FileInputDetail: $value'),
-  };
+  const FileInputDetail(this.value);
+
+  /// Creates a [FileInputDetail] from a JSON value.
+  factory FileInputDetail.fromJson(String json) {
+    return FileInputDetail.values.firstWhere(
+      (e) => e.value == json,
+      orElse: () => FileInputDetail.unknown,
+    );
+  }
 
   /// Converts to JSON.
   String toJson() => value;

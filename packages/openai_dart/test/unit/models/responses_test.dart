@@ -2590,8 +2590,8 @@ void main() {
       expect(FileInputDetail.low.toJson(), 'low');
     });
 
-    test('fromJson throws on unknown value', () {
-      expect(() => FileInputDetail.fromJson('auto'), throwsFormatException);
+    test('fromJson returns unknown for unrecognized value', () {
+      expect(FileInputDetail.fromJson('auto'), FileInputDetail.unknown);
     });
   });
 
