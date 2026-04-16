@@ -18,9 +18,9 @@ enum OcrConfidenceScoresGranularity {
   /// Returns `null` if [value] is null or unrecognized.
   static OcrConfidenceScoresGranularity? fromString(String? value) {
     if (value == null) return null;
-    return OcrConfidenceScoresGranularity.values.firstWhere(
-      (e) => e.value == value,
-      orElse: () => OcrConfidenceScoresGranularity.page,
-    );
+    for (final e in OcrConfidenceScoresGranularity.values) {
+      if (e.value == value) return e;
+    }
+    return null;
   }
 }

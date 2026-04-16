@@ -16,9 +16,9 @@ enum OcrTableFormat {
   /// Returns `null` if [value] is null or unrecognized.
   static OcrTableFormat? fromString(String? value) {
     if (value == null) return null;
-    return OcrTableFormat.values.firstWhere(
-      (e) => e.value == value,
-      orElse: () => OcrTableFormat.markdown,
-    );
+    for (final e in OcrTableFormat.values) {
+      if (e.value == value) return e;
+    }
+    return null;
   }
 }
