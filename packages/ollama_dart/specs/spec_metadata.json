@@ -2,7 +2,7 @@
   "specs": {
     "main": {
       "current_version": "0.1.0",
-      "last_fetched": "2026-04-08T21:17:25.078041Z",
+      "last_fetched": "2026-04-16T09:46:56.281077Z",
       "source_url": "https://raw.githubusercontent.com/ollama/ollama/refs/heads/main/docs/openapi.yaml",
       "title": "Ollama API",
       "version_history": []
