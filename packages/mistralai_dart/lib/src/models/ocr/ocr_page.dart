@@ -65,9 +65,7 @@ class OcrPage {
             .toList() ??
         [],
     dimensions: json['dimensions'] != null
-        ? OcrPageDimensions.fromJson(
-            json['dimensions'] as Map<String, dynamic>,
-          )
+        ? OcrPageDimensions.fromJson(json['dimensions'] as Map<String, dynamic>)
         : null,
     tables:
         (json['tables'] as List?)
