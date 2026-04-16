@@ -22,6 +22,13 @@ void main() async {
     print('Fetched: ${fetched.name}');
     print('Metadata: ${fetched.metadata.metadata}');
 
+    // Get a collection by ID
+    print('\nGetting collection by ID...');
+    final fetchedById = await client.getCollectionById(
+      collectionId: collection.id,
+    );
+    print('Fetched by ID: ${fetchedById.name}');
+
     // Get or create (idempotent operation)
     print('\nGet or create collection...');
     final existing = await client.getOrCreateCollection(

@@ -138,6 +138,32 @@ class CollectionsResource extends ResourceBase {
     return Collection.fromJson(parseJson(response));
   }
 
+  /// Gets a collection by ID.
+  ///
+  /// [collectionId] - The collection UUID.
+  /// [tenant] - The tenant containing the database.
+  /// [database] - The database containing the collection.
+  ///
+  /// Returns the [Collection] if found.
+  ///
+  /// Throws [ChromaNotFoundException] if the collection does not exist.
+  ///
+  /// Endpoint: `GET /api/v2/tenants/{tenant}/databases/{database}/collections/by-id/{collection_id}`
+  Future<Collection> getById({
+    required String collectionId,
+    String? tenant,
+    String? database,
+  }) async {
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(
+      '${_basePath(tenant: tenant, database: database)}/by-id/${Uri.encodeComponent(collectionId)}',
+    );
+    final headers = requestBuilder.buildHeaders(null);
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    return Collection.fromJson(parseJson(response));
+  }
+
   /// Gets a collection by Chroma Resource Name (CRN).
   ///
   /// [crn] - The Chroma Resource Name.

@@ -407,6 +407,38 @@ class ChromaClient {
     );
   }
 
+  /// Gets an existing collection by ID.
+  ///
+  /// Throws if the collection does not exist.
+  ///
+  /// [collectionId] - The collection UUID.
+  /// [embeddingFunction] - Optional embedding function for auto-embedding.
+  /// [dataLoader] - Optional data loader for loading data from URIs.
+  /// [tenant] - The tenant (defaults to client's configured tenant).
+  /// [database] - The database (defaults to client's configured database).
+  Future<ChromaCollection> getCollectionById({
+    required String collectionId,
+    EmbeddingFunction? embeddingFunction,
+    DataLoader<Loadable>? dataLoader,
+    String? tenant,
+    String? database,
+  }) async {
+    final collection = await collections.getById(
+      collectionId: collectionId,
+      tenant: tenant,
+      database: database,
+    );
+
+    return ChromaCollection(
+      records: records(collection.id, tenant: tenant, database: database),
+      collections: collections,
+      functions: functions(collection.id, tenant: tenant, database: database),
+      metadata: collection,
+      embeddingFunction: embeddingFunction,
+      dataLoader: dataLoader,
+    );
+  }
+
   /// Lists all collections in the database.
   ///
   /// [limit] - Maximum number of collections to return.

@@ -3500,6 +3500,104 @@
         ]
       }
     },
+    "/api/v2/tenants/{tenant}/databases/{database}/collections/by-id/{collection_id}": {
+      "get": {
+        "description": "Returns a collection by its UUID within a specific tenant and database.",
+        "operationId": "get_collection_by_id",
+        "parameters": [
+          {
+            "description": "Tenant ID",
+            "in": "path",
+            "name": "tenant",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Database name",
+            "in": "path",
+            "name": "database",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Collection UUID",
+            "in": "path",
+            "name": "collection_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Collection"
+                }
+              }
+            },
+            "description": "Collection found"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Collection not found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Server error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Get collection by ID",
+        "tags": [
+          "Collection"
+        ],
+        "x-codeSamples": [
+          {
+            "label": "Get collection by ID",
+            "lang": "typescript",
+            "source": "const collection = await client.getCollectionById({ id: 'collection-uuid-here' });"
+          },
+          {
+            "label": "Get collection by ID",
+            "lang": "python",
+            "source": "collection = client.get_collection_by_id(uuid.UUID('collection-uuid-here'))"
+          }
+        ]
+      }
+    },
     "/api/v2/tenants/{tenant}/databases/{database}/collections/{collection_id}": {
       "delete": {
         "description": "Deletes a collection in a database.",
