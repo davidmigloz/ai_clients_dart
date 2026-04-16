@@ -38,6 +38,7 @@ void main() {
         'low': {'supported': true},
         'max': {'supported': true},
         'medium': {'supported': true},
+        'xhigh': null,
         'supported': true,
       },
       'image_input': {'supported': true},
@@ -105,12 +106,13 @@ void main() {
       expect(roundTripped.effort.xhigh?.supported, isTrue);
     });
 
-    test('EffortCapability omits xhigh from JSON when null', () {
+    test('EffortCapability always serializes xhigh key (null when absent)', () {
       final json = fullCapabilitiesJson();
       final caps = ModelCapabilities.fromJson(json);
 
       final effortJson = caps.effort.toJson();
-      expect(effortJson.containsKey('xhigh'), isFalse);
+      expect(effortJson.containsKey('xhigh'), isTrue);
+      expect(effortJson['xhigh'], isNull);
     });
   });
 

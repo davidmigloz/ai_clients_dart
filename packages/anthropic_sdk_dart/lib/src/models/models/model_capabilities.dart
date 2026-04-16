@@ -214,6 +214,9 @@ class EffortCapability {
   final CapabilitySupport medium;
 
   /// Whether the model supports xhigh effort level.
+  ///
+  /// Required by the spec; value may be `null` when the model does not
+  /// expose xhigh support.
   final CapabilitySupport? xhigh;
 
   /// Whether this capability is supported by the model.
@@ -225,7 +228,7 @@ class EffortCapability {
     required this.low,
     required this.max,
     required this.medium,
-    this.xhigh,
+    required this.xhigh,
     required this.supported,
   });
 
@@ -251,7 +254,7 @@ class EffortCapability {
     'low': low.toJson(),
     'max': max.toJson(),
     'medium': medium.toJson(),
-    if (xhigh != null) 'xhigh': xhigh!.toJson(),
+    'xhigh': xhigh?.toJson(),
     'supported': supported,
   };
 
