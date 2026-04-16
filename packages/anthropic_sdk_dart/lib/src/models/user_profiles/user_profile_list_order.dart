@@ -1,4 +1,4 @@
-/// Sort order for the [UserProfilesResource.list] endpoint.
+/// Sort order for the `UserProfilesResource.list` endpoint.
 enum UserProfileListOrder {
   /// Ascending order (oldest first).
   asc('asc'),
