@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
+
 /// Represents an image extracted from a document page.
 @immutable
 class OcrImage {
@@ -57,14 +59,64 @@ class OcrImage {
     if (imageAnnotation != null) 'image_annotation': imageAnnotation,
   };
 
+  /// Creates a copy with the specified fields replaced.
+  ///
+  /// Pass `null` explicitly to clear nullable fields.
+  OcrImage copyWith({
+    String? id,
+    Object? topLeftX = unsetCopyWithValue,
+    Object? topLeftY = unsetCopyWithValue,
+    Object? bottomRightX = unsetCopyWithValue,
+    Object? bottomRightY = unsetCopyWithValue,
+    Object? imageBase64 = unsetCopyWithValue,
+    Object? imageAnnotation = unsetCopyWithValue,
+  }) => OcrImage(
+    id: id ?? this.id,
+    topLeftX: topLeftX == unsetCopyWithValue ? this.topLeftX : topLeftX as int?,
+    topLeftY: topLeftY == unsetCopyWithValue ? this.topLeftY : topLeftY as int?,
+    bottomRightX: bottomRightX == unsetCopyWithValue
+        ? this.bottomRightX
+        : bottomRightX as int?,
+    bottomRightY: bottomRightY == unsetCopyWithValue
+        ? this.bottomRightY
+        : bottomRightY as int?,
+    imageBase64: imageBase64 == unsetCopyWithValue
+        ? this.imageBase64
+        : imageBase64 as String?,
+    imageAnnotation: imageAnnotation == unsetCopyWithValue
+        ? this.imageAnnotation
+        : imageAnnotation as String?,
+  );
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is OcrImage && runtimeType == other.runtimeType && id == other.id;
+      other is OcrImage &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          topLeftX == other.topLeftX &&
+          topLeftY == other.topLeftY &&
+          bottomRightX == other.bottomRightX &&
+          bottomRightY == other.bottomRightY &&
+          imageBase64 == other.imageBase64 &&
+          imageAnnotation == other.imageAnnotation;
 
   @override
-  int get hashCode => id.hashCode;
+  int get hashCode => Object.hash(
+    id,
+    topLeftX,
+    topLeftY,
+    bottomRightX,
+    bottomRightY,
+    imageBase64,
+    imageAnnotation,
+  );
 
   @override
-  String toString() => 'OcrImage(id: $id)';
+  String toString() =>
+      'OcrImage(id: $id, '
+      'topLeft: ($topLeftX, $topLeftY), '
+      'bottomRight: ($bottomRightX, $bottomRightY), '
+      'imageBase64: ${imageBase64 != null ? "${imageBase64!.length} chars" : "null"}, '
+      'imageAnnotation: $imageAnnotation)';
 }

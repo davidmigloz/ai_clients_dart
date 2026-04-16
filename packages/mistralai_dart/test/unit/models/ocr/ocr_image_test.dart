@@ -77,8 +77,8 @@ void main() {
     });
 
     group('equality', () {
-      test('images with same id are equal', () {
-        const image1 = OcrImage(id: 'img-same');
+      test('images with same fields are equal', () {
+        const image1 = OcrImage(id: 'img-same', topLeftX: 10);
         const image2 = OcrImage(id: 'img-same', topLeftX: 10);
 
         expect(image1, equals(image2));

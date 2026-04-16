@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
+
 /// Usage information for an OCR request.
 @immutable
 class OcrUsageInfo {
@@ -23,6 +25,19 @@ class OcrUsageInfo {
     'pages_processed': pagesProcessed,
     if (docSizeBytes != null) 'doc_size_bytes': docSizeBytes,
   };
+
+  /// Creates a copy with the specified fields replaced.
+  ///
+  /// Pass `null` explicitly to clear nullable fields.
+  OcrUsageInfo copyWith({
+    int? pagesProcessed,
+    Object? docSizeBytes = unsetCopyWithValue,
+  }) => OcrUsageInfo(
+    pagesProcessed: pagesProcessed ?? this.pagesProcessed,
+    docSizeBytes: docSizeBytes == unsetCopyWithValue
+        ? this.docSizeBytes
+        : docSizeBytes as int?,
+  );
 
   @override
   bool operator ==(Object other) =>
