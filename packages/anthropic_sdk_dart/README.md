@@ -631,6 +631,7 @@ See the [example/](example/) directory for complete examples:
 | Agents (Beta) | ✅ Full |
 | Sessions (Beta) | ✅ Full |
 | Vaults (Beta) | ✅ Full |
+| User Profiles (Beta) | ✅ Full |
 
 ## Official Documentation
 
