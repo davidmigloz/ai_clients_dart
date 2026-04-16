@@ -789,7 +789,7 @@ class CompactionBlock extends ContentBlock {
   Map<String, dynamic> toJson() => {
     'type': 'compaction',
     'content': content,
-    if (encryptedContent != null) 'encrypted_content': encryptedContent,
+    'encrypted_content': encryptedContent,
   };
 
   /// Creates a copy with replaced values.

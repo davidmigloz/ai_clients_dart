@@ -27,10 +27,10 @@ sealed class ContentBlockDelta {
   factory ContentBlockDelta.citations(Citation citation) = CitationsDelta;
 
   /// Creates a compaction delta.
-  factory ContentBlockDelta.compaction(
-    String? content, {
-    String? encryptedContent,
-  }) = CompactionDelta;
+  ///
+  /// To include the encrypted compaction payload, construct [CompactionDelta]
+  /// directly.
+  factory ContentBlockDelta.compaction(String? content) = CompactionDelta;
 
   /// Creates a [ContentBlockDelta] from JSON.
   factory ContentBlockDelta.fromJson(Map<String, dynamic> json) {
@@ -189,7 +189,7 @@ class CompactionDelta extends ContentBlockDelta {
   Map<String, dynamic> toJson() => {
     'type': 'compaction_delta',
     'content': content,
-    if (encryptedContent != null) 'encrypted_content': encryptedContent,
+    'encrypted_content': encryptedContent,
   };
 
   /// Creates a copy with replaced values.

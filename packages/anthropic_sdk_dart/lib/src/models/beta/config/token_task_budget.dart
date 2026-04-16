@@ -14,7 +14,9 @@ class TokenTaskBudget {
   /// Total token budget across all contexts in the session. Minimum 1024.
   final int total;
 
-  /// Remaining tokens in the budget. Defaults to [total] when not provided.
+  /// Remaining tokens in the budget, used to track usage across contexts when
+  /// implementing compaction client-side. `null` when unset; the server
+  /// treats an absent value as equivalent to [total].
   final int? remaining;
 
   /// Creates a [TokenTaskBudget].

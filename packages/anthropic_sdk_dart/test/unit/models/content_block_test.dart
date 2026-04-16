@@ -432,6 +432,14 @@ void main() {
         expect(block.encryptedContent, 'enc_payload_xyz');
         expect(block.toJson(), json);
       });
+
+      test('compaction block always serializes encrypted_content key', () {
+        const block = CompactionBlock(content: 'Summary');
+        final json = block.toJson();
+
+        expect(json.containsKey('encrypted_content'), isTrue);
+        expect(json['encrypted_content'], isNull);
+      });
     });
   });
 

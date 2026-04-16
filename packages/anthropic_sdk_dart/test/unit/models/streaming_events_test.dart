@@ -353,6 +353,14 @@ void main() {
       expect(delta.encryptedContent, 'enc_delta_payload');
       expect(delta.toJson(), json);
     });
+
+    test('compaction_delta always serializes encrypted_content key', () {
+      const delta = CompactionDelta('Partial summary');
+      final json = delta.toJson();
+
+      expect(json.containsKey('encrypted_content'), isTrue);
+      expect(json['encrypted_content'], isNull);
+    });
   });
 
   group('Citations delta', () {
