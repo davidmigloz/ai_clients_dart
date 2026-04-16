@@ -96,7 +96,7 @@ identity and break equality for any non-trivial JSON payload:
 | Field type | `==` helper | `hashCode` helper |
 |-----------|-------------|-------------------|
 | `Map<String, dynamic>` (nested) | `mapsDeepEqual(a, b)` | `mapDeepHashCode(map)` |
-| `List<Map<String, dynamic>>` (nested) | `listOfMapsDeepEqual(a, b)` | `Object.hashAll(list.map(mapDeepHashCode))` |
+| `List<Map<String, dynamic>>` (nested) | `listOfMapsDeepEqual(a, b)` | `listOfMapsHashCode(list)` |
 
 ### New Field Checklist
 
@@ -182,7 +182,8 @@ Map<String, dynamic> toJson() => {
 //         so copyWith(retryStatus: newStatus) is lost
 Map<String, dynamic> toJson() => {
   'type': type,
-  ...rawJson,
+  'retry_status': retryStatus.toJson(),
+  ...rawJson, // spread last — overwrites the typed retry_status above
 };
 
 // CORRECT — rawJson provides the base, typed fields win on collision
