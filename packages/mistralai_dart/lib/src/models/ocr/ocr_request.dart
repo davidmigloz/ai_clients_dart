@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../metadata/response_format.dart';
 import 'ocr_confidence_scores_granularity.dart';
 import 'ocr_document.dart';
@@ -184,39 +185,59 @@ class OcrRequest {
   };
 
   /// Creates a copy with the specified fields replaced.
+  ///
+  /// Pass `null` explicitly to clear nullable fields.
   OcrRequest copyWith({
     String? model,
     OcrDocument? document,
-    String? id,
-    List<int>? pages,
-    bool? includeImageBase64,
-    int? imageLimit,
-    int? imageMinSize,
-    String? documentAnnotationPrompt,
-    OcrConfidenceScoresGranularity? confidenceScoresGranularity,
-    OcrTableFormat? tableFormat,
-    bool? extractHeader,
-    bool? extractFooter,
-    ResponseFormat? bboxAnnotationFormat,
-    ResponseFormat? documentAnnotationFormat,
+    Object? id = unsetCopyWithValue,
+    Object? pages = unsetCopyWithValue,
+    Object? includeImageBase64 = unsetCopyWithValue,
+    Object? imageLimit = unsetCopyWithValue,
+    Object? imageMinSize = unsetCopyWithValue,
+    Object? documentAnnotationPrompt = unsetCopyWithValue,
+    Object? confidenceScoresGranularity = unsetCopyWithValue,
+    Object? tableFormat = unsetCopyWithValue,
+    Object? extractHeader = unsetCopyWithValue,
+    Object? extractFooter = unsetCopyWithValue,
+    Object? bboxAnnotationFormat = unsetCopyWithValue,
+    Object? documentAnnotationFormat = unsetCopyWithValue,
   }) => OcrRequest(
     model: model ?? this.model,
     document: document ?? this.document,
-    id: id ?? this.id,
-    pages: pages ?? this.pages,
-    includeImageBase64: includeImageBase64 ?? this.includeImageBase64,
-    imageLimit: imageLimit ?? this.imageLimit,
-    imageMinSize: imageMinSize ?? this.imageMinSize,
-    documentAnnotationPrompt:
-        documentAnnotationPrompt ?? this.documentAnnotationPrompt,
+    id: id == unsetCopyWithValue ? this.id : id as String?,
+    pages: pages == unsetCopyWithValue ? this.pages : pages as List<int>?,
+    includeImageBase64: includeImageBase64 == unsetCopyWithValue
+        ? this.includeImageBase64
+        : includeImageBase64 as bool?,
+    imageLimit: imageLimit == unsetCopyWithValue
+        ? this.imageLimit
+        : imageLimit as int?,
+    imageMinSize: imageMinSize == unsetCopyWithValue
+        ? this.imageMinSize
+        : imageMinSize as int?,
+    documentAnnotationPrompt: documentAnnotationPrompt == unsetCopyWithValue
+        ? this.documentAnnotationPrompt
+        : documentAnnotationPrompt as String?,
     confidenceScoresGranularity:
-        confidenceScoresGranularity ?? this.confidenceScoresGranularity,
-    tableFormat: tableFormat ?? this.tableFormat,
-    extractHeader: extractHeader ?? this.extractHeader,
-    extractFooter: extractFooter ?? this.extractFooter,
-    bboxAnnotationFormat: bboxAnnotationFormat ?? this.bboxAnnotationFormat,
-    documentAnnotationFormat:
-        documentAnnotationFormat ?? this.documentAnnotationFormat,
+        confidenceScoresGranularity == unsetCopyWithValue
+        ? this.confidenceScoresGranularity
+        : confidenceScoresGranularity as OcrConfidenceScoresGranularity?,
+    tableFormat: tableFormat == unsetCopyWithValue
+        ? this.tableFormat
+        : tableFormat as OcrTableFormat?,
+    extractHeader: extractHeader == unsetCopyWithValue
+        ? this.extractHeader
+        : extractHeader as bool?,
+    extractFooter: extractFooter == unsetCopyWithValue
+        ? this.extractFooter
+        : extractFooter as bool?,
+    bboxAnnotationFormat: bboxAnnotationFormat == unsetCopyWithValue
+        ? this.bboxAnnotationFormat
+        : bboxAnnotationFormat as ResponseFormat?,
+    documentAnnotationFormat: documentAnnotationFormat == unsetCopyWithValue
+        ? this.documentAnnotationFormat
+        : documentAnnotationFormat as ResponseFormat?,
   );
 
   @override

@@ -61,8 +61,8 @@ class OcrResponse {
     usage: json['usage_info'] != null
         ? UsageInfo.fromJson(json['usage_info'] as Map<String, dynamic>)
         : json['usage'] != null
-            ? UsageInfo.fromJson(json['usage'] as Map<String, dynamic>)
-            : null,
+        ? UsageInfo.fromJson(json['usage'] as Map<String, dynamic>)
+        : null,
     totalPages: json['total_pages'] as int?,
     processedPages: json['processed_pages'] as int?,
     createdAt: json['created_at'] != null
@@ -81,8 +81,7 @@ class OcrResponse {
     if (totalPages != null) 'total_pages': totalPages,
     if (processedPages != null) 'processed_pages': processedPages,
     if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
-    if (documentAnnotation != null)
-      'document_annotation': documentAnnotation,
+    if (documentAnnotation != null) 'document_annotation': documentAnnotation,
   };
 
   /// Gets all extracted text as a single string.

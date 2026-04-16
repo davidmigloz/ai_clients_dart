@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import 'ocr_confidence_score.dart';
 import 'ocr_table_format.dart';
@@ -62,12 +63,14 @@ class OcrTable {
     String? id,
     String? content,
     OcrTableFormat? format,
-    List<OcrConfidenceScore>? wordConfidenceScores,
+    Object? wordConfidenceScores = unsetCopyWithValue,
   }) => OcrTable(
     id: id ?? this.id,
     content: content ?? this.content,
     format: format ?? this.format,
-    wordConfidenceScores: wordConfidenceScores ?? this.wordConfidenceScores,
+    wordConfidenceScores: wordConfidenceScores == unsetCopyWithValue
+        ? this.wordConfidenceScores
+        : wordConfidenceScores as List<OcrConfidenceScore>?,
   );
 
   @override

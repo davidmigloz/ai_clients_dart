@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import 'ocr_confidence_score.dart';
 
@@ -53,13 +54,15 @@ class OcrPageConfidenceScores {
   OcrPageConfidenceScores copyWith({
     double? averagePageConfidenceScore,
     double? minimumPageConfidenceScore,
-    List<OcrConfidenceScore>? wordConfidenceScores,
+    Object? wordConfidenceScores = unsetCopyWithValue,
   }) => OcrPageConfidenceScores(
     averagePageConfidenceScore:
         averagePageConfidenceScore ?? this.averagePageConfidenceScore,
     minimumPageConfidenceScore:
         minimumPageConfidenceScore ?? this.minimumPageConfidenceScore,
-    wordConfidenceScores: wordConfidenceScores ?? this.wordConfidenceScores,
+    wordConfidenceScores: wordConfidenceScores == unsetCopyWithValue
+        ? this.wordConfidenceScores
+        : wordConfidenceScores as List<OcrConfidenceScore>?,
   );
 
   @override

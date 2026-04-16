@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import 'ocr_image.dart';
 import 'ocr_page_confidence_scores.dart';
@@ -97,26 +98,32 @@ class OcrPage {
   };
 
   /// Creates a copy with the specified fields replaced.
+  ///
+  /// Pass `null` explicitly to clear nullable fields.
   OcrPage copyWith({
     int? index,
     String? markdown,
     List<OcrImage>? images,
-    OcrPageDimensions? dimensions,
+    Object? dimensions = unsetCopyWithValue,
     List<OcrTable>? tables,
-    String? header,
-    String? footer,
+    Object? header = unsetCopyWithValue,
+    Object? footer = unsetCopyWithValue,
     List<String>? hyperlinks,
-    OcrPageConfidenceScores? confidenceScores,
+    Object? confidenceScores = unsetCopyWithValue,
   }) => OcrPage(
     index: index ?? this.index,
     markdown: markdown ?? this.markdown,
     images: images ?? this.images,
-    dimensions: dimensions ?? this.dimensions,
+    dimensions: dimensions == unsetCopyWithValue
+        ? this.dimensions
+        : dimensions as OcrPageDimensions?,
     tables: tables ?? this.tables,
-    header: header ?? this.header,
-    footer: footer ?? this.footer,
+    header: header == unsetCopyWithValue ? this.header : header as String?,
+    footer: footer == unsetCopyWithValue ? this.footer : footer as String?,
     hyperlinks: hyperlinks ?? this.hyperlinks,
-    confidenceScores: confidenceScores ?? this.confidenceScores,
+    confidenceScores: confidenceScores == unsetCopyWithValue
+        ? this.confidenceScores
+        : confidenceScores as OcrPageConfidenceScores?,
   );
 
   @override
