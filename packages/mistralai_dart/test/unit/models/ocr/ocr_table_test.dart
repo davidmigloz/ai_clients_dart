@@ -15,7 +15,7 @@ void main() {
 
         expect(table.id, 'table-1');
         expect(table.content, '| A | B |\n|---|---|\n| 1 | 2 |');
-        expect(table.format, 'markdown');
+        expect(table.format, OcrTableFormat.markdown);
         expect(table.wordConfidenceScores, isNull);
       });
 
@@ -31,7 +31,7 @@ void main() {
 
         final table = OcrTable.fromJson(json);
 
-        expect(table.format, 'html');
+        expect(table.format, OcrTableFormat.html);
         expect(table.wordConfidenceScores, hasLength(1));
         expect(table.wordConfidenceScores![0].text, 'A');
       });
@@ -55,7 +55,7 @@ void main() {
         const table = OcrTable(
           id: 'table-1',
           content: '| A | B |',
-          format: 'markdown',
+          format: OcrTableFormat.markdown,
         );
 
         final json = table.toJson();
@@ -70,7 +70,7 @@ void main() {
         const table = OcrTable(
           id: 'table-1',
           content: 'content',
-          format: 'markdown',
+          format: OcrTableFormat.markdown,
           wordConfidenceScores: [
             OcrConfidenceScore(confidence: 0.9, startIndex: 0, text: 'word'),
           ],
@@ -87,7 +87,7 @@ void main() {
         const original = OcrTable(
           id: 'table-1',
           content: '| Col |\n|---|\n| Val |',
-          format: 'markdown',
+          format: OcrTableFormat.markdown,
           wordConfidenceScores: [
             OcrConfidenceScore(confidence: 0.95, startIndex: 0, text: 'Col'),
           ],
@@ -104,21 +104,24 @@ void main() {
         const original = OcrTable(
           id: 'table-1',
           content: 'old',
-          format: 'markdown',
+          format: OcrTableFormat.markdown,
         );
 
-        final copy = original.copyWith(content: 'new', format: 'html');
+        final copy = original.copyWith(
+          content: 'new',
+          format: OcrTableFormat.html,
+        );
 
         expect(copy.id, 'table-1');
         expect(copy.content, 'new');
-        expect(copy.format, 'html');
+        expect(copy.format, OcrTableFormat.html);
       });
 
       test('preserves values when not specified', () {
         const original = OcrTable(
           id: 'table-1',
           content: 'content',
-          format: 'markdown',
+          format: OcrTableFormat.markdown,
         );
 
         final copy = original.copyWith();
@@ -132,12 +135,12 @@ void main() {
         const a = OcrTable(
           id: 'table-1',
           content: 'content',
-          format: 'markdown',
+          format: OcrTableFormat.markdown,
         );
         const b = OcrTable(
           id: 'table-1',
           content: 'content',
-          format: 'markdown',
+          format: OcrTableFormat.markdown,
         );
 
         expect(a, equals(b));
@@ -148,12 +151,12 @@ void main() {
         const a = OcrTable(
           id: 'table-1',
           content: 'content',
-          format: 'markdown',
+          format: OcrTableFormat.markdown,
         );
         const b = OcrTable(
           id: 'table-2',
           content: 'content',
-          format: 'markdown',
+          format: OcrTableFormat.markdown,
         );
 
         expect(a, isNot(equals(b)));
@@ -164,7 +167,7 @@ void main() {
       const table = OcrTable(
         id: 'table-1',
         content: 'This is table content',
-        format: 'markdown',
+        format: OcrTableFormat.markdown,
       );
 
       final str = table.toString();

@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../common/equality_helpers.dart';
 import 'ocr_confidence_score.dart';
+import 'ocr_table_format.dart';
 
 /// Represents a table extracted from a document page by OCR.
 @immutable
@@ -12,8 +13,8 @@ class OcrTable {
   /// Content of the table in the given format.
   final String content;
 
-  /// Format of the table (`'markdown'` or `'html'`).
-  final String format;
+  /// Format of the table.
+  final OcrTableFormat format;
 
   /// Per-word confidence scores for the table content.
   ///
@@ -32,7 +33,7 @@ class OcrTable {
   factory OcrTable.fromJson(Map<String, dynamic> json) => OcrTable(
     id: json['id'] as String,
     content: json['content'] as String,
-    format: json['format'] as String,
+    format: OcrTableFormat.fromString(json['format'] as String?)!,
     wordConfidenceScores: (json['word_confidence_scores'] as List?)
         ?.map((e) => OcrConfidenceScore.fromJson(e as Map<String, dynamic>))
         .toList(),
@@ -42,7 +43,7 @@ class OcrTable {
   Map<String, dynamic> toJson() => {
     'id': id,
     'content': content,
-    'format': format,
+    'format': format.value,
     if (wordConfidenceScores != null)
       'word_confidence_scores': wordConfidenceScores!
           .map((e) => e.toJson())
@@ -53,7 +54,7 @@ class OcrTable {
   OcrTable copyWith({
     String? id,
     String? content,
-    String? format,
+    OcrTableFormat? format,
     List<OcrConfidenceScore>? wordConfidenceScores,
   }) => OcrTable(
     id: id ?? this.id,

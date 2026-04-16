@@ -59,7 +59,7 @@ void main() {
 
         expect(page.tables, hasLength(1));
         expect(page.tables[0].id, 'table-1');
-        expect(page.tables[0].format, 'markdown');
+        expect(page.tables[0].format, OcrTableFormat.markdown);
       });
 
       test('parses page with header and footer', () {
@@ -149,7 +149,11 @@ void main() {
           index: 0,
           markdown: 'Content',
           tables: [
-            OcrTable(id: 'table-1', content: '| A |', format: 'markdown'),
+            OcrTable(
+              id: 'table-1',
+              content: '| A |',
+              format: OcrTableFormat.markdown,
+            ),
           ],
         );
 
@@ -248,12 +252,16 @@ void main() {
         const page1 = OcrPage(
           index: 0,
           markdown: 'text',
-          tables: [OcrTable(id: 'a', content: 'c', format: 'markdown')],
+          tables: [
+            OcrTable(id: 'a', content: 'c', format: OcrTableFormat.markdown),
+          ],
         );
         const page2 = OcrPage(
           index: 0,
           markdown: 'text',
-          tables: [OcrTable(id: 'b', content: 'c', format: 'markdown')],
+          tables: [
+            OcrTable(id: 'b', content: 'c', format: OcrTableFormat.markdown),
+          ],
         );
 
         expect(page1, isNot(equals(page2)));
@@ -264,7 +272,9 @@ void main() {
       const page = OcrPage(
         index: 5,
         markdown: 'This is a long text that should be truncated in toString',
-        tables: [OcrTable(id: 't1', content: 'c', format: 'markdown')],
+        tables: [
+          OcrTable(id: 't1', content: 'c', format: OcrTableFormat.markdown),
+        ],
       );
 
       expect(page.toString(), contains('index: 5'));

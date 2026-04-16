@@ -32,8 +32,8 @@ void main() {
           imageLimit: 10,
           imageMinSize: 100,
           documentAnnotationPrompt: 'Annotate tables and charts',
-          confidenceScoresGranularity: 'word',
-          tableFormat: 'html',
+          confidenceScoresGranularity: OcrConfidenceScoresGranularity.word,
+          tableFormat: OcrTableFormat.html,
           extractHeader: true,
           extractFooter: true,
           bboxAnnotationFormat: ResponseFormat.jsonSchema(
@@ -54,8 +54,11 @@ void main() {
         expect(request.imageLimit, 10);
         expect(request.imageMinSize, 100);
         expect(request.documentAnnotationPrompt, 'Annotate tables and charts');
-        expect(request.confidenceScoresGranularity, 'word');
-        expect(request.tableFormat, 'html');
+        expect(
+          request.confidenceScoresGranularity,
+          OcrConfidenceScoresGranularity.word,
+        );
+        expect(request.tableFormat, OcrTableFormat.html);
         expect(request.extractHeader, isTrue);
         expect(request.extractFooter, isTrue);
         expect(request.bboxAnnotationFormat, isA<ResponseFormatJsonSchema>());
@@ -80,10 +83,13 @@ void main() {
       test('fromUrl passes confidenceScoresGranularity', () {
         final request = OcrRequest.fromUrl(
           url: 'https://example.com/doc.pdf',
-          confidenceScoresGranularity: 'page',
+          confidenceScoresGranularity: OcrConfidenceScoresGranularity.page,
         );
 
-        expect(request.confidenceScoresGranularity, 'page');
+        expect(
+          request.confidenceScoresGranularity,
+          OcrConfidenceScoresGranularity.page,
+        );
       });
 
       test('fromFile creates file document', () {
@@ -100,10 +106,13 @@ void main() {
       test('fromFile passes confidenceScoresGranularity', () {
         final request = OcrRequest.fromFile(
           fileId: 'file-456',
-          confidenceScoresGranularity: 'word',
+          confidenceScoresGranularity: OcrConfidenceScoresGranularity.word,
         );
 
-        expect(request.confidenceScoresGranularity, 'word');
+        expect(
+          request.confidenceScoresGranularity,
+          OcrConfidenceScoresGranularity.word,
+        );
       });
 
       test('fromBase64 creates base64 document', () {
@@ -124,10 +133,13 @@ void main() {
         final request = OcrRequest.fromBase64(
           data: 'base64data',
           mimeType: 'application/pdf',
-          confidenceScoresGranularity: 'page',
+          confidenceScoresGranularity: OcrConfidenceScoresGranularity.page,
         );
 
-        expect(request.confidenceScoresGranularity, 'page');
+        expect(
+          request.confidenceScoresGranularity,
+          OcrConfidenceScoresGranularity.page,
+        );
       });
     });
 
@@ -164,8 +176,8 @@ void main() {
           imageLimit: 5,
           imageMinSize: 50,
           documentAnnotationPrompt: 'Annotate everything',
-          confidenceScoresGranularity: 'word',
-          tableFormat: 'markdown',
+          confidenceScoresGranularity: OcrConfidenceScoresGranularity.word,
+          tableFormat: OcrTableFormat.markdown,
           extractHeader: true,
           extractFooter: false,
         );
@@ -232,6 +244,7 @@ void main() {
         expect(request.includeImageBase64, isTrue);
         expect(request.documentAnnotationPrompt, isNull);
         expect(request.confidenceScoresGranularity, isNull);
+        expect(request.tableFormat, isNull);
       });
 
       test('parses request with documentAnnotationPrompt', () {
@@ -261,7 +274,10 @@ void main() {
 
         final request = OcrRequest.fromJson(json);
 
-        expect(request.confidenceScoresGranularity, 'word');
+        expect(
+          request.confidenceScoresGranularity,
+          OcrConfidenceScoresGranularity.word,
+        );
       });
 
       test('parses request with table format and header/footer flags', () {
@@ -278,7 +294,7 @@ void main() {
 
         final request = OcrRequest.fromJson(json);
 
-        expect(request.tableFormat, 'html');
+        expect(request.tableFormat, OcrTableFormat.html);
         expect(request.extractHeader, isTrue);
         expect(request.extractFooter, isFalse);
       });
@@ -325,15 +341,18 @@ void main() {
         final copy = original.copyWith(
           model: 'new-model',
           pages: [1, 2],
-          confidenceScoresGranularity: 'page',
-          tableFormat: 'html',
+          confidenceScoresGranularity: OcrConfidenceScoresGranularity.page,
+          tableFormat: OcrTableFormat.html,
         );
 
         expect(copy.model, 'new-model');
         expect(copy.document, equals(original.document));
         expect(copy.pages, [1, 2]);
-        expect(copy.confidenceScoresGranularity, 'page');
-        expect(copy.tableFormat, 'html');
+        expect(
+          copy.confidenceScoresGranularity,
+          OcrConfidenceScoresGranularity.page,
+        );
+        expect(copy.tableFormat, OcrTableFormat.html);
       });
 
       test('preserves values when not specified', () {
@@ -344,8 +363,8 @@ void main() {
           pages: [0],
           includeImageBase64: true,
           documentAnnotationPrompt: 'Annotate all',
-          confidenceScoresGranularity: 'word',
-          tableFormat: 'markdown',
+          confidenceScoresGranularity: OcrConfidenceScoresGranularity.word,
+          tableFormat: OcrTableFormat.markdown,
           extractHeader: true,
           extractFooter: false,
         );
@@ -357,8 +376,11 @@ void main() {
         expect(copy.pages, [0]);
         expect(copy.includeImageBase64, isTrue);
         expect(copy.documentAnnotationPrompt, 'Annotate all');
-        expect(copy.confidenceScoresGranularity, 'word');
-        expect(copy.tableFormat, 'markdown');
+        expect(
+          copy.confidenceScoresGranularity,
+          OcrConfidenceScoresGranularity.word,
+        );
+        expect(copy.tableFormat, OcrTableFormat.markdown);
         expect(copy.extractHeader, isTrue);
         expect(copy.extractFooter, isFalse);
       });
