@@ -12,6 +12,7 @@ import '../resources/messages_resource.dart';
 import '../resources/models_resource.dart';
 import '../resources/sessions_resource.dart';
 import '../resources/skills_resource.dart';
+import '../resources/user_profiles_resource.dart';
 import '../resources/vaults_resource.dart';
 import 'config.dart';
 import 'interceptor_chain.dart';
@@ -85,6 +86,9 @@ class AnthropicClient {
 
   /// Resource for the Sessions API (Beta).
   late final SessionsResource sessions;
+
+  /// Resource for the User Profiles API (Beta).
+  late final UserProfilesResource userProfiles;
 
   /// Resource for the Vaults API (Beta).
   late final VaultsResource vaults;
@@ -209,6 +213,13 @@ class AnthropicClient {
       ensureNotClosed: _ensureNotClosed,
     );
     vaults = VaultsResource(
+      config: config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+    userProfiles = UserProfilesResource(
       config: config,
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,

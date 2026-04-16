@@ -164,6 +164,15 @@ export 'src/models/tools/tool_caller.dart';
 export 'src/models/tools/tool_choice.dart';
 export 'src/models/tools/tool_definition.dart';
 
+// Models - User Profiles (Beta)
+export 'src/models/user_profiles/create_user_profile_request.dart';
+export 'src/models/user_profiles/enrollment_url.dart';
+export 'src/models/user_profiles/list_user_profiles_response.dart';
+export 'src/models/user_profiles/update_user_profile_request.dart';
+export 'src/models/user_profiles/user_profile.dart';
+export 'src/models/user_profiles/user_profile_list_order.dart';
+export 'src/models/user_profiles/user_profile_trust_grant.dart';
+
 // Resources
 export 'src/resources/agents_resource.dart';
 export 'src/resources/files_resource.dart';
@@ -174,6 +183,7 @@ export 'src/resources/session_events_resource.dart';
 export 'src/resources/session_resources_resource.dart';
 export 'src/resources/sessions_resource.dart';
 export 'src/resources/skills_resource.dart';
+export 'src/resources/user_profiles_resource.dart';
 export 'src/resources/vault_credentials_resource.dart';
 export 'src/resources/vaults_resource.dart';
 

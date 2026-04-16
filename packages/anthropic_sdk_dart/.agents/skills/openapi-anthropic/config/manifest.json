@@ -2536,6 +2536,55 @@
       ],
       "note": "Content block / API wrapper - used as Map<String, dynamic>"
     },
+    "UserProfile": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UserProfile",
+      "file": "lib/src/models/user_profiles/user_profile.dart",
+      "schema": "BetaUserProfile"
+    },
+    "UserProfileTrustGrant": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UserProfileTrustGrant",
+      "file": "lib/src/models/user_profiles/user_profile_trust_grant.dart",
+      "schema": "BetaUserProfileTrustGrant"
+    },
+    "UserProfileListOrder": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "UserProfileListOrder",
+      "file": "lib/src/models/user_profiles/user_profile_list_order.dart",
+      "schema": "BetaUserProfileListOrder"
+    },
+    "EnrollmentUrl": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EnrollmentUrl",
+      "file": "lib/src/models/user_profiles/enrollment_url.dart",
+      "schema": "BetaEnrollmentUrl"
+    },
+    "CreateUserProfileRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateUserProfileRequest",
+      "file": "lib/src/models/user_profiles/create_user_profile_request.dart",
+      "schema": "BetaCreateUserProfileRequest"
+    },
+    "UpdateUserProfileRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateUserProfileRequest",
+      "file": "lib/src/models/user_profiles/update_user_profile_request.dart",
+      "schema": "BetaUpdateUserProfileRequestBody"
+    },
+    "ListUserProfilesResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ListUserProfilesResponse",
+      "file": "lib/src/models/user_profiles/list_user_profiles_response.dart",
+      "schema": "BetaListUserProfilesResponse"
+    },
     "Vault": {
       "spec": "main",
       "kind": "object",

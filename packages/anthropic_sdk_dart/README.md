@@ -46,6 +46,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Message batches for large-scale offline processing
 - Model discovery, files (beta), and skills (beta)
 - Managed agents with sessions, vaults, and streaming events (beta)
+- User profiles with trust-grant tracking and enrollment URLs (beta)
 
 ## Quickstart
 
@@ -613,6 +614,7 @@ See the [example/](example/) directory for complete examples:
 | [`skills_example.dart`](example/skills_example.dart) | Skills management (beta) |
 | [`mcp_example.dart`](example/mcp_example.dart) | MCP tool integration |
 | [`managed_agents_example.dart`](example/managed_agents_example.dart) | Managed agents: agents, sessions, vaults (beta) |
+| [`user_profiles_example.dart`](example/user_profiles_example.dart) | User profiles and enrollment URLs (beta) |
 | [`models_example.dart`](example/models_example.dart) | Model listing |
 | [`error_handling_example.dart`](example/error_handling_example.dart) | Exception handling patterns |
 | [`anthropic_sdk_dart_example.dart`](example/anthropic_sdk_dart_example.dart) | Quick-start overview |
