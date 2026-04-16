@@ -28,7 +28,7 @@ void main() {
             {'id': 'img-1'},
             {'id': 'img-2', 'format': 'png'},
           ],
-          'dimensions': [612.0, 792.0],
+          'dimensions': {'width': 612, 'height': 792, 'dpi': 72},
         };
 
         final page = OcrPage.fromJson(json);
@@ -39,7 +39,10 @@ void main() {
         expect(page.images[0].id, 'img-1');
         expect(page.images[1].id, 'img-2');
         expect(page.images[1].format, 'png');
-        expect(page.dimensions, [612.0, 792.0]);
+        expect(page.dimensions, isNotNull);
+        expect(page.dimensions!.width, 612);
+        expect(page.dimensions!.height, 792);
+        expect(page.dimensions!.dpi, 72);
       });
 
       test('parses page with tables', () {
@@ -134,14 +137,16 @@ void main() {
           index: 2,
           markdown: 'Content with images',
           images: [OcrImage(id: 'img-001')],
-          dimensions: [800.0, 600.0],
+          dimensions: OcrPageDimensions(width: 800, height: 600, dpi: 72),
         );
 
         final json = page.toJson();
 
         expect(json['index'], 2);
         expect(json['images'], hasLength(1));
-        expect(json['dimensions'], [800.0, 600.0]);
+        final dims = json['dimensions'] as Map<String, dynamic>;
+        expect(dims['width'], 800);
+        expect(dims['height'], 600);
       });
 
       test('serializes page with tables', () {

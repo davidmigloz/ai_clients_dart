@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import '../common/equality_helpers.dart';
 import 'ocr_image.dart';
 import 'ocr_page_confidence_scores.dart';
+import 'ocr_page_dimensions.dart';
 import 'ocr_table.dart';
 
 /// Represents a processed page from OCR.
@@ -17,8 +18,8 @@ class OcrPage {
   /// Images extracted from the page.
   final List<OcrImage> images;
 
-  /// Dimensions of the page [width, height].
-  final List<double>? dimensions;
+  /// Dimensions of the page image (width, height, dpi).
+  final OcrPageDimensions? dimensions;
 
   /// Tables extracted from the page.
   final List<OcrTable> tables;
@@ -63,7 +64,11 @@ class OcrPage {
             ?.map((e) => OcrImage.fromJson(e as Map<String, dynamic>))
             .toList() ??
         [],
-    dimensions: (json['dimensions'] as List?)?.cast<double>(),
+    dimensions: json['dimensions'] != null
+        ? OcrPageDimensions.fromJson(
+            json['dimensions'] as Map<String, dynamic>,
+          )
+        : null,
     tables:
         (json['tables'] as List?)
             ?.map((e) => OcrTable.fromJson(e as Map<String, dynamic>))
@@ -84,7 +89,7 @@ class OcrPage {
     'index': index,
     'markdown': markdown,
     if (images.isNotEmpty) 'images': images.map((e) => e.toJson()).toList(),
-    if (dimensions != null) 'dimensions': dimensions,
+    if (dimensions != null) 'dimensions': dimensions!.toJson(),
     if (tables.isNotEmpty) 'tables': tables.map((e) => e.toJson()).toList(),
     if (header != null) 'header': header,
     if (footer != null) 'footer': footer,
@@ -98,7 +103,7 @@ class OcrPage {
     int? index,
     String? markdown,
     List<OcrImage>? images,
-    List<double>? dimensions,
+    OcrPageDimensions? dimensions,
     List<OcrTable>? tables,
     String? header,
     String? footer,
@@ -124,7 +129,7 @@ class OcrPage {
           index == other.index &&
           markdown == other.markdown &&
           listsEqual(images, other.images) &&
-          listsEqual(dimensions, other.dimensions) &&
+          dimensions == other.dimensions &&
           listsEqual(tables, other.tables) &&
           header == other.header &&
           footer == other.footer &&
@@ -136,7 +141,7 @@ class OcrPage {
     index,
     markdown,
     listHash(images),
-    listHash(dimensions),
+    dimensions,
     listHash(tables),
     header,
     footer,
