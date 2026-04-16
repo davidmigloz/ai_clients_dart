@@ -37,11 +37,7 @@ void main() {
             },
             {'index': 1, 'markdown': '# Page 2\n\nMore content.'},
           ],
-          'usage_info': {
-            'prompt_tokens': 100,
-            'completion_tokens': 200,
-            'total_tokens': 300,
-          },
+          'usage_info': {'pages_processed': 2, 'doc_size_bytes': 102400},
           'total_pages': 5,
           'processed_pages': 2,
           'created_at': '2024-01-15T10:00:00Z',
@@ -56,12 +52,14 @@ void main() {
         expect(response.pages[0].markdown, contains('Page 1'));
         expect(response.pages[0].images, hasLength(1));
         expect(response.pages[1].index, 1);
-        expect(response.usage, isNotNull);
-        expect(response.usage!.totalTokens, 300);
+        expect(response.usageInfo, isNotNull);
+        expect(response.usageInfo!.pagesProcessed, 2);
+        expect(response.usageInfo!.docSizeBytes, 102400);
         expect(response.totalPages, 5);
         expect(response.processedPages, 2);
         expect(response.createdAt, isNotNull);
         expect(response.documentAnnotation, isNull);
+        expect(response.usageInfo, isNotNull);
       });
 
       test('parses response with document_annotation', () {
@@ -76,19 +74,6 @@ void main() {
 
         expect(response.documentAnnotation, isNotNull);
         expect(response.documentAnnotation, contains('Invoice'));
-      });
-
-      test('parses usage from legacy "usage" key', () {
-        final json = {
-          'id': 'ocr-legacy',
-          'model': 'mistral-ocr-latest',
-          'pages': <dynamic>[],
-          'usage': {'prompt_tokens': 50, 'total_tokens': 50},
-        };
-
-        final response = OcrResponse.fromJson(json);
-
-        expect(response.usage, isNotNull);
       });
     });
 

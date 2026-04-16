@@ -253,6 +253,7 @@ export 'src/models/ocr/ocr_request.dart';
 export 'src/models/ocr/ocr_response.dart';
 export 'src/models/ocr/ocr_table.dart';
 export 'src/models/ocr/ocr_table_format.dart';
+export 'src/models/ocr/ocr_usage_info.dart';
 // --- Models: Tools ---
 export 'src/models/tools/connector_auth.dart';
 export 'src/models/tools/function_call.dart';

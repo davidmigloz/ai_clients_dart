@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
 
-import '../metadata/usage_info.dart';
 import 'ocr_page.dart';
+import 'ocr_usage_info.dart';
 
 /// Response from OCR processing.
 @immutable
@@ -18,8 +18,8 @@ class OcrResponse {
   /// The processed pages with extracted text.
   final List<OcrPage> pages;
 
-  /// Usage statistics.
-  final UsageInfo? usage;
+  /// Usage statistics for the OCR request.
+  final OcrUsageInfo? usageInfo;
 
   /// Total number of pages in the document.
   final int? totalPages;
@@ -41,7 +41,7 @@ class OcrResponse {
     this.object = 'ocr.response',
     required this.model,
     required this.pages,
-    this.usage,
+    this.usageInfo,
     this.totalPages,
     this.processedPages,
     this.createdAt,
@@ -58,10 +58,8 @@ class OcrResponse {
             ?.map((e) => OcrPage.fromJson(e as Map<String, dynamic>))
             .toList() ??
         [],
-    usage: json['usage_info'] != null
-        ? UsageInfo.fromJson(json['usage_info'] as Map<String, dynamic>)
-        : json['usage'] != null
-        ? UsageInfo.fromJson(json['usage'] as Map<String, dynamic>)
+    usageInfo: json['usage_info'] != null
+        ? OcrUsageInfo.fromJson(json['usage_info'] as Map<String, dynamic>)
         : null,
     totalPages: json['total_pages'] as int?,
     processedPages: json['processed_pages'] as int?,
@@ -77,7 +75,7 @@ class OcrResponse {
     'object': object,
     'model': model,
     'pages': pages.map((e) => e.toJson()).toList(),
-    if (usage != null) 'usage_info': usage!.toJson(),
+    if (usageInfo != null) 'usage_info': usageInfo!.toJson(),
     if (totalPages != null) 'total_pages': totalPages,
     if (processedPages != null) 'processed_pages': processedPages,
     if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
