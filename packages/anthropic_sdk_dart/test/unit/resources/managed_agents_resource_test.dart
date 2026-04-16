@@ -51,8 +51,24 @@ class ManagedAgentsFixtures {
         'skills': <Map<String, dynamic>>[],
         'tools': <Map<String, dynamic>>[],
       },
+      'environment_id': 'env_test123',
+      'title': null,
+      'metadata': <String, String>{},
+      'resources': <Map<String, dynamic>>[],
+      'vault_ids': <String>[],
+      'stats': {
+        'active_seconds': 0,
+        'duration_seconds': 0,
+      },
+      'usage': {
+        'input_tokens': 0,
+        'output_tokens': 0,
+        'cache_read_input_tokens': 0,
+        'cache_creation_input_tokens': 0,
+      },
       'created_at': '2026-04-01T00:00:00Z',
       'updated_at': '2026-04-01T00:00:00Z',
+      'archived_at': null,
     };
   }
 

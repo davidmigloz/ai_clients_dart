@@ -60,25 +60,25 @@ class Session {
   final SessionAgent agent;
 
   /// ID of the environment defining the container configuration.
-  final String? environmentId;
+  final String environmentId;
 
   /// Human-readable session title.
   final String? title;
 
   /// Arbitrary key-value metadata attached to the session.
-  final Map<String, String>? metadata;
+  final Map<String, String> metadata;
 
   /// Resources mounted into the session.
-  final List<SessionResource>? resources;
+  final List<SessionResource> resources;
 
   /// Vault IDs attached to the session.
-  final List<String>? vaultIds;
+  final List<String> vaultIds;
 
   /// Timing statistics for the session.
-  final SessionStats? stats;
+  final SessionStats stats;
 
   /// Cumulative token usage for the session.
-  final SessionUsage? usage;
+  final SessionUsage usage;
 
   /// When the session was created.
   final DateTime createdAt;
@@ -95,16 +95,16 @@ class Session {
     this.type = 'session',
     required this.status,
     required this.agent,
-    this.environmentId,
-    this.title,
-    this.metadata,
-    this.resources,
-    this.vaultIds,
-    this.stats,
-    this.usage,
+    required this.environmentId,
+    required this.title,
+    required this.metadata,
+    required this.resources,
+    required this.vaultIds,
+    required this.stats,
+    required this.usage,
     required this.createdAt,
     required this.updatedAt,
-    this.archivedAt,
+    required this.archivedAt,
   });
 
   /// Creates a [Session] from JSON.
@@ -114,21 +114,17 @@ class Session {
       type: json['type'] as String? ?? 'session',
       status: SessionStatus.fromJson(json['status'] as String),
       agent: SessionAgent.fromJson(json['agent'] as Map<String, dynamic>),
-      environmentId: json['environment_id'] as String?,
+      environmentId: json['environment_id'] as String,
       title: json['title'] as String?,
-      metadata: (json['metadata'] as Map<String, dynamic>?)?.map(
+      metadata: (json['metadata'] as Map<String, dynamic>).map(
         (k, v) => MapEntry(k, v as String),
       ),
-      resources: (json['resources'] as List?)
-          ?.map((e) => SessionResource.fromJson(e as Map<String, dynamic>))
+      resources: (json['resources'] as List)
+          .map((e) => SessionResource.fromJson(e as Map<String, dynamic>))
           .toList(),
-      vaultIds: (json['vault_ids'] as List?)?.map((e) => e as String).toList(),
-      stats: json['stats'] != null
-          ? SessionStats.fromJson(json['stats'] as Map<String, dynamic>)
-          : null,
-      usage: json['usage'] != null
-          ? SessionUsage.fromJson(json['usage'] as Map<String, dynamic>)
-          : null,
+      vaultIds: (json['vault_ids'] as List).map((e) => e as String).toList(),
+      stats: SessionStats.fromJson(json['stats'] as Map<String, dynamic>),
+      usage: SessionUsage.fromJson(json['usage'] as Map<String, dynamic>),
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
       archivedAt: json['archived_at'] != null
@@ -143,14 +139,13 @@ class Session {
     'type': type,
     'status': status.toJson(),
     'agent': agent.toJson(),
-    if (environmentId != null) 'environment_id': environmentId,
+    'environment_id': environmentId,
     'title': title,
-    if (metadata != null) 'metadata': metadata,
-    if (resources != null)
-      'resources': resources!.map((e) => e.toJson()).toList(),
-    if (vaultIds != null) 'vault_ids': vaultIds,
-    if (stats != null) 'stats': stats!.toJson(),
-    if (usage != null) 'usage': usage!.toJson(),
+    'metadata': metadata,
+    'resources': resources.map((e) => e.toJson()).toList(),
+    'vault_ids': vaultIds,
+    'stats': stats.toJson(),
+    'usage': usage.toJson(),
     'created_at': createdAt.toUtc().toIso8601String(),
     'updated_at': updatedAt.toUtc().toIso8601String(),
     'archived_at': archivedAt?.toUtc().toIso8601String(),
@@ -162,13 +157,13 @@ class Session {
     String? type,
     SessionStatus? status,
     SessionAgent? agent,
-    Object? environmentId = unsetCopyWithValue,
+    String? environmentId,
     Object? title = unsetCopyWithValue,
-    Object? metadata = unsetCopyWithValue,
-    Object? resources = unsetCopyWithValue,
-    Object? vaultIds = unsetCopyWithValue,
-    Object? stats = unsetCopyWithValue,
-    Object? usage = unsetCopyWithValue,
+    Map<String, String>? metadata,
+    List<SessionResource>? resources,
+    List<String>? vaultIds,
+    SessionStats? stats,
+    SessionUsage? usage,
     DateTime? createdAt,
     DateTime? updatedAt,
     Object? archivedAt = unsetCopyWithValue,
@@ -178,21 +173,13 @@ class Session {
       type: type ?? this.type,
       status: status ?? this.status,
       agent: agent ?? this.agent,
-      environmentId: environmentId == unsetCopyWithValue
-          ? this.environmentId
-          : environmentId as String?,
+      environmentId: environmentId ?? this.environmentId,
       title: title == unsetCopyWithValue ? this.title : title as String?,
-      metadata: metadata == unsetCopyWithValue
-          ? this.metadata
-          : metadata as Map<String, String>?,
-      resources: resources == unsetCopyWithValue
-          ? this.resources
-          : resources as List<SessionResource>?,
-      vaultIds: vaultIds == unsetCopyWithValue
-          ? this.vaultIds
-          : vaultIds as List<String>?,
-      stats: stats == unsetCopyWithValue ? this.stats : stats as SessionStats?,
-      usage: usage == unsetCopyWithValue ? this.usage : usage as SessionUsage?,
+      metadata: metadata ?? this.metadata,
+      resources: resources ?? this.resources,
+      vaultIds: vaultIds ?? this.vaultIds,
+      stats: stats ?? this.stats,
+      usage: usage ?? this.usage,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       archivedAt: archivedAt == unsetCopyWithValue
