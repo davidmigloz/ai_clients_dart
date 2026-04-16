@@ -41,11 +41,17 @@ class UpdateUserProfileRequest {
   /// Creates an [UpdateUserProfileRequest].
   ///
   /// Omit a field to leave its stored value unchanged. Pass `null` explicitly
-  /// to clear a nullable field.
+  /// for [externalId] to clear it. [metadata] is not nullable per the spec —
+  /// to delete a stored key, include it in [metadata] with an empty-string
+  /// value; to leave metadata entirely unchanged, omit the parameter.
   const UpdateUserProfileRequest({
     Object? externalId = _notSet,
     Object? metadata = _notSet,
-  }) : _externalId = externalId,
+  }) : assert(
+         metadata == _notSet || metadata is Map<String, String>,
+         'metadata must be a Map<String, String> when provided; use empty-string values to remove keys, or omit the metadata parameter to leave it unchanged',
+       ),
+       _externalId = externalId,
        _metadata = metadata;
 
   /// Creates an [UpdateUserProfileRequest] from JSON.

@@ -244,6 +244,13 @@ void main() {
       expect(kept.externalId, 'user_1');
       expect(kept.hasExternalId, isTrue);
     });
+
+    test('rejects explicit null metadata (not nullable per spec)', () {
+      expect(
+        () => UpdateUserProfileRequest(metadata: null),
+        throwsA(isA<AssertionError>()),
+      );
+    });
   });
 
   group('ListUserProfilesResponse', () {

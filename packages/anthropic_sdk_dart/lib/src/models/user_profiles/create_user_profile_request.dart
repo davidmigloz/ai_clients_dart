@@ -11,7 +11,9 @@ class CreateUserProfileRequest {
   final String? externalId;
 
   /// Free-form key-value metadata to attach to this user profile.
-  /// Maximum 16 keys, keys up to 64 chars, values up to 512 chars.
+  ///
+  /// Maximum 16 keys, keys up to 64 chars, and values must be non-empty
+  /// strings up to 512 chars.
   final Map<String, String>? metadata;
 
   /// Creates a [CreateUserProfileRequest].
