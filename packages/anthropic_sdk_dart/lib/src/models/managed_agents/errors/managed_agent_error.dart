@@ -491,10 +491,9 @@ class UnknownManagedAgentError {
     final retryStatusJson = retryStatus.toJson();
     if (rawJson != null) {
       final rawRetryStatus = rawJson!['retry_status'];
-      final mergedRetryStatus =
-          rawRetryStatus is Map<String, dynamic>
-              ? {...rawRetryStatus, ...retryStatusJson}
-              : retryStatusJson;
+      final mergedRetryStatus = rawRetryStatus is Map<String, dynamic>
+          ? {...rawRetryStatus, ...retryStatusJson}
+          : retryStatusJson;
       return {
         ...rawJson!,
         'type': type,
@@ -502,11 +501,7 @@ class UnknownManagedAgentError {
         'retry_status': mergedRetryStatus,
       };
     }
-    return {
-      'type': type,
-      'message': message,
-      'retry_status': retryStatusJson,
-    };
+    return {'type': type, 'message': message, 'retry_status': retryStatusJson};
   }
 
   /// Creates a copy with replaced values.

@@ -857,9 +857,7 @@ void main() {
       };
 
       final error = UnknownManagedAgentError.fromJson(json);
-      final modified = error.copyWith(
-        retryStatus: const RetryStatusTerminal(),
-      );
+      final modified = error.copyWith(retryStatus: const RetryStatusTerminal());
       final output = modified.toJson();
 
       // The merged retry_status should reflect the new type from copyWith
