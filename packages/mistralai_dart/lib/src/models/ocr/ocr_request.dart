@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 import '../metadata/response_format.dart';
 import 'ocr_confidence_scores_granularity.dart';
 import 'ocr_document.dart';
@@ -246,11 +247,40 @@ class OcrRequest {
       other is OcrRequest &&
           runtimeType == other.runtimeType &&
           model == other.model &&
-          document == other.document;
+          document == other.document &&
+          id == other.id &&
+          listsEqual(pages, other.pages) &&
+          includeImageBase64 == other.includeImageBase64 &&
+          imageLimit == other.imageLimit &&
+          imageMinSize == other.imageMinSize &&
+          documentAnnotationPrompt == other.documentAnnotationPrompt &&
+          confidenceScoresGranularity == other.confidenceScoresGranularity &&
+          tableFormat == other.tableFormat &&
+          extractHeader == other.extractHeader &&
+          extractFooter == other.extractFooter &&
+          bboxAnnotationFormat == other.bboxAnnotationFormat &&
+          documentAnnotationFormat == other.documentAnnotationFormat;
 
   @override
-  int get hashCode => Object.hash(model, document);
+  int get hashCode => Object.hash(
+    model,
+    document,
+    id,
+    listHash(pages),
+    includeImageBase64,
+    imageLimit,
+    imageMinSize,
+    documentAnnotationPrompt,
+    confidenceScoresGranularity,
+    tableFormat,
+    extractHeader,
+    extractFooter,
+    bboxAnnotationFormat,
+    documentAnnotationFormat,
+  );
 
   @override
-  String toString() => 'OcrRequest(model: $model, document: $document)';
+  String toString() =>
+      'OcrRequest(model: $model, document: $document, '
+      'confidenceScoresGranularity: $confidenceScoresGranularity)';
 }

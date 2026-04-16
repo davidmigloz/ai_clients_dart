@@ -400,13 +400,14 @@ void main() {
     });
 
     group('equality', () {
-      test('requests with same model and document are equal', () {
+      test('requests with same fields are equal', () {
         const request1 = OcrRequest(
           document: UrlDocument('https://example.com/doc.pdf'),
+          pages: [0, 1],
         );
         const request2 = OcrRequest(
           document: UrlDocument('https://example.com/doc.pdf'),
-          pages: [0, 1], // Different but not part of equality
+          pages: [0, 1],
         );
 
         expect(request1, equals(request2));
