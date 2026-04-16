@@ -846,6 +846,29 @@ void main() {
       expect(retryStatus['retry_at'], '2026-04-01T00:01:00Z');
     });
 
+    test('toJson reflects copyWith retryStatus while preserving retry_at', () {
+      final json = {
+        'type': 'unknown_error',
+        'message': 'Retrying',
+        'retry_status': {
+          'type': 'retrying',
+          'retry_at': '2026-04-01T00:01:00Z',
+        },
+      };
+
+      final error = UnknownManagedAgentError.fromJson(json);
+      final modified = error.copyWith(
+        retryStatus: const RetryStatusTerminal(),
+      );
+      final output = modified.toJson();
+
+      // The merged retry_status should reflect the new type from copyWith
+      // while preserving retry_at from the original rawJson.
+      final retryStatus = output['retry_status'] as Map<String, dynamic>;
+      expect(retryStatus['type'], 'terminal');
+      expect(retryStatus['retry_at'], '2026-04-01T00:01:00Z');
+    });
+
     test('toJson preserves unknown fields from rawJson', () {
       final json = {
         'type': 'unknown_error',

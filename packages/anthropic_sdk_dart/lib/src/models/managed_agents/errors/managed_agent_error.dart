@@ -483,17 +483,29 @@ class UnknownManagedAgentError {
   /// Converts to JSON.
   ///
   /// When [rawJson] is present, it is used as the base to preserve unknown
-  /// fields. Only lossless scalar fields (`type`, `message`) are overwritten.
-  /// The `retry_status` from [rawJson] is kept verbatim because the parsed
-  /// [RetryStatus] subclasses may not round-trip all fields (e.g. `retry_at`).
+  /// fields. Lossless scalar fields (`type`, `message`) are overwritten, and
+  /// `retry_status` is merged so the current [retryStatus] state is reflected
+  /// while preserving any extra unknown fields from the original payload
+  /// (e.g. `retry_at`).
   Map<String, dynamic> toJson() {
+    final retryStatusJson = retryStatus.toJson();
     if (rawJson != null) {
-      return {...rawJson!, 'type': type, 'message': message};
+      final rawRetryStatus = rawJson!['retry_status'];
+      final mergedRetryStatus =
+          rawRetryStatus is Map<String, dynamic>
+              ? {...rawRetryStatus, ...retryStatusJson}
+              : retryStatusJson;
+      return {
+        ...rawJson!,
+        'type': type,
+        'message': message,
+        'retry_status': mergedRetryStatus,
+      };
     }
     return {
       'type': type,
       'message': message,
-      'retry_status': retryStatus.toJson(),
+      'retry_status': retryStatusJson,
     };
   }
 
