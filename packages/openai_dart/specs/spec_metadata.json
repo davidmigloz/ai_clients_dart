@@ -2,8 +2,8 @@
   "specs": {
     "main": {
       "current_version": "2.3.0",
-      "last_fetched": "2026-04-08T21:18:01.788107Z",
-      "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/openai%2Fopenai-a6eca1bd01e0c434af356fe5275c206057216a4e626d1051d294c27016cd6d05.yml",
+      "last_fetched": "2026-04-16T09:40:55.880616Z",
+      "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/openai%2Fopenai-7c540cce6eb30401259f4831ea9803b6d88501605d13734f98212cbb3b199e10.yml",
       "title": "OpenAI API",
       "version_history": []
     }

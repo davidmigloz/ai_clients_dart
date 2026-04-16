@@ -9830,6 +9830,18 @@
                   }
                 ]
               },
+              "max_output_tokens": {
+                "anyOf": [
+                  {
+                    "description": "An upper bound for the number of tokens that can be generated for a response, including visible output tokens and [reasoning tokens](https://platform.openai.com/docs/guides/reasoning).\n",
+                    "minimum": 16,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "parallel_tool_calls": {
                 "anyOf": [
                   {
@@ -14144,6 +14156,13 @@
         "title": "File citation",
         "type": "object"
       },
+      "FileDetailEnum": {
+        "enum": [
+          "low",
+          "high"
+        ],
+        "type": "string"
+      },
       "FileExpirationAfter": {
         "description": "The expiration policy for a file. By default, files with `purpose=batch` expire after 30 days and all other files are persisted until they are manually deleted.",
         "properties": {
@@ -14168,6 +14187,13 @@
         ],
         "title": "File expiration policy",
         "type": "object"
+      },
+      "FileInputDetail": {
+        "enum": [
+          "low",
+          "high"
+        ],
+        "type": "string"
       },
       "FilePath": {
         "description": "A path to a file.\n",
@@ -17887,6 +17913,10 @@
       "InputFileContent": {
         "description": "A file input to the model.",
         "properties": {
+          "detail": {
+            "$ref": "#/components/schemas/FileInputDetail",
+            "description": "The detail level of the file to be sent to the model. Use `low` for the default rendering behavior, or `high` to render the file at higher quality. Defaults to `low`."
+          },
           "file_data": {
             "description": "The content of the file to be sent to the model.\n",
             "type": "string"
@@ -17929,11 +17959,15 @@
       "InputFileContentParam": {
         "description": "A file input to the model.",
         "properties": {
+          "detail": {
+            "$ref": "#/components/schemas/FileDetailEnum",
+            "description": "The detail level of the file to be sent to the model. Use `low` for the default rendering behavior, or `high` to render the file at higher quality. Defaults to `low`."
+          },
           "file_data": {
             "anyOf": [
               {
                 "description": "The base64-encoded data of the file to be sent to the model.",
-                "maxLength": 33554432,
+                "maxLength": 73400320,
                 "type": "string"
               },
               {
@@ -31051,6 +31085,17 @@
                   }
                 ]
               },
+              "max_output_tokens": {
+                "anyOf": [
+                  {
+                    "description": "An upper bound for the number of tokens that can be generated for a response, including visible output tokens and [reasoning tokens](https://platform.openai.com/docs/guides/reasoning).\n",
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "object": {
                 "description": "The object type of this resource - always set to `response`.\n",
                 "enum": [
@@ -32999,17 +33044,6 @@
                 "default": false,
                 "description": "Whether to run the model response in the background.\n[Learn more](https://platform.openai.com/docs/guides/background).\n",
                 "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "max_output_tokens": {
-            "anyOf": [
-              {
-                "description": "An upper bound for the number of tokens that can be generated for a response, including visible output tokens and [reasoning tokens](https://platform.openai.com/docs/guides/reasoning).\n",
-                "type": "integer"
               },
               {
                 "type": "null"

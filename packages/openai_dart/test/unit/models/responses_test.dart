@@ -1012,6 +1012,71 @@ void main() {
         equals('data:application/pdf;base64,base64data=='),
       );
     });
+
+    test('creates file content from URL with detail', () {
+      const content = InputContent.fileUrl(
+        'https://example.com/file.pdf',
+        detail: FileInputDetail.high,
+      );
+
+      expect(content, isA<InputFileContent>());
+      const file = content as InputFileContent;
+      expect(file.fileUrl, equals('https://example.com/file.pdf'));
+      expect(file.detail, equals(FileInputDetail.high));
+    });
+
+    test('creates file content from file ID with detail', () {
+      const content = InputContent.fileId(
+        'file_456',
+        detail: FileInputDetail.low,
+      );
+
+      expect(content, isA<InputFileContent>());
+      const file = content as InputFileContent;
+      expect(file.fileId, equals('file_456'));
+      expect(file.detail, equals(FileInputDetail.low));
+    });
+
+    test('creates file content from base64 data with detail', () {
+      const content = InputContent.fileData(
+        'base64data==',
+        mediaType: 'application/pdf',
+        detail: FileInputDetail.high,
+      );
+
+      expect(content, isA<InputFileContent>());
+      const file = content as InputFileContent;
+      expect(file.fileData, equals('data:application/pdf;base64,base64data=='));
+      expect(file.detail, equals(FileInputDetail.high));
+    });
+
+    test('InputFileContent round-trip with detail', () {
+      const content = InputFileContent(
+        fileUrl: 'https://example.com/file.pdf',
+        filename: 'test.pdf',
+        detail: FileInputDetail.high,
+      );
+      final json = content.toJson();
+
+      expect(json['type'], equals('input_file'));
+      expect(json['file_url'], equals('https://example.com/file.pdf'));
+      expect(json['filename'], equals('test.pdf'));
+      expect(json['detail'], equals('high'));
+
+      final restored = InputFileContent.fromJson(json);
+      expect(restored, equals(content));
+    });
+
+    test('InputFileContent round-trip without detail', () {
+      const content = InputFileContent(fileId: 'file_123');
+      final json = content.toJson();
+
+      expect(json.containsKey('detail'), isFalse);
+
+      final restored = InputFileContent.fromJson(json);
+      expect(restored, equals(content));
+      expect(restored.detail, isNull);
+    });
   });
 
   group('AssistantTextContent', () {
@@ -2508,6 +2573,25 @@ void main() {
 
     test('toJson returns original', () {
       expect(ImageDetail.original.toJson(), 'original');
+    });
+  });
+
+  group('FileInputDetail', () {
+    test('fromJson parses high', () {
+      expect(FileInputDetail.fromJson('high'), FileInputDetail.high);
+    });
+
+    test('fromJson parses low', () {
+      expect(FileInputDetail.fromJson('low'), FileInputDetail.low);
+    });
+
+    test('toJson returns correct values', () {
+      expect(FileInputDetail.high.toJson(), 'high');
+      expect(FileInputDetail.low.toJson(), 'low');
+    });
+
+    test('fromJson throws on unknown value', () {
+      expect(() => FileInputDetail.fromJson('auto'), throwsFormatException);
     });
   });
 

@@ -38,12 +38,18 @@ sealed class InputContent {
       InputImageContent.file;
 
   /// Creates an [InputFileContent] from a URL.
-  const factory InputContent.fileUrl(String url, {String? filename}) =
-      InputFileContent.url;
+  const factory InputContent.fileUrl(
+    String url, {
+    String? filename,
+    FileInputDetail? detail,
+  }) = InputFileContent.url;
 
   /// Creates an [InputFileContent] from a file ID.
-  const factory InputContent.fileId(String id, {String? filename}) =
-      InputFileContent.file;
+  const factory InputContent.fileId(
+    String id, {
+    String? filename,
+    FileInputDetail? detail,
+  }) = InputFileContent.file;
 
   /// Creates an [InputFileContent] from base64-encoded data.
   ///
@@ -55,6 +61,7 @@ sealed class InputContent {
     String data, {
     required String mediaType,
     String? filename,
+    FileInputDetail? detail,
   }) = InputFileContent.data;
 
   /// Creates an [InputContent] from JSON.
@@ -228,22 +235,26 @@ class InputFileContent extends InputContent {
   /// The filename.
   final String? filename;
 
+  /// Optional detail level for file processing.
+  final FileInputDetail? detail;
+
   /// Creates an [InputFileContent].
   const InputFileContent({
     this.fileUrl,
     this.fileId,
     this.fileData,
     this.filename,
+    this.detail,
   });
 
   /// Creates an [InputFileContent] from a URL.
-  const InputFileContent.url(String url, {this.filename})
+  const InputFileContent.url(String url, {this.filename, this.detail})
     : fileUrl = url,
       fileId = null,
       fileData = null;
 
   /// Creates an [InputFileContent] from a file ID.
-  const InputFileContent.file(String id, {this.filename})
+  const InputFileContent.file(String id, {this.filename, this.detail})
     : fileUrl = null,
       fileId = id,
       fileData = null;
@@ -258,6 +269,7 @@ class InputFileContent extends InputContent {
     String data, {
     required String mediaType,
     this.filename,
+    this.detail,
   }) : fileUrl = null,
        fileId = null,
        fileData = 'data:$mediaType;base64,$data';
@@ -269,6 +281,9 @@ class InputFileContent extends InputContent {
       fileId: json['file_id'] as String?,
       fileData: json['file_data'] as String?,
       filename: json['filename'] as String?,
+      detail: json['detail'] != null
+          ? FileInputDetail.fromJson(json['detail'] as String)
+          : null,
     );
   }
 
@@ -279,6 +294,7 @@ class InputFileContent extends InputContent {
     if (fileId != null) 'file_id': fileId,
     if (fileData != null) 'file_data': fileData,
     if (filename != null) 'filename': filename,
+    if (detail != null) 'detail': detail!.toJson(),
   };
 
   @override
@@ -289,14 +305,15 @@ class InputFileContent extends InputContent {
           fileUrl == other.fileUrl &&
           fileId == other.fileId &&
           fileData == other.fileData &&
-          filename == other.filename;
+          filename == other.filename &&
+          detail == other.detail;
 
   @override
-  int get hashCode => Object.hash(fileUrl, fileId, fileData, filename);
+  int get hashCode => Object.hash(fileUrl, fileId, fileData, filename, detail);
 
   @override
   String toString() =>
-      'InputFileContent(fileUrl: $fileUrl, fileId: $fileId, fileData: $fileData, filename: $filename)';
+      'InputFileContent(fileUrl: $fileUrl, fileId: $fileId, fileData: $fileData, filename: $filename, detail: $detail)';
 }
 
 /// Video content via URL.
@@ -331,4 +348,31 @@ class InputVideoContent extends InputContent {
 
   @override
   String toString() => 'InputVideoContent(videoUrl: $videoUrl)';
+}
+
+/// Detail level for file inputs.
+///
+/// Controls how the model processes file content. Use `low` for the default
+/// rendering behavior, or `high` to render the file at higher quality.
+enum FileInputDetail {
+  /// High detail: more thorough processing.
+  high('high'),
+
+  /// Low detail: default processing.
+  low('low');
+
+  const FileInputDetail(this.value);
+
+  /// The JSON value for this detail level.
+  final String value;
+
+  /// Creates a [FileInputDetail] from JSON.
+  static FileInputDetail fromJson(String value) => switch (value) {
+    'high' => FileInputDetail.high,
+    'low' => FileInputDetail.low,
+    _ => throw FormatException('Unknown FileInputDetail: $value'),
+  };
+
+  /// Converts to JSON.
+  String toJson() => value;
 }

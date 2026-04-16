@@ -573,6 +573,15 @@
       "tags": ["acknowledged"],
       "note": "Shares discriminator value 'json_schema' with ResponseFormatJsonSchema. Both handled by JsonSchemaResponseFormat. TextResponseFormatJsonSchema has flat properties while ResponseFormatJsonSchema nests under json_schema key."
     },
+    "ResponseProperties": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "ResponseProperties",
+      "tags": ["acknowledged"],
+      "note": "Spec helper schema; properties inlined on CreateResponseRequest and Response. max_output_tokens moved to inline."
+    },
     "ToolChoice": {
       "spec": "main",
       "kind": "sealed_parent",
@@ -1030,20 +1039,20 @@
     "FileDetailEnum": {
       "spec": "main",
       "kind": "skip",
-      "dart_class": null,
-      "file": null,
+      "dart_class": "FileInputDetail",
+      "file": "lib/src/models/responses/content/input_content.dart",
       "schema": "FileDetailEnum",
       "tags": ["acknowledged"],
-      "note": "Removed from spec and Dart. Was FileInputDetail enum."
+      "note": "Identical to FileInputDetail; single Dart enum serves both schemas."
     },
     "FileInputDetail": {
       "spec": "main",
       "kind": "skip",
-      "dart_class": null,
-      "file": null,
+      "dart_class": "FileInputDetail",
+      "file": "lib/src/models/responses/content/input_content.dart",
       "schema": "FileInputDetail",
       "tags": ["acknowledged"],
-      "note": "Removed from spec and Dart."
+      "note": "Enum co-located in input_content.dart with InputFileContent."
     },
     "FunctionToolCallOutputResource": {
       "spec": "main",
@@ -1079,7 +1088,7 @@
       "file": "lib/src/models/responses/content/input_content.dart",
       "schema": "InputFileContent",
       "tags": ["acknowledged"],
-      "note": "detail property removed per spec change."
+      "note": "Manual class with detail property. Serves both InputFileContent and InputFileContentParam roles."
     },
     "InputFileContentParam": {
       "spec": "main",
