@@ -826,6 +826,26 @@ void main() {
       expect(output['retry_status'], isA<Map<String, dynamic>>());
     });
 
+    test('toJson preserves retry_status fields like retry_at', () {
+      final json = {
+        'type': 'unknown_error',
+        'message': 'Retrying',
+        'retry_status': {
+          'type': 'retrying',
+          'retry_at': '2026-04-01T00:01:00Z',
+        },
+      };
+
+      final error = UnknownManagedAgentError.fromJson(json);
+      final output = error.toJson();
+
+      // retry_status must preserve retry_at — the parsed RetryStatusRetrying
+      // only stores 'type', so rawJson is used verbatim.
+      final retryStatus = output['retry_status'] as Map<String, dynamic>;
+      expect(retryStatus['type'], 'retrying');
+      expect(retryStatus['retry_at'], '2026-04-01T00:01:00Z');
+    });
+
     test('toJson preserves unknown fields from rawJson', () {
       final json = {
         'type': 'unknown_error',

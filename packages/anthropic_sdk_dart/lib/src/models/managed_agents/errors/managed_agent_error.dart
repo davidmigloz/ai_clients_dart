@@ -481,12 +481,21 @@ class UnknownManagedAgentError {
   }
 
   /// Converts to JSON.
-  Map<String, dynamic> toJson() => {
-    if (rawJson != null) ...rawJson!,
-    'type': type,
-    'message': message,
-    'retry_status': retryStatus.toJson(),
-  };
+  ///
+  /// When [rawJson] is present, it is used as the base to preserve unknown
+  /// fields. Only lossless scalar fields (`type`, `message`) are overwritten.
+  /// The `retry_status` from [rawJson] is kept verbatim because the parsed
+  /// [RetryStatus] subclasses may not round-trip all fields (e.g. `retry_at`).
+  Map<String, dynamic> toJson() {
+    if (rawJson != null) {
+      return {...rawJson!, 'type': type, 'message': message};
+    }
+    return {
+      'type': type,
+      'message': message,
+      'retry_status': retryStatus.toJson(),
+    };
+  }
 
   /// Creates a copy with replaced values.
   UnknownManagedAgentError copyWith({
