@@ -820,7 +820,8 @@ class CompactionBlock extends ContentBlock {
 
   @override
   String toString() =>
-      'CompactionBlock(content: $content, encryptedContent: $encryptedContent)';
+      'CompactionBlock(content: $content, '
+      'encryptedContent: ${encryptedContent == null ? 'null' : '[${encryptedContent!.length} chars]'})';
 }
 
 /// Web search result content.

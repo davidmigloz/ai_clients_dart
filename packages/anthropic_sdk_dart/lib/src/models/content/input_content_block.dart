@@ -1341,7 +1341,8 @@ class CompactionInputBlock extends InputContentBlock {
   @override
   String toString() =>
       'CompactionInputBlock(content: $content, '
-      'encryptedContent: $encryptedContent, cacheControl: $cacheControl)';
+      'encryptedContent: ${encryptedContent == null ? 'null' : '[${encryptedContent!.length} chars]'}, '
+      'cacheControl: $cacheControl)';
 }
 
 /// Tool reference block in input.

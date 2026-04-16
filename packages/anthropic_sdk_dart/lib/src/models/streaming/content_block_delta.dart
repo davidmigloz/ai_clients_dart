@@ -218,7 +218,8 @@ class CompactionDelta extends ContentBlockDelta {
 
   @override
   String toString() =>
-      'CompactionDelta(content: $content, encryptedContent: $encryptedContent)';
+      'CompactionDelta(content: $content, '
+      'encryptedContent: ${encryptedContent == null ? 'null' : '[${encryptedContent!.length} chars]'})';
 }
 
 /// Delta for signature content updates (extended thinking verification).
