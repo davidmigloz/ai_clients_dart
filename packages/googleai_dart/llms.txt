@@ -4,15 +4,16 @@
 
 ## Docs
 
-- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/README.md) (~4.6k tokens): Primary package documentation with installation, configuration, and usage examples.
-- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/CHANGELOG.md) (~8.6k tokens): Release history and version-by-version changes.
-- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/MIGRATION.md) (~5k tokens): Upgrade notes and breaking-change guidance.
+- [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/README.md) (~4.9k tokens): Primary package documentation with installation, configuration, and usage examples.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/CHANGELOG.md) (~8.9k tokens): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/MIGRATION.md) (~5.3k tokens): Upgrade notes and breaking-change guidance.
 
 ## Examples
 
 - [generate_content.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/generate_content.dart) (~194 tokens): Basic text generation.
 - [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/streaming_example.dart) (~224 tokens): Streaming responses.
 - [image_generation_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/image_generation_example.dart) (~1.2k tokens): Image generation.
+- [tts_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/tts_example.dart) (~1.3k tokens): Text-to-speech with Gemini TTS models.
 - [function_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/function_calling_example.dart) (~578 tokens): Tool calling.
 - [google_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/google_search_example.dart) (~1k tokens): Grounding with Google Search.
 - [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/googleai_dart/example/embeddings_example.dart) (~490 tokens): Text embeddings.
@@ -51,4 +52,4 @@
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/googleai_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~52.1k tokens**
+**Total: ~54.4k tokens**
