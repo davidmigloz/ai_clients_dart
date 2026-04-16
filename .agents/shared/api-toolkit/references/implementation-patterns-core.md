@@ -88,6 +88,16 @@ equality helpers (most packages keep these in `models/common/equality_helpers.da
 independence. `mapsEqual()` checks `containsKey` before comparing values to
 distinguish missing keys from `null` values.
 
+For fields whose values may contain nested maps or lists (e.g., `Map<String, dynamic>`
+holding arbitrary JSON, unknown-variant `rawJson`, or `List<Map>` whose maps can be
+nested), use the deep variants — shallow helpers compare nested collections by
+identity and break equality for any non-trivial JSON payload:
+
+| Field type | `==` helper | `hashCode` helper |
+|-----------|-------------|-------------------|
+| `Map<String, dynamic>` (nested) | `mapsDeepEqual(a, b)` | `mapDeepHashCode(map)` |
+| `List<Map<String, dynamic>>` (nested) | `listOfMapsDeepEqual(a, b)` | `Object.hashAll(list.map(mapDeepHashCode))` |
+
 ### New Field Checklist
 
 When adding a field to a model class, update **all four**:
@@ -151,6 +161,36 @@ factory MySealed.fromJson(Map<String, dynamic> json) {
     _ => MyUnknown.fromJson(json), // preserves raw JSON
   };
 }
+```
+
+### Unknown Variant toJson Fidelity
+
+Unknown/fallback sealed variants store the original `rawJson` for forward
+compatibility. Their `toJson()` must spread `rawJson` first and let typed
+fields win on collision — otherwise either unknown keys are dropped, or
+`copyWith`-updated typed fields are silently overwritten by stale `rawJson`
+values:
+
+```dart
+// WRONG — ignores rawJson, drops forward-compat keys
+Map<String, dynamic> toJson() => {
+  'type': type,
+  'retry_status': retryStatus.toJson(),
+};
+
+// WRONG — rawJson's retry_status overwrites the typed field,
+//         so copyWith(retryStatus: newStatus) is lost
+Map<String, dynamic> toJson() => {
+  'type': type,
+  ...rawJson,
+};
+
+// CORRECT — rawJson provides the base, typed fields win on collision
+Map<String, dynamic> toJson() => {
+  ...rawJson,
+  'type': type,
+  'retry_status': retryStatus.toJson(), // copyWith changes preserved
+};
 ```
 
 ### Constructor Constraint Replication
