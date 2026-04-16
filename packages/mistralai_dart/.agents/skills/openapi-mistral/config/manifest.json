@@ -1539,12 +1539,26 @@
       "file": "lib/src/models/ocr/ocr_page_confidence_scores.dart",
       "schema": "OCRPageConfidenceScores"
     },
+    "OCRPageDimensions": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "OcrPageDimensions",
+      "file": "lib/src/models/ocr/ocr_page_dimensions.dart",
+      "schema": "OCRPageDimensions"
+    },
     "OCRTableObject": {
       "spec": "main",
       "kind": "object",
       "dart_class": "OcrTable",
       "file": "lib/src/models/ocr/ocr_table.dart",
       "schema": "OCRTableObject"
+    },
+    "OCRUsageInfo": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "OcrUsageInfo",
+      "file": "lib/src/models/ocr/ocr_usage_info.dart",
+      "schema": "OCRUsageInfo"
     },
     "ObservabilityError": {
       "spec": "main",
