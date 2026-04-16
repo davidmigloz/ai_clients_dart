@@ -59,7 +59,6 @@ void main() {
         expect(response.processedPages, 2);
         expect(response.createdAt, isNotNull);
         expect(response.documentAnnotation, isNull);
-        expect(response.usageInfo, isNotNull);
       });
 
       test('parses response with document_annotation', () {
@@ -67,6 +66,7 @@ void main() {
           'id': 'ocr-ann',
           'model': 'mistral-ocr-latest',
           'pages': <dynamic>[],
+          'usage_info': {'pages_processed': 1},
           'document_annotation': '{"title": "Invoice", "total": 42.0}',
         };
 
