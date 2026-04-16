@@ -152,8 +152,8 @@ print('Total pages in document: ${response.totalPages}');
 print('Pages processed: ${response.processedPages}');
 
 // 3. Get usage info
-if (response.usage != null) {
-  print('Tokens used: ${response.usage!.totalTokens}');
+if (response.usageInfo != null) {
+  print('Pages processed: ${response.usageInfo!.pagesProcessed}');
 }
 
 // 4. Process the extracted text
