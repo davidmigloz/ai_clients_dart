@@ -168,7 +168,8 @@ class Interaction {
           .toList(),
     if (responseMimeType != null) 'response_mime_type': responseMimeType,
     if (agentConfig != null) 'agent_config': agentConfig!.toJson(),
-    if (serviceTier != null) 'service_tier': serviceTierToString(serviceTier!),
+    if (serviceTier != null && serviceTier != ServiceTier.unspecified)
+      'service_tier': serviceTierToString(serviceTier!),
   };
 
   /// Creates a copy with replaced values.
@@ -337,7 +338,8 @@ class CreateModelInteractionParams {
     if (previousInteractionId != null)
       'previous_interaction_id': previousInteractionId,
     if (background != null) 'background': background,
-    if (serviceTier != null) 'service_tier': serviceTierToString(serviceTier!),
+    if (serviceTier != null && serviceTier != ServiceTier.unspecified)
+      'service_tier': serviceTierToString(serviceTier!),
   };
 }
 
@@ -396,6 +398,7 @@ class CreateAgentInteractionParams {
     if (previousInteractionId != null)
       'previous_interaction_id': previousInteractionId,
     if (background != null) 'background': background,
-    if (serviceTier != null) 'service_tier': serviceTierToString(serviceTier!),
+    if (serviceTier != null && serviceTier != ServiceTier.unspecified)
+      'service_tier': serviceTierToString(serviceTier!),
   };
 }
