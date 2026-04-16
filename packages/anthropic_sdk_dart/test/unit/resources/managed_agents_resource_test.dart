@@ -804,7 +804,7 @@ void main() {
 
       expect(output['type'], 'unknown_error');
       expect(output['message'], 'Something went wrong');
-      expect(output['retry_status'], isA<Map>());
+      expect(output['retry_status'], isA<Map<String, dynamic>>());
     });
 
     test('toJson preserves unknown fields from rawJson', () {
@@ -822,9 +822,9 @@ void main() {
     });
 
     test('copyWith creates modified copy', () {
-      final error = UnknownManagedAgentError(
+      const error = UnknownManagedAgentError(
         message: 'original',
-        retryStatus: const RetryStatusTerminal(),
+        retryStatus: RetryStatusTerminal(),
       );
       final modified = error.copyWith(message: 'updated');
 
@@ -834,17 +834,17 @@ void main() {
     });
 
     test('equality includes type and retryStatus', () {
-      final a = UnknownManagedAgentError(
+      const a = UnknownManagedAgentError(
         message: 'error',
-        retryStatus: const RetryStatusTerminal(),
+        retryStatus: RetryStatusTerminal(),
       );
-      final b = UnknownManagedAgentError(
+      const b = UnknownManagedAgentError(
         message: 'error',
-        retryStatus: const RetryStatusTerminal(),
+        retryStatus: RetryStatusTerminal(),
       );
-      final c = UnknownManagedAgentError(
+      const c = UnknownManagedAgentError(
         message: 'different',
-        retryStatus: const RetryStatusTerminal(),
+        retryStatus: RetryStatusTerminal(),
       );
 
       expect(a, equals(b));

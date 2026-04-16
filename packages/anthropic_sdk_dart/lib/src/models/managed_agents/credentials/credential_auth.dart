@@ -1329,32 +1329,41 @@ sealed class TokenEndpointAuthUpdateParam {
 /// Updated HTTP Basic authentication parameters for the token endpoint.
 @immutable
 class TokenEndpointAuthBasicUpdateParam extends TokenEndpointAuthUpdateParam {
+  /// The type discriminator. Always `client_secret_basic`.
+  final String type;
+
   /// Updated OAuth client secret.
   final String? clientSecret;
 
   /// Creates a [TokenEndpointAuthBasicUpdateParam].
-  const TokenEndpointAuthBasicUpdateParam({this.clientSecret});
+  const TokenEndpointAuthBasicUpdateParam({
+    this.type = 'client_secret_basic',
+    this.clientSecret,
+  });
 
   /// Creates a [TokenEndpointAuthBasicUpdateParam] from JSON.
   factory TokenEndpointAuthBasicUpdateParam.fromJson(
     Map<String, dynamic> json,
   ) {
     return TokenEndpointAuthBasicUpdateParam(
+      type: json['type'] as String? ?? 'client_secret_basic',
       clientSecret: json['client_secret'] as String?,
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
-    'type': 'client_secret_basic',
+    'type': type,
     if (clientSecret != null) 'client_secret': clientSecret,
   };
 
   /// Creates a copy with replaced values.
   TokenEndpointAuthBasicUpdateParam copyWith({
+    String? type,
     Object? clientSecret = unsetCopyWithValue,
   }) {
     return TokenEndpointAuthBasicUpdateParam(
+      type: type ?? this.type,
       clientSecret: clientSecret == unsetCopyWithValue
           ? this.clientSecret
           : clientSecret as String?,
@@ -1366,43 +1375,57 @@ class TokenEndpointAuthBasicUpdateParam extends TokenEndpointAuthUpdateParam {
       identical(this, other) ||
       other is TokenEndpointAuthBasicUpdateParam &&
           runtimeType == other.runtimeType &&
+          type == other.type &&
           clientSecret == other.clientSecret;
 
   @override
-  int get hashCode => clientSecret.hashCode;
+  int get hashCode => Object.hash(type, clientSecret);
 
   @override
   String toString() =>
-      'TokenEndpointAuthBasicUpdateParam(clientSecret: $clientSecret)';
+      'TokenEndpointAuthBasicUpdateParam('
+      'type: $type, '
+      'clientSecret: $clientSecret)';
 }
 
 /// Updated POST body authentication parameters for the token endpoint.
 @immutable
 class TokenEndpointAuthPostUpdateParam extends TokenEndpointAuthUpdateParam {
+  /// The type discriminator. Always `client_secret_post`.
+  final String type;
+
   /// Updated OAuth client secret.
   final String? clientSecret;
 
   /// Creates a [TokenEndpointAuthPostUpdateParam].
-  const TokenEndpointAuthPostUpdateParam({this.clientSecret});
+  const TokenEndpointAuthPostUpdateParam({
+    this.type = 'client_secret_post',
+    this.clientSecret,
+  });
 
   /// Creates a [TokenEndpointAuthPostUpdateParam] from JSON.
-  factory TokenEndpointAuthPostUpdateParam.fromJson(Map<String, dynamic> json) {
+  factory TokenEndpointAuthPostUpdateParam.fromJson(
+    Map<String, dynamic> json,
+  ) {
     return TokenEndpointAuthPostUpdateParam(
+      type: json['type'] as String? ?? 'client_secret_post',
       clientSecret: json['client_secret'] as String?,
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
-    'type': 'client_secret_post',
+    'type': type,
     if (clientSecret != null) 'client_secret': clientSecret,
   };
 
   /// Creates a copy with replaced values.
   TokenEndpointAuthPostUpdateParam copyWith({
+    String? type,
     Object? clientSecret = unsetCopyWithValue,
   }) {
     return TokenEndpointAuthPostUpdateParam(
+      type: type ?? this.type,
       clientSecret: clientSecret == unsetCopyWithValue
           ? this.clientSecret
           : clientSecret as String?,
@@ -1414,14 +1437,17 @@ class TokenEndpointAuthPostUpdateParam extends TokenEndpointAuthUpdateParam {
       identical(this, other) ||
       other is TokenEndpointAuthPostUpdateParam &&
           runtimeType == other.runtimeType &&
+          type == other.type &&
           clientSecret == other.clientSecret;
 
   @override
-  int get hashCode => clientSecret.hashCode;
+  int get hashCode => Object.hash(type, clientSecret);
 
   @override
   String toString() =>
-      'TokenEndpointAuthPostUpdateParam(clientSecret: $clientSecret)';
+      'TokenEndpointAuthPostUpdateParam('
+      'type: $type, '
+      'clientSecret: $clientSecret)';
 }
 
 /// Unrecognized token endpoint auth update type (preserves raw JSON).
