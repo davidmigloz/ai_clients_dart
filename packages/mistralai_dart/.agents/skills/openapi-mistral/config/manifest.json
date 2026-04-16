@@ -1532,6 +1532,13 @@
       "file": "lib/src/models/ocr/ocr_confidence_score.dart",
       "schema": "OCRConfidenceScore"
     },
+    "OCRImageObject": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "OcrImage",
+      "file": "lib/src/models/ocr/ocr_image.dart",
+      "schema": "OCRImageObject"
+    },
     "OCRPageConfidenceScores": {
       "spec": "main",
       "kind": "object",

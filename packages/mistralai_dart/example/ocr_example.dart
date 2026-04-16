@@ -147,16 +147,12 @@ final response = await client.ocr.process(
   ),
 );
 
-// 2. Check processing stats
-print('Total pages in document: ${response.totalPages}');
-print('Pages processed: ${response.processedPages}');
-
-// 3. Get usage info
+// 2. Get usage info
 if (response.usageInfo != null) {
   print('Pages processed: ${response.usageInfo!.pagesProcessed}');
 }
 
-// 4. Process the extracted text
+// 3. Process the extracted text
 final fullText = response.text;
 
 // Or get specific page content

@@ -26,7 +26,7 @@ void main() {
           'markdown': 'Some text with images',
           'images': [
             {'id': 'img-1'},
-            {'id': 'img-2', 'format': 'png'},
+            {'id': 'img-2', 'top_left_x': 10, 'top_left_y': 20},
           ],
           'dimensions': {'width': 612, 'height': 792, 'dpi': 72},
         };
@@ -38,7 +38,7 @@ void main() {
         expect(page.images, hasLength(2));
         expect(page.images[0].id, 'img-1');
         expect(page.images[1].id, 'img-2');
-        expect(page.images[1].format, 'png');
+        expect(page.images[1].topLeftX, 10);
         expect(page.dimensions, isNotNull);
         expect(page.dimensions!.width, 612);
         expect(page.dimensions!.height, 792);

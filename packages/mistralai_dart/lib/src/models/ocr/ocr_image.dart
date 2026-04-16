@@ -6,37 +6,55 @@ class OcrImage {
   /// Unique identifier for the image.
   final String id;
 
-  /// The bounding box of the image [x, y, width, height].
-  final List<double>? boundingBox;
+  /// X coordinate of the top-left corner of the extracted image.
+  final int? topLeftX;
 
-  /// Base64-encoded image data (if requested).
+  /// Y coordinate of the top-left corner of the extracted image.
+  final int? topLeftY;
+
+  /// X coordinate of the bottom-right corner of the extracted image.
+  final int? bottomRightX;
+
+  /// Y coordinate of the bottom-right corner of the extracted image.
+  final int? bottomRightY;
+
+  /// Base64 string of the extracted image (if requested).
   final String? imageBase64;
 
-  /// The format of the image (e.g., 'png', 'jpeg').
-  final String? format;
+  /// Annotation of the extracted image as a JSON string.
+  final String? imageAnnotation;
 
   /// Creates an [OcrImage].
   const OcrImage({
     required this.id,
-    this.boundingBox,
+    this.topLeftX,
+    this.topLeftY,
+    this.bottomRightX,
+    this.bottomRightY,
     this.imageBase64,
-    this.format,
+    this.imageAnnotation,
   });
 
   /// Creates an [OcrImage] from JSON.
   factory OcrImage.fromJson(Map<String, dynamic> json) => OcrImage(
     id: json['id'] as String? ?? '',
-    boundingBox: (json['bounding_box'] as List?)?.cast<double>(),
+    topLeftX: json['top_left_x'] as int?,
+    topLeftY: json['top_left_y'] as int?,
+    bottomRightX: json['bottom_right_x'] as int?,
+    bottomRightY: json['bottom_right_y'] as int?,
     imageBase64: json['image_base64'] as String?,
-    format: json['format'] as String?,
+    imageAnnotation: json['image_annotation'] as String?,
   );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'id': id,
-    if (boundingBox != null) 'bounding_box': boundingBox,
+    if (topLeftX != null) 'top_left_x': topLeftX,
+    if (topLeftY != null) 'top_left_y': topLeftY,
+    if (bottomRightX != null) 'bottom_right_x': bottomRightX,
+    if (bottomRightY != null) 'bottom_right_y': bottomRightY,
     if (imageBase64 != null) 'image_base64': imageBase64,
-    if (format != null) 'format': format,
+    if (imageAnnotation != null) 'image_annotation': imageAnnotation,
   };
 
   @override

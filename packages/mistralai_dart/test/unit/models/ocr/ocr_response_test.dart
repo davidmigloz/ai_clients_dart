@@ -6,46 +6,38 @@ void main() {
     group('fromJson', () {
       test('parses minimal response', () {
         final json = {
-          'id': 'ocr-123',
           'model': 'mistral-ocr-latest',
           'pages': <dynamic>[],
+          'usage_info': {'pages_processed': 0},
         };
 
         final response = OcrResponse.fromJson(json);
 
-        expect(response.id, 'ocr-123');
-        expect(response.object, 'ocr.response');
         expect(response.model, 'mistral-ocr-latest');
         expect(response.pages, isEmpty);
+        expect(response.usageInfo, isNotNull);
+        expect(response.documentAnnotation, isNull);
       });
 
       test('parses full response', () {
         final json = {
-          'id': 'ocr-456',
-          'object': 'ocr.response',
           'model': 'mistral-ocr-latest',
           'pages': [
             {
               'index': 0,
               'markdown': '# Page 1\n\nSome content.',
               'images': [
-                {
-                  'id': 'img-1',
-                  'bounding_box': [0.0, 0.0, 100.0, 100.0],
-                },
+                {'id': 'img-1', 'top_left_x': 0, 'top_left_y': 0},
               ],
             },
             {'index': 1, 'markdown': '# Page 2\n\nMore content.'},
           ],
           'usage_info': {'pages_processed': 2, 'doc_size_bytes': 102400},
-          'total_pages': 5,
-          'processed_pages': 2,
-          'created_at': '2024-01-15T10:00:00Z',
+          'document_annotation': '{"type": "report"}',
         };
 
         final response = OcrResponse.fromJson(json);
 
-        expect(response.id, 'ocr-456');
         expect(response.model, 'mistral-ocr-latest');
         expect(response.pages, hasLength(2));
         expect(response.pages[0].index, 0);
@@ -55,15 +47,11 @@ void main() {
         expect(response.usageInfo, isNotNull);
         expect(response.usageInfo!.pagesProcessed, 2);
         expect(response.usageInfo!.docSizeBytes, 102400);
-        expect(response.totalPages, 5);
-        expect(response.processedPages, 2);
-        expect(response.createdAt, isNotNull);
-        expect(response.documentAnnotation, isNull);
+        expect(response.documentAnnotation, '{"type": "report"}');
       });
 
       test('parses response with document_annotation', () {
         final json = {
-          'id': 'ocr-ann',
           'model': 'mistral-ocr-latest',
           'pages': <dynamic>[],
           'usage_info': {'pages_processed': 1},
@@ -80,35 +68,24 @@ void main() {
     group('toJson', () {
       test('serializes response', () {
         const response = OcrResponse(
-          id: 'ocr-789',
           model: 'mistral-ocr-latest',
           pages: [OcrPage(index: 0, markdown: '# Title\n\nParagraph text.')],
-          totalPages: 1,
-          processedPages: 1,
+          usageInfo: OcrUsageInfo(pagesProcessed: 1),
         );
 
         final json = response.toJson();
 
-        expect(json['id'], 'ocr-789');
-        expect(json['object'], 'ocr.response');
         expect(json['model'], 'mistral-ocr-latest');
         expect(json['pages'], hasLength(1));
-        expect(json['total_pages'], 1);
-        expect(json['processed_pages'], 1);
+        expect(json['usage_info'], isA<Map<String, dynamic>>());
       });
 
       test('omits null fields', () {
-        const response = OcrResponse(
-          id: 'ocr-test',
-          model: 'mistral-ocr-latest',
-          pages: [],
-        );
+        const response = OcrResponse(model: 'mistral-ocr-latest', pages: []);
 
         final json = response.toJson();
 
         expect(json.containsKey('usage_info'), isFalse);
-        expect(json.containsKey('total_pages'), isFalse);
-        expect(json.containsKey('created_at'), isFalse);
         expect(json.containsKey('document_annotation'), isFalse);
       });
     });
@@ -116,7 +93,6 @@ void main() {
     group('helper methods', () {
       test('text concatenates all page markdown', () {
         const response = OcrResponse(
-          id: 'ocr-text-test',
           model: 'mistral-ocr-latest',
           pages: [
             OcrPage(index: 0, markdown: 'Page 1 content'),
@@ -135,40 +111,37 @@ void main() {
 
       test('getPageText returns specific page content', () {
         const response = OcrResponse(
-          id: 'ocr-page-test',
           model: 'mistral-ocr-latest',
           pages: [
             OcrPage(index: 0, markdown: 'First page'),
-            OcrPage(index: 2, markdown: 'Third page'), // Non-consecutive
+            OcrPage(index: 2, markdown: 'Third page'),
           ],
         );
 
         expect(response.getPageText(0), 'First page');
         expect(response.getPageText(2), 'Third page');
-        expect(response.getPageText(1), isNull); // Not present
+        expect(response.getPageText(1), isNull);
       });
     });
 
     group('equality', () {
-      test('responses with same id are equal', () {
+      test('responses with same fields are equal', () {
         const response1 = OcrResponse(
-          id: 'ocr-same',
-          model: 'model-1',
-          pages: [],
+          model: 'mistral-ocr-latest',
+          pages: [OcrPage(index: 0, markdown: 'text')],
         );
         const response2 = OcrResponse(
-          id: 'ocr-same',
-          model: 'model-2', // Different but not part of equality
-          pages: [OcrPage(index: 0, markdown: 'content')],
+          model: 'mistral-ocr-latest',
+          pages: [OcrPage(index: 0, markdown: 'text')],
         );
 
         expect(response1, equals(response2));
         expect(response1.hashCode, equals(response2.hashCode));
       });
 
-      test('responses with different ids are not equal', () {
-        const response1 = OcrResponse(id: 'ocr-1', model: 'model', pages: []);
-        const response2 = OcrResponse(id: 'ocr-2', model: 'model', pages: []);
+      test('responses with different models are not equal', () {
+        const response1 = OcrResponse(model: 'model-1', pages: []);
+        const response2 = OcrResponse(model: 'model-2', pages: []);
 
         expect(response1, isNot(equals(response2)));
       });
@@ -176,7 +149,6 @@ void main() {
 
     test('toString returns readable representation', () {
       const response = OcrResponse(
-        id: 'ocr-123',
         model: 'mistral-ocr-latest',
         pages: [
           OcrPage(index: 0, markdown: 'content'),
@@ -184,7 +156,7 @@ void main() {
         ],
       );
 
-      expect(response.toString(), contains('ocr-123'));
+      expect(response.toString(), contains('mistral-ocr-latest'));
       expect(response.toString(), contains('pages: 2'));
     });
   });
