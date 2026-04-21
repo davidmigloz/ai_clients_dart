@@ -16,7 +16,7 @@
 - [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/tool_calling_example.dart) (~742 tokens): Function calling with tool definitions.
 - [vision_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/vision_example.dart) (~840 tokens): Image analysis with vision models.
 - [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/embeddings_example.dart) (~837 tokens): Text embeddings with dimension control.
-- [images_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/images_example.dart) (~860 tokens): GPT Image 2 generation, editing, and token usage.
+- [images_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/images_example.dart) (~1.2k tokens): GPT Image 2 generation, editing, streaming (partial images), and token usage.
 - [audio_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/audio_example.dart) (~1k tokens): Text-to-speech and transcription.
 - [realtime_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/realtime_example.dart) (~1.3k tokens): Realtime API (WebSocket and WebRTC).
 - [videos_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/openai_dart/example/videos_example.dart) (~1.6k tokens): Sora video generation, editing, and extension.
@@ -42,4 +42,4 @@
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/openai_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~60k tokens**
+**Total: ~60.4k tokens**

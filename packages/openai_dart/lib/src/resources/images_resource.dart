@@ -1,9 +1,13 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../errors/exceptions.dart';
 import '../models/images/images.dart';
+import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
+import 'streaming_resource.dart';
 
 /// Resource for image operations.
 ///
@@ -28,7 +32,7 @@ import 'base_resource.dart';
 /// final bytes = response.data.first.b64Json; // GPT image returns base64
 /// print('Tokens used: ${response.usage?.totalTokens}');
 /// ```
-class ImagesResource extends ResourceBase {
+class ImagesResource extends ResourceBase with StreamingResource {
   /// Creates an [ImagesResource].
   ImagesResource({
     required super.config,
@@ -84,6 +88,68 @@ class ImagesResource extends ResourceBase {
     );
   }
 
+  /// Streams image generation as Server-Sent Events (GPT image models only).
+  ///
+  /// Forces `stream: true` on the request. Yields one or more
+  /// [ImageGenPartialImageEvent]s followed by a terminal
+  /// [ImageGenCompletedEvent] carrying the final image and token-based usage.
+  ///
+  /// ## Example
+  ///
+  /// ```dart
+  /// final stream = client.images.generateStream(
+  ///   ImageGenerationRequest(
+  ///     model: ImageModels.gptImage2,
+  ///     prompt: 'A white cat wearing a top hat',
+  ///     partialImages: 2,
+  ///   ),
+  /// );
+  ///
+  /// await for (final event in stream) {
+  ///   switch (event) {
+  ///     case ImageGenPartialImageEvent():
+  ///       print('partial #${event.partialImageIndex}');
+  ///     case ImageGenCompletedEvent():
+  ///       print('done — ${event.usage.totalTokens} tokens');
+  ///     case ImageGenUnknownEvent():
+  ///       // Forward-compatibility fallback.
+  ///   }
+  /// }
+  /// ```
+  Stream<ImageGenStreamEvent> generateStream(
+    ImageGenerationRequest request, {
+    Future<void>? abortTrigger,
+  }) {
+    ensureNotClosed?.call();
+    final body = request.toJson()..['stream'] = true;
+    return streamSseEvents(
+      endpoint: _generateEndpoint,
+      body: body,
+      abortTrigger: abortTrigger,
+    ).map((json) {
+      final sseEvent = json['_event'] as String?;
+      final error = json['error'];
+      if (sseEvent == 'error' || error != null) {
+        throwInlineStreamError(json, sseEvent, error);
+      }
+      try {
+        return ImageGenStreamEvent.fromJson(json);
+      } on FormatException catch (e) {
+        throw ParseException(
+          message: 'Failed to parse image generation stream event: $e',
+          responseBody: json.toString(),
+          cause: e,
+        );
+      } on TypeError catch (e) {
+        throw ParseException(
+          message: 'Failed to parse image generation stream event: $e',
+          responseBody: json.toString(),
+          cause: e,
+        );
+      }
+    });
+  }
+
   /// Creates edited or extended images.
   ///
   /// Given an original image and a mask, generates new images where
@@ -136,6 +202,96 @@ class ImagesResource extends ResourceBase {
     return ImageResponse.fromJson(
       jsonDecode(response.body) as Map<String, dynamic>,
     );
+  }
+
+  /// Streams an image edit using a JSON payload (GPT image models only).
+  ///
+  /// Forces `stream: true` on the request. Yields
+  /// [ImageEditPartialImageEvent]s then a terminal [ImageEditCompletedEvent].
+  Stream<ImageEditStreamEvent> editJsonStream(
+    ImageEditJsonRequest request, {
+    Future<void>? abortTrigger,
+  }) {
+    ensureNotClosed?.call();
+    final body = request.toJson()..['stream'] = true;
+    return streamSseEvents(
+      endpoint: _editEndpoint,
+      body: body,
+      abortTrigger: abortTrigger,
+    ).map(_mapEditEvent);
+  }
+
+  /// Streams a multipart image edit (GPT image models only).
+  ///
+  /// Forces `stream: true` on the request. Yields
+  /// [ImageEditPartialImageEvent]s then a terminal [ImageEditCompletedEvent].
+  Stream<ImageEditStreamEvent> editStream(
+    ImageEditRequest request, {
+    Future<void>? abortTrigger,
+  }) async* {
+    ensureNotClosed?.call();
+
+    final multipart = _createEditMultipartRequest(
+      ImageEditRequest(
+        image: request.image,
+        imageFilename: request.imageFilename,
+        prompt: request.prompt,
+        mask: request.mask,
+        maskFilename: request.maskFilename,
+        model: request.model,
+        n: request.n,
+        size: request.size,
+        responseFormat: request.responseFormat,
+        user: request.user,
+        background: request.background,
+        inputFidelity: request.inputFidelity,
+        quality: request.quality,
+        outputFormat: request.outputFormat,
+        outputCompression: request.outputCompression,
+        moderation: request.moderation,
+        stream: true,
+        partialImages: request.partialImages,
+      ),
+    )..headers.addAll(requestBuilder.buildMultipartHeaders());
+
+    final response = await httpClient.send(multipart);
+    final requestId =
+        response.headers['x-request-id'] ??
+        response.request?.headers['X-Request-ID'] ??
+        'unknown';
+
+    if (response.statusCode >= 400) {
+      final body = await response.stream.bytesToString();
+      throw parseStreamError(response.statusCode, body, requestId);
+    }
+
+    const parser = SseParser();
+    await for (final json in parser.parse(response.stream)) {
+      yield _mapEditEvent(json);
+    }
+  }
+
+  ImageEditStreamEvent _mapEditEvent(Map<String, dynamic> json) {
+    final sseEvent = json['_event'] as String?;
+    final error = json['error'];
+    if (sseEvent == 'error' || error != null) {
+      throwInlineStreamError(json, sseEvent, error);
+    }
+    try {
+      return ImageEditStreamEvent.fromJson(json);
+    } on FormatException catch (e) {
+      throw ParseException(
+        message: 'Failed to parse image edit stream event: $e',
+        responseBody: json.toString(),
+        cause: e,
+      );
+    } on TypeError catch (e) {
+      throw ParseException(
+        message: 'Failed to parse image edit stream event: $e',
+        responseBody: json.toString(),
+        cause: e,
+      );
+    }
   }
 
   /// Creates variations of an existing image.

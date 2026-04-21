@@ -69,6 +69,45 @@ Future<void> main() async {
       print('(skipping edit — cat.png was not saved)');
     }
 
+    // Streaming generation with partial images.
+    print('\n=== GPT Image 2 — Streaming (partial + final) ===\n');
+
+    final stream = client.images.generateStream(
+      const ImageGenerationRequest(
+        model: ImageModels.gptImage2,
+        prompt: 'A simple orange circle on a white card',
+        size: ImageSize.size1024x1024,
+        partialImages: 2,
+      ),
+    );
+
+    var partialCount = 0;
+    ImageGenCompletedEvent? completed;
+    await for (final event in stream) {
+      switch (event) {
+        case ImageGenPartialImageEvent():
+          partialCount++;
+          print(
+            'partial #${event.partialImageIndex} '
+            '(${event.b64Json.length} base64 chars)',
+          );
+        case ImageGenCompletedEvent():
+          completed = event;
+        case ImageGenUnknownEvent():
+          print('unknown event type: ${event.type}');
+      }
+    }
+    print('Received $partialCount partial image(s)');
+    if (completed != null) {
+      File(
+        'stream_final.png',
+      ).writeAsBytesSync(base64Decode(completed.b64Json));
+      print(
+        'Stream tokens — total: ${completed.usage.totalTokens}, '
+        'out: ${completed.usage.outputTokens}',
+      );
+    }
+
     // Multiple images in one call.
     print('\n=== GPT Image 2 — Multiple Images ===\n');
 

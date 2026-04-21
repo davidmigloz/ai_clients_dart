@@ -113,6 +113,91 @@ void main() {
       },
     );
 
+    test(
+      'generates image with GPT Image 2 and token-based usage',
+      timeout: const Timeout(Duration(minutes: 5)),
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        final response = await client!.images.generate(
+          const ImageGenerationRequest(
+            model: ImageModels.gptImage2,
+            prompt: 'A red apple on a white background',
+            size: ImageSize.size1024x1024,
+            quality: ImageQuality.low,
+            background: ImageBackground.opaque,
+            outputFormat: ImageOutputFormat.png,
+            moderation: ImageModerationLevel.auto,
+          ),
+        );
+
+        // GPT Image 2 always returns base64, never a URL.
+        expect(response.data, hasLength(1));
+        expect(response.data.first.b64Json, isNotNull);
+        expect(response.data.first.b64Json!.length, greaterThan(100));
+        expect(response.data.first.url, isNull);
+
+        // Response metadata must echo the request.
+        expect(response.size, ImageSize.size1024x1024);
+        expect(response.background, ImageBackground.opaque);
+        expect(response.outputFormat, ImageOutputFormat.png);
+        expect(response.quality, ImageQuality.low);
+
+        // Token-based pricing: usage must be populated.
+        final usage = response.usage;
+        expect(usage, isNotNull);
+        expect(usage!.totalTokens, greaterThan(0));
+        expect(usage.inputTokens, greaterThan(0));
+        expect(usage.outputTokens, greaterThan(0));
+        expect(usage.inputTokensDetails.textTokens, greaterThanOrEqualTo(0));
+        expect(usage.inputTokensDetails.imageTokens, greaterThanOrEqualTo(0));
+      },
+    );
+
+    test(
+      'streams GPT Image 2 generation with partial + completed events',
+      timeout: const Timeout(Duration(minutes: 5)),
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        final events = await client!.images
+            .generateStream(
+              const ImageGenerationRequest(
+                model: ImageModels.gptImage2,
+                prompt: 'A simple green square on a white background',
+                size: ImageSize.size1024x1024,
+                quality: ImageQuality.low,
+                partialImages: 1,
+              ),
+            )
+            .toList();
+
+        expect(events, isNotEmpty);
+        final completed = events.whereType<ImageGenCompletedEvent>().toList();
+        expect(
+          completed,
+          hasLength(1),
+          reason: 'exactly one image_generation.completed event expected',
+        );
+        expect(completed.single.b64Json, isNotEmpty);
+        expect(completed.single.usage.totalTokens, greaterThan(0));
+
+        // Partial events are optional per API, but we requested them and
+        // the server may emit 0+ depending on how quickly it generates.
+        final partials = events.whereType<ImageGenPartialImageEvent>().toList();
+        for (final p in partials) {
+          expect(p.b64Json, isNotEmpty);
+          expect(p.partialImageIndex, greaterThanOrEqualTo(0));
+        }
+      },
+    );
+
     // Note: DALL-E 3 tests are more expensive, keeping minimal
     test(
       'generates image with DALL-E 3',
