@@ -201,7 +201,9 @@ void main() {
       expect(multipart.fields['model'], 'gpt-image-2');
       expect(multipart.fields['input_fidelity'], 'high');
       expect(sent.headers['Accept'], 'text/event-stream');
-      expect(sent.headers['Content-Type'], contains('multipart/form-data'));
+      // MultipartRequest.finalize() sets the boundary header under the
+      // lowercase key.
+      expect(sent.headers['content-type'], contains('multipart/form-data'));
 
       client.close();
     });
