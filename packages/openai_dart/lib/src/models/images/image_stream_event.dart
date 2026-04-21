@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality_helpers.dart';
 import 'image_common.dart';
 import 'image_response.dart';
 
@@ -264,6 +265,17 @@ class ImageGenUnknownEvent extends ImageGenStreamEvent {
   Map<String, dynamic> toJson() => Map<String, dynamic>.from(rawJson);
 
   @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ImageGenUnknownEvent &&
+          runtimeType == other.runtimeType &&
+          rawType == other.rawType &&
+          mapsDeepEqual(rawJson, other.rawJson);
+
+  @override
+  int get hashCode => Object.hash(rawType, mapDeepHashCode(rawJson));
+
+  @override
   String toString() => 'ImageGenUnknownEvent(type: $rawType)';
 }
 
@@ -513,6 +525,17 @@ class ImageEditUnknownEvent extends ImageEditStreamEvent {
 
   @override
   Map<String, dynamic> toJson() => Map<String, dynamic>.from(rawJson);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ImageEditUnknownEvent &&
+          runtimeType == other.runtimeType &&
+          rawType == other.rawType &&
+          mapsDeepEqual(rawJson, other.rawJson);
+
+  @override
+  int get hashCode => Object.hash(rawType, mapDeepHashCode(rawJson));
 
   @override
   String toString() => 'ImageEditUnknownEvent(type: $rawType)';

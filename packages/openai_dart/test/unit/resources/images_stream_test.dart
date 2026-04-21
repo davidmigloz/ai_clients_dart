@@ -69,6 +69,30 @@ void main() {
       // Raw JSON preserved on round-trip.
       expect(event.toJson()['something_new'], 'value');
     });
+
+    test('ImageGenUnknownEvent implements deep value equality', () {
+      final a = ImageGenUnknownEvent.fromJson(const {
+        'type': 'image_generation.future',
+        'nested': {
+          'arr': [1, 2, 3],
+        },
+      });
+      final b = ImageGenUnknownEvent.fromJson(const {
+        'type': 'image_generation.future',
+        'nested': {
+          'arr': [1, 2, 3],
+        },
+      });
+      final c = ImageGenUnknownEvent.fromJson(const {
+        'type': 'image_generation.future',
+        'nested': {
+          'arr': [1, 2, 4],
+        },
+      });
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+      expect(a, isNot(equals(c)));
+    });
   });
 
   group('ImageEditStreamEvent parsing', () {
@@ -119,6 +143,24 @@ void main() {
       const json = {'type': 'image_edit.v3', 'foo': 'bar'};
       final event = ImageEditStreamEvent.fromJson(json);
       expect(event, isA<ImageEditUnknownEvent>());
+    });
+
+    test('ImageEditUnknownEvent implements deep value equality', () {
+      final a = ImageEditUnknownEvent.fromJson(const {
+        'type': 'image_edit.future',
+        'extras': {'k': 'v'},
+      });
+      final b = ImageEditUnknownEvent.fromJson(const {
+        'type': 'image_edit.future',
+        'extras': {'k': 'v'},
+      });
+      final c = ImageEditUnknownEvent.fromJson(const {
+        'type': 'image_edit.future',
+        'extras': {'k': 'different'},
+      });
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+      expect(a, isNot(equals(c)));
     });
   });
 
