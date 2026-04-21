@@ -29,7 +29,12 @@ import 'streaming_resource.dart';
 ///   ),
 /// );
 ///
-/// final bytes = response.data.first.b64Json; // GPT image returns base64
+/// // GPT image models always return base64; decode before using as bytes.
+/// final b64Json = response.data.first.b64Json;
+/// if (b64Json == null) {
+///   throw StateError('Expected base64 image data but got null');
+/// }
+/// final bytes = base64Decode(b64Json);
 /// print('Tokens used: ${response.usage?.totalTokens}');
 /// ```
 class ImagesResource extends ResourceBase with StreamingResource {

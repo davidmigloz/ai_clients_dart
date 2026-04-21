@@ -43,25 +43,32 @@ void main() {
       );
 
       expect(body, isNotNull);
-      expect(body, contains('name="model"'));
-      expect(body, contains('gpt-image-2'));
-      expect(body, contains('name="background"'));
-      expect(body, contains('\r\ntransparent\r\n'));
-      expect(body, contains('name="input_fidelity"'));
-      expect(body, contains('\r\nhigh\r\n'));
-      expect(body, contains('name="quality"'));
-      expect(body, contains('name="output_format"'));
-      expect(body, contains('\r\nwebp\r\n'));
-      expect(body, contains('name="output_compression"'));
-      expect(body, contains('\r\n75\r\n'));
-      expect(body, contains('name="moderation"'));
-      expect(body, contains('\r\nlow\r\n'));
-      expect(body, contains('name="stream"'));
-      expect(body, contains('\r\ntrue\r\n'));
-      expect(body, contains('name="partial_images"'));
-      expect(body, contains('\r\n2\r\n'));
-      expect(body, contains('name="size"'));
-      expect(body, contains('\r\n1536x1024\r\n'));
+      // Scoped field=value assertions — guard against a value matching
+      // a different part (e.g. "high" is emitted for both quality and
+      // input_fidelity, so a bare contains() check isn't sufficient).
+      void expectMultipartField(String name, String value) {
+        expect(
+          body,
+          matches(
+            RegExp(
+              'name="${RegExp.escape(name)}"\\r\\n\\r\\n'
+              '${RegExp.escape(value)}\\r\\n',
+            ),
+          ),
+          reason: 'multipart field $name should carry value "$value"',
+        );
+      }
+
+      expectMultipartField('model', 'gpt-image-2');
+      expectMultipartField('background', 'transparent');
+      expectMultipartField('input_fidelity', 'high');
+      expectMultipartField('quality', 'high');
+      expectMultipartField('output_format', 'webp');
+      expectMultipartField('output_compression', '75');
+      expectMultipartField('moderation', 'low');
+      expectMultipartField('stream', 'true');
+      expectMultipartField('partial_images', '2');
+      expectMultipartField('size', '1536x1024');
 
       client.close();
     });

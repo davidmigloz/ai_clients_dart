@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality_helpers.dart';
 import 'image_common.dart';
 
 /// A response from the images API.
@@ -37,9 +38,16 @@ class ImageResponse {
 
   /// Creates an [ImageResponse] from JSON.
   factory ImageResponse.fromJson(Map<String, dynamic> json) {
+    final dataJson = json['data'];
+    if (dataJson is! List) {
+      throw FormatException(
+        'ImageResponse.data is required — expected a List, '
+        'got ${dataJson.runtimeType}',
+      );
+    }
     return ImageResponse(
       created: json['created'] as int,
-      data: (json['data'] as List<dynamic>? ?? const [])
+      data: dataJson
           .map((e) => GeneratedImage.fromJson(e as Map<String, dynamic>))
           .toList(),
       background: json['background'] != null
@@ -111,7 +119,7 @@ class ImageResponse {
       other is ImageResponse &&
           runtimeType == other.runtimeType &&
           created == other.created &&
-          data.length == other.data.length &&
+          listsEqual(data, other.data) &&
           background == other.background &&
           outputFormat == other.outputFormat &&
           quality == other.quality &&
@@ -121,7 +129,7 @@ class ImageResponse {
   @override
   int get hashCode => Object.hash(
     created,
-    data.length,
+    listHash(data),
     background,
     outputFormat,
     quality,

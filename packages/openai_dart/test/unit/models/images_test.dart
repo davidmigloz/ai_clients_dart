@@ -251,6 +251,29 @@ void main() {
       // Round-trip: toJson should emit the new fields and re-parse.
       final parsed = ImageResponse.fromJson(response.toJson());
       expect(parsed, equals(response));
+      expect(parsed.data, hasLength(1));
+      expect(parsed.data.first.b64Json, 'iVBORw0KGgo=');
+      expect(parsed.data.first.revisedPrompt, isNull);
+    });
+
+    test('fromJson throws FormatException when data is missing', () {
+      expect(
+        () => ImageResponse.fromJson(const {'created': 0}),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
+    test('ImageResponse == compares data contents, not just length', () {
+      const a = ImageResponse(
+        created: 1,
+        data: [GeneratedImage(b64Json: 'AAAA')],
+      );
+      const b = ImageResponse(
+        created: 1,
+        data: [GeneratedImage(b64Json: 'BBBB')],
+      );
+      expect(a, isNot(equals(b)));
+      expect(a.hashCode, isNot(equals(b.hashCode)));
     });
 
     test('parses minimal DALL-E response (no usage, no metadata)', () {
