@@ -194,10 +194,11 @@ class GeneratedImage {
       other is GeneratedImage &&
           runtimeType == other.runtimeType &&
           url == other.url &&
-          b64Json == other.b64Json;
+          b64Json == other.b64Json &&
+          revisedPrompt == other.revisedPrompt;
 
   @override
-  int get hashCode => Object.hash(url, b64Json);
+  int get hashCode => Object.hash(url, b64Json, revisedPrompt);
 
   @override
   String toString() {

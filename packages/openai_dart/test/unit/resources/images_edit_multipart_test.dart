@@ -23,6 +23,8 @@ void main() {
         httpClient: mockClient,
       );
 
+      // Non-streaming edit: stream / partialImages are rejected by edit()
+      // and covered in the dedicated streaming test for editStream.
       await client.images.edit(
         ImageEditRequest(
           image: Uint8List.fromList([1, 2, 3, 4]),
@@ -35,8 +37,6 @@ void main() {
           outputFormat: ImageOutputFormat.webp,
           outputCompression: 75,
           moderation: ImageModerationLevel.low,
-          stream: true,
-          partialImages: 2,
           size: ImageSize.size1536x1024,
           n: 1,
         ),
@@ -66,8 +66,6 @@ void main() {
       expectMultipartField('output_format', 'webp');
       expectMultipartField('output_compression', '75');
       expectMultipartField('moderation', 'low');
-      expectMultipartField('stream', 'true');
-      expectMultipartField('partial_images', '2');
       expectMultipartField('size', '1536x1024');
 
       client.close();
@@ -115,6 +113,81 @@ void main() {
           reason: '$key should not be present when unset',
         );
       }
+
+      client.close();
+    });
+
+    test('edit() rejects stream: true with ArgumentError', () async {
+      final client = OpenAIClient(
+        config: const OpenAIConfig(authProvider: ApiKeyProvider('sk-test-key')),
+        httpClient: MockClient((_) async => http.Response('{}', 200)),
+      );
+
+      await expectLater(
+        client.images.edit(
+          ImageEditRequest(
+            image: Uint8List.fromList([1, 2, 3, 4]),
+            imageFilename: 'a.png',
+            prompt: 'edit',
+            stream: true,
+          ),
+        ),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('editStream()'),
+          ),
+        ),
+      );
+
+      client.close();
+    });
+
+    test('generate() rejects stream: true with ArgumentError', () async {
+      final client = OpenAIClient(
+        config: const OpenAIConfig(authProvider: ApiKeyProvider('sk-test-key')),
+        httpClient: MockClient((_) async => http.Response('{}', 200)),
+      );
+
+      await expectLater(
+        client.images.generate(
+          const ImageGenerationRequest(prompt: 'p', stream: true),
+        ),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('generateStream()'),
+          ),
+        ),
+      );
+
+      client.close();
+    });
+
+    test('editJson() rejects stream: true with ArgumentError', () async {
+      final client = OpenAIClient(
+        config: const OpenAIConfig(authProvider: ApiKeyProvider('sk-test-key')),
+        httpClient: MockClient((_) async => http.Response('{}', 200)),
+      );
+
+      await expectLater(
+        client.images.editJson(
+          const ImageEditJsonRequest(
+            images: [ImageReference.url('https://example.com/x.png')],
+            prompt: 'edit',
+            stream: true,
+          ),
+        ),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('editJsonStream()'),
+          ),
+        ),
+      );
 
       client.close();
     });

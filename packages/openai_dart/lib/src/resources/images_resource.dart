@@ -46,6 +46,7 @@ class ImagesResource extends ResourceBase with StreamingResource {
     required super.interceptorChain,
     required super.requestBuilder,
     super.ensureNotClosed,
+    super.streamClientFactory,
   });
 
   static const _generateEndpoint = '/images/generations';
@@ -83,6 +84,13 @@ class ImagesResource extends ResourceBase with StreamingResource {
   /// ```
   Future<ImageResponse> generate(ImageGenerationRequest request) async {
     ensureNotClosed?.call();
+    if (request.stream ?? false) {
+      throw ArgumentError(
+        'generate() does not support stream: true. The server returns SSE '
+        'for streaming generations, which this method cannot parse. Use '
+        'generateStream() instead.',
+      );
+    }
     final url = requestBuilder.buildUrl(_generateEndpoint);
     final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('POST', url)
@@ -186,6 +194,13 @@ class ImagesResource extends ResourceBase with StreamingResource {
   /// ```
   Future<ImageResponse> edit(ImageEditRequest request) async {
     ensureNotClosed?.call();
+    if (request.stream ?? false) {
+      throw ArgumentError(
+        'edit() does not support stream: true. The server returns SSE for '
+        'streaming edits, which this method cannot parse. Use editStream() '
+        'instead.',
+      );
+    }
     final httpRequest = _createEditMultipartRequest(request);
     httpRequest.headers.addAll(requestBuilder.buildMultipartHeaders());
     final response = await interceptorChain.execute(httpRequest);
@@ -199,6 +214,12 @@ class ImagesResource extends ResourceBase with StreamingResource {
   /// editing workflows where images are referenced by URL or File ID.
   Future<ImageResponse> editJson(ImageEditJsonRequest request) async {
     ensureNotClosed?.call();
+    if (request.stream ?? false) {
+      throw ArgumentError(
+        'editJson() does not support stream: true. Use editJsonStream() '
+        'instead.',
+      );
+    }
     final url = requestBuilder.buildUrl(_editEndpoint);
     final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('POST', url)

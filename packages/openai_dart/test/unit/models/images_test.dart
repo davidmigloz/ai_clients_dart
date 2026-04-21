@@ -447,6 +447,19 @@ void main() {
       final image = GeneratedImage.fromJson(json);
       expect(image.revisedPrompt, 'The revised prompt text');
     });
+
+    test('== distinguishes images that differ only in revisedPrompt', () {
+      const a = GeneratedImage(
+        url: 'https://example.com/image.png',
+        revisedPrompt: 'A',
+      );
+      const b = GeneratedImage(
+        url: 'https://example.com/image.png',
+        revisedPrompt: 'B',
+      );
+      expect(a, isNot(equals(b)));
+      expect(a.hashCode, isNot(equals(b.hashCode)));
+    });
   });
 
   group('ImageQuality', () {
