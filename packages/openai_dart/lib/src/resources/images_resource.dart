@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 import '../errors/exceptions.dart';
 import '../models/images/images.dart';
@@ -228,38 +229,27 @@ class ImagesResource extends ResourceBase with StreamingResource {
 
   /// Streams a multipart image edit (GPT image models only).
   ///
-  /// Forces `stream: true` on the request. Yields
+  /// Forces `stream: true` on the multipart body. Yields
   /// [ImageEditPartialImageEvent]s then a terminal [ImageEditCompletedEvent].
+  ///
+  /// When [abortTrigger] completes, the underlying HTTP connection is closed
+  /// and the stream terminates — same contract as [generateStream] and
+  /// [editJsonStream].
   Stream<ImageEditStreamEvent> editStream(
     ImageEditRequest request, {
     Future<void>? abortTrigger,
   }) async* {
-    ensureNotClosed?.call();
-
     final multipart = _createEditMultipartRequest(
-      ImageEditRequest(
-        image: request.image,
-        imageFilename: request.imageFilename,
-        prompt: request.prompt,
-        mask: request.mask,
-        maskFilename: request.maskFilename,
-        model: request.model,
-        n: request.n,
-        size: request.size,
-        responseFormat: request.responseFormat,
-        user: request.user,
-        background: request.background,
-        inputFidelity: request.inputFidelity,
-        quality: request.quality,
-        outputFormat: request.outputFormat,
-        outputCompression: request.outputCompression,
-        moderation: request.moderation,
-        stream: true,
-        partialImages: request.partialImages,
-      ),
+      request.copyWith(stream: true),
     )..headers.addAll(requestBuilder.buildMultipartHeaders());
 
-    final response = await httpClient.send(multipart);
+    // Route through sendStream so abortTrigger closes the underlying client
+    // and terminates the in-flight connection, matching the JSON streaming
+    // paths above.
+    final response = await sendStream(
+      request: multipart,
+      abortTrigger: abortTrigger,
+    );
     final requestId =
         response.headers['x-request-id'] ??
         response.request?.headers['X-Request-ID'] ??
@@ -339,22 +329,28 @@ class ImagesResource extends ResourceBase with StreamingResource {
     final url = requestBuilder.buildUrl(_editEndpoint);
     final httpRequest = http.MultipartRequest('POST', url);
 
-    // Add image file
+    // Add image file. Passing an explicit Content-Type is required for
+    // GPT image models when `stream=true` — the server's streaming
+    // multipart parser rejects parts with the default
+    // `application/octet-stream` content-type.
     httpRequest.files.add(
       http.MultipartFile.fromBytes(
         'image',
         request.image,
         filename: request.imageFilename,
+        contentType: _inferImageContentType(request.imageFilename),
       ),
     );
 
     // Add mask if provided
     if (request.mask != null) {
+      final maskName = request.maskFilename ?? 'mask.png';
       httpRequest.files.add(
         http.MultipartFile.fromBytes(
           'mask',
           request.mask!,
-          filename: request.maskFilename ?? 'mask.png',
+          filename: maskName,
+          contentType: _inferImageContentType(maskName),
         ),
       );
     }
@@ -413,12 +409,14 @@ class ImagesResource extends ResourceBase with StreamingResource {
     final url = requestBuilder.buildUrl(_variationEndpoint);
     final httpRequest = http.MultipartRequest('POST', url);
 
-    // Add image file
+    // Add image file with an explicit Content-Type — keeps parity with
+    // the edit endpoint so consumers get predictable behavior.
     httpRequest.files.add(
       http.MultipartFile.fromBytes(
         'image',
         request.image,
         filename: request.imageFilename,
+        contentType: _inferImageContentType(request.imageFilename),
       ),
     );
 
@@ -440,5 +438,22 @@ class ImagesResource extends ResourceBase with StreamingResource {
     }
 
     return httpRequest;
+  }
+
+  /// Infers a multipart `Content-Type` from an image filename.
+  ///
+  /// Covers the formats accepted by the OpenAI images endpoints
+  /// (`png`, `jpeg`/`jpg`, `webp`, `gif`). Falls back to
+  /// `application/octet-stream` for unknown extensions — callers can still
+  /// set their filename precisely to match a supported extension.
+  static MediaType _inferImageContentType(String filename) {
+    final lower = filename.toLowerCase();
+    if (lower.endsWith('.png')) return MediaType('image', 'png');
+    if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) {
+      return MediaType('image', 'jpeg');
+    }
+    if (lower.endsWith('.webp')) return MediaType('image', 'webp');
+    if (lower.endsWith('.gif')) return MediaType('image', 'gif');
+    return MediaType('application', 'octet-stream');
   }
 }

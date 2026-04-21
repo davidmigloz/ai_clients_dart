@@ -201,7 +201,10 @@ class GeneratedImage {
 
   @override
   String toString() {
-    if (hasUrl) return 'GeneratedImage(url: ${url!.substring(0, 50)}...)';
+    if (hasUrl) {
+      final preview = url!.length > 50 ? '${url!.substring(0, 50)}...' : url!;
+      return 'GeneratedImage(url: $preview)';
+    }
     if (hasBase64) return 'GeneratedImage(b64_json: ${b64Json!.length} chars)';
     return 'GeneratedImage()';
   }

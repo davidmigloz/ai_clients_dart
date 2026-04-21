@@ -11,8 +11,11 @@ import 'image_response.dart';
 /// [ImagesResource.generateStream].
 ///
 /// Unknown event types are surfaced as [ImageGenUnknownEvent] with the raw
-/// JSON preserved, so newer server-side event variants do not cause parse
-/// failures.
+/// JSON preserved. Typed fields ([ImageSize], [ImageQuality],
+/// [ImageBackground], [ImageOutputFormat]) fall back to their `.unknown`
+/// variant when the server emits a value outside the current spec — for
+/// example, partial-image events sometimes carry transient sizes like
+/// `1254x1254`.
 @immutable
 sealed class ImageGenStreamEvent {
   const ImageGenStreamEvent();
@@ -74,16 +77,16 @@ class ImageGenPartialImageEvent extends ImageGenStreamEvent {
   /// Unix timestamp when the event was created.
   final int createdAt;
 
-  /// Requested image size.
+  /// Image size. May be [ImageSize.unknown] for out-of-spec values.
   final ImageSize size;
 
-  /// Requested image quality.
+  /// Image quality. May be [ImageQuality.unknown] for out-of-spec values.
   final ImageQuality quality;
 
-  /// Requested background handling.
+  /// Background. May be [ImageBackground.unknown] for out-of-spec values.
   final ImageBackground background;
 
-  /// Requested output format.
+  /// Output format. May be [ImageOutputFormat.unknown] for out-of-spec values.
   final ImageOutputFormat outputFormat;
 
   /// 0-based index of this partial image.
@@ -172,13 +175,13 @@ class ImageGenCompletedEvent extends ImageGenStreamEvent {
   /// Unix timestamp when the event was created.
   final int createdAt;
 
-  /// Final image size.
+  /// Final image size. May be [ImageSize.unknown] for out-of-spec values.
   final ImageSize size;
 
   /// Final image quality.
   final ImageQuality quality;
 
-  /// Final background handling.
+  /// Final background.
   final ImageBackground background;
 
   /// Final output format.
@@ -265,6 +268,9 @@ class ImageGenUnknownEvent extends ImageGenStreamEvent {
 }
 
 /// A Server-Sent Event from a streaming image edit request.
+///
+/// See [ImageGenStreamEvent] for the forward-compatibility contract on the
+/// typed fields.
 @immutable
 sealed class ImageEditStreamEvent {
   const ImageEditStreamEvent();
@@ -324,16 +330,16 @@ class ImageEditPartialImageEvent extends ImageEditStreamEvent {
   /// Unix timestamp when the event was created.
   final int createdAt;
 
-  /// Requested image size.
+  /// Image size. May be [ImageSize.unknown] for out-of-spec values.
   final ImageSize size;
 
-  /// Requested image quality.
+  /// Image quality.
   final ImageQuality quality;
 
-  /// Requested background handling.
+  /// Background.
   final ImageBackground background;
 
-  /// Requested output format.
+  /// Output format.
   final ImageOutputFormat outputFormat;
 
   /// 0-based index of this partial image.
@@ -428,7 +434,7 @@ class ImageEditCompletedEvent extends ImageEditStreamEvent {
   /// Final image quality.
   final ImageQuality quality;
 
-  /// Final background handling.
+  /// Final background.
   final ImageBackground background;
 
   /// Final output format.

@@ -3,6 +3,13 @@
 /// GPT image models (e.g. `gpt-image-2`) accept a richer set of parameters
 /// than the legacy DALL-E models. These enums cover the full spec surface;
 /// individual parameter docs call out which values apply to which model.
+///
+/// Every enum includes an `unknown` variant for forward compatibility —
+/// [fromJson] returns `unknown` rather than throwing when the server emits
+/// a value outside the current spec. Note that this is lossy: round-tripping
+/// an unknown value will serialize as `'unknown'`. If you need to preserve
+/// the raw wire value, read it from the surrounding response object
+/// (e.g. [ImageGenCompletedEvent.size] stores the raw string).
 library;
 
 /// Image quality options.
@@ -10,6 +17,9 @@ library;
 /// `standard` and `hd` apply to DALL-E 3. `low`, `medium`, `high`, and `auto`
 /// apply to GPT image models (including `gpt-image-2`).
 enum ImageQuality {
+  /// Unknown quality — forward-compat fallback for unrecognized server values.
+  unknown._('unknown'),
+
   /// Standard DALL-E 3 quality.
   standard._('standard'),
 
@@ -30,11 +40,11 @@ enum ImageQuality {
 
   const ImageQuality._(this._value);
 
-  /// Creates from JSON string.
+  /// Creates from JSON string. Unknown values map to [ImageQuality.unknown].
   factory ImageQuality.fromJson(String json) {
     return values.firstWhere(
       (e) => e._value == json,
-      orElse: () => throw FormatException('Unknown quality: $json'),
+      orElse: () => ImageQuality.unknown,
     );
   }
 
@@ -53,6 +63,12 @@ enum ImageQuality {
 /// `1024x1024`, `1792x1024`, `1024x1792`. GPT image models (including
 /// `gpt-image-2`) support `auto`, `1024x1024`, `1536x1024`, `1024x1536`.
 enum ImageSize {
+  /// Unknown size — forward-compat fallback for unrecognized server values.
+  ///
+  /// Streaming partial-image events sometimes carry transient sizes like
+  /// `1254x1254` that don't appear in the spec; those map here.
+  unknown._('unknown'),
+
   /// 256×256 (DALL-E 2 only).
   size256x256._('256x256'),
 
@@ -79,11 +95,11 @@ enum ImageSize {
 
   const ImageSize._(this._value);
 
-  /// Creates from JSON string.
+  /// Creates from JSON string. Unknown values map to [ImageSize.unknown].
   factory ImageSize.fromJson(String json) {
     return values.firstWhere(
       (e) => e._value == json,
-      orElse: () => throw FormatException('Unknown size: $json'),
+      orElse: () => ImageSize.unknown,
     );
   }
 
@@ -98,6 +114,9 @@ enum ImageSize {
 
 /// Output format options for GPT image models.
 enum ImageOutputFormat {
+  /// Unknown format — forward-compat fallback for unrecognized server values.
+  unknown._('unknown'),
+
   /// PNG lossless output.
   png._('png'),
 
@@ -110,10 +129,11 @@ enum ImageOutputFormat {
   const ImageOutputFormat._(this._value);
   final String _value;
 
-  /// Creates from JSON string.
+  /// Creates from JSON string. Unknown values map to
+  /// [ImageOutputFormat.unknown].
   factory ImageOutputFormat.fromJson(String json) => values.firstWhere(
     (e) => e._value == json,
-    orElse: () => throw FormatException('Unknown output format: $json'),
+    orElse: () => ImageOutputFormat.unknown,
   );
 
   /// Converts to JSON string.
@@ -122,6 +142,9 @@ enum ImageOutputFormat {
 
 /// Moderation level for GPT image models.
 enum ImageModerationLevel {
+  /// Unknown level — forward-compat fallback for unrecognized server values.
+  unknown._('unknown'),
+
   /// Low moderation; fewer content restrictions applied.
   low._('low'),
 
@@ -131,10 +154,11 @@ enum ImageModerationLevel {
   const ImageModerationLevel._(this._value);
   final String _value;
 
-  /// Creates from JSON string.
+  /// Creates from JSON string. Unknown values map to
+  /// [ImageModerationLevel.unknown].
   factory ImageModerationLevel.fromJson(String json) => values.firstWhere(
     (e) => e._value == json,
-    orElse: () => throw FormatException('Unknown moderation: $json'),
+    orElse: () => ImageModerationLevel.unknown,
   );
 
   /// Converts to JSON string.
@@ -143,6 +167,9 @@ enum ImageModerationLevel {
 
 /// Background handling for GPT image models.
 enum ImageBackground {
+  /// Unknown background — forward-compat fallback for unrecognized values.
+  unknown._('unknown'),
+
   /// Transparent background.
   transparent._('transparent'),
 
@@ -155,10 +182,11 @@ enum ImageBackground {
   const ImageBackground._(this._value);
   final String _value;
 
-  /// Creates from JSON string.
+  /// Creates from JSON string. Unknown values map to
+  /// [ImageBackground.unknown].
   factory ImageBackground.fromJson(String json) => values.firstWhere(
     (e) => e._value == json,
-    orElse: () => throw FormatException('Unknown background: $json'),
+    orElse: () => ImageBackground.unknown,
   );
 
   /// Converts to JSON string.
@@ -169,6 +197,9 @@ enum ImageBackground {
 ///
 /// Controls how closely the edit follows the input image.
 enum ImageInputFidelity {
+  /// Unknown fidelity — forward-compat fallback for unrecognized values.
+  unknown._('unknown'),
+
   /// High fidelity; closely follows the input image.
   high._('high'),
 
@@ -178,10 +209,11 @@ enum ImageInputFidelity {
   const ImageInputFidelity._(this._value);
   final String _value;
 
-  /// Creates from JSON string.
+  /// Creates from JSON string. Unknown values map to
+  /// [ImageInputFidelity.unknown].
   factory ImageInputFidelity.fromJson(String json) => values.firstWhere(
     (e) => e._value == json,
-    orElse: () => throw FormatException('Unknown input_fidelity: $json'),
+    orElse: () => ImageInputFidelity.unknown,
   );
 
   /// Converts to JSON string.

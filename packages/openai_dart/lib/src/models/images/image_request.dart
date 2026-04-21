@@ -373,12 +373,78 @@ class ImageEditRequest {
   /// Number of partial images to emit while streaming. GPT image models only.
   final int? partialImages;
 
+  /// Creates a copy with the given fields replaced.
+  ///
+  /// Nullable fields can be explicitly set to `null` to clear them. The
+  /// required `image`, `imageFilename`, and `prompt` are passed through
+  /// unchanged unless explicitly overridden.
+  ImageEditRequest copyWith({
+    Uint8List? image,
+    String? imageFilename,
+    String? prompt,
+    Object? mask = unsetCopyWithValue,
+    Object? maskFilename = unsetCopyWithValue,
+    Object? model = unsetCopyWithValue,
+    Object? n = unsetCopyWithValue,
+    Object? size = unsetCopyWithValue,
+    Object? responseFormat = unsetCopyWithValue,
+    Object? user = unsetCopyWithValue,
+    Object? background = unsetCopyWithValue,
+    Object? inputFidelity = unsetCopyWithValue,
+    Object? quality = unsetCopyWithValue,
+    Object? outputFormat = unsetCopyWithValue,
+    Object? outputCompression = unsetCopyWithValue,
+    Object? moderation = unsetCopyWithValue,
+    Object? stream = unsetCopyWithValue,
+    Object? partialImages = unsetCopyWithValue,
+  }) {
+    return ImageEditRequest(
+      image: image ?? this.image,
+      imageFilename: imageFilename ?? this.imageFilename,
+      prompt: prompt ?? this.prompt,
+      mask: mask == unsetCopyWithValue ? this.mask : mask as Uint8List?,
+      maskFilename: maskFilename == unsetCopyWithValue
+          ? this.maskFilename
+          : maskFilename as String?,
+      model: model == unsetCopyWithValue ? this.model : model as String?,
+      n: n == unsetCopyWithValue ? this.n : n as int?,
+      size: size == unsetCopyWithValue ? this.size : size as ImageSize?,
+      responseFormat: responseFormat == unsetCopyWithValue
+          ? this.responseFormat
+          : responseFormat as ImageResponseFormat?,
+      user: user == unsetCopyWithValue ? this.user : user as String?,
+      background: background == unsetCopyWithValue
+          ? this.background
+          : background as ImageBackground?,
+      inputFidelity: inputFidelity == unsetCopyWithValue
+          ? this.inputFidelity
+          : inputFidelity as ImageInputFidelity?,
+      quality: quality == unsetCopyWithValue
+          ? this.quality
+          : quality as ImageQuality?,
+      outputFormat: outputFormat == unsetCopyWithValue
+          ? this.outputFormat
+          : outputFormat as ImageOutputFormat?,
+      outputCompression: outputCompression == unsetCopyWithValue
+          ? this.outputCompression
+          : outputCompression as int?,
+      moderation: moderation == unsetCopyWithValue
+          ? this.moderation
+          : moderation as ImageModerationLevel?,
+      stream: stream == unsetCopyWithValue ? this.stream : stream as bool?,
+      partialImages: partialImages == unsetCopyWithValue
+          ? this.partialImages
+          : partialImages as int?,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ImageEditRequest &&
           runtimeType == other.runtimeType &&
           imageFilename == other.imageFilename &&
+          maskFilename == other.maskFilename &&
           prompt == other.prompt &&
           model == other.model &&
           n == other.n &&
@@ -397,6 +463,7 @@ class ImageEditRequest {
   @override
   int get hashCode => Object.hash(
     imageFilename,
+    maskFilename,
     prompt,
     model,
     n,
@@ -486,6 +553,9 @@ class ImageVariationRequest {
 
 /// Image response format options.
 enum ImageResponseFormat {
+  /// Unknown format — forward-compat fallback for unrecognized values.
+  unknown._('unknown'),
+
   /// Return a URL to the generated image.
   url._('url'),
 
@@ -494,11 +564,12 @@ enum ImageResponseFormat {
 
   const ImageResponseFormat._(this._value);
 
-  /// Creates from JSON string.
+  /// Creates from JSON string. Unknown values map to
+  /// [ImageResponseFormat.unknown].
   factory ImageResponseFormat.fromJson(String json) {
     return values.firstWhere(
       (e) => e._value == json,
-      orElse: () => throw FormatException('Unknown format: $json'),
+      orElse: () => ImageResponseFormat.unknown,
     );
   }
 
@@ -513,6 +584,9 @@ enum ImageResponseFormat {
 
 /// Image style options.
 enum ImageStyle {
+  /// Unknown style — forward-compat fallback for unrecognized values.
+  unknown._('unknown'),
+
   /// Vivid style (more hyper-real and dramatic).
   vivid._('vivid'),
 
@@ -521,11 +595,11 @@ enum ImageStyle {
 
   const ImageStyle._(this._value);
 
-  /// Creates from JSON string.
+  /// Creates from JSON string. Unknown values map to [ImageStyle.unknown].
   factory ImageStyle.fromJson(String json) {
     return values.firstWhere(
       (e) => e._value == json,
-      orElse: () => throw FormatException('Unknown style: $json'),
+      orElse: () => ImageStyle.unknown,
     );
   }
 

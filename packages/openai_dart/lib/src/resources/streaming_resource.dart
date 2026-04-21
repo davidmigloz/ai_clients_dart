@@ -28,7 +28,7 @@ mixin StreamingResource on ResourceBase {
   /// The interceptor chain is bypassed since streaming requires low-level
   /// access to the response stream.
   Future<http.StreamedResponse> sendStream({
-    required http.Request request,
+    required http.BaseRequest request,
     String? jsonBody,
     Map<String, String>? additionalHeaders,
     Future<void>? abortTrigger,
@@ -41,9 +41,24 @@ mixin StreamingResource on ResourceBase {
     );
     request.headers.addAll(streamHeaders);
 
+    // Multipart requests set their own Content-Type (with a boundary) at
+    // finalize time. Drop the JSON content-type added by buildStreamingHeaders
+    // so the multipart header isn't shadowed on the wire.
+    if (request is http.MultipartRequest) {
+      request.headers.removeWhere((k, _) => k.toLowerCase() == 'content-type');
+    }
+
     // Set body AFTER headers so body setter adds charset to Content-Type
-    // (e.g., application/json → application/json; charset=utf-8)
+    // (e.g., application/json → application/json; charset=utf-8).
+    // `jsonBody` only applies to `http.Request`; multipart/stream callers
+    // configure their body on the request before calling sendStream.
     if (jsonBody != null) {
+      if (request is! http.Request) {
+        throw ArgumentError(
+          'jsonBody is only supported for http.Request, '
+          'got ${request.runtimeType}',
+        );
+      }
       request.body = jsonBody;
     }
 

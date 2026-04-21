@@ -2,6 +2,7 @@
 @Tags(['integration'])
 library;
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:openai_dart/openai_dart.dart';
@@ -195,6 +196,49 @@ void main() {
           expect(p.b64Json, isNotEmpty);
           expect(p.partialImageIndex, greaterThanOrEqualTo(0));
         }
+      },
+    );
+
+    test(
+      'streams GPT Image 2 multipart edit with partial + completed events',
+      timeout: const Timeout(Duration(minutes: 5)),
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        // Generate a small seed image first so we have real bytes to edit.
+        final seed = await client!.images.generate(
+          const ImageGenerationRequest(
+            model: ImageModels.gptImage2,
+            prompt: 'A plain white card',
+            size: ImageSize.size1024x1024,
+            quality: ImageQuality.low,
+          ),
+        );
+        final seedBytes = base64Decode(seed.data.first.b64Json!);
+
+        final events = await client!.images
+            .editStream(
+              ImageEditRequest(
+                image: seedBytes,
+                imageFilename: 'seed.png',
+                prompt: 'Add a small orange dot in the center',
+                model: ImageModels.gptImage2,
+              ),
+            )
+            .toList();
+
+        expect(events, isNotEmpty);
+        final completed = events.whereType<ImageEditCompletedEvent>().toList();
+        expect(
+          completed,
+          hasLength(1),
+          reason: 'exactly one image_edit.completed event expected',
+        );
+        expect(completed.single.b64Json, isNotEmpty);
+        expect(completed.single.usage.totalTokens, greaterThan(0));
       },
     );
 

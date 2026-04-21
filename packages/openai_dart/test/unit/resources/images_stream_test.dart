@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -118,6 +119,70 @@ void main() {
       const json = {'type': 'image_edit.v3', 'foo': 'bar'};
       final event = ImageEditStreamEvent.fromJson(json);
       expect(event, isA<ImageEditUnknownEvent>());
+    });
+  });
+
+  group('ImagesResource.editStream', () {
+    test('forces stream=true and uses multipart body', () async {
+      final requestCompleter = Completer<http.BaseRequest>();
+
+      final mockClient = MockClient.streaming((request, _) async {
+        requestCompleter.complete(request);
+        return http.StreamedResponse(
+          Stream.fromIterable([utf8.encode('data: [DONE]\n\n')]),
+          200,
+        );
+      });
+
+      final client = OpenAIClient(
+        config: const OpenAIConfig(authProvider: ApiKeyProvider('sk-test-key')),
+        httpClient: mockClient,
+      );
+
+      // No abortTrigger — sendStream uses the injected mock client.
+      await client.images
+          .editStream(
+            ImageEditRequest(
+              image: Uint8List.fromList([1, 2, 3, 4]),
+              imageFilename: 'a.png',
+              prompt: 'edit',
+              model: ImageModels.gptImage2,
+              inputFidelity: ImageInputFidelity.high,
+            ),
+          )
+          .drain<void>();
+
+      final sent = await requestCompleter.future;
+      expect(sent, isA<http.MultipartRequest>());
+      final multipart = sent as http.MultipartRequest;
+      expect(multipart.fields['stream'], 'true');
+      expect(multipart.fields['model'], 'gpt-image-2');
+      expect(multipart.fields['input_fidelity'], 'high');
+      expect(sent.headers['Accept'], 'text/event-stream');
+      expect(sent.headers['Content-Type'], contains('multipart/form-data'));
+
+      client.close();
+    });
+
+    test('accepts abortTrigger parameter (type-signature check)', () {
+      // When abortTrigger is provided, sendStream() creates its own
+      // internal HTTP client, so end-to-end abort behavior must be
+      // validated against the real API (integration tests).
+      void verify(OpenAIClient c) {
+        // ignore: unused_local_variable
+        final stream = c.images.editStream(
+          ImageEditRequest(
+            image: Uint8List.fromList([1, 2, 3, 4]),
+            imageFilename: 'a.png',
+            prompt: 'edit',
+          ),
+          abortTrigger: Completer<void>().future,
+        );
+      }
+
+      // Compile-time check only.
+      // ignore: unused_local_variable
+      final _ = verify;
     });
   });
 

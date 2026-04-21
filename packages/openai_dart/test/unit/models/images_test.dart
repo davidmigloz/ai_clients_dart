@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:openai_dart/openai_dart.dart';
 import 'package:test/test.dart';
 
@@ -160,6 +162,45 @@ void main() {
       expect(a, equals(b));
       expect(a.hashCode, equals(b.hashCode));
       expect(a, isNot(equals(c)));
+    });
+  });
+
+  group('ImageEditRequest', () {
+    final imageBytes = Uint8List.fromList([1, 2, 3, 4]);
+
+    test('copyWith overrides specified fields only', () {
+      final original = ImageEditRequest(
+        image: imageBytes,
+        imageFilename: 'a.png',
+        prompt: 'p',
+        inputFidelity: ImageInputFidelity.low,
+        quality: ImageQuality.medium,
+      );
+      final modified = original.copyWith(
+        stream: true,
+        quality: ImageQuality.high,
+      );
+      expect(modified.stream, isTrue);
+      expect(modified.quality, ImageQuality.high);
+      expect(modified.inputFidelity, ImageInputFidelity.low); // preserved
+      expect(modified.prompt, 'p'); // preserved
+    });
+
+    test('== distinguishes requests that differ only in maskFilename', () {
+      final a = ImageEditRequest(
+        image: imageBytes,
+        imageFilename: 'a.png',
+        prompt: 'p',
+        maskFilename: 'maskA.png',
+      );
+      final b = ImageEditRequest(
+        image: imageBytes,
+        imageFilename: 'a.png',
+        prompt: 'p',
+        maskFilename: 'maskB.png',
+      );
+      expect(a, isNot(equals(b)));
+      expect(a.hashCode, isNot(equals(b.hashCode)));
     });
   });
 
