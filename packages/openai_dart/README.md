@@ -49,6 +49,15 @@ Dart client for the **[OpenAI API](https://platform.openai.com/docs/api-referenc
 
 See [API Coverage](#api-coverage) for the full coverage table.
 
+## Why choose this client?
+
+- Pure Dart with no Flutter dependency — works in mobile apps, backends, and CLIs.
+- Type-safe request and response models with minimal dependencies (`http`, `logging`, `meta`).
+- Streaming, retries, interceptors, and error handling built into the client.
+- Covers the full OpenAI API surface, including Responses, Realtime, and legacy Assistants.
+- Resource-based API design matching official SDKs.
+- Strict [semver](https://semver.org/) versioning so downstream packages can depend on stable, predictable version ranges.
+
 ## Quickstart
 
 ```yaml
@@ -92,15 +101,6 @@ import 'package:openai_dart/openai_dart_assistants.dart' as assistants;
 // Realtime API — WebSocket and WebRTC sessions
 import 'package:openai_dart/openai_dart_realtime.dart' as realtime;
 ```
-
-## Why choose this client?
-
-- Pure Dart with no Flutter dependency — works in mobile apps, backends, and CLIs.
-- Type-safe request and response models with minimal dependencies (`http`, `logging`, `meta`).
-- Streaming, retries, interceptors, and error handling built into the client.
-- Covers the full OpenAI API surface, including Responses, Realtime, and legacy Assistants.
-- Resource-based API design matching official SDKs.
-- Strict [semver](https://semver.org/) versioning so downstream packages can depend on stable, predictable version ranges.
 
 ## Configuration
 
@@ -351,24 +351,40 @@ print('Embedding dimensions: ${vector.length}');
 
 </details>
 
-### How do I generate images?
+### How do I generate images with GPT Image 2?
 
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.images.generate(...)` to create images from text prompts. Configure size, quality, and other options as needed.
+Use `client.images.generate(...)` with `ImageModels.gptImage2` to create images.
+GPT Image 2 brings:
+
+- **Flexible image sizes** — `1024x1024`, `1536x1024`, `1024x1536`, plus `auto`
+- **High-fidelity inputs** — see `client.images.edit(...)` with `ImageInputFidelity.high`
+- **Token-based pricing** — exposed via `response.usage` (total / input / output tokens, plus per-modality breakdowns)
+- **Batch API with 50% discount** — submit jobs via `client.batches` with `BatchEndpoint.imagesGenerations` / `BatchEndpoint.imagesEdits`
 
 ```dart
+import 'dart:convert';
+import 'dart:io';
+import 'package:openai_dart/openai_dart.dart';
+
 final response = await client.images.generate(
-  ImageGenerationRequest(
-    model: 'gpt-image-1.5',
+  const ImageGenerationRequest(
+    model: ImageModels.gptImage2,
     prompt: 'A white cat wearing a top hat',
-    size: ImageSize.size1024x1024,
-    quality: ImageQuality.hd,
+    size: ImageSize.size1536x1024,
+    quality: ImageQuality.high,
+    background: ImageBackground.transparent,
+    outputFormat: ImageOutputFormat.webp,
   ),
 );
 
-print('Image URL: ${response.data.first.url}');
+// GPT Image 2 always returns base64 — decode and save.
+final bytes = base64Decode(response.data.first.b64Json!);
+File('cat.webp').writeAsBytesSync(bytes);
+
+print('Tokens used: ${response.usage?.totalTokens}');
 ```
 
 → [Full example](example/images_example.dart)

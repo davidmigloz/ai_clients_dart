@@ -387,6 +387,7 @@ class OpenAIClient {
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
+    streamClientFactory: _streamClientFactory,
   );
 
   FilesResource? _files;
