@@ -7,24 +7,26 @@ import 'base_resource.dart';
 
 /// Resource for image operations.
 ///
-/// Provides image generation, editing, and variation capabilities
-/// using DALL-E models.
+/// Provides image generation, editing, and variation capabilities using
+/// GPT image models (e.g. `gpt-image-2`) and DALL-E.
 ///
 /// Access this resource through [OpenAIClient.images].
 ///
 /// ## Example
 ///
 /// ```dart
-/// // Generate an image
+/// // Generate an image with GPT Image 2
 /// final response = await client.images.generate(
 ///   ImageGenerationRequest(
-///     model: 'dall-e-3',
+///     model: ImageModels.gptImage2,
 ///     prompt: 'A white cat sitting on a windowsill',
 ///     size: ImageSize.size1024x1024,
+///     background: ImageBackground.transparent,
 ///   ),
 /// );
 ///
-/// final imageUrl = response.data.first.url;
+/// final bytes = response.data.first.b64Json; // GPT image returns base64
+/// print('Tokens used: ${response.usage?.totalTokens}');
 /// ```
 class ImagesResource extends ResourceBase {
   /// Creates an [ImagesResource].
@@ -57,16 +59,16 @@ class ImagesResource extends ResourceBase {
   /// ```dart
   /// final response = await client.images.generate(
   ///   ImageGenerationRequest(
-  ///     model: 'dall-e-3',
+  ///     model: ImageModels.gptImage2,
   ///     prompt: 'A beautiful sunset over mountains',
-  ///     size: ImageSize.size1024x1024,
-  ///     quality: ImageQuality.hd,
-  ///     style: ImageStyle.vivid,
+  ///     size: ImageSize.size1536x1024,
+  ///     quality: ImageQuality.high,
+  ///     outputFormat: ImageOutputFormat.webp,
   ///   ),
   /// );
   ///
   /// for (final image in response.data) {
-  ///   print('Image URL: ${image.url}');
+  ///   print('Base64 image: ${image.b64Json?.length} chars');
   /// }
   /// ```
   Future<ImageResponse> generate(ImageGenerationRequest request) async {
@@ -99,16 +101,14 @@ class ImagesResource extends ResourceBase {
   ///
   /// ```dart
   /// final imageBytes = File('original.png').readAsBytesSync();
-  /// final maskBytes = File('mask.png').readAsBytesSync();
   ///
   /// final response = await client.images.edit(
   ///   ImageEditRequest(
   ///     image: imageBytes,
   ///     imageFilename: 'original.png',
-  ///     mask: maskBytes,
-  ///     maskFilename: 'mask.png',
-  ///     prompt: 'Add a red hat',
-  ///     model: 'dall-e-2',
+  ///     prompt: 'Add a rainbow in the sky',
+  ///     model: ImageModels.gptImage2,
+  ///     inputFidelity: ImageInputFidelity.high,
   ///   ),
   /// );
   /// ```
@@ -216,6 +216,31 @@ class ImagesResource extends ResourceBase {
     }
     if (request.user != null) {
       httpRequest.fields['user'] = request.user!;
+    }
+    if (request.background != null) {
+      httpRequest.fields['background'] = request.background!.toJson();
+    }
+    if (request.inputFidelity != null) {
+      httpRequest.fields['input_fidelity'] = request.inputFidelity!.toJson();
+    }
+    if (request.quality != null) {
+      httpRequest.fields['quality'] = request.quality!.toJson();
+    }
+    if (request.outputFormat != null) {
+      httpRequest.fields['output_format'] = request.outputFormat!.toJson();
+    }
+    if (request.outputCompression != null) {
+      httpRequest.fields['output_compression'] = request.outputCompression
+          .toString();
+    }
+    if (request.moderation != null) {
+      httpRequest.fields['moderation'] = request.moderation!.toJson();
+    }
+    if (request.stream != null) {
+      httpRequest.fields['stream'] = request.stream! ? 'true' : 'false';
+    }
+    if (request.partialImages != null) {
+      httpRequest.fields['partial_images'] = request.partialImages.toString();
     }
 
     return httpRequest;

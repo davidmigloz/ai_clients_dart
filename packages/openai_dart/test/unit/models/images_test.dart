@@ -71,6 +71,96 @@ void main() {
       expect(modified.model, 'dall-e-2'); // Preserved
       expect(modified.size, ImageSize.size512x512);
     });
+
+    test('serializes GPT Image 2 fields', () {
+      const request = ImageGenerationRequest(
+        prompt: 'A red apple',
+        model: ImageModels.gptImage2,
+        size: ImageSize.size1536x1024,
+        quality: ImageQuality.high,
+        background: ImageBackground.transparent,
+        moderation: ImageModerationLevel.low,
+        outputFormat: ImageOutputFormat.webp,
+        outputCompression: 80,
+        stream: true,
+        partialImages: 3,
+      );
+
+      final json = request.toJson();
+
+      expect(json['model'], 'gpt-image-2');
+      expect(json['size'], '1536x1024');
+      expect(json['quality'], 'high');
+      expect(json['background'], 'transparent');
+      expect(json['moderation'], 'low');
+      expect(json['output_format'], 'webp');
+      expect(json['output_compression'], 80);
+      expect(json['stream'], true);
+      expect(json['partial_images'], 3);
+    });
+
+    test('fromJson round-trips GPT Image 2 fields', () {
+      final json = {
+        'prompt': 'A red apple',
+        'model': 'gpt-image-2',
+        'size': '1024x1536',
+        'quality': 'auto',
+        'background': 'opaque',
+        'moderation': 'auto',
+        'output_format': 'png',
+        'output_compression': 50,
+        'stream': false,
+        'partial_images': 0,
+      };
+
+      final request = ImageGenerationRequest.fromJson(json);
+
+      expect(request.model, 'gpt-image-2');
+      expect(request.size, ImageSize.size1024x1536);
+      expect(request.quality, ImageQuality.auto);
+      expect(request.background, ImageBackground.opaque);
+      expect(request.moderation, ImageModerationLevel.auto);
+      expect(request.outputFormat, ImageOutputFormat.png);
+      expect(request.outputCompression, 50);
+      expect(request.stream, false);
+      expect(request.partialImages, 0);
+    });
+
+    test('omits new fields when unset', () {
+      const request = ImageGenerationRequest(prompt: 'plain');
+      final json = request.toJson();
+      for (final key in const [
+        'background',
+        'moderation',
+        'output_format',
+        'output_compression',
+        'stream',
+        'partial_images',
+      ]) {
+        expect(json.containsKey(key), isFalse, reason: 'key $key');
+      }
+    });
+
+    test('equality includes all fields', () {
+      const a = ImageGenerationRequest(
+        prompt: 'p',
+        background: ImageBackground.transparent,
+        outputFormat: ImageOutputFormat.webp,
+      );
+      const b = ImageGenerationRequest(
+        prompt: 'p',
+        background: ImageBackground.transparent,
+        outputFormat: ImageOutputFormat.webp,
+      );
+      const c = ImageGenerationRequest(
+        prompt: 'p',
+        background: ImageBackground.opaque,
+        outputFormat: ImageOutputFormat.webp,
+      );
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+      expect(a, isNot(equals(c)));
+    });
   });
 
   group('ImageResponse', () {
@@ -119,6 +209,77 @@ void main() {
 
       final response = ImageResponse.fromJson(json);
       expect(response.firstBase64, 'base64encodeddata');
+    });
+
+    test('parses GPT Image 2 payload with usage + metadata', () {
+      final json = {
+        'created': 1776808255,
+        'background': 'opaque',
+        'size': '1024x1024',
+        'quality': 'low',
+        'output_format': 'png',
+        'usage': {
+          'total_tokens': 209,
+          'input_tokens': 13,
+          'input_tokens_details': {'text_tokens': 13, 'image_tokens': 0},
+          'output_tokens': 196,
+          'output_tokens_details': {'text_tokens': 0, 'image_tokens': 196},
+        },
+        'data': [
+          {'b64_json': 'iVBORw0KGgo='},
+        ],
+      };
+
+      final response = ImageResponse.fromJson(json);
+
+      expect(response.created, 1776808255);
+      expect(response.background, ImageBackground.opaque);
+      expect(response.size, ImageSize.size1024x1024);
+      expect(response.quality, ImageQuality.low);
+      expect(response.outputFormat, ImageOutputFormat.png);
+
+      final usage = response.usage;
+      expect(usage, isNotNull);
+      expect(usage!.totalTokens, 209);
+      expect(usage.inputTokens, 13);
+      expect(usage.outputTokens, 196);
+      expect(usage.inputTokensDetails.textTokens, 13);
+      expect(usage.inputTokensDetails.imageTokens, 0);
+      expect(usage.outputTokensDetails?.textTokens, 0);
+      expect(usage.outputTokensDetails?.imageTokens, 196);
+
+      // Round-trip: toJson should emit the new fields and re-parse.
+      final parsed = ImageResponse.fromJson(response.toJson());
+      expect(parsed, equals(response));
+    });
+
+    test('parses minimal DALL-E response (no usage, no metadata)', () {
+      final json = {
+        'created': 1677649420,
+        'data': [
+          {'url': 'https://example.com/image.png'},
+        ],
+      };
+
+      final response = ImageResponse.fromJson(json);
+
+      expect(response.data.length, 1);
+      expect(response.background, isNull);
+      expect(response.outputFormat, isNull);
+      expect(response.quality, isNull);
+      expect(response.size, isNull);
+      expect(response.usage, isNull);
+    });
+
+    test('ImagesUsage without output_tokens_details parses', () {
+      final usage = ImagesUsage.fromJson(const {
+        'total_tokens': 50,
+        'input_tokens': 10,
+        'input_tokens_details': {'text_tokens': 10, 'image_tokens': 0},
+        'output_tokens': 40,
+      });
+      expect(usage.outputTokensDetails, isNull);
+      expect(usage.totalTokens, 50);
     });
   });
 
@@ -228,11 +389,19 @@ void main() {
     test('parses all values correctly', () {
       expect(ImageQuality.fromJson('standard'), ImageQuality.standard);
       expect(ImageQuality.fromJson('hd'), ImageQuality.hd);
+      expect(ImageQuality.fromJson('low'), ImageQuality.low);
+      expect(ImageQuality.fromJson('medium'), ImageQuality.medium);
+      expect(ImageQuality.fromJson('high'), ImageQuality.high);
+      expect(ImageQuality.fromJson('auto'), ImageQuality.auto);
     });
 
     test('toJson returns correct values', () {
       expect(ImageQuality.standard.toJson(), 'standard');
       expect(ImageQuality.hd.toJson(), 'hd');
+      expect(ImageQuality.low.toJson(), 'low');
+      expect(ImageQuality.medium.toJson(), 'medium');
+      expect(ImageQuality.high.toJson(), 'high');
+      expect(ImageQuality.auto.toJson(), 'auto');
     });
   });
 
@@ -243,11 +412,55 @@ void main() {
       expect(ImageSize.fromJson('1024x1024'), ImageSize.size1024x1024);
       expect(ImageSize.fromJson('1792x1024'), ImageSize.size1792x1024);
       expect(ImageSize.fromJson('1024x1792'), ImageSize.size1024x1792);
+      expect(ImageSize.fromJson('1536x1024'), ImageSize.size1536x1024);
+      expect(ImageSize.fromJson('1024x1536'), ImageSize.size1024x1536);
+      expect(ImageSize.fromJson('auto'), ImageSize.auto);
     });
 
     test('toJson returns correct values', () {
       expect(ImageSize.size256x256.toJson(), '256x256');
       expect(ImageSize.size1024x1024.toJson(), '1024x1024');
+      expect(ImageSize.size1536x1024.toJson(), '1536x1024');
+      expect(ImageSize.size1024x1536.toJson(), '1024x1536');
+      expect(ImageSize.auto.toJson(), 'auto');
+    });
+  });
+
+  group('Image common enums', () {
+    test('ImageBackground round-trips', () {
+      for (final v in ImageBackground.values) {
+        expect(ImageBackground.fromJson(v.toJson()), v);
+      }
+    });
+
+    test('ImageOutputFormat round-trips', () {
+      for (final v in ImageOutputFormat.values) {
+        expect(ImageOutputFormat.fromJson(v.toJson()), v);
+      }
+    });
+
+    test('ImageModerationLevel round-trips', () {
+      for (final v in ImageModerationLevel.values) {
+        expect(ImageModerationLevel.fromJson(v.toJson()), v);
+      }
+    });
+
+    test('ImageInputFidelity round-trips', () {
+      for (final v in ImageInputFidelity.values) {
+        expect(ImageInputFidelity.fromJson(v.toJson()), v);
+      }
+    });
+  });
+
+  group('ImageModels constants', () {
+    test('exposes well-known model ids', () {
+      expect(ImageModels.gptImage2, 'gpt-image-2');
+      expect(ImageModels.gptImage15, 'gpt-image-1.5');
+      expect(ImageModels.gptImage1, 'gpt-image-1');
+      expect(ImageModels.gptImage1Mini, 'gpt-image-1-mini');
+      expect(ImageModels.chatgptImageLatest, 'chatgpt-image-latest');
+      expect(ImageModels.dallE3, 'dall-e-3');
+      expect(ImageModels.dallE2, 'dall-e-2');
     });
   });
 

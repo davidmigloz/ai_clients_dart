@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import 'image_common.dart';
+
 /// Reference an input image by URL/data URL or uploaded file ID.
 @immutable
 class ImageReference {
@@ -69,20 +71,20 @@ class ImageEditJsonRequest {
   /// Optional mask reference.
   final ImageReference? mask;
 
-  /// Optional model to use.
+  /// Optional model to use (e.g. `gpt-image-2`).
   final String? model;
 
   /// Number of images to generate.
   final int? n;
 
   /// Output quality.
-  final ImageEditJsonQuality? quality;
+  final ImageQuality? quality;
 
   /// Input fidelity.
   final ImageInputFidelity? inputFidelity;
 
   /// Requested output size.
-  final ImageEditJsonSize? size;
+  final ImageSize? size;
 
   /// End-user identifier.
   final String? user;
@@ -137,13 +139,13 @@ class ImageEditJsonRequest {
       model: json['model'] as String?,
       n: json['n'] as int?,
       quality: json['quality'] != null
-          ? ImageEditJsonQuality.fromJson(json['quality'] as String)
+          ? ImageQuality.fromJson(json['quality'] as String)
           : null,
       inputFidelity: json['input_fidelity'] != null
           ? ImageInputFidelity.fromJson(json['input_fidelity'] as String)
           : null,
       size: json['size'] != null
-          ? ImageEditJsonSize.fromJson(json['size'] as String)
+          ? ImageSize.fromJson(json['size'] as String)
           : null,
       user: json['user'] as String?,
       outputFormat: json['output_format'] != null
@@ -181,140 +183,12 @@ class ImageEditJsonRequest {
   };
 }
 
-/// JSON image edit quality options.
-enum ImageEditJsonQuality {
-  /// Low quality output.
-  low._('low'),
+/// Backwards-compatible alias — quality values for JSON image edits now share
+/// the unified [ImageQuality] enum.
+@Deprecated('Use ImageQuality instead.')
+typedef ImageEditJsonQuality = ImageQuality;
 
-  /// Medium quality output.
-  medium._('medium'),
-
-  /// High quality output.
-  high._('high'),
-
-  /// Automatically select quality.
-  auto._('auto');
-
-  const ImageEditJsonQuality._(this._value);
-  final String _value;
-
-  factory ImageEditJsonQuality.fromJson(String json) => values.firstWhere(
-    (e) => e._value == json,
-    orElse: () => throw FormatException('Unknown quality: $json'),
-  );
-
-  /// Converts to JSON string.
-  String toJson() => _value;
-}
-
-/// Input fidelity options.
-enum ImageInputFidelity {
-  /// High fidelity; closely follows the input image.
-  high._('high'),
-
-  /// Low fidelity; allows more creative deviation from the input.
-  low._('low');
-
-  const ImageInputFidelity._(this._value);
-  final String _value;
-
-  factory ImageInputFidelity.fromJson(String json) => values.firstWhere(
-    (e) => e._value == json,
-    orElse: () => throw FormatException('Unknown input_fidelity: $json'),
-  );
-
-  /// Converts to JSON string.
-  String toJson() => _value;
-}
-
-/// JSON image edit size options.
-enum ImageEditJsonSize {
-  /// Automatically select the output size.
-  auto._('auto'),
-
-  /// 1024×1024 square output.
-  size1024x1024._('1024x1024'),
-
-  /// 1536×1024 landscape output.
-  size1536x1024._('1536x1024'),
-
-  /// 1024×1536 portrait output.
-  size1024x1536._('1024x1536');
-
-  const ImageEditJsonSize._(this._value);
-  final String _value;
-
-  factory ImageEditJsonSize.fromJson(String json) => values.firstWhere(
-    (e) => e._value == json,
-    orElse: () => throw FormatException('Unknown size: $json'),
-  );
-
-  /// Converts to JSON string.
-  String toJson() => _value;
-}
-
-/// Output format options for JSON image edits.
-enum ImageOutputFormat {
-  /// PNG lossless output.
-  png._('png'),
-
-  /// JPEG lossy output.
-  jpeg._('jpeg'),
-
-  /// WebP output.
-  webp._('webp');
-
-  const ImageOutputFormat._(this._value);
-  final String _value;
-
-  factory ImageOutputFormat.fromJson(String json) => values.firstWhere(
-    (e) => e._value == json,
-    orElse: () => throw FormatException('Unknown output format: $json'),
-  );
-
-  /// Converts to JSON string.
-  String toJson() => _value;
-}
-
-/// Moderation level options for JSON image edits.
-enum ImageModerationLevel {
-  /// Low moderation; fewer content restrictions applied.
-  low._('low'),
-
-  /// Automatically determine moderation level.
-  auto._('auto');
-
-  const ImageModerationLevel._(this._value);
-  final String _value;
-
-  factory ImageModerationLevel.fromJson(String json) => values.firstWhere(
-    (e) => e._value == json,
-    orElse: () => throw FormatException('Unknown moderation: $json'),
-  );
-
-  /// Converts to JSON string.
-  String toJson() => _value;
-}
-
-/// Background options for JSON image edits.
-enum ImageBackground {
-  /// Transparent background.
-  transparent._('transparent'),
-
-  /// Opaque (solid) background.
-  opaque._('opaque'),
-
-  /// Automatically determine background handling.
-  auto._('auto');
-
-  const ImageBackground._(this._value);
-  final String _value;
-
-  factory ImageBackground.fromJson(String json) => values.firstWhere(
-    (e) => e._value == json,
-    orElse: () => throw FormatException('Unknown background: $json'),
-  );
-
-  /// Converts to JSON string.
-  String toJson() => _value;
-}
+/// Backwards-compatible alias — size values for JSON image edits now share
+/// the unified [ImageSize] enum.
+@Deprecated('Use ImageSize instead.')
+typedef ImageEditJsonSize = ImageSize;
