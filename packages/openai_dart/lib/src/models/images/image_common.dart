@@ -7,9 +7,8 @@
 /// Every enum includes an `unknown` variant for forward compatibility —
 /// [fromJson] returns `unknown` rather than throwing when the server emits
 /// a value outside the current spec. Note that this is lossy: round-tripping
-/// an unknown value will serialize as `'unknown'`. If you need to preserve
-/// the raw wire value, read it from the surrounding response object
-/// (e.g. [ImageGenCompletedEvent.size] stores the raw string).
+/// an unknown value will serialize as `'unknown'`, and these enum types do
+/// not preserve the original raw wire value.
 library;
 
 /// Image quality options.
