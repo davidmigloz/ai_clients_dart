@@ -748,6 +748,33 @@ void main() {
     });
   });
 
+  group('ReasoningEffort', () {
+    test('has correct values matching spec', () {
+      expect(ReasoningEffort.none.toJson(), 'none');
+      expect(ReasoningEffort.minimal.toJson(), 'minimal');
+      expect(ReasoningEffort.low.toJson(), 'low');
+      expect(ReasoningEffort.medium.toJson(), 'medium');
+      expect(ReasoningEffort.high.toJson(), 'high');
+      expect(ReasoningEffort.xhigh.toJson(), 'xhigh');
+    });
+
+    test('fromJson parses all valid values', () {
+      expect(ReasoningEffort.fromJson('none'), ReasoningEffort.none);
+      expect(ReasoningEffort.fromJson('minimal'), ReasoningEffort.minimal);
+      expect(ReasoningEffort.fromJson('low'), ReasoningEffort.low);
+      expect(ReasoningEffort.fromJson('medium'), ReasoningEffort.medium);
+      expect(ReasoningEffort.fromJson('high'), ReasoningEffort.high);
+      expect(ReasoningEffort.fromJson('xhigh'), ReasoningEffort.xhigh);
+    });
+
+    test('fromJson returns unknown for unrecognized values', () {
+      expect(
+        ReasoningEffort.fromJson('something_else'),
+        ReasoningEffort.unknown,
+      );
+    });
+  });
+
   // OpenAI-Compatible APIs Tests
   group('OpenAI-Compatible APIs', () {
     group('ChatCompletion nullable fields', () {
