@@ -259,14 +259,28 @@ class ImagesResource extends ResourceBase with StreamingResource {
   Stream<ImageEditStreamEvent> editStream(
     ImageEditRequest request, {
     Future<void>? abortTrigger,
+  }) {
+    // Perform the closed-client check eagerly (before the stream is
+    // listened to), matching the pattern used by generateStream and
+    // editJsonStream. Without this, the `async*` body is lazy and defers
+    // the check inside sendStream until subscription time.
+    ensureNotClosed?.call();
+    return _editStreamImpl(request, abortTrigger: abortTrigger);
+  }
+
+  Stream<ImageEditStreamEvent> _editStreamImpl(
+    ImageEditRequest request, {
+    Future<void>? abortTrigger,
   }) async* {
     final multipart = _createEditMultipartRequest(
       request.copyWith(stream: true),
-    )..headers.addAll(requestBuilder.buildMultipartHeaders());
+    );
 
     // Route through sendStream so abortTrigger closes the underlying client
     // and terminates the in-flight connection, matching the JSON streaming
-    // paths above.
+    // paths above. sendStream adds auth/org/project + Accept via
+    // buildStreamingHeaders and drops the JSON content-type for multipart,
+    // so there's no need to pre-apply buildMultipartHeaders here.
     final response = await sendStream(
       request: multipart,
       abortTrigger: abortTrigger,

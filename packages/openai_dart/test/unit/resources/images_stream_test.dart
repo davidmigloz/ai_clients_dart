@@ -206,6 +206,29 @@ void main() {
       client.close();
     });
 
+    test('editStream throws eagerly on a closed client (not on listen)', () {
+      final client = OpenAIClient(
+        config: const OpenAIConfig(authProvider: ApiKeyProvider('sk-test-key')),
+        httpClient: MockClient.streaming(
+          (_, _) async =>
+              http.StreamedResponse(const Stream<List<int>>.empty(), 200),
+        ),
+      )..close();
+
+      // Must throw synchronously — before any stream subscription — so it
+      // matches generateStream/editJsonStream which check eagerly.
+      expect(
+        () => client.images.editStream(
+          ImageEditRequest(
+            image: Uint8List.fromList([1, 2, 3, 4]),
+            imageFilename: 'a.png',
+            prompt: 'edit',
+          ),
+        ),
+        throwsStateError,
+      );
+    });
+
     test('accepts abortTrigger parameter (type-signature check)', () {
       // When abortTrigger is provided, sendStream() creates its own
       // internal HTTP client, so end-to-end abort behavior must be
