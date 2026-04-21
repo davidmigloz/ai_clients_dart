@@ -1,3 +1,10 @@
+## 4.3.0
+
+Adds support for [GPT Image 2](https://openai.com/index/introducing-chatgpt-images-2-0/#textmode) (`gpt-image-2`) — surfacing the full GPT-image parameter surface on `ImageGenerationRequest` and `ImageEditRequest` (background, moderation, output format/compression, streaming, input fidelity), expanded `ImageQuality` and `ImageSize` enums, token-based usage metadata on `ImageResponse`, and a new `ImageModels` constants class. Also expands the `ReasoningEffort` enum with `none`, `minimal`, and `xhigh` to match the latest OpenAI spec and the per-model support matrix for `gpt-5.1`, `gpt-5-pro`, and models after `gpt-5.1-codex-max`.
+
+- **FEAT**: Support GPT Image 2 (gpt-image-2) ([#195](https://github.com/davidmigloz/ai_clients_dart/issues/195)). ([902b1317](https://github.com/davidmigloz/ai_clients_dart/commit/902b13170eb1c482338188fb48e3e90b3adab3a6))
+- **FEAT**: Add none, minimal, xhigh to ReasoningEffort enum ([#194](https://github.com/davidmigloz/ai_clients_dart/issues/194)). ([8b8e0143](https://github.com/davidmigloz/ai_clients_dart/commit/8b8e0143450adb2c5a2476a073317f7327a206d0))
+
 ## 4.2.0
 
 Re-introduces the `detail` field on `InputFileContent` via a new `FileInputDetail` enum (`high`/`low`) for controlling how thoroughly the model processes file inputs, following the same pattern as the existing `ImageDetail` enum. Also refreshes the OpenAPI spec to the latest upstream version.
