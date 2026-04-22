@@ -4,6 +4,9 @@
 /// recently added data) or also include the write-ahead log (slower, but
 /// fully consistent).
 enum ReadLevel {
+  /// Read from the index and a bounded portion of the write-ahead log.
+  indexAndBoundedWal('index_and_bounded_wal'),
+
   /// Read from both the index and the write-ahead log.
   indexAndWal('index_and_wal'),
 
