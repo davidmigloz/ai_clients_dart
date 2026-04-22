@@ -1,6 +1,6 @@
 # Core Implementation Patterns
 
-**Contents:** [Manifest Kinds](#manifest-kind-values) · [Type Safety](#type-safety-patterns) · [toString](#tostring-convention) · [Equality & Hashing](#equality-and-hashing) · [copyWith Clearing](#copywith-nullable-clear-semantics) · [Immutability](#immutability-enforcement) · [fromJson Patterns](#fromjson-defensive-patterns) · [Nullable Serialization](#nullable-field-serialization) · [Open Objects](#open-object-schemas) · [HTTP Client](#http-client-patterns) · [DateTime](#datetime-handling) · [Security](#security) · [JSON](#json-serialization) · [SSE Parsing](#sse-parser-correctness) · [async\* Guard](#eager-ensurenotclosed-wrapping-for-async) · [API Design](#api-design)
+**Contents:** [Manifest Kinds](#manifest-kind-values) · [Type Safety](#type-safety-patterns) · [toString](#tostring-convention) · [Equality & Hashing](#equality-and-hashing) · [copyWith Clearing](#copywith-nullable-clear-semantics) · [Immutability](#immutability-enforcement) · [fromJson Patterns](#fromjson-defensive-patterns) · [Nullable Serialization](#nullable-field-serialization) · [Open Objects](#open-object-schemas) · [HTTP Client](#http-client-patterns) · [DateTime](#datetime-handling) · [Security](#security) · [Opaque Redaction](#opaque-payload-redaction) · [JSON](#json-serialization) · [SSE Parsing](#sse-parser-correctness) · [async\* Guard](#eager-ensurenotclosed-wrapping-for-async) · [API Design](#api-design)
 
 - Keep specs checked in under package `specs/` and compare them against fetched scratch specs.
 - Keep Dart serialization handwritten and deterministic.
@@ -112,7 +112,7 @@ The common `param ?? this.param` pattern silently conflates "caller didn't
 provide this field" with "caller explicitly passed `null`", so consumers cannot
 clear a previously-set nullable field via `copyWith`. When other models in the
 package use the `unsetCopyWithValue` sentinel (typically declared in
-`models/common/equality_helpers.dart`), nullable `copyWith` parameters should
+`models/common/copy_with_sentinel.dart`), nullable `copyWith` parameters should
 follow the same pattern for consistency:
 
 ```dart
