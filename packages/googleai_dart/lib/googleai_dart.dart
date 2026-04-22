@@ -79,6 +79,7 @@ export 'src/models/corpus/list_documents_response.dart';
 export 'src/models/embeddings/batch_embed_contents_request.dart';
 export 'src/models/embeddings/batch_embed_contents_response.dart';
 export 'src/models/embeddings/content_embedding.dart';
+export 'src/models/embeddings/embed_content_config.dart';
 export 'src/models/embeddings/embed_content_request.dart';
 export 'src/models/embeddings/embed_content_response.dart';
 export 'src/models/embeddings/embedding_usage_metadata.dart';
