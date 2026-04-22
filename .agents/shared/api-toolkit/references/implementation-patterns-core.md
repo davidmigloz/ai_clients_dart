@@ -1,6 +1,6 @@
 # Core Implementation Patterns
 
-**Contents:** [Manifest Kinds](#manifest-kind-values) · [Type Safety](#type-safety-patterns) · [toString](#tostring-convention) · [Equality & Hashing](#equality-and-hashing) · [Immutability](#immutability-enforcement) · [fromJson Patterns](#fromjson-defensive-patterns) · [Nullable Serialization](#nullable-field-serialization) · [Open Objects](#open-object-schemas) · [HTTP Client](#http-client-patterns) · [DateTime](#datetime-handling) · [Security](#security) · [JSON](#json-serialization) · [SSE Parsing](#sse-parser-correctness) · [API Design](#api-design)
+**Contents:** [Manifest Kinds](#manifest-kind-values) · [Type Safety](#type-safety-patterns) · [toString](#tostring-convention) · [Equality & Hashing](#equality-and-hashing) · [copyWith Clearing](#copywith-nullable-clear-semantics) · [Immutability](#immutability-enforcement) · [fromJson Patterns](#fromjson-defensive-patterns) · [Nullable Serialization](#nullable-field-serialization) · [Open Objects](#open-object-schemas) · [HTTP Client](#http-client-patterns) · [DateTime](#datetime-handling) · [Security](#security) · [JSON](#json-serialization) · [SSE Parsing](#sse-parser-correctness) · [async\* Guard](#eager-ensurenotclosed-wrapping-for-async) · [API Design](#api-design)
 
 - Keep specs checked in under package `specs/` and compare them against fetched scratch specs.
 - Keep Dart serialization handwritten and deterministic.
@@ -105,6 +105,44 @@ When adding a field to a model class, update **all four**:
 2. `hashCode` — include the field
 3. `toString` — print the field
 4. `copyWith` — expose the field
+
+## `copyWith` Nullable Clear Semantics
+
+The common `param ?? this.param` pattern silently conflates "caller didn't
+provide this field" with "caller explicitly passed `null`", so consumers cannot
+clear a previously-set nullable field via `copyWith`. When other models in the
+package use the `unsetCopyWithValue` sentinel (typically declared in
+`models/common/equality_helpers.dart`), nullable `copyWith` parameters should
+follow the same pattern for consistency:
+
+```dart
+// WRONG — cannot distinguish "not provided" from "set to null"
+OcrPage copyWith({
+  String? header,
+  String? footer,
+  OcrPageDimensions? dimensions,
+}) => OcrPage(
+  header: header ?? this.header,   // passing null keeps the old value
+  footer: footer ?? this.footer,
+  dimensions: dimensions ?? this.dimensions,
+);
+
+// CORRECT — sentinel differentiates "omitted" from "explicit null"
+OcrPage copyWith({
+  Object? header = unsetCopyWithValue,
+  Object? footer = unsetCopyWithValue,
+  Object? dimensions = unsetCopyWithValue,
+}) => OcrPage(
+  header: identical(header, unsetCopyWithValue) ? this.header : header as String?,
+  footer: identical(footer, unsetCopyWithValue) ? this.footer : footer as String?,
+  dimensions: identical(dimensions, unsetCopyWithValue)
+      ? this.dimensions
+      : dimensions as OcrPageDimensions?,
+);
+```
+
+For non-nullable fields the simple `param ?? this.param` pattern is still
+correct — there's no "clear" case to distinguish.
 
 ## Immutability Enforcement
 
@@ -410,6 +448,35 @@ String toString() {
 }
 ```
 
+### Opaque Payload Redaction
+
+The same risk applies to fields that aren't strictly credentials but that carry
+opaque, server-provided payloads — for example `encryptedContent` on
+Anthropic compaction blocks, verbatim signatures, or large binary blobs. They
+can leak into logs via `toString()`, bloat output enormously, and aren't
+meaningful to a human reader anyway. Redact them the same way existing
+`RedactedThinkingBlock` / `AdvisorRedactedResult` fields are handled in the
+codebase:
+
+```dart
+// WRONG — prints the full opaque payload, leaks and bloats logs
+@override
+String toString() => 'CompactionBlock('
+    'content: $content, '
+    'encryptedContent: $encryptedContent'
+    ')';
+
+// CORRECT — size-only summary, null preserved
+@override
+String toString() => 'CompactionBlock('
+    'content: $content, '
+    'encryptedContent: ${encryptedContent == null ? null : '[${encryptedContent!.length} chars]'}'
+    ')';
+```
+
+Keep the null branch so `toString` still conveys "present vs absent" — callers
+debugging serialization regressions often care about that distinction.
+
 ## JSON Serialization
 
 Always use `jsonEncode()` for JSON serialization — never `.toString()` on maps
@@ -472,6 +539,38 @@ In streaming APIs, content and delta types may receive partial events that only
 contain the type discriminator (e.g., `{"type": "text"}`). All non-discriminator
 fields on such types must be nullable to handle these partial events without
 throwing.
+
+### Eager `ensureNotClosed` Wrapping for `async*`
+
+`async*` method bodies are lazy — none of the code inside runs until a consumer
+calls `.listen()` on the returned stream. That means an `ensureNotClosed()` call
+inside an `async*` body fails *late*: callers who construct a stream on a closed
+client won't see the error until they try to read from it, which is often in a
+different stack frame and far from the original mistake.
+
+Wrap the `async*` body in a non-`async*` public method so the guard runs
+synchronously when the stream is constructed:
+
+```dart
+// WRONG — ensureNotClosed runs only when the returned stream is listened to
+Stream<ImageEditStreamEvent> editStream(ImageEditRequest request) async* {
+  ensureNotClosed?.call();            // lazy — fires on .listen(), not on call
+  yield* _performEdit(request);
+}
+
+// CORRECT — eager guard, async* body isolated in a private helper
+Stream<ImageEditStreamEvent> editStream(ImageEditRequest request) {
+  ensureNotClosed?.call();            // runs at call time
+  return _editStreamImpl(request);
+}
+
+Stream<ImageEditStreamEvent> _editStreamImpl(ImageEditRequest request) async* {
+  yield* _performEdit(request);
+}
+```
+
+The same split is the right default for any other synchronous precondition
+(argument validation, factory selection) on a streaming method.
 
 ## API Design
 
