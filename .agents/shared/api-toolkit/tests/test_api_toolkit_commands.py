@@ -2930,6 +2930,73 @@ class ApiToolkitCommandTests(unittest.TestCase):
             )
             self.assertEqual(exit_code, 1)
 
+    def test_verify_enum_int_value_not_matched_as_substring_of_larger_int(self) -> None:
+        """Int `1` must NOT be considered present when Dart file only has `10` — no digit-substring false negatives."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            (package_root / "specs" / "openapi.json").write_text(
+                json.dumps(
+                    {
+                        "openapi": "3.1.0",
+                        "info": {"title": "Sample", "version": "1"},
+                        "paths": {},
+                        "components": {
+                            "schemas": {
+                                "Priority": {"type": "integer", "enum": [1, 2]}
+                            }
+                        },
+                    }
+                )
+            )
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(root / "tmp" / "sample"),
+                },
+                manifest_payload={
+                    "surface": "openapi",
+                    "type_mappings": {},
+                    "placement": {"categories": {}, "default_category": "common", "parent_model_patterns": {}},
+                    "coverage": {},
+                    "types": {
+                        "Priority": {"spec": "main", "kind": "enum", "dart_class": "Priority", "file": "lib/src/models/common/priority.dart", "schema": "Priority"}
+                    },
+                },
+            )
+            # Dart file contains `10` and `21` but neither `1` nor `2` as bare
+            # digits — naive substring matching would falsely pass.
+            (package_root / "lib" / "src" / "models" / "common" / "priority.dart").write_text(
+                "enum Priority {\n"
+                "  ten(10),\n"
+                "  twentyOne(21),\n"
+                "  unknown(0);\n"
+                "}\n"
+            )
+
+            exit_code, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+
+            issues = payload["results"]["implementation"]["issues"]
+            missing = {
+                msg for msg in (i["message"] for i in issues)
+                if "not found in file" in msg
+            }
+            self.assertTrue(
+                any("'1'" in m for m in missing),
+                f"Expected '1' to be reported missing, got: {missing}",
+            )
+            self.assertTrue(
+                any("'2'" in m for m in missing),
+                f"Expected '2' to be reported missing, got: {missing}",
+            )
+            self.assertEqual(exit_code, 1)
+
     def test_verify_coverage_gap_is_blocking(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)

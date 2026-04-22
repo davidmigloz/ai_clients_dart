@@ -1467,9 +1467,19 @@ def _verify_enum_entry(config: ToolkitConfig, spec_payload: dict[str, Any], entr
     if not values:
         issues.append(_type_issue("error", entry.key, f"No enum values found in spec for '{entry.schema_name}'", file=entry.file))
     for value in values:
-        # OpenAPI enums may be strings OR integers (e.g. int-coded state enums);
-        # stringify before substring check so we never TypeError on `int in str`.
-        if str(value) not in content:
+        # OpenAPI enums may be strings OR integers (e.g. int-coded state enums).
+        # For ints, use a digit-boundary regex so `1` doesn't falsely match
+        # inside `10`/`21`; for strings, keep the original substring behavior
+        # (string enum values live in quotes in Dart source, so substring
+        # matching rarely collides).
+        if isinstance(value, int) and not isinstance(value, bool):
+            found = (
+                re.search(rf"(?<!\d){re.escape(str(value))}(?!\d)", content)
+                is not None
+            )
+        else:
+            found = str(value) in content
+        if not found:
             issues.append(_type_issue("error", entry.key, f"Enum value '{value}' not found in file", file=entry.file))
     if not any(fallback in content for fallback in UNKNOWN_ENUM_FALLBACKS):
         issues.append(_type_issue("error", entry.key, "Enum fallback value ('unknown' or 'unspecified') not found", file=entry.file))
