@@ -17,7 +17,6 @@ void main() {
         expect(page.header, isNull);
         expect(page.footer, isNull);
         expect(page.hyperlinks, isEmpty);
-        expect(page.confidenceScores, isNull);
       });
 
       test('parses page with images', () {
@@ -91,28 +90,6 @@ void main() {
         expect(page.hyperlinks, hasLength(2));
         expect(page.hyperlinks[0], 'https://example.com');
       });
-
-      test('parses page with confidence scores', () {
-        final json = {
-          'index': 0,
-          'markdown': 'Scored content',
-          'confidence_scores': {
-            'average_page_confidence_score': 0.92,
-            'minimum_page_confidence_score': 0.75,
-            'word_confidence_scores': [
-              {'confidence': 0.95, 'start_index': 0, 'text': 'Scored'},
-              {'confidence': 0.89, 'start_index': 7, 'text': 'content'},
-            ],
-          },
-        };
-
-        final page = OcrPage.fromJson(json);
-
-        expect(page.confidenceScores, isNotNull);
-        expect(page.confidenceScores!.averagePageConfidenceScore, 0.92);
-        expect(page.confidenceScores!.minimumPageConfidenceScore, 0.75);
-        expect(page.confidenceScores!.wordConfidenceScores, hasLength(2));
-      });
     });
 
     group('toJson', () {
@@ -129,7 +106,6 @@ void main() {
         expect(json.containsKey('header'), isFalse);
         expect(json.containsKey('footer'), isFalse);
         expect(json.containsKey('hyperlinks'), isFalse);
-        expect(json.containsKey('confidence_scores'), isFalse);
       });
 
       test('serializes page with images', () {
@@ -184,42 +160,17 @@ void main() {
         expect(json['footer'], 'Footer');
         expect(json['hyperlinks'], ['https://example.com']);
       });
-
-      test('serializes page with confidence scores', () {
-        const page = OcrPage(
-          index: 0,
-          markdown: 'Content',
-          confidenceScores: OcrPageConfidenceScores(
-            averagePageConfidenceScore: 0.90,
-            minimumPageConfidenceScore: 0.80,
-          ),
-        );
-
-        final json = page.toJson();
-
-        expect(json['confidence_scores'], isA<Map<String, dynamic>>());
-        final scores = json['confidence_scores'] as Map<String, dynamic>;
-        expect(scores['average_page_confidence_score'], 0.90);
-      });
     });
 
     group('copyWith', () {
       test('copies with new values', () {
         const original = OcrPage(index: 0, markdown: 'old');
 
-        final copy = original.copyWith(
-          markdown: 'new',
-          header: 'Header',
-          confidenceScores: const OcrPageConfidenceScores(
-            averagePageConfidenceScore: 0.9,
-            minimumPageConfidenceScore: 0.8,
-          ),
-        );
+        final copy = original.copyWith(markdown: 'new', header: 'Header');
 
         expect(copy.index, 0);
         expect(copy.markdown, 'new');
         expect(copy.header, 'Header');
-        expect(copy.confidenceScores, isNotNull);
       });
 
       test('preserves values when not specified', () {

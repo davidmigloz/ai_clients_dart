@@ -3,7 +3,6 @@ import 'package:meta/meta.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import 'ocr_image.dart';
-import 'ocr_page_confidence_scores.dart';
 import 'ocr_page_dimensions.dart';
 import 'ocr_table.dart';
 
@@ -38,11 +37,6 @@ class OcrPage {
   /// List of all hyperlinks in the page.
   final List<String> hyperlinks;
 
-  /// Confidence scores for the page.
-  ///
-  /// Populated when `confidenceScoresGranularity` is set in the request.
-  final OcrPageConfidenceScores? confidenceScores;
-
   /// Creates an [OcrPage].
   const OcrPage({
     required this.index,
@@ -53,7 +47,6 @@ class OcrPage {
     this.header,
     this.footer,
     this.hyperlinks = const [],
-    this.confidenceScores,
   });
 
   /// Creates an [OcrPage] from JSON.
@@ -76,11 +69,6 @@ class OcrPage {
     header: json['header'] as String?,
     footer: json['footer'] as String?,
     hyperlinks: (json['hyperlinks'] as List?)?.cast<String>() ?? [],
-    confidenceScores: json['confidence_scores'] != null
-        ? OcrPageConfidenceScores.fromJson(
-            json['confidence_scores'] as Map<String, dynamic>,
-          )
-        : null,
   );
 
   /// Converts to JSON.
@@ -93,8 +81,6 @@ class OcrPage {
     if (header != null) 'header': header,
     if (footer != null) 'footer': footer,
     if (hyperlinks.isNotEmpty) 'hyperlinks': hyperlinks,
-    if (confidenceScores != null)
-      'confidence_scores': confidenceScores!.toJson(),
   };
 
   /// Creates a copy with the specified fields replaced.
@@ -109,7 +95,6 @@ class OcrPage {
     Object? header = unsetCopyWithValue,
     Object? footer = unsetCopyWithValue,
     List<String>? hyperlinks,
-    Object? confidenceScores = unsetCopyWithValue,
   }) => OcrPage(
     index: index ?? this.index,
     markdown: markdown ?? this.markdown,
@@ -121,9 +106,6 @@ class OcrPage {
     header: header == unsetCopyWithValue ? this.header : header as String?,
     footer: footer == unsetCopyWithValue ? this.footer : footer as String?,
     hyperlinks: hyperlinks ?? this.hyperlinks,
-    confidenceScores: confidenceScores == unsetCopyWithValue
-        ? this.confidenceScores
-        : confidenceScores as OcrPageConfidenceScores?,
   );
 
   @override
@@ -138,8 +120,7 @@ class OcrPage {
           listsEqual(tables, other.tables) &&
           header == other.header &&
           footer == other.footer &&
-          listsEqual(hyperlinks, other.hyperlinks) &&
-          confidenceScores == other.confidenceScores;
+          listsEqual(hyperlinks, other.hyperlinks);
 
   @override
   int get hashCode => Object.hash(
@@ -151,7 +132,6 @@ class OcrPage {
     header,
     footer,
     listHash(hyperlinks),
-    confidenceScores,
   );
 
   @override
