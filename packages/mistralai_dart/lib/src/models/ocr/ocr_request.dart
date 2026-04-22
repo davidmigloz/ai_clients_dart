@@ -3,7 +3,6 @@ import 'package:meta/meta.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../metadata/response_format.dart';
-import 'ocr_confidence_scores_granularity.dart';
 import 'ocr_document.dart';
 import 'ocr_table_format.dart';
 
@@ -40,14 +39,6 @@ class OcrRequest {
   /// Custom prompt for document annotation.
   final String? documentAnnotationPrompt;
 
-  /// Granularity level for confidence scores.
-  ///
-  /// Set to [OcrConfidenceScoresGranularity.page] to get aggregate statistics
-  /// (average and minimum) per page, or [OcrConfidenceScoresGranularity.word]
-  /// to also get per-word scores on each page and table.
-  /// Defaults to null (no confidence scores returned).
-  final OcrConfidenceScoresGranularity? confidenceScoresGranularity;
-
   /// Format for extracted tables.
   final OcrTableFormat? tableFormat;
 
@@ -75,7 +66,6 @@ class OcrRequest {
     this.imageLimit,
     this.imageMinSize,
     this.documentAnnotationPrompt,
-    this.confidenceScoresGranularity,
     this.tableFormat,
     this.extractHeader,
     this.extractFooter,
@@ -90,14 +80,12 @@ class OcrRequest {
     String? id,
     List<int>? pages,
     bool? includeImageBase64,
-    OcrConfidenceScoresGranularity? confidenceScoresGranularity,
   }) => OcrRequest(
     model: model,
     document: OcrDocument.url(url),
     id: id,
     pages: pages,
     includeImageBase64: includeImageBase64,
-    confidenceScoresGranularity: confidenceScoresGranularity,
   );
 
   /// Creates an [OcrRequest] from a file ID.
@@ -107,14 +95,12 @@ class OcrRequest {
     String? id,
     List<int>? pages,
     bool? includeImageBase64,
-    OcrConfidenceScoresGranularity? confidenceScoresGranularity,
   }) => OcrRequest(
     model: model,
     document: OcrDocument.file(fileId),
     id: id,
     pages: pages,
     includeImageBase64: includeImageBase64,
-    confidenceScoresGranularity: confidenceScoresGranularity,
   );
 
   /// Creates an [OcrRequest] from base64-encoded data.
@@ -125,14 +111,12 @@ class OcrRequest {
     String? id,
     List<int>? pages,
     bool? includeImageBase64,
-    OcrConfidenceScoresGranularity? confidenceScoresGranularity,
   }) => OcrRequest(
     model: model,
     document: OcrDocument.base64(data: data, mimeType: mimeType),
     id: id,
     pages: pages,
     includeImageBase64: includeImageBase64,
-    confidenceScoresGranularity: confidenceScoresGranularity,
   );
 
   /// Creates an [OcrRequest] from JSON.
@@ -145,9 +129,6 @@ class OcrRequest {
     imageLimit: json['image_limit'] as int?,
     imageMinSize: json['image_min_size'] as int?,
     documentAnnotationPrompt: json['document_annotation_prompt'] as String?,
-    confidenceScoresGranularity: OcrConfidenceScoresGranularity.fromString(
-      json['confidence_scores_granularity'] as String?,
-    ),
     tableFormat: OcrTableFormat.fromString(json['table_format'] as String?),
     extractHeader: json['extract_header'] as bool?,
     extractFooter: json['extract_footer'] as bool?,
@@ -174,8 +155,6 @@ class OcrRequest {
     if (imageMinSize != null) 'image_min_size': imageMinSize,
     if (documentAnnotationPrompt != null)
       'document_annotation_prompt': documentAnnotationPrompt,
-    if (confidenceScoresGranularity != null)
-      'confidence_scores_granularity': confidenceScoresGranularity!.value,
     if (tableFormat != null) 'table_format': tableFormat!.value,
     if (extractHeader != null) 'extract_header': extractHeader,
     if (extractFooter != null) 'extract_footer': extractFooter,
@@ -197,7 +176,6 @@ class OcrRequest {
     Object? imageLimit = unsetCopyWithValue,
     Object? imageMinSize = unsetCopyWithValue,
     Object? documentAnnotationPrompt = unsetCopyWithValue,
-    Object? confidenceScoresGranularity = unsetCopyWithValue,
     Object? tableFormat = unsetCopyWithValue,
     Object? extractHeader = unsetCopyWithValue,
     Object? extractFooter = unsetCopyWithValue,
@@ -220,10 +198,6 @@ class OcrRequest {
     documentAnnotationPrompt: documentAnnotationPrompt == unsetCopyWithValue
         ? this.documentAnnotationPrompt
         : documentAnnotationPrompt as String?,
-    confidenceScoresGranularity:
-        confidenceScoresGranularity == unsetCopyWithValue
-        ? this.confidenceScoresGranularity
-        : confidenceScoresGranularity as OcrConfidenceScoresGranularity?,
     tableFormat: tableFormat == unsetCopyWithValue
         ? this.tableFormat
         : tableFormat as OcrTableFormat?,
@@ -254,7 +228,6 @@ class OcrRequest {
           imageLimit == other.imageLimit &&
           imageMinSize == other.imageMinSize &&
           documentAnnotationPrompt == other.documentAnnotationPrompt &&
-          confidenceScoresGranularity == other.confidenceScoresGranularity &&
           tableFormat == other.tableFormat &&
           extractHeader == other.extractHeader &&
           extractFooter == other.extractFooter &&
@@ -271,7 +244,6 @@ class OcrRequest {
     imageLimit,
     imageMinSize,
     documentAnnotationPrompt,
-    confidenceScoresGranularity,
     tableFormat,
     extractHeader,
     extractFooter,
@@ -280,7 +252,5 @@ class OcrRequest {
   );
 
   @override
-  String toString() =>
-      'OcrRequest(model: $model, document: $document, '
-      'confidenceScoresGranularity: $confidenceScoresGranularity)';
+  String toString() => 'OcrRequest(model: $model, document: $document)';
 }
