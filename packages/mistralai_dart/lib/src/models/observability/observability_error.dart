@@ -22,6 +22,10 @@ class ObservabilityError {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {'detail': detail.toJson()};
 
+  /// Creates a copy with the specified fields replaced.
+  ObservabilityError copyWith({ObservabilityErrorDetail? detail}) =>
+      ObservabilityError(detail: detail ?? this.detail);
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
