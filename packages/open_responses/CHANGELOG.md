@@ -1,3 +1,9 @@
+## 0.3.2
+
+Adds support for [WebSocket mode](https://developers.openai.com/api/docs/guides/websocket-mode) in the Responses API via new `WebSocketResponseCreateEvent` and `WebSocketErrorEvent` types. The request wrapper composes an existing `CreateResponseRequest` with the required `response.create` discriminator and automatically strips the three HTTP-only fields (`background`, `stream`, `stream_options`) that must not be sent over WebSocket. Promotes the bundled OpenResponses spec to v2.3.0 ([openresponses#71](https://github.com/openresponses/openresponses/pull/71)).
+
+- **FEAT**: Add WebSocket mode support ([#199](https://github.com/davidmigloz/ai_clients_dart/issues/199)). ([cb10f1d0](https://github.com/davidmigloz/ai_clients_dart/commit/cb10f1d0ad4a25d5b32e3139f80f171f58010e80))
+
 ## 0.3.1
 
 Annotates `llms.txt` with per-link token counts and per-package totals so coding agents can budget context before fetching documentation, examples, or changelogs — inspired by Addy Osmani's [Agentic Engine Optimization](https://addyosmani.com/blog/agentic-engine-optimization/) article.

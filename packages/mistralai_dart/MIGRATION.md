@@ -6,6 +6,48 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v2.x to v3.0.0
+
+v3.0.0 syncs with the 2026-04-22 Mistral AI spec. The only breaking change is the removal of the OCR confidence-score API surface — Mistral dropped it server-side, so the client no longer exposes the corresponding types and fields. If you do not use OCR confidence scoring, no migration is needed.
+
+### 1) OCR confidence-score types and fields removed
+
+The server no longer returns confidence data, so the following have been removed from the client:
+
+| Symbol | Notes |
+|---|---|
+| `OcrConfidenceScore` (class) | Removed upstream |
+| `OcrPageConfidenceScores` (class) | Removed upstream |
+| `OcrConfidenceScoresGranularity` (enum) | Removed upstream |
+| `OcrRequest.confidenceScoresGranularity` (field) | Removed upstream |
+| `OcrPage.confidenceScores` (field) | Removed upstream |
+| `OcrTable.wordConfidenceScores` (field) | Removed upstream |
+
+Remove any references to these symbols. There is no replacement — the data is no longer returned by the API.
+
+```dart
+// Before (v2.x)
+final request = OcrRequest.fromUrl(
+  url: 'https://example.com/doc.pdf',
+  confidenceScoresGranularity: OcrConfidenceScoresGranularity.word,
+);
+final page = response.pages.first;
+final avgConfidence = page.confidenceScores?.averagePageConfidenceScore;
+
+// After (v3.0.0)
+final request = OcrRequest.fromUrl(
+  url: 'https://example.com/doc.pdf',
+);
+final page = response.pages.first;
+// page.confidenceScores is no longer available
+```
+
+### 2) `WorkflowListResponse` removed
+
+The `GET /v1/workflows` endpoint was retired upstream and its response type has been deleted. It had no corresponding client method, so this is unlikely to affect most callers — if you were constructing or deserializing `WorkflowListResponse` manually, remove those references.
+
+---
+
 ## Migrating from v1.x to v2.0.0
 
 v2.0.0 updates to the latest Mistral AI spec, replaces untyped `Object` fields with sealed union types, and adds TTS support with a minor breaking change in `AgentCompletionRequest`.

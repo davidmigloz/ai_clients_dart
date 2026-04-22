@@ -53,7 +53,7 @@ Dart client for **[ChromaDB](https://www.trychroma.com/)** with collections, vec
 
 ```yaml
 dependencies:
-  chromadb: ^1.3.0
+  chromadb: ^1.4.0
 ```
 
 ```dart

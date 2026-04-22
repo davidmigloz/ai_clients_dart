@@ -1,3 +1,13 @@
+## 3.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Syncs with the 2026-04-22 Mistral AI spec: 9 endpoints and 20 schemas were removed upstream with no additions. **Breaking:** the entire OCR confidence-score surface has been removed server-side, so `OcrConfidenceScore`, `OcrPageConfidenceScores`, `OcrConfidenceScoresGranularity`, and the related fields on `OcrRequest`, `OcrPage`, and `OcrTable` are gone from the client. The orphan `WorkflowListResponse` model is also deleted along with its retired `GET /v1/workflows` endpoint. This release also adds missing `copyWith` methods on `ObservabilityError` and `ObservabilityErrorDetail`.
+
+- **BREAKING** **FEAT**: Sync with 2026-04-22 spec; drop OCR confidence ([#201](https://github.com/davidmigloz/ai_clients_dart/issues/201)). ([f255b63b](https://github.com/davidmigloz/ai_clients_dart/commit/f255b63b5840f940897b5fc3d888e5a9fec77c22))
+- **FIX**: Add missing copyWith to ObservabilityError models ([#202](https://github.com/davidmigloz/ai_clients_dart/issues/202)). ([5d0ecfb5](https://github.com/davidmigloz/ai_clients_dart/commit/5d0ecfb5472b670a515212b1cbf82dd787a50c7d))
+
 ## 2.3.0
 
 Adds support for OCR confidence scores with a new `confidenceScoresGranularity` request parameter (`page` or `word`) and per-page/per-word score response types. Also fills pre-existing spec gaps on `OcrPage` (tables, header, footer, hyperlinks) and `OcrRequest` (tableFormat, extractHeader, extractFooter, annotation formats).

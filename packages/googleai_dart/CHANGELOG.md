@@ -1,3 +1,9 @@
+## 6.2.0
+
+Adds support for the latest Gemini API surface. Introduces a new `EmbedContentConfig` schema that consolidates embedding request parameters — with new `autoTruncate`, `documentOcr`, and `audioTrackExtraction` fields — and deprecates the equivalent top-level `taskType`, `title`, and `outputDimensionality` fields on `EmbedContentRequest`. On the Interactions API, adds `collaborativePlanning` and `visualization` fields to `DeepResearchAgentConfig`, exposing the [next-generation Gemini Deep Research](https://blog.google/innovation-and-ai/models-and-research/gemini-models/next-generation-gemini-deep-research/) human-in-the-loop planning and inline visualization capabilities.
+
+- **FEAT**: Update to latest Gemini OpenAPI spec ([#197](https://github.com/davidmigloz/ai_clients_dart/issues/197)). ([3d655ad9](https://github.com/davidmigloz/ai_clients_dart/commit/3d655ad988f91e6601cf6a0974671cd28f3827c6))
+
 ## 6.1.0
 
 Adds a text-to-speech example for the new [Gemini 3.1 Flash TTS](https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-1-flash-tts/) preview model, demonstrating single-speaker synthesis, audio-tag control for inline pacing and tone, and multi-speaker dialogue. Also adds a README FAQ section for speech generation, fixes the image-generation snippet to use the `ResponseModality` enum, and refreshes the main OpenAPI spec metadata with no schema changes.

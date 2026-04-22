@@ -1,3 +1,9 @@
+## 1.4.0
+
+Adds the new `ReadLevel.indexAndBoundedWal` variant (`index_and_bounded_wal`) — a third read-consistency option between `index_only` (fastest) and `index_and_wal` (most up-to-date) that reads the index plus a bounded portion of the write-ahead log. Refreshes the OpenAPI spec from the latest upstream.
+
+- **FEAT**: Add index_and_bounded_wal read level ([#196](https://github.com/davidmigloz/ai_clients_dart/issues/196)). ([430ca2ae](https://github.com/davidmigloz/ai_clients_dart/commit/430ca2aef9deba4b46002c2ffa5540d170a16acb))
+
 ## 1.3.0
 
 Adds a new `getCollectionById` API for retrieving collections by UUID (previously only name and CRN lookups were supported), bringing the client to 29 endpoints against the latest upstream OpenAPI spec.
