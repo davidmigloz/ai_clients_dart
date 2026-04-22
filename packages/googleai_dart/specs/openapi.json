@@ -1329,6 +1329,41 @@
         },
         "type": "object"
       },
+      "EmbedContentConfig": {
+        "description": "Configurations for the EmbedContent request.",
+        "properties": {
+          "audioTrackExtraction": {
+            "description": "Optional. Whether to extract audio from video content.",
+            "type": "boolean"
+          },
+          "autoTruncate": {
+            "description": "Optional. Whether to silently truncate the input content if it's longer\nthan the maximum sequence length.",
+            "type": "boolean"
+          },
+          "documentOcr": {
+            "description": "Optional. Whether to enable OCR for document content.",
+            "type": "boolean"
+          },
+          "outputDimensionality": {
+            "description": "Optional. Reduced dimension for the output embedding. If set, excessive\nvalues in the output embedding are truncated from the end.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "taskType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TaskType"
+              }
+            ],
+            "description": "Optional. The task type of the embedding."
+          },
+          "title": {
+            "description": "Optional. The title for the text.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "EmbedContentRequest": {
         "description": "Request containing the `Content` for the model to embed.",
         "properties": {
@@ -1340,12 +1375,21 @@
             ],
             "description": "Required. The content to embed. Only the `parts.text` fields will be counted."
           },
+          "embedContentConfig": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EmbedContentConfig"
+              }
+            ],
+            "description": "Optional. Configuration for the EmbedContent request."
+          },
           "model": {
             "description": "Required. The model's resource name. This serves as an ID for the Model to use.\n\nThis name should match a model name returned by the `ListModels` method.\n\nFormat: `models/{model}`",
             "type": "string"
           },
           "outputDimensionality": {
-            "description": "Optional. Optional reduced dimension for the output embedding. If set, excessive\nvalues in the output embedding are truncated from the end. Supported by\nnewer models since 2024 only. You cannot set this value if using the\nearlier model (`models/embedding-001`).",
+            "deprecated": true,
+            "description": "Optional. Deprecated: Please use EmbedContentConfig.output_dimensionality instead.\nOptional reduced dimension for the output embedding. If set, excessive\nvalues in the output embedding are truncated from the end. Supported by\nnewer models since 2024 only. You cannot set this value if using the\nearlier model (`models/embedding-001`).",
             "format": "int32",
             "type": "integer"
           },
@@ -1355,10 +1399,12 @@
                 "$ref": "#/components/schemas/TaskType"
               }
             ],
-            "description": "Optional. Optional task type for which the embeddings will be used. Not supported on\nearlier models (`models/embedding-001`)."
+            "deprecated": true,
+            "description": "Optional. Deprecated: Please use EmbedContentConfig.task_type instead.\nOptional task type for which the embeddings will be used. Not supported on\nearlier models (`models/embedding-001`)."
           },
           "title": {
-            "description": "Optional. An optional title for the text. Only applicable when TaskType is\n`RETRIEVAL_DOCUMENT`.\n\nNote: Specifying a `title` for `RETRIEVAL_DOCUMENT` provides better quality\nembeddings for retrieval.",
+            "deprecated": true,
+            "description": "Optional. Deprecated: Please use EmbedContentConfig.title instead.\nAn optional title for the text. Only applicable when TaskType is\n`RETRIEVAL_DOCUMENT`.\n\nNote: Specifying a `title` for `RETRIEVAL_DOCUMENT` provides better quality\nembeddings for retrieval.",
             "type": "string"
           }
         },
@@ -5639,7 +5685,7 @@
     "description": "The Gemini API allows developers to build generative AI applications using Gemini models. Gemini is our most capable model, built from the ground up to be multimodal. It can generalize and seamlessly understand, operate across, and combine different types of information including language, images, audio, video, and code. You can use the Gemini API for use cases like reasoning across text and images, content generation, dialogue agents, summarization and classification systems, and more.",
     "title": "Gemini API",
     "version": "v1beta",
-    "x-google-revision": "20260415"
+    "x-google-revision": "20260421"
   },
   "openapi": "3.0.3",
   "paths": {

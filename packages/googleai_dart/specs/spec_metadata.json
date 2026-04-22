@@ -2,14 +2,14 @@
   "specs": {
     "interactions": {
       "current_version": "v1beta",
-      "last_fetched": "2026-04-16T21:12:00.747055Z",
+      "last_fetched": "2026-04-22T18:45:26.530625Z",
       "source_url": "https://ai.google.dev/static/api/interactions.openapi.json",
       "title": "Gemini API",
       "version_history": []
     },
     "main": {
       "current_version": "v1beta",
-      "last_fetched": "2026-04-16T21:11:47.906709Z",
+      "last_fetched": "2026-04-22T18:45:15.787993Z",
       "source_url": "https://generativelanguage.googleapis.com/$discovery/OPENAPI3_0?version=v1beta",
       "title": "Gemini API",
       "version_history": []

@@ -156,6 +156,22 @@
       "schema": "EmbedContentResponse",
       "tags": []
     },
+    "EmbedContentRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EmbedContentRequest",
+      "file": "lib/src/models/embeddings/embed_content_request.dart",
+      "schema": "EmbedContentRequest",
+      "tags": []
+    },
+    "EmbedContentConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EmbedContentConfig",
+      "file": "lib/src/models/embeddings/embed_content_config.dart",
+      "schema": "EmbedContentConfig",
+      "tags": []
+    },
     "BatchEmbedContentsResponse": {
       "spec": "main",
       "kind": "object",

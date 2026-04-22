@@ -2,6 +2,10 @@ import '../copy_with_sentinel.dart';
 import 'thinking_summaries.dart';
 
 /// Base class for agent configurations.
+///
+/// Subtypes:
+/// - [DynamicAgentConfig] (type `dynamic`)
+/// - [DeepResearchAgentConfig] (type `deep-research`)
 sealed class AgentConfig {
   /// The type of agent configuration.
   String get type;
@@ -59,6 +63,36 @@ class DynamicAgentConfig extends AgentConfig {
   }
 }
 
+/// Whether to include visualizations in the Deep Research response.
+enum DeepResearchVisualization {
+  /// Do not include visualizations.
+  off,
+
+  /// Automatically include visualizations.
+  auto,
+}
+
+/// Converts string to [DeepResearchVisualization] enum.
+///
+/// Returns `null` for `null` input or unrecognized values (forward-compatible:
+/// a new server-side enum value will surface as `null` rather than silently
+/// collapsing into an existing member).
+DeepResearchVisualization? deepResearchVisualizationFromString(String? value) {
+  return switch (value) {
+    'off' => DeepResearchVisualization.off,
+    'auto' => DeepResearchVisualization.auto,
+    _ => null,
+  };
+}
+
+/// Converts [DeepResearchVisualization] enum to string.
+String deepResearchVisualizationToString(DeepResearchVisualization value) {
+  return switch (value) {
+    DeepResearchVisualization.off => 'off',
+    DeepResearchVisualization.auto => 'auto',
+  };
+}
+
 /// Configuration for the Deep Research agent.
 class DeepResearchAgentConfig extends AgentConfig {
   @override
@@ -67,8 +101,22 @@ class DeepResearchAgentConfig extends AgentConfig {
   /// Whether to include thought summaries in the response.
   final InteractionThinkingSummaries? thinkingSummaries;
 
+  /// Enables human-in-the-loop planning for the Deep Research agent.
+  ///
+  /// If set to true, the Deep Research agent will provide a research plan in
+  /// its response. The agent will then proceed only if the user confirms the
+  /// plan in the next turn.
+  final bool? collaborativePlanning;
+
+  /// Whether to include visualizations in the response.
+  final DeepResearchVisualization? visualization;
+
   /// Creates a [DeepResearchAgentConfig] instance.
-  const DeepResearchAgentConfig({this.thinkingSummaries});
+  const DeepResearchAgentConfig({
+    this.thinkingSummaries,
+    this.collaborativePlanning,
+    this.visualization,
+  });
 
   /// Creates a [DeepResearchAgentConfig] from JSON.
   factory DeepResearchAgentConfig.fromJson(Map<String, dynamic> json) =>
@@ -78,6 +126,10 @@ class DeepResearchAgentConfig extends AgentConfig {
                 json['thinking_summaries'] as String?,
               )
             : null,
+        collaborativePlanning: json['collaborative_planning'] as bool?,
+        visualization: deepResearchVisualizationFromString(
+          json['visualization'] as String?,
+        ),
       );
 
   @override
@@ -87,16 +139,28 @@ class DeepResearchAgentConfig extends AgentConfig {
       'thinking_summaries': interactionThinkingSummariesToString(
         thinkingSummaries!,
       ),
+    if (collaborativePlanning != null)
+      'collaborative_planning': collaborativePlanning,
+    if (visualization != null)
+      'visualization': deepResearchVisualizationToString(visualization!),
   };
 
   /// Creates a copy with replaced values.
   DeepResearchAgentConfig copyWith({
     Object? thinkingSummaries = unsetCopyWithValue,
+    Object? collaborativePlanning = unsetCopyWithValue,
+    Object? visualization = unsetCopyWithValue,
   }) {
     return DeepResearchAgentConfig(
       thinkingSummaries: thinkingSummaries == unsetCopyWithValue
           ? this.thinkingSummaries
           : thinkingSummaries as InteractionThinkingSummaries?,
+      collaborativePlanning: collaborativePlanning == unsetCopyWithValue
+          ? this.collaborativePlanning
+          : collaborativePlanning as bool?,
+      visualization: visualization == unsetCopyWithValue
+          ? this.visualization
+          : visualization as DeepResearchVisualization?,
     );
   }
 }

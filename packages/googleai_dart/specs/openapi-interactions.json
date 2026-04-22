@@ -20,6 +20,16 @@
             "const": "deep-research-pro-preview-12-2025",
             "description": "Gemini Deep Research Agent",
             "x-stainless-nominal": false
+          },
+          {
+            "const": "deep-research-preview-04-2026",
+            "description": "Gemini Deep Research Agent",
+            "x-stainless-nominal": false
+          },
+          {
+            "const": "deep-research-max-preview-04-2026",
+            "description": "Gemini Deep Research Max Agent",
+            "x-stainless-nominal": false
           }
         ],
         "description": "The agent to interact with.",
@@ -96,7 +106,10 @@
               "audio/flac",
               "audio/mpeg",
               "audio/m4a",
-              "audio/l16"
+              "audio/l16",
+              "audio/opus",
+              "audio/alaw",
+              "audio/mulaw"
             ],
             "type": "string",
             "x-google-enum-descriptions": [
@@ -108,7 +121,10 @@
               "FLAC audio format",
               "MPEG audio format",
               "M4A audio format",
-              "L16 audio format"
+              "L16 audio format",
+              "OPUS audio format",
+              "ALAW audio format",
+              "MULAW audio format"
             ]
           },
           "rate": {
@@ -150,7 +166,10 @@
               "audio/flac",
               "audio/mpeg",
               "audio/m4a",
-              "audio/l16"
+              "audio/l16",
+              "audio/opus",
+              "audio/alaw",
+              "audio/mulaw"
             ],
             "type": "string",
             "x-google-enum-descriptions": [
@@ -162,7 +181,10 @@
               "FLAC audio format",
               "MPEG audio format",
               "M4A audio format",
-              "L16 audio format"
+              "L16 audio format",
+              "OPUS audio format",
+              "ALAW audio format",
+              "MULAW audio format"
             ]
           },
           "rate": {
@@ -766,11 +788,11 @@
             "type": "string",
             "x-google-enum-descriptions": [
               "The interaction is in progress.",
-              "The interaction requires action.",
+              "The interaction requires action/input from the user.",
               "The interaction is completed.",
-              "The interaction is failed.",
-              "The interaction is cancelled.",
-              "The interaction is incomplete."
+              "The interaction failed.",
+              "The interaction was cancelled.",
+              "The interaction is completed, but contains incomplete results (e.g.\nhitting max_tokens)."
             ]
           },
           "store": {
@@ -901,11 +923,11 @@
             "type": "string",
             "x-google-enum-descriptions": [
               "The interaction is in progress.",
-              "The interaction requires action.",
+              "The interaction requires action/input from the user.",
               "The interaction is completed.",
-              "The interaction is failed.",
-              "The interaction is cancelled.",
-              "The interaction is incomplete."
+              "The interaction failed.",
+              "The interaction was cancelled.",
+              "The interaction is completed, but contains incomplete results (e.g.\nhitting max_tokens)."
             ]
           },
           "store": {
@@ -949,12 +971,28 @@
       "DeepResearchAgentConfig": {
         "description": "Configuration for the Deep Research agent.",
         "properties": {
+          "collaborative_planning": {
+            "description": "Enables human-in-the-loop planning for the Deep Research agent. If set to\ntrue, the Deep Research agent will provide a research plan in its response.\nThe agent will then proceed only if the user confirms the plan in the next\nturn.",
+            "type": "boolean"
+          },
           "thinking_summaries": {
             "$ref": "#/components/schemas/ThinkingSummaries",
             "description": "Whether to include thought summaries in the response."
           },
           "type": {
             "const": "deep-research"
+          },
+          "visualization": {
+            "description": "Whether to include visualizations in the response.",
+            "enum": [
+              "off",
+              "auto"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Do not include visualizations.",
+              "Automatically include visualizations."
+            ]
           }
         },
         "required": [
@@ -2367,11 +2405,11 @@
             "type": "string",
             "x-google-enum-descriptions": [
               "The interaction is in progress.",
-              "The interaction requires action.",
+              "The interaction requires action/input from the user.",
               "The interaction is completed.",
-              "The interaction is failed.",
-              "The interaction is cancelled.",
-              "The interaction is incomplete."
+              "The interaction failed.",
+              "The interaction was cancelled.",
+              "The interaction is completed, but contains incomplete results (e.g.\nhitting max_tokens)."
             ]
           },
           "system_instruction": {
@@ -2557,11 +2595,11 @@
             "type": "string",
             "x-google-enum-descriptions": [
               "The interaction is in progress.",
-              "The interaction requires action.",
+              "The interaction requires action/input from the user.",
               "The interaction is completed.",
-              "The interaction is failed.",
-              "The interaction is cancelled.",
-              "The interaction is incomplete."
+              "The interaction failed.",
+              "The interaction was cancelled.",
+              "The interaction is completed, but contains incomplete results (e.g.\nhitting max_tokens)."
             ]
           }
         },
@@ -2961,6 +2999,11 @@
           {
             "const": "gemini-3.1-flash-lite-preview",
             "description": "Our most cost-efficient model, optimized for high-volume agentic tasks, translation, and simple data processing.",
+            "x-stainless-nominal": false
+          },
+          {
+            "const": "gemini-3.1-flash-tts-preview",
+            "description": "Gemini 3.1 Flash TTS: Powerful, low-latency speech generation. Enjoy natural outputs, steerable prompts, and new expressive audio tags for precise narration control.",
             "x-stainless-nominal": false
           },
           {
