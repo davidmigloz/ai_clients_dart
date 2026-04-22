@@ -2813,6 +2813,123 @@ class ApiToolkitCommandTests(unittest.TestCase):
             )
             self.assertEqual(exit_code, 0)
 
+    def test_verify_enum_with_integer_values(self) -> None:
+        """Int-valued OpenAPI enums must verify without TypeError (`int in str`)."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            (package_root / "specs" / "openapi.json").write_text(
+                json.dumps(
+                    {
+                        "openapi": "3.1.0",
+                        "info": {"title": "Sample", "version": "1"},
+                        "paths": {},
+                        "components": {
+                            "schemas": {
+                                "Priority": {"type": "integer", "enum": [1, 2, 3]}
+                            }
+                        },
+                    }
+                )
+            )
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(root / "tmp" / "sample"),
+                },
+                manifest_payload={
+                    "surface": "openapi",
+                    "type_mappings": {},
+                    "placement": {"categories": {}, "default_category": "common", "parent_model_patterns": {}},
+                    "coverage": {},
+                    "types": {
+                        "Priority": {"spec": "main", "kind": "enum", "dart_class": "Priority", "file": "lib/src/models/common/priority.dart", "schema": "Priority"}
+                    },
+                },
+            )
+            (package_root / "lib" / "src" / "models" / "common" / "priority.dart").write_text(
+                "enum Priority {\n"
+                "  low(1),\n"
+                "  medium(2),\n"
+                "  high(3),\n"
+                "  unknown(0);\n"
+                "  const Priority(this.value);\n"
+                "  final int value;\n"
+                "}\n"
+            )
+
+            exit_code, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+
+            issues = payload["results"]["implementation"]["issues"]
+            self.assertFalse(
+                any("not found in file" in issue["message"] for issue in issues),
+                f"Expected int enum values to be recognized, got: {issues}",
+            )
+            self.assertEqual(exit_code, 0)
+
+    def test_verify_enum_with_integer_values_missing_member_flagged(self) -> None:
+        """Int enum member missing from Dart source is still reported (not swallowed)."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            (package_root / "specs" / "openapi.json").write_text(
+                json.dumps(
+                    {
+                        "openapi": "3.1.0",
+                        "info": {"title": "Sample", "version": "1"},
+                        "paths": {},
+                        "components": {
+                            "schemas": {
+                                "Priority": {"type": "integer", "enum": [1, 2, 99]}
+                            }
+                        },
+                    }
+                )
+            )
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(root / "tmp" / "sample"),
+                },
+                manifest_payload={
+                    "surface": "openapi",
+                    "type_mappings": {},
+                    "placement": {"categories": {}, "default_category": "common", "parent_model_patterns": {}},
+                    "coverage": {},
+                    "types": {
+                        "Priority": {"spec": "main", "kind": "enum", "dart_class": "Priority", "file": "lib/src/models/common/priority.dart", "schema": "Priority"}
+                    },
+                },
+            )
+            (package_root / "lib" / "src" / "models" / "common" / "priority.dart").write_text(
+                "enum Priority {\n"
+                "  low(1),\n"
+                "  medium(2),\n"
+                "  unknown(0);\n"
+                "}\n"
+            )
+
+            exit_code, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+
+            issues = payload["results"]["implementation"]["issues"]
+            self.assertTrue(
+                any("'99'" in issue["message"] and "not found in file" in issue["message"] for issue in issues),
+                f"Expected missing '99' to be reported, got: {issues}",
+            )
+            self.assertEqual(exit_code, 1)
+
     def test_verify_coverage_gap_is_blocking(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)

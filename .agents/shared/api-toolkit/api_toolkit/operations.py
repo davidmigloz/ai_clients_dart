@@ -1452,7 +1452,7 @@ def _verify_enum_entry(config: ToolkitConfig, spec_payload: dict[str, Any], entr
     if "enum " not in content:
         return [_type_issue("error", entry.key, "Expected enum declaration", file=entry.file)]
 
-    values: list[str]
+    values: list[Any]
     if config.manifest.surface == "openapi":
         values = _extract_openapi_schemas(spec_payload).get(entry.schema_name, {}).get("enum_values", [])
     else:
@@ -1467,8 +1467,10 @@ def _verify_enum_entry(config: ToolkitConfig, spec_payload: dict[str, Any], entr
     if not values:
         issues.append(_type_issue("error", entry.key, f"No enum values found in spec for '{entry.schema_name}'", file=entry.file))
     for value in values:
-        if value not in content:
-            issues.append(_type_issue("error", entry.key, f"Enum string value '{value}' not found in file", file=entry.file))
+        # OpenAPI enums may be strings OR integers (e.g. int-coded state enums);
+        # stringify before substring check so we never TypeError on `int in str`.
+        if str(value) not in content:
+            issues.append(_type_issue("error", entry.key, f"Enum value '{value}' not found in file", file=entry.file))
     if not any(fallback in content for fallback in UNKNOWN_ENUM_FALLBACKS):
         issues.append(_type_issue("error", entry.key, "Enum fallback value ('unknown' or 'unspecified') not found", file=entry.file))
     return issues
