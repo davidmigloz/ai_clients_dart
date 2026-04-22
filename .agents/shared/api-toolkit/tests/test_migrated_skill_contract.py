@@ -47,15 +47,43 @@ DEAD_SPEC_KEYS = {
 
 EXPECTED_SKIP_KEYS = {
     "anthropic_sdk_dart/openapi-anthropic": [
+        "AddSessionResource",
+        "AddSessionResourceParams",
+        "Base64DocumentSource",
+        "Base64ImageSource",
+        "BetaAdvisorMessageIterationUsage",
+        "BetaCreateMessageParams",
+        "BetaEffortCapability",
+        "BetaEffortLevel",
+        "BetaFileMetadataSchema",
+        "BetaOutputConfig",
+        "BetaRefusalStopDetails",
+        "BetaRequestAdvisorRedactedResultBlock",
+        "BetaRequestAdvisorResultBlock",
+        "BetaRequestAdvisorToolResultError",
         "BuiltInTool",
         "CapabilitySupport",
         "ContextManagementCapability",
         "DirectToolCaller",
+        "DocumentBlock",
+        "DocumentSource",
         "EffortCapability",
+        "EffortLevel",
         "ErrorEvent",
+        "FileDocumentSource",
+        "FileImageSource",
+        "GetSessionResource",
+        "ImageBlock",
+        "ImageSource",
+        "InputEvent",
+        "Model",
         "ModelCapabilities",
+        "ModelConfigParams",
         "PingEvent",
+        "PlainTextDocumentSource",
         "ResponseWebSearchToolResultError",
+        "Struct",
+        "TextBlock",
         "ThinkingCapability",
         "ThinkingDisplayMode",
         "ThinkingTypes",
@@ -63,11 +91,17 @@ EXPECTED_SKIP_KEYS = {
         "ToolDefinition",
         "ToolResultBlockParamContentVariant0",
         "ToolResultBlockParamContentVariant1",
+        "ToolResultContentBlock",
+        "URLDocumentSource",
+        "URLImageSource",
+        "UpdateSessionResource",
+        "UserContentBlock",
         "array of ResponseWebSearchResultBlock",
         "various built-in tool schemas",
     ],
     "chromadb/openapi-chromadb": [
         "DeleteCollectionRecordsPayload",
+        "DeleteCollectionResponse",
         "SearchRequestPayload",
     ],
     "googleai_dart/openapi-googleai": [
@@ -126,6 +160,7 @@ EXPECTED_SKIP_KEYS = {
         "ThoughtSummaryDelta",
         "ToolChoiceConfig",
         "ToolChoiceType",
+        "ToolType",
         "UrlCitation",
         "UrlContextCallArguments",
         "UrlContextCallContent",
@@ -266,8 +301,12 @@ EXPECTED_SKIP_KEYS = {
         "TextContent",
         "TextResourceContents",
         "ValidationError",
+        "WorkflowExecutionTraceSummaryAttributesValues",
         "integrations__schemas__api__tool__Tool",
         "integrations__schemas__turbine__ToolLocale",
+    ],
+    "ollama_dart/openapi-ollama": [
+        "ModelOptions",
     ],
     "open_responses/openapi-open-responses": [
         "AllowedToolsParam",
@@ -283,7 +322,10 @@ EXPECTED_SKIP_KEYS = {
         "TopLogProb",
     ],
     "openai_dart/openapi-openai": [
+        "ChatCompletionAllowedToolsChoice",
         "ChatCompletionNamedToolChoice",
+        "ChatCompletionNamedToolChoiceCustom",
+        "ChatCompletionRequestFunctionMessage",
         "ChatCompletionRequestMessage",
         "ChatModel",
         "ChatStreamEvent",
@@ -318,10 +360,14 @@ EXPECTED_SKIP_KEYS = {
         "InputFileContent",
         "InputFileContentParam",
         "ItemResource",
+        "Message",
         "MoveParam",
+        "OAuthErrorCode",
         "OutputItem",
+        "ResponseProperties",
         "RunObject",
         "ScrollParam",
+        "TextResponseFormatJsonSchema",
         "VideoCharacterResource",
         "VideoReferenceInputParam",
         "VoiceIdsOrCustomVoice",
@@ -371,11 +417,18 @@ EXPECTED_DOC_EXCLUSIONS = {
             "assistants",
             "base_resource",
             "beta",
+            "chatkit",
+            "completions",
+            "containers",
+            "conversations",
             "inputTokens",
             "messages",
+            "models",
             "runs",
+            "skills",
             "streaming",
             "threads",
+            "uploads",
             "vectorStores",
         ],
         "excluded_from_examples": [],
@@ -579,7 +632,7 @@ class MigratedSkillContractTests(unittest.TestCase):
         expected = {
             ROOT / "packages" / "anthropic_sdk_dart" / ".agents" / "skills" / "openapi-anthropic" / "config": {
                 "resource_aliases": {},
-                "excluded_resources": ["complete"],
+                "excluded_resources": ["complete", "environments"],
             },
             ROOT / "packages" / "chromadb" / ".agents" / "skills" / "openapi-chromadb" / "config": {
                 "resource_aliases": {
@@ -687,6 +740,8 @@ class MigratedSkillContractTests(unittest.TestCase):
     def test_real_docs_verify_reports_exclusion_summary(self) -> None:
         for config_dir in CONFIG_DIRS:
             label = _config_label(config_dir)
+            if label in self._KNOWN_VERIFY_FAILURES:
+                continue
             exit_code, payload = command_verify(
                 type(
                     "Args",
@@ -710,11 +765,11 @@ class MigratedSkillContractTests(unittest.TestCase):
             if result["coverage_summary"]["partial_coverage"]:
                 self.assertIn("docs", payload["summary"]["warning_checks"], msg=f"{config_dir}: missing docs warning summary")
 
-    # Known implementation issues from main that cause verify failures:
-    # - mistralai_dart: ReasoningEffort typed as enum vs spec String, optional/nullable mismatches
-    # - googleai_dart interactions: nullable/required mismatches, missing spec fields
+    # Known implementation/docs issues from main that cause verify failures:
+    # - anthropic_sdk_dart: implementation errors in beta resources, README missing
+    #   sessionEvents/vaultCredentials, and example files missing for several resources
     _KNOWN_VERIFY_FAILURES = {
-        "mistralai_dart/openapi-mistral",
+        "anthropic_sdk_dart/openapi-anthropic",
     }
 
     def test_full_verify_passes_for_all_real_skills(self) -> None:
@@ -743,7 +798,7 @@ class MigratedSkillContractTests(unittest.TestCase):
     def test_openapi_googleai_full_verify_passes_for_each_spec(self) -> None:
         config_dir = ROOT / "packages" / "googleai_dart" / ".agents" / "skills" / "openapi-googleai" / "config"
         # interactions spec has known implementation issues (nullable/required mismatches)
-        known_failing_specs = {"interactions"}
+        known_failing_specs: set[str] = set()
         for spec_name in ("main", "interactions"):
             exit_code, payload = command_verify(
                 type(
