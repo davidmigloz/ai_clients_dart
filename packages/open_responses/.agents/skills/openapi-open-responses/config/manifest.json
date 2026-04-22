@@ -407,6 +407,22 @@
       "schema": "ErrorStreamingEvent",
       "parent": "StreamingEvent"
     },
+    "WebSocketErrorEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WebSocketErrorEvent",
+      "file": "lib/src/models/streaming/websocket_event.dart",
+      "schema": "WebSocketErrorEvent"
+    },
+    "WebSocketResponseCreateEvent": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "WebSocketResponseCreateEvent",
+      "file": "lib/src/models/streaming/websocket_event.dart",
+      "schema": "WebSocketResponseCreateEvent",
+      "tags": ["acknowledged"],
+      "note": "Modeled as composition wrapping CreateResponseRequest (the existing CreateResponseBody mapping) rather than re-declaring all 25 allOf-inherited fields. toJson also strips the three x-openresponses-disallowed fields (background, stream, stream_options) that MUST NOT be sent in WebSocket mode."
+    },
     "ToolChoice": {
       "spec": "main",
       "kind": "sealed_parent",

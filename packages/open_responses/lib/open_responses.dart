@@ -110,6 +110,7 @@ export 'src/models/response/usage.dart';
 
 // Models - Streaming
 export 'src/models/streaming/streaming_event.dart';
+export 'src/models/streaming/websocket_event.dart';
 
 // Models - Tools
 export 'src/models/tools/tool.dart';
