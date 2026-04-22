@@ -23,7 +23,17 @@ class WebSocketErrorEvent {
   const WebSocketErrorEvent({required this.status, required this.error});
 
   /// Creates a [WebSocketErrorEvent] from JSON.
+  ///
+  /// Throws a [FormatException] if the `type` discriminator is missing or not
+  /// `"error"`, since the spec requires it and silently accepting mismatches
+  /// would hide caller mistakes.
   factory WebSocketErrorEvent.fromJson(Map<String, dynamic> json) {
+    final jsonType = json['type'];
+    if (jsonType != 'error') {
+      throw FormatException(
+        'Invalid WebSocketErrorEvent type: expected "error", got $jsonType',
+      );
+    }
     return WebSocketErrorEvent(
       status: json['status'] as int,
       error: Map<String, dynamic>.from(json['error'] as Map),
@@ -78,7 +88,18 @@ class WebSocketResponseCreateEvent {
   const WebSocketResponseCreateEvent({required this.request});
 
   /// Creates a [WebSocketResponseCreateEvent] from JSON.
+  ///
+  /// Throws a [FormatException] if the `type` discriminator is missing or not
+  /// `"response.create"`, since the spec requires it and silently accepting
+  /// mismatches would hide caller mistakes.
   factory WebSocketResponseCreateEvent.fromJson(Map<String, dynamic> json) {
+    final jsonType = json['type'];
+    if (jsonType != 'response.create') {
+      throw FormatException(
+        'Invalid WebSocketResponseCreateEvent type: expected '
+        '"response.create", got $jsonType',
+      );
+    }
     final body = Map<String, dynamic>.from(json)..remove('type');
     return WebSocketResponseCreateEvent(
       request: CreateResponseRequest.fromJson(body),
@@ -86,12 +107,15 @@ class WebSocketResponseCreateEvent {
   }
 
   /// Converts to JSON.
+  ///
+  /// The `type` discriminator is spread last so it always wins, defending
+  /// against a future [CreateResponseRequest.toJson] gaining a `type` key.
   Map<String, dynamic> toJson() {
     final json = request.toJson()
       ..remove('background')
       ..remove('stream')
       ..remove('stream_options');
-    return {'type': 'response.create', ...json};
+    return {...json, 'type': 'response.create'};
   }
 
   /// Creates a copy with replaced values.

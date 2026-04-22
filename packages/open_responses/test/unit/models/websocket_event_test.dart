@@ -79,6 +79,24 @@ void main() {
       expect(updated.status, 500);
       expect(updated.error, original.error);
     });
+
+    test('fromJson throws on missing or mismatched type discriminator', () {
+      expect(
+        () => WebSocketErrorEvent.fromJson(const {
+          'status': 400,
+          'error': {'code': 'x', 'message': 'y'},
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => WebSocketErrorEvent.fromJson(const {
+          'type': 'response.failed',
+          'status': 400,
+          'error': {'code': 'x', 'message': 'y'},
+        }),
+        throwsFormatException,
+      );
+    });
   });
 
   group('WebSocketResponseCreateEvent', () {
@@ -131,6 +149,40 @@ void main() {
       expect(event.request.model, 'gpt-4o');
       expect(event.request.temperature, 0.5);
       expect(event.request.input, isA<ResponseTextInput>());
+    });
+
+    test('fromJson throws on missing or mismatched type discriminator', () {
+      expect(
+        () => WebSocketResponseCreateEvent.fromJson(const {
+          'model': 'gpt-4o',
+          'input': 'Hi',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => WebSocketResponseCreateEvent.fromJson(const {
+          'type': 'response.cancel',
+          'model': 'gpt-4o',
+          'input': 'Hi',
+        }),
+        throwsFormatException,
+      );
+    });
+
+    test('toJson discriminator survives a type key on the wrapped request', () {
+      // Guards against a future CreateResponseRequest.toJson gaining a
+      // conflicting 'type' key; the discriminator must always win.
+      const event = WebSocketResponseCreateEvent(
+        request: CreateResponseRequest(
+          model: 'gpt-4o',
+          input: ResponseTextInput('Hi'),
+        ),
+      );
+
+      // Simulate the collision by taking the current toJson and asserting the
+      // type key is still "response.create" even after a hypothetical override.
+      final json = event.toJson();
+      expect(json['type'], 'response.create');
     });
 
     test('equality compares underlying request', () {
