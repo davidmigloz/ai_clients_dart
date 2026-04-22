@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import 'observability_error_code.dart';
 
 /// Detail of an observability error.
@@ -28,6 +29,19 @@ class ObservabilityErrorDetail {
     'message': message,
     'error_code': errorCode?.value,
   };
+
+  /// Creates a copy with the specified fields replaced.
+  ///
+  /// Pass `null` explicitly to clear [errorCode].
+  ObservabilityErrorDetail copyWith({
+    String? message,
+    Object? errorCode = unsetCopyWithValue,
+  }) => ObservabilityErrorDetail(
+    message: message ?? this.message,
+    errorCode: errorCode == unsetCopyWithValue
+        ? this.errorCode
+        : errorCode as ObservabilityErrorCode?,
+  );
 
   @override
   bool operator ==(Object other) {
