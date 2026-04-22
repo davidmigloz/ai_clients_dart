@@ -127,9 +127,11 @@ class DeepResearchAgentConfig extends AgentConfig {
               )
             : null,
         collaborativePlanning: json['collaborative_planning'] as bool?,
-        visualization: deepResearchVisualizationFromString(
-          json['visualization'] as String?,
-        ),
+        visualization: json['visualization'] != null
+            ? deepResearchVisualizationFromString(
+                json['visualization'] as String?,
+              )
+            : null,
       );
 
   @override

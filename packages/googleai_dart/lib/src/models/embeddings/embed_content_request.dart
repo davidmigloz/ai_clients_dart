@@ -4,6 +4,11 @@ import 'embed_content_config.dart';
 import 'task_type.dart';
 
 /// Request to embed content.
+///
+/// Prefer [embedContentConfig] over the deprecated top-level [taskType],
+/// [title], and [outputDimensionality] fields. If both are provided the server
+/// treats [embedContentConfig] as authoritative, per the upstream deprecation
+/// notes on the legacy fields.
 class EmbedContentRequest {
   /// The content to embed. Only the `parts.text` fields will be counted.
   final Content content;
