@@ -1345,7 +1345,8 @@
       "ReadLevel": {
         "enum": [
           "index_and_wal",
-          "index_only"
+          "index_only",
+          "index_and_bounded_wal"
         ],
         "type": "string"
       },
