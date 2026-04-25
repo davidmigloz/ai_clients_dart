@@ -17,7 +17,7 @@ Future<void> main() async {
 
     final stream = client.chat.completions.createStream(
       ChatCompletionCreateRequest(
-        model: 'gpt-4.1',
+        model: 'gpt-5.5',
         messages: [ChatMessage.user('Count from 1 to 10 slowly.')],
         maxTokens: 100,
       ),
@@ -35,7 +35,7 @@ Future<void> main() async {
 
     final stream2 = client.chat.completions.createStream(
       ChatCompletionCreateRequest(
-        model: 'gpt-4.1',
+        model: 'gpt-5.5',
         messages: [ChatMessage.user('Say hello in 5 different languages.')],
         maxTokens: 200,
       ),
@@ -49,7 +49,7 @@ Future<void> main() async {
 
     final stream3 = client.chat.completions.createStream(
       ChatCompletionCreateRequest(
-        model: 'gpt-4.1',
+        model: 'gpt-5.5',
         messages: [ChatMessage.user('Write a short haiku about programming.')],
         maxTokens: 100,
       ),

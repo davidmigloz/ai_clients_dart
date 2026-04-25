@@ -16,7 +16,7 @@ Future<void> main() async {
 
     final response = await client.chat.completions.create(
       ChatCompletionCreateRequest(
-        model: 'gpt-4.1',
+        model: 'gpt-5.5',
         messages: [ChatMessage.user('What is the capital of France?')],
         maxTokens: 100,
       ),
@@ -34,7 +34,7 @@ Future<void> main() async {
 
     final response2 = await client.chat.completions.create(
       ChatCompletionCreateRequest(
-        model: 'gpt-4.1',
+        model: 'gpt-5.5',
         messages: [
           ChatMessage.system('You are a helpful assistant that speaks French.'),
           ChatMessage.user('What is the capital of France?'),
@@ -50,7 +50,7 @@ Future<void> main() async {
 
     final response3 = await client.chat.completions.create(
       ChatCompletionCreateRequest(
-        model: 'gpt-4.1',
+        model: 'gpt-5.5',
         messages: [
           ChatMessage.user('My name is Alice.'),
           ChatMessage.assistant(content: 'Hello Alice! Nice to meet you.'),

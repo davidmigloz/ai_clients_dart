@@ -17,7 +17,7 @@ Future<void> main() async {
     print('=== Count Input Tokens ===\n');
 
     final tokenCount = await client.responses.inputTokens.count(
-      model: 'gpt-4o',
+      model: 'gpt-5.5',
       input: const ResponseInput.text('Hello, how are you?'),
     );
 
@@ -27,7 +27,7 @@ Future<void> main() async {
     print('=== Count Tokens with Tools ===\n');
 
     final countWithTools = await client.responses.inputTokens.count(
-      model: 'gpt-4o',
+      model: 'gpt-5.5',
       input: const ResponseInput.text('What is the weather in Paris?'),
       tools: [
         ResponseTool.function(

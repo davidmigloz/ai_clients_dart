@@ -18,7 +18,7 @@ Future<void> main() async {
     try {
       await invalidClient.chat.completions.create(
         ChatCompletionCreateRequest(
-          model: 'gpt-4o',
+          model: 'gpt-5.5',
           messages: [ChatMessage.user('Hello')],
           maxTokens: 100,
         ),
@@ -35,7 +35,7 @@ Future<void> main() async {
     try {
       await client.chat.completions.create(
         ChatCompletionCreateRequest(
-          model: 'gpt-4o',
+          model: 'gpt-5.5',
           messages: [ChatMessage.user('Hello')],
           maxTokens: -1, // Invalid: must be positive
         ),
@@ -71,7 +71,7 @@ Future<void> main() async {
       // Make a normal request (rate limiting would occur with many requests)
       await client.chat.completions.create(
         ChatCompletionCreateRequest(
-          model: 'gpt-4o',
+          model: 'gpt-5.5',
           messages: [ChatMessage.user('Hello')],
           maxTokens: 10,
         ),
@@ -93,7 +93,7 @@ Future<void> main() async {
     try {
       await client.chat.completions.create(
         ChatCompletionCreateRequest(
-          model: 'gpt-4o',
+          model: 'gpt-5.5',
           messages: [ChatMessage.user('What is 2 + 2?')],
           maxTokens: 50,
         ),
@@ -137,7 +137,7 @@ Future<void> main() async {
     try {
       await client.chat.completions.create(
         ChatCompletionCreateRequest(
-          model: 'gpt-4o',
+          model: 'gpt-5.5',
           messages: [ChatMessage.user('Hello')],
           maxTokens: 0, // Invalid
         ),

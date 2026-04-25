@@ -26,7 +26,7 @@ Future<void> main() async {
 
     final assistant = await client.beta.assistants.create(
       const CreateAssistantRequest(
-        model: 'gpt-4.1',
+        model: 'gpt-5.5',
         name: 'Math Tutor',
         instructions:
             'You are a helpful math tutor. '

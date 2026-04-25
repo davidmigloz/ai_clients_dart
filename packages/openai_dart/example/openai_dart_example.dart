@@ -20,7 +20,7 @@ Future<void> main() async {
 
     final response = await client.chat.completions.create(
       ChatCompletionCreateRequest(
-        model: 'gpt-4.1',
+        model: 'gpt-5.5',
         messages: [
           ChatMessage.system('You are a helpful assistant.'),
           ChatMessage.user('What is Dart programming language?'),
@@ -36,7 +36,7 @@ Future<void> main() async {
 
     final stream = client.chat.completions.createStream(
       ChatCompletionCreateRequest(
-        model: 'gpt-4.1',
+        model: 'gpt-5.5',
         messages: [ChatMessage.user('Count from 1 to 5')],
         maxTokens: 50,
       ),
