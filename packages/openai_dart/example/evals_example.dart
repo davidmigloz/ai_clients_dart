@@ -109,7 +109,7 @@ Future<void> createMultiGraderEvaluation(OpenAIClient client) async {
         // 3. Label model for sentiment classification
         EvalGrader.labelModel(
           name: 'positive_tone',
-          model: 'gpt-4o-mini',
+          model: 'gpt-5.5',
           labels: ['positive', 'negative', 'neutral'],
           passingLabels: ['positive', 'neutral'],
           input: [
@@ -178,7 +178,7 @@ Future<void> runEvaluationWithPolling(OpenAIClient client) async {
             },
           ],
         ),
-        model: 'gpt-4o-mini',
+        model: 'gpt-5.5',
         inputMessages: InputMessages.template([
           const InputMessage.system('You are a helpful assistant.'),
           const InputMessage.user('{{item.input}}'),

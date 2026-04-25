@@ -63,11 +63,11 @@ Future<void> main() async {
     // Retrieve a specific model
     print('=== Retrieve Specific Model ===\n');
 
-    final gpt4o = await client.models.retrieve('gpt-4o');
-    print('Model: ${gpt4o.id}');
-    print('  Object: ${gpt4o.object}');
-    print('  Owned by: ${gpt4o.ownedBy}');
-    print('  Created: ${gpt4o.createdAt}');
+    final model = await client.models.retrieve('gpt-5.5');
+    print('Model: ${model.id}');
+    print('  Object: ${model.object}');
+    print('  Owned by: ${model.ownedBy}');
+    print('  Created: ${model.createdAt}');
     print('');
 
     // Group models by owner

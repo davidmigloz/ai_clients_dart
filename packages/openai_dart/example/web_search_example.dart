@@ -21,7 +21,7 @@ Future<void> main() async {
 
     final response = await client.responses.create(
       CreateResponseRequest(
-        model: 'gpt-4o',
+        model: 'gpt-5.5',
         input: const ResponseInput.text(
           'What are the latest developments in AI as of today?',
         ),
@@ -36,7 +36,7 @@ Future<void> main() async {
 
     final stream = client.responses.createStream(
       CreateResponseRequest(
-        model: 'gpt-4o',
+        model: 'gpt-5.5',
         input: const ResponseInput.text(
           'What is the current weather forecast for San Francisco?',
         ),
@@ -56,7 +56,7 @@ Future<void> main() async {
 
     final locationResponse = await client.responses.create(
       CreateResponseRequest(
-        model: 'gpt-4o',
+        model: 'gpt-5.5',
         input: const ResponseInput.items([
           MessageItem(
             role: MessageRole.user,
@@ -85,7 +85,7 @@ Future<void> main() async {
 
     final combinedResponse = await client.responses.create(
       CreateResponseRequest(
-        model: 'gpt-4o',
+        model: 'gpt-5.5',
         input: const ResponseInput.text(
           'Find the latest stock price for Apple and calculate '
           r'how many shares I can buy with $10,000.',
@@ -133,7 +133,7 @@ Future<void> main() async {
     // First turn: search for information
     final turn1 = await client.responses.create(
       CreateResponseRequest(
-        model: 'gpt-4o',
+        model: 'gpt-5.5',
         input: const ResponseInput.text(
           'What are the top 3 news stories today?',
         ),
@@ -146,7 +146,7 @@ Future<void> main() async {
     // Second turn: follow up question using previous context
     final turn2 = await client.responses.create(
       CreateResponseRequest(
-        model: 'gpt-4o',
+        model: 'gpt-5.5',
         input: const ResponseInput.items([
           MessageItem(
             role: MessageRole.user,

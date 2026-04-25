@@ -74,7 +74,7 @@ Future<void> main() async {
   try {
     final response = await client.responses.create(
       CreateResponseRequest(
-        model: 'gpt-5.4',
+        model: 'gpt-5.5',
         input: ResponseInput.text('What is the capital of France?'),
       ),
     );
@@ -167,7 +167,7 @@ final client = OpenAIClient.fromEnvironment();
 
 final response = await client.responses.create(
   CreateResponseRequest(
-    model: 'gpt-5.4',
+    model: 'gpt-5.5',
     input: ResponseInput.text('What is the capital of France?'),
   ),
 );
@@ -196,7 +196,7 @@ final client = OpenAIClient.fromEnvironment();
 
 final response = await client.chat.completions.create(
   ChatCompletionCreateRequest(
-    model: 'gpt-5.4',
+    model: 'gpt-5.5',
     messages: [
       ChatMessage.system('You are a helpful assistant.'),
       ChatMessage.user('What is the capital of France?'),
@@ -232,7 +232,7 @@ Streaming returns token-by-token deltas as they arrive. You can iterate text del
 ```dart
 final stream = client.chat.completions.createStream(
   ChatCompletionCreateRequest(
-    model: 'gpt-5.4',
+    model: 'gpt-5.5',
     messages: [ChatMessage.user('Tell me a story')],
   ),
 );
@@ -268,7 +268,7 @@ Define tools with JSON Schema parameters and pass them in the request. The respo
 ```dart
 final response = await client.chat.completions.create(
   ChatCompletionCreateRequest(
-    model: 'gpt-5.4',
+    model: 'gpt-5.5',
     messages: [
       ChatMessage.user("What's the weather in Tokyo?"),
     ],
@@ -310,7 +310,7 @@ Pass image URLs or base64-encoded images as content parts alongside text in a us
 ```dart
 final response = await client.chat.completions.create(
   ChatCompletionCreateRequest(
-    model: 'gpt-5.4',
+    model: 'gpt-5.5',
     messages: [
       ChatMessage.user([
         ContentPart.text('What is in this image?'),
@@ -706,7 +706,7 @@ Future<void> main() async {
   try {
     await client.responses.create(
       CreateResponseRequest(
-        model: 'gpt-5.4',
+        model: 'gpt-5.5',
         input: ResponseInput.text('Ping'),
       ),
     );

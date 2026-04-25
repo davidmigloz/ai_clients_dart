@@ -38,7 +38,7 @@ Future<void> main() async {
     // First request - model decides to call the tool
     final response = await client.chat.completions.create(
       ChatCompletionCreateRequest(
-        model: 'gpt-4.1',
+        model: 'gpt-5.5',
         messages: [ChatMessage.user("What's the weather like in Tokyo?")],
         tools: [weatherTool],
       ),
@@ -72,7 +72,7 @@ Future<void> main() async {
       // Second request - provide tool result
       final response2 = await client.chat.completions.create(
         ChatCompletionCreateRequest(
-          model: 'gpt-4.1',
+          model: 'gpt-5.5',
           messages: [
             ChatMessage.user("What's the weather like in Tokyo?"),
             ChatMessage.assistant(
@@ -95,7 +95,7 @@ Future<void> main() async {
 
     final response3 = await client.chat.completions.create(
       ChatCompletionCreateRequest(
-        model: 'gpt-4.1',
+        model: 'gpt-5.5',
         messages: [ChatMessage.user('Tell me about the weather.')],
         tools: [weatherTool],
         toolChoice: ToolChoice.function('get_weather'),

@@ -1,7 +1,7 @@
 // ignore_for_file: avoid_print
-/// Example demonstrating GPT-4 Vision capabilities.
+/// Example demonstrating vision capabilities.
 ///
-/// This example shows how to analyze images using GPT-4 Vision.
+/// This example shows how to analyze images with a multimodal chat model.
 /// Run with: dart run example/vision_example.dart
 library;
 
@@ -20,7 +20,7 @@ Future<void> main() async {
 
     final response = await client.chat.completions.create(
       ChatCompletionCreateRequest(
-        model: 'gpt-4.1',
+        model: 'gpt-5.5',
         messages: [
           ChatMessage.user(
             UserMessageContent.parts([
@@ -43,7 +43,7 @@ Future<void> main() async {
 
     final response2 = await client.chat.completions.create(
       ChatCompletionCreateRequest(
-        model: 'gpt-4.1',
+        model: 'gpt-5.5',
         messages: [
           ChatMessage.user(
             UserMessageContent.parts([
@@ -86,7 +86,7 @@ ImageContentPart(
 
     final response3 = await client.chat.completions.create(
       ChatCompletionCreateRequest(
-        model: 'gpt-4.1',
+        model: 'gpt-5.5',
         messages: [
           ChatMessage.user(
             UserMessageContent.parts([
