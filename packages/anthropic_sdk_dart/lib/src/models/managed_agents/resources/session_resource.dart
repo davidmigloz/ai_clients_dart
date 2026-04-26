@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
+import '../memory_stores/mount_mode.dart';
 import 'session_resource_params.dart';
 
 /// A resource attached to a session.
@@ -9,6 +10,7 @@ import 'session_resource_params.dart';
 /// Variants:
 /// - [FileResource] — A file resource (type: "file")
 /// - [GitHubRepositoryResource] — A GitHub repository (type: "github_repository")
+/// - [MemoryStoreSessionResource] — A mounted memory store (type: "memory_store")
 /// - [UnknownSessionResource] — Unrecognized type (preserves raw JSON)
 sealed class SessionResource {
   const SessionResource();
@@ -19,6 +21,7 @@ sealed class SessionResource {
     return switch (type) {
       'file' => FileResource.fromJson(json),
       'github_repository' => GitHubRepositoryResource.fromJson(json),
+      'memory_store' => MemoryStoreSessionResource.fromJson(json),
       _ => UnknownSessionResource.fromJson(json),
     };
   }
@@ -239,6 +242,136 @@ class GitHubRepositoryResource extends SessionResource {
       'checkout: $checkout, '
       'createdAt: $createdAt, '
       'updatedAt: $updatedAt)';
+}
+
+/// A memory store mounted into a session as a filesystem resource.
+@immutable
+class MemoryStoreSessionResource extends SessionResource {
+  /// The type discriminator. Always `memory_store`.
+  final String type;
+
+  /// The memory store ID (`memstore_...`).
+  final String memoryStoreId;
+
+  /// Display name of the memory store, snapshotted at attach time. Later
+  /// edits to the store's name do not propagate to this resource.
+  final String? name;
+
+  /// Description of the memory store, snapshotted at attach time. Rendered
+  /// into the agent's system prompt. Empty string when the store has no
+  /// description.
+  final String? description;
+
+  /// Per-attachment guidance for the agent on how to use this store.
+  /// Rendered into the memory section of the system prompt. Max 4096 chars.
+  final String? instructions;
+
+  /// Filesystem path where the store is mounted in the session container,
+  /// e.g. `/mnt/memory/user-preferences`. Derived from the store's name.
+  /// Output-only.
+  final String? mountPath;
+
+  /// Access mode for the mounted store. Defaults to `read_write`.
+  final MountMode? access;
+
+  /// Creates a [MemoryStoreSessionResource].
+  const MemoryStoreSessionResource({
+    this.type = 'memory_store',
+    required this.memoryStoreId,
+    this.name,
+    this.description,
+    this.instructions,
+    this.mountPath,
+    this.access,
+  });
+
+  /// Creates a [MemoryStoreSessionResource] from JSON.
+  factory MemoryStoreSessionResource.fromJson(Map<String, dynamic> json) {
+    return MemoryStoreSessionResource(
+      type: json['type'] as String? ?? 'memory_store',
+      memoryStoreId: json['memory_store_id'] as String,
+      name: json['name'] as String?,
+      description: json['description'] as String?,
+      instructions: json['instructions'] as String?,
+      mountPath: json['mount_path'] as String?,
+      access: json['access'] != null
+          ? MountMode.fromJson(json['access'] as String)
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'memory_store_id': memoryStoreId,
+    if (name != null) 'name': name,
+    if (description != null) 'description': description,
+    if (instructions != null) 'instructions': instructions,
+    if (mountPath != null) 'mount_path': mountPath,
+    if (access != null) 'access': access!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  MemoryStoreSessionResource copyWith({
+    String? type,
+    String? memoryStoreId,
+    Object? name = unsetCopyWithValue,
+    Object? description = unsetCopyWithValue,
+    Object? instructions = unsetCopyWithValue,
+    Object? mountPath = unsetCopyWithValue,
+    Object? access = unsetCopyWithValue,
+  }) {
+    return MemoryStoreSessionResource(
+      type: type ?? this.type,
+      memoryStoreId: memoryStoreId ?? this.memoryStoreId,
+      name: name == unsetCopyWithValue ? this.name : name as String?,
+      description: description == unsetCopyWithValue
+          ? this.description
+          : description as String?,
+      instructions: instructions == unsetCopyWithValue
+          ? this.instructions
+          : instructions as String?,
+      mountPath: mountPath == unsetCopyWithValue
+          ? this.mountPath
+          : mountPath as String?,
+      access: access == unsetCopyWithValue ? this.access : access as MountMode?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MemoryStoreSessionResource &&
+          runtimeType == other.runtimeType &&
+          type == other.type &&
+          memoryStoreId == other.memoryStoreId &&
+          name == other.name &&
+          description == other.description &&
+          instructions == other.instructions &&
+          mountPath == other.mountPath &&
+          access == other.access;
+
+  @override
+  int get hashCode => Object.hash(
+    type,
+    memoryStoreId,
+    name,
+    description,
+    instructions,
+    mountPath,
+    access,
+  );
+
+  @override
+  String toString() =>
+      'MemoryStoreSessionResource('
+      'type: $type, '
+      'memoryStoreId: $memoryStoreId, '
+      'name: $name, '
+      'description: $description, '
+      'instructions: $instructions, '
+      'mountPath: $mountPath, '
+      'access: $access)';
 }
 
 /// Unrecognized session resource type (preserves raw JSON).

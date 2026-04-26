@@ -46,6 +46,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Message batches for large-scale offline processing
 - Model discovery, files (beta), and skills (beta)
 - Managed agents with sessions, vaults, and streaming events (beta)
+- Memory stores for persistent agent memories with versioning and redaction (beta)
 - User profiles with trust-grant tracking and enrollment URLs (beta)
 
 ## Quickstart
@@ -554,6 +555,62 @@ Future<void> main() async {
 
 </details>
 
+### How do I manage agent memory stores?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.memoryStores` to create persistent memory stores that can be mounted into agent sessions. The API supports memory CRUD, append-only versioning, and per-version redaction. This is a beta feature and the SDK sends the required `anthropic-beta` header automatically.
+
+```dart
+import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
+
+Future<void> main() async {
+  final client = AnthropicClient.fromEnvironment();
+
+  try {
+    // Create a memory store and a memory inside it.
+    final store = await client.memoryStores.create(
+      const CreateMemoryStoreParams(name: 'user-preferences'),
+    );
+
+    final memories = client.memoryStores.memories(store.id);
+    final memory = await memories.create(
+      const CreateMemoryParams(
+        path: '/preferences/greeting.md',
+        content: 'Prefer "Hi"',
+      ),
+    );
+
+    // Update with an optional precondition.
+    await memories.update(
+      memory.id,
+      UpdateMemoryParams(
+        content: 'Prefer "Hello"',
+        precondition: ContentSha256Precondition(
+          contentSha256: memory.contentSha256,
+        ),
+      ),
+    );
+
+    // List versions, then archive and delete the store.
+    final versions = await client.memoryStores
+        .memoryVersions(store.id)
+        .list(memoryId: memory.id);
+    print('Versions: ${versions.data.length}');
+
+    await client.memoryStores.archive(store.id);
+    await client.memoryStores.delete(store.id);
+  } finally {
+    client.close();
+  }
+}
+```
+
+→ [Full example](example/memory_stores_example.dart)
+
+</details>
+
 ## Error Handling
 
 <details>
@@ -614,6 +671,7 @@ See the [example/](example/) directory for complete examples:
 | [`skills_example.dart`](example/skills_example.dart) | Skills management (beta) |
 | [`mcp_example.dart`](example/mcp_example.dart) | MCP tool integration |
 | [`managed_agents_example.dart`](example/managed_agents_example.dart) | Managed agents: agents, sessions, vaults (beta) |
+| [`memory_stores_example.dart`](example/memory_stores_example.dart) | Managed agents memory stores, memories, and versions (beta) |
 | [`user_profiles_example.dart`](example/user_profiles_example.dart) | User profiles and enrollment URLs (beta) |
 | [`models_example.dart`](example/models_example.dart) | Model listing |
 | [`error_handling_example.dart`](example/error_handling_example.dart) | Exception handling patterns |
@@ -631,6 +689,7 @@ See the [example/](example/) directory for complete examples:
 | Agents (Beta) | ✅ Full |
 | Sessions (Beta) | ✅ Full |
 | Vaults (Beta) | ✅ Full |
+| Memory Stores (Beta) | ✅ Full |
 | User Profiles (Beta) | ✅ Full |
 
 ## Official Documentation

@@ -543,3 +543,207 @@ class UnknownManagedAgentError {
       'retryStatus: $retryStatus, '
       'rawJson: $rawJson)';
 }
+
+// ============================================================================
+// Memory Stores errors
+// ============================================================================
+
+/// A generic conflict error returned by Memory Stores endpoints.
+@immutable
+class MemoryConflictError {
+  /// The type discriminator. Always `conflict_error`.
+  final String type;
+
+  /// Human-readable error description.
+  final String? message;
+
+  /// Creates a [MemoryConflictError].
+  const MemoryConflictError({this.type = 'conflict_error', this.message});
+
+  /// Creates a [MemoryConflictError] from JSON.
+  factory MemoryConflictError.fromJson(Map<String, dynamic> json) {
+    return MemoryConflictError(
+      type: json['type'] as String? ?? 'conflict_error',
+      message: json['message'] as String?,
+    );
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    if (message != null) 'message': message,
+  };
+
+  /// Creates a copy with replaced values.
+  MemoryConflictError copyWith({
+    String? type,
+    Object? message = unsetCopyWithValue,
+  }) {
+    return MemoryConflictError(
+      type: type ?? this.type,
+      message: message == unsetCopyWithValue
+          ? this.message
+          : message as String?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MemoryConflictError &&
+          runtimeType == other.runtimeType &&
+          type == other.type &&
+          message == other.message;
+
+  @override
+  int get hashCode => Object.hash(type, message);
+
+  @override
+  String toString() => 'MemoryConflictError(type: $type, message: $message)';
+}
+
+/// A path conflict error — the requested path collides with an existing
+/// memory in the same store.
+@immutable
+class MemoryPathConflictError {
+  /// The type discriminator. Always `memory_path_conflict_error`.
+  final String type;
+
+  /// Human-readable error description.
+  final String? message;
+
+  /// ID of the memory whose path collides with the request.
+  final String? conflictingMemoryId;
+
+  /// The conflicting path.
+  final String? conflictingPath;
+
+  /// Creates a [MemoryPathConflictError].
+  const MemoryPathConflictError({
+    this.type = 'memory_path_conflict_error',
+    this.message,
+    this.conflictingMemoryId,
+    this.conflictingPath,
+  });
+
+  /// Creates a [MemoryPathConflictError] from JSON.
+  factory MemoryPathConflictError.fromJson(Map<String, dynamic> json) {
+    return MemoryPathConflictError(
+      type: json['type'] as String? ?? 'memory_path_conflict_error',
+      message: json['message'] as String?,
+      conflictingMemoryId: json['conflicting_memory_id'] as String?,
+      conflictingPath: json['conflicting_path'] as String?,
+    );
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    if (message != null) 'message': message,
+    if (conflictingMemoryId != null)
+      'conflicting_memory_id': conflictingMemoryId,
+    if (conflictingPath != null) 'conflicting_path': conflictingPath,
+  };
+
+  /// Creates a copy with replaced values.
+  MemoryPathConflictError copyWith({
+    String? type,
+    Object? message = unsetCopyWithValue,
+    Object? conflictingMemoryId = unsetCopyWithValue,
+    Object? conflictingPath = unsetCopyWithValue,
+  }) {
+    return MemoryPathConflictError(
+      type: type ?? this.type,
+      message: message == unsetCopyWithValue
+          ? this.message
+          : message as String?,
+      conflictingMemoryId: conflictingMemoryId == unsetCopyWithValue
+          ? this.conflictingMemoryId
+          : conflictingMemoryId as String?,
+      conflictingPath: conflictingPath == unsetCopyWithValue
+          ? this.conflictingPath
+          : conflictingPath as String?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MemoryPathConflictError &&
+          runtimeType == other.runtimeType &&
+          type == other.type &&
+          message == other.message &&
+          conflictingMemoryId == other.conflictingMemoryId &&
+          conflictingPath == other.conflictingPath;
+
+  @override
+  int get hashCode =>
+      Object.hash(type, message, conflictingMemoryId, conflictingPath);
+
+  @override
+  String toString() =>
+      'MemoryPathConflictError('
+      'type: $type, '
+      'message: $message, '
+      'conflictingMemoryId: $conflictingMemoryId, '
+      'conflictingPath: $conflictingPath)';
+}
+
+/// A precondition-failed error — the supplied precondition (e.g.,
+/// `expected_content_sha256`) did not match the server's current state.
+@immutable
+class MemoryPreconditionFailedError {
+  /// The type discriminator. Always `memory_precondition_failed_error`.
+  final String type;
+
+  /// Human-readable error description.
+  final String? message;
+
+  /// Creates a [MemoryPreconditionFailedError].
+  const MemoryPreconditionFailedError({
+    this.type = 'memory_precondition_failed_error',
+    this.message,
+  });
+
+  /// Creates a [MemoryPreconditionFailedError] from JSON.
+  factory MemoryPreconditionFailedError.fromJson(Map<String, dynamic> json) {
+    return MemoryPreconditionFailedError(
+      type: json['type'] as String? ?? 'memory_precondition_failed_error',
+      message: json['message'] as String?,
+    );
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    if (message != null) 'message': message,
+  };
+
+  /// Creates a copy with replaced values.
+  MemoryPreconditionFailedError copyWith({
+    String? type,
+    Object? message = unsetCopyWithValue,
+  }) {
+    return MemoryPreconditionFailedError(
+      type: type ?? this.type,
+      message: message == unsetCopyWithValue
+          ? this.message
+          : message as String?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MemoryPreconditionFailedError &&
+          runtimeType == other.runtimeType &&
+          type == other.type &&
+          message == other.message;
+
+  @override
+  int get hashCode => Object.hash(type, message);
+
+  @override
+  String toString() =>
+      'MemoryPreconditionFailedError(type: $type, message: $message)';
+}

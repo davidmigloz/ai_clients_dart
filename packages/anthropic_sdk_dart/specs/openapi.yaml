@@ -60,8 +60,8 @@
               "skills-2025-10-02",
               "fast-mode-2026-02-01",
               "output-300k-2026-03-24",
-              "advisor-tool-2026-03-01",
-              "user-profiles-2026-03-24"
+              "user-profiles-2026-03-24",
+              "advisor-tool-2026-03-01"
             ],
             "type": "string",
             "x-stainless-nominal": false
@@ -2907,7 +2907,7 @@
           },
           "top_k": {
             "deprecated": true,
-            "description": "Only sample from the top K options for each subsequent token.\n\nUsed to remove \"long tail\" low probability responses. [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).\n\nRecommended for advanced use cases only. You usually only need to use `temperature`.",
+            "description": "Only sample from the top K options for each subsequent token.\n\nUsed to remove \"long tail\" low probability responses. [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).\n\nRecommended for advanced use cases only.",
             "examples": [
               5
             ],
@@ -2918,7 +2918,7 @@
           },
           "top_p": {
             "deprecated": true,
-            "description": "Use nucleus sampling.\n\nIn nucleus sampling, we compute the cumulative distribution over all the options for each subsequent token in decreasing probability order and cut it off once it reaches a particular probability specified by `top_p`. You should either alter `temperature` or `top_p`, but not both.\n\nRecommended for advanced use cases only. You usually only need to use `temperature`.",
+            "description": "Use nucleus sampling.\n\nIn nucleus sampling, we compute the cumulative distribution over all the options for each subsequent token in decreasing probability order and cut it off once it reaches a particular probability specified by `top_p`.\n\nRecommended for advanced use cases only.",
             "examples": [
               0.7
             ],
@@ -4877,6 +4877,28 @@
         "title": "MCPToolset",
         "type": "object"
       },
+      "BetaManagedAgentsActor": {
+        "discriminator": {
+          "mapping": {
+            "api_actor": "#/components/schemas/BetaManagedAgentsApiActor",
+            "session_actor": "#/components/schemas/BetaManagedAgentsSessionActor",
+            "user_actor": "#/components/schemas/BetaManagedAgentsUserActor"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsSessionActor"
+          },
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsApiActor"
+          },
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsUserActor"
+          }
+        ],
+        "type": "object"
+      },
       "BetaManagedAgentsAddSessionResource": {
         "description": "The added session resource.",
         "discriminator": {
@@ -5874,6 +5896,40 @@
         ],
         "type": "object"
       },
+      "BetaManagedAgentsApiActor": {
+        "additionalProperties": false,
+        "properties": {
+          "api_key_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "api_actor"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "api_key_id"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsArchiveMemoryStoreResponse": {
+        "discriminator": {
+          "mapping": {
+            "memory_store": "#/components/schemas/BetaManagedAgentsMemoryStore"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsMemoryStore"
+          }
+        ],
+        "type": "object"
+      },
       "BetaManagedAgentsBase64DocumentSource": {
         "additionalProperties": false,
         "description": "Base64-encoded document data.",
@@ -6028,6 +6084,42 @@
         "required": [
           "type",
           "sha"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsConflictError": {
+        "additionalProperties": false,
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "conflict_error"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsContentSha256Precondition": {
+        "additionalProperties": false,
+        "properties": {
+          "content_sha256": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "content_sha256"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
         ],
         "type": "object"
       },
@@ -6187,6 +6279,63 @@
         },
         "required": [
           "auth"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsCreateMemoryParams": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "nullable": true,
+            "type": "string"
+          },
+          "path": {
+            "maxLength": 1024,
+            "minLength": 2,
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "content"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsCreateMemoryStoreRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "maxLength": 1024,
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsCreateMemoryStoreResponse": {
+        "discriminator": {
+          "mapping": {
+            "memory_store": "#/components/schemas/BetaManagedAgentsMemoryStore"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsMemoryStore"
+          }
         ],
         "type": "object"
       },
@@ -6655,6 +6804,20 @@
         ],
         "type": "object"
       },
+      "BetaManagedAgentsDeleteMemoryStoreResponse": {
+        "discriminator": {
+          "mapping": {
+            "memory_store_deleted": "#/components/schemas/BetaManagedAgentsDeletedMemoryStore"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsDeletedMemoryStore"
+          }
+        ],
+        "type": "object"
+      },
       "BetaManagedAgentsDeleteSessionResource": {
         "additionalProperties": false,
         "description": "Confirmation of resource deletion.",
@@ -6706,6 +6869,44 @@
             ],
             "examples": [
               "vault_credential_deleted"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsDeletedMemory": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "memory_deleted"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsDeletedMemoryStore": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "memory_store_deleted"
             ],
             "type": "string"
           }
@@ -6836,6 +7037,82 @@
           {
             "$ref": "#/components/schemas/BetaManagedAgentsFileDocumentSource"
           }
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsError": {
+        "discriminator": {
+          "mapping": {
+            "api_error": "#/components/schemas/BetaAPIError",
+            "authentication_error": "#/components/schemas/BetaAuthenticationError",
+            "billing_error": "#/components/schemas/BetaBillingError",
+            "conflict_error": "#/components/schemas/BetaManagedAgentsConflictError",
+            "invalid_request_error": "#/components/schemas/BetaInvalidRequestError",
+            "memory_path_conflict_error": "#/components/schemas/BetaManagedAgentsMemoryPathConflictError",
+            "memory_precondition_failed_error": "#/components/schemas/BetaManagedAgentsMemoryPreconditionFailedError",
+            "not_found_error": "#/components/schemas/BetaNotFoundError",
+            "overloaded_error": "#/components/schemas/BetaOverloadedError",
+            "permission_error": "#/components/schemas/BetaPermissionError",
+            "rate_limit_error": "#/components/schemas/BetaRateLimitError",
+            "timeout_error": "#/components/schemas/BetaGatewayTimeoutError"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/BetaInvalidRequestError"
+          },
+          {
+            "$ref": "#/components/schemas/BetaAuthenticationError"
+          },
+          {
+            "$ref": "#/components/schemas/BetaBillingError"
+          },
+          {
+            "$ref": "#/components/schemas/BetaPermissionError"
+          },
+          {
+            "$ref": "#/components/schemas/BetaNotFoundError"
+          },
+          {
+            "$ref": "#/components/schemas/BetaRateLimitError"
+          },
+          {
+            "$ref": "#/components/schemas/BetaGatewayTimeoutError"
+          },
+          {
+            "$ref": "#/components/schemas/BetaAPIError"
+          },
+          {
+            "$ref": "#/components/schemas/BetaOverloadedError"
+          },
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsMemoryPreconditionFailedError"
+          },
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsMemoryPathConflictError"
+          },
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsConflictError"
+          }
+        ]
+      },
+      "BetaManagedAgentsErrorResponse": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/BetaManagedAgentsError"
+          },
+          "type": {
+            "description": "Always \"error\" for error responses",
+            "enum": [
+              "error"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "error"
         ],
         "type": "object"
       },
@@ -7015,12 +7292,27 @@
         ],
         "type": "object"
       },
+      "BetaManagedAgentsGetMemoryStoreResponse": {
+        "discriminator": {
+          "mapping": {
+            "memory_store": "#/components/schemas/BetaManagedAgentsMemoryStore"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsMemoryStore"
+          }
+        ],
+        "type": "object"
+      },
       "BetaManagedAgentsGetSessionResource": {
         "description": "The requested session resource.",
         "discriminator": {
           "mapping": {
             "file": "#/components/schemas/BetaManagedAgentsFileResource",
-            "github_repository": "#/components/schemas/BetaManagedAgentsGitHubRepositoryResource"
+            "github_repository": "#/components/schemas/BetaManagedAgentsGitHubRepositoryResource",
+            "memory_store": "#/components/schemas/BetaManagedAgentsMemoryStoreResource"
           },
           "propertyName": "type"
         },
@@ -7030,6 +7322,9 @@
           },
           {
             "$ref": "#/components/schemas/BetaManagedAgentsFileResource"
+          },
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsMemoryStoreResource"
           }
         ],
         "type": "object"
@@ -7351,6 +7646,54 @@
             "examples": [
               "page_MjAyNS0wNS0xNFQwMDowMDowMFo="
             ],
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BetaManagedAgentsListMemoriesResult": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/BetaManagedAgentsMemoryListItem"
+            },
+            "type": "array"
+          },
+          "next_page": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BetaManagedAgentsListMemoryStoresResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/BetaManagedAgentsMemoryStore"
+            },
+            "type": "array"
+          },
+          "next_page": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BetaManagedAgentsListMemoryVersionsResult": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/BetaManagedAgentsMemoryVersion"
+            },
+            "type": "array"
+          },
+          "next_page": {
             "nullable": true,
             "type": "string"
           }
@@ -8180,6 +8523,346 @@
         ],
         "type": "object"
       },
+      "BetaManagedAgentsMemory": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "nullable": true,
+            "type": "string"
+          },
+          "content_sha256": {
+            "type": "string"
+          },
+          "content_size_bytes": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/BetaTimestamp"
+          },
+          "id": {
+            "type": "string"
+          },
+          "memory_store_id": {
+            "type": "string"
+          },
+          "memory_version_id": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "memory"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "$ref": "#/components/schemas/BetaTimestamp"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "memory_store_id",
+          "path",
+          "content_size_bytes",
+          "content_sha256",
+          "memory_version_id",
+          "created_at",
+          "updated_at"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsMemoryListItem": {
+        "discriminator": {
+          "mapping": {
+            "memory": "#/components/schemas/BetaManagedAgentsMemory",
+            "memory_prefix": "#/components/schemas/BetaManagedAgentsMemoryPrefix"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsMemory"
+          },
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsMemoryPrefix"
+          }
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsMemoryPathConflictError": {
+        "additionalProperties": false,
+        "properties": {
+          "conflicting_memory_id": {
+            "type": "string"
+          },
+          "conflicting_path": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "memory_path_conflict_error"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsMemoryPreconditionFailedError": {
+        "additionalProperties": false,
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "memory_precondition_failed_error"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsMemoryPrefix": {
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "memory_prefix"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "path"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsMemoryStore": {
+        "additionalProperties": false,
+        "properties": {
+          "archived_at": {
+            "$ref": "#/components/schemas/BetaTimestamp",
+            "nullable": true
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/BetaTimestamp"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "memory_store"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "$ref": "#/components/schemas/BetaTimestamp"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "name",
+          "created_at",
+          "updated_at"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsMemoryStoreResource": {
+        "additionalProperties": false,
+        "description": "A memory store attached to an agent session.",
+        "properties": {
+          "access": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BetaManagedAgentsMountMode"
+              }
+            ],
+            "description": "Access mode for the mounted store. Defaults to read_write. read_only mounts the store as a read-only filesystem.",
+            "nullable": true
+          },
+          "description": {
+            "description": "Description of the memory store, snapshotted at attach time. Rendered into the agent's system prompt. Empty string when the store has no description.",
+            "type": "string"
+          },
+          "instructions": {
+            "description": "Per-attachment guidance for the agent on how to use this store. Rendered into the memory section of the system prompt. Max 4096 chars.",
+            "maxLength": 4096,
+            "nullable": true,
+            "type": "string"
+          },
+          "memory_store_id": {
+            "description": "The memory store ID (memstore_...). Must belong to the caller's organization and workspace.",
+            "type": "string"
+          },
+          "mount_path": {
+            "description": "Filesystem path where the store is mounted in the session container, e.g. /mnt/memory/user-preferences. Derived from the store's name. Output-only.",
+            "nullable": true,
+            "type": "string"
+          },
+          "name": {
+            "description": "Display name of the memory store, snapshotted at attach time. Later edits to the store's name do not propagate to this resource.",
+            "nullable": true,
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "memory_store"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "memory_store_id"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsMemoryStoreResourceParam": {
+        "additionalProperties": false,
+        "description": "Parameters for attaching a memory store to an agent session.",
+        "properties": {
+          "access": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BetaManagedAgentsMountMode"
+              }
+            ],
+            "description": "Access mode for the mounted store. Defaults to read_write. read_only mounts the store as a read-only filesystem.",
+            "nullable": true
+          },
+          "instructions": {
+            "description": "Per-attachment guidance for the agent on how to use this store. Rendered into the memory section of the system prompt. Max 4096 chars.",
+            "maxLength": 4096,
+            "nullable": true,
+            "type": "string"
+          },
+          "memory_store_id": {
+            "description": "The memory store ID (memstore_...). Must belong to the caller's organization and workspace.",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "memory_store"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "memory_store_id"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsMemoryVersion": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "nullable": true,
+            "type": "string"
+          },
+          "content_sha256": {
+            "nullable": true,
+            "type": "string"
+          },
+          "content_size_bytes": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/BetaTimestamp"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/BetaManagedAgentsActor"
+          },
+          "id": {
+            "type": "string"
+          },
+          "memory_id": {
+            "type": "string"
+          },
+          "memory_store_id": {
+            "type": "string"
+          },
+          "operation": {
+            "$ref": "#/components/schemas/BetaManagedAgentsMemoryVersionOperation"
+          },
+          "path": {
+            "nullable": true,
+            "type": "string"
+          },
+          "redacted_at": {
+            "$ref": "#/components/schemas/BetaTimestamp",
+            "nullable": true
+          },
+          "redacted_by": {
+            "$ref": "#/components/schemas/BetaManagedAgentsActor"
+          },
+          "type": {
+            "enum": [
+              "memory_version"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "memory_store_id",
+          "memory_id",
+          "operation",
+          "created_at"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsMemoryVersionOperation": {
+        "description": "MemoryVersionOperation enum",
+        "enum": [
+          "created",
+          "modified",
+          "deleted"
+        ],
+        "type": "string"
+      },
+      "BetaManagedAgentsMemoryView": {
+        "description": "MemoryView enum",
+        "enum": [
+          "basic",
+          "full"
+        ],
+        "type": "string"
+      },
       "BetaManagedAgentsModel": {
         "anyOf": [
           {
@@ -8396,6 +9079,14 @@
         ],
         "type": "object"
       },
+      "BetaManagedAgentsMountMode": {
+        "description": "Access mode for an attached memory store.",
+        "enum": [
+          "read_write",
+          "read_only"
+        ],
+        "type": "string"
+      },
       "BetaManagedAgentsPermissionPolicy": {
         "description": "Permission policy for tool execution.",
         "discriminator": {
@@ -8442,6 +9133,20 @@
           "type",
           "media_type",
           "data"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsPrecondition": {
+        "discriminator": {
+          "mapping": {
+            "content_sha256": "#/components/schemas/BetaManagedAgentsContentSha256Precondition"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsContentSha256Precondition"
+          }
         ],
         "type": "object"
       },
@@ -8890,6 +9595,26 @@
         ],
         "type": "object"
       },
+      "BetaManagedAgentsSessionActor": {
+        "additionalProperties": false,
+        "properties": {
+          "session_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "session_actor"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "session_id"
+        ],
+        "type": "object"
+      },
       "BetaManagedAgentsSessionAgent": {
         "additionalProperties": false,
         "description": "Resolved `agent` definition for a `session`. Snapshot of the `agent` at `session` creation time.",
@@ -9292,7 +10017,8 @@
         "discriminator": {
           "mapping": {
             "file": "#/components/schemas/BetaManagedAgentsFileResource",
-            "github_repository": "#/components/schemas/BetaManagedAgentsGitHubRepositoryResource"
+            "github_repository": "#/components/schemas/BetaManagedAgentsGitHubRepositoryResource",
+            "memory_store": "#/components/schemas/BetaManagedAgentsMemoryStoreResource"
           },
           "propertyName": "type"
         },
@@ -9302,6 +10028,9 @@
           },
           {
             "$ref": "#/components/schemas/BetaManagedAgentsFileResource"
+          },
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsMemoryStoreResource"
           }
         ],
         "type": "object"
@@ -9311,7 +10040,8 @@
         "discriminator": {
           "mapping": {
             "file": "#/components/schemas/BetaManagedAgentsFileResourceParams",
-            "github_repository": "#/components/schemas/BetaManagedAgentsGitHubRepositoryResourceParams"
+            "github_repository": "#/components/schemas/BetaManagedAgentsGitHubRepositoryResourceParams",
+            "memory_store": "#/components/schemas/BetaManagedAgentsMemoryStoreResourceParam"
           },
           "propertyName": "type"
         },
@@ -9326,6 +10056,9 @@
           },
           {
             "$ref": "#/components/schemas/BetaManagedAgentsFileResourceParams"
+          },
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsMemoryStoreResourceParam"
           }
         ],
         "type": "object"
@@ -10360,6 +11093,65 @@
         },
         "type": "object"
       },
+      "BetaManagedAgentsUpdateMemoryParams": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "nullable": true,
+            "type": "string"
+          },
+          "path": {
+            "maxLength": 1024,
+            "minLength": 2,
+            "nullable": true,
+            "type": "string"
+          },
+          "precondition": {
+            "$ref": "#/components/schemas/BetaManagedAgentsPrecondition"
+          }
+        },
+        "type": "object"
+      },
+      "BetaManagedAgentsUpdateMemoryStoreRequestBody": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "maxLength": 1024,
+            "nullable": true,
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": {
+              "nullable": true,
+              "type": "string"
+            },
+            "description": "Metadata patch. Set a key to a string to upsert it, or to null to delete it. Omit the field to preserve. The stored bag is limited to 16 keys (up to 64 chars each) with values up to 512 chars.",
+            "nullable": true,
+            "type": "object"
+          },
+          "name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BetaManagedAgentsUpdateMemoryStoreResponse": {
+        "discriminator": {
+          "mapping": {
+            "memory_store": "#/components/schemas/BetaManagedAgentsMemoryStore"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsMemoryStore"
+          }
+        ],
+        "type": "object"
+      },
       "BetaManagedAgentsUpdateSessionParams": {
         "additionalProperties": false,
         "description": "Request parameters for updating a `session`. Omit a field to preserve its current value.",
@@ -10401,7 +11193,8 @@
         "discriminator": {
           "mapping": {
             "file": "#/components/schemas/BetaManagedAgentsFileResource",
-            "github_repository": "#/components/schemas/BetaManagedAgentsGitHubRepositoryResource"
+            "github_repository": "#/components/schemas/BetaManagedAgentsGitHubRepositoryResource",
+            "memory_store": "#/components/schemas/BetaManagedAgentsMemoryStoreResource"
           },
           "propertyName": "type"
         },
@@ -10411,6 +11204,9 @@
           },
           {
             "$ref": "#/components/schemas/BetaManagedAgentsFileResource"
+          },
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsMemoryStoreResource"
           }
         ],
         "type": "object"
@@ -10471,6 +11267,26 @@
             "type": "object"
           }
         },
+        "type": "object"
+      },
+      "BetaManagedAgentsUserActor": {
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "enum": [
+              "user_actor"
+            ],
+            "type": "string"
+          },
+          "user_id": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "user_id"
+        ],
         "type": "object"
       },
       "BetaManagedAgentsUserContentBlock": {
@@ -19617,6 +20433,7 @@
             "type": "boolean"
           },
           "temperature": {
+            "deprecated": true,
             "description": "Amount of randomness injected into the response.\n\nDefaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0` for analytical / multiple choice, and closer to `1.0` for creative and generative tasks.\n\nNote that even with `temperature` of `0.0`, the results will not be fully deterministic.",
             "examples": [
               1
@@ -19624,26 +20441,31 @@
             "maximum": 1,
             "minimum": 0,
             "title": "Temperature",
-            "type": "number"
+            "type": "number",
+            "x-stainless-deprecation-message": "Deprecated. Models released after Claude Opus 4.6 do not support setting temperature. A value of 1.0 of will be accepted for backwards compatibility, all other values will be rejected with a 400 error."
           },
           "top_k": {
-            "description": "Only sample from the top K options for each subsequent token.\n\nUsed to remove \"long tail\" low probability responses. [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).\n\nRecommended for advanced use cases only. You usually only need to use `temperature`.",
+            "deprecated": true,
+            "description": "Only sample from the top K options for each subsequent token.\n\nUsed to remove \"long tail\" low probability responses. [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).\n\nRecommended for advanced use cases only.",
             "examples": [
               5
             ],
             "minimum": 0,
             "title": "Top K",
-            "type": "integer"
+            "type": "integer",
+            "x-stainless-deprecation-message": "Deprecated. Models released after Claude Opus 4.6 do not accept top_k; any value will be rejected with a 400 error."
           },
           "top_p": {
-            "description": "Use nucleus sampling.\n\nIn nucleus sampling, we compute the cumulative distribution over all the options for each subsequent token in decreasing probability order and cut it off once it reaches a particular probability specified by `top_p`. You should either alter `temperature` or `top_p`, but not both.\n\nRecommended for advanced use cases only. You usually only need to use `temperature`.",
+            "deprecated": true,
+            "description": "Use nucleus sampling.\n\nIn nucleus sampling, we compute the cumulative distribution over all the options for each subsequent token in decreasing probability order and cut it off once it reaches a particular probability specified by `top_p`.\n\nRecommended for advanced use cases only.",
             "examples": [
               0.7
             ],
             "maximum": 1,
             "minimum": 0,
             "title": "Top P",
-            "type": "number"
+            "type": "number",
+            "x-stainless-deprecation-message": "Deprecated. Models released after Claude Opus 4.6 do not support setting top_p. A value >= 0.99 will be accepted for backwards compatibility, all other values will be rejected with a 400 error."
           }
         },
         "required": [
@@ -20503,7 +21325,7 @@
           },
           "top_k": {
             "deprecated": true,
-            "description": "Only sample from the top K options for each subsequent token.\n\nUsed to remove \"long tail\" low probability responses. [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).\n\nRecommended for advanced use cases only. You usually only need to use `temperature`.",
+            "description": "Only sample from the top K options for each subsequent token.\n\nUsed to remove \"long tail\" low probability responses. [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).\n\nRecommended for advanced use cases only.",
             "examples": [
               5
             ],
@@ -20514,7 +21336,7 @@
           },
           "top_p": {
             "deprecated": true,
-            "description": "Use nucleus sampling.\n\nIn nucleus sampling, we compute the cumulative distribution over all the options for each subsequent token in decreasing probability order and cut it off once it reaches a particular probability specified by `top_p`. You should either alter `temperature` or `top_p`, but not both.\n\nRecommended for advanced use cases only. You usually only need to use `temperature`.",
+            "description": "Use nucleus sampling.\n\nIn nucleus sampling, we compute the cumulative distribution over all the options for each subsequent token in decreasing probability order and cut it off once it reaches a particular probability specified by `top_p`.\n\nRecommended for advanced use cases only.",
             "examples": [
               0.7
             ],
@@ -20760,7 +21582,7 @@
           },
           "top_k": {
             "deprecated": true,
-            "description": "Only sample from the top K options for each subsequent token.\n\nUsed to remove \"long tail\" low probability responses. [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).\n\nRecommended for advanced use cases only. You usually only need to use `temperature`.",
+            "description": "Only sample from the top K options for each subsequent token.\n\nUsed to remove \"long tail\" low probability responses. [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).\n\nRecommended for advanced use cases only.",
             "examples": [
               5
             ],
@@ -20771,7 +21593,7 @@
           },
           "top_p": {
             "deprecated": true,
-            "description": "Use nucleus sampling.\n\nIn nucleus sampling, we compute the cumulative distribution over all the options for each subsequent token in decreasing probability order and cut it off once it reaches a particular probability specified by `top_p`. You should either alter `temperature` or `top_p`, but not both.\n\nRecommended for advanced use cases only. You usually only need to use `temperature`.",
+            "description": "Use nucleus sampling.\n\nIn nucleus sampling, we compute the cumulative distribution over all the options for each subsequent token in decreasing probability order and cut it off once it reaches a particular probability specified by `top_p`.\n\nRecommended for advanced use cases only.",
             "examples": [
               0.7
             ],
@@ -28520,7 +29342,7 @@
     }
   },
   "info": {
-    "title": "Anthropic API + model-launch-april"
+    "title": "Anthropic API"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -31394,6 +32216,3261 @@
           }
         },
         "summary": "Upload File"
+      }
+    },
+    "/v1/memory_stores/{memory_store_id}/archive?beta=true": {
+      "post": {
+        "operationId": "BetaArchiveMemoryStore",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          },
+          {
+            "description": "Path parameter memory_store_id",
+            "in": "path",
+            "name": "memory_store_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsArchiveMemoryStoreResponse"
+                }
+              }
+            },
+            "description": "Successful response (OK)"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid argument - The client specified an invalid argument"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthenticated - The request does not have valid authentication credentials"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Permission denied - The caller does not have permission to execute the specified operation"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Not found - Some requested entity was not found"
+          },
+          "408": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - The deadline expired before the operation could complete"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Aborted - The operation was aborted due to concurrency issue"
+          },
+          "412": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Failed precondition - Operation was rejected because the system is not in required state"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Out of range - Operation was attempted past the valid range"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Resource exhausted - Some resource has been exhausted (rate limiting)"
+          },
+          "431": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Request header fields too large - Request metadata was too large"
+          },
+          "499": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Cancelled - The operation was cancelled by the client"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Internal - Internal server error"
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unimplemented - The operation is not implemented or supported"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unavailable - The service is currently unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - Upstream service did not respond in time"
+          }
+        },
+        "summary": "ArchiveMemoryStore"
+      }
+    },
+    "/v1/memory_stores/{memory_store_id}/memories/{memory_id}?beta=true": {
+      "delete": {
+        "operationId": "BetaDeleteMemory",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-api-key",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          },
+          {
+            "description": "Path parameter memory_store_id",
+            "in": "path",
+            "name": "memory_store_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Path parameter memory_id",
+            "in": "path",
+            "name": "memory_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Query parameter for expected_content_sha256",
+            "in": "query",
+            "name": "expected_content_sha256",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsDeletedMemory"
+                }
+              }
+            },
+            "description": "Successful response (OK)"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid argument - The client specified an invalid argument"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthenticated - The request does not have valid authentication credentials"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Permission denied - The caller does not have permission to execute the specified operation"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Not found - Some requested entity was not found"
+          },
+          "408": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - The deadline expired before the operation could complete"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Custom error status"
+          },
+          "412": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Failed precondition - Operation was rejected because the system is not in required state"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Out of range - Operation was attempted past the valid range"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Resource exhausted - Some resource has been exhausted (rate limiting)"
+          },
+          "431": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Request header fields too large - Request metadata was too large"
+          },
+          "499": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Cancelled - The operation was cancelled by the client"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Internal - Internal server error"
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Unimplemented - The operation is not implemented or supported"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Unavailable - The service is currently unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - Upstream service did not respond in time"
+          }
+        },
+        "summary": "DeleteMemory"
+      },
+      "get": {
+        "operationId": "BetaGetMemory",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-api-key",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          },
+          {
+            "description": "Path parameter memory_store_id",
+            "in": "path",
+            "name": "memory_store_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Path parameter memory_id",
+            "in": "path",
+            "name": "memory_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Query parameter for view",
+            "in": "query",
+            "name": "view",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/BetaManagedAgentsMemoryView"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsMemory"
+                }
+              }
+            },
+            "description": "Successful response (OK)"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid argument - The client specified an invalid argument"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthenticated - The request does not have valid authentication credentials"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Permission denied - The caller does not have permission to execute the specified operation"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Not found - Some requested entity was not found"
+          },
+          "408": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - The deadline expired before the operation could complete"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Custom error status"
+          },
+          "412": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Failed precondition - Operation was rejected because the system is not in required state"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Out of range - Operation was attempted past the valid range"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Resource exhausted - Some resource has been exhausted (rate limiting)"
+          },
+          "431": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Request header fields too large - Request metadata was too large"
+          },
+          "499": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Cancelled - The operation was cancelled by the client"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Internal - Internal server error"
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Unimplemented - The operation is not implemented or supported"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Unavailable - The service is currently unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - Upstream service did not respond in time"
+          }
+        },
+        "summary": "GetMemory"
+      },
+      "post": {
+        "operationId": "BetaUpdateMemory",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          },
+          {
+            "description": "Path parameter memory_store_id",
+            "in": "path",
+            "name": "memory_store_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Path parameter memory_id",
+            "in": "path",
+            "name": "memory_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Query parameter for view",
+            "in": "query",
+            "name": "view",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/BetaManagedAgentsMemoryView"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BetaManagedAgentsUpdateMemoryParams"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsMemory"
+                }
+              }
+            },
+            "description": "Successful response (OK)"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid argument - The client specified an invalid argument"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthenticated - The request does not have valid authentication credentials"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Permission denied - The caller does not have permission to execute the specified operation"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Not found - Some requested entity was not found"
+          },
+          "408": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - The deadline expired before the operation could complete"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Custom error status"
+          },
+          "412": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Failed precondition - Operation was rejected because the system is not in required state"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Out of range - Operation was attempted past the valid range"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Resource exhausted - Some resource has been exhausted (rate limiting)"
+          },
+          "431": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Request header fields too large - Request metadata was too large"
+          },
+          "499": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Cancelled - The operation was cancelled by the client"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Internal - Internal server error"
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Unimplemented - The operation is not implemented or supported"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Unavailable - The service is currently unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - Upstream service did not respond in time"
+          }
+        },
+        "summary": "UpdateMemory"
+      }
+    },
+    "/v1/memory_stores/{memory_store_id}/memories?beta=true": {
+      "get": {
+        "operationId": "BetaListMemories",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-api-key",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          },
+          {
+            "description": "Path parameter memory_store_id",
+            "in": "path",
+            "name": "memory_store_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Optional path prefix filter (raw string-prefix match; include a trailing slash for directory-scoped lists). This value appears in request URLs. Do not include secrets or personally identifiable information.",
+            "in": "query",
+            "name": "path_prefix",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Query parameter for depth",
+            "in": "query",
+            "name": "depth",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Query parameter for order_by",
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Query parameter for order",
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/BetaManagedAgentsListOrder"
+            }
+          },
+          {
+            "description": "Query parameter for limit",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Query parameter for page",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Query parameter for view",
+            "in": "query",
+            "name": "view",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/BetaManagedAgentsMemoryView"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsListMemoriesResult"
+                }
+              }
+            },
+            "description": "Successful response (OK)"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid argument - The client specified an invalid argument"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthenticated - The request does not have valid authentication credentials"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Permission denied - The caller does not have permission to execute the specified operation"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Not found - Some requested entity was not found"
+          },
+          "408": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - The deadline expired before the operation could complete"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Custom error status"
+          },
+          "412": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Failed precondition - Operation was rejected because the system is not in required state"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Out of range - Operation was attempted past the valid range"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Resource exhausted - Some resource has been exhausted (rate limiting)"
+          },
+          "431": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Request header fields too large - Request metadata was too large"
+          },
+          "499": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Cancelled - The operation was cancelled by the client"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Internal - Internal server error"
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Unimplemented - The operation is not implemented or supported"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Unavailable - The service is currently unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - Upstream service did not respond in time"
+          }
+        },
+        "summary": "ListMemories"
+      },
+      "post": {
+        "operationId": "BetaCreateMemory",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          },
+          {
+            "description": "Path parameter memory_store_id",
+            "in": "path",
+            "name": "memory_store_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Query parameter for view",
+            "in": "query",
+            "name": "view",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/BetaManagedAgentsMemoryView"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BetaManagedAgentsCreateMemoryParams"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsMemory"
+                }
+              }
+            },
+            "description": "Successful response (OK)"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid argument - The client specified an invalid argument"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthenticated - The request does not have valid authentication credentials"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Permission denied - The caller does not have permission to execute the specified operation"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Not found - Some requested entity was not found"
+          },
+          "408": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - The deadline expired before the operation could complete"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Custom error status"
+          },
+          "412": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Failed precondition - Operation was rejected because the system is not in required state"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Out of range - Operation was attempted past the valid range"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Resource exhausted - Some resource has been exhausted (rate limiting)"
+          },
+          "431": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Request header fields too large - Request metadata was too large"
+          },
+          "499": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Cancelled - The operation was cancelled by the client"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Internal - Internal server error"
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Unimplemented - The operation is not implemented or supported"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Unavailable - The service is currently unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - Upstream service did not respond in time"
+          }
+        },
+        "summary": "CreateMemory"
+      }
+    },
+    "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}/redact?beta=true": {
+      "post": {
+        "operationId": "BetaRedactMemoryVersion",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          },
+          {
+            "description": "Path parameter memory_store_id",
+            "in": "path",
+            "name": "memory_store_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Path parameter memory_version_id",
+            "in": "path",
+            "name": "memory_version_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsMemoryVersion"
+                }
+              }
+            },
+            "description": "Successful response (OK)"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid argument - The client specified an invalid argument"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthenticated - The request does not have valid authentication credentials"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Permission denied - The caller does not have permission to execute the specified operation"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Not found - Some requested entity was not found"
+          },
+          "408": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - The deadline expired before the operation could complete"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Custom error status"
+          },
+          "412": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Failed precondition - Operation was rejected because the system is not in required state"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Out of range - Operation was attempted past the valid range"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Resource exhausted - Some resource has been exhausted (rate limiting)"
+          },
+          "431": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Request header fields too large - Request metadata was too large"
+          },
+          "499": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Cancelled - The operation was cancelled by the client"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Internal - Internal server error"
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Unimplemented - The operation is not implemented or supported"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Unavailable - The service is currently unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - Upstream service did not respond in time"
+          }
+        },
+        "summary": "RedactMemoryVersion"
+      }
+    },
+    "/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}?beta=true": {
+      "get": {
+        "operationId": "BetaGetMemoryVersion",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-api-key",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          },
+          {
+            "description": "Path parameter memory_store_id",
+            "in": "path",
+            "name": "memory_store_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Path parameter memory_version_id",
+            "in": "path",
+            "name": "memory_version_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Query parameter for view",
+            "in": "query",
+            "name": "view",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/BetaManagedAgentsMemoryView"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsMemoryVersion"
+                }
+              }
+            },
+            "description": "Successful response (OK)"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid argument - The client specified an invalid argument"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthenticated - The request does not have valid authentication credentials"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Permission denied - The caller does not have permission to execute the specified operation"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Not found - Some requested entity was not found"
+          },
+          "408": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - The deadline expired before the operation could complete"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Custom error status"
+          },
+          "412": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Failed precondition - Operation was rejected because the system is not in required state"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Out of range - Operation was attempted past the valid range"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Resource exhausted - Some resource has been exhausted (rate limiting)"
+          },
+          "431": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Request header fields too large - Request metadata was too large"
+          },
+          "499": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Cancelled - The operation was cancelled by the client"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Internal - Internal server error"
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Unimplemented - The operation is not implemented or supported"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Unavailable - The service is currently unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - Upstream service did not respond in time"
+          }
+        },
+        "summary": "GetMemoryVersion"
+      }
+    },
+    "/v1/memory_stores/{memory_store_id}/memory_versions?beta=true": {
+      "get": {
+        "operationId": "BetaListMemoryVersions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-api-key",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          },
+          {
+            "description": "Path parameter memory_store_id",
+            "in": "path",
+            "name": "memory_store_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Query parameter for memory_id",
+            "in": "query",
+            "name": "memory_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Query parameter for session_id",
+            "in": "query",
+            "name": "session_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Query parameter for api_key_id",
+            "in": "query",
+            "name": "api_key_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Query parameter for operation",
+            "in": "query",
+            "name": "operation",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/BetaManagedAgentsMemoryVersionOperation"
+            }
+          },
+          {
+            "description": "Return versions created at or after this time (inclusive).",
+            "in": "query",
+            "name": "created_at[gte]",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/BetaTimestamp"
+            }
+          },
+          {
+            "description": "Return versions created at or before this time (inclusive).",
+            "in": "query",
+            "name": "created_at[lte]",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/BetaTimestamp"
+            }
+          },
+          {
+            "description": "Query parameter for limit",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Query parameter for page",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Query parameter for view",
+            "in": "query",
+            "name": "view",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/BetaManagedAgentsMemoryView"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsListMemoryVersionsResult"
+                }
+              }
+            },
+            "description": "Successful response (OK)"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid argument - The client specified an invalid argument"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthenticated - The request does not have valid authentication credentials"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Permission denied - The caller does not have permission to execute the specified operation"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Not found - Some requested entity was not found"
+          },
+          "408": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - The deadline expired before the operation could complete"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Custom error status"
+          },
+          "412": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Failed precondition - Operation was rejected because the system is not in required state"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Out of range - Operation was attempted past the valid range"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Resource exhausted - Some resource has been exhausted (rate limiting)"
+          },
+          "431": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Request header fields too large - Request metadata was too large"
+          },
+          "499": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Cancelled - The operation was cancelled by the client"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Internal - Internal server error"
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Unimplemented - The operation is not implemented or supported"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Unavailable - The service is currently unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - Upstream service did not respond in time"
+          }
+        },
+        "summary": "ListMemoryVersions"
+      }
+    },
+    "/v1/memory_stores/{memory_store_id}?beta=true": {
+      "delete": {
+        "operationId": "BetaDeleteMemoryStore",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-api-key",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          },
+          {
+            "description": "Path parameter memory_store_id",
+            "in": "path",
+            "name": "memory_store_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsDeleteMemoryStoreResponse"
+                }
+              }
+            },
+            "description": "Successful response (OK)"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid argument - The client specified an invalid argument"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthenticated - The request does not have valid authentication credentials"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Permission denied - The caller does not have permission to execute the specified operation"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Not found - Some requested entity was not found"
+          },
+          "408": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - The deadline expired before the operation could complete"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Aborted - The operation was aborted due to concurrency issue"
+          },
+          "412": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Failed precondition - Operation was rejected because the system is not in required state"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Out of range - Operation was attempted past the valid range"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Resource exhausted - Some resource has been exhausted (rate limiting)"
+          },
+          "431": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Request header fields too large - Request metadata was too large"
+          },
+          "499": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Cancelled - The operation was cancelled by the client"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Internal - Internal server error"
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unimplemented - The operation is not implemented or supported"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unavailable - The service is currently unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - Upstream service did not respond in time"
+          }
+        },
+        "summary": "DeleteMemoryStore"
+      },
+      "get": {
+        "operationId": "BetaGetMemoryStore",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-api-key",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          },
+          {
+            "description": "Path parameter memory_store_id",
+            "in": "path",
+            "name": "memory_store_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsGetMemoryStoreResponse"
+                }
+              }
+            },
+            "description": "Successful response (OK)"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid argument - The client specified an invalid argument"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthenticated - The request does not have valid authentication credentials"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Permission denied - The caller does not have permission to execute the specified operation"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Not found - Some requested entity was not found"
+          },
+          "408": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - The deadline expired before the operation could complete"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Aborted - The operation was aborted due to concurrency issue"
+          },
+          "412": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Failed precondition - Operation was rejected because the system is not in required state"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Out of range - Operation was attempted past the valid range"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Resource exhausted - Some resource has been exhausted (rate limiting)"
+          },
+          "431": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Request header fields too large - Request metadata was too large"
+          },
+          "499": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Cancelled - The operation was cancelled by the client"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Internal - Internal server error"
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unimplemented - The operation is not implemented or supported"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unavailable - The service is currently unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - Upstream service did not respond in time"
+          }
+        },
+        "summary": "GetMemoryStore"
+      },
+      "post": {
+        "operationId": "BetaUpdateMemoryStore",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          },
+          {
+            "description": "Path parameter memory_store_id",
+            "in": "path",
+            "name": "memory_store_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BetaManagedAgentsUpdateMemoryStoreRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsUpdateMemoryStoreResponse"
+                }
+              }
+            },
+            "description": "Successful response (OK)"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid argument - The client specified an invalid argument"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthenticated - The request does not have valid authentication credentials"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Permission denied - The caller does not have permission to execute the specified operation"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Not found - Some requested entity was not found"
+          },
+          "408": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - The deadline expired before the operation could complete"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Aborted - The operation was aborted due to concurrency issue"
+          },
+          "412": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Failed precondition - Operation was rejected because the system is not in required state"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Out of range - Operation was attempted past the valid range"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Resource exhausted - Some resource has been exhausted (rate limiting)"
+          },
+          "431": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Request header fields too large - Request metadata was too large"
+          },
+          "499": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Cancelled - The operation was cancelled by the client"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Internal - Internal server error"
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unimplemented - The operation is not implemented or supported"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unavailable - The service is currently unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - Upstream service did not respond in time"
+          }
+        },
+        "summary": "UpdateMemoryStore"
+      }
+    },
+    "/v1/memory_stores?beta=true": {
+      "get": {
+        "operationId": "BetaListMemoryStores",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-api-key",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          },
+          {
+            "description": "Query parameter for limit",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Query parameter for page",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Query parameter for include_archived",
+            "in": "query",
+            "name": "include_archived",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Return stores created at or after this time (inclusive).",
+            "in": "query",
+            "name": "created_at[gte]",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/BetaTimestamp"
+            }
+          },
+          {
+            "description": "Return stores created at or before this time (inclusive).",
+            "in": "query",
+            "name": "created_at[lte]",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/BetaTimestamp"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsListMemoryStoresResponse"
+                }
+              }
+            },
+            "description": "Successful response (OK)"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid argument - The client specified an invalid argument"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthenticated - The request does not have valid authentication credentials"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Permission denied - The caller does not have permission to execute the specified operation"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Not found - Some requested entity was not found"
+          },
+          "408": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - The deadline expired before the operation could complete"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Aborted - The operation was aborted due to concurrency issue"
+          },
+          "412": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Failed precondition - Operation was rejected because the system is not in required state"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Out of range - Operation was attempted past the valid range"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Resource exhausted - Some resource has been exhausted (rate limiting)"
+          },
+          "431": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Request header fields too large - Request metadata was too large"
+          },
+          "499": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Cancelled - The operation was cancelled by the client"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Internal - Internal server error"
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unimplemented - The operation is not implemented or supported"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unavailable - The service is currently unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - Upstream service did not respond in time"
+          }
+        },
+        "summary": "ListMemoryStores"
+      },
+      "post": {
+        "operationId": "BetaCreateMemoryStore",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BetaManagedAgentsCreateMemoryStoreRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaManagedAgentsCreateMemoryStoreResponse"
+                }
+              }
+            },
+            "description": "Successful response (OK)"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid argument - The client specified an invalid argument"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthenticated - The request does not have valid authentication credentials"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Permission denied - The caller does not have permission to execute the specified operation"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Not found - Some requested entity was not found"
+          },
+          "408": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - The deadline expired before the operation could complete"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Aborted - The operation was aborted due to concurrency issue"
+          },
+          "412": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Failed precondition - Operation was rejected because the system is not in required state"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Out of range - Operation was attempted past the valid range"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Resource exhausted - Some resource has been exhausted (rate limiting)"
+          },
+          "431": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Request header fields too large - Request metadata was too large"
+          },
+          "499": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Cancelled - The operation was cancelled by the client"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Internal - Internal server error"
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unimplemented - The operation is not implemented or supported"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unavailable - The service is currently unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - Upstream service did not respond in time"
+          }
+        },
+        "summary": "CreateMemoryStore"
       }
     },
     "/v1/messages": {

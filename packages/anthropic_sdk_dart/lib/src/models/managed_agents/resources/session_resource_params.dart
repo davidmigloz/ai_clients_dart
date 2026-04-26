@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
+import '../memory_stores/mount_mode.dart';
 
 // ============================================================================
 // SessionResourceParams — sealed
@@ -12,6 +13,7 @@ import '../../common/equality_helpers.dart';
 /// Variants:
 /// - [FileResourceParams] — Mount a file (type: "file")
 /// - [GitHubRepositoryResourceParams] — Mount a GitHub repo (type: "github_repository")
+/// - [MemoryStoreSessionResourceParams] — Mount a memory store (type: "memory_store")
 /// - [UnknownSessionResourceParams] — Unrecognized type (preserves raw JSON)
 sealed class SessionResourceParams {
   const SessionResourceParams();
@@ -22,6 +24,7 @@ sealed class SessionResourceParams {
     return switch (type) {
       'file' => FileResourceParams.fromJson(json),
       'github_repository' => GitHubRepositoryResourceParams.fromJson(json),
+      'memory_store' => MemoryStoreSessionResourceParams.fromJson(json),
       _ => UnknownSessionResourceParams.fromJson(json),
     };
   }
@@ -192,6 +195,89 @@ class GitHubRepositoryResourceParams extends SessionResourceParams {
       'authorizationToken: $authorizationToken, '
       'mountPath: $mountPath, '
       'checkout: $checkout)';
+}
+
+/// Mount a memory store into the session as a filesystem resource.
+@immutable
+class MemoryStoreSessionResourceParams extends SessionResourceParams {
+  /// The type discriminator. Always `memory_store`.
+  final String type;
+
+  /// The memory store ID (`memstore_...`).
+  final String memoryStoreId;
+
+  /// Per-attachment guidance for the agent on how to use this store.
+  /// Rendered into the memory section of the system prompt. Max 4096 chars.
+  final String? instructions;
+
+  /// Access mode for the mounted store. Defaults to `read_write` server-side.
+  final MountMode? access;
+
+  /// Creates a [MemoryStoreSessionResourceParams].
+  const MemoryStoreSessionResourceParams({
+    this.type = 'memory_store',
+    required this.memoryStoreId,
+    this.instructions,
+    this.access,
+  });
+
+  /// Creates a [MemoryStoreSessionResourceParams] from JSON.
+  factory MemoryStoreSessionResourceParams.fromJson(Map<String, dynamic> json) {
+    return MemoryStoreSessionResourceParams(
+      type: json['type'] as String? ?? 'memory_store',
+      memoryStoreId: json['memory_store_id'] as String,
+      instructions: json['instructions'] as String?,
+      access: json['access'] != null
+          ? MountMode.fromJson(json['access'] as String)
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'memory_store_id': memoryStoreId,
+    if (instructions != null) 'instructions': instructions,
+    if (access != null) 'access': access!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  MemoryStoreSessionResourceParams copyWith({
+    String? type,
+    String? memoryStoreId,
+    Object? instructions = unsetCopyWithValue,
+    Object? access = unsetCopyWithValue,
+  }) {
+    return MemoryStoreSessionResourceParams(
+      type: type ?? this.type,
+      memoryStoreId: memoryStoreId ?? this.memoryStoreId,
+      instructions: instructions == unsetCopyWithValue
+          ? this.instructions
+          : instructions as String?,
+      access: access == unsetCopyWithValue ? this.access : access as MountMode?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MemoryStoreSessionResourceParams &&
+          runtimeType == other.runtimeType &&
+          type == other.type &&
+          memoryStoreId == other.memoryStoreId &&
+          instructions == other.instructions &&
+          access == other.access;
+
+  @override
+  int get hashCode => Object.hash(type, memoryStoreId, instructions, access);
+
+  @override
+  String toString() =>
+      'MemoryStoreSessionResourceParams('
+      'type: $type, '
+      'memoryStoreId: $memoryStoreId, '
+      'instructions: $instructions, '
+      'access: $access)';
 }
 
 /// Unrecognized session resource params type (preserves raw JSON).
