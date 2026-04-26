@@ -571,7 +571,7 @@ Future<void> main() async {
   try {
     // Create a memory store and a memory inside it.
     final store = await client.memoryStores.create(
-      const CreateMemoryStoreParams(name: 'user-preferences'),
+      CreateMemoryStoreParams(name: 'user-preferences'),
     );
 
     final memories = client.memoryStores.memories(store.id);

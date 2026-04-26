@@ -185,6 +185,7 @@ void main() {
       final request = mockHttpClient.lastRequest!;
       expect(request.url.path, '/v1/memory_stores/memstore_test123');
       expect(request.method, 'POST');
+      expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
 
       final body =
           jsonDecode((request as dynamic).body) as Map<String, dynamic>;
@@ -224,6 +225,7 @@ void main() {
       final request = mockHttpClient.lastRequest!;
       expect(request.url.path, '/v1/memory_stores/memstore_test123/archive');
       expect(request.method, 'POST');
+      expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
 
       final body =
           jsonDecode((request as dynamic).body) as Map<String, dynamic>;
@@ -295,6 +297,7 @@ void main() {
       expect(request.url.queryParameters['limit'], '50');
       expect(request.url.queryParameters['page'], 'pg');
       expect(request.url.queryParameters['view'], 'basic');
+      expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
     });
 
     test('retrieve sends correct request with view', () async {
@@ -313,6 +316,7 @@ void main() {
       );
       expect(request.method, 'GET');
       expect(request.url.queryParameters['view'], 'full');
+      expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
     });
 
     test('update sends body with sealed precondition', () async {
@@ -334,6 +338,7 @@ void main() {
         '/v1/memory_stores/memstore_test123/memories/mem_test123',
       );
       expect(request.method, 'POST');
+      expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
 
       final body =
           jsonDecode((request as dynamic).body) as Map<String, dynamic>;
@@ -366,6 +371,7 @@ void main() {
       );
       expect(request.method, 'DELETE');
       expect(request.url.queryParameters['expected_content_sha256'], 'sha-abc');
+      expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
     });
   });
 
@@ -418,6 +424,7 @@ void main() {
       expect(request.url.queryParameters['limit'], '5');
       expect(request.url.queryParameters['page'], 'pg');
       expect(request.url.queryParameters['view'], 'full');
+      expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
     });
 
     test('retrieve sends correct request', () async {
@@ -436,6 +443,7 @@ void main() {
       );
       expect(request.method, 'GET');
       expect(request.url.queryParameters['view'], 'basic');
+      expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
     });
 
     test('redact sends empty-body POST to /redact', () async {
@@ -459,6 +467,7 @@ void main() {
         '/v1/memory_stores/memstore_test123/memory_versions/memver_test123/redact',
       );
       expect(request.method, 'POST');
+      expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
 
       final body =
           jsonDecode((request as dynamic).body) as Map<String, dynamic>;
