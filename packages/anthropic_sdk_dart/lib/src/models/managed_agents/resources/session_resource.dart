@@ -258,8 +258,8 @@ class MemoryStoreSessionResource extends SessionResource {
   final String? name;
 
   /// Description of the memory store, snapshotted at attach time. Rendered
-  /// into the agent's system prompt. Empty string when the store has no
-  /// description.
+  /// into the agent's system prompt. May be `null` (or an empty string) when
+  /// the store has no description.
   final String? description;
 
   /// Per-attachment guidance for the agent on how to use this store.
