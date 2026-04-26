@@ -7,6 +7,7 @@ import '../interceptors/interceptor.dart';
 import '../interceptors/logging_interceptor.dart';
 import '../resources/agents_resource.dart';
 import '../resources/files_resource.dart';
+import '../resources/memory_stores_resource.dart';
 import '../resources/message_batches_resource.dart';
 import '../resources/messages_resource.dart';
 import '../resources/models_resource.dart';
@@ -86,6 +87,9 @@ class AnthropicClient {
 
   /// Resource for the Sessions API (Beta).
   late final SessionsResource sessions;
+
+  /// Resource for the Memory Stores API (Beta).
+  late final MemoryStoresResource memoryStores;
 
   /// Resource for the User Profiles API (Beta).
   late final UserProfilesResource userProfiles;
@@ -206,6 +210,13 @@ class AnthropicClient {
       ensureNotClosed: _ensureNotClosed,
     );
     sessions = SessionsResource(
+      config: config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+    memoryStores = MemoryStoresResource(
       config: config,
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,

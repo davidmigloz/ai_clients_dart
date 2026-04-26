@@ -2881,6 +2881,287 @@
         "acknowledged"
       ],
       "note": "Beta variant of EffortCapability within ModelCapabilities; same Dart class covers both surfaces."
+    },
+    "ManagedAgentActor": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ManagedAgentActor",
+      "file": "lib/src/models/managed_agents/common/managed_agent_actor.dart",
+      "schema": "BetaManagedAgentsActor"
+    },
+    "SessionActor": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SessionActor",
+      "file": "lib/src/models/managed_agents/common/managed_agent_actor.dart",
+      "schema": "BetaManagedAgentsSessionActor",
+      "parent": "ManagedAgentActor"
+    },
+    "ApiActor": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ApiActor",
+      "file": "lib/src/models/managed_agents/common/managed_agent_actor.dart",
+      "schema": "BetaManagedAgentsApiActor",
+      "parent": "ManagedAgentActor"
+    },
+    "UserActor": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "UserActor",
+      "file": "lib/src/models/managed_agents/common/managed_agent_actor.dart",
+      "schema": "BetaManagedAgentsUserActor",
+      "parent": "ManagedAgentActor"
+    },
+    "MountMode": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "MountMode",
+      "file": "lib/src/models/managed_agents/memory_stores/mount_mode.dart",
+      "schema": "BetaManagedAgentsMountMode"
+    },
+    "MemoryView": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "MemoryView",
+      "file": "lib/src/models/managed_agents/memory_stores/memory_view.dart",
+      "schema": "BetaManagedAgentsMemoryView"
+    },
+    "MemoryVersionOperation": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "MemoryVersionOperation",
+      "file": "lib/src/models/managed_agents/memory_stores/memory_version.dart",
+      "schema": "BetaManagedAgentsMemoryVersionOperation"
+    },
+    "MemoryStore": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "MemoryStore",
+      "file": "lib/src/models/managed_agents/memory_stores/memory_store.dart",
+      "schema": "BetaManagedAgentsMemoryStore"
+    },
+    "DeletedMemoryStore": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeletedMemoryStore",
+      "file": "lib/src/models/managed_agents/memory_stores/memory_store.dart",
+      "schema": "BetaManagedAgentsDeletedMemoryStore"
+    },
+    "CreateMemoryStoreParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateMemoryStoreParams",
+      "file": "lib/src/models/managed_agents/memory_stores/create_memory_store_params.dart",
+      "schema": "BetaManagedAgentsCreateMemoryStoreRequest"
+    },
+    "UpdateMemoryStoreParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateMemoryStoreParams",
+      "file": "lib/src/models/managed_agents/memory_stores/update_memory_store_params.dart",
+      "schema": "BetaManagedAgentsUpdateMemoryStoreRequestBody"
+    },
+    "MemoryStoreListResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "MemoryStoreListResponse",
+      "file": "lib/src/models/managed_agents/memory_stores/memory_store_list_response.dart",
+      "schema": "BetaManagedAgentsListMemoryStoresResponse"
+    },
+    "MemoryListItem": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "MemoryListItem",
+      "file": "lib/src/models/managed_agents/memory_stores/memory.dart",
+      "schema": "BetaManagedAgentsMemoryListItem"
+    },
+    "Memory": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "Memory",
+      "file": "lib/src/models/managed_agents/memory_stores/memory.dart",
+      "schema": "BetaManagedAgentsMemory",
+      "parent": "MemoryListItem"
+    },
+    "MemoryPrefix": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "MemoryPrefix",
+      "file": "lib/src/models/managed_agents/memory_stores/memory.dart",
+      "schema": "BetaManagedAgentsMemoryPrefix",
+      "parent": "MemoryListItem"
+    },
+    "DeletedMemory": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeletedMemory",
+      "file": "lib/src/models/managed_agents/memory_stores/memory.dart",
+      "schema": "BetaManagedAgentsDeletedMemory"
+    },
+    "MemoryListResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "MemoryListResponse",
+      "file": "lib/src/models/managed_agents/memory_stores/memory_list_response.dart",
+      "schema": "BetaManagedAgentsListMemoriesResult"
+    },
+    "MemoryVersion": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "MemoryVersion",
+      "file": "lib/src/models/managed_agents/memory_stores/memory_version.dart",
+      "schema": "BetaManagedAgentsMemoryVersion"
+    },
+    "MemoryVersionListResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "MemoryVersionListResponse",
+      "file": "lib/src/models/managed_agents/memory_stores/memory_version_list_response.dart",
+      "schema": "BetaManagedAgentsListMemoryVersionsResult"
+    },
+    "CreateMemoryParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateMemoryParams",
+      "file": "lib/src/models/managed_agents/memory_stores/create_memory_params.dart",
+      "schema": "BetaManagedAgentsCreateMemoryParams"
+    },
+    "UpdateMemoryParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateMemoryParams",
+      "file": "lib/src/models/managed_agents/memory_stores/update_memory_params.dart",
+      "schema": "BetaManagedAgentsUpdateMemoryParams"
+    },
+    "MemoryPrecondition": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "MemoryPrecondition",
+      "file": "lib/src/models/managed_agents/memory_stores/update_memory_params.dart",
+      "schema": "BetaManagedAgentsPrecondition"
+    },
+    "ContentSha256Precondition": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ContentSha256Precondition",
+      "file": "lib/src/models/managed_agents/memory_stores/update_memory_params.dart",
+      "schema": "BetaManagedAgentsContentSha256Precondition",
+      "parent": "MemoryPrecondition"
+    },
+    "MemoryStoreSessionResource": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "MemoryStoreSessionResource",
+      "file": "lib/src/models/managed_agents/resources/session_resource.dart",
+      "schema": "BetaManagedAgentsMemoryStoreResource",
+      "parent": "SessionResource"
+    },
+    "MemoryStoreSessionResourceParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "MemoryStoreSessionResourceParams",
+      "file": "lib/src/models/managed_agents/resources/session_resource_params.dart",
+      "schema": "BetaManagedAgentsMemoryStoreResourceParam",
+      "parent": "SessionResourceParams"
+    },
+    "MemoryConflictError": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "MemoryConflictError",
+      "file": "lib/src/models/managed_agents/errors/managed_agent_error.dart",
+      "schema": "BetaManagedAgentsConflictError"
+    },
+    "MemoryPathConflictError": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "MemoryPathConflictError",
+      "file": "lib/src/models/managed_agents/errors/managed_agent_error.dart",
+      "schema": "BetaManagedAgentsMemoryPathConflictError"
+    },
+    "MemoryPreconditionFailedError": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "MemoryPreconditionFailedError",
+      "file": "lib/src/models/managed_agents/errors/managed_agent_error.dart",
+      "schema": "BetaManagedAgentsMemoryPreconditionFailedError"
+    },
+    "BetaManagedAgentsCreateMemoryStoreResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsCreateMemoryStoreResponse",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Single-variant oneOf response wrapper around BetaManagedAgentsMemoryStore — unwrapped to MemoryStore at the resource layer."
+    },
+    "BetaManagedAgentsUpdateMemoryStoreResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsUpdateMemoryStoreResponse",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Single-variant oneOf response wrapper around BetaManagedAgentsMemoryStore — unwrapped to MemoryStore at the resource layer."
+    },
+    "BetaManagedAgentsArchiveMemoryStoreResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsArchiveMemoryStoreResponse",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Single-variant oneOf response wrapper around BetaManagedAgentsMemoryStore — unwrapped to MemoryStore at the resource layer."
+    },
+    "BetaManagedAgentsGetMemoryStoreResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsGetMemoryStoreResponse",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Single-variant oneOf response wrapper around BetaManagedAgentsMemoryStore — unwrapped to MemoryStore at the resource layer."
+    },
+    "BetaManagedAgentsDeleteMemoryStoreResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsDeleteMemoryStoreResponse",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Single-variant oneOf response wrapper around BetaManagedAgentsDeletedMemoryStore — unwrapped to DeletedMemoryStore at the resource layer."
+    },
+    "BetaManagedAgentsError": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsError",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Error envelope union — errors are surfaced via AnthropicException by the ErrorInterceptor, not parsed from response bodies."
+    },
+    "BetaManagedAgentsErrorResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsErrorResponse",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Error response envelope — errors are surfaced via AnthropicException by the ErrorInterceptor, not parsed from response bodies."
     }
   }
 }
