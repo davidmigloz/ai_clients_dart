@@ -2527,9 +2527,14 @@ void main() {
       );
     });
 
-    test('values are distinct from FunctionCallStatus', () {
+    test('shares wire values with FunctionCallStatus', () {
+      // The OpenAI spec defines FunctionCallStatus and
+      // FunctionCallOutputStatusEnum as separately-named enums with the same
+      // values; both Dart enums should round-trip the same wire strings.
       expect(FunctionCallOutputStatus.inProgress.value, 'in_progress');
       expect(FunctionCallOutputStatus.incomplete.value, 'incomplete');
+      expect(FunctionCallStatus.inProgress.value, 'in_progress');
+      expect(FunctionCallStatus.incomplete.value, 'incomplete');
     });
   });
 
