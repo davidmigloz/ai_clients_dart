@@ -4176,8 +4176,6 @@
       },
       "ChatModel": {
         "enum": [
-          "gpt-5.5",
-          "gpt-5.5-2026-04-23",
           "gpt-5.4",
           "gpt-5.4-mini",
           "gpt-5.4-nano",
@@ -5123,6 +5121,17 @@
                 "description": "A key to use when reading from or writing to the prompt cache.",
                 "maxLength": 64,
                 "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "prompt_cache_retention": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PromptCacheRetentionEnum",
+                "description": "How long to retain a prompt cache entry created by this request."
               },
               {
                 "type": "null"
@@ -22997,6 +23006,13 @@
             "type": "null"
           }
         ]
+      },
+      "PromptCacheRetentionEnum": {
+        "enum": [
+          "in_memory",
+          "24h"
+        ],
+        "type": "string"
       },
       "PublicAssignOrganizationGroupRoleBody": {
         "description": "Request payload for assigning a role to a group or user.",

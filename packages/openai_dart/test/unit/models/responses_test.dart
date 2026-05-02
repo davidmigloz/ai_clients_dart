@@ -3382,6 +3382,75 @@ void main() {
     });
   });
 
+  group('CompactResponseRequest with promptCacheRetention', () {
+    test('round-trip with inMemory uses in_memory underscore', () {
+      const request = CompactResponseRequest(
+        model: 'gpt-4o',
+        promptCacheRetention: PromptCacheRetention.inMemory,
+      );
+
+      final json = request.toJson();
+      expect(json['prompt_cache_retention'], 'in_memory');
+
+      final restored = CompactResponseRequest.fromJson(json);
+      expect(restored.promptCacheRetention, PromptCacheRetention.inMemory);
+      expect(restored, equals(request));
+    });
+
+    test('round-trip with h24', () {
+      const request = CompactResponseRequest(
+        model: 'gpt-4o',
+        promptCacheRetention: PromptCacheRetention.h24,
+      );
+
+      final json = request.toJson();
+      expect(json['prompt_cache_retention'], '24h');
+
+      final restored = CompactResponseRequest.fromJson(json);
+      expect(restored.promptCacheRetention, PromptCacheRetention.h24);
+      expect(restored, equals(request));
+    });
+
+    test('fromJson accepts legacy hyphenated in-memory', () {
+      final restored = CompactResponseRequest.fromJson(const {
+        'model': 'gpt-4o',
+        'prompt_cache_retention': 'in-memory',
+      });
+      expect(restored.promptCacheRetention, PromptCacheRetention.inMemory);
+    });
+
+    test('fromJson falls back to unknown for unrecognized values', () {
+      final restored = CompactResponseRequest.fromJson(const {
+        'model': 'gpt-4o',
+        'prompt_cache_retention': 'forever',
+      });
+      expect(restored.promptCacheRetention, PromptCacheRetention.unknown);
+    });
+
+    test('copyWith sets promptCacheRetention', () {
+      const request = CompactResponseRequest(model: 'gpt-4o');
+      final updated = request.copyWith(
+        promptCacheRetention: PromptCacheRetention.h24,
+      );
+      expect(updated.promptCacheRetention, PromptCacheRetention.h24);
+    });
+
+    test('copyWith clears promptCacheRetention via null sentinel', () {
+      const request = CompactResponseRequest(
+        model: 'gpt-4o',
+        promptCacheRetention: PromptCacheRetention.inMemory,
+      );
+      final cleared = request.copyWith(promptCacheRetention: null);
+      expect(cleared.promptCacheRetention, isNull);
+    });
+
+    test('toJson omits prompt_cache_retention when null', () {
+      const request = CompactResponseRequest(model: 'gpt-4o');
+      final json = request.toJson();
+      expect(json.containsKey('prompt_cache_retention'), isFalse);
+    });
+  });
+
   group('Response with promptCacheKey and promptCacheRetention', () {
     test('fromJson parses new fields', () {
       final json = {

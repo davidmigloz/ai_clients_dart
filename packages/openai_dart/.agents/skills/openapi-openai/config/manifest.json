@@ -1186,6 +1186,23 @@
       "schema": "OAuthErrorCode",
       "tags": ["acknowledged"],
       "note": "Orphan schema used only on OAuthError exception in Python SDK. No endpoint or request/response model references it. OAuth error handling not yet in Dart."
+    },
+    "PromptCacheRetentionEnum": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PromptCacheRetention",
+      "file": "lib/src/models/responses/config/prompt_cache_retention.dart",
+      "schema": "PromptCacheRetentionEnum",
+      "tags": ["acknowledged"],
+      "note": "Spec inconsistency: this named enum uses 'in_memory' (underscore) but the inline ModelResponseProperties.prompt_cache_retention used by chat/responses still uses 'in-memory' (hyphen). The Dart PromptCacheRetention enum maps inMemory -> 'in-memory'; CompactResponseRequest serializes/deserializes 'in_memory' explicitly to bridge the gap. Marked skip to avoid verifier flagging the value mismatch."
+    },
+    "CompactResponseMethodPublicBody": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CompactResponseRequest",
+      "file": "lib/src/models/responses/compact_response_request.dart",
+      "schema": "CompactResponseMethodPublicBody",
+      "tags": []
     }
   }
 }
