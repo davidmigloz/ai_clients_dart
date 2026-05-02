@@ -7,6 +7,7 @@ import '../content/output_content.dart';
 import '../content/reasoning_summary_content.dart';
 import '../metadata/function_call_status.dart';
 import '../metadata/item_status.dart';
+import '../metadata/message_phase.dart';
 import '../metadata/message_role.dart';
 
 /// Input item for a response request.
@@ -25,6 +26,7 @@ sealed class Item {
       'function_call_output' => FunctionCallOutputItem.fromJson(json),
       'reasoning' => ReasoningInputItem.fromJson(json),
       'item_reference' => ItemReference.fromJson(json),
+      'compaction' => CompactionItem.fromJson(json),
       _ => throw FormatException('Unknown Item type: $type'),
     };
   }
@@ -113,10 +115,12 @@ sealed class MessageItem extends Item {
     List<OutputContent> content, {
     String? id,
     ItemStatus? status,
+    MessagePhase? phase,
   }) => AssistantMessageItem(
     content: AssistantMessagePartsContent(content),
     id: id,
     status: status,
+    phase: phase,
   );
 
   /// Creates an assistant message with simple text.
@@ -124,10 +128,12 @@ sealed class MessageItem extends Item {
     String text, {
     String? id,
     ItemStatus? status,
+    MessagePhase? phase,
   }) => AssistantMessageItem(
     content: AssistantMessageTextContent(text),
     id: id,
     status: status,
+    phase: phase,
   );
 
   /// Creates a [MessageItem] from JSON.
@@ -619,8 +625,20 @@ class AssistantMessageItem extends MessageItem {
   @override
   final ItemStatus? status;
 
+  /// Labels this assistant message as intermediate commentary or the final
+  /// answer.
+  ///
+  /// Preserve and resend on follow-up requests for compatible models — see
+  /// [MessagePhase] for details.
+  final MessagePhase? phase;
+
   /// Creates an [AssistantMessageItem].
-  const AssistantMessageItem({this.id, required this.content, this.status});
+  const AssistantMessageItem({
+    this.id,
+    required this.content,
+    this.status,
+    this.phase,
+  });
 
   /// Creates an [AssistantMessageItem] from JSON.
   factory AssistantMessageItem.fromJson(Map<String, dynamic> json) {
@@ -629,6 +647,9 @@ class AssistantMessageItem extends MessageItem {
       content: AssistantMessageContent.fromJson(json['content']),
       status: json['status'] != null
           ? ItemStatus.fromJson(json['status'] as String)
+          : null,
+      phase: json['phase'] != null
+          ? MessagePhase.fromJson(json['phase'] as String)
           : null,
     );
   }
@@ -640,6 +661,7 @@ class AssistantMessageItem extends MessageItem {
     'role': role.toJson(),
     'content': content.toJson(),
     if (status != null) 'status': status!.toJson(),
+    if (phase != null) 'phase': phase!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -647,6 +669,7 @@ class AssistantMessageItem extends MessageItem {
     Object? id = unsetCopyWithValue,
     AssistantMessageContent? content,
     Object? status = unsetCopyWithValue,
+    Object? phase = unsetCopyWithValue,
   }) {
     return AssistantMessageItem(
       id: id == unsetCopyWithValue ? this.id : id as String?,
@@ -654,6 +677,7 @@ class AssistantMessageItem extends MessageItem {
       status: status == unsetCopyWithValue
           ? this.status
           : status as ItemStatus?,
+      phase: phase == unsetCopyWithValue ? this.phase : phase as MessagePhase?,
     );
   }
 
@@ -664,14 +688,15 @@ class AssistantMessageItem extends MessageItem {
           runtimeType == other.runtimeType &&
           id == other.id &&
           content == other.content &&
-          status == other.status;
+          status == other.status &&
+          phase == other.phase;
 
   @override
-  int get hashCode => Object.hash(id, content, status);
+  int get hashCode => Object.hash(id, content, status, phase);
 
   @override
   String toString() =>
-      'AssistantMessageItem(id: $id, content: $content, status: $status)';
+      'AssistantMessageItem(id: $id, content: $content, status: $status, phase: $phase)';
 }
 
 /// A function call item.
@@ -1044,4 +1069,63 @@ class ReasoningInputItem extends Item {
   @override
   String toString() =>
       'ReasoningInputItem(id: $id, summary: $summary, encryptedContent: $encryptedContent)';
+}
+
+/// A compaction item used as input.
+///
+/// Carries the encrypted summary produced by the
+/// [`/responses/compact` endpoint](https://www.openresponses.org/) so
+/// previous turns can be replayed in a new request without resending the
+/// full transcript.
+@immutable
+class CompactionItem extends Item {
+  /// The unique ID of the compaction item.
+  final String? id;
+
+  /// The encrypted content of the compaction summary.
+  final String encryptedContent;
+
+  /// Creates a [CompactionItem].
+  const CompactionItem({this.id, required this.encryptedContent});
+
+  /// Creates a [CompactionItem] from JSON.
+  factory CompactionItem.fromJson(Map<String, dynamic> json) {
+    return CompactionItem(
+      id: json['id'] as String?,
+      encryptedContent: json['encrypted_content'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'compaction',
+    if (id != null) 'id': id,
+    'encrypted_content': encryptedContent,
+  };
+
+  /// Creates a copy with replaced values.
+  CompactionItem copyWith({
+    Object? id = unsetCopyWithValue,
+    String? encryptedContent,
+  }) {
+    return CompactionItem(
+      id: id == unsetCopyWithValue ? this.id : id as String?,
+      encryptedContent: encryptedContent ?? this.encryptedContent,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CompactionItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          encryptedContent == other.encryptedContent;
+
+  @override
+  int get hashCode => Object.hash(id, encryptedContent);
+
+  @override
+  String toString() =>
+      'CompactionItem(id: $id, encryptedContent: [${encryptedContent.length} chars])';
 }

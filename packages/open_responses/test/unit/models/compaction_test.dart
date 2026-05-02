@@ -1,0 +1,219 @@
+import 'package:open_responses/open_responses.dart';
+import 'package:test/test.dart';
+
+void main() {
+  group('MessagePhase', () {
+    test('serializes commentary and final_answer values', () {
+      expect(MessagePhase.commentary.toJson(), 'commentary');
+      expect(MessagePhase.finalAnswer.toJson(), 'final_answer');
+    });
+
+    test('parses known values', () {
+      expect(MessagePhase.fromJson('commentary'), MessagePhase.commentary);
+      expect(MessagePhase.fromJson('final_answer'), MessagePhase.finalAnswer);
+    });
+
+    test('falls back to unknown for unrecognized values', () {
+      expect(MessagePhase.fromJson('mystery_phase'), MessagePhase.unknown);
+    });
+  });
+
+  group('AssistantMessageItem.phase', () {
+    test('serializes phase when set', () {
+      final item = MessageItem.assistantText(
+        'Final answer here',
+        id: 'msg_1',
+        phase: MessagePhase.finalAnswer,
+      );
+      final json = item.toJson();
+      expect(json['phase'], 'final_answer');
+    });
+
+    test('omits phase when null', () {
+      final item = MessageItem.assistantText('Some text', id: 'msg_1');
+      expect(item.toJson().containsKey('phase'), isFalse);
+    });
+
+    test('round-trips through JSON', () {
+      final original = MessageItem.assistantText(
+        'Thinking out loud',
+        id: 'msg_2',
+        phase: MessagePhase.commentary,
+      );
+      final restored =
+          MessageItem.fromJson(original.toJson()) as AssistantMessageItem;
+      expect(restored.phase, MessagePhase.commentary);
+    });
+
+    test('copyWith replaces phase', () {
+      final original = MessageItem.assistantText('Hi') as AssistantMessageItem;
+      final modified = original.copyWith(phase: MessagePhase.commentary);
+      expect(modified.phase, MessagePhase.commentary);
+    });
+
+    test('copyWith clears phase with explicit null', () {
+      final original =
+          MessageItem.assistantText('Hi', phase: MessagePhase.finalAnswer)
+              as AssistantMessageItem;
+      final modified = original.copyWith(phase: null);
+      expect(modified.phase, isNull);
+    });
+  });
+
+  group('MessageOutputItem.phase', () {
+    test('round-trips through JSON', () {
+      final json = {
+        'type': 'message',
+        'id': 'msg_1',
+        'role': 'assistant',
+        'content': [
+          {'type': 'output_text', 'text': 'Hello'},
+        ],
+        'phase': 'final_answer',
+      };
+      final item = OutputItem.fromJson(json) as MessageOutputItem;
+      expect(item.phase, MessagePhase.finalAnswer);
+      expect(item.toJson()['phase'], 'final_answer');
+    });
+  });
+
+  group('CompactionItem (input)', () {
+    test('serializes with required fields', () {
+      const item = CompactionItem(
+        id: 'cmp_123',
+        encryptedContent: 'gAAAAAB...',
+      );
+      expect(item.toJson(), {
+        'type': 'compaction',
+        'id': 'cmp_123',
+        'encrypted_content': 'gAAAAAB...',
+      });
+    });
+
+    test('omits id when null', () {
+      const item = CompactionItem(encryptedContent: 'gAAAAAB...');
+      final json = item.toJson();
+      expect(json.containsKey('id'), isFalse);
+      expect(json['type'], 'compaction');
+    });
+
+    test('round-trips via Item.fromJson', () {
+      const original = CompactionItem(id: 'cmp_1', encryptedContent: 'enc');
+      final restored = Item.fromJson(original.toJson());
+      expect(restored, equals(original));
+    });
+
+    test('copyWith clears id with explicit null', () {
+      const original = CompactionItem(id: 'cmp_1', encryptedContent: 'enc');
+      final modified = original.copyWith(id: null);
+      expect(modified.id, isNull);
+    });
+  });
+
+  group('CompactionOutputItem', () {
+    test('parses from JSON', () {
+      final json = {
+        'type': 'compaction',
+        'id': 'cmp_001',
+        'encrypted_content': 'gAAAAABpM0Yj-...',
+      };
+      final item = OutputItem.fromJson(json);
+      expect(item, isA<CompactionOutputItem>());
+      final compaction = item as CompactionOutputItem;
+      expect(compaction.id, 'cmp_001');
+      expect(compaction.encryptedContent, 'gAAAAABpM0Yj-...');
+    });
+
+    test('round-trips through JSON', () {
+      const item = CompactionOutputItem(
+        id: 'cmp_001',
+        encryptedContent: 'enc-data',
+        createdBy: 'system',
+      );
+      expect(OutputItem.fromJson(item.toJson()), equals(item));
+    });
+
+    test('toCompactionItem converts to input variant', () {
+      const item = CompactionOutputItem(id: 'cmp_1', encryptedContent: 'enc');
+      expect(
+        item.toCompactionItem(),
+        const CompactionItem(id: 'cmp_1', encryptedContent: 'enc'),
+      );
+    });
+  });
+
+  group('CompactResource', () {
+    test('parses example payload', () {
+      final json = {
+        'id': 'resp_001',
+        'object': 'response.compaction',
+        'created_at': 1764967971,
+        'output': [
+          {
+            'type': 'message',
+            'id': 'msg_000',
+            'role': 'user',
+            'content': [
+              {'type': 'output_text', 'text': 'Hello'},
+            ],
+            'status': 'completed',
+          },
+          {
+            'type': 'compaction',
+            'id': 'cmp_001',
+            'encrypted_content': 'gAAAAABpM0Yj-...=',
+          },
+        ],
+        'usage': {
+          'input_tokens': 139,
+          'output_tokens': 438,
+          'total_tokens': 577,
+        },
+      };
+      final resource = CompactResource.fromJson(json);
+      expect(resource.id, 'resp_001');
+      expect(resource.object, 'response.compaction');
+      expect(resource.createdAt, 1764967971);
+      expect(resource.output, hasLength(2));
+      expect(resource.output[0], isA<MessageOutputItem>());
+      expect(resource.output[1], isA<CompactionOutputItem>());
+      expect(resource.usage.totalTokens, 577);
+    });
+  });
+
+  group('CompactResponseRequest', () {
+    test('serializes with only required fields', () {
+      const request = CompactResponseRequest(model: 'gpt-5');
+      expect(request.toJson(), {'model': 'gpt-5'});
+    });
+
+    test('serializes with all fields', () {
+      final request = CompactResponseRequest(
+        model: 'gpt-5',
+        input: ResponseInput.text('summarize this'),
+        instructions: 'be concise',
+        previousResponseId: 'resp_prev',
+        promptCacheKey: 'cache-key',
+      );
+      expect(request.toJson(), {
+        'model': 'gpt-5',
+        'input': 'summarize this',
+        'instructions': 'be concise',
+        'previous_response_id': 'resp_prev',
+        'prompt_cache_key': 'cache-key',
+      });
+    });
+
+    test('round-trips through JSON', () {
+      final request = CompactResponseRequest(
+        model: 'gpt-5',
+        input: ResponseInput.items(const [
+          CompactionItem(id: 'cmp_prev', encryptedContent: 'enc'),
+        ]),
+        previousResponseId: 'resp_prev',
+      );
+      final restored = CompactResponseRequest.fromJson(request.toJson());
+      expect(restored, equals(request));
+    });
+  });
+}

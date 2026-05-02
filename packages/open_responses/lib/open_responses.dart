@@ -88,6 +88,7 @@ export 'src/models/metadata/function_call_status.dart';
 export 'src/models/metadata/image_detail.dart';
 export 'src/models/metadata/include.dart';
 export 'src/models/metadata/item_status.dart';
+export 'src/models/metadata/message_phase.dart';
 export 'src/models/metadata/message_role.dart';
 export 'src/models/metadata/reasoning_effort.dart';
 export 'src/models/metadata/reasoning_summary.dart';
@@ -97,12 +98,14 @@ export 'src/models/metadata/truncation.dart';
 export 'src/models/metadata/verbosity.dart';
 
 // Models - Request
+export 'src/models/request/compact_response_request.dart';
 export 'src/models/request/create_response_request.dart';
 export 'src/models/request/reasoning_config.dart';
 export 'src/models/request/stream_options.dart';
 export 'src/models/request/text_config.dart';
 
 // Models - Response
+export 'src/models/response/compact_resource.dart';
 export 'src/models/response/error_payload.dart';
 export 'src/models/response/incomplete_details.dart';
 export 'src/models/response/response_resource.dart';

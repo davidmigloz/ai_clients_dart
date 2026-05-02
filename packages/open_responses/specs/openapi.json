@@ -119,6 +119,14 @@
               }
             ]
           },
+          "phase": {
+            "description": "Labels an `assistant` message as intermediate commentary (`commentary`) or the final answer (`final_answer`). For models like `gpt-5.3-codex` and beyond, when sending follow-up requests, preserve and resend phase on all assistant messages. Omitting it can degrade performance. Not used for user messages.",
+            "enum": [
+              "commentary",
+              "final_answer"
+            ],
+            "type": "string"
+          },
           "role": {
             "default": "assistant",
             "description": "The role of the message author. Always `assistant`.",
@@ -152,6 +160,226 @@
           "role",
           "content"
         ],
+        "type": "object"
+      },
+      "CompactResource": {
+        "example": {
+          "created_at": 1764967971,
+          "id": "resp_001",
+          "object": "response.compaction",
+          "output": [
+            {
+              "content": [
+                {
+                  "text": "Create a simple landing page for a dog petting cafe.",
+                  "type": "input_text"
+                }
+              ],
+              "id": "msg_000",
+              "role": "user",
+              "status": "completed",
+              "type": "message"
+            },
+            {
+              "encrypted_content": "gAAAAABpM0Yj-...=",
+              "id": "cmp_001",
+              "type": "compaction"
+            }
+          ],
+          "usage": {
+            "input_tokens": 139,
+            "input_tokens_details": {
+              "cached_tokens": 0
+            },
+            "output_tokens": 438,
+            "output_tokens_details": {
+              "reasoning_tokens": 64
+            },
+            "total_tokens": 577
+          }
+        },
+        "properties": {
+          "created_at": {
+            "description": "Unix timestamp (in seconds) when the compacted conversation was created.",
+            "type": "integer"
+          },
+          "id": {
+            "description": "The unique identifier for the compacted response.",
+            "type": "string"
+          },
+          "object": {
+            "default": "response.compaction",
+            "description": "The object type. Always `response.compaction`.",
+            "enum": [
+              "response.compaction"
+            ],
+            "type": "string"
+          },
+          "output": {
+            "description": "The compacted list of output items.",
+            "items": {
+              "$ref": "#/components/schemas/ItemField"
+            },
+            "type": "array"
+          },
+          "usage": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Usage"
+              },
+              {
+                "description": "Token accounting for the compaction pass, including cached, reasoning, and total tokens."
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "object",
+          "output",
+          "created_at",
+          "usage"
+        ],
+        "title": "The compacted response object",
+        "type": "object"
+      },
+      "CompactResponseMethodPublicBody": {
+        "properties": {
+          "input": {
+            "anyOf": [
+              {
+                "description": "Text, image, or file inputs to the model, used to generate a response",
+                "oneOf": [
+                  {
+                    "description": "A text input to the model, equivalent to a text input with the `user` role.",
+                    "maxLength": 10485760,
+                    "type": "string"
+                  },
+                  {
+                    "description": "A list of one or many input items to the model, containing different content types.",
+                    "items": {
+                      "$ref": "#/components/schemas/ItemParam"
+                    },
+                    "type": "array"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "instructions": {
+            "anyOf": [
+              {
+                "description": "A system (or developer) message inserted into the model's context.\nWhen used along with `previous_response_id`, the instructions from a previous response will not be carried over to the next response. This makes it simple to swap out system (or developer) messages in new responses.",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "model": {
+            "description": "Model ID used to generate the response, like `gpt-5` or `o3`. OpenAI offers a wide range of models with different capabilities, performance characteristics, and price points. Refer to the [model guide](/docs/models) to browse and compare available models.",
+            "type": "string"
+          },
+          "previous_response_id": {
+            "anyOf": [
+              {
+                "description": "The unique ID of the previous response to the model. Use this to create multi-turn conversations. Learn more about [conversation state](/docs/guides/conversation-state). Cannot be used in conjunction with `conversation`.",
+                "example": "resp_123",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "prompt_cache_key": {
+            "anyOf": [
+              {
+                "description": "A key to use when reading from or writing to the prompt cache.",
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "model"
+        ],
+        "type": "object"
+      },
+      "CompactionBody": {
+        "description": "A compaction item generated by the [`v1/responses/compact` API](/docs/api-reference/responses/compact).",
+        "properties": {
+          "created_by": {
+            "description": "The identifier of the actor that created the item.",
+            "type": "string"
+          },
+          "encrypted_content": {
+            "description": "The encrypted content that was produced by compaction.",
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique ID of the compaction item.",
+            "type": "string"
+          },
+          "type": {
+            "default": "compaction",
+            "description": "The type of the item. Always `compaction`.",
+            "enum": [
+              "compaction"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "encrypted_content"
+        ],
+        "title": "Compaction item",
+        "type": "object"
+      },
+      "CompactionSummaryItemParam": {
+        "description": "A compaction item generated by the [`v1/responses/compact` API](/docs/api-reference/responses/compact).",
+        "properties": {
+          "encrypted_content": {
+            "description": "The encrypted content of the compaction summary.",
+            "maxLength": 10485760,
+            "type": "string"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "description": "The ID of the compaction item.",
+                "example": "cmp_123",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "default": "compaction",
+            "description": "The type of the item. Always `compaction`.",
+            "enum": [
+              "compaction"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "encrypted_content"
+        ],
+        "title": "Compaction item",
         "type": "object"
       },
       "CreateResponseBody": {
@@ -1395,6 +1623,9 @@
           },
           {
             "$ref": "#/components/schemas/ReasoningBody"
+          },
+          {
+            "$ref": "#/components/schemas/CompactionBody"
           }
         ]
       },
@@ -1408,6 +1639,9 @@
           },
           {
             "$ref": "#/components/schemas/ReasoningItemParam"
+          },
+          {
+            "$ref": "#/components/schemas/CompactionSummaryItemParam"
           },
           {
             "$ref": "#/components/schemas/UserMessageItemParam"
@@ -1630,6 +1864,14 @@
           },
           "id": {
             "description": "The unique ID of the message.",
+            "type": "string"
+          },
+          "phase": {
+            "description": "Labels an `assistant` message as intermediate commentary (`commentary`) or the final answer (`final_answer`). For models like `gpt-5.3-codex` and beyond, when sending follow-up requests, preserve and resend phase on all assistant messages. Omitting it can degrade performance. Not used for user messages.",
+            "enum": [
+              "commentary",
+              "final_answer"
+            ],
             "type": "string"
           },
           "role": {
@@ -4378,6 +4620,35 @@
         "errorMessage": {
           "$ref": "#/components/schemas/WebSocketErrorEvent"
         }
+      }
+    },
+    "/responses/compact": {
+      "post": {
+        "description": "Compact a conversation. Returns a compacted response object.",
+        "operationId": "compactResponse",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompactResponseMethodPublicBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompactResource"
+                }
+              }
+            },
+            "description": "Success"
+          }
+        },
+        "summary": "Compact a response"
       }
     }
   },

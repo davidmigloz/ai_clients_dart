@@ -4,6 +4,7 @@ import '../common/equality_helpers.dart';
 import '../content/output_content.dart';
 import '../content/reasoning_summary_content.dart';
 import '../metadata/item_status.dart';
+import '../metadata/message_phase.dart';
 import '../metadata/message_role.dart';
 import 'item.dart';
 
@@ -21,6 +22,7 @@ sealed class OutputItem {
       'message' => MessageOutputItem.fromJson(json),
       'function_call' => FunctionCallOutputItemResponse.fromJson(json),
       'reasoning' => ReasoningItem.fromJson(json),
+      'compaction' => CompactionOutputItem.fromJson(json),
       _ => throw FormatException('Unknown OutputItem type: $type'),
     };
   }
@@ -44,12 +46,20 @@ class MessageOutputItem extends OutputItem {
   /// Item status.
   final ItemStatus? status;
 
+  /// Labels this assistant message as intermediate commentary or the final
+  /// answer.
+  ///
+  /// Preserve and resend on follow-up requests for compatible models — see
+  /// [MessagePhase] for details. Not used for non-assistant messages.
+  final MessagePhase? phase;
+
   /// Creates a [MessageOutputItem].
   const MessageOutputItem({
     required this.id,
     required this.role,
     required this.content,
     this.status,
+    this.phase,
   });
 
   /// Creates a [MessageOutputItem] from JSON.
@@ -62,6 +72,9 @@ class MessageOutputItem extends OutputItem {
           .toList(),
       status: json['status'] != null
           ? ItemStatus.fromJson(json['status'] as String)
+          : null,
+      phase: json['phase'] != null
+          ? MessagePhase.fromJson(json['phase'] as String)
           : null,
     );
   }
@@ -84,6 +97,7 @@ class MessageOutputItem extends OutputItem {
     'role': role.toJson(),
     'content': content.map((e) => e.toJson()).toList(),
     if (status != null) 'status': status!.toJson(),
+    if (phase != null) 'phase': phase!.toJson(),
   };
 
   @override
@@ -94,14 +108,16 @@ class MessageOutputItem extends OutputItem {
           id == other.id &&
           role == other.role &&
           listsEqual(content, other.content) &&
-          status == other.status;
+          status == other.status &&
+          phase == other.phase;
 
   @override
-  int get hashCode => Object.hash(id, role, Object.hashAll(content), status);
+  int get hashCode =>
+      Object.hash(id, role, Object.hashAll(content), status, phase);
 
   @override
   String toString() =>
-      'MessageOutputItem(id: $id, role: $role, content: $content, status: $status)';
+      'MessageOutputItem(id: $id, role: $role, content: $content, status: $status, phase: $phase)';
 }
 
 /// A function call output item in the response.
@@ -258,4 +274,65 @@ class ReasoningItem extends OutputItem {
   @override
   String toString() =>
       'ReasoningItem(id: $id, content: $content, summary: $summary, encryptedContent: $encryptedContent)';
+}
+
+/// A compaction item produced by the `/responses/compact` endpoint.
+///
+/// Carries the encrypted summary that can be replayed in a new request via
+/// [CompactionItem] to preserve previous turns without resending the full
+/// transcript.
+@immutable
+class CompactionOutputItem extends OutputItem {
+  /// Unique identifier of the compaction item.
+  final String id;
+
+  /// The encrypted content produced by compaction.
+  final String encryptedContent;
+
+  /// The identifier of the actor that created the item.
+  final String? createdBy;
+
+  /// Creates a [CompactionOutputItem].
+  const CompactionOutputItem({
+    required this.id,
+    required this.encryptedContent,
+    this.createdBy,
+  });
+
+  /// Creates a [CompactionOutputItem] from JSON.
+  factory CompactionOutputItem.fromJson(Map<String, dynamic> json) {
+    return CompactionOutputItem(
+      id: json['id'] as String,
+      encryptedContent: json['encrypted_content'] as String,
+      createdBy: json['created_by'] as String?,
+    );
+  }
+
+  /// Converts to a [CompactionItem] for use as input in subsequent requests.
+  CompactionItem toCompactionItem() =>
+      CompactionItem(id: id, encryptedContent: encryptedContent);
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'compaction',
+    'id': id,
+    'encrypted_content': encryptedContent,
+    if (createdBy != null) 'created_by': createdBy,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CompactionOutputItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          encryptedContent == other.encryptedContent &&
+          createdBy == other.createdBy;
+
+  @override
+  int get hashCode => Object.hash(id, encryptedContent, createdBy);
+
+  @override
+  String toString() =>
+      'CompactionOutputItem(id: $id, encryptedContent: [${encryptedContent.length} chars], createdBy: $createdBy)';
 }
