@@ -102,12 +102,21 @@ class MessageOutputItem extends OutputItem {
     );
   }
 
-  /// Combined text from all [OutputTextContent] parts.
+  /// Combined text from all text content parts in this message.
   ///
-  /// Returns `null` if there are no text content parts.
+  /// Includes both [OutputTextContent] (model output) and [InputTextContent]
+  /// (echoed user input in stored or compacted history). Returns `null` if
+  /// there are no text content parts.
   String? get text {
-    final texts = content.whereType<OutputTextContent>().map((c) => c.text);
-    return texts.isEmpty ? null : texts.join();
+    final buffer = StringBuffer();
+    for (final part in content) {
+      if (part is OutputTextContent) {
+        buffer.write(part.text);
+      } else if (part is InputTextContent) {
+        buffer.write(part.text);
+      }
+    }
+    return buffer.isEmpty ? null : buffer.toString();
   }
 
   /// Whether any content part is a refusal.

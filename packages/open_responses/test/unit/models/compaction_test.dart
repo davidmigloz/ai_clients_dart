@@ -257,6 +257,39 @@ void main() {
       expect(item.content.first, isA<OutputTextContent>());
       expect(item.text, 'Hi');
     });
+
+    test('text getter includes input_text from user messages', () {
+      const item = MessageOutputItem(
+        id: 'msg_user',
+        role: MessageRole.user,
+        content: [InputTextContent(text: 'Hello world')],
+        status: ItemStatus.completed,
+      );
+      expect(item.text, 'Hello world');
+    });
+
+    test('text getter combines input_text and output_text parts', () {
+      const item = MessageOutputItem(
+        id: 'msg_mixed',
+        role: MessageRole.user,
+        content: [
+          InputTextContent(text: 'in '),
+          OutputTextContent(text: 'out'),
+        ],
+        status: ItemStatus.completed,
+      );
+      expect(item.text, 'in out');
+    });
+
+    test('text getter returns null when no text parts exist', () {
+      const item = MessageOutputItem(
+        id: 'msg_image_only',
+        role: MessageRole.user,
+        content: [InputImageContent.url('https://example.com/img.png')],
+        status: ItemStatus.completed,
+      );
+      expect(item.text, isNull);
+    });
   });
 
   group('FunctionCallOutputResponseItem', () {
