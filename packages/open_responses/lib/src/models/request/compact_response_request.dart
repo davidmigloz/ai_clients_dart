@@ -26,8 +26,6 @@ class CompactResponseRequest {
   final String? instructions;
 
   /// ID of a previous response for multi-turn conversation.
-  ///
-  /// Cannot be used in conjunction with `conversation`.
   final String? previousResponseId;
 
   /// A key to use when reading from or writing to the prompt cache.
