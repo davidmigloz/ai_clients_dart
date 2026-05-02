@@ -1,6 +1,8 @@
 import 'package:meta/meta.dart';
 
 import '../common/equality_helpers.dart';
+import '../content/input_content.dart';
+import '../content/message_content_part.dart';
 import '../content/output_content.dart';
 import '../content/reasoning_summary_content.dart';
 import '../metadata/function_call_status.dart';
@@ -8,6 +10,19 @@ import '../metadata/item_status.dart';
 import '../metadata/message_phase.dart';
 import '../metadata/message_role.dart';
 import 'item.dart';
+
+/// Parses a single content part of a response-side `Message`.
+///
+/// Dispatches to [InputContent] for `input_*` types and to [OutputContent]
+/// for everything else (`output_text`, `reasoning_text`, `summary_text`,
+/// `refusal`).
+MessageContentPart _parseMessageContentPart(Map<String, dynamic> json) {
+  final type = json['type'] as String;
+  if (type.startsWith('input_')) {
+    return InputContent.fromJson(json);
+  }
+  return OutputContent.fromJson(json);
+}
 
 /// Output item from a response.
 ///
@@ -43,7 +58,13 @@ class MessageOutputItem extends OutputItem {
   final MessageRole role;
 
   /// The content of the message.
-  final List<OutputContent> content;
+  ///
+  /// Per the spec's `Message.content` union, response messages may carry both
+  /// [InputContent] parts (e.g. `input_text` for echoed-back user messages in
+  /// stored or compacted history) and [OutputContent] parts (e.g.
+  /// `output_text` for model responses). Use type guards on the leaf types to
+  /// inspect specific content kinds.
+  final List<MessageContentPart> content;
 
   /// Item status.
   final ItemStatus? status;
@@ -70,7 +91,7 @@ class MessageOutputItem extends OutputItem {
       id: json['id'] as String,
       role: MessageRole.fromJson(json['role'] as String),
       content: (json['content'] as List)
-          .map((e) => OutputContent.fromJson(e as Map<String, dynamic>))
+          .map((e) => _parseMessageContentPart(e as Map<String, dynamic>))
           .toList(),
       status: json['status'] != null
           ? ItemStatus.fromJson(json['status'] as String)

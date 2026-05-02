@@ -2,9 +2,10 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import '../metadata/image_detail.dart';
+import 'message_content_part.dart';
 
 /// Input content for messages.
-sealed class InputContent {
+sealed class InputContent implements MessageContentPart {
   /// Creates an [InputContent].
   const InputContent();
 
@@ -56,6 +57,7 @@ sealed class InputContent {
   }
 
   /// Converts to JSON.
+  @override
   Map<String, dynamic> toJson();
 }
 

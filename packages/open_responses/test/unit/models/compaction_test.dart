@@ -143,7 +143,9 @@ void main() {
   });
 
   group('CompactResource', () {
-    test('parses example payload', () {
+    test('parses example payload (matches CompactResource spec example)', () {
+      // Matches the OpenAPI example for CompactResource: a user message with
+      // input_text content alongside a compaction output item.
       final json = {
         'id': 'resp_001',
         'object': 'response.compaction',
@@ -154,7 +156,10 @@ void main() {
             'id': 'msg_000',
             'role': 'user',
             'content': [
-              {'type': 'output_text', 'text': 'Hello'},
+              {
+                'type': 'input_text',
+                'text': 'Create a simple landing page for a dog petting cafe.',
+              },
             ],
             'status': 'completed',
           },
@@ -176,8 +181,81 @@ void main() {
       expect(resource.createdAt, 1764967971);
       expect(resource.output, hasLength(2));
       expect(resource.output[0], isA<MessageOutputItem>());
+      final msg = resource.output[0] as MessageOutputItem;
+      expect(msg.content, hasLength(1));
+      expect(msg.content.first, isA<InputTextContent>());
       expect(resource.output[1], isA<CompactionOutputItem>());
       expect(resource.usage.totalTokens, 577);
+    });
+
+    test('round-trips a payload mixing input and output content parts', () {
+      const original = CompactResource(
+        id: 'resp_002',
+        createdAt: 1764967971,
+        output: [
+          MessageOutputItem(
+            id: 'msg_user',
+            role: MessageRole.user,
+            content: [InputTextContent(text: 'Hello')],
+            status: ItemStatus.completed,
+          ),
+          MessageOutputItem(
+            id: 'msg_assistant',
+            role: MessageRole.assistant,
+            content: [OutputTextContent(text: 'Hi there')],
+            status: ItemStatus.completed,
+          ),
+        ],
+        usage: Usage(inputTokens: 1, outputTokens: 1, totalTokens: 2),
+      );
+      expect(CompactResource.fromJson(original.toJson()), equals(original));
+    });
+  });
+
+  group('MessageOutputItem with mixed content', () {
+    test('parses input_text in user-role message', () {
+      final json = {
+        'type': 'message',
+        'id': 'msg_user',
+        'role': 'user',
+        'content': [
+          {'type': 'input_text', 'text': 'Hello'},
+        ],
+        'status': 'completed',
+      };
+      final item = OutputItem.fromJson(json) as MessageOutputItem;
+      expect(item.role, MessageRole.user);
+      expect(item.content.first, isA<InputTextContent>());
+      expect((item.content.first as InputTextContent).text, 'Hello');
+    });
+
+    test('parses input_image in user-role message', () {
+      final json = {
+        'type': 'message',
+        'id': 'msg_user',
+        'role': 'user',
+        'content': [
+          {'type': 'input_image', 'image_url': 'https://example.com/img.png'},
+        ],
+        'status': 'completed',
+      };
+      final item = OutputItem.fromJson(json) as MessageOutputItem;
+      expect(item.content.first, isA<InputImageContent>());
+    });
+
+    test('parses output_text in assistant-role message', () {
+      final json = {
+        'type': 'message',
+        'id': 'msg_asst',
+        'role': 'assistant',
+        'content': [
+          {'type': 'output_text', 'text': 'Hi'},
+        ],
+        'status': 'completed',
+      };
+      final item = OutputItem.fromJson(json) as MessageOutputItem;
+      expect(item.content.first, isA<OutputTextContent>());
+      expect(item.text, 'Hi');
     });
   });
 

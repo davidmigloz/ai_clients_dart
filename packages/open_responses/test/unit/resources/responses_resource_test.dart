@@ -614,11 +614,25 @@ void main() {
     });
 
     group('compact()', () {
+      // Matches the shape of the OpenAPI CompactResource example: a user
+      // message with input_text content alongside the compaction item.
       Map<String, dynamic> compactResponseFixture() => {
         'id': 'resp_compact_1',
         'object': 'response.compaction',
         'created_at': 1764967971,
         'output': [
+          {
+            'type': 'message',
+            'id': 'msg_000',
+            'role': 'user',
+            'status': 'completed',
+            'content': [
+              {
+                'type': 'input_text',
+                'text': 'Create a simple landing page for a dog petting cafe.',
+              },
+            ],
+          },
           {
             'type': 'compaction',
             'id': 'cmp_001',
@@ -648,7 +662,7 @@ void main() {
         expect(request.url.path, '/v1/responses/compact');
       });
 
-      test('returns parsed CompactResource', () async {
+      test('returns parsed CompactResource with mixed output items', () async {
         mockClient.queueJsonResponse(compactResponseFixture());
 
         final resource = await client.responses.compact(
@@ -657,8 +671,12 @@ void main() {
 
         expect(resource.id, 'resp_compact_1');
         expect(resource.object, 'response.compaction');
-        expect(resource.output, hasLength(1));
-        expect(resource.output.first, isA<CompactionOutputItem>());
+        expect(resource.output, hasLength(2));
+        expect(resource.output[0], isA<MessageOutputItem>());
+        final msg = resource.output[0] as MessageOutputItem;
+        expect(msg.role, MessageRole.user);
+        expect(msg.content.first, isA<InputTextContent>());
+        expect(resource.output[1], isA<CompactionOutputItem>());
         expect(resource.usage.totalTokens, 577);
       });
     });

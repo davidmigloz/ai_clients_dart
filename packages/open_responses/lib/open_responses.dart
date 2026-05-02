@@ -76,6 +76,7 @@ export 'src/models/common/equality_helpers.dart';
 export 'src/models/content/annotation.dart';
 export 'src/models/content/input_content.dart';
 export 'src/models/content/logprob.dart';
+export 'src/models/content/message_content_part.dart';
 export 'src/models/content/output_content.dart';
 export 'src/models/content/reasoning_summary_content.dart';
 
