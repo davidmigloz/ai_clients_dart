@@ -1,3 +1,9 @@
+## 6.3.0
+
+Syncs `googleai_dart` to the latest Gemini v1beta OpenAPI spec and adds an optional `mediaId` field to `RetrievedContext`. The Gemini API now returns a `mediaId` resource name (`fileSearchStores/{store_id}/media/{blob_id}`) on `RetrievedContext` chunks for multimodal file-search results, letting callers fetch the underlying blob from the `FileSearchStore`. The field is fully integrated into `fromJson` / `toJson` / `copyWith` / `toString`.
+
+- **FEAT**: Add mediaId to RetrievedContext ([#212](https://github.com/davidmigloz/ai_clients_dart/issues/212)). ([17a668db](https://github.com/davidmigloz/ai_clients_dart/commit/17a668dbd23cff3ada4fc3567eff754f6d1bd8eb))
+
 ## 6.2.0
 
 Adds support for the latest Gemini API surface. Introduces a new `EmbedContentConfig` schema that consolidates embedding request parameters — with new `autoTruncate`, `documentOcr`, and `audioTrackExtraction` fields — and deprecates the equivalent top-level `taskType`, `title`, and `outputDimensionality` fields on `EmbedContentRequest`. On the Interactions API, adds `collaborativePlanning` and `visualization` fields to `DeepResearchAgentConfig`, exposing the [next-generation Gemini Deep Research](https://blog.google/innovation-and-ai/models-and-research/gemini-models/next-generation-gemini-deep-research/) human-in-the-loop planning and inline visualization capabilities.

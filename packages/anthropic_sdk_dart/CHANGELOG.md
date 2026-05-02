@@ -1,3 +1,9 @@
+## 2.2.0
+
+Adds the [Memory Stores beta API](https://docs.claude.com/en/docs/build-with-claude/memory-stores) — 14 new endpoints exposed under `client.memoryStores` with child accessors for memories and memory versions. Memory Stores let you persist named memories that can be mounted into agent sessions, with append-only versioning, content-SHA preconditions, view modes (`basic`/`full`), and per-version redaction. Surfaces the full data model (`MemoryStore`, `Memory`, `MemoryVersion`, sealed `MemoryListItem`/`MemoryPrecondition`, `ManagedAgentActor`), three new enums, patch-style update params with null-as-delete metadata semantics, and three memory-specific error classes. `SessionResource` is extended with a new `memory_store` variant for mounting stores into agent sessions.
+
+- **FEAT**: Add Memory Stores beta API ([#207](https://github.com/davidmigloz/ai_clients_dart/issues/207)). ([3e8d88d3](https://github.com/davidmigloz/ai_clients_dart/commit/3e8d88d3d9985d32ae6df6303bc2b786c5d2b781))
+
 ## 2.1.0
 
 Adds support for [Claude Opus 4.7](https://www.anthropic.com/news/claude-opus-4-7) and refreshes the package to the latest Anthropic OpenAPI spec. Introduces the User Profiles beta API — 5 endpoints exposed as `client.userProfiles` for registering end-user profiles with metadata, per-feature trust grants, and short-lived enrollment URLs. Also extends `EffortLevel` with `xhigh`, adds `TokenTaskBudget` and `OutputConfig.taskBudget` for client-side compaction budgets, wires optional `encrypted_content` through compaction blocks, and adds `MessageCreateRequest.userProfileId` for end-user profile routing.

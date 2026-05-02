@@ -1,3 +1,15 @@
+## 5.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Adds support for [GPT-5.5](https://openai.com/index/introducing-gpt-5-5/) (`gpt-5.5` and the `gpt-5.5-2026-04-23` snapshot) across the `ChatModel` enum and all examples, and exposes the new `prompt_cache_retention` field on the `/v1/responses/{response_id}/compact` endpoint via `CompactResponseRequest`. Also fixes a `StateError` that affected non-streaming requests using `abortTrigger` (#209). **Breaking:** `FunctionCallStatus` is realigned to match the OpenAI spec (`inProgress`/`completed`/`incomplete`) — the non-spec `failed` value is removed (#208). The breaking surface is intentionally small: any code that referenced `FunctionCallStatus.failed` was already rejected by the API at runtime, so the practical impact is limited — but we follow strict semver and ship the enum change as a major bump regardless.
+
+- **BREAKING** **FIX**: Align FunctionCallStatus values with OpenAI spec ([#217](https://github.com/davidmigloz/ai_clients_dart/issues/217)). ([70a02fbd](https://github.com/davidmigloz/ai_clients_dart/commit/70a02fbd5308b3d68ddd6f844728703b1021aa3b))
+- **FEAT**: Add prompt_cache_retention to compact endpoint ([#215](https://github.com/davidmigloz/ai_clients_dart/issues/215)). ([57d042c6](https://github.com/davidmigloz/ai_clients_dart/commit/57d042c6403c9cbabcfc1f7d0430464404158789))
+- **FEAT**: Add GPT-5.5 model support ([#206](https://github.com/davidmigloz/ai_clients_dart/issues/206)). ([ca239826](https://github.com/davidmigloz/ai_clients_dart/commit/ca239826714808974c114738f96852ca8802bb58))
+- **FIX**: Avoid StateError when non-streaming requests use abortTrigger ([#216](https://github.com/davidmigloz/ai_clients_dart/issues/216)). ([9228f357](https://github.com/davidmigloz/ai_clients_dart/commit/9228f357227c14a854ef26faa650b0dc4f34004b))
+
 ## 4.3.0
 
 Adds support for [GPT Image 2](https://openai.com/index/introducing-chatgpt-images-2-0/#textmode) (`gpt-image-2`) — surfacing the full GPT-image parameter surface on `ImageGenerationRequest` and `ImageEditRequest` (background, moderation, output format/compression, streaming, input fidelity), expanded `ImageQuality` and `ImageSize` enums, token-based usage metadata on `ImageResponse`, and a new `ImageModels` constants class. Also expands the `ReasoningEffort` enum with `none`, `minimal`, and `xhigh` to match the latest OpenAI spec and the per-model support matrix for `gpt-5.1`, `gpt-5-pro`, and models after `gpt-5.1-codex-max`.

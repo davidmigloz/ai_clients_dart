@@ -1,6 +1,6 @@
 name: googleai_dart
 description: Unofficial Dart client for Google AI Gemini and Vertex AI Gemini REST APIs plus Live API WebSocket sessions.
-version: 6.2.0
+version: 6.3.0
 repository: https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/googleai_dart
 issue_tracker: https://github.com/davidmigloz/ai_clients_dart/issues?q=label:p:googleai_dart
 homepage: https://github.com/davidmigloz/ai_clients_dart

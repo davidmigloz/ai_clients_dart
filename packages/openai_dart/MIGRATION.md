@@ -6,6 +6,44 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v4.x to v5.0.0
+
+v5.0.0 realigns `FunctionCallStatus` with the OpenAI spec. The non-spec `failed` value is removed and replaced with the spec-correct `inProgress` and `incomplete` variants. Code that referenced `FunctionCallStatus.failed` was already broken at runtime — the API rejected the wire value `'failed'` with HTTP 400 — so the practical migration is to send `incomplete` and convey failure detail in the output payload itself.
+
+### 1) `FunctionCallStatus` Enum Realigned to Spec
+
+The enum had previously been hand-coded with an incorrect set of variants (`completed`, `failed`). The OpenAI spec defines three values: `in_progress`, `completed`, `incomplete`.
+
+```dart
+// Before (v4.x) — `failed` was rejected by the API.
+enum FunctionCallStatus { unknown, completed, failed }
+
+// After (v5.0.0) — matches the spec.
+enum FunctionCallStatus { unknown, inProgress, completed, incomplete }
+```
+
+For call sites that previously sent `FunctionCallStatus.failed`, switch to `FunctionCallStatus.incomplete` and put failure details in the output payload:
+
+```dart
+// Before — server rejected this with HTTP 400.
+FunctionCallOutputItem.string(
+  callId: id,
+  output: 'TOOL_CALL_ERROR: $message',
+  status: FunctionCallStatus.failed,
+);
+
+// After
+FunctionCallOutputItem.string(
+  callId: id,
+  output: 'TOOL_CALL_ERROR: $message',
+  status: FunctionCallStatus.incomplete,
+);
+```
+
+`FunctionCallStatus.completed` is unchanged. The serializer's `unknown` fallback still covers any future server-side values.
+
+---
+
 ## Migrating from v3.x to v4.0.0
 
 v4.0.0 adds new `ContentPart` sealed variants and changes `InputFileContent.data()` to require a `mediaType` parameter for proper data URL construction.

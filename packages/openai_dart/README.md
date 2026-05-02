@@ -62,7 +62,7 @@ See [API Coverage](#api-coverage) for the full coverage table.
 
 ```yaml
 dependencies:
-  openai_dart: ^4.3.0
+  openai_dart: ^5.0.0
 ```
 
 ```dart

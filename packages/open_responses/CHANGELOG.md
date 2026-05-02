@@ -1,3 +1,12 @@
+## 0.4.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Tracks [OpenResponses spec v2.3.0](https://www.openresponses.org/) ([openresponses#68](https://github.com/openresponses/openresponses/pull/68)) by adding response compaction, the assistant message phase, and broader output-item coverage. Adds `POST /responses/compact` via `ResponsesResource.compact()` along with new `CompactResource`, `CompactResponseRequest`, `CompactionItem` (input variant), and `CompactionOutputItem` (output variant) models. Adds `MessagePhase` (`commentary`/`final_answer`) with a new optional `phase` field on `AssistantMessageItem` and `MessageOutputItem` — required for follow-up requests on `gpt-5.3-codex` and similar models. Also adds `FunctionCallOutputResponseItem` so `OutputItem` covers all members of the spec's `ItemField` union, and supports `input_*` content parts in `MessageOutputItem.content` so echoed-back user messages in stored or compacted history parse correctly. **Breaking:** `MessageOutputItem.content` is retyped from `List<OutputContent>` to `List<MessageContentPart>` — type guards on leaf classes still narrow correctly, but callers that declare the intermediate list type must migrate.
+
+- **BREAKING** **FEAT**: Add response compaction and assistant phase ([#214](https://github.com/davidmigloz/ai_clients_dart/issues/214)). ([af4bd2fe](https://github.com/davidmigloz/ai_clients_dart/commit/af4bd2fe1d177ce8705297e8be4fd6201c146435))
+
 ## 0.3.2
 
 Adds support for [WebSocket mode](https://developers.openai.com/api/docs/guides/websocket-mode) in the Responses API via new `WebSocketResponseCreateEvent` and `WebSocketErrorEvent` types. The request wrapper composes an existing `CreateResponseRequest` with the required `response.create` discriminator and automatically strips the three HTTP-only fields (`background`, `stream`, `stream_options`) that must not be sent over WebSocket. Promotes the bundled OpenResponses spec to v2.3.0 ([openresponses#71](https://github.com/openresponses/openresponses/pull/71)).
