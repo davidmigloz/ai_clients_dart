@@ -128,6 +128,20 @@
         "critical"
       ]
     },
+    "CompactResponseMethodPublicBody": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CompactResponseRequest",
+      "file": "lib/src/models/request/compact_response_request.dart",
+      "schema": "CompactResponseMethodPublicBody"
+    },
+    "CompactResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CompactResource",
+      "file": "lib/src/models/response/compact_resource.dart",
+      "schema": "CompactResource"
+    },
     "TextParam": {
       "spec": "main",
       "kind": "object",
@@ -655,7 +669,8 @@
           "ReasoningItemParam": "reasoning",
           "FunctionCallItemParam": "function_call",
           "FunctionCallOutputItemParam": "function_call_output",
-          "ItemReferenceParam": "item_reference"
+          "ItemReferenceParam": "item_reference",
+          "CompactionSummaryItemParam": "compaction"
         }
       },
       "excluded_properties": [
@@ -749,6 +764,69 @@
       "schema": "ReasoningItemParam",
       "parent": "Item",
       "excluded_properties": ["content"]
+    },
+    "CompactionSummaryItemParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "CompactionItem",
+      "file": "lib/src/models/items/item.dart",
+      "schema": "CompactionSummaryItemParam",
+      "parent": "Item"
+    },
+    "ItemParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "Item",
+      "file": "lib/src/models/items/item.dart",
+      "schema": "ItemParam",
+      "discriminator": {
+        "field": "type",
+        "mapping": {}
+      }
+    },
+    "ItemField": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "OutputItem",
+      "file": "lib/src/models/items/output_item.dart",
+      "schema": "ItemField",
+      "tags": ["acknowledged"],
+      "note": "ItemField is the response-side union (Message, FunctionCall, FunctionCallOutput, ReasoningBody, CompactionBody) used by ResponseResource.output and CompactResource.output. Mapped to the OutputItem sealed hierarchy."
+    },
+    "Message": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "MessageOutputItem",
+      "file": "lib/src/models/items/output_item.dart",
+      "schema": "Message",
+      "tags": ["acknowledged"],
+      "note": "Message is the response-side message item. Mapped to the existing MessageOutputItem under OutputItem."
+    },
+    "CompactionBody": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "CompactionOutputItem",
+      "file": "lib/src/models/items/output_item.dart",
+      "schema": "CompactionBody",
+      "parent": "OutputItem",
+      "tags": ["acknowledged"],
+      "note": "Mapped as OutputItem variant. The spec 'type' property is a constant discriminator emitted by toJson, not stored as a Dart field."
+    },
+    "OutputItem:CompactionOutputItem": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "CompactionOutputItem",
+      "file": "lib/src/models/items/output_item.dart",
+      "schema": null,
+      "parent": "OutputItem"
+    },
+    "OutputItem:FunctionCallOutputResponseItem": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "FunctionCallOutputResponseItem",
+      "file": "lib/src/models/items/output_item.dart",
+      "schema": null,
+      "parent": "OutputItem"
     },
     "OutputItem": {
       "spec": "main",

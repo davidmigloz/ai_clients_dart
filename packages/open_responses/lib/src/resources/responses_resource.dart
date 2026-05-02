@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../client/response_stream.dart';
+import '../models/request/compact_response_request.dart';
 import '../models/request/create_response_request.dart';
+import '../models/response/compact_resource.dart';
 import '../models/response/response_resource.dart';
 import '../models/streaming/streaming_event.dart';
 import '../utils/sse_parser.dart';
@@ -103,5 +105,31 @@ class ResponsesResource extends ResourceBase with StreamingResource {
     Future<void>? abortTrigger,
   }) {
     return ResponseStream(createStream(request, abortTrigger: abortTrigger));
+  }
+
+  /// Compacts a response.
+  ///
+  /// Sends [request] to `POST /responses/compact` and returns the compacted
+  /// response resource. The optional [abortTrigger] allows canceling the
+  /// request.
+  Future<CompactResource> compact(
+    CompactResponseRequest request, {
+    Future<void>? abortTrigger,
+  }) async {
+    ensureNotClosed?.call();
+
+    final url = requestBuilder.buildUrl('/responses/compact');
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+
+    final response = await interceptorChain.execute(
+      httpRequest,
+      abortTrigger: abortTrigger,
+    );
+    return CompactResource.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }

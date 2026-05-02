@@ -612,5 +612,73 @@ void main() {
         );
       });
     });
+
+    group('compact()', () {
+      // Matches the shape of the OpenAPI CompactResource example: a user
+      // message with input_text content alongside the compaction item.
+      Map<String, dynamic> compactResponseFixture() => {
+        'id': 'resp_compact_1',
+        'object': 'response.compaction',
+        'created_at': 1764967971,
+        'output': [
+          {
+            'type': 'message',
+            'id': 'msg_000',
+            'role': 'user',
+            'status': 'completed',
+            'content': [
+              {
+                'type': 'input_text',
+                'text': 'Create a simple landing page for a dog petting cafe.',
+              },
+            ],
+          },
+          {
+            'type': 'compaction',
+            'id': 'cmp_001',
+            'encrypted_content': 'gAAAAABpM0Yj-...=',
+          },
+        ],
+        'usage': {
+          'input_tokens': 139,
+          'output_tokens': 438,
+          'total_tokens': 577,
+        },
+      };
+
+      test('sends correct request to /responses/compact endpoint', () async {
+        mockClient.queueJsonResponse(compactResponseFixture());
+
+        await client.responses.compact(
+          const CompactResponseRequest(
+            model: 'gpt-5',
+            previousResponseId: 'resp_prev',
+          ),
+        );
+
+        expect(mockClient.requests, hasLength(1));
+        final request = mockClient.lastRequest!;
+        expect(request.method, 'POST');
+        expect(request.url.path, '/v1/responses/compact');
+      });
+
+      test('returns parsed CompactResource with mixed output items', () async {
+        mockClient.queueJsonResponse(compactResponseFixture());
+
+        final resource = await client.responses.compact(
+          const CompactResponseRequest(model: 'gpt-5'),
+        );
+
+        expect(resource.id, 'resp_compact_1');
+        expect(resource.object, 'response.compaction');
+        expect(resource.output, hasLength(2));
+        expect(resource.output[0], isA<MessageOutputItem>());
+        final msg = resource.output[0] as MessageOutputItem;
+        expect(msg.role, MessageRole.user);
+        expect(msg.content.first, isA<InputTextContent>());
+        expect(resource.output[1], isA<CompactionOutputItem>());
+        expect(resource.usage.totalTokens, 577);
+      });
+    });
   });
 }

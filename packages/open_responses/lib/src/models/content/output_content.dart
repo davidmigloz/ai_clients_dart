@@ -4,9 +4,10 @@ import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import 'annotation.dart';
 import 'logprob.dart';
+import 'message_content_part.dart';
 
 /// Output content from model.
-sealed class OutputContent {
+sealed class OutputContent implements MessageContentPart {
   /// Creates an [OutputContent].
   const OutputContent();
 
@@ -45,6 +46,7 @@ sealed class OutputContent {
   }
 
   /// Converts to JSON.
+  @override
   Map<String, dynamic> toJson();
 }
 
