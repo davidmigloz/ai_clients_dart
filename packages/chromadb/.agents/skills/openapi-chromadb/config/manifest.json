@@ -101,7 +101,9 @@
       "dart_class": "Collection",
       "file": "lib/src/models/collections/collection.dart",
       "schema": "Collection",
-      "tags": []
+      "tags": [],
+      "excluded_properties": ["id", "metadata", "schema"],
+      "note": "Type-comparison exclusions: 'id' (spec ref CollectionUuid is a {type: string, format: uuid} alias — Dart uses bare String, no typedef wrapper); 'metadata' (spec ref HashMap is an open dict {type: object, additionalProperties: oneOf[...]} — Dart uses idiomatic Map<String, dynamic>); 'schema' (Dart class renamed to CollectionSchema to avoid name conflict with the generic 'Schema' identifier per the API Design naming guideline)."
     },
     "QueryResponse": {
       "spec": "main",
@@ -109,7 +111,9 @@
       "dart_class": "QueryResponse",
       "file": "lib/src/models/records/query_response.dart",
       "schema": "QueryResponse",
-      "tags": []
+      "tags": [],
+      "excluded_properties": ["documents", "metadatas", "uris"],
+      "note": "Type-comparison exclusions: 'documents'/'uris' items are spec'd as {type: [string, null]} so Dart correctly uses List<List<String?>>; 'metadatas' items are oneOf[null, HashMap] so Dart uses List<List<Map<String, dynamic>?>>. The verifier doesn't propagate item-level nullability (or the HashMap → Map<String, dynamic> alias) into expected types, producing spurious mismatches."
     },
     "GetResponse": {
       "spec": "main",
@@ -117,7 +121,9 @@
       "dart_class": "GetResponse",
       "file": "lib/src/models/records/get_response.dart",
       "schema": "GetResponse",
-      "tags": []
+      "tags": [],
+      "excluded_properties": ["documents", "metadatas", "uris"],
+      "note": "Type-comparison exclusions: 'documents'/'uris' items are spec'd as {type: [string, null]} so Dart correctly uses List<String?>; 'metadatas' items are oneOf[null, HashMap] so Dart uses List<Map<String, dynamic>?>. The verifier doesn't propagate item-level nullability (or the HashMap → Map<String, dynamic> alias) into expected types, producing spurious mismatches."
     },
     "DeleteCollectionRecordsPayload": {
       "spec": "main",
@@ -193,6 +199,24 @@
       "file": "lib/src/models/collections/fork_count_response.dart",
       "schema": "ForkCountResponse",
       "tags": []
+    },
+    "SparseIndexAlgorithm": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "SparseIndexAlgorithm",
+      "tags": ["acknowledged"],
+      "note": "Sparse index algorithm enum nested inside CollectionSchema — schema stored as Map<String, dynamic>, no dedicated Dart model needed."
+    },
+    "SparseVectorIndexConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "SparseVectorIndexConfig",
+      "tags": ["acknowledged"],
+      "note": "Sparse vector index config nested inside CollectionSchema — schema stored as Map<String, dynamic>, no dedicated Dart model needed."
     }
   }
 }
