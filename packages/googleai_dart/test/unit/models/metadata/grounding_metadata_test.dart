@@ -434,6 +434,29 @@ void main() {
 
       expect(slv['values'], ['a', 'b']);
     });
+
+    test('mediaId round-trips through fromJson/toJson and copyWith', () {
+      const mediaId = 'fileSearchStores/abc/media/blob-123';
+      final json = {
+        'fileSearchStore': 'fileSearchStores/abc',
+        'mediaId': mediaId,
+      };
+
+      final ctx = RetrievedContext.fromJson(json);
+      expect(ctx.mediaId, mediaId);
+      expect(ctx.toJson()['mediaId'], mediaId);
+      expect(ctx.toString(), contains('mediaId: $mediaId'));
+
+      final cleared = ctx.copyWith(mediaId: null);
+      expect(cleared.mediaId, isNull);
+      expect(cleared.toJson().containsKey('mediaId'), isFalse);
+    });
+
+    test('toJson omits null mediaId', () {
+      const ctx = RetrievedContext(uri: 'gs://bucket/doc.pdf');
+
+      expect(ctx.toJson().containsKey('mediaId'), isFalse);
+    });
   });
 
   group('RetrievalMetadata', () {
