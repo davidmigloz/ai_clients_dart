@@ -1786,6 +1786,14 @@
         },
         "type": "object"
       },
+      "SparseIndexAlgorithm": {
+        "description": "Sparse vector index algorithm.\n\nControls which posting list format and query engine are used for\nsparse vector search within a collection.",
+        "enum": [
+          "wand",
+          "max_score"
+        ],
+        "type": "string"
+      },
       "SparseVector": {
         "description": "Represents a sparse vector using parallel arrays for indices and values.\n\nOn deserialization: accepts both old format `{\"indices\": [...], \"values\": [...]}`\nand new format `{\"#type\": \"sparse_vector\", \"indices\": [...], \"values\": [...]}`.\n\nOn serialization: always includes `#type` field with value `\"sparse_vector\"`.",
         "properties": {
@@ -1826,6 +1834,10 @@
       "SparseVectorIndexConfig": {
         "additionalProperties": false,
         "properties": {
+          "algorithm": {
+            "$ref": "#/components/schemas/SparseIndexAlgorithm",
+            "description": "Sparse index algorithm (cloud-only, tenant-gated).\nOmitted from JSON when set to the default (Wand) so that old\nservers/clients that do not know about this field can still\ndeserialize the schema."
+          },
           "bm25": {
             "description": "Whether this embedding is BM25",
             "type": [
