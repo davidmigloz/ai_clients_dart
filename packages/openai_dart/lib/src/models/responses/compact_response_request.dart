@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import 'config/prompt_cache_retention.dart';
 import 'response_input.dart';
 
 /// Request to compact response conversation state.
@@ -21,6 +22,14 @@ class CompactResponseRequest {
   /// Optional prompt cache key.
   final String? promptCacheKey;
 
+  /// Optional prompt cache retention policy.
+  ///
+  /// The compact endpoint serializes this as `'in_memory'` (underscore) or
+  /// `'24h'`. Note that this differs from the chat/responses surface, which
+  /// uses `'in-memory'` (hyphen) for the same logical value; both spellings
+  /// are accepted on read.
+  final PromptCacheRetention? promptCacheRetention;
+
   /// Creates a [CompactResponseRequest].
   const CompactResponseRequest({
     required this.model,
@@ -28,6 +37,7 @@ class CompactResponseRequest {
     this.previousResponseId,
     this.instructions,
     this.promptCacheKey,
+    this.promptCacheRetention,
   });
 
   /// Creates a [CompactResponseRequest] from JSON.
@@ -40,6 +50,12 @@ class CompactResponseRequest {
       previousResponseId: json['previous_response_id'] as String?,
       instructions: json['instructions'] as String?,
       promptCacheKey: json['prompt_cache_key'] as String?,
+      promptCacheRetention: switch (json['prompt_cache_retention'] as String?) {
+        null => null,
+        'in_memory' || 'in-memory' => PromptCacheRetention.inMemory,
+        '24h' => PromptCacheRetention.h24,
+        _ => PromptCacheRetention.unknown,
+      },
     );
   }
 
@@ -50,6 +66,12 @@ class CompactResponseRequest {
     if (previousResponseId != null) 'previous_response_id': previousResponseId,
     if (instructions != null) 'instructions': instructions,
     if (promptCacheKey != null) 'prompt_cache_key': promptCacheKey,
+    if (promptCacheRetention != null)
+      'prompt_cache_retention': switch (promptCacheRetention!) {
+        PromptCacheRetention.inMemory => 'in_memory',
+        PromptCacheRetention.h24 => '24h',
+        PromptCacheRetention.unknown => 'unknown',
+      },
   };
 
   /// Creates a copy with replaced values.
@@ -61,6 +83,7 @@ class CompactResponseRequest {
     Object? previousResponseId = unsetCopyWithValue,
     Object? instructions = unsetCopyWithValue,
     Object? promptCacheKey = unsetCopyWithValue,
+    Object? promptCacheRetention = unsetCopyWithValue,
   }) {
     return CompactResponseRequest(
       model: model ?? this.model,
@@ -74,6 +97,9 @@ class CompactResponseRequest {
       promptCacheKey: promptCacheKey == unsetCopyWithValue
           ? this.promptCacheKey
           : promptCacheKey as String?,
+      promptCacheRetention: promptCacheRetention == unsetCopyWithValue
+          ? this.promptCacheRetention
+          : promptCacheRetention as PromptCacheRetention?,
     );
   }
 
@@ -86,7 +112,8 @@ class CompactResponseRequest {
           input == other.input &&
           previousResponseId == other.previousResponseId &&
           instructions == other.instructions &&
-          promptCacheKey == other.promptCacheKey;
+          promptCacheKey == other.promptCacheKey &&
+          promptCacheRetention == other.promptCacheRetention;
 
   @override
   int get hashCode => Object.hash(
@@ -95,9 +122,16 @@ class CompactResponseRequest {
     previousResponseId,
     instructions,
     promptCacheKey,
+    promptCacheRetention,
   );
 
   @override
   String toString() =>
-      'CompactResponseRequest(model: $model, previousResponseId: $previousResponseId)';
+      'CompactResponseRequest('
+      'model: $model, '
+      'input: $input, '
+      'previousResponseId: $previousResponseId, '
+      'instructions: $instructions, '
+      'promptCacheKey: $promptCacheKey, '
+      'promptCacheRetention: $promptCacheRetention)';
 }
