@@ -236,18 +236,21 @@ class _AbortableRequestWrapper extends http.BaseRequest
 
   @override
   http.ByteStream finalize() {
-    super.finalize();
+    // Finalize the inner request first so any values it computes during
+    // finalize (e.g. multipart Content-Type boundary, content length) are
+    // available before we mirror them onto this wrapper.
     final stream = _inner.finalize();
 
-    // Synchronize headers and contentLength with the inner request after it
-    // has been finalized. This ensures that any values set during finalize(),
-    // such as multipart Content-Type boundaries and computed content length,
-    // are visible to the HTTP client when sending this wrapper request.
+    // Mirror headers and contentLength from the inner request *before*
+    // finalizing this wrapper. Once super.finalize() runs, the contentLength
+    // setter on http.BaseRequest throws StateError, which previously broke
+    // every non-streaming request that supplied an abortTrigger.
     headers
       ..clear()
       ..addAll(_inner.headers);
     contentLength = _inner.contentLength;
 
+    super.finalize();
     return stream;
   }
 }
