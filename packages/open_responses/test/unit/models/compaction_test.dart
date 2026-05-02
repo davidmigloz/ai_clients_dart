@@ -181,6 +181,49 @@ void main() {
     });
   });
 
+  group('FunctionCallOutputResponseItem', () {
+    test('parses from JSON', () {
+      final json = {
+        'type': 'function_call_output',
+        'id': 'fco_001',
+        'call_id': 'call_abc',
+        'output': '{"result":"ok"}',
+        'status': 'completed',
+      };
+      final item = OutputItem.fromJson(json);
+      expect(item, isA<FunctionCallOutputResponseItem>());
+      final fco = item as FunctionCallOutputResponseItem;
+      expect(fco.id, 'fco_001');
+      expect(fco.callId, 'call_abc');
+      expect(fco.output, isA<FunctionCallOutputString>());
+      expect(fco.status, FunctionCallStatus.completed);
+    });
+
+    test('round-trips through JSON', () {
+      const item = FunctionCallOutputResponseItem(
+        id: 'fco_001',
+        callId: 'call_abc',
+        output: FunctionCallOutputString('{"result":"ok"}'),
+        status: FunctionCallStatus.completed,
+      );
+      expect(OutputItem.fromJson(item.toJson()), equals(item));
+    });
+
+    test('toFunctionCallOutputItem converts to input variant', () {
+      const item = FunctionCallOutputResponseItem(
+        id: 'fco_1',
+        callId: 'call_1',
+        output: FunctionCallOutputString('value'),
+        status: FunctionCallStatus.completed,
+      );
+      final input = item.toFunctionCallOutputItem();
+      expect(input.id, 'fco_1');
+      expect(input.callId, 'call_1');
+      expect(input.output, isA<FunctionCallOutputString>());
+      expect(input.status, FunctionCallStatus.completed);
+    });
+  });
+
   group('CompactResponseRequest', () {
     test('serializes with only required fields', () {
       const request = CompactResponseRequest(model: 'gpt-5');

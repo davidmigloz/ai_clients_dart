@@ -791,7 +791,7 @@
       "file": "lib/src/models/items/output_item.dart",
       "schema": "ItemField",
       "tags": ["acknowledged"],
-      "note": "ItemField is the response-side union (Message, FunctionCall, FunctionCallOutput, ReasoningBody, CompactionBody) used by CompactResource.output. Mapped to the existing OutputItem hierarchy. FunctionCallOutput type 'function_call_output' is not yet implemented as an OutputItem variant."
+      "note": "ItemField is the response-side union (Message, FunctionCall, FunctionCallOutput, ReasoningBody, CompactionBody) used by ResponseResource.output and CompactResource.output. Mapped to the OutputItem sealed hierarchy."
     },
     "Message": {
       "spec": "main",
@@ -816,6 +816,14 @@
       "spec": "main",
       "kind": "extension",
       "dart_class": "CompactionOutputItem",
+      "file": "lib/src/models/items/output_item.dart",
+      "schema": null,
+      "parent": "OutputItem"
+    },
+    "OutputItem:FunctionCallOutputResponseItem": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "FunctionCallOutputResponseItem",
       "file": "lib/src/models/items/output_item.dart",
       "schema": null,
       "parent": "OutputItem"

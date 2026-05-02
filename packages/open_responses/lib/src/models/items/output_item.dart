@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import '../common/equality_helpers.dart';
 import '../content/output_content.dart';
 import '../content/reasoning_summary_content.dart';
+import '../metadata/function_call_status.dart';
 import '../metadata/item_status.dart';
 import '../metadata/message_phase.dart';
 import '../metadata/message_role.dart';
@@ -21,6 +22,7 @@ sealed class OutputItem {
     return switch (type) {
       'message' => MessageOutputItem.fromJson(json),
       'function_call' => FunctionCallOutputItemResponse.fromJson(json),
+      'function_call_output' => FunctionCallOutputResponseItem.fromJson(json),
       'reasoning' => ReasoningItem.fromJson(json),
       'compaction' => CompactionOutputItem.fromJson(json),
       _ => throw FormatException('Unknown OutputItem type: $type'),
@@ -335,4 +337,78 @@ class CompactionOutputItem extends OutputItem {
   @override
   String toString() =>
       'CompactionOutputItem(id: $id, encryptedContent: [${encryptedContent.length} chars], createdBy: $createdBy)';
+}
+
+/// A function call output item echoed back as part of a response's output.
+///
+/// Carries the result of a previously-submitted function call (the same shape
+/// as the user-sent [FunctionCallOutputItem]) so it can appear in stored or
+/// compacted response history.
+@immutable
+class FunctionCallOutputResponseItem extends OutputItem {
+  /// Unique identifier.
+  final String id;
+
+  /// The call ID this output corresponds to.
+  final String callId;
+
+  /// The output content.
+  final FunctionCallOutput output;
+
+  /// The status of the function call output.
+  final FunctionCallStatus? status;
+
+  /// Creates a [FunctionCallOutputResponseItem].
+  const FunctionCallOutputResponseItem({
+    required this.id,
+    required this.callId,
+    required this.output,
+    this.status,
+  });
+
+  /// Creates a [FunctionCallOutputResponseItem] from JSON.
+  factory FunctionCallOutputResponseItem.fromJson(Map<String, dynamic> json) {
+    return FunctionCallOutputResponseItem(
+      id: json['id'] as String,
+      callId: json['call_id'] as String,
+      output: FunctionCallOutput.fromJson(json['output']),
+      status: json['status'] != null
+          ? FunctionCallStatus.fromJson(json['status'] as String)
+          : null,
+    );
+  }
+
+  /// Converts to a [FunctionCallOutputItem] for use as input.
+  FunctionCallOutputItem toFunctionCallOutputItem() => FunctionCallOutputItem(
+    id: id,
+    callId: callId,
+    output: output,
+    status: status,
+  );
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'function_call_output',
+    'id': id,
+    'call_id': callId,
+    'output': output.toJson(),
+    if (status != null) 'status': status!.toJson(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FunctionCallOutputResponseItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          callId == other.callId &&
+          output == other.output &&
+          status == other.status;
+
+  @override
+  int get hashCode => Object.hash(id, callId, output, status);
+
+  @override
+  String toString() =>
+      'FunctionCallOutputResponseItem(id: $id, callId: $callId, output: $output, status: $status)';
 }
