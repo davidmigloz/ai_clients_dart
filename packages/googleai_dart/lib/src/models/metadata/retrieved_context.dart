@@ -17,6 +17,12 @@ class RetrievedContext {
   /// Example: `fileSearchStores/123`
   final String? fileSearchStore;
 
+  /// Optional. The media blob resource name for multimodal file search
+  /// results.
+  ///
+  /// Format: `fileSearchStores/{file_search_store_id}/media/{blob_id}`
+  final String? mediaId;
+
   /// Optional. Page number of the retrieved context, if applicable.
   final int? pageNumber;
 
@@ -29,6 +35,7 @@ class RetrievedContext {
     this.title,
     this.text,
     this.fileSearchStore,
+    this.mediaId,
     this.pageNumber,
     this.customMetadata,
   });
@@ -40,6 +47,7 @@ class RetrievedContext {
         title: json['title'] as String?,
         text: json['text'] as String?,
         fileSearchStore: json['fileSearchStore'] as String?,
+        mediaId: json['mediaId'] as String?,
         pageNumber: json['pageNumber'] as int?,
         customMetadata: (json['customMetadata'] as List?)
             ?.map(
@@ -56,6 +64,7 @@ class RetrievedContext {
     if (title != null) 'title': title,
     if (text != null) 'text': text,
     if (fileSearchStore != null) 'fileSearchStore': fileSearchStore,
+    if (mediaId != null) 'mediaId': mediaId,
     if (pageNumber != null) 'pageNumber': pageNumber,
     if (customMetadata != null)
       'customMetadata': customMetadata!.map((e) => e.toJson()).toList(),
@@ -67,6 +76,7 @@ class RetrievedContext {
     Object? title = unsetCopyWithValue,
     Object? text = unsetCopyWithValue,
     Object? fileSearchStore = unsetCopyWithValue,
+    Object? mediaId = unsetCopyWithValue,
     Object? pageNumber = unsetCopyWithValue,
     Object? customMetadata = unsetCopyWithValue,
   }) {
@@ -77,6 +87,9 @@ class RetrievedContext {
       fileSearchStore: fileSearchStore == unsetCopyWithValue
           ? this.fileSearchStore
           : fileSearchStore as String?,
+      mediaId: mediaId == unsetCopyWithValue
+          ? this.mediaId
+          : mediaId as String?,
       pageNumber: pageNumber == unsetCopyWithValue
           ? this.pageNumber
           : pageNumber as int?,
@@ -88,5 +101,5 @@ class RetrievedContext {
 
   @override
   String toString() =>
-      'RetrievedContext(uri: $uri, title: $title, text: $text, fileSearchStore: $fileSearchStore, pageNumber: $pageNumber, customMetadata: $customMetadata)';
+      'RetrievedContext(uri: $uri, title: $title, text: $text, fileSearchStore: $fileSearchStore, mediaId: $mediaId, pageNumber: $pageNumber, customMetadata: $customMetadata)';
 }

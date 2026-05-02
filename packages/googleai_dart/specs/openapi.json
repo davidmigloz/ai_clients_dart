@@ -336,7 +336,7 @@
             "type": "string"
           },
           "mimeType": {
-            "description": "The IANA standard MIME type of the source data.\nExamples:\n  - image/png\n  - image/jpeg\nIf an unsupported MIME type is provided, an error will be returned. For a\ncomplete list of supported types, see [Supported file\nformats](https://ai.google.dev/gemini-api/docs/prompting_with_media#supported_file_formats).",
+            "description": "The IANA standard MIME type of the source data.\nExamples of supported types:\n- Images: image/png, image/jpeg, image/jpg, image/webp, image/heic,\nimage/heif, image/gif, image/avif\n- Audio: audio/*, video/audio/s16le, video/audio/wav\n- Video: video/*\n- Text: text/plain, text/html, text/css, text/javascript,\ntext/x-typescript, text/csv, text/markdown, text/x-python, text/xml,\ntext/rtf, video/text/timestamp\n- Applications: application/x-javascript, application/x-typescript,\napplication/x-python-code, application/json, application/x-ipynb+json,\napplication/rtf, application/pdf For additional context,\nsee [Supported file\nformats](https://ai.google.dev/gemini-api/docs/file-input-methods#supported-content-types).\n//",
             "type": "string"
           }
         },
@@ -4335,6 +4335,10 @@
             "description": "Optional. Name of the `FileSearchStore` containing the document.\nExample: `fileSearchStores/123`",
             "type": "string"
           },
+          "mediaId": {
+            "description": "Optional. The media blob resource name for multimodal file search results.\nFormat: fileSearchStores/{file_search_store_id}/media/{blob_id}",
+            "type": "string"
+          },
           "pageNumber": {
             "description": "Optional. Page number of the retrieved context, if applicable.",
             "format": "int32",
@@ -5685,7 +5689,7 @@
     "description": "The Gemini API allows developers to build generative AI applications using Gemini models. Gemini is our most capable model, built from the ground up to be multimodal. It can generalize and seamlessly understand, operate across, and combine different types of information including language, images, audio, video, and code. You can use the Gemini API for use cases like reasoning across text and images, content generation, dialogue agents, summarization and classification systems, and more.",
     "title": "Gemini API",
     "version": "v1beta",
-    "x-google-revision": "20260421"
+    "x-google-revision": "20260501"
   },
   "openapi": "3.0.3",
   "paths": {
