@@ -1,6 +1,9 @@
+import 'package:meta/meta.dart';
+
 import '../copy_with_sentinel.dart';
 
 /// A `FileSearchStore` is a collection of `Document`s.
+@immutable
 class FileSearchStore {
   /// Output only. Immutable. The `FileSearchStore` resource name.
   ///
@@ -39,6 +42,15 @@ class FileSearchStore {
   /// This is the total size of all the documents in the `FileSearchStore`.
   final String? sizeBytes;
 
+  /// Optional. The embedding model to use for the `FileSearchStore`.
+  ///
+  /// The model's resource name. This serves as an ID for the Model to use.
+  /// Format: `models/{model}` — for example, `models/gemini-embedding-2`
+  /// to enable multimodal File Search RAG.
+  ///
+  /// May be `null`. When `null`, the default embedding model is used.
+  final String? embeddingModel;
+
   /// Creates a [FileSearchStore].
   const FileSearchStore({
     this.name,
@@ -49,6 +61,7 @@ class FileSearchStore {
     this.pendingDocumentsCount,
     this.failedDocumentsCount,
     this.sizeBytes,
+    this.embeddingModel,
   });
 
   /// Creates a [FileSearchStore] from JSON.
@@ -66,6 +79,7 @@ class FileSearchStore {
         pendingDocumentsCount: json['pendingDocumentsCount'] as String?,
         failedDocumentsCount: json['failedDocumentsCount'] as String?,
         sizeBytes: json['sizeBytes'] as String?,
+        embeddingModel: json['embeddingModel'] as String?,
       );
 
   /// Converts to JSON.
@@ -81,6 +95,7 @@ class FileSearchStore {
     if (failedDocumentsCount != null)
       'failedDocumentsCount': failedDocumentsCount,
     if (sizeBytes != null) 'sizeBytes': sizeBytes,
+    if (embeddingModel != null) 'embeddingModel': embeddingModel,
   };
 
   /// Creates a copy with replaced values.
@@ -93,6 +108,7 @@ class FileSearchStore {
     Object? pendingDocumentsCount = unsetCopyWithValue,
     Object? failedDocumentsCount = unsetCopyWithValue,
     Object? sizeBytes = unsetCopyWithValue,
+    Object? embeddingModel = unsetCopyWithValue,
   }) {
     return FileSearchStore(
       name: name == unsetCopyWithValue ? this.name : name as String?,
@@ -117,10 +133,43 @@ class FileSearchStore {
       sizeBytes: sizeBytes == unsetCopyWithValue
           ? this.sizeBytes
           : sizeBytes as String?,
+      embeddingModel: embeddingModel == unsetCopyWithValue
+          ? this.embeddingModel
+          : embeddingModel as String?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is FileSearchStore &&
+        other.name == name &&
+        other.displayName == displayName &&
+        other.createTime == createTime &&
+        other.updateTime == updateTime &&
+        other.activeDocumentsCount == activeDocumentsCount &&
+        other.pendingDocumentsCount == pendingDocumentsCount &&
+        other.failedDocumentsCount == failedDocumentsCount &&
+        other.sizeBytes == sizeBytes &&
+        other.embeddingModel == embeddingModel;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(
+      name,
+      displayName,
+      createTime,
+      updateTime,
+      activeDocumentsCount,
+      pendingDocumentsCount,
+      failedDocumentsCount,
+      sizeBytes,
+      embeddingModel,
     );
   }
 
   @override
   String toString() =>
-      'FileSearchStore(name: $name, displayName: $displayName, createTime: $createTime, updateTime: $updateTime, activeDocumentsCount: $activeDocumentsCount, pendingDocumentsCount: $pendingDocumentsCount, failedDocumentsCount: $failedDocumentsCount, sizeBytes: $sizeBytes)';
+      'FileSearchStore(name: $name, displayName: $displayName, createTime: $createTime, updateTime: $updateTime, activeDocumentsCount: $activeDocumentsCount, pendingDocumentsCount: $pendingDocumentsCount, failedDocumentsCount: $failedDocumentsCount, sizeBytes: $sizeBytes, embeddingModel: $embeddingModel)';
 }

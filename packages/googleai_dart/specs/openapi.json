@@ -342,6 +342,45 @@
         },
         "type": "object"
       },
+      "Blobstore2Info": {
+        "description": "Information to read/write to blobstore2.",
+        "properties": {
+          "blobGeneration": {
+            "description": "The blob generation id.",
+            "format": "int64",
+            "type": "string"
+          },
+          "blobId": {
+            "description": "The blob id, e.g., /blobstore/prod/playground/scotty",
+            "type": "string"
+          },
+          "downloadExternalReadToken": {
+            "description": "A serialized External Read Token passed from Bigstore -> Scotty for a GCS\ndownload. This field must never be consumed outside of Bigstore, and is not\napplicable to non-GCS media uploads.",
+            "format": "byte",
+            "type": "string"
+          },
+          "downloadReadHandle": {
+            "description": "Read handle passed from Bigstore -> Scotty for a GCS download.\nThis is a signed, serialized blobstore2.ReadHandle proto which must never\nbe set outside of Bigstore, and is not applicable to non-GCS media\ndownloads.",
+            "format": "byte",
+            "type": "string"
+          },
+          "readToken": {
+            "description": "The blob read token. Needed to read blobs that have not been\nreplicated. Might not be available until the final call.",
+            "type": "string"
+          },
+          "uploadFragmentListCreationInfo": {
+            "description": "A serialized Object Fragment List Creation Info passed from Bigstore ->\nScotty for a GCS upload. This field must never be consumed outside of\nBigstore, and is not applicable to non-GCS media uploads.",
+            "format": "byte",
+            "type": "string"
+          },
+          "uploadMetadataContainer": {
+            "description": "Metadata passed from Blobstore -> Scotty for a new GCS upload.\nThis is a signed, serialized blobstore2.BlobMetadataContainer proto which\nmust never be consumed outside of Bigstore, and is not applicable to\nnon-GCS media uploads.",
+            "format": "byte",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "CachedContent": {
         "description": "Content that has been preprocessed and can be used in subsequent request\nto GenerativeService.\n\nCached content can be only used with model it was created for.",
         "properties": {
@@ -674,6 +713,88 @@
         ],
         "type": "object"
       },
+      "CompositeMedia": {
+        "description": "A sequence of media data references representing composite data.\nIntroduced to support Bigstore composite objects. For details, visit\nhttp://go/bigstore-composites.",
+        "properties": {
+          "blobRef": {
+            "deprecated": true,
+            "description": "Blobstore v1 reference, set if reference_type is BLOBSTORE_REF\nThis should be the byte representation of a blobstore.BlobRef.\nSince Blobstore is deprecating v1, use blobstore2_info instead.\nFor now, any v2 blob will also be represented in this field as\nv1 BlobRef.",
+            "format": "byte",
+            "type": "string"
+          },
+          "blobstore2Info": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Blobstore2Info"
+              }
+            ],
+            "description": "Blobstore v2 info, set if reference_type is BLOBSTORE_REF and it refers\nto a v2 blob."
+          },
+          "cosmoBinaryReference": {
+            "description": "A binary data reference for a media download. Serves as a\ntechnology-agnostic binary reference in some Google infrastructure.\nThis value is a serialized storage_cosmo.BinaryReference proto. Storing\nit as bytes is a hack to get around the fact that the cosmo proto\n(as well as others it includes) doesn't support JavaScript. This\nprevents us from including the actual type of this field.",
+            "format": "byte",
+            "type": "string"
+          },
+          "crc32cHash": {
+            "description": "crc32.c hash for the payload.",
+            "format": "int64",
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "inline": {
+            "description": "Media data, set if reference_type is INLINE",
+            "format": "byte",
+            "type": "string"
+          },
+          "length": {
+            "description": "Size of the data, in bytes",
+            "format": "int64",
+            "type": "string"
+          },
+          "md5Hash": {
+            "description": "MD5 hash for the payload.",
+            "format": "byte",
+            "type": "string"
+          },
+          "objectId": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ObjectId"
+              }
+            ],
+            "description": "Reference to a TI Blob, set if reference_type is BIGSTORE_REF."
+          },
+          "path": {
+            "description": "Path to the data, set if reference_type is PATH",
+            "type": "string"
+          },
+          "referenceType": {
+            "description": "Describes what the field reference contains.",
+            "enum": [
+              "PATH",
+              "BLOB_REF",
+              "INLINE",
+              "BIGSTORE_REF",
+              "COSMO_BINARY_REFERENCE"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Reference contains a GFS path or a local path.",
+              "Reference points to a blobstore object. This could be either\na v1 blob_ref or a v2 blobstore2_info. Clients should check\nblobstore2_info first, since v1 is being deprecated.",
+              "Data is included into this proto buffer",
+              "Reference points to a bigstore object",
+              "Indicates the data is stored in cosmo_binary_reference."
+            ]
+          },
+          "sha1Hash": {
+            "description": "SHA-1 hash for the payload.",
+            "format": "byte",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "ComputerUse": {
         "description": "Computer Use tool type.",
         "properties": {
@@ -805,6 +926,41 @@
               "Content was blocked by safety settings.",
               "Content was blocked, but the reason is uncategorized."
             ]
+          }
+        },
+        "type": "object"
+      },
+      "ContentTypeInfo": {
+        "description": "Detailed Content-Type information from Scotty. The Content-Type of the media\nwill typically be filled in by the header or Scotty's best_guess, but this\nextended information provides the backend with more information so that it\ncan make a better decision if needed. This is only used on media upload\nrequests from Scotty.",
+        "properties": {
+          "bestGuess": {
+            "description": "Scotty's best guess of what the content type of the file is.",
+            "type": "string"
+          },
+          "fromBytes": {
+            "description": "The content type of the file derived by looking at specific\nbytes (i.e. \"magic bytes\") of the actual file.",
+            "type": "string"
+          },
+          "fromFileName": {
+            "description": "The content type of the file derived from the file extension of\nthe original file name used by the client.",
+            "type": "string"
+          },
+          "fromFusionId": {
+            "description": "The content type of the file detected by Fusion ID. go/fusionid",
+            "type": "string"
+          },
+          "fromHeader": {
+            "description": "The content type of the file as specified in the request headers,\nmultipart headers, or RUPIO start request.",
+            "type": "string"
+          },
+          "fromUrlPath": {
+            "description": "The content type of the file derived from the file extension of the\nURL path.  The URL path is assumed to represent a file name (which\nis typically only true for agents that are providing a REST API).",
+            "type": "string"
+          },
+          "fusionIdDetectionMetadata": {
+            "description": "Metadata information from Fusion ID detection. Serialized\nFusionIdDetectionMetadata proto. Only set if from_fusion_id is set.",
+            "format": "byte",
+            "type": "string"
           }
         },
         "type": "object"
@@ -1106,6 +1262,115 @@
         },
         "type": "object"
       },
+      "DiffChecksumsResponse": {
+        "description": "Backend response for a Diff get checksums response.\nFor details on the Scotty Diff protocol,\nvisit http://go/scotty-diff-protocol.",
+        "properties": {
+          "checksumsLocation": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CompositeMedia"
+              }
+            ],
+            "description": "Exactly one of these fields must be populated.\n\nIf checksums_location is filled, the server will return the corresponding\ncontents to the user.  If object_location is filled, the server will\ncalculate the checksums based on the content there and return that to the\nuser.\nFor details on the format of the checksums,\nsee http://go/scotty-diff-protocol."
+          },
+          "chunkSizeBytes": {
+            "description": "The chunk size of checksums.  Must be a multiple of 256KB.",
+            "format": "int64",
+            "type": "string"
+          },
+          "objectLocation": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CompositeMedia"
+              }
+            ],
+            "description": "If set, calculate the checksums based on the contents and return them to\nthe caller."
+          },
+          "objectSizeBytes": {
+            "description": "The total size of the server object.",
+            "format": "int64",
+            "type": "string"
+          },
+          "objectVersion": {
+            "description": "The object version of the object the checksums are being returned for.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DiffDownloadResponse": {
+        "description": "Backend response for a Diff download response.\nFor details on the Scotty Diff protocol,\nvisit http://go/scotty-diff-protocol.",
+        "properties": {
+          "objectLocation": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CompositeMedia"
+              }
+            ],
+            "description": "The original object location."
+          }
+        },
+        "type": "object"
+      },
+      "DiffUploadRequest": {
+        "description": "A Diff upload request.\nFor details on the Scotty Diff protocol,\nvisit http://go/scotty-diff-protocol.",
+        "properties": {
+          "checksumsInfo": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CompositeMedia"
+              }
+            ],
+            "description": "The location of the checksums for the new object.\nAgents must clone the object located here, as the upload server will\ndelete the contents once a response is received.\nFor details on the format of the checksums,\nsee http://go/scotty-diff-protocol."
+          },
+          "objectInfo": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CompositeMedia"
+              }
+            ],
+            "description": "The location of the new object.\nAgents must clone the object located here, as the upload server will\ndelete the contents once a response is received."
+          },
+          "objectVersion": {
+            "description": "The object version of the object that is the base version the incoming\ndiff script will be applied to.\nThis field will always be filled in.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DiffUploadResponse": {
+        "description": "Backend response for a Diff upload request.\nFor details on the Scotty Diff protocol,\nvisit http://go/scotty-diff-protocol.",
+        "properties": {
+          "objectVersion": {
+            "description": "The object version of the object at the server. Must be included in the\nend notification response.\nThe version in the end notification response must correspond to the new\nversion of the object that is now stored at the server, after the upload.",
+            "type": "string"
+          },
+          "originalObject": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CompositeMedia"
+              }
+            ],
+            "description": "The location of the original file for a diff upload request. Must be\nfilled in if responding to an upload start notification."
+          }
+        },
+        "type": "object"
+      },
+      "DiffVersionResponse": {
+        "description": "Backend response for a Diff get version response.\nFor details on the Scotty Diff protocol,\nvisit http://go/scotty-diff-protocol.",
+        "properties": {
+          "objectSizeBytes": {
+            "description": "The total size of the server object.",
+            "format": "int64",
+            "type": "string"
+          },
+          "objectVersion": {
+            "description": "The version of the object stored at the server.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Document": {
         "description": "A `Document` is a collection of `Chunk`s.",
         "properties": {
@@ -1171,6 +1436,35 @@
       },
       "DownloadFileResponse": {
         "description": "Response for `DownloadFile`.",
+        "type": "object"
+      },
+      "DownloadMediaResponse": {
+        "description": "Response for DownloadMedia.",
+        "properties": {
+          "blob": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GdataMedia"
+              }
+            ],
+            "description": "Output only. The blob data.",
+            "readOnly": true
+          }
+        },
+        "type": "object"
+      },
+      "DownloadParameters": {
+        "description": "Parameters specific to media downloads.",
+        "properties": {
+          "allowGzipCompression": {
+            "description": "A boolean to be returned in the response to Scotty. Allows/disallows gzip\nencoding of the payload content when the server thinks it's\nadvantageous (hence, does not guarantee compression) which allows\nScotty to GZip the response to the client.",
+            "type": "boolean"
+          },
+          "ignoreRange": {
+            "description": "Determining whether or not Apiary should skip the inclusion\nof any Content-Range header on its response to Scotty.",
+            "type": "boolean"
+          }
+        },
         "type": "object"
       },
       "DynamicRetrievalConfig": {
@@ -1737,6 +2031,10 @@
             "description": "Optional. The human-readable display name for the `FileSearchStore`. The display name\nmust be no more than 512 characters in length, including spaces. Example:\n\"Docs on Semantic Retriever\"",
             "type": "string"
           },
+          "embeddingModel": {
+            "description": "Optional. The embedding model to use for the `FileSearchStore`.\nThe model's resource name. This serves as an ID for the Model to use.\nFormat: `models/{model}`.\nIf not specified, the default embedding model will be used.",
+            "type": "string"
+          },
           "failedDocumentsCount": {
             "description": "Output only. The number of documents in the `FileSearchStore` that have failed\nprocessing.",
             "format": "int64",
@@ -1957,6 +2255,218 @@
               }
             ],
             "description": "Inline media bytes."
+          }
+        },
+        "type": "object"
+      },
+      "GdataMedia": {
+        "description": "A reference to data stored on the filesystem, on GFS or in blobstore.",
+        "properties": {
+          "algorithm": {
+            "deprecated": true,
+            "description": "Deprecated, use one of explicit hash type fields instead.\nAlgorithm used for calculating the hash.\nAs of 2011/01/21, \"MD5\" is the only possible value for this field.\nNew values may be added at any time.",
+            "type": "string"
+          },
+          "bigstoreObjectRef": {
+            "deprecated": true,
+            "description": "Use object_id instead.",
+            "format": "byte",
+            "type": "string"
+          },
+          "blobRef": {
+            "deprecated": true,
+            "description": "Blobstore v1 reference, set if reference_type is BLOBSTORE_REF\nThis should be the byte representation of a blobstore.BlobRef.\nSince Blobstore is deprecating v1, use blobstore2_info instead.\nFor now, any v2 blob will also be represented in this field as\nv1 BlobRef.",
+            "format": "byte",
+            "type": "string"
+          },
+          "blobstore2Info": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Blobstore2Info"
+              }
+            ],
+            "description": "Blobstore v2 info, set if reference_type is BLOBSTORE_REF and it refers\nto a v2 blob."
+          },
+          "compositeMedia": {
+            "description": "A composite media composed of one or more media objects, set if\nreference_type is COMPOSITE_MEDIA. The media length field must be set\nto the sum of the lengths of all composite media objects.\n\nNote: All composite media must have length specified.",
+            "items": {
+              "$ref": "#/components/schemas/CompositeMedia"
+            },
+            "type": "array"
+          },
+          "contentType": {
+            "description": "MIME type of the data",
+            "type": "string"
+          },
+          "contentTypeInfo": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContentTypeInfo"
+              }
+            ],
+            "description": "Extended content type information provided for Scotty uploads."
+          },
+          "cosmoBinaryReference": {
+            "description": "A binary data reference for a media download. Serves as a\ntechnology-agnostic binary reference in some Google infrastructure.\nThis value is a serialized storage_cosmo.BinaryReference proto. Storing\nit as bytes is a hack to get around the fact that the cosmo proto\n(as well as others it includes) doesn't support JavaScript. This\nprevents us from including the actual type of this field.",
+            "format": "byte",
+            "type": "string"
+          },
+          "crc32cHash": {
+            "description": "For Scotty Uploads:\nScotty-provided hashes for uploads\n\nFor Scotty Downloads:\n(WARNING: DO NOT USE WITHOUT PERMISSION FROM THE SCOTTY TEAM.)\nA Hash provided by the agent to be used to verify the data being\ndownloaded. Currently only supported for inline payloads.\nFurther, only crc32c_hash is currently supported.",
+            "format": "int64",
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "diffChecksumsResponse": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DiffChecksumsResponse"
+              }
+            ],
+            "description": "Set if reference_type is DIFF_CHECKSUMS_RESPONSE."
+          },
+          "diffDownloadResponse": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DiffDownloadResponse"
+              }
+            ],
+            "description": "Set if reference_type is DIFF_DOWNLOAD_RESPONSE."
+          },
+          "diffUploadRequest": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DiffUploadRequest"
+              }
+            ],
+            "description": "Set if reference_type is DIFF_UPLOAD_REQUEST."
+          },
+          "diffUploadResponse": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DiffUploadResponse"
+              }
+            ],
+            "description": "Set if reference_type is DIFF_UPLOAD_RESPONSE."
+          },
+          "diffVersionResponse": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DiffVersionResponse"
+              }
+            ],
+            "description": "Set if reference_type is DIFF_VERSION_RESPONSE."
+          },
+          "downloadParameters": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DownloadParameters"
+              }
+            ],
+            "description": "Parameters for a media download."
+          },
+          "filename": {
+            "description": "Original file name",
+            "type": "string"
+          },
+          "hash": {
+            "deprecated": true,
+            "description": "Deprecated, use one of explicit hash type fields instead.\nThese two hash related fields will only be populated on Scotty based media\nuploads and will contain the content of the hash group in the\nNotificationRequest:\nhttp://cs/#google3/blobstore2/api/scotty/service/proto/upload_listener.proto&q=class:Hash\nHex encoded hash value of the uploaded media.",
+            "type": "string"
+          },
+          "hashVerified": {
+            "description": "For Scotty uploads only. If a user sends a hash code and the backend has\nrequested that Scotty verify the upload against the client hash,\nScotty will perform the check on behalf of the backend and will reject it\nif the hashes don't match. This is set to true if Scotty performed\nthis verification.",
+            "type": "boolean"
+          },
+          "inline": {
+            "description": "Media data, set if reference_type is INLINE",
+            "format": "byte",
+            "type": "string"
+          },
+          "isPotentialRetry": {
+            "description": "|is_potential_retry| is set false only when Scotty is\ncertain that it has not sent the request before. When a client resumes\nan upload, this field must be set true in agent calls, because Scotty\ncannot be certain that it has never sent the request before due\nto potential failure in the session state persistence.",
+            "type": "boolean"
+          },
+          "length": {
+            "description": "Size of the data, in bytes",
+            "format": "int64",
+            "type": "string"
+          },
+          "md5Hash": {
+            "description": "Scotty-provided MD5 hash for an upload.",
+            "format": "byte",
+            "type": "string"
+          },
+          "mediaId": {
+            "description": "Media id to forward to the operation GetMedia.\nCan be set if reference_type is GET_MEDIA.",
+            "format": "byte",
+            "type": "string"
+          },
+          "objectId": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ObjectId"
+              }
+            ],
+            "description": "Reference to a TI Blob, set if reference_type is BIGSTORE_REF."
+          },
+          "path": {
+            "description": "Path to the data, set if reference_type is PATH",
+            "type": "string"
+          },
+          "referenceType": {
+            "description": "Describes what the field reference contains.",
+            "enum": [
+              "PATH",
+              "BLOB_REF",
+              "INLINE",
+              "GET_MEDIA",
+              "COMPOSITE_MEDIA",
+              "BIGSTORE_REF",
+              "DIFF_VERSION_RESPONSE",
+              "DIFF_CHECKSUMS_RESPONSE",
+              "DIFF_DOWNLOAD_RESPONSE",
+              "DIFF_UPLOAD_REQUEST",
+              "DIFF_UPLOAD_RESPONSE",
+              "COSMO_BINARY_REFERENCE",
+              "ARBITRARY_BYTES"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Reference contains a GFS path or a local path.",
+              "Reference points to a blobstore object. This could be either\na v1 blob_ref or a v2 blobstore2_info. Clients should check\nblobstore2_info first, since v1 is being deprecated.",
+              "Data is included into this proto buffer",
+              "Data should be accessed from the current service\nusing the operation GetMedia.",
+              "The content for this media object is stored across\nmultiple partial media objects under the\ncomposite_media field.",
+              "Reference points to a bigstore object",
+              "Indicates the data is stored in diff_version_response.",
+              "Indicates the data is stored in diff_checksums_response.",
+              "Indicates the data is stored in diff_download_response.",
+              "Indicates the data is stored in diff_upload_request.",
+              "Indicates the data is stored in diff_upload_response.",
+              "Indicates the data is stored in cosmo_binary_reference.",
+              "Informs Scotty to generate a response payload with the size specified\nin the length field. The contents of the payload are generated by\nScotty and are undefined. This is useful for testing download speeds\nbetween the user and Scotty without involving a real payload source.\n\nNote: range is not supported when using arbitrary_bytes."
+            ]
+          },
+          "sha1Hash": {
+            "description": "Scotty-provided SHA1 hash for an upload.",
+            "format": "byte",
+            "type": "string"
+          },
+          "sha256Hash": {
+            "description": "Scotty-provided SHA256 hash for an upload.",
+            "format": "byte",
+            "type": "string"
+          },
+          "timestamp": {
+            "description": "Time at which the media data was last updated,\nin milliseconds since UNIX epoch",
+            "format": "uint64",
+            "type": "string"
+          },
+          "token": {
+            "description": "A unique fingerprint/version id for the media data",
+            "type": "string"
           }
         },
         "type": "object"
@@ -3912,6 +4422,25 @@
         ],
         "type": "object"
       },
+      "ObjectId": {
+        "description": "This is a copy of the tech.blob.ObjectId proto, which could not\nbe used directly here due to transitive closure issues with\nJavaScript support; see http://b/8801763.",
+        "properties": {
+          "bucketName": {
+            "description": "The name of the bucket to which this object belongs.",
+            "type": "string"
+          },
+          "generation": {
+            "description": "Generation of the object. Generations are monotonically increasing\nacross writes, allowing them to be be compared to determine which\ngeneration is newer. If this is omitted in a request, then you are\nrequesting the live object.\nSee http://go/bigstore-versions",
+            "format": "int64",
+            "type": "string"
+          },
+          "objectName": {
+            "description": "The name of the object.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Operation": {
         "allOf": [
           {
@@ -4905,7 +5434,7 @@
             "type": "integer"
           },
           "thinkingLevel": {
-            "description": "Optional. Controls the maximum depth of the model's internal reasoning process before\nit produces a response. If not specified, the default is HIGH. Recommended\nfor Gemini 3 or later models. Use with earlier models results in an error.",
+            "description": "Optional. Controls the maximum depth of the model's internal reasoning process before\nit produces a response. The default value is model-dependent. Refer to the\n[Thinking levels\nguide](https://ai.google.dev/gemini-api/docs/thinking#thinking-levels) for\nmore details. Recommended for Gemini 3 or later models. Use with earlier\nmodels results in an error.",
             "enum": [
               "THINKING_LEVEL_UNSPECIFIED",
               "MINIMAL",
@@ -5520,6 +6049,15 @@
             "readOnly": true,
             "type": "array"
           },
+          "serviceTier": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ServiceTier"
+              }
+            ],
+            "description": "Output only. Service tier of the request.",
+            "readOnly": true
+          },
           "thoughtsTokenCount": {
             "description": "Output only. Number of tokens of thoughts for thinking models.",
             "format": "int32",
@@ -5541,7 +6079,7 @@
             "type": "array"
           },
           "totalTokenCount": {
-            "description": "Total token count for the generation request (prompt + response\ncandidates).",
+            "description": "Total token count for the generation request (prompt + thoughts +\nresponse candidates).",
             "format": "int32",
             "type": "integer"
           }
@@ -5689,7 +6227,7 @@
     "description": "The Gemini API allows developers to build generative AI applications using Gemini models. Gemini is our most capable model, built from the ground up to be multimodal. It can generalize and seamlessly understand, operate across, and combine different types of information including language, images, audio, video, and code. You can use the Gemini API for use cases like reasoning across text and images, content generation, dialogue agents, summarization and classification systems, and more.",
     "title": "Gemini API",
     "version": "v1beta",
-    "x-google-revision": "20260501"
+    "x-google-revision": "20260506"
   },
   "openapi": "3.0.3",
   "paths": {
@@ -7007,6 +7545,62 @@
           "generativelanguage"
         ]
       }
+    },
+    "/v1beta/fileSearchStores/{fileSearchStoresId}/media/{mediaId}": {
+      "get": {
+        "description": "Downloads media from a `FileSearchStore`.",
+        "operationId": "DownloadMedia",
+        "parameters": [
+          {
+            "description": "Part of `name`. Required. The resource name of the media to download.\nExample: `fileSearchStores/abc-123/media/blob123`",
+            "in": "path",
+            "name": "fileSearchStoresId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Part of `name`. See documentation of `fileSearchStoresId`.",
+            "in": "path",
+            "name": "mediaId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DownloadMediaResponse"
+                }
+              }
+            },
+            "description": "Successful operation"
+          }
+        },
+        "security": [],
+        "tags": [
+          "generativelanguage"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/alt"
+        },
+        {
+          "$ref": "#/components/parameters/callback"
+        },
+        {
+          "$ref": "#/components/parameters/prettyPrint"
+        },
+        {
+          "$ref": "#/components/parameters/_.xgafv"
+        }
+      ]
     },
     "/v1beta/fileSearchStores/{fileSearchStoresId}/upload/operations/{operationsId}": {
       "get": {

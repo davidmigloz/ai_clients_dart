@@ -476,6 +476,36 @@ class FileSearchStoresResource extends ResourceBase {
     await interceptorChain.execute(httpRequest);
   }
 
+  /// Downloads the raw media bytes for a chunk in a file search store.
+  ///
+  /// The [fileSearchStoreName] is the resource name of the store
+  /// (e.g., `fileSearchStores/my-store-123`). [mediaId] identifies the media
+  /// within that store.
+  ///
+  /// Returns the raw byte payload. The request sends `alt=media` so the
+  /// server returns the media bytes directly rather than a JSON envelope.
+  ///
+  /// GET /v1beta/{fileSearchStoreName}/media/{mediaId}?alt=media
+  Future<List<int>> downloadMedia({
+    required String fileSearchStoreName,
+    required String mediaId,
+  }) async {
+    _validateGoogleAIOnly();
+
+    final url = requestBuilder.buildUrl(
+      '/{version}/$fileSearchStoreName/media/$mediaId',
+      queryParams: const {'alt': 'media'},
+    );
+
+    final headers = requestBuilder.buildHeaders();
+
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+
+    final response = await interceptorChain.execute(httpRequest);
+
+    return response.bodyBytes;
+  }
+
   /// Maps HTTP errors for streaming (mirrors ErrorInterceptor logic).
   GoogleAIException _mapHttpErrorForStreaming(http.Response response) {
     final statusCode = response.statusCode;

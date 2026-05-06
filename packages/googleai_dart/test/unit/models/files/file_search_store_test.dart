@@ -14,6 +14,7 @@ void main() {
           'pendingDocumentsCount': '2',
           'failedDocumentsCount': '1',
           'sizeBytes': '1048576',
+          'embeddingModel': 'models/gemini-embedding-2',
         };
 
         final store = FileSearchStore.fromJson(json);
@@ -26,6 +27,7 @@ void main() {
         expect(store.pendingDocumentsCount, '2');
         expect(store.failedDocumentsCount, '1');
         expect(store.sizeBytes, '1048576');
+        expect(store.embeddingModel, 'models/gemini-embedding-2');
       });
 
       test('creates FileSearchStore with minimal fields', () {
@@ -41,6 +43,7 @@ void main() {
         expect(store.pendingDocumentsCount, isNull);
         expect(store.failedDocumentsCount, isNull);
         expect(store.sizeBytes, isNull);
+        expect(store.embeddingModel, isNull);
       });
     });
 
@@ -77,6 +80,18 @@ void main() {
         expect(json['name'], 'fileSearchStores/test-123');
         expect(json.containsKey('displayName'), false);
         expect(json.containsKey('activeDocumentsCount'), false);
+        expect(json.containsKey('embeddingModel'), false);
+      });
+
+      test('emits embeddingModel when set', () {
+        const store = FileSearchStore(
+          name: 'fileSearchStores/multimodal',
+          embeddingModel: 'models/gemini-embedding-2',
+        );
+
+        final json = store.toJson();
+
+        expect(json['embeddingModel'], 'models/gemini-embedding-2');
       });
     });
 
@@ -90,19 +105,13 @@ void main() {
         pendingDocumentsCount: '1',
         failedDocumentsCount: '0',
         sizeBytes: '512000',
+        embeddingModel: 'models/gemini-embedding-2',
       );
 
       final json = original.toJson();
       final restored = FileSearchStore.fromJson(json);
 
-      expect(restored.name, original.name);
-      expect(restored.displayName, original.displayName);
-      expect(restored.createTime, original.createTime);
-      expect(restored.updateTime, original.updateTime);
-      expect(restored.activeDocumentsCount, original.activeDocumentsCount);
-      expect(restored.pendingDocumentsCount, original.pendingDocumentsCount);
-      expect(restored.failedDocumentsCount, original.failedDocumentsCount);
-      expect(restored.sizeBytes, original.sizeBytes);
+      expect(restored, original);
     });
 
     group('copyWith', () {
@@ -127,19 +136,32 @@ void main() {
         const original = FileSearchStore(
           name: 'fileSearchStores/test',
           displayName: 'Test',
+          embeddingModel: 'models/gemini-embedding-2',
         );
 
-        final copy = original.copyWith(displayName: null);
+        final copy = original.copyWith(displayName: null, embeddingModel: null);
 
         expect(copy.name, 'fileSearchStores/test');
         expect(copy.displayName, isNull);
+        expect(copy.embeddingModel, isNull);
+      });
+
+      test('updates embeddingModel', () {
+        const original = FileSearchStore(name: 'fileSearchStores/x');
+
+        final copy = original.copyWith(
+          embeddingModel: 'models/gemini-embedding-2',
+        );
+
+        expect(copy.embeddingModel, 'models/gemini-embedding-2');
       });
     });
 
-    test('toString includes all fields', () {
+    test('toString includes embeddingModel', () {
       const store = FileSearchStore(
         name: 'fileSearchStores/test-456',
         displayName: 'Test Display',
+        embeddingModel: 'models/gemini-embedding-2',
       );
 
       final str = store.toString();
@@ -147,6 +169,38 @@ void main() {
       expect(str, contains('FileSearchStore('));
       expect(str, contains('name: fileSearchStores/test-456'));
       expect(str, contains('displayName: Test Display'));
+      expect(str, contains('embeddingModel: models/gemini-embedding-2'));
+    });
+
+    group('equality', () {
+      test('two instances with the same fields are equal', () {
+        const a = FileSearchStore(
+          name: 'fileSearchStores/eq',
+          displayName: 'Eq',
+          embeddingModel: 'models/gemini-embedding-2',
+        );
+        const b = FileSearchStore(
+          name: 'fileSearchStores/eq',
+          displayName: 'Eq',
+          embeddingModel: 'models/gemini-embedding-2',
+        );
+
+        expect(a, b);
+        expect(a.hashCode, b.hashCode);
+      });
+
+      test('differing embeddingModel makes instances unequal', () {
+        const a = FileSearchStore(
+          name: 'fileSearchStores/eq',
+          embeddingModel: 'models/gemini-embedding-2',
+        );
+        const b = FileSearchStore(
+          name: 'fileSearchStores/eq',
+          embeddingModel: 'models/text-embedding-004',
+        );
+
+        expect(a, isNot(b));
+      });
     });
   });
 }
