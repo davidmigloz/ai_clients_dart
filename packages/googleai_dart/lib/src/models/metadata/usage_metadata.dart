@@ -230,9 +230,12 @@ class UsageMetadata {
       'cachedContentTokenCount: $cachedContentTokenCount, '
       'thoughtsTokenCount: $thoughtsTokenCount, '
       'toolUsePromptTokenCount: $toolUsePromptTokenCount, '
-      'cacheTokensDetails: ${cacheTokensDetails?.length} items, '
-      'candidatesTokensDetails: ${candidatesTokensDetails?.length} items, '
-      'promptTokensDetails: ${promptTokensDetails?.length} items, '
-      'toolUsePromptTokensDetails: ${toolUsePromptTokensDetails?.length} items, '
+      'cacheTokensDetails: ${_summarize(cacheTokensDetails)}, '
+      'candidatesTokensDetails: ${_summarize(candidatesTokensDetails)}, '
+      'promptTokensDetails: ${_summarize(promptTokensDetails)}, '
+      'toolUsePromptTokensDetails: ${_summarize(toolUsePromptTokensDetails)}, '
       'serviceTier: $serviceTier)';
 }
+
+String _summarize(List<Object?>? list) =>
+    list == null ? 'null' : '${list.length} items';

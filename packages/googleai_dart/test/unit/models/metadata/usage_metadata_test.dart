@@ -193,6 +193,26 @@ void main() {
       expect(str, contains('serviceTier: ServiceTier.flex'));
     });
 
+    test('toString renders absent lists as "null", not "null items"', () {
+      const usage = UsageMetadata(promptTokenCount: 1);
+
+      final str = usage.toString();
+
+      expect(str, contains('cacheTokensDetails: null'));
+      expect(str, isNot(contains('cacheTokensDetails: null items')));
+      expect(str, contains('candidatesTokensDetails: null'));
+      expect(str, contains('promptTokensDetails: null'));
+      expect(str, contains('toolUsePromptTokensDetails: null'));
+    });
+
+    test('toString renders empty lists as "0 items"', () {
+      const usage = UsageMetadata(cacheTokensDetails: []);
+
+      final str = usage.toString();
+
+      expect(str, contains('cacheTokensDetails: 0 items'));
+    });
+
     group('equality', () {
       test('instances with identical lists are equal', () {
         const a = UsageMetadata(
