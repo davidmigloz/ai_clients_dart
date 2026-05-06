@@ -1565,6 +1565,128 @@
       "tags": [
         "acknowledged"
       ]
+    },
+    "FileSearchStore": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "FileSearchStore",
+      "file": "lib/src/models/files/file_search_store.dart",
+      "schema": "FileSearchStore"
+    },
+    "UsageMetadata": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UsageMetadata",
+      "file": "lib/src/models/metadata/usage_metadata.dart",
+      "schema": "UsageMetadata"
+    },
+    "DownloadMediaResponse": {
+      "spec": "main",
+      "schema": "DownloadMediaResponse",
+      "kind": "skip",
+      "note": "Wire envelope around GdataMedia for GET /fileSearchStores/{id}/media/{mediaId}. Exposed in Dart as Future<List<int>> downloadMedia() in FileSearchStoresResource. Not modeled in python-genai or js-genai.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "GdataMedia": {
+      "spec": "main",
+      "schema": "GdataMedia",
+      "kind": "skip",
+      "note": "Internal Google Scotty/Bigstore media descriptor; surfaces only inside DownloadMediaResponse. Exposed as raw bytes via FileSearchStoresResource.downloadMedia(). Not modeled in python-genai or js-genai.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "Blobstore2Info": {
+      "spec": "main",
+      "schema": "Blobstore2Info",
+      "kind": "skip",
+      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "CompositeMedia": {
+      "spec": "main",
+      "schema": "CompositeMedia",
+      "kind": "skip",
+      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "ContentTypeInfo": {
+      "spec": "main",
+      "schema": "ContentTypeInfo",
+      "kind": "skip",
+      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "DiffChecksumsResponse": {
+      "spec": "main",
+      "schema": "DiffChecksumsResponse",
+      "kind": "skip",
+      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "DiffDownloadResponse": {
+      "spec": "main",
+      "schema": "DiffDownloadResponse",
+      "kind": "skip",
+      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "DiffUploadRequest": {
+      "spec": "main",
+      "schema": "DiffUploadRequest",
+      "kind": "skip",
+      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "DiffUploadResponse": {
+      "spec": "main",
+      "schema": "DiffUploadResponse",
+      "kind": "skip",
+      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "DiffVersionResponse": {
+      "spec": "main",
+      "schema": "DiffVersionResponse",
+      "kind": "skip",
+      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "DownloadParameters": {
+      "spec": "main",
+      "schema": "DownloadParameters",
+      "kind": "skip",
+      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "ObjectId": {
+      "spec": "main",
+      "schema": "ObjectId",
+      "kind": "skip",
+      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia and CompositeMedia. See GdataMedia entry.",
+      "tags": [
+        "acknowledged"
+      ]
     }
   }
 }

@@ -1,6 +1,9 @@
+import 'package:meta/meta.dart';
+
 import '../copy_with_sentinel.dart';
 
 /// Represents token counting info for a single modality.
+@immutable
 class ModalityTokenCount {
   /// The modality associated with this token count.
   final String? modality;
@@ -38,4 +41,19 @@ class ModalityTokenCount {
           : tokenCount as int?,
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is ModalityTokenCount &&
+        other.modality == modality &&
+        other.tokenCount == tokenCount;
+  }
+
+  @override
+  int get hashCode => Object.hash(modality, tokenCount);
+
+  @override
+  String toString() =>
+      'ModalityTokenCount(modality: $modality, tokenCount: $tokenCount)';
 }
