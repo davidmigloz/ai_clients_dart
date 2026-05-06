@@ -80,6 +80,9 @@ void main() {
           req.url.path,
           '/v1beta/fileSearchStores/my-store-123/media/media-abc-456',
         );
+        // alt=media is required so the server returns raw bytes rather than
+        // a JSON DownloadMediaResponse envelope.
+        expect(req.url.queryParameters['alt'], 'media');
       },
     );
 
