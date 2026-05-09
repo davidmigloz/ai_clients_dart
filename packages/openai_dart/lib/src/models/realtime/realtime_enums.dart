@@ -1,45 +1,31 @@
 import 'package:meta/meta.dart';
 
 // =============================================================================
-// RealtimeVoice
+// NoiseReductionType
 // =============================================================================
 
-/// Voice options for realtime audio output.
+/// Noise reduction profile for the input audio buffer.
 ///
-/// These are the available voices for generating audio responses
-/// in realtime sessions.
-enum RealtimeVoice {
-  /// Alloy voice.
-  alloy._('alloy'),
+/// `near_field` is for close-talking microphones such as headphones;
+/// `far_field` is for far-field microphones such as conference-room mics or
+/// laptops.
+///
+/// Unknown values from `fromJson` throw `FormatException`, matching the
+/// existing convention used by other realtime enums.
+enum NoiseReductionType {
+  /// Close-talking microphone profile.
+  nearField._('near_field'),
 
-  /// Ash voice.
-  ash._('ash'),
+  /// Far-field microphone profile.
+  farField._('far_field');
 
-  /// Ballad voice.
-  ballad._('ballad'),
+  const NoiseReductionType._(this._value);
 
-  /// Coral voice.
-  coral._('coral'),
-
-  /// Echo voice.
-  echo._('echo'),
-
-  /// Sage voice.
-  sage._('sage'),
-
-  /// Shimmer voice.
-  shimmer._('shimmer'),
-
-  /// Verse voice.
-  verse._('verse');
-
-  const RealtimeVoice._(this._value);
-
-  /// Creates from JSON string.
-  factory RealtimeVoice.fromJson(String json) {
+  /// Creates from JSON string. Throws `FormatException` for unknown values.
+  factory NoiseReductionType.fromJson(String json) {
     return values.firstWhere(
       (e) => e._value == json,
-      orElse: () => throw FormatException('Unknown RealtimeVoice: $json'),
+      orElse: () => throw FormatException('Unknown NoiseReductionType: $json'),
     );
   }
 
@@ -53,62 +39,40 @@ enum RealtimeVoice {
 }
 
 // =============================================================================
-// RealtimeAudioFormat
+// AudioTranscriptionDelay
 // =============================================================================
 
-/// Audio format for realtime sessions.
+/// Transcription latency-vs-accuracy delay knob.
 ///
-/// Specifies the encoding format for audio input and output.
-enum RealtimeAudioFormat {
-  /// 16-bit PCM audio.
-  pcm16._('pcm16'),
+/// Higher values trade latency for accuracy. Only supported with
+/// `gpt-realtime-whisper` in Realtime sessions.
+///
+/// Unknown values from `fromJson` throw `FormatException`, matching the
+/// existing convention used by other realtime enums.
+enum AudioTranscriptionDelay {
+  /// Lowest latency, lowest accuracy.
+  minimal._('minimal'),
 
-  /// G.711 μ-law audio.
-  g711Ulaw._('g711_ulaw'),
+  /// Low transcription delay.
+  low._('low'),
 
-  /// G.711 A-law audio.
-  g711Alaw._('g711_alaw');
+  /// Medium transcription delay.
+  medium._('medium'),
 
-  const RealtimeAudioFormat._(this._value);
+  /// High transcription delay.
+  high._('high'),
 
-  /// Creates from JSON string.
-  factory RealtimeAudioFormat.fromJson(String json) {
+  /// Highest latency, highest accuracy.
+  xhigh._('xhigh');
+
+  const AudioTranscriptionDelay._(this._value);
+
+  /// Creates from JSON string. Throws `FormatException` for unknown values.
+  factory AudioTranscriptionDelay.fromJson(String json) {
     return values.firstWhere(
       (e) => e._value == json,
-      orElse: () => throw FormatException('Unknown RealtimeAudioFormat: $json'),
-    );
-  }
-
-  final String _value;
-
-  /// Converts to JSON string.
-  String toJson() => _value;
-
-  @override
-  String toString() => _value;
-}
-
-// =============================================================================
-// TurnDetectionType
-// =============================================================================
-
-/// Turn detection type for realtime sessions.
-///
-/// Determines how the server detects when the user has finished speaking.
-enum TurnDetectionType {
-  /// Server-side voice activity detection.
-  serverVad._('server_vad'),
-
-  /// No automatic turn detection.
-  none._('none');
-
-  const TurnDetectionType._(this._value);
-
-  /// Creates from JSON string.
-  factory TurnDetectionType.fromJson(String json) {
-    return values.firstWhere(
-      (e) => e._value == json,
-      orElse: () => throw FormatException('Unknown TurnDetectionType: $json'),
+      orElse: () =>
+          throw FormatException('Unknown AudioTranscriptionDelay: $json'),
     );
   }
 

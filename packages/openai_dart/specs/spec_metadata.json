@@ -2,10 +2,17 @@
   "specs": {
     "main": {
       "current_version": "2.3.0",
-      "last_fetched": "2026-05-02T08:00:03.586206Z",
-      "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/openai%2Fopenai-64c6ba619ccbf87e56b4f464230d04401fd78ad924d2606176309d19ca281af5.yml",
+      "last_fetched": "2026-05-07T22:20:39.687825Z",
+      "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/openai/openai-371f497afe4d6070f6e252e5febbe8f453c7058a8dff0c26a01b4d88442a4ac2.yml",
       "title": "OpenAI API",
-      "version_history": []
+      "version_history": [
+        {
+          "version": "2.3.0",
+          "fetched_at": "2026-05-02T08:00:03.586206Z",
+          "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/openai%2Fopenai-64c6ba619ccbf87e56b4f464230d04401fd78ad924d2606176309d19ca281af5.yml",
+          "note": "Pre-GA Realtime spec; replaced by 371f497… on 2026-05-08 to pick up GA Realtime sessions, Realtime Translation API, gpt-realtime-2/translate/whisper models, and transcription delay."
+        }
+      ]
     }
   }
 }

@@ -15,18 +15,22 @@ import 'base_resource.dart';
 /// ## Example
 ///
 /// ```dart
-/// // Create a realtime session with ephemeral key
-/// final session = await client.realtimeSessions.create(
-///   RealtimeSessionCreateRequest(
-///     model: 'gpt-realtime-1.5',
-///     voice: RealtimeVoice.alloy,
+/// // Create a realtime session and a separate ephemeral client secret
+/// final secret = await client.realtimeSessions.createClientSecret(
+///   RealtimeClientSecretCreateRequest(
+///     session: RealtimeSessionCreateRequest(
+///       model: 'gpt-realtime-2',
+///       audio: RealtimeAudioConfig(
+///         output: RealtimeAudioConfigOutput(voice: 'alloy'),
+///       ),
+///     ),
 ///   ),
 /// );
 ///
 /// // Use the client secret for WebSocket connection
 /// final ws = await WebSocket.connect(
 ///   'wss://api.openai.com/v1/realtime',
-///   headers: {'Authorization': 'Bearer ${session.clientSecret.value}'},
+///   headers: {'Authorization': 'Bearer ${secret.value}'},
 /// );
 /// ```
 class RealtimeSessionsResource extends ResourceBase {
@@ -39,11 +43,10 @@ class RealtimeSessionsResource extends ResourceBase {
     super.ensureNotClosed,
   });
 
-  static const _sessionsEndpoint = '/realtime/sessions';
-  static const _transcriptionEndpoint = '/realtime/transcription_sessions';
   static const _clientSecretsEndpoint = '/realtime/client_secrets';
 
   RealtimeCallsResource? _calls;
+  RealtimeTranslationsResource? _translations;
 
   /// Access to WebRTC call operations.
   RealtimeCallsResource get calls => _calls ??= RealtimeCallsResource(
@@ -54,105 +57,19 @@ class RealtimeSessionsResource extends ResourceBase {
     ensureNotClosed: ensureNotClosed,
   );
 
-  /// Creates a realtime session with an ephemeral API key.
+  /// Access to Realtime translation operations.
   ///
-  /// This endpoint creates a session configuration and returns an ephemeral
-  /// client secret that can be used to authenticate WebSocket connections
-  /// without exposing your main API key.
-  ///
-  /// ## Parameters
-  ///
-  /// - [request] - The session creation request parameters.
-  ///
-  /// ## Returns
-  ///
-  /// A [RealtimeSessionCreateResponse] containing the session configuration
-  /// and client secret.
-  ///
-  /// ## Example
-  ///
-  /// ```dart
-  /// final session = await client.realtimeSessions.create(
-  ///   RealtimeSessionCreateRequest(
-  ///     model: 'gpt-realtime-1.5',
-  ///     voice: RealtimeVoice.alloy,
-  ///     instructions: 'You are a helpful assistant.',
-  ///     turnDetection: TurnDetection(
-  ///       type: TurnDetectionType.serverVad,
-  ///       threshold: 0.5,
-  ///     ),
-  ///   ),
-  /// );
-  ///
-  /// print('Session ID: ${session.id}');
-  /// print('Client secret: ${session.clientSecret.value}');
-  /// ```
-  Future<RealtimeSessionCreateResponse> create(
-    RealtimeSessionCreateRequest request, {
-    Future<void>? abortTrigger,
-  }) async {
-    ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl(_sessionsEndpoint);
-    final headers = requestBuilder.buildHeaders();
-    final httpRequest = http.Request('POST', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
-    final response = await interceptorChain.execute(
-      httpRequest,
-      abortTrigger: abortTrigger,
-    );
-    return RealtimeSessionCreateResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
-  }
-
-  /// Creates a realtime transcription session.
-  ///
-  /// Transcription sessions are optimized for audio-to-text scenarios
-  /// without generating audio responses.
-  ///
-  /// ## Parameters
-  ///
-  /// - [request] - The transcription session creation request.
-  ///
-  /// ## Returns
-  ///
-  /// A [RealtimeTranscriptionSessionCreateResponse] containing the session
-  /// configuration and client secret.
-  ///
-  /// ## Example
-  ///
-  /// ```dart
-  /// final session = await client.realtimeSessions.createTranscription(
-  ///   RealtimeTranscriptionSessionCreateRequest(
-  ///     inputAudioFormat: RealtimeAudioFormat.pcm16,
-  ///     inputAudioTranscription: InputAudioTranscription(
-  ///       model: 'whisper-1',
-  ///     ),
-  ///     turnDetection: TurnDetection(
-  ///       type: TurnDetectionType.serverVad,
-  ///     ),
-  ///   ),
-  /// );
-  /// ```
-  Future<RealtimeTranscriptionSessionCreateResponse> createTranscription(
-    RealtimeTranscriptionSessionCreateRequest request, {
-    Future<void>? abortTrigger,
-  }) async {
-    ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl(_transcriptionEndpoint);
-    final headers = requestBuilder.buildHeaders();
-    final httpRequest = http.Request('POST', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
-    final response = await interceptorChain.execute(
-      httpRequest,
-      abortTrigger: abortTrigger,
-    );
-    return RealtimeTranscriptionSessionCreateResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
-  }
+  /// Mirrors the Python SDK split (`client.realtime.client_secrets` /
+  /// `client.realtime.calls`) — final user-facing path:
+  /// `client.realtimeSessions.translations.createClientSecret(...)`.
+  RealtimeTranslationsResource get translations =>
+      _translations ??= RealtimeTranslationsResource(
+        config: config,
+        httpClient: httpClient,
+        interceptorChain: interceptorChain,
+        requestBuilder: requestBuilder,
+        ensureNotClosed: ensureNotClosed,
+      );
 
   /// Creates a client secret with custom configuration.
   ///
@@ -175,8 +92,10 @@ class RealtimeSessionsResource extends ResourceBase {
   ///   RealtimeClientSecretCreateRequest(
   ///     expiresAfter: ExpiresAfter(anchor: 'created_at', seconds: 3600),
   ///     session: RealtimeSessionCreateRequest(
-  ///       model: 'gpt-realtime-1.5',
-  ///       voice: RealtimeVoice.shimmer,
+  ///       model: 'gpt-realtime-2',
+  ///       audio: RealtimeAudioConfig(
+  ///         output: RealtimeAudioConfigOutput(voice: 'shimmer'),
+  ///       ),
   ///     ),
   ///   ),
   /// );
@@ -187,13 +106,48 @@ class RealtimeSessionsResource extends ResourceBase {
   Future<RealtimeClientSecretCreateResponse> createClientSecret(
     RealtimeClientSecretCreateRequest request, {
     Future<void>? abortTrigger,
+  }) => _postClientSecret(request.toJson(), abortTrigger: abortTrigger);
+
+  /// Creates an ephemeral client secret for a **transcription** session.
+  ///
+  /// Transcription sessions use a different shape than realtime sessions —
+  /// they don't carry a `model` on the inner session payload. This helper
+  /// posts to the same `/realtime/client_secrets` endpoint with the
+  /// transcription discriminator (`type: 'transcription'`).
+  ///
+  /// ## Example
+  ///
+  /// ```dart
+  /// final response =
+  ///     await client.realtimeSessions.createTranscriptionClientSecret(
+  ///   RealtimeTranscriptionClientSecretCreateRequest(
+  ///     session: RealtimeTranscriptionSessionCreateRequest(
+  ///       audio: RealtimeTranscriptionSessionAudio(
+  ///         input: RealtimeAudioConfigInput(
+  ///           transcription: InputAudioTranscription(
+  ///             model: 'gpt-realtime-whisper',
+  ///           ),
+  ///         ),
+  ///       ),
+  ///     ),
+  ///   ),
+  /// );
+  /// ```
+  Future<RealtimeClientSecretCreateResponse> createTranscriptionClientSecret(
+    RealtimeTranscriptionClientSecretCreateRequest request, {
+    Future<void>? abortTrigger,
+  }) => _postClientSecret(request.toJson(), abortTrigger: abortTrigger);
+
+  Future<RealtimeClientSecretCreateResponse> _postClientSecret(
+    Map<String, dynamic> body, {
+    Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl(_clientSecretsEndpoint);
     final headers = requestBuilder.buildHeaders();
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
+      ..body = jsonEncode(body);
     final response = await interceptorChain.execute(
       httpRequest,
       abortTrigger: abortTrigger,
@@ -245,8 +199,10 @@ class RealtimeCallsResource extends ResourceBase {
   ///   RealtimeCallCreateRequest(
   ///     sdp: myPeerConnection.localDescription.sdp,
   ///     session: RealtimeSessionCreateRequest(
-  ///       model: 'gpt-realtime-1.5',
-  ///       voice: RealtimeVoice.alloy,
+  ///       model: 'gpt-realtime-2',
+  ///       audio: RealtimeAudioConfig(
+  ///         output: RealtimeAudioConfigOutput(voice: 'alloy'),
+  ///       ),
   ///     ),
   ///   ),
   /// );
@@ -279,18 +235,53 @@ class RealtimeCallsResource extends ResourceBase {
     return response.body;
   }
 
-  /// Accepts an incoming SIP call.
+  /// Accepts an incoming SIP call, optionally overriding the realtime
+  /// session configuration.
   ///
   /// ## Parameters
   ///
   /// - [callId] - The ID of the call to accept.
-  Future<void> accept(String callId, {Future<void>? abortTrigger}) async {
+  /// - [request] - Optional session configuration to apply on accept
+  ///   (model, audio, instructions, tools, reasoning, tracing, …). When
+  ///   omitted, the call is accepted with the server's default session.
+  ///
+  /// ## Example
+  ///
+  /// ```dart
+  /// await client.realtimeSessions.calls.accept(
+  ///   callId,
+  ///   request: const RealtimeSessionCreateRequest(
+  ///     model: 'gpt-realtime-2',
+  ///     audio: RealtimeAudioConfig(
+  ///       output: RealtimeAudioConfigOutput(voice: 'alloy'),
+  ///     ),
+  ///     instructions: 'Greet the caller in English.',
+  ///   ),
+  /// );
+  /// ```
+  Future<void> accept(
+    String callId, {
+    RealtimeSessionCreateRequest? request,
+    Future<void>? abortTrigger,
+  }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('$_callsEndpoint/$callId/accept');
     final headers = requestBuilder.buildHeaders();
+    // The /realtime/calls/{id}/accept endpoint requires the `type`
+    // discriminator on the embedded session payload (whereas the bare
+    // /realtime/sessions endpoint rejects it). Inject `'realtime'` when
+    // the caller didn't set it explicitly — same trick as
+    // `RealtimeClientSecretCreateRequest.toJson`.
+    final Map<String, dynamic> body;
+    if (request != null) {
+      body = request.toJson();
+      body['type'] ??= 'realtime';
+    } else {
+      body = <String, dynamic>{};
+    }
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
-      ..body = jsonEncode(<String, dynamic>{});
+      ..body = jsonEncode(body);
     await interceptorChain.execute(httpRequest, abortTrigger: abortTrigger);
   }
 
@@ -365,5 +356,69 @@ class RealtimeCallsResource extends ResourceBase {
       ..headers.addAll(headers)
       ..body = jsonEncode(request?.toJson() ?? <String, dynamic>{});
     await interceptorChain.execute(httpRequest, abortTrigger: abortTrigger);
+  }
+}
+
+/// Resource for Realtime translation operations.
+///
+/// Translation sessions continuously translate input audio into the configured
+/// output language using `gpt-realtime-translate`.
+class RealtimeTranslationsResource extends ResourceBase {
+  /// Creates a [RealtimeTranslationsResource].
+  RealtimeTranslationsResource({
+    required super.config,
+    required super.httpClient,
+    required super.interceptorChain,
+    required super.requestBuilder,
+    super.ensureNotClosed,
+  });
+
+  static const _translationClientSecretsEndpoint =
+      '/realtime/translations/client_secrets';
+
+  /// Creates a translation client secret with session configuration.
+  ///
+  /// `POST /realtime/translations/client_secrets`. Returns an ephemeral
+  /// client secret that authenticates a translation WebSocket session.
+  ///
+  /// ## Example
+  ///
+  /// ```dart
+  /// final response =
+  ///     await client.realtimeSessions.translations.createClientSecret(
+  ///   RealtimeTranslationClientSecretCreateRequest(
+  ///     session: RealtimeTranslationSessionCreateRequest(
+  ///       model: 'gpt-realtime-translate',
+  ///       audio: RealtimeTranslationSessionAudio(
+  ///         input: RealtimeTranslationSessionAudioInput(
+  ///           transcription: RealtimeTranslationInputTranscription(
+  ///             model: 'gpt-realtime-whisper',
+  ///           ),
+  ///         ),
+  ///         output: RealtimeTranslationSessionAudioOutput(language: 'es'),
+  ///       ),
+  ///     ),
+  ///   ),
+  /// );
+  ///
+  /// print('Secret: ${response.value}');
+  /// ```
+  Future<RealtimeTranslationClientSecretCreateResponse> createClientSecret(
+    RealtimeTranslationClientSecretCreateRequest request, {
+    Future<void>? abortTrigger,
+  }) async {
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(_translationClientSecretsEndpoint);
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+    final response = await interceptorChain.execute(
+      httpRequest,
+      abortTrigger: abortTrigger,
+    );
+    return RealtimeTranslationClientSecretCreateResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 }
