@@ -21,9 +21,12 @@ Future<void> main() async {
     // Connect to a realtime session via WebSocket using the main API key.
     // This is suitable for server-side (Dart VM) usage.
     final ws = await client.realtime.connect(
-      model: 'gpt-realtime-1.5',
-      config: const realtime.SessionUpdateConfig(
-        voice: realtime.RealtimeVoice.alloy,
+      model: 'gpt-realtime-2',
+      config: const realtime.RealtimeSessionCreateRequest(
+        model: 'gpt-realtime-2',
+        audio: realtime.RealtimeAudioConfig(
+          output: realtime.RealtimeAudioConfigOutput(voice: 'alloy'),
+        ),
         instructions: 'You are a helpful assistant.',
       ),
     );
@@ -52,24 +55,29 @@ Future<void> main() async {
     print('\n=== Ephemeral Client Secret ===\n');
 
     // On web platforms, browsers cannot set custom headers on WebSocket
-    // connections. Use realtimeSessions.create() to obtain an ephemeral
-    // client secret, then pass it to your frontend to connect directly.
-    final session = await client.realtimeSessions.create(
-      const realtime.RealtimeSessionCreateRequest(
-        model: 'gpt-realtime-1.5',
-        voice: realtime.RealtimeVoice.alloy,
-        instructions: 'You are a helpful assistant.',
-        turnDetection: realtime.TurnDetection(
-          type: realtime.TurnDetectionType.serverVad,
+    // connections. Call createClientSecret() to obtain an ephemeral key,
+    // then pass it to your frontend to connect directly.
+    final secretResponse = await client.realtimeSessions.createClientSecret(
+      const realtime.RealtimeClientSecretCreateRequest(
+        session: realtime.RealtimeSessionCreateRequest(
+          model: 'gpt-realtime-2',
+          audio: realtime.RealtimeAudioConfig(
+            input: realtime.RealtimeAudioConfigInput(
+              turnDetection:
+                  realtime.RealtimeAudioInputTurnDetection.serverVad(),
+            ),
+            output: realtime.RealtimeAudioConfigOutput(voice: 'alloy'),
+          ),
+          instructions: 'You are a helpful assistant.',
         ),
       ),
     );
 
-    print('Session ID: ${session.id}');
-    print('Client secret: ${session.clientSecret?.value}');
-    print('Expires at: ${session.clientSecret?.expiresAt}');
-    // Use session.clientSecret.value as the Bearer token when connecting
-    // from a browser WebSocket client.
+    print('Session ID: ${secretResponse.session.id}');
+    print('Client secret: ${secretResponse.value}');
+    print('Expires at: ${secretResponse.expiresAt}');
+    // Use secretResponse.value as the Bearer token when connecting from a
+    // browser WebSocket client.
 
     // --- WebRTC: Create call with SDP exchange ---
     print('\n=== WebRTC: SDP Exchange ===\n');
@@ -88,8 +96,10 @@ Future<void> main() async {
     //   realtime.RealtimeCallCreateRequest(
     //     sdp: offer.sdp!,
     //     session: realtime.RealtimeSessionCreateRequest(
-    //       model: 'gpt-realtime-1.5',
-    //       voice: realtime.RealtimeVoice.alloy,
+    //       model: 'gpt-realtime-2',
+    //       audio: realtime.RealtimeAudioConfig(
+    //         output: realtime.RealtimeAudioConfigOutput(voice: 'alloy'),
+    //       ),
     //     ),
     //   ),
     // );
@@ -131,20 +141,53 @@ Future<void> main() async {
     // --- Transcription session ---
     print('\n=== Transcription Session ===\n');
 
-    final transcriptionSession = await client.realtimeSessions
-        .createTranscription(
-          const realtime.RealtimeTranscriptionSessionCreateRequest(
-            inputAudioFormat: realtime.RealtimeAudioFormat.pcm16,
-            inputAudioTranscription: realtime.InputAudioTranscription(
-              model: 'whisper-1',
-            ),
-            turnDetection: realtime.TurnDetection(
-              type: realtime.TurnDetectionType.serverVad,
+    // Transcription sessions are created via the GA client-secrets endpoint
+    // with `type: 'transcription'`.
+    final transcriptionSecret = await client.realtimeSessions
+        .createClientSecret(
+          const realtime.RealtimeClientSecretCreateRequest(
+            session: realtime.RealtimeSessionCreateRequest(
+              model: 'gpt-realtime-2',
+              type: 'transcription',
+              audio: realtime.RealtimeAudioConfig(
+                input: realtime.RealtimeAudioConfigInput(
+                  format: realtime.AudioPcm(rate: 24000),
+                  transcription: realtime.InputAudioTranscription(
+                    model: 'gpt-realtime-whisper',
+                    delay: realtime.AudioTranscriptionDelay.high,
+                  ),
+                ),
+              ),
             ),
           ),
         );
 
-    print('Client secret: ${transcriptionSession.clientSecret.value}');
+    print('Transcription session ID: ${transcriptionSecret.session.id}');
+
+    // --- Translation session (new in v6) ---
+    print('\n=== Translation Session ===\n');
+
+    final translationSecret = await client.realtimeSessions.translations
+        .createClientSecret(
+          const realtime.RealtimeTranslationClientSecretCreateRequest(
+            session: realtime.RealtimeTranslationSessionCreateRequest(
+              model: 'gpt-realtime-translate',
+              audio: realtime.RealtimeTranslationSessionAudio(
+                input: realtime.RealtimeTranslationSessionAudioInput(
+                  transcription: realtime.RealtimeTranslationInputTranscription(
+                    model: 'gpt-realtime-whisper',
+                  ),
+                ),
+                output: realtime.RealtimeTranslationSessionAudioOutput(
+                  language: 'es',
+                ),
+              ),
+            ),
+          ),
+        );
+
+    print('Translation secret: ${translationSecret.value}');
+    print('Translation session: ${translationSecret.session.id}');
 
     print('\nDone!');
   } on OpenAIException catch (e) {

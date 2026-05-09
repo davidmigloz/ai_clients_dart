@@ -19,7 +19,7 @@ import 'realtime/websocket_connector.dart';
 /// ```dart
 /// // Connect to realtime session
 /// final session = await client.realtime.connect(
-///   model: 'gpt-realtime-1.5',
+///   model: 'gpt-realtime-2',
 /// );
 ///
 /// // Listen for events
@@ -49,7 +49,7 @@ class RealtimeResource extends ResourceBase {
   ///
   /// ## Parameters
   ///
-  /// - [model] - The model to use (e.g., 'gpt-realtime-1.5').
+  /// - [model] - The model to use (e.g., 'gpt-realtime-2').
   /// - [config] - Optional session configuration.
   ///
   /// ## Returns
@@ -67,16 +67,19 @@ class RealtimeResource extends ResourceBase {
   ///
   /// ```dart
   /// final session = await client.realtime.connect(
-  ///   model: 'gpt-realtime-1.5',
-  ///   config: SessionUpdateConfig(
-  ///     voice: 'alloy',
+  ///   model: 'gpt-realtime-2',
+  ///   config: RealtimeSessionCreateRequest(
+  ///     model: 'gpt-realtime-2',
+  ///     audio: RealtimeAudioConfig(
+  ///       output: RealtimeAudioConfigOutput(voice: 'alloy'),
+  ///     ),
   ///     instructions: 'You are a helpful assistant.',
   ///   ),
   /// );
   /// ```
   Future<RealtimeConnection> connect({
     required String model,
-    SessionUpdateConfig? config,
+    RealtimeSessionCreateRequest? config,
   }) async {
     ensureNotClosed?.call();
 
@@ -135,6 +138,13 @@ class RealtimeResource extends ResourceBase {
 /// Use this to send and receive events from the Realtime API.
 class RealtimeConnection {
   RealtimeConnection._(this._socket) {
+    // Buffer events emitted before the first listener attaches; drain them
+    // when the broadcast stream gets its first subscriber. Without this,
+    // early frames from the server (notably `session.created`) get dropped
+    // because broadcast streams discard events when nobody is listening.
+    _eventController = StreamController<RealtimeEvent>.broadcast(
+      onListen: _drainBuffer,
+    );
     _subscription = _socket.events.listen(
       _handleEvent,
       onError: _handleError,
@@ -144,8 +154,39 @@ class RealtimeConnection {
 
   final WebSocket _socket;
   late final StreamSubscription<WebSocketEvent> _subscription;
-  final _eventController = StreamController<RealtimeEvent>.broadcast();
+  late final StreamController<RealtimeEvent> _eventController;
+  final List<_BufferedEvent> _earlyEvents = [];
+  bool _drained = false;
   bool _closed = false;
+
+  void _drainBuffer() {
+    if (_drained) return;
+    _drained = true;
+    for (final buffered in _earlyEvents) {
+      if (buffered.error != null) {
+        _eventController.addError(buffered.error!);
+      } else {
+        _eventController.add(buffered.event!);
+      }
+    }
+    _earlyEvents.clear();
+  }
+
+  void _emitEvent(RealtimeEvent event) {
+    if (_drained) {
+      _eventController.add(event);
+    } else {
+      _earlyEvents.add(_BufferedEvent.event(event));
+    }
+  }
+
+  void _emitError(Object error) {
+    if (_drained) {
+      _eventController.addError(error);
+    } else {
+      _earlyEvents.add(_BufferedEvent.error(error));
+    }
+  }
 
   /// Stream of events from the server.
   ///
@@ -186,14 +227,14 @@ class RealtimeConnection {
     try {
       final json = jsonDecode(message) as Map<String, dynamic>;
       final event = RealtimeEvent.fromJson(json);
-      _eventController.add(event);
+      _emitEvent(event);
     } catch (e) {
-      _eventController.addError(e);
+      _emitError(e);
     }
   }
 
   void _handleError(Object error) {
-    _eventController.addError(error);
+    _emitError(error);
   }
 
   void _handleDone() {
@@ -222,13 +263,20 @@ class RealtimeConnection {
   ///
   /// ```dart
   /// session.updateSession(
-  ///   SessionUpdateConfig(
-  ///     voice: 'shimmer',
+  ///   RealtimeSessionCreateRequest(
+  ///     model: 'gpt-realtime-2',
+  ///     audio: RealtimeAudioConfig(
+  ///       output: RealtimeAudioConfigOutput(voice: 'shimmer'),
+  ///     ),
   ///     temperature: 0.8,
   ///   ),
   /// );
   /// ```
-  void updateSession(SessionUpdateConfig config, {String? eventId}) {
+  ///
+  /// Per the spec, `model` and `voice` cannot be changed after the session
+  /// has produced audio output; the server will ignore those fields if you
+  /// supply them on update.
+  void updateSession(RealtimeSessionCreateRequest config, {String? eventId}) {
     send({
       'type': 'session.update',
       'event_id': ?eventId,
@@ -449,4 +497,14 @@ class RealtimeConnection {
     await _socket.close(code, reason);
     await _eventController.close();
   }
+}
+
+/// Internal: buffered event/error pair used while no listener is yet
+/// attached to [RealtimeConnection.events].
+class _BufferedEvent {
+  _BufferedEvent.event(RealtimeEvent this.event) : error = null;
+  _BufferedEvent.error(Object this.error) : event = null;
+
+  final RealtimeEvent? event;
+  final Object? error;
 }

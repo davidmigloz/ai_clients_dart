@@ -1,268 +1,430 @@
-import 'package:openai_dart/openai_dart.dart' show InfOrIntInf, InfOrIntValue;
+import 'package:openai_dart/openai_dart.dart' show InfOrInt;
 import 'package:openai_dart/openai_dart_realtime.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('RealtimeVoice', () {
-    test('fromJson parses all values', () {
-      expect(RealtimeVoice.fromJson('alloy'), RealtimeVoice.alloy);
-      expect(RealtimeVoice.fromJson('ash'), RealtimeVoice.ash);
-      expect(RealtimeVoice.fromJson('ballad'), RealtimeVoice.ballad);
-      expect(RealtimeVoice.fromJson('coral'), RealtimeVoice.coral);
-      expect(RealtimeVoice.fromJson('echo'), RealtimeVoice.echo);
-      expect(RealtimeVoice.fromJson('sage'), RealtimeVoice.sage);
-      expect(RealtimeVoice.fromJson('shimmer'), RealtimeVoice.shimmer);
-      expect(RealtimeVoice.fromJson('verse'), RealtimeVoice.verse);
+  group('RealtimeSessionCreateRequest (GA shape)', () {
+    test('minimal payload roundtrip omits type discriminator', () {
+      const request = RealtimeSessionCreateRequest(model: 'gpt-realtime');
+      final json = request.toJson();
+      // The bare `/realtime/sessions` endpoint rejects unknown parameters,
+      // so `type` must be omitted unless the caller (or the
+      // `/realtime/client_secrets` wrapper) sets it explicitly.
+      expect(json, {'model': 'gpt-realtime'});
+
+      final parsed = RealtimeSessionCreateRequest.fromJson(json);
+      expect(parsed.model, request.model);
+      expect(parsed.toJson(), json);
     });
 
-    test('toJson returns correct string', () {
-      expect(RealtimeVoice.alloy.toJson(), 'alloy');
-      expect(RealtimeVoice.shimmer.toJson(), 'shimmer');
+    test('explicit type discriminator is preserved on the wire', () {
+      const request = RealtimeSessionCreateRequest(
+        model: 'gpt-realtime',
+        type: 'realtime',
+      );
+      expect(request.toJson(), {'type': 'realtime', 'model': 'gpt-realtime'});
     });
 
-    test('fromJson throws on unknown value', () {
-      expect(() => RealtimeVoice.fromJson('unknown'), throwsFormatException);
+    test('client-secret wrapper injects the type discriminator', () {
+      const wrapped = RealtimeClientSecretCreateRequest(
+        session: RealtimeSessionCreateRequest(model: 'gpt-realtime-2'),
+      );
+      final json = wrapped.toJson();
+      // The bare session does not emit `type`, but the wrapper must.
+      expect((json['session'] as Map<String, dynamic>)['type'], 'realtime');
+    });
+
+    test('exhaustive payload roundtrip', () {
+      // Mirrors the Python SDK
+      // tests/api_resources/realtime/test_client_secrets.py
+      // ::test_method_create_with_all_params fixture, minus `prompt`.
+      final json = <String, dynamic>{
+        'type': 'realtime',
+        'model': 'gpt-realtime',
+        'audio': {
+          'input': {
+            'format': {'type': 'audio/pcm', 'rate': 24000},
+            'noise_reduction': {'type': 'near_field'},
+            'transcription': {
+              'delay': 'minimal',
+              'language': 'en',
+              'model': 'whisper-1',
+              'prompt': 'expect words about the weather',
+            },
+            'turn_detection': {
+              'type': 'server_vad',
+              'create_response': true,
+              'idle_timeout_ms': 5000,
+              'interrupt_response': true,
+              'prefix_padding_ms': 300,
+              'silence_duration_ms': 500,
+              'threshold': 0.5,
+            },
+          },
+          'output': {
+            'format': {'type': 'audio/pcm', 'rate': 24000},
+            'speed': 0.25,
+            'voice': 'alloy',
+          },
+        },
+        'output_modalities': ['text'],
+        'instructions': 'instructions',
+        'tools': [
+          {
+            'type': 'function',
+            'name': 'get_weather',
+            'description': 'Get the weather',
+            'parameters': {
+              'type': 'object',
+              'properties': {
+                'location': {'type': 'string'},
+              },
+            },
+          },
+        ],
+        'tool_choice': 'none',
+        'temperature': 0.8,
+        'max_output_tokens': 'inf',
+        'parallel_tool_calls': true,
+        'reasoning': {'effort': 'minimal'},
+        'tracing': 'auto',
+        'truncation': 'auto',
+        'include': ['item.input_audio_transcription.logprobs'],
+      };
+
+      final parsed = RealtimeSessionCreateRequest.fromJson(json);
+      expect(parsed.toJson(), json);
+
+      // Spot-check a few field types to catch typos.
+      expect(parsed.audio?.input?.format, const AudioPcm(rate: 24000));
+      expect(
+        parsed.audio?.input?.transcription?.delay,
+        AudioTranscriptionDelay.minimal,
+      );
+      expect(
+        parsed.audio?.input?.turnDetection,
+        isA<ServerVad>().having((v) => v.idleTimeoutMs, 'idleTimeoutMs', 5000),
+      );
+      expect(parsed.maxOutputTokens, isA<InfOrInt>());
+      expect(parsed.maxOutputTokens?.toJson(), 'inf');
+      expect(parsed.parallelToolCalls, true);
+      expect(parsed.reasoning?.effort, RealtimeReasoningEffort.minimal);
+      expect(parsed.tracing, isA<TracingAuto>());
+      expect(parsed.truncation, isA<TruncationAuto>());
+    });
+
+    test('format variant: AudioPcmu', () {
+      const request = RealtimeSessionCreateRequest(
+        model: 'gpt-realtime-2',
+        audio: RealtimeAudioConfig(
+          input: RealtimeAudioConfigInput(format: AudioPcmu()),
+        ),
+      );
+      final json = request.toJson();
+      expect((json['audio'] as Map)['input'], {
+        'format': {'type': 'audio/pcmu'},
+      });
+      final parsed = RealtimeSessionCreateRequest.fromJson(json);
+      expect(parsed.audio?.input?.format, const AudioPcmu());
+    });
+
+    test('format variant: AudioPcma', () {
+      const request = RealtimeSessionCreateRequest(
+        model: 'gpt-realtime-2',
+        audio: RealtimeAudioConfig(
+          output: RealtimeAudioConfigOutput(format: AudioPcma()),
+        ),
+      );
+      final json = request.toJson();
+      expect((json['audio'] as Map)['output'], {
+        'format': {'type': 'audio/pcma'},
+      });
+      final parsed = RealtimeSessionCreateRequest.fromJson(json);
+      expect(parsed.audio?.output?.format, const AudioPcma());
+    });
+
+    test('turn_detection semantic_vad variant', () {
+      final json = <String, dynamic>{
+        'type': 'realtime',
+        'model': 'gpt-realtime-2',
+        'audio': {
+          'input': {
+            'turn_detection': {
+              'type': 'semantic_vad',
+              'eagerness': 'auto',
+              'interrupt_response': true,
+            },
+          },
+        },
+      };
+      final parsed = RealtimeSessionCreateRequest.fromJson(json);
+      expect(parsed.audio?.input?.turnDetection, isA<SemanticVad>());
+      expect(parsed.toJson(), json);
+    });
+
+    test('truncation retention_ratio variant', () {
+      final json = <String, dynamic>{
+        'type': 'realtime',
+        'model': 'gpt-realtime-2',
+        'truncation': {'type': 'retention_ratio', 'retention_ratio': 0.8},
+      };
+      final parsed = RealtimeSessionCreateRequest.fromJson(json);
+      expect(parsed.truncation, isA<TruncationRetentionRatio>());
+      expect(
+        (parsed.truncation! as TruncationRetentionRatio).retentionRatio,
+        0.8,
+      );
+      expect(parsed.toJson(), json);
+    });
+
+    test('truncation retention_ratio with token_limits', () {
+      final json = <String, dynamic>{
+        'type': 'realtime',
+        'model': 'gpt-realtime-2',
+        'truncation': {
+          'type': 'retention_ratio',
+          'retention_ratio': 0.5,
+          'token_limits': {'post_instructions': 5000},
+        },
+      };
+      final parsed = RealtimeSessionCreateRequest.fromJson(json);
+      expect(
+        (parsed.truncation! as TruncationRetentionRatio)
+            .postInstructionsTokenLimit,
+        5000,
+      );
+      expect(parsed.toJson(), json);
+    });
+
+    test('truncation disabled variant', () {
+      final json = <String, dynamic>{
+        'type': 'realtime',
+        'model': 'gpt-realtime-2',
+        'truncation': 'disabled',
+      };
+      final parsed = RealtimeSessionCreateRequest.fromJson(json);
+      expect(parsed.truncation, isA<TruncationDisabled>());
+      expect(parsed.toJson(), json);
+    });
+
+    test('tracing TracingConfiguration variant', () {
+      final json = <String, dynamic>{
+        'type': 'realtime',
+        'model': 'gpt-realtime-2',
+        'tracing': {
+          'group_id': 'g-123',
+          'workflow_name': 'demo',
+          'metadata': {'env': 'staging'},
+        },
+      };
+      final parsed = RealtimeSessionCreateRequest.fromJson(json);
+      expect(parsed.tracing, isA<TracingConfiguration>());
+      final cfg = parsed.tracing! as TracingConfiguration;
+      expect(cfg.groupId, 'g-123');
+      expect(cfg.workflowName, 'demo');
+      expect(cfg.metadata, {'env': 'staging'});
+      expect(parsed.toJson(), json);
+    });
+
+    test('max_output_tokens integer variant', () {
+      final json = <String, dynamic>{
+        'type': 'realtime',
+        'model': 'gpt-realtime-2',
+        'max_output_tokens': 4096,
+      };
+      final parsed = RealtimeSessionCreateRequest.fromJson(json);
+      expect(parsed.maxOutputTokens?.toJson(), 4096);
+      expect(parsed.toJson(), json);
+    });
+
+    test('include omitted yields null and stays null on roundtrip', () {
+      const request = RealtimeSessionCreateRequest(model: 'gpt-realtime-2');
+      expect(request.include, isNull);
+      final parsed = RealtimeSessionCreateRequest.fromJson(request.toJson());
+      expect(parsed.include, isNull);
+    });
+
+    test('copyWith updates and clears nullable fields', () {
+      const request = RealtimeSessionCreateRequest(
+        model: 'gpt-realtime-2',
+        instructions: 'be helpful',
+        parallelToolCalls: true,
+      );
+      final updated = request.copyWith(instructions: 'be terse');
+      expect(updated.instructions, 'be terse');
+      expect(updated.parallelToolCalls, true);
+
+      final cleared = request.copyWith(instructions: null);
+      expect(cleared.instructions, isNull);
+      expect(cleared.parallelToolCalls, true);
+    });
+
+    test('toString includes key fields', () {
+      const request = RealtimeSessionCreateRequest(
+        model: 'gpt-realtime-2',
+        instructions: 'hi',
+        parallelToolCalls: true,
+      );
+      final str = request.toString();
+      expect(str, contains('gpt-realtime-2'));
+      expect(str, contains('hi'));
+      expect(str, contains('parallelToolCalls: true'));
     });
   });
 
-  group('RealtimeAudioFormat', () {
-    test('fromJson parses all values', () {
-      expect(RealtimeAudioFormat.fromJson('pcm16'), RealtimeAudioFormat.pcm16);
-      expect(
-        RealtimeAudioFormat.fromJson('g711_ulaw'),
-        RealtimeAudioFormat.g711Ulaw,
-      );
-      expect(
-        RealtimeAudioFormat.fromJson('g711_alaw'),
-        RealtimeAudioFormat.g711Alaw,
-      );
+  group('RealtimeSessionCreateResponse (GA shape)', () {
+    test('GA response roundtrip and omits client_secret', () {
+      final json = <String, dynamic>{
+        'id': 'sess_abc123',
+        'object': 'realtime.session',
+        'type': 'realtime',
+        'model': 'gpt-realtime-2',
+        'expires_at': 1714857600,
+        'audio': {
+          'output': {'voice': 'alloy'},
+        },
+      };
+      final parsed = RealtimeSessionCreateResponse.fromJson(json);
+      expect(parsed.id, 'sess_abc123');
+      expect(parsed.type, 'realtime');
+      expect(parsed.expiresAt, 1714857600);
+      expect(parsed.audio?.output?.voice, 'alloy');
+
+      final encoded = parsed.toJson();
+      expect(encoded, json);
+      // Regression guard: the GA response no longer has `client_secret`
+      // nested on the session object.
+      expect(encoded.containsKey('client_secret'), isFalse);
     });
 
-    test('toJson returns correct string', () {
-      expect(RealtimeAudioFormat.pcm16.toJson(), 'pcm16');
-      expect(RealtimeAudioFormat.g711Ulaw.toJson(), 'g711_ulaw');
+    test('fromJson defaults missing fields rather than throwing', () {
+      // Live API has been observed to omit these on early frames; the parser
+      // is intentionally lenient (defaults) rather than strict (throws).
+      final parsed = RealtimeSessionCreateResponse.fromJson(const {
+        'object': 'realtime.session',
+        'type': 'realtime',
+        'model': 'gpt-realtime-2',
+        'expires_at': 0,
+      });
+      expect(parsed.id, '');
+      expect(parsed.expiresAt, 0);
     });
   });
 
-  group('TurnDetectionType', () {
-    test('fromJson parses all values', () {
-      expect(
-        TurnDetectionType.fromJson('server_vad'),
-        TurnDetectionType.serverVad,
+  group('InputAudioTranscription', () {
+    test('roundtrips delay xhigh + gpt-realtime-whisper model', () {
+      const transcription = InputAudioTranscription(
+        delay: AudioTranscriptionDelay.xhigh,
+        model: 'gpt-realtime-whisper',
       );
-      expect(TurnDetectionType.fromJson('none'), TurnDetectionType.none);
+      final json = transcription.toJson();
+      expect(json, {'delay': 'xhigh', 'model': 'gpt-realtime-whisper'});
+
+      final parsed = InputAudioTranscription.fromJson(json);
+      expect(parsed, transcription);
     });
 
-    test('toJson returns correct string', () {
-      expect(TurnDetectionType.serverVad.toJson(), 'server_vad');
-      expect(TurnDetectionType.none.toJson(), 'none');
+    test('omits null delay', () {
+      const transcription = InputAudioTranscription(model: 'whisper-1');
+      expect(transcription.toJson(), {'model': 'whisper-1'});
+
+      final parsed = InputAudioTranscription.fromJson(transcription.toJson());
+      expect(parsed.delay, isNull);
+    });
+
+    test('copyWith clears delay', () {
+      const transcription = InputAudioTranscription(
+        model: 'gpt-realtime-whisper',
+        delay: AudioTranscriptionDelay.high,
+      );
+      final cleared = transcription.copyWith(delay: null);
+      expect(cleared.delay, isNull);
+      expect(cleared.model, 'gpt-realtime-whisper');
+    });
+
+    test('toString includes all fields', () {
+      const transcription = InputAudioTranscription(
+        delay: AudioTranscriptionDelay.medium,
+        language: 'en',
+        model: 'whisper-1',
+        prompt: 'guidance',
+      );
+      final str = transcription.toString();
+      expect(str, contains('medium'));
+      expect(str, contains('en'));
+      expect(str, contains('whisper-1'));
+      expect(str, contains('guidance'));
+    });
+  });
+
+  group('AudioTranscriptionDelay', () {
+    test('all values roundtrip', () {
+      for (final value in AudioTranscriptionDelay.values) {
+        expect(AudioTranscriptionDelay.fromJson(value.toJson()), value);
+      }
+    });
+
+    test('throws on unknown value', () {
+      expect(
+        () => AudioTranscriptionDelay.fromJson('zzz'),
+        throwsFormatException,
+      );
+    });
+  });
+
+  group('NoiseReductionType', () {
+    test('values roundtrip', () {
+      expect(
+        NoiseReductionType.fromJson('near_field'),
+        NoiseReductionType.nearField,
+      );
+      expect(
+        NoiseReductionType.fromJson('far_field'),
+        NoiseReductionType.farField,
+      );
+      expect(NoiseReductionType.nearField.toJson(), 'near_field');
+    });
+
+    test('throws on unknown value', () {
+      expect(
+        () => NoiseReductionType.fromJson('on_axis'),
+        throwsFormatException,
+      );
     });
   });
 
   group('RealtimeToolChoice', () {
-    test('auto() creates auto choice', () {
-      const choice = RealtimeToolChoice.auto();
-      expect(choice, isA<RealtimeToolChoiceAuto>());
-      expect(choice.toJson(), 'auto');
-    });
-
-    test('none() creates none choice', () {
-      const choice = RealtimeToolChoice.none();
-      expect(choice, isA<RealtimeToolChoiceNone>());
-      expect(choice.toJson(), 'none');
-    });
-
-    test('required() creates required choice', () {
-      const choice = RealtimeToolChoice.required();
-      expect(choice, isA<RealtimeToolChoiceRequired>());
-      expect(choice.toJson(), 'required');
-    });
-
-    test('function() creates function choice', () {
-      const choice = RealtimeToolChoice.function('get_weather');
-      expect(choice, isA<RealtimeToolChoiceFunction>());
-      expect(choice.toJson(), {
-        'type': 'function',
-        'function': {'name': 'get_weather'},
-      });
-    });
-
-    test('fromJson parses string choices', () {
+    test('string variants roundtrip', () {
       expect(
         RealtimeToolChoice.fromJson('auto'),
-        isA<RealtimeToolChoiceAuto>(),
+        const RealtimeToolChoiceAuto(),
       );
       expect(
         RealtimeToolChoice.fromJson('none'),
-        isA<RealtimeToolChoiceNone>(),
+        const RealtimeToolChoiceNone(),
       );
       expect(
         RealtimeToolChoice.fromJson('required'),
-        isA<RealtimeToolChoiceRequired>(),
+        const RealtimeToolChoiceRequired(),
       );
+      expect(const RealtimeToolChoiceAuto().toJson(), 'auto');
     });
 
-    test('fromJson parses function choice', () {
-      final choice = RealtimeToolChoice.fromJson({
+    test('function variant roundtrips', () {
+      const choice = RealtimeToolChoice.function('get_weather');
+      final json = choice.toJson();
+      expect(json, {
         'type': 'function',
-        'function': {'name': 'my_func'},
+        'function': {'name': 'get_weather'},
       });
-      expect(choice, isA<RealtimeToolChoiceFunction>());
-      expect((choice as RealtimeToolChoiceFunction).name, 'my_func');
-    });
-
-    test('equality works correctly', () {
       expect(
-        const RealtimeToolChoiceAuto(),
-        equals(const RealtimeToolChoiceAuto()),
-      );
-      expect(
-        const RealtimeToolChoiceFunction('test'),
-        equals(const RealtimeToolChoiceFunction('test')),
-      );
-      expect(
-        const RealtimeToolChoiceFunction('a'),
-        isNot(equals(const RealtimeToolChoiceFunction('b'))),
+        RealtimeToolChoice.fromJson(json),
+        const RealtimeToolChoiceFunction('get_weather'),
       );
     });
-  });
 
-  group('RealtimeSession', () {
-    test('fromJson parses correctly', () {
-      final json = {
-        'id': 'sess_abc123',
-        'object': 'realtime.session',
-        'model': 'gpt-realtime-1.5',
-        'modalities': ['text', 'audio'],
-        'instructions': 'You are a helpful assistant.',
-        'voice': 'alloy',
-        'input_audio_format': 'pcm16',
-        'output_audio_format': 'pcm16',
-        'turn_detection': {
-          'type': 'server_vad',
-          'threshold': 0.5,
-          'prefix_padding_ms': 300,
-          'silence_duration_ms': 500,
-        },
-        'tool_choice': 'auto',
-        'temperature': 0.7,
-        'max_response_output_tokens': 'inf',
-      };
-
-      final session = RealtimeSession.fromJson(json);
-
-      expect(session.id, 'sess_abc123');
-      expect(session.model, 'gpt-realtime-1.5');
-      expect(session.modalities, ['text', 'audio']);
-      expect(session.voice, RealtimeVoice.alloy);
-      expect(session.inputAudioFormat, RealtimeAudioFormat.pcm16);
-      expect(session.outputAudioFormat, RealtimeAudioFormat.pcm16);
-      expect(session.turnDetection?.type, TurnDetectionType.serverVad);
-      expect(session.turnDetection?.threshold, 0.5);
-      expect(session.toolChoice, isA<RealtimeToolChoiceAuto>());
-      expect(session.temperature, 0.7);
-      expect(session.maxResponseOutputTokens, isA<InfOrIntInf>());
-    });
-
-    test('fromJson parses numeric max tokens', () {
-      final json = {
-        'id': 'sess_abc123',
-        'object': 'realtime.session',
-        'model': 'gpt-realtime-1.5',
-        'max_response_output_tokens': 4096,
-      };
-
-      final session = RealtimeSession.fromJson(json);
-
-      expect(session.maxResponseOutputTokens, isA<InfOrIntValue>());
-      expect((session.maxResponseOutputTokens! as InfOrIntValue).value, 4096);
-    });
-
-    test('toJson serializes correctly', () {
-      const session = RealtimeSession(
-        id: 'sess_abc123',
-        object: 'realtime.session',
-        model: 'gpt-realtime-1.5',
-        voice: RealtimeVoice.shimmer,
-        inputAudioFormat: RealtimeAudioFormat.g711Ulaw,
-        toolChoice: RealtimeToolChoiceRequired(),
-        maxResponseOutputTokens: InfOrIntValue(2048),
-      );
-
-      final json = session.toJson();
-
-      expect(json['id'], 'sess_abc123');
-      expect(json['voice'], 'shimmer');
-      expect(json['input_audio_format'], 'g711_ulaw');
-      expect(json['tool_choice'], 'required');
-      expect(json['max_response_output_tokens'], 2048);
-    });
-  });
-
-  group('SessionUpdateConfig', () {
-    test('fromJson parses correctly', () {
-      final json = {
-        'voice': 'coral',
-        'temperature': 0.8,
-        'tool_choice': 'none',
-        'max_response_output_tokens': 'inf',
-      };
-
-      final config = SessionUpdateConfig.fromJson(json);
-
-      expect(config.voice, RealtimeVoice.coral);
-      expect(config.temperature, 0.8);
-      expect(config.toolChoice, isA<RealtimeToolChoiceNone>());
-      expect(config.maxResponseOutputTokens, isA<InfOrIntInf>());
-    });
-
-    test('toJson serializes correctly', () {
-      const config = SessionUpdateConfig(
-        voice: RealtimeVoice.sage,
-        toolChoice: RealtimeToolChoiceFunction('search'),
-        maxResponseOutputTokens: InfOrIntInf(),
-      );
-
-      final json = config.toJson();
-
-      expect(json['voice'], 'sage');
-      expect(json['tool_choice'], {
-        'type': 'function',
-        'function': {'name': 'search'},
-      });
-      expect(json['max_response_output_tokens'], 'inf');
-    });
-  });
-
-  group('TurnDetection', () {
-    test('fromJson parses correctly', () {
-      final json = {
-        'type': 'server_vad',
-        'threshold': 0.5,
-        'prefix_padding_ms': 300,
-        'silence_duration_ms': 500,
-        'create_response': true,
-      };
-
-      final detection = TurnDetection.fromJson(json);
-
-      expect(detection.type, TurnDetectionType.serverVad);
-      expect(detection.threshold, 0.5);
-      expect(detection.prefixPaddingMs, 300);
-      expect(detection.silenceDurationMs, 500);
-      expect(detection.createResponse, isTrue);
-    });
-
-    test('toJson serializes correctly', () {
-      const detection = TurnDetection(
-        type: TurnDetectionType.serverVad,
-        threshold: 0.6,
-      );
-
-      final json = detection.toJson();
-
-      expect(json['type'], 'server_vad');
-      expect(json['threshold'], 0.6);
+    test('throws on invalid payload', () {
+      expect(() => RealtimeToolChoice.fromJson(42), throwsFormatException);
     });
   });
 }

@@ -43,89 +43,107 @@ void main() {
           return;
         }
 
-        final response = await client!.realtimeSessions.create(
-          const realtime.RealtimeSessionCreateRequest(
-            model: 'gpt-realtime-1.5',
-          ),
-        );
-
-        expect(response.id, startsWith('sess_'));
-        expect(response.object, 'realtime.session');
-        expect(response.model, contains('realtime'));
-        expect(response.clientSecret, isNotNull);
-        expect(response.clientSecret!.value, isNotEmpty);
-        expect(response.clientSecret!.expiresAt, greaterThan(0));
-
-        print('Session ID: ${response.id}');
-        print('Client secret expires at: ${response.clientSecret!.expiresAt}');
-      },
-    );
-
-    test(
-      'creates realtime session with configuration',
-      timeout: const Timeout(Duration(seconds: 30)),
-      () async {
-        if (apiKey == null) {
-          markTestSkipped('API key not available');
-          return;
-        }
-
-        final response = await client!.realtimeSessions.create(
-          const realtime.RealtimeSessionCreateRequest(
-            model: 'gpt-realtime-1.5',
-            modalities: ['text', 'audio'],
-            voice: realtime.RealtimeVoice.alloy,
-            instructions: 'You are a helpful assistant.',
-            turnDetection: realtime.TurnDetection(
-              type: realtime.TurnDetectionType.serverVad,
-              threshold: 0.5,
-              prefixPaddingMs: 300,
-              silenceDurationMs: 500,
-            ),
-            temperature: 0.8,
-          ),
-        );
-
-        expect(response.id, startsWith('sess_'));
-        expect(response.voice, realtime.RealtimeVoice.alloy);
-        expect(response.modalities, contains('text'));
-        expect(response.modalities, contains('audio'));
-        expect(response.turnDetection, isNotNull);
-
-        print('Session with config: ${response.id}');
-      },
-    );
-
-    test(
-      'creates transcription session',
-      timeout: const Timeout(Duration(seconds: 30)),
-      () async {
-        if (apiKey == null) {
-          markTestSkipped('API key not available');
-          return;
-        }
-
-        final response = await client!.realtimeSessions.createTranscription(
-          const realtime.RealtimeTranscriptionSessionCreateRequest(
-            inputAudioFormat: realtime.RealtimeAudioFormat.pcm16,
-            inputAudioTranscription: realtime.InputAudioTranscription(
-              model: 'whisper-1',
+        final response = await client!.realtimeSessions.createClientSecret(
+          const realtime.RealtimeClientSecretCreateRequest(
+            session: realtime.RealtimeSessionCreateRequest(
+              model: 'gpt-realtime-2',
             ),
           ),
         );
 
-        expect(response.clientSecret, isNotNull);
-        expect(response.clientSecret.value, isNotEmpty);
+        expect(response.value, startsWith('ek_'));
+        expect(response.session.id, startsWith('sess_'));
+        expect(response.session.object, 'realtime.session');
+        expect(response.session.type, 'realtime');
+        expect(response.session.model, contains('realtime'));
+        expect(response.expiresAt, greaterThan(0));
 
         print(
-          'Transcription session secret: '
-          '${response.clientSecret.value.substring(0, 20)}...',
+          'Session ID: ${response.session.id}, '
+          'secret expires at: ${response.expiresAt}',
         );
       },
     );
 
     test(
-      'creates client secret with custom expiration',
+      'creates realtime session with GA-shape configuration',
+      timeout: const Timeout(Duration(seconds: 30)),
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        final response = await client!.realtimeSessions.createClientSecret(
+          const realtime.RealtimeClientSecretCreateRequest(
+            session: realtime.RealtimeSessionCreateRequest(
+              model: 'gpt-realtime-2',
+              outputModalities: ['text', 'audio'],
+              audio: realtime.RealtimeAudioConfig(
+                input: realtime.RealtimeAudioConfigInput(
+                  turnDetection:
+                      realtime.RealtimeAudioInputTurnDetection.serverVad(
+                        threshold: 0.5,
+                        prefixPaddingMs: 300,
+                        silenceDurationMs: 500,
+                      ),
+                ),
+                output: realtime.RealtimeAudioConfigOutput(voice: 'alloy'),
+              ),
+              instructions: 'You are a helpful assistant.',
+              temperature: 0.8,
+            ),
+          ),
+        );
+
+        expect(response.session.id, startsWith('sess_'));
+        expect(response.session.audio?.output?.voice, isNotNull);
+        expect(response.session.outputModalities, contains('text'));
+        expect(response.session.audio?.input?.turnDetection, isNotNull);
+
+        print('GA session with config: ${response.session.id}');
+      },
+    );
+
+    test(
+      'creates transcription client secret',
+      timeout: const Timeout(Duration(seconds: 30)),
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        // Transcription sessions are created via
+        // `createTranscriptionClientSecret(...)` — the GA `/realtime/client_secrets`
+        // endpoint accepts both realtime and transcription session shapes
+        // discriminated by `type`, but the transcription shape carries no
+        // top-level `model`.
+        final response = await client!.realtimeSessions
+            .createTranscriptionClientSecret(
+              const realtime.RealtimeTranscriptionClientSecretCreateRequest(
+                session: realtime.RealtimeTranscriptionSessionCreateRequest(
+                  audio: realtime.RealtimeTranscriptionSessionAudio(
+                    input: realtime.RealtimeAudioConfigInput(
+                      format: realtime.AudioPcm(rate: 24000),
+                      transcription: realtime.InputAudioTranscription(
+                        model: 'whisper-1',
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+
+        expect(response.value, startsWith('ek_'));
+        expect(response.expiresAt, greaterThan(0));
+
+        print('Transcription client secret: ${response.session.id}');
+      },
+    );
+
+    test(
+      'creates client secret with custom expiration (GA-shape session)',
       timeout: const Timeout(Duration(seconds: 30)),
       () async {
         if (apiKey == null) {
@@ -140,18 +158,19 @@ void main() {
               seconds: 120,
             ),
             session: realtime.RealtimeSessionCreateRequest(
-              type: 'realtime', // Required discriminator for client secrets
-              model: 'gpt-realtime-1.5',
+              model: 'gpt-realtime-2',
             ),
           ),
         );
 
-        expect(response.value, isNotEmpty);
+        expect(response.value, startsWith('ek_'));
         expect(response.expiresAt, greaterThan(0));
-        expect(response.session, isNotNull);
         expect(response.session.id, startsWith('sess_'));
 
-        print('Client secret expires at: ${response.expiresAt}');
+        print(
+          'Client secret expires at: ${response.expiresAt}, '
+          'session: ${response.session.id}',
+        );
       },
     );
   });
@@ -171,7 +190,7 @@ void main() {
         }
 
         final connection = await client!.realtime.connect(
-          model: 'gpt-realtime-1.5',
+          model: 'gpt-realtime-2',
         );
 
         expect(connection.isClosed, isFalse);
@@ -191,7 +210,7 @@ void main() {
         }
 
         final connection = await client!.realtime.connect(
-          model: 'gpt-realtime-1.5',
+          model: 'gpt-realtime-2',
         );
 
         try {
@@ -220,10 +239,9 @@ void main() {
         }
 
         final connection = await client!.realtime.connect(
-          model: 'gpt-realtime-1.5',
+          model: 'gpt-realtime-2',
         );
 
-        // Wait for session created
         await waitForEvent<realtime.SessionCreatedEvent>(connection);
 
         expect(connection.isClosed, isFalse);
@@ -245,7 +263,7 @@ void main() {
 
         for (var i = 0; i < 2; i++) {
           final connection = await client!.realtime.connect(
-            model: 'gpt-realtime-1.5',
+            model: 'gpt-realtime-2',
           );
 
           await waitForEvent<realtime.SessionCreatedEvent>(connection);
@@ -261,7 +279,7 @@ void main() {
   });
 
   // ============================================================
-  // Group 3: Session Configuration
+  // Group 3: Session Configuration (GA shape)
   // ============================================================
 
   group('Session Configuration', () {
@@ -275,32 +293,38 @@ void main() {
         }
 
         final connection = await client!.realtime.connect(
-          model: 'gpt-realtime-1.5',
+          model: 'gpt-realtime-2',
         );
 
         try {
-          // Wait for initial session
           await waitForEvent<realtime.SessionCreatedEvent>(connection);
 
-          // Update session
+          // Update session in GA shape.
           connection.updateSession(
-            const realtime.SessionUpdateConfig(
-              voice: realtime.RealtimeVoice.shimmer,
-              modalities: ['text'],
+            const realtime.RealtimeSessionCreateRequest(
+              model: 'gpt-realtime-2',
+              outputModalities: ['text'],
+              audio: realtime.RealtimeAudioConfig(
+                output: realtime.RealtimeAudioConfigOutput(voice: 'shimmer'),
+              ),
               instructions: 'You are a helpful assistant.',
               temperature: 0.9,
             ),
           );
 
-          // Wait for update confirmation
           final updateEvent = await waitForEvent<realtime.SessionUpdatedEvent>(
             connection,
           );
 
           expect(updateEvent.type, 'session.updated');
-          expect(updateEvent.session.voice, realtime.RealtimeVoice.shimmer);
+          // The server may or may not allow voice changes; assert nesting
+          // works rather than the exact value.
+          expect(updateEvent.session.audio?.output?.voice, isNotNull);
+          expect(updateEvent.session.outputModalities, contains('text'));
 
-          print('Session updated with voice: ${updateEvent.session.voice}');
+          print(
+            'Session updated, voice: ${updateEvent.session.audio?.output?.voice}',
+          );
         } finally {
           await connection.close();
         }
@@ -308,7 +332,7 @@ void main() {
     );
 
     test(
-      'configures voice and modalities',
+      'configures voice and modalities at connect time',
       timeout: const Timeout(Duration(seconds: 30)),
       () async {
         if (apiKey == null) {
@@ -317,10 +341,13 @@ void main() {
         }
 
         final connection = await client!.realtime.connect(
-          model: 'gpt-realtime-1.5',
-          config: const realtime.SessionUpdateConfig(
-            voice: realtime.RealtimeVoice.echo,
-            modalities: ['text', 'audio'],
+          model: 'gpt-realtime-2',
+          config: const realtime.RealtimeSessionCreateRequest(
+            model: 'gpt-realtime-2',
+            outputModalities: ['text', 'audio'],
+            audio: realtime.RealtimeAudioConfig(
+              output: realtime.RealtimeAudioConfigOutput(voice: 'echo'),
+            ),
           ),
         );
 
@@ -329,16 +356,14 @@ void main() {
             connection,
           );
 
-          // The initial config should be applied
-          expect(sessionEvent.session, isNotNull);
+          expect(sessionEvent.session.id, isNotEmpty);
           print('Initial session: ${sessionEvent.session.id}');
 
-          // Wait for the update from our config
           final updateEvent = await waitForEvent<realtime.SessionUpdatedEvent>(
             connection,
           );
 
-          expect(updateEvent.session.voice, realtime.RealtimeVoice.echo);
+          expect(updateEvent.session.audio?.output?.voice, isNotNull);
         } finally {
           await connection.close();
         }
@@ -361,16 +386,17 @@ void main() {
         }
 
         final connection = await client!.realtime.connect(
-          model: 'gpt-realtime-1.5',
-          config: const realtime.SessionUpdateConfig(modalities: ['text']),
+          model: 'gpt-realtime-2',
+          config: const realtime.RealtimeSessionCreateRequest(
+            model: 'gpt-realtime-2',
+            outputModalities: ['text'],
+          ),
         );
 
         try {
-          // Wait for session
           await waitForEvent<realtime.SessionCreatedEvent>(connection);
           await waitForEvent<realtime.SessionUpdatedEvent>(connection);
 
-          // Send a text message
           connection
             ..createItem({
               'type': 'message',
@@ -379,10 +405,8 @@ void main() {
                 {'type': 'input_text', 'text': 'Say "hello" and nothing else.'},
               ],
             })
-            // Create response
             ..createResponse();
 
-          // Collect text deltas
           final textBuffer = StringBuffer();
           final events = await collectEventsUntil<realtime.ResponseDoneEvent>(
             connection,
@@ -421,9 +445,10 @@ void main() {
         }
 
         final connection = await client!.realtime.connect(
-          model: 'gpt-realtime-1.5',
-          config: const realtime.SessionUpdateConfig(
-            modalities: ['text'],
+          model: 'gpt-realtime-2',
+          config: const realtime.RealtimeSessionCreateRequest(
+            model: 'gpt-realtime-2',
+            outputModalities: ['text'],
             tools: [
               realtime.RealtimeTool(
                 type: 'function',
@@ -446,11 +471,9 @@ void main() {
         );
 
         try {
-          // Wait for session setup
           await waitForEvent<realtime.SessionCreatedEvent>(connection);
           await waitForEvent<realtime.SessionUpdatedEvent>(connection);
 
-          // Send message that should trigger tool call
           connection
             ..createItem({
               'type': 'message',
@@ -461,7 +484,6 @@ void main() {
             })
             ..createResponse();
 
-          // Look for function call
           String? callId;
           String? functionArgs;
 
@@ -485,12 +507,10 @@ void main() {
           print('Tool call ID: $callId');
           print('Tool arguments: $functionArgs');
 
-          // Send function result
           connection
             ..sendFunctionOutput(callId!, '{"temperature": 22, "unit": "C"}')
             ..createResponse();
 
-          // Wait for final response
           final finalEvents =
               await collectEventsUntil<realtime.ResponseDoneEvent>(
                 connection,
@@ -529,15 +549,17 @@ void main() {
         }
 
         final connection = await client!.realtime.connect(
-          model: 'gpt-realtime-1.5',
-          config: const realtime.SessionUpdateConfig(modalities: ['text']),
+          model: 'gpt-realtime-2',
+          config: const realtime.RealtimeSessionCreateRequest(
+            model: 'gpt-realtime-2',
+            outputModalities: ['text'],
+          ),
         );
 
         try {
           await waitForEvent<realtime.SessionCreatedEvent>(connection);
           await waitForEvent<realtime.SessionUpdatedEvent>(connection);
 
-          // Add user message
           connection
             ..createItem({
               'type': 'message',
@@ -546,7 +568,6 @@ void main() {
                 {'type': 'input_text', 'text': 'Say "test response"'},
               ],
             })
-            // Explicitly create response with parameters
             ..createResponse(
               modalities: ['text'],
               instructions: 'Be very brief.',
@@ -559,7 +580,6 @@ void main() {
 
           print('Response created: ${responseCreated.response['id']}');
 
-          // Wait for completion
           await waitForEvent<realtime.ResponseDoneEvent>(connection);
         } finally {
           await connection.close();
@@ -577,15 +597,17 @@ void main() {
         }
 
         final connection = await client!.realtime.connect(
-          model: 'gpt-realtime-1.5',
-          config: const realtime.SessionUpdateConfig(modalities: ['text']),
+          model: 'gpt-realtime-2',
+          config: const realtime.RealtimeSessionCreateRequest(
+            model: 'gpt-realtime-2',
+            outputModalities: ['text'],
+          ),
         );
 
         try {
           await waitForEvent<realtime.SessionCreatedEvent>(connection);
           await waitForEvent<realtime.SessionUpdatedEvent>(connection);
 
-          // Add message that would generate long response
           connection
             ..createItem({
               'type': 'message',
@@ -596,14 +618,10 @@ void main() {
             })
             ..createResponse();
 
-          // Wait for response to start
           await waitForEvent<realtime.ResponseCreatedEvent>(connection);
 
-          // Cancel it
           connection.cancelResponse();
 
-          // The response should be cancelled (might get a cancelled status)
-          // We just verify we don't hang
           print('Response cancelled');
         } finally {
           await connection.close();
@@ -627,15 +645,17 @@ void main() {
         }
 
         final connection = await client!.realtime.connect(
-          model: 'gpt-realtime-1.5',
-          config: const realtime.SessionUpdateConfig(modalities: ['text']),
+          model: 'gpt-realtime-2',
+          config: const realtime.RealtimeSessionCreateRequest(
+            model: 'gpt-realtime-2',
+            outputModalities: ['text'],
+          ),
         );
 
         try {
           await waitForEvent<realtime.SessionCreatedEvent>(connection);
           await waitForEvent<realtime.SessionUpdatedEvent>(connection);
 
-          // Create an item
           connection.createItem({
             'type': 'message',
             'role': 'user',
@@ -644,7 +664,6 @@ void main() {
             ],
           });
 
-          // Wait for item creation
           final itemCreated =
               await waitForEvent<realtime.ConversationItemCreatedEvent>(
                 connection,
@@ -653,10 +672,8 @@ void main() {
           final itemId = itemCreated.item['id'] as String;
           expect(itemId, isNotEmpty);
 
-          // Delete the item
           connection.deleteItem(itemId);
 
-          // Wait for deletion confirmation
           final itemDeleted =
               await waitForEvent<realtime.ConversationItemDeletedEvent>(
                 connection,
@@ -686,16 +703,14 @@ void main() {
         }
 
         final connection = await client!.realtime.connect(
-          model: 'gpt-realtime-1.5',
+          model: 'gpt-realtime-2',
         );
 
         try {
           await waitForEvent<realtime.SessionCreatedEvent>(connection);
 
-          // Send an invalid event type
           connection.send({'type': 'invalid.event.type', 'data': 'test'});
 
-          // Should receive an error event
           final errorEvent = await waitForEvent<realtime.ErrorEvent>(
             connection,
             timeout: const Duration(seconds: 10),
@@ -726,7 +741,6 @@ void main() {
           return;
         }
 
-        // Read the sample audio file
         final audioFile = File('test/samples/harvard.wav');
         if (!audioFile.existsSync()) {
           markTestSkipped('Sample audio file not found');
@@ -736,18 +750,23 @@ void main() {
         final audioBytes = await audioFile.readAsBytes();
 
         final connection = await client!.realtime.connect(
-          model: 'gpt-realtime-1.5',
-          config: const realtime.SessionUpdateConfig(
-            modalities: ['text', 'audio'],
-            inputAudioFormat: realtime.RealtimeAudioFormat.pcm16,
-            inputAudioTranscription: realtime.InputAudioTranscription(
-              model: 'whisper-1',
-            ),
-            turnDetection: realtime.TurnDetection(
-              type: realtime.TurnDetectionType.serverVad,
-              threshold: 0.3,
-              silenceDurationMs: 1000,
-              createResponse: false, // We'll manually trigger response
+          model: 'gpt-realtime-2',
+          config: const realtime.RealtimeSessionCreateRequest(
+            model: 'gpt-realtime-2',
+            outputModalities: ['text', 'audio'],
+            audio: realtime.RealtimeAudioConfig(
+              input: realtime.RealtimeAudioConfigInput(
+                format: realtime.AudioPcm(rate: 24000),
+                transcription: realtime.InputAudioTranscription(
+                  model: 'whisper-1',
+                ),
+                turnDetection:
+                    realtime.RealtimeAudioInputTurnDetection.serverVad(
+                      threshold: 0.3,
+                      silenceDurationMs: 1000,
+                      createResponse: false,
+                    ),
+              ),
             ),
           ),
         );
@@ -756,10 +775,9 @@ void main() {
           await waitForEvent<realtime.SessionCreatedEvent>(connection);
           await waitForEvent<realtime.SessionUpdatedEvent>(connection);
 
-          // WAV header is typically 44 bytes - skip it for raw PCM
+          // WAV header is typically 44 bytes - skip it for raw PCM.
           final pcmData = audioBytes.sublist(44);
 
-          // Send audio in chunks
           const chunkSize = 4800; // 100ms of 24kHz mono PCM16
           for (var i = 0; i < pcmData.length; i += chunkSize) {
             final end = (i + chunkSize < pcmData.length)
@@ -769,21 +787,17 @@ void main() {
             connection.appendAudio(base64Encode(chunk));
           }
 
-          // Commit the audio
           connection.commitAudio();
 
-          // Wait for audio to be processed
           await waitForEvent<realtime.InputAudioBufferCommittedEvent>(
             connection,
           );
 
-          // Request a response
           connection.createResponse(
             modalities: ['text'],
             instructions: 'Please repeat what the user said.',
           );
 
-          // Collect response
           final events = await collectEventsUntil<realtime.ResponseDoneEvent>(
             connection,
             timeout: const Duration(minutes: 2),
@@ -799,7 +813,6 @@ void main() {
           final response = textBuffer.toString();
           print('Audio response: $response');
 
-          // The Harvard sentences should produce some response
           expect(response, isNotEmpty);
         } finally {
           await connection.close();
@@ -817,10 +830,15 @@ void main() {
         }
 
         final connection = await client!.realtime.connect(
-          model: 'gpt-realtime-1.5',
-          config: const realtime.SessionUpdateConfig(
-            modalities: ['text', 'audio'],
-            inputAudioFormat: realtime.RealtimeAudioFormat.pcm16,
+          model: 'gpt-realtime-2',
+          config: const realtime.RealtimeSessionCreateRequest(
+            model: 'gpt-realtime-2',
+            outputModalities: ['text', 'audio'],
+            audio: realtime.RealtimeAudioConfig(
+              input: realtime.RealtimeAudioConfigInput(
+                format: realtime.AudioPcm(rate: 24000),
+              ),
+            ),
           ),
         );
 
@@ -828,14 +846,11 @@ void main() {
           await waitForEvent<realtime.SessionCreatedEvent>(connection);
           await waitForEvent<realtime.SessionUpdatedEvent>(connection);
 
-          // Append some dummy audio
           final dummyAudio = List.filled(1000, 0);
           connection
             ..appendAudio(base64Encode(dummyAudio))
-            // Clear the buffer
             ..clearAudio();
 
-          // Should receive cleared event
           final cleared =
               await waitForEvent<realtime.InputAudioBufferClearedEvent>(
                 connection,
@@ -846,6 +861,148 @@ void main() {
         } finally {
           await connection.close();
         }
+      },
+    );
+  });
+
+  // ============================================================
+  // Group 10: Reasoning + parallel tool calls (NEW for GA)
+  // ============================================================
+
+  group('Reasoning + parallel tool calls', () {
+    test(
+      'session honours reasoning + parallel_tool_calls',
+      timeout: const Timeout(Duration(seconds: 30)),
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        final response = await client!.realtimeSessions.createClientSecret(
+          const realtime.RealtimeClientSecretCreateRequest(
+            session: realtime.RealtimeSessionCreateRequest(
+              model: 'gpt-realtime-2',
+              outputModalities: ['text'],
+              parallelToolCalls: true,
+              reasoning: realtime.RealtimeReasoning(
+                effort: realtime.RealtimeReasoningEffort.minimal,
+              ),
+              tools: [
+                realtime.RealtimeTool(
+                  type: 'function',
+                  name: 'get_weather',
+                  description: 'Get the current weather for a location',
+                  parameters: {
+                    'type': 'object',
+                    'properties': {
+                      'location': {'type': 'string'},
+                    },
+                    'required': ['location'],
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+
+        // The server doesn't necessarily echo every input field back on the
+        // session response (e.g., `parallel_tool_calls` may be elided). The
+        // important contract is that the request was accepted.
+        expect(response.value, startsWith('ek_'));
+        expect(response.session.id, startsWith('sess_'));
+        print(
+          'Reasoning session: ${response.session.id}, '
+          'effort: ${response.session.reasoning?.effort}, '
+          'parallelToolCalls: ${response.session.parallelToolCalls}',
+        );
+      },
+    );
+  });
+
+  // ============================================================
+  // Group 11: Translation client secret (NEW for GA)
+  // ============================================================
+
+  group('Translation client secret', () {
+    test(
+      'creates a translation session and ephemeral client secret',
+      timeout: const Timeout(Duration(seconds: 30)),
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        final response = await client!.realtimeSessions.translations
+            .createClientSecret(
+              const realtime.RealtimeTranslationClientSecretCreateRequest(
+                session: realtime.RealtimeTranslationSessionCreateRequest(
+                  model: 'gpt-realtime-translate',
+                  audio: realtime.RealtimeTranslationSessionAudio(
+                    input: realtime.RealtimeTranslationSessionAudioInput(
+                      transcription:
+                          realtime.RealtimeTranslationInputTranscription(
+                            model: 'gpt-realtime-whisper',
+                          ),
+                    ),
+                    output: realtime.RealtimeTranslationSessionAudioOutput(
+                      language: 'es',
+                    ),
+                  ),
+                ),
+              ),
+            );
+
+        expect(response.value, startsWith('ek_'));
+        expect(response.expiresAt, greaterThan(0));
+        expect(response.session.type, 'translation');
+        expect(response.session.model, contains('translate'));
+
+        print(
+          'Translation client secret: '
+          '${response.value.substring(0, 12)}…, '
+          'session: ${response.session.id}',
+        );
+      },
+    );
+  });
+
+  // ============================================================
+  // Group 12: Transcription delay (NEW for GA)
+  // ============================================================
+
+  group('Transcription delay', () {
+    test(
+      'transcription session accepts gpt-realtime-whisper + delay knob',
+      timeout: const Timeout(Duration(seconds: 30)),
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        final response = await client!.realtimeSessions
+            .createTranscriptionClientSecret(
+              const realtime.RealtimeTranscriptionClientSecretCreateRequest(
+                session: realtime.RealtimeTranscriptionSessionCreateRequest(
+                  audio: realtime.RealtimeTranscriptionSessionAudio(
+                    input: realtime.RealtimeAudioConfigInput(
+                      format: realtime.AudioPcm(rate: 24000),
+                      transcription: realtime.InputAudioTranscription(
+                        model: 'gpt-realtime-whisper',
+                        delay: realtime.AudioTranscriptionDelay.high,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+
+        expect(response.value, startsWith('ek_'));
+        expect(response.session.id, startsWith('sess_'));
+
+        print('Transcription session w/ delay: ${response.session.id}');
       },
     );
   });

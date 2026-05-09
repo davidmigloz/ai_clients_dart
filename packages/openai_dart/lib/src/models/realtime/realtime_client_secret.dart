@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import 'realtime_session_create.dart';
+import 'realtime_transcription_session.dart';
 
 // =============================================================================
 // ExpiresAfter
@@ -62,8 +63,10 @@ class ExpiresAfter {
 ///   RealtimeClientSecretCreateRequest(
 ///     expiresAfter: ExpiresAfter(anchor: 'created_at', seconds: 3600),
 ///     session: RealtimeSessionCreateRequest(
-///       model: 'gpt-realtime-1.5',
-///       voice: RealtimeVoice.alloy,
+///       model: 'gpt-realtime-2',
+///       audio: RealtimeAudioConfig(
+///         output: RealtimeAudioConfigOutput(voice: 'alloy'),
+///       ),
 ///     ),
 ///   ),
 /// );
@@ -99,10 +102,20 @@ class RealtimeClientSecretCreateRequest {
   final RealtimeSessionCreateRequest session;
 
   /// Converts to JSON.
-  Map<String, dynamic> toJson() => {
-    if (expiresAfter != null) 'expires_after': expiresAfter!.toJson(),
-    'session': session.toJson(),
-  };
+  ///
+  /// The `/realtime/client_secrets` endpoint requires a `type` discriminator
+  /// on the embedded session (`'realtime'` vs `'transcription'`). If the
+  /// caller didn't set it explicitly, default it to `'realtime'` here so the
+  /// bare `/realtime/sessions` payload (which rejects `type`) stays
+  /// untouched.
+  Map<String, dynamic> toJson() {
+    final sessionJson = session.toJson();
+    sessionJson['type'] ??= 'realtime';
+    return {
+      if (expiresAfter != null) 'expires_after': expiresAfter!.toJson(),
+      'session': sessionJson,
+    };
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -115,6 +128,77 @@ class RealtimeClientSecretCreateRequest {
 
   @override
   String toString() => 'RealtimeClientSecretCreateRequest(...)';
+}
+
+// =============================================================================
+// RealtimeTranscriptionClientSecretCreateRequest
+// =============================================================================
+
+/// Request for creating a client secret for a **transcription** session.
+///
+/// Posts to `POST /realtime/client_secrets`. The session payload uses the
+/// transcription-specific shape (no `model` field, audio limited to inputs).
+/// Realtime sessions use [RealtimeClientSecretCreateRequest] instead.
+@immutable
+class RealtimeTranscriptionClientSecretCreateRequest {
+  /// Creates a [RealtimeTranscriptionClientSecretCreateRequest].
+  const RealtimeTranscriptionClientSecretCreateRequest({
+    required this.session,
+    this.expiresAfter,
+  });
+
+  /// Creates from JSON.
+  factory RealtimeTranscriptionClientSecretCreateRequest.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    if (json['session'] == null) {
+      throw const FormatException(
+        'RealtimeTranscriptionClientSecretCreateRequest.fromJson missing '
+        'required "session" field',
+      );
+    }
+    return RealtimeTranscriptionClientSecretCreateRequest(
+      session: RealtimeTranscriptionSessionCreateRequest.fromJson(
+        json['session'] as Map<String, dynamic>,
+      ),
+      expiresAfter: json['expires_after'] != null
+          ? ExpiresAfter.fromJson(json['expires_after'] as Map<String, dynamic>)
+          : null,
+    );
+  }
+
+  /// Transcription session configuration.
+  final RealtimeTranscriptionSessionCreateRequest session;
+
+  /// Optional client-secret expiration.
+  final ExpiresAfter? expiresAfter;
+
+  /// Converts to JSON, injecting `'type': 'transcription'` on the embedded
+  /// session if the caller didn't set it explicitly.
+  Map<String, dynamic> toJson() {
+    final sessionJson = session.toJson();
+    sessionJson['type'] ??= 'transcription';
+    return {
+      if (expiresAfter != null) 'expires_after': expiresAfter!.toJson(),
+      'session': sessionJson,
+    };
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RealtimeTranscriptionClientSecretCreateRequest &&
+          runtimeType == other.runtimeType &&
+          session == other.session &&
+          expiresAfter == other.expiresAfter;
+
+  @override
+  int get hashCode => Object.hash(session, expiresAfter);
+
+  @override
+  String toString() =>
+      'RealtimeTranscriptionClientSecretCreateRequest(session: $session, '
+      'expiresAfter: $expiresAfter)';
 }
 
 // =============================================================================

@@ -18,8 +18,10 @@ import 'realtime_session_create.dart';
 ///   RealtimeCallCreateRequest(
 ///     sdp: sdpOffer,
 ///     session: RealtimeSessionCreateRequest(
-///       model: 'gpt-realtime-1.5',
-///       voice: RealtimeVoice.alloy,
+///       model: 'gpt-realtime-2',
+///       audio: RealtimeAudioConfig(
+///         output: RealtimeAudioConfigOutput(voice: 'alloy'),
+///       ),
 ///     ),
 ///   ),
 /// );

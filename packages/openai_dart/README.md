@@ -447,9 +447,12 @@ final client = OpenAIClient.fromEnvironment();
 
 // Connect to a realtime session via WebSocket
 final session = await client.realtime.connect(
-  model: 'gpt-realtime-1.5',
-  config: const realtime.SessionUpdateConfig(
-    voice: realtime.RealtimeVoice.alloy,
+  model: 'gpt-realtime-2',
+  config: const realtime.RealtimeSessionCreateRequest(
+    model: 'gpt-realtime-2',
+    audio: realtime.RealtimeAudioConfig(
+      output: realtime.RealtimeAudioConfigOutput(voice: 'alloy'),
+    ),
     instructions: 'You are a helpful assistant.',
   ),
 );
@@ -498,8 +501,10 @@ final sdpAnswer = await client.realtimeSessions.calls.create(
   realtime.RealtimeCallCreateRequest(
     sdp: offer.sdp!,
     session: const realtime.RealtimeSessionCreateRequest(
-      model: 'gpt-realtime-1.5',
-      voice: realtime.RealtimeVoice.alloy,
+      model: 'gpt-realtime-2',
+      audio: realtime.RealtimeAudioConfig(
+        output: realtime.RealtimeAudioConfigOutput(voice: 'alloy'),
+      ),
     ),
   ),
 );

@@ -630,7 +630,7 @@ class OpenAIClient {
   ///
   /// ```dart
   /// final session = await client.realtime.connect(
-  ///   model: 'gpt-realtime-1.5',
+  ///   model: 'gpt-realtime-2',
   /// );
   ///
   /// session.events.listen((event) {
@@ -653,22 +653,26 @@ class OpenAIClient {
 
   /// Real-time sessions API resource (HTTP).
   ///
-  /// Use this to create realtime sessions, client secrets, and manage
-  /// WebRTC calls via HTTP endpoints.
+  /// Use this to create realtime client secrets and manage WebRTC calls and
+  /// translation sessions via HTTP endpoints.
   ///
   /// ## Example
   ///
   /// ```dart
-  /// // Create a session with ephemeral key
-  /// final session = await client.realtimeSessions.create(
-  ///   RealtimeSessionCreateRequest(
-  ///     model: 'gpt-realtime-1.5',
-  ///     voice: RealtimeVoice.alloy,
+  /// // Create a session with an ephemeral client secret.
+  /// final response = await client.realtimeSessions.createClientSecret(
+  ///   RealtimeClientSecretCreateRequest(
+  ///     session: RealtimeSessionCreateRequest(
+  ///       model: 'gpt-realtime-2',
+  ///       audio: RealtimeAudioConfig(
+  ///         output: RealtimeAudioConfigOutput(voice: 'alloy'),
+  ///       ),
+  ///     ),
   ///   ),
   /// );
   ///
-  /// // Use the client secret for WebSocket authentication
-  /// print('Client secret: ${session.clientSecret.value}');
+  /// // Use the client secret for WebSocket authentication.
+  /// print('Client secret: ${response.value}');
   /// ```
   RealtimeSessionsResource get realtimeSessions =>
       _realtimeSessions ??= RealtimeSessionsResource(
