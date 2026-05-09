@@ -235,18 +235,53 @@ class RealtimeCallsResource extends ResourceBase {
     return response.body;
   }
 
-  /// Accepts an incoming SIP call.
+  /// Accepts an incoming SIP call, optionally overriding the realtime
+  /// session configuration.
   ///
   /// ## Parameters
   ///
   /// - [callId] - The ID of the call to accept.
-  Future<void> accept(String callId, {Future<void>? abortTrigger}) async {
+  /// - [request] - Optional session configuration to apply on accept
+  ///   (model, audio, instructions, tools, reasoning, tracing, …). When
+  ///   omitted, the call is accepted with the server's default session.
+  ///
+  /// ## Example
+  ///
+  /// ```dart
+  /// await client.realtimeSessions.calls.accept(
+  ///   callId,
+  ///   request: const RealtimeSessionCreateRequest(
+  ///     model: 'gpt-realtime-2',
+  ///     audio: RealtimeAudioConfig(
+  ///       output: RealtimeAudioConfigOutput(voice: 'alloy'),
+  ///     ),
+  ///     instructions: 'Greet the caller in English.',
+  ///   ),
+  /// );
+  /// ```
+  Future<void> accept(
+    String callId, {
+    RealtimeSessionCreateRequest? request,
+    Future<void>? abortTrigger,
+  }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('$_callsEndpoint/$callId/accept');
     final headers = requestBuilder.buildHeaders();
+    // The /realtime/calls/{id}/accept endpoint requires the `type`
+    // discriminator on the embedded session payload (whereas the bare
+    // /realtime/sessions endpoint rejects it). Inject `'realtime'` when
+    // the caller didn't set it explicitly — same trick as
+    // `RealtimeClientSecretCreateRequest.toJson`.
+    final Map<String, dynamic> body;
+    if (request != null) {
+      body = request.toJson();
+      body['type'] ??= 'realtime';
+    } else {
+      body = <String, dynamic>{};
+    }
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
-      ..body = jsonEncode(<String, dynamic>{});
+      ..body = jsonEncode(body);
     await interceptorChain.execute(httpRequest, abortTrigger: abortTrigger);
   }
 

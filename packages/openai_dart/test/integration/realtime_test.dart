@@ -3,7 +3,6 @@
 library;
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:openai_dart/openai_dart.dart';
@@ -397,15 +396,7 @@ void main() {
           await waitForEvent<realtime.SessionCreatedEvent>(connection);
           await waitForEvent<realtime.SessionUpdatedEvent>(connection);
 
-          connection
-            ..createItem({
-              'type': 'message',
-              'role': 'user',
-              'content': [
-                {'type': 'input_text', 'text': 'Say "hello" and nothing else.'},
-              ],
-            })
-            ..createResponse();
+          connection.sendUserMessage('Say "hello" and nothing else.');
 
           final textBuffer = StringBuffer();
           final events = await collectEventsUntil<realtime.ResponseDoneEvent>(
@@ -787,7 +778,7 @@ void main() {
                 ? i + chunkSize
                 : pcmData.length;
             final chunk = pcmData.sublist(i, end);
-            connection.appendAudio(base64Encode(chunk));
+            connection.appendAudioBytes(chunk);
           }
 
           connection.commitAudio();
@@ -851,7 +842,7 @@ void main() {
 
           final dummyAudio = List.filled(1000, 0);
           connection
-            ..appendAudio(base64Encode(dummyAudio))
+            ..appendAudioBytes(dummyAudio)
             ..clearAudio();
 
           final cleared =

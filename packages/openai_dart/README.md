@@ -457,8 +457,9 @@ final session = await client.realtime.connect(
   ),
 );
 
-// Send a request and process events until the response is complete
-session.createResponse();
+// Send a user text message and process events until the response is complete.
+// (Use `session.appendAudioBytes(rawPcmBytes)` to stream raw audio instead.)
+session.sendUserMessage('Say hello and nothing else.');
 
 await for (final event in session.events) {
   switch (event) {
@@ -514,7 +515,18 @@ await pc.setRemoteDescription(RTCSessionDescription(sdpAnswer, 'answer'));
 
 // Call management operations (callId is obtained from your SIP/telephony layer)
 const callId = 'call_xxx';
-await client.realtimeSessions.calls.accept(callId);
+
+// Accept the call (optionally override the session configuration on accept).
+await client.realtimeSessions.calls.accept(
+  callId,
+  request: const realtime.RealtimeSessionCreateRequest(
+    model: 'gpt-realtime-2',
+    audio: realtime.RealtimeAudioConfig(
+      output: realtime.RealtimeAudioConfigOutput(voice: 'alloy'),
+    ),
+    instructions: 'Greet the caller in English.',
+  ),
+);
 await client.realtimeSessions.calls.hangup(callId);
 await client.realtimeSessions.calls.refer(
   callId,

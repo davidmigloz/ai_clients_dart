@@ -31,8 +31,9 @@ Future<void> main() async {
       ),
     );
 
-    // Listen for events using await for to process them until done
-    ws.createResponse();
+    // Send a user text message and process events until the response is
+    // complete. Use `ws.appendAudioBytes(rawPcmBytes)` to stream audio.
+    ws.sendUserMessage('Say hello and nothing else.');
 
     await for (final event in ws.events) {
       switch (event) {
@@ -116,9 +117,20 @@ Future<void> main() async {
     // These operations require a valid call ID from a previous call
     const callId = 'call_example_id';
 
-    // Accept an incoming SIP call
+    // Accept an incoming SIP call (optionally override the session
+    // configuration on accept).
     // await client.realtimeSessions.calls.accept(callId);
-    print('accept(callId) - Accept an incoming call');
+    // await client.realtimeSessions.calls.accept(
+    //   callId,
+    //   request: const realtime.RealtimeSessionCreateRequest(
+    //     model: 'gpt-realtime-2',
+    //     audio: realtime.RealtimeAudioConfig(
+    //       output: realtime.RealtimeAudioConfigOutput(voice: 'alloy'),
+    //     ),
+    //     instructions: 'Greet the caller in English.',
+    //   ),
+    // );
+    print('accept(callId, {request}) - Accept an incoming call');
 
     // Hang up an active call
     // await client.realtimeSessions.calls.hangup(callId);

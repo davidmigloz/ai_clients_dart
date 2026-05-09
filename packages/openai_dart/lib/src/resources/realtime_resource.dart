@@ -17,7 +17,7 @@ import 'realtime/websocket_connector.dart';
 /// ## Example
 ///
 /// ```dart
-/// // Connect to realtime session
+/// // Connect to a realtime session
 /// final session = await client.realtime.connect(
 ///   model: 'gpt-realtime-2',
 /// );
@@ -29,8 +29,11 @@ import 'realtime/websocket_connector.dart';
 ///   }
 /// });
 ///
-/// // Send audio
-/// session.sendAudio(audioBytes);
+/// // Send a user text message and let the model respond
+/// session.sendUserMessage('Say hello');
+///
+/// // Or stream audio bytes (24 kHz PCM16 mono for realtime sessions)
+/// session.appendAudioBytes(audioBytes);
 ///
 /// // Close when done
 /// await session.close();
@@ -304,7 +307,7 @@ class RealtimeConnection {
   ///     audio: RealtimeAudioConfig(
   ///       output: RealtimeAudioConfigOutput(voice: 'shimmer'),
   ///     ),
-  ///     temperature: 0.8,
+  ///     instructions: 'Be terse.',
   ///   ),
   /// );
   /// ```
@@ -349,6 +352,16 @@ class RealtimeConnection {
     });
   }
 
+  /// Convenience over [appendAudio]: base64-encodes the raw audio bytes
+  /// for you.
+  ///
+  /// The audio must be in the format negotiated for the session
+  /// (typically 24 kHz PCM16 mono little-endian for realtime sessions;
+  /// G.711 μ-law/A-law for telephony). This helper does **not** validate
+  /// or transcode — it only wraps `base64Encode`.
+  void appendAudioBytes(List<int> audioBytes, {String? eventId}) =>
+      appendAudio(base64Encode(audioBytes), eventId: eventId);
+
   /// Commits the audio buffer, creating a new conversation item.
   ///
   /// ## Parameters
@@ -369,21 +382,26 @@ class RealtimeConnection {
 
   /// Creates a new conversation item.
   ///
+  /// For the canonical "send a user text turn" flow, prefer
+  /// [sendUserMessage] — it wraps this method plus [createResponse] in
+  /// one call.
+  ///
   /// ## Parameters
   ///
-  /// - [item] - The item to create.
+  /// - [item] - The item to create. Use this for advanced item types
+  ///   (function-call output, assistant messages, system items,
+  ///   item-references) or any flow not covered by [sendUserMessage].
   /// - [previousItemId] - Optional ID of the previous item.
   /// - [eventId] - Optional event ID.
   ///
   /// ## Example
   ///
   /// ```dart
+  /// // Function-call output (assistant tool result):
   /// session.createItem({
-  ///   'type': 'message',
-  ///   'role': 'user',
-  ///   'content': [
-  ///     {'type': 'input_text', 'text': 'Hello!'},
-  ///   ],
+  ///   'type': 'function_call_output',
+  ///   'call_id': 'call_abc123',
+  ///   'output': '{"temperature": 22, "unit": "C"}',
   /// });
   /// ```
   void createItem(
@@ -397,6 +415,40 @@ class RealtimeConnection {
       'previous_item_id': ?previousItemId,
       'item': item,
     });
+  }
+
+  /// Sends a user text message as a conversation item, and (optionally)
+  /// requests a response immediately afterwards.
+  ///
+  /// Convenience over [createItem] + [createResponse] for the canonical
+  /// "send a turn" flow.
+  ///
+  /// **Caveat:** when the session has server-side VAD with
+  /// `create_response: true` (the default), the server will already
+  /// generate a response automatically; passing `createResponse: true`
+  /// here would queue a duplicate request. Set `createResponse: false`
+  /// in that mode.
+  ///
+  /// ## Example
+  ///
+  /// ```dart
+  /// session.sendUserMessage('Say hello and nothing else.');
+  /// ```
+  void sendUserMessage(
+    String text, {
+    bool createResponse = true,
+    String? eventId,
+  }) {
+    createItem({
+      'type': 'message',
+      'role': 'user',
+      'content': [
+        {'type': 'input_text', 'text': text},
+      ],
+    }, eventId: eventId);
+    if (createResponse) {
+      this.createResponse();
+    }
   }
 
   /// Truncates a conversation item.
@@ -440,14 +492,18 @@ class RealtimeConnection {
   ///
   /// ## Parameters
   ///
-  /// - [modalities] - The response modalities (e.g., ['text', 'audio']).
-  /// - [instructions] - Additional instructions for this response.
-  /// - [voice] - The voice to use.
-  /// - [outputAudioFormat] - The audio output format.
+  /// - [outputModalities] - Response modality (`['text']` or `['audio']`).
+  /// - [instructions] - Per-response instruction override.
+  /// - [audio] - Per-response audio output config (format + voice).
   /// - [tools] - Tools available for this response.
   /// - [toolChoice] - The tool choice mode.
-  /// - [temperature] - Sampling temperature.
   /// - [maxOutputTokens] - Maximum output tokens.
+  /// - [parallelToolCalls] - Whether to allow parallel tool calls.
+  /// - [reasoning] - Reasoning configuration.
+  /// - [conversation] - Which conversation the response belongs to
+  ///   (`'auto'` to add to the default conversation, `'none'` for an
+  ///   out-of-band response).
+  /// - [metadata] - Arbitrary metadata for disambiguating responses.
   /// - [eventId] - Optional event ID.
   ///
   /// ## Example
@@ -571,8 +627,8 @@ class RealtimeTranslationConnection {
   RealtimeTranslationConnection._(this._socket) {
     _eventController =
         StreamController<RealtimeTranslationServerEvent>.broadcast(
-      onListen: _drainBuffer,
-    );
+          onListen: _drainBuffer,
+        );
     _subscription = _socket.events.listen(
       _handleEvent,
       onError: _handleError,
@@ -690,6 +746,13 @@ class RealtimeTranslationConnection {
       'audio': audioBase64,
     });
   }
+
+  /// Convenience over [appendAudio]: base64-encodes the raw audio bytes
+  /// for you. The translation flow expects 24 kHz PCM16 mono
+  /// little-endian audio in 200 ms frames. This helper does **not**
+  /// validate or transcode — it only wraps `base64Encode`.
+  void appendAudioBytes(List<int> audioBytes, {String? eventId}) =>
+      appendAudio(base64Encode(audioBytes), eventId: eventId);
 
   /// Gracefully closes the translation session. The server flushes any
   /// pending input audio and emits any remaining translated output before
