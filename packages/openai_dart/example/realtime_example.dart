@@ -52,12 +52,23 @@ Future<void> main() async {
       }
     }
 
-    // --- Ephemeral client secret (for web/frontend clients) ---
+    // --- Ephemeral client secret (for WebRTC / signed URLs) ---
     print('\n=== Ephemeral Client Secret ===\n');
 
-    // On web platforms, browsers cannot set custom headers on WebSocket
-    // connections. Call createClientSecret() to obtain an ephemeral key,
-    // then pass it to your frontend to connect directly.
+    // Generates a short-lived (`ek_…`) credential for use with the
+    // Realtime API. Use cases:
+    //   • WebRTC SDP exchange (`realtimeSessions.calls.create(...)`) —
+    //     the SDK uses the secret server-side; the browser only sees
+    //     the SDP answer.
+    //   • Server-side WebSocket sessions where you'd rather not pass
+    //     the main API key around (the secret has narrower scope and a
+    //     ~10-minute lifetime).
+    //
+    // Note: browser WebSocket connections cannot use this secret as a
+    // bearer token because the WebSocket API doesn't allow custom
+    // Authorization headers. For browser realtime, prefer WebRTC (see
+    // the WebRTC section below) or proxy the WebSocket through a
+    // server.
     final secretResponse = await client.realtimeSessions.createClientSecret(
       const realtime.RealtimeClientSecretCreateRequest(
         session: realtime.RealtimeSessionCreateRequest(
@@ -77,8 +88,6 @@ Future<void> main() async {
     print('Session ID: ${secretResponse.session.id}');
     print('Client secret: ${secretResponse.value}');
     print('Expires at: ${secretResponse.expiresAt}');
-    // Use secretResponse.value as the Bearer token when connecting from a
-    // browser WebSocket client.
 
     // --- WebRTC: Create call with SDP exchange ---
     print('\n=== WebRTC: SDP Exchange ===\n');

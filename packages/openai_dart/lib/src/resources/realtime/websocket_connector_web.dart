@@ -14,14 +14,16 @@ Future<WebSocket> connectWebSocket(Uri uri, {Map<String, String>? headers}) {
     if (headers.containsKey('Authorization')) {
       throw ConnectionException(
         message:
-            'OpenAI Realtime API requires Authorization headers which are not '
-            'supported by browser WebSocket connections. '
-            'On web platforms, obtain an ephemeral client secret '
-            'server-side via realtimeSessions.createClientSecret(...) '
-            '(or createTranscriptionClientSecret(...) for transcription) '
-            'and use the returned `ek_…` value as the bearer token. '
-            'Direct Realtime API connections with the main API key are '
-            'only supported on native platforms (server, CLI, mobile).',
+            'OpenAI Realtime API requires Authorization headers, which the '
+            'browser WebSocket API does not allow. The Realtime WebSocket '
+            'transport is supported on server / CLI / mobile only. '
+            'For browser-based realtime, use the WebRTC transport: open a '
+            'peer connection client-side, generate an SDP offer, and POST '
+            'it via `client.realtimeSessions.calls.create(...)` (the SDK '
+            'handles the SDP answer + ephemeral auth). For SIP / phone '
+            'integrations, use `realtimeSessions.calls.accept/refer/hangup`. '
+            'Alternatively, route the WebSocket through a server-side '
+            'proxy that can set the Authorization header on your behalf.',
         url: uri.toString(),
       );
     }

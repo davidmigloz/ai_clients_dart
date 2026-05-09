@@ -62,11 +62,15 @@ class RealtimeResource extends ResourceBase {
   ///
   /// ## Platform Notes
   ///
-  /// On web platforms, browser WebSocket connections do not support custom
-  /// headers. Direct connections with API keys will throw
-  /// [ConnectionException]. For web, obtain an ephemeral client secret via
-  /// `client.realtimeSessions.createClientSecret(...)` server-side and pass
-  /// it as the bearer token from the browser.
+  /// The browser WebSocket API does not allow custom headers, so the
+  /// Realtime WebSocket transport is supported on server / CLI / mobile
+  /// only — calling `connect(...)` from a browser raises
+  /// [ConnectionException]. For browser-based realtime, use the WebRTC
+  /// transport via `client.realtimeSessions.calls.create(...)` (open a
+  /// peer connection client-side, POST the SDP offer, complete the
+  /// handshake with the returned answer). Alternatively, route the
+  /// WebSocket through a server-side proxy that can set the
+  /// `Authorization` header.
   ///
   /// ## Example
   ///
