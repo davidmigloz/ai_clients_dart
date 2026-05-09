@@ -172,6 +172,49 @@ void main() {
       expect(request1.hashCode, request2.hashCode);
     });
 
+    test('equality covers all generation parameters', () {
+      const base = FimCompletionRequest(model: 'codestral-latest', prompt: 'p');
+
+      // Each variant should be distinct from the base.
+      const variants = [
+        FimCompletionRequest(
+          model: 'codestral-latest',
+          prompt: 'p',
+          temperature: 0.5,
+        ),
+        FimCompletionRequest(model: 'codestral-latest', prompt: 'p', topP: 0.9),
+        FimCompletionRequest(
+          model: 'codestral-latest',
+          prompt: 'p',
+          maxTokens: 100,
+        ),
+        FimCompletionRequest(
+          model: 'codestral-latest',
+          prompt: 'p',
+          minTokens: 1,
+        ),
+        FimCompletionRequest(
+          model: 'codestral-latest',
+          prompt: 'p',
+          stream: true,
+        ),
+        FimCompletionRequest(
+          model: 'codestral-latest',
+          prompt: 'p',
+          stop: StopSequence.single('END'),
+        ),
+        FimCompletionRequest(
+          model: 'codestral-latest',
+          prompt: 'p',
+          randomSeed: 42,
+        ),
+      ];
+
+      for (final v in variants) {
+        expect(v, isNot(equals(base)), reason: 'variant $v should differ');
+      }
+    });
+
     test('toString provides useful representation', () {
       const request = FimCompletionRequest(
         model: 'codestral-latest',

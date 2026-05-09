@@ -172,12 +172,31 @@ class FimCompletionRequest {
           model == other.model &&
           prompt == other.prompt &&
           suffix == other.suffix &&
+          temperature == other.temperature &&
+          topP == other.topP &&
+          maxTokens == other.maxTokens &&
+          minTokens == other.minTokens &&
+          stream == other.stream &&
+          stop == other.stop &&
+          randomSeed == other.randomSeed &&
           mapsEqual(metadata, other.metadata) &&
           promptCacheKey == other.promptCacheKey;
 
   @override
-  int get hashCode =>
-      Object.hash(model, prompt, suffix, mapHash(metadata), promptCacheKey);
+  int get hashCode => Object.hash(
+    model,
+    prompt,
+    suffix,
+    temperature,
+    topP,
+    maxTokens,
+    minTokens,
+    stream,
+    stop,
+    randomSeed,
+    mapHash(metadata),
+    promptCacheKey,
+  );
 
   @override
   String toString() =>
