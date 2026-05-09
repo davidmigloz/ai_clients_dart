@@ -16,10 +16,12 @@ Future<WebSocket> connectWebSocket(Uri uri, {Map<String, String>? headers}) {
         message:
             'OpenAI Realtime API requires Authorization headers which are not '
             'supported by browser WebSocket connections. '
-            'On web platforms, use ephemeral tokens obtained from the '
-            'realtimeSessions.create() endpoint for authentication. '
-            'Direct Realtime API connections with API keys are only '
-            'supported on native platforms (server, CLI, mobile).',
+            'On web platforms, obtain an ephemeral client secret '
+            'server-side via realtimeSessions.createClientSecret(...) '
+            '(or createTranscriptionClientSecret(...) for transcription) '
+            'and use the returned `ek_…` value as the bearer token. '
+            'Direct Realtime API connections with the main API key are '
+            'only supported on native platforms (server, CLI, mobile).',
         url: uri.toString(),
       );
     }

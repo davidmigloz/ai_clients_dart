@@ -201,6 +201,15 @@ class RealtimeConnection {
   void _drainBuffer() {
     if (_drained) return;
     _drained = true;
+    // Guard against the race where the socket closes (and
+    // [_handleDone] closes the controller) before the first listener
+    // attaches. In that case `onListen` still fires when a late
+    // subscriber arrives — emitting into a closed controller would
+    // throw `StateError`. Clear the buffer instead.
+    if (_closed) {
+      _earlyEvents.clear();
+      return;
+    }
     for (final buffered in _earlyEvents) {
       if (buffered.error != null) {
         _eventController.addError(buffered.error!);
@@ -212,6 +221,7 @@ class RealtimeConnection {
   }
 
   void _emitEvent(RealtimeEvent event) {
+    if (_closed) return;
     if (_drained) {
       _eventController.add(event);
     } else {
@@ -220,6 +230,7 @@ class RealtimeConnection {
   }
 
   void _emitError(Object error) {
+    if (_closed) return;
     if (_drained) {
       _eventController.addError(error);
     } else {
@@ -646,6 +657,15 @@ class RealtimeTranslationConnection {
   void _drainBuffer() {
     if (_drained) return;
     _drained = true;
+    // Guard against the race where the socket closes (and
+    // [_handleDone] closes the controller) before the first listener
+    // attaches. In that case `onListen` still fires when a late
+    // subscriber arrives — emitting into a closed controller would
+    // throw `StateError`. Clear the buffer instead.
+    if (_closed) {
+      _earlyEvents.clear();
+      return;
+    }
     for (final buffered in _earlyEvents) {
       if (buffered.error != null) {
         _eventController.addError(buffered.error!);
@@ -657,6 +677,7 @@ class RealtimeTranslationConnection {
   }
 
   void _emitEvent(RealtimeTranslationServerEvent event) {
+    if (_closed) return;
     if (_drained) {
       _eventController.add(event);
     } else {
@@ -665,6 +686,7 @@ class RealtimeTranslationConnection {
   }
 
   void _emitError(Object error) {
+    if (_closed) return;
     if (_drained) {
       _eventController.addError(error);
     } else {
