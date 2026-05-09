@@ -90,6 +90,16 @@ class RealtimeResource extends ResourceBase {
     required String model,
     RealtimeSessionCreateRequest? config,
   }) async {
+    if (config != null && config.model != model) {
+      throw ArgumentError.value(
+        config.model,
+        'config.model',
+        'must match the connect(model:) argument ("$model"): the WebSocket '
+            'is opened for the URL-query model and the embedded session.update '
+            'would target a different model, which the server may reject. '
+            'Pass the same value in both places.',
+      );
+    }
     final socket = await _openSocket('/realtime', model);
     final connection = RealtimeConnection._(socket);
     if (config != null) {
