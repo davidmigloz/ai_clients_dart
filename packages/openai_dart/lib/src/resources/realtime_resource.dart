@@ -50,7 +50,8 @@ class RealtimeResource extends ResourceBase {
   /// ## Parameters
   ///
   /// - [model] - The model to use (e.g., 'gpt-realtime-2').
-  /// - [config] - Optional session configuration.
+  /// - [config] - Optional session configuration applied via `session.update`
+  ///   immediately after the connection opens.
   ///
   /// ## Returns
   ///
@@ -59,9 +60,10 @@ class RealtimeResource extends ResourceBase {
   /// ## Platform Notes
   ///
   /// On web platforms, browser WebSocket connections do not support custom
-  /// headers. Direct connections with API keys will throw [ConnectionException].
-  /// For web, use ephemeral tokens from [OpenAIClient.realtimeSessions.create()]
-  /// to authenticate.
+  /// headers. Direct connections with API keys will throw
+  /// [ConnectionException]. For web, obtain an ephemeral client secret via
+  /// `client.realtimeSessions.createClientSecret(...)` server-side and pass
+  /// it as the bearer token from the browser.
   ///
   /// ## Example
   ///
@@ -81,55 +83,89 @@ class RealtimeResource extends ResourceBase {
     required String model,
     RealtimeSessionCreateRequest? config,
   }) async {
-    ensureNotClosed?.call();
-
-    // Build URL with proper normalization using the request builder
-    final httpUrl = requestBuilder.buildUrl(
-      '/realtime',
-      queryParams: {'model': model},
-    );
-
-    // Convert to WebSocket scheme
-    final wsUrl = httpUrl.replace(
-      scheme: httpUrl.scheme == 'https' ? 'wss' : 'ws',
-    );
-
-    // Build headers with all config options
-    final headers = <String, String>{
-      'OpenAI-Beta': 'realtime=v1',
-      ...this.config.defaultHeaders,
-    };
-
-    // Add auth headers
-    if (this.config.authProvider case final authProvider?) {
-      headers.addAll(authProvider.getHeaders());
-    }
-
-    // Add organization header if configured
-    if (this.config.organization case final org?) {
-      headers['OpenAI-Organization'] = org;
-    }
-
-    // Add project header if configured
-    if (this.config.project case final proj?) {
-      headers['OpenAI-Project'] = proj;
-    }
-
-    // Add API version if configured
-    if (this.config.apiVersion case final version?) {
-      headers['OpenAI-Version'] = version;
-    }
-
-    // Connect to WebSocket using platform-specific implementation
-    final socket = await connectWebSocket(wsUrl, headers: headers);
+    final socket = await _openSocket('/realtime', model);
     final connection = RealtimeConnection._(socket);
-
-    // Apply config if provided
     if (config != null) {
       connection.updateSession(config);
     }
-
     return connection;
+  }
+
+  /// Connects to a Realtime translation session.
+  ///
+  /// Translation sessions stream source audio in and translated audio plus
+  /// transcript deltas out continuously — there is no `response.create`
+  /// lifecycle. The WebSocket lives at
+  /// `wss://api.openai.com/v1/realtime/translations`.
+  ///
+  /// ## Parameters
+  ///
+  /// - [model] - The translation model (e.g., `'gpt-realtime-translate'`).
+  /// - [config] - Optional update applied via `session.update` immediately
+  ///   after the connection opens (e.g., to set `audio.output.language`).
+  ///
+  /// ## Example
+  ///
+  /// ```dart
+  /// final session = await client.realtime.connectTranslation(
+  ///   model: 'gpt-realtime-translate',
+  ///   config: RealtimeTranslationSessionUpdateRequest(
+  ///     audio: RealtimeTranslationSessionAudio(
+  ///       output: RealtimeTranslationSessionAudioOutput(language: 'es'),
+  ///     ),
+  ///   ),
+  /// );
+  ///
+  /// session.events.listen((event) {
+  ///   switch (event) {
+  ///     case RealtimeTranslationOutputAudioDeltaEvent(:final delta):
+  ///       // base64 PCM16 translated audio
+  ///     case RealtimeTranslationOutputTranscriptDeltaEvent(:final delta):
+  ///       stdout.write(delta);
+  ///     default:
+  ///       break;
+  ///   }
+  /// });
+  /// ```
+  Future<RealtimeTranslationConnection> connectTranslation({
+    required String model,
+    RealtimeTranslationSessionUpdateRequest? config,
+  }) async {
+    final socket = await _openSocket('/realtime/translations', model);
+    final connection = RealtimeTranslationConnection._(socket);
+    if (config != null) {
+      connection.updateSession(config);
+    }
+    return connection;
+  }
+
+  Future<WebSocket> _openSocket(String path, String model) {
+    ensureNotClosed?.call();
+    final httpUrl = requestBuilder.buildUrl(
+      path,
+      queryParams: {'model': model},
+    );
+    final wsUrl = httpUrl.replace(
+      scheme: httpUrl.scheme == 'https' ? 'wss' : 'ws',
+    );
+    // The Realtime API authenticates via the standard `Authorization`
+    // bearer token only — no `OpenAI-Beta` header is required (or
+    // accepted) on the WebSocket handshake.
+    final cfg = config;
+    final headers = <String, String>{...cfg.defaultHeaders};
+    if (cfg.authProvider case final authProvider?) {
+      headers.addAll(authProvider.getHeaders());
+    }
+    if (cfg.organization case final org?) {
+      headers['OpenAI-Organization'] = org;
+    }
+    if (cfg.project case final proj?) {
+      headers['OpenAI-Project'] = proj;
+    }
+    if (cfg.apiVersion case final version?) {
+      headers['OpenAI-Version'] = version;
+    }
+    return connectWebSocket(wsUrl, headers: headers);
   }
 }
 
@@ -277,10 +313,17 @@ class RealtimeConnection {
   /// has produced audio output; the server will ignore those fields if you
   /// supply them on update.
   void updateSession(RealtimeSessionCreateRequest config, {String? eventId}) {
+    // The `session.update` event requires a discriminated session payload
+    // (`type: 'realtime'` vs `'transcription'`). Inject the realtime
+    // discriminator when the caller didn't set it so the bare
+    // `RealtimeSessionCreateRequest.toJson` (which omits `type` to keep the
+    // HTTP endpoint happy) still works on the WebSocket wire.
+    final sessionJson = config.toJson();
+    sessionJson['type'] ??= 'realtime';
     send({
       'type': 'session.update',
       'event_id': ?eventId,
-      'session': config.toJson(),
+      'session': sessionJson,
     });
   }
 
@@ -411,30 +454,39 @@ class RealtimeConnection {
   ///
   /// ```dart
   /// session.createResponse(
-  ///   modalities: ['text', 'audio'],
+  ///   outputModalities: ['text'],
   ///   instructions: 'Respond briefly.',
   /// );
   /// ```
+  ///
+  /// The response payload follows `RealtimeResponseCreateParams` from the
+  /// spec: `output_modalities` (single-modality array), nested
+  /// `audio.output.{format, voice}`, and reasoning/parallel-tool-calls
+  /// knobs.
   void createResponse({
-    List<String>? modalities,
+    List<String>? outputModalities,
     String? instructions,
-    String? voice,
-    String? outputAudioFormat,
+    RealtimeAudioConfigOutput? audio,
     List<RealtimeTool>? tools,
     Object? toolChoice,
-    double? temperature,
     Object? maxOutputTokens,
+    bool? parallelToolCalls,
+    RealtimeReasoning? reasoning,
+    String? conversation,
+    Map<String, dynamic>? metadata,
     String? eventId,
   }) {
     final response = <String, dynamic>{
-      'modalities': ?modalities,
+      'output_modalities': ?outputModalities,
       'instructions': ?instructions,
-      'voice': ?voice,
-      'output_audio_format': ?outputAudioFormat,
-      if (tools != null) 'tools': tools.map((t) => t.toJson()).toList(),
+      'audio': ?(audio == null ? null : {'output': audio.toJson()}),
+      'tools': ?tools?.map((t) => t.toJson()).toList(),
       'tool_choice': ?toolChoice,
-      'temperature': ?temperature,
       'max_output_tokens': ?maxOutputTokens,
+      'parallel_tool_calls': ?parallelToolCalls,
+      'reasoning': ?reasoning?.toJson(),
+      'conversation': ?conversation,
+      'metadata': ?metadata,
     };
 
     send({
@@ -506,5 +558,161 @@ class _BufferedEvent {
   _BufferedEvent.error(Object this.error) : event = null;
 
   final RealtimeEvent? event;
+  final Object? error;
+}
+
+/// A connection to a Realtime translation session.
+///
+/// Translation sessions stream source audio in and translated audio plus
+/// transcript deltas out continuously. They use a different event surface
+/// from regular Realtime sessions — see [RealtimeTranslationServerEvent]
+/// for the event types you'll receive on [events].
+class RealtimeTranslationConnection {
+  RealtimeTranslationConnection._(this._socket) {
+    _eventController =
+        StreamController<RealtimeTranslationServerEvent>.broadcast(
+      onListen: _drainBuffer,
+    );
+    _subscription = _socket.events.listen(
+      _handleEvent,
+      onError: _handleError,
+      onDone: _handleDone,
+    );
+  }
+
+  final WebSocket _socket;
+  late final StreamSubscription<WebSocketEvent> _subscription;
+  late final StreamController<RealtimeTranslationServerEvent> _eventController;
+  final List<_BufferedTranslationEvent> _earlyEvents = [];
+  bool _drained = false;
+  bool _closed = false;
+
+  void _drainBuffer() {
+    if (_drained) return;
+    _drained = true;
+    for (final buffered in _earlyEvents) {
+      if (buffered.error != null) {
+        _eventController.addError(buffered.error!);
+      } else {
+        _eventController.add(buffered.event!);
+      }
+    }
+    _earlyEvents.clear();
+  }
+
+  void _emitEvent(RealtimeTranslationServerEvent event) {
+    if (_drained) {
+      _eventController.add(event);
+    } else {
+      _earlyEvents.add(_BufferedTranslationEvent.event(event));
+    }
+  }
+
+  void _emitError(Object error) {
+    if (_drained) {
+      _eventController.addError(error);
+    } else {
+      _earlyEvents.add(_BufferedTranslationEvent.error(error));
+    }
+  }
+
+  /// Stream of translation server events.
+  Stream<RealtimeTranslationServerEvent> get events => _eventController.stream;
+
+  /// Whether the connection is closed.
+  bool get isClosed => _closed;
+
+  void _handleEvent(WebSocketEvent event) {
+    switch (event) {
+      case TextDataReceived(:final text):
+        _handleMessage(text);
+      case BinaryDataReceived():
+        // Binary data not expected from OpenAI Realtime API
+        break;
+      case CloseReceived():
+        _handleDone();
+    }
+  }
+
+  void _handleMessage(String message) {
+    try {
+      final json = jsonDecode(message) as Map<String, dynamic>;
+      final event = RealtimeTranslationServerEvent.fromJson(json);
+      _emitEvent(event);
+    } catch (e) {
+      _emitError(e);
+    }
+  }
+
+  void _handleError(Object error) {
+    _emitError(error);
+  }
+
+  void _handleDone() {
+    _closed = true;
+    unawaited(_eventController.close());
+  }
+
+  void _ensureNotClosed() {
+    if (_closed) {
+      throw StateError('RealtimeTranslationConnection is closed.');
+    }
+  }
+
+  /// Sends a raw client event to the server.
+  void send(Map<String, dynamic> event) {
+    _ensureNotClosed();
+    _socket.sendText(jsonEncode(event));
+  }
+
+  /// Updates the translation session's configuration.
+  ///
+  /// Translation sessions only allow updates to `audio.input.transcription`,
+  /// `audio.input.noise_reduction`, and `audio.output.language` — `model`
+  /// and the session `type` are fixed at session creation.
+  void updateSession(
+    RealtimeTranslationSessionUpdateRequest config, {
+    String? eventId,
+  }) {
+    send({
+      'type': 'session.update',
+      'event_id': ?eventId,
+      'session': config.toJson(),
+    });
+  }
+
+  /// Appends base64-encoded 24 kHz PCM16 mono audio bytes to the input
+  /// buffer. The translation engine consumes 200 ms frames.
+  void appendAudio(String audioBase64, {String? eventId}) {
+    send({
+      'type': 'session.input_audio_buffer.append',
+      'event_id': ?eventId,
+      'audio': audioBase64,
+    });
+  }
+
+  /// Gracefully closes the translation session. The server flushes any
+  /// pending input audio and emits any remaining translated output before
+  /// closing the socket.
+  void closeSession({String? eventId}) {
+    send({'type': 'session.close', 'event_id': ?eventId});
+  }
+
+  /// Closes the WebSocket connection.
+  Future<void> close({int? code, String? reason}) async {
+    if (_closed) return;
+    _closed = true;
+    await _subscription.cancel();
+    await _socket.close(code, reason);
+    await _eventController.close();
+  }
+}
+
+class _BufferedTranslationEvent {
+  _BufferedTranslationEvent.event(RealtimeTranslationServerEvent this.event)
+    : error = null;
+  _BufferedTranslationEvent.error(Object this.error) : event = null;
+
+  final RealtimeTranslationServerEvent? event;
   final Object? error;
 }

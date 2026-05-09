@@ -97,15 +97,13 @@ class RealtimeTool {
 // RealtimeSession
 // =============================================================================
 
-/// Configuration for a GA Realtime session.
+/// Configuration for a Realtime session.
 ///
 /// The Realtime API enables real-time audio conversations with the model
-/// using WebSockets.
-///
-/// This is the **GA-shape** session: audio configuration is nested under
-/// [audio] (`audio.input.*` / `audio.output.*`), `outputModalities` replaces
-/// the legacy `modalities` field, and `maxOutputTokens` replaces
-/// `maxResponseOutputTokens`.
+/// using WebSockets. Audio configuration is nested under [audio]
+/// (`audio.input.*` / `audio.output.*`), output modalities are configured
+/// via [outputModalities], and the maximum output token cap is set on
+/// [maxOutputTokens].
 ///
 /// Note: the `prompt` field from the spec is intentionally not modelled in
 /// this PR — the spec helper schema `Prompt` has no Dart class yet. Tracked
@@ -126,7 +124,6 @@ class RealtimeSession {
     this.instructions,
     this.tools,
     this.toolChoice,
-    this.temperature,
     this.maxOutputTokens,
     this.parallelToolCalls,
     this.reasoning,
@@ -161,7 +158,6 @@ class RealtimeSession {
       toolChoice: json['tool_choice'] != null
           ? RealtimeToolChoice.fromJson(json['tool_choice'] as Object)
           : null,
-      temperature: (json['temperature'] as num?)?.toDouble(),
       maxOutputTokens: json['max_output_tokens'] != null
           ? InfOrInt.fromJson(json['max_output_tokens'] as Object)
           : null,
@@ -199,9 +195,8 @@ class RealtimeSession {
   /// Nested audio configuration.
   final RealtimeAudioConfig? audio;
 
-  /// Output modalities (e.g. `['text', 'audio']`). Defaults to `['audio']`.
-  ///
-  /// Replaces the Beta-shape `modalities` field.
+  /// Output modalities (e.g. `['audio']` or `['text']`). Defaults to
+  /// `['audio']`. The server only accepts a single modality at a time.
   final List<String>? outputModalities;
 
   /// System instructions.
@@ -213,12 +208,7 @@ class RealtimeSession {
   /// Tool choice setting.
   final RealtimeToolChoice? toolChoice;
 
-  /// Sampling temperature.
-  final double? temperature;
-
   /// Maximum output tokens (`'inf'` or a specific integer).
-  ///
-  /// Replaces the Beta-shape `maxResponseOutputTokens` field.
   final InfOrInt? maxOutputTokens;
 
   /// Whether the model may call multiple tools in parallel. Only supported by
@@ -250,7 +240,6 @@ class RealtimeSession {
     if (instructions != null) 'instructions': instructions,
     if (tools != null) 'tools': tools!.map((t) => t.toJson()).toList(),
     if (toolChoice != null) 'tool_choice': toolChoice!.toJson(),
-    if (temperature != null) 'temperature': temperature,
     if (maxOutputTokens != null) 'max_output_tokens': maxOutputTokens!.toJson(),
     if (parallelToolCalls != null) 'parallel_tool_calls': parallelToolCalls,
     if (reasoning != null) 'reasoning': reasoning!.toJson(),
@@ -273,7 +262,6 @@ class RealtimeSession {
     Object? instructions = unsetCopyWithValue,
     Object? tools = unsetCopyWithValue,
     Object? toolChoice = unsetCopyWithValue,
-    Object? temperature = unsetCopyWithValue,
     Object? maxOutputTokens = unsetCopyWithValue,
     Object? parallelToolCalls = unsetCopyWithValue,
     Object? reasoning = unsetCopyWithValue,
@@ -301,9 +289,6 @@ class RealtimeSession {
     toolChoice: identical(toolChoice, unsetCopyWithValue)
         ? this.toolChoice
         : toolChoice as RealtimeToolChoice?,
-    temperature: identical(temperature, unsetCopyWithValue)
-        ? this.temperature
-        : temperature as double?,
     maxOutputTokens: identical(maxOutputTokens, unsetCopyWithValue)
         ? this.maxOutputTokens
         : maxOutputTokens as InfOrInt?,
@@ -339,7 +324,6 @@ class RealtimeSession {
           instructions == other.instructions &&
           listsEqual(tools, other.tools) &&
           toolChoice == other.toolChoice &&
-          temperature == other.temperature &&
           maxOutputTokens == other.maxOutputTokens &&
           parallelToolCalls == other.parallelToolCalls &&
           reasoning == other.reasoning &&
@@ -359,7 +343,6 @@ class RealtimeSession {
     instructions,
     listHash(tools),
     toolChoice,
-    temperature,
     maxOutputTokens,
     parallelToolCalls,
     reasoning,
@@ -373,7 +356,7 @@ class RealtimeSession {
       'RealtimeSession(id: $id, model: $model, expiresAt: $expiresAt, '
       'audio: $audio, outputModalities: $outputModalities, '
       'instructions: $instructions, tools: $tools, toolChoice: $toolChoice, '
-      'temperature: $temperature, maxOutputTokens: $maxOutputTokens, '
+      'maxOutputTokens: $maxOutputTokens, '
       'parallelToolCalls: $parallelToolCalls, reasoning: $reasoning, '
       'tracing: $tracing, truncation: $truncation, include: $include)';
 }

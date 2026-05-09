@@ -66,7 +66,7 @@ void main() {
     );
 
     test(
-      'creates realtime session with GA-shape configuration',
+      'creates realtime session with full configuration',
       timeout: const Timeout(Duration(seconds: 30)),
       () async {
         if (apiKey == null) {
@@ -78,7 +78,9 @@ void main() {
           const realtime.RealtimeClientSecretCreateRequest(
             session: realtime.RealtimeSessionCreateRequest(
               model: 'gpt-realtime-2',
-              outputModalities: ['text', 'audio'],
+              // The server only accepts a single modality at a time —
+              // `['text', 'audio']` is rejected; pick `['text']` or `['audio']`.
+              outputModalities: ['audio'],
               audio: realtime.RealtimeAudioConfig(
                 input: realtime.RealtimeAudioConfigInput(
                   turnDetection:
@@ -91,17 +93,16 @@ void main() {
                 output: realtime.RealtimeAudioConfigOutput(voice: 'alloy'),
               ),
               instructions: 'You are a helpful assistant.',
-              temperature: 0.8,
             ),
           ),
         );
 
         expect(response.session.id, startsWith('sess_'));
         expect(response.session.audio?.output?.voice, isNotNull);
-        expect(response.session.outputModalities, contains('text'));
+        expect(response.session.outputModalities, contains('audio'));
         expect(response.session.audio?.input?.turnDetection, isNotNull);
 
-        print('GA session with config: ${response.session.id}');
+        print('Session with full config: ${response.session.id}');
       },
     );
 
@@ -115,8 +116,8 @@ void main() {
         }
 
         // Transcription sessions are created via
-        // `createTranscriptionClientSecret(...)` — the GA `/realtime/client_secrets`
-        // endpoint accepts both realtime and transcription session shapes
+        // `createTranscriptionClientSecret(...)` — `/realtime/client_secrets`
+        // accepts both realtime and transcription session shapes
         // discriminated by `type`, but the transcription shape carries no
         // top-level `model`.
         final response = await client!.realtimeSessions
@@ -143,7 +144,7 @@ void main() {
     );
 
     test(
-      'creates client secret with custom expiration (GA-shape session)',
+      'creates client secret with custom expiration',
       timeout: const Timeout(Duration(seconds: 30)),
       () async {
         if (apiKey == null) {
@@ -279,7 +280,7 @@ void main() {
   });
 
   // ============================================================
-  // Group 3: Session Configuration (GA shape)
+  // Group 3: Session Configuration
   // ============================================================
 
   group('Session Configuration', () {
@@ -299,7 +300,7 @@ void main() {
         try {
           await waitForEvent<realtime.SessionCreatedEvent>(connection);
 
-          // Update session in GA shape.
+          // Update the session configuration.
           connection.updateSession(
             const realtime.RealtimeSessionCreateRequest(
               model: 'gpt-realtime-2',
@@ -308,7 +309,6 @@ void main() {
                 output: realtime.RealtimeAudioConfigOutput(voice: 'shimmer'),
               ),
               instructions: 'You are a helpful assistant.',
-              temperature: 0.9,
             ),
           );
 
@@ -344,7 +344,7 @@ void main() {
           model: 'gpt-realtime-2',
           config: const realtime.RealtimeSessionCreateRequest(
             model: 'gpt-realtime-2',
-            outputModalities: ['text', 'audio'],
+            outputModalities: ['audio'],
             audio: realtime.RealtimeAudioConfig(
               output: realtime.RealtimeAudioConfigOutput(voice: 'echo'),
             ),
@@ -569,7 +569,7 @@ void main() {
               ],
             })
             ..createResponse(
-              modalities: ['text'],
+              outputModalities: ['text'],
               instructions: 'Be very brief.',
               maxOutputTokens: 50,
             );
@@ -664,12 +664,15 @@ void main() {
             ],
           });
 
-          final itemCreated =
-              await waitForEvent<realtime.ConversationItemCreatedEvent>(
+          // The server emits `conversation.item.added` after a client
+          // `conversation.item.create`. The `conversation.item.created`
+          // event is reserved for `item_reference` lookup paths.
+          final itemAdded =
+              await waitForEvent<realtime.ConversationItemAddedEvent>(
                 connection,
               );
 
-          final itemId = itemCreated.item['id'] as String;
+          final itemId = itemAdded.item['id'] as String;
           expect(itemId, isNotEmpty);
 
           connection.deleteItem(itemId);
@@ -753,7 +756,7 @@ void main() {
           model: 'gpt-realtime-2',
           config: const realtime.RealtimeSessionCreateRequest(
             model: 'gpt-realtime-2',
-            outputModalities: ['text', 'audio'],
+            outputModalities: ['text'],
             audio: realtime.RealtimeAudioConfig(
               input: realtime.RealtimeAudioConfigInput(
                 format: realtime.AudioPcm(rate: 24000),
@@ -794,7 +797,7 @@ void main() {
           );
 
           connection.createResponse(
-            modalities: ['text'],
+            outputModalities: ['text'],
             instructions: 'Please repeat what the user said.',
           );
 
@@ -833,7 +836,7 @@ void main() {
           model: 'gpt-realtime-2',
           config: const realtime.RealtimeSessionCreateRequest(
             model: 'gpt-realtime-2',
-            outputModalities: ['text', 'audio'],
+            outputModalities: ['audio'],
             audio: realtime.RealtimeAudioConfig(
               input: realtime.RealtimeAudioConfigInput(
                 format: realtime.AudioPcm(rate: 24000),
@@ -866,7 +869,7 @@ void main() {
   });
 
   // ============================================================
-  // Group 10: Reasoning + parallel tool calls (NEW for GA)
+  // Group 10: Reasoning + parallel tool calls
   // ============================================================
 
   group('Reasoning + parallel tool calls', () {
@@ -921,7 +924,7 @@ void main() {
   });
 
   // ============================================================
-  // Group 11: Translation client secret (NEW for GA)
+  // Group 11: Translation client secret
   // ============================================================
 
   group('Translation client secret', () {
@@ -969,7 +972,7 @@ void main() {
   });
 
   // ============================================================
-  // Group 12: Transcription delay (NEW for GA)
+  // Group 12: Transcription delay
   // ============================================================
 
   group('Transcription delay', () {

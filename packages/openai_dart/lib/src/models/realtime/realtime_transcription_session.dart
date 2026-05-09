@@ -8,7 +8,7 @@ import 'realtime_audio_config.dart';
 // RealtimeTranscriptionSessionAudio
 // =============================================================================
 
-/// Audio configuration block for a GA transcription session.
+/// Audio configuration block for a transcription session.
 ///
 /// Mirrors the Python SDK `realtime_transcription_session_audio` shape.
 @immutable
@@ -66,7 +66,7 @@ class RealtimeTranscriptionSessionAudio {
 // RealtimeTranscriptionSessionCreateRequest
 // =============================================================================
 
-/// Request for creating a GA Realtime transcription session via HTTP.
+/// Request for creating a Realtime transcription session via HTTP.
 ///
 /// Transcription sessions are optimized for audio-to-text scenarios without
 /// generating audio responses.
@@ -173,9 +173,9 @@ class RealtimeTranscriptionSessionCreateRequest {
 // RealtimeTranscriptionSessionCreateResponse
 // =============================================================================
 
-/// Response from creating a GA Realtime transcription session.
+/// Response from creating a Realtime transcription session.
 ///
-/// Note: the GA shape no longer includes `client_secret` on the inner session
+/// Note: the response does not include `client_secret` on the inner session
 /// object; callers must read the secret from the wrapper response of the
 /// `/realtime/client_secrets` endpoint.
 @immutable

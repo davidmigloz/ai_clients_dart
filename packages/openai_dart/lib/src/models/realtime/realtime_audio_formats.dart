@@ -7,7 +7,7 @@ import '../common/equality_helpers.dart';
 // RealtimeAudioFormats
 // =============================================================================
 
-/// Audio format for GA Realtime sessions.
+/// Audio format for Realtime sessions.
 ///
 /// A discriminated union (`type`) of three concrete formats:
 ///

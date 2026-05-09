@@ -14,22 +14,25 @@ import 'realtime_truncation.dart';
 // RealtimeSessionCreateRequest
 // =============================================================================
 
-/// Request for creating a GA Realtime session via HTTP.
+/// Realtime session configuration.
 ///
-/// This endpoint creates an ephemeral API key that can be used to authenticate
-/// a WebSocket connection to the Realtime API.
+/// Used as the embedded `session` in [RealtimeClientSecretCreateRequest]
+/// when calling `client.realtimeSessions.createClientSecret(...)` and as the
+/// payload of the `session.update` WebSocket event.
 ///
 /// ## Example
 ///
 /// ```dart
-/// final response = await client.realtimeSessions.create(
-///   RealtimeSessionCreateRequest(
-///     model: 'gpt-realtime-2',
-///     audio: RealtimeAudioConfig(
-///       output: RealtimeAudioConfigOutput(voice: 'alloy'),
+/// final response = await client.realtimeSessions.createClientSecret(
+///   RealtimeClientSecretCreateRequest(
+///     session: RealtimeSessionCreateRequest(
+///       model: 'gpt-realtime-2',
+///       audio: RealtimeAudioConfig(
+///         output: RealtimeAudioConfigOutput(voice: 'alloy'),
+///       ),
+///       instructions: 'You are a helpful assistant.',
+///       reasoning: RealtimeReasoning(effort: RealtimeReasoningEffort.minimal),
 ///     ),
-///     instructions: 'You are a helpful assistant.',
-///     reasoning: RealtimeReasoning(effort: RealtimeReasoningEffort.minimal),
 ///   ),
 /// );
 /// ```
@@ -49,7 +52,6 @@ class RealtimeSessionCreateRequest {
     this.instructions,
     this.tools,
     this.toolChoice,
-    this.temperature,
     this.maxOutputTokens,
     this.parallelToolCalls,
     this.reasoning,
@@ -80,7 +82,6 @@ class RealtimeSessionCreateRequest {
       toolChoice: json['tool_choice'] != null
           ? RealtimeToolChoice.fromJson(json['tool_choice'] as Object)
           : null,
-      temperature: (json['temperature'] as num?)?.toDouble(),
       maxOutputTokens: json['max_output_tokens'] != null
           ? InfOrInt.fromJson(json['max_output_tokens'] as Object)
           : null,
@@ -125,9 +126,6 @@ class RealtimeSessionCreateRequest {
   /// Tool choice setting.
   final RealtimeToolChoice? toolChoice;
 
-  /// Sampling temperature.
-  final double? temperature;
-
   /// Maximum output tokens (`'inf'` or a specific integer).
   final InfOrInt? maxOutputTokens;
 
@@ -160,7 +158,6 @@ class RealtimeSessionCreateRequest {
     if (instructions != null) 'instructions': instructions,
     if (tools != null) 'tools': tools!.map((t) => t.toJson()).toList(),
     if (toolChoice != null) 'tool_choice': toolChoice!.toJson(),
-    if (temperature != null) 'temperature': temperature,
     if (maxOutputTokens != null) 'max_output_tokens': maxOutputTokens!.toJson(),
     if (parallelToolCalls != null) 'parallel_tool_calls': parallelToolCalls,
     if (reasoning != null) 'reasoning': reasoning!.toJson(),
@@ -180,7 +177,6 @@ class RealtimeSessionCreateRequest {
     Object? instructions = unsetCopyWithValue,
     Object? tools = unsetCopyWithValue,
     Object? toolChoice = unsetCopyWithValue,
-    Object? temperature = unsetCopyWithValue,
     Object? maxOutputTokens = unsetCopyWithValue,
     Object? parallelToolCalls = unsetCopyWithValue,
     Object? reasoning = unsetCopyWithValue,
@@ -205,9 +201,6 @@ class RealtimeSessionCreateRequest {
     toolChoice: identical(toolChoice, unsetCopyWithValue)
         ? this.toolChoice
         : toolChoice as RealtimeToolChoice?,
-    temperature: identical(temperature, unsetCopyWithValue)
-        ? this.temperature
-        : temperature as double?,
     maxOutputTokens: identical(maxOutputTokens, unsetCopyWithValue)
         ? this.maxOutputTokens
         : maxOutputTokens as InfOrInt?,
@@ -240,7 +233,6 @@ class RealtimeSessionCreateRequest {
           instructions == other.instructions &&
           listsEqual(tools, other.tools) &&
           toolChoice == other.toolChoice &&
-          temperature == other.temperature &&
           maxOutputTokens == other.maxOutputTokens &&
           parallelToolCalls == other.parallelToolCalls &&
           reasoning == other.reasoning &&
@@ -257,7 +249,6 @@ class RealtimeSessionCreateRequest {
     instructions,
     listHash(tools),
     toolChoice,
-    temperature,
     maxOutputTokens,
     parallelToolCalls,
     reasoning,
@@ -270,7 +261,7 @@ class RealtimeSessionCreateRequest {
   String toString() =>
       'RealtimeSessionCreateRequest(model: $model, type: $type, audio: $audio, '
       'outputModalities: $outputModalities, instructions: $instructions, '
-      'tools: $tools, toolChoice: $toolChoice, temperature: $temperature, '
+      'tools: $tools, toolChoice: $toolChoice, '
       'maxOutputTokens: $maxOutputTokens, parallelToolCalls: $parallelToolCalls, '
       'reasoning: $reasoning, tracing: $tracing, truncation: $truncation, '
       'include: $include)';
@@ -280,11 +271,11 @@ class RealtimeSessionCreateRequest {
 // RealtimeSessionCreateResponse
 // =============================================================================
 
-/// Response from creating a GA Realtime session via HTTP.
+/// Response from creating a Realtime session via HTTP.
 ///
-/// Contains the session configuration. Note that the GA shape no longer nests
-/// the client secret inside this response — the `/realtime/client_secrets`
-/// endpoint returns a [RealtimeClientSecretCreateResponse] wrapping this
+/// Contains the session configuration. The client secret is **not** nested
+/// on this response — the `/realtime/client_secrets` endpoint returns a
+/// [RealtimeClientSecretCreateResponse] wrapping this
 /// [RealtimeSessionCreateResponse] alongside the secret.
 @immutable
 class RealtimeSessionCreateResponse {
@@ -300,7 +291,6 @@ class RealtimeSessionCreateResponse {
     this.instructions,
     this.tools,
     this.toolChoice,
-    this.temperature,
     this.maxOutputTokens,
     this.parallelToolCalls,
     this.reasoning,
@@ -333,7 +323,6 @@ class RealtimeSessionCreateResponse {
       toolChoice: json['tool_choice'] != null
           ? RealtimeToolChoice.fromJson(json['tool_choice'] as Object)
           : null,
-      temperature: (json['temperature'] as num?)?.toDouble(),
       maxOutputTokens: json['max_output_tokens'] != null
           ? InfOrInt.fromJson(json['max_output_tokens'] as Object)
           : null,
@@ -383,9 +372,6 @@ class RealtimeSessionCreateResponse {
   /// Tool choice setting.
   final RealtimeToolChoice? toolChoice;
 
-  /// Sampling temperature.
-  final double? temperature;
-
   /// Maximum output tokens.
   final InfOrInt? maxOutputTokens;
 
@@ -416,7 +402,6 @@ class RealtimeSessionCreateResponse {
     if (instructions != null) 'instructions': instructions,
     if (tools != null) 'tools': tools!.map((t) => t.toJson()).toList(),
     if (toolChoice != null) 'tool_choice': toolChoice!.toJson(),
-    if (temperature != null) 'temperature': temperature,
     if (maxOutputTokens != null) 'max_output_tokens': maxOutputTokens!.toJson(),
     if (parallelToolCalls != null) 'parallel_tool_calls': parallelToolCalls,
     if (reasoning != null) 'reasoning': reasoning!.toJson(),
@@ -439,7 +424,6 @@ class RealtimeSessionCreateResponse {
     Object? instructions = unsetCopyWithValue,
     Object? tools = unsetCopyWithValue,
     Object? toolChoice = unsetCopyWithValue,
-    Object? temperature = unsetCopyWithValue,
     Object? maxOutputTokens = unsetCopyWithValue,
     Object? parallelToolCalls = unsetCopyWithValue,
     Object? reasoning = unsetCopyWithValue,
@@ -467,9 +451,6 @@ class RealtimeSessionCreateResponse {
     toolChoice: identical(toolChoice, unsetCopyWithValue)
         ? this.toolChoice
         : toolChoice as RealtimeToolChoice?,
-    temperature: identical(temperature, unsetCopyWithValue)
-        ? this.temperature
-        : temperature as double?,
     maxOutputTokens: identical(maxOutputTokens, unsetCopyWithValue)
         ? this.maxOutputTokens
         : maxOutputTokens as InfOrInt?,
@@ -505,7 +486,6 @@ class RealtimeSessionCreateResponse {
           instructions == other.instructions &&
           listsEqual(tools, other.tools) &&
           toolChoice == other.toolChoice &&
-          temperature == other.temperature &&
           maxOutputTokens == other.maxOutputTokens &&
           parallelToolCalls == other.parallelToolCalls &&
           reasoning == other.reasoning &&
@@ -525,7 +505,6 @@ class RealtimeSessionCreateResponse {
     instructions,
     listHash(tools),
     toolChoice,
-    temperature,
     maxOutputTokens,
     parallelToolCalls,
     reasoning,

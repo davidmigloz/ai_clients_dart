@@ -45,7 +45,7 @@ enum NoiseReductionType {
 /// Transcription latency-vs-accuracy delay knob.
 ///
 /// Higher values trade latency for accuracy. Only supported with
-/// `gpt-realtime-whisper` in GA Realtime sessions.
+/// `gpt-realtime-whisper` in Realtime sessions.
 ///
 /// Unknown values from `fromJson` throw `FormatException`, matching the
 /// existing convention used by other realtime enums.

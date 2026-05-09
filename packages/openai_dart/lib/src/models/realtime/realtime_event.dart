@@ -5,116 +5,115 @@ import 'realtime_session.dart';
 /// Base class for all realtime events.
 ///
 /// Events are sent and received over the WebSocket connection.
+///
+/// **Wire names**: a few server events have multiple historical names
+/// (e.g., `response.text.delta` and `response.output_text.delta`,
+/// `response.audio.delta` and `response.output_audio.delta`,
+/// `response.audio_transcript.delta` and `response.output_audio_transcript.delta`).
+/// `fromJson` accepts either spelling and dispatches to the same Dart
+/// class. Unrecognised event types fall through to
+/// [UnknownRealtimeEvent] rather than throwing, so future server
+/// additions don't break existing clients.
 sealed class RealtimeEvent {
   /// Creates a [RealtimeEvent] from JSON.
+  ///
+  /// Unknown `type` values yield an [UnknownRealtimeEvent] preserving the
+  /// raw payload — never throws on unrecognised discriminators.
   factory RealtimeEvent.fromJson(Map<String, dynamic> json) {
-    final type = json['type'] as String;
+    final type = json['type'] as String?;
+    if (type == null) {
+      return UnknownRealtimeEvent(Map<String, dynamic>.from(json));
+    }
+    return switch (type) {
+      // Session events
+      'session.created' => SessionCreatedEvent.fromJson(json),
+      'session.updated' => SessionUpdatedEvent.fromJson(json),
 
-    // Session events
-    if (type == 'session.created') {
-      return SessionCreatedEvent.fromJson(json);
-    }
-    if (type == 'session.updated') {
-      return SessionUpdatedEvent.fromJson(json);
-    }
+      // Conversation events
+      'conversation.created' => ConversationCreatedEvent.fromJson(json),
+      'conversation.item.added' => ConversationItemAddedEvent.fromJson(json),
+      'conversation.item.created' => ConversationItemCreatedEvent.fromJson(
+        json,
+      ),
+      'conversation.item.deleted' => ConversationItemDeletedEvent.fromJson(
+        json,
+      ),
+      'conversation.item.truncated' => ConversationItemTruncatedEvent.fromJson(
+        json,
+      ),
 
-    // Conversation events
-    if (type == 'conversation.created') {
-      return ConversationCreatedEvent.fromJson(json);
-    }
-    if (type == 'conversation.item.created') {
-      return ConversationItemCreatedEvent.fromJson(json);
-    }
-    if (type == 'conversation.item.deleted') {
-      return ConversationItemDeletedEvent.fromJson(json);
-    }
-    if (type == 'conversation.item.truncated') {
-      return ConversationItemTruncatedEvent.fromJson(json);
-    }
+      // Input audio transcription events
+      'conversation.item.input_audio_transcription.delta' =>
+        InputAudioTranscriptionDeltaEvent.fromJson(json),
+      'conversation.item.input_audio_transcription.completed' =>
+        InputAudioTranscriptionCompletedEvent.fromJson(json),
+      'conversation.item.input_audio_transcription.failed' =>
+        InputAudioTranscriptionFailedEvent.fromJson(json),
+      'conversation.item.input_audio_transcription.segment' =>
+        InputAudioTranscriptionSegmentEvent.fromJson(json),
 
-    // Input audio transcription events
-    if (type == 'conversation.item.input_audio_transcription.delta') {
-      return InputAudioTranscriptionDeltaEvent.fromJson(json);
-    }
-    if (type == 'conversation.item.input_audio_transcription.completed') {
-      return InputAudioTranscriptionCompletedEvent.fromJson(json);
-    }
-    if (type == 'conversation.item.input_audio_transcription.failed') {
-      return InputAudioTranscriptionFailedEvent.fromJson(json);
-    }
-    if (type == 'conversation.item.input_audio_transcription.segment') {
-      return InputAudioTranscriptionSegmentEvent.fromJson(json);
-    }
+      // Input audio buffer events
+      'input_audio_buffer.committed' => InputAudioBufferCommittedEvent.fromJson(
+        json,
+      ),
+      'input_audio_buffer.cleared' => InputAudioBufferClearedEvent.fromJson(
+        json,
+      ),
+      'input_audio_buffer.speech_started' =>
+        InputAudioBufferSpeechStartedEvent.fromJson(json),
+      'input_audio_buffer.speech_stopped' =>
+        InputAudioBufferSpeechStoppedEvent.fromJson(json),
 
-    // Input audio events
-    if (type == 'input_audio_buffer.committed') {
-      return InputAudioBufferCommittedEvent.fromJson(json);
-    }
-    if (type == 'input_audio_buffer.cleared') {
-      return InputAudioBufferClearedEvent.fromJson(json);
-    }
-    if (type == 'input_audio_buffer.speech_started') {
-      return InputAudioBufferSpeechStartedEvent.fromJson(json);
-    }
-    if (type == 'input_audio_buffer.speech_stopped') {
-      return InputAudioBufferSpeechStoppedEvent.fromJson(json);
-    }
+      // Response events
+      'response.created' => ResponseCreatedEvent.fromJson(json),
+      'response.done' => ResponseDoneEvent.fromJson(json),
+      'response.output_item.added' => ResponseOutputItemAddedEvent.fromJson(
+        json,
+      ),
+      'response.output_item.done' => ResponseOutputItemDoneEvent.fromJson(json),
+      'response.content_part.added' => ResponseContentPartAddedEvent.fromJson(
+        json,
+      ),
+      'response.content_part.done' => ResponseContentPartDoneEvent.fromJson(
+        json,
+      ),
 
-    // Response events
-    if (type == 'response.created') {
-      return ResponseCreatedEvent.fromJson(json);
-    }
-    if (type == 'response.done') {
-      return ResponseDoneEvent.fromJson(json);
-    }
-    if (type == 'response.output_item.added') {
-      return ResponseOutputItemAddedEvent.fromJson(json);
-    }
-    if (type == 'response.output_item.done') {
-      return ResponseOutputItemDoneEvent.fromJson(json);
-    }
-    if (type == 'response.content_part.added') {
-      return ResponseContentPartAddedEvent.fromJson(json);
-    }
-    if (type == 'response.content_part.done') {
-      return ResponseContentPartDoneEvent.fromJson(json);
-    }
-    if (type == 'response.text.delta') {
-      return ResponseTextDeltaEvent.fromJson(json);
-    }
-    if (type == 'response.text.done') {
-      return ResponseTextDoneEvent.fromJson(json);
-    }
-    if (type == 'response.audio_transcript.delta') {
-      return ResponseAudioTranscriptDeltaEvent.fromJson(json);
-    }
-    if (type == 'response.audio_transcript.done') {
-      return ResponseAudioTranscriptDoneEvent.fromJson(json);
-    }
-    if (type == 'response.audio.delta') {
-      return ResponseAudioDeltaEvent.fromJson(json);
-    }
-    if (type == 'response.audio.done') {
-      return ResponseAudioDoneEvent.fromJson(json);
-    }
-    if (type == 'response.function_call_arguments.delta') {
-      return ResponseFunctionCallArgumentsDeltaEvent.fromJson(json);
-    }
-    if (type == 'response.function_call_arguments.done') {
-      return ResponseFunctionCallArgumentsDoneEvent.fromJson(json);
-    }
+      // Text delta/done — accept either historical wire name.
+      'response.text.delta' ||
+      'response.output_text.delta' => ResponseTextDeltaEvent.fromJson(json),
+      'response.text.done' ||
+      'response.output_text.done' => ResponseTextDoneEvent.fromJson(json),
 
-    // Rate limit event
-    if (type == 'rate_limits.updated') {
-      return RateLimitsUpdatedEvent.fromJson(json);
-    }
+      // Audio transcript delta/done — accept either historical wire name.
+      'response.audio_transcript.delta' ||
+      'response.output_audio_transcript.delta' =>
+        ResponseAudioTranscriptDeltaEvent.fromJson(json),
+      'response.audio_transcript.done' ||
+      'response.output_audio_transcript.done' =>
+        ResponseAudioTranscriptDoneEvent.fromJson(json),
 
-    // Error event
-    if (type == 'error') {
-      return ErrorEvent.fromJson(json);
-    }
+      // Audio delta/done — accept either historical wire name.
+      'response.audio.delta' ||
+      'response.output_audio.delta' => ResponseAudioDeltaEvent.fromJson(json),
+      'response.audio.done' ||
+      'response.output_audio.done' => ResponseAudioDoneEvent.fromJson(json),
 
-    throw FormatException('Unknown realtime event type: $type');
+      'response.function_call_arguments.delta' =>
+        ResponseFunctionCallArgumentsDeltaEvent.fromJson(json),
+      'response.function_call_arguments.done' =>
+        ResponseFunctionCallArgumentsDoneEvent.fromJson(json),
+
+      // Rate limit + error events.
+      'rate_limits.updated' => RateLimitsUpdatedEvent.fromJson(json),
+      'error' => ErrorEvent.fromJson(json),
+
+      // Forward-compat: any event we don't model individually
+      // (`conversation.item.done`, `output_audio_buffer.*`,
+      // `mcp_list_tools.*`, `response.mcp_call.*`,
+      // `transcription_session.updated`, `input_audio_buffer.timeout_triggered`,
+      // …) is surfaced as [UnknownRealtimeEvent] preserving the raw JSON.
+      _ => UnknownRealtimeEvent(Map<String, dynamic>.from(json)),
+    };
   }
 
   /// The event type.
@@ -125,6 +124,52 @@ sealed class RealtimeEvent {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson();
+}
+
+/// Forward-compatible fallback for [RealtimeEvent] discriminators that this
+/// client doesn't model individually.
+///
+/// Surfaces unrecognised wire `type` values without throwing so future
+/// server additions or out-of-band frames don't break the event stream.
+/// The raw JSON is preserved verbatim and round-trips through [toJson].
+@immutable
+class UnknownRealtimeEvent implements RealtimeEvent {
+  /// Creates an [UnknownRealtimeEvent] from the raw JSON payload.
+  const UnknownRealtimeEvent(this.json);
+
+  /// The raw JSON map preserved verbatim.
+  final Map<String, dynamic> json;
+
+  @override
+  String get type => (json['type'] as String?) ?? '';
+
+  @override
+  String? get eventId => json['event_id'] as String?;
+
+  @override
+  Map<String, dynamic> toJson() => Map<String, dynamic>.from(json);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnknownRealtimeEvent &&
+          runtimeType == other.runtimeType &&
+          _mapsEqual(json, other.json);
+
+  @override
+  int get hashCode => Object.hashAllUnordered(json.entries);
+
+  @override
+  String toString() => 'UnknownRealtimeEvent(type: $type)';
+}
+
+bool _mapsEqual(Map<String, dynamic> a, Map<String, dynamic> b) {
+  if (identical(a, b)) return true;
+  if (a.length != b.length) return false;
+  for (final key in a.keys) {
+    if (!b.containsKey(key) || a[key] != b[key]) return false;
+  }
+  return true;
 }
 
 /// Session created event.
@@ -317,6 +362,65 @@ class ConversationItemCreatedEvent implements RealtimeEvent {
 
   @override
   String toString() => 'ConversationItemCreatedEvent(eventId: $eventId)';
+}
+
+/// Conversation item added event.
+///
+/// The server emits `conversation.item.added` when a new item is appended
+/// to the conversation (e.g., immediately after the client sends
+/// `conversation.item.create`). For most flows this is the primary
+/// item-creation signal; `conversation.item.created` is emitted for
+/// `item_reference` lookup paths in some flows.
+@immutable
+class ConversationItemAddedEvent implements RealtimeEvent {
+  /// Creates a [ConversationItemAddedEvent].
+  const ConversationItemAddedEvent({
+    required this.eventId,
+    this.previousItemId,
+    required this.item,
+  });
+
+  /// Creates a [ConversationItemAddedEvent] from JSON.
+  factory ConversationItemAddedEvent.fromJson(Map<String, dynamic> json) {
+    return ConversationItemAddedEvent(
+      eventId: json['event_id'] as String,
+      previousItemId: json['previous_item_id'] as String?,
+      item: Map<String, dynamic>.from(json['item'] as Map),
+    );
+  }
+
+  @override
+  String get type => 'conversation.item.added';
+
+  @override
+  final String eventId;
+
+  /// The ID of the previous item, if any.
+  final String? previousItemId;
+
+  /// The newly added item.
+  final Map<String, dynamic> item;
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'event_id': eventId,
+    if (previousItemId != null) 'previous_item_id': previousItemId,
+    'item': item,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ConversationItemAddedEvent &&
+          runtimeType == other.runtimeType &&
+          eventId == other.eventId;
+
+  @override
+  int get hashCode => eventId.hashCode;
+
+  @override
+  String toString() => 'ConversationItemAddedEvent(eventId: $eventId)';
 }
 
 /// Conversation item deleted event.

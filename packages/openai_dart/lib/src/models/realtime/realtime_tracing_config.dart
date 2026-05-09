@@ -7,7 +7,7 @@ import '../common/equality_helpers.dart';
 // RealtimeTracingConfig
 // =============================================================================
 
-/// Tracing configuration for GA Realtime sessions.
+/// Tracing configuration for Realtime sessions.
 ///
 /// A discriminated union covering:
 ///

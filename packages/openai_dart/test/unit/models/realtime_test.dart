@@ -3,7 +3,7 @@ import 'package:openai_dart/openai_dart_realtime.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('RealtimeSessionCreateRequest (GA shape)', () {
+  group('RealtimeSessionCreateRequest', () {
     test('minimal payload roundtrip omits type discriminator', () {
       const request = RealtimeSessionCreateRequest(model: 'gpt-realtime');
       final json = request.toJson();
@@ -83,7 +83,6 @@ void main() {
           },
         ],
         'tool_choice': 'none',
-        'temperature': 0.8,
         'max_output_tokens': 'inf',
         'parallel_tool_calls': true,
         'reasoning': {'effort': 'minimal'},
@@ -272,8 +271,8 @@ void main() {
     });
   });
 
-  group('RealtimeSessionCreateResponse (GA shape)', () {
-    test('GA response roundtrip and omits client_secret', () {
+  group('RealtimeSessionCreateResponse', () {
+    test('response roundtrip omits client_secret', () {
       final json = <String, dynamic>{
         'id': 'sess_abc123',
         'object': 'realtime.session',
@@ -292,7 +291,7 @@ void main() {
 
       final encoded = parsed.toJson();
       expect(encoded, json);
-      // Regression guard: the GA response no longer has `client_secret`
+      // Regression guard: the response shape does not have `client_secret`
       // nested on the session object.
       expect(encoded.containsKey('client_secret'), isFalse);
     });

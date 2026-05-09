@@ -6,7 +6,7 @@ import '../common/copy_with_sentinel.dart';
 // RealtimeTruncation
 // =============================================================================
 
-/// Truncation strategy for GA Realtime sessions.
+/// Truncation strategy for Realtime sessions.
 ///
 /// A discriminated union covering the three supported strategies:
 ///

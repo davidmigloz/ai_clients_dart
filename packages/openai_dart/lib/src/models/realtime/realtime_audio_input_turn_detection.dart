@@ -51,7 +51,7 @@ enum SemanticVadEagerness {
 // RealtimeAudioInputTurnDetection
 // =============================================================================
 
-/// Turn detection configuration for GA Realtime sessions.
+/// Turn detection configuration for Realtime sessions.
 ///
 /// A discriminated union covering the two supported strategies:
 ///

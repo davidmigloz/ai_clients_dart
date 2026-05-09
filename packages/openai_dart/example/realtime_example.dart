@@ -141,7 +141,7 @@ Future<void> main() async {
     // --- Transcription session ---
     print('\n=== Transcription Session ===\n');
 
-    // Transcription sessions are created via the GA client-secrets endpoint
+    // Transcription sessions are created via the client-secrets endpoint
     // with `type: 'transcription'`.
     final transcriptionSecret = await client.realtimeSessions
         .createClientSecret(

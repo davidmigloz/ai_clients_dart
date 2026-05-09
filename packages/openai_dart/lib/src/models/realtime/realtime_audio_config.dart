@@ -89,7 +89,7 @@ class InputAudioTranscription {
   /// Optional delay knob.
   ///
   /// Higher values trade latency for accuracy. Only supported with
-  /// `gpt-realtime-whisper` in GA Realtime sessions.
+  /// `gpt-realtime-whisper` in Realtime sessions.
   final AudioTranscriptionDelay? delay;
 
   /// ISO-639-1 language hint, e.g. `'en'`.
@@ -155,7 +155,7 @@ class InputAudioTranscription {
 // RealtimeAudioConfigInput
 // =============================================================================
 
-/// Input audio configuration for a GA Realtime session.
+/// Input audio configuration for a Realtime session.
 @immutable
 class RealtimeAudioConfigInput {
   /// Creates a [RealtimeAudioConfigInput].
@@ -258,7 +258,7 @@ class RealtimeAudioConfigInput {
 // RealtimeAudioConfigOutput
 // =============================================================================
 
-/// Output audio configuration for a GA Realtime session.
+/// Output audio configuration for a Realtime session.
 @immutable
 class RealtimeAudioConfigOutput {
   /// Creates a [RealtimeAudioConfigOutput].
@@ -331,12 +331,11 @@ class RealtimeAudioConfigOutput {
 // RealtimeAudioConfig
 // =============================================================================
 
-/// Audio configuration for a GA Realtime session.
+/// Audio configuration for a Realtime session.
 ///
-/// Replaces the Beta-shape top-level audio fields (`voice`, `inputAudioFormat`,
-/// `outputAudioFormat`, `inputAudioTranscription`, `turnDetection`,
-/// `inputAudioNoiseReduction`) with a nested `audio.input.*` /
-/// `audio.output.*` structure that matches the GA Stainless schema.
+/// Groups input audio settings (`format`, `transcription`, `turn_detection`,
+/// `noise_reduction`) and output audio settings (`format`, `voice`, `speed`)
+/// under a single nested object on the session payload.
 @immutable
 class RealtimeAudioConfig {
   /// Creates a [RealtimeAudioConfig].
