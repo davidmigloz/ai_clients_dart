@@ -426,6 +426,58 @@ void main() {
     });
   });
 
+  group('RealtimeAudioConfigInput tri-state serialization', () {
+    test('omits keys when fields are null and clear flags are false', () {
+      const input = RealtimeAudioConfigInput();
+      expect(input.toJson(), isEmpty);
+    });
+
+    test('emits explicit JSON null when clear flag is true', () {
+      const input = RealtimeAudioConfigInput(
+        clearNoiseReduction: true,
+        clearTranscription: true,
+        clearTurnDetection: true,
+      );
+      final json = input.toJson();
+      expect(json, containsPair('noise_reduction', null));
+      expect(json, containsPair('transcription', null));
+      expect(json, containsPair('turn_detection', null));
+    });
+
+    test('value wins over clear flag', () {
+      const input = RealtimeAudioConfigInput(
+        transcription: InputAudioTranscription(model: 'whisper-1'),
+        clearTranscription: true,
+      );
+      final json = input.toJson();
+      expect(json['transcription'], isA<Map<String, dynamic>>());
+    });
+
+    test('roundtrips explicit JSON null back to clear flag = true', () {
+      final json = <String, dynamic>{
+        'noise_reduction': null,
+        'transcription': null,
+        'turn_detection': null,
+      };
+      final parsed = RealtimeAudioConfigInput.fromJson(json);
+      expect(parsed.noiseReduction, isNull);
+      expect(parsed.transcription, isNull);
+      expect(parsed.turnDetection, isNull);
+      expect(parsed.clearNoiseReduction, isTrue);
+      expect(parsed.clearTranscription, isTrue);
+      expect(parsed.clearTurnDetection, isTrue);
+      // Round-trip shape preserved.
+      expect(parsed.toJson(), equals(json));
+    });
+
+    test('absent keys parse with clear flag = false', () {
+      final parsed = RealtimeAudioConfigInput.fromJson(const {});
+      expect(parsed.clearNoiseReduction, isFalse);
+      expect(parsed.clearTranscription, isFalse);
+      expect(parsed.clearTurnDetection, isFalse);
+    });
+  });
+
   group('Sealed Unknown-variant fallbacks', () {
     test(
       'RealtimeEvent.fromJson unrecognised type roundtrips through Unknown',

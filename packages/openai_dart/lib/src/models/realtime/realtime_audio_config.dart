@@ -156,6 +156,23 @@ class InputAudioTranscription {
 // =============================================================================
 
 /// Input audio configuration for a Realtime session.
+///
+/// **Tri-state serialization for `noise_reduction`, `transcription`,
+/// `turn_detection`** — these fields have three distinct meanings on
+/// `session.update`:
+///
+/// - **Field omitted from the request** → server keeps the current value
+///   (don't change). This is the default when the typed field is `null`.
+/// - **Field present with value** → server sets/replaces the configuration.
+/// - **Field present with explicit JSON `null`** → server *disables* the
+///   feature (clears any prior configuration).
+///
+/// To send the third form (explicit JSON null), pass the matching
+/// `clearNoiseReduction` / `clearTranscription` / `clearTurnDetection`
+/// flag as `true`. The flags are ignored when the corresponding typed
+/// field is also non-null (the value wins). Roundtrip preserves the
+/// distinction: a wire payload with `"noise_reduction": null` parses
+/// back as `clearNoiseReduction: true`.
 @immutable
 class RealtimeAudioConfigInput {
   /// Creates a [RealtimeAudioConfigInput].
@@ -164,6 +181,9 @@ class RealtimeAudioConfigInput {
     this.noiseReduction,
     this.transcription,
     this.turnDetection,
+    this.clearNoiseReduction = false,
+    this.clearTranscription = false,
+    this.clearTurnDetection = false,
   });
 
   /// Creates from JSON.
@@ -189,6 +209,13 @@ class RealtimeAudioConfigInput {
               json['turn_detection'] as Map<String, dynamic>,
             )
           : null,
+      clearNoiseReduction:
+          json.containsKey('noise_reduction') &&
+          json['noise_reduction'] == null,
+      clearTranscription:
+          json.containsKey('transcription') && json['transcription'] == null,
+      clearTurnDetection:
+          json.containsKey('turn_detection') && json['turn_detection'] == null,
     );
   }
 
@@ -204,21 +231,50 @@ class RealtimeAudioConfigInput {
   /// Turn-detection configuration.
   final RealtimeAudioInputTurnDetection? turnDetection;
 
+  /// When `true`, emit `"noise_reduction": null` on the wire to ask the
+  /// server to disable noise reduction (only relevant on
+  /// `session.update`). Has no effect when [noiseReduction] is non-null.
+  final bool clearNoiseReduction;
+
+  /// When `true`, emit `"transcription": null` on the wire to ask the
+  /// server to disable transcription. Has no effect when [transcription]
+  /// is non-null.
+  final bool clearTranscription;
+
+  /// When `true`, emit `"turn_detection": null` on the wire to ask the
+  /// server to disable turn detection. Has no effect when
+  /// [turnDetection] is non-null.
+  final bool clearTurnDetection;
+
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (format != null) 'format': format!.toJson(),
-    if (noiseReduction != null) 'noise_reduction': noiseReduction!.toJson(),
-    if (transcription != null) 'transcription': transcription!.toJson(),
-    if (turnDetection != null) 'turn_detection': turnDetection!.toJson(),
+    if (noiseReduction != null)
+      'noise_reduction': noiseReduction!.toJson()
+    else if (clearNoiseReduction)
+      'noise_reduction': null,
+    if (transcription != null)
+      'transcription': transcription!.toJson()
+    else if (clearTranscription)
+      'transcription': null,
+    if (turnDetection != null)
+      'turn_detection': turnDetection!.toJson()
+    else if (clearTurnDetection)
+      'turn_detection': null,
   };
 
   /// Returns a copy of this [RealtimeAudioConfigInput] with the given fields
-  /// replaced. Pass `null` for any field to clear the existing value.
+  /// replaced. Pass `null` for any nullable field to clear the in-memory
+  /// value (use the `clear*` flags to send explicit JSON null over the
+  /// wire).
   RealtimeAudioConfigInput copyWith({
     Object? format = unsetCopyWithValue,
     Object? noiseReduction = unsetCopyWithValue,
     Object? transcription = unsetCopyWithValue,
     Object? turnDetection = unsetCopyWithValue,
+    bool? clearNoiseReduction,
+    bool? clearTranscription,
+    bool? clearTurnDetection,
   }) => RealtimeAudioConfigInput(
     format: identical(format, unsetCopyWithValue)
         ? this.format
@@ -232,6 +288,9 @@ class RealtimeAudioConfigInput {
     turnDetection: identical(turnDetection, unsetCopyWithValue)
         ? this.turnDetection
         : turnDetection as RealtimeAudioInputTurnDetection?,
+    clearNoiseReduction: clearNoiseReduction ?? this.clearNoiseReduction,
+    clearTranscription: clearTranscription ?? this.clearTranscription,
+    clearTurnDetection: clearTurnDetection ?? this.clearTurnDetection,
   );
 
   @override
@@ -242,16 +301,29 @@ class RealtimeAudioConfigInput {
           format == other.format &&
           noiseReduction == other.noiseReduction &&
           transcription == other.transcription &&
-          turnDetection == other.turnDetection;
+          turnDetection == other.turnDetection &&
+          clearNoiseReduction == other.clearNoiseReduction &&
+          clearTranscription == other.clearTranscription &&
+          clearTurnDetection == other.clearTurnDetection;
 
   @override
-  int get hashCode =>
-      Object.hash(format, noiseReduction, transcription, turnDetection);
+  int get hashCode => Object.hash(
+    format,
+    noiseReduction,
+    transcription,
+    turnDetection,
+    clearNoiseReduction,
+    clearTranscription,
+    clearTurnDetection,
+  );
 
   @override
   String toString() =>
       'RealtimeAudioConfigInput(format: $format, noiseReduction: $noiseReduction, '
-      'transcription: $transcription, turnDetection: $turnDetection)';
+      'transcription: $transcription, turnDetection: $turnDetection, '
+      'clearNoiseReduction: $clearNoiseReduction, '
+      'clearTranscription: $clearTranscription, '
+      'clearTurnDetection: $clearTurnDetection)';
 }
 
 // =============================================================================

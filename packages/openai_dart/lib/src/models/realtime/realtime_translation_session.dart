@@ -112,12 +112,26 @@ class RealtimeTranslationNoiseReduction {
 // =============================================================================
 
 /// Input audio configuration for a translation session.
+///
+/// **Tri-state serialization for `transcription` and `noise_reduction`** —
+/// translation `session.update` events use the same convention as
+/// realtime sessions:
+///
+/// - **Field omitted** → server keeps the current value (don't change).
+/// - **Field with value** → server sets/replaces the configuration.
+/// - **Field with explicit JSON `null`** → server *disables* the feature.
+///
+/// To send the third form, pass [clearTranscription] / [clearNoiseReduction]
+/// as `true`. The flags are ignored when the corresponding typed field is
+/// non-null. Roundtrip preserves the distinction.
 @immutable
 class RealtimeTranslationSessionAudioInput {
   /// Creates a [RealtimeTranslationSessionAudioInput].
   const RealtimeTranslationSessionAudioInput({
     this.transcription,
     this.noiseReduction,
+    this.clearTranscription = false,
+    this.clearNoiseReduction = false,
   });
 
   /// Creates from JSON.
@@ -135,27 +149,51 @@ class RealtimeTranslationSessionAudioInput {
               json['noise_reduction'] as Map<String, dynamic>,
             )
           : null,
+      clearTranscription:
+          json.containsKey('transcription') && json['transcription'] == null,
+      clearNoiseReduction:
+          json.containsKey('noise_reduction') &&
+          json['noise_reduction'] == null,
     );
   }
 
   /// Source-language transcription configuration.
   final RealtimeTranslationInputTranscription? transcription;
 
-  /// Noise reduction configuration. `null` disables noise reduction.
+  /// Noise reduction configuration.
   final RealtimeTranslationNoiseReduction? noiseReduction;
+
+  /// When `true`, emit `"transcription": null` on the wire to ask the
+  /// server to disable transcription. Has no effect when [transcription]
+  /// is non-null.
+  final bool clearTranscription;
+
+  /// When `true`, emit `"noise_reduction": null` on the wire to ask the
+  /// server to disable noise reduction. Has no effect when
+  /// [noiseReduction] is non-null.
+  final bool clearNoiseReduction;
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
-    if (transcription != null) 'transcription': transcription!.toJson(),
-    if (noiseReduction != null) 'noise_reduction': noiseReduction!.toJson(),
+    if (transcription != null)
+      'transcription': transcription!.toJson()
+    else if (clearTranscription)
+      'transcription': null,
+    if (noiseReduction != null)
+      'noise_reduction': noiseReduction!.toJson()
+    else if (clearNoiseReduction)
+      'noise_reduction': null,
   };
 
   /// Returns a copy of this with the given fields replaced.
   ///
-  /// Pass `null` for any field to clear the existing value.
+  /// Pass `null` for any nullable field to clear the in-memory value
+  /// (use the `clear*` flags to send explicit JSON null over the wire).
   RealtimeTranslationSessionAudioInput copyWith({
     Object? transcription = unsetCopyWithValue,
     Object? noiseReduction = unsetCopyWithValue,
+    bool? clearTranscription,
+    bool? clearNoiseReduction,
   }) => RealtimeTranslationSessionAudioInput(
     transcription: identical(transcription, unsetCopyWithValue)
         ? this.transcription
@@ -163,6 +201,8 @@ class RealtimeTranslationSessionAudioInput {
     noiseReduction: identical(noiseReduction, unsetCopyWithValue)
         ? this.noiseReduction
         : noiseReduction as RealtimeTranslationNoiseReduction?,
+    clearTranscription: clearTranscription ?? this.clearTranscription,
+    clearNoiseReduction: clearNoiseReduction ?? this.clearNoiseReduction,
   );
 
   @override
@@ -171,15 +211,24 @@ class RealtimeTranslationSessionAudioInput {
       other is RealtimeTranslationSessionAudioInput &&
           runtimeType == other.runtimeType &&
           transcription == other.transcription &&
-          noiseReduction == other.noiseReduction;
+          noiseReduction == other.noiseReduction &&
+          clearTranscription == other.clearTranscription &&
+          clearNoiseReduction == other.clearNoiseReduction;
 
   @override
-  int get hashCode => Object.hash(transcription, noiseReduction);
+  int get hashCode => Object.hash(
+    transcription,
+    noiseReduction,
+    clearTranscription,
+    clearNoiseReduction,
+  );
 
   @override
   String toString() =>
       'RealtimeTranslationSessionAudioInput(transcription: $transcription, '
-      'noiseReduction: $noiseReduction)';
+      'noiseReduction: $noiseReduction, '
+      'clearTranscription: $clearTranscription, '
+      'clearNoiseReduction: $clearNoiseReduction)';
 }
 
 // =============================================================================
