@@ -22,6 +22,26 @@ void main() {
     });
   });
 
+  group('BetaUserProfileRelationship', () {
+    test('round-trips known values', () {
+      for (final value in const [
+        BetaUserProfileRelationship.external,
+        BetaUserProfileRelationship.resold,
+        BetaUserProfileRelationship.internal,
+      ]) {
+        final parsed = BetaUserProfileRelationship.fromJson(value.toJson());
+        expect(parsed, value);
+      }
+    });
+
+    test('falls back to unknown for unrecognized values', () {
+      expect(
+        BetaUserProfileRelationship.fromJson('partner'),
+        BetaUserProfileRelationship.unknown,
+      );
+    });
+  });
+
   group('UserProfileListOrder', () {
     test('round-trips known values', () {
       expect(
@@ -84,11 +104,13 @@ void main() {
       String? externalId = 'user_12345',
       Map<String, String>? metadata,
       Map<String, dynamic>? trustGrants,
+      String relationship = 'external',
     }) {
       return {
         'id': 'uprof_011CZkZCu8hGbp5mYRQgUmz9',
         'type': 'user_profile',
         'external_id': externalId,
+        'relationship': relationship,
         'metadata': metadata ?? <String, String>{},
         'trust_grants':
             trustGrants ??
@@ -170,6 +192,32 @@ void main() {
 
       expect(copy.externalId, 'user_12345');
     });
+
+    test('round-trips name and resold relationship when present', () {
+      final json = profileJson(relationship: 'resold');
+      json['name'] = 'Acme Corp';
+
+      final parsed = UserProfile.fromJson(json);
+      expect(parsed.name, 'Acme Corp');
+      expect(parsed.relationship, BetaUserProfileRelationship.resold);
+
+      final reparsed = UserProfile.fromJson(parsed.toJson());
+      expect(reparsed, equals(parsed));
+    });
+
+    test('treats missing name as null and defaults relationship', () {
+      final parsed = UserProfile.fromJson(profileJson());
+      expect(parsed.name, isNull);
+      expect(parsed.relationship, BetaUserProfileRelationship.external);
+    });
+
+    test('copyWith updates relationship', () {
+      final original = UserProfile.fromJson(profileJson());
+      final updated = original.copyWith(
+        relationship: BetaUserProfileRelationship.internal,
+      );
+      expect(updated.relationship, BetaUserProfileRelationship.internal);
+    });
   });
 
   group('CreateUserProfileRequest', () {
@@ -199,6 +247,18 @@ void main() {
       final cleared = request.copyWith(externalId: null);
 
       expect(cleared.externalId, isNull);
+    });
+
+    test('serializes name and relationship when set', () {
+      const request = CreateUserProfileRequest(
+        name: 'Acme Corp',
+        relationship: BetaUserProfileRelationship.resold,
+      );
+
+      expect(request.toJson(), {'name': 'Acme Corp', 'relationship': 'resold'});
+
+      final parsed = CreateUserProfileRequest.fromJson(request.toJson());
+      expect(parsed, equals(request));
     });
   });
 
@@ -251,6 +311,39 @@ void main() {
         throwsA(isA<AssertionError>()),
       );
     });
+
+    test('serializes name and relationship updates', () {
+      const request = UpdateUserProfileRequest(
+        name: 'Acme Corp',
+        relationship: BetaUserProfileRelationship.internal,
+      );
+
+      final json = request.toJson();
+      expect(json['name'], 'Acme Corp');
+      expect(json['relationship'], 'internal');
+
+      final parsed = UpdateUserProfileRequest.fromJson(json);
+      expect(parsed.name, 'Acme Corp');
+      expect(parsed.relationship, BetaUserProfileRelationship.internal);
+      expect(parsed.hasName, isTrue);
+      expect(parsed.hasRelationship, isTrue);
+    });
+
+    test('clears name with explicit null', () {
+      const request = UpdateUserProfileRequest(name: null);
+      final json = request.toJson();
+      expect(json.containsKey('name'), isTrue);
+      expect(json['name'], isNull);
+      expect(request.hasName, isTrue);
+    });
+
+    test('omits name and relationship when unset', () {
+      const request = UpdateUserProfileRequest();
+      expect(request.hasName, isFalse);
+      expect(request.hasRelationship, isFalse);
+      expect(request.toJson().containsKey('name'), isFalse);
+      expect(request.toJson().containsKey('relationship'), isFalse);
+    });
   });
 
   group('ListUserProfilesResponse', () {
@@ -261,6 +354,7 @@ void main() {
             'id': 'uprof_1',
             'type': 'user_profile',
             'external_id': null,
+            'relationship': 'external',
             'trust_grants': <String, dynamic>{},
             'created_at': '2026-03-15T10:00:00Z',
             'updated_at': '2026-03-15T10:00:00Z',

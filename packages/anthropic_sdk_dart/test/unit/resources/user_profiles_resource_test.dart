@@ -19,6 +19,7 @@ class UserProfilesFixtures {
       'id': id,
       'type': 'user_profile',
       'external_id': externalId,
+      'relationship': 'external',
       'metadata': metadata ?? <String, String>{},
       'trust_grants':
           trustGrants ??

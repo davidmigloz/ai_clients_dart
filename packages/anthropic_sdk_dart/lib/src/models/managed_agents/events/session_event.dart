@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../../beta_timestamp.dart';
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
 import '../config/agent_tool.dart' show AgentEvaluatedPermission;
@@ -86,7 +87,7 @@ class AgentMessageEvent extends SessionEvent {
   final List<Map<String, dynamic>> content;
 
   /// Timestamp when this response was generated.
-  final DateTime processedAt;
+  final BetaTimestamp processedAt;
 
   /// Creates an [AgentMessageEvent].
   const AgentMessageEvent({
@@ -118,7 +119,7 @@ class AgentMessageEvent extends SessionEvent {
   AgentMessageEvent copyWith({
     String? id,
     List<Map<String, dynamic>>? content,
-    DateTime? processedAt,
+    BetaTimestamp? processedAt,
   }) {
     return AgentMessageEvent(
       id: id ?? this.id,
@@ -155,7 +156,7 @@ class AgentThinkingEvent extends SessionEvent {
   final String id;
 
   /// Timestamp when this thinking was produced.
-  final DateTime processedAt;
+  final BetaTimestamp processedAt;
 
   /// Creates an [AgentThinkingEvent].
   const AgentThinkingEvent({required this.id, required this.processedAt});
@@ -176,7 +177,7 @@ class AgentThinkingEvent extends SessionEvent {
   };
 
   /// Creates a copy with replaced values.
-  AgentThinkingEvent copyWith({String? id, DateTime? processedAt}) {
+  AgentThinkingEvent copyWith({String? id, BetaTimestamp? processedAt}) {
     return AgentThinkingEvent(
       id: id ?? this.id,
       processedAt: processedAt ?? this.processedAt,
@@ -217,7 +218,10 @@ class AgentToolUseEvent extends SessionEvent {
   final AgentEvaluatedPermission? evaluatedPermission;
 
   /// Timestamp when this event was processed.
-  final DateTime processedAt;
+  final BetaTimestamp processedAt;
+
+  /// ID of the session thread this event belongs to, if any.
+  final String? sessionThreadId;
 
   /// Creates an [AgentToolUseEvent].
   const AgentToolUseEvent({
@@ -226,6 +230,7 @@ class AgentToolUseEvent extends SessionEvent {
     required this.input,
     this.evaluatedPermission,
     required this.processedAt,
+    this.sessionThreadId,
   });
 
   /// Creates an [AgentToolUseEvent] from JSON.
@@ -240,6 +245,7 @@ class AgentToolUseEvent extends SessionEvent {
             )
           : null,
       processedAt: DateTime.parse(json['processed_at'] as String),
+      sessionThreadId: json['session_thread_id'] as String?,
     );
   }
 
@@ -252,6 +258,7 @@ class AgentToolUseEvent extends SessionEvent {
     if (evaluatedPermission != null)
       'evaluated_permission': evaluatedPermission!.toJson(),
     'processed_at': processedAt.toUtc().toIso8601String(),
+    if (sessionThreadId != null) 'session_thread_id': sessionThreadId,
   };
 
   /// Creates a copy with replaced values.
@@ -260,7 +267,8 @@ class AgentToolUseEvent extends SessionEvent {
     String? name,
     Map<String, dynamic>? input,
     Object? evaluatedPermission = unsetCopyWithValue,
-    DateTime? processedAt,
+    BetaTimestamp? processedAt,
+    Object? sessionThreadId = unsetCopyWithValue,
   }) {
     return AgentToolUseEvent(
       id: id ?? this.id,
@@ -270,6 +278,9 @@ class AgentToolUseEvent extends SessionEvent {
           ? this.evaluatedPermission
           : evaluatedPermission as AgentEvaluatedPermission?,
       processedAt: processedAt ?? this.processedAt,
+      sessionThreadId: sessionThreadId == unsetCopyWithValue
+          ? this.sessionThreadId
+          : sessionThreadId as String?,
     );
   }
 
@@ -282,7 +293,8 @@ class AgentToolUseEvent extends SessionEvent {
           name == other.name &&
           mapsDeepEqual(input, other.input) &&
           evaluatedPermission == other.evaluatedPermission &&
-          processedAt == other.processedAt;
+          processedAt == other.processedAt &&
+          sessionThreadId == other.sessionThreadId;
 
   @override
   int get hashCode => Object.hash(
@@ -291,13 +303,15 @@ class AgentToolUseEvent extends SessionEvent {
     mapDeepHashCode(input),
     evaluatedPermission,
     processedAt,
+    sessionThreadId,
   );
 
   @override
   String toString() =>
       'AgentToolUseEvent(id: $id, name: $name, input: $input, '
       'evaluatedPermission: $evaluatedPermission, '
-      'processedAt: $processedAt)';
+      'processedAt: $processedAt, '
+      'sessionThreadId: $sessionThreadId)';
 }
 
 /// Result of a built-in agent tool execution.
@@ -319,7 +333,7 @@ class AgentToolResultEvent extends SessionEvent {
   final bool? isError;
 
   /// Timestamp when this event was processed.
-  final DateTime processedAt;
+  final BetaTimestamp processedAt;
 
   /// Creates an [AgentToolResultEvent].
   const AgentToolResultEvent({
@@ -359,7 +373,7 @@ class AgentToolResultEvent extends SessionEvent {
     String? toolUseId,
     Object? content = unsetCopyWithValue,
     Object? isError = unsetCopyWithValue,
-    DateTime? processedAt,
+    BetaTimestamp? processedAt,
   }) {
     return AgentToolResultEvent(
       id: id ?? this.id,
@@ -420,7 +434,10 @@ class AgentMcpToolUseEvent extends SessionEvent {
   final AgentEvaluatedPermission? evaluatedPermission;
 
   /// Timestamp when this event was processed.
-  final DateTime processedAt;
+  final BetaTimestamp processedAt;
+
+  /// ID of the session thread this event belongs to, if any.
+  final String? sessionThreadId;
 
   /// Creates an [AgentMcpToolUseEvent].
   const AgentMcpToolUseEvent({
@@ -430,6 +447,7 @@ class AgentMcpToolUseEvent extends SessionEvent {
     required this.input,
     this.evaluatedPermission,
     required this.processedAt,
+    this.sessionThreadId,
   });
 
   /// Creates an [AgentMcpToolUseEvent] from JSON.
@@ -445,6 +463,7 @@ class AgentMcpToolUseEvent extends SessionEvent {
             )
           : null,
       processedAt: DateTime.parse(json['processed_at'] as String),
+      sessionThreadId: json['session_thread_id'] as String?,
     );
   }
 
@@ -458,6 +477,7 @@ class AgentMcpToolUseEvent extends SessionEvent {
     if (evaluatedPermission != null)
       'evaluated_permission': evaluatedPermission!.toJson(),
     'processed_at': processedAt.toUtc().toIso8601String(),
+    if (sessionThreadId != null) 'session_thread_id': sessionThreadId,
   };
 
   /// Creates a copy with replaced values.
@@ -467,7 +487,8 @@ class AgentMcpToolUseEvent extends SessionEvent {
     String? name,
     Map<String, dynamic>? input,
     Object? evaluatedPermission = unsetCopyWithValue,
-    DateTime? processedAt,
+    BetaTimestamp? processedAt,
+    Object? sessionThreadId = unsetCopyWithValue,
   }) {
     return AgentMcpToolUseEvent(
       id: id ?? this.id,
@@ -478,6 +499,9 @@ class AgentMcpToolUseEvent extends SessionEvent {
           ? this.evaluatedPermission
           : evaluatedPermission as AgentEvaluatedPermission?,
       processedAt: processedAt ?? this.processedAt,
+      sessionThreadId: sessionThreadId == unsetCopyWithValue
+          ? this.sessionThreadId
+          : sessionThreadId as String?,
     );
   }
 
@@ -491,7 +515,8 @@ class AgentMcpToolUseEvent extends SessionEvent {
           name == other.name &&
           mapsDeepEqual(input, other.input) &&
           evaluatedPermission == other.evaluatedPermission &&
-          processedAt == other.processedAt;
+          processedAt == other.processedAt &&
+          sessionThreadId == other.sessionThreadId;
 
   @override
   int get hashCode => Object.hash(
@@ -501,6 +526,7 @@ class AgentMcpToolUseEvent extends SessionEvent {
     mapDeepHashCode(input),
     evaluatedPermission,
     processedAt,
+    sessionThreadId,
   );
 
   @override
@@ -508,7 +534,8 @@ class AgentMcpToolUseEvent extends SessionEvent {
       'AgentMcpToolUseEvent(id: $id, mcpServerName: $mcpServerName, '
       'name: $name, input: $input, '
       'evaluatedPermission: $evaluatedPermission, '
-      'processedAt: $processedAt)';
+      'processedAt: $processedAt, '
+      'sessionThreadId: $sessionThreadId)';
 }
 
 /// Result of an MCP tool execution.
@@ -530,7 +557,7 @@ class AgentMcpToolResultEvent extends SessionEvent {
   final bool? isError;
 
   /// Timestamp when this event was processed.
-  final DateTime processedAt;
+  final BetaTimestamp processedAt;
 
   /// Creates an [AgentMcpToolResultEvent].
   const AgentMcpToolResultEvent({
@@ -570,7 +597,7 @@ class AgentMcpToolResultEvent extends SessionEvent {
     String? mcpToolUseId,
     Object? content = unsetCopyWithValue,
     Object? isError = unsetCopyWithValue,
-    DateTime? processedAt,
+    BetaTimestamp? processedAt,
   }) {
     return AgentMcpToolResultEvent(
       id: id ?? this.id,
@@ -625,7 +652,10 @@ class AgentCustomToolUseEvent extends SessionEvent {
   final Map<String, dynamic> input;
 
   /// Timestamp when this tool use was processed.
-  final DateTime processedAt;
+  final BetaTimestamp processedAt;
+
+  /// ID of the session thread this event belongs to, if any.
+  final String? sessionThreadId;
 
   /// Creates an [AgentCustomToolUseEvent].
   const AgentCustomToolUseEvent({
@@ -633,6 +663,7 @@ class AgentCustomToolUseEvent extends SessionEvent {
     required this.name,
     required this.input,
     required this.processedAt,
+    this.sessionThreadId,
   });
 
   /// Creates an [AgentCustomToolUseEvent] from JSON.
@@ -642,6 +673,7 @@ class AgentCustomToolUseEvent extends SessionEvent {
       name: json['name'] as String,
       input: json['input'] as Map<String, dynamic>,
       processedAt: DateTime.parse(json['processed_at'] as String),
+      sessionThreadId: json['session_thread_id'] as String?,
     );
   }
 
@@ -652,6 +684,7 @@ class AgentCustomToolUseEvent extends SessionEvent {
     'name': name,
     'input': input,
     'processed_at': processedAt.toUtc().toIso8601String(),
+    if (sessionThreadId != null) 'session_thread_id': sessionThreadId,
   };
 
   /// Creates a copy with replaced values.
@@ -659,13 +692,17 @@ class AgentCustomToolUseEvent extends SessionEvent {
     String? id,
     String? name,
     Map<String, dynamic>? input,
-    DateTime? processedAt,
+    BetaTimestamp? processedAt,
+    Object? sessionThreadId = unsetCopyWithValue,
   }) {
     return AgentCustomToolUseEvent(
       id: id ?? this.id,
       name: name ?? this.name,
       input: input ?? this.input,
       processedAt: processedAt ?? this.processedAt,
+      sessionThreadId: sessionThreadId == unsetCopyWithValue
+          ? this.sessionThreadId
+          : sessionThreadId as String?,
     );
   }
 
@@ -677,16 +714,22 @@ class AgentCustomToolUseEvent extends SessionEvent {
           id == other.id &&
           name == other.name &&
           mapsDeepEqual(input, other.input) &&
-          processedAt == other.processedAt;
+          processedAt == other.processedAt &&
+          sessionThreadId == other.sessionThreadId;
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, mapDeepHashCode(input), processedAt);
+  int get hashCode => Object.hash(
+    id,
+    name,
+    mapDeepHashCode(input),
+    processedAt,
+    sessionThreadId,
+  );
 
   @override
   String toString() =>
       'AgentCustomToolUseEvent(id: $id, name: $name, input: $input, '
-      'processedAt: $processedAt)';
+      'processedAt: $processedAt, sessionThreadId: $sessionThreadId)';
 }
 
 /// Context compaction (summarization) occurred during the session.
@@ -699,7 +742,7 @@ class AgentThreadContextCompactedEvent extends SessionEvent {
   final String id;
 
   /// Timestamp when compaction was processed.
-  final DateTime processedAt;
+  final BetaTimestamp processedAt;
 
   /// Creates an [AgentThreadContextCompactedEvent].
   const AgentThreadContextCompactedEvent({
@@ -725,7 +768,7 @@ class AgentThreadContextCompactedEvent extends SessionEvent {
   /// Creates a copy with replaced values.
   AgentThreadContextCompactedEvent copyWith({
     String? id,
-    DateTime? processedAt,
+    BetaTimestamp? processedAt,
   }) {
     return AgentThreadContextCompactedEvent(
       id: id ?? this.id,
@@ -767,7 +810,7 @@ class UserMessageEvent extends SessionEvent {
   final List<Map<String, dynamic>> content;
 
   /// Timestamp when the agent finished processing this message.
-  final DateTime? processedAt;
+  final BetaTimestamp? processedAt;
 
   /// Creates a [UserMessageEvent].
   const UserMessageEvent({
@@ -809,7 +852,7 @@ class UserMessageEvent extends SessionEvent {
       content: content ?? this.content,
       processedAt: processedAt == unsetCopyWithValue
           ? this.processedAt
-          : processedAt as DateTime?,
+          : processedAt as BetaTimestamp?,
     );
   }
 
@@ -841,10 +884,17 @@ class UserInterruptEvent extends SessionEvent {
   final String id;
 
   /// Timestamp when the interrupt was processed.
-  final DateTime? processedAt;
+  final BetaTimestamp? processedAt;
+
+  /// ID of the session thread this event belongs to, if any.
+  final String? sessionThreadId;
 
   /// Creates a [UserInterruptEvent].
-  const UserInterruptEvent({required this.id, this.processedAt});
+  const UserInterruptEvent({
+    required this.id,
+    this.processedAt,
+    this.sessionThreadId,
+  });
 
   /// Creates a [UserInterruptEvent] from JSON.
   factory UserInterruptEvent.fromJson(Map<String, dynamic> json) {
@@ -853,6 +903,7 @@ class UserInterruptEvent extends SessionEvent {
       processedAt: json['processed_at'] != null
           ? DateTime.parse(json['processed_at'] as String)
           : null,
+      sessionThreadId: json['session_thread_id'] as String?,
     );
   }
 
@@ -862,18 +913,23 @@ class UserInterruptEvent extends SessionEvent {
     'id': id,
     if (processedAt != null)
       'processed_at': processedAt!.toUtc().toIso8601String(),
+    if (sessionThreadId != null) 'session_thread_id': sessionThreadId,
   };
 
   /// Creates a copy with replaced values.
   UserInterruptEvent copyWith({
     String? id,
     Object? processedAt = unsetCopyWithValue,
+    Object? sessionThreadId = unsetCopyWithValue,
   }) {
     return UserInterruptEvent(
       id: id ?? this.id,
       processedAt: processedAt == unsetCopyWithValue
           ? this.processedAt
-          : processedAt as DateTime?,
+          : processedAt as BetaTimestamp?,
+      sessionThreadId: sessionThreadId == unsetCopyWithValue
+          ? this.sessionThreadId
+          : sessionThreadId as String?,
     );
   }
 
@@ -883,13 +939,16 @@ class UserInterruptEvent extends SessionEvent {
       other is UserInterruptEvent &&
           runtimeType == other.runtimeType &&
           id == other.id &&
-          processedAt == other.processedAt;
+          processedAt == other.processedAt &&
+          sessionThreadId == other.sessionThreadId;
 
   @override
-  int get hashCode => Object.hash(id, processedAt);
+  int get hashCode => Object.hash(id, processedAt, sessionThreadId);
 
   @override
-  String toString() => 'UserInterruptEvent(id: $id, processedAt: $processedAt)';
+  String toString() =>
+      'UserInterruptEvent(id: $id, processedAt: $processedAt, '
+      'sessionThreadId: $sessionThreadId)';
 }
 
 /// Confirmation result for tool execution.
@@ -938,7 +997,10 @@ class UserToolConfirmationEvent extends SessionEvent {
   final String? denyMessage;
 
   /// Timestamp when the confirmation was processed.
-  final DateTime? processedAt;
+  final BetaTimestamp? processedAt;
+
+  /// ID of the session thread this event belongs to, if any.
+  final String? sessionThreadId;
 
   /// Creates a [UserToolConfirmationEvent].
   const UserToolConfirmationEvent({
@@ -947,6 +1009,7 @@ class UserToolConfirmationEvent extends SessionEvent {
     required this.result,
     this.denyMessage,
     this.processedAt,
+    this.sessionThreadId,
   });
 
   /// Creates a [UserToolConfirmationEvent] from JSON.
@@ -959,6 +1022,7 @@ class UserToolConfirmationEvent extends SessionEvent {
       processedAt: json['processed_at'] != null
           ? DateTime.parse(json['processed_at'] as String)
           : null,
+      sessionThreadId: json['session_thread_id'] as String?,
     );
   }
 
@@ -971,6 +1035,7 @@ class UserToolConfirmationEvent extends SessionEvent {
     if (denyMessage != null) 'deny_message': denyMessage,
     if (processedAt != null)
       'processed_at': processedAt!.toUtc().toIso8601String(),
+    if (sessionThreadId != null) 'session_thread_id': sessionThreadId,
   };
 
   /// Creates a copy with replaced values.
@@ -980,6 +1045,7 @@ class UserToolConfirmationEvent extends SessionEvent {
     UserToolConfirmationResult? result,
     Object? denyMessage = unsetCopyWithValue,
     Object? processedAt = unsetCopyWithValue,
+    Object? sessionThreadId = unsetCopyWithValue,
   }) {
     return UserToolConfirmationEvent(
       id: id ?? this.id,
@@ -990,7 +1056,10 @@ class UserToolConfirmationEvent extends SessionEvent {
           : denyMessage as String?,
       processedAt: processedAt == unsetCopyWithValue
           ? this.processedAt
-          : processedAt as DateTime?,
+          : processedAt as BetaTimestamp?,
+      sessionThreadId: sessionThreadId == unsetCopyWithValue
+          ? this.sessionThreadId
+          : sessionThreadId as String?,
     );
   }
 
@@ -1003,17 +1072,24 @@ class UserToolConfirmationEvent extends SessionEvent {
           toolUseId == other.toolUseId &&
           result == other.result &&
           denyMessage == other.denyMessage &&
-          processedAt == other.processedAt;
+          processedAt == other.processedAt &&
+          sessionThreadId == other.sessionThreadId;
 
   @override
-  int get hashCode =>
-      Object.hash(id, toolUseId, result, denyMessage, processedAt);
+  int get hashCode => Object.hash(
+    id,
+    toolUseId,
+    result,
+    denyMessage,
+    processedAt,
+    sessionThreadId,
+  );
 
   @override
   String toString() =>
       'UserToolConfirmationEvent(id: $id, toolUseId: $toolUseId, '
       'result: $result, denyMessage: $denyMessage, '
-      'processedAt: $processedAt)';
+      'processedAt: $processedAt, sessionThreadId: $sessionThreadId)';
 }
 
 /// Custom tool result event sent by the client.
@@ -1035,7 +1111,10 @@ class UserCustomToolResultEvent extends SessionEvent {
   final bool? isError;
 
   /// Timestamp when this result was processed.
-  final DateTime? processedAt;
+  final BetaTimestamp? processedAt;
+
+  /// ID of the session thread this event belongs to, if any.
+  final String? sessionThreadId;
 
   /// Creates a [UserCustomToolResultEvent].
   const UserCustomToolResultEvent({
@@ -1044,6 +1123,7 @@ class UserCustomToolResultEvent extends SessionEvent {
     this.content,
     this.isError,
     this.processedAt,
+    this.sessionThreadId,
   });
 
   /// Creates a [UserCustomToolResultEvent] from JSON.
@@ -1058,6 +1138,7 @@ class UserCustomToolResultEvent extends SessionEvent {
       processedAt: json['processed_at'] != null
           ? DateTime.parse(json['processed_at'] as String)
           : null,
+      sessionThreadId: json['session_thread_id'] as String?,
     );
   }
 
@@ -1070,6 +1151,7 @@ class UserCustomToolResultEvent extends SessionEvent {
     if (isError != null) 'is_error': isError,
     if (processedAt != null)
       'processed_at': processedAt!.toUtc().toIso8601String(),
+    if (sessionThreadId != null) 'session_thread_id': sessionThreadId,
   };
 
   /// Creates a copy with replaced values.
@@ -1079,6 +1161,7 @@ class UserCustomToolResultEvent extends SessionEvent {
     Object? content = unsetCopyWithValue,
     Object? isError = unsetCopyWithValue,
     Object? processedAt = unsetCopyWithValue,
+    Object? sessionThreadId = unsetCopyWithValue,
   }) {
     return UserCustomToolResultEvent(
       id: id ?? this.id,
@@ -1089,7 +1172,10 @@ class UserCustomToolResultEvent extends SessionEvent {
       isError: isError == unsetCopyWithValue ? this.isError : isError as bool?,
       processedAt: processedAt == unsetCopyWithValue
           ? this.processedAt
-          : processedAt as DateTime?,
+          : processedAt as BetaTimestamp?,
+      sessionThreadId: sessionThreadId == unsetCopyWithValue
+          ? this.sessionThreadId
+          : sessionThreadId as String?,
     );
   }
 
@@ -1102,7 +1188,8 @@ class UserCustomToolResultEvent extends SessionEvent {
           customToolUseId == other.customToolUseId &&
           listOfMapsDeepEqual(content, other.content) &&
           isError == other.isError &&
-          processedAt == other.processedAt;
+          processedAt == other.processedAt &&
+          sessionThreadId == other.sessionThreadId;
 
   @override
   int get hashCode => Object.hash(
@@ -1111,13 +1198,15 @@ class UserCustomToolResultEvent extends SessionEvent {
     listOfMapsHashCode(content),
     isError,
     processedAt,
+    sessionThreadId,
   );
 
   @override
   String toString() =>
       'UserCustomToolResultEvent(id: $id, '
       'customToolUseId: $customToolUseId, content: $content, '
-      'isError: $isError, processedAt: $processedAt)';
+      'isError: $isError, processedAt: $processedAt, '
+      'sessionThreadId: $sessionThreadId)';
 }
 
 // ---------------------------------------------------------------------------
@@ -1134,7 +1223,7 @@ class SessionStatusRunningEvent extends SessionEvent {
   final String id;
 
   /// Timestamp of status change.
-  final DateTime processedAt;
+  final BetaTimestamp processedAt;
 
   /// Creates a [SessionStatusRunningEvent].
   const SessionStatusRunningEvent({
@@ -1158,7 +1247,7 @@ class SessionStatusRunningEvent extends SessionEvent {
   };
 
   /// Creates a copy with replaced values.
-  SessionStatusRunningEvent copyWith({String? id, DateTime? processedAt}) {
+  SessionStatusRunningEvent copyWith({String? id, BetaTimestamp? processedAt}) {
     return SessionStatusRunningEvent(
       id: id ?? this.id,
       processedAt: processedAt ?? this.processedAt,
@@ -1344,7 +1433,7 @@ class SessionStatusIdleEvent extends SessionEvent {
   final SessionStopReason stopReason;
 
   /// Timestamp of status change.
-  final DateTime processedAt;
+  final BetaTimestamp processedAt;
 
   /// Creates a [SessionStatusIdleEvent].
   const SessionStatusIdleEvent({
@@ -1376,7 +1465,7 @@ class SessionStatusIdleEvent extends SessionEvent {
   SessionStatusIdleEvent copyWith({
     String? id,
     SessionStopReason? stopReason,
-    DateTime? processedAt,
+    BetaTimestamp? processedAt,
   }) {
     return SessionStatusIdleEvent(
       id: id ?? this.id,
@@ -1413,7 +1502,7 @@ class SessionStatusRescheduledEvent extends SessionEvent {
   final String id;
 
   /// Timestamp of status change.
-  final DateTime processedAt;
+  final BetaTimestamp processedAt;
 
   /// Creates a [SessionStatusRescheduledEvent].
   const SessionStatusRescheduledEvent({
@@ -1437,7 +1526,10 @@ class SessionStatusRescheduledEvent extends SessionEvent {
   };
 
   /// Creates a copy with replaced values.
-  SessionStatusRescheduledEvent copyWith({String? id, DateTime? processedAt}) {
+  SessionStatusRescheduledEvent copyWith({
+    String? id,
+    BetaTimestamp? processedAt,
+  }) {
     return SessionStatusRescheduledEvent(
       id: id ?? this.id,
       processedAt: processedAt ?? this.processedAt,
@@ -1470,7 +1562,7 @@ class SessionStatusTerminatedEvent extends SessionEvent {
   final String id;
 
   /// Timestamp of status change.
-  final DateTime processedAt;
+  final BetaTimestamp processedAt;
 
   /// Creates a [SessionStatusTerminatedEvent].
   const SessionStatusTerminatedEvent({
@@ -1494,7 +1586,10 @@ class SessionStatusTerminatedEvent extends SessionEvent {
   };
 
   /// Creates a copy with replaced values.
-  SessionStatusTerminatedEvent copyWith({String? id, DateTime? processedAt}) {
+  SessionStatusTerminatedEvent copyWith({
+    String? id,
+    BetaTimestamp? processedAt,
+  }) {
     return SessionStatusTerminatedEvent(
       id: id ?? this.id,
       processedAt: processedAt ?? this.processedAt,
@@ -1530,7 +1625,7 @@ class SessionErrorEvent extends SessionEvent {
   final Map<String, dynamic> error;
 
   /// Timestamp when the error occurred.
-  final DateTime processedAt;
+  final BetaTimestamp processedAt;
 
   /// Creates a [SessionErrorEvent].
   const SessionErrorEvent({
@@ -1560,7 +1655,7 @@ class SessionErrorEvent extends SessionEvent {
   SessionErrorEvent copyWith({
     String? id,
     Map<String, dynamic>? error,
-    DateTime? processedAt,
+    BetaTimestamp? processedAt,
   }) {
     return SessionErrorEvent(
       id: id ?? this.id,
@@ -1597,7 +1692,7 @@ class SessionDeletedEvent extends SessionEvent {
   final String id;
 
   /// Timestamp when the session was deleted.
-  final DateTime processedAt;
+  final BetaTimestamp processedAt;
 
   /// Creates a [SessionDeletedEvent].
   const SessionDeletedEvent({required this.id, required this.processedAt});
@@ -1618,7 +1713,7 @@ class SessionDeletedEvent extends SessionEvent {
   };
 
   /// Creates a copy with replaced values.
-  SessionDeletedEvent copyWith({String? id, DateTime? processedAt}) {
+  SessionDeletedEvent copyWith({String? id, BetaTimestamp? processedAt}) {
     return SessionDeletedEvent(
       id: id ?? this.id,
       processedAt: processedAt ?? this.processedAt,
@@ -1655,7 +1750,7 @@ class SpanModelRequestStartEvent extends SessionEvent {
   final String id;
 
   /// Timestamp when the model request started.
-  final DateTime processedAt;
+  final BetaTimestamp processedAt;
 
   /// Creates a [SpanModelRequestStartEvent].
   const SpanModelRequestStartEvent({
@@ -1679,7 +1774,10 @@ class SpanModelRequestStartEvent extends SessionEvent {
   };
 
   /// Creates a copy with replaced values.
-  SpanModelRequestStartEvent copyWith({String? id, DateTime? processedAt}) {
+  SpanModelRequestStartEvent copyWith({
+    String? id,
+    BetaTimestamp? processedAt,
+  }) {
     return SpanModelRequestStartEvent(
       id: id ?? this.id,
       processedAt: processedAt ?? this.processedAt,
@@ -1721,7 +1819,7 @@ class SpanModelRequestEndEvent extends SessionEvent {
   final String modelRequestStartId;
 
   /// Timestamp when the model request completed.
-  final DateTime processedAt;
+  final BetaTimestamp processedAt;
 
   /// Creates a [SpanModelRequestEndEvent].
   const SpanModelRequestEndEvent({
@@ -1761,7 +1859,7 @@ class SpanModelRequestEndEvent extends SessionEvent {
     Object? isError = unsetCopyWithValue,
     Object? modelUsage = unsetCopyWithValue,
     String? modelRequestStartId,
-    DateTime? processedAt,
+    BetaTimestamp? processedAt,
   }) {
     return SpanModelRequestEndEvent(
       id: id ?? this.id,

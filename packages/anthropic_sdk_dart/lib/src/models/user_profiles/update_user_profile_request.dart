@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import 'user_profile_relationship.dart';
 
 /// Private sentinel to distinguish "not provided" from explicit `null`.
 const Object _notSet = Object();
@@ -27,6 +28,27 @@ class UpdateUserProfileRequest {
   bool get hasExternalId => _externalId != _notSet;
   final Object? _externalId;
 
+  /// Updated display name, or `null` to clear it.
+  ///
+  /// Returns `null` both when omitted and when explicitly set to `null`.
+  /// Use [hasName] to disambiguate if needed.
+  String? get name => _name == _notSet ? null : _name as String?;
+
+  /// Whether a name update was provided (set to a value or to null).
+  bool get hasName => _name != _notSet;
+  final Object? _name;
+
+  /// Updated relationship to the platform.
+  ///
+  /// Returns `null` when omitted. Use [hasRelationship] to disambiguate.
+  BetaUserProfileRelationship? get relationship => _relationship == _notSet
+      ? null
+      : _relationship as BetaUserProfileRelationship?;
+
+  /// Whether a relationship update was provided.
+  bool get hasRelationship => _relationship != _notSet;
+  final Object? _relationship;
+
   /// Metadata patch: keys to upsert into the stored metadata.
   ///
   /// Set a key's value to the empty string to delete it server-side.
@@ -41,17 +63,22 @@ class UpdateUserProfileRequest {
   /// Creates an [UpdateUserProfileRequest].
   ///
   /// Omit a field to leave its stored value unchanged. Pass `null` explicitly
-  /// for [externalId] to clear it. [metadata] is not nullable per the spec —
-  /// to delete a stored key, include it in [metadata] with an empty-string
-  /// value; to leave metadata entirely unchanged, omit the parameter.
+  /// for [externalId], [name], or [relationship] to clear them. [metadata] is
+  /// not nullable per the spec — to delete a stored key, include it in
+  /// [metadata] with an empty-string value; to leave metadata entirely
+  /// unchanged, omit the parameter.
   const UpdateUserProfileRequest({
     Object? externalId = _notSet,
+    Object? name = _notSet,
+    Object? relationship = _notSet,
     Object? metadata = _notSet,
   }) : assert(
          metadata == _notSet || metadata is Map<String, String>,
          'metadata must be a Map<String, String> when provided; use empty-string values to remove keys, or omit the metadata parameter to leave it unchanged',
        ),
        _externalId = externalId,
+       _name = name,
+       _relationship = relationship,
        _metadata = metadata;
 
   /// Creates an [UpdateUserProfileRequest] from JSON.
@@ -59,6 +86,14 @@ class UpdateUserProfileRequest {
     return UpdateUserProfileRequest(
       externalId: json.containsKey('external_id')
           ? json['external_id'] as String?
+          : _notSet,
+      name: json.containsKey('name') ? json['name'] as String? : _notSet,
+      relationship: json.containsKey('relationship')
+          ? (json['relationship'] != null
+                ? BetaUserProfileRelationship.fromJson(
+                    json['relationship'] as String,
+                  )
+                : null)
           : _notSet,
       metadata: json.containsKey('metadata')
           ? (json['metadata'] as Map<String, dynamic>?)?.map(
@@ -75,6 +110,9 @@ class UpdateUserProfileRequest {
   /// on the server.
   Map<String, dynamic> toJson() => {
     if (_externalId != _notSet) 'external_id': _externalId,
+    if (_name != _notSet) 'name': _name,
+    if (_relationship != _notSet)
+      'relationship': (_relationship as BetaUserProfileRelationship?)?.toJson(),
     if (_metadata != _notSet) 'metadata': _metadata,
   };
 
@@ -84,10 +122,16 @@ class UpdateUserProfileRequest {
   /// original value, or pass `null` explicitly to set the field to null.
   UpdateUserProfileRequest copyWith({
     Object? externalId = unsetCopyWithValue,
+    Object? name = unsetCopyWithValue,
+    Object? relationship = unsetCopyWithValue,
     Object? metadata = unsetCopyWithValue,
   }) {
     return UpdateUserProfileRequest(
       externalId: externalId == unsetCopyWithValue ? _externalId : externalId,
+      name: name == unsetCopyWithValue ? _name : name,
+      relationship: relationship == unsetCopyWithValue
+          ? _relationship
+          : relationship,
       metadata: metadata == unsetCopyWithValue ? _metadata : metadata,
     );
   }
@@ -98,11 +142,15 @@ class UpdateUserProfileRequest {
       other is UpdateUserProfileRequest &&
           runtimeType == other.runtimeType &&
           _externalId == other._externalId &&
+          _name == other._name &&
+          _relationship == other._relationship &&
           _mapsEqualOrBothSentinel(_metadata, other._metadata);
 
   @override
   int get hashCode => Object.hash(
     _externalId,
+    _name,
+    _relationship,
     _metadata == _notSet ? _notSet : mapHash(metadata),
   );
 
@@ -110,6 +158,8 @@ class UpdateUserProfileRequest {
   String toString() =>
       'UpdateUserProfileRequest('
       'externalId: $externalId, '
+      'name: $name, '
+      'relationship: $relationship, '
       'metadata: $metadata)';
 }
 

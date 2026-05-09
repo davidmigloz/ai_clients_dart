@@ -2557,6 +2557,13 @@
       "file": "lib/src/models/user_profiles/user_profile_list_order.dart",
       "schema": "BetaUserProfileListOrder"
     },
+    "BetaUserProfileRelationship": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "BetaUserProfileRelationship",
+      "file": "lib/src/models/user_profiles/user_profile_relationship.dart",
+      "schema": "BetaUserProfileRelationship"
+    },
     "EnrollmentUrl": {
       "spec": "main",
       "kind": "object",
