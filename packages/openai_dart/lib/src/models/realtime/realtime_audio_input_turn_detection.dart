@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 
 // =============================================================================
 // SemanticVadEagerness
@@ -328,20 +329,11 @@ class UnknownRealtimeAudioInputTurnDetection
       identical(this, other) ||
       other is UnknownRealtimeAudioInputTurnDetection &&
           runtimeType == other.runtimeType &&
-          _mapsEqual(json, other.json);
+          mapsDeepEqual(json, other.json);
 
   @override
-  int get hashCode => Object.hashAllUnordered(json.entries);
+  int get hashCode => mapDeepHashCode(json);
 
   @override
   String toString() => 'UnknownRealtimeAudioInputTurnDetection(type: $type)';
-}
-
-bool _mapsEqual(Map<String, dynamic> a, Map<String, dynamic> b) {
-  if (identical(a, b)) return true;
-  if (a.length != b.length) return false;
-  for (final key in a.keys) {
-    if (!b.containsKey(key) || a[key] != b[key]) return false;
-  }
-  return true;
 }

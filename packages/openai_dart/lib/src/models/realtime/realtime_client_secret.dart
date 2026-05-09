@@ -121,13 +121,17 @@ class RealtimeClientSecretCreateRequest {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is RealtimeClientSecretCreateRequest &&
-          runtimeType == other.runtimeType;
+          runtimeType == other.runtimeType &&
+          expiresAfter == other.expiresAfter &&
+          session == other.session;
 
   @override
-  int get hashCode => session.hashCode;
+  int get hashCode => Object.hash(expiresAfter, session);
 
   @override
-  String toString() => 'RealtimeClientSecretCreateRequest(...)';
+  String toString() =>
+      'RealtimeClientSecretCreateRequest(expiresAfter: $expiresAfter, '
+      'session: $session)';
 }
 
 // =============================================================================
@@ -249,12 +253,15 @@ class RealtimeClientSecretCreateResponse {
       identical(this, other) ||
       other is RealtimeClientSecretCreateResponse &&
           runtimeType == other.runtimeType &&
-          value == other.value;
+          value == other.value &&
+          expiresAt == other.expiresAt &&
+          session == other.session;
 
   @override
-  int get hashCode => value.hashCode;
+  int get hashCode => Object.hash(value, expiresAt, session);
 
   @override
   String toString() =>
-      'RealtimeClientSecretCreateResponse(expiresAt: $expiresAt)';
+      'RealtimeClientSecretCreateResponse(expiresAt: $expiresAt, '
+      'session: $session)';
 }

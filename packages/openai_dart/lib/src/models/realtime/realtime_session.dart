@@ -114,11 +114,11 @@ class RealtimeTool {
 class RealtimeSession {
   /// Creates a [RealtimeSession].
   const RealtimeSession({
-    required this.id,
-    required this.object,
-    required this.type,
-    required this.model,
-    required this.expiresAt,
+    this.id,
+    this.object,
+    this.type,
+    this.model,
+    this.expiresAt,
     this.audio,
     this.outputModalities,
     this.instructions,
@@ -134,18 +134,17 @@ class RealtimeSession {
 
   /// Creates a [RealtimeSession] from JSON.
   ///
-  /// `id`, `object`, `type`, `model`, and `expires_at` are documented as
-  /// required by the spec, but the live API has been observed to omit them
-  /// transiently (e.g., on early WebSocket `session.created` payloads
-  /// before the session is fully provisioned). To stay forward- and
-  /// backward-compatible, missing values default rather than throw.
+  /// All fields are optional per the spec — server payloads include
+  /// the relevant subset for the session shape (realtime vs.
+  /// transcription) and partial frames omit metadata that hasn't been
+  /// resolved yet.
   factory RealtimeSession.fromJson(Map<String, dynamic> json) {
     return RealtimeSession(
-      id: (json['id'] as String?) ?? '',
-      object: (json['object'] as String?) ?? 'realtime.session',
-      type: (json['type'] as String?) ?? 'realtime',
-      model: (json['model'] as String?) ?? '',
-      expiresAt: (json['expires_at'] as int?) ?? 0,
+      id: json['id'] as String?,
+      object: json['object'] as String?,
+      type: json['type'] as String?,
+      model: json['model'] as String?,
+      expiresAt: json['expires_at'] as int?,
       audio: json['audio'] != null
           ? RealtimeAudioConfig.fromJson(json['audio'] as Map<String, dynamic>)
           : null,
@@ -177,20 +176,23 @@ class RealtimeSession {
     );
   }
 
-  /// The session identifier (`sess_…`).
-  final String id;
+  /// The session identifier (`sess_…`). Optional on partial frames.
+  final String? id;
 
-  /// The object type (always `'realtime.session'`).
-  final String object;
+  /// The object type (e.g. `'realtime.session'`). Optional on partial frames.
+  final String? object;
 
-  /// The session type (always `'realtime'` for realtime sessions).
-  final String type;
+  /// The session type (`'realtime'` or `'transcription'`). Optional on
+  /// partial frames.
+  final String? type;
 
-  /// The model identifier.
-  final String model;
+  /// The model identifier. Always present for realtime sessions; omitted
+  /// for transcription sessions (which don't carry a top-level model).
+  final String? model;
 
-  /// Expiration timestamp (Unix epoch seconds).
-  final int expiresAt;
+  /// Expiration timestamp (Unix epoch seconds). May be `null` on partial
+  /// frames before the session is fully provisioned.
+  final int? expiresAt;
 
   /// Nested audio configuration.
   final RealtimeAudioConfig? audio;
@@ -230,11 +232,11 @@ class RealtimeSession {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'object': object,
-    'type': type,
-    'model': model,
-    'expires_at': expiresAt,
+    if (id != null) 'id': id,
+    if (object != null) 'object': object,
+    if (type != null) 'type': type,
+    if (model != null) 'model': model,
+    if (expiresAt != null) 'expires_at': expiresAt,
     if (audio != null) 'audio': audio!.toJson(),
     if (outputModalities != null) 'output_modalities': outputModalities,
     if (instructions != null) 'instructions': instructions,
@@ -252,11 +254,11 @@ class RealtimeSession {
   ///
   /// Pass `null` for any nullable field to clear the existing value.
   RealtimeSession copyWith({
-    String? id,
-    String? object,
-    String? type,
-    String? model,
-    int? expiresAt,
+    Object? id = unsetCopyWithValue,
+    Object? object = unsetCopyWithValue,
+    Object? type = unsetCopyWithValue,
+    Object? model = unsetCopyWithValue,
+    Object? expiresAt = unsetCopyWithValue,
     Object? audio = unsetCopyWithValue,
     Object? outputModalities = unsetCopyWithValue,
     Object? instructions = unsetCopyWithValue,
@@ -269,11 +271,15 @@ class RealtimeSession {
     Object? truncation = unsetCopyWithValue,
     Object? include = unsetCopyWithValue,
   }) => RealtimeSession(
-    id: id ?? this.id,
-    object: object ?? this.object,
-    type: type ?? this.type,
-    model: model ?? this.model,
-    expiresAt: expiresAt ?? this.expiresAt,
+    id: identical(id, unsetCopyWithValue) ? this.id : id as String?,
+    object: identical(object, unsetCopyWithValue)
+        ? this.object
+        : object as String?,
+    type: identical(type, unsetCopyWithValue) ? this.type : type as String?,
+    model: identical(model, unsetCopyWithValue) ? this.model : model as String?,
+    expiresAt: identical(expiresAt, unsetCopyWithValue)
+        ? this.expiresAt
+        : expiresAt as int?,
     audio: identical(audio, unsetCopyWithValue)
         ? this.audio
         : audio as RealtimeAudioConfig?,

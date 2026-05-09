@@ -296,17 +296,16 @@ void main() {
       expect(encoded.containsKey('client_secret'), isFalse);
     });
 
-    test('fromJson defaults missing fields rather than throwing', () {
-      // Live API has been observed to omit these on early frames; the parser
-      // is intentionally lenient (defaults) rather than strict (throws).
-      final parsed = RealtimeSessionCreateResponse.fromJson(const {
-        'object': 'realtime.session',
-        'type': 'realtime',
-        'model': 'gpt-realtime-2',
-        'expires_at': 0,
-      });
-      expect(parsed.id, '');
-      expect(parsed.expiresAt, 0);
+    test('fromJson throws FormatException on missing required fields', () {
+      expect(
+        () => RealtimeSessionCreateResponse.fromJson(const {
+          'object': 'realtime.session',
+          'type': 'realtime',
+          'model': 'gpt-realtime-2',
+          'expires_at': 0,
+        }),
+        throwsFormatException,
+      );
     });
   });
 
@@ -424,6 +423,83 @@ void main() {
 
     test('throws on invalid payload', () {
       expect(() => RealtimeToolChoice.fromJson(42), throwsFormatException);
+    });
+  });
+
+  group('Sealed Unknown-variant fallbacks', () {
+    test(
+      'RealtimeEvent.fromJson unrecognised type roundtrips through Unknown',
+      () {
+        final json = <String, dynamic>{
+          'type': 'session.future_event',
+          'event_id': 'evt_123',
+          'extra': <String, dynamic>{'nested': true},
+        };
+        final parsed = RealtimeEvent.fromJson(json);
+        expect(parsed, isA<UnknownRealtimeEvent>());
+        expect(parsed.type, 'session.future_event');
+        expect(parsed.eventId, 'evt_123');
+        // Round-trip preserves unknown keys including nested maps.
+        expect(parsed.toJson(), equals(json));
+
+        // Equality is content-based and deep.
+        final twin = RealtimeEvent.fromJson(<String, dynamic>{
+          'type': 'session.future_event',
+          'event_id': 'evt_123',
+          'extra': <String, dynamic>{'nested': true},
+        });
+        expect(parsed, equals(twin));
+        expect(parsed.hashCode, twin.hashCode);
+      },
+    );
+
+    test('RealtimeAudioInputTurnDetection.fromJson unknown discriminator '
+        'roundtrips', () {
+      final json = <String, dynamic>{
+        'type': 'experimental_vad',
+        'threshold': 0.7,
+      };
+      final parsed = RealtimeAudioInputTurnDetection.fromJson(json);
+      expect(parsed, isA<UnknownRealtimeAudioInputTurnDetection>());
+      expect(parsed.type, 'experimental_vad');
+      expect(parsed.toJson(), equals(json));
+
+      // Deep equality + hash consistency.
+      final twin = RealtimeAudioInputTurnDetection.fromJson(<String, dynamic>{
+        'type': 'experimental_vad',
+        'threshold': 0.7,
+      });
+      expect(parsed, equals(twin));
+      expect(parsed.hashCode, twin.hashCode);
+    });
+
+    test('RealtimeTracingConfig.fromJson non-map non-auto value yields '
+        'UnknownRealtimeTracingConfig', () {
+      // Maps always parse into [TracingConfiguration] (any keys are valid
+      // — they're all optional). The Unknown fallback only triggers for
+      // non-map values that aren't the literal `'auto'` string, e.g. if
+      // a future spec allows `'enabled'`/`'disabled'` strings.
+      final parsed = RealtimeTracingConfig.fromJson('enabled');
+      expect(parsed, isA<UnknownRealtimeTracingConfig>());
+      expect(parsed.toJson(), equals('enabled'));
+    });
+
+    test('RealtimeTruncation.fromJson unknown discriminator roundtrips', () {
+      final json = <String, dynamic>{
+        'type': 'experimental',
+        'config': <String, dynamic>{'mode': 'aggressive'},
+      };
+      final parsed = RealtimeTruncation.fromJson(json);
+      expect(parsed, isA<UnknownRealtimeTruncation>());
+      expect(parsed.toJson(), equals(json));
+
+      // Deep-equality semantics on nested maps.
+      final twin = RealtimeTruncation.fromJson(<String, dynamic>{
+        'type': 'experimental',
+        'config': <String, dynamic>{'mode': 'aggressive'},
+      });
+      expect(parsed, equals(twin));
+      expect(parsed.hashCode, twin.hashCode);
     });
   });
 }

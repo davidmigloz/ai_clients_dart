@@ -284,8 +284,8 @@ class RealtimeSessionCreateResponse {
     required this.id,
     required this.object,
     required this.type,
-    required this.model,
-    required this.expiresAt,
+    this.model,
+    this.expiresAt,
     this.audio,
     this.outputModalities,
     this.instructions,
@@ -301,16 +301,24 @@ class RealtimeSessionCreateResponse {
 
   /// Creates a [RealtimeSessionCreateResponse] from JSON.
   ///
-  /// Spec-required fields (`id`, `object`, `type`, `model`, `expires_at`)
-  /// are defaulted rather than required to stay tolerant of partial server
-  /// payloads (e.g., on early `session.created` frames).
+  /// Throws [FormatException] when any spec-required field (`id`,
+  /// `object`, `type`) is missing. `model` and `expires_at` are
+  /// optional per the spec — transcription session responses don't
+  /// carry a top-level `model`, and partial frames may omit
+  /// `expires_at`.
   factory RealtimeSessionCreateResponse.fromJson(Map<String, dynamic> json) {
+    if (json['id'] == null || json['object'] == null || json['type'] == null) {
+      throw const FormatException(
+        'RealtimeSessionCreateResponse.fromJson missing one or more required '
+        'fields (id, object, type)',
+      );
+    }
     return RealtimeSessionCreateResponse(
-      id: (json['id'] as String?) ?? '',
-      object: (json['object'] as String?) ?? 'realtime.session',
-      type: (json['type'] as String?) ?? 'realtime',
-      model: (json['model'] as String?) ?? '',
-      expiresAt: (json['expires_at'] as int?) ?? 0,
+      id: json['id'] as String,
+      object: json['object'] as String,
+      type: json['type'] as String,
+      model: json['model'] as String?,
+      expiresAt: json['expires_at'] as int?,
       audio: json['audio'] != null
           ? RealtimeAudioConfig.fromJson(json['audio'] as Map<String, dynamic>)
           : null,
@@ -345,17 +353,21 @@ class RealtimeSessionCreateResponse {
   /// The session identifier.
   final String id;
 
-  /// The object type (always `'realtime.session'`).
+  /// The object type (e.g. `'realtime.session'` /
+  /// `'realtime.transcription_session'`).
   final String object;
 
-  /// The session type (always `'realtime'`).
+  /// The session type (`'realtime'` or `'transcription'`).
   final String type;
 
-  /// The model identifier.
-  final String model;
+  /// The model identifier. Always present for realtime sessions; omitted
+  /// from transcription session responses (which carry the model on the
+  /// nested `audio.input.transcription` instead).
+  final String? model;
 
-  /// Expiration timestamp (Unix epoch seconds).
-  final int expiresAt;
+  /// Expiration timestamp (Unix epoch seconds). May be `null` on partial
+  /// or transient frames.
+  final int? expiresAt;
 
   /// Nested audio configuration.
   final RealtimeAudioConfig? audio;
@@ -395,8 +407,8 @@ class RealtimeSessionCreateResponse {
     'id': id,
     'object': object,
     'type': type,
-    'model': model,
-    'expires_at': expiresAt,
+    if (model != null) 'model': model,
+    if (expiresAt != null) 'expires_at': expiresAt,
     if (audio != null) 'audio': audio!.toJson(),
     if (outputModalities != null) 'output_modalities': outputModalities,
     if (instructions != null) 'instructions': instructions,
@@ -417,8 +429,8 @@ class RealtimeSessionCreateResponse {
     String? id,
     String? object,
     String? type,
-    String? model,
-    int? expiresAt,
+    Object? model = unsetCopyWithValue,
+    Object? expiresAt = unsetCopyWithValue,
     Object? audio = unsetCopyWithValue,
     Object? outputModalities = unsetCopyWithValue,
     Object? instructions = unsetCopyWithValue,
@@ -434,8 +446,10 @@ class RealtimeSessionCreateResponse {
     id: id ?? this.id,
     object: object ?? this.object,
     type: type ?? this.type,
-    model: model ?? this.model,
-    expiresAt: expiresAt ?? this.expiresAt,
+    model: identical(model, unsetCopyWithValue) ? this.model : model as String?,
+    expiresAt: identical(expiresAt, unsetCopyWithValue)
+        ? this.expiresAt
+        : expiresAt as int?,
     audio: identical(audio, unsetCopyWithValue)
         ? this.audio
         : audio as RealtimeAudioConfig?,

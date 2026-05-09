@@ -74,11 +74,14 @@ class RealtimeTranscriptionSessionAudio {
 /// ## Example
 ///
 /// ```dart
-/// final response = await client.realtimeSessions.createTranscription(
-///   RealtimeTranscriptionSessionCreateRequest(
-///     audio: RealtimeTranscriptionSessionAudio(
-///       input: RealtimeAudioConfigInput(
-///         transcription: InputAudioTranscription(model: 'whisper-1'),
+/// final response =
+///     await client.realtimeSessions.createTranscriptionClientSecret(
+///   RealtimeTranscriptionClientSecretCreateRequest(
+///     session: RealtimeTranscriptionSessionCreateRequest(
+///       audio: RealtimeTranscriptionSessionAudio(
+///         input: RealtimeAudioConfigInput(
+///           transcription: InputAudioTranscription(model: 'whisper-1'),
+///         ),
 ///       ),
 ///     ),
 ///   ),

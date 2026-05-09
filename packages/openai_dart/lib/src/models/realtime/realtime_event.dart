@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality_helpers.dart';
 import 'realtime_session.dart';
 
 /// Base class for all realtime events.
@@ -154,22 +155,13 @@ class UnknownRealtimeEvent implements RealtimeEvent {
       identical(this, other) ||
       other is UnknownRealtimeEvent &&
           runtimeType == other.runtimeType &&
-          _mapsEqual(json, other.json);
+          mapsDeepEqual(json, other.json);
 
   @override
-  int get hashCode => Object.hashAllUnordered(json.entries);
+  int get hashCode => mapDeepHashCode(json);
 
   @override
   String toString() => 'UnknownRealtimeEvent(type: $type)';
-}
-
-bool _mapsEqual(Map<String, dynamic> a, Map<String, dynamic> b) {
-  if (identical(a, b)) return true;
-  if (a.length != b.length) return false;
-  for (final key in a.keys) {
-    if (!b.containsKey(key) || a[key] != b[key]) return false;
-  }
-  return true;
 }
 
 /// Session created event.
@@ -317,7 +309,7 @@ class ConversationItemCreatedEvent implements RealtimeEvent {
   /// Creates a [ConversationItemCreatedEvent].
   const ConversationItemCreatedEvent({
     required this.eventId,
-    required this.previousItemId,
+    this.previousItemId,
     required this.item,
   });
 
@@ -2034,13 +2026,18 @@ class RateLimit {
       identical(this, other) ||
       other is RateLimit &&
           runtimeType == other.runtimeType &&
-          name == other.name;
+          name == other.name &&
+          limit == other.limit &&
+          remaining == other.remaining &&
+          resetSeconds == other.resetSeconds;
 
   @override
-  int get hashCode => name.hashCode;
+  int get hashCode => Object.hash(name, limit, remaining, resetSeconds);
 
   @override
-  String toString() => 'RateLimit(name: $name, remaining: $remaining)';
+  String toString() =>
+      'RateLimit(name: $name, limit: $limit, remaining: $remaining, '
+      'resetSeconds: $resetSeconds)';
 }
 
 /// An error event.
@@ -2139,11 +2136,17 @@ class RealtimeError {
       identical(this, other) ||
       other is RealtimeError &&
           runtimeType == other.runtimeType &&
-          code == other.code;
+          type == other.type &&
+          code == other.code &&
+          message == other.message &&
+          param == other.param &&
+          eventId == other.eventId;
 
   @override
-  int get hashCode => code.hashCode;
+  int get hashCode => Object.hash(type, code, message, param, eventId);
 
   @override
-  String toString() => 'RealtimeError(code: $code, message: $message)';
+  String toString() =>
+      'RealtimeError(type: $type, code: $code, message: $message, '
+      'param: $param, eventId: $eventId)';
 }

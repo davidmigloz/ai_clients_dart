@@ -153,15 +153,15 @@ Future<void> main() async {
     // --- Transcription session ---
     print('\n=== Transcription Session ===\n');
 
-    // Transcription sessions are created via the client-secrets endpoint
-    // with `type: 'transcription'`.
+    // Transcription sessions use the dedicated
+    // `createTranscriptionClientSecret(...)` helper, which posts to the
+    // shared `/realtime/client_secrets` endpoint with the transcription
+    // session shape (no top-level `model`).
     final transcriptionSecret = await client.realtimeSessions
-        .createClientSecret(
-          const realtime.RealtimeClientSecretCreateRequest(
-            session: realtime.RealtimeSessionCreateRequest(
-              model: 'gpt-realtime-2',
-              type: 'transcription',
-              audio: realtime.RealtimeAudioConfig(
+        .createTranscriptionClientSecret(
+          const realtime.RealtimeTranscriptionClientSecretCreateRequest(
+            session: realtime.RealtimeTranscriptionSessionCreateRequest(
+              audio: realtime.RealtimeTranscriptionSessionAudio(
                 input: realtime.RealtimeAudioConfigInput(
                   format: realtime.AudioPcm(rate: 24000),
                   transcription: realtime.InputAudioTranscription(
