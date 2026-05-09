@@ -19,8 +19,8 @@ class OcrTable {
 
   /// Per-span confidence scores for the table's extracted text.
   ///
-  /// Populated when the request was made with `word`
-  /// `confidenceScoresGranularity`. `null` otherwise.
+  /// Populated when [OcrRequest.confidenceScoresGranularity] is set to
+  /// [OcrConfidenceScoresGranularity.word]; `null` otherwise.
   final List<OcrConfidenceScore>? wordConfidenceScores;
 
   /// Creates an [OcrTable].

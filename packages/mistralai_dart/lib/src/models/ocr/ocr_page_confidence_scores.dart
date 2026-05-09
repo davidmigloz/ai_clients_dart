@@ -24,8 +24,8 @@ class OcrPageConfidenceScores {
 
   /// Per-span confidence scores for the page's extracted text.
   ///
-  /// Populated when the request was made with `word` granularity; `null`
-  /// otherwise.
+  /// Populated when [OcrRequest.confidenceScoresGranularity] is set to
+  /// [OcrConfidenceScoresGranularity.word]; `null` otherwise.
   final List<OcrConfidenceScore>? wordConfidenceScores;
 
   /// Creates an [OcrPageConfidenceScores].

@@ -40,8 +40,9 @@ class OcrPage {
 
   /// Aggregate (and optionally per-word) confidence scores for this page.
   ///
-  /// Populated when the request was made with
-  /// `confidenceScoresGranularity` set. `null` otherwise.
+  /// Populated when [OcrRequest.confidenceScoresGranularity] is set
+  /// (either [OcrConfidenceScoresGranularity.word] or
+  /// [OcrConfidenceScoresGranularity.page]); `null` otherwise.
   final OcrPageConfidenceScores? confidenceScores;
 
   /// Creates an [OcrPage].
