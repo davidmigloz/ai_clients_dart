@@ -350,5 +350,113 @@ void main() {
         expect(request1, isNot(equals(request2)));
       });
     });
+
+    group('confidenceScoresGranularity', () {
+      test('omitted from JSON when null', () {
+        const request = OcrRequest(
+          document: UrlDocument('https://example.com/doc.pdf'),
+        );
+
+        final json = request.toJson();
+
+        expect(json.containsKey('confidence_scores_granularity'), isFalse);
+      });
+
+      test('serializes as "word"', () {
+        const request = OcrRequest(
+          document: UrlDocument('https://example.com/doc.pdf'),
+          confidenceScoresGranularity: OcrConfidenceScoresGranularity.word,
+        );
+
+        expect(request.toJson()['confidence_scores_granularity'], 'word');
+      });
+
+      test('serializes as "page"', () {
+        const request = OcrRequest(
+          document: UrlDocument('https://example.com/doc.pdf'),
+          confidenceScoresGranularity: OcrConfidenceScoresGranularity.page,
+        );
+
+        expect(request.toJson()['confidence_scores_granularity'], 'page');
+      });
+
+      test('round-trips word granularity', () {
+        const original = OcrRequest(
+          document: UrlDocument('https://example.com/doc.pdf'),
+          confidenceScoresGranularity: OcrConfidenceScoresGranularity.word,
+        );
+
+        final roundTripped = OcrRequest.fromJson(original.toJson());
+
+        expect(
+          roundTripped.confidenceScoresGranularity,
+          OcrConfidenceScoresGranularity.word,
+        );
+      });
+
+      test('round-trips page granularity', () {
+        const original = OcrRequest(
+          document: UrlDocument('https://example.com/doc.pdf'),
+          confidenceScoresGranularity: OcrConfidenceScoresGranularity.page,
+        );
+
+        final roundTripped = OcrRequest.fromJson(original.toJson());
+
+        expect(
+          roundTripped.confidenceScoresGranularity,
+          OcrConfidenceScoresGranularity.page,
+        );
+      });
+
+      test('fromJson maps unknown granularity value to unknown sentinel', () {
+        final request = OcrRequest.fromJson(const {
+          'document': {
+            'type': 'document_url',
+            'document_url': 'https://example.com/doc.pdf',
+          },
+          'confidence_scores_granularity': 'sentence',
+        });
+
+        expect(
+          request.confidenceScoresGranularity,
+          OcrConfidenceScoresGranularity.unknown,
+        );
+      });
+
+      test('copyWith clears with explicit null', () {
+        const original = OcrRequest(
+          document: UrlDocument('https://example.com/doc.pdf'),
+          confidenceScoresGranularity: OcrConfidenceScoresGranularity.word,
+        );
+
+        final cleared = original.copyWith(confidenceScoresGranularity: null);
+
+        expect(cleared.confidenceScoresGranularity, isNull);
+      });
+    });
+
+    group('OcrConfidenceScoresGranularity.fromString', () {
+      test('parses known values', () {
+        expect(
+          OcrConfidenceScoresGranularity.fromString('word'),
+          OcrConfidenceScoresGranularity.word,
+        );
+        expect(
+          OcrConfidenceScoresGranularity.fromString('page'),
+          OcrConfidenceScoresGranularity.page,
+        );
+      });
+
+      test('returns null for null input', () {
+        expect(OcrConfidenceScoresGranularity.fromString(null), isNull);
+      });
+
+      test('returns unknown for unrecognized values', () {
+        expect(
+          OcrConfidenceScoresGranularity.fromString('character'),
+          OcrConfidenceScoresGranularity.unknown,
+        );
+      });
+    });
   });
 }

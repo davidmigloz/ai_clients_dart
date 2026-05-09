@@ -360,6 +360,78 @@ void main() {
         expect(str, contains('maxTokens: null'));
         expect(str, contains('frequencyPenalty: null'));
         expect(str, contains('reasoningEffort: null'));
+        expect(str, contains('promptCacheKey: null'));
+      });
+    });
+
+    group('promptCacheKey', () {
+      test('omits prompt_cache_key from JSON when null', () {
+        final request = AgentCompletionRequest(
+          agentId: 'agent-1',
+          messages: [ChatMessage.user('Hi')],
+        );
+
+        final json = request.toJson();
+
+        expect(json.containsKey('prompt_cache_key'), isFalse);
+      });
+
+      test('serializes prompt_cache_key when set', () {
+        final request = AgentCompletionRequest(
+          agentId: 'agent-1',
+          messages: [ChatMessage.user('Hi')],
+          promptCacheKey: 'tenant-42',
+        );
+
+        final json = request.toJson();
+
+        expect(json['prompt_cache_key'], 'tenant-42');
+      });
+
+      test('round-trips prompt_cache_key', () {
+        final original = AgentCompletionRequest(
+          agentId: 'agent-1',
+          messages: [ChatMessage.user('Hi')],
+          promptCacheKey: 'tenant-42',
+        );
+
+        final roundTripped = AgentCompletionRequest.fromJson(original.toJson());
+
+        expect(roundTripped.promptCacheKey, 'tenant-42');
+      });
+
+      test('copyWith clears with explicit null', () {
+        final original = AgentCompletionRequest(
+          agentId: 'agent-1',
+          messages: [ChatMessage.user('Hi')],
+          promptCacheKey: 'tenant-42',
+        );
+
+        final cleared = original.copyWith(promptCacheKey: null);
+
+        expect(cleared.promptCacheKey, isNull);
+      });
+
+      test('equality and hashCode include prompt_cache_key', () {
+        final a = AgentCompletionRequest(
+          agentId: 'agent-1',
+          messages: [ChatMessage.user('Hi')],
+          promptCacheKey: 'k1',
+        );
+        final b = AgentCompletionRequest(
+          agentId: 'agent-1',
+          messages: [ChatMessage.user('Hi')],
+          promptCacheKey: 'k1',
+        );
+        final c = AgentCompletionRequest(
+          agentId: 'agent-1',
+          messages: [ChatMessage.user('Hi')],
+          promptCacheKey: 'k2',
+        );
+
+        expect(a, equals(b));
+        expect(a.hashCode, b.hashCode);
+        expect(a, isNot(equals(c)));
       });
     });
   });

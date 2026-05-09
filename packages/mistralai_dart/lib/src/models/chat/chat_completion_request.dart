@@ -106,6 +106,13 @@ class ChatCompletionRequest {
   /// Guardrail configurations for content moderation.
   final List<GuardrailConfig>? guardrails;
 
+  /// Optional cache key used to enable Mistral's prompt cache.
+  ///
+  /// Requests sharing the same `promptCacheKey` and matching prefix tokens
+  /// will reuse a cached prefix; cached prefix tokens are billed at 10% of
+  /// the standard input token price.
+  final String? promptCacheKey;
+
   /// Creates a [ChatCompletionRequest].
   const ChatCompletionRequest({
     required this.model,
@@ -129,6 +136,7 @@ class ChatCompletionRequest {
     this.promptMode,
     this.reasoningEffort,
     this.guardrails,
+    this.promptCacheKey,
   });
 
   /// Creates a [ChatCompletionRequest] from JSON.
@@ -177,6 +185,7 @@ class ChatCompletionRequest {
         guardrails: (json['guardrails'] as List?)
             ?.map((e) => GuardrailConfig.fromJson(e as Map<String, dynamic>))
             .toList(),
+        promptCacheKey: json['prompt_cache_key'] as String?,
       );
 
   /// Converts to JSON.
@@ -203,6 +212,7 @@ class ChatCompletionRequest {
     if (reasoningEffort != null) 'reasoning_effort': reasoningEffort!.value,
     if (guardrails != null)
       'guardrails': guardrails!.map((e) => e.toJson()).toList(),
+    if (promptCacheKey != null) 'prompt_cache_key': promptCacheKey,
   };
 
   /// Creates a copy with replaced values.
@@ -228,6 +238,7 @@ class ChatCompletionRequest {
     Object? promptMode = unsetCopyWithValue,
     Object? reasoningEffort = unsetCopyWithValue,
     Object? guardrails = unsetCopyWithValue,
+    Object? promptCacheKey = unsetCopyWithValue,
   }) {
     return ChatCompletionRequest(
       model: model ?? this.model,
@@ -279,6 +290,9 @@ class ChatCompletionRequest {
       guardrails: guardrails == unsetCopyWithValue
           ? this.guardrails
           : guardrails as List<GuardrailConfig>?,
+      promptCacheKey: promptCacheKey == unsetCopyWithValue
+          ? this.promptCacheKey
+          : promptCacheKey as String?,
     );
   }
 
@@ -310,7 +324,8 @@ class ChatCompletionRequest {
         mapsEqual(metadata, other.metadata) &&
         prediction == other.prediction &&
         promptMode == other.promptMode &&
-        reasoningEffort == other.reasoningEffort;
+        reasoningEffort == other.reasoningEffort &&
+        promptCacheKey == other.promptCacheKey;
     // guardrails compared above via listsEqual
   }
 
@@ -335,6 +350,7 @@ class ChatCompletionRequest {
     mapHash(metadata),
     Object.hash(prediction, promptMode, reasoningEffort),
     listHash(guardrails),
+    promptCacheKey,
   );
 
   @override
@@ -359,5 +375,6 @@ class ChatCompletionRequest {
       'prediction: $prediction, '
       'promptMode: $promptMode, '
       'reasoningEffort: $reasoningEffort, '
-      'guardrails: $guardrails)';
+      'guardrails: $guardrails, '
+      'promptCacheKey: $promptCacheKey)';
 }

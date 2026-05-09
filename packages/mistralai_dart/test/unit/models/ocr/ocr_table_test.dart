@@ -138,5 +138,85 @@ void main() {
       expect(str, contains('markdown'));
       expect(str, contains('chars'));
     });
+
+    group('wordConfidenceScores', () {
+      test('omitted when null', () {
+        const table = OcrTable(
+          id: 't',
+          content: 'c',
+          format: OcrTableFormat.markdown,
+        );
+
+        final json = table.toJson();
+
+        expect(json.containsKey('word_confidence_scores'), isFalse);
+      });
+
+      test('parses an empty list', () {
+        final table = OcrTable.fromJson(const {
+          'id': 't',
+          'content': 'c',
+          'format': 'markdown',
+          'word_confidence_scores': <Map<String, dynamic>>[],
+        });
+
+        expect(table.wordConfidenceScores, isEmpty);
+      });
+
+      test('round-trips a populated list', () {
+        const original = OcrTable(
+          id: 't',
+          content: '| A |\n|---|',
+          format: OcrTableFormat.markdown,
+          wordConfidenceScores: [
+            OcrConfidenceScore(confidence: 0.95, startIndex: 2, text: 'A'),
+            OcrConfidenceScore(confidence: 0.5, startIndex: 4, text: '|'),
+          ],
+        );
+
+        final roundTripped = OcrTable.fromJson(original.toJson());
+
+        expect(roundTripped, equals(original));
+        expect(roundTripped.wordConfidenceScores, hasLength(2));
+        expect(roundTripped.wordConfidenceScores![1].text, '|');
+      });
+
+      test('not equal when scores differ', () {
+        const a = OcrTable(
+          id: 't',
+          content: 'c',
+          format: OcrTableFormat.markdown,
+          wordConfidenceScores: [
+            OcrConfidenceScore(confidence: 0.5, startIndex: 0, text: 'a'),
+          ],
+        );
+        const b = OcrTable(
+          id: 't',
+          content: 'c',
+          format: OcrTableFormat.markdown,
+          wordConfidenceScores: [
+            OcrConfidenceScore(confidence: 0.5, startIndex: 0, text: 'b'),
+          ],
+        );
+
+        expect(a, isNot(equals(b)));
+      });
+
+      test('copyWith clears with explicit null', () {
+        const original = OcrTable(
+          id: 't',
+          content: 'c',
+          format: OcrTableFormat.markdown,
+          wordConfidenceScores: [
+            OcrConfidenceScore(confidence: 0.5, startIndex: 0, text: 'a'),
+          ],
+        );
+
+        final cleared = original.copyWith(wordConfidenceScores: null);
+
+        expect(cleared.wordConfidenceScores, isNull);
+        expect(cleared.id, 't');
+      });
+    });
   });
 }

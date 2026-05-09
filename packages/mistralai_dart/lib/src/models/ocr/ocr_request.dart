@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../metadata/response_format.dart';
+import 'ocr_confidence_scores_granularity.dart';
 import 'ocr_document.dart';
 import 'ocr_table_format.dart';
 
@@ -56,6 +57,13 @@ class OcrRequest {
   /// document. Only json_schema is valid.
   final ResponseFormat? documentAnnotationFormat;
 
+  /// Granularity of confidence scores returned in the response.
+  ///
+  /// `word` returns per-word scores plus the page aggregate; `page` returns
+  /// only the page aggregate. When omitted, no confidence scores are
+  /// returned, which keeps the response payload small.
+  final OcrConfidenceScoresGranularity? confidenceScoresGranularity;
+
   /// Creates an [OcrRequest].
   const OcrRequest({
     this.model = 'mistral-ocr-latest',
@@ -71,6 +79,7 @@ class OcrRequest {
     this.extractFooter,
     this.bboxAnnotationFormat,
     this.documentAnnotationFormat,
+    this.confidenceScoresGranularity,
   });
 
   /// Creates an [OcrRequest] from a URL.
@@ -142,6 +151,9 @@ class OcrRequest {
             json['document_annotation_format'] as Map<String, dynamic>,
           )
         : null,
+    confidenceScoresGranularity: OcrConfidenceScoresGranularity.fromString(
+      json['confidence_scores_granularity'] as String?,
+    ),
   );
 
   /// Converts to JSON.
@@ -162,6 +174,8 @@ class OcrRequest {
       'bbox_annotation_format': bboxAnnotationFormat!.toJson(),
     if (documentAnnotationFormat != null)
       'document_annotation_format': documentAnnotationFormat!.toJson(),
+    if (confidenceScoresGranularity != null)
+      'confidence_scores_granularity': confidenceScoresGranularity!.value,
   };
 
   /// Creates a copy with the specified fields replaced.
@@ -181,6 +195,7 @@ class OcrRequest {
     Object? extractFooter = unsetCopyWithValue,
     Object? bboxAnnotationFormat = unsetCopyWithValue,
     Object? documentAnnotationFormat = unsetCopyWithValue,
+    Object? confidenceScoresGranularity = unsetCopyWithValue,
   }) => OcrRequest(
     model: model ?? this.model,
     document: document ?? this.document,
@@ -213,6 +228,10 @@ class OcrRequest {
     documentAnnotationFormat: documentAnnotationFormat == unsetCopyWithValue
         ? this.documentAnnotationFormat
         : documentAnnotationFormat as ResponseFormat?,
+    confidenceScoresGranularity:
+        confidenceScoresGranularity == unsetCopyWithValue
+        ? this.confidenceScoresGranularity
+        : confidenceScoresGranularity as OcrConfidenceScoresGranularity?,
   );
 
   @override
@@ -232,7 +251,8 @@ class OcrRequest {
           extractHeader == other.extractHeader &&
           extractFooter == other.extractFooter &&
           bboxAnnotationFormat == other.bboxAnnotationFormat &&
-          documentAnnotationFormat == other.documentAnnotationFormat;
+          documentAnnotationFormat == other.documentAnnotationFormat &&
+          confidenceScoresGranularity == other.confidenceScoresGranularity;
 
   @override
   int get hashCode => Object.hash(
@@ -249,6 +269,7 @@ class OcrRequest {
     extractFooter,
     bboxAnnotationFormat,
     documentAnnotationFormat,
+    confidenceScoresGranularity,
   );
 
   @override

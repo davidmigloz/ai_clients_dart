@@ -1277,6 +1277,18 @@
             "title": "Presence Penalty",
             "type": "number"
           },
+          "prompt_cache_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "A cache key to enable prompt caching. When provided, the API will attempt to reuse previously computed tokens for requests sharing the same prefix (e.g. multi-turn conversations or requests with a similar system prompt). Cached tokens are billed at 10% of the standard input token price.",
+            "title": "Prompt Cache Key"
+          },
           "prompt_mode": {
             "anyOf": [
               {
@@ -3084,6 +3096,18 @@
             "minimum": -2,
             "title": "Presence Penalty",
             "type": "number"
+          },
+          "prompt_cache_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "A cache key to enable prompt caching. When provided, the API will attempt to reuse previously computed tokens for requests sharing the same prefix (e.g. multi-turn conversations or requests with a similar system prompt). Cached tokens are billed at 10% of the standard input token price.",
+            "title": "Prompt Cache Key"
           },
           "prompt_mode": {
             "anyOf": [
@@ -8121,6 +8145,18 @@
             "title": "Prompt",
             "type": "string"
           },
+          "prompt_cache_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "A cache key to enable prompt caching. When provided, the API will attempt to reuse previously computed tokens for requests sharing the same prefix (e.g. multi-turn conversations or requests with a similar system prompt). Cached tokens are billed at 10% of the standard input token price.",
+            "title": "Prompt Cache Key"
+          },
           "random_seed": {
             "anyOf": [
               {
@@ -11967,6 +12003,37 @@
         "title": "OAuth2TokenAuth",
         "type": "object"
       },
+      "OCRConfidenceScore": {
+        "additionalProperties": false,
+        "description": "Confidence score for a token or word in OCR output.",
+        "properties": {
+          "confidence": {
+            "description": "Confidence score (0-1)",
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Confidence",
+            "type": "number"
+          },
+          "start_index": {
+            "description": "Start index of the text in the page markdown string",
+            "minimum": 0,
+            "title": "Start Index",
+            "type": "integer"
+          },
+          "text": {
+            "description": "The word or text segment",
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "confidence",
+          "start_index"
+        ],
+        "title": "OCRConfidenceScore",
+        "type": "object"
+      },
       "OCRImageObject": {
         "additionalProperties": false,
         "properties": {
@@ -12062,6 +12129,40 @@
         "title": "OCRImageObject",
         "type": "object"
       },
+      "OCRPageConfidenceScores": {
+        "additionalProperties": false,
+        "description": "Confidence scores for an OCR page at various granularities.",
+        "properties": {
+          "average_page_confidence_score": {
+            "description": "Average confidence score for the page",
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Average Page Confidence Score",
+            "type": "number"
+          },
+          "minimum_page_confidence_score": {
+            "description": "Minimum confidence score for the page",
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Minimum Page Confidence Score",
+            "type": "number"
+          },
+          "word_confidence_scores": {
+            "description": "Word-level confidence scores (populated only for 'word' granularity)",
+            "items": {
+              "$ref": "#/components/schemas/OCRConfidenceScore"
+            },
+            "title": "Word Confidence Scores",
+            "type": "array"
+          }
+        },
+        "required": [
+          "average_page_confidence_score",
+          "minimum_page_confidence_score"
+        ],
+        "title": "OCRPageConfidenceScores",
+        "type": "object"
+      },
       "OCRPageDimensions": {
         "additionalProperties": false,
         "properties": {
@@ -12095,6 +12196,17 @@
       "OCRPageObject": {
         "additionalProperties": false,
         "properties": {
+          "confidence_scores": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OCRPageConfidenceScores"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Confidence scores for the OCR page (populated when confidence_scores_granularity is set)"
+          },
           "dimensions": {
             "anyOf": [
               {
@@ -12188,6 +12300,21 @@
               }
             ],
             "description": "Structured output class for extracting useful information from each extracted bounding box / image from document. Only json_schema is valid for this field"
+          },
+          "confidence_scores_granularity": {
+            "anyOf": [
+              {
+                "enum": [
+                  "word",
+                  "page"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Granularity for confidence scores: 'word' (per-word scores) or 'page' (aggregate only). Defaults to None (no confidence scores) to keep response payload small."
           },
           "document": {
             "anyOf": [
@@ -12388,6 +12515,21 @@
             "description": "Table ID for extracted table in a page",
             "title": "Id",
             "type": "string"
+          },
+          "word_confidence_scores": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/OCRConfidenceScore"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Per-word confidence scores for the table content. Returned when confidence_scores_granularity is set to 'word'.",
+            "title": "Word Confidence Scores"
           }
         },
         "required": [

@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 import '../metadata/stop_sequence.dart';
 
 /// Request for a fill-in-the-middle (FIM) completion.
@@ -57,6 +58,18 @@ class FimCompletionRequest {
   /// Random seed for deterministic generation.
   final int? randomSeed;
 
+  /// Custom request metadata.
+  ///
+  /// Allows attaching arbitrary key-value pairs to the request.
+  final Map<String, dynamic>? metadata;
+
+  /// Optional cache key used to enable Mistral's prompt cache.
+  ///
+  /// Requests sharing the same `promptCacheKey` and matching prefix tokens
+  /// will reuse a cached prefix; cached prefix tokens are billed at 10% of
+  /// the standard input token price.
+  final String? promptCacheKey;
+
   /// Creates a [FimCompletionRequest].
   const FimCompletionRequest({
     required this.model,
@@ -69,6 +82,8 @@ class FimCompletionRequest {
     this.stream,
     this.stop,
     this.randomSeed,
+    this.metadata,
+    this.promptCacheKey,
   });
 
   /// Creates a [FimCompletionRequest] from JSON.
@@ -86,6 +101,8 @@ class FimCompletionRequest {
             ? StopSequence.fromJson(json['stop'] as Object)
             : null,
         randomSeed: json['random_seed'] as int?,
+        metadata: json['metadata'] as Map<String, dynamic>?,
+        promptCacheKey: json['prompt_cache_key'] as String?,
       );
 
   /// Converts to JSON.
@@ -100,6 +117,8 @@ class FimCompletionRequest {
     if (stream != null) 'stream': stream,
     if (stop != null) 'stop': stop!.toJson(),
     if (randomSeed != null) 'random_seed': randomSeed,
+    if (metadata != null) 'metadata': metadata,
+    if (promptCacheKey != null) 'prompt_cache_key': promptCacheKey,
   };
 
   /// Creates a copy with replaced values.
@@ -114,6 +133,8 @@ class FimCompletionRequest {
     Object? stream = unsetCopyWithValue,
     Object? stop = unsetCopyWithValue,
     Object? randomSeed = unsetCopyWithValue,
+    Object? metadata = unsetCopyWithValue,
+    Object? promptCacheKey = unsetCopyWithValue,
   }) {
     return FimCompletionRequest(
       model: model ?? this.model,
@@ -134,6 +155,12 @@ class FimCompletionRequest {
       randomSeed: randomSeed == unsetCopyWithValue
           ? this.randomSeed
           : randomSeed as int?,
+      metadata: metadata == unsetCopyWithValue
+          ? this.metadata
+          : metadata as Map<String, dynamic>?,
+      promptCacheKey: promptCacheKey == unsetCopyWithValue
+          ? this.promptCacheKey
+          : promptCacheKey as String?,
     );
   }
 
@@ -144,10 +171,13 @@ class FimCompletionRequest {
           runtimeType == other.runtimeType &&
           model == other.model &&
           prompt == other.prompt &&
-          suffix == other.suffix;
+          suffix == other.suffix &&
+          mapsEqual(metadata, other.metadata) &&
+          promptCacheKey == other.promptCacheKey;
 
   @override
-  int get hashCode => Object.hash(model, prompt, suffix);
+  int get hashCode =>
+      Object.hash(model, prompt, suffix, mapHash(metadata), promptCacheKey);
 
   @override
   String toString() =>

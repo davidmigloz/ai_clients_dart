@@ -1066,6 +1066,13 @@
       ],
       "note": "Internal platform API \u2014 filtering"
     },
+    "FIMCompletionRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "FimCompletionRequest",
+      "file": "lib/src/models/fim/fim_completion_request.dart",
+      "schema": "FIMCompletionRequest"
+    },
     "FunctionName": {
       "spec": "main",
       "kind": "sealed_variant",
@@ -1393,12 +1400,26 @@
       "schema": "OAuth2TokenAuth",
       "parent": "ConnectorAuth"
     },
+    "OCRConfidenceScore": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "OcrConfidenceScore",
+      "file": "lib/src/models/ocr/ocr_confidence_score.dart",
+      "schema": "OCRConfidenceScore"
+    },
     "OCRImageObject": {
       "spec": "main",
       "kind": "object",
       "dart_class": "OcrImage",
       "file": "lib/src/models/ocr/ocr_image.dart",
       "schema": "OCRImageObject"
+    },
+    "OCRPageConfidenceScores": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "OcrPageConfidenceScores",
+      "file": "lib/src/models/ocr/ocr_page_confidence_scores.dart",
+      "schema": "OCRPageConfidenceScores"
     },
     "OCRPageDimensions": {
       "spec": "main",
