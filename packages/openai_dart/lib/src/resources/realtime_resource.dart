@@ -220,11 +220,24 @@ class RealtimeConnection {
     _earlyEvents.clear();
   }
 
+  /// Maximum events buffered before the first listener attaches.
+  ///
+  /// Drops the oldest entry when full. Prevents unbounded memory growth
+  /// if a caller never attaches a listener to [events] (or attaches very
+  /// late in a long-running session). 1024 entries is large enough to
+  /// cover the realistic "session.created" race window and an opening
+  /// burst of frames; beyond that the loss is on partial early state
+  /// the consumer chose not to read.
+  static const int _maxBufferedEvents = 1024;
+
   void _emitEvent(RealtimeEvent event) {
     if (_closed) return;
     if (_drained) {
       _eventController.add(event);
     } else {
+      if (_earlyEvents.length >= _maxBufferedEvents) {
+        _earlyEvents.removeAt(0);
+      }
       _earlyEvents.add(_BufferedEvent.event(event));
     }
   }
@@ -234,6 +247,9 @@ class RealtimeConnection {
     if (_drained) {
       _eventController.addError(error);
     } else {
+      if (_earlyEvents.length >= _maxBufferedEvents) {
+        _earlyEvents.removeAt(0);
+      }
       _earlyEvents.add(_BufferedEvent.error(error));
     }
   }
@@ -288,6 +304,12 @@ class RealtimeConnection {
   }
 
   void _handleDone() {
+    // Idempotent: `_handleEvent` calls this on `CloseReceived`, and the
+    // socket subscription's `onDone` also fires it. Without the guard,
+    // `_eventController.close()` would run twice (the second call is a
+    // no-op on `StreamController` but the explicit short-circuit makes
+    // the contract clear and prevents future regressions).
+    if (_closed) return;
     _closed = true;
     unawaited(_eventController.close());
   }
@@ -676,11 +698,21 @@ class RealtimeTranslationConnection {
     _earlyEvents.clear();
   }
 
+  /// Maximum events buffered before the first listener attaches.
+  ///
+  /// Drops the oldest entry when full. Prevents unbounded memory growth
+  /// in long-lived translation sessions where a listener attaches late
+  /// (or never).
+  static const int _maxBufferedEvents = 1024;
+
   void _emitEvent(RealtimeTranslationServerEvent event) {
     if (_closed) return;
     if (_drained) {
       _eventController.add(event);
     } else {
+      if (_earlyEvents.length >= _maxBufferedEvents) {
+        _earlyEvents.removeAt(0);
+      }
       _earlyEvents.add(_BufferedTranslationEvent.event(event));
     }
   }
@@ -690,6 +722,9 @@ class RealtimeTranslationConnection {
     if (_drained) {
       _eventController.addError(error);
     } else {
+      if (_earlyEvents.length >= _maxBufferedEvents) {
+        _earlyEvents.removeAt(0);
+      }
       _earlyEvents.add(_BufferedTranslationEvent.error(error));
     }
   }
@@ -727,6 +762,12 @@ class RealtimeTranslationConnection {
   }
 
   void _handleDone() {
+    // Idempotent: `_handleEvent` calls this on `CloseReceived`, and the
+    // socket subscription's `onDone` also fires it. Without the guard,
+    // `_eventController.close()` would run twice (the second call is a
+    // no-op on `StreamController` but the explicit short-circuit makes
+    // the contract clear and prevents future regressions).
+    if (_closed) return;
     _closed = true;
     unawaited(_eventController.close());
   }
