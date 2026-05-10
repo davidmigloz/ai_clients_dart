@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../../beta_timestamp.dart';
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
 import '../config/agent_skill.dart';
@@ -44,13 +45,13 @@ class Agent {
   final Map<String, String>? metadata;
 
   /// ISO 8601 timestamp of when the agent was created.
-  final DateTime createdAt;
+  final BetaTimestamp createdAt;
 
   /// ISO 8601 timestamp of when the agent was last updated.
-  final DateTime updatedAt;
+  final BetaTimestamp updatedAt;
 
   /// ISO 8601 timestamp of when the agent was archived, or null.
-  final DateTime? archivedAt;
+  final BetaTimestamp? archivedAt;
 
   /// Creates an [Agent].
   const Agent({
@@ -133,8 +134,8 @@ class Agent {
     List<MCPServer>? mcpServers,
     List<AgentSkill>? skills,
     Object? metadata = unsetCopyWithValue,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    BetaTimestamp? createdAt,
+    BetaTimestamp? updatedAt,
     Object? archivedAt = unsetCopyWithValue,
   }) {
     return Agent(
@@ -157,7 +158,7 @@ class Agent {
       updatedAt: updatedAt ?? this.updatedAt,
       archivedAt: archivedAt == unsetCopyWithValue
           ? this.archivedAt
-          : archivedAt as DateTime?,
+          : archivedAt as BetaTimestamp?,
     );
   }
 

@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../../beta_timestamp.dart';
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
 import '../config/agent_skill.dart';
@@ -81,13 +82,13 @@ class Session {
   final SessionUsage usage;
 
   /// When the session was created.
-  final DateTime createdAt;
+  final BetaTimestamp createdAt;
 
   /// When the session was last updated.
-  final DateTime updatedAt;
+  final BetaTimestamp updatedAt;
 
   /// When the session was archived. Null if not archived.
-  final DateTime? archivedAt;
+  final BetaTimestamp? archivedAt;
 
   /// Creates a [Session].
   const Session({
@@ -164,8 +165,8 @@ class Session {
     List<String>? vaultIds,
     SessionStats? stats,
     SessionUsage? usage,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    BetaTimestamp? createdAt,
+    BetaTimestamp? updatedAt,
     Object? archivedAt = unsetCopyWithValue,
   }) {
     return Session(
@@ -184,7 +185,7 @@ class Session {
       updatedAt: updatedAt ?? this.updatedAt,
       archivedAt: archivedAt == unsetCopyWithValue
           ? this.archivedAt
-          : archivedAt as DateTime?,
+          : archivedAt as BetaTimestamp?,
     );
   }
 

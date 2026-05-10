@@ -299,6 +299,19 @@ void main() {
       expect(request.url.queryParameters['limit'], '10');
     });
 
+    test('list passes memory_store_id and statuses[] filters', () async {
+      mockHttpClient.queueJsonResponse({'data': <Map<String, dynamic>>[]});
+
+      await client.sessions.list(
+        memoryStoreId: 'memstore_abc',
+        statuses: const [SessionStatus.running, SessionStatus.idle],
+      );
+
+      final params = mockHttpClient.lastRequest!.url.queryParametersAll;
+      expect(params['memory_store_id'], ['memstore_abc']);
+      expect(params['statuses[]'], ['running', 'idle']);
+    });
+
     test('retrieve sends correct request', () async {
       mockHttpClient.queueJsonResponse(ManagedAgentsFixtures.session());
 
@@ -376,6 +389,23 @@ void main() {
       expect(request.url.path, '/v1/sessions/session_test123/events');
       expect(request.method, 'GET');
       expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
+    });
+
+    test('list passes created_at[*] and types[] filters', () async {
+      mockHttpClient.queueJsonResponse({'data': <Map<String, dynamic>>[]});
+
+      await client.sessions
+          .events('session_test123')
+          .list(
+            createdAtGt: '2026-04-01T00:00:00Z',
+            createdAtLte: '2026-04-30T23:59:59Z',
+            types: const ['agent.message', 'user.interrupt'],
+          );
+
+      final params = mockHttpClient.lastRequest!.url.queryParametersAll;
+      expect(params['created_at[gt]'], ['2026-04-01T00:00:00Z']);
+      expect(params['created_at[lte]'], ['2026-04-30T23:59:59Z']);
+      expect(params['types[]'], ['agent.message', 'user.interrupt']);
     });
 
     test('send sends correct request', () async {

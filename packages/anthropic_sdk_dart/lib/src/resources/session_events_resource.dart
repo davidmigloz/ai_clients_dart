@@ -35,11 +35,22 @@ class SessionEventsResource extends ResourceBase with StreamingResource {
   /// - [limit]: Maximum number of events to return.
   /// - [order]: Sort order.
   /// - [page]: Pagination token from a previous response.
+  /// - [createdAtGt]: Filter events created after this ISO 8601 timestamp.
+  /// - [createdAtGte]: Filter events created at or after this timestamp.
+  /// - [createdAtLt]: Filter events created before this timestamp.
+  /// - [createdAtLte]: Filter events created at or before this timestamp.
+  /// - [types]: Filter by event types (e.g. `agent.message`,
+  ///   `user.interrupt`). Multiple values are OR-ed.
   /// - [abortTrigger]: Allows canceling the request.
   Future<ListSessionEventsResponse> list({
     int? limit,
     ListOrder? order,
     String? page,
+    String? createdAtGt,
+    String? createdAtGte,
+    String? createdAtLt,
+    String? createdAtLte,
+    List<String>? types,
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
@@ -47,6 +58,11 @@ class SessionEventsResource extends ResourceBase with StreamingResource {
       'limit': ?limit?.toString(),
       'order': ?order?.toJson(),
       'page': ?page,
+      'created_at[gt]': ?createdAtGt,
+      'created_at[gte]': ?createdAtGte,
+      'created_at[lt]': ?createdAtLt,
+      'created_at[lte]': ?createdAtLte,
+      'types[]': ?types,
     };
 
     final url = requestBuilder.buildUrl(

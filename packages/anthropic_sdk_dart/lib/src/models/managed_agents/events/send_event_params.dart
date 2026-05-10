@@ -126,27 +126,53 @@ class UserInterruptEventParams extends EventParams {
   /// The event type, always 'user.interrupt'.
   String get type => 'user.interrupt';
 
+  /// ID of the session thread to interrupt, if any.
+  final String? sessionThreadId;
+
   /// Creates a [UserInterruptEventParams].
-  const UserInterruptEventParams();
+  const UserInterruptEventParams({this.sessionThreadId});
 
   /// Creates a [UserInterruptEventParams] from JSON.
-  factory UserInterruptEventParams.fromJson(Map<String, dynamic> _) {
-    return const UserInterruptEventParams();
+  factory UserInterruptEventParams.fromJson(Map<String, dynamic> json) {
+    return UserInterruptEventParams(
+      sessionThreadId: json['session_thread_id'] as String?,
+    );
   }
 
   @override
-  Map<String, dynamic> toJson() => {'type': type};
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    if (sessionThreadId != null) 'session_thread_id': sessionThreadId,
+  };
+
+  /// Creates a copy with replaced values.
+  ///
+  /// For nullable fields ([sessionThreadId]), pass the sentinel value
+  /// [unsetCopyWithValue] (or omit) to keep the original value, or pass
+  /// `null` explicitly to set the field to null.
+  UserInterruptEventParams copyWith({
+    Object? sessionThreadId = unsetCopyWithValue,
+  }) {
+    return UserInterruptEventParams(
+      sessionThreadId: sessionThreadId == unsetCopyWithValue
+          ? this.sessionThreadId
+          : sessionThreadId as String?,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is UserInterruptEventParams && runtimeType == other.runtimeType;
+      other is UserInterruptEventParams &&
+          runtimeType == other.runtimeType &&
+          sessionThreadId == other.sessionThreadId;
 
   @override
-  int get hashCode => runtimeType.hashCode;
+  int get hashCode => sessionThreadId.hashCode;
 
   @override
-  String toString() => 'UserInterruptEventParams()';
+  String toString() =>
+      'UserInterruptEventParams(sessionThreadId: $sessionThreadId)';
 }
 
 /// Parameters for confirming or denying a tool execution request.

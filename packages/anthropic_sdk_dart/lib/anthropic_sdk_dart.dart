@@ -72,6 +72,9 @@ export 'src/models/beta/config/token_task_budget.dart';
 // since they extend BuiltInTool (sealed class)
 export 'src/models/beta/tools/code_execution_tool.dart';
 
+// Models - Beta Common
+export 'src/models/beta_timestamp.dart';
+
 // Models - Completions (Legacy)
 export 'src/models/completions/completion.dart';
 
@@ -184,6 +187,7 @@ export 'src/models/user_profiles/list_user_profiles_response.dart';
 export 'src/models/user_profiles/update_user_profile_request.dart';
 export 'src/models/user_profiles/user_profile.dart';
 export 'src/models/user_profiles/user_profile_list_order.dart';
+export 'src/models/user_profiles/user_profile_relationship.dart';
 export 'src/models/user_profiles/user_profile_trust_grant.dart';
 
 // Resources

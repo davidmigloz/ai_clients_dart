@@ -47,7 +47,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Model discovery, files (beta), and skills (beta)
 - Managed agents with sessions, vaults, and streaming events (beta)
 - Memory stores for persistent agent memories with versioning and redaction (beta)
-- User profiles with trust-grant tracking and enrollment URLs (beta)
+- User profiles with relationship classification (`external`/`resold`/`internal`), trust-grant tracking, and enrollment URLs (beta)
 
 ## Quickstart
 

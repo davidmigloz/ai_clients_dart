@@ -1,7 +1,9 @@
 import 'package:meta/meta.dart';
 
+import '../beta_timestamp.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import 'user_profile_relationship.dart';
 import 'user_profile_trust_grant.dart';
 
 /// A user profile representing an end-user of a platform built on Claude.
@@ -20,6 +22,18 @@ class UserProfile {
   /// Platform's own identifier for this user. Not enforced unique.
   final String? externalId;
 
+  /// Display name of the entity this profile represents.
+  ///
+  /// Required when [relationship] is `resold` (the resold-to company's name);
+  /// optional otherwise. Maximum 255 characters.
+  final String? name;
+
+  /// How the entity relates to the platform.
+  ///
+  /// `external` (default): an individual end-user. `resold`: a company the
+  /// platform resells Claude access to. `internal`: the platform's own usage.
+  final BetaUserProfileRelationship relationship;
+
   /// Arbitrary key-value metadata. Maximum 16 pairs, keys up to 64 chars,
   /// values up to 512 chars. Always present; may be empty.
   final Map<String, String> metadata;
@@ -30,18 +44,20 @@ class UserProfile {
   final Map<String, UserProfileTrustGrant> trustGrants;
 
   /// When this user profile was created.
-  final DateTime createdAt;
+  final BetaTimestamp createdAt;
 
   /// When this user profile was last updated.
   ///
   /// Bumped when trust grants change or metadata is updated.
-  final DateTime updatedAt;
+  final BetaTimestamp updatedAt;
 
   /// Creates a [UserProfile].
   const UserProfile({
     required this.id,
     this.type = 'user_profile',
     this.externalId,
+    this.name,
+    required this.relationship,
     required this.metadata,
     required this.trustGrants,
     required this.createdAt,
@@ -55,6 +71,10 @@ class UserProfile {
       id: json['id'] as String,
       type: json['type'] as String? ?? 'user_profile',
       externalId: json['external_id'] as String?,
+      name: json['name'] as String?,
+      relationship: BetaUserProfileRelationship.fromJson(
+        json['relationship'] as String,
+      ),
       metadata:
           (json['metadata'] as Map<String, dynamic>?)?.map(
             (k, v) => MapEntry(k, v as String),
@@ -78,6 +98,8 @@ class UserProfile {
     'id': id,
     'type': type,
     'external_id': externalId,
+    'name': name,
+    'relationship': relationship.toJson(),
     'metadata': metadata,
     'trust_grants': trustGrants.map((k, v) => MapEntry(k, v.toJson())),
     'created_at': createdAt.toUtc().toIso8601String(),
@@ -86,17 +108,19 @@ class UserProfile {
 
   /// Creates a copy with replaced values.
   ///
-  /// For nullable fields ([externalId]), pass the sentinel value
+  /// For nullable fields ([externalId], [name]), pass the sentinel value
   /// [unsetCopyWithValue] (or omit) to keep the original value, or pass
   /// `null` explicitly to set the field to null.
   UserProfile copyWith({
     String? id,
     String? type,
     Object? externalId = unsetCopyWithValue,
+    Object? name = unsetCopyWithValue,
+    BetaUserProfileRelationship? relationship,
     Map<String, String>? metadata,
     Map<String, UserProfileTrustGrant>? trustGrants,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    BetaTimestamp? createdAt,
+    BetaTimestamp? updatedAt,
   }) {
     return UserProfile(
       id: id ?? this.id,
@@ -104,6 +128,8 @@ class UserProfile {
       externalId: externalId == unsetCopyWithValue
           ? this.externalId
           : externalId as String?,
+      name: name == unsetCopyWithValue ? this.name : name as String?,
+      relationship: relationship ?? this.relationship,
       metadata: metadata ?? this.metadata,
       trustGrants: trustGrants ?? this.trustGrants,
       createdAt: createdAt ?? this.createdAt,
@@ -119,6 +145,8 @@ class UserProfile {
           id == other.id &&
           type == other.type &&
           externalId == other.externalId &&
+          name == other.name &&
+          relationship == other.relationship &&
           mapsEqual(metadata, other.metadata) &&
           mapsEqual(trustGrants, other.trustGrants) &&
           createdAt == other.createdAt &&
@@ -129,6 +157,8 @@ class UserProfile {
     id,
     type,
     externalId,
+    name,
+    relationship,
     mapHash(metadata),
     mapHash(trustGrants),
     createdAt,
@@ -141,6 +171,8 @@ class UserProfile {
       'id: $id, '
       'type: $type, '
       'externalId: $externalId, '
+      'name: $name, '
+      'relationship: $relationship, '
       'metadata: $metadata, '
       'trustGrants: $trustGrants, '
       'createdAt: $createdAt, '

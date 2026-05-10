@@ -90,6 +90,8 @@ class SessionsResource extends ResourceBase {
   /// - [createdAtLt]: Filter sessions created before this timestamp.
   /// - [createdAtLte]: Filter sessions created at or before this timestamp.
   /// - [includeArchived]: Whether to include archived sessions.
+  /// - [memoryStoreId]: Filter sessions by memory store ID.
+  /// - [statuses]: Filter sessions by status. Multiple values are OR-ed.
   /// - [abortTrigger]: Allows canceling the request.
   Future<ListSessionsResponse> list({
     String? agentId,
@@ -102,6 +104,8 @@ class SessionsResource extends ResourceBase {
     String? createdAtLt,
     String? createdAtLte,
     bool? includeArchived,
+    String? memoryStoreId,
+    List<SessionStatus>? statuses,
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
@@ -116,6 +120,8 @@ class SessionsResource extends ResourceBase {
       'created_at[lt]': ?createdAtLt,
       'created_at[lte]': ?createdAtLte,
       'include_archived': ?includeArchived?.toString(),
+      'memory_store_id': ?memoryStoreId,
+      'statuses[]': ?statuses?.map((s) => s.toJson()).toList(),
     };
 
     final url = requestBuilder.buildUrl(
