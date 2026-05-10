@@ -1,5 +1,8 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
+import 'ocr_confidence_score.dart';
 import 'ocr_table_format.dart';
 
 /// Represents a table extracted from a document page by OCR.
@@ -14,11 +17,18 @@ class OcrTable {
   /// Format of the table.
   final OcrTableFormat format;
 
+  /// Per-span confidence scores for the table's extracted text.
+  ///
+  /// Populated when [OcrRequest.confidenceScoresGranularity] is set to
+  /// [OcrConfidenceScoresGranularity.word]; `null` otherwise.
+  final List<OcrConfidenceScore>? wordConfidenceScores;
+
   /// Creates an [OcrTable].
   const OcrTable({
     required this.id,
     required this.content,
     required this.format,
+    this.wordConfidenceScores,
   });
 
   /// Creates an [OcrTable] from JSON.
@@ -32,6 +42,9 @@ class OcrTable {
       id: json['id'] as String,
       content: json['content'] as String,
       format: format,
+      wordConfidenceScores: (json['word_confidence_scores'] as List?)
+          ?.map((e) => OcrConfidenceScore.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
   }
 
@@ -40,15 +53,28 @@ class OcrTable {
     'id': id,
     'content': content,
     'format': format.value,
+    if (wordConfidenceScores != null)
+      'word_confidence_scores': wordConfidenceScores!
+          .map((e) => e.toJson())
+          .toList(),
   };
 
   /// Creates a copy with the specified fields replaced.
-  OcrTable copyWith({String? id, String? content, OcrTableFormat? format}) =>
-      OcrTable(
-        id: id ?? this.id,
-        content: content ?? this.content,
-        format: format ?? this.format,
-      );
+  ///
+  /// Pass `null` explicitly to clear nullable fields.
+  OcrTable copyWith({
+    String? id,
+    String? content,
+    OcrTableFormat? format,
+    Object? wordConfidenceScores = unsetCopyWithValue,
+  }) => OcrTable(
+    id: id ?? this.id,
+    content: content ?? this.content,
+    format: format ?? this.format,
+    wordConfidenceScores: wordConfidenceScores == unsetCopyWithValue
+        ? this.wordConfidenceScores
+        : wordConfidenceScores as List<OcrConfidenceScore>?,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -57,10 +83,12 @@ class OcrTable {
           runtimeType == other.runtimeType &&
           id == other.id &&
           content == other.content &&
-          format == other.format;
+          format == other.format &&
+          listsEqual(wordConfidenceScores, other.wordConfidenceScores);
 
   @override
-  int get hashCode => Object.hash(id, content, format);
+  int get hashCode =>
+      Object.hash(id, content, format, listHash(wordConfidenceScores));
 
   @override
   String toString() =>

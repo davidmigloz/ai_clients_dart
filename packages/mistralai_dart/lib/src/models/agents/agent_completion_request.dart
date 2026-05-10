@@ -80,6 +80,13 @@ class AgentCompletionRequest {
   /// Controls the reasoning effort level for reasoning models.
   final ReasoningEffort? reasoningEffort;
 
+  /// Optional cache key used to enable Mistral's prompt cache.
+  ///
+  /// Requests sharing the same `promptCacheKey` and matching prefix tokens
+  /// will reuse a cached prefix; cached prefix tokens are billed at 10% of
+  /// the standard input token price.
+  final String? promptCacheKey;
+
   /// Creates an [AgentCompletionRequest].
   const AgentCompletionRequest({
     required this.agentId,
@@ -101,6 +108,7 @@ class AgentCompletionRequest {
     this.prediction,
     this.promptMode,
     this.reasoningEffort,
+    this.promptCacheKey,
   });
 
   /// Creates an [AgentCompletionRequest] from JSON.
@@ -145,6 +153,7 @@ class AgentCompletionRequest {
         reasoningEffort: ReasoningEffort.fromString(
           json['reasoning_effort'] as String?,
         ),
+        promptCacheKey: json['prompt_cache_key'] as String?,
       );
 
   /// Converts to JSON.
@@ -168,6 +177,7 @@ class AgentCompletionRequest {
     if (prediction != null) 'prediction': prediction!.toJson(),
     if (promptMode != null) 'prompt_mode': promptMode!.value,
     if (reasoningEffort != null) 'reasoning_effort': reasoningEffort!.value,
+    if (promptCacheKey != null) 'prompt_cache_key': promptCacheKey,
   };
 
   /// Creates a copy with replaced values.
@@ -191,6 +201,7 @@ class AgentCompletionRequest {
     Object? prediction = unsetCopyWithValue,
     Object? promptMode = unsetCopyWithValue,
     Object? reasoningEffort = unsetCopyWithValue,
+    Object? promptCacheKey = unsetCopyWithValue,
   }) {
     return AgentCompletionRequest(
       agentId: agentId ?? this.agentId,
@@ -236,6 +247,9 @@ class AgentCompletionRequest {
       reasoningEffort: reasoningEffort == unsetCopyWithValue
           ? this.reasoningEffort
           : reasoningEffort as ReasoningEffort?,
+      promptCacheKey: promptCacheKey == unsetCopyWithValue
+          ? this.promptCacheKey
+          : promptCacheKey as String?,
     );
   }
 
@@ -265,7 +279,8 @@ class AgentCompletionRequest {
         mapsEqual(metadata, other.metadata) &&
         prediction == other.prediction &&
         promptMode == other.promptMode &&
-        reasoningEffort == other.reasoningEffort;
+        reasoningEffort == other.reasoningEffort &&
+        promptCacheKey == other.promptCacheKey;
     // messages and tools compared above via listsEqual
   }
 
@@ -288,6 +303,7 @@ class AgentCompletionRequest {
     parallelToolCalls,
     mapHash(metadata),
     Object.hash(prediction, promptMode, reasoningEffort),
+    promptCacheKey,
   );
 
   @override
@@ -310,5 +326,6 @@ class AgentCompletionRequest {
       'metadata: $metadata, '
       'prediction: $prediction, '
       'promptMode: $promptMode, '
-      'reasoningEffort: $reasoningEffort)';
+      'reasoningEffort: $reasoningEffort, '
+      'promptCacheKey: $promptCacheKey)';
 }

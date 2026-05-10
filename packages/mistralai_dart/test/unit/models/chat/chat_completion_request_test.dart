@@ -366,6 +366,71 @@ void main() {
         expect(str, contains('promptMode: null'));
         expect(str, contains('reasoningEffort: null'));
         expect(str, contains('guardrails: null'));
+        expect(str, contains('promptCacheKey: null'));
+      });
+    });
+
+    group('promptCacheKey', () {
+      test('omits prompt_cache_key from JSON when null', () {
+        final request = ChatCompletionRequest(
+          model: 'mistral-small-latest',
+          messages: [ChatMessage.user('Hi')],
+        );
+
+        final json = request.toJson();
+
+        expect(json.containsKey('prompt_cache_key'), isFalse);
+      });
+
+      test('serializes prompt_cache_key when set', () {
+        final request = ChatCompletionRequest(
+          model: 'mistral-small-latest',
+          messages: [ChatMessage.user('Hi')],
+          promptCacheKey: 'tenant-42',
+        );
+
+        final json = request.toJson();
+
+        expect(json['prompt_cache_key'], 'tenant-42');
+      });
+
+      test('round-trips prompt_cache_key', () {
+        final original = ChatCompletionRequest(
+          model: 'mistral-small-latest',
+          messages: [ChatMessage.user('Hi')],
+          promptCacheKey: 'tenant-42',
+        );
+
+        final roundTripped = ChatCompletionRequest.fromJson(original.toJson());
+
+        expect(roundTripped.promptCacheKey, 'tenant-42');
+      });
+
+      test('copyWith clears with explicit null', () {
+        final original = ChatCompletionRequest(
+          model: 'mistral-small-latest',
+          messages: [ChatMessage.user('Hi')],
+          promptCacheKey: 'tenant-42',
+        );
+
+        final cleared = original.copyWith(promptCacheKey: null);
+
+        expect(cleared.promptCacheKey, isNull);
+      });
+
+      test('equality includes promptCacheKey', () {
+        final a = ChatCompletionRequest(
+          model: 'm',
+          messages: [ChatMessage.user('Hi')],
+          promptCacheKey: 'k1',
+        );
+        final b = ChatCompletionRequest(
+          model: 'm',
+          messages: [ChatMessage.user('Hi')],
+          promptCacheKey: 'k2',
+        );
+
+        expect(a, isNot(equals(b)));
       });
     });
   });

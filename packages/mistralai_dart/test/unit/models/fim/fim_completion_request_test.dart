@@ -172,6 +172,49 @@ void main() {
       expect(request1.hashCode, request2.hashCode);
     });
 
+    test('equality covers all generation parameters', () {
+      const base = FimCompletionRequest(model: 'codestral-latest', prompt: 'p');
+
+      // Each variant should be distinct from the base.
+      const variants = [
+        FimCompletionRequest(
+          model: 'codestral-latest',
+          prompt: 'p',
+          temperature: 0.5,
+        ),
+        FimCompletionRequest(model: 'codestral-latest', prompt: 'p', topP: 0.9),
+        FimCompletionRequest(
+          model: 'codestral-latest',
+          prompt: 'p',
+          maxTokens: 100,
+        ),
+        FimCompletionRequest(
+          model: 'codestral-latest',
+          prompt: 'p',
+          minTokens: 1,
+        ),
+        FimCompletionRequest(
+          model: 'codestral-latest',
+          prompt: 'p',
+          stream: true,
+        ),
+        FimCompletionRequest(
+          model: 'codestral-latest',
+          prompt: 'p',
+          stop: StopSequence.single('END'),
+        ),
+        FimCompletionRequest(
+          model: 'codestral-latest',
+          prompt: 'p',
+          randomSeed: 42,
+        ),
+      ];
+
+      for (final v in variants) {
+        expect(v, isNot(equals(base)), reason: 'variant $v should differ');
+      }
+    });
+
     test('toString provides useful representation', () {
       const request = FimCompletionRequest(
         model: 'codestral-latest',
@@ -180,6 +223,103 @@ void main() {
 
       expect(request.toString(), contains('FimCompletionRequest'));
       expect(request.toString(), contains('codestral-latest'));
+    });
+
+    group('metadata', () {
+      test('omitted from JSON when null', () {
+        const request = FimCompletionRequest(
+          model: 'codestral-latest',
+          prompt: 'def f():',
+        );
+
+        expect(request.toJson().containsKey('metadata'), isFalse);
+      });
+
+      test('round-trips metadata', () {
+        const original = FimCompletionRequest(
+          model: 'codestral-latest',
+          prompt: 'def f():',
+          metadata: {'tenant': 'acme', 'job': 42},
+        );
+
+        final roundTripped = FimCompletionRequest.fromJson(original.toJson());
+
+        expect(roundTripped.metadata, {'tenant': 'acme', 'job': 42});
+      });
+
+      test('copyWith clears with explicit null', () {
+        const original = FimCompletionRequest(
+          model: 'codestral-latest',
+          prompt: 'def f():',
+          metadata: {'k': 'v'},
+        );
+
+        expect(original.copyWith(metadata: null).metadata, isNull);
+      });
+    });
+
+    group('promptCacheKey', () {
+      test('omits prompt_cache_key from JSON when null', () {
+        const request = FimCompletionRequest(
+          model: 'codestral-latest',
+          prompt: 'def f():',
+        );
+
+        final json = request.toJson();
+
+        expect(json.containsKey('prompt_cache_key'), isFalse);
+      });
+
+      test('serializes prompt_cache_key when set', () {
+        const request = FimCompletionRequest(
+          model: 'codestral-latest',
+          prompt: 'def f():',
+          promptCacheKey: 'tenant-42',
+        );
+
+        final json = request.toJson();
+
+        expect(json['prompt_cache_key'], 'tenant-42');
+      });
+
+      test('round-trips prompt_cache_key', () {
+        const original = FimCompletionRequest(
+          model: 'codestral-latest',
+          prompt: 'def f():',
+          promptCacheKey: 'tenant-42',
+        );
+
+        final roundTripped = FimCompletionRequest.fromJson(original.toJson());
+
+        expect(roundTripped.promptCacheKey, 'tenant-42');
+      });
+
+      test('copyWith clears with explicit null', () {
+        const original = FimCompletionRequest(
+          model: 'codestral-latest',
+          prompt: 'def f():',
+          promptCacheKey: 'tenant-42',
+        );
+
+        final cleared = original.copyWith(promptCacheKey: null);
+
+        expect(cleared.promptCacheKey, isNull);
+      });
+
+      test('equality includes prompt_cache_key', () {
+        const a = FimCompletionRequest(
+          model: 'codestral-latest',
+          prompt: 'p',
+          promptCacheKey: 'k1',
+        );
+        const b = FimCompletionRequest(
+          model: 'codestral-latest',
+          prompt: 'p',
+          promptCacheKey: 'k2',
+        );
+
+        expect(a, isNot(equals(b)));
+      });
     });
   });
 }

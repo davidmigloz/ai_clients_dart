@@ -237,5 +237,77 @@ void main() {
       expect(page.toString(), contains('chars'));
       expect(page.toString(), contains('tables: 1'));
     });
+
+    group('confidenceScores', () {
+      test('parses confidence_scores when present', () {
+        final page = OcrPage.fromJson(const {
+          'index': 0,
+          'markdown': 'text',
+          'confidence_scores': {
+            'average_page_confidence_score': 0.9,
+            'minimum_page_confidence_score': 0.5,
+            'word_confidence_scores': [
+              {'confidence': 0.5, 'start_index': 0, 'text': 'text'},
+            ],
+          },
+        });
+
+        expect(page.confidenceScores, isNotNull);
+        expect(page.confidenceScores!.averagePageConfidenceScore, 0.9);
+        expect(page.confidenceScores!.minimumPageConfidenceScore, 0.5);
+        expect(page.confidenceScores!.wordConfidenceScores, hasLength(1));
+      });
+
+      test('omits confidence_scores from JSON when null', () {
+        const page = OcrPage(index: 0, markdown: 'text');
+
+        final json = page.toJson();
+
+        expect(json.containsKey('confidence_scores'), isFalse);
+      });
+
+      test('round-trips a populated confidenceScores', () {
+        const original = OcrPage(
+          index: 1,
+          markdown: 'lorem ipsum',
+          confidenceScores: OcrPageConfidenceScores(
+            averagePageConfidenceScore: 0.88,
+            minimumPageConfidenceScore: 0.31,
+            wordConfidenceScores: [
+              OcrConfidenceScore(
+                confidence: 0.88,
+                startIndex: 0,
+                text: 'lorem',
+              ),
+              OcrConfidenceScore(
+                confidence: 0.31,
+                startIndex: 6,
+                text: 'ipsum',
+              ),
+            ],
+          ),
+        );
+
+        final roundTripped = OcrPage.fromJson(original.toJson());
+
+        expect(roundTripped, equals(original));
+      });
+
+      test('copyWith clears confidenceScores with explicit null', () {
+        const original = OcrPage(
+          index: 0,
+          markdown: 'text',
+          confidenceScores: OcrPageConfidenceScores(
+            averagePageConfidenceScore: 0.9,
+            minimumPageConfidenceScore: 0.5,
+          ),
+        );
+
+        final cleared = original.copyWith(confidenceScores: null);
+
+        expect(cleared.confidenceScores, isNull);
+        expect(cleared.markdown, 'text');
+      });
+    });
   });
 }
