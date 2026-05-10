@@ -10,6 +10,7 @@ import '../models/managed_agents/sessions/update_session_params.dart';
 import 'base_resource.dart';
 import 'session_events_resource.dart';
 import 'session_resources_resource.dart';
+import 'session_threads_resource.dart';
 
 /// Beta header for the Managed Agents API.
 const _betaHeader = 'managed-agents-2026-04-01';
@@ -44,6 +45,18 @@ class SessionsResource extends ResourceBase {
   /// Returns a [SessionResourcesResource] scoped to the given [sessionId].
   SessionResourcesResource resources(String sessionId) {
     return SessionResourcesResource(
+      sessionId: sessionId,
+      config: config,
+      httpClient: httpClient,
+      interceptorChain: interceptorChain,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
+    );
+  }
+
+  /// Returns a [SessionThreadsResource] scoped to the given [sessionId].
+  SessionThreadsResource threads(String sessionId) {
+    return SessionThreadsResource(
       sessionId: sessionId,
       config: config,
       httpClient: httpClient,

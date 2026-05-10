@@ -1971,6 +1971,13 @@
         "data"
       ]
     },
+    "ListSessionThreads": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ListSessionThreadsResponse",
+      "file": "lib/src/models/managed_agents/sessions/session_thread_list_response.dart",
+      "schema": "BetaManagedAgentsListSessionThreads"
+    },
     "ListSessions": {
       "spec": "main",
       "kind": "object",
@@ -2317,6 +2324,35 @@
       "file": "lib/src/models/managed_agents/sessions/session.dart",
       "schema": "BetaManagedAgentsSessionStatus"
     },
+    "SessionThread": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SessionThread",
+      "file": "lib/src/models/managed_agents/sessions/session_thread.dart",
+      "schema": "BetaManagedAgentsSessionThread",
+      "excluded_properties": [
+        "agent",
+        "status",
+        "archived_at",
+        "parent_thread_id",
+        "stats",
+        "usage"
+      ]
+    },
+    "SessionThreadStats": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SessionThreadStats",
+      "file": "lib/src/models/managed_agents/sessions/session_thread.dart",
+      "schema": "BetaManagedAgentsSessionThreadStats"
+    },
+    "SessionThreadUsage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SessionThreadUsage",
+      "file": "lib/src/models/managed_agents/sessions/session_thread.dart",
+      "schema": "BetaManagedAgentsSessionThreadUsage"
+    },
     "SessionUsage": {
       "spec": "main",
       "kind": "object",
@@ -2382,6 +2418,13 @@
       "dart_class": "SessionEvent",
       "file": "lib/src/models/managed_agents/events/session_event.dart",
       "schema": "BetaManagedAgentsStreamSessionEvents"
+    },
+    "StreamSessionThreadEvents": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "SessionEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsStreamSessionThreadEvents"
     },
     "Struct": {
       "spec": "main",
@@ -2650,6 +2693,22 @@
       "schema": "BetaManagedAgentsAgentThreadContextCompactedEvent",
       "parent": "SessionEvent"
     },
+    "AgentThreadMessageReceivedEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentThreadMessageReceivedEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsAgentThreadMessageReceivedEvent",
+      "parent": "SessionEvent"
+    },
+    "AgentThreadMessageSentEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentThreadMessageSentEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsAgentThreadMessageSentEvent",
+      "parent": "SessionEvent"
+    },
     "AgentToolResultEvent": {
       "spec": "main",
       "kind": "sealed_variant",
@@ -2712,6 +2771,46 @@
       "dart_class": "SessionStatusTerminatedEvent",
       "file": "lib/src/models/managed_agents/events/session_event.dart",
       "schema": "BetaManagedAgentsSessionStatusTerminatedEvent",
+      "parent": "SessionEvent"
+    },
+    "SessionThreadCreatedEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SessionThreadCreatedEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsSessionThreadCreatedEvent",
+      "parent": "SessionEvent"
+    },
+    "SessionThreadStatusIdleEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SessionThreadStatusIdleEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsSessionThreadStatusIdleEvent",
+      "parent": "SessionEvent"
+    },
+    "SessionThreadStatusRescheduledEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SessionThreadStatusRescheduledEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsSessionThreadStatusRescheduledEvent",
+      "parent": "SessionEvent"
+    },
+    "SessionThreadStatusRunningEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SessionThreadStatusRunningEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsSessionThreadStatusRunningEvent",
+      "parent": "SessionEvent"
+    },
+    "SessionThreadStatusTerminatedEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SessionThreadStatusTerminatedEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsSessionThreadStatusTerminatedEvent",
       "parent": "SessionEvent"
     },
     "SpanModelRequestEndEvent": {

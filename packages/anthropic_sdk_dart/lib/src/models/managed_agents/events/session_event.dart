@@ -17,6 +17,8 @@ import 'telemetry.dart';
 /// - [AgentMcpToolResultEvent] — result of an MCP tool execution.
 /// - [AgentCustomToolUseEvent] — agent custom tool invocation.
 /// - [AgentThreadContextCompactedEvent] — context compaction occurred.
+/// - [AgentThreadMessageReceivedEvent] — a peer agent thread sent this thread a message.
+/// - [AgentThreadMessageSentEvent] — this thread sent a peer agent thread a message.
 /// - [UserMessageEvent] — user message.
 /// - [UserInterruptEvent] — user interrupt.
 /// - [UserToolConfirmationEvent] — user tool confirmation.
@@ -25,6 +27,11 @@ import 'telemetry.dart';
 /// - [SessionStatusIdleEvent] — session is idle.
 /// - [SessionStatusRescheduledEvent] — session rescheduled.
 /// - [SessionStatusTerminatedEvent] — session terminated.
+/// - [SessionThreadCreatedEvent] — a thread was created within the session.
+/// - [SessionThreadStatusRunningEvent] — a thread is running.
+/// - [SessionThreadStatusIdleEvent] — a thread is idle.
+/// - [SessionThreadStatusRescheduledEvent] — a thread was rescheduled.
+/// - [SessionThreadStatusTerminatedEvent] — a thread terminated.
 /// - [SessionErrorEvent] — session error.
 /// - [SessionDeletedEvent] — session deleted.
 /// - [SpanModelRequestStartEvent] — model request started.
@@ -46,6 +53,9 @@ sealed class SessionEvent {
       'agent.custom_tool_use' => AgentCustomToolUseEvent.fromJson(json),
       'agent.thread_context_compacted' =>
         AgentThreadContextCompactedEvent.fromJson(json),
+      'agent.thread_message_received' =>
+        AgentThreadMessageReceivedEvent.fromJson(json),
+      'agent.thread_message_sent' => AgentThreadMessageSentEvent.fromJson(json),
       'user.message' => UserMessageEvent.fromJson(json),
       'user.interrupt' => UserInterruptEvent.fromJson(json),
       'user.tool_confirmation' => UserToolConfirmationEvent.fromJson(json),
@@ -58,6 +68,16 @@ sealed class SessionEvent {
       'session.status_terminated' => SessionStatusTerminatedEvent.fromJson(
         json,
       ),
+      'session.thread_created' => SessionThreadCreatedEvent.fromJson(json),
+      'session.thread_status_running' =>
+        SessionThreadStatusRunningEvent.fromJson(json),
+      'session.thread_status_idle' => SessionThreadStatusIdleEvent.fromJson(
+        json,
+      ),
+      'session.thread_status_rescheduled' =>
+        SessionThreadStatusRescheduledEvent.fromJson(json),
+      'session.thread_status_terminated' =>
+        SessionThreadStatusTerminatedEvent.fromJson(json),
       'session.error' => SessionErrorEvent.fromJson(json),
       'session.deleted' => SessionDeletedEvent.fromJson(json),
       'span.model_request_start' => SpanModelRequestStartEvent.fromJson(json),
@@ -1897,6 +1917,630 @@ class SpanModelRequestEndEvent extends SessionEvent {
 
 // ---------------------------------------------------------------------------
 // Unknown fallback
+// ---------------------------------------------------------------------------
+// Session thread events
+// ---------------------------------------------------------------------------
+
+/// A thread was created within the session.
+@immutable
+class SessionThreadCreatedEvent extends SessionEvent {
+  /// The event type, always 'session.thread_created'.
+  String get type => 'session.thread_created';
+
+  /// Unique identifier for this event.
+  final String id;
+
+  /// Name of the agent owning the thread.
+  final String agentName;
+
+  /// ID of the session thread that was created.
+  final String sessionThreadId;
+
+  /// Timestamp when this event was processed.
+  final BetaTimestamp processedAt;
+
+  /// Creates a [SessionThreadCreatedEvent].
+  const SessionThreadCreatedEvent({
+    required this.id,
+    required this.agentName,
+    required this.sessionThreadId,
+    required this.processedAt,
+  });
+
+  /// Creates a [SessionThreadCreatedEvent] from JSON.
+  factory SessionThreadCreatedEvent.fromJson(Map<String, dynamic> json) {
+    return SessionThreadCreatedEvent(
+      id: json['id'] as String,
+      agentName: json['agent_name'] as String,
+      sessionThreadId: json['session_thread_id'] as String,
+      processedAt: DateTime.parse(json['processed_at'] as String),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'agent_name': agentName,
+    'session_thread_id': sessionThreadId,
+    'processed_at': processedAt.toUtc().toIso8601String(),
+  };
+
+  /// Creates a copy with replaced values.
+  SessionThreadCreatedEvent copyWith({
+    String? id,
+    String? agentName,
+    String? sessionThreadId,
+    BetaTimestamp? processedAt,
+  }) {
+    return SessionThreadCreatedEvent(
+      id: id ?? this.id,
+      agentName: agentName ?? this.agentName,
+      sessionThreadId: sessionThreadId ?? this.sessionThreadId,
+      processedAt: processedAt ?? this.processedAt,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SessionThreadCreatedEvent &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          agentName == other.agentName &&
+          sessionThreadId == other.sessionThreadId &&
+          processedAt == other.processedAt;
+
+  @override
+  int get hashCode => Object.hash(id, agentName, sessionThreadId, processedAt);
+
+  @override
+  String toString() =>
+      'SessionThreadCreatedEvent(id: $id, agentName: $agentName, '
+      'sessionThreadId: $sessionThreadId, processedAt: $processedAt)';
+}
+
+/// Thread is actively running.
+@immutable
+class SessionThreadStatusRunningEvent extends SessionEvent {
+  /// The event type, always 'session.thread_status_running'.
+  String get type => 'session.thread_status_running';
+
+  /// Unique identifier for this event.
+  final String id;
+
+  /// Name of the agent owning the thread.
+  final String agentName;
+
+  /// ID of the session thread whose status changed.
+  final String sessionThreadId;
+
+  /// Timestamp when this event was processed.
+  final BetaTimestamp processedAt;
+
+  /// Creates a [SessionThreadStatusRunningEvent].
+  const SessionThreadStatusRunningEvent({
+    required this.id,
+    required this.agentName,
+    required this.sessionThreadId,
+    required this.processedAt,
+  });
+
+  /// Creates a [SessionThreadStatusRunningEvent] from JSON.
+  factory SessionThreadStatusRunningEvent.fromJson(Map<String, dynamic> json) {
+    return SessionThreadStatusRunningEvent(
+      id: json['id'] as String,
+      agentName: json['agent_name'] as String,
+      sessionThreadId: json['session_thread_id'] as String,
+      processedAt: DateTime.parse(json['processed_at'] as String),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'agent_name': agentName,
+    'session_thread_id': sessionThreadId,
+    'processed_at': processedAt.toUtc().toIso8601String(),
+  };
+
+  /// Creates a copy with replaced values.
+  SessionThreadStatusRunningEvent copyWith({
+    String? id,
+    String? agentName,
+    String? sessionThreadId,
+    BetaTimestamp? processedAt,
+  }) {
+    return SessionThreadStatusRunningEvent(
+      id: id ?? this.id,
+      agentName: agentName ?? this.agentName,
+      sessionThreadId: sessionThreadId ?? this.sessionThreadId,
+      processedAt: processedAt ?? this.processedAt,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SessionThreadStatusRunningEvent &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          agentName == other.agentName &&
+          sessionThreadId == other.sessionThreadId &&
+          processedAt == other.processedAt;
+
+  @override
+  int get hashCode => Object.hash(id, agentName, sessionThreadId, processedAt);
+
+  @override
+  String toString() =>
+      'SessionThreadStatusRunningEvent(id: $id, agentName: $agentName, '
+      'sessionThreadId: $sessionThreadId, processedAt: $processedAt)';
+}
+
+/// Thread became idle, awaiting more input.
+@immutable
+class SessionThreadStatusIdleEvent extends SessionEvent {
+  /// The event type, always 'session.thread_status_idle'.
+  String get type => 'session.thread_status_idle';
+
+  /// Unique identifier for this event.
+  final String id;
+
+  /// Name of the agent owning the thread.
+  final String agentName;
+
+  /// ID of the session thread whose status changed.
+  final String sessionThreadId;
+
+  /// The reason the thread transitioned to idle.
+  final SessionStopReason stopReason;
+
+  /// Timestamp when this event was processed.
+  final BetaTimestamp processedAt;
+
+  /// Creates a [SessionThreadStatusIdleEvent].
+  const SessionThreadStatusIdleEvent({
+    required this.id,
+    required this.agentName,
+    required this.sessionThreadId,
+    required this.stopReason,
+    required this.processedAt,
+  });
+
+  /// Creates a [SessionThreadStatusIdleEvent] from JSON.
+  factory SessionThreadStatusIdleEvent.fromJson(Map<String, dynamic> json) {
+    return SessionThreadStatusIdleEvent(
+      id: json['id'] as String,
+      agentName: json['agent_name'] as String,
+      sessionThreadId: json['session_thread_id'] as String,
+      stopReason: SessionStopReason.fromJson(
+        json['stop_reason'] as Map<String, dynamic>,
+      ),
+      processedAt: DateTime.parse(json['processed_at'] as String),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'agent_name': agentName,
+    'session_thread_id': sessionThreadId,
+    'stop_reason': stopReason.toJson(),
+    'processed_at': processedAt.toUtc().toIso8601String(),
+  };
+
+  /// Creates a copy with replaced values.
+  SessionThreadStatusIdleEvent copyWith({
+    String? id,
+    String? agentName,
+    String? sessionThreadId,
+    SessionStopReason? stopReason,
+    BetaTimestamp? processedAt,
+  }) {
+    return SessionThreadStatusIdleEvent(
+      id: id ?? this.id,
+      agentName: agentName ?? this.agentName,
+      sessionThreadId: sessionThreadId ?? this.sessionThreadId,
+      stopReason: stopReason ?? this.stopReason,
+      processedAt: processedAt ?? this.processedAt,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SessionThreadStatusIdleEvent &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          agentName == other.agentName &&
+          sessionThreadId == other.sessionThreadId &&
+          stopReason == other.stopReason &&
+          processedAt == other.processedAt;
+
+  @override
+  int get hashCode =>
+      Object.hash(id, agentName, sessionThreadId, stopReason, processedAt);
+
+  @override
+  String toString() =>
+      'SessionThreadStatusIdleEvent(id: $id, agentName: $agentName, '
+      'sessionThreadId: $sessionThreadId, stopReason: $stopReason, '
+      'processedAt: $processedAt)';
+}
+
+/// Thread rescheduled after recovering from an error.
+@immutable
+class SessionThreadStatusRescheduledEvent extends SessionEvent {
+  /// The event type, always 'session.thread_status_rescheduled'.
+  String get type => 'session.thread_status_rescheduled';
+
+  /// Unique identifier for this event.
+  final String id;
+
+  /// Name of the agent owning the thread.
+  final String agentName;
+
+  /// ID of the session thread whose status changed.
+  final String sessionThreadId;
+
+  /// Timestamp when this event was processed.
+  final BetaTimestamp processedAt;
+
+  /// Creates a [SessionThreadStatusRescheduledEvent].
+  const SessionThreadStatusRescheduledEvent({
+    required this.id,
+    required this.agentName,
+    required this.sessionThreadId,
+    required this.processedAt,
+  });
+
+  /// Creates a [SessionThreadStatusRescheduledEvent] from JSON.
+  factory SessionThreadStatusRescheduledEvent.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return SessionThreadStatusRescheduledEvent(
+      id: json['id'] as String,
+      agentName: json['agent_name'] as String,
+      sessionThreadId: json['session_thread_id'] as String,
+      processedAt: DateTime.parse(json['processed_at'] as String),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'agent_name': agentName,
+    'session_thread_id': sessionThreadId,
+    'processed_at': processedAt.toUtc().toIso8601String(),
+  };
+
+  /// Creates a copy with replaced values.
+  SessionThreadStatusRescheduledEvent copyWith({
+    String? id,
+    String? agentName,
+    String? sessionThreadId,
+    BetaTimestamp? processedAt,
+  }) {
+    return SessionThreadStatusRescheduledEvent(
+      id: id ?? this.id,
+      agentName: agentName ?? this.agentName,
+      sessionThreadId: sessionThreadId ?? this.sessionThreadId,
+      processedAt: processedAt ?? this.processedAt,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SessionThreadStatusRescheduledEvent &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          agentName == other.agentName &&
+          sessionThreadId == other.sessionThreadId &&
+          processedAt == other.processedAt;
+
+  @override
+  int get hashCode => Object.hash(id, agentName, sessionThreadId, processedAt);
+
+  @override
+  String toString() =>
+      'SessionThreadStatusRescheduledEvent(id: $id, agentName: $agentName, '
+      'sessionThreadId: $sessionThreadId, processedAt: $processedAt)';
+}
+
+/// Thread terminated.
+@immutable
+class SessionThreadStatusTerminatedEvent extends SessionEvent {
+  /// The event type, always 'session.thread_status_terminated'.
+  String get type => 'session.thread_status_terminated';
+
+  /// Unique identifier for this event.
+  final String id;
+
+  /// Name of the agent owning the thread.
+  final String agentName;
+
+  /// ID of the session thread whose status changed.
+  final String sessionThreadId;
+
+  /// Timestamp when this event was processed.
+  final BetaTimestamp processedAt;
+
+  /// Creates a [SessionThreadStatusTerminatedEvent].
+  const SessionThreadStatusTerminatedEvent({
+    required this.id,
+    required this.agentName,
+    required this.sessionThreadId,
+    required this.processedAt,
+  });
+
+  /// Creates a [SessionThreadStatusTerminatedEvent] from JSON.
+  factory SessionThreadStatusTerminatedEvent.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return SessionThreadStatusTerminatedEvent(
+      id: json['id'] as String,
+      agentName: json['agent_name'] as String,
+      sessionThreadId: json['session_thread_id'] as String,
+      processedAt: DateTime.parse(json['processed_at'] as String),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'agent_name': agentName,
+    'session_thread_id': sessionThreadId,
+    'processed_at': processedAt.toUtc().toIso8601String(),
+  };
+
+  /// Creates a copy with replaced values.
+  SessionThreadStatusTerminatedEvent copyWith({
+    String? id,
+    String? agentName,
+    String? sessionThreadId,
+    BetaTimestamp? processedAt,
+  }) {
+    return SessionThreadStatusTerminatedEvent(
+      id: id ?? this.id,
+      agentName: agentName ?? this.agentName,
+      sessionThreadId: sessionThreadId ?? this.sessionThreadId,
+      processedAt: processedAt ?? this.processedAt,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SessionThreadStatusTerminatedEvent &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          agentName == other.agentName &&
+          sessionThreadId == other.sessionThreadId &&
+          processedAt == other.processedAt;
+
+  @override
+  int get hashCode => Object.hash(id, agentName, sessionThreadId, processedAt);
+
+  @override
+  String toString() =>
+      'SessionThreadStatusTerminatedEvent(id: $id, agentName: $agentName, '
+      'sessionThreadId: $sessionThreadId, processedAt: $processedAt)';
+}
+
+// ---------------------------------------------------------------------------
+// Cross-thread message events
+// ---------------------------------------------------------------------------
+
+/// A peer agent thread sent this thread a message.
+@immutable
+class AgentThreadMessageReceivedEvent extends SessionEvent {
+  /// The event type, always 'agent.thread_message_received'.
+  String get type => 'agent.thread_message_received';
+
+  /// Unique identifier for this event.
+  final String id;
+
+  /// ID of the session thread that sent the message.
+  final String fromSessionThreadId;
+
+  /// Name of the agent that owns the sending thread. May be `null` if the
+  /// sender isn't a named agent.
+  final String? fromAgentName;
+
+  /// Message content blocks delivered by the peer thread.
+  final List<Map<String, dynamic>> content;
+
+  /// Timestamp when this event was processed.
+  final BetaTimestamp processedAt;
+
+  /// Creates an [AgentThreadMessageReceivedEvent].
+  const AgentThreadMessageReceivedEvent({
+    required this.id,
+    required this.fromSessionThreadId,
+    this.fromAgentName,
+    required this.content,
+    required this.processedAt,
+  });
+
+  /// Creates an [AgentThreadMessageReceivedEvent] from JSON.
+  factory AgentThreadMessageReceivedEvent.fromJson(Map<String, dynamic> json) {
+    return AgentThreadMessageReceivedEvent(
+      id: json['id'] as String,
+      fromSessionThreadId: json['from_session_thread_id'] as String,
+      fromAgentName: json['from_agent_name'] as String?,
+      content: (json['content'] as List)
+          .map((e) => e as Map<String, dynamic>)
+          .toList(),
+      processedAt: DateTime.parse(json['processed_at'] as String),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'from_session_thread_id': fromSessionThreadId,
+    if (fromAgentName != null) 'from_agent_name': fromAgentName,
+    'content': content,
+    'processed_at': processedAt.toUtc().toIso8601String(),
+  };
+
+  /// Creates a copy with replaced values.
+  AgentThreadMessageReceivedEvent copyWith({
+    String? id,
+    String? fromSessionThreadId,
+    Object? fromAgentName = unsetCopyWithValue,
+    List<Map<String, dynamic>>? content,
+    BetaTimestamp? processedAt,
+  }) {
+    return AgentThreadMessageReceivedEvent(
+      id: id ?? this.id,
+      fromSessionThreadId: fromSessionThreadId ?? this.fromSessionThreadId,
+      fromAgentName: fromAgentName == unsetCopyWithValue
+          ? this.fromAgentName
+          : fromAgentName as String?,
+      content: content ?? this.content,
+      processedAt: processedAt ?? this.processedAt,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AgentThreadMessageReceivedEvent &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          fromSessionThreadId == other.fromSessionThreadId &&
+          fromAgentName == other.fromAgentName &&
+          listOfMapsDeepEqual(content, other.content) &&
+          processedAt == other.processedAt;
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    fromSessionThreadId,
+    fromAgentName,
+    listOfMapsHashCode(content),
+    processedAt,
+  );
+
+  @override
+  String toString() =>
+      'AgentThreadMessageReceivedEvent(id: $id, '
+      'fromSessionThreadId: $fromSessionThreadId, '
+      'fromAgentName: $fromAgentName, '
+      'content: ${content.length} items, '
+      'processedAt: $processedAt)';
+}
+
+/// This thread sent a peer agent thread a message.
+@immutable
+class AgentThreadMessageSentEvent extends SessionEvent {
+  /// The event type, always 'agent.thread_message_sent'.
+  String get type => 'agent.thread_message_sent';
+
+  /// Unique identifier for this event.
+  final String id;
+
+  /// ID of the session thread that received the message.
+  final String toSessionThreadId;
+
+  /// Name of the agent that owns the recipient thread. May be `null` if the
+  /// recipient isn't a named agent.
+  final String? toAgentName;
+
+  /// Message content blocks delivered to the peer thread.
+  final List<Map<String, dynamic>> content;
+
+  /// Timestamp when this event was processed.
+  final BetaTimestamp processedAt;
+
+  /// Creates an [AgentThreadMessageSentEvent].
+  const AgentThreadMessageSentEvent({
+    required this.id,
+    required this.toSessionThreadId,
+    this.toAgentName,
+    required this.content,
+    required this.processedAt,
+  });
+
+  /// Creates an [AgentThreadMessageSentEvent] from JSON.
+  factory AgentThreadMessageSentEvent.fromJson(Map<String, dynamic> json) {
+    return AgentThreadMessageSentEvent(
+      id: json['id'] as String,
+      toSessionThreadId: json['to_session_thread_id'] as String,
+      toAgentName: json['to_agent_name'] as String?,
+      content: (json['content'] as List)
+          .map((e) => e as Map<String, dynamic>)
+          .toList(),
+      processedAt: DateTime.parse(json['processed_at'] as String),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'to_session_thread_id': toSessionThreadId,
+    if (toAgentName != null) 'to_agent_name': toAgentName,
+    'content': content,
+    'processed_at': processedAt.toUtc().toIso8601String(),
+  };
+
+  /// Creates a copy with replaced values.
+  AgentThreadMessageSentEvent copyWith({
+    String? id,
+    String? toSessionThreadId,
+    Object? toAgentName = unsetCopyWithValue,
+    List<Map<String, dynamic>>? content,
+    BetaTimestamp? processedAt,
+  }) {
+    return AgentThreadMessageSentEvent(
+      id: id ?? this.id,
+      toSessionThreadId: toSessionThreadId ?? this.toSessionThreadId,
+      toAgentName: toAgentName == unsetCopyWithValue
+          ? this.toAgentName
+          : toAgentName as String?,
+      content: content ?? this.content,
+      processedAt: processedAt ?? this.processedAt,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AgentThreadMessageSentEvent &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          toSessionThreadId == other.toSessionThreadId &&
+          toAgentName == other.toAgentName &&
+          listOfMapsDeepEqual(content, other.content) &&
+          processedAt == other.processedAt;
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    toSessionThreadId,
+    toAgentName,
+    listOfMapsHashCode(content),
+    processedAt,
+  );
+
+  @override
+  String toString() =>
+      'AgentThreadMessageSentEvent(id: $id, '
+      'toSessionThreadId: $toSessionThreadId, '
+      'toAgentName: $toAgentName, '
+      'content: ${content.length} items, '
+      'processedAt: $processedAt)';
+}
+
 // ---------------------------------------------------------------------------
 
 /// Unrecognized session event — preserves raw JSON.
