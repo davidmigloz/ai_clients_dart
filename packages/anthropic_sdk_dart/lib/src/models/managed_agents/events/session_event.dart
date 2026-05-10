@@ -1916,8 +1916,6 @@ class SpanModelRequestEndEvent extends SessionEvent {
 }
 
 // ---------------------------------------------------------------------------
-// Unknown fallback
-// ---------------------------------------------------------------------------
 // Session thread events
 // ---------------------------------------------------------------------------
 
@@ -2541,6 +2539,8 @@ class AgentThreadMessageSentEvent extends SessionEvent {
       'processedAt: $processedAt)';
 }
 
+// ---------------------------------------------------------------------------
+// Unknown fallback
 // ---------------------------------------------------------------------------
 
 /// Unrecognized session event — preserves raw JSON.
