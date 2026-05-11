@@ -116,4 +116,133 @@ void main() {
       expect(cleared.sessionThreadId, isNull);
     });
   });
+
+  group('SessionEvent thread variants', () {
+    test('SessionThreadCreatedEvent round-trips via dispatch', () {
+      final json = <String, dynamic>{
+        'type': 'session.thread_created',
+        'id': 'event_t1',
+        'agent_name': 'Researcher',
+        'session_thread_id': 'sthr_011',
+        'processed_at': '2026-04-01T12:00:00Z',
+      };
+
+      final parsed = SessionEvent.fromJson(json) as SessionThreadCreatedEvent;
+      expect(parsed.agentName, 'Researcher');
+      expect(parsed.sessionThreadId, 'sthr_011');
+
+      final reparsed =
+          SessionEvent.fromJson(parsed.toJson()) as SessionThreadCreatedEvent;
+      expect(reparsed, equals(parsed));
+    });
+
+    test('SessionThreadStatusRunningEvent round-trips via dispatch', () {
+      final json = <String, dynamic>{
+        'type': 'session.thread_status_running',
+        'id': 'event_t2',
+        'agent_name': 'Researcher',
+        'session_thread_id': 'sthr_011',
+        'processed_at': '2026-04-01T12:00:00Z',
+      };
+
+      final parsed =
+          SessionEvent.fromJson(json) as SessionThreadStatusRunningEvent;
+      expect(parsed.sessionThreadId, 'sthr_011');
+    });
+
+    test(
+      'SessionThreadStatusIdleEvent dispatches stopReason sealed family',
+      () {
+        final json = <String, dynamic>{
+          'type': 'session.thread_status_idle',
+          'id': 'event_t3',
+          'agent_name': 'Researcher',
+          'session_thread_id': 'sthr_011',
+          'stop_reason': {'type': 'end_turn'},
+          'processed_at': '2026-04-01T12:00:00Z',
+        };
+
+        final parsed =
+            SessionEvent.fromJson(json) as SessionThreadStatusIdleEvent;
+        expect(parsed.stopReason, isA<SessionEndTurn>());
+      },
+    );
+
+    test('SessionThreadStatusRescheduledEvent round-trips via dispatch', () {
+      final json = <String, dynamic>{
+        'type': 'session.thread_status_rescheduled',
+        'id': 'event_t4',
+        'agent_name': 'Researcher',
+        'session_thread_id': 'sthr_011',
+        'processed_at': '2026-04-01T12:00:00Z',
+      };
+      final parsed =
+          SessionEvent.fromJson(json) as SessionThreadStatusRescheduledEvent;
+      expect(parsed.id, 'event_t4');
+    });
+
+    test('SessionThreadStatusTerminatedEvent round-trips via dispatch', () {
+      final json = <String, dynamic>{
+        'type': 'session.thread_status_terminated',
+        'id': 'event_t5',
+        'agent_name': 'Researcher',
+        'session_thread_id': 'sthr_011',
+        'processed_at': '2026-04-01T12:00:00Z',
+      };
+      final parsed =
+          SessionEvent.fromJson(json) as SessionThreadStatusTerminatedEvent;
+      expect(parsed.id, 'event_t5');
+    });
+
+    test(
+      'AgentThreadMessageReceivedEvent round-trips, omits null from_agent_name',
+      () {
+        final json = <String, dynamic>{
+          'type': 'agent.thread_message_received',
+          'id': 'event_m1',
+          'from_session_thread_id': 'sthr_peer',
+          'content': [
+            {'type': 'text', 'text': 'hi'},
+          ],
+          'processed_at': '2026-04-01T12:00:00Z',
+        };
+
+        final parsed =
+            SessionEvent.fromJson(json) as AgentThreadMessageReceivedEvent;
+        expect(parsed.fromAgentName, isNull);
+        expect(parsed.fromSessionThreadId, 'sthr_peer');
+
+        expect(parsed.toJson().containsKey('from_agent_name'), isFalse);
+      },
+    );
+
+    test('AgentThreadMessageSentEvent serializes to_agent_name when set', () {
+      final json = <String, dynamic>{
+        'type': 'agent.thread_message_sent',
+        'id': 'event_m2',
+        'to_session_thread_id': 'sthr_peer',
+        'to_agent_name': 'Summarizer',
+        'content': [
+          {'type': 'text', 'text': 'done'},
+        ],
+        'processed_at': '2026-04-01T12:00:00Z',
+      };
+
+      final parsed = SessionEvent.fromJson(json) as AgentThreadMessageSentEvent;
+      expect(parsed.toAgentName, 'Summarizer');
+
+      final reparsed =
+          SessionEvent.fromJson(parsed.toJson()) as AgentThreadMessageSentEvent;
+      expect(reparsed, equals(parsed));
+    });
+
+    test('unknown discriminator falls back to UnknownSessionEvent', () {
+      final json = <String, dynamic>{
+        'type': 'session.future_event_no_one_knows',
+        'random': 'payload',
+      };
+      final parsed = SessionEvent.fromJson(json);
+      expect(parsed, isA<UnknownSessionEvent>());
+    });
+  });
 }

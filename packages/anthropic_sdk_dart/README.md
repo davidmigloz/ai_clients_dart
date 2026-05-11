@@ -45,7 +45,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 
 - Message batches for large-scale offline processing
 - Model discovery, files (beta), and skills (beta)
-- Managed agents with sessions, vaults, and streaming events (beta)
+- Managed agents with sessions, threads, vaults, and streaming events (beta)
 - Memory stores for persistent agent memories with versioning and redaction (beta)
 - User profiles with relationship classification (`external`/`resold`/`internal`), trust-grant tracking, and enrollment URLs (beta)
 
@@ -671,6 +671,7 @@ See the [example/](example/) directory for complete examples:
 | [`skills_example.dart`](example/skills_example.dart) | Skills management (beta) |
 | [`mcp_example.dart`](example/mcp_example.dart) | MCP tool integration |
 | [`managed_agents_example.dart`](example/managed_agents_example.dart) | Managed agents: agents, sessions, vaults (beta) |
+| [`session_threads_example.dart`](example/session_threads_example.dart) | Session threads: list, retrieve, stream events, archive (beta) |
 | [`memory_stores_example.dart`](example/memory_stores_example.dart) | Managed agents memory stores, memories, and versions (beta) |
 | [`user_profiles_example.dart`](example/user_profiles_example.dart) | User profiles and enrollment URLs (beta) |
 | [`models_example.dart`](example/models_example.dart) | Model listing |

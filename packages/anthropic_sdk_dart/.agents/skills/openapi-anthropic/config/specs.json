@@ -20,7 +20,11 @@
             "path": "src/anthropic/types/__init__.py"
           }
         },
-        "schema_aliases": {}
+        "schema_aliases": {
+          "BetaManagedAgentsSessionThreadAgent": "BetaManagedAgentsSessionAgent",
+          "BetaManagedAgentsSessionThreadStatus": "BetaManagedAgentsSessionStatus",
+          "BetaManagedAgentsListSessionThreadEvents": "BetaManagedAgentsListSessionEvents"
+        }
       },
       "auth_env_vars": [],
       "description": "Anthropic API for Claude models",

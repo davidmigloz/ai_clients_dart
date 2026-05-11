@@ -118,6 +118,49 @@ class ManagedAgentsFixtures {
       'processed_at': '2026-04-01T00:00:00Z',
     };
   }
+
+  static Map<String, dynamic> sessionThread({
+    String id = 'sthr_test123',
+    String sessionId = 'session_test123',
+    String status = 'running',
+  }) {
+    return {
+      'id': id,
+      'type': 'session_thread',
+      'session_id': sessionId,
+      'status': status,
+      'agent': {
+        'id': 'agent_test123',
+        'type': 'agent',
+        'version': 1,
+        'name': 'Test Agent',
+        'model': {'id': 'claude-sonnet-4-5', 'type': 'model'},
+        'mcp_servers': <Map<String, dynamic>>[],
+        'skills': <Map<String, dynamic>>[],
+        'tools': <Map<String, dynamic>>[],
+      },
+      'parent_thread_id': null,
+      'created_at': '2026-04-01T00:00:00Z',
+      'updated_at': '2026-04-01T00:00:00Z',
+      'archived_at': null,
+      'usage': null,
+      'stats': null,
+    };
+  }
+
+  static Map<String, dynamic> sessionThreadCreatedEvent({
+    String id = 'event_test_thread',
+    String sessionThreadId = 'sthr_test123',
+    String agentName = 'Test Agent',
+  }) {
+    return {
+      'type': 'session.thread_created',
+      'id': id,
+      'agent_name': agentName,
+      'session_thread_id': sessionThreadId,
+      'processed_at': '2026-04-01T00:00:00Z',
+    };
+  }
 }
 
 void main() {
@@ -477,6 +520,124 @@ void main() {
       final request = mockHttpClient.lastRequest!;
       expect(request.url.path, '/v1/sessions/session_test123/events/stream');
       expect(request.method, 'GET');
+      expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
+    });
+  });
+
+  group('SessionThreadsResource', () {
+    test('retrieve sends correct request', () async {
+      mockHttpClient.queueJsonResponse(ManagedAgentsFixtures.sessionThread());
+
+      final thread = await client.sessions
+          .threads('session_test123')
+          .retrieve('sthr_test123');
+
+      expect(thread.id, 'sthr_test123');
+      expect(thread.sessionId, 'session_test123');
+
+      final request = mockHttpClient.lastRequest!;
+      expect(
+        request.url.path,
+        '/v1/sessions/session_test123/threads/sthr_test123',
+      );
+      expect(request.method, 'GET');
+      expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
+    });
+
+    test('list sends correct request with query params', () async {
+      mockHttpClient.queueJsonResponse({
+        'data': [ManagedAgentsFixtures.sessionThread()],
+        'next_page': null,
+      });
+
+      final response = await client.sessions
+          .threads('session_test123')
+          .list(limit: 10, page: 'page_abc');
+
+      expect(response.data, hasLength(1));
+
+      final request = mockHttpClient.lastRequest!;
+      expect(request.url.path, '/v1/sessions/session_test123/threads');
+      expect(request.method, 'GET');
+      expect(request.url.queryParameters['limit'], '10');
+      expect(request.url.queryParameters['page'], 'page_abc');
+      expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
+    });
+
+    test('archive sends correct request and parses archived_at', () async {
+      mockHttpClient.queueJsonResponse({
+        ...ManagedAgentsFixtures.sessionThread(),
+        'archived_at': '2026-04-01T12:00:00Z',
+      });
+
+      final thread = await client.sessions
+          .threads('session_test123')
+          .archive('sthr_test123');
+
+      expect(thread.archivedAt, isNotNull);
+
+      final request = mockHttpClient.lastRequest!;
+      expect(
+        request.url.path,
+        '/v1/sessions/session_test123/threads/sthr_test123/archive',
+      );
+      expect(request.method, 'POST');
+      expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
+    });
+  });
+
+  group('SessionThreadEventsResource', () {
+    test('list sends correct request', () async {
+      mockHttpClient.queueJsonResponse({
+        'data': [ManagedAgentsFixtures.sessionThreadCreatedEvent()],
+        'next_page': null,
+      });
+
+      final response = await client.sessions
+          .threads('session_test123')
+          .events('sthr_test123')
+          .list(limit: 20);
+
+      expect(response.data, hasLength(1));
+      expect(response.data.first, isA<SessionThreadCreatedEvent>());
+
+      final request = mockHttpClient.lastRequest!;
+      expect(
+        request.url.path,
+        '/v1/sessions/session_test123/threads/sthr_test123/events',
+      );
+      expect(request.method, 'GET');
+      expect(request.url.queryParameters['limit'], '20');
+      expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
+    });
+
+    test('stream sends correct request and parses SSE events', () async {
+      mockHttpClient.queueStreamingResponse([
+        ManagedAgentsFixtures.sessionThreadCreatedEvent(),
+        {
+          'type': 'session.thread_status_running',
+          'id': 'event_running',
+          'agent_name': 'Test Agent',
+          'session_thread_id': 'sthr_test123',
+          'processed_at': '2026-04-01T00:00:01Z',
+        },
+      ]);
+
+      final events = await client.sessions
+          .threads('session_test123')
+          .events('sthr_test123')
+          .stream()
+          .toList();
+
+      expect(events, hasLength(2));
+      expect(events[0], isA<SessionThreadCreatedEvent>());
+      expect(events[1], isA<SessionThreadStatusRunningEvent>());
+
+      final request = mockHttpClient.lastRequest!;
+      expect(
+        request.url.path,
+        '/v1/sessions/session_test123/threads/sthr_test123/stream',
+      );
       expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
     });
   });

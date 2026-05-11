@@ -2,8 +2,6 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../models/managed_agents/common/list_order.dart';
-import '../models/managed_agents/events/send_event_params.dart';
 import '../models/managed_agents/events/session_event.dart';
 import '../models/managed_agents/events/session_event_list_response.dart';
 import 'base_resource.dart';
@@ -12,16 +10,21 @@ import 'streaming_resource.dart';
 /// Beta header for the Managed Agents API.
 const _betaHeader = 'managed-agents-2026-04-01';
 
-/// Resource for session events (Beta).
+/// Resource for events scoped to a specific session thread (Beta).
 ///
-/// Events represent the messages, tool calls, and status changes in a session.
-class SessionEventsResource extends ResourceBase with StreamingResource {
+/// Events represent the messages, tool calls, and status changes within a
+/// thread. Access either via paginated `list()` or live SSE `stream()`.
+class SessionThreadEventsResource extends ResourceBase with StreamingResource {
   /// The session ID this resource is scoped to.
   final String sessionId;
 
-  /// Creates a [SessionEventsResource].
-  SessionEventsResource({
+  /// The thread ID this resource is scoped to.
+  final String threadId;
+
+  /// Creates a [SessionThreadEventsResource].
+  SessionThreadEventsResource({
     required this.sessionId,
+    required this.threadId,
     required super.config,
     required super.httpClient,
     required super.interceptorChain,
@@ -29,44 +32,25 @@ class SessionEventsResource extends ResourceBase with StreamingResource {
     super.ensureNotClosed,
   });
 
-  /// Lists events for the session.
+  /// Lists events for the thread.
   ///
   /// Parameters:
   /// - [limit]: Maximum number of events to return.
-  /// - [order]: Sort order.
   /// - [page]: Pagination token from a previous response.
-  /// - [createdAtGt]: Filter events created after this ISO 8601 timestamp.
-  /// - [createdAtGte]: Filter events created at or after this timestamp.
-  /// - [createdAtLt]: Filter events created before this timestamp.
-  /// - [createdAtLte]: Filter events created at or before this timestamp.
-  /// - [types]: Filter by event types (e.g. `agent.message`,
-  ///   `user.interrupt`). Multiple values are OR-ed.
   /// - [abortTrigger]: Allows canceling the request.
   Future<ListSessionEventsResponse> list({
     int? limit,
-    ListOrder? order,
     String? page,
-    String? createdAtGt,
-    String? createdAtGte,
-    String? createdAtLt,
-    String? createdAtLte,
-    List<String>? types,
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
     final queryParams = <String, dynamic>{
       'limit': ?limit?.toString(),
-      'order': ?order?.toJson(),
       'page': ?page,
-      'created_at[gt]': ?createdAtGt,
-      'created_at[gte]': ?createdAtGte,
-      'created_at[lt]': ?createdAtLt,
-      'created_at[lte]': ?createdAtLte,
-      'types[]': ?types,
     };
 
     final url = requestBuilder.buildUrl(
-      '/v1/sessions/$sessionId/events',
+      '/v1/sessions/$sessionId/threads/$threadId/events',
       queryParams: queryParams.isEmpty ? null : queryParams,
     );
     final headers = requestBuilder.buildHeaders(
@@ -84,33 +68,7 @@ class SessionEventsResource extends ResourceBase with StreamingResource {
     );
   }
 
-  /// Sends events to the session.
-  ///
-  /// The optional [abortTrigger] allows canceling the request.
-  Future<SendSessionEventsResponse> send(
-    SendSessionEventsParams request, {
-    Future<void>? abortTrigger,
-  }) async {
-    ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('/v1/sessions/$sessionId/events');
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'anthropic-beta': _betaHeader},
-    );
-    final httpRequest = http.Request('POST', url)
-      ..headers.addAll(headers)
-      ..body = jsonEncode(request.toJson());
-
-    final response = await interceptorChain.execute(
-      httpRequest,
-      abortTrigger: abortTrigger,
-    );
-
-    return SendSessionEventsResponse.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
-  }
-
-  /// Streams events from the session via SSE.
+  /// Streams events from the thread via SSE.
   ///
   /// Parameters:
   /// - [lastEventId]: Resume streaming from after this event ID.
@@ -133,7 +91,7 @@ class SessionEventsResource extends ResourceBase with StreamingResource {
     final queryParams = <String, dynamic>{'last_event_id': ?lastEventId};
 
     final eventStream = getStream(
-      '/v1/sessions/$sessionId/events/stream',
+      '/v1/sessions/$sessionId/threads/$threadId/stream',
       queryParams: queryParams.isEmpty ? null : queryParams,
       headers: {'anthropic-beta': _betaHeader},
       abortTrigger: abortTrigger,
