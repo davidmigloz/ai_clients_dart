@@ -115,7 +115,18 @@ class SessionEventsResource extends ResourceBase with StreamingResource {
   /// Parameters:
   /// - [lastEventId]: Resume streaming from after this event ID.
   /// - [abortTrigger]: Allows canceling the stream.
+  ///
+  /// Uses the eager-guard wrapper pattern so `ensureNotClosed()` runs at call
+  /// time rather than on `.listen()`.
   Stream<SessionEvent> stream({
+    String? lastEventId,
+    Future<void>? abortTrigger,
+  }) {
+    ensureNotClosed?.call();
+    return _streamImpl(lastEventId: lastEventId, abortTrigger: abortTrigger);
+  }
+
+  Stream<SessionEvent> _streamImpl({
     String? lastEventId,
     Future<void>? abortTrigger,
   }) async* {
