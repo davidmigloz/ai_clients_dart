@@ -113,10 +113,19 @@ class ThinkingBlock extends ContentBlock {
   const ThinkingBlock({required this.thinking, required this.signature});
 
   /// Creates a [ThinkingBlock] from JSON.
+  ///
+  /// `thinking` and `signature` default to empty string when absent or
+  /// null. Streaming `content_block_start` events from Anthropic-compatible
+  /// servers (notably MiniMax-Anthropic) sometimes omit `signature` at
+  /// block start — the real value arrives later in a `signature_delta`
+  /// that the accumulator merges onto the partial message. Defaulting to
+  /// empty rather than throwing keeps the SDK usable against those
+  /// servers; real Anthropic always sends both fields upfront, so this is
+  /// a no-op there.
   factory ThinkingBlock.fromJson(Map<String, dynamic> json) {
     return ThinkingBlock(
-      thinking: json['thinking'] as String,
-      signature: json['signature'] as String,
+      thinking: json['thinking'] as String? ?? '',
+      signature: json['signature'] as String? ?? '',
     );
   }
 
@@ -162,8 +171,13 @@ class RedactedThinkingBlock extends ContentBlock {
   const RedactedThinkingBlock({required this.data});
 
   /// Creates a [RedactedThinkingBlock] from JSON.
+  ///
+  /// `data` defaults to empty string when absent or null. Mirrors the
+  /// [ThinkingBlock.fromJson] tolerance so non-canonical Anthropic-API
+  /// servers that omit the field on `content_block_start` events don't
+  /// crash the parser.
   factory RedactedThinkingBlock.fromJson(Map<String, dynamic> json) {
-    return RedactedThinkingBlock(data: json['data'] as String);
+    return RedactedThinkingBlock(data: json['data'] as String? ?? '');
   }
 
   @override
