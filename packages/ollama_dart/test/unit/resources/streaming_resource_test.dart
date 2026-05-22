@@ -46,11 +46,13 @@ void main() {
   TestStreamingResource createResource({
     AuthProvider? authProvider,
     Level logLevel = Level.OFF,
+    bool sendRequestIdHeader = false,
   }) {
     final config = OllamaConfig(
       baseUrl: 'http://localhost:11434',
       authProvider: authProvider,
       logLevel: logLevel,
+      sendRequestIdHeader: sendRequestIdHeader,
     );
     return TestStreamingResource(
       config: config,
@@ -153,7 +155,7 @@ void main() {
           Uri.parse('http://localhost:11434/api/chat'),
         );
 
-        final prepared = await resource.prepareStreamingRequest(request);
+        final (prepared, _) = await resource.prepareStreamingRequest(request);
 
         expect(prepared.headers['Authorization'], 'Bearer test-token');
       });
@@ -170,7 +172,7 @@ void main() {
           Uri.parse('http://localhost:11434/api/chat'),
         );
 
-        final prepared = await resource.prepareStreamingRequest(request);
+        final (prepared, _) = await resource.prepareStreamingRequest(request);
 
         expect(prepared.headers.containsKey('Authorization'), isFalse);
       });
@@ -182,34 +184,74 @@ void main() {
           Uri.parse('http://localhost:11434/api/chat'),
         );
 
-        final prepared = await resource.prepareStreamingRequest(request);
+        final (prepared, _) = await resource.prepareStreamingRequest(request);
 
         expect(prepared.headers.containsKey('Authorization'), isFalse);
       });
 
-      test('adds X-Request-ID header when not present', () async {
+      test('does not add X-Request-ID header by default', () async {
         resource = createResource();
         final request = http.Request(
           'POST',
           Uri.parse('http://localhost:11434/api/chat'),
         );
 
-        final prepared = await resource.prepareStreamingRequest(request);
+        final (prepared, requestId) = await resource.prepareStreamingRequest(
+          request,
+        );
 
-        expect(prepared.headers['X-Request-ID'], isNotNull);
-        expect(prepared.headers['X-Request-ID'], isNotEmpty);
+        // No header on the wire (browser/CORS-safe default)...
+        expect(prepared.headers.containsKey('X-Request-ID'), isFalse);
+        // ...but an ID is still generated for log/error correlation.
+        expect(requestId, isNotEmpty);
       });
 
-      test('preserves existing X-Request-ID header', () async {
+      test(
+        'adds X-Request-ID header when sendRequestIdHeader is true',
+        () async {
+          resource = createResource(sendRequestIdHeader: true);
+          final request = http.Request(
+            'POST',
+            Uri.parse('http://localhost:11434/api/chat'),
+          );
+
+          final (prepared, requestId) = await resource.prepareStreamingRequest(
+            request,
+          );
+
+          expect(prepared.headers['X-Request-ID'], isNotEmpty);
+          expect(prepared.headers['X-Request-ID'], requestId);
+        },
+      );
+
+      test('preserves caller-supplied X-Request-ID when flag is off', () async {
         resource = createResource();
         final request = http.Request(
           'POST',
           Uri.parse('http://localhost:11434/api/chat'),
         )..headers['X-Request-ID'] = 'existing-id';
 
-        final prepared = await resource.prepareStreamingRequest(request);
+        final (prepared, requestId) = await resource.prepareStreamingRequest(
+          request,
+        );
 
         expect(prepared.headers['X-Request-ID'], 'existing-id');
+        expect(requestId, 'existing-id');
+      });
+
+      test('preserves caller-supplied X-Request-ID when flag is on', () async {
+        resource = createResource(sendRequestIdHeader: true);
+        final request = http.Request(
+          'POST',
+          Uri.parse('http://localhost:11434/api/chat'),
+        )..headers['X-Request-ID'] = 'existing-id';
+
+        final (prepared, requestId) = await resource.prepareStreamingRequest(
+          request,
+        );
+
+        expect(prepared.headers['X-Request-ID'], 'existing-id');
+        expect(requestId, 'existing-id');
       });
     });
 
@@ -229,7 +271,10 @@ void main() {
           () => mockHttpClient.send(any()),
         ).thenAnswer((_) async => mockStreamedResponse);
 
-        final response = await resource.sendStreamingRequest(request);
+        final response = await resource.sendStreamingRequest(
+          request,
+          requestId: 'test-id',
+        );
 
         expect(response.statusCode, 200);
       });
@@ -250,7 +295,7 @@ void main() {
         ).thenAnswer((_) async => mockStreamedResponse);
 
         expect(
-          () => resource.sendStreamingRequest(request),
+          () => resource.sendStreamingRequest(request, requestId: 'test-id'),
           throwsA(isA<ApiException>()),
         );
       });
@@ -272,7 +317,7 @@ void main() {
         ).thenAnswer((_) async => mockStreamedResponse);
 
         expect(
-          () => resource.sendStreamingRequest(request),
+          () => resource.sendStreamingRequest(request, requestId: 'test-id'),
           throwsA(isA<RateLimitException>()),
         );
       });

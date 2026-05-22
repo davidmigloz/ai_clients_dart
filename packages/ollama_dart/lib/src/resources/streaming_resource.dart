@@ -44,8 +44,13 @@ mixin StreamingResource on ResourceBase {
   /// Prepares a streaming request by applying auth and logging.
   ///
   /// This applies the same auth and logging that the interceptor chain would
-  /// apply, but without buffering the response.
-  Future<http.Request> prepareStreamingRequest(http.Request request) async {
+  /// apply, but without buffering the response. Returns the prepared request
+  /// together with its request ID (for log/error correlation); the ID is only
+  /// added to the request as an `X-Request-ID` header when
+  /// [OllamaConfig.sendRequestIdHeader] is enabled.
+  Future<(http.Request, String)> prepareStreamingRequest(
+    http.Request request,
+  ) async {
     var req = request;
 
     // Apply auth
@@ -55,18 +60,18 @@ mixin StreamingResource on ResourceBase {
     req = _applyAuthToRequest(req, credentials);
 
     // Apply logging
-    req = _applyLoggingToRequest(req);
-
-    return req;
+    return _applyLoggingToRequest(req);
   }
 
   /// Sends a streaming request with error handling.
   ///
   /// Returns the [StreamedResponse] if successful, or throws an
-  /// [OllamaException] if the response indicates an error.
+  /// [OllamaException] if the response indicates an error. [requestId] is used
+  /// for error-log correlation.
   Future<http.StreamedResponse> sendStreamingRequest(
-    http.Request request,
-  ) async {
+    http.Request request, {
+    required String requestId,
+  }) async {
     ensureNotClosed?.call();
 
     http.StreamedResponse streamedResponse;
@@ -78,10 +83,7 @@ mixin StreamingResource on ResourceBase {
         throw mapHttpError(response);
       }
     } catch (e) {
-      _logStreamError(
-        e,
-        request.headers['X-Request-ID'] ?? generateRequestId(),
-      );
+      _logStreamError(e, requestId);
       rethrow;
     }
 
@@ -106,26 +108,33 @@ mixin StreamingResource on ResourceBase {
     };
   }
 
-  /// Applies logging to a request by adding a request ID.
-  http.Request _applyLoggingToRequest(http.Request request) {
-    if (!request.headers.containsKey('X-Request-ID')) {
-      final requestId = generateRequestId();
+  /// Derives a request ID for the request and logs it.
+  ///
+  /// Returns the request together with its ID. The `X-Request-ID` header is
+  /// only added to the outgoing request when
+  /// [OllamaConfig.sendRequestIdHeader] is enabled and the caller didn't
+  /// already supply one; otherwise the ID is used for logging only.
+  (http.Request, String) _applyLoggingToRequest(http.Request request) {
+    final requestId = request.headers['X-Request-ID'] ?? generateRequestId();
+
+    if (config.logLevel.value <= Level.INFO.value) {
+      Logger(
+        'Ollama.HTTP',
+      ).info('REQUEST [$requestId] ${request.method} ${request.url}');
+    }
+
+    if (config.sendRequestIdHeader &&
+        !request.headers.containsKey('X-Request-ID')) {
       final updatedRequest = http.Request(request.method, request.url)
         ..headers.addAll(request.headers)
         ..headers['X-Request-ID'] = requestId
         ..bodyBytes = request.bodyBytes
         ..encoding = request.encoding;
 
-      if (config.logLevel.value <= Level.INFO.value) {
-        Logger(
-          'Ollama.HTTP',
-        ).info('REQUEST [$requestId] ${request.method} ${request.url}');
-      }
-
-      return updatedRequest;
+      return (updatedRequest, requestId);
     }
 
-    return request;
+    return (request, requestId);
   }
 
   /// Maps an HTTP error response to an [OllamaException].

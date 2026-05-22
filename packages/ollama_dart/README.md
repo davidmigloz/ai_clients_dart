@@ -111,6 +111,8 @@ Environment variable:
 
 Use `BearerTokenProvider` when the Ollama server is exposed behind an authenticated reverse proxy or remote deployment.
 
+By default the client does **not** send an `X-Request-ID` header — Ollama's CORS allow-list excludes it, so sending it breaks the preflight in browser targets (Flutter Web / dart2wasm). A request ID is still generated internally for logging and error correlation. Set `OllamaConfig(sendRequestIdHeader: true)` to emit the header when talking to an intermediary (e.g. a reverse proxy) you've configured to accept it.
+
 </details>
 
 ## Usage
