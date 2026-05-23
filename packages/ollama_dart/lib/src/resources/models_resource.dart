@@ -123,13 +123,18 @@ class ModelsResource extends ResourceBase with StreamingResource {
     // Ensure stream is true for streaming
     final requestData = request.copyWith(stream: true);
 
-    var httpRequest = http.Request('POST', url)
+    final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(requestData.toJson());
 
     // Use mixin methods for streaming request handling
-    httpRequest = await prepareStreamingRequest(httpRequest);
-    final streamedResponse = await sendStreamingRequest(httpRequest);
+    final (preparedRequest, requestId) = await prepareStreamingRequest(
+      httpRequest,
+    );
+    final streamedResponse = await sendStreamingRequest(
+      preparedRequest,
+      requestId: requestId,
+    );
 
     await for (final json in parseNDJSON(streamedResponse.stream)) {
       if (json['error'] != null) {
@@ -213,13 +218,18 @@ class ModelsResource extends ResourceBase with StreamingResource {
     // Ensure stream is true for streaming
     final requestData = request.copyWith(stream: true);
 
-    var httpRequest = http.Request('POST', url)
+    final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(requestData.toJson());
 
     // Use mixin methods for streaming request handling
-    httpRequest = await prepareStreamingRequest(httpRequest);
-    final streamedResponse = await sendStreamingRequest(httpRequest);
+    final (preparedRequest, requestId) = await prepareStreamingRequest(
+      httpRequest,
+    );
+    final streamedResponse = await sendStreamingRequest(
+      preparedRequest,
+      requestId: requestId,
+    );
 
     await for (final json in parseNDJSON(streamedResponse.stream)) {
       if (json['error'] != null) {
@@ -269,13 +279,18 @@ class ModelsResource extends ResourceBase with StreamingResource {
     // Ensure stream is true for streaming
     final requestData = request.copyWith(stream: true);
 
-    var httpRequest = http.Request('POST', url)
+    final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(requestData.toJson());
 
     // Use mixin methods for streaming request handling
-    httpRequest = await prepareStreamingRequest(httpRequest);
-    final streamedResponse = await sendStreamingRequest(httpRequest);
+    final (preparedRequest, requestId) = await prepareStreamingRequest(
+      httpRequest,
+    );
+    final streamedResponse = await sendStreamingRequest(
+      preparedRequest,
+      requestId: requestId,
+    );
 
     await for (final json in parseNDJSON(streamedResponse.stream)) {
       if (json['error'] != null) {

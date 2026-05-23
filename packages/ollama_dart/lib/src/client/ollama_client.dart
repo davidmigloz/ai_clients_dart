@@ -128,6 +128,7 @@ class OllamaClient {
       LoggingInterceptor(
         logLevel: this.config.logLevel,
         redactionList: this.config.redactionList,
+        sendRequestIdHeader: this.config.sendRequestIdHeader,
       ),
       // Error interceptor
       const ErrorInterceptor(),
