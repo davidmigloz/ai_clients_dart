@@ -8,6 +8,7 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// - Starting sessions and sending messages
 /// - Polling session events
 /// - Managing vaults and credentials
+/// - Multiagent coordinator rosters and outcome evaluations
 ///
 /// Note: The Managed Agents API is a beta feature.
 void main() async {
@@ -100,7 +101,58 @@ void main() async {
     print('Credentials in vault: ${credentials.data.length}');
 
     // =========================================================================
-    // 4. Cleanup
+    // 4. Multiagent orchestration & outcome evaluations
+    // =========================================================================
+    print('\n=== Multiagent & Outcomes ===');
+
+    // Create a leaf "worker" agent the coordinator can spawn (depth limit 1).
+    final worker = await client.agents.create(
+      const CreateAgentParams(
+        name: 'Worker',
+        model: ModelParamsId(id: 'claude-sonnet-4-5'),
+      ),
+    );
+
+    // Create a coordinator agent with a roster: the worker plus `self`.
+    final coordinator = await client.agents.create(
+      CreateAgentParams(
+        name: 'Coordinator',
+        model: const ModelParamsId(id: 'claude-sonnet-4-5'),
+        multiagent: MultiagentCoordinatorParams(
+          agents: [
+            MultiagentRosterEntryAgent(agent: AgentParamsId(id: worker.id)),
+            const MultiagentSelfParams(),
+          ],
+        ),
+      ),
+    );
+    final resolved = coordinator.multiagent;
+    if (resolved is MultiagentCoordinator) {
+      print(
+        'Coordinator roster: ${resolved.agents.map((a) => a.id).join(', ')}',
+      );
+    }
+
+    // Define an outcome the agent should work toward, graded by a rubric.
+    await client.sessions
+        .events(session.id)
+        .send(
+          const SendSessionEventsParams(
+            events: [
+              UserDefineOutcomeEventParams(
+                description: 'Produce a one-paragraph summary.',
+                rubric: TextRubricParams(
+                  content: 'Must be a single paragraph with no bullet points.',
+                ),
+                maxIterations: 3,
+              ),
+            ],
+          ),
+        );
+    print('Defined an outcome for the session');
+
+    // =========================================================================
+    // 5. Cleanup
     // =========================================================================
     print('\n=== Cleanup ===');
 
@@ -108,7 +160,9 @@ void main() async {
     print('Deleted session');
 
     await client.agents.archive(agent.id);
-    print('Archived agent');
+    await client.agents.archive(coordinator.id);
+    await client.agents.archive(worker.id);
+    print('Archived agents');
 
     await client.vaults.delete(vault.id);
     print('Deleted vault');

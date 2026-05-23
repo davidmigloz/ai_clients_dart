@@ -8,6 +8,7 @@ import '../config/agent_tool.dart';
 import '../config/mcp_server.dart';
 import '../config/model_config.dart';
 import '../events/telemetry.dart';
+import '../outcomes/outcome_evaluation.dart';
 import '../resources/session_resource.dart';
 
 /// Session status.
@@ -81,6 +82,10 @@ class Session {
   /// Cumulative token usage for the session.
   final SessionUsage usage;
 
+  /// Per-outcome evaluation state. One entry per `user.define_outcome` event
+  /// sent to the session. Empty when no outcomes have been defined.
+  final List<OutcomeEvaluation> outcomeEvaluations;
+
   /// When the session was created.
   final BetaTimestamp createdAt;
 
@@ -103,6 +108,7 @@ class Session {
     required this.vaultIds,
     required this.stats,
     required this.usage,
+    this.outcomeEvaluations = const [],
     required this.createdAt,
     required this.updatedAt,
     required this.archivedAt,
@@ -126,6 +132,13 @@ class Session {
       vaultIds: (json['vault_ids'] as List).map((e) => e as String).toList(),
       stats: SessionStats.fromJson(json['stats'] as Map<String, dynamic>),
       usage: SessionUsage.fromJson(json['usage'] as Map<String, dynamic>),
+      outcomeEvaluations:
+          (json['outcome_evaluations'] as List?)
+              ?.map(
+                (e) => OutcomeEvaluation.fromJson(e as Map<String, dynamic>),
+              )
+              .toList() ??
+          const [],
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
       archivedAt: json['archived_at'] != null
@@ -147,6 +160,7 @@ class Session {
     'vault_ids': vaultIds,
     'stats': stats.toJson(),
     'usage': usage.toJson(),
+    'outcome_evaluations': outcomeEvaluations.map((e) => e.toJson()).toList(),
     'created_at': createdAt.toUtc().toIso8601String(),
     'updated_at': updatedAt.toUtc().toIso8601String(),
     'archived_at': archivedAt?.toUtc().toIso8601String(),
@@ -165,6 +179,7 @@ class Session {
     List<String>? vaultIds,
     SessionStats? stats,
     SessionUsage? usage,
+    List<OutcomeEvaluation>? outcomeEvaluations,
     BetaTimestamp? createdAt,
     BetaTimestamp? updatedAt,
     Object? archivedAt = unsetCopyWithValue,
@@ -181,6 +196,7 @@ class Session {
       vaultIds: vaultIds ?? this.vaultIds,
       stats: stats ?? this.stats,
       usage: usage ?? this.usage,
+      outcomeEvaluations: outcomeEvaluations ?? this.outcomeEvaluations,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       archivedAt: archivedAt == unsetCopyWithValue
@@ -205,6 +221,7 @@ class Session {
           listsEqual(vaultIds, other.vaultIds) &&
           stats == other.stats &&
           usage == other.usage &&
+          listsEqual(outcomeEvaluations, other.outcomeEvaluations) &&
           createdAt == other.createdAt &&
           updatedAt == other.updatedAt &&
           archivedAt == other.archivedAt;
@@ -222,6 +239,7 @@ class Session {
     listHash(vaultIds),
     stats,
     usage,
+    listHash(outcomeEvaluations),
     createdAt,
     updatedAt,
     archivedAt,
@@ -241,6 +259,7 @@ class Session {
       'vaultIds: $vaultIds, '
       'stats: $stats, '
       'usage: $usage, '
+      'outcomeEvaluations: $outcomeEvaluations, '
       'createdAt: $createdAt, '
       'updatedAt: $updatedAt, '
       'archivedAt: $archivedAt)';
@@ -279,6 +298,10 @@ class SessionAgent {
   /// Tool configurations for this agent.
   final List<AgentTool> tools;
 
+  /// Resolved multiagent orchestration configuration. Null when the agent is
+  /// single-threaded.
+  final SessionMultiagent? multiagent;
+
   /// Creates a [SessionAgent].
   const SessionAgent({
     required this.id,
@@ -291,6 +314,7 @@ class SessionAgent {
     required this.mcpServers,
     required this.skills,
     required this.tools,
+    this.multiagent,
   });
 
   /// Creates a [SessionAgent] from JSON.
@@ -318,6 +342,11 @@ class SessionAgent {
               ?.map((e) => AgentTool.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
+      multiagent: json['multiagent'] != null
+          ? SessionMultiagent.fromJson(
+              json['multiagent'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
@@ -333,6 +362,7 @@ class SessionAgent {
     'mcp_servers': mcpServers.map((e) => e.toJson()).toList(),
     'skills': skills.map((e) => e.toJson()).toList(),
     'tools': tools.map((e) => e.toJson()).toList(),
+    if (multiagent != null) 'multiagent': multiagent!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -347,6 +377,7 @@ class SessionAgent {
     List<MCPServer>? mcpServers,
     List<AgentSkill>? skills,
     List<AgentTool>? tools,
+    Object? multiagent = unsetCopyWithValue,
   }) {
     return SessionAgent(
       id: id ?? this.id,
@@ -361,6 +392,9 @@ class SessionAgent {
       mcpServers: mcpServers ?? this.mcpServers,
       skills: skills ?? this.skills,
       tools: tools ?? this.tools,
+      multiagent: multiagent == unsetCopyWithValue
+          ? this.multiagent
+          : multiagent as SessionMultiagent?,
     );
   }
 
@@ -378,7 +412,8 @@ class SessionAgent {
           model == other.model &&
           listsEqual(mcpServers, other.mcpServers) &&
           listsEqual(skills, other.skills) &&
-          listsEqual(tools, other.tools);
+          listsEqual(tools, other.tools) &&
+          multiagent == other.multiagent;
 
   @override
   int get hashCode => Object.hash(
@@ -392,6 +427,7 @@ class SessionAgent {
     listHash(mcpServers),
     listHash(skills),
     listHash(tools),
+    multiagent,
   );
 
   @override
@@ -406,7 +442,8 @@ class SessionAgent {
       'model: $model, '
       'mcpServers: $mcpServers, '
       'skills: $skills, '
-      'tools: $tools)';
+      'tools: $tools, '
+      'multiagent: $multiagent)';
 }
 
 /// Timing statistics for a session.
@@ -605,4 +642,104 @@ class DeletedSession {
 
   @override
   String toString() => 'DeletedSession(id: $id, type: $type)';
+}
+
+/// Resolved multiagent orchestration configuration as returned on a [Session].
+///
+/// Variants:
+/// - [SessionMultiagentCoordinator] — a coordinator topology with full agent
+///   definitions for each roster member.
+/// - [UnknownSessionMultiagent] — unrecognized topology, for forward
+///   compatibility.
+sealed class SessionMultiagent {
+  const SessionMultiagent();
+
+  /// Creates a [SessionMultiagent] from JSON.
+  ///
+  /// Dispatches on the `type` discriminator; unrecognized values fall back to
+  /// [UnknownSessionMultiagent].
+  factory SessionMultiagent.fromJson(Map<String, dynamic> json) {
+    final type = json['type'] as String?;
+    return switch (type) {
+      'coordinator' => SessionMultiagentCoordinator.fromJson(json),
+      _ => UnknownSessionMultiagent(rawJson: json),
+    };
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson();
+}
+
+/// Resolved coordinator topology with full agent definitions for each roster
+/// member.
+@immutable
+class SessionMultiagentCoordinator extends SessionMultiagent {
+  /// The topology type, always 'coordinator'.
+  String get type => 'coordinator';
+
+  /// Full agent definitions the coordinator may spawn as session threads.
+  final List<SessionAgent> agents;
+
+  /// Creates a [SessionMultiagentCoordinator].
+  const SessionMultiagentCoordinator({required this.agents});
+
+  /// Creates a [SessionMultiagentCoordinator] from JSON.
+  factory SessionMultiagentCoordinator.fromJson(Map<String, dynamic> json) {
+    return SessionMultiagentCoordinator(
+      agents: (json['agents'] as List)
+          .map((e) => SessionAgent.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'agents': agents.map((e) => e.toJson()).toList(),
+  };
+
+  /// Creates a copy with replaced values.
+  SessionMultiagentCoordinator copyWith({List<SessionAgent>? agents}) {
+    return SessionMultiagentCoordinator(agents: agents ?? this.agents);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SessionMultiagentCoordinator &&
+          runtimeType == other.runtimeType &&
+          listsEqual(agents, other.agents);
+
+  @override
+  int get hashCode => listHash(agents);
+
+  @override
+  String toString() => 'SessionMultiagentCoordinator(agents: $agents)';
+}
+
+/// Unrecognized session multiagent topology — preserves raw JSON for forward
+/// compatibility.
+@immutable
+class UnknownSessionMultiagent extends SessionMultiagent {
+  /// The raw JSON.
+  final Map<String, dynamic> rawJson;
+
+  /// Creates an [UnknownSessionMultiagent].
+  const UnknownSessionMultiagent({required this.rawJson});
+
+  @override
+  Map<String, dynamic> toJson() => rawJson;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnknownSessionMultiagent &&
+          runtimeType == other.runtimeType &&
+          mapsDeepEqual(rawJson, other.rawJson);
+
+  @override
+  int get hashCode => mapDeepHashCode(rawJson);
+
+  @override
+  String toString() => 'UnknownSessionMultiagent(rawJson: $rawJson)';
 }

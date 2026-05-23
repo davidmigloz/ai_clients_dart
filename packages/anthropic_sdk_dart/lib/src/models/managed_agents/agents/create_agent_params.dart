@@ -6,6 +6,7 @@ import '../config/agent_skill.dart';
 import '../config/agent_tool.dart';
 import '../config/mcp_server.dart';
 import '../config/model_config.dart';
+import 'multiagent_params.dart';
 
 /// Request parameters for creating an agent.
 @immutable
@@ -34,6 +35,10 @@ class CreateAgentParams {
   /// Arbitrary key-value metadata.
   final Map<String, String>? metadata;
 
+  /// Multiagent orchestration configuration. Currently supports the
+  /// `coordinator` topology with a roster of 1-20 agents.
+  final MultiagentParams? multiagent;
+
   /// Creates a [CreateAgentParams].
   const CreateAgentParams({
     required this.name,
@@ -44,6 +49,7 @@ class CreateAgentParams {
     this.mcpServers,
     this.skills,
     this.metadata,
+    this.multiagent,
   });
 
   /// Creates a [CreateAgentParams] from JSON.
@@ -63,6 +69,11 @@ class CreateAgentParams {
           ?.map((e) => AgentSkillParams.fromJson(e as Map<String, dynamic>))
           .toList(),
       metadata: (json['metadata'] as Map?)?.cast<String, String>(),
+      multiagent: json['multiagent'] != null
+          ? MultiagentParams.fromJson(
+              json['multiagent'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
@@ -77,6 +88,7 @@ class CreateAgentParams {
       'mcp_servers': mcpServers!.map((e) => e.toJson()).toList(),
     if (skills != null) 'skills': skills!.map((e) => e.toJson()).toList(),
     if (metadata != null) 'metadata': metadata,
+    if (multiagent != null) 'multiagent': multiagent!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -89,6 +101,7 @@ class CreateAgentParams {
     Object? mcpServers = unsetCopyWithValue,
     Object? skills = unsetCopyWithValue,
     Object? metadata = unsetCopyWithValue,
+    Object? multiagent = unsetCopyWithValue,
   }) {
     return CreateAgentParams(
       name: name ?? this.name,
@@ -109,6 +122,9 @@ class CreateAgentParams {
       metadata: metadata == unsetCopyWithValue
           ? this.metadata
           : metadata as Map<String, String>?,
+      multiagent: multiagent == unsetCopyWithValue
+          ? this.multiagent
+          : multiagent as MultiagentParams?,
     );
   }
 
@@ -124,7 +140,8 @@ class CreateAgentParams {
           listsEqual(tools, other.tools) &&
           listsEqual(mcpServers, other.mcpServers) &&
           listsEqual(skills, other.skills) &&
-          mapsEqual(metadata, other.metadata);
+          mapsEqual(metadata, other.metadata) &&
+          multiagent == other.multiagent;
 
   @override
   int get hashCode => Object.hash(
@@ -136,6 +153,7 @@ class CreateAgentParams {
     listHash(mcpServers),
     listHash(skills),
     mapHash(metadata),
+    multiagent,
   );
 
   @override
@@ -148,5 +166,6 @@ class CreateAgentParams {
       'tools: $tools, '
       'mcpServers: $mcpServers, '
       'skills: $skills, '
-      'metadata: $metadata)';
+      'metadata: $metadata, '
+      'multiagent: $multiagent)';
 }

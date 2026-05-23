@@ -7,6 +7,7 @@ import '../config/agent_skill.dart';
 import '../config/agent_tool.dart';
 import '../config/mcp_server.dart';
 import '../config/model_config.dart';
+import 'multiagent.dart';
 
 /// A Managed Agents agent.
 @immutable
@@ -44,6 +45,10 @@ class Agent {
   /// Arbitrary key-value metadata.
   final Map<String, String>? metadata;
 
+  /// Multiagent orchestration configuration. Null when the agent is
+  /// single-threaded.
+  final Multiagent? multiagent;
+
   /// ISO 8601 timestamp of when the agent was created.
   final BetaTimestamp createdAt;
 
@@ -66,6 +71,7 @@ class Agent {
     required this.mcpServers,
     required this.skills,
     required this.metadata,
+    this.multiagent,
     required this.createdAt,
     required this.updatedAt,
     required this.archivedAt,
@@ -91,6 +97,9 @@ class Agent {
           .map((e) => AgentSkill.fromJson(e as Map<String, dynamic>))
           .toList(),
       metadata: (json['metadata'] as Map?)?.cast<String, String>(),
+      multiagent: json['multiagent'] != null
+          ? Multiagent.fromJson(json['multiagent'] as Map<String, dynamic>)
+          : null,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
       archivedAt: json['archived_at'] != null
@@ -112,6 +121,7 @@ class Agent {
     'mcp_servers': mcpServers.map((e) => e.toJson()).toList(),
     'skills': skills.map((e) => e.toJson()).toList(),
     'metadata': metadata,
+    if (multiagent != null) 'multiagent': multiagent!.toJson(),
     'created_at': createdAt.toUtc().toIso8601String(),
     'updated_at': updatedAt.toUtc().toIso8601String(),
     'archived_at': archivedAt?.toUtc().toIso8601String(),
@@ -134,6 +144,7 @@ class Agent {
     List<MCPServer>? mcpServers,
     List<AgentSkill>? skills,
     Object? metadata = unsetCopyWithValue,
+    Object? multiagent = unsetCopyWithValue,
     BetaTimestamp? createdAt,
     BetaTimestamp? updatedAt,
     Object? archivedAt = unsetCopyWithValue,
@@ -154,6 +165,9 @@ class Agent {
       metadata: metadata == unsetCopyWithValue
           ? this.metadata
           : metadata as Map<String, String>?,
+      multiagent: multiagent == unsetCopyWithValue
+          ? this.multiagent
+          : multiagent as Multiagent?,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       archivedAt: archivedAt == unsetCopyWithValue
@@ -178,6 +192,7 @@ class Agent {
           listsEqual(mcpServers, other.mcpServers) &&
           listsEqual(skills, other.skills) &&
           mapsEqual(metadata, other.metadata) &&
+          multiagent == other.multiagent &&
           createdAt == other.createdAt &&
           updatedAt == other.updatedAt &&
           archivedAt == other.archivedAt;
@@ -195,6 +210,7 @@ class Agent {
     listHash(mcpServers),
     listHash(skills),
     mapHash(metadata),
+    multiagent,
     createdAt,
     updatedAt,
     archivedAt,
@@ -214,6 +230,7 @@ class Agent {
       'mcpServers: $mcpServers, '
       'skills: $skills, '
       'metadata: $metadata, '
+      'multiagent: $multiagent, '
       'createdAt: $createdAt, '
       'updatedAt: $updatedAt, '
       'archivedAt: $archivedAt)';
