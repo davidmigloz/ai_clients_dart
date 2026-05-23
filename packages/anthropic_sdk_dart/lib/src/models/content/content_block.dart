@@ -104,9 +104,17 @@ class TextBlock extends ContentBlock {
 @immutable
 class ThinkingBlock extends ContentBlock {
   /// The thinking/reasoning content.
+  ///
+  /// Empty when parsed from a partial streaming `content_block_start` (the
+  /// text accumulates via `thinking_delta` events) or from an
+  /// Anthropic-compatible server that omits it.
   final String thinking;
 
   /// Signature for the thinking block.
+  ///
+  /// Empty when parsed from a streaming `content_block_start`; the real value
+  /// arrives later in a `signature_delta`. Also empty for Anthropic-compatible
+  /// servers (e.g. MiniMax) that omit it.
   final String signature;
 
   /// Creates a [ThinkingBlock].
@@ -114,14 +122,14 @@ class ThinkingBlock extends ContentBlock {
 
   /// Creates a [ThinkingBlock] from JSON.
   ///
-  /// `thinking` and `signature` default to empty string when absent or
-  /// null. Streaming `content_block_start` events from Anthropic-compatible
-  /// servers (notably MiniMax-Anthropic) sometimes omit `signature` at
-  /// block start — the real value arrives later in a `signature_delta`
-  /// that the accumulator merges onto the partial message. Defaulting to
-  /// empty rather than throwing keeps the SDK usable against those
-  /// servers; real Anthropic always sends both fields upfront, so this is
-  /// a no-op there.
+  /// `thinking` and `signature` are `required` only on the final response
+  /// block per the API spec. A streaming `content_block_start` carries a
+  /// *partial* thinking block whose `signature` (and initially `thinking`)
+  /// are absent — the real values arrive later in `thinking_delta` /
+  /// `signature_delta` events that the stream accumulator merges onto the
+  /// message. Some Anthropic-compatible servers (e.g. MiniMax) likewise omit
+  /// `signature` at block start. Defaulting to empty rather than throwing
+  /// keeps parsing robust in all of these cases.
   factory ThinkingBlock.fromJson(Map<String, dynamic> json) {
     return ThinkingBlock(
       thinking: json['thinking'] as String? ?? '',
@@ -165,6 +173,9 @@ class ThinkingBlock extends ContentBlock {
 @immutable
 class RedactedThinkingBlock extends ContentBlock {
   /// Opaque data for the redacted content.
+  ///
+  /// Empty when parsed from a partial streaming block or an
+  /// Anthropic-compatible server that omits the field.
   final String data;
 
   /// Creates a [RedactedThinkingBlock].
@@ -172,10 +183,10 @@ class RedactedThinkingBlock extends ContentBlock {
 
   /// Creates a [RedactedThinkingBlock] from JSON.
   ///
-  /// `data` defaults to empty string when absent or null. Mirrors the
-  /// [ThinkingBlock.fromJson] tolerance so non-canonical Anthropic-API
-  /// servers that omit the field on `content_block_start` events don't
-  /// crash the parser.
+  /// `data` defaults to empty string when absent or null, mirroring
+  /// [ThinkingBlock.fromJson]: a streaming `content_block_start` (or an
+  /// Anthropic-compatible server) may omit it rather than supplying the
+  /// final value, so defaulting avoids crashing the parser.
   factory RedactedThinkingBlock.fromJson(Map<String, dynamic> json) {
     return RedactedThinkingBlock(data: json['data'] as String? ?? '');
   }
