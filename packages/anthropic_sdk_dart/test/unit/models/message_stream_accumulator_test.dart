@@ -78,9 +78,9 @@ Map<String, dynamic> _textBlockJson({String text = ''}) => {
 };
 
 Map<String, dynamic> _thinkingBlockJson({
-  String thinking = '',
-  String signature = '',
-}) => {'type': 'thinking', 'thinking': thinking, 'signature': signature};
+  String? thinking = '',
+  String? signature = '',
+}) => {'type': 'thinking', 'thinking': ?thinking, 'signature': ?signature};
 
 Map<String, dynamic> _toolUseBlockJson({
   String id = 'toolu_123',
@@ -106,9 +106,9 @@ Map<String, dynamic> _compactionBlockJson({String? content}) => {
   'content': content,
 };
 
-Map<String, dynamic> _redactedThinkingBlockJson({String data = 'abc123'}) => {
+Map<String, dynamic> _redactedThinkingBlockJson({String? data = 'abc123'}) => {
   'type': 'redacted_thinking',
-  'data': data,
+  'data': ?data,
 };
 
 Map<String, dynamic> _containerUploadBlockJson({String fileId = 'file_1'}) => {
@@ -252,6 +252,48 @@ void main() {
         expect((acc.contentBlocks[0] as ThinkingBlock).signature, 'sig_abc');
       });
 
+      test('thinking stream tolerates content_block_start without signature '
+          '(MiniMax-Anthropic), merges later signature_delta', () {
+        // MiniMax-Anthropic emits content_block_start without `signature`;
+        // the real value arrives later as a signature_delta. This must not
+        // throw at block start, and the late signature must be merged on.
+        final acc = _accumulate([
+          _messageStartJson(),
+          _contentBlockStartJson(0, _thinkingBlockJson(signature: null)),
+          _contentBlockDeltaJson(0, _thinkingDeltaJson('Let me think')),
+          _contentBlockDeltaJson(0, _thinkingDeltaJson(' about this.')),
+          _contentBlockDeltaJson(0, _signatureDeltaJson('sig_abc')),
+          _contentBlockStopJson(0),
+          _messageDeltaJson(stopReason: 'end_turn'),
+          _messageStopJson,
+        ]);
+
+        expect(acc.contentBlocks, hasLength(1));
+        final block = acc.contentBlocks[0];
+        expect(block, isA<ThinkingBlock>());
+        expect((block as ThinkingBlock).thinking, 'Let me think about this.');
+        expect(block.signature, 'sig_abc');
+      });
+
+      test('thinking stream without any signature_delta keeps empty '
+          'signature', () {
+        // A compatible server that omits `signature` at start and never sends
+        // a signature_delta: the empty placeholder persists, no throw.
+        final acc = _accumulate([
+          _messageStartJson(),
+          _contentBlockStartJson(0, _thinkingBlockJson(signature: null)),
+          _contentBlockDeltaJson(0, _thinkingDeltaJson('Reasoning...')),
+          _contentBlockStopJson(0),
+          _messageDeltaJson(stopReason: 'end_turn'),
+          _messageStopJson,
+        ]);
+
+        expect(acc.contentBlocks, hasLength(1));
+        final block = acc.contentBlocks[0] as ThinkingBlock;
+        expect(block.thinking, 'Reasoning...');
+        expect(block.signature, '');
+      });
+
       test('tool use stream', () {
         final acc = _accumulate([
           _messageStartJson(),
@@ -337,6 +379,24 @@ void main() {
         final block = acc.contentBlocks[0];
         expect(block, isA<RedactedThinkingBlock>());
         expect((block as RedactedThinkingBlock).data, 'abc123');
+      });
+
+      test('redacted thinking block tolerates content_block_start without '
+          'data', () {
+        // Non-canonical servers may omit `data` on the redacted block start;
+        // it must default to empty rather than crash the parser.
+        final acc = _accumulate([
+          _messageStartJson(),
+          _contentBlockStartJson(0, _redactedThinkingBlockJson(data: null)),
+          _contentBlockStopJson(0),
+          _messageDeltaJson(stopReason: 'end_turn'),
+          _messageStopJson,
+        ]);
+
+        expect(acc.contentBlocks, hasLength(1));
+        final block = acc.contentBlocks[0];
+        expect(block, isA<RedactedThinkingBlock>());
+        expect((block as RedactedThinkingBlock).data, '');
       });
     });
 

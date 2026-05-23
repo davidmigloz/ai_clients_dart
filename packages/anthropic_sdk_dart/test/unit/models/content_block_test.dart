@@ -55,6 +55,78 @@ void main() {
         expect(json['thinking'], 'Deep thought');
         expect(json['signature'], 'abc123');
       });
+
+      test('fromJson tolerates missing signature (streaming '
+          'content_block_start before signature_delta)', () {
+        // MiniMax-Anthropic and other Anthropic-compatible servers emit
+        // content_block_start without `signature`; the real signature
+        // arrives later as a signature_delta the accumulator merges on.
+        // `signature` is required only on the final response block, so
+        // defaulting to empty keeps parsing robust for the partial
+        // streaming shape too.
+        final json = <String, dynamic>{'type': 'thinking', 'thinking': ''};
+        final block = ContentBlock.fromJson(json);
+
+        expect(block, isA<ThinkingBlock>());
+        final thinking = block as ThinkingBlock;
+        expect(thinking.thinking, '');
+        expect(thinking.signature, '');
+      });
+
+      test('fromJson tolerates explicit null signature', () {
+        final json = <String, dynamic>{
+          'type': 'thinking',
+          'thinking': 'hmm',
+          'signature': null,
+        };
+        final block = ContentBlock.fromJson(json) as ThinkingBlock;
+        expect(block.thinking, 'hmm');
+        expect(block.signature, '');
+      });
+
+      test('fromJson tolerates missing thinking field', () {
+        final json = <String, dynamic>{'type': 'thinking', 'signature': 'sig'};
+        final block = ContentBlock.fromJson(json) as ThinkingBlock;
+        expect(block.thinking, '');
+        expect(block.signature, 'sig');
+      });
+
+      test(
+        'toJson re-emits defaulted fields after parsing a partial block',
+        () {
+          // Parsing a partial streaming block defaults the fields; toJson must
+          // still emit them (the always-emit contract round-trips rely on).
+          final block =
+              ContentBlock.fromJson({'type': 'thinking'}) as ThinkingBlock;
+          expect(block.toJson(), {
+            'type': 'thinking',
+            'thinking': '',
+            'signature': '',
+          });
+        },
+      );
+    });
+
+    group('RedactedThinkingBlock', () {
+      test('fromJson parses redacted thinking block with data', () {
+        final json = {'type': 'redacted_thinking', 'data': 'opaque-blob'};
+        final block = ContentBlock.fromJson(json);
+        expect(block, isA<RedactedThinkingBlock>());
+        expect((block as RedactedThinkingBlock).data, 'opaque-blob');
+      });
+
+      test('fromJson tolerates missing/null data (mirrors '
+          'ThinkingBlock for non-canonical servers)', () {
+        final missing =
+            ContentBlock.fromJson({'type': 'redacted_thinking'})
+                as RedactedThinkingBlock;
+        expect(missing.data, '');
+
+        final nullData =
+            ContentBlock.fromJson({'type': 'redacted_thinking', 'data': null})
+                as RedactedThinkingBlock;
+        expect(nullData.data, '');
+      });
     });
 
     group('ToolUseBlock', () {
