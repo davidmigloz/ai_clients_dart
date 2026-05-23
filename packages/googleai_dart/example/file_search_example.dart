@@ -198,13 +198,13 @@ await for (final event in client.interactions.createStream(
   ],
 )) {
   switch (event) {
-    case ContentDeltaEvent():
+    case StepStartEvent():
+      // A new step is starting — could be a file_search_call, model_output, etc.
+      print('Step starting: ${event.step.type}');
+    case StepDeltaEvent():
       final delta = event.delta;
       if (delta is TextDelta) {
         print(delta.text);
-      } else if (delta is FileSearchResultDelta) {
-        // File search results received
-        print('Retrieved ${delta.results?.length} document chunks');
       }
     default:
       break;

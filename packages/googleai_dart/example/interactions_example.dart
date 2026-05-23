@@ -65,20 +65,20 @@ Future<void> streamingInteraction(GoogleAIClient client) async {
     input: const InteractionInput.text('Write a haiku about programming.'),
   )) {
     switch (event) {
-      case InteractionStartEvent():
-        print('Stream started: ${event.interaction?.id}');
-      case ContentDeltaEvent():
+      case InteractionCreatedEvent():
+        print('Stream started: ${event.interaction.id}');
+      case StepDeltaEvent():
         // Handle incremental content updates
         final delta = event.delta;
         if (delta is TextDelta) {
           // Print text as it streams in
           print(delta.text);
         }
-      case ContentStopEvent():
-        print('\nContent block completed (index: ${event.index})');
-      case InteractionCompleteEvent():
+      case StepStopEvent():
+        print('\nStep completed (index: ${event.index})');
+      case InteractionCompletedEvent():
         print('Stream completed');
-        print('Total tokens: ${event.interaction?.usage?.totalTokens}');
+        print('Total tokens: ${event.interaction.usage?.totalTokens}');
       case ErrorEvent():
         print('Error: ${event.error?.message}');
       default:
@@ -140,33 +140,27 @@ Future<void> functionCallingInteraction(GoogleAIClient client) async {
     tools: tools,
   )) {
     switch (event) {
-      case ContentStartEvent():
-        // Content is starting - could be text or function call
-        final content = event.content;
-        if (content != null) {
-          print('Content starting: ${content.type}');
-        }
-      case ContentDeltaEvent():
+      case StepStartEvent():
+        // A new step is starting - could be model_output, function_call, etc.
+        print('Step starting: ${event.step.type}');
+      case StepDeltaEvent():
         final delta = event.delta;
         if (delta is TextDelta) {
           print('Text: ${delta.text}');
-        } else if (delta is FunctionCallDelta) {
-          // Function call arguments arrive incrementally
-          if (delta.name != null) {
-            print('Function: ${delta.name}');
-          }
-          if (delta.arguments != null) {
-            print('Arguments: ${delta.arguments}');
+        } else if (delta is ArgumentsDelta) {
+          // Function call arguments arrive incrementally as JSON fragments
+          if (delta.partialArguments != null) {
+            print('Arguments: ${delta.partialArguments}');
           }
         }
-      case InteractionCompleteEvent():
+      case InteractionCompletedEvent():
         print('Interaction complete');
         // Check if we need to handle function results
-        if (event.interaction?.status == InteractionStatus.requiresAction) {
+        if (event.interaction.status == InteractionStatus.requiresAction) {
           print('Action required: execute function and continue');
         }
-        // Use functionCallOutputs extension for easy access
-        final functionCalls = event.interaction?.functionCallOutputs ?? [];
+        // Use functionCallSteps extension for easy access
+        final functionCalls = event.interaction.functionCallSteps;
         for (final call in functionCalls) {
           print('Function call: ${call.name}');
           print('Arguments: ${call.arguments}');

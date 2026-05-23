@@ -1,12 +1,13 @@
 part of 'deltas.dart';
 
 /// A thought summary delta update.
-class ThoughtSummaryDelta extends InteractionDelta {
+class ThoughtSummaryDelta extends StepDeltaData {
   @override
   String get type => 'thought_summary';
 
-  /// The content of the thought summary (text or image).
-  final InteractionContent? content;
+  /// The new summary item to be added to the thought
+  /// (text or image content).
+  final ThoughtSummaryContent? content;
 
   /// Creates a [ThoughtSummaryDelta] instance.
   const ThoughtSummaryDelta({this.content});
@@ -15,7 +16,7 @@ class ThoughtSummaryDelta extends InteractionDelta {
   factory ThoughtSummaryDelta.fromJson(Map<String, dynamic> json) =>
       ThoughtSummaryDelta(
         content: json['content'] != null
-            ? InteractionContent.fromJson(
+            ? ThoughtSummaryContent.fromJson(
                 json['content'] as Map<String, dynamic>,
               )
             : null,

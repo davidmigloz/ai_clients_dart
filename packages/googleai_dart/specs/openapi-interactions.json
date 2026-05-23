@@ -70,6 +70,20 @@
         ],
         "type": "object"
       },
+      "ArgumentsDelta": {
+        "properties": {
+          "partial_arguments": {
+            "type": "string"
+          },
+          "type": {
+            "const": "arguments_delta"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
       "AudioContent": {
         "description": "An audio content block.",
         "examples": [
@@ -127,7 +141,7 @@
               "MULAW audio format"
             ]
           },
-          "rate": {
+          "sample_rate": {
             "description": "The sample rate of the audio.",
             "format": "int32",
             "type": "integer"
@@ -188,6 +202,12 @@
             ]
           },
           "rate": {
+            "deprecated": true,
+            "description": "Deprecated. Use sample_rate instead. The value is ignored.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "sample_rate": {
             "description": "The sample rate of the audio.",
             "format": "int32",
             "type": "integer"
@@ -197,6 +217,60 @@
           },
           "uri": {
             "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "AudioResponseFormat": {
+        "description": "Configuration for audio output format.",
+        "properties": {
+          "bitRate": {
+            "description": "Bit rate in bits per second (bps). Only applicable for compressed formats\n(MP3, Opus).",
+            "format": "int32",
+            "type": "integer"
+          },
+          "delivery": {
+            "description": "The delivery mode for the audio output.",
+            "enum": [
+              "inline",
+              "url"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Audio data is returned inline in the response.",
+              "Audio data is returned as a URL."
+            ]
+          },
+          "mimeType": {
+            "description": "The MIME type of the audio output.",
+            "enum": [
+              "audio/mp3",
+              "audio/ogg_opus",
+              "audio/l16",
+              "audio/wav",
+              "audio/alaw",
+              "audio/mulaw"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "MP3 audio format.",
+              "OGG Opus audio format.",
+              "Raw PCM (L16) audio format.",
+              "WAV audio format.",
+              "A-law audio format.",
+              "Mu-law audio format."
+            ]
+          },
+          "sampleRate": {
+            "description": "Sample rate in Hz.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "type": {
+            "const": "audio"
           }
         },
         "required": [
@@ -253,48 +327,6 @@
         },
         "type": "object"
       },
-      "CodeExecutionCallContent": {
-        "description": "Code execution content.",
-        "examples": [
-          {
-            "code_execution_call": {
-              "summary": "Code Execution Call",
-              "value": {
-                "arguments": {
-                  "code": "print('hello world')",
-                  "language": "python"
-                },
-                "id": "call_123456",
-                "type": "code_execution_call"
-              }
-            }
-          }
-        ],
-        "properties": {
-          "arguments": {
-            "$ref": "#/components/schemas/CodeExecutionCallArguments",
-            "description": "Required. The arguments to pass to the code execution."
-          },
-          "id": {
-            "description": "Required. A unique ID for this specific tool call.",
-            "type": "string"
-          },
-          "signature": {
-            "description": "A signature hash for backend validation.",
-            "format": "byte",
-            "type": "string"
-          },
-          "type": {
-            "const": "code_execution_call"
-          }
-        },
-        "required": [
-          "type",
-          "arguments",
-          "id"
-        ],
-        "type": "object"
-      },
       "CodeExecutionCallDelta": {
         "properties": {
           "arguments": {
@@ -320,31 +352,63 @@
         ],
         "type": "object"
       },
-      "CodeExecutionResultContent": {
-        "description": "Code execution result content.",
-        "examples": [
-          {
-            "code_execution_result": {
-              "summary": "Code Execution Result",
-              "value": {
-                "call_id": "call_123456",
-                "result": "hello world",
-                "type": "code_execution_result"
-              }
-            }
+      "CodeExecutionCallStep": {
+        "description": "Code execution call step.",
+        "properties": {
+          "arguments": {
+            "$ref": "#/components/schemas/CodeExecutionCallStepArguments",
+            "description": "Required. The arguments to pass to the code execution."
+          },
+          "id": {
+            "description": "Required. A unique ID for this specific tool call.",
+            "type": "string"
+          },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
+          },
+          "type": {
+            "const": "code_execution_call"
           }
+        },
+        "required": [
+          "type",
+          "arguments",
+          "id"
         ],
+        "type": "object"
+      },
+      "CodeExecutionCallStepArguments": {
+        "description": "The arguments to pass to the code execution.",
+        "properties": {
+          "code": {
+            "description": "The code to be executed.",
+            "type": "string"
+          },
+          "language": {
+            "description": "Programming language of the `code`.",
+            "enum": [
+              "python"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Python >= 3.10, with numpy and simpy available."
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "CodeExecutionResultDelta": {
         "properties": {
           "call_id": {
             "description": "Required. ID to match the ID from the function call block.",
             "type": "string"
           },
           "is_error": {
-            "description": "Whether the code execution resulted in an error.",
             "type": "boolean"
           },
           "result": {
-            "description": "Required. The output of the code execution.",
             "type": "string"
           },
           "signature": {
@@ -363,16 +427,19 @@
         ],
         "type": "object"
       },
-      "CodeExecutionResultDelta": {
+      "CodeExecutionResultStep": {
+        "description": "Code execution result step.",
         "properties": {
           "call_id": {
             "description": "Required. ID to match the ID from the function call block.",
             "type": "string"
           },
           "is_error": {
+            "description": "Whether the code execution resulted in an error.",
             "type": "boolean"
           },
           "result": {
+            "description": "Required. The output of the code execution.",
             "type": "string"
           },
           "signature": {
@@ -457,51 +524,6 @@
           },
           {
             "$ref": "#/components/schemas/VideoContent"
-          },
-          {
-            "$ref": "#/components/schemas/ThoughtContent"
-          },
-          {
-            "$ref": "#/components/schemas/FunctionCallContent"
-          },
-          {
-            "$ref": "#/components/schemas/CodeExecutionCallContent"
-          },
-          {
-            "$ref": "#/components/schemas/UrlContextCallContent"
-          },
-          {
-            "$ref": "#/components/schemas/McpServerToolCallContent"
-          },
-          {
-            "$ref": "#/components/schemas/GoogleSearchCallContent"
-          },
-          {
-            "$ref": "#/components/schemas/FileSearchCallContent"
-          },
-          {
-            "$ref": "#/components/schemas/GoogleMapsCallContent"
-          },
-          {
-            "$ref": "#/components/schemas/FunctionResultContent"
-          },
-          {
-            "$ref": "#/components/schemas/CodeExecutionResultContent"
-          },
-          {
-            "$ref": "#/components/schemas/UrlContextResultContent"
-          },
-          {
-            "$ref": "#/components/schemas/GoogleSearchResultContent"
-          },
-          {
-            "$ref": "#/components/schemas/McpServerToolResultContent"
-          },
-          {
-            "$ref": "#/components/schemas/FileSearchResultContent"
-          },
-          {
-            "$ref": "#/components/schemas/GoogleMapsResultContent"
           }
         ],
         "type": "object"
@@ -729,20 +751,20 @@
           "input": {
             "$ref": "#/components/schemas/InteractionsInput"
           },
-          "outputs": {
-            "description": "Output only. Responses from the model.",
-            "items": {
-              "$ref": "#/components/schemas/Content"
-            },
-            "readOnly": true,
-            "type": "array"
-          },
           "previous_interaction_id": {
             "description": "The ID of the previous interaction, if any.",
             "type": "string"
           },
           "response_format": {
-            "description": "Enforces that the generated response is a JSON object that complies with\nthe JSON schema specified in this field."
+            "description": "Enforces that the generated response is a JSON object that complies with the JSON schema specified in this field.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ResponseFormatList"
+              },
+              {
+                "$ref": "#/components/schemas/ResponseFormat"
+              }
+            ]
           },
           "response_mime_type": {
             "description": "The mime type of the response. This is required if response_format is set.",
@@ -756,6 +778,7 @@
             "type": "array"
           },
           "role": {
+            "deprecated": true,
             "description": "Output only. The role of the interaction.",
             "readOnly": true,
             "type": "string"
@@ -795,6 +818,14 @@
               "The interaction is completed, but contains incomplete results (e.g.\nhitting max_tokens)."
             ]
           },
+          "steps": {
+            "description": "Output only. The steps that make up the interaction.",
+            "items": {
+              "$ref": "#/components/schemas/Step"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
           "store": {
             "description": "Input only. Whether to store the response and request for later retrieval.",
             "type": "boolean",
@@ -826,6 +857,10 @@
             "$ref": "#/components/schemas/Usage",
             "description": "Output only. Statistics on the interaction request's token usage.",
             "readOnly": true
+          },
+          "webhook_config": {
+            "$ref": "#/components/schemas/WebhookConfig",
+            "description": "Optional. Webhook configuration for receiving notifications when the\ninteraction completes."
           }
         },
         "required": [
@@ -864,20 +899,20 @@
             "$ref": "#/components/schemas/ModelOption",
             "description": "The name of the `Model` used for generating the interaction."
           },
-          "outputs": {
-            "description": "Output only. Responses from the model.",
-            "items": {
-              "$ref": "#/components/schemas/Content"
-            },
-            "readOnly": true,
-            "type": "array"
-          },
           "previous_interaction_id": {
             "description": "The ID of the previous interaction, if any.",
             "type": "string"
           },
           "response_format": {
-            "description": "Enforces that the generated response is a JSON object that complies with\nthe JSON schema specified in this field."
+            "description": "Enforces that the generated response is a JSON object that complies with the JSON schema specified in this field.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ResponseFormatList"
+              },
+              {
+                "$ref": "#/components/schemas/ResponseFormat"
+              }
+            ]
           },
           "response_mime_type": {
             "description": "The mime type of the response. This is required if response_format is set.",
@@ -891,6 +926,7 @@
             "type": "array"
           },
           "role": {
+            "deprecated": true,
             "description": "Output only. The role of the interaction.",
             "readOnly": true,
             "type": "string"
@@ -930,6 +966,14 @@
               "The interaction is completed, but contains incomplete results (e.g.\nhitting max_tokens)."
             ]
           },
+          "steps": {
+            "description": "Output only. The steps that make up the interaction.",
+            "items": {
+              "$ref": "#/components/schemas/Step"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
           "store": {
             "description": "Input only. Whether to store the response and request for later retrieval.",
             "type": "boolean",
@@ -961,6 +1005,10 @@
             "$ref": "#/components/schemas/Usage",
             "description": "Output only. Statistics on the interaction request's token usage.",
             "readOnly": true
+          },
+          "webhook_config": {
+            "$ref": "#/components/schemas/WebhookConfig",
+            "description": "Optional. Webhook configuration for receiving notifications when the\ninteraction completes."
           }
         },
         "required": [
@@ -972,7 +1020,7 @@
         "description": "Configuration for the Deep Research agent.",
         "properties": {
           "collaborative_planning": {
-            "description": "Enables human-in-the-loop planning for the Deep Research agent. If set to\ntrue, the Deep Research agent will provide a research plan in its response.\nThe agent will then proceed only if the user confirms the plan in the next\nturn.",
+            "description": "Enables human-in-the-loop planning for the Deep Research agent. If set to\ntrue, the Deep Research agent will provide a research plan in its response.\nThe agent will then proceed only if the user confirms the plan in the next\nturn. .",
             "type": "boolean"
           },
           "thinking_summaries": {
@@ -1085,6 +1133,11 @@
         ],
         "type": "object"
       },
+      "Empty": {
+        "description": "A generic empty message that you can re-use to avoid defining duplicated\nempty messages in your APIs. A typical example is to use it as the request\nor the response type of an API method. For instance:\n\n    service Foo {\n      rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty);\n    }",
+        "type": "object",
+        "x-stainless-empty-object": true
+      },
       "Error": {
         "description": "Error message from an interaction.",
         "properties": {
@@ -1134,6 +1187,13 @@
       "FileCitation": {
         "description": "A file citation annotation.",
         "properties": {
+          "custom_metadata": {
+            "additionalProperties": {
+              "description": "Properties of the object."
+            },
+            "description": "User provided metadata about the retrieved context.",
+            "type": "object"
+          },
           "document_uri": {
             "description": "The URI of the file.",
             "type": "string"
@@ -1146,6 +1206,15 @@
           "file_name": {
             "description": "The name of the file.",
             "type": "string"
+          },
+          "media_id": {
+            "description": "Media ID in-case of image citations, if applicable.",
+            "type": "string"
+          },
+          "page_number": {
+            "description": "Page number of the cited document, if applicable.",
+            "format": "int32",
+            "type": "integer"
           },
           "source": {
             "description": "Source attributed for a portion of the text.",
@@ -1210,19 +1279,7 @@
           }
         ]
       },
-      "FileSearchCallContent": {
-        "description": "File Search content.",
-        "examples": [
-          {
-            "file_search_call": {
-              "summary": "File Search Call",
-              "value": {
-                "id": "call_123456",
-                "type": "file_search_call"
-              }
-            }
-          }
-        ],
+      "FileSearchCallDelta": {
         "properties": {
           "id": {
             "description": "Required. A unique ID for this specific tool call.",
@@ -1243,7 +1300,8 @@
         ],
         "type": "object"
       },
-      "FileSearchCallDelta": {
+      "FileSearchCallStep": {
+        "description": "File Search call step.",
         "properties": {
           "id": {
             "description": "Required. A unique ID for this specific tool call.",
@@ -1266,62 +1324,6 @@
       },
       "FileSearchResult": {
         "description": "The result of the File Search.",
-        "properties": {
-          "custom_metadata": {
-            "description": "User provided metadata about the FileSearchResult.",
-            "items": {
-              "type": "object"
-            },
-            "type": "array"
-          }
-        },
-        "type": "object"
-      },
-      "FileSearchResultContent": {
-        "description": "File Search result content.",
-        "examples": [
-          {
-            "file_search_result": {
-              "summary": "File Search Result",
-              "value": {
-                "call_id": "call_123456",
-                "result": [
-                  {
-                    "file_search_store": "file_search_store",
-                    "text": "search result chunk"
-                  }
-                ],
-                "type": "file_search_result"
-              }
-            }
-          }
-        ],
-        "properties": {
-          "call_id": {
-            "description": "Required. ID to match the ID from the function call block.",
-            "type": "string"
-          },
-          "result": {
-            "description": "Required. The results of the File Search.",
-            "items": {
-              "$ref": "#/components/schemas/FileSearchResult"
-            },
-            "type": "array"
-          },
-          "signature": {
-            "description": "A signature hash for backend validation.",
-            "format": "byte",
-            "type": "string"
-          },
-          "type": {
-            "const": "file_search_result"
-          }
-        },
-        "required": [
-          "type",
-          "result",
-          "call_id"
-        ],
         "type": "object"
       },
       "FileSearchResultDelta": {
@@ -1348,6 +1350,28 @@
         "required": [
           "type",
           "result",
+          "call_id"
+        ],
+        "type": "object"
+      },
+      "FileSearchResultStep": {
+        "description": "File Search result step.",
+        "properties": {
+          "call_id": {
+            "description": "Required. ID to match the ID from the function call block.",
+            "type": "string"
+          },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
+          },
+          "type": {
+            "const": "file_search_result"
+          }
+        },
+        "required": [
+          "type",
           "call_id"
         ],
         "type": "object"
@@ -1392,23 +1416,40 @@
           }
         ]
       },
-      "FunctionCallContent": {
-        "description": "A function tool call content block.",
-        "examples": [
-          {
-            "function_call": {
-              "summary": "Function Call",
-              "value": {
-                "arguments": {
-                  "location": "Boston, MA"
-                },
-                "id": "gth23981",
-                "name": "get_weather",
-                "type": "function_call"
-              }
-            }
+      "FunctionCallDelta": {
+        "properties": {
+          "arguments": {
+            "additionalProperties": {
+              "description": "Properties of the object."
+            },
+            "type": "object"
+          },
+          "id": {
+            "description": "Required. A unique ID for this specific tool call.",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
+          },
+          "type": {
+            "const": "function_call"
           }
+        },
+        "required": [
+          "type",
+          "name",
+          "arguments",
+          "id"
         ],
+        "type": "object"
+      },
+      "FunctionCallStep": {
+        "description": "A function tool call step.",
         "properties": {
           "arguments": {
             "additionalProperties": {
@@ -1442,73 +1483,19 @@
         ],
         "type": "object"
       },
-      "FunctionCallDelta": {
-        "properties": {
-          "arguments": {
-            "additionalProperties": {
-              "description": "Properties of the object."
-            },
-            "type": "object"
-          },
-          "id": {
-            "description": "Required. A unique ID for this specific tool call.",
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "signature": {
-            "description": "A signature hash for backend validation.",
-            "format": "byte",
-            "type": "string"
-          },
-          "type": {
-            "const": "function_call"
-          }
-        },
-        "required": [
-          "type",
-          "name",
-          "arguments",
-          "id"
-        ],
-        "type": "object"
-      },
-      "FunctionResultContent": {
-        "description": "A function tool result content block.",
-        "examples": [
-          {
-            "function_result": {
-              "summary": "Function Result",
-              "value": {
-                "call_id": "gth23981",
-                "name": "get_weather",
-                "result": [
-                  {
-                    "text": "{\"weather\":\"sunny\"}",
-                    "type": "text"
-                  }
-                ],
-                "type": "function_result"
-              }
-            }
-          }
-        ],
+      "FunctionResultDelta": {
         "properties": {
           "call_id": {
             "description": "Required. ID to match the ID from the function call block.",
             "type": "string"
           },
           "is_error": {
-            "description": "Whether the tool call resulted in an error.",
             "type": "boolean"
           },
           "name": {
-            "description": "The name of the tool that was called.",
             "type": "string"
           },
           "result": {
-            "description": "The result of the tool call.",
             "oneOf": [
               {
                 "type": "object"
@@ -1541,19 +1528,23 @@
         ],
         "type": "object"
       },
-      "FunctionResultDelta": {
+      "FunctionResultStep": {
+        "description": "Result of a function tool call.",
         "properties": {
           "call_id": {
             "description": "Required. ID to match the ID from the function call block.",
             "type": "string"
           },
           "is_error": {
+            "description": "Whether the tool call resulted in an error.",
             "type": "boolean"
           },
           "name": {
+            "description": "The name of the tool that was called.",
             "type": "string"
           },
           "result": {
+            "description": "The result of the tool call.",
             "oneOf": [
               {
                 "type": "object"
@@ -1719,46 +1710,6 @@
         },
         "type": "object"
       },
-      "GoogleMapsCallContent": {
-        "description": "Google Maps content.",
-        "examples": [
-          {
-            "google_maps_call": {
-              "summary": "Google Maps Call",
-              "value": {
-                "arguments": {
-                  "query": "best food near me"
-                },
-                "id": "call_123456",
-                "type": "google_maps_call"
-              }
-            }
-          }
-        ],
-        "properties": {
-          "arguments": {
-            "$ref": "#/components/schemas/GoogleMapsCallArguments",
-            "description": "The arguments to pass to the Google Maps tool."
-          },
-          "id": {
-            "description": "Required. A unique ID for this specific tool call.",
-            "type": "string"
-          },
-          "signature": {
-            "description": "A signature hash for backend validation.",
-            "format": "byte",
-            "type": "string"
-          },
-          "type": {
-            "const": "google_maps_call"
-          }
-        },
-        "required": [
-          "type",
-          "id"
-        ],
-        "type": "object"
-      },
       "GoogleMapsCallDelta": {
         "properties": {
           "arguments": {
@@ -1784,6 +1735,45 @@
         ],
         "type": "object"
       },
+      "GoogleMapsCallStep": {
+        "description": "Google Maps call step.",
+        "properties": {
+          "arguments": {
+            "$ref": "#/components/schemas/GoogleMapsCallStepArguments",
+            "description": "The arguments to pass to the Google Maps tool."
+          },
+          "id": {
+            "description": "Required. A unique ID for this specific tool call.",
+            "type": "string"
+          },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
+          },
+          "type": {
+            "const": "google_maps_call"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "type": "object"
+      },
+      "GoogleMapsCallStepArguments": {
+        "description": "The arguments to pass to the Google Maps tool.",
+        "properties": {
+          "queries": {
+            "description": "The queries to be executed.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "GoogleMapsResult": {
         "description": "The result of the Google Maps.",
         "properties": {
@@ -1799,57 +1789,6 @@
             "type": "string"
           }
         },
-        "type": "object"
-      },
-      "GoogleMapsResultContent": {
-        "description": "Google Maps result content.",
-        "examples": [
-          {
-            "google_maps_result": {
-              "summary": "Google Maps Result",
-              "value": {
-                "call_id": "call_123456",
-                "result": [
-                  {
-                    "places": [
-                      {
-                        "name": "Tasty Restaurant",
-                        "url": "https://www.google.com/maps/search/best+food+near+me"
-                      }
-                    ]
-                  }
-                ],
-                "type": "google_maps_result"
-              }
-            }
-          }
-        ],
-        "properties": {
-          "call_id": {
-            "description": "Required. ID to match the ID from the function call block.",
-            "type": "string"
-          },
-          "result": {
-            "description": "Required. The results of the Google Maps.",
-            "items": {
-              "$ref": "#/components/schemas/GoogleMapsResult"
-            },
-            "type": "array"
-          },
-          "signature": {
-            "description": "A signature hash for backend validation.",
-            "format": "byte",
-            "type": "string"
-          },
-          "type": {
-            "const": "google_maps_result"
-          }
-        },
-        "required": [
-          "type",
-          "result",
-          "call_id"
-        ],
         "type": "object"
       },
       "GoogleMapsResultDelta": {
@@ -1876,6 +1815,70 @@
         },
         "required": [
           "type",
+          "call_id"
+        ],
+        "type": "object"
+      },
+      "GoogleMapsResultItem": {
+        "description": "The result of the Google Maps.",
+        "properties": {
+          "places": {
+            "items": {
+              "$ref": "#/components/schemas/GoogleMapsResultPlaces"
+            },
+            "type": "array"
+          },
+          "widget_context_token": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleMapsResultPlaces": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "place_id": {
+            "type": "string"
+          },
+          "review_snippets": {
+            "items": {
+              "$ref": "#/components/schemas/ReviewSnippet"
+            },
+            "type": "array"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleMapsResultStep": {
+        "description": "Google Maps result step.",
+        "properties": {
+          "call_id": {
+            "description": "Required. ID to match the ID from the function call block.",
+            "type": "string"
+          },
+          "result": {
+            "items": {
+              "$ref": "#/components/schemas/GoogleMapsResultItem"
+            },
+            "type": "array"
+          },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
+          },
+          "type": {
+            "const": "google_maps_result"
+          }
+        },
+        "required": [
+          "type",
+          "result",
           "call_id"
         ],
         "type": "object"
@@ -1939,27 +1942,36 @@
         },
         "type": "object"
       },
-      "GoogleSearchCallContent": {
-        "description": "Google Search content.",
-        "examples": [
-          {
-            "google_search_call": {
-              "summary": "Google Search Call",
-              "value": {
-                "arguments": {
-                  "queries": [
-                    "weather in Boston"
-                  ]
-                },
-                "id": "call_123456",
-                "type": "google_search_call"
-              }
-            }
-          }
-        ],
+      "GoogleSearchCallDelta": {
         "properties": {
           "arguments": {
-            "$ref": "#/components/schemas/GoogleSearchCallArguments",
+            "$ref": "#/components/schemas/GoogleSearchCallArguments"
+          },
+          "id": {
+            "description": "Required. A unique ID for this specific tool call.",
+            "type": "string"
+          },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
+          },
+          "type": {
+            "const": "google_search_call"
+          }
+        },
+        "required": [
+          "type",
+          "arguments",
+          "id"
+        ],
+        "type": "object"
+      },
+      "GoogleSearchCallStep": {
+        "description": "Google Search call step.",
+        "properties": {
+          "arguments": {
+            "$ref": "#/components/schemas/GoogleSearchCallStepArguments",
             "description": "Required. The arguments to pass to Google Search."
           },
           "id": {
@@ -1996,29 +2008,17 @@
         ],
         "type": "object"
       },
-      "GoogleSearchCallDelta": {
+      "GoogleSearchCallStepArguments": {
+        "description": "The arguments to pass to Google Search.",
         "properties": {
-          "arguments": {
-            "$ref": "#/components/schemas/GoogleSearchCallArguments"
-          },
-          "id": {
-            "description": "Required. A unique ID for this specific tool call.",
-            "type": "string"
-          },
-          "signature": {
-            "description": "A signature hash for backend validation.",
-            "format": "byte",
-            "type": "string"
-          },
-          "type": {
-            "const": "google_search_call"
+          "queries": {
+            "description": "Web search queries for the following-up web search.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           }
         },
-        "required": [
-          "type",
-          "arguments",
-          "id"
-        ],
         "type": "object"
       },
       "GoogleSearchResult": {
@@ -2029,57 +2029,6 @@
             "type": "string"
           }
         },
-        "type": "object"
-      },
-      "GoogleSearchResultContent": {
-        "description": "Google Search result content.",
-        "examples": [
-          {
-            "google_search_result": {
-              "summary": "Google Search Result",
-              "value": {
-                "call_id": "call_123456",
-                "result": [
-                  {
-                    "title": "Weather in Boston",
-                    "url": "https://www.google.com/search?q=weather+in+Boston"
-                  }
-                ],
-                "type": "google_search_result"
-              }
-            }
-          }
-        ],
-        "properties": {
-          "call_id": {
-            "description": "Required. ID to match the ID from the function call block.",
-            "type": "string"
-          },
-          "is_error": {
-            "description": "Whether the Google Search resulted in an error.",
-            "type": "boolean"
-          },
-          "result": {
-            "description": "Required. The results of the Google Search.",
-            "items": {
-              "$ref": "#/components/schemas/GoogleSearchResult"
-            },
-            "type": "array"
-          },
-          "signature": {
-            "description": "A signature hash for backend validation.",
-            "format": "byte",
-            "type": "string"
-          },
-          "type": {
-            "const": "google_search_result"
-          }
-        },
-        "required": [
-          "type",
-          "result",
-          "call_id"
-        ],
         "type": "object"
       },
       "GoogleSearchResultDelta": {
@@ -2111,6 +2060,75 @@
           "result",
           "call_id"
         ],
+        "type": "object"
+      },
+      "GoogleSearchResultItem": {
+        "description": "The result of the Google Search.",
+        "properties": {
+          "search_suggestions": {
+            "description": "Web content snippet that can be embedded in a web page or an app webview.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleSearchResultStep": {
+        "description": "Google Search result step.",
+        "properties": {
+          "call_id": {
+            "description": "Required. ID to match the ID from the function call block.",
+            "type": "string"
+          },
+          "is_error": {
+            "description": "Whether the Google Search resulted in an error.",
+            "type": "boolean"
+          },
+          "result": {
+            "description": "Required. The results of the Google Search.",
+            "items": {
+              "$ref": "#/components/schemas/GoogleSearchResultItem"
+            },
+            "type": "array"
+          },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
+          },
+          "type": {
+            "const": "google_search_result"
+          }
+        },
+        "required": [
+          "type",
+          "result",
+          "call_id"
+        ],
+        "type": "object"
+      },
+      "GroundingToolCount": {
+        "description": "The number of grounding tool counts.",
+        "properties": {
+          "count": {
+            "description": "The number of grounding tool counts.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "type": {
+            "description": "The grounding tool type associated with the count.",
+            "enum": [
+              "google_search",
+              "google_maps",
+              "retrieval"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Grounding with Google Web Search and Image Search, & Web Grounding\nfor Enterprise.",
+              "Grounding with Google Maps.",
+              "Grounding with customer's data, for example, VertexAISearch."
+            ]
+          }
+        },
         "type": "object"
       },
       "ImageConfig": {
@@ -2273,6 +2291,92 @@
         ],
         "type": "object"
       },
+      "ImageResponseFormat": {
+        "description": "Configuration for image output format.",
+        "properties": {
+          "aspectRatio": {
+            "description": "The aspect ratio for the image output.",
+            "enum": [
+              "1:1",
+              "2:3",
+              "3:2",
+              "3:4",
+              "4:3",
+              "4:5",
+              "5:4",
+              "9:16",
+              "16:9",
+              "21:9",
+              "1:8",
+              "8:1",
+              "1:4",
+              "4:1"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "1:1 aspect ratio.",
+              "2:3 aspect ratio.",
+              "3:2 aspect ratio.",
+              "3:4 aspect ratio.",
+              "4:3 aspect ratio.",
+              "4:5 aspect ratio.",
+              "5:4 aspect ratio.",
+              "9:16 aspect ratio.",
+              "16:9 aspect ratio.",
+              "21:9 aspect ratio.",
+              "1:8 aspect ratio.",
+              "8:1 aspect ratio.",
+              "1:4 aspect ratio.",
+              "4:1 aspect ratio."
+            ]
+          },
+          "delivery": {
+            "description": "The delivery mode for the image output.",
+            "enum": [
+              "inline",
+              "url"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Image data is returned inline in the response.",
+              "Image data is returned as a URL."
+            ]
+          },
+          "imageSize": {
+            "description": "The size of the image output.",
+            "enum": [
+              "512",
+              "1K",
+              "2K",
+              "4K"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "512px image size.",
+              "1K image size.",
+              "2K image size.",
+              "4K image size."
+            ]
+          },
+          "mimeType": {
+            "description": "The MIME type of the image output.",
+            "enum": [
+              "image/jpeg"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "JPEG image format."
+            ]
+          },
+          "type": {
+            "const": "image"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
       "Interaction": {
         "description": "The Interaction resource.",
         "example": {
@@ -2346,20 +2450,20 @@
             "$ref": "#/components/schemas/ModelOption",
             "description": "The name of the `Model` used for generating the interaction."
           },
-          "outputs": {
-            "description": "Output only. Responses from the model.",
-            "items": {
-              "$ref": "#/components/schemas/Content"
-            },
-            "readOnly": true,
-            "type": "array"
-          },
           "previous_interaction_id": {
             "description": "The ID of the previous interaction, if any.",
             "type": "string"
           },
           "response_format": {
-            "description": "Enforces that the generated response is a JSON object that complies with\nthe JSON schema specified in this field."
+            "description": "Enforces that the generated response is a JSON object that complies with the JSON schema specified in this field.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ResponseFormatList"
+              },
+              {
+                "$ref": "#/components/schemas/ResponseFormat"
+              }
+            ]
           },
           "response_mime_type": {
             "description": "The mime type of the response. This is required if response_format is set.",
@@ -2373,6 +2477,7 @@
             "type": "array"
           },
           "role": {
+            "deprecated": true,
             "description": "Output only. The role of the interaction.",
             "readOnly": true,
             "type": "string"
@@ -2412,6 +2517,14 @@
               "The interaction is completed, but contains incomplete results (e.g.\nhitting max_tokens)."
             ]
           },
+          "steps": {
+            "description": "Output only. The steps that make up the interaction.",
+            "items": {
+              "$ref": "#/components/schemas/Step"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
           "system_instruction": {
             "description": "System instruction for the interaction.",
             "type": "string"
@@ -2433,6 +2546,10 @@
             "$ref": "#/components/schemas/Usage",
             "description": "Output only. Statistics on the interaction request's token usage.",
             "readOnly": true
+          },
+          "webhook_config": {
+            "$ref": "#/components/schemas/WebhookConfig",
+            "description": "Optional. Webhook configuration for receiving notifications when the\ninteraction completes."
           }
         },
         "required": [
@@ -2442,51 +2559,37 @@
           "updated"
         ]
       },
-      "InteractionCompleteEvent": {
-        "examples": [
-          {
-            "interaction_complete": {
-              "summary": "Interaction Complete",
-              "value": {
-                "event_type": "interaction.complete",
-                "interaction": {
-                  "created": "2025-12-09T18:45:40Z",
-                  "id": "v1_ChdTMjQ0YWJ5TUF1TzcxZThQdjRpcnFRcxIXUzI0NGFieU1BdU83MWU4UHY0aXJxUXM",
-                  "model": "gemini-3-flash-preview",
-                  "object": "interaction",
-                  "role": "model",
-                  "status": "completed",
-                  "updated": "2025-12-09T18:45:40Z",
-                  "usage": {
-                    "input_tokens_by_modality": [
-                      {
-                        "modality": "text",
-                        "tokens": 11
-                      }
-                    ],
-                    "total_cached_tokens": 0,
-                    "total_input_tokens": 11,
-                    "total_output_tokens": 364,
-                    "total_thought_tokens": 1120,
-                    "total_tokens": 1495,
-                    "total_tool_use_tokens": 0
-                  }
-                }
-              }
-            }
-          }
-        ],
+      "InteractionCompletedEvent": {
         "properties": {
           "event_id": {
             "description": "The event_id token to be used to resume the interaction stream, from\nthis event.",
             "type": "string"
           },
           "event_type": {
-            "const": "interaction.complete"
+            "const": "interaction.completed"
           },
           "interaction": {
             "$ref": "#/components/schemas/Interaction",
             "description": "Required. The completed interaction with empty outputs to reduce the payload size.\nUse the preceding ContentDelta events for the actual output."
+          }
+        },
+        "required": [
+          "event_type",
+          "interaction"
+        ],
+        "type": "object"
+      },
+      "InteractionCreatedEvent": {
+        "properties": {
+          "event_id": {
+            "description": "The event_id token to be used to resume the interaction stream, from\nthis event.",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "interaction.created"
+          },
+          "interaction": {
+            "$ref": "#/components/schemas/Interaction"
           }
         },
         "required": [
@@ -2501,61 +2604,26 @@
         },
         "oneOf": [
           {
-            "$ref": "#/components/schemas/InteractionStartEvent"
+            "$ref": "#/components/schemas/InteractionCreatedEvent"
           },
           {
-            "$ref": "#/components/schemas/InteractionCompleteEvent"
+            "$ref": "#/components/schemas/InteractionCompletedEvent"
           },
           {
             "$ref": "#/components/schemas/InteractionStatusUpdate"
           },
           {
-            "$ref": "#/components/schemas/ContentStart"
-          },
-          {
-            "$ref": "#/components/schemas/ContentDelta"
-          },
-          {
-            "$ref": "#/components/schemas/ContentStop"
-          },
-          {
             "$ref": "#/components/schemas/ErrorEvent"
-          }
-        ],
-        "type": "object"
-      },
-      "InteractionStartEvent": {
-        "examples": [
+          },
           {
-            "interaction_start": {
-              "summary": "Interaction Start",
-              "value": {
-                "event_type": "interaction.start",
-                "interaction": {
-                  "id": "v1_ChdTMjQ0YWJ5TUF1TzcxZThQdjRpcnFRcxIXUzI0NGFieU1BdU83MWU4UHY0aXJxUXM",
-                  "model": "gemini-3-flash-preview",
-                  "object": "interaction",
-                  "status": "in_progress"
-                }
-              }
-            }
-          }
-        ],
-        "properties": {
-          "event_id": {
-            "description": "The event_id token to be used to resume the interaction stream, from\nthis event.",
-            "type": "string"
+            "$ref": "#/components/schemas/StepStart"
           },
-          "event_type": {
-            "const": "interaction.start"
+          {
+            "$ref": "#/components/schemas/StepDelta"
           },
-          "interaction": {
-            "$ref": "#/components/schemas/Interaction"
+          {
+            "$ref": "#/components/schemas/StepStop"
           }
-        },
-        "required": [
-          "event_type",
-          "interaction"
         ],
         "type": "object"
       },
@@ -2614,6 +2682,16 @@
         "description": "The input for the interaction.",
         "oneOf": [
           {
+            "type": "string"
+          },
+          {
+            "items": {
+              "$ref": "#/components/schemas/Step"
+            },
+            "title": "StepList",
+            "type": "array"
+          },
+          {
             "items": {
               "$ref": "#/components/schemas/Content"
             },
@@ -2621,19 +2699,26 @@
             "type": "array"
           },
           {
-            "type": "string"
-          },
-          {
-            "items": {
-              "$ref": "#/components/schemas/Turn"
-            },
-            "title": "TurnList",
-            "type": "array"
-          },
-          {
             "$ref": "#/components/schemas/Content"
           }
         ]
+      },
+      "ListWebhooksResponse": {
+        "description": "Response message for WebhookService.ListWebhooks.",
+        "properties": {
+          "next_page_token": {
+            "description": "A token, which can be sent as `page_token` to retrieve the next page.\nIf this field is omitted, there are no subsequent pages.",
+            "type": "string"
+          },
+          "webhooks": {
+            "description": "The webhooks.",
+            "items": {
+              "$ref": "#/components/schemas/Webhook"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
       },
       "McpServer": {
         "description": "A MCPServer is a server that can be called by the model to perform actions.",
@@ -2686,24 +2771,44 @@
           }
         ]
       },
-      "McpServerToolCallContent": {
-        "description": "MCPServer tool call content.",
-        "examples": [
-          {
-            "mcp_server_tool_call": {
-              "summary": "Mcp Server Tool Call",
-              "value": {
-                "arguments": {
-                  "city": "London"
-                },
-                "id": "call_123456",
-                "name": "get_forecast",
-                "server_name": "weather_server",
-                "type": "mcp_server_tool_call"
-              }
-            }
+      "McpServerToolCallDelta": {
+        "properties": {
+          "arguments": {
+            "additionalProperties": {
+              "description": "Properties of the object."
+            },
+            "type": "object"
+          },
+          "id": {
+            "description": "Required. A unique ID for this specific tool call.",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "server_name": {
+            "type": "string"
+          },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
+          },
+          "type": {
+            "const": "mcp_server_tool_call"
           }
+        },
+        "required": [
+          "type",
+          "name",
+          "server_name",
+          "arguments",
+          "id"
         ],
+        "type": "object"
+      },
+      "McpServerToolCallStep": {
+        "description": "MCPServer tool call step.",
         "properties": {
           "arguments": {
             "additionalProperties": {
@@ -2742,105 +2847,6 @@
         ],
         "type": "object"
       },
-      "McpServerToolCallDelta": {
-        "properties": {
-          "arguments": {
-            "additionalProperties": {
-              "description": "Properties of the object."
-            },
-            "type": "object"
-          },
-          "id": {
-            "description": "Required. A unique ID for this specific tool call.",
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "server_name": {
-            "type": "string"
-          },
-          "signature": {
-            "description": "A signature hash for backend validation.",
-            "format": "byte",
-            "type": "string"
-          },
-          "type": {
-            "const": "mcp_server_tool_call"
-          }
-        },
-        "required": [
-          "type",
-          "name",
-          "server_name",
-          "arguments",
-          "id"
-        ],
-        "type": "object"
-      },
-      "McpServerToolResultContent": {
-        "description": "MCPServer tool result content.",
-        "examples": [
-          {
-            "mcp_server_tool_result": {
-              "summary": "Mcp Server Tool Result",
-              "value": {
-                "call_id": "call_123456",
-                "name": "get_forecast",
-                "result": "sunny",
-                "server_name": "weather_server",
-                "type": "mcp_server_tool_result"
-              }
-            }
-          }
-        ],
-        "properties": {
-          "call_id": {
-            "description": "Required. ID to match the ID from the function call block.",
-            "type": "string"
-          },
-          "name": {
-            "description": "Name of the tool which is called for this specific tool call.",
-            "type": "string"
-          },
-          "result": {
-            "description": "The output from the MCP server call. Can be simple text or rich content.",
-            "oneOf": [
-              {
-                "type": "object"
-              },
-              {
-                "items": {
-                  "$ref": "#/components/schemas/FunctionResultSubcontent"
-                },
-                "title": "FunctionResultSubcontentList",
-                "type": "array"
-              },
-              {
-                "type": "string"
-              }
-            ]
-          },
-          "server_name": {
-            "description": "The name of the used MCP server.",
-            "type": "string"
-          },
-          "signature": {
-            "description": "A signature hash for backend validation.",
-            "format": "byte",
-            "type": "string"
-          },
-          "type": {
-            "const": "mcp_server_tool_result"
-          }
-        },
-        "required": [
-          "type",
-          "call_id",
-          "result"
-        ],
-        "type": "object"
-      },
       "McpServerToolResultDelta": {
         "properties": {
           "call_id": {
@@ -2868,6 +2874,55 @@
             ]
           },
           "server_name": {
+            "type": "string"
+          },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
+          },
+          "type": {
+            "const": "mcp_server_tool_result"
+          }
+        },
+        "required": [
+          "type",
+          "call_id",
+          "result"
+        ],
+        "type": "object"
+      },
+      "McpServerToolResultStep": {
+        "description": "MCPServer tool result step.",
+        "properties": {
+          "call_id": {
+            "description": "Required. ID to match the ID from the function call block.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the tool which is called for this specific tool call.",
+            "type": "string"
+          },
+          "result": {
+            "description": "The output from the MCP server call. Can be simple text or rich content.",
+            "oneOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "$ref": "#/components/schemas/FunctionResultSubcontent"
+                },
+                "title": "FunctionResultSubcontentList",
+                "type": "array"
+              }
+            ]
+          },
+          "server_name": {
+            "description": "The name of the used MCP server.",
             "type": "string"
           },
           "signature": {
@@ -3020,6 +3075,34 @@
         "description": "The model that will complete your prompt.\\n\\nSee [models](https://ai.google.dev/gemini-api/docs/models) for additional details.",
         "title": "Model"
       },
+      "ModelOutputStep": {
+        "description": "Output generated by the model.",
+        "properties": {
+          "content": {
+            "items": {
+              "$ref": "#/components/schemas/Content"
+            },
+            "type": "array"
+          },
+          "type": {
+            "const": "model_output"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "PingWebhookRequest": {
+        "description": "Request message for WebhookService.PingWebhook.",
+        "type": "object",
+        "x-stainless-empty-object": true
+      },
+      "PingWebhookResponse": {
+        "description": "Response message for WebhookService.PingWebhook.",
+        "type": "object",
+        "x-stainless-empty-object": true
+      },
       "PlaceCitation": {
         "description": "A place citation annotation.",
         "properties": {
@@ -3085,6 +3168,35 @@
         },
         "type": "object"
       },
+      "ResponseFormat": {
+        "discriminator": {
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/AudioResponseFormat"
+          },
+          {
+            "$ref": "#/components/schemas/TextResponseFormat"
+          },
+          {
+            "$ref": "#/components/schemas/ImageResponseFormat"
+          },
+          {
+            "$ref": "#/components/schemas/VideoResponseFormat"
+          },
+          {
+            "type": "object"
+          }
+        ],
+        "type": "object"
+      },
+      "ResponseFormatList": {
+        "items": {
+          "$ref": "#/components/schemas/ResponseFormat"
+        },
+        "type": "array"
+      },
       "ResponseModality": {
         "enum": [
           "text",
@@ -3149,6 +3261,52 @@
         },
         "type": "object"
       },
+      "RotateSigningSecretRequest": {
+        "description": "Request message for WebhookService.RotateSigningSecret.",
+        "properties": {
+          "revocation_behavior": {
+            "description": "Optional. The revocation behavior for previous signing secrets.",
+            "enum": [
+              "revoke_previous_secrets_after_h24",
+              "revoke_previous_secrets_immediately"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Generate a new signing secret and revoke all previous secrets after 24\nhours. Default and safest option for migrations.",
+              "Revoke all previous secrets immediately. Use with caution as this can\ninterrupt ongoing notifications."
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "RotateSigningSecretResponse": {
+        "description": "Response message for WebhookService.RotateSigningSecret.",
+        "properties": {
+          "secret": {
+            "description": "Output only. The newly generated signing secret.",
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SigningSecret": {
+        "description": "Represents a signing secret used to verify webhook payloads.",
+        "properties": {
+          "expire_time": {
+            "description": "Output only. The expiration date of the signing secret.",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "truncated_secret": {
+            "description": "Output only. The truncated version of the signing secret.",
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "SpeechConfig": {
         "description": "The configuration for speech interaction.",
         "properties": {
@@ -3167,6 +3325,169 @@
         },
         "type": "object"
       },
+      "Step": {
+        "description": "A step in the interaction.",
+        "discriminator": {
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/UserInputStep"
+          },
+          {
+            "$ref": "#/components/schemas/ModelOutputStep"
+          },
+          {
+            "$ref": "#/components/schemas/ThoughtStep"
+          },
+          {
+            "$ref": "#/components/schemas/FunctionCallStep"
+          },
+          {
+            "$ref": "#/components/schemas/CodeExecutionCallStep"
+          },
+          {
+            "$ref": "#/components/schemas/UrlContextCallStep"
+          },
+          {
+            "$ref": "#/components/schemas/McpServerToolCallStep"
+          },
+          {
+            "$ref": "#/components/schemas/GoogleSearchCallStep"
+          },
+          {
+            "$ref": "#/components/schemas/FileSearchCallStep"
+          },
+          {
+            "$ref": "#/components/schemas/GoogleMapsCallStep"
+          },
+          {
+            "$ref": "#/components/schemas/FunctionResultStep"
+          },
+          {
+            "$ref": "#/components/schemas/CodeExecutionResultStep"
+          },
+          {
+            "$ref": "#/components/schemas/UrlContextResultStep"
+          },
+          {
+            "$ref": "#/components/schemas/GoogleSearchResultStep"
+          },
+          {
+            "$ref": "#/components/schemas/McpServerToolResultStep"
+          },
+          {
+            "$ref": "#/components/schemas/FileSearchResultStep"
+          },
+          {
+            "$ref": "#/components/schemas/GoogleMapsResultStep"
+          }
+        ],
+        "type": "object"
+      },
+      "StepDelta": {
+        "properties": {
+          "delta": {
+            "$ref": "#/components/schemas/StepDeltaData"
+          },
+          "event_id": {
+            "description": "The event_id token to be used to resume the interaction stream, from\nthis event.",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "step.delta"
+          },
+          "index": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "event_type",
+          "index",
+          "delta"
+        ],
+        "type": "object"
+      },
+      "StepDeltaData": {
+        "discriminator": {
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/TextDelta"
+          },
+          {
+            "$ref": "#/components/schemas/ImageDelta"
+          },
+          {
+            "$ref": "#/components/schemas/AudioDelta"
+          },
+          {
+            "$ref": "#/components/schemas/DocumentDelta"
+          },
+          {
+            "$ref": "#/components/schemas/VideoDelta"
+          },
+          {
+            "$ref": "#/components/schemas/ThoughtSummaryDelta"
+          },
+          {
+            "$ref": "#/components/schemas/ThoughtSignatureDelta"
+          },
+          {
+            "$ref": "#/components/schemas/TextAnnotationDelta"
+          },
+          {
+            "$ref": "#/components/schemas/ArgumentsDelta"
+          }
+        ],
+        "type": "object"
+      },
+      "StepStart": {
+        "properties": {
+          "event_id": {
+            "description": "The event_id token to be used to resume the interaction stream, from\nthis event.",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "step.start"
+          },
+          "index": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "step": {
+            "$ref": "#/components/schemas/Step"
+          }
+        },
+        "required": [
+          "event_type",
+          "index",
+          "step"
+        ],
+        "type": "object"
+      },
+      "StepStop": {
+        "properties": {
+          "event_id": {
+            "description": "The event_id token to be used to resume the interaction stream, from\nthis event.",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "step.stop"
+          },
+          "index": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "event_type",
+          "index"
+        ],
+        "type": "object"
+      },
       "TextAnnotationDelta": {
         "properties": {
           "annotations": {
@@ -3177,7 +3498,7 @@
             "type": "array"
           },
           "type": {
-            "const": "text_annotation"
+            "const": "text_annotation_delta"
           }
         },
         "required": [
@@ -3232,6 +3553,37 @@
         "required": [
           "type",
           "text"
+        ],
+        "type": "object"
+      },
+      "TextResponseFormat": {
+        "description": "Configuration for text output format.",
+        "properties": {
+          "mimeType": {
+            "description": "The MIME type of the text output.",
+            "enum": [
+              "application/json",
+              "text/plain"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "JSON output format.",
+              "Plain text output format."
+            ]
+          },
+          "schema": {
+            "additionalProperties": {
+              "description": "Properties of the object."
+            },
+            "description": "The JSON schema that the output should conform to. Only applicable when\nmime_type is application/json.",
+            "type": "object"
+          },
+          "type": {
+            "const": "text"
+          }
+        },
+        "required": [
+          "type"
         ],
         "type": "object"
       },
@@ -3311,6 +3663,30 @@
           },
           "type": {
             "const": "thought_signature"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "ThoughtStep": {
+        "description": "A thought step.",
+        "properties": {
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
+          },
+          "summary": {
+            "description": "A summary of the thought.",
+            "items": {
+              "$ref": "#/components/schemas/ThoughtSummaryContent"
+            },
+            "type": "array"
+          },
+          "type": {
+            "const": "thought"
           }
         },
         "required": [
@@ -3409,6 +3785,7 @@
         ]
       },
       "Turn": {
+        "deprecated": true,
         "examples": [
           {
             "user_turn": {
@@ -3533,49 +3910,6 @@
         },
         "type": "object"
       },
-      "UrlContextCallContent": {
-        "description": "URL context content.",
-        "examples": [
-          {
-            "url_context_call": {
-              "summary": "Url Context Call",
-              "value": {
-                "arguments": {
-                  "urls": [
-                    "https://www.example.com"
-                  ]
-                },
-                "id": "call_123456",
-                "type": "url_context_call"
-              }
-            }
-          }
-        ],
-        "properties": {
-          "arguments": {
-            "$ref": "#/components/schemas/UrlContextCallArguments",
-            "description": "Required. The arguments to pass to the URL context."
-          },
-          "id": {
-            "description": "Required. A unique ID for this specific tool call.",
-            "type": "string"
-          },
-          "signature": {
-            "description": "A signature hash for backend validation.",
-            "format": "byte",
-            "type": "string"
-          },
-          "type": {
-            "const": "url_context_call"
-          }
-        },
-        "required": [
-          "type",
-          "arguments",
-          "id"
-        ],
-        "type": "object"
-      },
       "UrlContextCallDelta": {
         "properties": {
           "arguments": {
@@ -3599,6 +3933,46 @@
           "arguments",
           "id"
         ],
+        "type": "object"
+      },
+      "UrlContextCallStep": {
+        "description": "URL context call step.",
+        "properties": {
+          "arguments": {
+            "$ref": "#/components/schemas/UrlContextCallStepArguments",
+            "description": "Required. The arguments to pass to the URL context."
+          },
+          "id": {
+            "description": "Required. A unique ID for this specific tool call.",
+            "type": "string"
+          },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
+          },
+          "type": {
+            "const": "url_context_call"
+          }
+        },
+        "required": [
+          "type",
+          "arguments",
+          "id"
+        ],
+        "type": "object"
+      },
+      "UrlContextCallStepArguments": {
+        "description": "The arguments to pass to the URL context.",
+        "properties": {
+          "urls": {
+            "description": "The URLs to fetch.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
         "type": "object"
       },
       "UrlContextResult": {
@@ -3625,57 +3999,6 @@
             "type": "string"
           }
         },
-        "type": "object"
-      },
-      "UrlContextResultContent": {
-        "description": "URL context result content.",
-        "examples": [
-          {
-            "url_context_result": {
-              "summary": "Url Context Result",
-              "value": {
-                "call_id": "call_123456",
-                "result": [
-                  {
-                    "status": "SUCCESS",
-                    "url": "https://www.example.com"
-                  }
-                ],
-                "type": "url_context_result"
-              }
-            }
-          }
-        ],
-        "properties": {
-          "call_id": {
-            "description": "Required. ID to match the ID from the function call block.",
-            "type": "string"
-          },
-          "is_error": {
-            "description": "Whether the URL context resulted in an error.",
-            "type": "boolean"
-          },
-          "result": {
-            "description": "Required. The results of the URL context.",
-            "items": {
-              "$ref": "#/components/schemas/UrlContextResult"
-            },
-            "type": "array"
-          },
-          "signature": {
-            "description": "A signature hash for backend validation.",
-            "format": "byte",
-            "type": "string"
-          },
-          "type": {
-            "const": "url_context_result"
-          }
-        },
-        "required": [
-          "type",
-          "result",
-          "call_id"
-        ],
         "type": "object"
       },
       "UrlContextResultDelta": {
@@ -3709,6 +4032,66 @@
         ],
         "type": "object"
       },
+      "UrlContextResultItem": {
+        "description": "The result of the URL context.",
+        "properties": {
+          "status": {
+            "description": "The status of the URL retrieval.",
+            "enum": [
+              "success",
+              "error",
+              "paywall",
+              "unsafe"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "",
+              "",
+              "",
+              ""
+            ]
+          },
+          "url": {
+            "description": "The URL that was fetched.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UrlContextResultStep": {
+        "description": "URL context result step.",
+        "properties": {
+          "call_id": {
+            "description": "Required. ID to match the ID from the function call block.",
+            "type": "string"
+          },
+          "is_error": {
+            "description": "Whether the URL context resulted in an error.",
+            "type": "boolean"
+          },
+          "result": {
+            "description": "Required. The results of the URL context.",
+            "items": {
+              "$ref": "#/components/schemas/UrlContextResultItem"
+            },
+            "type": "array"
+          },
+          "signature": {
+            "description": "A signature hash for backend validation.",
+            "format": "byte",
+            "type": "string"
+          },
+          "type": {
+            "const": "url_context_result"
+          }
+        },
+        "required": [
+          "type",
+          "result",
+          "call_id"
+        ],
+        "type": "object"
+      },
       "Usage": {
         "description": "Statistics on the interaction request's token usage.",
         "properties": {
@@ -3716,6 +4099,13 @@
             "description": "A breakdown of cached token usage by modality.",
             "items": {
               "$ref": "#/components/schemas/ModalityTokens"
+            },
+            "type": "array"
+          },
+          "grounding_tool_count": {
+            "description": "Grounding tool count.",
+            "items": {
+              "$ref": "#/components/schemas/GroundingToolCount"
             },
             "type": "array"
           },
@@ -3771,6 +4161,24 @@
             "type": "integer"
           }
         },
+        "type": "object"
+      },
+      "UserInputStep": {
+        "description": "Input provided by the user.",
+        "properties": {
+          "content": {
+            "items": {
+              "$ref": "#/components/schemas/Content"
+            },
+            "type": "array"
+          },
+          "type": {
+            "const": "user_input"
+          }
+        },
+        "required": [
+          "type"
+        ],
         "type": "object"
       },
       "VertexAISearchConfig": {
@@ -3897,6 +4305,220 @@
         "required": [
           "type"
         ],
+        "type": "object"
+      },
+      "VideoResponseFormat": {
+        "description": "Configuration for video output format.",
+        "properties": {
+          "type": {
+            "const": "video"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "Webhook": {
+        "description": "A Webhook resource.",
+        "properties": {
+          "create_time": {
+            "description": "Output only. The timestamp when the webhook was created.",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "Output only. The ID of the webhook.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "description": "Optional. The user-provided name of the webhook.",
+            "type": "string"
+          },
+          "new_signing_secret": {
+            "description": "Output only. The new signing secret for the webhook. Only populated on create.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "signing_secrets": {
+            "description": "Output only. The signing secrets associated with this webhook.",
+            "items": {
+              "$ref": "#/components/schemas/SigningSecret"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "state": {
+            "description": "Output only. The state of the webhook.",
+            "enum": [
+              "enabled",
+              "disabled",
+              "disabled_due_to_failed_deliveries"
+            ],
+            "readOnly": true,
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "The webhook is enabled.",
+              "The webhook is disabled by the user.",
+              "The webhook is disabled due to failed deliveries."
+            ]
+          },
+          "subscribed_events": {
+            "description": "Required. The events that the webhook is subscribed to.\nAvailable events:\n- batch.succeeded\n- batch.expired\n- batch.failed\n- interaction.requires_action\n- interaction.completed\n- interaction.failed\n- video.generated",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "const": "batch.succeeded",
+                  "description": "Batch processing finished successfully.",
+                  "x-stainless-nominal": false
+                },
+                {
+                  "const": "batch.expired",
+                  "description": "Batch has not been processed within the 48h timeframe.",
+                  "x-stainless-nominal": false
+                },
+                {
+                  "const": "batch.failed",
+                  "description": "Batch job failed.",
+                  "x-stainless-nominal": false
+                },
+                {
+                  "const": "interaction.requires_action",
+                  "description": "Interaction requires action (e.g., function calling).",
+                  "x-stainless-nominal": false
+                },
+                {
+                  "const": "interaction.completed",
+                  "description": "Interaction completed successfully.",
+                  "x-stainless-nominal": false
+                },
+                {
+                  "const": "interaction.failed",
+                  "description": "Interaction failed.",
+                  "x-stainless-nominal": false
+                },
+                {
+                  "const": "video.generated",
+                  "description": "Video generation completed.",
+                  "x-stainless-nominal": false
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "update_time": {
+            "description": "Output only. The timestamp when the webhook was last updated.",
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "uri": {
+            "description": "Required. The URI to which webhook events will be sent.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "uri",
+          "subscribed_events"
+        ],
+        "type": "object"
+      },
+      "WebhookConfig": {
+        "description": "Message for configuring webhook events for a request.",
+        "properties": {
+          "uris": {
+            "description": "Optional. If set, these webhook URIs will be used for webhook events instead of the\nregistered webhooks.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "user_metadata": {
+            "additionalProperties": {
+              "description": "Properties of the object."
+            },
+            "description": "Optional. The user metadata that will be returned on each event emission to the\nwebhooks.",
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "WebhookUpdate": {
+        "properties": {
+          "name": {
+            "description": "Optional. The user-provided name of the webhook.",
+            "type": "string"
+          },
+          "state": {
+            "description": "Optional. The state of the webhook.",
+            "enum": [
+              "enabled",
+              "disabled",
+              "disabled_due_to_failed_deliveries"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "The webhook is enabled.",
+              "The webhook is disabled by the user.",
+              "The webhook is disabled due to failed deliveries."
+            ]
+          },
+          "subscribed_events": {
+            "description": "Optional. The events that the webhook is subscribed to.\nAvailable events:\n- batch.succeeded\n- batch.expired\n- batch.failed\n- interaction.requires_action\n- interaction.completed\n- interaction.failed\n- video.generated",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "const": "batch.succeeded",
+                  "description": "Batch processing finished successfully.",
+                  "x-stainless-nominal": false
+                },
+                {
+                  "const": "batch.expired",
+                  "description": "Batch has not been processed within the 48h timeframe.",
+                  "x-stainless-nominal": false
+                },
+                {
+                  "const": "batch.failed",
+                  "description": "Batch job failed.",
+                  "x-stainless-nominal": false
+                },
+                {
+                  "const": "interaction.requires_action",
+                  "description": "Interaction requires action (e.g., function calling).",
+                  "x-stainless-nominal": false
+                },
+                {
+                  "const": "interaction.completed",
+                  "description": "Interaction completed successfully.",
+                  "x-stainless-nominal": false
+                },
+                {
+                  "const": "interaction.failed",
+                  "description": "Interaction failed.",
+                  "x-stainless-nominal": false
+                },
+                {
+                  "const": "video.generated",
+                  "description": "Video generation completed.",
+                  "x-stainless-nominal": false
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "uri": {
+            "description": "Optional. The URI to which webhook events will be sent.",
+            "type": "string"
+          }
+        },
         "type": "object"
       }
     },
@@ -4318,6 +4940,7 @@
             }
           },
           {
+            "deprecated": true,
             "description": "If set to true, includes the input in the response.",
             "in": "query",
             "name": "include_input",
@@ -4582,6 +5205,302 @@
         "security": [],
         "summary": "Creating an interaction",
         "x-internal": true
+      }
+    },
+    "/{api_version}/webhooks": {
+      "get": {
+        "description": "Lists all Webhooks.",
+        "operationId": "ListWebhooks",
+        "parameters": [
+          {
+            "description": "Optional. The maximum number of webhooks to return. The service may return fewer than\nthis value. If unspecified, at most 50 webhooks will be returned.\nThe maximum value is 1000.",
+            "in": "query",
+            "name": "page_size",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Optional. A page token, received from a previous `ListWebhooks` call.\nProvide this to retrieve the subsequent page.",
+            "in": "query",
+            "name": "page_token",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListWebhooksResponse"
+                }
+              }
+            },
+            "description": "Successful operation"
+          }
+        },
+        "security": []
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/api_version"
+        }
+      ],
+      "post": {
+        "description": "Creates a new Webhook.",
+        "operationId": "CreateWebhook",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Webhook"
+              }
+            }
+          },
+          "description": "Required. The webhook to create."
+        },
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Webhook"
+                }
+              }
+            },
+            "description": "Successful operation"
+          }
+        },
+        "security": []
+      }
+    },
+    "/{api_version}/webhooks/{id}": {
+      "delete": {
+        "description": "Deletes a Webhook.",
+        "operationId": "DeleteWebhook",
+        "parameters": [
+          {
+            "description": "Required. The ID of the webhook to delete.\nFormat: `{webhook_id}`",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Empty"
+                }
+              }
+            },
+            "description": "Successful operation"
+          }
+        },
+        "security": []
+      },
+      "get": {
+        "description": "Gets a specific Webhook.",
+        "operationId": "GetWebhook",
+        "parameters": [
+          {
+            "description": "Required. The ID of the webhook to retrieve.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Webhook"
+                }
+              }
+            },
+            "description": "Successful operation"
+          }
+        },
+        "security": []
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "$ref": "#/components/parameters/api_version"
+        }
+      ],
+      "patch": {
+        "description": "Updates an existing Webhook.",
+        "operationId": "UpdateWebhook",
+        "parameters": [
+          {
+            "description": "Required. The ID of the webhook to update.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Optional. The list of fields to update.",
+            "in": "query",
+            "name": "update_mask",
+            "schema": {
+              "format": "google-fieldmask",
+              "pattern": "^(\\s*[^,\\s.]+(\\s*[,.]\\s*[^,\\s.]+)*)?$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookUpdate"
+              }
+            }
+          },
+          "description": "Required. The webhook to update."
+        },
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Webhook"
+                }
+              }
+            },
+            "description": "Successful operation"
+          }
+        },
+        "security": []
+      }
+    },
+    "/{api_version}/webhooks/{id}:ping": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "$ref": "#/components/parameters/api_version"
+        }
+      ],
+      "post": {
+        "description": "Sends a ping event to a Webhook.",
+        "operationId": "PingWebhook",
+        "parameters": [
+          {
+            "description": "Required. The ID of the webhook to ping.\nFormat: `{webhook_id}`",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PingWebhookRequest"
+              }
+            }
+          },
+          "description": "The request body."
+        },
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PingWebhookResponse"
+                }
+              }
+            },
+            "description": "Successful operation"
+          }
+        },
+        "security": []
+      }
+    },
+    "/{api_version}/webhooks/{id}:rotateSigningSecret": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "$ref": "#/components/parameters/api_version"
+        }
+      ],
+      "post": {
+        "description": "Generates a new signing secret for a Webhook.",
+        "operationId": "RotateSigningSecret",
+        "parameters": [
+          {
+            "description": "Required. The ID of the webhook for which to generate a signing secret.\nFormat: `{webhook_id}`",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RotateSigningSecretRequest"
+              }
+            }
+          },
+          "description": "The request body."
+        },
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RotateSigningSecretResponse"
+                }
+              }
+            },
+            "description": "Successful operation"
+          }
+        },
+        "security": []
       }
     }
   },

@@ -18,9 +18,15 @@ void main() {
         expect(result, isA<ToolResultContentList>());
         final contentList = result as ToolResultContentList;
         expect(contentList.items, hasLength(2));
-        expect(contentList.items[0], isA<TextContent>());
-        expect((contentList.items[0] as TextContent).text, 'Hello');
-        expect((contentList.items[1] as TextContent).text, 'World');
+        expect(contentList.items[0], isA<FunctionResultSubcontentText>());
+        expect(
+          (contentList.items[0] as FunctionResultSubcontentText).content.text,
+          'Hello',
+        );
+        expect(
+          (contentList.items[1] as FunctionResultSubcontentText).content.text,
+          'World',
+        );
       });
 
       test('parses Map as ToolResultObject', () {
@@ -53,7 +59,9 @@ void main() {
       });
 
       test('ToolResultContentList serializes to List', () {
-        const result = ToolResultContentList([TextContent(text: 'Hello')]);
+        const result = ToolResultContentList([
+          FunctionResultSubcontentText(TextContent(text: 'Hello')),
+        ]);
         final json = result.toJson() as List;
         expect(json, hasLength(1));
         expect((json[0] as Map)['type'], 'text');
@@ -76,13 +84,16 @@ void main() {
 
       test('ToolResultContentList round-trips', () {
         const original = ToolResultContentList([
-          TextContent(text: 'Response data'),
+          FunctionResultSubcontentText(TextContent(text: 'Response data')),
         ]);
         final restored = ToolResult.fromJson(original.toJson());
         expect(restored, isA<ToolResultContentList>());
         final list = restored as ToolResultContentList;
         expect(list.items, hasLength(1));
-        expect((list.items[0] as TextContent).text, 'Response data');
+        expect(
+          (list.items[0] as FunctionResultSubcontentText).content.text,
+          'Response data',
+        );
       });
 
       test('ToolResultObject round-trips', () {

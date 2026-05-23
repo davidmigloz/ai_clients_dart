@@ -1,7 +1,7 @@
 part of 'deltas.dart';
 
 /// An audio delta update.
-class AudioDelta extends InteractionDelta {
+class AudioDelta extends StepDeltaData {
   @override
   String get type => 'audio';
 
@@ -18,7 +18,7 @@ class AudioDelta extends InteractionDelta {
   final int? channels;
 
   /// The sample rate of the audio.
-  final int? rate;
+  final int? sampleRate;
 
   /// Creates an [AudioDelta] instance.
   const AudioDelta({
@@ -26,7 +26,7 @@ class AudioDelta extends InteractionDelta {
     this.uri,
     this.mimeType,
     this.channels,
-    this.rate,
+    this.sampleRate,
   });
 
   /// Creates an [AudioDelta] from JSON.
@@ -35,7 +35,7 @@ class AudioDelta extends InteractionDelta {
     uri: json['uri'] as String?,
     mimeType: json['mime_type'] as String?,
     channels: json['channels'] as int?,
-    rate: json['rate'] as int?,
+    sampleRate: json['sample_rate'] as int?,
   );
 
   @override
@@ -45,6 +45,6 @@ class AudioDelta extends InteractionDelta {
     if (uri != null) 'uri': uri,
     if (mimeType != null) 'mime_type': mimeType,
     if (channels != null) 'channels': channels,
-    if (rate != null) 'rate': rate,
+    if (sampleRate != null) 'sample_rate': sampleRate,
   };
 }

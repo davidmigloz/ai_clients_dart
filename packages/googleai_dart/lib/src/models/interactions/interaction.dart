@@ -1,19 +1,21 @@
 import '../common/service_tier.dart';
 import '../copy_with_sentinel.dart';
 import 'agent_config.dart';
-import 'content/content.dart';
 import 'generation_config.dart';
 import 'interaction_input.dart';
 import 'interaction_status.dart';
+import 'response_formats/response_formats.dart';
 import 'response_modality.dart';
+import 'steps/steps.dart';
 import 'tools/tools.dart';
 import 'usage.dart';
+import 'webhook_config.dart';
 
 /// The Interaction resource.
 ///
 /// Represents a single interaction with the Gemini API using server-side
 /// state management. Contains both request parameters (input, tools, config)
-/// and response fields (outputs, usage, status).
+/// and response fields (steps, usage, status).
 class Interaction {
   /// A unique identifier for the interaction.
   final String id;
@@ -38,12 +40,12 @@ class Interaction {
 
   /// The inputs for the interaction.
   ///
-  /// Can be a [TextInput], a [ContentListInput], a [TurnsInput],
+  /// Can be a [TextInput], a [StepListInput], a [ContentListInput],
   /// or a [SingleContentInput].
   final InteractionInput? input;
 
-  /// Output only. Responses from the model.
-  final List<InteractionContent>? outputs;
+  /// Output only. The steps that make up the interaction.
+  final List<InteractionStep>? steps;
 
   /// Statistics on the interaction request's token usage.
   final InteractionUsage? usage;
@@ -69,11 +71,19 @@ class Interaction {
   /// The mime type of the response.
   final String? responseMimeType;
 
+  /// Enforces the response format (a single [ResponseFormat] or a list of
+  /// them). Used for structured output and per-modality output configuration.
+  final ResponseFormatConfig? responseFormat;
+
   /// Configuration for the agent.
   final AgentConfig? agentConfig;
 
   /// The service tier for the interaction.
   final ServiceTier? serviceTier;
+
+  /// Webhook configuration for receiving notifications when the interaction
+  /// completes.
+  final WebhookConfig? webhookConfig;
 
   /// Creates an [Interaction] instance.
   const Interaction({
@@ -85,7 +95,7 @@ class Interaction {
     this.updated,
     this.role,
     this.input,
-    this.outputs,
+    this.steps,
     this.usage,
     this.object = 'interaction',
     this.previousInteractionId,
@@ -94,8 +104,10 @@ class Interaction {
     this.generationConfig,
     this.responseModalities,
     this.responseMimeType,
+    this.responseFormat,
     this.agentConfig,
     this.serviceTier,
+    this.webhookConfig,
   });
 
   /// Creates an [Interaction] from JSON.
@@ -114,8 +126,8 @@ class Interaction {
     input: json['input'] != null
         ? InteractionInput.fromJson(json['input'] as Object)
         : null,
-    outputs: (json['outputs'] as List<dynamic>?)
-        ?.map((e) => InteractionContent.fromJson(e as Map<String, dynamic>))
+    steps: (json['steps'] as List<dynamic>?)
+        ?.map((e) => InteractionStep.fromJson(e as Map<String, dynamic>))
         .toList(),
     usage: json['usage'] != null
         ? InteractionUsage.fromJson(json['usage'] as Map<String, dynamic>)
@@ -135,11 +147,17 @@ class Interaction {
         ?.map((e) => interactionResponseModalityFromString(e as String))
         .toList(),
     responseMimeType: json['response_mime_type'] as String?,
+    responseFormat: json['response_format'] != null
+        ? ResponseFormatConfig.fromJson(json['response_format'] as Object)
+        : null,
     agentConfig: json['agent_config'] != null
         ? AgentConfig.fromJson(json['agent_config'] as Map<String, dynamic>)
         : null,
     serviceTier: json['service_tier'] != null
         ? serviceTierFromString(json['service_tier'] as String?)
+        : null,
+    webhookConfig: json['webhook_config'] != null
+        ? WebhookConfig.fromJson(json['webhook_config'] as Map<String, dynamic>)
         : null,
   );
 
@@ -153,7 +171,7 @@ class Interaction {
     if (updated != null) 'updated': updated!.toIso8601String(),
     if (role != null) 'role': role,
     if (input != null) 'input': input!.toJson(),
-    if (outputs != null) 'outputs': outputs!.map((e) => e.toJson()).toList(),
+    if (steps != null) 'steps': steps!.map((e) => e.toJson()).toList(),
     if (usage != null) 'usage': usage!.toJson(),
     'object': object,
     if (previousInteractionId != null)
@@ -167,9 +185,11 @@ class Interaction {
           .map(interactionResponseModalityToString)
           .toList(),
     if (responseMimeType != null) 'response_mime_type': responseMimeType,
+    if (responseFormat != null) 'response_format': responseFormat!.toJson(),
     if (agentConfig != null) 'agent_config': agentConfig!.toJson(),
     if (serviceTier != null && serviceTier != ServiceTier.unspecified)
       'service_tier': serviceTierToString(serviceTier!),
+    if (webhookConfig != null) 'webhook_config': webhookConfig!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -182,7 +202,7 @@ class Interaction {
     Object? updated = unsetCopyWithValue,
     Object? role = unsetCopyWithValue,
     Object? input = unsetCopyWithValue,
-    Object? outputs = unsetCopyWithValue,
+    Object? steps = unsetCopyWithValue,
     Object? usage = unsetCopyWithValue,
     Object? object = unsetCopyWithValue,
     Object? previousInteractionId = unsetCopyWithValue,
@@ -191,8 +211,10 @@ class Interaction {
     Object? generationConfig = unsetCopyWithValue,
     Object? responseModalities = unsetCopyWithValue,
     Object? responseMimeType = unsetCopyWithValue,
+    Object? responseFormat = unsetCopyWithValue,
     Object? agentConfig = unsetCopyWithValue,
     Object? serviceTier = unsetCopyWithValue,
+    Object? webhookConfig = unsetCopyWithValue,
   }) {
     return Interaction(
       id: id == unsetCopyWithValue ? this.id : id! as String,
@@ -211,9 +233,9 @@ class Interaction {
       input: input == unsetCopyWithValue
           ? this.input
           : input as InteractionInput?,
-      outputs: outputs == unsetCopyWithValue
-          ? this.outputs
-          : outputs as List<InteractionContent>?,
+      steps: steps == unsetCopyWithValue
+          ? this.steps
+          : steps as List<InteractionStep>?,
       usage: usage == unsetCopyWithValue
           ? this.usage
           : usage as InteractionUsage?,
@@ -236,12 +258,18 @@ class Interaction {
       responseMimeType: responseMimeType == unsetCopyWithValue
           ? this.responseMimeType
           : responseMimeType as String?,
+      responseFormat: responseFormat == unsetCopyWithValue
+          ? this.responseFormat
+          : responseFormat as ResponseFormatConfig?,
       agentConfig: agentConfig == unsetCopyWithValue
           ? this.agentConfig
           : agentConfig as AgentConfig?,
       serviceTier: serviceTier == unsetCopyWithValue
           ? this.serviceTier
           : serviceTier as ServiceTier?,
+      webhookConfig: webhookConfig == unsetCopyWithValue
+          ? this.webhookConfig
+          : webhookConfig as WebhookConfig?,
     );
   }
 }
@@ -253,7 +281,7 @@ class CreateModelInteractionParams {
 
   /// The input for the interaction.
   ///
-  /// Can be a [TextInput], a [ContentListInput], a [TurnsInput],
+  /// Can be a [TextInput], a [StepListInput], a [ContentListInput],
   /// or a [SingleContentInput].
   final InteractionInput? input;
 
@@ -272,6 +300,10 @@ class CreateModelInteractionParams {
   /// The mime type of the response.
   final String? responseMimeType;
 
+  /// Enforces the response format (a single [ResponseFormat] or a list of
+  /// them). Used for structured output and per-modality output configuration.
+  final ResponseFormatConfig? responseFormat;
+
   /// The ID of a previous interaction to continue from.
   final String? previousInteractionId;
 
@@ -280,6 +312,10 @@ class CreateModelInteractionParams {
 
   /// The service tier for the interaction.
   final ServiceTier? serviceTier;
+
+  /// Webhook configuration for receiving notifications when the interaction
+  /// completes.
+  final WebhookConfig? webhookConfig;
 
   /// Creates a [CreateModelInteractionParams] instance.
   const CreateModelInteractionParams({
@@ -290,9 +326,11 @@ class CreateModelInteractionParams {
     this.generationConfig,
     this.responseModalities,
     this.responseMimeType,
+    this.responseFormat,
     this.previousInteractionId,
     this.background,
     this.serviceTier,
+    this.webhookConfig,
   });
 
   /// Creates from JSON.
@@ -315,10 +353,18 @@ class CreateModelInteractionParams {
             ?.map((e) => interactionResponseModalityFromString(e as String))
             .toList(),
         responseMimeType: json['response_mime_type'] as String?,
+        responseFormat: json['response_format'] != null
+            ? ResponseFormatConfig.fromJson(json['response_format'] as Object)
+            : null,
         previousInteractionId: json['previous_interaction_id'] as String?,
         background: json['background'] as bool?,
         serviceTier: json['service_tier'] != null
             ? serviceTierFromString(json['service_tier'] as String?)
+            : null,
+        webhookConfig: json['webhook_config'] != null
+            ? WebhookConfig.fromJson(
+                json['webhook_config'] as Map<String, dynamic>,
+              )
             : null,
       );
 
@@ -335,11 +381,13 @@ class CreateModelInteractionParams {
           .map(interactionResponseModalityToString)
           .toList(),
     if (responseMimeType != null) 'response_mime_type': responseMimeType,
+    if (responseFormat != null) 'response_format': responseFormat!.toJson(),
     if (previousInteractionId != null)
       'previous_interaction_id': previousInteractionId,
     if (background != null) 'background': background,
     if (serviceTier != null && serviceTier != ServiceTier.unspecified)
       'service_tier': serviceTierToString(serviceTier!),
+    if (webhookConfig != null) 'webhook_config': webhookConfig!.toJson(),
   };
 }
 
@@ -354,6 +402,10 @@ class CreateAgentInteractionParams {
   /// Configuration for the agent.
   final AgentConfig? agentConfig;
 
+  /// Enforces the response format (a single [ResponseFormat] or a list of
+  /// them). Used for structured output and per-modality output configuration.
+  final ResponseFormatConfig? responseFormat;
+
   /// The ID of a previous interaction to continue from.
   final String? previousInteractionId;
 
@@ -363,14 +415,20 @@ class CreateAgentInteractionParams {
   /// The service tier for the interaction.
   final ServiceTier? serviceTier;
 
+  /// Webhook configuration for receiving notifications when the interaction
+  /// completes.
+  final WebhookConfig? webhookConfig;
+
   /// Creates a [CreateAgentInteractionParams] instance.
   const CreateAgentInteractionParams({
     required this.agent,
     this.input,
     this.agentConfig,
+    this.responseFormat,
     this.previousInteractionId,
     this.background,
     this.serviceTier,
+    this.webhookConfig,
   });
 
   /// Creates from JSON.
@@ -383,10 +441,18 @@ class CreateAgentInteractionParams {
         agentConfig: json['agent_config'] != null
             ? AgentConfig.fromJson(json['agent_config'] as Map<String, dynamic>)
             : null,
+        responseFormat: json['response_format'] != null
+            ? ResponseFormatConfig.fromJson(json['response_format'] as Object)
+            : null,
         previousInteractionId: json['previous_interaction_id'] as String?,
         background: json['background'] as bool?,
         serviceTier: json['service_tier'] != null
             ? serviceTierFromString(json['service_tier'] as String?)
+            : null,
+        webhookConfig: json['webhook_config'] != null
+            ? WebhookConfig.fromJson(
+                json['webhook_config'] as Map<String, dynamic>,
+              )
             : null,
       );
 
@@ -395,10 +461,12 @@ class CreateAgentInteractionParams {
     'agent': agent,
     if (input != null) 'input': input!.toJson(),
     if (agentConfig != null) 'agent_config': agentConfig!.toJson(),
+    if (responseFormat != null) 'response_format': responseFormat!.toJson(),
     if (previousInteractionId != null)
       'previous_interaction_id': previousInteractionId,
     if (background != null) 'background': background,
     if (serviceTier != null && serviceTier != ServiceTier.unspecified)
       'service_tier': serviceTierToString(serviceTier!),
+    if (webhookConfig != null) 'webhook_config': webhookConfig!.toJson(),
   };
 }

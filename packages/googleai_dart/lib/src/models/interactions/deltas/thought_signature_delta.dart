@@ -1,7 +1,7 @@
 part of 'deltas.dart';
 
 /// A thought signature delta update.
-class ThoughtSignatureDelta extends InteractionDelta {
+class ThoughtSignatureDelta extends StepDeltaData {
   @override
   String get type => 'thought_signature';
 

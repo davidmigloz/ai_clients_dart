@@ -607,6 +607,7 @@ See the [example/](example/) directory for complete examples:
 | [`tuned_models_example.dart`](example/tuned_models_example.dart) | Tuned model workflows |
 | [`url_context_example.dart`](example/url_context_example.dart) | URL content fetching and analysis |
 | [`vertex_ai_example.dart`](example/vertex_ai_example.dart) | Vertex AI configuration |
+| [`webhooks_example.dart`](example/webhooks_example.dart) | Webhook subscriptions for interaction events |
 
 ## API Coverage
 
@@ -621,6 +622,7 @@ See the [example/](example/) directory for complete examples:
 | Corpora | ✅ Full |
 | File Search Stores | ✅ Full |
 | Interactions (Experimental) | ✅ Full |
+| Webhooks (Experimental) | ✅ Full |
 | Auth Tokens | ✅ Full |
 | Live API (WebSocket) | ✅ Full |
 

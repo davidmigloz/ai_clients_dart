@@ -1,4 +1,5 @@
 import '../copy_with_sentinel.dart';
+import 'grounding_tool_count.dart';
 import 'modality_tokens.dart';
 
 /// Statistics on the interaction request's token usage.
@@ -33,6 +34,9 @@ class InteractionUsage {
   /// Total token count for the interaction request.
   final int? totalTokens;
 
+  /// Grounding tool count breakdown.
+  final List<GroundingToolCount>? groundingToolCount;
+
   /// Creates an [InteractionUsage] instance.
   const InteractionUsage({
     this.totalInputTokens,
@@ -45,6 +49,7 @@ class InteractionUsage {
     this.toolUseTokensByModality,
     this.totalThoughtTokens,
     this.totalTokens,
+    this.groundingToolCount,
   });
 
   /// Creates an [InteractionUsage] from JSON.
@@ -72,6 +77,9 @@ class InteractionUsage {
                 .toList(),
         totalThoughtTokens: json['total_thought_tokens'] as int?,
         totalTokens: json['total_tokens'] as int?,
+        groundingToolCount: (json['grounding_tool_count'] as List<dynamic>?)
+            ?.map((e) => GroundingToolCount.fromJson(e as Map<String, dynamic>))
+            .toList(),
       );
 
   /// Converts to JSON.
@@ -98,6 +106,10 @@ class InteractionUsage {
           .toList(),
     if (totalThoughtTokens != null) 'total_thought_tokens': totalThoughtTokens,
     if (totalTokens != null) 'total_tokens': totalTokens,
+    if (groundingToolCount != null)
+      'grounding_tool_count': groundingToolCount!
+          .map((e) => e.toJson())
+          .toList(),
   };
 
   /// Creates a copy with replaced values.
@@ -112,6 +124,7 @@ class InteractionUsage {
     Object? toolUseTokensByModality = unsetCopyWithValue,
     Object? totalThoughtTokens = unsetCopyWithValue,
     Object? totalTokens = unsetCopyWithValue,
+    Object? groundingToolCount = unsetCopyWithValue,
   }) {
     return InteractionUsage(
       totalInputTokens: totalInputTokens == unsetCopyWithValue
@@ -144,6 +157,9 @@ class InteractionUsage {
       totalTokens: totalTokens == unsetCopyWithValue
           ? this.totalTokens
           : totalTokens as int?,
+      groundingToolCount: groundingToolCount == unsetCopyWithValue
+          ? this.groundingToolCount
+          : groundingToolCount as List<GroundingToolCount>?,
     );
   }
 }

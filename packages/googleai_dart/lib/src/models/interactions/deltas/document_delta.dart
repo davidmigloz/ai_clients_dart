@@ -1,7 +1,7 @@
 part of 'deltas.dart';
 
 /// A document delta update.
-class DocumentDelta extends InteractionDelta {
+class DocumentDelta extends StepDeltaData {
   @override
   String get type => 'document';
 

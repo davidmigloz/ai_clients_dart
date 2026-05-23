@@ -140,179 +140,6 @@
     ]
   },
   "types": {
-    "EmbeddingUsageMetadata": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "EmbeddingUsageMetadata",
-      "file": "lib/src/models/embeddings/embedding_usage_metadata.dart",
-      "schema": "EmbeddingUsageMetadata",
-      "tags": []
-    },
-    "EmbedContentResponse": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "EmbedContentResponse",
-      "file": "lib/src/models/embeddings/embed_content_response.dart",
-      "schema": "EmbedContentResponse",
-      "tags": []
-    },
-    "EmbedContentRequest": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "EmbedContentRequest",
-      "file": "lib/src/models/embeddings/embed_content_request.dart",
-      "schema": "EmbedContentRequest",
-      "tags": []
-    },
-    "EmbedContentConfig": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "EmbedContentConfig",
-      "file": "lib/src/models/embeddings/embed_content_config.dart",
-      "schema": "EmbedContentConfig",
-      "tags": []
-    },
-    "BatchEmbedContentsResponse": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "BatchEmbedContentsResponse",
-      "file": "lib/src/models/embeddings/batch_embed_contents_response.dart",
-      "schema": "BatchEmbedContentsResponse",
-      "tags": []
-    },
-    "Tool": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "Tool",
-      "file": "lib/src/models/tools/tool.dart",
-      "schema": "Tool",
-      "tags": [],
-      "note": "codeExecution and urlContext remain Map<String,dynamic> (empty schemas in spec)"
-    },
-    "Candidate": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "Candidate",
-      "file": "lib/src/models/content/candidate.dart",
-      "schema": "Candidate",
-      "tags": []
-    },
-    "Content": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "Content",
-      "file": "lib/src/models/content/content.dart",
-      "schema": "Content",
-      "tags": [
-        "critical"
-      ]
-    },
-    "GenerateContentRequest": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "GenerateContentRequest",
-      "file": "lib/src/models/generation/generate_content_request.dart",
-      "schema": "GenerateContentRequest",
-      "note": "Excludes model (only used in endpoint URL path, not serialized in the body)",
-      "excluded_properties": [
-        "model"
-      ]
-    },
-    "GenerationConfig": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "GenerationConfig",
-      "file": "lib/src/models/generation/generation_config.dart",
-      "schema": "GenerationConfig",
-      "tags": [],
-      "note": "Excludes _responseJsonSchema (internal underscore-prefixed field) via excluded_properties",
-      "excluded_properties": [
-        "_responseJsonSchema"
-      ]
-    },
-    "ToolConfig": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "ToolConfig",
-      "file": "lib/src/models/tools/tool_config.dart",
-      "schema": "ToolConfig",
-      "tags": []
-    },
-    "GroundingMetadata": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "GroundingMetadata",
-      "file": "lib/src/models/metadata/grounding_metadata.dart",
-      "schema": "GroundingMetadata",
-      "tags": [],
-      "note": "Includes googleMapsWidgetContextToken field added in spec update"
-    },
-    "FunctionCall": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "FunctionCall",
-      "file": "lib/src/models/tools/function_call.dart",
-      "schema": "FunctionCall",
-      "tags": [
-        "critical"
-      ]
-    },
-    "FunctionResponse": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "FunctionResponse",
-      "file": "lib/src/models/tools/function_response.dart",
-      "schema": "FunctionResponse",
-      "tags": []
-    },
-    "GroundingChunk": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "GroundingChunk",
-      "file": "lib/src/models/metadata/grounding_chunk.dart",
-      "schema": "GroundingChunk",
-      "note": "Upgraded from skip to object; fields match spec (web, retrievedContext, maps)"
-    },
-    "Blob": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "Blob",
-      "file": "lib/src/models/content/blob.dart",
-      "schema": "Blob"
-    },
-    "FileData": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "FileData",
-      "file": "lib/src/models/content/file_data.dart",
-      "schema": "FileData"
-    },
-    "ExecutableCode": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "ExecutableCode",
-      "file": "lib/src/models/tools/executable_code.dart",
-      "schema": "ExecutableCode"
-    },
-    "CodeExecutionResult": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "CodeExecutionResult",
-      "file": "lib/src/models/tools/code_execution_result.dart",
-      "schema": "CodeExecutionResult"
-    },
-    "Part": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": "PartMetadataPart",
-      "file": "lib/src/models/content/part.dart",
-      "schema": "Part",
-      "parent": "Part",
-      "note": "Intentional skip: uses Dart sealed-class field-presence discrimination rather than spec's flat schema. The spec's Part schema represents a union of mutually exclusive fields, which is modeled in Dart as a sealed class hierarchy.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
     "AgentOption": {
       "spec": "interactions",
       "schema": "AgentOption",
@@ -346,6 +173,18 @@
         }
       }
     },
+    "ArgumentsDelta": {
+      "spec": "interactions",
+      "schema": "ArgumentsDelta",
+      "parent": "StepDeltaData",
+      "kind": "skip",
+      "dart_class": "ArgumentsDelta",
+      "file": "lib/src/models/interactions/deltas/arguments_delta.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "SSE/delta event DTOs follow the existing googleai_dart convention of omitting copyWith on small immutable events."
+    },
     "AudioContent": {
       "spec": "interactions",
       "schema": "AudioContent",
@@ -363,55 +202,1342 @@
       "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
       "tags": [
         "acknowledged"
-      ]
+      ],
+      "parent": "StepDeltaData"
     },
-    "FileSearchCallContent": {
+    "AudioResponseFormat": {
       "spec": "interactions",
-      "schema": "FileSearchCallContent",
-      "parent": "InteractionContent",
+      "schema": "AudioResponseFormat",
+      "parent": "ResponseFormat",
       "kind": "sealed_variant",
-      "dart_class": "FileSearchCallContent",
-      "file": "lib/src/models/interactions/content/file_search_call_content.dart"
+      "dart_class": "AudioResponseFormat",
+      "file": "lib/src/models/interactions/response_formats/audio_response_format.dart"
     },
-    "FileSearchCallDelta": {
-      "spec": "interactions",
-      "schema": "FileSearchCallDelta",
-      "dart_class": "FileSearchCallDelta",
-      "file": "lib/src/models/interactions/deltas/file_search_call_delta.dart",
+    "BatchEmbedContentsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "BatchEmbedContentsResponse",
+      "file": "lib/src/models/embeddings/batch_embed_contents_response.dart",
+      "schema": "BatchEmbedContentsResponse",
+      "tags": []
+    },
+    "Blob": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Blob",
+      "file": "lib/src/models/content/blob.dart",
+      "schema": "Blob"
+    },
+    "Blobstore2Info": {
+      "spec": "main",
+      "schema": "Blobstore2Info",
       "kind": "skip",
-      "note": "Delta type tracked as sealed variant of InteractionDelta.",
+      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
       "tags": [
         "acknowledged"
       ]
     },
-    "interactions:ImageConfig": {
+    "Candidate": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Candidate",
+      "file": "lib/src/models/content/candidate.dart",
+      "schema": "Candidate",
+      "tags": []
+    },
+    "CodeExecutionCallStep": {
       "spec": "interactions",
-      "schema": "ImageConfig",
-      "dart_class": "InteractionImageConfig",
-      "file": "lib/src/models/interactions/image_config.dart",
+      "schema": "CodeExecutionCallStep",
+      "parent": "InteractionStep",
+      "kind": "sealed_variant",
+      "dart_class": "CodeExecutionCallStep",
+      "file": "lib/src/models/interactions/steps/code_execution_call_step.dart"
+    },
+    "CodeExecutionCallStepArguments": {
+      "spec": "interactions",
+      "schema": "CodeExecutionCallStepArguments",
+      "kind": "object",
+      "dart_class": "CodeExecutionCallStepArguments",
+      "file": "lib/src/models/interactions/steps/code_execution_call_step.dart"
+    },
+    "CodeExecutionResult": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CodeExecutionResult",
+      "file": "lib/src/models/tools/code_execution_result.dart",
+      "schema": "CodeExecutionResult"
+    },
+    "CodeExecutionResultStep": {
+      "spec": "interactions",
+      "schema": "CodeExecutionResultStep",
+      "parent": "InteractionStep",
+      "kind": "sealed_variant",
+      "dart_class": "CodeExecutionResultStep",
+      "file": "lib/src/models/interactions/steps/code_execution_result_step.dart"
+    },
+    "CompositeMedia": {
+      "spec": "main",
+      "schema": "CompositeMedia",
+      "kind": "skip",
+      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "Content": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Content",
+      "file": "lib/src/models/content/content.dart",
+      "schema": "Content",
+      "tags": [
+        "critical"
+      ]
+    },
+    "ContentTypeInfo": {
+      "spec": "main",
+      "schema": "ContentTypeInfo",
+      "kind": "skip",
+      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "CreateAgentInteractionParams": {
+      "spec": "interactions",
+      "schema": "CreateAgentInteractionParams",
+      "dart_class": "CreateAgentInteractionParams",
+      "file": "lib/src/models/interactions/interaction.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "CreateModelInteractionParams": {
+      "spec": "interactions",
+      "schema": "CreateModelInteractionParams",
+      "dart_class": "CreateModelInteractionParams",
+      "file": "lib/src/models/interactions/interaction.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "DeepResearchAgentConfig": {
+      "spec": "interactions",
+      "schema": "DeepResearchAgentConfig",
+      "dart_class": "DeepResearchAgentConfig",
+      "file": "lib/src/models/interactions/agent_config.dart",
       "kind": "object"
     },
-    "InteractionCompleteEvent": {
-      "spec": "interactions",
-      "schema": "InteractionCompleteEvent",
-      "dart_class": "InteractionCompleteEvent",
-      "file": "lib/src/models/interactions/events/interaction_complete_event.dart",
+    "DiffChecksumsResponse": {
+      "spec": "main",
+      "schema": "DiffChecksumsResponse",
       "kind": "skip",
-      "note": "Now a standalone spec schema (was part of generic InteractionEvent). Implementation unchanged as sealed subclass of InteractionEvent.",
+      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
       "tags": [
         "acknowledged"
       ]
     },
-    "InteractionStartEvent": {
-      "spec": "interactions",
-      "schema": "InteractionStartEvent",
-      "dart_class": "InteractionStartEvent",
-      "file": "lib/src/models/interactions/events/interaction_start_event.dart",
+    "DiffDownloadResponse": {
+      "spec": "main",
+      "schema": "DiffDownloadResponse",
       "kind": "skip",
-      "note": "Now a standalone spec schema (was part of generic InteractionEvent). Implementation unchanged as sealed subclass of InteractionEvent.",
+      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
       "tags": [
         "acknowledged"
       ]
+    },
+    "DiffUploadRequest": {
+      "spec": "main",
+      "schema": "DiffUploadRequest",
+      "kind": "skip",
+      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "DiffUploadResponse": {
+      "spec": "main",
+      "schema": "DiffUploadResponse",
+      "kind": "skip",
+      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "DiffVersionResponse": {
+      "spec": "main",
+      "schema": "DiffVersionResponse",
+      "kind": "skip",
+      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "DocumentContent": {
+      "spec": "interactions",
+      "schema": "DocumentContent",
+      "parent": "InteractionContent",
+      "kind": "sealed_variant",
+      "dart_class": "DocumentContent",
+      "file": "lib/src/models/interactions/content/document_content.dart"
+    },
+    "DocumentDelta": {
+      "spec": "interactions",
+      "schema": "DocumentDelta",
+      "dart_class": "DocumentDelta",
+      "file": "lib/src/models/interactions/deltas/document_delta.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
+      "tags": [
+        "acknowledged"
+      ],
+      "parent": "StepDeltaData"
+    },
+    "DownloadMediaResponse": {
+      "spec": "main",
+      "schema": "DownloadMediaResponse",
+      "kind": "skip",
+      "note": "Wire envelope around GdataMedia for GET /fileSearchStores/{id}/media/{mediaId}. Exposed in Dart as Future<List<int>> downloadMedia() in FileSearchStoresResource. Not modeled in python-genai or js-genai.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "DownloadParameters": {
+      "spec": "main",
+      "schema": "DownloadParameters",
+      "kind": "skip",
+      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "DynamicAgentConfig": {
+      "spec": "interactions",
+      "schema": "DynamicAgentConfig",
+      "dart_class": "DynamicAgentConfig",
+      "file": "lib/src/models/interactions/agent_config.dart",
+      "kind": "object"
+    },
+    "EmbedContentConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EmbedContentConfig",
+      "file": "lib/src/models/embeddings/embed_content_config.dart",
+      "schema": "EmbedContentConfig",
+      "tags": []
+    },
+    "EmbedContentRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EmbedContentRequest",
+      "file": "lib/src/models/embeddings/embed_content_request.dart",
+      "schema": "EmbedContentRequest",
+      "tags": []
+    },
+    "EmbedContentResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EmbedContentResponse",
+      "file": "lib/src/models/embeddings/embed_content_response.dart",
+      "schema": "EmbedContentResponse",
+      "tags": []
+    },
+    "EmbeddingUsageMetadata": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EmbeddingUsageMetadata",
+      "file": "lib/src/models/embeddings/embedding_usage_metadata.dart",
+      "schema": "EmbeddingUsageMetadata",
+      "tags": []
+    },
+    "Empty": {
+      "spec": "interactions",
+      "schema": "Empty",
+      "kind": "skip",
+      "note": "Empty marker (x-stainless-empty-object); resource method returns Future<void>.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "Error": {
+      "spec": "interactions",
+      "schema": "Error",
+      "dart_class": "InteractionError",
+      "file": "lib/src/models/interactions/events/interaction_error.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "ErrorEvent": {
+      "spec": "interactions",
+      "schema": "ErrorEvent",
+      "dart_class": "ErrorEvent",
+      "file": "lib/src/models/interactions/events/error_event.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "ExecutableCode": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ExecutableCode",
+      "file": "lib/src/models/tools/executable_code.dart",
+      "schema": "ExecutableCode"
+    },
+    "FileCitation": {
+      "spec": "interactions",
+      "schema": "FileCitation",
+      "parent": "Annotation",
+      "kind": "skip",
+      "dart_class": "FileCitation",
+      "file": "lib/src/models/interactions/content/annotation.dart",
+      "note": "Handled by Annotation sealed class with type discriminator; appears in JSON as { \"type\": \"<subtype>\", ... }.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "FileData": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "FileData",
+      "file": "lib/src/models/content/file_data.dart",
+      "schema": "FileData"
+    },
+    "FileSearchCallStep": {
+      "spec": "interactions",
+      "schema": "FileSearchCallStep",
+      "parent": "InteractionStep",
+      "kind": "sealed_variant",
+      "dart_class": "FileSearchCallStep",
+      "file": "lib/src/models/interactions/steps/file_search_call_step.dart"
+    },
+    "FileSearchResultStep": {
+      "spec": "interactions",
+      "schema": "FileSearchResultStep",
+      "parent": "InteractionStep",
+      "kind": "sealed_variant",
+      "dart_class": "FileSearchResultStep",
+      "file": "lib/src/models/interactions/steps/file_search_result_step.dart"
+    },
+    "FileSearchStore": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "FileSearchStore",
+      "file": "lib/src/models/files/file_search_store.dart",
+      "schema": "FileSearchStore"
+    },
+    "Function": {
+      "spec": "interactions",
+      "schema": "Function",
+      "dart_class": "FunctionTool",
+      "file": "lib/src/models/interactions/tools/function_tool.dart",
+      "kind": "skip",
+      "parent": "InteractionTool",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "FunctionCall": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "FunctionCall",
+      "file": "lib/src/models/tools/function_call.dart",
+      "schema": "FunctionCall",
+      "tags": [
+        "critical"
+      ]
+    },
+    "FunctionCallStep": {
+      "spec": "interactions",
+      "schema": "FunctionCallStep",
+      "parent": "InteractionStep",
+      "kind": "sealed_variant",
+      "dart_class": "FunctionCallStep",
+      "file": "lib/src/models/interactions/steps/function_call_step.dart"
+    },
+    "FunctionResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "FunctionResponse",
+      "file": "lib/src/models/tools/function_response.dart",
+      "schema": "FunctionResponse",
+      "tags": []
+    },
+    "FunctionResultStep": {
+      "spec": "interactions",
+      "schema": "FunctionResultStep",
+      "parent": "InteractionStep",
+      "kind": "sealed_variant",
+      "dart_class": "FunctionResultStep",
+      "file": "lib/src/models/interactions/steps/function_result_step.dart"
+    },
+    "FunctionResultSubcontent": {
+      "spec": "interactions",
+      "schema": "FunctionResultSubcontent",
+      "kind": "sealed_parent",
+      "dart_class": "FunctionResultSubcontent",
+      "file": "lib/src/models/interactions/function_result_subcontent.dart",
+      "note": "Flattened into FunctionResultContent rather than standalone type.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "GdataMedia": {
+      "spec": "main",
+      "schema": "GdataMedia",
+      "kind": "skip",
+      "note": "Internal Google Scotty/Bigstore media descriptor; surfaces only inside DownloadMediaResponse. Exposed as raw bytes via FileSearchStoresResource.downloadMedia(). Not modeled in python-genai or js-genai.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "GenerateContentRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GenerateContentRequest",
+      "file": "lib/src/models/generation/generate_content_request.dart",
+      "schema": "GenerateContentRequest",
+      "note": "Excludes model (only used in endpoint URL path, not serialized in the body)",
+      "excluded_properties": [
+        "model"
+      ]
+    },
+    "GenerationConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GenerationConfig",
+      "file": "lib/src/models/generation/generation_config.dart",
+      "schema": "GenerationConfig",
+      "tags": [],
+      "note": "Excludes _responseJsonSchema (internal underscore-prefixed field) via excluded_properties",
+      "excluded_properties": [
+        "_responseJsonSchema"
+      ]
+    },
+    "GoogleMapsCallStep": {
+      "spec": "interactions",
+      "schema": "GoogleMapsCallStep",
+      "parent": "InteractionStep",
+      "kind": "sealed_variant",
+      "dart_class": "GoogleMapsCallStep",
+      "file": "lib/src/models/interactions/steps/google_maps_call_step.dart"
+    },
+    "GoogleMapsCallStepArguments": {
+      "spec": "interactions",
+      "schema": "GoogleMapsCallStepArguments",
+      "kind": "object",
+      "dart_class": "GoogleMapsCallStepArguments",
+      "file": "lib/src/models/interactions/steps/google_maps_call_step.dart"
+    },
+    "GoogleMapsResultItem": {
+      "spec": "interactions",
+      "schema": "GoogleMapsResultItem",
+      "kind": "object",
+      "dart_class": "GoogleMapsResultItem",
+      "file": "lib/src/models/interactions/steps/google_maps_result_step.dart"
+    },
+    "GoogleMapsResultPlaces": {
+      "spec": "interactions",
+      "schema": "GoogleMapsResultPlaces",
+      "kind": "object",
+      "dart_class": "GoogleMapsResultPlaces",
+      "file": "lib/src/models/interactions/steps/google_maps_result_step.dart"
+    },
+    "GoogleMapsResultStep": {
+      "spec": "interactions",
+      "schema": "GoogleMapsResultStep",
+      "parent": "InteractionStep",
+      "kind": "sealed_variant",
+      "dart_class": "GoogleMapsResultStep",
+      "file": "lib/src/models/interactions/steps/google_maps_result_step.dart"
+    },
+    "GoogleSearch": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GoogleSearch",
+      "file": "lib/src/models/common/google_search.dart",
+      "schema": "GoogleSearch"
+    },
+    "GoogleSearchCallStep": {
+      "spec": "interactions",
+      "schema": "GoogleSearchCallStep",
+      "parent": "InteractionStep",
+      "kind": "sealed_variant",
+      "dart_class": "GoogleSearchCallStep",
+      "file": "lib/src/models/interactions/steps/google_search_call_step.dart"
+    },
+    "GoogleSearchCallStepArguments": {
+      "spec": "interactions",
+      "schema": "GoogleSearchCallStepArguments",
+      "kind": "object",
+      "dart_class": "GoogleSearchCallStepArguments",
+      "file": "lib/src/models/interactions/steps/google_search_call_step.dart"
+    },
+    "GoogleSearchResultItem": {
+      "spec": "interactions",
+      "schema": "GoogleSearchResultItem",
+      "kind": "object",
+      "dart_class": "GoogleSearchResultItem",
+      "file": "lib/src/models/interactions/steps/google_search_result_step.dart"
+    },
+    "GoogleSearchResultStep": {
+      "spec": "interactions",
+      "schema": "GoogleSearchResultStep",
+      "parent": "InteractionStep",
+      "kind": "sealed_variant",
+      "dart_class": "GoogleSearchResultStep",
+      "file": "lib/src/models/interactions/steps/google_search_result_step.dart"
+    },
+    "GroundingChunk": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GroundingChunk",
+      "file": "lib/src/models/metadata/grounding_chunk.dart",
+      "schema": "GroundingChunk",
+      "note": "Upgraded from skip to object; fields match spec (web, retrievedContext, maps)"
+    },
+    "GroundingChunkCustomMetadata": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GroundingChunkCustomMetadata",
+      "file": "lib/src/models/common/grounding_chunk_custom_metadata.dart",
+      "schema": "GroundingChunkCustomMetadata"
+    },
+    "GroundingChunkStringList": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GroundingChunkStringList",
+      "file": "lib/src/models/common/grounding_chunk_string_list.dart",
+      "schema": "GroundingChunkStringList"
+    },
+    "GroundingMetadata": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GroundingMetadata",
+      "file": "lib/src/models/metadata/grounding_metadata.dart",
+      "schema": "GroundingMetadata",
+      "tags": [],
+      "note": "Includes googleMapsWidgetContextToken field added in spec update"
+    },
+    "GroundingSupport": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GroundingSupport",
+      "file": "lib/src/models/metadata/grounding_support.dart",
+      "schema": "GoogleAiGenerativelanguageV1betaGroundingSupport",
+      "note": "Spec schema is GoogleAiGenerativelanguageV1betaGroundingSupport; Dart class retains the GroundingSupport name."
+    },
+    "GroundingToolCount": {
+      "spec": "interactions",
+      "schema": "GroundingToolCount",
+      "kind": "object",
+      "dart_class": "GroundingToolCount",
+      "file": "lib/src/models/interactions/grounding_tool_count.dart"
+    },
+    "Image": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Image",
+      "file": "lib/src/models/common/image.dart",
+      "schema": "Image"
+    },
+    "ImageContent": {
+      "spec": "interactions",
+      "schema": "ImageContent",
+      "parent": "InteractionContent",
+      "kind": "sealed_variant",
+      "dart_class": "ImageContent",
+      "file": "lib/src/models/interactions/content/image_content.dart"
+    },
+    "ImageDelta": {
+      "spec": "interactions",
+      "schema": "ImageDelta",
+      "dart_class": "ImageDelta",
+      "file": "lib/src/models/interactions/deltas/image_delta.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
+      "tags": [
+        "acknowledged"
+      ],
+      "parent": "StepDeltaData"
+    },
+    "ImageResponseFormat": {
+      "spec": "interactions",
+      "schema": "ImageResponseFormat",
+      "parent": "ResponseFormat",
+      "kind": "sealed_variant",
+      "dart_class": "ImageResponseFormat",
+      "file": "lib/src/models/interactions/response_formats/image_response_format.dart"
+    },
+    "ImageSearch": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ImageSearch",
+      "file": "lib/src/models/common/image_search.dart",
+      "schema": "ImageSearch",
+      "note": "Empty schema in spec (no properties). Implementation is an empty class.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "Interaction": {
+      "spec": "interactions",
+      "schema": "Interaction",
+      "dart_class": "Interaction",
+      "file": "lib/src/models/interactions/interaction.dart",
+      "kind": "skip",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
+    },
+    "InteractionCompletedEvent": {
+      "spec": "interactions",
+      "schema": "InteractionCompletedEvent",
+      "kind": "skip",
+      "dart_class": "InteractionCompletedEvent",
+      "file": "lib/src/models/interactions/events/interaction_completed_event.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "SSE/delta event DTOs follow the existing googleai_dart convention of omitting copyWith on small immutable events."
+    },
+    "InteractionCreatedEvent": {
+      "spec": "interactions",
+      "schema": "InteractionCreatedEvent",
+      "kind": "skip",
+      "dart_class": "InteractionCreatedEvent",
+      "file": "lib/src/models/interactions/events/interaction_created_event.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "SSE/delta event DTOs follow the existing googleai_dart convention of omitting copyWith on small immutable events."
+    },
+    "InteractionReviewSnippet": {
+      "spec": "interactions",
+      "schema": "ReviewSnippet",
+      "kind": "object",
+      "dart_class": "InteractionReviewSnippet",
+      "file": "lib/src/models/interactions/interaction_review_snippet.dart",
+      "note": "Named InteractionReviewSnippet to avoid collision with metadata ReviewSnippet (different JSON key casing)."
+    },
+    "InteractionSseEvent": {
+      "spec": "interactions",
+      "schema": "InteractionSseEvent",
+      "dart_class": "InteractionEvent",
+      "file": "lib/src/models/interactions/events/events.dart",
+      "kind": "skip",
+      "note": "Dispatched through InteractionEvent sealed parent in events/events.dart (renamed for parity with existing package naming).",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "InteractionStatusUpdate": {
+      "spec": "interactions",
+      "schema": "InteractionStatusUpdate",
+      "dart_class": "InteractionStatusUpdateEvent",
+      "file": "lib/src/models/interactions/events/interaction_status_update_event.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "InteractionsInput": {
+      "spec": "interactions",
+      "schema": "InteractionsInput",
+      "kind": "skip",
+      "dart_class": "InteractionInput",
+      "file": "lib/src/models/interactions/interaction_input.dart",
+      "note": "Mapped to InteractionInput; schema name differs from Dart class.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "Interval": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Interval",
+      "file": "lib/src/models/common/interval.dart",
+      "schema": "Interval"
+    },
+    "ListWebhooksResponse": {
+      "spec": "interactions",
+      "schema": "ListWebhooksResponse",
+      "kind": "object",
+      "dart_class": "ListWebhooksResponse",
+      "file": "lib/src/models/webhooks/list_webhooks_response.dart"
+    },
+    "McpServerToolCallStep": {
+      "spec": "interactions",
+      "schema": "McpServerToolCallStep",
+      "parent": "InteractionStep",
+      "kind": "sealed_variant",
+      "dart_class": "McpServerToolCallStep",
+      "file": "lib/src/models/interactions/steps/mcp_server_tool_call_step.dart"
+    },
+    "McpServerToolResultStep": {
+      "spec": "interactions",
+      "schema": "McpServerToolResultStep",
+      "parent": "InteractionStep",
+      "kind": "sealed_variant",
+      "dart_class": "McpServerToolResultStep",
+      "file": "lib/src/models/interactions/steps/mcp_server_tool_result_step.dart"
+    },
+    "MediaResolution": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "MediaResolution",
+      "file": "lib/src/models/content/media_resolution.dart",
+      "schema": "MediaResolution",
+      "note": "Retained for compatibility with python-genai and js-genai SDKs; numTokens field added to match PartMediaResolution in reference SDKs.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "ModalityTokens": {
+      "spec": "interactions",
+      "schema": "ModalityTokens",
+      "dart_class": "ModalityTokens",
+      "file": "lib/src/models/interactions/modality_tokens.dart",
+      "kind": "object"
+    },
+    "ModelOption": {
+      "spec": "interactions",
+      "schema": "ModelOption",
+      "dart_class": "ModelOption",
+      "file": "lib/src/models/interactions/common/model_option.dart",
+      "kind": "skip",
+      "note": "No direct one-to-one Dart model is currently tracked for this schema. Review manually when the schema changes.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "ModelOutputStep": {
+      "spec": "interactions",
+      "schema": "ModelOutputStep",
+      "parent": "InteractionStep",
+      "kind": "sealed_variant",
+      "dart_class": "ModelOutputStep",
+      "file": "lib/src/models/interactions/steps/model_output_step.dart"
+    },
+    "ModelStage": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ModelStage",
+      "file": "lib/src/models/common/model_stage.dart",
+      "schema": "ModelStage"
+    },
+    "ModelStatus": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ModelStatus",
+      "file": "lib/src/models/common/model_status.dart",
+      "schema": "ModelStatus"
+    },
+    "ObjectId": {
+      "spec": "main",
+      "schema": "ObjectId",
+      "kind": "skip",
+      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia and CompositeMedia. See GdataMedia entry.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "Part": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "PartMetadataPart",
+      "file": "lib/src/models/content/part.dart",
+      "schema": "Part",
+      "parent": "Part",
+      "note": "Intentional skip: uses Dart sealed-class field-presence discrimination rather than spec's flat schema. The spec's Part schema represents a union of mutually exclusive fields, which is modeled in Dart as a sealed class hierarchy.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "PingWebhookRequest": {
+      "spec": "interactions",
+      "schema": "PingWebhookRequest",
+      "kind": "skip",
+      "note": "Empty marker (x-stainless-empty-object); ping() sends an empty body.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "PingWebhookResponse": {
+      "spec": "interactions",
+      "schema": "PingWebhookResponse",
+      "kind": "skip",
+      "note": "Empty marker (x-stainless-empty-object); ping() returns Future<void>.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "PlaceCitation": {
+      "spec": "interactions",
+      "schema": "PlaceCitation",
+      "parent": "Annotation",
+      "kind": "skip",
+      "dart_class": "PlaceCitation",
+      "file": "lib/src/models/interactions/content/annotation.dart",
+      "note": "Handled by Annotation sealed class with type discriminator; appears in JSON as { \"type\": \"<subtype>\", ... }.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "Places": {
+      "spec": "interactions",
+      "schema": "Places",
+      "kind": "skip",
+      "note": "Replaced by GoogleMapsResultPlaces (co-located in google_maps_result_step.dart). Standalone Places schema remains in spec but is unused by this package.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "RegisterFilesRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RegisterFilesRequest",
+      "file": "lib/src/models/common/register_files_request.dart",
+      "schema": "RegisterFilesRequest"
+    },
+    "RegisterFilesResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RegisterFilesResponse",
+      "file": "lib/src/models/common/register_files_response.dart",
+      "schema": "RegisterFilesResponse"
+    },
+    "ResponseFormat": {
+      "spec": "interactions",
+      "schema": "ResponseFormat",
+      "kind": "sealed_parent",
+      "dart_class": "ResponseFormat",
+      "file": "lib/src/models/interactions/response_formats/response_formats.dart"
+    },
+    "ResponseFormatList": {
+      "spec": "interactions",
+      "schema": "ResponseFormatList",
+      "kind": "skip",
+      "dart_class": "ResponseFormatList",
+      "file": "lib/src/models/interactions/response_formats/response_format_config.dart",
+      "note": "Spec ResponseFormatList is an array typedef (List<ResponseFormat>), so no field verification applies. Dart exposes a ResponseFormatList class as the list variant of the ResponseFormatConfig sealed wrapper modelling the `response_format` oneOf (ResponseFormatList | ResponseFormat).",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "ResponseFormatConfig": {
+      "spec": "interactions",
+      "kind": "extension",
+      "dart_class": "ResponseFormatConfig",
+      "file": "lib/src/models/interactions/response_formats/response_format_config.dart",
+      "note": "Dart-only sealed wrapper for the inline `response_format` oneOf (ResponseFormatList | ResponseFormat). Variants: SingleResponseFormat, ResponseFormatList.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "SingleResponseFormat": {
+      "spec": "interactions",
+      "parent": "ResponseFormatConfig",
+      "kind": "extension",
+      "dart_class": "SingleResponseFormat",
+      "file": "lib/src/models/interactions/response_formats/response_format_config.dart",
+      "note": "Dart-only single-format variant of the ResponseFormatConfig wrapper (holds one ResponseFormat).",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "ResponseModality": {
+      "spec": "interactions",
+      "schema": "ResponseModality",
+      "dart_class": "InteractionResponseModality",
+      "file": "lib/src/models/interactions/response_modality.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "RetrievedContext": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RetrievedContext",
+      "file": "lib/src/models/metadata/retrieved_context.dart",
+      "schema": "RetrievedContext"
+    },
+    "RotateSigningSecretRequest": {
+      "spec": "interactions",
+      "schema": "RotateSigningSecretRequest",
+      "kind": "object",
+      "dart_class": "RotateSigningSecretRequest",
+      "file": "lib/src/models/webhooks/rotate_signing_secret_request.dart"
+    },
+    "RotateSigningSecretResponse": {
+      "spec": "interactions",
+      "schema": "RotateSigningSecretResponse",
+      "kind": "object",
+      "dart_class": "RotateSigningSecretResponse",
+      "file": "lib/src/models/webhooks/rotate_signing_secret_response.dart"
+    },
+    "SearchTypes": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SearchTypes",
+      "file": "lib/src/models/common/search_types.dart",
+      "schema": "SearchTypes"
+    },
+    "ServiceTier": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ServiceTier",
+      "file": "lib/src/models/common/service_tier.dart",
+      "schema": "ServiceTier"
+    },
+    "SigningSecret": {
+      "spec": "interactions",
+      "schema": "SigningSecret",
+      "kind": "object",
+      "dart_class": "SigningSecret",
+      "file": "lib/src/models/webhooks/signing_secret.dart"
+    },
+    "Step": {
+      "spec": "interactions",
+      "schema": "Step",
+      "kind": "sealed_parent",
+      "dart_class": "InteractionStep",
+      "file": "lib/src/models/interactions/steps/steps.dart"
+    },
+    "StepDelta": {
+      "spec": "interactions",
+      "schema": "StepDelta",
+      "kind": "skip",
+      "dart_class": "StepDeltaEvent",
+      "file": "lib/src/models/interactions/events/step_delta_event.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "SSE/delta event DTOs follow the existing googleai_dart convention of omitting copyWith on small immutable events."
+    },
+    "StepDeltaData": {
+      "spec": "interactions",
+      "schema": "StepDeltaData",
+      "kind": "sealed_parent",
+      "dart_class": "StepDeltaData",
+      "file": "lib/src/models/interactions/deltas/deltas.dart",
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "text": "#/components/schemas/TextDelta",
+          "image": "#/components/schemas/ImageDelta",
+          "audio": "#/components/schemas/AudioDelta",
+          "document": "#/components/schemas/DocumentDelta",
+          "video": "#/components/schemas/VideoDelta",
+          "thought_summary": "#/components/schemas/ThoughtSummaryDelta",
+          "thought_signature": "#/components/schemas/ThoughtSignatureDelta",
+          "function_call": "#/components/schemas/FunctionCallDelta",
+          "function_result": "#/components/schemas/FunctionResultDelta",
+          "code_execution_call": "#/components/schemas/CodeExecutionCallDelta",
+          "code_execution_result": "#/components/schemas/CodeExecutionResultDelta",
+          "url_context_call": "#/components/schemas/UrlContextCallDelta",
+          "url_context_result": "#/components/schemas/UrlContextResultDelta",
+          "google_search_call": "#/components/schemas/GoogleSearchCallDelta",
+          "google_search_result": "#/components/schemas/GoogleSearchResultDelta",
+          "google_maps_call": "#/components/schemas/GoogleMapsCallDelta",
+          "google_maps_result": "#/components/schemas/GoogleMapsResultDelta",
+          "mcp_server_tool_call": "#/components/schemas/McpServerToolCallDelta",
+          "mcp_server_tool_result": "#/components/schemas/McpServerToolResultDelta",
+          "file_search_call": "#/components/schemas/FileSearchCallDelta",
+          "file_search_result": "#/components/schemas/FileSearchResultDelta",
+          "text_annotation": "#/components/schemas/TextAnnotationDelta"
+        }
+      }
+    },
+    "StepStart": {
+      "spec": "interactions",
+      "schema": "StepStart",
+      "kind": "skip",
+      "dart_class": "StepStartEvent",
+      "file": "lib/src/models/interactions/events/step_start_event.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "SSE/delta event DTOs follow the existing googleai_dart convention of omitting copyWith on small immutable events."
+    },
+    "StepStop": {
+      "spec": "interactions",
+      "schema": "StepStop",
+      "kind": "skip",
+      "dart_class": "StepStopEvent",
+      "file": "lib/src/models/interactions/events/step_stop_event.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "SSE/delta event DTOs follow the existing googleai_dart convention of omitting copyWith on small immutable events."
+    },
+    "TextAnnotationDelta": {
+      "spec": "interactions",
+      "schema": "TextAnnotationDelta",
+      "dart_class": "TextAnnotationDelta",
+      "file": "lib/src/models/interactions/deltas/text_annotation_delta.dart",
+      "kind": "sealed_variant",
+      "parent": "StepDeltaData"
+    },
+    "TextContent": {
+      "spec": "interactions",
+      "schema": "TextContent",
+      "parent": "InteractionContent",
+      "kind": "sealed_variant",
+      "dart_class": "TextContent",
+      "file": "lib/src/models/interactions/content/text_content.dart"
+    },
+    "TextDelta": {
+      "spec": "interactions",
+      "schema": "TextDelta",
+      "dart_class": "TextDelta",
+      "file": "lib/src/models/interactions/deltas/text_delta.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
+      "tags": [
+        "acknowledged"
+      ],
+      "parent": "StepDeltaData"
+    },
+    "TextResponseFormat": {
+      "spec": "interactions",
+      "schema": "TextResponseFormat",
+      "parent": "ResponseFormat",
+      "kind": "sealed_variant",
+      "dart_class": "TextResponseFormat",
+      "file": "lib/src/models/interactions/response_formats/text_response_format.dart"
+    },
+    "ThinkingLevel": {
+      "spec": "interactions",
+      "schema": "ThinkingLevel",
+      "dart_class": "InteractionThinkingLevel",
+      "file": "lib/src/models/interactions/thinking_level.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "ThinkingSummaries": {
+      "spec": "interactions",
+      "schema": "ThinkingSummaries",
+      "dart_class": "InteractionThinkingSummaries",
+      "file": "lib/src/models/interactions/thinking_summaries.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "ThoughtSignatureDelta": {
+      "spec": "interactions",
+      "schema": "ThoughtSignatureDelta",
+      "dart_class": "ThoughtSignatureDelta",
+      "file": "lib/src/models/interactions/deltas/thought_signature_delta.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
+      "tags": [
+        "acknowledged"
+      ],
+      "parent": "StepDeltaData"
+    },
+    "ThoughtStep": {
+      "spec": "interactions",
+      "schema": "ThoughtStep",
+      "parent": "InteractionStep",
+      "kind": "sealed_variant",
+      "dart_class": "ThoughtStep",
+      "file": "lib/src/models/interactions/steps/thought_step.dart"
+    },
+    "ThoughtSummary": {
+      "spec": "interactions",
+      "schema": "ThoughtSummary",
+      "dart_class": "ThoughtSummary",
+      "file": "lib/src/models/interactions/common/thought_summary.dart",
+      "kind": "skip",
+      "note": "No direct one-to-one Dart model is currently tracked for this schema. Review manually when the schema changes.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "ThoughtSummaryContent": {
+      "spec": "interactions",
+      "schema": "ThoughtSummaryContent",
+      "kind": "sealed_parent",
+      "dart_class": "ThoughtSummaryContent",
+      "file": "lib/src/models/interactions/thought_summary_content.dart",
+      "note": "Represented as ThoughtContent.summary field rather than standalone type.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "ThoughtSummaryDelta": {
+      "spec": "interactions",
+      "schema": "ThoughtSummaryDelta",
+      "dart_class": "ThoughtSummaryDelta",
+      "file": "lib/src/models/interactions/deltas/thought_summary_delta.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
+      "tags": [
+        "acknowledged"
+      ],
+      "parent": "StepDeltaData"
+    },
+    "Tool": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Tool",
+      "file": "lib/src/models/tools/tool.dart",
+      "schema": "Tool",
+      "tags": [],
+      "note": "codeExecution and urlContext remain Map<String,dynamic> (empty schemas in spec)"
+    },
+    "ToolCall": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ToolCall",
+      "file": "lib/src/models/tools/tool_call.dart",
+      "schema": "ToolCall"
+    },
+    "ToolChoiceConfig": {
+      "spec": "interactions",
+      "schema": "ToolChoiceConfig",
+      "dart_class": "AllowedTools",
+      "file": "lib/src/models/interactions/allowed_tools.dart",
+      "kind": "skip",
+      "parent": "InteractionToolChoice",
+      "note": "ToolChoiceConfig is represented as AllowedTools inside InteractionToolChoice. Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "ToolChoiceType": {
+      "spec": "interactions",
+      "schema": "ToolChoiceType",
+      "dart_class": "InteractionToolChoiceType",
+      "file": "lib/src/models/interactions/tool_choice_type.dart",
+      "kind": "skip",
+      "parent": "InteractionToolChoice",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "ToolConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ToolConfig",
+      "file": "lib/src/models/tools/tool_config.dart",
+      "schema": "ToolConfig",
+      "tags": []
+    },
+    "ToolResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ToolResponse",
+      "file": "lib/src/models/tools/tool_response.dart",
+      "schema": "ToolResponse"
+    },
+    "ToolType": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ToolType",
+      "file": "lib/src/models/tools/tool_type.dart",
+      "schema": "ToolType",
+      "note": "Removed from spec; kept for Part.toolCall()/toolResponse() convenience APIs",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "Turn": {
+      "spec": "interactions",
+      "schema": "Turn",
+      "kind": "skip",
+      "note": "Deprecated in the spec (deprecated: true, 0 references) and removed from the InteractionsInput union (now string | StepList | ContentList | Content). The live API rejects turn_list under Api-Revision 2026-05-20. Not generated; use StepListInput for inline history.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "UnknownInteractionEvent": {
+      "spec": "interactions",
+      "parent": "InteractionEvent",
+      "kind": "extension",
+      "dart_class": "UnknownInteractionEvent",
+      "file": "lib/src/models/interactions/events/unknown_interaction_event.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Fallback variant of InteractionEvent for unrecognized SSE event_type values; preserves raw JSON so an undocumented event type cannot break the stream."
+    },
+    "UnknownResponseFormat": {
+      "spec": "interactions",
+      "parent": "ResponseFormat",
+      "kind": "extension",
+      "dart_class": "UnknownResponseFormat",
+      "file": "lib/src/models/interactions/response_formats/unknown_response_format.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Catch-all variant of ResponseFormat for the spec's open `{ \"type\": object }` member and forward-compatibility; preserves raw JSON."
+    },
+    "UnknownStep": {
+      "spec": "interactions",
+      "parent": "InteractionStep",
+      "kind": "extension",
+      "dart_class": "UnknownStep",
+      "file": "lib/src/models/interactions/steps/unknown_step.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Fallback variant of InteractionStep for unrecognized step `type` values; preserves raw JSON so an undocumented step type cannot break parsing of a steps list or a streamed step.start event."
+    },
+    "UnknownStepDelta": {
+      "spec": "interactions",
+      "parent": "StepDeltaData",
+      "kind": "extension",
+      "dart_class": "UnknownStepDelta",
+      "file": "lib/src/models/interactions/deltas/unknown_step_delta.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Dart-only fallback variant of StepDeltaData. The API streams tool-call/result payloads (e.g. google_search_call, url_context_result) as step.delta events whose type mirrors the step but which are not in the published StepDeltaData schema; this preserves their raw JSON instead of failing the stream and keeps parsing forward-compatible."
+    },
+    "UrlCitation": {
+      "spec": "interactions",
+      "schema": "UrlCitation",
+      "parent": "Annotation",
+      "kind": "skip",
+      "dart_class": "UrlCitation",
+      "file": "lib/src/models/interactions/content/annotation.dart",
+      "note": "Handled by Annotation sealed class with type discriminator; appears in JSON as { \"type\": \"<subtype>\", ... }.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "UrlContextCallStep": {
+      "spec": "interactions",
+      "schema": "UrlContextCallStep",
+      "parent": "InteractionStep",
+      "kind": "sealed_variant",
+      "dart_class": "UrlContextCallStep",
+      "file": "lib/src/models/interactions/steps/url_context_call_step.dart"
+    },
+    "UrlContextCallStepArguments": {
+      "spec": "interactions",
+      "schema": "UrlContextCallStepArguments",
+      "kind": "object",
+      "dart_class": "UrlContextCallStepArguments",
+      "file": "lib/src/models/interactions/steps/url_context_call_step.dart"
+    },
+    "UrlContextResultItem": {
+      "spec": "interactions",
+      "schema": "UrlContextResultItem",
+      "kind": "object",
+      "dart_class": "UrlContextResultItem",
+      "file": "lib/src/models/interactions/steps/url_context_result_step.dart"
+    },
+    "UrlContextResultStep": {
+      "spec": "interactions",
+      "schema": "UrlContextResultStep",
+      "parent": "InteractionStep",
+      "kind": "sealed_variant",
+      "dart_class": "UrlContextResultStep",
+      "file": "lib/src/models/interactions/steps/url_context_result_step.dart"
+    },
+    "Usage": {
+      "spec": "interactions",
+      "schema": "Usage",
+      "dart_class": "InteractionUsage",
+      "file": "lib/src/models/interactions/usage.dart",
+      "kind": "object"
+    },
+    "UsageMetadata": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UsageMetadata",
+      "file": "lib/src/models/metadata/usage_metadata.dart",
+      "schema": "UsageMetadata"
+    },
+    "UserInputStep": {
+      "spec": "interactions",
+      "schema": "UserInputStep",
+      "parent": "InteractionStep",
+      "kind": "sealed_variant",
+      "dart_class": "UserInputStep",
+      "file": "lib/src/models/interactions/steps/user_input_step.dart"
+    },
+    "VideoContent": {
+      "spec": "interactions",
+      "schema": "VideoContent",
+      "parent": "InteractionContent",
+      "kind": "sealed_variant",
+      "dart_class": "VideoContent",
+      "file": "lib/src/models/interactions/content/video_content.dart"
+    },
+    "VideoDelta": {
+      "spec": "interactions",
+      "schema": "VideoDelta",
+      "dart_class": "VideoDelta",
+      "file": "lib/src/models/interactions/deltas/video_delta.dart",
+      "kind": "skip",
+      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
+      "tags": [
+        "acknowledged"
+      ],
+      "parent": "StepDeltaData"
+    },
+    "VideoResponseFormat": {
+      "spec": "interactions",
+      "schema": "VideoResponseFormat",
+      "parent": "ResponseFormat",
+      "kind": "sealed_variant",
+      "dart_class": "VideoResponseFormat",
+      "file": "lib/src/models/interactions/response_formats/video_response_format.dart"
+    },
+    "WebSearch": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "WebSearch",
+      "file": "lib/src/models/common/web_search.dart",
+      "schema": "WebSearch",
+      "note": "Empty schema in spec (no properties). Implementation is an empty class.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "Webhook": {
+      "spec": "interactions",
+      "schema": "Webhook",
+      "kind": "object",
+      "dart_class": "Webhook",
+      "file": "lib/src/models/webhooks/webhook.dart"
+    },
+    "WebhookConfig": {
+      "spec": "interactions",
+      "schema": "WebhookConfig",
+      "kind": "object",
+      "dart_class": "WebhookConfig",
+      "file": "lib/src/models/interactions/webhook_config.dart"
+    },
+    "WebhookUpdate": {
+      "spec": "interactions",
+      "schema": "WebhookUpdate",
+      "kind": "object",
+      "dart_class": "WebhookUpdate",
+      "file": "lib/src/models/webhooks/webhook_update.dart"
     },
     "interactions:CodeExecution": {
       "spec": "interactions",
@@ -420,59 +1546,6 @@
       "file": "lib/src/models/interactions/tools/code_execution_tool.dart",
       "kind": "skip",
       "parent": "InteractionTool",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "CodeExecutionCallArguments": {
-      "spec": "interactions",
-      "schema": "CodeExecutionCallArguments",
-      "kind": "skip",
-      "file": "lib/src/models/interactions/content/code_execution_call_content.dart",
-      "dart_class": "CodeExecutionCallArguments",
-      "note": "This arguments shape is flattened into the enclosing content model rather than represented as a standalone Dart type.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "CodeExecutionCallContent": {
-      "spec": "interactions",
-      "schema": "CodeExecutionCallContent",
-      "parent": "InteractionContent",
-      "kind": "skip",
-      "dart_class": "CodeExecutionCallContent",
-      "file": "lib/src/models/interactions/content/code_execution_call_content.dart",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "CodeExecutionCallDelta": {
-      "spec": "interactions",
-      "schema": "CodeExecutionCallDelta",
-      "dart_class": "CodeExecutionCallDelta",
-      "file": "lib/src/models/interactions/deltas/code_execution_call_delta.dart",
-      "kind": "skip",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "CodeExecutionResultContent": {
-      "spec": "interactions",
-      "schema": "CodeExecutionResultContent",
-      "parent": "InteractionContent",
-      "kind": "sealed_variant",
-      "dart_class": "CodeExecutionResultContent",
-      "file": "lib/src/models/interactions/content/code_execution_result_content.dart"
-    },
-    "CodeExecutionResultDelta": {
-      "spec": "interactions",
-      "schema": "CodeExecutionResultDelta",
-      "dart_class": "CodeExecutionResultDelta",
-      "file": "lib/src/models/interactions/deltas/code_execution_result_delta.dart",
-      "kind": "skip",
       "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
       "tags": [
         "acknowledged"
@@ -531,150 +1604,6 @@
       },
       "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
     },
-    "ContentDeltaData": {
-      "spec": "interactions",
-      "schema": "ContentDeltaData",
-      "kind": "sealed_parent",
-      "dart_class": "InteractionDelta",
-      "file": "lib/src/models/interactions/deltas/deltas.dart",
-      "discriminator": {
-        "field": "type",
-        "mapping": {
-          "text": "#/components/schemas/TextDelta",
-          "image": "#/components/schemas/ImageDelta",
-          "audio": "#/components/schemas/AudioDelta",
-          "document": "#/components/schemas/DocumentDelta",
-          "video": "#/components/schemas/VideoDelta",
-          "thought_summary": "#/components/schemas/ThoughtSummaryDelta",
-          "thought_signature": "#/components/schemas/ThoughtSignatureDelta",
-          "function_call": "#/components/schemas/FunctionCallDelta",
-          "function_result": "#/components/schemas/FunctionResultDelta",
-          "code_execution_call": "#/components/schemas/CodeExecutionCallDelta",
-          "code_execution_result": "#/components/schemas/CodeExecutionResultDelta",
-          "url_context_call": "#/components/schemas/UrlContextCallDelta",
-          "url_context_result": "#/components/schemas/UrlContextResultDelta",
-          "google_search_call": "#/components/schemas/GoogleSearchCallDelta",
-          "google_search_result": "#/components/schemas/GoogleSearchResultDelta",
-          "google_maps_call": "#/components/schemas/GoogleMapsCallDelta",
-          "google_maps_result": "#/components/schemas/GoogleMapsResultDelta",
-          "mcp_server_tool_call": "#/components/schemas/McpServerToolCallDelta",
-          "mcp_server_tool_result": "#/components/schemas/McpServerToolResultDelta",
-          "file_search_call": "#/components/schemas/FileSearchCallDelta",
-          "file_search_result": "#/components/schemas/FileSearchResultDelta",
-          "text_annotation": "#/components/schemas/TextAnnotationDelta"
-        }
-      }
-    },
-    "ContentDelta": {
-      "spec": "interactions",
-      "schema": "ContentDelta",
-      "dart_class": "ContentDeltaEvent",
-      "file": "lib/src/models/interactions/events/content_delta_event.dart",
-      "kind": "skip",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "ContentStart": {
-      "spec": "interactions",
-      "schema": "ContentStart",
-      "dart_class": "ContentStartEvent",
-      "file": "lib/src/models/interactions/events/content_start_event.dart",
-      "kind": "skip",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "ContentStop": {
-      "spec": "interactions",
-      "schema": "ContentStop",
-      "dart_class": "ContentStopEvent",
-      "file": "lib/src/models/interactions/events/content_stop_event.dart",
-      "kind": "skip",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "CreateAgentInteractionParams": {
-      "spec": "interactions",
-      "schema": "CreateAgentInteractionParams",
-      "dart_class": "CreateAgentInteractionParams",
-      "file": "lib/src/models/interactions/interaction.dart",
-      "kind": "skip",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "CreateModelInteractionParams": {
-      "spec": "interactions",
-      "schema": "CreateModelInteractionParams",
-      "dart_class": "CreateModelInteractionParams",
-      "file": "lib/src/models/interactions/interaction.dart",
-      "kind": "skip",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "DeepResearchAgentConfig": {
-      "spec": "interactions",
-      "schema": "DeepResearchAgentConfig",
-      "dart_class": "DeepResearchAgentConfig",
-      "file": "lib/src/models/interactions/agent_config.dart",
-      "kind": "object"
-    },
-    "DocumentContent": {
-      "spec": "interactions",
-      "schema": "DocumentContent",
-      "parent": "InteractionContent",
-      "kind": "sealed_variant",
-      "dart_class": "DocumentContent",
-      "file": "lib/src/models/interactions/content/document_content.dart"
-    },
-    "DocumentDelta": {
-      "spec": "interactions",
-      "schema": "DocumentDelta",
-      "dart_class": "DocumentDelta",
-      "file": "lib/src/models/interactions/deltas/document_delta.dart",
-      "kind": "skip",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "DynamicAgentConfig": {
-      "spec": "interactions",
-      "schema": "DynamicAgentConfig",
-      "dart_class": "DynamicAgentConfig",
-      "file": "lib/src/models/interactions/agent_config.dart",
-      "kind": "object"
-    },
-    "Error": {
-      "spec": "interactions",
-      "schema": "Error",
-      "dart_class": "InteractionError",
-      "file": "lib/src/models/interactions/events/interaction_error.dart",
-      "kind": "skip",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "ErrorEvent": {
-      "spec": "interactions",
-      "schema": "ErrorEvent",
-      "dart_class": "ErrorEvent",
-      "file": "lib/src/models/interactions/events/error_event.dart",
-      "kind": "skip",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
     "interactions:FileSearch": {
       "spec": "interactions",
       "schema": "FileSearch",
@@ -682,82 +1611,6 @@
       "file": "lib/src/models/interactions/tools/file_search_tool.dart",
       "kind": "skip",
       "parent": "InteractionTool",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "FileSearchResult": {
-      "spec": "interactions",
-      "schema": "FileSearchResult",
-      "kind": "object",
-      "dart_class": "FileSearchResult",
-      "file": "lib/src/models/interactions/content/file_search_result_content.dart"
-    },
-    "FileSearchResultContent": {
-      "spec": "interactions",
-      "schema": "FileSearchResultContent",
-      "parent": "InteractionContent",
-      "kind": "sealed_variant",
-      "dart_class": "FileSearchResultContent",
-      "file": "lib/src/models/interactions/content/file_search_result_content.dart"
-    },
-    "FileSearchResultDelta": {
-      "spec": "interactions",
-      "schema": "FileSearchResultDelta",
-      "dart_class": "FileSearchResultDelta",
-      "file": "lib/src/models/interactions/deltas/file_search_result_delta.dart",
-      "kind": "skip",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "Function": {
-      "spec": "interactions",
-      "schema": "Function",
-      "dart_class": "FunctionTool",
-      "file": "lib/src/models/interactions/tools/function_tool.dart",
-      "kind": "skip",
-      "parent": "InteractionTool",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "FunctionCallContent": {
-      "spec": "interactions",
-      "schema": "FunctionCallContent",
-      "parent": "InteractionContent",
-      "kind": "sealed_variant",
-      "dart_class": "FunctionCallContent",
-      "file": "lib/src/models/interactions/content/function_call_content.dart"
-    },
-    "FunctionCallDelta": {
-      "spec": "interactions",
-      "schema": "FunctionCallDelta",
-      "dart_class": "FunctionCallDelta",
-      "file": "lib/src/models/interactions/deltas/function_call_delta.dart",
-      "kind": "skip",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "FunctionResultContent": {
-      "spec": "interactions",
-      "schema": "FunctionResultContent",
-      "parent": "InteractionContent",
-      "kind": "sealed_variant",
-      "dart_class": "FunctionResultContent",
-      "file": "lib/src/models/interactions/content/function_result_content.dart"
-    },
-    "FunctionResultDelta": {
-      "spec": "interactions",
-      "schema": "FunctionResultDelta",
-      "dart_class": "FunctionResultDelta",
-      "file": "lib/src/models/interactions/deltas/function_result_delta.dart",
-      "kind": "skip",
       "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
       "tags": [
         "acknowledged"
@@ -773,6 +1626,18 @@
         "critical"
       ]
     },
+    "interactions:GoogleMaps": {
+      "spec": "interactions",
+      "schema": "GoogleMaps",
+      "dart_class": "GoogleMapsTool",
+      "file": "lib/src/models/interactions/tools/google_maps_tool.dart",
+      "kind": "skip",
+      "parent": "InteractionTool",
+      "note": "Skipped: interactions tool types use sealed_variant pattern via InteractionTool sealed class.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
     "interactions:GoogleSearch": {
       "spec": "interactions",
       "schema": "GoogleSearch",
@@ -785,121 +1650,12 @@
         "acknowledged"
       ]
     },
-    "GoogleSearchCallArguments": {
+    "interactions:ImageConfig": {
       "spec": "interactions",
-      "schema": "GoogleSearchCallArguments",
-      "kind": "skip",
-      "file": "lib/src/models/interactions/content/google_search_call_content.dart",
-      "dart_class": "GoogleSearchCallArguments",
-      "note": "This arguments shape is flattened into the enclosing content model rather than represented as a standalone Dart type.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "GoogleSearchCallContent": {
-      "spec": "interactions",
-      "schema": "GoogleSearchCallContent",
-      "parent": "InteractionContent",
-      "kind": "skip",
-      "dart_class": "GoogleSearchCallContent",
-      "file": "lib/src/models/interactions/content/google_search_call_content.dart",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "GoogleSearchCallDelta": {
-      "spec": "interactions",
-      "schema": "GoogleSearchCallDelta",
-      "dart_class": "GoogleSearchCallDelta",
-      "file": "lib/src/models/interactions/deltas/google_search_call_delta.dart",
-      "kind": "skip",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "GoogleSearchResult": {
-      "spec": "interactions",
-      "schema": "GoogleSearchResult",
-      "kind": "skip",
-      "dart_class": "GoogleSearchResult",
-      "file": "lib/src/models/interactions/content/google_search_result_content.dart",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "GoogleSearchResultContent": {
-      "spec": "interactions",
-      "schema": "GoogleSearchResultContent",
-      "parent": "InteractionContent",
-      "kind": "sealed_variant",
-      "dart_class": "GoogleSearchResultContent",
-      "file": "lib/src/models/interactions/content/google_search_result_content.dart"
-    },
-    "GoogleSearchResultDelta": {
-      "spec": "interactions",
-      "schema": "GoogleSearchResultDelta",
-      "dart_class": "GoogleSearchResultDelta",
-      "file": "lib/src/models/interactions/deltas/google_search_result_delta.dart",
-      "kind": "skip",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "ImageContent": {
-      "spec": "interactions",
-      "schema": "ImageContent",
-      "parent": "InteractionContent",
-      "kind": "sealed_variant",
-      "dart_class": "ImageContent",
-      "file": "lib/src/models/interactions/content/image_content.dart"
-    },
-    "ImageDelta": {
-      "spec": "interactions",
-      "schema": "ImageDelta",
-      "dart_class": "ImageDelta",
-      "file": "lib/src/models/interactions/deltas/image_delta.dart",
-      "kind": "skip",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "Interaction": {
-      "spec": "interactions",
-      "schema": "Interaction",
-      "dart_class": "Interaction",
-      "file": "lib/src/models/interactions/interaction.dart",
-      "kind": "skip",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up."
-    },
-    "InteractionSseEvent": {
-      "spec": "interactions",
-      "schema": "InteractionSseEvent",
-      "dart_class": "InteractionEvent",
-      "file": "lib/src/models/interactions/events/events.dart",
-      "kind": "skip",
-      "note": "Stream event union is represented by InteractionEvent subclasses rather than a direct InteractionSseEvent model.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "InteractionStatusUpdate": {
-      "spec": "interactions",
-      "schema": "InteractionStatusUpdate",
-      "dart_class": "InteractionStatusUpdateEvent",
-      "file": "lib/src/models/interactions/events/interaction_status_update_event.dart",
-      "kind": "skip",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
+      "schema": "ImageConfig",
+      "dart_class": "InteractionImageConfig",
+      "file": "lib/src/models/interactions/image_config.dart",
+      "kind": "object"
     },
     "interactions:McpServer": {
       "spec": "interactions",
@@ -908,48 +1664,6 @@
       "file": "lib/src/models/interactions/tools/mcp_server_tool.dart",
       "kind": "skip",
       "parent": "InteractionTool",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "McpServerToolCallContent": {
-      "spec": "interactions",
-      "schema": "McpServerToolCallContent",
-      "parent": "InteractionContent",
-      "kind": "sealed_variant",
-      "dart_class": "McpServerToolCallContent",
-      "file": "lib/src/models/interactions/content/mcp_server_tool_call_content.dart"
-    },
-    "McpServerToolCallDelta": {
-      "spec": "interactions",
-      "schema": "McpServerToolCallDelta",
-      "dart_class": "McpServerToolCallDelta",
-      "file": "lib/src/models/interactions/deltas/mcp_server_tool_call_delta.dart",
-      "kind": "skip",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "McpServerToolResultContent": {
-      "spec": "interactions",
-      "schema": "McpServerToolResultContent",
-      "parent": "InteractionContent",
-      "kind": "skip",
-      "dart_class": "McpServerToolResultContent",
-      "file": "lib/src/models/interactions/content/mcp_server_tool_result_content.dart",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "McpServerToolResultDelta": {
-      "spec": "interactions",
-      "schema": "McpServerToolResultDelta",
-      "dart_class": "McpServerToolResultDelta",
-      "file": "lib/src/models/interactions/deltas/mcp_server_tool_result_delta.dart",
-      "kind": "skip",
       "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
       "tags": [
         "acknowledged"
@@ -966,34 +1680,13 @@
         "acknowledged"
       ]
     },
-    "ModalityTokens": {
+    "interactions:Retrieval": {
       "spec": "interactions",
-      "schema": "ModalityTokens",
-      "dart_class": "ModalityTokens",
-      "file": "lib/src/models/interactions/modality_tokens.dart",
-      "kind": "object"
-    },
-    "ModelOption": {
-      "spec": "interactions",
-      "schema": "ModelOption",
-      "dart_class": "ModelOption",
-      "file": "lib/src/models/interactions/common/model_option.dart",
-      "kind": "skip",
-      "note": "No direct one-to-one Dart model is currently tracked for this schema. Review manually when the schema changes.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "ResponseModality": {
-      "spec": "interactions",
-      "schema": "ResponseModality",
-      "dart_class": "InteractionResponseModality",
-      "file": "lib/src/models/interactions/response_modality.dart",
-      "kind": "skip",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
+      "schema": "Retrieval",
+      "dart_class": "RetrievalTool",
+      "file": "lib/src/models/interactions/tools/retrieval_tool.dart",
+      "kind": "sealed_variant",
+      "parent": "InteractionTool"
     },
     "interactions:SpeechConfig": {
       "spec": "interactions",
@@ -1001,96 +1694,6 @@
       "dart_class": "InteractionSpeechConfig",
       "file": "lib/src/models/interactions/speech_config.dart",
       "kind": "object"
-    },
-    "TextContent": {
-      "spec": "interactions",
-      "schema": "TextContent",
-      "parent": "InteractionContent",
-      "kind": "sealed_variant",
-      "dart_class": "TextContent",
-      "file": "lib/src/models/interactions/content/text_content.dart"
-    },
-    "TextDelta": {
-      "spec": "interactions",
-      "schema": "TextDelta",
-      "dart_class": "TextDelta",
-      "file": "lib/src/models/interactions/deltas/text_delta.dart",
-      "kind": "skip",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "ThinkingLevel": {
-      "spec": "interactions",
-      "schema": "ThinkingLevel",
-      "dart_class": "InteractionThinkingLevel",
-      "file": "lib/src/models/interactions/thinking_level.dart",
-      "kind": "skip",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "ThinkingSummaries": {
-      "spec": "interactions",
-      "schema": "ThinkingSummaries",
-      "dart_class": "InteractionThinkingSummaries",
-      "file": "lib/src/models/interactions/thinking_summaries.dart",
-      "kind": "skip",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "ThoughtContent": {
-      "spec": "interactions",
-      "schema": "ThoughtContent",
-      "parent": "InteractionContent",
-      "kind": "sealed_variant",
-      "dart_class": "ThoughtContent",
-      "file": "lib/src/models/interactions/content/thought_content.dart"
-    },
-    "ThoughtSignatureDelta": {
-      "spec": "interactions",
-      "schema": "ThoughtSignatureDelta",
-      "dart_class": "ThoughtSignatureDelta",
-      "file": "lib/src/models/interactions/deltas/thought_signature_delta.dart",
-      "kind": "skip",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "TextAnnotationDelta": {
-      "spec": "interactions",
-      "schema": "TextAnnotationDelta",
-      "dart_class": "TextAnnotationDelta",
-      "file": "lib/src/models/interactions/deltas/text_annotation_delta.dart",
-      "kind": "sealed_variant",
-      "parent": "InteractionDelta"
-    },
-    "ThoughtSummary": {
-      "spec": "interactions",
-      "schema": "ThoughtSummary",
-      "dart_class": "ThoughtSummary",
-      "file": "lib/src/models/interactions/common/thought_summary.dart",
-      "kind": "skip",
-      "note": "No direct one-to-one Dart model is currently tracked for this schema. Review manually when the schema changes.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "ThoughtSummaryDelta": {
-      "spec": "interactions",
-      "schema": "ThoughtSummaryDelta",
-      "dart_class": "ThoughtSummaryDelta",
-      "file": "lib/src/models/interactions/deltas/thought_summary_delta.dart",
-      "kind": "skip",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
     },
     "interactions:Tool": {
       "spec": "interactions",
@@ -1116,52 +1719,6 @@
         }
       }
     },
-    "interactions:Retrieval": {
-      "spec": "interactions",
-      "schema": "Retrieval",
-      "dart_class": "RetrievalTool",
-      "file": "lib/src/models/interactions/tools/retrieval_tool.dart",
-      "kind": "sealed_variant",
-      "parent": "InteractionTool"
-    },
-    "interactions:VertexAISearchConfig": {
-      "spec": "interactions",
-      "schema": "VertexAISearchConfig",
-      "dart_class": "VertexAISearchConfig",
-      "file": "lib/src/models/interactions/tools/vertex_ai_search_config.dart",
-      "kind": "object"
-    },
-    "ToolChoiceConfig": {
-      "spec": "interactions",
-      "schema": "ToolChoiceConfig",
-      "dart_class": "AllowedTools",
-      "file": "lib/src/models/interactions/allowed_tools.dart",
-      "kind": "skip",
-      "parent": "InteractionToolChoice",
-      "note": "ToolChoiceConfig is represented as AllowedTools inside InteractionToolChoice. Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "ToolChoiceType": {
-      "spec": "interactions",
-      "schema": "ToolChoiceType",
-      "dart_class": "InteractionToolChoiceType",
-      "file": "lib/src/models/interactions/tool_choice_type.dart",
-      "kind": "skip",
-      "parent": "InteractionToolChoice",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "Turn": {
-      "spec": "interactions",
-      "schema": "Turn",
-      "dart_class": "Turn",
-      "file": "lib/src/models/interactions/turn.dart",
-      "kind": "object"
-    },
     "interactions:UrlContext": {
       "spec": "interactions",
       "schema": "UrlContext",
@@ -1174,519 +1731,12 @@
         "acknowledged"
       ]
     },
-    "UrlContextCallArguments": {
+    "interactions:VertexAISearchConfig": {
       "spec": "interactions",
-      "schema": "UrlContextCallArguments",
-      "kind": "skip",
-      "file": "lib/src/models/interactions/content/url_context_call_content.dart",
-      "dart_class": "UrlContextCallArguments",
-      "note": "This arguments shape is flattened into the enclosing content model rather than represented as a standalone Dart type.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "UrlContextCallContent": {
-      "spec": "interactions",
-      "schema": "UrlContextCallContent",
-      "parent": "InteractionContent",
-      "kind": "skip",
-      "dart_class": "UrlContextCallContent",
-      "file": "lib/src/models/interactions/content/url_context_call_content.dart",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "UrlContextCallDelta": {
-      "spec": "interactions",
-      "schema": "UrlContextCallDelta",
-      "dart_class": "UrlContextCallDelta",
-      "file": "lib/src/models/interactions/deltas/url_context_call_delta.dart",
-      "kind": "skip",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "UrlContextResult": {
-      "spec": "interactions",
-      "schema": "UrlContextResult",
-      "kind": "object",
-      "dart_class": "UrlContextResult",
-      "file": "lib/src/models/interactions/content/url_context_result_content.dart"
-    },
-    "UrlContextResultContent": {
-      "spec": "interactions",
-      "schema": "UrlContextResultContent",
-      "parent": "InteractionContent",
-      "kind": "sealed_variant",
-      "dart_class": "UrlContextResultContent",
-      "file": "lib/src/models/interactions/content/url_context_result_content.dart"
-    },
-    "UrlContextResultDelta": {
-      "spec": "interactions",
-      "schema": "UrlContextResultDelta",
-      "dart_class": "UrlContextResultDelta",
-      "file": "lib/src/models/interactions/deltas/url_context_result_delta.dart",
-      "kind": "skip",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "Usage": {
-      "spec": "interactions",
-      "schema": "Usage",
-      "dart_class": "InteractionUsage",
-      "file": "lib/src/models/interactions/usage.dart",
+      "schema": "VertexAISearchConfig",
+      "dart_class": "VertexAISearchConfig",
+      "file": "lib/src/models/interactions/tools/vertex_ai_search_config.dart",
       "kind": "object"
-    },
-    "VideoContent": {
-      "spec": "interactions",
-      "schema": "VideoContent",
-      "parent": "InteractionContent",
-      "kind": "sealed_variant",
-      "dart_class": "VideoContent",
-      "file": "lib/src/models/interactions/content/video_content.dart"
-    },
-    "VideoDelta": {
-      "spec": "interactions",
-      "schema": "VideoDelta",
-      "dart_class": "VideoDelta",
-      "file": "lib/src/models/interactions/deltas/video_delta.dart",
-      "kind": "skip",
-      "note": "Skipped by repair: current experimental interactions model diverges from strict shared-schema verification and needs package-specific follow-up.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "GoogleSearch": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "GoogleSearch",
-      "file": "lib/src/models/common/google_search.dart",
-      "schema": "GoogleSearch"
-    },
-    "Interval": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "Interval",
-      "file": "lib/src/models/common/interval.dart",
-      "schema": "Interval"
-    },
-    "SearchTypes": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "SearchTypes",
-      "file": "lib/src/models/common/search_types.dart",
-      "schema": "SearchTypes"
-    },
-    "ImageSearch": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": "ImageSearch",
-      "file": "lib/src/models/common/image_search.dart",
-      "schema": "ImageSearch",
-      "note": "Empty schema in spec (no properties). Implementation is an empty class.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "WebSearch": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": "WebSearch",
-      "file": "lib/src/models/common/web_search.dart",
-      "schema": "WebSearch",
-      "note": "Empty schema in spec (no properties). Implementation is an empty class.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "Image": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "Image",
-      "file": "lib/src/models/common/image.dart",
-      "schema": "Image"
-    },
-    "GroundingChunkCustomMetadata": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "GroundingChunkCustomMetadata",
-      "file": "lib/src/models/common/grounding_chunk_custom_metadata.dart",
-      "schema": "GroundingChunkCustomMetadata"
-    },
-    "RetrievedContext": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "RetrievedContext",
-      "file": "lib/src/models/metadata/retrieved_context.dart",
-      "schema": "RetrievedContext"
-    },
-    "GroundingChunkStringList": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "GroundingChunkStringList",
-      "file": "lib/src/models/common/grounding_chunk_string_list.dart",
-      "schema": "GroundingChunkStringList"
-    },
-    "GroundingSupport": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "GroundingSupport",
-      "file": "lib/src/models/metadata/grounding_support.dart",
-      "schema": "GoogleAiGenerativelanguageV1betaGroundingSupport",
-      "note": "Spec schema is GoogleAiGenerativelanguageV1betaGroundingSupport; Dart class retains the GroundingSupport name."
-    },
-    "ModelStage": {
-      "spec": "main",
-      "kind": "enum",
-      "dart_class": "ModelStage",
-      "file": "lib/src/models/common/model_stage.dart",
-      "schema": "ModelStage"
-    },
-    "ServiceTier": {
-      "spec": "main",
-      "kind": "enum",
-      "dart_class": "ServiceTier",
-      "file": "lib/src/models/common/service_tier.dart",
-      "schema": "ServiceTier"
-    },
-    "ModelStatus": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "ModelStatus",
-      "file": "lib/src/models/common/model_status.dart",
-      "schema": "ModelStatus"
-    },
-    "RegisterFilesRequest": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "RegisterFilesRequest",
-      "file": "lib/src/models/common/register_files_request.dart",
-      "schema": "RegisterFilesRequest"
-    },
-    "RegisterFilesResponse": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "RegisterFilesResponse",
-      "file": "lib/src/models/common/register_files_response.dart",
-      "schema": "RegisterFilesResponse"
-    },
-    "MediaResolution": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": "MediaResolution",
-      "file": "lib/src/models/content/media_resolution.dart",
-      "schema": "MediaResolution",
-      "note": "Retained for compatibility with python-genai and js-genai SDKs; numTokens field added to match PartMediaResolution in reference SDKs.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "ToolType": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": "ToolType",
-      "file": "lib/src/models/tools/tool_type.dart",
-      "schema": "ToolType",
-      "note": "Removed from spec; kept for Part.toolCall()/toolResponse() convenience APIs",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "ToolCall": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "ToolCall",
-      "file": "lib/src/models/tools/tool_call.dart",
-      "schema": "ToolCall"
-    },
-    "ToolResponse": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "ToolResponse",
-      "file": "lib/src/models/tools/tool_response.dart",
-      "schema": "ToolResponse"
-    },
-    "interactions:GoogleMaps": {
-      "spec": "interactions",
-      "schema": "GoogleMaps",
-      "dart_class": "GoogleMapsTool",
-      "file": "lib/src/models/interactions/tools/google_maps_tool.dart",
-      "kind": "skip",
-      "parent": "InteractionTool",
-      "note": "Skipped: interactions tool types use sealed_variant pattern via InteractionTool sealed class.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "GoogleMapsCallArguments": {
-      "spec": "interactions",
-      "schema": "GoogleMapsCallArguments",
-      "kind": "skip",
-      "file": "lib/src/models/interactions/content/google_maps_call_content.dart",
-      "dart_class": "GoogleMapsCallArguments",
-      "note": "This arguments shape is flattened into the enclosing content model rather than represented as a standalone Dart type.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "GoogleMapsCallContent": {
-      "spec": "interactions",
-      "schema": "GoogleMapsCallContent",
-      "parent": "InteractionContent",
-      "kind": "skip",
-      "dart_class": "GoogleMapsCallContent",
-      "file": "lib/src/models/interactions/content/google_maps_call_content.dart",
-      "note": "Arguments shape is flattened into content model; fields nullable for content.start events.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "GoogleMapsCallDelta": {
-      "spec": "interactions",
-      "schema": "GoogleMapsCallDelta",
-      "dart_class": "GoogleMapsCallDelta",
-      "file": "lib/src/models/interactions/deltas/google_maps_call_delta.dart",
-      "kind": "skip",
-      "note": "Delta type tracked as sealed variant of InteractionDelta.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "GoogleMapsResult": {
-      "spec": "interactions",
-      "schema": "GoogleMapsResult",
-      "kind": "object",
-      "dart_class": "GoogleMapsResult",
-      "file": "lib/src/models/interactions/content/google_maps_result_content.dart"
-    },
-    "GoogleMapsResultContent": {
-      "spec": "interactions",
-      "schema": "GoogleMapsResultContent",
-      "parent": "InteractionContent",
-      "kind": "sealed_variant",
-      "dart_class": "GoogleMapsResultContent",
-      "file": "lib/src/models/interactions/content/google_maps_result_content.dart"
-    },
-    "GoogleMapsResultDelta": {
-      "spec": "interactions",
-      "schema": "GoogleMapsResultDelta",
-      "dart_class": "GoogleMapsResultDelta",
-      "file": "lib/src/models/interactions/deltas/google_maps_result_delta.dart",
-      "kind": "skip",
-      "note": "Delta type tracked as sealed variant of InteractionDelta.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "Places": {
-      "spec": "interactions",
-      "schema": "Places",
-      "kind": "object",
-      "dart_class": "Places",
-      "file": "lib/src/models/interactions/content/google_maps_result_content.dart"
-    },
-    "InteractionReviewSnippet": {
-      "spec": "interactions",
-      "schema": "ReviewSnippet",
-      "kind": "object",
-      "dart_class": "InteractionReviewSnippet",
-      "file": "lib/src/models/interactions/content/google_maps_result_content.dart",
-      "note": "Named InteractionReviewSnippet to avoid collision with metadata ReviewSnippet (different JSON key casing)."
-    },
-    "UrlCitation": {
-      "spec": "interactions",
-      "schema": "UrlCitation",
-      "parent": "Annotation",
-      "kind": "skip",
-      "dart_class": "UrlCitation",
-      "file": "lib/src/models/interactions/content/annotation.dart",
-      "note": "Handled by Annotation sealed class with type discriminator; appears in JSON as { \"type\": \"<subtype>\", ... }.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "FileCitation": {
-      "spec": "interactions",
-      "schema": "FileCitation",
-      "parent": "Annotation",
-      "kind": "skip",
-      "dart_class": "FileCitation",
-      "file": "lib/src/models/interactions/content/annotation.dart",
-      "note": "Handled by Annotation sealed class with type discriminator; appears in JSON as { \"type\": \"<subtype>\", ... }.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "PlaceCitation": {
-      "spec": "interactions",
-      "schema": "PlaceCitation",
-      "parent": "Annotation",
-      "kind": "skip",
-      "dart_class": "PlaceCitation",
-      "file": "lib/src/models/interactions/content/annotation.dart",
-      "note": "Handled by Annotation sealed class with type discriminator; appears in JSON as { \"type\": \"<subtype>\", ... }.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "ThoughtSummaryContent": {
-      "spec": "interactions",
-      "schema": "ThoughtSummaryContent",
-      "kind": "skip",
-      "dart_class": "ThoughtSummaryContent",
-      "file": "lib/src/models/interactions/content/thought_content.dart",
-      "note": "Represented as ThoughtContent.summary field rather than standalone type.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "FunctionResultSubcontent": {
-      "spec": "interactions",
-      "schema": "FunctionResultSubcontent",
-      "kind": "skip",
-      "dart_class": "FunctionResultSubcontent",
-      "file": "lib/src/models/interactions/content/function_result_content.dart",
-      "note": "Flattened into FunctionResultContent rather than standalone type.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "InteractionsInput": {
-      "spec": "interactions",
-      "schema": "InteractionsInput",
-      "kind": "skip",
-      "dart_class": "InteractionInput",
-      "file": "lib/src/models/interactions/interaction_input.dart",
-      "note": "Mapped to InteractionInput; schema name differs from Dart class.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "FileSearchStore": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "FileSearchStore",
-      "file": "lib/src/models/files/file_search_store.dart",
-      "schema": "FileSearchStore"
-    },
-    "UsageMetadata": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "UsageMetadata",
-      "file": "lib/src/models/metadata/usage_metadata.dart",
-      "schema": "UsageMetadata"
-    },
-    "DownloadMediaResponse": {
-      "spec": "main",
-      "schema": "DownloadMediaResponse",
-      "kind": "skip",
-      "note": "Wire envelope around GdataMedia for GET /fileSearchStores/{id}/media/{mediaId}. Exposed in Dart as Future<List<int>> downloadMedia() in FileSearchStoresResource. Not modeled in python-genai or js-genai.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "GdataMedia": {
-      "spec": "main",
-      "schema": "GdataMedia",
-      "kind": "skip",
-      "note": "Internal Google Scotty/Bigstore media descriptor; surfaces only inside DownloadMediaResponse. Exposed as raw bytes via FileSearchStoresResource.downloadMedia(). Not modeled in python-genai or js-genai.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "Blobstore2Info": {
-      "spec": "main",
-      "schema": "Blobstore2Info",
-      "kind": "skip",
-      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "CompositeMedia": {
-      "spec": "main",
-      "schema": "CompositeMedia",
-      "kind": "skip",
-      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "ContentTypeInfo": {
-      "spec": "main",
-      "schema": "ContentTypeInfo",
-      "kind": "skip",
-      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "DiffChecksumsResponse": {
-      "spec": "main",
-      "schema": "DiffChecksumsResponse",
-      "kind": "skip",
-      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "DiffDownloadResponse": {
-      "spec": "main",
-      "schema": "DiffDownloadResponse",
-      "kind": "skip",
-      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "DiffUploadRequest": {
-      "spec": "main",
-      "schema": "DiffUploadRequest",
-      "kind": "skip",
-      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "DiffUploadResponse": {
-      "spec": "main",
-      "schema": "DiffUploadResponse",
-      "kind": "skip",
-      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "DiffVersionResponse": {
-      "spec": "main",
-      "schema": "DiffVersionResponse",
-      "kind": "skip",
-      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "DownloadParameters": {
-      "spec": "main",
-      "schema": "DownloadParameters",
-      "kind": "skip",
-      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia. See GdataMedia entry.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
-    "ObjectId": {
-      "spec": "main",
-      "schema": "ObjectId",
-      "kind": "skip",
-      "note": "Internal Scotty/Bigstore type; reachable only through GdataMedia and CompositeMedia. See GdataMedia entry.",
-      "tags": [
-        "acknowledged"
-      ]
     }
   }
 }

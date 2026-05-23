@@ -74,29 +74,29 @@ Future<void> urlContextWithInteractions(GoogleAIClient client) async {
     tools: const [UrlContextTool()],
   )) {
     switch (event) {
-      case InteractionStartEvent():
+      case InteractionCreatedEvent():
         print('[Stream started]');
-      case ContentStartEvent():
-        final content = event.content;
-        if (content != null) {
-          print('[Content type: ${content.type}]');
+      case StepStartEvent():
+        final step = event.step;
+        print('[Step type: ${step.type}]');
+        if (step is UrlContextCallStep) {
+          final urls = step.arguments.urls ?? const <String>[];
+          if (urls.isNotEmpty) {
+            print('[Fetching URLs: ${urls.join(", ")}]');
+          }
         }
-      case ContentDeltaEvent():
+      case StepDeltaEvent():
         final delta = event.delta;
         if (delta is TextDelta) {
           stdout.write(delta.text);
-        } else if (delta is UrlContextCallDelta) {
-          // Model is fetching a URL
-          if (delta.urls != null && delta.urls!.isNotEmpty) {
-            print('\n[Fetching URLs: ${delta.urls!.join(", ")}]');
+        } else if (delta is ArgumentsDelta) {
+          if (delta.partialArguments != null) {
+            stdout.write(delta.partialArguments);
           }
-        } else if (delta is UrlContextResultDelta) {
-          // URL content retrieved
-          print('\n[URL content retrieved]');
         }
-      case ContentStopEvent():
-        print('\n[Content completed]');
-      case InteractionCompleteEvent():
+      case StepStopEvent():
+        print('\n[Step completed]');
+      case InteractionCompletedEvent():
         print('[Stream completed]');
       default:
         break;

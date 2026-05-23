@@ -1,18 +1,28 @@
 import 'content/content.dart';
-import 'turn.dart';
+import 'steps/steps.dart';
+
+/// Set of `type` discriminator values that identify a media-only
+/// [InteractionContent] item (the trimmed `Content` family in the spec).
+const _contentTypes = <String>{'text', 'image', 'audio', 'document', 'video'};
 
 /// The input for an interaction.
 ///
-/// Can represent different input formats:
+/// Matches the spec's `InteractionsInput` union and can represent:
 /// - [TextInput] — a simple text string
-/// - [ContentListInput] — a list of [InteractionContent] items
+/// - [StepListInput] — a list of [InteractionStep]s (e.g. for passing
+///   function results back via a [FunctionResultStep], or to provide
+///   conversation history inline)
+/// - [ContentListInput] — a list of media-only [InteractionContent] items
 /// - [SingleContentInput] — a single [InteractionContent] item
-/// - [TurnsInput] — a list of [Turn]s for multi-turn conversations
 sealed class InteractionInput {
   const InteractionInput();
 
   /// Creates a [TextInput] with the given [text].
   const factory InteractionInput.text(String text) = TextInput;
+
+  /// Creates a [StepListInput] with the given [steps].
+  const factory InteractionInput.steps(List<InteractionStep> steps) =
+      StepListInput;
 
   /// Creates a [ContentListInput] with the given [content] list.
   const factory InteractionInput.contentList(List<InteractionContent> content) =
@@ -22,16 +32,15 @@ sealed class InteractionInput {
   const factory InteractionInput.singleContent(InteractionContent content) =
       SingleContentInput;
 
-  /// Creates a [TurnsInput] with the given [turns].
-  const factory InteractionInput.turns(List<Turn> turns) = TurnsInput;
-
   /// Creates an [InteractionInput] from a JSON value.
   ///
   /// - A [String] is parsed as [TextInput].
   /// - A [Map] with a `type` key is parsed as [SingleContentInput].
-  /// - A [List] where the first element has a `type` key is parsed as
-  ///   [ContentListInput] (since [InteractionContent] always requires `type`).
-  /// - A [List] where elements lack a `type` key is parsed as [TurnsInput].
+  /// - A [List] where the first element's `type` is a media type
+  ///   (`text`/`image`/`audio`/`document`/`video`) is parsed as
+  ///   [ContentListInput].
+  /// - A [List] where the first element has a `type` matching a step
+  ///   discriminator is parsed as [StepListInput].
   factory InteractionInput.fromJson(Object json) {
     if (json is String) {
       return TextInput(json);
@@ -51,16 +60,25 @@ sealed class InteractionInput {
       }
       final first = json.first;
       if (first is Map<String, dynamic> && first.containsKey('type')) {
-        return ContentListInput(
+        final type = first['type'] as String?;
+        if (type != null && _contentTypes.contains(type)) {
+          return ContentListInput(
+            json
+                .map(
+                  (e) => InteractionContent.fromJson(e as Map<String, dynamic>),
+                )
+                .toList(),
+          );
+        }
+        return StepListInput(
           json
-              .map(
-                (e) => InteractionContent.fromJson(e as Map<String, dynamic>),
-              )
+              .map((e) => InteractionStep.fromJson(e as Map<String, dynamic>))
               .toList(),
         );
       }
-      return TurnsInput(
-        json.map((e) => Turn.fromJson(e as Map<String, dynamic>)).toList(),
+      throw ArgumentError(
+        'Unknown InteractionInput list element: expected a Content or Step '
+        'map with a "type" key, got: $first',
       );
     }
     throw ArgumentError('Unknown InteractionInput format: ${json.runtimeType}');
@@ -80,6 +98,21 @@ class TextInput extends InteractionInput {
 
   @override
   Object toJson() => text;
+}
+
+/// A list of [InteractionStep] items as input.
+///
+/// Use this for passing function/tool result steps back to continue an
+/// interaction that was paused with `InteractionStatus.requiresAction`.
+class StepListInput extends InteractionInput {
+  /// The step items.
+  final List<InteractionStep> steps;
+
+  /// Creates a [StepListInput].
+  const StepListInput(this.steps);
+
+  @override
+  Object toJson() => steps.map((s) => s.toJson()).toList();
 }
 
 /// A list of [InteractionContent] items as input.
@@ -104,16 +137,4 @@ class SingleContentInput extends InteractionInput {
 
   @override
   Object toJson() => content.toJson();
-}
-
-/// A list of [Turn]s for multi-turn conversation input.
-class TurnsInput extends InteractionInput {
-  /// The conversation turns.
-  final List<Turn> turns;
-
-  /// Creates a [TurnsInput].
-  const TurnsInput(this.turns);
-
-  @override
-  Object toJson() => turns.map((t) => t.toJson()).toList();
 }

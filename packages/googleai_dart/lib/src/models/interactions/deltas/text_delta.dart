@@ -1,7 +1,7 @@
 part of 'deltas.dart';
 
 /// A text delta update.
-class TextDelta extends InteractionDelta {
+class TextDelta extends StepDeltaData {
   @override
   String get type => 'text';
 

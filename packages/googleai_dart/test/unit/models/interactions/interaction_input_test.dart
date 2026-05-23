@@ -68,11 +68,7 @@ void main() {
       test('round-trip preserves value', () {
         const original = ContentListInput([
           TextContent(text: 'Hello'),
-          FunctionCallContent(
-            id: 'call-1',
-            name: 'test',
-            arguments: {'key': 'value'},
-          ),
+          ImageContent(data: 'base64data', mimeType: 'image/png'),
         ]);
         final json = original.toJson();
         final restored = InteractionInput.fromJson(json);
@@ -80,7 +76,7 @@ void main() {
         final contentList = restored as ContentListInput;
         expect(contentList.content, hasLength(2));
         expect(contentList.content[0], isA<TextContent>());
-        expect(contentList.content[1], isA<FunctionCallContent>());
+        expect(contentList.content[1], isA<ImageContent>());
       });
     });
 
@@ -113,68 +109,66 @@ void main() {
 
       test('round-trip preserves value', () {
         const original = SingleContentInput(
-          FunctionCallContent(
-            id: 'call-1',
-            name: 'test',
-            arguments: {'key': 'value'},
-          ),
+          ImageContent(data: 'base64data', mimeType: 'image/jpeg'),
         );
         final json = original.toJson();
         final restored = InteractionInput.fromJson(json);
         expect(restored, isA<SingleContentInput>());
         final single = restored as SingleContentInput;
-        expect(single.content, isA<FunctionCallContent>());
-        expect((single.content as FunctionCallContent).name, 'test');
+        expect(single.content, isA<ImageContent>());
+        expect((single.content as ImageContent).mimeType, 'image/jpeg');
       });
     });
 
-    group('TurnsInput', () {
+    group('StepListInput', () {
       test('factory constructor', () {
-        const input = InteractionInput.turns([
-          Turn(role: 'user', content: TurnTextContent('Hello')),
-          Turn(role: 'model', content: TurnTextContent('Hi there')),
+        const input = InteractionInput.steps([
+          UserInputStep(content: [TextContent(text: 'Hello')]),
+          ModelOutputStep(content: [TextContent(text: 'Hi there')]),
         ]);
-        expect(input, isA<TurnsInput>());
-        expect((input as TurnsInput).turns, hasLength(2));
+        expect(input, isA<StepListInput>());
+        expect((input as StepListInput).steps, hasLength(2));
       });
 
-      test('fromJson with list of turn maps', () {
+      test('fromJson with list of step maps', () {
         final input = InteractionInput.fromJson([
-          {'role': 'user', 'content': 'Hello'},
-          {'role': 'model', 'content': 'Hi there'},
+          {
+            'type': 'user_input',
+            'content': [
+              {'type': 'text', 'text': 'Hello'},
+            ],
+          },
+          {'type': 'function_result', 'call_id': 'c', 'result': 'ok'},
         ]);
-        expect(input, isA<TurnsInput>());
-        final turns = input as TurnsInput;
-        expect(turns.turns, hasLength(2));
-        expect(turns.turns[0].role, 'user');
-        expect(turns.turns[1].role, 'model');
+        expect(input, isA<StepListInput>());
+        final steps = input as StepListInput;
+        expect(steps.steps, hasLength(2));
+        expect(steps.steps[0], isA<UserInputStep>());
+        expect(steps.steps[1], isA<FunctionResultStep>());
       });
 
       test('toJson returns list of maps', () {
-        const input = TurnsInput([
-          Turn(role: 'user', content: TurnTextContent('Hello')),
+        const input = StepListInput([
+          FunctionResultStep(callId: 'c', result: ToolResultText('done')),
         ]);
         final json = input.toJson() as List<dynamic>;
         expect(json, hasLength(1));
-        expect((json[0] as Map<String, dynamic>)['role'], 'user');
-        expect((json[0] as Map<String, dynamic>)['content'], 'Hello');
+        expect((json[0] as Map<String, dynamic>)['type'], 'function_result');
+        expect((json[0] as Map<String, dynamic>)['call_id'], 'c');
       });
 
       test('round-trip preserves value', () {
-        const original = TurnsInput([
-          Turn(role: 'user', content: TurnTextContent('What is AI?')),
-          Turn(role: 'model', content: TurnTextContent('AI is...')),
+        const original = StepListInput([
+          UserInputStep(content: [TextContent(text: 'My name is Bob.')]),
+          ModelOutputStep(content: [TextContent(text: 'Hi Bob!')]),
         ]);
         final json = original.toJson();
         final restored = InteractionInput.fromJson(json);
-        expect(restored, isA<TurnsInput>());
-        final turns = restored as TurnsInput;
-        expect(turns.turns, hasLength(2));
-        expect(turns.turns[0].role, 'user');
-        expect(
-          (turns.turns[0].content! as TurnTextContent).text,
-          'What is AI?',
-        );
+        expect(restored, isA<StepListInput>());
+        final steps = restored as StepListInput;
+        expect(steps.steps, hasLength(2));
+        expect(steps.steps[0], isA<UserInputStep>());
+        expect(steps.steps[1], isA<ModelOutputStep>());
       });
     });
 
@@ -182,57 +176,14 @@ void main() {
       test('throws ArgumentError for unsupported type', () {
         expect(() => InteractionInput.fromJson(42), throwsArgumentError);
       });
-    });
-  });
 
-  group('TurnContent', () {
-    group('TurnTextContent', () {
-      test('factory constructor', () {
-        const content = TurnContent.text('Hello');
-        expect(content, isA<TurnTextContent>());
-        expect((content as TurnTextContent).text, 'Hello');
-      });
-
-      test('fromJson with string', () {
-        final content = TurnContent.fromJson('Hello');
-        expect(content, isA<TurnTextContent>());
-        expect((content as TurnTextContent).text, 'Hello');
-      });
-
-      test('toJson returns string', () {
-        const content = TurnTextContent('Hello');
-        expect(content.toJson(), 'Hello');
-      });
-    });
-
-    group('TurnContentList', () {
-      test('factory constructor', () {
-        const content = TurnContent.contentList([TextContent(text: 'Hello')]);
-        expect(content, isA<TurnContentList>());
-        expect((content as TurnContentList).content, hasLength(1));
-      });
-
-      test('fromJson with list', () {
-        final content = TurnContent.fromJson([
-          {'type': 'text', 'text': 'Hello'},
-        ]);
-        expect(content, isA<TurnContentList>());
-        final list = content as TurnContentList;
-        expect(list.content, hasLength(1));
-        expect(list.content.first, isA<TextContent>());
-      });
-
-      test('toJson returns list of maps', () {
-        const content = TurnContentList([TextContent(text: 'Hello')]);
-        final json = content.toJson() as List<dynamic>;
-        expect(json, hasLength(1));
-        expect((json[0] as Map<String, dynamic>)['text'], 'Hello');
-      });
-    });
-
-    group('fromJson error handling', () {
-      test('throws ArgumentError for unsupported type', () {
-        expect(() => TurnContent.fromJson(42), throwsArgumentError);
+      test('throws ArgumentError for list elements without a type key', () {
+        expect(
+          () => InteractionInput.fromJson([
+            {'role': 'user', 'content': 'Hello'},
+          ]),
+          throwsArgumentError,
+        );
       });
     });
   });

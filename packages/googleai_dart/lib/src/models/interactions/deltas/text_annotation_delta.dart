@@ -1,9 +1,9 @@
 part of 'deltas.dart';
 
 /// A text annotation delta update containing citation information.
-class TextAnnotationDelta extends InteractionDelta {
+class TextAnnotationDelta extends StepDeltaData {
   @override
-  String get type => 'text_annotation';
+  String get type => 'text_annotation_delta';
 
   /// Citation information for model-generated content.
   final List<Annotation>? annotations;
