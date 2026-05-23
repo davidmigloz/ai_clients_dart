@@ -76,7 +76,7 @@ Future<void> main() async {
 
   try {
     final response = await client.models.generateContent(
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.5-flash',
       request: GenerateContentRequest(
         contents: [Content.text('Explain why Dart works well for APIs.')],
       ),
@@ -209,7 +209,7 @@ Future<void> main() async {
 
   try {
     final response = await client.models.generateContent(
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.5-flash',
       request: GenerateContentRequest(
         contents: [Content.text('Explain what hot restart does in Flutter.')],
         // Optional: route to a specific service tier (standard, flex, priority)
@@ -245,7 +245,7 @@ Future<void> main() async {
 
   try {
     await for (final chunk in client.models.streamGenerateContent(
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.5-flash',
       request: GenerateContentRequest(
         contents: [Content.text('Write a short poem about Dart streams.')],
       ),
@@ -363,7 +363,7 @@ Future<void> main() async {
 
   try {
     final response = await client.models.generateContent(
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.5-flash',
       request: GenerateContentRequest(
         contents: [Content.text('What is the weather in Madrid?')],
         tools: [
@@ -412,7 +412,7 @@ Future<void> main() async {
 
   try {
     final response = await client.models.generateContent(
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.5-flash',
       request: GenerateContentRequest(
         contents: [Content.text('What are the latest Dart language updates?')],
         tools: [Tool(googleSearch: GoogleSearch())],
@@ -543,7 +543,7 @@ Future<void> main() async {
 
   try {
     await client.models.generateContent(
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.5-flash',
       request: GenerateContentRequest(
         contents: [Content.text('Ping')],
       ),

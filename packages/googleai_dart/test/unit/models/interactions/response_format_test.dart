@@ -152,7 +152,7 @@ void main() {
   group('response_format wiring on models', () {
     test('CreateModelInteractionParams parses + serializes single format', () {
       final params = CreateModelInteractionParams.fromJson({
-        'model': 'gemini-2.5-flash',
+        'model': 'gemini-3.5-flash',
         'response_format': {
           'type': 'text',
           'mime_type': 'application/json',

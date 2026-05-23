@@ -41,7 +41,7 @@ Future<void> main() async {
 /// URL Context using the generateContent API.
 Future<void> urlContextWithGenerateContent(GoogleAIClient client) async {
   final response = await client.models.generateContent(
-    model: 'gemini-3.1-flash-preview',
+    model: 'gemini-3.5-flash',
     request: GenerateContentRequest(
       contents: [
         Content.text(
@@ -67,7 +67,7 @@ Future<void> urlContextWithInteractions(GoogleAIClient client) async {
   print('Analyzing URL content (streaming):\n');
 
   await for (final event in client.interactions.createStream(
-    model: 'gemini-3.1-flash-preview',
+    model: 'gemini-3.5-flash',
     input: const InteractionInput.text(
       'What are the key features mentioned on https://pub.dev/packages/googleai_dart ?',
     ),
@@ -108,7 +108,7 @@ Future<void> urlContextWithInteractions(GoogleAIClient client) async {
 Future<void> compareMultipleUrls(GoogleAIClient client) async {
   // You can reference up to 20 URLs in a single request
   final response = await client.models.generateContent(
-    model: 'gemini-3.1-flash-preview',
+    model: 'gemini-3.5-flash',
     request: GenerateContentRequest(
       contents: [
         Content.text(

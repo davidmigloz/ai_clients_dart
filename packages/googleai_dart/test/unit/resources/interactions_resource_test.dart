@@ -70,7 +70,7 @@ void main() {
       });
 
       await resource.create(
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.5-flash',
         input: const InteractionInput.text('hi'),
       );
 
@@ -100,7 +100,7 @@ void main() {
       });
 
       await resource.create(
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.5-flash',
         input: const InteractionInput.text('hi'),
         responseFormat: const ResponseFormatConfig.single(
           TextResponseFormat(
