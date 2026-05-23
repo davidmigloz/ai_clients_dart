@@ -310,8 +310,9 @@ void main() {
           ),
         );
 
+        Session? session;
         try {
-          final session = await client!.sessions.create(
+          session = await client!.sessions.create(
             CreateSessionParams(
               agent: AgentParamsId(id: agent.id),
               environmentId: environmentId!,
@@ -356,10 +357,11 @@ void main() {
             retrieved.outcomeEvaluations.map((o) => o.outcomeId),
             contains(outcomeId),
           );
-
-          // 5. Cleanup the session.
-          await client!.sessions.delete(session.id);
         } finally {
+          // Cleanup always runs, even if an assertion above throws.
+          if (session != null) {
+            await client!.sessions.delete(session.id);
+          }
           await client!.agents.archive(agent.id);
         }
       },
