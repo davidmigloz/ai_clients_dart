@@ -152,7 +152,53 @@ void main() async {
     print('Defined an outcome for the session');
 
     // =========================================================================
-    // 5. Cleanup
+    // 5. Webhooks & credential validation
+    // =========================================================================
+    print('\n=== Webhooks & Credential Validation ===');
+
+    // Parse an inbound webhook payload (e.g. the body of your HTTP handler)
+    // into a typed event, then switch over the discriminated `data` union.
+    final samplePayload = <String, dynamic>{
+      'type': 'event',
+      'id': 'evt_123',
+      'created_at': '2026-04-01T00:00:00Z',
+      'data': <String, dynamic>{
+        'type': 'session.created',
+        'id': 'sesn_123',
+        'organization_id': 'org_123',
+        'workspace_id': 'wrkspc_123',
+      },
+    };
+    final webhookEvent = WebhookEvent.fromJson(samplePayload);
+    switch (webhookEvent.data) {
+      case WebhookSessionCreatedEventData(:final id):
+        print('Webhook: session $id created');
+      case WebhookVaultCredentialRefreshFailedEventData(:final id):
+        print('Webhook: credential $id refresh failed');
+      default:
+        print('Webhook: ${webhookEvent.data.runtimeType}');
+    }
+
+    // Validate a vault credential's MCP-OAuth setup. The mcp_oauth_validate
+    // endpoint only accepts MCP-OAuth credentials (a static-bearer credential
+    // is rejected with a 400), so create one of those.
+    final credential = await client.vaults
+        .credentials(vault.id)
+        .create(
+          const CreateCredentialParams(
+            auth: McpOauthCreateParams(
+              accessToken: 'access-token',
+              mcpServerUrl: 'https://mcp.example.com',
+            ),
+          ),
+        );
+    final validation = await client.vaults
+        .credentials(vault.id)
+        .validateCredential(credential.id);
+    print('Credential validation status: ${validation.status.value}');
+
+    // =========================================================================
+    // 6. Cleanup
     // =========================================================================
     print('\n=== Cleanup ===');
 

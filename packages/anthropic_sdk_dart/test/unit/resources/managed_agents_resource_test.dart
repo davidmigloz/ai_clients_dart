@@ -105,6 +105,31 @@ class ManagedAgentsFixtures {
     };
   }
 
+  static Map<String, dynamic> credentialValidation({
+    String credentialId = 'cred_test123',
+    String vaultId = 'vault_test123',
+    String status = 'valid',
+  }) {
+    return {
+      'type': 'vault_credential_validation',
+      'credential_id': credentialId,
+      'vault_id': vaultId,
+      'status': status,
+      'validated_at': '2026-04-01T00:00:00Z',
+      'has_refresh_token': true,
+      'mcp_probe': {
+        'method': 'initialize',
+        'http_response': {
+          'status_code': 200,
+          'content_type': 'application/json',
+          'body': '{}',
+          'body_truncated': false,
+        },
+      },
+      'refresh': null,
+    };
+  }
+
   static Map<String, dynamic> sessionEvent({
     String type = 'user.message',
     String id = 'event_test123',
@@ -978,6 +1003,38 @@ void main() {
       );
       expect(request.method, 'POST');
     });
+
+    test(
+      'validateCredential sends correct request and parses response',
+      () async {
+        mockHttpClient.queueJsonResponse(
+          ManagedAgentsFixtures.credentialValidation(),
+        );
+
+        final validation = await client.vaults
+            .credentials('vault_test123')
+            .validateCredential('cred_test123');
+
+        // Parses the typed result.
+        expect(validation.credentialId, 'cred_test123');
+        expect(validation.vaultId, 'vault_test123');
+        expect(validation.status, CredentialValidationStatus.valid);
+        expect(validation.mcpProbe, isA<McpProbe>());
+
+        // The unit test is the real gate for this endpoint (verify is blind to
+        // it): assert path, method, beta header, and empty body.
+        final request = mockHttpClient.lastRequest!;
+        expect(
+          request.url.path,
+          '/v1/vaults/vault_test123/credentials/cred_test123/mcp_oauth_validate',
+        );
+        expect(request.method, 'POST');
+        expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
+        final body =
+            jsonDecode((request as dynamic).body) as Map<String, dynamic>;
+        expect(body, isEmpty);
+      },
+    );
   });
 
   group('UnknownManagedAgentError', () {

@@ -20,7 +20,7 @@
 - [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/models_example.dart) (~471 tokens): Model listing.
 - [files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/files_example.dart) (~842 tokens): File management (beta).
 - [skills_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/skills_example.dart) (~1k tokens): Skills management (beta).
-- [managed_agents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/managed_agents_example.dart) (~1.2k tokens): Managed agents: agents, sessions, vaults, multiagent rosters, outcomes (beta).
+- [managed_agents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/managed_agents_example.dart) (~1.5k tokens): Managed agents: agents, sessions, vaults, multiagent rosters, outcomes, webhooks, credential validation (beta).
 - [memory_stores_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/memory_stores_example.dart) (~903 tokens): Managed agents memory stores, memories, and versions (beta).
 - [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/error_handling_example.dart) (~632 tokens): Exception handling patterns.
 - [web_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/web_search_example.dart) (~793 tokens): Web search tool.
@@ -36,4 +36,4 @@
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/anthropic_sdk_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~36k tokens**
+**Total: ~36.4k tokens**

@@ -3437,6 +3437,248 @@
       "file": "lib/src/models/managed_agents/events/send_event_params.dart",
       "schema": "BetaManagedAgentsUserDefineOutcomeEventParams",
       "parent": "EventParams"
+    },
+    "WebhookEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WebhookEvent",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookEvent"
+    },
+    "WebhookEventData": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "WebhookEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookEventData"
+    },
+    "WebhookSessionArchivedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookSessionArchivedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookSessionArchivedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookSessionCreatedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookSessionCreatedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookSessionCreatedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookSessionDeletedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookSessionDeletedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookSessionDeletedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookSessionIdledEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookSessionIdledEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookSessionIdledEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookSessionOutcomeEvaluationEndedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookSessionOutcomeEvaluationEndedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookSessionOutcomeEvaluationEndedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookSessionPendingEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookSessionPendingEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookSessionPendingEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookSessionRequiresActionEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookSessionRequiresActionEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookSessionRequiresActionEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookSessionRunningEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookSessionRunningEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookSessionRunningEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookSessionStatusIdledEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookSessionStatusIdledEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookSessionStatusIdledEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookSessionStatusRescheduledEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookSessionStatusRescheduledEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookSessionStatusRescheduledEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookSessionStatusRunStartedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookSessionStatusRunStartedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookSessionStatusRunStartedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookSessionStatusTerminatedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookSessionStatusTerminatedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookSessionStatusTerminatedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookSessionThreadCreatedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookSessionThreadCreatedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookSessionThreadCreatedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookSessionThreadIdledEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookSessionThreadIdledEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookSessionThreadIdledEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookSessionThreadTerminatedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookSessionThreadTerminatedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookSessionThreadTerminatedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookVaultCreatedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookVaultCreatedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookVaultCreatedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookVaultArchivedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookVaultArchivedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookVaultArchivedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookVaultDeletedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookVaultDeletedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookVaultDeletedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookVaultCredentialCreatedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookVaultCredentialCreatedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookVaultCredentialCreatedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookVaultCredentialArchivedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookVaultCredentialArchivedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookVaultCredentialArchivedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookVaultCredentialDeletedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookVaultCredentialDeletedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookVaultCredentialDeletedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookVaultCredentialRefreshFailedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookVaultCredentialRefreshFailedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookVaultCredentialRefreshFailedEventData",
+      "parent": "WebhookEventData"
+    },
+    "CredentialValidation": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CredentialValidation",
+      "file": "lib/src/models/managed_agents/credentials/credential_validation.dart",
+      "schema": "BetaManagedAgentsCredentialValidation",
+      "excluded_properties": [
+        "mcp_probe",
+        "refresh"
+      ]
+    },
+    "RefreshObject": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RefreshObject",
+      "file": "lib/src/models/managed_agents/credentials/credential_validation.dart",
+      "schema": "BetaManagedAgentsRefreshObject",
+      "excluded_properties": [
+        "http_response"
+      ]
+    },
+    "McpProbe": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "McpProbe",
+      "file": "lib/src/models/managed_agents/credentials/credential_validation.dart",
+      "schema": "BetaManagedAgentsMcpProbe",
+      "excluded_properties": [
+        "http_response"
+      ]
+    },
+    "RefreshHttpResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "RefreshHttpResponse",
+      "file": "lib/src/models/managed_agents/credentials/credential_validation.dart",
+      "schema": "BetaManagedAgentsRefreshHttpResponse"
+    },
+    "CredentialValidationStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "CredentialValidationStatus",
+      "file": "lib/src/models/managed_agents/credentials/credential_validation.dart",
+      "schema": "BetaManagedAgentsCredentialValidationStatus"
+    },
+    "CredentialRefreshStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "CredentialRefreshStatus",
+      "file": "lib/src/models/managed_agents/credentials/credential_validation.dart",
+      "schema": "BetaManagedAgentsCredentialRefreshStatus"
     }
   }
 }
