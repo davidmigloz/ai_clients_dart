@@ -106,6 +106,7 @@ export 'src/models/managed_agents/credentials/create_credential_params.dart';
 export 'src/models/managed_agents/credentials/credential.dart';
 export 'src/models/managed_agents/credentials/credential_auth.dart';
 export 'src/models/managed_agents/credentials/credential_list_response.dart';
+export 'src/models/managed_agents/credentials/credential_validation.dart';
 export 'src/models/managed_agents/credentials/update_credential_params.dart';
 export 'src/models/managed_agents/errors/managed_agent_error.dart';
 export 'src/models/managed_agents/events/send_event_params.dart';
@@ -139,6 +140,7 @@ export 'src/models/managed_agents/vaults/create_vault_params.dart';
 export 'src/models/managed_agents/vaults/update_vault_params.dart';
 export 'src/models/managed_agents/vaults/vault.dart';
 export 'src/models/managed_agents/vaults/vault_list_response.dart';
+export 'src/models/managed_agents/webhooks/webhook_event.dart';
 
 // Models - Messages
 export 'src/models/messages/input_message.dart';

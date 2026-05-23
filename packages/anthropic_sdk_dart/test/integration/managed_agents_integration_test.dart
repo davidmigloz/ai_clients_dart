@@ -366,5 +366,56 @@ void main() {
         }
       },
     );
+
+    test(
+      'validate a vault credential',
+      timeout: const Timeout(Duration(minutes: 3)),
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        // 1. Create a vault + credential to validate.
+        final vault = await client!.vaults.create(
+          const CreateVaultParams(
+            displayName: 'Validate Test Vault - Dart SDK',
+          ),
+        );
+
+        try {
+          // The mcp_oauth_validate endpoint validates MCP-OAuth credentials, so
+          // create one (a static bearer credential is rejected with a 400).
+          final credential = await client!.vaults
+              .credentials(vault.id)
+              .create(
+                const CreateCredentialParams(
+                  auth: McpOauthCreateParams(
+                    accessToken: 'test-access-token',
+                    mcpServerUrl: 'https://mcp.example.com',
+                  ),
+                  displayName: 'Validate Test Credential',
+                ),
+              );
+
+          // 2. Validate it. A placeholder token/server legitimately yields an
+          // invalid/unknown status with a probe error — we only assert the
+          // call succeeds and returns a parseable, well-formed result.
+          final validation = await client!.vaults
+              .credentials(vault.id)
+              .validateCredential(credential.id);
+
+          expect(validation.credentialId, equals(credential.id));
+          expect(validation.vaultId, equals(vault.id));
+          expect(
+            CredentialValidationStatus.values,
+            contains(validation.status),
+          );
+        } finally {
+          // Cleanup: delete the vault (cascades to its credentials).
+          await client!.vaults.delete(vault.id);
+        }
+      },
+    );
   });
 }
