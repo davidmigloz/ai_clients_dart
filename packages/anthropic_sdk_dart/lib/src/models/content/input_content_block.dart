@@ -6,6 +6,7 @@ import '../metadata/cache_control.dart';
 import '../sources/document_source.dart';
 import '../sources/image_source.dart';
 import '../tools/tool_caller.dart';
+import 'citations_config.dart';
 import 'content_block.dart';
 
 /// Content block for input messages.
@@ -30,8 +31,24 @@ sealed class InputContentBlock {
   factory InputContentBlock.document(
     DocumentSource source, {
     String? title,
+    String? context,
+    RequestCitationsConfig? citations,
     CacheControlEphemeral? cacheControl,
   }) = DocumentInputBlock;
+
+  /// Creates a search result content block.
+  ///
+  /// Supply your own cited search results (e.g. from a custom retrieval/RAG
+  /// system) so the model can reference them and return `search_result_location`
+  /// citations. Set [citations] to `RequestCitationsConfig(enabled: true)` to
+  /// allow the model to cite this result.
+  factory InputContentBlock.searchResult({
+    required List<TextInputBlock> content,
+    required String source,
+    required String title,
+    RequestCitationsConfig? citations,
+    CacheControlEphemeral? cacheControl,
+  }) = SearchResultInputBlock;
 
   /// Creates a tool use block (for assistant messages).
   factory InputContentBlock.toolUse({
@@ -131,6 +148,7 @@ sealed class InputContentBlock {
       'text' => TextInputBlock.fromJson(json),
       'image' => ImageInputBlock.fromJson(json),
       'document' => DocumentInputBlock.fromJson(json),
+      'search_result' => SearchResultInputBlock.fromJson(json),
       'tool_use' => ToolUseInputBlock.fromJson(json),
       'tool_result' => ToolResultInputBlock.fromJson(json),
       'server_tool_use' => ServerToolUseInputBlock.fromJson(json),
@@ -165,16 +183,26 @@ class TextInputBlock extends InputContentBlock {
   /// The text content.
   final String text;
 
+  /// Citations attached to this text.
+  ///
+  /// Tells the model where spans of [text] were sourced from (e.g. when this
+  /// block is part of a [SearchResultInputBlock]'s content), so it can cite
+  /// them back in its response.
+  final List<InputCitation>? citations;
+
   /// Cache control for this block.
   final CacheControlEphemeral? cacheControl;
 
   /// Creates a [TextInputBlock].
-  const TextInputBlock(this.text, {this.cacheControl});
+  const TextInputBlock(this.text, {this.citations, this.cacheControl});
 
   /// Creates a [TextInputBlock] from JSON.
   factory TextInputBlock.fromJson(Map<String, dynamic> json) {
     return TextInputBlock(
       json['text'] as String,
+      citations: (json['citations'] as List?)
+          ?.map((e) => InputCitation.fromJson(e as Map<String, dynamic>))
+          .toList(),
       cacheControl: json['cache_control'] != null
           ? CacheControlEphemeral.fromJson(
               json['cache_control'] as Map<String, dynamic>,
@@ -187,16 +215,22 @@ class TextInputBlock extends InputContentBlock {
   Map<String, dynamic> toJson() => {
     'type': 'text',
     'text': text,
+    if (citations != null)
+      'citations': citations!.map((e) => e.toJson()).toList(),
     if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
   };
 
   /// Creates a copy with replaced values.
   TextInputBlock copyWith({
     String? text,
+    Object? citations = unsetCopyWithValue,
     Object? cacheControl = unsetCopyWithValue,
   }) {
     return TextInputBlock(
       text ?? this.text,
+      citations: citations == unsetCopyWithValue
+          ? this.citations
+          : citations as List<InputCitation>?,
       cacheControl: cacheControl == unsetCopyWithValue
           ? this.cacheControl
           : cacheControl as CacheControlEphemeral?,
@@ -209,14 +243,16 @@ class TextInputBlock extends InputContentBlock {
       other is TextInputBlock &&
           runtimeType == other.runtimeType &&
           text == other.text &&
+          listsEqual(citations, other.citations) &&
           cacheControl == other.cacheControl;
 
   @override
-  int get hashCode => Object.hash(text, cacheControl);
+  int get hashCode => Object.hash(text, listHash(citations), cacheControl);
 
   @override
   String toString() =>
-      'TextInputBlock(text: [${text.length} chars], cacheControl: $cacheControl)';
+      'TextInputBlock(text: [${text.length} chars], citations: $citations, '
+      'cacheControl: $cacheControl)';
 }
 
 /// Image content block for input.
@@ -288,17 +324,39 @@ class DocumentInputBlock extends InputContentBlock {
   /// Optional title for the document.
   final String? title;
 
+  /// Optional context about the document, passed to the model but not used for
+  /// citations.
+  final String? context;
+
+  /// Citations configuration for this document.
+  ///
+  /// Set to `RequestCitationsConfig(enabled: true)` to let the model cite this
+  /// document in its response.
+  final RequestCitationsConfig? citations;
+
   /// Cache control for this block.
   final CacheControlEphemeral? cacheControl;
 
   /// Creates a [DocumentInputBlock].
-  const DocumentInputBlock(this.source, {this.title, this.cacheControl});
+  const DocumentInputBlock(
+    this.source, {
+    this.title,
+    this.context,
+    this.citations,
+    this.cacheControl,
+  });
 
   /// Creates a [DocumentInputBlock] from JSON.
   factory DocumentInputBlock.fromJson(Map<String, dynamic> json) {
     return DocumentInputBlock(
       DocumentSource.fromJson(json['source'] as Map<String, dynamic>),
       title: json['title'] as String?,
+      context: json['context'] as String?,
+      citations: json['citations'] != null
+          ? RequestCitationsConfig.fromJson(
+              json['citations'] as Map<String, dynamic>,
+            )
+          : null,
       cacheControl: json['cache_control'] != null
           ? CacheControlEphemeral.fromJson(
               json['cache_control'] as Map<String, dynamic>,
@@ -312,6 +370,8 @@ class DocumentInputBlock extends InputContentBlock {
     'type': 'document',
     'source': source.toJson(),
     if (title != null) 'title': title,
+    if (context != null) 'context': context,
+    if (citations != null) 'citations': citations!.toJson(),
     if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
   };
 
@@ -319,11 +379,19 @@ class DocumentInputBlock extends InputContentBlock {
   DocumentInputBlock copyWith({
     DocumentSource? source,
     Object? title = unsetCopyWithValue,
+    Object? context = unsetCopyWithValue,
+    Object? citations = unsetCopyWithValue,
     Object? cacheControl = unsetCopyWithValue,
   }) {
     return DocumentInputBlock(
       source ?? this.source,
       title: title == unsetCopyWithValue ? this.title : title as String?,
+      context: context == unsetCopyWithValue
+          ? this.context
+          : context as String?,
+      citations: citations == unsetCopyWithValue
+          ? this.citations
+          : citations as RequestCitationsConfig?,
       cacheControl: cacheControl == unsetCopyWithValue
           ? this.cacheControl
           : cacheControl as CacheControlEphemeral?,
@@ -337,15 +405,126 @@ class DocumentInputBlock extends InputContentBlock {
           runtimeType == other.runtimeType &&
           source == other.source &&
           title == other.title &&
+          context == other.context &&
+          citations == other.citations &&
           cacheControl == other.cacheControl;
 
   @override
-  int get hashCode => Object.hash(source, title, cacheControl);
+  int get hashCode =>
+      Object.hash(source, title, context, citations, cacheControl);
 
   @override
   String toString() =>
       'DocumentInputBlock(source: $source, title: $title, '
-      'cacheControl: $cacheControl)';
+      'context: $context, citations: $citations, cacheControl: $cacheControl)';
+}
+
+/// Search result content block for input.
+///
+/// Lets you supply your own cited search results (e.g. from a custom
+/// retrieval/RAG system) so the model can reference them and return
+/// `search_result_location` citations. The [content] is the searchable text,
+/// split into citable [TextInputBlock]s.
+@immutable
+class SearchResultInputBlock extends InputContentBlock {
+  /// The searchable content of this result, as citable text blocks.
+  final List<TextInputBlock> content;
+
+  /// Source identifier for this result (e.g. a URL or document id).
+  final String source;
+
+  /// Display title for this result.
+  final String title;
+
+  /// Citations configuration for this result.
+  ///
+  /// Set to `RequestCitationsConfig(enabled: true)` to let the model cite this
+  /// result in its response.
+  final RequestCitationsConfig? citations;
+
+  /// Cache control for this block.
+  final CacheControlEphemeral? cacheControl;
+
+  /// Creates a [SearchResultInputBlock].
+  const SearchResultInputBlock({
+    required this.content,
+    required this.source,
+    required this.title,
+    this.citations,
+    this.cacheControl,
+  });
+
+  /// Creates a [SearchResultInputBlock] from JSON.
+  factory SearchResultInputBlock.fromJson(Map<String, dynamic> json) {
+    return SearchResultInputBlock(
+      content: (json['content'] as List)
+          .map((e) => TextInputBlock.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      source: json['source'] as String,
+      title: json['title'] as String,
+      citations: json['citations'] != null
+          ? RequestCitationsConfig.fromJson(
+              json['citations'] as Map<String, dynamic>,
+            )
+          : null,
+      cacheControl: json['cache_control'] != null
+          ? CacheControlEphemeral.fromJson(
+              json['cache_control'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'search_result',
+    'content': content.map((e) => e.toJson()).toList(),
+    'source': source,
+    'title': title,
+    if (citations != null) 'citations': citations!.toJson(),
+    if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  SearchResultInputBlock copyWith({
+    List<TextInputBlock>? content,
+    String? source,
+    String? title,
+    Object? citations = unsetCopyWithValue,
+    Object? cacheControl = unsetCopyWithValue,
+  }) {
+    return SearchResultInputBlock(
+      content: content ?? this.content,
+      source: source ?? this.source,
+      title: title ?? this.title,
+      citations: citations == unsetCopyWithValue
+          ? this.citations
+          : citations as RequestCitationsConfig?,
+      cacheControl: cacheControl == unsetCopyWithValue
+          ? this.cacheControl
+          : cacheControl as CacheControlEphemeral?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SearchResultInputBlock &&
+          runtimeType == other.runtimeType &&
+          listsEqual(content, other.content) &&
+          source == other.source &&
+          title == other.title &&
+          citations == other.citations &&
+          cacheControl == other.cacheControl;
+
+  @override
+  int get hashCode =>
+      Object.hash(listHash(content), source, title, citations, cacheControl);
+
+  @override
+  String toString() =>
+      'SearchResultInputBlock(content: $content, source: $source, '
+      'title: $title, citations: $citations, cacheControl: $cacheControl)';
 }
 
 /// Tool use block for assistant messages in input.
@@ -1701,4 +1880,553 @@ class UnknownInputContentBlock extends InputContentBlock {
 
   @override
   String toString() => 'UnknownInputContentBlock(raw: ${raw.length} entries)';
+}
+
+// ============================================================================
+// Request Citations (per-citation location types)
+// ============================================================================
+
+/// A citation supplied on a request [TextInputBlock] (e.g. inside a
+/// [SearchResultInputBlock]'s content) that tells the model where a span of
+/// text was sourced from, so the model can cite it back in its response.
+///
+/// This is the request-side counterpart to the response-side `Citation` family.
+/// Note the serialization difference: the spec marks the nullable
+/// `title` / `document_title` keys as **required**, so they are always emitted
+/// (as `null` when absent), unlike their response-side equivalents.
+///
+/// Dispatches on the `type` discriminator; unrecognized values fall back to
+/// [UnknownInputCitation].
+///
+/// Subtypes:
+/// - [CharLocationInputCitation] (`char_location`)
+/// - [PageLocationInputCitation] (`page_location`)
+/// - [ContentBlockLocationInputCitation] (`content_block_location`)
+/// - [WebSearchResultLocationInputCitation] (`web_search_result_location`)
+/// - [SearchResultLocationInputCitation] (`search_result_location`)
+/// - [UnknownInputCitation] (forward-compatible fallback)
+sealed class InputCitation {
+  const InputCitation();
+
+  /// Creates an [InputCitation] from JSON.
+  ///
+  /// Dispatches on the `type` discriminator; unrecognized values fall back to
+  /// [UnknownInputCitation].
+  factory InputCitation.fromJson(Map<String, dynamic> json) {
+    final type = json['type'] as String?;
+    return switch (type) {
+      'char_location' => CharLocationInputCitation.fromJson(json),
+      'page_location' => PageLocationInputCitation.fromJson(json),
+      'content_block_location' => ContentBlockLocationInputCitation.fromJson(
+        json,
+      ),
+      'web_search_result_location' =>
+        WebSearchResultLocationInputCitation.fromJson(json),
+      'search_result_location' => SearchResultLocationInputCitation.fromJson(
+        json,
+      ),
+      _ => UnknownInputCitation(rawJson: json),
+    };
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson();
+}
+
+/// Request citation with character location (for plain text document sources).
+@immutable
+class CharLocationInputCitation extends InputCitation {
+  /// The cited text.
+  final String citedText;
+
+  /// The document index.
+  final int documentIndex;
+
+  /// The document title (may be `null`; the key is always sent).
+  final String? documentTitle;
+
+  /// Start character offset.
+  final int startCharIndex;
+
+  /// End character offset.
+  final int endCharIndex;
+
+  /// Creates a [CharLocationInputCitation].
+  const CharLocationInputCitation({
+    required this.citedText,
+    required this.documentIndex,
+    required this.documentTitle,
+    required this.startCharIndex,
+    required this.endCharIndex,
+  });
+
+  /// Creates a [CharLocationInputCitation] from JSON.
+  factory CharLocationInputCitation.fromJson(Map<String, dynamic> json) {
+    return CharLocationInputCitation(
+      citedText: json['cited_text'] as String,
+      documentIndex: json['document_index'] as int,
+      documentTitle: json['document_title'] as String?,
+      startCharIndex: json['start_char_index'] as int,
+      endCharIndex: json['end_char_index'] as int,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'char_location',
+    'cited_text': citedText,
+    'document_index': documentIndex,
+    'document_title': documentTitle,
+    'start_char_index': startCharIndex,
+    'end_char_index': endCharIndex,
+  };
+
+  /// Creates a copy with replaced values.
+  CharLocationInputCitation copyWith({
+    String? citedText,
+    int? documentIndex,
+    Object? documentTitle = unsetCopyWithValue,
+    int? startCharIndex,
+    int? endCharIndex,
+  }) {
+    return CharLocationInputCitation(
+      citedText: citedText ?? this.citedText,
+      documentIndex: documentIndex ?? this.documentIndex,
+      documentTitle: documentTitle == unsetCopyWithValue
+          ? this.documentTitle
+          : documentTitle as String?,
+      startCharIndex: startCharIndex ?? this.startCharIndex,
+      endCharIndex: endCharIndex ?? this.endCharIndex,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CharLocationInputCitation &&
+          runtimeType == other.runtimeType &&
+          citedText == other.citedText &&
+          documentIndex == other.documentIndex &&
+          documentTitle == other.documentTitle &&
+          startCharIndex == other.startCharIndex &&
+          endCharIndex == other.endCharIndex;
+
+  @override
+  int get hashCode => Object.hash(
+    citedText,
+    documentIndex,
+    documentTitle,
+    startCharIndex,
+    endCharIndex,
+  );
+
+  @override
+  String toString() =>
+      'CharLocationInputCitation(citedText: [${citedText.length} chars], '
+      'documentIndex: $documentIndex, documentTitle: $documentTitle, '
+      'startCharIndex: $startCharIndex, endCharIndex: $endCharIndex)';
+}
+
+/// Request citation with page location (for PDF document sources).
+@immutable
+class PageLocationInputCitation extends InputCitation {
+  /// The cited text.
+  final String citedText;
+
+  /// The document index.
+  final int documentIndex;
+
+  /// The document title (may be `null`; the key is always sent).
+  final String? documentTitle;
+
+  /// Start page number.
+  final int startPageNumber;
+
+  /// End page number.
+  final int endPageNumber;
+
+  /// Creates a [PageLocationInputCitation].
+  const PageLocationInputCitation({
+    required this.citedText,
+    required this.documentIndex,
+    required this.documentTitle,
+    required this.startPageNumber,
+    required this.endPageNumber,
+  });
+
+  /// Creates a [PageLocationInputCitation] from JSON.
+  factory PageLocationInputCitation.fromJson(Map<String, dynamic> json) {
+    return PageLocationInputCitation(
+      citedText: json['cited_text'] as String,
+      documentIndex: json['document_index'] as int,
+      documentTitle: json['document_title'] as String?,
+      startPageNumber: json['start_page_number'] as int,
+      endPageNumber: json['end_page_number'] as int,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'page_location',
+    'cited_text': citedText,
+    'document_index': documentIndex,
+    'document_title': documentTitle,
+    'start_page_number': startPageNumber,
+    'end_page_number': endPageNumber,
+  };
+
+  /// Creates a copy with replaced values.
+  PageLocationInputCitation copyWith({
+    String? citedText,
+    int? documentIndex,
+    Object? documentTitle = unsetCopyWithValue,
+    int? startPageNumber,
+    int? endPageNumber,
+  }) {
+    return PageLocationInputCitation(
+      citedText: citedText ?? this.citedText,
+      documentIndex: documentIndex ?? this.documentIndex,
+      documentTitle: documentTitle == unsetCopyWithValue
+          ? this.documentTitle
+          : documentTitle as String?,
+      startPageNumber: startPageNumber ?? this.startPageNumber,
+      endPageNumber: endPageNumber ?? this.endPageNumber,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PageLocationInputCitation &&
+          runtimeType == other.runtimeType &&
+          citedText == other.citedText &&
+          documentIndex == other.documentIndex &&
+          documentTitle == other.documentTitle &&
+          startPageNumber == other.startPageNumber &&
+          endPageNumber == other.endPageNumber;
+
+  @override
+  int get hashCode => Object.hash(
+    citedText,
+    documentIndex,
+    documentTitle,
+    startPageNumber,
+    endPageNumber,
+  );
+
+  @override
+  String toString() =>
+      'PageLocationInputCitation(citedText: [${citedText.length} chars], '
+      'documentIndex: $documentIndex, documentTitle: $documentTitle, '
+      'startPageNumber: $startPageNumber, endPageNumber: $endPageNumber)';
+}
+
+/// Request citation with content block location (block-indexed sources).
+@immutable
+class ContentBlockLocationInputCitation extends InputCitation {
+  /// The cited text.
+  final String citedText;
+
+  /// The document index.
+  final int documentIndex;
+
+  /// The document title (may be `null`; the key is always sent).
+  final String? documentTitle;
+
+  /// Start content block index.
+  final int startBlockIndex;
+
+  /// End content block index.
+  final int endBlockIndex;
+
+  /// Creates a [ContentBlockLocationInputCitation].
+  const ContentBlockLocationInputCitation({
+    required this.citedText,
+    required this.documentIndex,
+    required this.documentTitle,
+    required this.startBlockIndex,
+    required this.endBlockIndex,
+  });
+
+  /// Creates a [ContentBlockLocationInputCitation] from JSON.
+  factory ContentBlockLocationInputCitation.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return ContentBlockLocationInputCitation(
+      citedText: json['cited_text'] as String,
+      documentIndex: json['document_index'] as int,
+      documentTitle: json['document_title'] as String?,
+      startBlockIndex: json['start_block_index'] as int,
+      endBlockIndex: json['end_block_index'] as int,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'content_block_location',
+    'cited_text': citedText,
+    'document_index': documentIndex,
+    'document_title': documentTitle,
+    'start_block_index': startBlockIndex,
+    'end_block_index': endBlockIndex,
+  };
+
+  /// Creates a copy with replaced values.
+  ContentBlockLocationInputCitation copyWith({
+    String? citedText,
+    int? documentIndex,
+    Object? documentTitle = unsetCopyWithValue,
+    int? startBlockIndex,
+    int? endBlockIndex,
+  }) {
+    return ContentBlockLocationInputCitation(
+      citedText: citedText ?? this.citedText,
+      documentIndex: documentIndex ?? this.documentIndex,
+      documentTitle: documentTitle == unsetCopyWithValue
+          ? this.documentTitle
+          : documentTitle as String?,
+      startBlockIndex: startBlockIndex ?? this.startBlockIndex,
+      endBlockIndex: endBlockIndex ?? this.endBlockIndex,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ContentBlockLocationInputCitation &&
+          runtimeType == other.runtimeType &&
+          citedText == other.citedText &&
+          documentIndex == other.documentIndex &&
+          documentTitle == other.documentTitle &&
+          startBlockIndex == other.startBlockIndex &&
+          endBlockIndex == other.endBlockIndex;
+
+  @override
+  int get hashCode => Object.hash(
+    citedText,
+    documentIndex,
+    documentTitle,
+    startBlockIndex,
+    endBlockIndex,
+  );
+
+  @override
+  String toString() =>
+      'ContentBlockLocationInputCitation(citedText: [${citedText.length} chars], '
+      'documentIndex: $documentIndex, documentTitle: $documentTitle, '
+      'startBlockIndex: $startBlockIndex, endBlockIndex: $endBlockIndex)';
+}
+
+/// Request citation referencing a web search result.
+@immutable
+class WebSearchResultLocationInputCitation extends InputCitation {
+  /// The cited text.
+  final String citedText;
+
+  /// Encrypted index for the citation.
+  final String encryptedIndex;
+
+  /// Title of the source (may be `null`; the key is always sent).
+  final String? title;
+
+  /// URL of the source.
+  final String url;
+
+  /// Creates a [WebSearchResultLocationInputCitation].
+  const WebSearchResultLocationInputCitation({
+    required this.citedText,
+    required this.encryptedIndex,
+    required this.title,
+    required this.url,
+  });
+
+  /// Creates a [WebSearchResultLocationInputCitation] from JSON.
+  factory WebSearchResultLocationInputCitation.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return WebSearchResultLocationInputCitation(
+      citedText: json['cited_text'] as String,
+      encryptedIndex: json['encrypted_index'] as String,
+      title: json['title'] as String?,
+      url: json['url'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'web_search_result_location',
+    'cited_text': citedText,
+    'encrypted_index': encryptedIndex,
+    'title': title,
+    'url': url,
+  };
+
+  /// Creates a copy with replaced values.
+  WebSearchResultLocationInputCitation copyWith({
+    String? citedText,
+    String? encryptedIndex,
+    Object? title = unsetCopyWithValue,
+    String? url,
+  }) {
+    return WebSearchResultLocationInputCitation(
+      citedText: citedText ?? this.citedText,
+      encryptedIndex: encryptedIndex ?? this.encryptedIndex,
+      title: title == unsetCopyWithValue ? this.title : title as String?,
+      url: url ?? this.url,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WebSearchResultLocationInputCitation &&
+          runtimeType == other.runtimeType &&
+          citedText == other.citedText &&
+          encryptedIndex == other.encryptedIndex &&
+          title == other.title &&
+          url == other.url;
+
+  @override
+  int get hashCode => Object.hash(citedText, encryptedIndex, title, url);
+
+  @override
+  String toString() =>
+      'WebSearchResultLocationInputCitation('
+      'citedText: [${citedText.length} chars], '
+      'encryptedIndex: [${encryptedIndex.length} chars], '
+      'title: $title, url: $url)';
+}
+
+/// Request citation referencing a range of blocks within a `search_result`
+/// content block (for supplying your own cited search results, e.g. RAG).
+@immutable
+class SearchResultLocationInputCitation extends InputCitation {
+  /// The cited text (the concatenated contents of the cited block range).
+  final String citedText;
+
+  /// 0-based index of the cited search result among all `search_result`
+  /// content blocks in the request.
+  final int searchResultIndex;
+
+  /// Source identifier of the cited search result.
+  final String source;
+
+  /// Title of the cited search result (may be `null`; the key is always sent).
+  final String? title;
+
+  /// 0-based index of the first cited block in the source's content array.
+  final int startBlockIndex;
+
+  /// Exclusive 0-based end index of the cited block range.
+  final int endBlockIndex;
+
+  /// Creates a [SearchResultLocationInputCitation].
+  const SearchResultLocationInputCitation({
+    required this.citedText,
+    required this.searchResultIndex,
+    required this.source,
+    required this.title,
+    required this.startBlockIndex,
+    required this.endBlockIndex,
+  });
+
+  /// Creates a [SearchResultLocationInputCitation] from JSON.
+  factory SearchResultLocationInputCitation.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return SearchResultLocationInputCitation(
+      citedText: json['cited_text'] as String,
+      searchResultIndex: json['search_result_index'] as int,
+      source: json['source'] as String,
+      title: json['title'] as String?,
+      startBlockIndex: json['start_block_index'] as int,
+      endBlockIndex: json['end_block_index'] as int,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'search_result_location',
+    'cited_text': citedText,
+    'search_result_index': searchResultIndex,
+    'source': source,
+    'title': title,
+    'start_block_index': startBlockIndex,
+    'end_block_index': endBlockIndex,
+  };
+
+  /// Creates a copy with replaced values.
+  SearchResultLocationInputCitation copyWith({
+    String? citedText,
+    int? searchResultIndex,
+    String? source,
+    Object? title = unsetCopyWithValue,
+    int? startBlockIndex,
+    int? endBlockIndex,
+  }) {
+    return SearchResultLocationInputCitation(
+      citedText: citedText ?? this.citedText,
+      searchResultIndex: searchResultIndex ?? this.searchResultIndex,
+      source: source ?? this.source,
+      title: title == unsetCopyWithValue ? this.title : title as String?,
+      startBlockIndex: startBlockIndex ?? this.startBlockIndex,
+      endBlockIndex: endBlockIndex ?? this.endBlockIndex,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SearchResultLocationInputCitation &&
+          runtimeType == other.runtimeType &&
+          citedText == other.citedText &&
+          searchResultIndex == other.searchResultIndex &&
+          source == other.source &&
+          title == other.title &&
+          startBlockIndex == other.startBlockIndex &&
+          endBlockIndex == other.endBlockIndex;
+
+  @override
+  int get hashCode => Object.hash(
+    citedText,
+    searchResultIndex,
+    source,
+    title,
+    startBlockIndex,
+    endBlockIndex,
+  );
+
+  @override
+  String toString() =>
+      'SearchResultLocationInputCitation('
+      'citedText: [${citedText.length} chars], '
+      'searchResultIndex: $searchResultIndex, source: $source, title: $title, '
+      'startBlockIndex: $startBlockIndex, endBlockIndex: $endBlockIndex)';
+}
+
+/// Unrecognized request citation type — preserves raw JSON for forward
+/// compatibility.
+@immutable
+class UnknownInputCitation extends InputCitation {
+  /// The raw JSON.
+  final Map<String, dynamic> rawJson;
+
+  /// Creates an [UnknownInputCitation].
+  const UnknownInputCitation({required this.rawJson});
+
+  @override
+  Map<String, dynamic> toJson() => rawJson;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnknownInputCitation &&
+          runtimeType == other.runtimeType &&
+          mapsDeepEqual(rawJson, other.rawJson);
+
+  @override
+  int get hashCode => mapDeepHashCode(rawJson);
+
+  @override
+  String toString() => 'UnknownInputCitation(rawJson: $rawJson)';
 }

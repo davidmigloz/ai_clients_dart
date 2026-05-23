@@ -79,6 +79,7 @@ export 'src/models/beta_timestamp.dart';
 export 'src/models/completions/completion.dart';
 
 // Models - Content
+export 'src/models/content/citations_config.dart';
 export 'src/models/content/content_block.dart';
 export 'src/models/content/input_content_block.dart';
 
