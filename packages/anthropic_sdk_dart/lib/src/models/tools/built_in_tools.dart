@@ -5,6 +5,11 @@ import '../common/equality_helpers.dart';
 import '../content/citations_config.dart';
 import '../metadata/cache_control.dart';
 
+// RequestCitationsConfig now lives in content/citations_config.dart but is part
+// of this library's API surface (e.g. WebFetchTool.citations), so re-export it
+// to preserve the import surface for consumers of this sublibrary.
+export '../content/citations_config.dart';
+
 // Include beta tools as part of this library to allow them to extend BuiltInTool
 part '../beta/tools/advisor_tool.dart';
 part '../beta/tools/computer_use_tool.dart';
