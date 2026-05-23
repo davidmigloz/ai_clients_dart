@@ -179,13 +179,15 @@ void main() async {
         print('Webhook: ${webhookEvent.data.runtimeType}');
     }
 
-    // Validate a vault credential's MCP-OAuth setup.
+    // Validate a vault credential's MCP-OAuth setup. The mcp_oauth_validate
+    // endpoint only accepts MCP-OAuth credentials (a static-bearer credential
+    // is rejected with a 400), so create one of those.
     final credential = await client.vaults
         .credentials(vault.id)
         .create(
           const CreateCredentialParams(
-            auth: StaticBearerCreateParams(
-              token: 'secret-token',
+            auth: McpOauthCreateParams(
+              accessToken: 'access-token',
               mcpServerUrl: 'https://mcp.example.com',
             ),
           ),
