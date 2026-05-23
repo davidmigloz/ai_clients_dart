@@ -1282,6 +1282,26 @@ void main() {
       expect(c.copyWith(source: 'y').title, 'T');
     });
 
+    test('search_result_location toString includes fields (cited text '
+        'redacted)', () {
+      const c = SearchResultLocationCitation(
+        citedText: 'hello world',
+        searchResultIndex: 2,
+        source: 'kb://doc-42',
+        title: 'T',
+        startBlockIndex: 1,
+        endBlockIndex: 3,
+      );
+      final s = c.toString();
+      expect(s, contains('SearchResultLocationCitation'));
+      expect(s, contains('citedText: [11 chars]'));
+      expect(s, contains('searchResultIndex: 2'));
+      expect(s, contains('source: kb://doc-42'));
+      expect(s, contains('title: T'));
+      expect(s, contains('startBlockIndex: 1'));
+      expect(s, contains('endBlockIndex: 3'));
+    });
+
     test('unknown type falls back to UnknownCitation (never throws)', () {
       final json = {'type': 'future_location', 'foo': 'bar'};
       final c = Citation.fromJson(json);
