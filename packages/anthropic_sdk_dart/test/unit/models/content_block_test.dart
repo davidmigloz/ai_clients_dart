@@ -61,12 +61,10 @@ void main() {
         // MiniMax-Anthropic and other Anthropic-compatible servers emit
         // content_block_start without `signature`; the real signature
         // arrives later as a signature_delta the accumulator merges on.
-        // Defaulting to empty here keeps the SDK usable; real Anthropic
-        // is unaffected because it always sends `signature` upfront.
-        final json = <String, dynamic>{
-          'type': 'thinking',
-          'thinking': '',
-        };
+        // `signature` is required only on the final response block, so
+        // defaulting to empty keeps parsing robust for the partial
+        // streaming shape too.
+        final json = <String, dynamic>{'type': 'thinking', 'thinking': ''};
         final block = ContentBlock.fromJson(json);
 
         expect(block, isA<ThinkingBlock>());
@@ -87,14 +85,26 @@ void main() {
       });
 
       test('fromJson tolerates missing thinking field', () {
-        final json = <String, dynamic>{
-          'type': 'thinking',
-          'signature': 'sig',
-        };
+        final json = <String, dynamic>{'type': 'thinking', 'signature': 'sig'};
         final block = ContentBlock.fromJson(json) as ThinkingBlock;
         expect(block.thinking, '');
         expect(block.signature, 'sig');
       });
+
+      test(
+        'toJson re-emits defaulted fields after parsing a partial block',
+        () {
+          // Parsing a partial streaming block defaults the fields; toJson must
+          // still emit them (the always-emit contract round-trips rely on).
+          final block =
+              ContentBlock.fromJson({'type': 'thinking'}) as ThinkingBlock;
+          expect(block.toJson(), {
+            'type': 'thinking',
+            'thinking': '',
+            'signature': '',
+          });
+        },
+      );
     });
 
     group('RedactedThinkingBlock', () {
@@ -107,14 +117,14 @@ void main() {
 
       test('fromJson tolerates missing/null data (mirrors '
           'ThinkingBlock for non-canonical servers)', () {
-        final missing = ContentBlock.fromJson(
-          {'type': 'redacted_thinking'},
-        ) as RedactedThinkingBlock;
+        final missing =
+            ContentBlock.fromJson({'type': 'redacted_thinking'})
+                as RedactedThinkingBlock;
         expect(missing.data, '');
 
-        final nullData = ContentBlock.fromJson(
-          {'type': 'redacted_thinking', 'data': null},
-        ) as RedactedThinkingBlock;
+        final nullData =
+            ContentBlock.fromJson({'type': 'redacted_thinking', 'data': null})
+                as RedactedThinkingBlock;
         expect(nullData.data, '');
       });
     });
