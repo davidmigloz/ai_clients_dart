@@ -1531,7 +1531,8 @@
         "archived_at",
         "description",
         "system",
-        "metadata"
+        "metadata",
+        "multiagent"
       ]
     },
     "AgentEvaluatedPermission": {
@@ -2262,7 +2263,8 @@
       "schema": "BetaManagedAgentsSessionAgent",
       "excluded_properties": [
         "description",
-        "system"
+        "system",
+        "multiagent"
       ]
     },
     "SessionEndTurn": {
@@ -3268,6 +3270,173 @@
         "acknowledged"
       ],
       "note": "Error response envelope — errors are surfaced via AnthropicException by the ErrorInterceptor, not parsed from response bodies."
+    },
+    "Multiagent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "Multiagent",
+      "file": "lib/src/models/managed_agents/agents/multiagent.dart",
+      "schema": "BetaManagedAgentsMultiagent"
+    },
+    "MultiagentCoordinator": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "MultiagentCoordinator",
+      "file": "lib/src/models/managed_agents/agents/multiagent.dart",
+      "schema": "BetaManagedAgentsMultiagentCoordinator",
+      "parent": "Multiagent"
+    },
+    "AgentReference": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentReference",
+      "file": "lib/src/models/managed_agents/agents/multiagent.dart",
+      "schema": "BetaManagedAgentsAgentReference"
+    },
+    "MultiagentParams": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "MultiagentParams",
+      "file": "lib/src/models/managed_agents/agents/multiagent_params.dart",
+      "schema": "BetaManagedAgentsMultiagentParams"
+    },
+    "MultiagentCoordinatorParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "MultiagentCoordinatorParams",
+      "file": "lib/src/models/managed_agents/agents/multiagent_params.dart",
+      "schema": "BetaManagedAgentsMultiagentCoordinatorParams",
+      "parent": "MultiagentParams"
+    },
+    "MultiagentRosterEntryParams": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "MultiagentRosterEntryParams",
+      "file": "lib/src/models/managed_agents/agents/multiagent_params.dart",
+      "schema": "BetaManagedAgentsMultiagentRosterEntryParams"
+    },
+    "MultiagentSelfParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "MultiagentSelfParams",
+      "file": "lib/src/models/managed_agents/agents/multiagent_params.dart",
+      "schema": "BetaManagedAgentsMultiagentSelfParams",
+      "parent": "MultiagentRosterEntryParams"
+    },
+    "SessionMultiagent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "SessionMultiagent",
+      "file": "lib/src/models/managed_agents/sessions/session.dart",
+      "schema": "BetaManagedAgentsSessionMultiagent"
+    },
+    "SessionMultiagentCoordinator": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SessionMultiagentCoordinator",
+      "file": "lib/src/models/managed_agents/sessions/session.dart",
+      "schema": "BetaManagedAgentsSessionMultiagentCoordinator",
+      "parent": "SessionMultiagent"
+    },
+    "OutcomeEvaluation": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "OutcomeEvaluation",
+      "file": "lib/src/models/managed_agents/outcomes/outcome_evaluation.dart",
+      "schema": "BetaManagedAgentsOutcomeEvaluationResource",
+      "excluded_properties": [
+        "completed_at",
+        "explanation"
+      ]
+    },
+    "Rubric": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "Rubric",
+      "file": "lib/src/models/managed_agents/outcomes/rubric.dart",
+      "schema": "BetaManagedAgentsRubric"
+    },
+    "FileRubric": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "FileRubric",
+      "file": "lib/src/models/managed_agents/outcomes/rubric.dart",
+      "schema": "BetaManagedAgentsFileRubric",
+      "parent": "Rubric"
+    },
+    "TextRubric": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "TextRubric",
+      "file": "lib/src/models/managed_agents/outcomes/rubric.dart",
+      "schema": "BetaManagedAgentsTextRubric",
+      "parent": "Rubric"
+    },
+    "RubricParams": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "RubricParams",
+      "file": "lib/src/models/managed_agents/outcomes/rubric_params.dart",
+      "schema": "BetaManagedAgentsRubricParams"
+    },
+    "FileRubricParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "FileRubricParams",
+      "file": "lib/src/models/managed_agents/outcomes/rubric_params.dart",
+      "schema": "BetaManagedAgentsFileRubricParams",
+      "parent": "RubricParams"
+    },
+    "TextRubricParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "TextRubricParams",
+      "file": "lib/src/models/managed_agents/outcomes/rubric_params.dart",
+      "schema": "BetaManagedAgentsTextRubricParams",
+      "parent": "RubricParams"
+    },
+    "SpanOutcomeEvaluationStartEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SpanOutcomeEvaluationStartEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsSpanOutcomeEvaluationStartEvent",
+      "parent": "SessionEvent"
+    },
+    "SpanOutcomeEvaluationOngoingEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SpanOutcomeEvaluationOngoingEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsSpanOutcomeEvaluationOngoingEvent",
+      "parent": "SessionEvent"
+    },
+    "SpanOutcomeEvaluationEndEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SpanOutcomeEvaluationEndEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsSpanOutcomeEvaluationEndEvent",
+      "parent": "SessionEvent"
+    },
+    "UserDefineOutcomeEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "UserDefineOutcomeEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsUserDefineOutcomeEvent",
+      "parent": "SessionEvent",
+      "excluded_properties": [
+        "max_iterations"
+      ]
+    },
+    "UserDefineOutcomeEventParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "UserDefineOutcomeEventParams",
+      "file": "lib/src/models/managed_agents/events/send_event_params.dart",
+      "schema": "BetaManagedAgentsUserDefineOutcomeEventParams",
+      "parent": "EventParams"
     }
   }
 }
