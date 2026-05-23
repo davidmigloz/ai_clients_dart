@@ -54,7 +54,7 @@ import 'retry_wrapper.dart';
 ///
 /// // Generate content
 /// final response = await client.models.generateContent(
-///   model: 'gemini-3.1-flash-preview',
+///   model: 'gemini-3.5-flash',
 ///   request: GenerateContentRequest(
 ///     contents: [
 ///       Content(parts: [TextPart('Hello!')], role: 'user'),

@@ -65,7 +65,7 @@ Future<void> main() async {
 
     // 6. Per-interaction override: attach inline webhook URIs.
     final interaction = await client.interactions.create(
-      model: 'gemini-3.1-flash-preview',
+      model: 'gemini-3.5-flash',
       input: const InteractionInput.text('Generate a haiku.'),
       webhookConfig: const WebhookConfig(
         uris: ['https://example.com/one-off-hook'],

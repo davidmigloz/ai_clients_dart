@@ -54,7 +54,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
 
   /// Creates a new interaction.
   ///
-  /// The [model] specifies which model to use (e.g., "gemini-3.1-flash-preview").
+  /// The [model] specifies which model to use (e.g., "gemini-3.5-flash").
   /// The [input] can be a [TextInput], a [StepListInput], a [ContentListInput],
   /// or a [SingleContentInput].
   ///

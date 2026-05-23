@@ -7,7 +7,7 @@ void main() {
       test('creates Interaction with all fields', () {
         final json = {
           'id': 'abc-123',
-          'model': 'gemini-3.1-flash-preview',
+          'model': 'gemini-3.5-flash',
           'status': 'completed',
           'created': '2024-01-15T10:30:00Z',
           'updated': '2024-01-15T10:31:00Z',
@@ -30,7 +30,7 @@ void main() {
         final interaction = Interaction.fromJson(json);
 
         expect(interaction.id, 'abc-123');
-        expect(interaction.model, 'gemini-3.1-flash-preview');
+        expect(interaction.model, 'gemini-3.5-flash');
         expect(interaction.status, InteractionStatus.completed);
         expect(interaction.created, DateTime.parse('2024-01-15T10:30:00Z'));
         expect(interaction.updated, DateTime.parse('2024-01-15T10:31:00Z'));
@@ -80,7 +80,7 @@ void main() {
         final interaction = Interaction(
           id: 'test-456',
           status: InteractionStatus.completed,
-          model: 'gemini-2.5-pro',
+          model: 'gemini-3.5-flash',
           created: DateTime.parse('2024-02-20T08:15:00Z'),
           updated: DateTime.parse('2024-02-20T08:16:00Z'),
           usage: const InteractionUsage(
@@ -92,7 +92,7 @@ void main() {
         final json = interaction.toJson();
 
         expect(json['id'], 'test-456');
-        expect(json['model'], 'gemini-2.5-pro');
+        expect(json['model'], 'gemini-3.5-flash');
         expect(json['status'], 'completed');
         expect(json['created'], contains('2024-02-20'));
         expect(json['updated'], contains('2024-02-20'));
@@ -119,7 +119,7 @@ void main() {
       final original = Interaction(
         id: 'roundtrip-789',
         status: InteractionStatus.inProgress,
-        model: 'gemini-3.1-flash-preview',
+        model: 'gemini-3.5-flash',
         created: DateTime.parse('2024-03-10T12:00:00Z'),
         usage: const InteractionUsage(
           totalInputTokens: 50,
@@ -363,7 +363,7 @@ void main() {
 
   group('CreateModelInteractionParams tools type safety', () {
     test('parses serviceTier correctly', () {
-      final json = {'model': 'gemini-2.0-flash', 'service_tier': 'priority'};
+      final json = {'model': 'gemini-3.5-flash', 'service_tier': 'priority'};
       final params = CreateModelInteractionParams.fromJson(json);
 
       expect(params.serviceTier, ServiceTier.priority);
@@ -374,7 +374,7 @@ void main() {
 
     test('parses GoogleSearchTool correctly', () {
       final json = {
-        'model': 'gemini-2.0-flash',
+        'model': 'gemini-3.5-flash',
         'tools': [
           {'type': 'google_search'},
         ],
@@ -387,7 +387,7 @@ void main() {
 
     test('parses FunctionTool correctly', () {
       final json = {
-        'model': 'gemini-2.0-flash',
+        'model': 'gemini-3.5-flash',
         'tools': [
           {
             'type': 'function',
@@ -412,7 +412,7 @@ void main() {
 
     test('parses CodeExecutionTool correctly', () {
       final json = {
-        'model': 'gemini-2.0-flash',
+        'model': 'gemini-3.5-flash',
         'tools': [
           {'type': 'code_execution'},
         ],
@@ -424,7 +424,7 @@ void main() {
 
     test('parses UrlContextTool correctly', () {
       final json = {
-        'model': 'gemini-2.0-flash',
+        'model': 'gemini-3.5-flash',
         'tools': [
           {'type': 'url_context'},
         ],
@@ -436,7 +436,7 @@ void main() {
 
     test('parses multiple tools', () {
       final json = {
-        'model': 'gemini-2.0-flash',
+        'model': 'gemini-3.5-flash',
         'tools': [
           {'type': 'google_search'},
           {'type': 'code_execution'},
@@ -453,7 +453,7 @@ void main() {
 
     test('parses RetrievalTool correctly', () {
       final json = {
-        'model': 'gemini-2.0-flash',
+        'model': 'gemini-3.5-flash',
         'tools': [
           {
             'type': 'retrieval',
@@ -485,14 +485,14 @@ void main() {
     });
 
     test('handles null tools', () {
-      final json = {'model': 'gemini-2.0-flash'};
+      final json = {'model': 'gemini-3.5-flash'};
       final params = CreateModelInteractionParams.fromJson(json);
       expect(params.tools, isNull);
     });
 
     test('round-trip serialization preserves typed tools', () {
       const original = CreateModelInteractionParams(
-        model: 'gemini-2.0-flash',
+        model: 'gemini-3.5-flash',
         tools: [
           GoogleSearchTool(),
           FunctionTool(name: 'get_weather', description: 'Gets weather'),

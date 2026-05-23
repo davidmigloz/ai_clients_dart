@@ -190,7 +190,7 @@ void main() {
 
   group('CreateModelInteractionParams with InteractionInput', () {
     test('fromJson parses text input', () {
-      final json = {'model': 'gemini-2.0-flash', 'input': 'Hello'};
+      final json = {'model': 'gemini-3.5-flash', 'input': 'Hello'};
       final params = CreateModelInteractionParams.fromJson(json);
       expect(params.input, isA<TextInput>());
       expect((params.input! as TextInput).text, 'Hello');
@@ -198,7 +198,7 @@ void main() {
 
     test('toJson serializes InteractionInput', () {
       const params = CreateModelInteractionParams(
-        model: 'gemini-2.0-flash',
+        model: 'gemini-3.5-flash',
         input: TextInput('Hello'),
       );
       final json = params.toJson();
@@ -206,7 +206,7 @@ void main() {
     });
 
     test('handles null input', () {
-      final json = {'model': 'gemini-2.0-flash'};
+      final json = {'model': 'gemini-3.5-flash'};
       final params = CreateModelInteractionParams.fromJson(json);
       expect(params.input, isNull);
     });
