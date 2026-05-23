@@ -6,7 +6,9 @@ import 'interceptor.dart';
 
 /// Interceptor that logs HTTP requests and responses.
 ///
-/// Adds `X-Request-ID` header if not already present.
+/// A request ID is always generated for log/error correlation. The
+/// `X-Request-ID` header is only added to the outgoing request when
+/// [sendRequestIdHeader] is `true` (or the caller already supplied one).
 /// Logs request/response details based on configured log level.
 class LoggingInterceptor implements Interceptor {
   /// Logger instance.
@@ -18,9 +20,15 @@ class LoggingInterceptor implements Interceptor {
   /// Fields to redact in logs.
   final List<String> redactionList;
 
+  /// Whether to add the `X-Request-ID` header to the outgoing request.
+  final bool sendRequestIdHeader;
+
   /// Creates a [LoggingInterceptor].
-  LoggingInterceptor({required this.logLevel, required this.redactionList})
-    : _logger = Logger('ollama_dart');
+  LoggingInterceptor({
+    required this.logLevel,
+    required this.redactionList,
+    required this.sendRequestIdHeader,
+  }) : _logger = Logger('ollama_dart');
 
   @override
   Future<http.Response> intercept(
@@ -29,11 +37,14 @@ class LoggingInterceptor implements Interceptor {
   ) async {
     final startTime = DateTime.now();
 
-    // Add request ID if not present
+    // Always derive a request ID for log/error correlation. Only add it to the
+    // outgoing request when enabled; a caller-supplied header is preserved.
     final requestId =
         context.request.headers['X-Request-ID'] ?? generateRequestId();
 
-    final request = _ensureRequestId(context.request, requestId);
+    final request = sendRequestIdHeader
+        ? _ensureRequestId(context.request, requestId)
+        : context.request;
 
     // Store correlation ID in metadata
     final metadata = Map<String, dynamic>.from(context.metadata)

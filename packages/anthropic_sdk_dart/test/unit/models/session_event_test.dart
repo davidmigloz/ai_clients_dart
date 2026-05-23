@@ -245,4 +245,134 @@ void main() {
       expect(parsed, isA<UnknownSessionEvent>());
     });
   });
+
+  group('SessionEvent outcome variants', () {
+    test('SpanOutcomeEvaluationStartEvent round-trips via dispatch', () {
+      final json = <String, dynamic>{
+        'type': 'span.outcome_evaluation_start',
+        'id': 'sevt_011CZkZTUy4mGhu8peVXnlzr',
+        'processed_at': '2026-03-15T10:02:14.000Z',
+        'iteration': 0,
+        'outcome_id': 'outc_011CZkZRSw2kEfs6ncTVljxP',
+      };
+      final parsed =
+          SessionEvent.fromJson(json) as SpanOutcomeEvaluationStartEvent;
+      expect(parsed.outcomeId, 'outc_011CZkZRSw2kEfs6ncTVljxP');
+      expect(parsed.iteration, 0);
+      expect(parsed.toJson(), json);
+    });
+
+    test('SpanOutcomeEvaluationOngoingEvent round-trips via dispatch', () {
+      final json = <String, dynamic>{
+        'type': 'span.outcome_evaluation_ongoing',
+        'id': 'sevt_011CZkZbCG2uOpc6xmDfvTzh',
+        'processed_at': '2026-03-15T10:02:14.000Z',
+        'iteration': 1,
+        'outcome_id': 'outc_011CZkZRSw2kEfs6ncTVljxP',
+      };
+      final parsed =
+          SessionEvent.fromJson(json) as SpanOutcomeEvaluationOngoingEvent;
+      expect(parsed.iteration, 1);
+      expect(parsed.toJson(), json);
+    });
+
+    test('SpanOutcomeEvaluationEndEvent round-trips with usage', () {
+      final json = <String, dynamic>{
+        'type': 'span.outcome_evaluation_end',
+        'id': 'sevt_011CZkZUVz5nHiv9qfWYomas',
+        'processed_at': '2026-03-15T10:02:31.000Z',
+        'outcome_evaluation_start_id': 'sevt_011CZkZTUy4mGhu8peVXnlzr',
+        'iteration': 0,
+        'result': 'satisfied',
+        'explanation': 'All five sections present.',
+        'usage': {
+          'input_tokens': 1842,
+          'output_tokens': 213,
+          'cache_read_input_tokens': 1536,
+          'cache_creation_input_tokens': 0,
+        },
+        'outcome_id': 'outc_011CZkZRSw2kEfs6ncTVljxP',
+      };
+      final parsed =
+          SessionEvent.fromJson(json) as SpanOutcomeEvaluationEndEvent;
+      expect(parsed.result, 'satisfied');
+      expect(parsed.outcomeEvaluationStartId, 'sevt_011CZkZTUy4mGhu8peVXnlzr');
+      expect(parsed.usage.inputTokens, 1842);
+      expect(parsed.toJson(), json);
+    });
+
+    test('UserDefineOutcomeEvent round-trips with a nested rubric', () {
+      final json = <String, dynamic>{
+        'type': 'user.define_outcome',
+        'id': 'sevt_011CZkZSTx3lFgt7odUWmkyq',
+        'processed_at': '2026-03-15T10:02:14.000Z',
+        'outcome_id': 'outc_011CZkZRSw2kEfs6ncTVljxP',
+        'description': 'Produce a 2-page summary as summary.md',
+        'max_iterations': 3,
+        'rubric': {
+          'type': 'text',
+          'content': 'Must cover all five sections; cite sources inline.',
+        },
+      };
+      final parsed = SessionEvent.fromJson(json) as UserDefineOutcomeEvent;
+      expect(parsed.outcomeId, 'outc_011CZkZRSw2kEfs6ncTVljxP');
+      expect(parsed.maxIterations, 3);
+      expect(parsed.rubric, isA<TextRubric>());
+      expect(parsed.toJson(), json);
+    });
+
+    test('UserDefineOutcomeEvent tolerates null max_iterations', () {
+      final json = <String, dynamic>{
+        'type': 'user.define_outcome',
+        'id': 'sevt_1',
+        'processed_at': '2026-03-15T10:02:14.000Z',
+        'outcome_id': 'outc_1',
+        'description': 'task',
+        'max_iterations': null,
+        'rubric': {'type': 'file', 'file_id': 'file_1'},
+      };
+      final parsed = SessionEvent.fromJson(json) as UserDefineOutcomeEvent;
+      expect(parsed.maxIterations, isNull);
+      expect(parsed.rubric, isA<FileRubric>());
+      expect(parsed.toJson(), json);
+    });
+  });
+
+  group('UserDefineOutcomeEventParams', () {
+    test('round-trips through EventParams.fromJson dispatch', () {
+      final json = <String, dynamic>{
+        'type': 'user.define_outcome',
+        'description': 'Produce a summary',
+        'rubric': {'type': 'text', 'content': 'cover all sections'},
+        'max_iterations': 2,
+      };
+      final parsed = EventParams.fromJson(json) as UserDefineOutcomeEventParams;
+      expect(parsed.description, 'Produce a summary');
+      expect(parsed.rubric, isA<TextRubricParams>());
+      expect(parsed.maxIterations, 2);
+      expect(parsed.toJson(), json);
+    });
+
+    test('omits max_iterations when null', () {
+      const params = UserDefineOutcomeEventParams(
+        description: 'task',
+        rubric: TextRubricParams(content: 'body'),
+      );
+      expect(params.toJson(), {
+        'type': 'user.define_outcome',
+        'description': 'task',
+        'rubric': {'type': 'text', 'content': 'body'},
+      });
+    });
+
+    test('copyWith preserves and clears maxIterations', () {
+      const params = UserDefineOutcomeEventParams(
+        description: 'task',
+        rubric: TextRubricParams(content: 'body'),
+        maxIterations: 5,
+      );
+      expect(params.copyWith(description: 'new').maxIterations, 5);
+      expect(params.copyWith(maxIterations: null).maxIterations, isNull);
+    });
+  });
 }

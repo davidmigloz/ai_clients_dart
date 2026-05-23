@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import '../models/managed_agents/credentials/create_credential_params.dart';
 import '../models/managed_agents/credentials/credential.dart';
 import '../models/managed_agents/credentials/credential_list_response.dart';
+import '../models/managed_agents/credentials/credential_validation.dart';
 import '../models/managed_agents/credentials/update_credential_params.dart';
 import 'base_resource.dart';
 
@@ -207,6 +208,40 @@ class VaultCredentialsResource extends ResourceBase {
     );
 
     return Credential.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
+  }
+
+  /// Validates a credential by probing its MCP server (Beta).
+  ///
+  /// Attempts an MCP-OAuth handshake (and a token refresh if applicable) and
+  /// returns the typed [CredentialValidation] result. Sensitive values in any
+  /// captured HTTP responses are scrubbed.
+  ///
+  /// Parameters:
+  /// - [credentialId]: The ID of the credential to validate.
+  /// - [abortTrigger]: Allows canceling the request.
+  Future<CredentialValidation> validateCredential(
+    String credentialId, {
+    Future<void>? abortTrigger,
+  }) async {
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(
+      '/v1/vaults/$vaultId/credentials/$credentialId/mcp_oauth_validate',
+    );
+    final headers = requestBuilder.buildHeaders(
+      additionalHeaders: {'anthropic-beta': _betaHeader},
+    );
+    final httpRequest = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(<String, dynamic>{});
+
+    final response = await interceptorChain.execute(
+      httpRequest,
+      abortTrigger: abortTrigger,
+    );
+
+    return CredentialValidation.fromJson(
       jsonDecode(response.body) as Map<String, dynamic>,
     );
   }

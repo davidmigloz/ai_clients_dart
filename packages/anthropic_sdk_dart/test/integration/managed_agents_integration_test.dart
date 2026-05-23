@@ -230,5 +230,192 @@ void main() {
         }
       },
     );
+
+    test(
+      'multiagent coordinator agent lifecycle',
+      timeout: const Timeout(Duration(minutes: 5)),
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        // 1. Create a leaf "worker" agent (no multiagent — depth limit 1).
+        final worker = await client!.agents.create(
+          const CreateAgentParams(
+            name: 'MA Worker - Dart SDK',
+            model: ModelParamsId(id: 'claude-sonnet-4-5'),
+          ),
+        );
+
+        Agent? coordinator;
+        try {
+          // 2. Create a coordinator agent with a roster (worker + self).
+          coordinator = await client!.agents.create(
+            CreateAgentParams(
+              name: 'MA Coordinator - Dart SDK',
+              model: const ModelParamsId(id: 'claude-sonnet-4-5'),
+              multiagent: MultiagentCoordinatorParams(
+                agents: [
+                  MultiagentRosterEntryAgent(
+                    agent: AgentParamsId(id: worker.id),
+                  ),
+                  const MultiagentSelfParams(),
+                ],
+              ),
+            ),
+          );
+
+          // 3. Retrieve it and assert the resolved coordinator roster.
+          final retrieved = await client!.agents.retrieve(coordinator.id);
+          expect(retrieved.multiagent, isA<MultiagentCoordinator>());
+          final coord = retrieved.multiagent! as MultiagentCoordinator;
+          expect(coord.agents.map((a) => a.id), contains(worker.id));
+
+          // 4. Update an unrelated field; omitting `multiagent` preserves it.
+          final updated = await client!.agents.update(
+            coordinator.id,
+            UpdateAgentParams(
+              version: retrieved.version,
+              name: 'MA Coordinator (renamed) - Dart SDK',
+            ),
+          );
+          expect(updated.name, equals('MA Coordinator (renamed) - Dart SDK'));
+          expect(updated.multiagent, isA<MultiagentCoordinator>());
+        } finally {
+          // 5. Cleanup.
+          if (coordinator != null) {
+            await client!.agents.archive(coordinator.id);
+          }
+          await client!.agents.archive(worker.id);
+        }
+      },
+    );
+
+    test(
+      'outcome evaluation over a session',
+      timeout: const Timeout(Duration(minutes: 5)),
+      () async {
+        if (apiKey == null || environmentId == null) {
+          markTestSkipped('API key or environment ID not available');
+          return;
+        }
+
+        // 1. Create an agent + session.
+        final agent = await client!.agents.create(
+          const CreateAgentParams(
+            name: 'Outcome Test Agent - Dart SDK',
+            model: ModelParamsId(id: 'claude-sonnet-4-5'),
+            system: 'You are a helpful assistant. Keep responses very brief.',
+          ),
+        );
+
+        Session? session;
+        try {
+          session = await client!.sessions.create(
+            CreateSessionParams(
+              agent: AgentParamsId(id: agent.id),
+              environmentId: environmentId!,
+            ),
+          );
+
+          // 2. Define an outcome with a text rubric.
+          final sendResponse = await client!.sessions
+              .events(session.id)
+              .send(
+                const SendSessionEventsParams(
+                  events: [
+                    UserDefineOutcomeEventParams(
+                      description: 'Reply with the single word "done".',
+                      rubric: TextRubricParams(
+                        content: 'The response contains the word "done".',
+                      ),
+                      maxIterations: 1,
+                    ),
+                  ],
+                ),
+              );
+          expect(sendResponse.data, isNotEmpty);
+
+          // 3. Wait, then list events and gather the define-outcome echo.
+          await Future<void>.delayed(const Duration(seconds: 10));
+          final events = await client!.sessions.events(session.id).list();
+          final defines = [
+            ...sendResponse.data,
+            ...events.data,
+          ].whereType<UserDefineOutcomeEvent>().toList();
+          expect(
+            defines,
+            isNotEmpty,
+            reason: 'the define_outcome event should be echoed back',
+          );
+          final outcomeId = defines.first.outcomeId;
+
+          // 4. Retrieve the session and assert the outcome is tracked.
+          final retrieved = await client!.sessions.retrieve(session.id);
+          expect(
+            retrieved.outcomeEvaluations.map((o) => o.outcomeId),
+            contains(outcomeId),
+          );
+        } finally {
+          // Cleanup always runs, even if an assertion above throws.
+          if (session != null) {
+            await client!.sessions.delete(session.id);
+          }
+          await client!.agents.archive(agent.id);
+        }
+      },
+    );
+
+    test(
+      'validate a vault credential',
+      timeout: const Timeout(Duration(minutes: 3)),
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
+
+        // 1. Create a vault + credential to validate.
+        final vault = await client!.vaults.create(
+          const CreateVaultParams(
+            displayName: 'Validate Test Vault - Dart SDK',
+          ),
+        );
+
+        try {
+          // The mcp_oauth_validate endpoint validates MCP-OAuth credentials, so
+          // create one (a static bearer credential is rejected with a 400).
+          final credential = await client!.vaults
+              .credentials(vault.id)
+              .create(
+                const CreateCredentialParams(
+                  auth: McpOauthCreateParams(
+                    accessToken: 'test-access-token',
+                    mcpServerUrl: 'https://mcp.example.com',
+                  ),
+                  displayName: 'Validate Test Credential',
+                ),
+              );
+
+          // 2. Validate it. A placeholder token/server legitimately yields an
+          // invalid/unknown status with a probe error — we only assert the
+          // call succeeds and returns a parseable, well-formed result.
+          final validation = await client!.vaults
+              .credentials(vault.id)
+              .validateCredential(credential.id);
+
+          expect(validation.credentialId, equals(credential.id));
+          expect(validation.vaultId, equals(vault.id));
+          expect(
+            CredentialValidationStatus.values,
+            contains(validation.status),
+          );
+        } finally {
+          // Cleanup: delete the vault (cascades to its credentials).
+          await client!.vaults.delete(vault.id);
+        }
+      },
+    );
   });
 }

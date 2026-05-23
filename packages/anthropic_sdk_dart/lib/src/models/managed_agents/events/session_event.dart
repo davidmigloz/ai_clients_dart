@@ -4,6 +4,7 @@ import '../../beta_timestamp.dart';
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
 import '../config/agent_tool.dart' show AgentEvaluatedPermission;
+import '../outcomes/rubric.dart';
 import 'telemetry.dart';
 
 /// Server-sent event in a managed agents session.
@@ -36,6 +37,10 @@ import 'telemetry.dart';
 /// - [SessionDeletedEvent] — session deleted.
 /// - [SpanModelRequestStartEvent] — model request started.
 /// - [SpanModelRequestEndEvent] — model request completed.
+/// - [SpanOutcomeEvaluationStartEvent] — outcome evaluation cycle began.
+/// - [SpanOutcomeEvaluationOngoingEvent] — outcome evaluation heartbeat.
+/// - [SpanOutcomeEvaluationEndEvent] — outcome evaluation cycle completed.
+/// - [UserDefineOutcomeEvent] — echo of a `user.define_outcome` input event.
 /// - [UnknownSessionEvent] — unrecognized event type.
 sealed class SessionEvent {
   const SessionEvent();
@@ -82,6 +87,14 @@ sealed class SessionEvent {
       'session.deleted' => SessionDeletedEvent.fromJson(json),
       'span.model_request_start' => SpanModelRequestStartEvent.fromJson(json),
       'span.model_request_end' => SpanModelRequestEndEvent.fromJson(json),
+      'span.outcome_evaluation_start' =>
+        SpanOutcomeEvaluationStartEvent.fromJson(json),
+      'span.outcome_evaluation_ongoing' =>
+        SpanOutcomeEvaluationOngoingEvent.fromJson(json),
+      'span.outcome_evaluation_end' => SpanOutcomeEvaluationEndEvent.fromJson(
+        json,
+      ),
+      'user.define_outcome' => UserDefineOutcomeEvent.fromJson(json),
       _ => UnknownSessionEvent(rawJson: json),
     };
   }
@@ -2537,6 +2550,410 @@ class AgentThreadMessageSentEvent extends SessionEvent {
       'toAgentName: $toAgentName, '
       'content: ${content.length} items, '
       'processedAt: $processedAt)';
+}
+
+// ---------------------------------------------------------------------------
+// Outcome evaluation events
+// ---------------------------------------------------------------------------
+
+/// Emitted when an outcome evaluation cycle begins.
+@immutable
+class SpanOutcomeEvaluationStartEvent extends SessionEvent {
+  /// The event type, always 'span.outcome_evaluation_start'.
+  String get type => 'span.outcome_evaluation_start';
+
+  /// Unique identifier for this event.
+  final String id;
+
+  /// Timestamp when outcome evaluation started.
+  final BetaTimestamp processedAt;
+
+  /// 0-indexed revision cycle being evaluated.
+  final int iteration;
+
+  /// The `outc_` ID of the outcome being evaluated.
+  final String outcomeId;
+
+  /// Creates a [SpanOutcomeEvaluationStartEvent].
+  const SpanOutcomeEvaluationStartEvent({
+    required this.id,
+    required this.processedAt,
+    required this.iteration,
+    required this.outcomeId,
+  });
+
+  /// Creates a [SpanOutcomeEvaluationStartEvent] from JSON.
+  factory SpanOutcomeEvaluationStartEvent.fromJson(Map<String, dynamic> json) {
+    return SpanOutcomeEvaluationStartEvent(
+      id: json['id'] as String,
+      processedAt: DateTime.parse(json['processed_at'] as String),
+      iteration: json['iteration'] as int,
+      outcomeId: json['outcome_id'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'processed_at': processedAt.toUtc().toIso8601String(),
+    'iteration': iteration,
+    'outcome_id': outcomeId,
+  };
+
+  /// Creates a copy with replaced values.
+  SpanOutcomeEvaluationStartEvent copyWith({
+    String? id,
+    BetaTimestamp? processedAt,
+    int? iteration,
+    String? outcomeId,
+  }) {
+    return SpanOutcomeEvaluationStartEvent(
+      id: id ?? this.id,
+      processedAt: processedAt ?? this.processedAt,
+      iteration: iteration ?? this.iteration,
+      outcomeId: outcomeId ?? this.outcomeId,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SpanOutcomeEvaluationStartEvent &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          processedAt == other.processedAt &&
+          iteration == other.iteration &&
+          outcomeId == other.outcomeId;
+
+  @override
+  int get hashCode => Object.hash(id, processedAt, iteration, outcomeId);
+
+  @override
+  String toString() =>
+      'SpanOutcomeEvaluationStartEvent(id: $id, processedAt: $processedAt, '
+      'iteration: $iteration, outcomeId: $outcomeId)';
+}
+
+/// Periodic heartbeat emitted while an outcome evaluation cycle is in progress.
+@immutable
+class SpanOutcomeEvaluationOngoingEvent extends SessionEvent {
+  /// The event type, always 'span.outcome_evaluation_ongoing'.
+  String get type => 'span.outcome_evaluation_ongoing';
+
+  /// Unique identifier for this event.
+  final String id;
+
+  /// Timestamp when this heartbeat was emitted.
+  final BetaTimestamp processedAt;
+
+  /// 0-indexed revision cycle being evaluated.
+  final int iteration;
+
+  /// The `outc_` ID of the outcome being evaluated.
+  final String outcomeId;
+
+  /// Creates a [SpanOutcomeEvaluationOngoingEvent].
+  const SpanOutcomeEvaluationOngoingEvent({
+    required this.id,
+    required this.processedAt,
+    required this.iteration,
+    required this.outcomeId,
+  });
+
+  /// Creates a [SpanOutcomeEvaluationOngoingEvent] from JSON.
+  factory SpanOutcomeEvaluationOngoingEvent.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return SpanOutcomeEvaluationOngoingEvent(
+      id: json['id'] as String,
+      processedAt: DateTime.parse(json['processed_at'] as String),
+      iteration: json['iteration'] as int,
+      outcomeId: json['outcome_id'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'processed_at': processedAt.toUtc().toIso8601String(),
+    'iteration': iteration,
+    'outcome_id': outcomeId,
+  };
+
+  /// Creates a copy with replaced values.
+  SpanOutcomeEvaluationOngoingEvent copyWith({
+    String? id,
+    BetaTimestamp? processedAt,
+    int? iteration,
+    String? outcomeId,
+  }) {
+    return SpanOutcomeEvaluationOngoingEvent(
+      id: id ?? this.id,
+      processedAt: processedAt ?? this.processedAt,
+      iteration: iteration ?? this.iteration,
+      outcomeId: outcomeId ?? this.outcomeId,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SpanOutcomeEvaluationOngoingEvent &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          processedAt == other.processedAt &&
+          iteration == other.iteration &&
+          outcomeId == other.outcomeId;
+
+  @override
+  int get hashCode => Object.hash(id, processedAt, iteration, outcomeId);
+
+  @override
+  String toString() =>
+      'SpanOutcomeEvaluationOngoingEvent(id: $id, processedAt: $processedAt, '
+      'iteration: $iteration, outcomeId: $outcomeId)';
+}
+
+/// Emitted when an outcome evaluation cycle completes. Carries the verdict and
+/// aggregate token usage.
+@immutable
+class SpanOutcomeEvaluationEndEvent extends SessionEvent {
+  /// The event type, always 'span.outcome_evaluation_end'.
+  String get type => 'span.outcome_evaluation_end';
+
+  /// Unique identifier for this event.
+  final String id;
+
+  /// Timestamp when outcome evaluation ended.
+  final BetaTimestamp processedAt;
+
+  /// The id of the corresponding `span.outcome_evaluation_start` event.
+  final String outcomeEvaluationStartId;
+
+  /// 0-indexed revision cycle being evaluated.
+  final int iteration;
+
+  /// Evaluation verdict (e.g. `satisfied`, `needs_revision`, `failed`).
+  final String result;
+
+  /// Human-readable explanation of the verdict.
+  final String explanation;
+
+  /// Aggregate token usage for this evaluation cycle.
+  final SpanModelUsage usage;
+
+  /// The `outc_` ID of the outcome being evaluated.
+  final String outcomeId;
+
+  /// Creates a [SpanOutcomeEvaluationEndEvent].
+  const SpanOutcomeEvaluationEndEvent({
+    required this.id,
+    required this.processedAt,
+    required this.outcomeEvaluationStartId,
+    required this.iteration,
+    required this.result,
+    required this.explanation,
+    required this.usage,
+    required this.outcomeId,
+  });
+
+  /// Creates a [SpanOutcomeEvaluationEndEvent] from JSON.
+  factory SpanOutcomeEvaluationEndEvent.fromJson(Map<String, dynamic> json) {
+    return SpanOutcomeEvaluationEndEvent(
+      id: json['id'] as String,
+      processedAt: DateTime.parse(json['processed_at'] as String),
+      outcomeEvaluationStartId: json['outcome_evaluation_start_id'] as String,
+      iteration: json['iteration'] as int,
+      result: json['result'] as String,
+      explanation: json['explanation'] as String,
+      usage: SpanModelUsage.fromJson(json['usage'] as Map<String, dynamic>),
+      outcomeId: json['outcome_id'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'processed_at': processedAt.toUtc().toIso8601String(),
+    'outcome_evaluation_start_id': outcomeEvaluationStartId,
+    'iteration': iteration,
+    'result': result,
+    'explanation': explanation,
+    'usage': usage.toJson(),
+    'outcome_id': outcomeId,
+  };
+
+  /// Creates a copy with replaced values.
+  SpanOutcomeEvaluationEndEvent copyWith({
+    String? id,
+    BetaTimestamp? processedAt,
+    String? outcomeEvaluationStartId,
+    int? iteration,
+    String? result,
+    String? explanation,
+    SpanModelUsage? usage,
+    String? outcomeId,
+  }) {
+    return SpanOutcomeEvaluationEndEvent(
+      id: id ?? this.id,
+      processedAt: processedAt ?? this.processedAt,
+      outcomeEvaluationStartId:
+          outcomeEvaluationStartId ?? this.outcomeEvaluationStartId,
+      iteration: iteration ?? this.iteration,
+      result: result ?? this.result,
+      explanation: explanation ?? this.explanation,
+      usage: usage ?? this.usage,
+      outcomeId: outcomeId ?? this.outcomeId,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SpanOutcomeEvaluationEndEvent &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          processedAt == other.processedAt &&
+          outcomeEvaluationStartId == other.outcomeEvaluationStartId &&
+          iteration == other.iteration &&
+          result == other.result &&
+          explanation == other.explanation &&
+          usage == other.usage &&
+          outcomeId == other.outcomeId;
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    processedAt,
+    outcomeEvaluationStartId,
+    iteration,
+    result,
+    explanation,
+    usage,
+    outcomeId,
+  );
+
+  @override
+  String toString() =>
+      'SpanOutcomeEvaluationEndEvent(id: $id, processedAt: $processedAt, '
+      'outcomeEvaluationStartId: $outcomeEvaluationStartId, '
+      'iteration: $iteration, result: $result, explanation: $explanation, '
+      'usage: $usage, outcomeId: $outcomeId)';
+}
+
+/// Echo of a `user.define_outcome` input event. Carries the server-generated
+/// `outcomeId` that subsequent `span.outcome_evaluation_*` events reference.
+@immutable
+class UserDefineOutcomeEvent extends SessionEvent {
+  /// The event type, always 'user.define_outcome'.
+  String get type => 'user.define_outcome';
+
+  /// Unique identifier for this event.
+  final String id;
+
+  /// Timestamp when the outcome was accepted.
+  final BetaTimestamp processedAt;
+
+  /// Server-generated `outc_` ID for this outcome.
+  final String outcomeId;
+
+  /// What the agent should produce. Copied from the input event.
+  final String description;
+
+  /// Evaluate-then-revise cycles before giving up. Default 3, max 20.
+  final int? maxIterations;
+
+  /// How to grade the outcome.
+  final Rubric rubric;
+
+  /// Creates a [UserDefineOutcomeEvent].
+  const UserDefineOutcomeEvent({
+    required this.id,
+    required this.processedAt,
+    required this.outcomeId,
+    required this.description,
+    required this.maxIterations,
+    required this.rubric,
+  });
+
+  /// Creates a [UserDefineOutcomeEvent] from JSON.
+  factory UserDefineOutcomeEvent.fromJson(Map<String, dynamic> json) {
+    return UserDefineOutcomeEvent(
+      id: json['id'] as String,
+      processedAt: DateTime.parse(json['processed_at'] as String),
+      outcomeId: json['outcome_id'] as String,
+      description: json['description'] as String,
+      maxIterations: json['max_iterations'] as int?,
+      rubric: Rubric.fromJson(json['rubric'] as Map<String, dynamic>),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'processed_at': processedAt.toUtc().toIso8601String(),
+    'outcome_id': outcomeId,
+    'description': description,
+    'max_iterations': maxIterations,
+    'rubric': rubric.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  ///
+  /// For the nullable field [maxIterations], pass the sentinel value
+  /// [unsetCopyWithValue] (or omit) to keep the original value, or pass `null`
+  /// explicitly to set the field to null.
+  UserDefineOutcomeEvent copyWith({
+    String? id,
+    BetaTimestamp? processedAt,
+    String? outcomeId,
+    String? description,
+    Object? maxIterations = unsetCopyWithValue,
+    Rubric? rubric,
+  }) {
+    return UserDefineOutcomeEvent(
+      id: id ?? this.id,
+      processedAt: processedAt ?? this.processedAt,
+      outcomeId: outcomeId ?? this.outcomeId,
+      description: description ?? this.description,
+      maxIterations: maxIterations == unsetCopyWithValue
+          ? this.maxIterations
+          : maxIterations as int?,
+      rubric: rubric ?? this.rubric,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserDefineOutcomeEvent &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          processedAt == other.processedAt &&
+          outcomeId == other.outcomeId &&
+          description == other.description &&
+          maxIterations == other.maxIterations &&
+          rubric == other.rubric;
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    processedAt,
+    outcomeId,
+    description,
+    maxIterations,
+    rubric,
+  );
+
+  @override
+  String toString() =>
+      'UserDefineOutcomeEvent(id: $id, processedAt: $processedAt, '
+      'outcomeId: $outcomeId, description: $description, '
+      'maxIterations: $maxIterations, rubric: $rubric)';
 }
 
 // ---------------------------------------------------------------------------

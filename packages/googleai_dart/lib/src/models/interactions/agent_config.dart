@@ -46,10 +46,7 @@ class DynamicAgentConfig extends AgentConfig {
   }
 
   @override
-  Map<String, dynamic> toJson() => {
-    'type': type,
-    if (additionalProperties != null) ...additionalProperties!,
-  };
+  Map<String, dynamic> toJson() => {'type': type, ...?additionalProperties};
 
   /// Creates a copy with replaced values.
   DynamicAgentConfig copyWith({

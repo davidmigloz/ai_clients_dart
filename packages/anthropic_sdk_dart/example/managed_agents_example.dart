@@ -8,6 +8,7 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// - Starting sessions and sending messages
 /// - Polling session events
 /// - Managing vaults and credentials
+/// - Multiagent coordinator rosters and outcome evaluations
 ///
 /// Note: The Managed Agents API is a beta feature.
 void main() async {
@@ -100,7 +101,104 @@ void main() async {
     print('Credentials in vault: ${credentials.data.length}');
 
     // =========================================================================
-    // 4. Cleanup
+    // 4. Multiagent orchestration & outcome evaluations
+    // =========================================================================
+    print('\n=== Multiagent & Outcomes ===');
+
+    // Create a leaf "worker" agent the coordinator can spawn (depth limit 1).
+    final worker = await client.agents.create(
+      const CreateAgentParams(
+        name: 'Worker',
+        model: ModelParamsId(id: 'claude-sonnet-4-5'),
+      ),
+    );
+
+    // Create a coordinator agent with a roster: the worker plus `self`.
+    final coordinator = await client.agents.create(
+      CreateAgentParams(
+        name: 'Coordinator',
+        model: const ModelParamsId(id: 'claude-sonnet-4-5'),
+        multiagent: MultiagentCoordinatorParams(
+          agents: [
+            MultiagentRosterEntryAgent(agent: AgentParamsId(id: worker.id)),
+            const MultiagentSelfParams(),
+          ],
+        ),
+      ),
+    );
+    final resolved = coordinator.multiagent;
+    if (resolved is MultiagentCoordinator) {
+      print(
+        'Coordinator roster: ${resolved.agents.map((a) => a.id).join(', ')}',
+      );
+    }
+
+    // Define an outcome the agent should work toward, graded by a rubric.
+    await client.sessions
+        .events(session.id)
+        .send(
+          const SendSessionEventsParams(
+            events: [
+              UserDefineOutcomeEventParams(
+                description: 'Produce a one-paragraph summary.',
+                rubric: TextRubricParams(
+                  content: 'Must be a single paragraph with no bullet points.',
+                ),
+                maxIterations: 3,
+              ),
+            ],
+          ),
+        );
+    print('Defined an outcome for the session');
+
+    // =========================================================================
+    // 5. Webhooks & credential validation
+    // =========================================================================
+    print('\n=== Webhooks & Credential Validation ===');
+
+    // Parse an inbound webhook payload (e.g. the body of your HTTP handler)
+    // into a typed event, then switch over the discriminated `data` union.
+    final samplePayload = <String, dynamic>{
+      'type': 'event',
+      'id': 'evt_123',
+      'created_at': '2026-04-01T00:00:00Z',
+      'data': <String, dynamic>{
+        'type': 'session.created',
+        'id': 'sesn_123',
+        'organization_id': 'org_123',
+        'workspace_id': 'wrkspc_123',
+      },
+    };
+    final webhookEvent = WebhookEvent.fromJson(samplePayload);
+    switch (webhookEvent.data) {
+      case WebhookSessionCreatedEventData(:final id):
+        print('Webhook: session $id created');
+      case WebhookVaultCredentialRefreshFailedEventData(:final id):
+        print('Webhook: credential $id refresh failed');
+      default:
+        print('Webhook: ${webhookEvent.data.runtimeType}');
+    }
+
+    // Validate a vault credential's MCP-OAuth setup. The mcp_oauth_validate
+    // endpoint only accepts MCP-OAuth credentials (a static-bearer credential
+    // is rejected with a 400), so create one of those.
+    final credential = await client.vaults
+        .credentials(vault.id)
+        .create(
+          const CreateCredentialParams(
+            auth: McpOauthCreateParams(
+              accessToken: 'access-token',
+              mcpServerUrl: 'https://mcp.example.com',
+            ),
+          ),
+        );
+    final validation = await client.vaults
+        .credentials(vault.id)
+        .validateCredential(credential.id);
+    print('Credential validation status: ${validation.status.value}');
+
+    // =========================================================================
+    // 6. Cleanup
     // =========================================================================
     print('\n=== Cleanup ===');
 
@@ -108,7 +206,9 @@ void main() async {
     print('Deleted session');
 
     await client.agents.archive(agent.id);
-    print('Archived agent');
+    await client.agents.archive(coordinator.id);
+    await client.agents.archive(worker.id);
+    print('Archived agents');
 
     await client.vaults.delete(vault.id);
     print('Deleted vault');

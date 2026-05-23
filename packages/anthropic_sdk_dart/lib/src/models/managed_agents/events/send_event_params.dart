@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
+import '../outcomes/rubric_params.dart';
 import 'session_event.dart';
 
 /// Request parameters for sending events to a session.
@@ -53,6 +54,7 @@ class SendSessionEventsParams {
 /// - [UserInterruptEventParams] — send an interrupt.
 /// - [UserToolConfirmationEventParams] — confirm or deny a tool execution.
 /// - [UserCustomToolResultEventParams] — provide custom tool result.
+/// - [UserDefineOutcomeEventParams] — define an outcome the agent works toward.
 /// - [UnknownEventParams] — unrecognized event type.
 sealed class EventParams {
   const EventParams();
@@ -69,6 +71,7 @@ sealed class EventParams {
       'user.custom_tool_result' => UserCustomToolResultEventParams.fromJson(
         json,
       ),
+      'user.define_outcome' => UserDefineOutcomeEventParams.fromJson(json),
       _ => UnknownEventParams(rawJson: json),
     };
   }
@@ -320,6 +323,79 @@ class UserCustomToolResultEventParams extends EventParams {
   String toString() =>
       'UserCustomToolResultEventParams(customToolUseId: $customToolUseId, '
       'content: $content, isError: $isError)';
+}
+
+/// Parameters for defining an outcome the agent should work toward. The agent
+/// begins work on receipt.
+@immutable
+class UserDefineOutcomeEventParams extends EventParams {
+  /// The event type, always 'user.define_outcome'.
+  String get type => 'user.define_outcome';
+
+  /// What the agent should produce. This is the task specification.
+  final String description;
+
+  /// How to grade the outcome. Text or file reference.
+  final RubricParams rubric;
+
+  /// Evaluate-then-revise cycles before giving up. Default 3, max 20.
+  final int? maxIterations;
+
+  /// Creates a [UserDefineOutcomeEventParams].
+  const UserDefineOutcomeEventParams({
+    required this.description,
+    required this.rubric,
+    this.maxIterations,
+  });
+
+  /// Creates a [UserDefineOutcomeEventParams] from JSON.
+  factory UserDefineOutcomeEventParams.fromJson(Map<String, dynamic> json) {
+    return UserDefineOutcomeEventParams(
+      description: json['description'] as String,
+      rubric: RubricParams.fromJson(json['rubric'] as Map<String, dynamic>),
+      maxIterations: json['max_iterations'] as int?,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'description': description,
+    'rubric': rubric.toJson(),
+    if (maxIterations != null) 'max_iterations': maxIterations,
+  };
+
+  /// Creates a copy with replaced values.
+  UserDefineOutcomeEventParams copyWith({
+    String? description,
+    RubricParams? rubric,
+    Object? maxIterations = unsetCopyWithValue,
+  }) {
+    return UserDefineOutcomeEventParams(
+      description: description ?? this.description,
+      rubric: rubric ?? this.rubric,
+      maxIterations: maxIterations == unsetCopyWithValue
+          ? this.maxIterations
+          : maxIterations as int?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserDefineOutcomeEventParams &&
+          runtimeType == other.runtimeType &&
+          description == other.description &&
+          rubric == other.rubric &&
+          maxIterations == other.maxIterations;
+
+  @override
+  int get hashCode => Object.hash(description, rubric, maxIterations);
+
+  @override
+  String toString() =>
+      'UserDefineOutcomeEventParams(description: $description, '
+      'rubric: $rubric, maxIterations: $maxIterations)';
 }
 
 /// Unrecognized event params — preserves raw JSON.
