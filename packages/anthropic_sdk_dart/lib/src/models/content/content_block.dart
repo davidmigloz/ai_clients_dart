@@ -991,12 +991,24 @@ class WebSearchResultError extends WebSearchResult {
 }
 
 /// Citation for text content.
+///
+/// Variants:
+/// - [CharLocationCitation] — `char_location` (plain text sources).
+/// - [PageLocationCitation] — `page_location` (paginated documents).
+/// - [ContentBlockLocationCitation] — `content_block_location`.
+/// - [WebSearchResultLocationCitation] — `web_search_result_location`.
+/// - [SearchResultLocationCitation] — `search_result_location` (search-result
+///   content blocks).
+/// - [UnknownCitation] — unrecognized citation type, for forward compatibility.
 sealed class Citation {
   const Citation();
 
   /// Creates a [Citation] from JSON.
+  ///
+  /// Dispatches on the `type` discriminator; unrecognized values fall back to
+  /// [UnknownCitation].
   factory Citation.fromJson(Map<String, dynamic> json) {
-    final type = json['type'] as String;
+    final type = json['type'] as String?;
     return switch (type) {
       'char_location' => CharLocationCitation.fromJson(json),
       'page_location' => PageLocationCitation.fromJson(json),
@@ -1004,7 +1016,8 @@ sealed class Citation {
       'web_search_result_location' => WebSearchResultLocationCitation.fromJson(
         json,
       ),
-      _ => throw FormatException('Unknown Citation type: $type'),
+      'search_result_location' => SearchResultLocationCitation.fromJson(json),
+      _ => UnknownCitation(rawJson: json),
     };
   }
 
@@ -1369,6 +1382,136 @@ class WebSearchResultLocationCitation extends Citation {
       'WebSearchResultLocationCitation(citedText: [${citedText.length} chars], '
       'encryptedIndex: [${encryptedIndex.length} chars], '
       'title: $title, url: $url)';
+}
+
+/// Citation referencing a range of blocks within a `search_result` content
+/// block (returned when the model cites search-result sources, e.g. RAG).
+@immutable
+class SearchResultLocationCitation extends Citation {
+  /// The cited text (the concatenated contents of the cited block range).
+  final String citedText;
+
+  /// 0-based index of the cited search result among all `search_result`
+  /// content blocks in the request.
+  final int searchResultIndex;
+
+  /// Source identifier of the cited search result.
+  final String source;
+
+  /// Title of the cited search result, if any.
+  final String? title;
+
+  /// 0-based index of the first cited block in the source's content array.
+  final int startBlockIndex;
+
+  /// Exclusive 0-based end index of the cited block range.
+  final int endBlockIndex;
+
+  /// Creates a [SearchResultLocationCitation].
+  const SearchResultLocationCitation({
+    required this.citedText,
+    required this.searchResultIndex,
+    required this.source,
+    this.title,
+    required this.startBlockIndex,
+    required this.endBlockIndex,
+  });
+
+  /// Creates a [SearchResultLocationCitation] from JSON.
+  factory SearchResultLocationCitation.fromJson(Map<String, dynamic> json) {
+    return SearchResultLocationCitation(
+      citedText: json['cited_text'] as String,
+      searchResultIndex: json['search_result_index'] as int,
+      source: json['source'] as String,
+      title: json['title'] as String?,
+      startBlockIndex: json['start_block_index'] as int,
+      endBlockIndex: json['end_block_index'] as int,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'search_result_location',
+    'cited_text': citedText,
+    'search_result_index': searchResultIndex,
+    'source': source,
+    if (title != null) 'title': title,
+    'start_block_index': startBlockIndex,
+    'end_block_index': endBlockIndex,
+  };
+
+  /// Creates a copy with replaced values.
+  SearchResultLocationCitation copyWith({
+    String? citedText,
+    int? searchResultIndex,
+    String? source,
+    Object? title = unsetCopyWithValue,
+    int? startBlockIndex,
+    int? endBlockIndex,
+  }) {
+    return SearchResultLocationCitation(
+      citedText: citedText ?? this.citedText,
+      searchResultIndex: searchResultIndex ?? this.searchResultIndex,
+      source: source ?? this.source,
+      title: title == unsetCopyWithValue ? this.title : title as String?,
+      startBlockIndex: startBlockIndex ?? this.startBlockIndex,
+      endBlockIndex: endBlockIndex ?? this.endBlockIndex,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SearchResultLocationCitation &&
+          runtimeType == other.runtimeType &&
+          citedText == other.citedText &&
+          searchResultIndex == other.searchResultIndex &&
+          source == other.source &&
+          title == other.title &&
+          startBlockIndex == other.startBlockIndex &&
+          endBlockIndex == other.endBlockIndex;
+
+  @override
+  int get hashCode => Object.hash(
+    citedText,
+    searchResultIndex,
+    source,
+    title,
+    startBlockIndex,
+    endBlockIndex,
+  );
+
+  @override
+  String toString() =>
+      'SearchResultLocationCitation(citedText: [${citedText.length} chars], '
+      'searchResultIndex: $searchResultIndex, source: $source, title: $title, '
+      'startBlockIndex: $startBlockIndex, endBlockIndex: $endBlockIndex)';
+}
+
+/// Unrecognized citation type — preserves raw JSON for forward compatibility.
+@immutable
+class UnknownCitation extends Citation {
+  /// The raw JSON.
+  final Map<String, dynamic> rawJson;
+
+  /// Creates an [UnknownCitation].
+  const UnknownCitation({required this.rawJson});
+
+  @override
+  Map<String, dynamic> toJson() => rawJson;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnknownCitation &&
+          runtimeType == other.runtimeType &&
+          mapsDeepEqual(rawJson, other.rawJson);
+
+  @override
+  int get hashCode => mapDeepHashCode(rawJson);
+
+  @override
+  String toString() => 'UnknownCitation(rawJson: $rawJson)';
 }
 
 // ============================================================================

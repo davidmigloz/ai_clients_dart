@@ -1183,4 +1183,150 @@ void main() {
       });
     });
   });
+
+  group('Citation', () {
+    final byType = <String, Map<String, dynamic>>{
+      'char_location': {
+        'type': 'char_location',
+        'cited_text': 'a',
+        'document_index': 0,
+        'start_char_index': 0,
+        'end_char_index': 1,
+      },
+      'page_location': {
+        'type': 'page_location',
+        'cited_text': 'a',
+        'document_index': 0,
+        'start_page_number': 1,
+        'end_page_number': 2,
+      },
+      'content_block_location': {
+        'type': 'content_block_location',
+        'cited_text': 'a',
+        'document_index': 0,
+        'start_block_index': 0,
+        'end_block_index': 1,
+      },
+      'web_search_result_location': {
+        'type': 'web_search_result_location',
+        'cited_text': 'a',
+        'encrypted_index': 'enc',
+      },
+      'search_result_location': {
+        'type': 'search_result_location',
+        'cited_text': 'a',
+        'search_result_index': 0,
+        'source': 'src',
+        'start_block_index': 0,
+        'end_block_index': 1,
+      },
+    };
+
+    final expectedType = <String, Matcher>{
+      'char_location': isA<CharLocationCitation>(),
+      'page_location': isA<PageLocationCitation>(),
+      'content_block_location': isA<ContentBlockLocationCitation>(),
+      'web_search_result_location': isA<WebSearchResultLocationCitation>(),
+      'search_result_location': isA<SearchResultLocationCitation>(),
+    };
+
+    byType.forEach((type, json) {
+      test('$type dispatches and round-trips', () {
+        final c = Citation.fromJson(json);
+        expect(c, expectedType[type]);
+        expect(c.toJson(), json);
+      });
+    });
+
+    test('search_result_location parses all fields incl. title', () {
+      final json = {
+        'type': 'search_result_location',
+        'cited_text': 'the cited span',
+        'search_result_index': 2,
+        'source': 'kb://doc-42',
+        'title': 'Result title',
+        'start_block_index': 1,
+        'end_block_index': 3,
+      };
+      final c = Citation.fromJson(json) as SearchResultLocationCitation;
+      expect(c.citedText, 'the cited span');
+      expect(c.searchResultIndex, 2);
+      expect(c.source, 'kb://doc-42');
+      expect(c.title, 'Result title');
+      expect(c.startBlockIndex, 1);
+      expect(c.endBlockIndex, 3);
+      expect(c.toJson(), json);
+    });
+
+    test('search_result_location omits title when null', () {
+      const c = SearchResultLocationCitation(
+        citedText: 'x',
+        searchResultIndex: 0,
+        source: 's',
+        startBlockIndex: 0,
+        endBlockIndex: 1,
+      );
+      expect(c.toJson().containsKey('title'), isFalse);
+    });
+
+    test('copyWith clears title with explicit null and preserves on omit', () {
+      const c = SearchResultLocationCitation(
+        citedText: 'x',
+        searchResultIndex: 0,
+        source: 's',
+        title: 'T',
+        startBlockIndex: 0,
+        endBlockIndex: 1,
+      );
+      expect(c.copyWith(title: null).title, isNull);
+      expect(c.copyWith(source: 'y').title, 'T');
+    });
+
+    test('search_result_location toString includes fields (cited text '
+        'redacted)', () {
+      const c = SearchResultLocationCitation(
+        citedText: 'hello world',
+        searchResultIndex: 2,
+        source: 'kb://doc-42',
+        title: 'T',
+        startBlockIndex: 1,
+        endBlockIndex: 3,
+      );
+      final s = c.toString();
+      expect(s, contains('SearchResultLocationCitation'));
+      expect(s, contains('citedText: [11 chars]'));
+      expect(s, contains('searchResultIndex: 2'));
+      expect(s, contains('source: kb://doc-42'));
+      expect(s, contains('title: T'));
+      expect(s, contains('startBlockIndex: 1'));
+      expect(s, contains('endBlockIndex: 3'));
+    });
+
+    test('unknown type falls back to UnknownCitation (never throws)', () {
+      final json = {'type': 'future_location', 'foo': 'bar'};
+      final c = Citation.fromJson(json);
+      expect(c, isA<UnknownCitation>());
+      expect(c.toJson(), json);
+    });
+
+    test('missing type falls back to UnknownCitation', () {
+      final json = {'foo': 'bar'};
+      final c = Citation.fromJson(json);
+      expect(c, isA<UnknownCitation>());
+      expect(c.toJson(), json);
+    });
+
+    test('UnknownCitation uses deep equality', () {
+      final a = Citation.fromJson({
+        'type': 'x',
+        'n': {'k': 1},
+      });
+      final b = Citation.fromJson({
+        'type': 'x',
+        'n': {'k': 1},
+      });
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+    });
+  });
 }

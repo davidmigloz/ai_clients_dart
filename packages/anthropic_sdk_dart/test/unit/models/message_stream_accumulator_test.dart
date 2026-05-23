@@ -172,6 +172,23 @@ Map<String, dynamic> _webSearchCitationJson({
   'url': ?url,
 };
 
+Map<String, dynamic> _searchResultCitationJson({
+  String citedText = 'sr cited',
+  int searchResultIndex = 0,
+  String source = 'kb://doc',
+  String? title,
+  int startBlockIndex = 0,
+  int endBlockIndex = 1,
+}) => {
+  'type': 'search_result_location',
+  'cited_text': citedText,
+  'search_result_index': searchResultIndex,
+  'source': source,
+  'title': ?title,
+  'start_block_index': startBlockIndex,
+  'end_block_index': endBlockIndex,
+};
+
 // ---------------------------------------------------------------------------
 // Helper to feed a sequence of JSON events into an accumulator.
 // ---------------------------------------------------------------------------
@@ -598,6 +615,28 @@ void main() {
         expect(citations, hasLength(2));
         expect(citations[0], isA<CharLocationCitation>());
         expect(citations[1], isA<WebSearchResultLocationCitation>());
+      });
+
+      test('search_result_location citation accumulates onto text block', () {
+        final acc = _accumulate([
+          _messageStartJson(),
+          _contentBlockStartJson(0, _textBlockJson()),
+          _contentBlockDeltaJson(0, _textDeltaJson('Grounded answer')),
+          _contentBlockDeltaJson(
+            0,
+            _citationsDeltaJson(
+              _searchResultCitationJson(source: 'kb://doc-42'),
+            ),
+          ),
+          _contentBlockStopJson(0),
+          _messageDeltaJson(stopReason: 'end_turn'),
+          _messageStopJson,
+        ]);
+
+        final citations = acc.textBlocks[0].citations!;
+        expect(citations, hasLength(1));
+        final citation = citations.single as SearchResultLocationCitation;
+        expect(citation.source, 'kb://doc-42');
       });
     });
 
