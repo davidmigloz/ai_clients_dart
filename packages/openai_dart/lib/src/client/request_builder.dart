@@ -54,7 +54,7 @@ class RequestBuilder {
     // Merge query params: base URL params + request params (request wins on conflict)
     final mergedQueryParams = <String, String>{
       ...baseUri.queryParameters,
-      if (queryParams != null) ...queryParams,
+      ...?queryParams,
     };
 
     return baseUri.replace(
@@ -98,7 +98,7 @@ class RequestBuilder {
       if (queryParameters != null)
         for (final entry in queryParameters.entries) entry.key: [entry.value],
       // Add repeated params (these override single-value params with same key)
-      if (queryParametersAll != null) ...queryParametersAll,
+      ...?queryParametersAll,
     };
 
     // Build the URI with queryParametersAll.
