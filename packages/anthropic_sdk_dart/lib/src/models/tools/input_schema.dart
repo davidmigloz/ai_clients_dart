@@ -68,7 +68,7 @@ class InputSchema {
   /// [extra] is spread first; known keys are written after, so typed fields
   /// always take precedence on key collision.
   Map<String, dynamic> toJson() => {
-    if (extra != null) ...extra!,
+    ...?extra,
     'type': type,
     if (properties != null) 'properties': properties,
     if (required != null) 'required': required,

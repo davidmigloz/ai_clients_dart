@@ -43,7 +43,7 @@ class RequestBuilder {
     // Merge query parameters (request params override defaults)
     final mergedParams = <String, String>{
       ...defaultQueryParameters,
-      if (queryParameters != null) ...queryParameters,
+      ...?queryParameters,
     };
 
     // Handle path properly - avoid double slashes
@@ -66,9 +66,6 @@ class RequestBuilder {
   ///
   /// Request headers override default headers (last-write-wins).
   Map<String, String> buildHeaders(Map<String, String>? requestHeaders) {
-    return <String, String>{
-      ...defaultHeaders,
-      if (requestHeaders != null) ...requestHeaders,
-    };
+    return <String, String>{...defaultHeaders, ...?requestHeaders};
   }
 }

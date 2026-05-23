@@ -40,7 +40,7 @@ class ConversationPayload {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'messages': messages.map(Map<String, dynamic>.from).toList(),
-    if (extra != null) ...extra!,
+    ...?extra,
   };
 
   @override
