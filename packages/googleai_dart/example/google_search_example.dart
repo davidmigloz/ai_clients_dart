@@ -34,7 +34,7 @@ Future<void> main() async {
 /// Google Search grounding using the generateContent API.
 Future<void> googleSearchWithGenerateContent(GoogleAIClient client) async {
   final response = await client.models.generateContent(
-    model: 'gemini-3.1-flash-preview',
+    model: 'gemini-3.5-flash',
     request: GenerateContentRequest(
       contents: [
         Content.text('Who won Euro 2024 and what was the final score?'),
@@ -89,42 +89,43 @@ Future<void> googleSearchWithInteractions(GoogleAIClient client) async {
   print('Response (streaming):');
 
   await for (final event in client.interactions.createStream(
-    model: 'gemini-3.1-flash-preview',
+    model: 'gemini-3.5-flash',
     input: const InteractionInput.text(
       "What are today's top technology news? Give me 3 headlines.",
     ),
     tools: const [GoogleSearchTool()],
   )) {
     switch (event) {
-      case InteractionStartEvent():
-        print('[Stream started: ${event.interaction?.id}]');
-      case ContentStartEvent():
-        // Content block is starting
-        final content = event.content;
-        if (content != null) {
-          print('[Content type: ${content.type}]');
+      case InteractionCreatedEvent():
+        print('[Stream started: ${event.interaction.id}]');
+      case StepStartEvent():
+        // A new step is starting - could be model_output, google_search_call, etc.
+        final step = event.step;
+        print('[Step type: ${step.type}]');
+        if (step is GoogleSearchCallStep) {
+          final queries = step.arguments.queries ?? const <String>[];
+          if (queries.isNotEmpty) {
+            print('[Searching: ${queries.join(", ")}]');
+          }
         }
-      case ContentDeltaEvent():
+      case StepDeltaEvent():
         final delta = event.delta;
         if (delta is TextDelta) {
           // Print text as it streams
           stdout.write(delta.text);
-        } else if (delta is GoogleSearchCallDelta) {
-          // Model is making a search call
-          if (delta.queries != null && delta.queries!.isNotEmpty) {
-            print('\n[Searching: ${delta.queries!.join(", ")}]');
+        } else if (delta is ArgumentsDelta) {
+          // Search call arguments arrive incrementally as JSON fragments
+          if (delta.partialArguments != null) {
+            stdout.write(delta.partialArguments);
           }
-        } else if (delta is GoogleSearchResultDelta) {
-          // Search results received
-          print('\n[Search results received]');
         }
-      case ContentStopEvent():
-        print('\n[Content block completed]');
-      case InteractionCompleteEvent():
+      case StepStopEvent():
+        print('\n[Step completed]');
+      case InteractionCompletedEvent():
         print('\n[Stream completed]');
         // Access final usage stats
-        if (event.interaction?.usage != null) {
-          final usage = event.interaction!.usage!;
+        if (event.interaction.usage != null) {
+          final usage = event.interaction.usage!;
           print(
             'Tokens - Input: ${usage.totalInputTokens}, '
             'Output: ${usage.totalOutputTokens}',

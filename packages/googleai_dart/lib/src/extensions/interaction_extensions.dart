@@ -1,11 +1,12 @@
 import '../models/interactions/content/content.dart';
 import '../models/interactions/interaction.dart';
+import '../models/interactions/steps/steps.dart';
 
 /// Convenience extensions for [Interaction].
 extension InteractionExtensions on Interaction {
-  /// Concatenated text from all text outputs.
+  /// Concatenated text from all `model_output` text content across all steps.
   ///
-  /// Returns null if no text outputs exist.
+  /// Returns `null` if no text outputs exist.
   ///
   /// Example:
   /// ```dart
@@ -15,46 +16,59 @@ extension InteractionExtensions on Interaction {
   String? get text {
     final buffer = StringBuffer();
     var hasText = false;
-    for (final output in outputs ?? <InteractionContent>[]) {
-      if (output is TextContent && output.text.isNotEmpty) {
-        buffer.write(output.text);
-        hasText = true;
+    for (final step in steps ?? <InteractionStep>[]) {
+      if (step is! ModelOutputStep) continue;
+      for (final content in step.content ?? const <InteractionContent>[]) {
+        if (content is TextContent && content.text.isNotEmpty) {
+          buffer.write(content.text);
+          hasText = true;
+        }
       }
     }
     return hasText ? buffer.toString() : null;
   }
 
-  /// All text content outputs.
-  List<TextContent> get textOutputs =>
-      outputs?.whereType<TextContent>().toList() ?? [];
+  /// All [ModelOutputStep] entries.
+  List<ModelOutputStep> get modelOutputSteps =>
+      steps?.whereType<ModelOutputStep>().toList() ?? const [];
 
-  /// All function call outputs.
-  List<FunctionCallContent> get functionCallOutputs =>
-      outputs?.whereType<FunctionCallContent>().toList() ?? [];
+  /// All text content blocks emitted across [ModelOutputStep] entries.
+  List<TextContent> get textOutputs => [
+    for (final step in modelOutputSteps)
+      ...?step.content?.whereType<TextContent>(),
+  ];
 
-  /// All thought outputs (for reasoning models).
-  List<ThoughtContent> get thoughtOutputs =>
-      outputs?.whereType<ThoughtContent>().toList() ?? [];
+  /// All function call steps.
+  List<FunctionCallStep> get functionCallSteps =>
+      steps?.whereType<FunctionCallStep>().toList() ?? const [];
 
-  /// All image outputs.
-  List<ImageContent> get imageOutputs =>
-      outputs?.whereType<ImageContent>().toList() ?? [];
+  /// All thought steps (for reasoning models).
+  List<ThoughtStep> get thoughtSteps =>
+      steps?.whereType<ThoughtStep>().toList() ?? const [];
 
-  /// All audio outputs.
-  List<AudioContent> get audioOutputs =>
-      outputs?.whereType<AudioContent>().toList() ?? [];
+  /// All image content blocks emitted across [ModelOutputStep] entries.
+  List<ImageContent> get imageOutputs => [
+    for (final step in modelOutputSteps)
+      ...?step.content?.whereType<ImageContent>(),
+  ];
 
-  /// True if the interaction has text output.
+  /// All audio content blocks emitted across [ModelOutputStep] entries.
+  List<AudioContent> get audioOutputs => [
+    for (final step in modelOutputSteps)
+      ...?step.content?.whereType<AudioContent>(),
+  ];
+
+  /// True if the interaction has any text output.
   bool get hasTextOutput => textOutputs.isNotEmpty;
 
-  /// True if the interaction has function calls.
-  bool get hasFunctionCalls => functionCallOutputs.isNotEmpty;
+  /// True if the interaction has any function call steps.
+  bool get hasFunctionCalls => functionCallSteps.isNotEmpty;
 
-  /// All Google Maps call outputs.
-  List<GoogleMapsCallContent> get googleMapsCallOutputs =>
-      outputs?.whereType<GoogleMapsCallContent>().toList() ?? [];
+  /// All Google Maps call steps.
+  List<GoogleMapsCallStep> get googleMapsCallSteps =>
+      steps?.whereType<GoogleMapsCallStep>().toList() ?? const [];
 
-  /// All Google Maps result outputs.
-  List<GoogleMapsResultContent> get googleMapsResultOutputs =>
-      outputs?.whereType<GoogleMapsResultContent>().toList() ?? [];
+  /// All Google Maps result steps.
+  List<GoogleMapsResultStep> get googleMapsResultSteps =>
+      steps?.whereType<GoogleMapsResultStep>().toList() ?? const [];
 }

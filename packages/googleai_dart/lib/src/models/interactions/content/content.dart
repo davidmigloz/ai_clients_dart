@@ -1,33 +1,22 @@
 import '../../copy_with_sentinel.dart';
+import '../interaction_review_snippet.dart';
 import '../media_resolution.dart';
-import '../tool_result.dart';
 
 part 'annotation.dart';
 part 'audio_content.dart';
-part 'code_execution_call_content.dart';
-part 'code_execution_result_content.dart';
 part 'document_content.dart';
-part 'file_search_call_content.dart';
-part 'file_search_result_content.dart';
-part 'function_call_content.dart';
-part 'function_result_content.dart';
-part 'google_maps_call_content.dart';
-part 'google_maps_result_content.dart';
-part 'google_search_call_content.dart';
-part 'google_search_result_content.dart';
 part 'image_content.dart';
-part 'mcp_server_tool_call_content.dart';
-part 'mcp_server_tool_result_content.dart';
 part 'text_content.dart';
-part 'thought_content.dart';
-part 'url_context_call_content.dart';
-part 'url_context_result_content.dart';
 part 'video_content.dart';
 
-/// The content of an interaction response.
+/// The media content of an interaction step.
 ///
-/// This is a sealed class with 20 subtypes representing different content
-/// types in the Interactions API.
+/// This is a sealed class with 5 subtypes: [TextContent], [ImageContent],
+/// [AudioContent], [DocumentContent], [VideoContent].
+///
+/// In the new step-based interactions API, [InteractionContent] only carries
+/// media payloads — tool calls and results live as standalone
+/// `InteractionStep` variants.
 sealed class InteractionContent {
   /// The type discriminator for this content.
   String get type;
@@ -43,21 +32,6 @@ sealed class InteractionContent {
       'audio' => AudioContent.fromJson(json),
       'document' => DocumentContent.fromJson(json),
       'video' => VideoContent.fromJson(json),
-      'thought' => ThoughtContent.fromJson(json),
-      'function_call' => FunctionCallContent.fromJson(json),
-      'function_result' => FunctionResultContent.fromJson(json),
-      'code_execution_call' => CodeExecutionCallContent.fromJson(json),
-      'code_execution_result' => CodeExecutionResultContent.fromJson(json),
-      'url_context_call' => UrlContextCallContent.fromJson(json),
-      'url_context_result' => UrlContextResultContent.fromJson(json),
-      'google_maps_call' => GoogleMapsCallContent.fromJson(json),
-      'google_maps_result' => GoogleMapsResultContent.fromJson(json),
-      'google_search_call' => GoogleSearchCallContent.fromJson(json),
-      'google_search_result' => GoogleSearchResultContent.fromJson(json),
-      'mcp_server_tool_call' => McpServerToolCallContent.fromJson(json),
-      'mcp_server_tool_result' => McpServerToolResultContent.fromJson(json),
-      'file_search_call' => FileSearchCallContent.fromJson(json),
-      'file_search_result' => FileSearchResultContent.fromJson(json),
       _ => throw ArgumentError('Unknown content type: $type'),
     };
   }

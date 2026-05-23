@@ -7,8 +7,10 @@ import '../models/interactions/events/events.dart';
 import '../models/interactions/generation_config.dart';
 import '../models/interactions/interaction.dart';
 import '../models/interactions/interaction_input.dart';
+import '../models/interactions/response_formats/response_formats.dart';
 import '../models/interactions/response_modality.dart';
 import '../models/interactions/tools/tools.dart';
+import '../models/interactions/webhook_config.dart';
 import '../utils/streaming_parser.dart';
 import 'base_resource.dart';
 import 'streaming_resource.dart';
@@ -30,11 +32,31 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     super.ensureNotClosed,
   });
 
+  /// The Interactions API schema revision this client targets.
+  ///
+  /// Sending it via the `Api-Revision` header opts into the `steps` schema and
+  /// `step.*`/`interaction.*` SSE events during the migration window: the new
+  /// schema becomes the default on 2026-05-26 and the legacy `outputs` schema
+  /// is removed on 2026-06-08. The official google-genai SDK sends this header
+  /// unconditionally; mirroring it keeps responses on the modern shape this
+  /// client models.
+  ///
+  /// See https://ai.google.dev/gemini-api/docs/interactions-breaking-changes-may-2026
+  static const _apiRevision = '2026-05-20';
+
+  /// Builds headers for an Interactions API request, always opting into the
+  /// [_apiRevision] schema via the `Api-Revision` header.
+  Map<String, String> _buildHeaders([Map<String, String>? additionalHeaders]) {
+    return requestBuilder.buildHeaders(
+      additionalHeaders: {'Api-Revision': _apiRevision, ...?additionalHeaders},
+    );
+  }
+
   /// Creates a new interaction.
   ///
-  /// The [model] specifies which model to use (e.g., "gemini-3.1-flash-preview").
-  /// The [input] can be a [TextInput], a [ContentListInput],
-  /// a [TurnsInput], or a [SingleContentInput].
+  /// The [model] specifies which model to use (e.g., "gemini-3.5-flash").
+  /// The [input] can be a [TextInput], a [StepListInput], a [ContentListInput],
+  /// or a [SingleContentInput].
   ///
   /// Returns the [Interaction] with the model's response.
   Future<Interaction> create({
@@ -45,14 +67,14 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     InteractionGenerationConfig? generationConfig,
     List<InteractionResponseModality>? responseModalities,
     String? responseMimeType,
+    ResponseFormatConfig? responseFormat,
     String? previousInteractionId,
     bool? background,
+    WebhookConfig? webhookConfig,
   }) async {
     final url = requestBuilder.buildUrl('/{version}/interactions');
 
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'Content-Type': 'application/json'},
-    );
+    final headers = _buildHeaders(const {'Content-Type': 'application/json'});
 
     final body = <String, dynamic>{
       'model': model,
@@ -66,8 +88,10 @@ class InteractionsResource extends ResourceBase with StreamingResource {
             .map(interactionResponseModalityToString)
             .toList(),
       'response_mime_type': ?responseMimeType,
+      if (responseFormat != null) 'response_format': responseFormat.toJson(),
       'previous_interaction_id': ?previousInteractionId,
       'background': ?background,
+      if (webhookConfig != null) 'webhook_config': webhookConfig.toJson(),
     };
 
     final httpRequest = http.Request('POST', url)
@@ -89,21 +113,23 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     required String agent,
     InteractionInput? input,
     AgentConfig? agentConfig,
+    ResponseFormatConfig? responseFormat,
     String? previousInteractionId,
     bool? background,
+    WebhookConfig? webhookConfig,
   }) async {
     final url = requestBuilder.buildUrl('/{version}/interactions');
 
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'Content-Type': 'application/json'},
-    );
+    final headers = _buildHeaders(const {'Content-Type': 'application/json'});
 
     final body = <String, dynamic>{
       'agent': agent,
       if (input != null) 'input': input.toJson(),
       if (agentConfig != null) 'agent_config': agentConfig.toJson(),
+      if (responseFormat != null) 'response_format': responseFormat.toJson(),
       'previous_interaction_id': ?previousInteractionId,
       'background': ?background,
+      if (webhookConfig != null) 'webhook_config': webhookConfig.toJson(),
     };
 
     final httpRequest = http.Request('POST', url)
@@ -132,7 +158,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
       queryParams: queryParams,
     );
 
-    final headers = requestBuilder.buildHeaders();
+    final headers = _buildHeaders();
 
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
@@ -150,9 +176,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
   Future<Interaction> cancel(String id) async {
     final url = requestBuilder.buildUrl('/{version}/interactions/$id/cancel');
 
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'Content-Type': 'application/json'},
-    );
+    final headers = _buildHeaders(const {'Content-Type': 'application/json'});
 
     final httpRequest = http.Request('POST', url)..headers.addAll(headers);
 
@@ -166,7 +190,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
   Future<void> delete(String id) async {
     final url = requestBuilder.buildUrl('/{version}/interactions/$id');
 
-    final headers = requestBuilder.buildHeaders();
+    final headers = _buildHeaders();
 
     final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
 
@@ -184,6 +208,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     InteractionGenerationConfig? generationConfig,
     List<InteractionResponseModality>? responseModalities,
     String? responseMimeType,
+    ResponseFormatConfig? responseFormat,
     String? previousInteractionId,
   }) async* {
     final url = requestBuilder.buildUrl(
@@ -191,9 +216,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
       queryParams: {'alt': 'sse'},
     );
 
-    final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {'Content-Type': 'application/json'},
-    );
+    final headers = _buildHeaders(const {'Content-Type': 'application/json'});
 
     final body = <String, dynamic>{
       'model': model,
@@ -208,6 +231,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
             .map(interactionResponseModalityToString)
             .toList(),
       'response_mime_type': ?responseMimeType,
+      if (responseFormat != null) 'response_format': responseFormat.toJson(),
       'previous_interaction_id': ?previousInteractionId,
     };
 
@@ -246,7 +270,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
       queryParams: queryParams,
     );
 
-    final headers = requestBuilder.buildHeaders();
+    final headers = _buildHeaders();
 
     var httpRequest = http.Request('GET', url)..headers.addAll(headers);
 

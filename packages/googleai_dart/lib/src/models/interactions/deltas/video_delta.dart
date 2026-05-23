@@ -1,7 +1,7 @@
 part of 'deltas.dart';
 
 /// A video delta update.
-class VideoDelta extends InteractionDelta {
+class VideoDelta extends StepDeltaData {
   @override
   String get type => 'video';
 

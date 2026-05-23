@@ -93,6 +93,15 @@ class FileCitation extends Annotation {
   /// The source identifier.
   final String? source;
 
+  /// User provided metadata about the retrieved context.
+  final Map<String, dynamic>? customMetadata;
+
+  /// Media ID for image citations, if applicable.
+  final String? mediaId;
+
+  /// Page number of the cited document, if applicable.
+  final int? pageNumber;
+
   /// Creates a [FileCitation] instance.
   const FileCitation({
     this.startIndex,
@@ -100,6 +109,9 @@ class FileCitation extends Annotation {
     this.fileName,
     this.documentUri,
     this.source,
+    this.customMetadata,
+    this.mediaId,
+    this.pageNumber,
   });
 
   /// Creates a [FileCitation] from JSON.
@@ -109,6 +121,9 @@ class FileCitation extends Annotation {
     fileName: json['file_name'] as String?,
     documentUri: json['document_uri'] as String?,
     source: json['source'] as String?,
+    customMetadata: json['custom_metadata'] as Map<String, dynamic>?,
+    mediaId: json['media_id'] as String?,
+    pageNumber: json['page_number'] as int?,
   );
 
   @override
@@ -119,6 +134,9 @@ class FileCitation extends Annotation {
     if (fileName != null) 'file_name': fileName,
     if (documentUri != null) 'document_uri': documentUri,
     if (source != null) 'source': source,
+    if (customMetadata != null) 'custom_metadata': customMetadata,
+    if (mediaId != null) 'media_id': mediaId,
+    if (pageNumber != null) 'page_number': pageNumber,
   };
 
   /// Creates a copy with replaced values.
@@ -128,6 +146,9 @@ class FileCitation extends Annotation {
     Object? fileName = unsetCopyWithValue,
     Object? documentUri = unsetCopyWithValue,
     Object? source = unsetCopyWithValue,
+    Object? customMetadata = unsetCopyWithValue,
+    Object? mediaId = unsetCopyWithValue,
+    Object? pageNumber = unsetCopyWithValue,
   }) {
     return FileCitation(
       startIndex: startIndex == unsetCopyWithValue
@@ -143,6 +164,15 @@ class FileCitation extends Annotation {
           ? this.documentUri
           : documentUri as String?,
       source: source == unsetCopyWithValue ? this.source : source as String?,
+      customMetadata: customMetadata == unsetCopyWithValue
+          ? this.customMetadata
+          : customMetadata as Map<String, dynamic>?,
+      mediaId: mediaId == unsetCopyWithValue
+          ? this.mediaId
+          : mediaId as String?,
+      pageNumber: pageNumber == unsetCopyWithValue
+          ? this.pageNumber
+          : pageNumber as int?,
     );
   }
 }

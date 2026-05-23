@@ -7,7 +7,7 @@ void main() {
       test('creates Interaction with all fields', () {
         final json = {
           'id': 'abc-123',
-          'model': 'gemini-3.1-flash-preview',
+          'model': 'gemini-3.5-flash',
           'status': 'completed',
           'created': '2024-01-15T10:30:00Z',
           'updated': '2024-01-15T10:31:00Z',
@@ -17,25 +17,32 @@ void main() {
             'total_output_tokens': 50,
             'total_tokens': 150,
           },
-          'outputs': [
-            {'type': 'text', 'text': 'Hello!'},
+          'steps': [
+            {
+              'type': 'model_output',
+              'content': [
+                {'type': 'text', 'text': 'Hello!'},
+              ],
+            },
           ],
         };
 
         final interaction = Interaction.fromJson(json);
 
         expect(interaction.id, 'abc-123');
-        expect(interaction.model, 'gemini-3.1-flash-preview');
+        expect(interaction.model, 'gemini-3.5-flash');
         expect(interaction.status, InteractionStatus.completed);
         expect(interaction.created, DateTime.parse('2024-01-15T10:30:00Z'));
         expect(interaction.updated, DateTime.parse('2024-01-15T10:31:00Z'));
         expect(interaction.serviceTier, ServiceTier.standard);
         expect(interaction.usage, isNotNull);
         expect(interaction.usage!.totalInputTokens, 100);
-        expect(interaction.outputs, isNotNull);
-        expect(interaction.outputs!.length, 1);
-        expect(interaction.outputs!.first, isA<TextContent>());
-        expect((interaction.outputs!.first as TextContent).text, 'Hello!');
+        expect(interaction.steps, isNotNull);
+        expect(interaction.steps!.length, 1);
+        expect(interaction.steps!.first, isA<ModelOutputStep>());
+        final modelOutput = interaction.steps!.first as ModelOutputStep;
+        expect(modelOutput.content, hasLength(1));
+        expect((modelOutput.content!.first as TextContent).text, 'Hello!');
       });
 
       test('creates Interaction with minimal required fields', () {
@@ -47,7 +54,7 @@ void main() {
         expect(interaction.status, InteractionStatus.inProgress);
         expect(interaction.model, isNull);
         expect(interaction.usage, isNull);
-        expect(interaction.outputs, isNull);
+        expect(interaction.steps, isNull);
       });
 
       test('parses all status values', () {
@@ -73,7 +80,7 @@ void main() {
         final interaction = Interaction(
           id: 'test-456',
           status: InteractionStatus.completed,
-          model: 'gemini-2.5-pro',
+          model: 'gemini-3.5-flash',
           created: DateTime.parse('2024-02-20T08:15:00Z'),
           updated: DateTime.parse('2024-02-20T08:16:00Z'),
           usage: const InteractionUsage(
@@ -85,7 +92,7 @@ void main() {
         final json = interaction.toJson();
 
         expect(json['id'], 'test-456');
-        expect(json['model'], 'gemini-2.5-pro');
+        expect(json['model'], 'gemini-3.5-flash');
         expect(json['status'], 'completed');
         expect(json['created'], contains('2024-02-20'));
         expect(json['updated'], contains('2024-02-20'));
@@ -104,7 +111,7 @@ void main() {
         expect(json['status'], 'in_progress');
         expect(json.containsKey('model'), false);
         expect(json.containsKey('usage'), false);
-        expect(json.containsKey('outputs'), false);
+        expect(json.containsKey('steps'), false);
       });
     });
 
@@ -112,7 +119,7 @@ void main() {
       final original = Interaction(
         id: 'roundtrip-789',
         status: InteractionStatus.inProgress,
-        model: 'gemini-3.1-flash-preview',
+        model: 'gemini-3.5-flash',
         created: DateTime.parse('2024-03-10T12:00:00Z'),
         usage: const InteractionUsage(
           totalInputTokens: 50,
@@ -134,28 +141,33 @@ void main() {
       );
     });
 
-    group('outputs type safety', () {
-      test('parses TextContent correctly', () {
+    group('steps type safety', () {
+      test('parses ModelOutputStep with TextContent', () {
         final json = {
           'id': 'test-id',
           'status': 'completed',
-          'outputs': [
-            {'type': 'text', 'text': 'Hello world'},
+          'steps': [
+            {
+              'type': 'model_output',
+              'content': [
+                {'type': 'text', 'text': 'Hello world'},
+              ],
+            },
           ],
         };
         final interaction = Interaction.fromJson(json);
 
-        expect(interaction.outputs, isNotNull);
-        expect(interaction.outputs, hasLength(1));
-        expect(interaction.outputs!.first, isA<TextContent>());
-        expect((interaction.outputs!.first as TextContent).text, 'Hello world');
+        expect(interaction.steps, hasLength(1));
+        final step = interaction.steps!.first as ModelOutputStep;
+        expect(step.content!.first, isA<TextContent>());
+        expect((step.content!.first as TextContent).text, 'Hello world');
       });
 
-      test('parses FunctionCallContent correctly', () {
+      test('parses FunctionCallStep correctly', () {
         final json = {
           'id': 'test-id',
           'status': 'completed',
-          'outputs': [
+          'steps': [
             {
               'type': 'function_call',
               'id': 'call-1',
@@ -166,34 +178,40 @@ void main() {
         };
         final interaction = Interaction.fromJson(json);
 
-        expect(interaction.outputs!.first, isA<FunctionCallContent>());
-        final call = interaction.outputs!.first as FunctionCallContent;
+        expect(interaction.steps!.first, isA<FunctionCallStep>());
+        final call = interaction.steps!.first as FunctionCallStep;
+        expect(call.id, 'call-1');
         expect(call.name, 'get_weather');
         expect(call.arguments, {'city': 'Tokyo'});
       });
 
-      test('parses ThoughtContent correctly', () {
+      test('parses ThoughtStep correctly', () {
         final json = {
           'id': 'test-id',
           'status': 'completed',
-          'outputs': [
+          'steps': [
             {'type': 'thought', 'signature': 'sig-123'},
           ],
         };
         final interaction = Interaction.fromJson(json);
 
-        expect(interaction.outputs!.first, isA<ThoughtContent>());
-        final thought = interaction.outputs!.first as ThoughtContent;
+        expect(interaction.steps!.first, isA<ThoughtStep>());
+        final thought = interaction.steps!.first as ThoughtStep;
         expect(thought.signature, 'sig-123');
       });
 
-      test('parses mixed output types', () {
+      test('parses mixed step types', () {
         final json = {
           'id': 'test-id',
           'status': 'completed',
-          'outputs': [
+          'steps': [
             {'type': 'thought', 'signature': 'sig-1'},
-            {'type': 'text', 'text': 'Response'},
+            {
+              'type': 'model_output',
+              'content': [
+                {'type': 'text', 'text': 'Response'},
+              ],
+            },
             {
               'type': 'function_call',
               'id': 'call-1',
@@ -204,25 +222,25 @@ void main() {
         };
         final interaction = Interaction.fromJson(json);
 
-        expect(interaction.outputs, hasLength(3));
-        expect(interaction.outputs![0], isA<ThoughtContent>());
-        expect(interaction.outputs![1], isA<TextContent>());
-        expect(interaction.outputs![2], isA<FunctionCallContent>());
+        expect(interaction.steps, hasLength(3));
+        expect(interaction.steps![0], isA<ThoughtStep>());
+        expect(interaction.steps![1], isA<ModelOutputStep>());
+        expect(interaction.steps![2], isA<FunctionCallStep>());
       });
 
-      test('handles null outputs', () {
-        final json = {'id': 'test-id', 'status': 'pending'};
+      test('handles null steps', () {
+        final json = {'id': 'test-id', 'status': 'in_progress'};
         final interaction = Interaction.fromJson(json);
-        expect(interaction.outputs, isNull);
+        expect(interaction.steps, isNull);
       });
 
-      test('round-trip serialization preserves typed outputs', () {
+      test('round-trip serialization preserves typed steps', () {
         const original = Interaction(
-          id: 'roundtrip-outputs',
+          id: 'roundtrip-steps',
           status: InteractionStatus.completed,
-          outputs: [
-            TextContent(text: 'Hello'),
-            FunctionCallContent(
+          steps: [
+            ModelOutputStep(content: [TextContent(text: 'Hello')]),
+            FunctionCallStep(
               id: 'call-1',
               name: 'test_fn',
               arguments: {'key': 'value'},
@@ -233,11 +251,31 @@ void main() {
         final json = original.toJson();
         final restored = Interaction.fromJson(json);
 
-        expect(restored.outputs, hasLength(2));
-        expect(restored.outputs![0], isA<TextContent>());
-        expect((restored.outputs![0] as TextContent).text, 'Hello');
-        expect(restored.outputs![1], isA<FunctionCallContent>());
-        expect((restored.outputs![1] as FunctionCallContent).name, 'test_fn');
+        expect(restored.steps, hasLength(2));
+        expect(restored.steps![0], isA<ModelOutputStep>());
+        expect(
+          ((restored.steps![0] as ModelOutputStep).content!.first
+                  as TextContent)
+              .text,
+          'Hello',
+        );
+        expect(restored.steps![1], isA<FunctionCallStep>());
+        expect((restored.steps![1] as FunctionCallStep).name, 'test_fn');
+      });
+
+      test('webhookConfig roundtrip', () {
+        const interaction = Interaction(
+          id: 'wh-test',
+          status: InteractionStatus.inProgress,
+          webhookConfig: WebhookConfig(
+            uris: ['https://example.com/hook'],
+            userMetadata: {'env': 'test'},
+          ),
+        );
+        final restored = Interaction.fromJson(interaction.toJson());
+        expect(restored.webhookConfig, isNotNull);
+        expect(restored.webhookConfig!.uris, ['https://example.com/hook']);
+        expect(restored.webhookConfig!.userMetadata, {'env': 'test'});
       });
     });
   });
@@ -323,69 +361,9 @@ void main() {
     });
   });
 
-  group('Turn', () {
-    test('fromJson with content list', () {
-      final json = {
-        'role': 'user',
-        'content': [
-          {'type': 'text', 'text': 'Hello'},
-        ],
-      };
-
-      final turn = Turn.fromJson(json);
-
-      expect(turn.role, 'user');
-      expect(turn.content, isNotNull);
-      expect(turn.content, isA<TurnContentList>());
-      final contentList = turn.content! as TurnContentList;
-      expect(contentList.content.length, 1);
-      expect(contentList.content.first, isA<TextContent>());
-    });
-
-    test('fromJson with text string', () {
-      final json = {'role': 'user', 'content': 'Hello'};
-
-      final turn = Turn.fromJson(json);
-
-      expect(turn.role, 'user');
-      expect(turn.content, isA<TurnTextContent>());
-      expect((turn.content! as TurnTextContent).text, 'Hello');
-    });
-
-    test('toJson with content list', () {
-      const turn = Turn(
-        role: 'model',
-        content: TurnContentList([TextContent(text: 'Response')]),
-      );
-
-      final json = turn.toJson();
-
-      expect(json['role'], 'model');
-      expect(json['content'], isA<List<dynamic>>());
-      expect((json['content'] as List<dynamic>).length, 1);
-    });
-
-    test('Turn.text factory', () {
-      final turn = Turn.text(role: 'user', text: 'Hello');
-
-      expect(turn.role, 'user');
-      expect(turn.content, isA<TurnTextContent>());
-      expect((turn.content! as TurnTextContent).text, 'Hello');
-    });
-
-    test('copyWith preserves TurnContent type', () {
-      final turn = Turn.text(role: 'user', text: 'Hello');
-      final copy = turn.copyWith(role: 'model');
-
-      expect(copy.role, 'model');
-      expect(copy.content, isA<TurnTextContent>());
-      expect((copy.content! as TurnTextContent).text, 'Hello');
-    });
-  });
-
   group('CreateModelInteractionParams tools type safety', () {
     test('parses serviceTier correctly', () {
-      final json = {'model': 'gemini-2.0-flash', 'service_tier': 'priority'};
+      final json = {'model': 'gemini-3.5-flash', 'service_tier': 'priority'};
       final params = CreateModelInteractionParams.fromJson(json);
 
       expect(params.serviceTier, ServiceTier.priority);
@@ -396,7 +374,7 @@ void main() {
 
     test('parses GoogleSearchTool correctly', () {
       final json = {
-        'model': 'gemini-2.0-flash',
+        'model': 'gemini-3.5-flash',
         'tools': [
           {'type': 'google_search'},
         ],
@@ -409,7 +387,7 @@ void main() {
 
     test('parses FunctionTool correctly', () {
       final json = {
-        'model': 'gemini-2.0-flash',
+        'model': 'gemini-3.5-flash',
         'tools': [
           {
             'type': 'function',
@@ -434,7 +412,7 @@ void main() {
 
     test('parses CodeExecutionTool correctly', () {
       final json = {
-        'model': 'gemini-2.0-flash',
+        'model': 'gemini-3.5-flash',
         'tools': [
           {'type': 'code_execution'},
         ],
@@ -446,7 +424,7 @@ void main() {
 
     test('parses UrlContextTool correctly', () {
       final json = {
-        'model': 'gemini-2.0-flash',
+        'model': 'gemini-3.5-flash',
         'tools': [
           {'type': 'url_context'},
         ],
@@ -458,7 +436,7 @@ void main() {
 
     test('parses multiple tools', () {
       final json = {
-        'model': 'gemini-2.0-flash',
+        'model': 'gemini-3.5-flash',
         'tools': [
           {'type': 'google_search'},
           {'type': 'code_execution'},
@@ -475,7 +453,7 @@ void main() {
 
     test('parses RetrievalTool correctly', () {
       final json = {
-        'model': 'gemini-2.0-flash',
+        'model': 'gemini-3.5-flash',
         'tools': [
           {
             'type': 'retrieval',
@@ -507,14 +485,14 @@ void main() {
     });
 
     test('handles null tools', () {
-      final json = {'model': 'gemini-2.0-flash'};
+      final json = {'model': 'gemini-3.5-flash'};
       final params = CreateModelInteractionParams.fromJson(json);
       expect(params.tools, isNull);
     });
 
     test('round-trip serialization preserves typed tools', () {
       const original = CreateModelInteractionParams(
-        model: 'gemini-2.0-flash',
+        model: 'gemini-3.5-flash',
         tools: [
           GoogleSearchTool(),
           FunctionTool(name: 'get_weather', description: 'Gets weather'),

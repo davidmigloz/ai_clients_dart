@@ -1,7 +1,7 @@
 part of 'deltas.dart';
 
 /// An image delta update.
-class ImageDelta extends InteractionDelta {
+class ImageDelta extends StepDeltaData {
   @override
   String get type => 'image';
 

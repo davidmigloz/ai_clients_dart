@@ -18,6 +18,7 @@ import '../resources/generated_files_resource.dart';
 import '../resources/interactions_resource.dart';
 import '../resources/models_resource.dart';
 import '../resources/tuned_models_resource.dart';
+import '../resources/webhooks_resource.dart';
 import 'config.dart';
 import 'interceptor_chain.dart';
 import 'request_builder.dart';
@@ -53,7 +54,7 @@ import 'retry_wrapper.dart';
 ///
 /// // Generate content
 /// final response = await client.models.generateContent(
-///   model: 'gemini-3.1-flash-preview',
+///   model: 'gemini-3.5-flash',
 ///   request: GenerateContentRequest(
 ///     contents: [
 ///       Content(parts: [TextPart('Hello!')], role: 'user'),
@@ -125,6 +126,15 @@ class GoogleAIClient {
   ///
   /// This is an experimental API and is subject to change.
   late final InteractionsResource interactions;
+
+  /// Resource for webhooks API (experimental).
+  ///
+  /// The Webhooks API manages webhook subscriptions that deliver events for
+  /// batches and interactions (e.g. completion notifications, video
+  /// generation results).
+  ///
+  /// This is an experimental API and is subject to change.
+  late final WebhooksResource webhooks;
 
   /// Resource for ephemeral authentication token management.
   ///
@@ -227,6 +237,14 @@ class GoogleAIClient {
     );
 
     interactions = InteractionsResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+
+    webhooks = WebhooksResource(
       config: this.config,
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,

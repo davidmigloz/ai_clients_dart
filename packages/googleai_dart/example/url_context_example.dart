@@ -41,7 +41,7 @@ Future<void> main() async {
 /// URL Context using the generateContent API.
 Future<void> urlContextWithGenerateContent(GoogleAIClient client) async {
   final response = await client.models.generateContent(
-    model: 'gemini-3.1-flash-preview',
+    model: 'gemini-3.5-flash',
     request: GenerateContentRequest(
       contents: [
         Content.text(
@@ -67,36 +67,36 @@ Future<void> urlContextWithInteractions(GoogleAIClient client) async {
   print('Analyzing URL content (streaming):\n');
 
   await for (final event in client.interactions.createStream(
-    model: 'gemini-3.1-flash-preview',
+    model: 'gemini-3.5-flash',
     input: const InteractionInput.text(
       'What are the key features mentioned on https://pub.dev/packages/googleai_dart ?',
     ),
     tools: const [UrlContextTool()],
   )) {
     switch (event) {
-      case InteractionStartEvent():
+      case InteractionCreatedEvent():
         print('[Stream started]');
-      case ContentStartEvent():
-        final content = event.content;
-        if (content != null) {
-          print('[Content type: ${content.type}]');
+      case StepStartEvent():
+        final step = event.step;
+        print('[Step type: ${step.type}]');
+        if (step is UrlContextCallStep) {
+          final urls = step.arguments.urls ?? const <String>[];
+          if (urls.isNotEmpty) {
+            print('[Fetching URLs: ${urls.join(", ")}]');
+          }
         }
-      case ContentDeltaEvent():
+      case StepDeltaEvent():
         final delta = event.delta;
         if (delta is TextDelta) {
           stdout.write(delta.text);
-        } else if (delta is UrlContextCallDelta) {
-          // Model is fetching a URL
-          if (delta.urls != null && delta.urls!.isNotEmpty) {
-            print('\n[Fetching URLs: ${delta.urls!.join(", ")}]');
+        } else if (delta is ArgumentsDelta) {
+          if (delta.partialArguments != null) {
+            stdout.write(delta.partialArguments);
           }
-        } else if (delta is UrlContextResultDelta) {
-          // URL content retrieved
-          print('\n[URL content retrieved]');
         }
-      case ContentStopEvent():
-        print('\n[Content completed]');
-      case InteractionCompleteEvent():
+      case StepStopEvent():
+        print('\n[Step completed]');
+      case InteractionCompletedEvent():
         print('[Stream completed]');
       default:
         break;
@@ -108,7 +108,7 @@ Future<void> urlContextWithInteractions(GoogleAIClient client) async {
 Future<void> compareMultipleUrls(GoogleAIClient client) async {
   // You can reference up to 20 URLs in a single request
   final response = await client.models.generateContent(
-    model: 'gemini-3.1-flash-preview',
+    model: 'gemini-3.5-flash',
     request: GenerateContentRequest(
       contents: [
         Content.text(

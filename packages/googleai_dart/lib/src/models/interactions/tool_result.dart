@@ -1,17 +1,17 @@
-import 'content/content.dart';
+import 'function_result_subcontent.dart';
 
 /// The result of a tool call.
 ///
 /// Can represent different result formats:
-/// - [ToolResultContentList] — a list of content items (typically
-///   [TextContent] and/or [ImageContent])
+/// - [ToolResultContentList] — a list of [FunctionResultSubcontent] items
+///   ([FunctionResultSubcontentText] and/or [FunctionResultSubcontentImage])
 /// - [ToolResultText] — a plain text string
 /// - [ToolResultObject] — an arbitrary JSON object (fallback)
 sealed class ToolResult {
   const ToolResult();
 
   /// Creates a [ToolResultContentList] with the given [items].
-  const factory ToolResult.contentList(List<InteractionContent> items) =
+  const factory ToolResult.contentList(List<FunctionResultSubcontent> items) =
       ToolResultContentList;
 
   /// Creates a [ToolResultText] with the given [text].
@@ -25,7 +25,7 @@ sealed class ToolResult {
   ///
   /// - A [String] is parsed as [ToolResultText].
   /// - A [List] is parsed as [ToolResultContentList] (each element parsed as
-  ///   [InteractionContent]).
+  ///   [FunctionResultSubcontent]).
   /// - A [Map] is parsed as [ToolResultObject].
   factory ToolResult.fromJson(Object json) {
     if (json is String) {
@@ -34,7 +34,10 @@ sealed class ToolResult {
     if (json is List) {
       return ToolResultContentList(
         json
-            .map((e) => InteractionContent.fromJson(e as Map<String, dynamic>))
+            .map(
+              (e) =>
+                  FunctionResultSubcontent.fromJson(e as Map<String, dynamic>),
+            )
             .toList(),
       );
     }
@@ -48,12 +51,13 @@ sealed class ToolResult {
   Object toJson();
 }
 
-/// A list of content items as a tool result.
+/// A list of subcontent items as a tool result.
 ///
-/// Typically contains [TextContent] and/or [ImageContent] items.
+/// Contains [FunctionResultSubcontentText] and/or
+/// [FunctionResultSubcontentImage] items.
 class ToolResultContentList extends ToolResult {
-  /// The content items.
-  final List<InteractionContent> items;
+  /// The subcontent items.
+  final List<FunctionResultSubcontent> items;
 
   /// Creates a [ToolResultContentList].
   const ToolResultContentList(this.items);

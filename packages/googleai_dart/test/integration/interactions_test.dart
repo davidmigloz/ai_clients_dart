@@ -2,6 +2,7 @@
 @Tags(['integration'])
 library;
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:googleai_dart/googleai_dart.dart';
@@ -118,6 +119,39 @@ void main() {
       expect(interaction.usage!.totalOutputTokens, greaterThan(0));
       expect(interaction.usage!.totalTokens, greaterThan(0));
     });
+
+    test('produces structured JSON output via responseFormat', () async {
+      if (apiKey == null) {
+        markTestSkipped('API key not available');
+        return;
+      }
+
+      final interaction = await client!.interactions.create(
+        model: defaultInteractionsModel,
+        input: const InteractionInput.text(
+          'Give me a person named Bob who is 42 years old.',
+        ),
+        responseFormat: const ResponseFormatConfig.single(
+          TextResponseFormat(
+            mimeType: TextResponseFormatMimeType.applicationJson,
+            schema: {
+              'type': 'object',
+              'properties': {
+                'name': {'type': 'string'},
+                'age': {'type': 'integer'},
+              },
+              'required': ['name', 'age'],
+            },
+          ),
+        ),
+      );
+
+      expect(interaction.status, InteractionStatus.completed);
+      // Output should be valid JSON conforming to the requested schema.
+      final decoded = jsonDecode(interaction.text!) as Map<String, dynamic>;
+      expect(decoded['name'], isA<String>());
+      expect(decoded['age'], isA<int>());
+    });
   });
 
   group('Interactions - Get and Delete', () {
@@ -158,7 +192,12 @@ void main() {
       );
 
       expect(retrieved.id, equals(created.id));
-      expect(retrieved.input, isNotNull);
+      // With the steps-based schema, the included input is surfaced as a
+      // `user_input` step in the steps timeline rather than a top-level field.
+      final userInputSteps =
+          retrieved.steps?.whereType<UserInputStep>().toList() ??
+          const <UserInputStep>[];
+      expect(userInputSteps, isNotEmpty);
     });
 
     test('deletes an interaction', () async {
@@ -243,27 +282,31 @@ void main() {
       expect(text, contains('blue'));
     });
 
-    test('supports turns input for providing conversation history', () async {
-      if (apiKey == null) {
-        markTestSkipped('API key not available');
-        return;
-      }
+    test(
+      'supports step-list input for providing conversation history',
+      () async {
+        if (apiKey == null) {
+          markTestSkipped('API key not available');
+          return;
+        }
 
-      final interaction = await client!.interactions.create(
-        model: defaultInteractionsModel,
-        input: const InteractionInput.turns([
-          Turn(role: 'user', content: TurnTextContent('My name is Bob.')),
-          Turn(
-            role: 'model',
-            content: TurnTextContent('Nice to meet you, Bob!'),
-          ),
-          Turn(role: 'user', content: TurnTextContent('What is my name?')),
-        ]),
-      );
+        // The steps-based schema replaces the legacy `turn_list` input with a
+        // `step_list`: pass prior turns as user_input/model_output steps.
+        final interaction = await client!.interactions.create(
+          model: defaultInteractionsModel,
+          input: const InteractionInput.steps([
+            UserInputStep(content: [TextContent(text: 'My name is Bob.')]),
+            ModelOutputStep(
+              content: [TextContent(text: 'Nice to meet you, Bob!')],
+            ),
+            UserInputStep(content: [TextContent(text: 'What is my name?')]),
+          ]),
+        );
 
-      expect(interaction.status, InteractionStatus.completed);
-      expect(interaction.text!.toLowerCase(), contains('bob'));
-    });
+        expect(interaction.status, InteractionStatus.completed);
+        expect(interaction.text!.toLowerCase(), contains('bob'));
+      },
+    );
   });
 
   group('Interactions - Function Calling', () {
@@ -300,10 +343,9 @@ void main() {
         expect(interaction.status, InteractionStatus.requiresAction);
         expect(interaction.hasFunctionCalls, isTrue);
 
-        final functionCalls = interaction.functionCallOutputs;
+        final functionCalls = interaction.functionCallSteps;
         expect(functionCalls, isNotEmpty);
         expect(functionCalls.first.name, equals('get_weather'));
-        expect(functionCalls.first.arguments, isNotNull);
         expect(
           functionCalls.first.arguments['location'].toString().toLowerCase(),
           contains('paris'),
@@ -341,18 +383,18 @@ void main() {
       );
 
       expect(step1.status, InteractionStatus.requiresAction);
-      final functionCall = step1.functionCallOutputs.first;
+      final functionCall = step1.functionCallSteps.first;
 
-      // Step 2: Return the function result
+      // Step 2: Return the function result via a StepListInput
       final step2 = await client!.interactions.create(
         model: defaultInteractionsModel,
-        input: InteractionInput.singleContent(
-          FunctionResultContent(
+        input: InteractionInput.steps([
+          FunctionResultStep(
             callId: functionCall.id,
             name: functionCall.name,
             result: const ToolResult.text('15 degrees Celsius'),
           ),
-        ),
+        ]),
         tools: tools,
         previousInteractionId: step1.id,
       );
@@ -380,12 +422,12 @@ void main() {
       expect(interaction.text, isNotNull);
       expect(interaction.text, isNotEmpty);
 
-      // Should have google search related outputs
-      final outputs = interaction.outputs ?? [];
-      final hasSearchOutput = outputs.any(
-        (o) => o is GoogleSearchCallContent || o is GoogleSearchResultContent,
+      // Should have google search related steps
+      final steps = interaction.steps ?? const <InteractionStep>[];
+      final hasSearchStep = steps.any(
+        (s) => s is GoogleSearchCallStep || s is GoogleSearchResultStep,
       );
-      expect(hasSearchOutput, isTrue);
+      expect(hasSearchStep, isTrue);
     });
   });
 
@@ -433,31 +475,31 @@ void main() {
       // Should have start, content events, and complete
       expect(events, isNotEmpty);
 
-      // First event should be InteractionStartEvent
-      expect(events.first, isA<InteractionStartEvent>());
-      final startEvent = events.first as InteractionStartEvent;
-      expect(startEvent.interaction?.id, isNotNull);
+      // First event should be InteractionCreatedEvent
+      expect(events.first, isA<InteractionCreatedEvent>());
+      final startEvent = events.first as InteractionCreatedEvent;
+      expect(startEvent.interaction.id, isNotNull);
 
-      // Last event should be InteractionCompleteEvent
-      expect(events.last, isA<InteractionCompleteEvent>());
-      final completeEvent = events.last as InteractionCompleteEvent;
-      expect(completeEvent.interaction?.status, InteractionStatus.completed);
+      // Last event should be InteractionCompletedEvent
+      expect(events.last, isA<InteractionCompletedEvent>());
+      final completeEvent = events.last as InteractionCompletedEvent;
+      expect(completeEvent.interaction.status, InteractionStatus.completed);
 
-      // Should have content delta events with text
+      // Should have step delta events with text
       final textDeltas = events
-          .whereType<ContentDeltaEvent>()
+          .whereType<StepDeltaEvent>()
           .where((d) => d.delta is TextDelta)
           .toList();
       expect(textDeltas, isNotEmpty);
 
       // Accumulate text from deltas
       final text = textDeltas
-          .map((d) => (d.delta! as TextDelta).text ?? '')
+          .map((d) => (d.delta as TextDelta).text ?? '')
           .join();
       expect(text.toLowerCase(), contains('hello'));
     });
 
-    test('streams content start and stop events', () async {
+    test('streams step start and stop events', () async {
       if (apiKey == null) {
         markTestSkipped('API key not available');
         return;
@@ -471,14 +513,14 @@ void main() {
           )
           .forEach(events.add);
 
-      final contentStarts = events.whereType<ContentStartEvent>().toList();
-      final contentStops = events.whereType<ContentStopEvent>().toList();
+      final stepStarts = events.whereType<StepStartEvent>().toList();
+      final stepStops = events.whereType<StepStopEvent>().toList();
 
-      // Should have at least one content start and stop pair
-      expect(contentStarts, isNotEmpty);
-      expect(contentStops, isNotEmpty);
+      // Should have at least one step start and stop pair
+      expect(stepStarts, isNotEmpty);
+      expect(stepStops, isNotEmpty);
       // Each start should have a matching stop
-      expect(contentStarts.length, equals(contentStops.length));
+      expect(stepStarts.length, equals(stepStops.length));
     });
 
     test('streams function call events', () async {
@@ -511,16 +553,16 @@ void main() {
           .forEach(events.add);
 
       // Should complete with requires_action status
-      final completeEvent = events.whereType<InteractionCompleteEvent>().first;
+      final completeEvent = events.whereType<InteractionCompletedEvent>().first;
       expect(
-        completeEvent.interaction?.status,
+        completeEvent.interaction.status,
         InteractionStatus.requiresAction,
       );
 
-      // Should have function call content start
+      // Should have function call step start
       final functionCallStarts = events
-          .whereType<ContentStartEvent>()
-          .where((e) => e.content is FunctionCallContent)
+          .whereType<StepStartEvent>()
+          .where((e) => e.step is FunctionCallStep)
           .toList();
       expect(functionCallStarts, isNotEmpty);
     });
@@ -549,9 +591,9 @@ void main() {
 
       // Accumulate text from deltas
       final text = events
-          .whereType<ContentDeltaEvent>()
+          .whereType<StepDeltaEvent>()
           .where((d) => d.delta is TextDelta)
-          .map((d) => (d.delta! as TextDelta).text ?? '')
+          .map((d) => (d.delta as TextDelta).text ?? '')
           .join();
       expect(text.toLowerCase(), contains('green'));
     });
@@ -576,18 +618,15 @@ void main() {
       expect(events, isNotEmpty);
 
       // Should complete successfully
-      final completeEvent = events.whereType<InteractionCompleteEvent>().first;
-      expect(completeEvent.interaction?.status, InteractionStatus.completed);
+      final completeEvent = events.whereType<InteractionCompletedEvent>().first;
+      expect(completeEvent.interaction.status, InteractionStatus.completed);
 
-      // Should have google search related events (content starts or deltas)
+      // Should have google search related events (step starts)
       final hasSearchEvents = events.any(
         (e) =>
-            (e is ContentStartEvent &&
-                (e.content is GoogleSearchCallContent ||
-                    e.content is GoogleSearchResultContent)) ||
-            (e is ContentDeltaEvent &&
-                (e.delta is GoogleSearchCallDelta ||
-                    e.delta is GoogleSearchResultDelta)),
+            e is StepStartEvent &&
+            (e.step is GoogleSearchCallStep ||
+                e.step is GoogleSearchResultStep),
       );
       expect(hasSearchEvents, isTrue);
     });
@@ -638,8 +677,8 @@ void main() {
       );
 
       expect(interaction.hasFunctionCalls, isTrue);
-      expect(interaction.functionCallOutputs, isNotEmpty);
-      expect(interaction.functionCallOutputs.first.name, 'get_weather');
+      expect(interaction.functionCallSteps, isNotEmpty);
+      expect(interaction.functionCallSteps.first.name, 'get_weather');
     });
   });
 
