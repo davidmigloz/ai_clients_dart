@@ -23,6 +23,7 @@ import '../tools/response_tool.dart';
 /// - [CustomToolCallOutputInputItem] - Output from a custom tool call
 /// - [ToolSearchCallItemParam] - A tool search call
 /// - [ToolSearchOutputItemParam] - Tool search results
+/// - [CompactionTriggerItem] - Triggers compaction of the current context
 sealed class Item {
   /// Creates an [Item].
   const Item();
@@ -38,6 +39,7 @@ sealed class Item {
       'item_reference' => ItemReference.fromJson(json),
       'tool_search_call' => ToolSearchCallItemParam.fromJson(json),
       'tool_search_output' => ToolSearchOutputItemParam.fromJson(json),
+      'compaction_trigger' => CompactionTriggerItem.fromJson(json),
       _ => throw FormatException('Unknown Item type: $type'),
     };
   }
@@ -453,6 +455,38 @@ class ItemReference extends Item {
 
   @override
   String toString() => 'ItemReference(id: $id)';
+}
+
+/// Triggers compaction of the current context.
+///
+/// Compacts the current context. Must be the final input item in the list.
+@immutable
+class CompactionTriggerItem extends Item {
+  /// Creates a [CompactionTriggerItem].
+  const CompactionTriggerItem();
+
+  /// Creates a [CompactionTriggerItem] from JSON.
+  factory CompactionTriggerItem.fromJson(Map<String, dynamic> json) {
+    final type = json['type'] as String?;
+    if (type != 'compaction_trigger') {
+      throw FormatException('Expected type "compaction_trigger", got "$type"');
+    }
+    return const CompactionTriggerItem();
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': 'compaction_trigger'};
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CompactionTriggerItem && runtimeType == other.runtimeType;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  String toString() => 'CompactionTriggerItem()';
 }
 
 /// A custom tool call output input item.

@@ -738,6 +738,32 @@
       "AssignedRoleDetails": {
         "description": "Detailed information about a role assignment entry returned when listing assignments.",
         "properties": {
+          "assignment_sources": {
+            "anyOf": [
+              {
+                "items": {
+                  "properties": {
+                    "principal_id": {
+                      "type": "string"
+                    },
+                    "principal_type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "principal_id",
+                    "principal_type"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Principals from which the role assignment is inherited, when available."
+          },
           "created_at": {
             "anyOf": [
               {
@@ -822,7 +848,7 @@
           "updated_at": {
             "anyOf": [
               {
-                "format": "int64",
+                "format": "unixtime",
                 "type": "integer"
               },
               {
@@ -843,7 +869,8 @@
           "updated_at",
           "created_by",
           "created_by_user_obj",
-          "metadata"
+          "metadata",
+          "assignment_sources"
         ],
         "type": "object"
       },
@@ -5263,6 +5290,17 @@
                 "type": "null"
               }
             ]
+          },
+          "service_tier": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ServiceTierEnum",
+                "description": "The service tier to use for this request."
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -5338,6 +5376,25 @@
           "encrypted_content"
         ],
         "title": "Compaction item",
+        "type": "object"
+      },
+      "CompactionTriggerItemParam": {
+        "description": "Compacts the current context. Must be the final input item.",
+        "properties": {
+          "type": {
+            "default": "compaction_trigger",
+            "description": "The type of the item. Always `compaction_trigger`.",
+            "enum": [
+              "compaction_trigger"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "Compaction trigger",
         "type": "object"
       },
       "ComparisonFilter": {
@@ -10448,6 +10505,40 @@
         "discriminator": {
           "propertyName": "type"
         }
+      },
+      "CreateSpendAlertBody": {
+        "description": "Parameters for creating or updating a spend alert.",
+        "properties": {
+          "currency": {
+            "description": "The currency for the threshold amount.",
+            "enum": [
+              "USD"
+            ],
+            "type": "string"
+          },
+          "interval": {
+            "description": "The time interval for evaluating spend against the threshold.",
+            "enum": [
+              "month"
+            ],
+            "type": "string"
+          },
+          "notification_channel": {
+            "$ref": "#/components/schemas/SpendAlertNotificationChannel"
+          },
+          "threshold_amount": {
+            "description": "The alert threshold amount, in cents.",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "threshold_amount",
+          "currency",
+          "interval",
+          "notification_channel"
+        ],
+        "type": "object"
       },
       "CreateThreadAndRunRequest": {
         "additionalProperties": false,
@@ -16988,6 +17079,73 @@
           "name": "Group list"
         }
       },
+      "GroupMemberUser": {
+        "description": "Details about a user returned from an organization group membership lookup.",
+        "properties": {
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Email address of the user, or `null` for users without an email."
+          },
+          "id": {
+            "description": "Identifier for the user.",
+            "type": "string"
+          },
+          "is_service_account": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Whether the user is a service account."
+          },
+          "name": {
+            "description": "Display name of the user.",
+            "type": "string"
+          },
+          "picture": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "URL of the user's profile picture, if available."
+          },
+          "user_type": {
+            "description": "The type of user.",
+            "enum": [
+              "user",
+              "tenant_user"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "email",
+          "picture",
+          "is_service_account",
+          "user_type"
+        ],
+        "type": "object",
+        "x-oaiMeta": {
+          "example": "{\n    \"id\": \"user_abc123\",\n    \"name\": \"Ada Lovelace\",\n    \"email\": \"ada@example.com\",\n    \"picture\": null,\n    \"is_service_account\": false,\n    \"user_type\": \"user\"\n}\n",
+          "name": "The group member user object"
+        }
+      },
       "GroupResourceWithSuccess": {
         "description": "Response returned after updating a group.",
         "properties": {
@@ -17030,6 +17188,10 @@
           },
           "group_type": {
             "description": "The type of the group.",
+            "enum": [
+              "group",
+              "tenant_group"
+            ],
             "type": "string"
           },
           "id": {
@@ -17189,6 +17351,31 @@
         },
         "required": [],
         "title": "Chat history configuration",
+        "type": "object"
+      },
+      "HostedToolPermission": {
+        "description": "Permission state for a single hosted tool on a project.",
+        "properties": {
+          "enabled": {
+            "description": "Whether the hosted tool is enabled for the project.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ],
+        "type": "object"
+      },
+      "HostedToolPermissionUpdate": {
+        "properties": {
+          "enabled": {
+            "description": "Whether to enable the hosted tool for the project.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ],
         "type": "object"
       },
       "HybridSearchOptions": {
@@ -18413,6 +18600,9 @@
             "type": "object"
           },
           {
+            "$ref": "#/components/schemas/CompactionTriggerItemParam"
+          },
+          {
             "$ref": "#/components/schemas/ItemReferenceParam"
           }
         ],
@@ -18763,7 +18953,7 @@
             "type": "string"
           },
           "projects": {
-            "description": "An array of projects to which membership is granted at the same time the org invite is accepted. If omitted, the user will be invited to the default project for compatibility with legacy behavior.",
+            "description": "An array of projects to which membership is granted at the same time the org invite is accepted. If omitted, the user will be invited to the default project for compatibility with legacy behavior. If empty list is passed, the user will not be invited to any projects, including the default one.",
             "items": {
               "properties": {
                 "id": {
@@ -22324,6 +22514,38 @@
         ],
         "type": "object"
       },
+      "OrganizationDataRetention": {
+        "description": "Represents the organization's data retention control setting.",
+        "properties": {
+          "object": {
+            "description": "The object type, which is always `organization.data_retention`.",
+            "enum": [
+              "organization.data_retention"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          },
+          "type": {
+            "description": "The configured organization data retention type.",
+            "enum": [
+              "zero_data_retention",
+              "modified_abuse_monitoring",
+              "enhanced_zero_data_retention",
+              "enhanced_modified_abuse_monitoring"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "object",
+          "type"
+        ],
+        "type": "object",
+        "x-oaiMeta": {
+          "example": "{\n    \"object\": \"organization.data_retention\",\n    \"type\": \"modified_abuse_monitoring\"\n}\n",
+          "name": "The organization data retention object"
+        }
+      },
       "OrganizationProjectCertificate": {
         "description": "Represents an individual certificate configured at the project level.",
         "properties": {
@@ -22428,6 +22650,138 @@
         "required": [
           "object",
           "data"
+        ],
+        "type": "object"
+      },
+      "OrganizationSpendAlert": {
+        "description": "Represents a spend alert configured at the organization level.",
+        "properties": {
+          "currency": {
+            "description": "The currency for the threshold amount.",
+            "enum": [
+              "USD"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "description": "The identifier, which can be referenced in API endpoints.",
+            "type": "string"
+          },
+          "interval": {
+            "description": "The time interval for evaluating spend against the threshold.",
+            "enum": [
+              "month"
+            ],
+            "type": "string"
+          },
+          "notification_channel": {
+            "$ref": "#/components/schemas/SpendAlertNotificationChannel"
+          },
+          "object": {
+            "description": "The object type, which is always `organization.spend_alert`.",
+            "enum": [
+              "organization.spend_alert"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          },
+          "threshold_amount": {
+            "description": "The alert threshold amount, in cents.",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "object",
+          "threshold_amount",
+          "currency",
+          "interval",
+          "notification_channel"
+        ],
+        "type": "object",
+        "x-oaiMeta": {
+          "example": "{\n    \"id\": \"alert_abc123\",\n    \"object\": \"organization.spend_alert\",\n    \"threshold_amount\": 100000,\n    \"currency\": \"USD\",\n    \"interval\": \"month\",\n    \"notification_channel\": {\n        \"type\": \"email\",\n        \"recipients\": [\"finance@example.com\"],\n        \"subject_prefix\": \"OpenAI spend alert\"\n    }\n}\n",
+          "name": "The organization spend alert object"
+        }
+      },
+      "OrganizationSpendAlertDeletedResource": {
+        "description": "Confirmation payload returned after deleting an organization spend alert.",
+        "properties": {
+          "deleted": {
+            "description": "Whether the spend alert was deleted.",
+            "type": "boolean"
+          },
+          "id": {
+            "description": "The deleted spend alert ID.",
+            "type": "string"
+          },
+          "object": {
+            "description": "Always `organization.spend_alert.deleted`.",
+            "enum": [
+              "organization.spend_alert.deleted"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "id",
+          "object",
+          "deleted"
+        ],
+        "type": "object"
+      },
+      "OrganizationSpendAlertListResource": {
+        "description": "Paginated list of organization spend alerts.",
+        "properties": {
+          "data": {
+            "description": "Spend alerts returned in the current page.",
+            "items": {
+              "$ref": "#/components/schemas/OrganizationSpendAlert"
+            },
+            "type": "array"
+          },
+          "first_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The ID of the first spend alert in this page."
+          },
+          "has_more": {
+            "description": "Whether more spend alerts are available when paginating.",
+            "type": "boolean"
+          },
+          "last_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The ID of the last spend alert in this page."
+          },
+          "object": {
+            "description": "Always `list`.",
+            "enum": [
+              "list"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "object",
+          "data",
+          "first_id",
+          "last_id",
+          "has_more"
         ],
         "type": "object"
       },
@@ -23064,6 +23418,40 @@
         ],
         "type": "object"
       },
+      "ProjectDataRetention": {
+        "description": "Represents a project's data retention control setting.",
+        "properties": {
+          "object": {
+            "description": "The object type, which is always `project.data_retention`.",
+            "enum": [
+              "project.data_retention"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          },
+          "type": {
+            "description": "The configured project data retention type.",
+            "enum": [
+              "organization_default",
+              "none",
+              "zero_data_retention",
+              "modified_abuse_monitoring",
+              "enhanced_zero_data_retention",
+              "enhanced_modified_abuse_monitoring"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "object",
+          "type"
+        ],
+        "type": "object",
+        "x-oaiMeta": {
+          "example": "{\n    \"object\": \"project.data_retention\",\n    \"type\": \"organization_default\"\n}\n",
+          "name": "The project data retention object"
+        }
+      },
       "ProjectGroup": {
         "description": "Details about a group's membership in a project.",
         "properties": {
@@ -23082,6 +23470,10 @@
           },
           "group_type": {
             "description": "The type of the group.",
+            "enum": [
+              "group",
+              "tenant_group"
+            ],
             "type": "string"
           },
           "object": {
@@ -23183,6 +23575,98 @@
           "name": "Project group list"
         }
       },
+      "ProjectHostedToolPermissions": {
+        "description": "Represents hosted tool permissions for a project.",
+        "properties": {
+          "code_interpreter": {
+            "$ref": "#/components/schemas/HostedToolPermission"
+          },
+          "file_search": {
+            "$ref": "#/components/schemas/HostedToolPermission"
+          },
+          "image_generation": {
+            "$ref": "#/components/schemas/HostedToolPermission"
+          },
+          "mcp": {
+            "$ref": "#/components/schemas/HostedToolPermission"
+          },
+          "web_search": {
+            "$ref": "#/components/schemas/HostedToolPermission"
+          }
+        },
+        "required": [
+          "file_search",
+          "web_search",
+          "image_generation",
+          "mcp",
+          "code_interpreter"
+        ],
+        "type": "object",
+        "x-oaiMeta": {
+          "example": "{\n    \"file_search\": {\n        \"enabled\": true\n    },\n    \"web_search\": {\n        \"enabled\": true\n    },\n    \"image_generation\": {\n        \"enabled\": true\n    },\n    \"mcp\": {\n        \"enabled\": true\n    },\n    \"code_interpreter\": {\n        \"enabled\": true\n    }\n}\n",
+          "name": "The project hosted tool permissions object"
+        }
+      },
+      "ProjectHostedToolPermissionsUpdateRequest": {
+        "properties": {
+          "code_interpreter": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HostedToolPermissionUpdate"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The code interpreter permission update."
+          },
+          "file_search": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HostedToolPermissionUpdate"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The file search permission update."
+          },
+          "image_generation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HostedToolPermissionUpdate"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The image generation permission update."
+          },
+          "mcp": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HostedToolPermissionUpdate"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The MCP permission update."
+          },
+          "web_search": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HostedToolPermissionUpdate"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The web search permission update."
+          }
+        },
+        "type": "object"
+      },
       "ProjectListResponse": {
         "properties": {
           "data": {
@@ -23226,6 +23710,94 @@
           "object",
           "data",
           "has_more"
+        ],
+        "type": "object"
+      },
+      "ProjectModelPermissions": {
+        "description": "Represents the model allowlist or denylist policy for a project.",
+        "properties": {
+          "mode": {
+            "description": "Whether the project uses an allowlist or a denylist.",
+            "enum": [
+              "allow_list",
+              "deny_list"
+            ],
+            "type": "string"
+          },
+          "model_ids": {
+            "description": "The model IDs included in the model permissions policy.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "object": {
+            "description": "The object type, which is always `project.model_permissions`.",
+            "enum": [
+              "project.model_permissions"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "object",
+          "mode",
+          "model_ids"
+        ],
+        "type": "object",
+        "x-oaiMeta": {
+          "example": "{\n    \"object\": \"project.model_permissions\",\n    \"mode\": \"allow_list\",\n    \"model_ids\": [\n        \"gpt-4.1\",\n        \"o3\"\n    ]\n}\n",
+          "name": "The project model permissions object"
+        }
+      },
+      "ProjectModelPermissionsDeleteResponse": {
+        "description": "Confirmation payload returned after deleting project model permissions.",
+        "properties": {
+          "deleted": {
+            "description": "Whether the project model permissions were deleted.",
+            "type": "boolean"
+          },
+          "object": {
+            "description": "The object type, which is always `project.model_permissions.deleted`.",
+            "enum": [
+              "project.model_permissions.deleted"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "object",
+          "deleted"
+        ],
+        "type": "object",
+        "x-oaiMeta": {
+          "example": "{\n    \"object\": \"project.model_permissions.deleted\",\n    \"deleted\": true\n}\n",
+          "name": "Project model permissions deletion confirmation"
+        }
+      },
+      "ProjectModelPermissionsUpdateRequest": {
+        "properties": {
+          "mode": {
+            "description": "The model permissions mode to apply.",
+            "enum": [
+              "allow_list",
+              "deny_list"
+            ],
+            "type": "string"
+          },
+          "model_ids": {
+            "description": "The model IDs included in this permissions policy.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "mode",
+          "model_ids"
         ],
         "type": "object"
       },
@@ -23565,6 +24137,138 @@
         "required": [
           "object",
           "data",
+          "has_more"
+        ],
+        "type": "object"
+      },
+      "ProjectSpendAlert": {
+        "description": "Represents a spend alert configured at the project level.",
+        "properties": {
+          "currency": {
+            "description": "The currency for the threshold amount.",
+            "enum": [
+              "USD"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "description": "The identifier, which can be referenced in API endpoints.",
+            "type": "string"
+          },
+          "interval": {
+            "description": "The time interval for evaluating spend against the threshold.",
+            "enum": [
+              "month"
+            ],
+            "type": "string"
+          },
+          "notification_channel": {
+            "$ref": "#/components/schemas/SpendAlertNotificationChannel"
+          },
+          "object": {
+            "description": "The object type, which is always `project.spend_alert`.",
+            "enum": [
+              "project.spend_alert"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          },
+          "threshold_amount": {
+            "description": "The alert threshold amount, in cents.",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "object",
+          "threshold_amount",
+          "currency",
+          "interval",
+          "notification_channel"
+        ],
+        "type": "object",
+        "x-oaiMeta": {
+          "example": "{\n    \"id\": \"alert_abc123\",\n    \"object\": \"project.spend_alert\",\n    \"threshold_amount\": 100000,\n    \"currency\": \"USD\",\n    \"interval\": \"month\",\n    \"notification_channel\": {\n        \"type\": \"email\",\n        \"recipients\": [\"finance@example.com\"],\n        \"subject_prefix\": \"OpenAI spend alert\"\n    }\n}\n",
+          "name": "The project spend alert object"
+        }
+      },
+      "ProjectSpendAlertDeletedResource": {
+        "description": "Confirmation payload returned after deleting a project spend alert.",
+        "properties": {
+          "deleted": {
+            "description": "Whether the spend alert was deleted.",
+            "type": "boolean"
+          },
+          "id": {
+            "description": "The deleted spend alert ID.",
+            "type": "string"
+          },
+          "object": {
+            "description": "Always `project.spend_alert.deleted`.",
+            "enum": [
+              "project.spend_alert.deleted"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "id",
+          "object",
+          "deleted"
+        ],
+        "type": "object"
+      },
+      "ProjectSpendAlertListResource": {
+        "description": "Paginated list of project spend alerts.",
+        "properties": {
+          "data": {
+            "description": "Spend alerts returned in the current page.",
+            "items": {
+              "$ref": "#/components/schemas/ProjectSpendAlert"
+            },
+            "type": "array"
+          },
+          "first_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The ID of the first spend alert in this page."
+          },
+          "has_more": {
+            "description": "Whether more spend alerts are available when paginating.",
+            "type": "boolean"
+          },
+          "last_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The ID of the last spend alert in this page."
+          },
+          "object": {
+            "description": "Always `list`.",
+            "enum": [
+              "list"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "object",
+          "data",
+          "first_id",
+          "last_id",
           "has_more"
         ],
         "type": "object"
@@ -31810,9 +32514,15 @@
             "type": "string"
           },
           "elapsed_ms": {
-            "description": "Timing metadata for stream alignment, derived from the translation frame\nwhen available. It advances in 200 ms increments, but multiple transcript\ndeltas may share the same `elapsed_ms`. Treat it as alignment metadata,\nnot a unique transcript-delta identifier.\n",
-            "nullable": true,
-            "type": "integer"
+            "anyOf": [
+              {
+                "description": "Timing metadata for stream alignment, derived from the translation frame\nwhen available. It advances in 200 ms increments, but multiple transcript\ndeltas may share the same `elapsed_ms`. Treat it as alignment metadata,\nnot a unique transcript-delta identifier.\n",
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "event_id": {
             "description": "The unique ID of the server event.",
@@ -31849,9 +32559,15 @@
             "type": "string"
           },
           "elapsed_ms": {
-            "description": "Timing metadata for stream alignment, derived from the translation frame\nwhen available. Treat `elapsed_ms` as alignment metadata, not a unique\nevent identifier.\n",
-            "nullable": true,
-            "type": "integer"
+            "anyOf": [
+              {
+                "description": "Timing metadata for stream alignment, derived from the translation frame\nwhen available. Treat `elapsed_ms` as alignment metadata, not a unique\nevent identifier.\n",
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "event_id": {
             "description": "The unique ID of the server event.",
@@ -31896,9 +32612,15 @@
             "type": "string"
           },
           "elapsed_ms": {
-            "description": "Timing metadata for stream alignment, derived from the translation frame\nwhen available. It advances in 200 ms increments, but multiple transcript\ndeltas may share the same `elapsed_ms`. Treat it as alignment metadata,\nnot a unique transcript-delta identifier.\n",
-            "nullable": true,
-            "type": "integer"
+            "anyOf": [
+              {
+                "description": "Timing metadata for stream alignment, derived from the translation frame\nwhen available. It advances in 200 ms increments, but multiple transcript\ndeltas may share the same `elapsed_ms`. Treat it as alignment metadata,\nnot a unique transcript-delta identifier.\n",
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "event_id": {
             "description": "The unique ID of the server event.",
@@ -35725,7 +36447,7 @@
         ],
         "type": "object",
         "x-oaiMeta": {
-          "example": "{\n    \"object\": \"list\",\n    \"data\": [\n        {\n            \"id\": \"role_01J1F8ROLE01\",\n            \"name\": \"API Group Manager\",\n            \"permissions\": [\n                \"api.groups.read\",\n                \"api.groups.write\"\n            ],\n            \"resource_type\": \"api.organization\",\n            \"predefined_role\": false,\n            \"description\": \"Allows managing organization groups\",\n            \"created_at\": 1711471533,\n            \"updated_at\": 1711472599,\n            \"created_by\": \"user_abc123\",\n            \"created_by_user_obj\": {\n                \"id\": \"user_abc123\",\n                \"name\": \"Ada Lovelace\",\n                \"email\": \"ada@example.com\"\n            },\n            \"metadata\": {}\n        }\n    ],\n    \"has_more\": false,\n    \"next\": null\n}\n",
+          "example": "{\n    \"object\": \"list\",\n    \"data\": [\n        {\n            \"id\": \"role_01J1F8ROLE01\",\n            \"name\": \"API Group Manager\",\n            \"permissions\": [\n                \"api.groups.read\",\n                \"api.groups.write\"\n            ],\n            \"resource_type\": \"api.organization\",\n            \"predefined_role\": false,\n            \"description\": \"Allows managing organization groups\",\n            \"created_at\": 1711471533,\n            \"updated_at\": 1711472599,\n            \"created_by\": \"user_abc123\",\n            \"created_by_user_obj\": {\n                \"id\": \"user_abc123\",\n                \"name\": \"Ada Lovelace\",\n                \"email\": \"ada@example.com\"\n            },\n            \"metadata\": {},\n            \"assignment_sources\": null\n        }\n    ],\n    \"has_more\": false,\n    \"next\": null\n}\n",
           "name": "Assigned role list"
         }
       },
@@ -37646,6 +38368,15 @@
           }
         ]
       },
+      "ServiceTierEnum": {
+        "enum": [
+          "auto",
+          "default",
+          "flex",
+          "priority"
+        ],
+        "type": "string"
+      },
       "SetDefaultSkillVersionBody": {
         "description": "Updates the default version pointer for a skill.",
         "properties": {
@@ -37996,6 +38727,42 @@
           "group": "speech",
           "name": "Stream Event (speech.audio.done)"
         }
+      },
+      "SpendAlertNotificationChannel": {
+        "description": "Email notification settings for a spend alert.",
+        "properties": {
+          "recipients": {
+            "description": "Email addresses that receive the spend alert notification.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "subject_prefix": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional subject prefix for alert emails."
+          },
+          "type": {
+            "description": "The notification channel type. Currently only `email` is supported.",
+            "enum": [
+              "email"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type",
+          "recipients"
+        ],
+        "type": "object"
       },
       "StaticChunkingStrategy": {
         "additionalProperties": false,
@@ -40025,6 +40792,64 @@
           "example": "{\n    \"name\": \"Escalations\"\n}\n"
         }
       },
+      "UpdateOrganizationDataRetentionBody": {
+        "description": "Parameters for updating organization data retention controls.",
+        "properties": {
+          "retention_type": {
+            "description": "The desired organization data retention type.",
+            "enum": [
+              "zero_data_retention",
+              "modified_abuse_monitoring",
+              "enhanced_zero_data_retention",
+              "enhanced_modified_abuse_monitoring"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "retention_type"
+        ],
+        "type": "object"
+      },
+      "UpdateProjectDataRetentionBody": {
+        "description": "Parameters for updating project data retention controls.",
+        "properties": {
+          "retention_type": {
+            "description": "The desired project data retention type.",
+            "enum": [
+              "organization_default",
+              "none",
+              "zero_data_retention",
+              "modified_abuse_monitoring",
+              "enhanced_zero_data_retention",
+              "enhanced_modified_abuse_monitoring"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "retention_type"
+        ],
+        "type": "object"
+      },
+      "UpdateProjectServiceAccountBody": {
+        "description": "Parameters for updating a project service account.",
+        "properties": {
+          "name": {
+            "description": "The updated service account name.",
+            "type": "string"
+          },
+          "role": {
+            "description": "The updated service account role.",
+            "enum": [
+              "member",
+              "owner"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "UpdateVectorStoreFileAttributesRequest": {
         "additionalProperties": false,
         "properties": {
@@ -40668,6 +41493,75 @@
           "name": "Embeddings usage object"
         }
       },
+      "UsageFileSearchCallsResult": {
+        "description": "The aggregated file search calls usage details of the specific time bucket.",
+        "properties": {
+          "api_key_id": {
+            "anyOf": [
+              {
+                "description": "When `group_by=api_key_id`, this field provides the API key ID of the grouped usage result.",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "num_requests": {
+            "description": "The count of file search calls.",
+            "type": "integer"
+          },
+          "object": {
+            "enum": [
+              "organization.usage.file_searches.result"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "description": "When `group_by=project_id`, this field provides the project ID of the grouped usage result.",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "description": "When `group_by=user_id`, this field provides the user ID of the grouped usage result.",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "vector_store_id": {
+            "anyOf": [
+              {
+                "description": "When `group_by=vector_store_id`, this field provides the vector store ID of the grouped usage result.",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "object",
+          "num_requests"
+        ],
+        "type": "object",
+        "x-oaiMeta": {
+          "example": "{\n    \"object\": \"organization.usage.file_searches.result\",\n    \"num_requests\": 2,\n    \"project_id\": \"proj_abc\",\n    \"user_id\": \"user-abc\",\n    \"api_key_id\": \"key_abc\",\n    \"vector_store_id\": \"vs_abc\"\n}\n",
+          "name": "File search calls usage object"
+        }
+      },
       "UsageImagesResult": {
         "description": "The aggregated images usage details of the specific time bucket.",
         "properties": {
@@ -40915,6 +41809,12 @@
                   "$ref": "#/components/schemas/UsageCodeInterpreterSessionsResult"
                 },
                 {
+                  "$ref": "#/components/schemas/UsageFileSearchCallsResult"
+                },
+                {
+                  "$ref": "#/components/schemas/UsageWebSearchCallsResult"
+                },
+                {
                   "$ref": "#/components/schemas/CostsResult"
                 }
               ],
@@ -40970,6 +41870,91 @@
         "x-oaiMeta": {
           "example": "{\n    \"object\": \"organization.usage.vector_stores.result\",\n    \"usage_bytes\": 1024,\n    \"project_id\": \"proj_abc\"\n}\n",
           "name": "Vector stores usage object"
+        }
+      },
+      "UsageWebSearchCallsResult": {
+        "description": "The aggregated web search calls usage details of the specific time bucket.",
+        "properties": {
+          "api_key_id": {
+            "anyOf": [
+              {
+                "description": "When `group_by=api_key_id`, this field provides the API key ID of the grouped usage result.",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "context_level": {
+            "anyOf": [
+              {
+                "description": "When `group_by=context_level`, this field provides the search context size of the grouped usage result.",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "model": {
+            "anyOf": [
+              {
+                "description": "When `group_by=model`, this field provides the model name of the grouped usage result.",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "num_model_requests": {
+            "description": "The count of model requests.",
+            "type": "integer"
+          },
+          "num_requests": {
+            "description": "The count of web search calls.",
+            "type": "integer"
+          },
+          "object": {
+            "enum": [
+              "organization.usage.web_searches.result"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "description": "When `group_by=project_id`, this field provides the project ID of the grouped usage result.",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "description": "When `group_by=user_id`, this field provides the user ID of the grouped usage result.",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "object",
+          "num_model_requests",
+          "num_requests"
+        ],
+        "type": "object",
+        "x-oaiMeta": {
+          "example": "{\n    \"object\": \"organization.usage.web_searches.result\",\n    \"num_model_requests\": 2,\n    \"num_requests\": 2,\n    \"project_id\": \"proj_abc\",\n    \"user_id\": \"user-abc\",\n    \"api_key_id\": \"key_abc\",\n    \"model\": \"gpt-4o-mini-2024-07-18\",\n    \"context_level\": \"medium\"\n}\n",
+          "name": "Web search calls usage object"
         }
       },
       "User": {
@@ -50015,6 +51000,89 @@
         }
       }
     },
+    "/organization/data_retention": {
+      "get": {
+        "description": "Retrieves organization data retention controls.",
+        "operationId": "retrieve-organization-data-retention",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationDataRetention"
+                }
+              }
+            },
+            "description": "Organization data retention controls retrieved successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Retrieve organization data retention",
+        "tags": [
+          "Data retention"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl https://api.openai.com/v1/organization/data_retention \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\"\n"
+            },
+            "response": "{\n    \"object\": \"organization.data_retention\",\n    \"type\": \"modified_abuse_monitoring\"\n}\n"
+          },
+          "group": "administration",
+          "name": "Retrieve organization data retention"
+        }
+      },
+      "post": {
+        "description": "Updates organization data retention controls.",
+        "operationId": "update-organization-data-retention",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOrganizationDataRetentionBody"
+              }
+            }
+          },
+          "description": "The desired organization data retention setting.",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationDataRetention"
+                }
+              }
+            },
+            "description": "Organization data retention controls updated successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Update organization data retention",
+        "tags": [
+          "Data retention"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl -X POST https://api.openai.com/v1/organization/data_retention \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n      \"retention_type\": \"modified_abuse_monitoring\"\n  }'\n"
+            },
+            "response": "{\n    \"object\": \"organization.data_retention\",\n    \"type\": \"modified_abuse_monitoring\"\n}\n"
+          },
+          "group": "administration",
+          "name": "Update organization data retention"
+        }
+      }
+    },
     "/organization/groups": {
       "get": {
         "description": "Lists all groups in the organization.",
@@ -50180,6 +51248,52 @@
           },
           "group": "administration",
           "name": "Delete group"
+        }
+      },
+      "get": {
+        "description": "Retrieves a group.",
+        "operationId": "retrieve-group",
+        "parameters": [
+          {
+            "description": "The ID of the group to retrieve.",
+            "in": "path",
+            "name": "group_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupResponse"
+                }
+              }
+            },
+            "description": "Group retrieved successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Retrieve group",
+        "tags": [
+          "Groups"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl https://api.openai.com/v1/organization/groups/group_01J1F8ABCDXYZ \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\"\n"
+            },
+            "response": "{\n    \"id\": \"group_01J1F8ABCDXYZ\",\n    \"name\": \"Support Team\",\n    \"created_at\": 1711471533,\n    \"is_scim_managed\": false,\n    \"group_type\": \"group\"\n}\n"
+          },
+          "group": "administration",
+          "name": "Retrieve group"
         }
       },
       "post": {
@@ -50433,6 +51547,61 @@
           "group": "administration",
           "name": "Unassign organization role from group"
         }
+      },
+      "get": {
+        "description": "Retrieves an organization role assigned to a group.",
+        "operationId": "retrieve-group-role",
+        "parameters": [
+          {
+            "description": "The ID of the group to inspect.",
+            "in": "path",
+            "name": "group_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The ID of the organization role to retrieve for the group.",
+            "in": "path",
+            "name": "role_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignedRoleDetails"
+                }
+              }
+            },
+            "description": "Organization role retrieved for the group successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Retrieve group organization role",
+        "tags": [
+          "Group organization role assignments"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl https://api.openai.com/v1/organization/groups/group_01J1F8ABCDXYZ/roles/role_01J1F8ROLE01 \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\"\n"
+            },
+            "response": "{\n    \"id\": \"role_01J1F8ROLE01\",\n    \"name\": \"API Group Manager\",\n    \"permissions\": [\n        \"api.groups.read\",\n        \"api.groups.write\"\n    ],\n    \"resource_type\": \"api.organization\",\n    \"predefined_role\": false,\n    \"description\": \"Allows managing organization groups\",\n    \"created_at\": 1711471533,\n    \"updated_at\": 1711472599,\n    \"created_by\": \"user_abc123\",\n    \"created_by_user_obj\": null,\n    \"metadata\": {},\n    \"assignment_sources\": null\n}\n"
+          },
+          "group": "administration",
+          "name": "Retrieve group organization role"
+        }
       }
     },
     "/organization/groups/{group_id}/users": {
@@ -50629,6 +51798,61 @@
           },
           "group": "administration",
           "name": "Remove group user"
+        }
+      },
+      "get": {
+        "description": "Retrieves a user in a group.",
+        "operationId": "retrieve-group-user",
+        "parameters": [
+          {
+            "description": "The ID of the group to inspect.",
+            "in": "path",
+            "name": "group_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The ID of the user to retrieve from the group.",
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupMemberUser"
+                }
+              }
+            },
+            "description": "User retrieved from the group successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Retrieve group user",
+        "tags": [
+          "Group users"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl https://api.openai.com/v1/organization/groups/group_01J1F8ABCDXYZ/users/user_abc123 \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\"\n"
+            },
+            "response": "{\n    \"id\": \"user_abc123\",\n    \"name\": \"Ada Lovelace\",\n    \"email\": \"ada@example.com\",\n    \"picture\": null,\n    \"is_service_account\": false,\n    \"user_type\": \"user\"\n}\n"
+          },
+          "group": "administration",
+          "name": "Retrieve group user"
         }
       }
     },
@@ -51493,6 +52717,111 @@
         }
       }
     },
+    "/organization/projects/{project_id}/data_retention": {
+      "get": {
+        "description": "Retrieves project data retention controls.",
+        "operationId": "retrieve-project-data-retention",
+        "parameters": [
+          {
+            "description": "The ID of the project to inspect.",
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectDataRetention"
+                }
+              }
+            },
+            "description": "Project data retention controls retrieved successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Retrieve project data retention",
+        "tags": [
+          "Data retention"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl https://api.openai.com/v1/organization/projects/proj_abc/data_retention \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\"\n"
+            },
+            "response": "{\n    \"object\": \"project.data_retention\",\n    \"type\": \"organization_default\"\n}\n"
+          },
+          "group": "administration",
+          "name": "Retrieve project data retention"
+        }
+      },
+      "post": {
+        "description": "Updates project data retention controls.",
+        "operationId": "update-project-data-retention",
+        "parameters": [
+          {
+            "description": "The ID of the project to update.",
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProjectDataRetentionBody"
+              }
+            }
+          },
+          "description": "The desired project data retention setting.",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectDataRetention"
+                }
+              }
+            },
+            "description": "Project data retention controls updated successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Update project data retention",
+        "tags": [
+          "Data retention"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl -X POST https://api.openai.com/v1/organization/projects/proj_abc/data_retention \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n      \"retention_type\": \"modified_abuse_monitoring\"\n  }'\n"
+            },
+            "response": "{\n    \"object\": \"project.data_retention\",\n    \"type\": \"modified_abuse_monitoring\"\n}\n"
+          },
+          "group": "administration",
+          "name": "Update project data retention"
+        }
+      }
+    },
     "/organization/projects/{project_id}/groups": {
       "get": {
         "description": "Lists the groups that have access to a project.",
@@ -51687,6 +53016,331 @@
           },
           "group": "administration",
           "name": "Remove project group"
+        }
+      },
+      "get": {
+        "description": "Retrieves a project's group.",
+        "operationId": "retrieve-project-group",
+        "parameters": [
+          {
+            "description": "The ID of the project to inspect.",
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The ID of the group to retrieve.",
+            "in": "path",
+            "name": "group_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The type of group to retrieve.",
+            "in": "query",
+            "name": "group_type",
+            "required": false,
+            "schema": {
+              "default": "group",
+              "enum": [
+                "group",
+                "tenant_group"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectGroup"
+                }
+              }
+            },
+            "description": "Project group retrieved successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Retrieve project group",
+        "tags": [
+          "Project groups"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl https://api.openai.com/v1/organization/projects/proj_abc123/groups/group_01J1F8ABCDXYZ \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\"\n"
+            },
+            "response": "{\n    \"object\": \"project.group\",\n    \"project_id\": \"proj_abc123\",\n    \"group_id\": \"group_01J1F8ABCDXYZ\",\n    \"group_name\": \"Support Team\",\n    \"group_type\": \"group\",\n    \"created_at\": 1711471533\n}\n"
+          },
+          "group": "administration",
+          "name": "Retrieve project group"
+        }
+      }
+    },
+    "/organization/projects/{project_id}/hosted_tool_permissions": {
+      "get": {
+        "description": "Returns hosted tool permissions for a project.",
+        "operationId": "retrieve-project-hosted-tool-permissions",
+        "parameters": [
+          {
+            "description": "The ID of the project.",
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectHostedToolPermissions"
+                }
+              }
+            },
+            "description": "Project hosted tool permissions retrieved successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Retrieve project hosted tool permissions",
+        "tags": [
+          "Hosted tools"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl https://api.openai.com/v1/organization/projects/proj_abc/hosted_tool_permissions \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\"\n"
+            },
+            "response": "{\n    \"file_search\": {\n        \"enabled\": true\n    },\n    \"web_search\": {\n        \"enabled\": true\n    },\n    \"image_generation\": {\n        \"enabled\": true\n    },\n    \"mcp\": {\n        \"enabled\": true\n    },\n    \"code_interpreter\": {\n        \"enabled\": true\n    }\n}\n"
+          },
+          "group": "administration",
+          "name": "Retrieve project hosted tool permissions"
+        }
+      },
+      "post": {
+        "description": "Updates hosted tool permissions for a project.",
+        "operationId": "update-project-hosted-tool-permissions",
+        "parameters": [
+          {
+            "description": "The ID of the project.",
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectHostedToolPermissionsUpdateRequest"
+              }
+            }
+          },
+          "description": "The project hosted tool permissions update request payload.",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectHostedToolPermissions"
+                }
+              }
+            },
+            "description": "Project hosted tool permissions updated successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Modify project hosted tool permissions",
+        "tags": [
+          "Hosted tools"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl -X POST https://api.openai.com/v1/organization/projects/proj_abc/hosted_tool_permissions \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n      \"file_search\": {\n          \"enabled\": true\n      },\n      \"image_generation\": {\n          \"enabled\": false\n      }\n  }'\n"
+            },
+            "response": "{\n    \"file_search\": {\n        \"enabled\": true\n    },\n    \"web_search\": {\n        \"enabled\": true\n    },\n    \"image_generation\": {\n        \"enabled\": false\n    },\n    \"mcp\": {\n        \"enabled\": true\n    },\n    \"code_interpreter\": {\n        \"enabled\": true\n    }\n}\n"
+          },
+          "group": "administration",
+          "name": "Modify project hosted tool permissions"
+        }
+      }
+    },
+    "/organization/projects/{project_id}/model_permissions": {
+      "delete": {
+        "description": "Deletes model permissions for a project.",
+        "operationId": "delete-project-model-permissions",
+        "parameters": [
+          {
+            "description": "The ID of the project.",
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectModelPermissionsDeleteResponse"
+                }
+              }
+            },
+            "description": "Project model permissions deleted successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Delete project model permissions",
+        "tags": [
+          "Projects"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl -X DELETE https://api.openai.com/v1/organization/projects/proj_abc/model_permissions \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\"\n"
+            },
+            "response": "{\n    \"object\": \"project.model_permissions.deleted\",\n    \"deleted\": true\n}\n"
+          },
+          "group": "administration",
+          "name": "Delete project model permissions"
+        }
+      },
+      "get": {
+        "description": "Returns model permissions for a project.",
+        "operationId": "retrieve-project-model-permissions",
+        "parameters": [
+          {
+            "description": "The ID of the project.",
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectModelPermissions"
+                }
+              }
+            },
+            "description": "Project model permissions retrieved successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Retrieve project model permissions",
+        "tags": [
+          "Projects"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl https://api.openai.com/v1/organization/projects/proj_abc/model_permissions \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\"\n"
+            },
+            "response": "{\n    \"object\": \"project.model_permissions\",\n    \"mode\": \"allow_list\",\n    \"model_ids\": [\n        \"gpt-4.1\",\n        \"o3\"\n    ]\n}\n"
+          },
+          "group": "administration",
+          "name": "Retrieve project model permissions"
+        }
+      },
+      "post": {
+        "description": "Updates model permissions for a project.",
+        "operationId": "update-project-model-permissions",
+        "parameters": [
+          {
+            "description": "The ID of the project.",
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectModelPermissionsUpdateRequest"
+              }
+            }
+          },
+          "description": "The project model permissions update request payload.",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectModelPermissions"
+                }
+              }
+            },
+            "description": "Project model permissions updated successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Modify project model permissions",
+        "tags": [
+          "Projects"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl -X POST https://api.openai.com/v1/organization/projects/proj_abc/model_permissions \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n      \"mode\": \"deny_list\",\n      \"model_ids\": [\n          \"o3\"\n      ]\n  }'\n"
+            },
+            "response": "{\n    \"object\": \"project.model_permissions\",\n    \"mode\": \"deny_list\",\n    \"model_ids\": [\n        \"o3\"\n    ]\n}\n"
+          },
+          "group": "administration",
+          "name": "Modify project model permissions"
         }
       }
     },
@@ -52099,6 +53753,343 @@
           },
           "group": "administration",
           "name": "Retrieve project service account"
+        }
+      },
+      "post": {
+        "description": "Updates a service account in the project.",
+        "operationId": "update-project-service-account",
+        "parameters": [
+          {
+            "description": "The ID of the project.",
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The ID of the service account.",
+            "in": "path",
+            "name": "service_account_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProjectServiceAccountBody"
+              }
+            }
+          },
+          "description": "Fields to update on the service account.",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectServiceAccount"
+                }
+              }
+            },
+            "description": "Project service account updated successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Update project service account",
+        "tags": [
+          "Projects"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl -X POST https://api.openai.com/v1/organization/projects/proj_abc/service_accounts/svc_acct_abc \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n      \"name\": \"Updated service account\",\n      \"role\": \"member\"\n  }'\n"
+            },
+            "response": "{\n    \"object\": \"organization.project.service_account\",\n    \"id\": \"svc_acct_abc\",\n    \"name\": \"Updated service account\",\n    \"role\": \"member\",\n    \"created_at\": 1711471533\n}\n"
+          },
+          "group": "administration",
+          "name": "Update project service account"
+        }
+      }
+    },
+    "/organization/projects/{project_id}/spend_alerts": {
+      "get": {
+        "description": "Lists project spend alerts.",
+        "operationId": "list-project-spend-alerts",
+        "parameters": [
+          {
+            "description": "The ID of the project to inspect.",
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "A limit on the number of spend alerts to return. Defaults to 20.",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Sort order for the returned spend alerts.",
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "schema": {
+              "default": "asc",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cursor for pagination. Provide the ID of the last spend alert from the previous response to fetch the next page.",
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cursor for pagination. Provide the ID of the first spend alert from the previous response to fetch the previous page.",
+            "in": "query",
+            "name": "before",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectSpendAlertListResource"
+                }
+              }
+            },
+            "description": "Project spend alerts listed successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "List project spend alerts",
+        "tags": [
+          "Spend alerts"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl https://api.openai.com/v1/organization/projects/proj_abc/spend_alerts?limit=20&order=asc \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\"\n"
+            },
+            "response": "{\n    \"object\": \"list\",\n    \"data\": [\n        {\n            \"id\": \"alert_abc123\",\n            \"object\": \"project.spend_alert\",\n            \"threshold_amount\": 100000,\n            \"currency\": \"USD\",\n            \"interval\": \"month\",\n            \"notification_channel\": {\n                \"type\": \"email\",\n                \"recipients\": [\"finance@example.com\"],\n                \"subject_prefix\": \"OpenAI spend alert\"\n            }\n        }\n    ],\n    \"first_id\": \"alert_abc123\",\n    \"last_id\": \"alert_abc123\",\n    \"has_more\": false\n}\n"
+          },
+          "group": "administration",
+          "name": "List project spend alerts"
+        }
+      },
+      "post": {
+        "description": "Creates a project spend alert.",
+        "operationId": "create-project-spend-alert",
+        "parameters": [
+          {
+            "description": "The ID of the project to update.",
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSpendAlertBody"
+              }
+            }
+          },
+          "description": "Parameters for the project spend alert you want to create.",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectSpendAlert"
+                }
+              }
+            },
+            "description": "Project spend alert created successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Create project spend alert",
+        "tags": [
+          "Spend alerts"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl -X POST https://api.openai.com/v1/organization/projects/proj_abc/spend_alerts \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n      \"threshold_amount\": 100000,\n      \"currency\": \"USD\",\n      \"interval\": \"month\",\n      \"notification_channel\": {\n          \"type\": \"email\",\n          \"recipients\": [\"finance@example.com\"],\n          \"subject_prefix\": \"OpenAI spend alert\"\n      }\n  }'\n"
+            },
+            "response": "{\n    \"id\": \"alert_abc123\",\n    \"object\": \"project.spend_alert\",\n    \"threshold_amount\": 100000,\n    \"currency\": \"USD\",\n    \"interval\": \"month\",\n    \"notification_channel\": {\n        \"type\": \"email\",\n        \"recipients\": [\"finance@example.com\"],\n        \"subject_prefix\": \"OpenAI spend alert\"\n    }\n}\n"
+          },
+          "group": "administration",
+          "name": "Create project spend alert"
+        }
+      }
+    },
+    "/organization/projects/{project_id}/spend_alerts/{alert_id}": {
+      "delete": {
+        "description": "Deletes a project spend alert.",
+        "operationId": "delete-project-spend-alert",
+        "parameters": [
+          {
+            "description": "The ID of the project to update.",
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The ID of the spend alert to delete.",
+            "in": "path",
+            "name": "alert_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectSpendAlertDeletedResource"
+                }
+              }
+            },
+            "description": "Project spend alert deleted successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Delete project spend alert",
+        "tags": [
+          "Spend alerts"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl -X DELETE https://api.openai.com/v1/organization/projects/proj_abc/spend_alerts/alert_abc123 \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\"\n"
+            },
+            "response": "{\n    \"id\": \"alert_abc123\",\n    \"object\": \"project.spend_alert.deleted\",\n    \"deleted\": true\n}\n"
+          },
+          "group": "administration",
+          "name": "Delete project spend alert"
+        }
+      },
+      "post": {
+        "description": "Updates a project spend alert.",
+        "operationId": "update-project-spend-alert",
+        "parameters": [
+          {
+            "description": "The ID of the project to update.",
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The ID of the spend alert to update.",
+            "in": "path",
+            "name": "alert_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSpendAlertBody"
+              }
+            }
+          },
+          "description": "Fields to update on the project spend alert.",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectSpendAlert"
+                }
+              }
+            },
+            "description": "Project spend alert updated successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Update project spend alert",
+        "tags": [
+          "Spend alerts"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl -X POST https://api.openai.com/v1/organization/projects/proj_abc/spend_alerts/alert_abc123 \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n      \"threshold_amount\": 150000,\n      \"currency\": \"USD\",\n      \"interval\": \"month\",\n      \"notification_channel\": {\n          \"type\": \"email\",\n          \"recipients\": [\"finance@example.com\"],\n          \"subject_prefix\": \"OpenAI spend alert\"\n      }\n  }'\n"
+            },
+            "response": "{\n    \"id\": \"alert_abc123\",\n    \"object\": \"project.spend_alert\",\n    \"threshold_amount\": 150000,\n    \"currency\": \"USD\",\n    \"interval\": \"month\",\n    \"notification_channel\": {\n        \"type\": \"email\",\n        \"recipients\": [\"finance@example.com\"],\n        \"subject_prefix\": \"OpenAI spend alert\"\n    }\n}\n"
+          },
+          "group": "administration",
+          "name": "Update project spend alert"
         }
       }
     },
@@ -52611,6 +54602,52 @@
           "name": "Delete organization role"
         }
       },
+      "get": {
+        "description": "Retrieves an organization role.",
+        "operationId": "retrieve-role",
+        "parameters": [
+          {
+            "description": "The ID of the role to retrieve.",
+            "in": "path",
+            "name": "role_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Role"
+                }
+              }
+            },
+            "description": "Role retrieved successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Retrieve organization role",
+        "tags": [
+          "Roles"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl https://api.openai.com/v1/organization/roles/role_01J1F8ROLE01 \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\"\n"
+            },
+            "response": "{\n    \"object\": \"role\",\n    \"id\": \"role_01J1F8ROLE01\",\n    \"name\": \"API Group Manager\",\n    \"description\": \"Allows managing organization groups\",\n    \"permissions\": [\n        \"api.groups.read\",\n        \"api.groups.write\"\n    ],\n    \"resource_type\": \"api.organization\",\n    \"predefined_role\": false\n}\n"
+          },
+          "group": "administration",
+          "name": "Retrieve organization role"
+        }
+      },
       "post": {
         "description": "Updates an existing organization role.",
         "operationId": "update-role",
@@ -52666,6 +54703,239 @@
           },
           "group": "administration",
           "name": "Update organization role"
+        }
+      }
+    },
+    "/organization/spend_alerts": {
+      "get": {
+        "description": "Lists organization spend alerts.",
+        "operationId": "list-organization-spend-alerts",
+        "parameters": [
+          {
+            "description": "A limit on the number of spend alerts to return. Defaults to 20.",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Sort order for the returned spend alerts.",
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "schema": {
+              "default": "asc",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cursor for pagination. Provide the ID of the last spend alert from the previous response to fetch the next page.",
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Cursor for pagination. Provide the ID of the first spend alert from the previous response to fetch the previous page.",
+            "in": "query",
+            "name": "before",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationSpendAlertListResource"
+                }
+              }
+            },
+            "description": "Organization spend alerts listed successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "List organization spend alerts",
+        "tags": [
+          "Spend alerts"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl https://api.openai.com/v1/organization/spend_alerts?limit=20&order=asc \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\"\n"
+            },
+            "response": "{\n    \"object\": \"list\",\n    \"data\": [\n        {\n            \"id\": \"alert_abc123\",\n            \"object\": \"organization.spend_alert\",\n            \"threshold_amount\": 100000,\n            \"currency\": \"USD\",\n            \"interval\": \"month\",\n            \"notification_channel\": {\n                \"type\": \"email\",\n                \"recipients\": [\"finance@example.com\"],\n                \"subject_prefix\": \"OpenAI spend alert\"\n            }\n        }\n    ],\n    \"first_id\": \"alert_abc123\",\n    \"last_id\": \"alert_abc123\",\n    \"has_more\": false\n}\n"
+          },
+          "group": "administration",
+          "name": "List organization spend alerts"
+        }
+      },
+      "post": {
+        "description": "Creates an organization spend alert.",
+        "operationId": "create-organization-spend-alert",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSpendAlertBody"
+              }
+            }
+          },
+          "description": "Parameters for the organization spend alert you want to create.",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationSpendAlert"
+                }
+              }
+            },
+            "description": "Organization spend alert created successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Create organization spend alert",
+        "tags": [
+          "Spend alerts"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl -X POST https://api.openai.com/v1/organization/spend_alerts \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n      \"threshold_amount\": 100000,\n      \"currency\": \"USD\",\n      \"interval\": \"month\",\n      \"notification_channel\": {\n          \"type\": \"email\",\n          \"recipients\": [\"finance@example.com\"],\n          \"subject_prefix\": \"OpenAI spend alert\"\n      }\n  }'\n"
+            },
+            "response": "{\n    \"id\": \"alert_abc123\",\n    \"object\": \"organization.spend_alert\",\n    \"threshold_amount\": 100000,\n    \"currency\": \"USD\",\n    \"interval\": \"month\",\n    \"notification_channel\": {\n        \"type\": \"email\",\n        \"recipients\": [\"finance@example.com\"],\n        \"subject_prefix\": \"OpenAI spend alert\"\n    }\n}\n"
+          },
+          "group": "administration",
+          "name": "Create organization spend alert"
+        }
+      }
+    },
+    "/organization/spend_alerts/{alert_id}": {
+      "delete": {
+        "description": "Deletes an organization spend alert.",
+        "operationId": "delete-organization-spend-alert",
+        "parameters": [
+          {
+            "description": "The ID of the spend alert to delete.",
+            "in": "path",
+            "name": "alert_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationSpendAlertDeletedResource"
+                }
+              }
+            },
+            "description": "Organization spend alert deleted successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Delete organization spend alert",
+        "tags": [
+          "Spend alerts"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl -X DELETE https://api.openai.com/v1/organization/spend_alerts/alert_abc123 \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\"\n"
+            },
+            "response": "{\n    \"id\": \"alert_abc123\",\n    \"object\": \"organization.spend_alert.deleted\",\n    \"deleted\": true\n}\n"
+          },
+          "group": "administration",
+          "name": "Delete organization spend alert"
+        }
+      },
+      "post": {
+        "description": "Updates an organization spend alert.",
+        "operationId": "update-organization-spend-alert",
+        "parameters": [
+          {
+            "description": "The ID of the spend alert to update.",
+            "in": "path",
+            "name": "alert_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSpendAlertBody"
+              }
+            }
+          },
+          "description": "Fields to update on the organization spend alert.",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationSpendAlert"
+                }
+              }
+            },
+            "description": "Organization spend alert updated successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Update organization spend alert",
+        "tags": [
+          "Spend alerts"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl -X POST https://api.openai.com/v1/organization/spend_alerts/alert_abc123 \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n      \"threshold_amount\": 150000,\n      \"currency\": \"USD\",\n      \"interval\": \"month\",\n      \"notification_channel\": {\n          \"type\": \"email\",\n          \"recipients\": [\"finance@example.com\"],\n          \"subject_prefix\": \"OpenAI spend alert\"\n      }\n  }'\n"
+            },
+            "response": "{\n    \"id\": \"alert_abc123\",\n    \"object\": \"organization.spend_alert\",\n    \"threshold_amount\": 150000,\n    \"currency\": \"USD\",\n    \"interval\": \"month\",\n    \"notification_channel\": {\n        \"type\": \"email\",\n        \"recipients\": [\"finance@example.com\"],\n        \"subject_prefix\": \"OpenAI spend alert\"\n    }\n}\n"
+          },
+          "group": "administration",
+          "name": "Update organization spend alert"
         }
       }
     },
@@ -53416,6 +55686,161 @@
         }
       }
     },
+    "/organization/usage/file_search_calls": {
+      "get": {
+        "description": "Get file search calls usage details for the organization.",
+        "operationId": "usage-file-search-calls",
+        "parameters": [
+          {
+            "description": "Start time (Unix seconds) of the query time range, inclusive.",
+            "in": "query",
+            "name": "start_time",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "End time (Unix seconds) of the query time range, exclusive.",
+            "in": "query",
+            "name": "end_time",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Width of each time bucket in response. Currently `1m`, `1h` and `1d` are supported, default to `1d`.",
+            "in": "query",
+            "name": "bucket_width",
+            "required": false,
+            "schema": {
+              "default": "1d",
+              "enum": [
+                "1m",
+                "1h",
+                "1d"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Return only usage for these projects.",
+            "in": "query",
+            "name": "project_ids",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Return only usage for these users.",
+            "in": "query",
+            "name": "user_ids",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Return only usage for these API keys.",
+            "in": "query",
+            "name": "api_key_ids",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Return only usage for these vector stores.",
+            "in": "query",
+            "name": "vector_store_ids",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Group the usage data by the specified fields. Support fields include `project_id`, `user_id`, `api_key_id`, `vector_store_id` or any combination of them.",
+            "in": "query",
+            "name": "group_by",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "project_id",
+                  "user_id",
+                  "api_key_id",
+                  "vector_store_id"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Specifies the number of buckets to return.\n- `bucket_width=1d`: default: 7, max: 31\n- `bucket_width=1h`: default: 24, max: 168\n- `bucket_width=1m`: default: 60, max: 1440\n",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "A cursor for use in pagination. Corresponding to the `next_page` field from the previous response.",
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageResponse"
+                }
+              }
+            },
+            "description": "Usage data retrieved successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "File search calls",
+        "tags": [
+          "Usage"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl \"https://api.openai.com/v1/organization/usage/file_search_calls?start_time=1730419200&limit=1\" \\\n-H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n-H \"Content-Type: application/json\"\n"
+            },
+            "response": "{\n    \"object\": \"page\",\n    \"data\": [\n        {\n            \"object\": \"bucket\",\n            \"start_time\": 1730419200,\n            \"end_time\": 1730505600,\n            \"results\": [\n                {\n                    \"object\": \"organization.usage.file_searches.result\",\n                    \"num_requests\": 2,\n                    \"project_id\": null,\n                    \"user_id\": null,\n                    \"api_key_id\": null,\n                    \"vector_store_id\": null\n                }\n            ]\n        }\n    ],\n    \"has_more\": false,\n    \"next_page\": null\n}\n"
+          },
+          "group": "usage-file-search-calls",
+          "name": "File search calls"
+        }
+      }
+    },
     "/organization/usage/images": {
       "get": {
         "description": "Get images usage details for the organization.",
@@ -53880,6 +56305,179 @@
         }
       }
     },
+    "/organization/usage/web_search_calls": {
+      "get": {
+        "description": "Get web search calls usage details for the organization.",
+        "operationId": "usage-web-search-calls",
+        "parameters": [
+          {
+            "description": "Start time (Unix seconds) of the query time range, inclusive.",
+            "in": "query",
+            "name": "start_time",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "End time (Unix seconds) of the query time range, exclusive.",
+            "in": "query",
+            "name": "end_time",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Width of each time bucket in response. Currently `1m`, `1h` and `1d` are supported, default to `1d`.",
+            "in": "query",
+            "name": "bucket_width",
+            "required": false,
+            "schema": {
+              "default": "1d",
+              "enum": [
+                "1m",
+                "1h",
+                "1d"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Return only usage for these projects.",
+            "in": "query",
+            "name": "project_ids",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Return only usage for these users.",
+            "in": "query",
+            "name": "user_ids",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Return only usage for these API keys.",
+            "in": "query",
+            "name": "api_key_ids",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Return only usage for these models.",
+            "in": "query",
+            "name": "models",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Return only web search usage for these context levels.",
+            "in": "query",
+            "name": "context_levels",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "low",
+                  "medium",
+                  "high"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Group the usage data by the specified fields. Support fields include `project_id`, `user_id`, `api_key_id`, `model`, `context_level` or any combination of them.",
+            "in": "query",
+            "name": "group_by",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "project_id",
+                  "user_id",
+                  "api_key_id",
+                  "model",
+                  "context_level"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Specifies the number of buckets to return.\n- `bucket_width=1d`: default: 7, max: 31\n- `bucket_width=1h`: default: 24, max: 168\n- `bucket_width=1m`: default: 60, max: 1440\n",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "A cursor for use in pagination. Corresponding to the `next_page` field from the previous response.",
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageResponse"
+                }
+              }
+            },
+            "description": "Usage data retrieved successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Web search calls",
+        "tags": [
+          "Usage"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl \"https://api.openai.com/v1/organization/usage/web_search_calls?start_time=1730419200&limit=1\" \\\n-H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n-H \"Content-Type: application/json\"\n"
+            },
+            "response": "{\n    \"object\": \"page\",\n    \"data\": [\n        {\n            \"object\": \"bucket\",\n            \"start_time\": 1730419200,\n            \"end_time\": 1730505600,\n            \"results\": [\n                {\n                    \"object\": \"organization.usage.web_searches.result\",\n                    \"num_model_requests\": 2,\n                    \"num_requests\": 2,\n                    \"project_id\": null,\n                    \"user_id\": null,\n                    \"api_key_id\": null,\n                    \"model\": null,\n                    \"context_level\": null\n                }\n            ]\n        }\n    ],\n    \"has_more\": false,\n    \"next_page\": null\n}\n"
+          },
+          "group": "usage-web-search-calls",
+          "name": "Web search calls"
+        }
+      }
+    },
     "/organization/users": {
       "get": {
         "description": "Lists all of the users in the organization.",
@@ -54294,6 +56892,61 @@
           "group": "administration",
           "name": "Unassign organization role from user"
         }
+      },
+      "get": {
+        "description": "Retrieves an organization role assigned to a user.",
+        "operationId": "retrieve-user-role",
+        "parameters": [
+          {
+            "description": "The ID of the user to inspect.",
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The ID of the organization role to retrieve for the user.",
+            "in": "path",
+            "name": "role_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignedRoleDetails"
+                }
+              }
+            },
+            "description": "Organization role retrieved for the user successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Retrieve user organization role",
+        "tags": [
+          "User organization role assignments"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl https://api.openai.com/v1/organization/users/user_abc123/roles/role_01J1F8ROLE01 \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\"\n"
+            },
+            "response": "{\n    \"id\": \"role_01J1F8ROLE01\",\n    \"name\": \"API Group Manager\",\n    \"permissions\": [\n        \"api.groups.read\",\n        \"api.groups.write\"\n    ],\n    \"resource_type\": \"api.organization\",\n    \"predefined_role\": false,\n    \"description\": \"Allows managing organization groups\",\n    \"created_at\": 1711471533,\n    \"updated_at\": 1711472599,\n    \"created_by\": \"user_abc123\",\n    \"created_by_user_obj\": null,\n    \"metadata\": {},\n    \"assignment_sources\": null\n}\n"
+          },
+          "group": "administration",
+          "name": "Retrieve user organization role"
+        }
       }
     },
     "/projects/{project_id}/groups/{group_id}/roles": {
@@ -54516,6 +57169,70 @@
           "group": "administration",
           "name": "Unassign project role from group"
         }
+      },
+      "get": {
+        "description": "Retrieves a project role assigned to a group.",
+        "operationId": "retrieve-project-group-role",
+        "parameters": [
+          {
+            "description": "The ID of the project to inspect.",
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The ID of the group to inspect.",
+            "in": "path",
+            "name": "group_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The ID of the project role to retrieve for the group.",
+            "in": "path",
+            "name": "role_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignedRoleDetails"
+                }
+              }
+            },
+            "description": "Project role retrieved for the group successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Retrieve project group role",
+        "tags": [
+          "Project group role assignments"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl https://api.openai.com/v1/projects/proj_abc123/groups/group_01J1F8ABCDXYZ/roles/role_01J1F8PROJ \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\"\n"
+            },
+            "response": "{\n    \"id\": \"role_01J1F8PROJ\",\n    \"name\": \"API Project Key Manager\",\n    \"permissions\": [\n        \"api.organization.projects.api_keys.read\",\n        \"api.organization.projects.api_keys.write\"\n    ],\n    \"resource_type\": \"api.project\",\n    \"predefined_role\": false,\n    \"description\": \"Allows managing API keys for the project\",\n    \"created_at\": 1711471533,\n    \"updated_at\": 1711472599,\n    \"created_by\": \"user_abc123\",\n    \"created_by_user_obj\": null,\n    \"metadata\": {},\n    \"assignment_sources\": null\n}\n"
+          },
+          "group": "administration",
+          "name": "Retrieve project group role"
+        }
       }
     },
     "/projects/{project_id}/roles": {
@@ -54712,6 +57429,61 @@
           },
           "group": "administration",
           "name": "Delete project role"
+        }
+      },
+      "get": {
+        "description": "Retrieves a project role.",
+        "operationId": "retrieve-project-role",
+        "parameters": [
+          {
+            "description": "The ID of the project.",
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The ID of the role to retrieve.",
+            "in": "path",
+            "name": "role_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Role"
+                }
+              }
+            },
+            "description": "Project role retrieved successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Retrieve project role",
+        "tags": [
+          "Roles"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl https://api.openai.com/v1/projects/proj_abc123/roles/role_01J1F8PROJ \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\"\n"
+            },
+            "response": "{\n    \"object\": \"role\",\n    \"id\": \"role_01J1F8PROJ\",\n    \"name\": \"API Project Key Manager\",\n    \"description\": \"Allows managing API keys for the project\",\n    \"permissions\": [\n        \"api.organization.projects.api_keys.read\",\n        \"api.organization.projects.api_keys.write\"\n    ],\n    \"resource_type\": \"api.project\",\n    \"predefined_role\": false\n}\n"
+          },
+          "group": "administration",
+          "name": "Retrieve project role"
         }
       },
       "post": {
@@ -55000,6 +57772,70 @@
           },
           "group": "administration",
           "name": "Unassign project role from user"
+        }
+      },
+      "get": {
+        "description": "Retrieves a project role assigned to a user.",
+        "operationId": "retrieve-project-user-role",
+        "parameters": [
+          {
+            "description": "The ID of the project to inspect.",
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The ID of the user to inspect.",
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The ID of the project role to retrieve for the user.",
+            "in": "path",
+            "name": "role_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignedRoleDetails"
+                }
+              }
+            },
+            "description": "Project role retrieved for the user successfully."
+          }
+        },
+        "security": [
+          {
+            "AdminApiKeyAuth": []
+          }
+        ],
+        "summary": "Retrieve project user role",
+        "tags": [
+          "Project user role assignments"
+        ],
+        "x-oaiMeta": {
+          "examples": {
+            "request": {
+              "curl": "curl https://api.openai.com/v1/projects/proj_abc123/users/user_abc123/roles/role_01J1F8PROJ \\\n  -H \"Authorization: Bearer $OPENAI_ADMIN_KEY\" \\\n  -H \"Content-Type: application/json\"\n"
+            },
+            "response": "{\n    \"id\": \"role_01J1F8PROJ\",\n    \"name\": \"API Project Key Manager\",\n    \"permissions\": [\n        \"api.organization.projects.api_keys.read\",\n        \"api.organization.projects.api_keys.write\"\n    ],\n    \"resource_type\": \"api.project\",\n    \"predefined_role\": false,\n    \"description\": \"Allows managing API keys for the project\",\n    \"created_at\": 1711471533,\n    \"updated_at\": 1711472599,\n    \"created_by\": \"user_abc123\",\n    \"created_by_user_obj\": null,\n    \"metadata\": {},\n    \"assignment_sources\": null\n}\n"
+          },
+          "group": "administration",
+          "name": "Retrieve project user role"
         }
       }
     },

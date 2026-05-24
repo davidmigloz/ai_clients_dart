@@ -376,6 +376,35 @@ void main() {
       expect(request.model, equals('gpt-5.1-codex-max'));
       expect(request.input, isA<ResponseInputText>());
     });
+
+    test('serializes and deserializes service_tier', () {
+      const request = CompactResponseRequest(
+        model: 'gpt-5.1-codex-max',
+        serviceTier: ServiceTier.flex,
+      );
+
+      final json = request.toJson();
+      expect(json['service_tier'], equals('flex'));
+
+      final restored = CompactResponseRequest.fromJson(json);
+      expect(restored.serviceTier, equals(ServiceTier.flex));
+    });
+
+    test('omits service_tier when null', () {
+      const request = CompactResponseRequest(model: 'gpt-5.1-codex-max');
+
+      expect(request.toJson().containsKey('service_tier'), isFalse);
+    });
+
+    test('copyWith can clear service_tier', () {
+      const request = CompactResponseRequest(
+        model: 'gpt-5.1-codex-max',
+        serviceTier: ServiceTier.priority,
+      );
+
+      final cleared = request.copyWith(serviceTier: null);
+      expect(cleared.serviceTier, isNull);
+    });
   });
 
   group('ResponseCompaction', () {
@@ -884,6 +913,23 @@ void main() {
       const item = ItemReference(id: 'item_123');
 
       expect(item.id, equals('item_123'));
+    });
+
+    test('parses and serializes compaction trigger item', () {
+      final item = Item.fromJson(const {'type': 'compaction_trigger'});
+
+      expect(item, isA<CompactionTriggerItem>());
+      expect(item.toJson(), equals({'type': 'compaction_trigger'}));
+    });
+
+    test('compaction trigger as final item in ResponseInput', () {
+      final input = ResponseInput.items([
+        MessageItem.userText('Summarize'),
+        const CompactionTriggerItem(),
+      ]);
+
+      final json = input.toJson() as List;
+      expect(json.last, equals({'type': 'compaction_trigger'}));
     });
 
     test('FunctionCallItem.argumentsMap parses JSON arguments', () {
