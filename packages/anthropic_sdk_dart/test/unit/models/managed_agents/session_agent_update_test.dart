@@ -90,6 +90,20 @@ void main() {
       expect(copied.mcpServers, equals(update.mcpServers));
     });
 
+    test('copyWith can clear a field back to null (omit/preserve)', () {
+      const update = SessionAgentUpdate(tools: [], mcpServers: []);
+
+      // Omitting an argument preserves the existing value...
+      final preserved = update.copyWith(tools: const []);
+      expect(preserved.mcpServers, isEmpty);
+
+      // ...while explicitly passing null clears it (omit-to-preserve on wire).
+      final cleared = update.copyWith(tools: null);
+      expect(cleared.tools, isNull);
+      expect(cleared.toJson().containsKey('tools'), isFalse);
+      expect(cleared.mcpServers, isEmpty);
+    });
+
     test('toString includes fields', () {
       const update = SessionAgentUpdate(tools: []);
       expect(update.toString(), contains('SessionAgentUpdate'));

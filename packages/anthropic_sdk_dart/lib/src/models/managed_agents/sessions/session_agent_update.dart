@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
 import '../config/agent_tool.dart';
 import '../config/mcp_server.dart';
@@ -51,13 +52,21 @@ class SessionAgentUpdate {
   };
 
   /// Creates a copy with replaced values.
+  ///
+  /// Uses the [unsetCopyWithValue] sentinel so callers can both preserve the
+  /// existing value (omit the argument) and explicitly set a field back to
+  /// `null` (omit/preserve semantics on the wire).
   SessionAgentUpdate copyWith({
-    List<AgentToolParams>? tools,
-    List<MCPServerParams>? mcpServers,
+    Object? tools = unsetCopyWithValue,
+    Object? mcpServers = unsetCopyWithValue,
   }) {
     return SessionAgentUpdate(
-      tools: tools ?? this.tools,
-      mcpServers: mcpServers ?? this.mcpServers,
+      tools: tools == unsetCopyWithValue
+          ? this.tools
+          : (tools as List?)?.cast<AgentToolParams>(),
+      mcpServers: mcpServers == unsetCopyWithValue
+          ? this.mcpServers
+          : (mcpServers as List?)?.cast<MCPServerParams>(),
     );
   }
 
