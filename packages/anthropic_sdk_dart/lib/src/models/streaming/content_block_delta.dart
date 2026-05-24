@@ -132,23 +132,43 @@ class ThinkingDelta extends ContentBlockDelta {
   /// The thinking content.
   final String thinking;
 
+  /// A coarse, lossy display hint for the number of thinking tokens so far.
+  ///
+  /// Populated only when the `thinking-token-count-2026-05-13` beta header is
+  /// set and `thinking.display` resolves to `"omitted"`. The value is a rough
+  /// estimate intended for UI display (increments are summed across frames),
+  /// NOT a billable count — `usage.output_tokens` remains authoritative.
+  final int? estimatedTokens;
+
   /// Creates a [ThinkingDelta].
-  const ThinkingDelta(this.thinking);
+  const ThinkingDelta(this.thinking, {this.estimatedTokens});
 
   /// Creates a [ThinkingDelta] from JSON.
   factory ThinkingDelta.fromJson(Map<String, dynamic> json) {
-    return ThinkingDelta(json['thinking'] as String);
+    return ThinkingDelta(
+      json['thinking'] as String,
+      estimatedTokens: json['estimated_tokens'] as int?,
+    );
   }
 
   @override
   Map<String, dynamic> toJson() => {
     'type': 'thinking_delta',
     'thinking': thinking,
+    if (estimatedTokens != null) 'estimated_tokens': estimatedTokens,
   };
 
   /// Creates a copy with replaced values.
-  ThinkingDelta copyWith({String? thinking}) {
-    return ThinkingDelta(thinking ?? this.thinking);
+  ThinkingDelta copyWith({
+    String? thinking,
+    Object? estimatedTokens = unsetCopyWithValue,
+  }) {
+    return ThinkingDelta(
+      thinking ?? this.thinking,
+      estimatedTokens: estimatedTokens == unsetCopyWithValue
+          ? this.estimatedTokens
+          : estimatedTokens as int?,
+    );
   }
 
   @override
@@ -156,13 +176,16 @@ class ThinkingDelta extends ContentBlockDelta {
       identical(this, other) ||
       other is ThinkingDelta &&
           runtimeType == other.runtimeType &&
-          thinking == other.thinking;
+          thinking == other.thinking &&
+          estimatedTokens == other.estimatedTokens;
 
   @override
-  int get hashCode => thinking.hashCode;
+  int get hashCode => Object.hash(thinking, estimatedTokens);
 
   @override
-  String toString() => 'ThinkingDelta(thinking: [${thinking.length} chars])';
+  String toString() =>
+      'ThinkingDelta(thinking: [${thinking.length} chars], '
+      'estimatedTokens: $estimatedTokens)';
 }
 
 /// Delta for compaction content updates (beta).

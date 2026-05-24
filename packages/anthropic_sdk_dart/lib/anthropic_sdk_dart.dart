@@ -133,6 +133,7 @@ export 'src/models/managed_agents/resources/session_resource.dart';
 export 'src/models/managed_agents/resources/session_resource_params.dart';
 export 'src/models/managed_agents/sessions/create_session_params.dart';
 export 'src/models/managed_agents/sessions/session.dart';
+export 'src/models/managed_agents/sessions/session_agent_update.dart';
 export 'src/models/managed_agents/sessions/session_list_response.dart';
 export 'src/models/managed_agents/sessions/session_thread.dart';
 export 'src/models/managed_agents/sessions/session_thread_list_response.dart';
@@ -144,6 +145,9 @@ export 'src/models/managed_agents/vaults/vault_list_response.dart';
 export 'src/models/managed_agents/webhooks/webhook_event.dart';
 
 // Models - Messages
+export 'src/models/messages/cache_miss_reason.dart';
+export 'src/models/messages/diagnostics.dart';
+export 'src/models/messages/diagnostics_param.dart';
 export 'src/models/messages/input_message.dart';
 export 'src/models/messages/message.dart';
 export 'src/models/messages/message_create_request.dart';

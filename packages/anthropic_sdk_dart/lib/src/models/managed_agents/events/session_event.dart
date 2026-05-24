@@ -5,6 +5,7 @@ import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
 import '../config/agent_tool.dart' show AgentEvaluatedPermission;
 import '../outcomes/rubric.dart';
+import '../sessions/session.dart' show SessionAgent;
 import 'telemetry.dart';
 
 /// Server-sent event in a managed agents session.
@@ -24,6 +25,7 @@ import 'telemetry.dart';
 /// - [UserInterruptEvent] — user interrupt.
 /// - [UserToolConfirmationEvent] — user tool confirmation.
 /// - [UserCustomToolResultEvent] — user custom tool result.
+/// - [UserToolResultEvent] — user tool result.
 /// - [SessionStatusRunningEvent] — session is running.
 /// - [SessionStatusIdleEvent] — session is idle.
 /// - [SessionStatusRescheduledEvent] — session rescheduled.
@@ -35,6 +37,7 @@ import 'telemetry.dart';
 /// - [SessionThreadStatusTerminatedEvent] — a thread terminated.
 /// - [SessionErrorEvent] — session error.
 /// - [SessionDeletedEvent] — session deleted.
+/// - [SessionUpdatedEvent] — an UpdateSession request changed a field.
 /// - [SpanModelRequestStartEvent] — model request started.
 /// - [SpanModelRequestEndEvent] — model request completed.
 /// - [SpanOutcomeEvaluationStartEvent] — outcome evaluation cycle began.
@@ -65,6 +68,7 @@ sealed class SessionEvent {
       'user.interrupt' => UserInterruptEvent.fromJson(json),
       'user.tool_confirmation' => UserToolConfirmationEvent.fromJson(json),
       'user.custom_tool_result' => UserCustomToolResultEvent.fromJson(json),
+      'user.tool_result' => UserToolResultEvent.fromJson(json),
       'session.status_running' => SessionStatusRunningEvent.fromJson(json),
       'session.status_idle' => SessionStatusIdleEvent.fromJson(json),
       'session.status_rescheduled' => SessionStatusRescheduledEvent.fromJson(
@@ -85,6 +89,7 @@ sealed class SessionEvent {
         SessionThreadStatusTerminatedEvent.fromJson(json),
       'session.error' => SessionErrorEvent.fromJson(json),
       'session.deleted' => SessionDeletedEvent.fromJson(json),
+      'session.updated' => SessionUpdatedEvent.fromJson(json),
       'span.model_request_start' => SpanModelRequestStartEvent.fromJson(json),
       'span.model_request_end' => SpanModelRequestEndEvent.fromJson(json),
       'span.outcome_evaluation_start' =>
@@ -1242,6 +1247,122 @@ class UserCustomToolResultEvent extends SessionEvent {
       'sessionThreadId: $sessionThreadId)';
 }
 
+/// Tool result event sent by the client for a generic tool use.
+@immutable
+class UserToolResultEvent extends SessionEvent {
+  /// The event type, always 'user.tool_result'.
+  String get type => 'user.tool_result';
+
+  /// Unique identifier for this event.
+  final String id;
+
+  /// The id of the tool_use event this result corresponds to.
+  final String toolUseId;
+
+  /// The result content returned by the tool.
+  final List<Map<String, dynamic>>? content;
+
+  /// Whether the tool execution resulted in an error.
+  final bool? isError;
+
+  /// Timestamp when this result was processed.
+  final BetaTimestamp? processedAt;
+
+  /// ID of the session thread this event belongs to, if any.
+  final String? sessionThreadId;
+
+  /// Creates a [UserToolResultEvent].
+  const UserToolResultEvent({
+    required this.id,
+    required this.toolUseId,
+    this.content,
+    this.isError,
+    this.processedAt,
+    this.sessionThreadId,
+  });
+
+  /// Creates a [UserToolResultEvent] from JSON.
+  factory UserToolResultEvent.fromJson(Map<String, dynamic> json) {
+    return UserToolResultEvent(
+      id: json['id'] as String,
+      toolUseId: json['tool_use_id'] as String,
+      content: (json['content'] as List?)
+          ?.map((e) => e as Map<String, dynamic>)
+          .toList(),
+      isError: json['is_error'] as bool?,
+      processedAt: json['processed_at'] != null
+          ? DateTime.parse(json['processed_at'] as String)
+          : null,
+      sessionThreadId: json['session_thread_id'] as String?,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'tool_use_id': toolUseId,
+    if (content != null) 'content': content,
+    if (isError != null) 'is_error': isError,
+    if (processedAt != null)
+      'processed_at': processedAt!.toUtc().toIso8601String(),
+    if (sessionThreadId != null) 'session_thread_id': sessionThreadId,
+  };
+
+  /// Creates a copy with replaced values.
+  UserToolResultEvent copyWith({
+    String? id,
+    String? toolUseId,
+    Object? content = unsetCopyWithValue,
+    Object? isError = unsetCopyWithValue,
+    Object? processedAt = unsetCopyWithValue,
+    Object? sessionThreadId = unsetCopyWithValue,
+  }) {
+    return UserToolResultEvent(
+      id: id ?? this.id,
+      toolUseId: toolUseId ?? this.toolUseId,
+      content: content == unsetCopyWithValue
+          ? this.content
+          : content as List<Map<String, dynamic>>?,
+      isError: isError == unsetCopyWithValue ? this.isError : isError as bool?,
+      processedAt: processedAt == unsetCopyWithValue
+          ? this.processedAt
+          : processedAt as BetaTimestamp?,
+      sessionThreadId: sessionThreadId == unsetCopyWithValue
+          ? this.sessionThreadId
+          : sessionThreadId as String?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserToolResultEvent &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          toolUseId == other.toolUseId &&
+          listOfMapsDeepEqual(content, other.content) &&
+          isError == other.isError &&
+          processedAt == other.processedAt &&
+          sessionThreadId == other.sessionThreadId;
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    toolUseId,
+    listOfMapsHashCode(content),
+    isError,
+    processedAt,
+    sessionThreadId,
+  );
+
+  @override
+  String toString() =>
+      'UserToolResultEvent(id: $id, toolUseId: $toolUseId, '
+      'content: $content, isError: $isError, processedAt: $processedAt, '
+      'sessionThreadId: $sessionThreadId)';
+}
+
 // ---------------------------------------------------------------------------
 // Session status events
 // ---------------------------------------------------------------------------
@@ -1767,6 +1888,101 @@ class SessionDeletedEvent extends SessionEvent {
   @override
   String toString() =>
       'SessionDeletedEvent(id: $id, processedAt: $processedAt)';
+}
+
+/// Emitted when an UpdateSession request changed at least one field.
+@immutable
+class SessionUpdatedEvent extends SessionEvent {
+  /// The event type, always 'session.updated'.
+  String get type => 'session.updated';
+
+  /// Unique identifier for this event.
+  final String id;
+
+  /// Timestamp when the update was processed.
+  final BetaTimestamp processedAt;
+
+  /// The updated agent configuration, if the agent changed.
+  final SessionAgent? agent;
+
+  /// The updated session metadata, if it changed.
+  final Map<String, String>? metadata;
+
+  /// The updated session title, if it changed.
+  final String? title;
+
+  /// Creates a [SessionUpdatedEvent].
+  const SessionUpdatedEvent({
+    required this.id,
+    required this.processedAt,
+    this.agent,
+    this.metadata,
+    this.title,
+  });
+
+  /// Creates a [SessionUpdatedEvent] from JSON.
+  factory SessionUpdatedEvent.fromJson(Map<String, dynamic> json) {
+    return SessionUpdatedEvent(
+      id: json['id'] as String,
+      processedAt: DateTime.parse(json['processed_at'] as String),
+      agent: json['agent'] != null
+          ? SessionAgent.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
+      metadata: (json['metadata'] as Map<String, dynamic>?)?.map(
+        (k, v) => MapEntry(k, v as String),
+      ),
+      title: json['title'] as String?,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'processed_at': processedAt.toUtc().toIso8601String(),
+    if (agent != null) 'agent': agent!.toJson(),
+    if (metadata != null) 'metadata': metadata,
+    if (title != null) 'title': title,
+  };
+
+  /// Creates a copy with replaced values.
+  SessionUpdatedEvent copyWith({
+    String? id,
+    BetaTimestamp? processedAt,
+    Object? agent = unsetCopyWithValue,
+    Object? metadata = unsetCopyWithValue,
+    Object? title = unsetCopyWithValue,
+  }) {
+    return SessionUpdatedEvent(
+      id: id ?? this.id,
+      processedAt: processedAt ?? this.processedAt,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as SessionAgent?,
+      metadata: metadata == unsetCopyWithValue
+          ? this.metadata
+          : metadata as Map<String, String>?,
+      title: title == unsetCopyWithValue ? this.title : title as String?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SessionUpdatedEvent &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          processedAt == other.processedAt &&
+          agent == other.agent &&
+          mapsEqual(metadata, other.metadata) &&
+          title == other.title;
+
+  @override
+  int get hashCode =>
+      Object.hash(id, processedAt, agent, mapHash(metadata), title);
+
+  @override
+  String toString() =>
+      'SessionUpdatedEvent(id: $id, processedAt: $processedAt, '
+      'agent: $agent, metadata: $metadata, title: $title)';
 }
 
 // ---------------------------------------------------------------------------

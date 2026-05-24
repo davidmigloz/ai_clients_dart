@@ -34,6 +34,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Messages with typed inputs, system prompts, and multi-turn history
 - SSE streaming with cancelation and token counting
 - Extended thinking and adaptive thinking controls
+- Prompt-cache diagnostics: report why the cache prefix diverged between turns (beta)
 
 ### Tools and multimodal
 
@@ -665,6 +666,7 @@ See the [example/](example/) directory for complete examples:
 | [`advisor_example.dart`](example/advisor_example.dart) | Advisor tool (beta) |
 | [`computer_use_example.dart`](example/computer_use_example.dart) | Computer use tool |
 | [`thinking_example.dart`](example/thinking_example.dart) | Extended thinking |
+| [`diagnostics_example.dart`](example/diagnostics_example.dart) | Prompt-cache diagnostics: why the cache prefix diverged (beta) |
 | [`vision_example.dart`](example/vision_example.dart) | Image and document inputs |
 | [`document_example.dart`](example/document_example.dart) | Document inputs with citations |
 | [`search_result_example.dart`](example/search_result_example.dart) | Supplying your own cited `search_result` blocks (RAG) |

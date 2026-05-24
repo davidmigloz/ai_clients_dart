@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
+import 'session_agent_update.dart';
 
 /// Private sentinel to distinguish "not provided" from explicit `null`.
 const Object _notSet = Object();
@@ -26,6 +27,11 @@ class UpdateSessionParams {
       _vaultIds == _notSet ? null : _vaultIds as List<String>?;
   final Object? _vaultIds;
 
+  /// Agent configuration patch to apply to the session.
+  SessionAgentUpdate? get agent =>
+      _agent == _notSet ? null : _agent as SessionAgentUpdate?;
+  final Object? _agent;
+
   /// Creates an [UpdateSessionParams].
   ///
   /// Omit a field to preserve its current value on the server.
@@ -34,9 +40,11 @@ class UpdateSessionParams {
     Object? title = _notSet,
     Object? metadata = _notSet,
     Object? vaultIds = _notSet,
+    Object? agent = _notSet,
   }) : _title = title,
        _metadata = metadata,
-       _vaultIds = vaultIds;
+       _vaultIds = vaultIds,
+       _agent = agent;
 
   /// Creates an [UpdateSessionParams] from JSON.
   factory UpdateSessionParams.fromJson(Map<String, dynamic> json) {
@@ -50,6 +58,13 @@ class UpdateSessionParams {
       vaultIds: json.containsKey('vault_ids')
           ? (json['vault_ids'] as List?)?.map((e) => e as String).toList()
           : _notSet,
+      agent: json.containsKey('agent')
+          ? (json['agent'] != null
+                ? SessionAgentUpdate.fromJson(
+                    json['agent'] as Map<String, dynamic>,
+                  )
+                : null)
+          : _notSet,
     );
   }
 
@@ -62,6 +77,7 @@ class UpdateSessionParams {
     if (_title != _notSet) 'title': _title,
     if (_metadata != _notSet) 'metadata': _metadata,
     if (_vaultIds != _notSet) 'vault_ids': _vaultIds,
+    if (_agent != _notSet) 'agent': (_agent as SessionAgentUpdate?)?.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -69,11 +85,13 @@ class UpdateSessionParams {
     Object? title = unsetCopyWithValue,
     Object? metadata = unsetCopyWithValue,
     Object? vaultIds = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return UpdateSessionParams(
       title: title == unsetCopyWithValue ? _title : title,
       metadata: metadata == unsetCopyWithValue ? _metadata : metadata,
       vaultIds: vaultIds == unsetCopyWithValue ? _vaultIds : vaultIds,
+      agent: agent == unsetCopyWithValue ? _agent : agent,
     );
   }
 
@@ -84,13 +102,15 @@ class UpdateSessionParams {
           runtimeType == other.runtimeType &&
           _title == other._title &&
           _mapsEqualOrBothSentinel(_metadata, other._metadata) &&
-          _listsEqualOrBothSentinel(_vaultIds, other._vaultIds);
+          _listsEqualOrBothSentinel(_vaultIds, other._vaultIds) &&
+          _agent == other._agent;
 
   @override
   int get hashCode => Object.hash(
     _title,
     _metadata == _notSet ? _notSet : mapHash(metadata),
     _vaultIds == _notSet ? _notSet : listHash(vaultIds),
+    _agent,
   );
 
   @override
@@ -98,7 +118,8 @@ class UpdateSessionParams {
       'UpdateSessionParams('
       'title: $title, '
       'metadata: $metadata, '
-      'vaultIds: $vaultIds)';
+      'vaultIds: $vaultIds, '
+      'agent: $agent)';
 }
 
 bool _listsEqualOrBothSentinel(Object? a, Object? b) {

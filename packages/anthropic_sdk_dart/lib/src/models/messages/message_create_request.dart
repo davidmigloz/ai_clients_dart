@@ -9,6 +9,7 @@ import '../metadata/service_tier.dart';
 import '../metadata/speed.dart';
 import '../tools/tool_choice.dart';
 import '../tools/tool_definition.dart';
+import 'diagnostics_param.dart';
 import 'input_message.dart';
 import 'thinking_config.dart';
 
@@ -215,6 +216,13 @@ class MessageCreateRequest {
   /// Optional identifier of the end-user profile this request belongs to.
   final String? userProfileId;
 
+  /// Cache diagnostics configuration.
+  ///
+  /// Opts the request into prompt-cache diagnostics. Requires the
+  /// `cache-diagnosis-2026-04-07` beta header — pass
+  /// `betas: ['cache-diagnosis-2026-04-07']` to `messages.create`.
+  final DiagnosticsParam? diagnostics;
+
   /// Creates a [MessageCreateRequest].
   const MessageCreateRequest({
     required this.model,
@@ -237,6 +245,7 @@ class MessageCreateRequest {
     this.speed,
     this.cacheControl,
     this.userProfileId,
+    this.diagnostics,
   });
 
   /// Creates a [MessageCreateRequest] from JSON.
@@ -284,6 +293,11 @@ class MessageCreateRequest {
             )
           : null,
       userProfileId: json['user_profile_id'] as String?,
+      diagnostics: json['diagnostics'] != null
+          ? DiagnosticsParam.fromJson(
+              json['diagnostics'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
@@ -309,6 +323,7 @@ class MessageCreateRequest {
     if (speed != null) 'speed': speed!.toJson(),
     if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
     if (userProfileId != null) 'user_profile_id': userProfileId,
+    if (diagnostics != null) 'diagnostics': diagnostics!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -333,6 +348,7 @@ class MessageCreateRequest {
     Object? speed = unsetCopyWithValue,
     Object? cacheControl = unsetCopyWithValue,
     Object? userProfileId = unsetCopyWithValue,
+    Object? diagnostics = unsetCopyWithValue,
   }) {
     return MessageCreateRequest(
       model: model ?? this.model,
@@ -381,6 +397,9 @@ class MessageCreateRequest {
       userProfileId: userProfileId == unsetCopyWithValue
           ? this.userProfileId
           : userProfileId as String?,
+      diagnostics: diagnostics == unsetCopyWithValue
+          ? this.diagnostics
+          : diagnostics as DiagnosticsParam?,
     );
   }
 
@@ -408,10 +427,11 @@ class MessageCreateRequest {
           container == other.container &&
           speed == other.speed &&
           cacheControl == other.cacheControl &&
-          userProfileId == other.userProfileId;
+          userProfileId == other.userProfileId &&
+          diagnostics == other.diagnostics;
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     model,
     listHash(messages),
     maxTokens,
@@ -432,7 +452,8 @@ class MessageCreateRequest {
     speed,
     cacheControl,
     userProfileId,
-  );
+    diagnostics,
+  ]);
 
   @override
   String toString() =>
@@ -443,5 +464,5 @@ class MessageCreateRequest {
       'toolChoice: $toolChoice, tools: $tools, topP: $topP, topK: $topK, '
       'inferenceGeo: $inferenceGeo, outputConfig: $outputConfig, '
       'container: $container, speed: $speed, cacheControl: $cacheControl, '
-      'userProfileId: $userProfileId)';
+      'userProfileId: $userProfileId, diagnostics: $diagnostics)';
 }

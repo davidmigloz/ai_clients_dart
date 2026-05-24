@@ -54,6 +54,7 @@ class SendSessionEventsParams {
 /// - [UserInterruptEventParams] — send an interrupt.
 /// - [UserToolConfirmationEventParams] — confirm or deny a tool execution.
 /// - [UserCustomToolResultEventParams] — provide custom tool result.
+/// - [UserToolResultEventParams] — provide a generic tool result.
 /// - [UserDefineOutcomeEventParams] — define an outcome the agent works toward.
 /// - [UnknownEventParams] — unrecognized event type.
 sealed class EventParams {
@@ -71,6 +72,7 @@ sealed class EventParams {
       'user.custom_tool_result' => UserCustomToolResultEventParams.fromJson(
         json,
       ),
+      'user.tool_result' => UserToolResultEventParams.fromJson(json),
       'user.define_outcome' => UserDefineOutcomeEventParams.fromJson(json),
       _ => UnknownEventParams(rawJson: json),
     };
@@ -322,6 +324,81 @@ class UserCustomToolResultEventParams extends EventParams {
   @override
   String toString() =>
       'UserCustomToolResultEventParams(customToolUseId: $customToolUseId, '
+      'content: $content, isError: $isError)';
+}
+
+/// Parameters for providing a generic tool execution result.
+@immutable
+class UserToolResultEventParams extends EventParams {
+  /// The event type, always 'user.tool_result'.
+  String get type => 'user.tool_result';
+
+  /// The id of the tool_use event this result corresponds to.
+  final String toolUseId;
+
+  /// The result content returned by the tool.
+  final List<Map<String, dynamic>>? content;
+
+  /// Whether the tool execution resulted in an error.
+  final bool? isError;
+
+  /// Creates a [UserToolResultEventParams].
+  const UserToolResultEventParams({
+    required this.toolUseId,
+    this.content,
+    this.isError,
+  });
+
+  /// Creates a [UserToolResultEventParams] from JSON.
+  factory UserToolResultEventParams.fromJson(Map<String, dynamic> json) {
+    return UserToolResultEventParams(
+      toolUseId: json['tool_use_id'] as String,
+      content: (json['content'] as List?)
+          ?.map((e) => e as Map<String, dynamic>)
+          .toList(),
+      isError: json['is_error'] as bool?,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'tool_use_id': toolUseId,
+    if (content != null) 'content': content,
+    if (isError != null) 'is_error': isError,
+  };
+
+  /// Creates a copy with replaced values.
+  UserToolResultEventParams copyWith({
+    String? toolUseId,
+    Object? content = unsetCopyWithValue,
+    Object? isError = unsetCopyWithValue,
+  }) {
+    return UserToolResultEventParams(
+      toolUseId: toolUseId ?? this.toolUseId,
+      content: content == unsetCopyWithValue
+          ? this.content
+          : content as List<Map<String, dynamic>>?,
+      isError: isError == unsetCopyWithValue ? this.isError : isError as bool?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserToolResultEventParams &&
+          runtimeType == other.runtimeType &&
+          toolUseId == other.toolUseId &&
+          listOfMapsDeepEqual(content, other.content) &&
+          isError == other.isError;
+
+  @override
+  int get hashCode =>
+      Object.hash(toolUseId, listOfMapsHashCode(content), isError);
+
+  @override
+  String toString() =>
+      'UserToolResultEventParams(toolUseId: $toolUseId, '
       'content: $content, isError: $isError)';
 }
 

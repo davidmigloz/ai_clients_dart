@@ -79,6 +79,312 @@
     ]
   },
   "types": {
+    "DiagnosticsParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DiagnosticsParam",
+      "file": "lib/src/models/messages/diagnostics_param.dart",
+      "schema": "BetaDiagnosticsParam"
+    },
+    "Diagnostics": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Diagnostics",
+      "file": "lib/src/models/messages/diagnostics.dart",
+      "schema": "BetaDiagnostics"
+    },
+    "CacheMissReason": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "CacheMissReason",
+      "file": "lib/src/models/messages/cache_miss_reason.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "CacheMissModelChanged": "model_changed",
+          "CacheMissSystemChanged": "system_changed",
+          "CacheMissToolsChanged": "tools_changed",
+          "CacheMissMessagesChanged": "messages_changed",
+          "CacheMissPreviousMessageNotFound": "previous_message_not_found",
+          "CacheMissUnavailable": "unavailable"
+        }
+      }
+    },
+    "CacheMissModelChanged": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "CacheMissModelChanged",
+      "file": "lib/src/models/messages/cache_miss_reason.dart",
+      "schema": "BetaCacheMissModelChanged",
+      "parent": "CacheMissReason"
+    },
+    "CacheMissSystemChanged": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "CacheMissSystemChanged",
+      "file": "lib/src/models/messages/cache_miss_reason.dart",
+      "schema": "BetaCacheMissSystemChanged",
+      "parent": "CacheMissReason"
+    },
+    "CacheMissToolsChanged": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "CacheMissToolsChanged",
+      "file": "lib/src/models/messages/cache_miss_reason.dart",
+      "schema": "BetaCacheMissToolsChanged",
+      "parent": "CacheMissReason"
+    },
+    "CacheMissMessagesChanged": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "CacheMissMessagesChanged",
+      "file": "lib/src/models/messages/cache_miss_reason.dart",
+      "schema": "BetaCacheMissMessagesChanged",
+      "parent": "CacheMissReason"
+    },
+    "CacheMissPreviousMessageNotFound": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "CacheMissPreviousMessageNotFound",
+      "file": "lib/src/models/messages/cache_miss_reason.dart",
+      "schema": "BetaCacheMissPreviousMessageNotFound",
+      "parent": "CacheMissReason"
+    },
+    "CacheMissUnavailable": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "CacheMissUnavailable",
+      "file": "lib/src/models/messages/cache_miss_reason.dart",
+      "schema": "BetaCacheMissUnavailable",
+      "parent": "CacheMissReason"
+    },
+    "UnknownCacheMissReason": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownCacheMissReason",
+      "file": "lib/src/models/messages/cache_miss_reason.dart",
+      "schema": null,
+      "parent": "CacheMissReason",
+      "note": "Forward-compatible fallback for unrecognized cache_miss_reason types; preserves raw JSON."
+    },
+    "SessionAgentUpdate": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SessionAgentUpdate",
+      "file": "lib/src/models/managed_agents/sessions/session_agent_update.dart",
+      "schema": "BetaManagedAgentsSessionAgentUpdate"
+    },
+    "SessionUpdatedEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SessionUpdatedEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsSessionUpdatedEvent",
+      "parent": "SessionEvent"
+    },
+    "UserToolResultEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "UserToolResultEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsUserToolResultEvent",
+      "parent": "SessionEvent"
+    },
+    "UserToolResultEventParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "UserToolResultEventParams",
+      "file": "lib/src/models/managed_agents/events/send_event_params.dart",
+      "schema": "BetaManagedAgentsUserToolResultEventParams",
+      "parent": "EventParams"
+    },
+    "BetaMessage": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Message",
+      "file": "lib/src/models/messages/message.dart",
+      "schema": "BetaMessage",
+      "tags": ["acknowledged"],
+      "note": "Beta variant of Message; unified Message class covers both surfaces (diagnostics field added)."
+    },
+    "BetaThinkingContentBlockDelta": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ThinkingDelta",
+      "file": "lib/src/models/streaming/content_block_delta.dart",
+      "schema": "BetaThinkingContentBlockDelta",
+      "tags": ["acknowledged"],
+      "note": "Beta variant of ThinkingContentBlockDelta; unified ThinkingDelta covers both surfaces (estimated_tokens field added)."
+    },
+    "BetaManagedAgentsSearchResultBlock": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "schema": "BetaManagedAgentsSearchResultBlock",
+      "tags": ["acknowledged"],
+      "note": "Managed-agents content block / API wrapper - used as Map<String, dynamic>."
+    },
+    "BetaManagedAgentsSearchResultCitations": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "schema": "BetaManagedAgentsSearchResultCitations",
+      "tags": ["acknowledged"],
+      "note": "Managed-agents content block / API wrapper - used as Map<String, dynamic>."
+    },
+    "BetaManagedAgentsSearchResultContent": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "schema": "BetaManagedAgentsSearchResultContent",
+      "tags": ["acknowledged"],
+      "note": "Managed-agents content block / API wrapper - used as Map<String, dynamic>."
+    },
+    "BetaManagedAgentsAgentToolset20260401_BashInput": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "schema": "BetaManagedAgentsAgentToolset20260401_BashInput",
+      "tags": ["acknowledged"],
+      "note": "Toolset tool input schema - passed through as Map<String, dynamic>."
+    },
+    "BetaManagedAgentsAgentToolset20260401_EditInput": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "schema": "BetaManagedAgentsAgentToolset20260401_EditInput",
+      "tags": ["acknowledged"],
+      "note": "Toolset tool input schema - passed through as Map<String, dynamic>."
+    },
+    "BetaManagedAgentsAgentToolset20260401_GlobInput": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "schema": "BetaManagedAgentsAgentToolset20260401_GlobInput",
+      "tags": ["acknowledged"],
+      "note": "Toolset tool input schema - passed through as Map<String, dynamic>."
+    },
+    "BetaManagedAgentsAgentToolset20260401_GrepInput": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "schema": "BetaManagedAgentsAgentToolset20260401_GrepInput",
+      "tags": ["acknowledged"],
+      "note": "Toolset tool input schema - passed through as Map<String, dynamic>."
+    },
+    "BetaManagedAgentsAgentToolset20260401_ReadInput": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "schema": "BetaManagedAgentsAgentToolset20260401_ReadInput",
+      "tags": ["acknowledged"],
+      "note": "Toolset tool input schema - passed through as Map<String, dynamic>."
+    },
+    "BetaManagedAgentsAgentToolset20260401_WriteInput": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "schema": "BetaManagedAgentsAgentToolset20260401_WriteInput",
+      "tags": ["acknowledged"],
+      "note": "Toolset tool input schema - passed through as Map<String, dynamic>."
+    },
+    "BetaEnvironment": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "schema": "BetaEnvironment",
+      "tags": ["acknowledged"],
+      "note": "environments resource excluded - see coverage.excluded_resources."
+    },
+    "BetaPublicEnvironmentCreateRequest": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "schema": "BetaPublicEnvironmentCreateRequest",
+      "tags": ["acknowledged"],
+      "note": "environments resource excluded - see coverage.excluded_resources."
+    },
+    "BetaPublicEnvironmentUpdateRequest": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "schema": "BetaPublicEnvironmentUpdateRequest",
+      "tags": ["acknowledged"],
+      "note": "environments resource excluded - see coverage.excluded_resources."
+    },
+    "BetaSelfHostedConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "schema": "BetaSelfHostedConfig",
+      "tags": ["acknowledged"],
+      "note": "environments resource excluded - see coverage.excluded_resources."
+    },
+    "BetaSelfHostedConfigParams": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "schema": "BetaSelfHostedConfigParams",
+      "tags": ["acknowledged"],
+      "note": "environments resource excluded - see coverage.excluded_resources."
+    },
+    "BetaSelfHostedWork": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "schema": "BetaSelfHostedWork",
+      "tags": ["acknowledged"],
+      "note": "environments resource excluded - see coverage.excluded_resources."
+    },
+    "BetaSelfHostedWorkHeartbeatResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "schema": "BetaSelfHostedWorkHeartbeatResponse",
+      "tags": ["acknowledged"],
+      "note": "environments resource excluded - see coverage.excluded_resources."
+    },
+    "BetaSelfHostedWorkListResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "schema": "BetaSelfHostedWorkListResponse",
+      "tags": ["acknowledged"],
+      "note": "environments resource excluded - see coverage.excluded_resources."
+    },
+    "BetaSelfHostedWorkQueueStats": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "schema": "BetaSelfHostedWorkQueueStats",
+      "tags": ["acknowledged"],
+      "note": "environments resource excluded - see coverage.excluded_resources."
+    },
+    "BetaSelfHostedWorkStopRequest": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "schema": "BetaSelfHostedWorkStopRequest",
+      "tags": ["acknowledged"],
+      "note": "environments resource excluded - see coverage.excluded_resources."
+    },
+    "BetaSelfHostedWorkUpdateRequest": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "schema": "BetaSelfHostedWorkUpdateRequest",
+      "tags": ["acknowledged"],
+      "note": "environments resource excluded - see coverage.excluded_resources."
+    },
+    "BetaSessionWorkData": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "schema": "BetaSessionWorkData",
+      "tags": ["acknowledged"],
+      "note": "environments resource excluded - see coverage.excluded_resources."
+    },
     "Message": {
       "spec": "main",
       "kind": "object",
