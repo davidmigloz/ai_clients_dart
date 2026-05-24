@@ -21,9 +21,9 @@
           }
         },
         "schema_aliases": {
+          "BetaManagedAgentsListSessionThreadEvents": "BetaManagedAgentsListSessionEvents",
           "BetaManagedAgentsSessionThreadAgent": "BetaManagedAgentsSessionAgent",
-          "BetaManagedAgentsSessionThreadStatus": "BetaManagedAgentsSessionStatus",
-          "BetaManagedAgentsListSessionThreadEvents": "BetaManagedAgentsListSessionEvents"
+          "BetaManagedAgentsSessionThreadStatus": "BetaManagedAgentsSessionStatus"
         }
       },
       "auth_env_vars": [],
@@ -31,9 +31,9 @@
       "fetch_mode": "remote",
       "local_file": "openapi.yaml",
       "name": "Anthropic API",
-      "pinned_hash": "0df2c793ea4c3ad955e8e488be39d7041a0a95e2fe144dd69ae4d9fb72835190",
+      "pinned_hash": "945e3a57b7a6fa5974baf70845ebafdb25f185625f6e2fab98dc034e44d14a5a",
       "requires_auth": false,
-      "url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/anthropic/anthropic-0df2c793ea4c3ad955e8e488be39d7041a0a95e2fe144dd69ae4d9fb72835190.yml"
+      "url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/anthropic/anthropic-945e3a57b7a6fa5974baf70845ebafdb25f185625f6e2fab98dc034e44d14a5a.yml"
     }
   },
   "specs_dir": "packages/anthropic_sdk_dart/specs"

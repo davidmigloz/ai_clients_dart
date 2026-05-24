@@ -300,6 +300,54 @@ class SkillsResource extends ResourceBase {
     );
   }
 
+  /// Downloads the content of a specific version of a skill.
+  ///
+  /// The [skillId] is the unique identifier of the skill.
+  /// The [version] is the version identifier to download.
+  ///
+  /// Returns the version's content as a ZIP archive (raw bytes).
+  ///
+  /// This is a beta feature and requires the `anthropic-beta:
+  /// skills-2025-10-02` header (sent automatically).
+  ///
+  /// Example:
+  /// ```dart
+  /// final bytes = await client.skills.downloadVersion(
+  ///   skillId: 'skill_abc123',
+  ///   version: '1759178010641129',
+  /// );
+  /// await File('skill.zip').writeAsBytes(bytes);
+  /// ```
+  Future<Uint8List> downloadVersion({
+    required String skillId,
+    required String version,
+  }) async {
+    if (skillId.isEmpty) {
+      throw ArgumentError.value(skillId, 'skillId', 'must not be empty');
+    }
+    if (version.isEmpty) {
+      throw ArgumentError.value(version, 'version', 'must not be empty');
+    }
+
+    ensureNotClosed?.call();
+    final url = requestBuilder.buildUrl(
+      '/v1/skills/$skillId/versions/$version/content',
+    );
+    // The response is a binary ZIP archive. Widen Accept and drop the default
+    // JSON content-type (this GET has no request body), matching the binary
+    // download convention used by FilesResource.download.
+    final headers = requestBuilder.buildHeaders(
+      additionalHeaders: {'anthropic-beta': _betaHeader},
+    );
+    headers['accept'] = '*/*';
+    headers.remove('content-type');
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+
+    final response = await interceptorChain.execute(httpRequest);
+
+    return response.bodyBytes;
+  }
+
   /// Deletes a specific version of a skill.
   ///
   /// The [skillId] is the unique identifier of the skill.

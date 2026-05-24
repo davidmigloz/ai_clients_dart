@@ -6,6 +6,7 @@ import '../common/equality_helpers.dart';
 import '../content/content_block.dart';
 import '../metadata/stop_reason.dart';
 import '../metadata/usage.dart';
+import 'diagnostics.dart';
 import 'message_role.dart';
 
 /// A message response from the API.
@@ -43,6 +44,11 @@ class Message {
   /// Container metadata when server-side code execution was used.
   final Container? container;
 
+  /// Cache diagnostics, present only when requested via the
+  /// `cache-diagnosis-2026-04-07` beta header. `null` when no prompt-cache
+  /// divergence was detected.
+  final Diagnostics? diagnostics;
+
   /// Creates a [Message].
   const Message({
     required this.id,
@@ -55,6 +61,7 @@ class Message {
     this.stopSequence,
     required this.usage,
     this.container,
+    this.diagnostics,
   });
 
   /// Creates a [Message] from JSON.
@@ -82,6 +89,9 @@ class Message {
       container: json['container'] != null
           ? Container.fromJson(json['container'] as Map<String, dynamic>)
           : null,
+      diagnostics: json['diagnostics'] != null
+          ? Diagnostics.fromJson(json['diagnostics'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -97,6 +107,7 @@ class Message {
     if (stopSequence != null) 'stop_sequence': stopSequence,
     'usage': usage.toJson(),
     if (container != null) 'container': container!.toJson(),
+    if (diagnostics != null) 'diagnostics': diagnostics!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -111,6 +122,7 @@ class Message {
     Object? stopSequence = unsetCopyWithValue,
     Usage? usage,
     Object? container = unsetCopyWithValue,
+    Object? diagnostics = unsetCopyWithValue,
   }) {
     return Message(
       id: id ?? this.id,
@@ -131,6 +143,9 @@ class Message {
       container: container == unsetCopyWithValue
           ? this.container
           : container as Container?,
+      diagnostics: diagnostics == unsetCopyWithValue
+          ? this.diagnostics
+          : diagnostics as Diagnostics?,
     );
   }
 
@@ -148,7 +163,8 @@ class Message {
           stopDetails == other.stopDetails &&
           stopSequence == other.stopSequence &&
           usage == other.usage &&
-          container == other.container;
+          container == other.container &&
+          diagnostics == other.diagnostics;
 
   @override
   int get hashCode => Object.hash(
@@ -162,6 +178,7 @@ class Message {
     stopSequence,
     usage,
     container,
+    diagnostics,
   );
 
   @override
@@ -169,5 +186,5 @@ class Message {
       'Message(id: $id, type: $type, role: $role, '
       'content: $content, model: $model, stopReason: $stopReason, '
       'stopDetails: $stopDetails, stopSequence: $stopSequence, '
-      'usage: $usage, container: $container)';
+      'usage: $usage, container: $container, diagnostics: $diagnostics)';
 }

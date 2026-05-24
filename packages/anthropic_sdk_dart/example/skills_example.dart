@@ -82,7 +82,16 @@ void main() async {
         print('  - ${v.version}: ${v.description}');
       }
 
-      // Example 6: Delete version
+      // Example 6: Download a version's content (zip archive)
+      print('\n=== Download Version Content ===');
+      final contentBytes = await client.skills.downloadVersion(
+        skillId: skill.id,
+        version: version.version,
+      );
+      print('Downloaded ${contentBytes.length} bytes');
+      await File('downloaded_skill.zip').writeAsBytes(contentBytes);
+
+      // Example 7: Delete version
       print('\n=== Delete Version ===');
       await client.skills.deleteVersion(
         skillId: skill.id,
@@ -90,7 +99,7 @@ void main() async {
       );
       print('Version deleted');
 
-      // Example 7: Delete skill
+      // Example 8: Delete skill
       print('\n=== Delete Skill ===');
       await client.skills.deleteSkill(skillId: skill.id);
       print('Skill deleted');

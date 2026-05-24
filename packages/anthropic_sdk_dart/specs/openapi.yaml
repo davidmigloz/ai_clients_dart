@@ -62,7 +62,9 @@
               "output-300k-2026-03-24",
               "user-profiles-2026-03-24",
               "advisor-tool-2026-03-01",
-              "managed-agents-2026-04-01"
+              "managed-agents-2026-04-01",
+              "cache-diagnosis-2026-04-07",
+              "thinking-token-count-2026-05-13"
             ],
             "type": "string",
             "x-stainless-nominal": false
@@ -820,6 +822,120 @@
           "ephemeral_5m_input_tokens"
         ],
         "title": "CacheCreation",
+        "type": "object"
+      },
+      "BetaCacheMissMessagesChanged": {
+        "properties": {
+          "cache_missed_input_tokens": {
+            "description": "Approximate number of input tokens that would have been read from cache had the prefix matched the previous request.",
+            "title": "Cache Missed Input Tokens",
+            "type": "integer"
+          },
+          "type": {
+            "const": "messages_changed",
+            "default": "messages_changed",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "cache_missed_input_tokens",
+          "type"
+        ],
+        "title": "CacheMissMessagesChanged",
+        "type": "object"
+      },
+      "BetaCacheMissModelChanged": {
+        "properties": {
+          "cache_missed_input_tokens": {
+            "description": "Approximate number of input tokens that would have been read from cache had the prefix matched the previous request.",
+            "title": "Cache Missed Input Tokens",
+            "type": "integer"
+          },
+          "type": {
+            "const": "model_changed",
+            "default": "model_changed",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "cache_missed_input_tokens",
+          "type"
+        ],
+        "title": "CacheMissModelChanged",
+        "type": "object"
+      },
+      "BetaCacheMissPreviousMessageNotFound": {
+        "properties": {
+          "type": {
+            "const": "previous_message_not_found",
+            "default": "previous_message_not_found",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "CacheMissPreviousMessageNotFound",
+        "type": "object"
+      },
+      "BetaCacheMissSystemChanged": {
+        "properties": {
+          "cache_missed_input_tokens": {
+            "description": "Approximate number of input tokens that would have been read from cache had the prefix matched the previous request.",
+            "title": "Cache Missed Input Tokens",
+            "type": "integer"
+          },
+          "type": {
+            "const": "system_changed",
+            "default": "system_changed",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "cache_missed_input_tokens",
+          "type"
+        ],
+        "title": "CacheMissSystemChanged",
+        "type": "object"
+      },
+      "BetaCacheMissToolsChanged": {
+        "properties": {
+          "cache_missed_input_tokens": {
+            "description": "Approximate number of input tokens that would have been read from cache had the prefix matched the previous request.",
+            "title": "Cache Missed Input Tokens",
+            "type": "integer"
+          },
+          "type": {
+            "const": "tools_changed",
+            "default": "tools_changed",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "cache_missed_input_tokens",
+          "type"
+        ],
+        "title": "CacheMissToolsChanged",
+        "type": "object"
+      },
+      "BetaCacheMissUnavailable": {
+        "properties": {
+          "type": {
+            "const": "unavailable",
+            "default": "unavailable",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "CacheMissUnavailable",
         "type": "object"
       },
       "BetaCanceledResult": {
@@ -2667,6 +2783,17 @@
             ],
             "description": "Context management configuration.\n\nThis allows you to control how Claude manages context across multiple requests, such as whether to clear function results or not."
           },
+          "diagnostics": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BetaDiagnosticsParam"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Request-level diagnostics. Supply `previous_message_id` to have the response include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence from that prior request."
+          },
           "inference_geo": {
             "anyOf": [
               {
@@ -3229,6 +3356,80 @@
         "title": "DeleteSkillVersionResponse",
         "type": "object"
       },
+      "BetaDiagnostics": {
+        "description": "Response envelope for request-level diagnostics. Present (possibly\nnull) whenever the caller supplied `diagnostics` on the request.",
+        "properties": {
+          "cache_miss_reason": {
+            "anyOf": [
+              {
+                "discriminator": {
+                  "mapping": {
+                    "messages_changed": "#/components/schemas/BetaCacheMissMessagesChanged",
+                    "model_changed": "#/components/schemas/BetaCacheMissModelChanged",
+                    "previous_message_not_found": "#/components/schemas/BetaCacheMissPreviousMessageNotFound",
+                    "system_changed": "#/components/schemas/BetaCacheMissSystemChanged",
+                    "tools_changed": "#/components/schemas/BetaCacheMissToolsChanged",
+                    "unavailable": "#/components/schemas/BetaCacheMissUnavailable"
+                  },
+                  "propertyName": "type"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/BetaCacheMissModelChanged"
+                  },
+                  {
+                    "$ref": "#/components/schemas/BetaCacheMissSystemChanged"
+                  },
+                  {
+                    "$ref": "#/components/schemas/BetaCacheMissToolsChanged"
+                  },
+                  {
+                    "$ref": "#/components/schemas/BetaCacheMissMessagesChanged"
+                  },
+                  {
+                    "$ref": "#/components/schemas/BetaCacheMissPreviousMessageNotFound"
+                  },
+                  {
+                    "$ref": "#/components/schemas/BetaCacheMissUnavailable"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Explains why the prompt cache could not fully reuse the prefix from the request identified by `diagnostics.previous_message_id`. `null` means diagnosis is still pending \u2014 the response was serialized before the background comparison completed.",
+            "title": "Cache Miss Reason"
+          }
+        },
+        "required": [
+          "cache_miss_reason"
+        ],
+        "title": "Diagnostics",
+        "type": "object"
+      },
+      "BetaDiagnosticsParam": {
+        "additionalProperties": false,
+        "description": "Request-level diagnostics. Currently carries the previous response\nid for prompt-cache divergence reporting.",
+        "properties": {
+          "previous_message_id": {
+            "anyOf": [
+              {
+                "maxLength": 256,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The `id` (`msg_...`) from this client's previous /v1/messages response. The server compares that request's prompt fingerprint against this one and returns `diagnostics.cache_miss_reason` when the prompt-cache prefix could not be reused. Pass `null` on the first turn to opt in without a prior message to compare.",
+            "title": "Previous Message Id"
+          }
+        },
+        "title": "DiagnosticsParam",
+        "type": "object"
+      },
       "BetaDirectCaller": {
         "additionalProperties": false,
         "description": "Tool invocation directly from the model.",
@@ -3403,7 +3604,8 @@
             "description": "Environment configuration (either Anthropic Cloud or self-hosted)",
             "discriminator": {
               "mapping": {
-                "cloud": "#/components/schemas/BetaCloudConfig"
+                "cloud": "#/components/schemas/BetaCloudConfig",
+                "self_hosted": "#/components/schemas/BetaSelfHostedConfig"
               },
               "propertyName": "type"
             },
@@ -3435,6 +3637,9 @@
             "oneOf": [
               {
                 "$ref": "#/components/schemas/BetaCloudConfig"
+              },
+              {
+                "$ref": "#/components/schemas/BetaSelfHostedConfig"
               }
             ],
             "title": "Config"
@@ -3482,6 +3687,15 @@
               "python-data-analysis"
             ],
             "title": "Name",
+            "type": "string"
+          },
+          "scope": {
+            "description": "The visibility scope for this environment. 'organization' means visible to all accounts. 'account' means visible only to the owning account.",
+            "enum": [
+              "organization",
+              "account"
+            ],
+            "title": "Scope",
             "type": "string"
           },
           "type": {
@@ -5910,6 +6124,132 @@
         ],
         "type": "object"
       },
+      "BetaManagedAgentsAgentToolset20260401_BashInput": {
+        "additionalProperties": false,
+        "description": "Input payload for the `bash` tool of the\n`agent_toolset_20260401` toolset. All fields are optional;\na normal invocation supplies `command`, while `restart=true`\n(with no `command`) reboots the runner-side bash session.\n",
+        "properties": {
+          "command": {
+            "description": "Shell command to execute. Omit only when `restart` is true.",
+            "type": "string"
+          },
+          "restart": {
+            "description": "When true, restart the persistent bash session instead of\nrunning a command. Subsequent calls without `restart` will\nrun against the fresh session.\n",
+            "type": "boolean"
+          },
+          "timeout_ms": {
+            "description": "Per-call timeout in milliseconds. Defaults to the\nrunner-wide tool timeout when omitted or zero.\n",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "BetaManagedAgentsAgentToolset20260401_EditInput": {
+        "additionalProperties": false,
+        "description": "Input payload for the `edit` tool. Performs a string\nreplacement in the named file; by default `old_string` must\noccur exactly once.\n",
+        "properties": {
+          "file_path": {
+            "description": "Path of the file to edit.",
+            "type": "string"
+          },
+          "new_string": {
+            "description": "Replacement text.",
+            "type": "string"
+          },
+          "old_string": {
+            "description": "Substring to find and replace.",
+            "type": "string"
+          },
+          "replace_all": {
+            "description": "When true, replace every occurrence of `old_string`\ninstead of requiring a unique match.\n",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "file_path",
+          "old_string",
+          "new_string"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsAgentToolset20260401_GlobInput": {
+        "additionalProperties": false,
+        "description": "Input payload for the `glob` tool. Returns paths matching a\ndoublestar glob pattern, newest first.\n",
+        "properties": {
+          "path": {
+            "description": "Optional directory root to search under. Defaults to the\nrunner's working directory.\n",
+            "type": "string"
+          },
+          "pattern": {
+            "description": "Doublestar glob pattern (e.g. `**/*.go`). Absolute patterns\nare only permitted when the runner is configured to allow\nthem.\n",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pattern"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsAgentToolset20260401_GrepInput": {
+        "additionalProperties": false,
+        "description": "Input payload for the `grep` tool. Searches file contents for\na regular expression, returning matching lines.\n",
+        "properties": {
+          "path": {
+            "description": "Optional directory root to search under. Defaults to the\nrunner's working directory.\n",
+            "type": "string"
+          },
+          "pattern": {
+            "description": "Regular expression to search for.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pattern"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsAgentToolset20260401_ReadInput": {
+        "additionalProperties": false,
+        "description": "Input payload for the `read` tool. Reads file contents\nrelative to the runner's working directory (or absolute when\nthe runner permits).\n",
+        "properties": {
+          "file_path": {
+            "description": "Path of the file to read.",
+            "type": "string"
+          },
+          "view_range": {
+            "description": "Optional `[start_line, end_line]` 1-indexed inclusive\nrange. When omitted the entire file is returned.\n`end_line` of 0 or negative means \"to end of file\".\n",
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          }
+        },
+        "required": [
+          "file_path"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsAgentToolset20260401_WriteInput": {
+        "additionalProperties": false,
+        "description": "Input payload for the `write` tool. Writes (overwriting) the\nentire file contents.\n",
+        "properties": {
+          "content": {
+            "description": "Full file contents to write.",
+            "type": "string"
+          },
+          "file_path": {
+            "description": "Path of the file to write.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_path",
+          "content"
+        ],
+        "type": "object"
+      },
       "BetaManagedAgentsAgentToolsetDefaultConfig": {
         "additionalProperties": false,
         "description": "Resolved default configuration for agent tools.",
@@ -7459,7 +7799,8 @@
             "user.define_outcome": "#/components/schemas/BetaManagedAgentsUserDefineOutcomeEventParams",
             "user.interrupt": "#/components/schemas/BetaManagedAgentsUserInterruptEventParams",
             "user.message": "#/components/schemas/BetaManagedAgentsUserMessageEventParams",
-            "user.tool_confirmation": "#/components/schemas/BetaManagedAgentsUserToolConfirmationEventParams"
+            "user.tool_confirmation": "#/components/schemas/BetaManagedAgentsUserToolConfirmationEventParams",
+            "user.tool_result": "#/components/schemas/BetaManagedAgentsUserToolResultEventParams"
           },
           "propertyName": "type"
         },
@@ -7478,6 +7819,9 @@
           },
           {
             "$ref": "#/components/schemas/BetaManagedAgentsUserDefineOutcomeEventParams"
+          },
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsUserToolResultEventParams"
           }
         ],
         "type": "object"
@@ -7912,7 +8256,8 @@
             "user.define_outcome": "#/components/schemas/BetaManagedAgentsUserDefineOutcomeEvent",
             "user.interrupt": "#/components/schemas/BetaManagedAgentsUserInterruptEvent",
             "user.message": "#/components/schemas/BetaManagedAgentsUserMessageEvent",
-            "user.tool_confirmation": "#/components/schemas/BetaManagedAgentsUserToolConfirmationEvent"
+            "user.tool_confirmation": "#/components/schemas/BetaManagedAgentsUserToolConfirmationEvent",
+            "user.tool_result": "#/components/schemas/BetaManagedAgentsUserToolResultEvent"
           },
           "propertyName": "type"
         },
@@ -7931,6 +8276,9 @@
           },
           {
             "$ref": "#/components/schemas/BetaManagedAgentsUserDefineOutcomeEvent"
+          },
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsUserToolResultEvent"
           }
         ],
         "type": "object"
@@ -9951,7 +10299,7 @@
             "type": "string"
           },
           "result": {
-            "description": "Current evaluation state. 'pending' before the agent begins work; 'running' while producing or revising; 'evaluating' while the grader scores; 'satisfied'/'max_iterations_reached'/'failed'/'interrupted' are terminal.",
+            "description": "Current evaluation state. `pending` before the agent begins work; `running` while producing or revising; `evaluating` while the grader scores; `satisfied`/`max_iterations_reached`/`failed`/`interrupted` are terminal.",
             "examples": [
               "satisfied"
             ],
@@ -10224,6 +10572,87 @@
             "$ref": "#/components/schemas/BetaManagedAgentsTextRubricParams"
           }
         ]
+      },
+      "BetaManagedAgentsSearchResultBlock": {
+        "additionalProperties": false,
+        "description": "A block containing a web search result.",
+        "properties": {
+          "citations": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BetaManagedAgentsSearchResultCitations"
+              }
+            ],
+            "description": "Citation settings for this search result."
+          },
+          "content": {
+            "description": "Array of text content blocks from the search result.",
+            "items": {
+              "$ref": "#/components/schemas/BetaManagedAgentsSearchResultContent"
+            },
+            "type": "array"
+          },
+          "source": {
+            "description": "The URL source of the search result.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": {
+            "description": "The title of the search result.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "search_result"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "source",
+          "title",
+          "content",
+          "citations"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsSearchResultCitations": {
+        "additionalProperties": false,
+        "description": "Citation settings for a search result.",
+        "properties": {
+          "enabled": {
+            "description": "Whether citations are enabled for this search result.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsSearchResultContent": {
+        "additionalProperties": false,
+        "description": "Text content within a search result.",
+        "properties": {
+          "text": {
+            "description": "The text content.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "text"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "text"
+        ],
+        "type": "object"
       },
       "BetaManagedAgentsSendSessionEvents": {
         "additionalProperties": false,
@@ -10819,6 +11248,27 @@
         ],
         "type": "object"
       },
+      "BetaManagedAgentsSessionAgentUpdate": {
+        "additionalProperties": false,
+        "description": "Mid-session agent configuration update. Only `tools` and `mcp_servers` are updatable. Full replacement: the provided array becomes the new value. To preserve existing entries, GET the session, modify the array, and POST it back.",
+        "properties": {
+          "mcp_servers": {
+            "description": "Replacement MCP server list. Full replacement: the provided array becomes the new value. Send an empty array to clear; omit to preserve.",
+            "items": {
+              "$ref": "#/components/schemas/BetaManagedAgentsMCPServerParams"
+            },
+            "type": "array"
+          },
+          "tools": {
+            "description": "Replacement tool list. Full replacement: the provided array becomes the new value. Send an empty array to clear; omit to preserve.",
+            "items": {
+              "$ref": "#/components/schemas/BetaManagedAgentsAgentToolParams"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "BetaManagedAgentsSessionDeletedEvent": {
         "additionalProperties": false,
         "description": "Emitted when a session has been deleted. Terminates any active event stream \u2014 no further events will be emitted for this session.",
@@ -10959,6 +11409,7 @@
             "session.thread_status_rescheduled": "#/components/schemas/BetaManagedAgentsSessionThreadStatusRescheduledEvent",
             "session.thread_status_running": "#/components/schemas/BetaManagedAgentsSessionThreadStatusRunningEvent",
             "session.thread_status_terminated": "#/components/schemas/BetaManagedAgentsSessionThreadStatusTerminatedEvent",
+            "session.updated": "#/components/schemas/BetaManagedAgentsSessionUpdatedEvent",
             "span.model_request_end": "#/components/schemas/BetaManagedAgentsSpanModelRequestEndEvent",
             "span.model_request_start": "#/components/schemas/BetaManagedAgentsSpanModelRequestStartEvent",
             "span.outcome_evaluation_end": "#/components/schemas/BetaManagedAgentsSpanOutcomeEvaluationEndEvent",
@@ -10968,7 +11419,8 @@
             "user.define_outcome": "#/components/schemas/BetaManagedAgentsUserDefineOutcomeEvent",
             "user.interrupt": "#/components/schemas/BetaManagedAgentsUserInterruptEvent",
             "user.message": "#/components/schemas/BetaManagedAgentsUserMessageEvent",
-            "user.tool_confirmation": "#/components/schemas/BetaManagedAgentsUserToolConfirmationEvent"
+            "user.tool_confirmation": "#/components/schemas/BetaManagedAgentsUserToolConfirmationEvent",
+            "user.tool_result": "#/components/schemas/BetaManagedAgentsUserToolResultEvent"
           },
           "propertyName": "type"
         },
@@ -11064,7 +11516,13 @@
             "$ref": "#/components/schemas/BetaManagedAgentsSessionThreadStatusTerminatedEvent"
           },
           {
+            "$ref": "#/components/schemas/BetaManagedAgentsUserToolResultEvent"
+          },
+          {
             "$ref": "#/components/schemas/BetaManagedAgentsSessionThreadStatusRescheduledEvent"
+          },
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsSessionUpdatedEvent"
           }
         ],
         "type": "object"
@@ -12056,6 +12514,57 @@
         },
         "type": "object"
       },
+      "BetaManagedAgentsSessionUpdatedEvent": {
+        "additionalProperties": false,
+        "description": "Emitted when an UpdateSession request changed at least one field. Carries only the fields that changed; absent fields were not part of the update. The new configuration applies from the next turn.",
+        "properties": {
+          "agent": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BetaManagedAgentsSessionAgent"
+              }
+            ],
+            "description": "The session's effective agent configuration after the update. Present only when the update changed `agent` (tools or mcp_servers); when present it is the full materialised snapshot, not a diff.",
+            "nullable": true
+          },
+          "id": {
+            "description": "Unique identifier for this event.",
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "The session's full metadata bag after the update. Present when the update set non-empty metadata; absent when metadata was unchanged or cleared to empty.",
+            "type": "object"
+          },
+          "processed_at": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BetaTimestamp"
+              }
+            ],
+            "description": "Timestamp when the update was applied."
+          },
+          "title": {
+            "description": "The session's new title. Present only when the update changed it.",
+            "nullable": true,
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "session.updated"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "processed_at"
+        ],
+        "type": "object"
+      },
       "BetaManagedAgentsSessionUsage": {
         "additionalProperties": false,
         "description": "Cumulative token usage for a session across all turns.",
@@ -12614,6 +13123,7 @@
             "session.thread_status_rescheduled": "#/components/schemas/BetaManagedAgentsSessionThreadStatusRescheduledEvent",
             "session.thread_status_running": "#/components/schemas/BetaManagedAgentsSessionThreadStatusRunningEvent",
             "session.thread_status_terminated": "#/components/schemas/BetaManagedAgentsSessionThreadStatusTerminatedEvent",
+            "session.updated": "#/components/schemas/BetaManagedAgentsSessionUpdatedEvent",
             "span.model_request_end": "#/components/schemas/BetaManagedAgentsSpanModelRequestEndEvent",
             "span.model_request_start": "#/components/schemas/BetaManagedAgentsSpanModelRequestStartEvent",
             "span.outcome_evaluation_end": "#/components/schemas/BetaManagedAgentsSpanOutcomeEvaluationEndEvent",
@@ -12623,7 +13133,8 @@
             "user.define_outcome": "#/components/schemas/BetaManagedAgentsUserDefineOutcomeEvent",
             "user.interrupt": "#/components/schemas/BetaManagedAgentsUserInterruptEvent",
             "user.message": "#/components/schemas/BetaManagedAgentsUserMessageEvent",
-            "user.tool_confirmation": "#/components/schemas/BetaManagedAgentsUserToolConfirmationEvent"
+            "user.tool_confirmation": "#/components/schemas/BetaManagedAgentsUserToolConfirmationEvent",
+            "user.tool_result": "#/components/schemas/BetaManagedAgentsUserToolResultEvent"
           },
           "propertyName": "type"
         },
@@ -12719,7 +13230,13 @@
             "$ref": "#/components/schemas/BetaManagedAgentsSessionThreadStatusTerminatedEvent"
           },
           {
+            "$ref": "#/components/schemas/BetaManagedAgentsUserToolResultEvent"
+          },
+          {
             "$ref": "#/components/schemas/BetaManagedAgentsSessionThreadStatusRescheduledEvent"
+          },
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsSessionUpdatedEvent"
           }
         ],
         "type": "object"
@@ -12749,6 +13266,7 @@
             "session.thread_status_rescheduled": "#/components/schemas/BetaManagedAgentsSessionThreadStatusRescheduledEvent",
             "session.thread_status_running": "#/components/schemas/BetaManagedAgentsSessionThreadStatusRunningEvent",
             "session.thread_status_terminated": "#/components/schemas/BetaManagedAgentsSessionThreadStatusTerminatedEvent",
+            "session.updated": "#/components/schemas/BetaManagedAgentsSessionUpdatedEvent",
             "span.model_request_end": "#/components/schemas/BetaManagedAgentsSpanModelRequestEndEvent",
             "span.model_request_start": "#/components/schemas/BetaManagedAgentsSpanModelRequestStartEvent",
             "span.outcome_evaluation_end": "#/components/schemas/BetaManagedAgentsSpanOutcomeEvaluationEndEvent",
@@ -12758,7 +13276,8 @@
             "user.define_outcome": "#/components/schemas/BetaManagedAgentsUserDefineOutcomeEvent",
             "user.interrupt": "#/components/schemas/BetaManagedAgentsUserInterruptEvent",
             "user.message": "#/components/schemas/BetaManagedAgentsUserMessageEvent",
-            "user.tool_confirmation": "#/components/schemas/BetaManagedAgentsUserToolConfirmationEvent"
+            "user.tool_confirmation": "#/components/schemas/BetaManagedAgentsUserToolConfirmationEvent",
+            "user.tool_result": "#/components/schemas/BetaManagedAgentsUserToolResultEvent"
           },
           "propertyName": "type"
         },
@@ -12854,7 +13373,13 @@
             "$ref": "#/components/schemas/BetaManagedAgentsSessionThreadStatusTerminatedEvent"
           },
           {
+            "$ref": "#/components/schemas/BetaManagedAgentsUserToolResultEvent"
+          },
+          {
             "$ref": "#/components/schemas/BetaManagedAgentsSessionThreadStatusRescheduledEvent"
+          },
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsSessionUpdatedEvent"
           }
         ],
         "type": "object"
@@ -13110,6 +13635,7 @@
           "mapping": {
             "document": "#/components/schemas/BetaManagedAgentsDocumentBlock",
             "image": "#/components/schemas/BetaManagedAgentsImageBlock",
+            "search_result": "#/components/schemas/BetaManagedAgentsSearchResultBlock",
             "text": "#/components/schemas/BetaManagedAgentsTextBlock"
           },
           "propertyName": "type"
@@ -13123,6 +13649,9 @@
           },
           {
             "$ref": "#/components/schemas/BetaManagedAgentsDocumentBlock"
+          },
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsSearchResultBlock"
           }
         ],
         "type": "object"
@@ -13457,6 +13986,14 @@
           "title": "Order #1234 inquiry"
         },
         "properties": {
+          "agent": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BetaManagedAgentsSessionAgentUpdate"
+              }
+            ],
+            "description": "Agent configuration update. Only `tools` and `mcp_servers` are updatable mid-session. Only valid for sessions created from an agent or deployment reference. The session must not be running."
+          },
           "metadata": {
             "additionalProperties": {
               "nullable": true,
@@ -14118,6 +14655,93 @@
         ],
         "type": "string"
       },
+      "BetaManagedAgentsUserToolResultEvent": {
+        "additionalProperties": false,
+        "description": "Event sent by the client providing the result of an agent-toolset tool execution. Only valid on `self_hosted` environments, where sandbox-routed tools are executed by the client rather than the server.",
+        "properties": {
+          "content": {
+            "description": "The result content returned by the tool.",
+            "items": {
+              "$ref": "#/components/schemas/BetaManagedAgentsToolResultContentBlock"
+            },
+            "type": "array"
+          },
+          "id": {
+            "description": "Unique identifier for this event.",
+            "type": "string"
+          },
+          "is_error": {
+            "description": "Whether the tool execution resulted in an error.",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "processed_at": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BetaTimestamp"
+              }
+            ],
+            "description": "Timestamp when this result was processed.",
+            "nullable": true
+          },
+          "session_thread_id": {
+            "description": "Routes this result to a subagent thread. Copy from the `agent.tool_use` event's `session_thread_id`.",
+            "nullable": true,
+            "type": "string"
+          },
+          "tool_use_id": {
+            "description": "The id of the `agent.tool_use` event this result corresponds to, which can be found in the last `session.status_idle` [event's](https://platform.claude.com/docs/en/api/beta/sessions/events/list#beta_managed_agents_session_requires_action.event_ids) `stop_reason.event_ids` field.",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "user.tool_result"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "tool_use_id"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsUserToolResultEventParams": {
+        "additionalProperties": false,
+        "description": "Parameters for providing the result of an agent-toolset tool execution. Only valid on `self_hosted` environments, where sandbox-routed tools are executed by the client rather than the server.",
+        "properties": {
+          "content": {
+            "description": "The result content returned by the tool.",
+            "items": {
+              "$ref": "#/components/schemas/BetaManagedAgentsToolResultContentBlock"
+            },
+            "type": "array"
+          },
+          "is_error": {
+            "description": "Whether the tool execution resulted in an error.",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "tool_use_id": {
+            "description": "The id of the `agent.tool_use` event this result corresponds to, which can be found in the last `session.status_idle` [event's](https://platform.claude.com/docs/en/api/beta/sessions/events/list#beta_managed_agents_session_requires_action.event_ids) `stop_reason.event_ids` field.",
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "user.tool_result"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "tool_use_id"
+        ],
+        "type": "object"
+      },
       "BetaManagedAgentsVault": {
         "additionalProperties": false,
         "description": "A vault that stores credentials for use by agents during sessions.",
@@ -14561,6 +15185,18 @@
             "default": null,
             "description": "Context management response.\n\nInformation about context management strategies applied during the request."
           },
+          "diagnostics": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BetaDiagnostics"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Request-level diagnostics. Present only when `diagnostics` was supplied on the request; `null` when no prompt-cache divergence was detected."
+          },
           "id": {
             "description": "Unique object identifier.\n\nThe format and length of IDs may change over time.",
             "examples": [
@@ -14644,6 +15280,7 @@
           "stop_sequence",
           "stop_details",
           "usage",
+          "diagnostics",
           "context_management",
           "container"
         ],
@@ -15666,13 +16303,17 @@
               {
                 "discriminator": {
                   "mapping": {
-                    "cloud": "#/components/schemas/BetaCloudConfigParams"
+                    "cloud": "#/components/schemas/BetaCloudConfigParams",
+                    "self_hosted": "#/components/schemas/BetaSelfHostedConfigParams"
                   },
                   "propertyName": "type"
                 },
                 "oneOf": [
                   {
                     "$ref": "#/components/schemas/BetaCloudConfigParams"
+                  },
+                  {
+                    "$ref": "#/components/schemas/BetaSelfHostedConfigParams"
                   }
                 ]
               },
@@ -15734,6 +16375,22 @@
             "minLength": 1,
             "title": "Name",
             "type": "string"
+          },
+          "scope": {
+            "anyOf": [
+              {
+                "enum": [
+                  "organization",
+                  "account"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The visibility scope for this environment. 'organization' makes the environment visible to all accounts. 'account' restricts visibility to the owning account only. Only applicable for self-hosted environments. If not specified, defaults based on organization type.",
+            "title": "Scope"
           }
         },
         "required": [
@@ -15754,13 +16411,17 @@
               {
                 "discriminator": {
                   "mapping": {
-                    "cloud": "#/components/schemas/BetaCloudConfigParams"
+                    "cloud": "#/components/schemas/BetaCloudConfigParams",
+                    "self_hosted": "#/components/schemas/BetaSelfHostedConfigParams"
                   },
                   "propertyName": "type"
                 },
                 "oneOf": [
                   {
                     "$ref": "#/components/schemas/BetaCloudConfigParams"
+                  },
+                  {
+                    "$ref": "#/components/schemas/BetaSelfHostedConfigParams"
                   }
                 ]
               },
@@ -15815,6 +16476,22 @@
             ],
             "description": "Updated name for the environment",
             "title": "Name"
+          },
+          "scope": {
+            "anyOf": [
+              {
+                "enum": [
+                  "organization",
+                  "account"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The visibility scope for this environment. 'organization' makes the environment visible to all accounts. 'account' restricts visibility to the owning account only.",
+            "title": "Scope"
           }
         },
         "title": "PublicEnvironmentUpdateRequest",
@@ -16398,7 +17075,6 @@
           }
         },
         "required": [
-          "content",
           "type"
         ],
         "title": "RequestCompactionBlock",
@@ -20016,6 +20692,346 @@
         "title": "ResponseWebSearchToolResultError",
         "type": "object"
       },
+      "BetaSelfHostedConfig": {
+        "additionalProperties": false,
+        "description": "Configuration for self-hosted environments.",
+        "properties": {
+          "type": {
+            "const": "self_hosted",
+            "description": "Environment type",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "SelfHostedConfig",
+        "type": "object"
+      },
+      "BetaSelfHostedConfigParams": {
+        "additionalProperties": false,
+        "description": "Request params for `self_hosted` environment configuration.",
+        "properties": {
+          "type": {
+            "const": "self_hosted",
+            "description": "Environment type",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "SelfHostedConfigParams",
+        "type": "object"
+      },
+      "BetaSelfHostedWork": {
+        "description": "Work resource representing a unit of work in a self-hosted environment.\n\nWork items are queued when sessions are created or when long-dormant sessions\nreceive new messages. The environment worker polls for work to execute in a\nself-hosted sandbox.",
+        "properties": {
+          "acknowledged_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "RFC 3339 timestamp when the work item was acknowledged and assigned to a self-hosted sandbox",
+            "title": "Acknowledged At"
+          },
+          "created_at": {
+            "description": "RFC 3339 timestamp when work was created",
+            "title": "Created At",
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/BetaSessionWorkData",
+            "description": "The actual work to be performed"
+          },
+          "environment_id": {
+            "description": "Environment identifier this work belongs to (e.g., `env_...`)",
+            "title": "Environment Id",
+            "type": "string"
+          },
+          "id": {
+            "description": "Work identifier (e.g., 'work_...')",
+            "title": "Id",
+            "type": "string"
+          },
+          "latest_heartbeat_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "RFC 3339 timestamp of the most recent heartbeat",
+            "title": "Latest Heartbeat At"
+          },
+          "metadata": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "User-provided metadata key-value pairs associated with this work item",
+            "title": "Metadata",
+            "type": "object"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "RFC 3339 timestamp when work execution started",
+            "title": "Started At"
+          },
+          "state": {
+            "description": "Current state of the work item",
+            "enum": [
+              "queued",
+              "starting",
+              "active",
+              "stopping",
+              "stopped"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "stop_requested_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "RFC 3339 timestamp when stop was requested",
+            "title": "Stop Requested At"
+          },
+          "stopped_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "RFC 3339 timestamp when work execution stopped",
+            "title": "Stopped At"
+          },
+          "type": {
+            "const": "work",
+            "default": "work",
+            "description": "The type of object (always 'work')",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "acknowledged_at",
+          "created_at",
+          "data",
+          "environment_id",
+          "id",
+          "latest_heartbeat_at",
+          "metadata",
+          "started_at",
+          "state",
+          "stop_requested_at",
+          "stopped_at",
+          "type"
+        ],
+        "title": "SelfHostedWork",
+        "type": "object"
+      },
+      "BetaSelfHostedWorkHeartbeatResponse": {
+        "description": "Response after recording a heartbeat for a work item.",
+        "properties": {
+          "last_heartbeat": {
+            "description": "RFC 3339 timestamp of the actual heartbeat from DB",
+            "title": "Last Heartbeat",
+            "type": "string"
+          },
+          "lease_extended": {
+            "description": "Whether the heartbeat succeeded in extending the lease",
+            "title": "Lease Extended",
+            "type": "boolean"
+          },
+          "state": {
+            "description": "Current state of the work item (active/stopping/stopped)",
+            "enum": [
+              "queued",
+              "starting",
+              "active",
+              "stopping",
+              "stopped"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "ttl_seconds": {
+            "description": "Effective TTL applied to the lease",
+            "title": "Ttl Seconds",
+            "type": "integer"
+          },
+          "type": {
+            "const": "work_heartbeat",
+            "default": "work_heartbeat",
+            "description": "The type of response",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "last_heartbeat",
+          "lease_extended",
+          "state",
+          "ttl_seconds",
+          "type"
+        ],
+        "title": "SelfHostedWorkHeartbeatResponse",
+        "type": "object"
+      },
+      "BetaSelfHostedWorkListResponse": {
+        "description": "Response when listing work items with cursor-based pagination.",
+        "properties": {
+          "data": {
+            "description": "List of work items",
+            "items": {
+              "$ref": "#/components/schemas/BetaSelfHostedWork"
+            },
+            "title": "Data",
+            "type": "array",
+            "x-stainless-pagination-property": {
+              "purpose": "items"
+            }
+          },
+          "next_page": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Opaque cursor for fetching the next page of results",
+            "title": "Next Page",
+            "x-stainless-pagination-property": {
+              "purpose": "next_cursor_field"
+            }
+          }
+        },
+        "required": [
+          "data",
+          "next_page"
+        ],
+        "title": "SelfHostedWorkListResponse",
+        "type": "object"
+      },
+      "BetaSelfHostedWorkQueueStats": {
+        "description": "Statistics about the work queue for an environment.\n\nUses Redis Stream consumer group metrics for O(1) queries.",
+        "properties": {
+          "depth": {
+            "description": "Number of work items waiting to be picked up (lag from consumer group)",
+            "title": "Depth",
+            "type": "integer"
+          },
+          "oldest_queued_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "RFC 3339 timestamp of oldest item in the work stream (includes both queued and pending items), null if stream empty",
+            "title": "Oldest Queued At"
+          },
+          "pending": {
+            "default": 0,
+            "description": "Number of work items being processed (polled but not acknowledged)",
+            "title": "Pending",
+            "type": "integer"
+          },
+          "type": {
+            "const": "work_queue_stats",
+            "default": "work_queue_stats",
+            "description": "The type of object",
+            "title": "Type",
+            "type": "string"
+          },
+          "workers_polling": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Number of workers that have polled for work in the last 30 seconds. Requires worker_id to be sent with poll requests.",
+            "title": "Workers Polling"
+          }
+        },
+        "required": [
+          "depth",
+          "oldest_queued_at",
+          "pending",
+          "type",
+          "workers_polling"
+        ],
+        "title": "SelfHostedWorkQueueStats",
+        "type": "object"
+      },
+      "BetaSelfHostedWorkStopRequest": {
+        "description": "Request to stop a work item.",
+        "properties": {
+          "force": {
+            "default": false,
+            "description": "If true, immediately stop work without graceful shutdown",
+            "title": "Force",
+            "type": "boolean"
+          }
+        },
+        "title": "SelfHostedWorkStopRequest",
+        "type": "object"
+      },
+      "BetaSelfHostedWorkUpdateRequest": {
+        "description": "Request to update work item metadata.",
+        "properties": {
+          "metadata": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "description": "Metadata patch. Set a key to a string to upsert it, or to null to delete it. Omit the field to preserve existing metadata.",
+            "title": "Metadata",
+            "type": "object"
+          }
+        },
+        "required": [
+          "metadata"
+        ],
+        "title": "SelfHostedWorkUpdateRequest",
+        "type": "object"
+      },
       "BetaServerToolCaller": {
         "additionalProperties": false,
         "description": "Tool invocation generated by a server-side tool.",
@@ -20087,6 +21103,28 @@
           "web_search_requests"
         ],
         "title": "ServerToolUsage",
+        "type": "object"
+      },
+      "BetaSessionWorkData": {
+        "description": "Work data for session work items.\n\nThis resource type is used when work represents a session that needs to be executed\nin a self-hosted environment.",
+        "properties": {
+          "id": {
+            "description": "Session identifier (e.g., 'session_...')",
+            "title": "Id",
+            "type": "string"
+          },
+          "type": {
+            "const": "session",
+            "description": "Type of work data",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "title": "SessionWorkData",
         "type": "object"
       },
       "BetaSignatureContentBlockDelta": {
@@ -20767,6 +21805,19 @@
       },
       "BetaThinkingContentBlockDelta": {
         "properties": {
+          "estimated_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Per-frame increment of a coarse, running estimate of the tokens this thinking block has produced so far. Present whenever the `thinking-token-count-2026-05-13` beta is set; `null` unless `thinking.display` resolves to `\"omitted\"` and a count is due this frame. Sum the increments across `thinking_delta` frames on this block for a progress indicator. Each increment is a non-negative multiple of a fixed quantum and the cadence is rate-limited, so this is a deliberately lossy display hint, not a billable count; `usage.output_tokens` remains authoritative.",
+            "title": "Estimated Tokens"
+          },
           "thinking": {
             "title": "Thinking",
             "type": "string"
@@ -20779,6 +21830,7 @@
           }
         },
         "required": [
+          "estimated_tokens",
           "thinking",
           "type"
         ],
@@ -33339,6 +34391,942 @@
         "summary": "Archive Environment"
       }
     },
+    "/v1/environments/{environment_id}/work/poll?beta=true": {
+      "get": {
+        "description": "Note: these endpoints are called automatically by the pre-built environment worker provided in the SDKs and CLI, for orchestrating sessions with self-hosted sandbox environments. They are included here as a reference; you do not need to invoke them directly.\n\nLong poll for work items in the queue.",
+        "operationId": "beta_poll_work_v1_environments__environment_id__work_poll_get",
+        "parameters": [
+          {
+            "example": "env_011CZkZ9X2dpNyB7HsEFoRfW",
+            "in": "path",
+            "name": "environment_id",
+            "required": true,
+            "schema": {
+              "title": "Environment Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "How long to wait for work to arrive before returning. Must be 1-999 in milliseconds. Defaults to non-blocking (returns immediately if no work is available).",
+            "in": "query",
+            "name": "block_ms",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "How long to wait for work to arrive before returning. Must be 1-999 in milliseconds. Defaults to non-blocking (returns immediately if no work is available).",
+              "title": "Block Ms"
+            }
+          },
+          {
+            "description": "Reclaim unacknowledged work items older than this many milliseconds. If omitted, uses the default (5000ms).",
+            "in": "query",
+            "name": "reclaim_older_than_ms",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Reclaim unacknowledged work items older than this many milliseconds. If omitted, uses the default (5000ms).",
+              "title": "Reclaim Older Than Ms"
+            }
+          },
+          {
+            "description": "Optional header to specify the beta version(s) you want to use.\n\nTo use multiple betas, use a comma separated list like `beta1,beta2` or specify the header multiple times for each beta.",
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "description": "Optional header to specify the beta version(s) you want to use.\n\nTo use multiple betas, use a comma separated list like `beta1,beta2` or specify the header multiple times for each beta.",
+              "items": {
+                "type": "string"
+              },
+              "title": "Anthropic-Beta",
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          },
+          {
+            "description": "The version of the Claude API you want to use.\n\nRead more about versioning and our version history [here](https://docs.claude.com/en/api/versioning).",
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "description": "The version of the Claude API you want to use.\n\nRead more about versioning and our version history [here](https://docs.claude.com/en/api/versioning).",
+              "title": "Anthropic-Version",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Unique identifier for the specific worker polling, used to track aggregated environment-level work metrics in Console",
+            "in": "header",
+            "name": "Anthropic-Worker-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Unique identifier for the specific worker polling, used to track aggregated environment-level work metrics in Console",
+              "title": "Anthropic-Worker-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/BetaSelfHostedWork"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Poll Work V1 Environments  Environment Id  Work Poll Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "4XX": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Error response.\n\nSee our [errors documentation](https://docs.claude.com/en/api/errors) for more details."
+          }
+        },
+        "summary": "Poll for Work"
+      }
+    },
+    "/v1/environments/{environment_id}/work/stats?beta=true": {
+      "get": {
+        "description": "Get statistics about the work queue for an environment.",
+        "operationId": "beta_get_environment_stats_v1_environments__environment_id__work_stats_get",
+        "parameters": [
+          {
+            "example": "env_011CZkZ9X2dpNyB7HsEFoRfW",
+            "in": "path",
+            "name": "environment_id",
+            "required": true,
+            "schema": {
+              "title": "Environment Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Optional header to specify the beta version(s) you want to use.\n\nTo use multiple betas, use a comma separated list like `beta1,beta2` or specify the header multiple times for each beta.",
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "description": "Optional header to specify the beta version(s) you want to use.\n\nTo use multiple betas, use a comma separated list like `beta1,beta2` or specify the header multiple times for each beta.",
+              "items": {
+                "type": "string"
+              },
+              "title": "Anthropic-Beta",
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          },
+          {
+            "description": "The version of the Claude API you want to use.\n\nRead more about versioning and our version history [here](https://docs.claude.com/en/api/versioning).",
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "description": "The version of the Claude API you want to use.\n\nRead more about versioning and our version history [here](https://docs.claude.com/en/api/versioning).",
+              "title": "Anthropic-Version",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-api-key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaSelfHostedWorkQueueStats"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "4XX": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Error response.\n\nSee our [errors documentation](https://docs.claude.com/en/api/errors) for more details."
+          }
+        },
+        "summary": "Get Queue Statistics"
+      }
+    },
+    "/v1/environments/{environment_id}/work/{work_id}/ack?beta=true": {
+      "post": {
+        "description": "Note: these endpoints are called automatically by the pre-built environment worker provided in the SDKs and CLI, for orchestrating sessions with self-hosted sandbox environments. They are included here as a reference; you do not need to invoke them directly.\n\nAcknowledge receipt of a work item, transitioning it from 'queued' to 'starting' and removing it from the queue.",
+        "operationId": "beta_acknowledge_work_v1_environments__environment_id__work__work_id__ack_post",
+        "parameters": [
+          {
+            "example": "env_011CZkZ9X2dpNyB7HsEFoRfW",
+            "in": "path",
+            "name": "environment_id",
+            "required": true,
+            "schema": {
+              "title": "Environment Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "work_id",
+            "required": true,
+            "schema": {
+              "title": "Work Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Optional header to specify the beta version(s) you want to use.\n\nTo use multiple betas, use a comma separated list like `beta1,beta2` or specify the header multiple times for each beta.",
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "description": "Optional header to specify the beta version(s) you want to use.\n\nTo use multiple betas, use a comma separated list like `beta1,beta2` or specify the header multiple times for each beta.",
+              "items": {
+                "type": "string"
+              },
+              "title": "Anthropic-Beta",
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          },
+          {
+            "description": "The version of the Claude API you want to use.\n\nRead more about versioning and our version history [here](https://docs.claude.com/en/api/versioning).",
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "description": "The version of the Claude API you want to use.\n\nRead more about versioning and our version history [here](https://docs.claude.com/en/api/versioning).",
+              "title": "Anthropic-Version",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaSelfHostedWork"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "4XX": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Error response.\n\nSee our [errors documentation](https://docs.claude.com/en/api/errors) for more details."
+          }
+        },
+        "summary": "Acknowledge Work"
+      }
+    },
+    "/v1/environments/{environment_id}/work/{work_id}/heartbeat?beta=true": {
+      "post": {
+        "description": "Note: these endpoints are called automatically by the pre-built environment worker provided in the SDKs and CLI, for orchestrating sessions with self-hosted sandbox environments. They are included here as a reference; you do not need to invoke them directly.\n\nRecord a heartbeat for a work item to maintain the lease.",
+        "operationId": "beta_record_heartbeat_v1_environments__environment_id__work__work_id__heartbeat_post",
+        "parameters": [
+          {
+            "example": "env_011CZkZ9X2dpNyB7HsEFoRfW",
+            "in": "path",
+            "name": "environment_id",
+            "required": true,
+            "schema": {
+              "title": "Environment Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "work_id",
+            "required": true,
+            "schema": {
+              "title": "Work Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Desired TTL in seconds",
+            "in": "query",
+            "name": "desired_ttl_seconds",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Desired TTL in seconds",
+              "title": "Desired Ttl Seconds"
+            }
+          },
+          {
+            "description": "Expected last_heartbeat for conditional update (optimistic concurrency). Use literal 'NO_HEARTBEAT' to claim an unclaimed lease (first heartbeat). For subsequent heartbeats, echo the server's previous last_heartbeat value exactly. Returns 412 Precondition Failed if the actual value doesn't match.",
+            "examples": {
+              "first_claim": {
+                "summary": "First heartbeat (claim unclaimed lease)",
+                "value": "NO_HEARTBEAT"
+              },
+              "subsequent": {
+                "summary": "Subsequent heartbeat (echo server's value)",
+                "value": "2026-05-14T10:30:45.123456Z"
+              }
+            },
+            "in": "query",
+            "name": "expected_last_heartbeat",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Expected last_heartbeat for conditional update (optimistic concurrency). Use literal 'NO_HEARTBEAT' to claim an unclaimed lease (first heartbeat). For subsequent heartbeats, echo the server's previous last_heartbeat value exactly. Returns 412 Precondition Failed if the actual value doesn't match.",
+              "title": "Expected Last Heartbeat"
+            }
+          },
+          {
+            "description": "Optional header to specify the beta version(s) you want to use.\n\nTo use multiple betas, use a comma separated list like `beta1,beta2` or specify the header multiple times for each beta.",
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "description": "Optional header to specify the beta version(s) you want to use.\n\nTo use multiple betas, use a comma separated list like `beta1,beta2` or specify the header multiple times for each beta.",
+              "items": {
+                "type": "string"
+              },
+              "title": "Anthropic-Beta",
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          },
+          {
+            "description": "The version of the Claude API you want to use.\n\nRead more about versioning and our version history [here](https://docs.claude.com/en/api/versioning).",
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "description": "The version of the Claude API you want to use.\n\nRead more about versioning and our version history [here](https://docs.claude.com/en/api/versioning).",
+              "title": "Anthropic-Version",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaSelfHostedWorkHeartbeatResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "4XX": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Error response.\n\nSee our [errors documentation](https://docs.claude.com/en/api/errors) for more details."
+          }
+        },
+        "summary": "Record Heartbeat"
+      }
+    },
+    "/v1/environments/{environment_id}/work/{work_id}/stop?beta=true": {
+      "post": {
+        "description": "Note: these endpoints are called automatically by the pre-built environment worker provided in the SDKs and CLI, for orchestrating sessions with self-hosted sandbox environments. They are included here as a reference; you do not need to invoke them directly.\n\nStop a work item, initiating graceful or forced shutdown.",
+        "operationId": "beta_stop_work_v1_environments__environment_id__work__work_id__stop_post",
+        "parameters": [
+          {
+            "example": "env_011CZkZ9X2dpNyB7HsEFoRfW",
+            "in": "path",
+            "name": "environment_id",
+            "required": true,
+            "schema": {
+              "title": "Environment Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "work_id",
+            "required": true,
+            "schema": {
+              "title": "Work Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Optional header to specify the beta version(s) you want to use.\n\nTo use multiple betas, use a comma separated list like `beta1,beta2` or specify the header multiple times for each beta.",
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "description": "Optional header to specify the beta version(s) you want to use.\n\nTo use multiple betas, use a comma separated list like `beta1,beta2` or specify the header multiple times for each beta.",
+              "items": {
+                "type": "string"
+              },
+              "title": "Anthropic-Beta",
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          },
+          {
+            "description": "The version of the Claude API you want to use.\n\nRead more about versioning and our version history [here](https://docs.claude.com/en/api/versioning).",
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "description": "The version of the Claude API you want to use.\n\nRead more about versioning and our version history [here](https://docs.claude.com/en/api/versioning).",
+              "title": "Anthropic-Version",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BetaSelfHostedWorkStopRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaSelfHostedWork"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "4XX": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Error response.\n\nSee our [errors documentation](https://docs.claude.com/en/api/errors) for more details."
+          }
+        },
+        "summary": "Stop Work"
+      }
+    },
+    "/v1/environments/{environment_id}/work/{work_id}?beta=true": {
+      "get": {
+        "description": "Note: these endpoints are called automatically by the pre-built environment worker provided in the SDKs and CLI, for orchestrating sessions with self-hosted sandbox environments. They are included here as a reference; you do not need to invoke them directly.\n\nRetrieve detailed information about a specific work item.",
+        "operationId": "beta_get_work_v1_environments__environment_id__work__work_id__get",
+        "parameters": [
+          {
+            "example": "env_011CZkZ9X2dpNyB7HsEFoRfW",
+            "in": "path",
+            "name": "environment_id",
+            "required": true,
+            "schema": {
+              "title": "Environment Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "work_id",
+            "required": true,
+            "schema": {
+              "title": "Work Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Optional header to specify the beta version(s) you want to use.\n\nTo use multiple betas, use a comma separated list like `beta1,beta2` or specify the header multiple times for each beta.",
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "description": "Optional header to specify the beta version(s) you want to use.\n\nTo use multiple betas, use a comma separated list like `beta1,beta2` or specify the header multiple times for each beta.",
+              "items": {
+                "type": "string"
+              },
+              "title": "Anthropic-Beta",
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          },
+          {
+            "description": "The version of the Claude API you want to use.\n\nRead more about versioning and our version history [here](https://docs.claude.com/en/api/versioning).",
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "description": "The version of the Claude API you want to use.\n\nRead more about versioning and our version history [here](https://docs.claude.com/en/api/versioning).",
+              "title": "Anthropic-Version",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-api-key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaSelfHostedWork"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "4XX": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Error response.\n\nSee our [errors documentation](https://docs.claude.com/en/api/errors) for more details."
+          }
+        },
+        "summary": "Get Work Item"
+      },
+      "post": {
+        "description": "Note: these endpoints are called automatically by the pre-built environment worker provided in the SDKs and CLI, for orchestrating sessions with self-hosted sandbox environments. They are included here as a reference; you do not need to invoke them directly.\n\nUpdate work item metadata with merge semantics.",
+        "operationId": "beta_update_work_v1_environments__environment_id__work__work_id__post",
+        "parameters": [
+          {
+            "example": "env_011CZkZ9X2dpNyB7HsEFoRfW",
+            "in": "path",
+            "name": "environment_id",
+            "required": true,
+            "schema": {
+              "title": "Environment Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "work_id",
+            "required": true,
+            "schema": {
+              "title": "Work Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Optional header to specify the beta version(s) you want to use.\n\nTo use multiple betas, use a comma separated list like `beta1,beta2` or specify the header multiple times for each beta.",
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "description": "Optional header to specify the beta version(s) you want to use.\n\nTo use multiple betas, use a comma separated list like `beta1,beta2` or specify the header multiple times for each beta.",
+              "items": {
+                "type": "string"
+              },
+              "title": "Anthropic-Beta",
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          },
+          {
+            "description": "The version of the Claude API you want to use.\n\nRead more about versioning and our version history [here](https://docs.claude.com/en/api/versioning).",
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "description": "The version of the Claude API you want to use.\n\nRead more about versioning and our version history [here](https://docs.claude.com/en/api/versioning).",
+              "title": "Anthropic-Version",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BetaSelfHostedWorkUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaSelfHostedWork"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "4XX": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Error response.\n\nSee our [errors documentation](https://docs.claude.com/en/api/errors) for more details."
+          }
+        },
+        "summary": "Update Work Item"
+      }
+    },
+    "/v1/environments/{environment_id}/work?beta=true": {
+      "get": {
+        "description": "Note: these endpoints are called automatically by the pre-built environment worker provided in the SDKs and CLI, for orchestrating sessions with self-hosted sandbox environments. They are included here as a reference; you do not need to invoke them directly.\n\nList work items in an environment.",
+        "operationId": "beta_list_work_v1_environments__environment_id__work_get",
+        "parameters": [
+          {
+            "example": "env_011CZkZ9X2dpNyB7HsEFoRfW",
+            "in": "path",
+            "name": "environment_id",
+            "required": true,
+            "schema": {
+              "title": "Environment Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Maximum number of work items to return",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "description": "Maximum number of work items to return",
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Opaque cursor from previous response for pagination",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Opaque cursor from previous response for pagination",
+              "title": "Page",
+              "x-stainless-pagination-property": {
+                "purpose": "next_cursor_param"
+              }
+            }
+          },
+          {
+            "description": "Optional header to specify the beta version(s) you want to use.\n\nTo use multiple betas, use a comma separated list like `beta1,beta2` or specify the header multiple times for each beta.",
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "description": "Optional header to specify the beta version(s) you want to use.\n\nTo use multiple betas, use a comma separated list like `beta1,beta2` or specify the header multiple times for each beta.",
+              "items": {
+                "type": "string"
+              },
+              "title": "Anthropic-Beta",
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          },
+          {
+            "description": "The version of the Claude API you want to use.\n\nRead more about versioning and our version history [here](https://docs.claude.com/en/api/versioning).",
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "description": "The version of the Claude API you want to use.\n\nRead more about versioning and our version history [here](https://docs.claude.com/en/api/versioning).",
+              "title": "Anthropic-Version",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaSelfHostedWorkListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "4XX": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Error response.\n\nSee our [errors documentation](https://docs.claude.com/en/api/errors) for more details."
+          }
+        },
+        "summary": "List Work Items"
+      }
+    },
     "/v1/environments/{environment_id}?beta=true": {
       "delete": {
         "description": "Delete an environment by ID. Returns a confirmation of the deletion.",
@@ -43459,6 +45447,104 @@
           }
         },
         "summary": "Create Session"
+      }
+    },
+    "/v1/skills/{skill_id}/versions/{version}/content?beta=true": {
+      "get": {
+        "description": "Download a skill version's content as a zip archive.",
+        "operationId": "beta_download_skill_version_content_v1_skills__skill_id__versions__version__content_get",
+        "parameters": [
+          {
+            "description": "Unique identifier for the skill.\n\nThe format and length of IDs may change over time.",
+            "in": "path",
+            "name": "skill_id",
+            "required": true,
+            "schema": {
+              "description": "Unique identifier for the skill.\n\nThe format and length of IDs may change over time.",
+              "title": "Skill Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Version identifier for the skill.\n\nEach version is identified by a Unix epoch timestamp (e.g., \"1759178010641129\").",
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "description": "Version identifier for the skill.\n\nEach version is identified by a Unix epoch timestamp (e.g., \"1759178010641129\").",
+              "title": "Version",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Optional header to specify the beta version(s) you want to use.\n\nTo use multiple betas, use a comma separated list like `beta1,beta2` or specify the header multiple times for each beta.",
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "description": "Optional header to specify the beta version(s) you want to use.\n\nTo use multiple betas, use a comma separated list like `beta1,beta2` or specify the header multiple times for each beta.",
+              "items": {
+                "type": "string"
+              },
+              "title": "Anthropic-Beta",
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          },
+          {
+            "description": "The version of the Claude API you want to use.\n\nRead more about versioning and our version history [here](https://docs.claude.com/en/api/versioning).",
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "description": "The version of the Claude API you want to use.\n\nRead more about versioning and our version history [here](https://docs.claude.com/en/api/versioning).",
+              "title": "Anthropic-Version",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Your unique API key for authentication.\n\nThis key is required in the header of all API requests, to authenticate your account and access Anthropic's services. Get your API key through the [Console](https://console.anthropic.com/settings/keys). Each key is scoped to a Workspace.",
+            "in": "header",
+            "name": "x-api-key",
+            "required": false,
+            "schema": {
+              "description": "Your unique API key for authentication.\n\nThis key is required in the header of all API requests, to authenticate your account and access Anthropic's services. Get your API key through the [Console](https://console.anthropic.com/settings/keys). Each key is scoped to a Workspace.",
+              "title": "X-Api-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/zip": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "4XX": {
+            "content": {
+              "application/zip": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Error response.\n\nSee our [errors documentation](https://docs.claude.com/en/api/errors) for more details."
+          }
+        },
+        "summary": "Download Skill Version Content"
       }
     },
     "/v1/skills/{skill_id}/versions/{version}?beta=true": {
