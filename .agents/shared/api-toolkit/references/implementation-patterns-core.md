@@ -1,6 +1,6 @@
 # Core Implementation Patterns
 
-**Contents:** [Manifest Kinds](#manifest-kind-values) · [Type Safety](#type-safety-patterns) · [toString](#tostring-convention) · [Equality & Hashing](#equality-and-hashing) · [copyWith Clearing](#copywith-nullable-clear-semantics) · [Immutability](#immutability-enforcement) · [fromJson Patterns](#fromjson-defensive-patterns) · [Nullable Serialization](#nullable-field-serialization) · [Open Objects](#open-object-schemas) · [HTTP Client](#http-client-patterns) · [DateTime](#datetime-handling) · [Security](#security) · [Opaque Redaction](#opaque-payload-redaction) · [JSON](#json-serialization) · [SSE Parsing](#sse-parser-correctness) · [async\* Guard](#eager-ensurenotclosed-wrapping-for-async) · [API Design](#api-design)
+**Contents:** [Manifest Kinds](#manifest-kind-values) · [Type Safety](#type-safety-patterns) · [toString](#tostring-convention) · [Equality & Hashing](#equality-and-hashing) · [copyWith Clearing](#copywith-nullable-clear-semantics) · [Immutability](#immutability-enforcement) · [fromJson Patterns](#fromjson-defensive-patterns) · [Nullable Serialization](#nullable-field-serialization) · [Tri-State Nullable](#tri-state-nullable-serialization) · [Open Objects](#open-object-schemas) · [HTTP Client](#http-client-patterns) · [DateTime](#datetime-handling) · [Security](#security) · [Opaque Redaction](#opaque-payload-redaction) · [JSON](#json-serialization) · [SSE Parsing](#sse-parser-correctness) · [async\* Guard](#eager-ensurenotclosed-wrapping-for-async) · [Stream Lifecycle](#stream-connection-lifecycle) · [API Design](#api-design)
 
 - Keep specs checked in under package `specs/` and compare them against fetched scratch specs.
 - Keep Dart serialization handwritten and deterministic.
@@ -70,6 +70,21 @@ readable, truncate or summarize noisy values:
 - **Long strings**: first N chars — `instructions: ${instructions?.substring(0, 50)}...`
 - **Nested objects**: use their own toString or show a summary field
 
+For **nullable** collections, do not write `${list?.length} items` — when the
+field is `null` that renders the misleading literal `"null items"`. Print `null`
+when the field is absent and the count only when present, e.g. via a small helper:
+
+```dart
+String _summarize(List<Object?>? list) =>
+    list == null ? 'null' : '${list.length} items';
+
+// usage
+String toString() => 'UsageMetadata(cacheTokensDetails: ${_summarize(cacheTokensDetails)})';
+// absent  → cacheTokensDetails: null
+// empty   → cacheTokensDetails: 0 items
+// present → cacheTokensDetails: 2 items
+```
+
 ## Equality and Hashing
 
 ### Collection Fields
@@ -97,6 +112,27 @@ identity and break equality for any non-trivial JSON payload:
 |-----------|-------------|-------------------|
 | `Map<String, dynamic>` (nested) | `mapsDeepEqual(a, b)` | `mapDeepHashCode(map)` |
 | `List<Map<String, dynamic>>` (nested) | `listOfMapsDeepEqual(a, b)` | `listOfMapsHashCode(list)` |
+
+### Unknown-Variant Fallbacks Reuse the Shared Deep Helpers
+
+Unknown/fallback sealed variants store arbitrary server JSON, so their `==`/`hashCode`
+must use the **deep** helpers above. Don't roll a bespoke per-class shallow
+comparator — a hand-written `_mapsEqual`/`_jsonsEqual` paired with
+`Object.hashAllUnordered(json.entries)` compares nested maps/lists by identity,
+so two unknown payloads with equal nested content compare unequal, diverging
+from every other `Unknown*` type in the SDK:
+
+```dart
+// WRONG — bespoke shallow helper, nested values compared by identity
+bool operator ==(Object other) =>
+    other is UnknownEvent && _mapsEqual(json, other.json);
+int get hashCode => Object.hashAllUnordered(json.entries);
+
+// CORRECT — shared deep helpers
+bool operator ==(Object other) =>
+    other is UnknownEvent && mapsDeepEqual(json, other.json);
+int get hashCode => mapDeepHashCode(json);
+```
 
 ### New Field Checklist
 
@@ -291,6 +327,56 @@ Map<String, dynamic> toJson() => {
 
 Confusing optional vs required, or scalars vs models, is a common source of
 bugs — always check the OpenAPI spec.
+
+### Tri-State Nullable Serialization
+
+The decision table above has only two outcomes for an optional field: omit the
+key (`null`) or emit it. Some specs need a **third** state. When a field is
+*optional and nullable* and the API treats explicit JSON `null` as "turn this
+feature off" — common in `session.update`-style partial-update payloads where a
+field is `anyOf: {object, null}` — plain optional-omit can't express it: omitting
+the key means "leave unchanged", so callers have no way to send `"x": null`.
+
+Model the third state with an additive `clearX` flag (defaulting to `false`, so
+existing call sites keep compiling) and have `fromJson` distinguish "key absent"
+from "key present with null" via `containsKey`:
+
+```dart
+@immutable
+class AudioConfigInput {
+  const AudioConfigInput({
+    this.noiseReduction,
+    this.clearNoiseReduction = false,
+  });
+
+  final NoiseReduction? noiseReduction;
+  /// When true, `toJson` emits `"noise_reduction": null` to disable the feature.
+  final bool clearNoiseReduction;
+
+  factory AudioConfigInput.fromJson(Map<String, dynamic> json) =>
+      AudioConfigInput(
+        noiseReduction: json['noise_reduction'] == null
+            ? null
+            : NoiseReduction.fromJson(
+                json['noise_reduction'] as Map<String, dynamic>),
+        // key present with null → caller asked to disable
+        clearNoiseReduction:
+            json.containsKey('noise_reduction') && json['noise_reduction'] == null,
+      );
+
+  Map<String, dynamic> toJson() => {
+        if (noiseReduction != null)
+          'noise_reduction': noiseReduction!.toJson()
+        else if (clearNoiseReduction)
+          'noise_reduction': null, // explicit disable
+        // otherwise omit → "no change"
+      };
+}
+```
+
+This is the request-payload sibling of [copyWith nullable clear
+semantics](#copywith-nullable-clear-semantics): both distinguish "not provided"
+from "explicitly null".
 
 ## Open Object Schemas
 
@@ -571,6 +657,68 @@ Stream<ImageEditStreamEvent> _editStreamImpl(ImageEditRequest request) async* {
 
 The same split is the right default for any other synchronous precondition
 (argument validation, factory selection) on a streaming method.
+
+## Stream Connection Lifecycle
+
+Connection wrappers (WebSocket/Realtime-style) that expose incoming frames as a
+`Stream` often buffer events that arrive **before the first listener attaches**,
+then drain the buffer in the controller's `onListen`. Three lifecycle hazards
+recur in this shape — handle all three, and apply each fix to every parallel
+connection class (e.g. realtime, translation, transcription variants):
+
+1. **Idempotent done/close.** The done handler can fire more than once — e.g. the
+   IO connector emits `CloseReceived` from inside its own `onDone`, so both the
+   `CloseReceived` event branch and the subscription's `onDone` call it. Guard with
+   an early return so `_eventController.close()` runs exactly once.
+2. **Guard emit/drain against a closed controller.** If the socket closes before
+   any listener attaches and a listener subscribes *later*, the buffered drain (or
+   a straggler frame) runs after `close()` — `add`/`addError` then throw
+   `StateError: Cannot add new events after calling close`. Short-circuit drain and
+   emit paths when `_closed`.
+3. **Bound the pre-listener buffer.** A consumer that attaches late or never makes
+   `_earlyEvents` grow without limit for the life of the connection. Cap it with a
+   drop policy (drop-oldest is usually right — keep the most recent frames).
+
+```dart
+final _eventController = StreamController<RealtimeEvent>(onListen: _drainBuffer);
+final _earlyEvents = <Object>[];        // buffered events/errors, pre-listener
+static const _maxEarlyEvents = 1024;
+var _closed = false;
+
+void _handleDone() {
+  if (_closed) return;                  // (1) idempotent — close() fires once
+  _closed = true;
+  _eventController.close();
+}
+
+void _emitEvent(RealtimeEvent event) {
+  if (_closed) return;                  // (2) never add after close
+  if (!_eventController.hasListener) {
+    if (_earlyEvents.length >= _maxEarlyEvents) {
+      _earlyEvents.removeAt(0);         // (3) drop oldest
+    }
+    _earlyEvents.add(event);
+    return;
+  }
+  _eventController.add(event);
+}
+
+void _drainBuffer() {
+  if (_closed) {                        // (2) socket already closed; just clear
+    _earlyEvents.clear();
+    return;
+  }
+  for (final e in _earlyEvents) {
+    if (e is RealtimeEvent) _eventController.add(e);
+    // ... addError for buffered errors
+  }
+  _earlyEvents.clear();
+}
+```
+
+`StreamController.close()` is itself idempotent, but the explicit `_closed` guard
+makes the contract clear and keeps the drain/emit short-circuits correct if the
+close logic later grows.
 
 ## API Design
 

@@ -41,3 +41,44 @@ throwing.
 
 Check the OpenAPI spec examples and the Python SDK for which fields are truly
 required across all model variants vs only present in specific ones.
+
+### Web WebSocket Authentication
+
+Browser WebSockets cannot set request headers — there is no API to send
+`Authorization` (or `OpenAI-Project`, etc.) on the handshake. Any guidance that
+tells a web caller to "use the ephemeral secret as a bearer token and connect
+directly" is wrong: the header is silently dropped and the connection fails with
+an opaque close/401.
+
+Two consequences for the Realtime resource:
+
+1. **The web connector must reject all headers, not just `Authorization`.** Throw
+   unconditionally when `headers.isNotEmpty` — no per-key matching, so lowercase
+   `authorization`, `OpenAI-Project`, and any future header all surface rather
+   than only the exact `Authorization` key — and report the received keys plus
+   the supported alternatives:
+
+   ```dart
+   // WRONG — only catches the exact key; lowercase `authorization`,
+   //         `OpenAI-Project`, etc. silently fail
+   if (headers.containsKey('Authorization')) {
+     throw const ConnectionException('Browser WebSockets cannot set Authorization.');
+   }
+
+   // CORRECT — any header is unsupported on web
+   if (headers.isNotEmpty) {
+     throw ConnectionException(
+       'Browser WebSockets cannot set headers (got: ${headers.keys.join(', ')}). '
+       'Use WebRTC (realtimeSessions.calls.create(...)) or a server-side '
+       'WebSocket proxy that can set the Authorization header.',
+     );
+   }
+   ```
+
+2. **Docs/examples must point at the real web flows.** Replace any "connect
+   directly from the browser with a bearer token" framing with WebRTC
+   (`realtimeSessions.calls.create(...)`) or a backend/proxy that opens the
+   authenticated socket. The ephemeral client secret is still useful on web — for
+   the WebRTC SDP exchange and for server-side scope-narrowing — just not as a
+   WebSocket bearer token. Keep `connect()`'s Platform Notes and the
+   `ConnectionException` message consistent with this.

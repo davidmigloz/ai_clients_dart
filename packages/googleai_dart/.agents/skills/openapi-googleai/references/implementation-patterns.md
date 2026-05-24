@@ -56,3 +56,32 @@ String modelStageToString(ModelStage value) => switch (value) { ... };
 When scaffolded files incorrectly call `ModelStage.fromJson(...)` or `.toJson()`, replace with `modelStageFromString(...)` and `modelStageToString(...)`.
 
 Some enums define `fromJson()`/`toJson()` instance methods instead (e.g. `FunctionResponseScheduling`). Check the existing codebase pattern for the specific enum before choosing an approach.
+
+## Media Download Endpoints (`alt=media`)
+
+Google media endpoints inherit a path-level `alt` parameter
+(`enum: ["json","media","proto"]`, `default: "json"`). A `downloadMedia`-style
+endpoint's `default` response is `application/json` returning a `*Response`
+envelope — so a plain GET returns the **JSON envelope bytes**, not the media. A
+method that returns raw bytes must explicitly request `alt=media`:
+
+```dart
+// WRONG — returns the JSON DownloadMediaResponse envelope, not the file bytes
+final url = buildUrl(path: '...:downloadMedia');
+final response = await httpClient.get(url);
+return response.bodyBytes;
+
+// CORRECT — alt=media yields the raw media payload
+final url = buildUrl(
+  path: '...:downloadMedia',
+  queryParams: const {'alt': 'media'},
+);
+final response = await httpClient.get(url);
+return response.bodyBytes;
+```
+
+Apply the `queryParams: const {'alt': 'media'}` change to every platform variant
+(`_io`, `_web`, `_stub`), update the dartdoc's canonical URL to include
+`?alt=media`, and add a unit assertion on
+`req.url.queryParameters['alt'] == 'media'` so a regression that drops the
+parameter fails the test rather than silently returning envelope bytes.
