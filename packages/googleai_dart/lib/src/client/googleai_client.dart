@@ -8,6 +8,7 @@ import '../interceptors/error_interceptor.dart';
 import '../interceptors/logging_interceptor.dart';
 import '../live/live_client.dart';
 import '../models/models/operation.dart';
+import '../resources/agents_resource.dart';
 import '../resources/auth_tokens_resource.dart';
 import '../resources/batches_resource.dart';
 import '../resources/cached_contents_resource.dart';
@@ -41,6 +42,8 @@ import 'retry_wrapper.dart';
 /// - [corpora] - Corpus management for semantic retrieval
 /// - [fileSearchStores] - File search store management for file-based retrieval
 /// - [interactions] - Server-side state management for conversations (experimental)
+/// - [agents] - Reusable agent definitions for interactions (experimental)
+/// - [webhooks] - Webhook subscriptions for batches and interactions (experimental)
 /// - [authTokens] - Ephemeral token management for secure client-side auth
 ///
 /// ## Example Usage
@@ -126,6 +129,15 @@ class GoogleAIClient {
   ///
   /// This is an experimental API and is subject to change.
   late final InteractionsResource interactions;
+
+  /// Resource for agents API (experimental).
+  ///
+  /// The Agents API manages reusable agent definitions (base agent,
+  /// environment, system instruction, and tools) that can be referenced when
+  /// creating interactions.
+  ///
+  /// This is an experimental API and is subject to change.
+  late final AgentsResource agents;
 
   /// Resource for webhooks API (experimental).
   ///
@@ -237,6 +249,14 @@ class GoogleAIClient {
     );
 
     interactions = InteractionsResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+
+    agents = AgentsResource(
       config: this.config,
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,

@@ -149,8 +149,8 @@ Future<void> functionCallingInteraction(GoogleAIClient client) async {
           print('Text: ${delta.text}');
         } else if (delta is ArgumentsDelta) {
           // Function call arguments arrive incrementally as JSON fragments
-          if (delta.partialArguments != null) {
-            print('Arguments: ${delta.partialArguments}');
+          if (delta.arguments != null) {
+            print('Arguments: ${delta.arguments}');
           }
         }
       case InteractionCompletedEvent():

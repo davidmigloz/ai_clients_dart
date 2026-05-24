@@ -571,6 +571,7 @@ See the [example/](example/) directory for complete examples:
 | Example | Description |
 |---------|-------------|
 | [`abort_example.dart`](example/abort_example.dart) | Request cancellation with abort triggers |
+| [`agents_example.dart`](example/agents_example.dart) | Reusable agents and environments for interactions |
 | [`api_versions_example.dart`](example/api_versions_example.dart) | API version selection (v1 vs v1beta) |
 | [`auth_tokens_example.dart`](example/auth_tokens_example.dart) | Ephemeral token authentication |
 | [`batch_example.dart`](example/batch_example.dart) | Batch operations |
@@ -622,6 +623,7 @@ See the [example/](example/) directory for complete examples:
 | Corpora | ✅ Full |
 | File Search Stores | ✅ Full |
 | Interactions (Experimental) | ✅ Full |
+| Agents (Experimental) | ✅ Full |
 | Webhooks (Experimental) | ✅ Full |
 | Auth Tokens | ✅ Full |
 | Live API (WebSocket) | ✅ Full |

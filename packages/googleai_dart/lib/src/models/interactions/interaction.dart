@@ -1,6 +1,7 @@
 import '../common/service_tier.dart';
 import '../copy_with_sentinel.dart';
 import 'agent_config.dart';
+import 'environments/environments.dart';
 import 'generation_config.dart';
 import 'interaction_input.dart';
 import 'interaction_status.dart';
@@ -71,15 +72,26 @@ class Interaction {
   /// The mime type of the response.
   final String? responseMimeType;
 
-  /// Enforces the response format (a single [ResponseFormat] or a list of
+  /// Enforces the response format (a single [InteractionResponseFormat] or a list of
   /// them). Used for structured output and per-modality output configuration.
-  final ResponseFormatConfig? responseFormat;
+  final InteractionResponseFormatConfig? responseFormat;
 
   /// Configuration for the agent.
   final AgentConfig? agentConfig;
 
   /// The service tier for the interaction.
   final ServiceTier? serviceTier;
+
+  /// The environment configuration for the interaction.
+  ///
+  /// Either an inline [EnvironmentConfig] ([InlineEnvironmentConfig]) or a
+  /// string reference ([EnvironmentIdRef]) — an existing environment id, or a
+  /// literal such as `"remote"`.
+  final EnvironmentConfigOrId? environment;
+
+  /// Output only. The id of the environment created for this interaction when
+  /// an [environment] config was provided.
+  final String? environmentId;
 
   /// Webhook configuration for receiving notifications when the interaction
   /// completes.
@@ -107,6 +119,8 @@ class Interaction {
     this.responseFormat,
     this.agentConfig,
     this.serviceTier,
+    this.environment,
+    this.environmentId,
     this.webhookConfig,
   });
 
@@ -148,7 +162,9 @@ class Interaction {
         .toList(),
     responseMimeType: json['response_mime_type'] as String?,
     responseFormat: json['response_format'] != null
-        ? ResponseFormatConfig.fromJson(json['response_format'] as Object)
+        ? InteractionResponseFormatConfig.fromJson(
+            json['response_format'] as Object,
+          )
         : null,
     agentConfig: json['agent_config'] != null
         ? AgentConfig.fromJson(json['agent_config'] as Map<String, dynamic>)
@@ -156,6 +172,10 @@ class Interaction {
     serviceTier: json['service_tier'] != null
         ? serviceTierFromString(json['service_tier'] as String?)
         : null,
+    environment: json['environment'] != null
+        ? EnvironmentConfigOrId.fromJson(json['environment'] as Object)
+        : null,
+    environmentId: json['environment_id'] as String?,
     webhookConfig: json['webhook_config'] != null
         ? WebhookConfig.fromJson(json['webhook_config'] as Map<String, dynamic>)
         : null,
@@ -189,6 +209,8 @@ class Interaction {
     if (agentConfig != null) 'agent_config': agentConfig!.toJson(),
     if (serviceTier != null && serviceTier != ServiceTier.unspecified)
       'service_tier': serviceTierToString(serviceTier!),
+    if (environment != null) 'environment': environment!.toJson(),
+    if (environmentId != null) 'environment_id': environmentId,
     if (webhookConfig != null) 'webhook_config': webhookConfig!.toJson(),
   };
 
@@ -214,6 +236,8 @@ class Interaction {
     Object? responseFormat = unsetCopyWithValue,
     Object? agentConfig = unsetCopyWithValue,
     Object? serviceTier = unsetCopyWithValue,
+    Object? environment = unsetCopyWithValue,
+    Object? environmentId = unsetCopyWithValue,
     Object? webhookConfig = unsetCopyWithValue,
   }) {
     return Interaction(
@@ -260,13 +284,19 @@ class Interaction {
           : responseMimeType as String?,
       responseFormat: responseFormat == unsetCopyWithValue
           ? this.responseFormat
-          : responseFormat as ResponseFormatConfig?,
+          : responseFormat as InteractionResponseFormatConfig?,
       agentConfig: agentConfig == unsetCopyWithValue
           ? this.agentConfig
           : agentConfig as AgentConfig?,
       serviceTier: serviceTier == unsetCopyWithValue
           ? this.serviceTier
           : serviceTier as ServiceTier?,
+      environment: environment == unsetCopyWithValue
+          ? this.environment
+          : environment as EnvironmentConfigOrId?,
+      environmentId: environmentId == unsetCopyWithValue
+          ? this.environmentId
+          : environmentId as String?,
       webhookConfig: webhookConfig == unsetCopyWithValue
           ? this.webhookConfig
           : webhookConfig as WebhookConfig?,
@@ -300,9 +330,9 @@ class CreateModelInteractionParams {
   /// The mime type of the response.
   final String? responseMimeType;
 
-  /// Enforces the response format (a single [ResponseFormat] or a list of
+  /// Enforces the response format (a single [InteractionResponseFormat] or a list of
   /// them). Used for structured output and per-modality output configuration.
-  final ResponseFormatConfig? responseFormat;
+  final InteractionResponseFormatConfig? responseFormat;
 
   /// The ID of a previous interaction to continue from.
   final String? previousInteractionId;
@@ -312,6 +342,13 @@ class CreateModelInteractionParams {
 
   /// The service tier for the interaction.
   final ServiceTier? serviceTier;
+
+  /// The environment configuration for the interaction.
+  ///
+  /// Either an inline [EnvironmentConfig] ([InlineEnvironmentConfig]) or a
+  /// string reference ([EnvironmentIdRef]) — an existing environment id, or a
+  /// literal such as `"remote"`.
+  final EnvironmentConfigOrId? environment;
 
   /// Webhook configuration for receiving notifications when the interaction
   /// completes.
@@ -330,6 +367,7 @@ class CreateModelInteractionParams {
     this.previousInteractionId,
     this.background,
     this.serviceTier,
+    this.environment,
     this.webhookConfig,
   });
 
@@ -354,12 +392,17 @@ class CreateModelInteractionParams {
             .toList(),
         responseMimeType: json['response_mime_type'] as String?,
         responseFormat: json['response_format'] != null
-            ? ResponseFormatConfig.fromJson(json['response_format'] as Object)
+            ? InteractionResponseFormatConfig.fromJson(
+                json['response_format'] as Object,
+              )
             : null,
         previousInteractionId: json['previous_interaction_id'] as String?,
         background: json['background'] as bool?,
         serviceTier: json['service_tier'] != null
             ? serviceTierFromString(json['service_tier'] as String?)
+            : null,
+        environment: json['environment'] != null
+            ? EnvironmentConfigOrId.fromJson(json['environment'] as Object)
             : null,
         webhookConfig: json['webhook_config'] != null
             ? WebhookConfig.fromJson(
@@ -387,6 +430,7 @@ class CreateModelInteractionParams {
     if (background != null) 'background': background,
     if (serviceTier != null && serviceTier != ServiceTier.unspecified)
       'service_tier': serviceTierToString(serviceTier!),
+    if (environment != null) 'environment': environment!.toJson(),
     if (webhookConfig != null) 'webhook_config': webhookConfig!.toJson(),
   };
 }
@@ -402,9 +446,9 @@ class CreateAgentInteractionParams {
   /// Configuration for the agent.
   final AgentConfig? agentConfig;
 
-  /// Enforces the response format (a single [ResponseFormat] or a list of
+  /// Enforces the response format (a single [InteractionResponseFormat] or a list of
   /// them). Used for structured output and per-modality output configuration.
-  final ResponseFormatConfig? responseFormat;
+  final InteractionResponseFormatConfig? responseFormat;
 
   /// The ID of a previous interaction to continue from.
   final String? previousInteractionId;
@@ -414,6 +458,13 @@ class CreateAgentInteractionParams {
 
   /// The service tier for the interaction.
   final ServiceTier? serviceTier;
+
+  /// The environment configuration for the interaction.
+  ///
+  /// Either an inline [EnvironmentConfig] ([InlineEnvironmentConfig]) or a
+  /// string reference ([EnvironmentIdRef]) — an existing environment id, or a
+  /// literal such as `"remote"`.
+  final EnvironmentConfigOrId? environment;
 
   /// Webhook configuration for receiving notifications when the interaction
   /// completes.
@@ -428,6 +479,7 @@ class CreateAgentInteractionParams {
     this.previousInteractionId,
     this.background,
     this.serviceTier,
+    this.environment,
     this.webhookConfig,
   });
 
@@ -442,12 +494,17 @@ class CreateAgentInteractionParams {
             ? AgentConfig.fromJson(json['agent_config'] as Map<String, dynamic>)
             : null,
         responseFormat: json['response_format'] != null
-            ? ResponseFormatConfig.fromJson(json['response_format'] as Object)
+            ? InteractionResponseFormatConfig.fromJson(
+                json['response_format'] as Object,
+              )
             : null,
         previousInteractionId: json['previous_interaction_id'] as String?,
         background: json['background'] as bool?,
         serviceTier: json['service_tier'] != null
             ? serviceTierFromString(json['service_tier'] as String?)
+            : null,
+        environment: json['environment'] != null
+            ? EnvironmentConfigOrId.fromJson(json['environment'] as Object)
             : null,
         webhookConfig: json['webhook_config'] != null
             ? WebhookConfig.fromJson(
@@ -467,6 +524,7 @@ class CreateAgentInteractionParams {
     if (background != null) 'background': background,
     if (serviceTier != null && serviceTier != ServiceTier.unspecified)
       'service_tier': serviceTierToString(serviceTier!),
+    if (environment != null) 'environment': environment!.toJson(),
     if (webhookConfig != null) 'webhook_config': webhookConfig!.toJson(),
   };
 }

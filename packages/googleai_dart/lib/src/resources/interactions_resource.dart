@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../models/interactions/agent_config.dart';
+import '../models/interactions/environments/environments.dart';
 import '../models/interactions/events/events.dart';
 import '../models/interactions/generation_config.dart';
 import '../models/interactions/interaction.dart';
@@ -48,7 +49,8 @@ class InteractionsResource extends ResourceBase with StreamingResource {
   /// [_apiRevision] schema via the `Api-Revision` header.
   Map<String, String> _buildHeaders([Map<String, String>? additionalHeaders]) {
     return requestBuilder.buildHeaders(
-      additionalHeaders: {'Api-Revision': _apiRevision, ...?additionalHeaders},
+      // Spread additionalHeaders first so the Api-Revision opt-in always wins.
+      additionalHeaders: {...?additionalHeaders, 'Api-Revision': _apiRevision},
     );
   }
 
@@ -67,9 +69,10 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     InteractionGenerationConfig? generationConfig,
     List<InteractionResponseModality>? responseModalities,
     String? responseMimeType,
-    ResponseFormatConfig? responseFormat,
+    InteractionResponseFormatConfig? responseFormat,
     String? previousInteractionId,
     bool? background,
+    EnvironmentConfigOrId? environment,
     WebhookConfig? webhookConfig,
   }) async {
     final url = requestBuilder.buildUrl('/{version}/interactions');
@@ -91,6 +94,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
       if (responseFormat != null) 'response_format': responseFormat.toJson(),
       'previous_interaction_id': ?previousInteractionId,
       'background': ?background,
+      if (environment != null) 'environment': environment.toJson(),
       if (webhookConfig != null) 'webhook_config': webhookConfig.toJson(),
     };
 
@@ -113,9 +117,10 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     required String agent,
     InteractionInput? input,
     AgentConfig? agentConfig,
-    ResponseFormatConfig? responseFormat,
+    InteractionResponseFormatConfig? responseFormat,
     String? previousInteractionId,
     bool? background,
+    EnvironmentConfigOrId? environment,
     WebhookConfig? webhookConfig,
   }) async {
     final url = requestBuilder.buildUrl('/{version}/interactions');
@@ -129,6 +134,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
       if (responseFormat != null) 'response_format': responseFormat.toJson(),
       'previous_interaction_id': ?previousInteractionId,
       'background': ?background,
+      if (environment != null) 'environment': environment.toJson(),
       if (webhookConfig != null) 'webhook_config': webhookConfig.toJson(),
     };
 
@@ -208,8 +214,9 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     InteractionGenerationConfig? generationConfig,
     List<InteractionResponseModality>? responseModalities,
     String? responseMimeType,
-    ResponseFormatConfig? responseFormat,
+    InteractionResponseFormatConfig? responseFormat,
     String? previousInteractionId,
+    EnvironmentConfigOrId? environment,
   }) async* {
     final url = requestBuilder.buildUrl(
       '/{version}/interactions',
@@ -233,6 +240,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
       'response_mime_type': ?responseMimeType,
       if (responseFormat != null) 'response_format': responseFormat.toJson(),
       'previous_interaction_id': ?previousInteractionId,
+      if (environment != null) 'environment': environment.toJson(),
     };
 
     var httpRequest = http.Request('POST', url)

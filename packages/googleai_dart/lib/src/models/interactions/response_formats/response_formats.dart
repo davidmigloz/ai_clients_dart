@@ -5,34 +5,33 @@ part 'image_response_format.dart';
 part 'response_format_config.dart';
 part 'text_response_format.dart';
 part 'unknown_response_format.dart';
-part 'video_response_format.dart';
 
 /// A single response format for an interaction.
 ///
-/// This is a sealed class with subtypes [AudioResponseFormat],
-/// [TextResponseFormat], [ImageResponseFormat], [VideoResponseFormat], and
-/// [UnknownResponseFormat] for the spec's open `{ "type": object }` member.
+/// This is a sealed class with subtypes [InteractionAudioResponseFormat],
+/// [InteractionTextResponseFormat], [InteractionImageResponseFormat], and
+/// [UnknownInteractionResponseFormat] for the spec's open `{ "type": object }`
+/// member.
 ///
 /// To configure `response_format` on an interaction, wrap one or more of these
-/// in a [ResponseFormatConfig].
-sealed class ResponseFormat {
+/// in an [InteractionResponseFormatConfig].
+sealed class InteractionResponseFormat {
   /// The type discriminator for this response format.
   String get type;
 
-  const ResponseFormat();
+  const InteractionResponseFormat();
 
-  /// Creates a [ResponseFormat] from JSON.
+  /// Creates an [InteractionResponseFormat] from JSON.
   ///
-  /// Unrecognized `type` values are surfaced as [UnknownResponseFormat] (raw
-  /// JSON preserved) to match the spec's open union member and stay
-  /// forward-compatible.
-  factory ResponseFormat.fromJson(Map<String, dynamic> json) {
+  /// Unrecognized `type` values are surfaced as
+  /// [UnknownInteractionResponseFormat] (raw JSON preserved) to match the
+  /// spec's open union member and stay forward-compatible.
+  factory InteractionResponseFormat.fromJson(Map<String, dynamic> json) {
     return switch (json['type']) {
-      'audio' => AudioResponseFormat.fromJson(json),
-      'text' => TextResponseFormat.fromJson(json),
-      'image' => ImageResponseFormat.fromJson(json),
-      'video' => VideoResponseFormat.fromJson(json),
-      _ => UnknownResponseFormat.fromJson(json),
+      'audio' => InteractionAudioResponseFormat.fromJson(json),
+      'text' => InteractionTextResponseFormat.fromJson(json),
+      'image' => InteractionImageResponseFormat.fromJson(json),
+      _ => UnknownInteractionResponseFormat.fromJson(json),
     };
   }
 

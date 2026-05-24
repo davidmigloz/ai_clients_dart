@@ -1,7 +1,10 @@
 export 'agent_config.dart';
+export 'agents/agent.dart';
+export 'agents/list_agents_response.dart';
 export 'allowed_tools.dart';
 export 'content/content.dart';
 export 'deltas/deltas.dart';
+export 'environments/environments.dart';
 export 'events/events.dart';
 export 'function_result_subcontent.dart';
 export 'generation_config.dart';

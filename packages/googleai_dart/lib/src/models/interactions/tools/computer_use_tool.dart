@@ -21,7 +21,7 @@ class ComputerUseTool extends InteractionTool {
       ComputerUseTool(
         environment: json['environment'] as String?,
         excludedPredefinedFunctions:
-            (json['excludedPredefinedFunctions'] as List<dynamic>?)
+            (json['excluded_predefined_functions'] as List<dynamic>?)
                 ?.cast<String>(),
       );
 
@@ -30,6 +30,6 @@ class ComputerUseTool extends InteractionTool {
     'type': type,
     if (environment != null) 'environment': environment,
     if (excludedPredefinedFunctions != null)
-      'excludedPredefinedFunctions': excludedPredefinedFunctions,
+      'excluded_predefined_functions': excludedPredefinedFunctions,
   };
 }

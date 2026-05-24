@@ -2,6 +2,7 @@ import '../common/speech_config.dart';
 import '../content/media_resolution.dart';
 import '../copy_with_sentinel.dart';
 import 'image_config.dart';
+import 'response_formats/response_format_config.dart';
 import 'response_modality.dart';
 import 'thinking_config.dart';
 
@@ -83,6 +84,12 @@ class GenerationConfig {
   /// single-voice and multi-speaker setups.
   final SpeechConfig? speechConfig;
 
+  /// Configuration for the response output format.
+  ///
+  /// Allows specifying output configuration per modality (text, audio, image)
+  /// in a flat structure.
+  final ResponseFormatConfig? responseFormat;
+
   /// Creates a [GenerationConfig].
   const GenerationConfig({
     this.candidateCount,
@@ -105,6 +112,7 @@ class GenerationConfig {
     this.responseJsonSchema,
     this.enableEnhancedCivicAnswers,
     this.speechConfig,
+    this.responseFormat,
   });
 
   /// Creates a [GenerationConfig] from JSON.
@@ -144,6 +152,11 @@ class GenerationConfig {
                 json['speechConfig'] as Map<String, dynamic>,
               )
             : null,
+        responseFormat: json['responseFormat'] != null
+            ? ResponseFormatConfig.fromJson(
+                json['responseFormat'] as Map<String, dynamic>,
+              )
+            : null,
       );
 
   /// Converts to JSON.
@@ -173,6 +186,7 @@ class GenerationConfig {
     if (enableEnhancedCivicAnswers != null)
       'enableEnhancedCivicAnswers': enableEnhancedCivicAnswers,
     if (speechConfig != null) 'speechConfig': speechConfig!.toJson(),
+    if (responseFormat != null) 'responseFormat': responseFormat!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -197,6 +211,7 @@ class GenerationConfig {
     Object? responseJsonSchema = unsetCopyWithValue,
     Object? enableEnhancedCivicAnswers = unsetCopyWithValue,
     Object? speechConfig = unsetCopyWithValue,
+    Object? responseFormat = unsetCopyWithValue,
   }) {
     return GenerationConfig(
       candidateCount: candidateCount == unsetCopyWithValue
@@ -254,6 +269,9 @@ class GenerationConfig {
       speechConfig: speechConfig == unsetCopyWithValue
           ? this.speechConfig
           : speechConfig as SpeechConfig?,
+      responseFormat: responseFormat == unsetCopyWithValue
+          ? this.responseFormat
+          : responseFormat as ResponseFormatConfig?,
     );
   }
 }

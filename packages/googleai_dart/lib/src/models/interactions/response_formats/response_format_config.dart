@@ -2,33 +2,42 @@ part of 'response_formats.dart';
 
 /// The `response_format` configuration for an interaction.
 ///
-/// Per the spec, `response_format` is either a single [ResponseFormat]
-/// ([SingleResponseFormat]) or a list of them ([ResponseFormatList]).
-sealed class ResponseFormatConfig {
-  const ResponseFormatConfig();
+/// Per the spec, `response_format` is either a single
+/// [InteractionResponseFormat] ([InteractionSingleResponseFormat]) or a list of
+/// them ([InteractionResponseFormatList]).
+sealed class InteractionResponseFormatConfig {
+  const InteractionResponseFormatConfig();
 
-  /// Wraps a single [ResponseFormat].
-  const factory ResponseFormatConfig.single(ResponseFormat format) =
-      SingleResponseFormat;
+  /// Wraps a single [InteractionResponseFormat].
+  const factory InteractionResponseFormatConfig.single(
+    InteractionResponseFormat format,
+  ) = InteractionSingleResponseFormat;
 
-  /// Wraps a list of [ResponseFormat]s.
-  const factory ResponseFormatConfig.list(List<ResponseFormat> formats) =
-      ResponseFormatList;
+  /// Wraps a list of [InteractionResponseFormat]s.
+  const factory InteractionResponseFormatConfig.list(
+    List<InteractionResponseFormat> formats,
+  ) = InteractionResponseFormatList;
 
-  /// Creates a [ResponseFormatConfig] from a JSON value.
+  /// Creates an [InteractionResponseFormatConfig] from a JSON value.
   ///
-  /// Accepts either a single response-format object ([SingleResponseFormat]) or
-  /// a list of them ([ResponseFormatList]).
-  factory ResponseFormatConfig.fromJson(Object json) {
+  /// Accepts either a single response-format object
+  /// ([InteractionSingleResponseFormat]) or a list of them
+  /// ([InteractionResponseFormatList]).
+  factory InteractionResponseFormatConfig.fromJson(Object json) {
     if (json is List) {
-      return ResponseFormatList(
+      return InteractionResponseFormatList(
         json
-            .map((e) => ResponseFormat.fromJson(e as Map<String, dynamic>))
+            .map(
+              (e) =>
+                  InteractionResponseFormat.fromJson(e as Map<String, dynamic>),
+            )
             .toList(),
       );
     }
     if (json is Map<String, dynamic>) {
-      return SingleResponseFormat(ResponseFormat.fromJson(json));
+      return InteractionSingleResponseFormat(
+        InteractionResponseFormat.fromJson(json),
+      );
     }
     throw ArgumentError(
       'Unknown response format: expected an object or a list, got '
@@ -40,25 +49,25 @@ sealed class ResponseFormatConfig {
   Object toJson();
 }
 
-/// A single [ResponseFormat] response-format configuration.
-class SingleResponseFormat extends ResponseFormatConfig {
+/// A single [InteractionResponseFormat] response-format configuration.
+class InteractionSingleResponseFormat extends InteractionResponseFormatConfig {
   /// The response format.
-  final ResponseFormat format;
+  final InteractionResponseFormat format;
 
-  /// Creates a [SingleResponseFormat].
-  const SingleResponseFormat(this.format);
+  /// Creates an [InteractionSingleResponseFormat].
+  const InteractionSingleResponseFormat(this.format);
 
   @override
   Object toJson() => format.toJson();
 }
 
-/// A list of [ResponseFormat]s as the response-format configuration.
-class ResponseFormatList extends ResponseFormatConfig {
+/// A list of [InteractionResponseFormat]s as the response-format configuration.
+class InteractionResponseFormatList extends InteractionResponseFormatConfig {
   /// The response formats.
-  final List<ResponseFormat> formats;
+  final List<InteractionResponseFormat> formats;
 
-  /// Creates a [ResponseFormatList].
-  const ResponseFormatList(this.formats);
+  /// Creates an [InteractionResponseFormatList].
+  const InteractionResponseFormatList(this.formats);
 
   @override
   Object toJson() => formats.map((f) => f.toJson()).toList();

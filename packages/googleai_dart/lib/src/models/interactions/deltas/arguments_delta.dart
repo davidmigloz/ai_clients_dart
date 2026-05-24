@@ -9,10 +9,10 @@ class ArgumentsDelta extends StepDeltaData {
   String get type => 'arguments_delta';
 
   /// A partial JSON-encoded fragment of the arguments object.
-  final String? partialArguments;
+  final String? arguments;
 
   /// Creates an [ArgumentsDelta] instance.
-  const ArgumentsDelta({this.partialArguments});
+  const ArgumentsDelta({this.arguments});
 
   /// Creates an [ArgumentsDelta] from JSON.
   factory ArgumentsDelta.fromJson(Map<String, dynamic> json) {
@@ -21,14 +21,12 @@ class ArgumentsDelta extends StepDeltaData {
         'Expected type "arguments_delta" but got "${json['type']}"',
       );
     }
-    return ArgumentsDelta(
-      partialArguments: json['partial_arguments'] as String?,
-    );
+    return ArgumentsDelta(arguments: json['arguments'] as String?);
   }
 
   @override
   Map<String, dynamic> toJson() => {
     'type': type,
-    if (partialArguments != null) 'partial_arguments': partialArguments,
+    if (arguments != null) 'arguments': arguments,
   };
 }

@@ -115,8 +115,8 @@ Future<void> googleSearchWithInteractions(GoogleAIClient client) async {
           stdout.write(delta.text);
         } else if (delta is ArgumentsDelta) {
           // Search call arguments arrive incrementally as JSON fragments
-          if (delta.partialArguments != null) {
-            stdout.write(delta.partialArguments);
+          if (delta.arguments != null) {
+            stdout.write(delta.arguments);
           }
         }
       case StepStopEvent():
