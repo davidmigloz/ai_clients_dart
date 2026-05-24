@@ -53,8 +53,10 @@ an opaque close/401.
 Two consequences for the Realtime resource:
 
 1. **The web connector must reject all headers, not just `Authorization`.** Throw
-   on *any* non-empty `headers` map, comparing case-insensitively, and surface the
-   received keys plus the supported alternatives:
+   unconditionally when `headers.isNotEmpty` — no per-key matching, so lowercase
+   `authorization`, `OpenAI-Project`, and any future header all surface rather
+   than only the exact `Authorization` key — and report the received keys plus
+   the supported alternatives:
 
    ```dart
    // WRONG — only catches the exact key; lowercase `authorization`,
