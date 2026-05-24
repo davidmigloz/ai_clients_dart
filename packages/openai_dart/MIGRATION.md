@@ -6,6 +6,79 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v5.x to v6.0.0
+
+v6.0.0 migrates the **Realtime API** client to the GA shape announced with OpenAI's 2026-05-07 Voice Intelligence drop. **All breaking changes are confined to the Realtime API** (`client.realtime` / `client.realtimeSessions`) — the Chat Completions and Responses APIs are unaffected.
+
+### 1) Audio config moved under nested `audio.{input,output}`
+
+The flat top-level audio fields are replaced by a nested `RealtimeAudioConfig` with `input`/`output` sub-shapes, both on session config and on `createResponse(...)`.
+
+```dart
+// After (v6.0.0)
+final session = RealtimeSessionCreateRequest(
+  model: 'gpt-realtime-2',
+  audio: RealtimeAudioConfig(
+    output: RealtimeAudioConfigOutput(voice: 'alloy'),
+  ),
+  reasoning: RealtimeReasoning(effort: RealtimeReasoningEffort.minimal),
+  parallelToolCalls: true,
+);
+```
+
+### 2) Enums replaced by sealed unions / open strings
+
+- `RealtimeAudioFormat` enum → `RealtimeAudioFormats` **sealed union** (`AudioPcm` / `AudioPcmu` / `AudioPcma` + `UnknownRealtimeAudioFormats`).
+- `TurnDetection` flat class → `RealtimeAudioInputTurnDetection` **sealed union** (`ServerVad` / `SemanticVad` + Unknown fallback).
+- `RealtimeVoice` enum **removed** — `audio.output.voice` is now an open `String`.
+
+```dart
+// Before — enum format
+format: RealtimeAudioFormat.pcm16,
+// After — sealed-union variant
+format: AudioPcm(rate: 24000),
+```
+
+### 3) `SessionUpdateConfig` → `RealtimeSessionCreateRequest`
+
+`connect(config:)` and `updateSession(...)` now take a `RealtimeSessionCreateRequest` (the same type used to create a session), replacing `SessionUpdateConfig`.
+
+### 4) Legacy session-create methods removed → client-secret flows
+
+`client.realtimeSessions.create()` and `createTranscription()` are removed — the legacy `/realtime/sessions` and `/realtime/transcription_sessions` HTTP endpoints reject the new payload shape. Use the client-secret flow instead (matching the official Python SDK).
+
+```dart
+// After (v6.0.0)
+final response = await client.realtimeSessions.createClientSecret(
+  RealtimeClientSecretCreateRequest(
+    session: RealtimeSessionCreateRequest(
+      model: 'gpt-realtime-2',
+      audio: RealtimeAudioConfig(
+        output: RealtimeAudioConfigOutput(voice: 'alloy'),
+      ),
+    ),
+  ),
+);
+
+// Transcription sessions use the parallel method:
+final t = await client.realtimeSessions.createTranscriptionClientSecret(...);
+```
+
+### 5) `RealtimeConnection.createResponse(...)` signature changed
+
+The `modalities` / `voice` / `outputAudioFormat` / `temperature` parameters are removed and replaced by `outputModalities` / `audio: RealtimeAudioConfigOutput?` / `parallelToolCalls` / `reasoning` / `conversation` / `metadata`.
+
+### 6) Removed fields, tightened nullability, and a lenient parser
+
+- `RealtimeSessionCreateResponse.clientSecret` **removed** — the secret is a sibling of the session on `/realtime/client_secrets`, not nested.
+- `RealtimeSession.temperature` **removed** (no longer in the spec — it was silently making `session.update` fail).
+- `RealtimeSession` / `RealtimeSessionCreateResponse` nullability tightened to match the spec (`model` / `expiresAt` are nullable on the response since transcription responses omit them).
+- `RealtimeEvent.fromJson` **no longer throws** on unrecognized types — it returns `UnknownRealtimeEvent`. If you relied on a thrown exception to detect unknown events, switch to checking for the `UnknownRealtimeEvent` variant.
+
+New convenience helpers (non-breaking, but worth adopting): `RealtimeConnection.sendUserMessage(text)` and `appendAudioBytes(List<int>)` remove the manual base64/event boilerplate, and `client.realtime.connectTranslation(...)` opens the realtime translation WebSocket.
+
+---
+
 ## Migrating from v4.x to v5.0.0
 
 v5.0.0 realigns `FunctionCallStatus` with the OpenAI spec. The non-spec `failed` value is removed and replaced with the spec-correct `inProgress` and `incomplete` variants. Code that referenced `FunctionCallStatus.failed` was already broken at runtime — the API rejected the wire value `'failed'` with HTTP 400 — so the practical migration is to send `incomplete` and convey failure detail in the output payload itself.

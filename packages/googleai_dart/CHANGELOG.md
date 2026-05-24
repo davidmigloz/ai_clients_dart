@@ -1,3 +1,16 @@
+## 7.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Brings `googleai_dart` up to the May-2026 Gemini spec. The core API gains `GenerationConfig.responseFormat` for per-modality (text/audio/image) output configuration, and File Search adds multimodal RAG via `FileSearchStore.embeddingModel` (opt into `gemini-embedding-2`) plus a `downloadMedia(...)` endpoint. The [Interactions API](https://ai.google.dev/api/interactions-api) is migrated to its [May-2026 breaking-changes shape](https://ai.google.dev/gemini-api/docs/interactions-breaking-changes-may-2026) — tool calls/results now live in an `InteractionStep` sealed family, the SSE event stream is restructured, and a new `client.webhooks` resource (CRUD + ping + secret rotation) is added, with the client opting in via the `Api-Revision: 2026-05-20` header. `LiveSession.close()` is now idempotent. **Breaking:** the impact is confined to the experimental Interactions API — renamed types (the `ResponseFormat` family gains an `Interaction*` prefix, `Interaction.outputs` → `steps`, `ArgumentsDelta.partialArguments` → `arguments`, `AudioContent.rate` → `sampleRate`), the replaced tool-call/result step types, and the dropped `VideoResponseFormat`. Callers using only the core `generateContent`/embeddings/files surface are unaffected.
+
+- **BREAKING** **FEAT**: Sync to latest spec (Agents, Environments, responseFormat) ([#239](https://github.com/davidmigloz/ai_clients_dart/issues/239)). ([e2318200](https://github.com/davidmigloz/ai_clients_dart/commit/e231820031a9b72d06237554dfda2d003a985a7f))
+- **BREAKING** **FEAT**: Migrate Interactions API, add Webhooks resource ([#234](https://github.com/davidmigloz/ai_clients_dart/issues/234)). ([74b5a52e](https://github.com/davidmigloz/ai_clients_dart/commit/74b5a52e8aeb40537c863bae6d85e732aa2b7573))
+- **FEAT**: Add file search embeddingModel and downloadMedia ([#219](https://github.com/davidmigloz/ai_clients_dart/issues/219)). ([85cf5f88](https://github.com/davidmigloz/ai_clients_dart/commit/85cf5f8824724c1a9ac53eb9b90af8db618e7a69))
+- **FIX**: Make LiveSession.close idempotent ([#240](https://github.com/davidmigloz/ai_clients_dart/issues/240)). ([2855dd3b](https://github.com/davidmigloz/ai_clients_dart/commit/2855dd3b175a5075de62bc1ddec455259d4709ba))
+- **CHORE**: Fix use_null_aware_elements lint flagged by Dart 3.12 ([#232](https://github.com/davidmigloz/ai_clients_dart/issues/232)). ([31ac5efc](https://github.com/davidmigloz/ai_clients_dart/commit/31ac5efcaf8367e844a3485f80a6c0e6219af7cb))
+
 ## 6.3.0
 
 Syncs `googleai_dart` to the latest Gemini v1beta OpenAPI spec and adds an optional `mediaId` field to `RetrievedContext`. The Gemini API now returns a `mediaId` resource name (`fileSearchStores/{store_id}/media/{blob_id}`) on `RetrievedContext` chunks for multimodal file-search results, letting callers fetch the underlying blob from the `FileSearchStore`. The field is fully integrated into `fromJson` / `toJson` / `copyWith` / `toString`.

@@ -6,6 +6,87 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v6.x to v7.0.0
+
+v7.0.0 migrates the **experimental Interactions API** to its [May-2026 breaking-changes shape](https://ai.google.dev/gemini-api/docs/interactions-breaking-changes-may-2026): tool calls and results move out of `Content` into a new `InteractionStep` sealed family, the SSE event stream is restructured, and the interactions response-format types are renamed to free the bare names for the new main-spec `GenerationConfig.responseFormat`. **All breaking changes are confined to the Interactions API** — if you use only the core `generateContent`/embeddings/files surface, no changes are required.
+
+### 1) `Interaction.outputs` → `Interaction.steps` (new `InteractionStep` family)
+
+The tool-call/result `*Content` classes are removed and replaced by 17 `InteractionStep` variants (`ModelOutputStep`, `ThoughtStep`, `FunctionCallStep`, `FunctionResultStep`, …). The same rename applies to `CreateModelInteractionParams` and `CreateAgentInteractionParams`.
+
+```dart
+// Before (v6.x)
+for (final c in interaction.outputs!) { ... }
+
+// After (v7.0.0)
+for (final step in interaction.steps!) { ... } // ModelOutputStep, ThoughtStep, FunctionCallStep, ...
+```
+
+Extension getters were renamed accordingly: `functionCallOutputs` / `thoughtOutputs` → `functionCallSteps` / `thoughtSteps`, etc.
+
+### 2) Input restructured: `TurnsInput`/`Turn`/`TurnContent` removed
+
+Conversation input now uses `InteractionInput.steps` with typed step classes instead of turns.
+
+```dart
+// Before (v6.x)
+input: InteractionInput.turns([
+  Turn(role: 'user', content: TurnTextContent('My name is Bob.')),
+  Turn(role: 'model', content: TurnTextContent('Hi Bob!')),
+])
+
+// After (v7.0.0)
+input: const InteractionInput.steps([
+  UserInputStep(content: [TextContent(text: 'My name is Bob.')]),
+  ModelOutputStep(content: [TextContent(text: 'Hi Bob!')]),
+])
+```
+
+### 3) Stream events restructured
+
+The SSE event family is renamed and re-typed:
+
+- `InteractionStartEvent` → `InteractionCreatedEvent`
+- `InteractionCompleteEvent` → `InteractionCompletedEvent`
+- `Content{Start,Delta,Stop}Event` → `Step{Start,Delta,Stop}Event` (`StepStartEvent.step` is an `InteractionStep`)
+- `ContentDeltaData` → `StepDeltaData`; the tool-delta variants are removed and replaced by a new `ArgumentsDelta`
+
+Every sealed union in the streaming surface now has an unknown-fallback variant, so undocumented discriminators preserve raw JSON instead of throwing and killing the stream — add a wildcard / `Unknown*` branch to your `switch`es to stay forward-compatible.
+
+### 4) Response-format family renamed (`Interaction*` prefix); `VideoResponseFormat` removed
+
+The interactions response-format types are prefixed with `Interaction*` so the bare names are free for the new main-spec `GenerationConfig.responseFormat` types.
+
+```dart
+// Before (v6.x)
+final fmt = ResponseFormat.fromJson(json);                       // interactions
+const cfg = ResponseFormatConfig.single(TextResponseFormat(...));
+
+// After (v7.0.0)
+final fmt = InteractionResponseFormat.fromJson(json);
+const cfg = InteractionResponseFormatConfig.single(
+  InteractionTextResponseFormat(...),
+);
+```
+
+Renamed: `ResponseFormat` → `InteractionResponseFormat`, `AudioResponseFormat` → `InteractionAudioResponseFormat`, `ImageResponseFormat` → `InteractionImageResponseFormat`, `TextResponseFormat` → `InteractionTextResponseFormat`, `ResponseFormatConfig` → `InteractionResponseFormatConfig`, `SingleResponseFormat` → `InteractionSingleResponseFormat`, `ResponseFormatList` → `InteractionResponseFormatList`, `UnknownResponseFormat` → `UnknownInteractionResponseFormat` (and their enums/helpers). `VideoResponseFormat` is **removed** (dropped from the spec); a `{"type":"video"}` payload now decodes to `UnknownInteractionResponseFormat`.
+
+### 5) Field renames
+
+```dart
+// ArgumentsDelta: wire key partial_arguments → arguments
+delta.partialArguments;  // before
+delta.arguments;         // after
+
+// AudioContent / AudioDelta: rate → sampleRate
+audio.rate;       // before
+audio.sampleRate; // after
+```
+
+`ToolResult.contentList` element type changes from `List<InteractionContent>` to `List<FunctionResultSubcontent>`.
+
+---
+
 ## Migrating from v5.x to v6.0.0
 
 v6.0.0 aligns with the latest interactions OpenAPI spec, which splits annotation events out of `TextDelta` into a dedicated delta variant. Callers that pattern-match on streaming interaction deltas must handle the new `TextAnnotationDelta` variant.

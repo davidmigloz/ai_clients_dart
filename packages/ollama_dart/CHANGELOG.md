@@ -1,3 +1,9 @@
+## 2.2.0
+
+Fixes browser usage (Flutter Web / dart2wasm) by no longer sending the non-CORS-safelisted `X-Request-ID` header by default — Ollama's `Access-Control-Allow-Headers` list excludes it, so the preflight previously failed and blocked all browser requests against a real Ollama server. A request ID is still generated internally for logging, error correlation, and retry/abort tracing; the new `OllamaConfig(sendRequestIdHeader: true)` opt-in restores the wire header for callers behind a proxy configured to accept it, and an `X-Request-ID` set explicitly via `defaultHeaders` is always sent.
+
+- **FEAT**: Make X-Request-ID header opt-in to fix browser CORS ([#228](https://github.com/davidmigloz/ai_clients_dart/issues/228)). ([f497a722](https://github.com/davidmigloz/ai_clients_dart/commit/f497a7226a2e11fb7ab9dd55f22202f9136d9ab8))
+
 ## 2.1.0
 
 Annotates `llms.txt` with per-link token counts and per-package totals so coding agents can budget context before fetching documentation, examples, or changelogs — inspired by Addy Osmani's [Agentic Engine Optimization](https://addyosmani.com/blog/agentic-engine-optimization/) article.

@@ -1,3 +1,14 @@
+## 6.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Migrates the Realtime API client to the GA shape from OpenAI's [Voice Intelligence](https://openai.com/index/advancing-voice-intelligence-with-new-models-in-the-api/) drop (2026-05-07): a nested `audio.{input,output}` config block, sealed unions for audio formats / turn detection / truncation / tracing, new `RealtimeReasoning`, `parallelToolCalls`, transcription `delay`, and the realtime **translation** surface (`gpt-realtime-translate` + `gpt-realtime-whisper`) via `connectTranslation(...)` and the new client-secret methods. Adds DX helpers `RealtimeConnection.sendUserMessage(text)` and `appendAudioBytes(...)`, plus a lenient event parser that returns `UnknownRealtimeEvent` instead of throwing. Also adds an optional `serviceTier` and a typed `CompactionTriggerItem` to the `/responses/compact` surface. **Breaking:** the impact is confined to the Realtime API (`client.realtime` / `client.realtimeSessions`) — audio fields moved under `audio.{input,output}`, several enums became sealed unions (`RealtimeAudioFormats`, `RealtimeAudioInputTurnDetection`), the legacy `create()`/`createTranscription()` HTTP methods are replaced by client-secret flows, and spec-dropped fields (`RealtimeSession.temperature`, `RealtimeSessionCreateResponse.clientSecret`) are removed. The Chat Completions and Responses APIs are unaffected.
+
+- **BREAKING** **FEAT**: Migrate Realtime API to GA shape ([#220](https://github.com/davidmigloz/ai_clients_dart/issues/220)). ([53f3c47e](https://github.com/davidmigloz/ai_clients_dart/commit/53f3c47ef40b12323e1f722bc094629a841b612f))
+- **FEAT**: Add compact service_tier & compaction_trigger item ([#238](https://github.com/davidmigloz/ai_clients_dart/issues/238)). ([1ded0dee](https://github.com/davidmigloz/ai_clients_dart/commit/1ded0dee346ebce3e15f0573a69451e26aa21e59))
+- **CHORE**: Fix use_null_aware_elements lint flagged by Dart 3.12 ([#232](https://github.com/davidmigloz/ai_clients_dart/issues/232)). ([31ac5efc](https://github.com/davidmigloz/ai_clients_dart/commit/31ac5efcaf8367e844a3485f80a6c0e6219af7cb))
+
 ## 5.0.0
 
 > [!CAUTION]

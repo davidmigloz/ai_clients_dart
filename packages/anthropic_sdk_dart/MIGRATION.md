@@ -6,6 +6,73 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v2.x to v3.0.0
+
+v3.0.0 completes the four-part Anthropic spec refresh. The breaking surface is small and mostly about forward-compatibility: several **exported `sealed` unions gained new variants**, so only code that `switch`es over them *exhaustively* (without a wildcard or `Unknown*` branch) needs updating. There is one concrete API break — `UserProfile.relationship` is now a required constructor parameter. Pure-deserialization consumers (no exhaustive `switch` over these types) are unaffected.
+
+### 1) `UserProfile.relationship` is now required
+
+The spec marks `relationship` as required and non-nullable, so it is now a required constructor parameter. Only code that constructs `UserProfile` directly (tests, mocks, fixtures) is affected — `UserProfile.fromJson` is unchanged.
+
+```dart
+// Before (v2.x)
+final profile = UserProfile(
+  id: 'uprof_…',
+  metadata: {},
+  trustGrants: {},
+  createdAt: DateTime.now(),
+  updatedAt: DateTime.now(),
+);
+
+// After (v3.0.0) — relationship is now required
+final profile = UserProfile(
+  id: 'uprof_…',
+  relationship: BetaUserProfileRelationship.external,
+  metadata: {},
+  trustGrants: {},
+  createdAt: DateTime.now(),
+  updatedAt: DateTime.now(),
+);
+```
+
+### 2) New variants on exported `sealed` unions
+
+Adding variants to a `sealed` type is source-breaking for downstream `switch` statements that were exhaustive over the previous variant set. The fix is the same in every case: handle the new variant(s), or add a wildcard / `Unknown*` catch-all so future additions stay non-breaking.
+
+The affected unions and their new variants:
+
+- **`Citation`** ([#233](https://github.com/davidmigloz/ai_clients_dart/issues/233)) — `SearchResultLocationCitation`, `UnknownCitation`. (Bonus: `Citation.fromJson` previously *threw* `FormatException` on unrecognized types; with `UnknownCitation` it is now forward-compatible.)
+- **`InputContentBlock`** ([#235](https://github.com/davidmigloz/ai_clients_dart/issues/235)) — `SearchResultInputBlock`.
+- **`SessionEvent`** ([#236](https://github.com/davidmigloz/ai_clients_dart/issues/236), [#230](https://github.com/davidmigloz/ai_clients_dart/issues/230), [#224](https://github.com/davidmigloz/ai_clients_dart/issues/224)) — `SessionUpdatedEvent`, `UserToolResultEvent`, `SpanOutcomeEvaluationStartEvent`, `SpanOutcomeEvaluationOngoingEvent`, `SpanOutcomeEvaluationEndEvent`, `UserDefineOutcomeEvent`, plus the session-thread lifecycle events.
+- **`EventParams`** ([#236](https://github.com/davidmigloz/ai_clients_dart/issues/236), [#230](https://github.com/davidmigloz/ai_clients_dart/issues/230)) — `UserToolResultEventParams`, `UserDefineOutcomeEventParams`.
+
+```dart
+// Before — exhaustive over the prior variant set (stops compiling on upgrade)
+final label = switch (citation) {
+  CharLocationCitation() => 'char',
+  PageLocationCitation() => 'page',
+  ContentBlockLocationCitation() => 'block',
+  WebSearchResultLocationCitation() => 'web',
+};
+
+// After — handle the new variant, and use UnknownCitation (or a wildcard `_`)
+// so subsequent additions are non-breaking
+final label = switch (citation) {
+  CharLocationCitation() => 'char',
+  PageLocationCitation() => 'page',
+  ContentBlockLocationCitation() => 'block',
+  WebSearchResultLocationCitation() => 'web',
+  SearchResultLocationCitation() => 'search_result',
+  UnknownCitation() => 'unknown',
+};
+```
+
+The same pattern applies to `InputContentBlock`, `SessionEvent`, and `EventParams` — add the new branches, or a wildcard `_` (or the union's `Unknown*` variant) to stay forward-compatible.
+
+All newly added *fields* in this release (`Message.diagnostics`, `MessageCreateRequest.diagnostics`, `ThinkingDelta.estimatedTokens`, `UpdateSessionParams.agent`, the new `DocumentInputBlock`/`TextInputBlock` citation fields, etc.) are optional and nullable, so they are non-breaking on their own.
+
+---
+
 ## Migrating from v1.x to v2.0.0
 
 v2.0.0 tightens `Session` field nullability to match the `BetaManagedAgentsSession` spec. Six fields that were previously nullable are now required non-nullable, so code constructing `Session` instances directly (for tests, mocks, or fixtures) must provide them.

@@ -60,7 +60,7 @@ Dart client for the **[Mistral AI API](https://docs.mistral.ai/)** with chat com
 
 ```yaml
 dependencies:
-  mistralai_dart: ^3.0.0
+  mistralai_dart: ^3.1.0
 ```
 
 ```dart

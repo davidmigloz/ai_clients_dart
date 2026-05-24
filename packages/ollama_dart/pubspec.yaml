@@ -1,6 +1,6 @@
 name: ollama_dart
 description: Dart client for the Ollama API to run LLMs locally (OpenAI gpt-oss, DeepSeek-R1, Gemma 3, Llama 4, and more).
-version: 2.1.0
+version: 2.2.0
 repository: https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/ollama_dart
 issue_tracker: https://github.com/davidmigloz/ai_clients_dart/issues?q=label:p:ollama_dart
 homepage: https://github.com/davidmigloz/ai_clients_dart

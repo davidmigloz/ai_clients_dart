@@ -1,3 +1,10 @@
+## 3.1.0
+
+Adds `promptCacheKey` to `AgentCompletionRequest`, `ChatCompletionRequest`, and `FimCompletionRequest` — tokens served from a cached prefix are billed at 10% of the standard input price. Re-introduces OCR confidence scores (`OcrConfidenceScore`, `OcrPageConfidenceScores`, the `OcrConfidenceScoresGranularity` enum, and the related fields on `OcrRequest`/`OcrPage`/`OcrTable`) following their return to the upstream spec, and adds the previously-missing `metadata` field on `FimCompletionRequest` for parity with the other completion requests. Refreshes the bundled OpenAPI spec to its 2026-05-09 snapshot. All changes are additive.
+
+- **FEAT**: Prompt cache key and OCR confidence scores ([#222](https://github.com/davidmigloz/ai_clients_dart/issues/222)). ([099093e1](https://github.com/davidmigloz/ai_clients_dart/commit/099093e1fa08377cb828cfafac788b97ad0294f3))
+- **CHORE**: Fix use_null_aware_elements lint flagged by Dart 3.12 ([#232](https://github.com/davidmigloz/ai_clients_dart/issues/232)). ([31ac5efc](https://github.com/davidmigloz/ai_clients_dart/commit/31ac5efcaf8367e844a3485f80a6c0e6219af7cb))
+
 ## 3.0.0
 
 > [!CAUTION]
