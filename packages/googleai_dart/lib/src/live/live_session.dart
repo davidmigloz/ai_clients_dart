@@ -224,10 +224,14 @@ class LiveSession {
       // The underlying connection is already closed (the server closed it
       // first, or close() was called more than once). Per the web_socket
       // package contract, close() throws in that case; closing is idempotent
-      // here, so ignore it and still tear down the message controller below.
-    }
-    if (!_messageController.isClosed) {
-      await _messageController.close();
+      // here, so ignore it. Any other error (e.g. an invalid close code or a
+      // transport failure) propagates after the finally block runs.
+    } finally {
+      // Always tear down the message controller — even if close() throws an
+      // unexpected error — so listeners are never left hanging.
+      if (!_messageController.isClosed) {
+        await _messageController.close();
+      }
     }
   }
 }

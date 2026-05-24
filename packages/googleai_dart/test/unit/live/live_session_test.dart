@@ -8,11 +8,15 @@ import 'package:web_socket/web_socket.dart';
 /// A fake [WebSocket] whose [close] behavior is configurable, used to exercise
 /// [LiveSession.close] without a real connection.
 class _FakeWebSocket implements WebSocket {
-  _FakeWebSocket({this.throwOnClose = false});
+  _FakeWebSocket({this.throwOnClose = false, this.closeError});
 
   /// When true, [close] throws [WebSocketConnectionClosed], mimicking the
   /// web_socket package contract for an already-closed connection.
   final bool throwOnClose;
+
+  /// When set, [close] throws this error (used to exercise the non-idempotent
+  /// failure path, e.g. an invalid close code or a transport error).
+  final Object? closeError;
 
   final StreamController<WebSocketEvent> _events =
       StreamController<WebSocketEvent>.broadcast();
@@ -34,6 +38,11 @@ class _FakeWebSocket implements WebSocket {
   @override
   Future<void> close([int? code, String? reason]) async {
     closeCallCount++;
+    if (closeError != null) {
+      // Intentionally throw a configurable error to exercise the failure path.
+      // ignore: only_throw_errors
+      throw closeError!;
+    }
     if (throwOnClose) {
       throw WebSocketConnectionClosed();
     }
@@ -78,6 +87,18 @@ void main() {
 
       await session.close();
       await expectLater(session.close(), completes);
+    });
+
+    test('rethrows a non-WebSocketConnectionClosed error but still closes the '
+        'message controller', () async {
+      // e.g. an invalid close code or a transport failure.
+      final socket = _FakeWebSocket(closeError: ArgumentError('bad code'));
+      final session = LiveSession.fromWebSocket(socket);
+
+      // The unexpected error propagates to the caller...
+      await expectLater(session.close(), throwsArgumentError);
+      // ...but the message controller is still torn down (no leak).
+      await expectLater(session.messages, emitsDone);
     });
   });
 }
