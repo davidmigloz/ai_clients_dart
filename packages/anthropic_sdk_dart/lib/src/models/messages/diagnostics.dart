@@ -11,8 +11,10 @@ import 'cache_miss_reason.dart';
 class Diagnostics {
   /// Why the prompt-cache lookup missed, if any.
   ///
-  /// The key is always present in responses but may be `null` when there is no
-  /// cache miss to report.
+  /// The key is always present in responses but may be `null`. Per the API, a
+  /// `null` value means the diagnosis is still pending — the response was
+  /// serialized before the background prompt-cache comparison completed (it may
+  /// also indicate that no divergence was detected).
   final CacheMissReason? cacheMissReason;
 
   /// Creates a [Diagnostics].

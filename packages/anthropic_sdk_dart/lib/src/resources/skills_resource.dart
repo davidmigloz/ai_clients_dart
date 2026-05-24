@@ -333,14 +333,14 @@ class SkillsResource extends ResourceBase {
     final url = requestBuilder.buildUrl(
       '/v1/skills/$skillId/versions/$version/content',
     );
-    // The response is a binary ZIP archive, so override the default Accept
-    // header to request binary content.
+    // The response is a binary ZIP archive. Widen Accept and drop the default
+    // JSON content-type (this GET has no request body), matching the binary
+    // download convention used by FilesResource.download.
     final headers = requestBuilder.buildHeaders(
-      additionalHeaders: {
-        'anthropic-beta': _betaHeader,
-        'Accept': 'application/binary',
-      },
+      additionalHeaders: {'anthropic-beta': _betaHeader},
     );
+    headers['accept'] = '*/*';
+    headers.remove('content-type');
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
 
     final response = await interceptorChain.execute(httpRequest);

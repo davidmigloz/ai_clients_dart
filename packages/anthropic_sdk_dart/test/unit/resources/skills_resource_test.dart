@@ -57,10 +57,10 @@ void main() {
       );
       expect(request.method, 'GET');
       expect(request.headers['anthropic-beta'], 'skills-2025-10-02');
-      // http lowercases header keys for lookup, so this works regardless of
-      // the casing used when the header was set.
-      expect(request.headers['Accept'], 'application/binary');
-      expect(request.headers['accept'], 'application/binary');
+      // Binary download: Accept is widened and the default JSON content-type is
+      // dropped, matching FilesResource.download.
+      expect(request.headers['accept'], '*/*');
+      expect(request.headers.containsKey('content-type'), isFalse);
       expect(request.headers['x-api-key'], 'test-api-key');
     });
 

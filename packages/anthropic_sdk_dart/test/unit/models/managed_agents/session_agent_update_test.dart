@@ -122,11 +122,14 @@ void main() {
       expect(params.agent, isNull);
     });
 
-    test('explicit null agent is included as null (clear semantics)', () {
-      const params = UpdateSessionParams(agent: null);
-      expect(params.toJson().containsKey('agent'), isTrue);
-      expect(params.toJson()['agent'], isNull);
-    });
+    test(
+      'explicit null agent is omitted (agent is not nullable in the API)',
+      () {
+        const params = UpdateSessionParams(agent: null);
+        expect(params.toJson().containsKey('agent'), isFalse);
+        expect(params.agent, isNull);
+      },
+    );
 
     test('fromJson preserves agent when key omitted', () {
       final parsed = UpdateSessionParams.fromJson(const {'title': 'x'});

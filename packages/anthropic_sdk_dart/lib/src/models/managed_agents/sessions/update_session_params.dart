@@ -28,9 +28,12 @@ class UpdateSessionParams {
   final Object? _vaultIds;
 
   /// Agent configuration patch to apply to the session.
-  SessionAgentUpdate? get agent =>
-      _agent == _notSet ? null : _agent as SessionAgentUpdate?;
-  final Object? _agent;
+  ///
+  /// Provide a [SessionAgentUpdate] to replace the agent's tools and/or MCP
+  /// servers. The API does not accept `null` for this field, so `null` here
+  /// means "not provided" and is omitted from the request. To clear tools or
+  /// MCP servers, pass empty arrays inside the [SessionAgentUpdate].
+  final SessionAgentUpdate? agent;
 
   /// Creates an [UpdateSessionParams].
   ///
@@ -40,11 +43,10 @@ class UpdateSessionParams {
     Object? title = _notSet,
     Object? metadata = _notSet,
     Object? vaultIds = _notSet,
-    Object? agent = _notSet,
+    this.agent,
   }) : _title = title,
        _metadata = metadata,
-       _vaultIds = vaultIds,
-       _agent = agent;
+       _vaultIds = vaultIds;
 
   /// Creates an [UpdateSessionParams] from JSON.
   factory UpdateSessionParams.fromJson(Map<String, dynamic> json) {
@@ -58,26 +60,23 @@ class UpdateSessionParams {
       vaultIds: json.containsKey('vault_ids')
           ? (json['vault_ids'] as List?)?.map((e) => e as String).toList()
           : _notSet,
-      agent: json.containsKey('agent')
-          ? (json['agent'] != null
-                ? SessionAgentUpdate.fromJson(
-                    json['agent'] as Map<String, dynamic>,
-                  )
-                : null)
-          : _notSet,
+      agent: json['agent'] != null
+          ? SessionAgentUpdate.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
   /// Converts to JSON.
   ///
-  /// Fields that were not set (left as default) are omitted.
-  /// Fields explicitly set to `null` are included as `null` to clear
-  /// the value on the server.
+  /// Clearable fields ([title], [metadata], [vaultIds]) that were not set are
+  /// omitted; when explicitly set to `null` they are included as `null` to
+  /// clear the value on the server. [agent] is not nullable in the API, so it
+  /// is emitted only when a value is provided.
   Map<String, dynamic> toJson() => {
     if (_title != _notSet) 'title': _title,
     if (_metadata != _notSet) 'metadata': _metadata,
     if (_vaultIds != _notSet) 'vault_ids': _vaultIds,
-    if (_agent != _notSet) 'agent': (_agent as SessionAgentUpdate?)?.toJson(),
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -91,7 +90,9 @@ class UpdateSessionParams {
       title: title == unsetCopyWithValue ? _title : title,
       metadata: metadata == unsetCopyWithValue ? _metadata : metadata,
       vaultIds: vaultIds == unsetCopyWithValue ? _vaultIds : vaultIds,
-      agent: agent == unsetCopyWithValue ? _agent : agent,
+      agent: agent == unsetCopyWithValue
+          ? this.agent
+          : agent as SessionAgentUpdate?,
     );
   }
 
@@ -103,14 +104,14 @@ class UpdateSessionParams {
           _title == other._title &&
           _mapsEqualOrBothSentinel(_metadata, other._metadata) &&
           _listsEqualOrBothSentinel(_vaultIds, other._vaultIds) &&
-          _agent == other._agent;
+          agent == other.agent;
 
   @override
   int get hashCode => Object.hash(
     _title,
     _metadata == _notSet ? _notSet : mapHash(metadata),
     _vaultIds == _notSet ? _notSet : listHash(vaultIds),
-    _agent,
+    agent,
   );
 
   @override
