@@ -160,8 +160,8 @@ enum InteractionImageResponseFormatDelivery {
   /// Image data is returned inline in the response.
   inline,
 
-  /// Image data is returned as a URL.
-  url,
+  /// Image data is returned as a URI.
+  uri,
 }
 
 /// Converts a JSON string to an [InteractionImageResponseFormatDelivery], or
@@ -170,7 +170,7 @@ InteractionImageResponseFormatDelivery?
 interactionImageResponseFormatDeliveryFromString(String? value) {
   return switch (value) {
     'inline' => InteractionImageResponseFormatDelivery.inline,
-    'url' => InteractionImageResponseFormatDelivery.url,
+    'uri' => InteractionImageResponseFormatDelivery.uri,
     _ => null,
   };
 }
@@ -181,7 +181,7 @@ String interactionImageResponseFormatDeliveryToString(
 ) {
   return switch (value) {
     InteractionImageResponseFormatDelivery.inline => 'inline',
-    InteractionImageResponseFormatDelivery.url => 'url',
+    InteractionImageResponseFormatDelivery.uri => 'uri',
   };
 }
 

@@ -64,6 +64,13 @@ void main() {
       final restored = EnvironmentNetworkEgressAllowlist.fromJson('disabled');
       expect(restored, isA<EnvironmentNetworkDisabled>());
     });
+
+    test('rejects string values other than "disabled"', () {
+      expect(
+        () => EnvironmentNetworkEgressAllowlist.fromJson('enabled'),
+        throwsArgumentError,
+      );
+    });
   });
 
   group('EnvironmentConfig', () {
@@ -112,7 +119,7 @@ void main() {
   });
 
   group('environment wiring on interaction models', () {
-    test('CreateModelInteractionParams serializes environment + id', () {
+    test('CreateModelInteractionParams serializes environment', () {
       const params = CreateModelInteractionParams(
         model: 'gemini-3.5-flash',
         environment: EnvironmentConfigOrId.config(
@@ -121,6 +128,8 @@ void main() {
       );
       final json = params.toJson();
       expect((json['environment'] as Map)['network'], 'disabled');
+      // environment_id is output-only; it is never sent in a create request.
+      expect(json.containsKey('environment_id'), isFalse);
 
       final restored = CreateModelInteractionParams.fromJson(json);
       expect(restored.environment, isA<InlineEnvironmentConfig>());

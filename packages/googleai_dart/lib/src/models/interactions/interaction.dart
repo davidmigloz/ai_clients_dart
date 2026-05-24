@@ -348,9 +348,6 @@ class CreateModelInteractionParams {
   /// reference to an existing environment by id ([EnvironmentIdRef]).
   final EnvironmentConfigOrId? environment;
 
-  /// The id of an existing environment to use for the interaction.
-  final String? environmentId;
-
   /// Webhook configuration for receiving notifications when the interaction
   /// completes.
   final WebhookConfig? webhookConfig;
@@ -369,7 +366,6 @@ class CreateModelInteractionParams {
     this.background,
     this.serviceTier,
     this.environment,
-    this.environmentId,
     this.webhookConfig,
   });
 
@@ -406,7 +402,6 @@ class CreateModelInteractionParams {
         environment: json['environment'] != null
             ? EnvironmentConfigOrId.fromJson(json['environment'] as Object)
             : null,
-        environmentId: json['environment_id'] as String?,
         webhookConfig: json['webhook_config'] != null
             ? WebhookConfig.fromJson(
                 json['webhook_config'] as Map<String, dynamic>,
@@ -434,7 +429,6 @@ class CreateModelInteractionParams {
     if (serviceTier != null && serviceTier != ServiceTier.unspecified)
       'service_tier': serviceTierToString(serviceTier!),
     if (environment != null) 'environment': environment!.toJson(),
-    if (environmentId != null) 'environment_id': environmentId,
     if (webhookConfig != null) 'webhook_config': webhookConfig!.toJson(),
   };
 }
@@ -469,9 +463,6 @@ class CreateAgentInteractionParams {
   /// reference to an existing environment by id ([EnvironmentIdRef]).
   final EnvironmentConfigOrId? environment;
 
-  /// The id of an existing environment to use for the interaction.
-  final String? environmentId;
-
   /// Webhook configuration for receiving notifications when the interaction
   /// completes.
   final WebhookConfig? webhookConfig;
@@ -486,7 +477,6 @@ class CreateAgentInteractionParams {
     this.background,
     this.serviceTier,
     this.environment,
-    this.environmentId,
     this.webhookConfig,
   });
 
@@ -513,7 +503,6 @@ class CreateAgentInteractionParams {
         environment: json['environment'] != null
             ? EnvironmentConfigOrId.fromJson(json['environment'] as Object)
             : null,
-        environmentId: json['environment_id'] as String?,
         webhookConfig: json['webhook_config'] != null
             ? WebhookConfig.fromJson(
                 json['webhook_config'] as Map<String, dynamic>,
@@ -533,7 +522,6 @@ class CreateAgentInteractionParams {
     if (serviceTier != null && serviceTier != ServiceTier.unspecified)
       'service_tier': serviceTierToString(serviceTier!),
     if (environment != null) 'environment': environment!.toJson(),
-    if (environmentId != null) 'environment_id': environmentId,
     if (webhookConfig != null) 'webhook_config': webhookConfig!.toJson(),
   };
 }

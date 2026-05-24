@@ -49,7 +49,8 @@ class InteractionsResource extends ResourceBase with StreamingResource {
   /// [_apiRevision] schema via the `Api-Revision` header.
   Map<String, String> _buildHeaders([Map<String, String>? additionalHeaders]) {
     return requestBuilder.buildHeaders(
-      additionalHeaders: {'Api-Revision': _apiRevision, ...?additionalHeaders},
+      // Spread additionalHeaders first so the Api-Revision opt-in always wins.
+      additionalHeaders: {...?additionalHeaders, 'Api-Revision': _apiRevision},
     );
   }
 
@@ -72,7 +73,6 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     String? previousInteractionId,
     bool? background,
     EnvironmentConfigOrId? environment,
-    String? environmentId,
     WebhookConfig? webhookConfig,
   }) async {
     final url = requestBuilder.buildUrl('/{version}/interactions');
@@ -95,7 +95,6 @@ class InteractionsResource extends ResourceBase with StreamingResource {
       'previous_interaction_id': ?previousInteractionId,
       'background': ?background,
       if (environment != null) 'environment': environment.toJson(),
-      'environment_id': ?environmentId,
       if (webhookConfig != null) 'webhook_config': webhookConfig.toJson(),
     };
 
@@ -122,7 +121,6 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     String? previousInteractionId,
     bool? background,
     EnvironmentConfigOrId? environment,
-    String? environmentId,
     WebhookConfig? webhookConfig,
   }) async {
     final url = requestBuilder.buildUrl('/{version}/interactions');
@@ -137,7 +135,6 @@ class InteractionsResource extends ResourceBase with StreamingResource {
       'previous_interaction_id': ?previousInteractionId,
       'background': ?background,
       if (environment != null) 'environment': environment.toJson(),
-      'environment_id': ?environmentId,
       if (webhookConfig != null) 'webhook_config': webhookConfig.toJson(),
     };
 

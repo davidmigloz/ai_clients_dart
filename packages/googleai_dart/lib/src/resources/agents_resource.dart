@@ -35,7 +35,8 @@ class AgentsResource extends ResourceBase {
   /// [_apiRevision] schema via the `Api-Revision` header.
   Map<String, String> _buildHeaders([Map<String, String>? additionalHeaders]) {
     return requestBuilder.buildHeaders(
-      additionalHeaders: {'Api-Revision': _apiRevision, ...?additionalHeaders},
+      // Spread additionalHeaders first so the Api-Revision opt-in always wins.
+      additionalHeaders: {...?additionalHeaders, 'Api-Revision': _apiRevision},
     );
   }
 

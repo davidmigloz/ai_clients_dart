@@ -55,8 +55,8 @@ enum InteractionAudioResponseFormatDelivery {
   /// Audio data is returned inline in the response.
   inline,
 
-  /// Audio data is returned as a URL.
-  url,
+  /// Audio data is returned as a URI.
+  uri,
 }
 
 /// Converts a JSON string to an [InteractionAudioResponseFormatDelivery], or
@@ -65,7 +65,7 @@ InteractionAudioResponseFormatDelivery?
 interactionAudioResponseFormatDeliveryFromString(String? value) {
   return switch (value) {
     'inline' => InteractionAudioResponseFormatDelivery.inline,
-    'url' => InteractionAudioResponseFormatDelivery.url,
+    'uri' => InteractionAudioResponseFormatDelivery.uri,
     _ => null,
   };
 }
@@ -76,7 +76,7 @@ String interactionAudioResponseFormatDeliveryToString(
 ) {
   return switch (value) {
     InteractionAudioResponseFormatDelivery.inline => 'inline',
-    InteractionAudioResponseFormatDelivery.url => 'url',
+    InteractionAudioResponseFormatDelivery.uri => 'uri',
   };
 }
 

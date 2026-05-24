@@ -67,6 +67,28 @@ void main() {
     );
   });
 
+  group('InteractionResponseFormat delivery enum', () {
+    test('audio/image delivery round-trips inline and uri', () {
+      for (final delivery in ['inline', 'uri']) {
+        final audio =
+            InteractionResponseFormat.fromJson({
+                  'type': 'audio',
+                  'delivery': delivery,
+                })
+                as InteractionAudioResponseFormat;
+        expect(audio.toJson()['delivery'], delivery);
+
+        final image =
+            InteractionResponseFormat.fromJson({
+                  'type': 'image',
+                  'delivery': delivery,
+                })
+                as InteractionImageResponseFormat;
+        expect(image.toJson()['delivery'], delivery);
+      }
+    });
+  });
+
   group('InteractionResponseFormat dispatch', () {
     test('dispatches the three typed variants', () {
       expect(

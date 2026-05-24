@@ -15,7 +15,13 @@ sealed class EnvironmentNetworkEgressAllowlist {
   /// allowlist object ([EnvironmentNetworkAllowlist]).
   factory EnvironmentNetworkEgressAllowlist.fromJson(Object json) {
     if (json is String) {
-      return const EnvironmentNetworkDisabled();
+      if (json == 'disabled') {
+        return const EnvironmentNetworkDisabled();
+      }
+      throw ArgumentError(
+        'Unknown network egress config string: expected "disabled", got '
+        '"$json"',
+      );
     }
     if (json is Map<String, dynamic>) {
       return EnvironmentNetworkAllowlist(
