@@ -216,6 +216,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
     String? responseMimeType,
     InteractionResponseFormatConfig? responseFormat,
     String? previousInteractionId,
+    EnvironmentConfigOrId? environment,
   }) async* {
     final url = requestBuilder.buildUrl(
       '/{version}/interactions',
@@ -239,6 +240,7 @@ class InteractionsResource extends ResourceBase with StreamingResource {
       'response_mime_type': ?responseMimeType,
       if (responseFormat != null) 'response_format': responseFormat.toJson(),
       'previous_interaction_id': ?previousInteractionId,
+      if (environment != null) 'environment': environment.toJson(),
     };
 
     var httpRequest = http.Request('POST', url)

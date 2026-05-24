@@ -62,14 +62,10 @@ Future<void> main() async {
     final fetched = await client.agents.get(agent.id!);
     print('Fetched agent base: ${fetched.baseAgent}');
 
-    // 4. Create an interaction that reuses the agent by id, with network
-    //    egress disabled for this run.
-    final interaction = await client.interactions.create(
-      model: 'gemini-3.5-flash',
+    // 4. Create an interaction that reuses the agent by id.
+    final interaction = await client.interactions.createWithAgent(
+      agent: agent.id!,
       input: const InteractionInput.text("Summarize today's AI news."),
-      environment: const EnvironmentConfigOrId.config(
-        EnvironmentConfig(network: EnvironmentNetworkDisabled()),
-      ),
     );
     print('Interaction id: ${interaction.id}');
 
