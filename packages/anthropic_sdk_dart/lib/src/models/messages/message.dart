@@ -44,8 +44,9 @@ class Message {
   /// Container metadata when server-side code execution was used.
   final Container? container;
 
-  /// Cache diagnostics, when requested via the `cache-diagnosis-2026-04-07`
-  /// beta header.
+  /// Cache diagnostics, present only when requested via the
+  /// `cache-diagnosis-2026-04-07` beta header. `null` when no prompt-cache
+  /// divergence was detected.
   final Diagnostics? diagnostics;
 
   /// Creates a [Message].
