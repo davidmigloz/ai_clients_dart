@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import 'config/prompt_cache_retention.dart';
+import 'config/service_tier.dart';
 import 'response_input.dart';
 
 /// Request to compact response conversation state.
@@ -30,6 +31,9 @@ class CompactResponseRequest {
   /// are accepted on read.
   final PromptCacheRetention? promptCacheRetention;
 
+  /// The service tier for request processing.
+  final ServiceTier? serviceTier;
+
   /// Creates a [CompactResponseRequest].
   const CompactResponseRequest({
     required this.model,
@@ -38,6 +42,7 @@ class CompactResponseRequest {
     this.instructions,
     this.promptCacheKey,
     this.promptCacheRetention,
+    this.serviceTier,
   });
 
   /// Creates a [CompactResponseRequest] from JSON.
@@ -56,6 +61,9 @@ class CompactResponseRequest {
         '24h' => PromptCacheRetention.h24,
         _ => PromptCacheRetention.unknown,
       },
+      serviceTier: json['service_tier'] != null
+          ? ServiceTier.fromJson(json['service_tier'] as String)
+          : null,
     );
   }
 
@@ -72,6 +80,7 @@ class CompactResponseRequest {
         PromptCacheRetention.h24 => '24h',
         PromptCacheRetention.unknown => 'unknown',
       },
+    if (serviceTier != null) 'service_tier': serviceTier!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -84,6 +93,7 @@ class CompactResponseRequest {
     Object? instructions = unsetCopyWithValue,
     Object? promptCacheKey = unsetCopyWithValue,
     Object? promptCacheRetention = unsetCopyWithValue,
+    Object? serviceTier = unsetCopyWithValue,
   }) {
     return CompactResponseRequest(
       model: model ?? this.model,
@@ -100,6 +110,9 @@ class CompactResponseRequest {
       promptCacheRetention: promptCacheRetention == unsetCopyWithValue
           ? this.promptCacheRetention
           : promptCacheRetention as PromptCacheRetention?,
+      serviceTier: serviceTier == unsetCopyWithValue
+          ? this.serviceTier
+          : serviceTier as ServiceTier?,
     );
   }
 
@@ -113,7 +126,8 @@ class CompactResponseRequest {
           previousResponseId == other.previousResponseId &&
           instructions == other.instructions &&
           promptCacheKey == other.promptCacheKey &&
-          promptCacheRetention == other.promptCacheRetention;
+          promptCacheRetention == other.promptCacheRetention &&
+          serviceTier == other.serviceTier;
 
   @override
   int get hashCode => Object.hash(
@@ -123,6 +137,7 @@ class CompactResponseRequest {
     instructions,
     promptCacheKey,
     promptCacheRetention,
+    serviceTier,
   );
 
   @override
@@ -133,5 +148,6 @@ class CompactResponseRequest {
       'previousResponseId: $previousResponseId, '
       'instructions: $instructions, '
       'promptCacheKey: $promptCacheKey, '
-      'promptCacheRetention: $promptCacheRetention)';
+      'promptCacheRetention: $promptCacheRetention, '
+      'serviceTier: $serviceTier)';
 }
