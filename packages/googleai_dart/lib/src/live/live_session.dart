@@ -211,10 +211,21 @@ class LiveSession {
   /// After calling this, the session can no longer send or receive messages.
   /// If session resumption is enabled, save the [resumptionToken] before
   /// closing to resume the session later.
+  ///
+  /// This is idempotent and safe to call when the connection has already been
+  /// closed (for example, when the server closed it first, or when [close] is
+  /// called more than once).
   Future<void> close([int? code, String? reason]) async {
     _isConnected = false;
     await _subscription?.cancel();
-    await _socket.close(code, reason);
+    try {
+      await _socket.close(code, reason);
+    } on WebSocketConnectionClosed {
+      // The underlying connection is already closed (the server closed it
+      // first, or close() was called more than once). Per the web_socket
+      // package contract, close() throws in that case; closing is idempotent
+      // here, so ignore it and still tear down the message controller below.
+    }
     if (!_messageController.isClosed) {
       await _messageController.close();
     }
