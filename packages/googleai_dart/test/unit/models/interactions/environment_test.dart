@@ -99,6 +99,17 @@ void main() {
       final restored = EnvironmentConfig.fromJson(json);
       expect(restored.network, isA<EnvironmentNetworkDisabled>());
     });
+
+    test('type is the constant "remote" and is always serialized', () {
+      expect(const EnvironmentConfig().type, 'remote');
+      expect(const EnvironmentConfig().toJson()['type'], 'remote');
+      // A "remote" type in JSON is accepted; any other value is rejected.
+      expect(EnvironmentConfig.fromJson({'type': 'remote'}).type, 'remote');
+      expect(
+        () => EnvironmentConfig.fromJson({'type': 'local'}),
+        throwsFormatException,
+      );
+    });
   });
 
   group('EnvironmentConfigOrId', () {

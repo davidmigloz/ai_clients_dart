@@ -1959,7 +1959,11 @@
       "schema": "EnvironmentConfig",
       "kind": "object",
       "dart_class": "EnvironmentConfig",
-      "file": "lib/src/models/interactions/environments/environment_config.dart"
+      "file": "lib/src/models/interactions/environments/environment_config.dart",
+      "note": "Excludes the const \"remote\" type discriminator (modeled as a fixed getter, not a settable field).",
+      "excluded_properties": [
+        "type"
+      ]
     },
     "Source": {
       "spec": "interactions",

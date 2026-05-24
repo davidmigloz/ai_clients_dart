@@ -2,8 +2,10 @@ part of 'environments.dart';
 
 /// Configuration for a remote environment (sandbox) for an interaction or agent.
 class EnvironmentConfig {
-  /// The environment type. Currently always `"remote"`.
-  final String type;
+  /// The environment type.
+  ///
+  /// Per the spec this is the constant `"remote"`; it is not configurable.
+  String get type => 'remote';
 
   /// Network configuration for the environment.
   ///
@@ -16,21 +18,30 @@ class EnvironmentConfig {
   final List<Source>? sources;
 
   /// Creates an [EnvironmentConfig].
-  const EnvironmentConfig({this.type = 'remote', this.network, this.sources});
+  const EnvironmentConfig({this.network, this.sources});
 
   /// Creates an [EnvironmentConfig] from JSON.
-  factory EnvironmentConfig.fromJson(Map<String, dynamic> json) =>
-      EnvironmentConfig(
-        type: json['type'] as String? ?? 'remote',
-        network: json['network'] != null
-            ? EnvironmentNetworkEgressAllowlist.fromJson(
-                json['network'] as Object,
-              )
-            : null,
-        sources: (json['sources'] as List<dynamic>?)
-            ?.map((e) => Source.fromJson(e as Map<String, dynamic>))
-            .toList(),
+  ///
+  /// Throws a [FormatException] if a `type` other than the constant `"remote"`
+  /// is present.
+  factory EnvironmentConfig.fromJson(Map<String, dynamic> json) {
+    final type = json['type'];
+    if (type != null && type != 'remote') {
+      throw FormatException(
+        'Expected EnvironmentConfig type "remote" but got "$type"',
       );
+    }
+    return EnvironmentConfig(
+      network: json['network'] != null
+          ? EnvironmentNetworkEgressAllowlist.fromJson(
+              json['network'] as Object,
+            )
+          : null,
+      sources: (json['sources'] as List<dynamic>?)
+          ?.map((e) => Source.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
@@ -41,12 +52,10 @@ class EnvironmentConfig {
 
   /// Creates a copy with replaced values.
   EnvironmentConfig copyWith({
-    Object? type = unsetCopyWithValue,
     Object? network = unsetCopyWithValue,
     Object? sources = unsetCopyWithValue,
   }) {
     return EnvironmentConfig(
-      type: type == unsetCopyWithValue ? this.type : type! as String,
       network: network == unsetCopyWithValue
           ? this.network
           : network as EnvironmentNetworkEgressAllowlist?,
