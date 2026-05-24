@@ -85,7 +85,8 @@ class Interaction {
   /// The environment configuration for the interaction.
   ///
   /// Either an inline [EnvironmentConfig] ([InlineEnvironmentConfig]) or a
-  /// reference to an existing environment by id ([EnvironmentIdRef]).
+  /// string reference ([EnvironmentIdRef]) — an existing environment id, or a
+  /// literal such as `"remote"`.
   final EnvironmentConfigOrId? environment;
 
   /// Output only. The id of the environment created for this interaction when
@@ -345,7 +346,8 @@ class CreateModelInteractionParams {
   /// The environment configuration for the interaction.
   ///
   /// Either an inline [EnvironmentConfig] ([InlineEnvironmentConfig]) or a
-  /// reference to an existing environment by id ([EnvironmentIdRef]).
+  /// string reference ([EnvironmentIdRef]) — an existing environment id, or a
+  /// literal such as `"remote"`.
   final EnvironmentConfigOrId? environment;
 
   /// Webhook configuration for receiving notifications when the interaction
@@ -460,7 +462,8 @@ class CreateAgentInteractionParams {
   /// The environment configuration for the interaction.
   ///
   /// Either an inline [EnvironmentConfig] ([InlineEnvironmentConfig]) or a
-  /// reference to an existing environment by id ([EnvironmentIdRef]).
+  /// string reference ([EnvironmentIdRef]) — an existing environment id, or a
+  /// literal such as `"remote"`.
   final EnvironmentConfigOrId? environment;
 
   /// Webhook configuration for receiving notifications when the interaction

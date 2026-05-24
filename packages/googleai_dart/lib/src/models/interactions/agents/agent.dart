@@ -16,7 +16,8 @@ class Agent {
   /// The environment configuration for the agent.
   ///
   /// Either an inline [EnvironmentConfig] ([InlineEnvironmentConfig]) or a
-  /// reference to an existing environment by id ([EnvironmentIdRef]).
+  /// string reference ([EnvironmentIdRef]) — an existing environment id, or a
+  /// literal such as `"remote"`.
   final EnvironmentConfigOrId? baseEnvironment;
 
   /// A human-readable description of the agent.
