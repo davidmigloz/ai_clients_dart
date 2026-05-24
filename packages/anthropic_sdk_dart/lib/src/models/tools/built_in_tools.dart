@@ -2,7 +2,13 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import '../content/citations_config.dart';
 import '../metadata/cache_control.dart';
+
+// RequestCitationsConfig now lives in content/citations_config.dart but is part
+// of this library's API surface (e.g. WebFetchTool.citations), so re-export it
+// to preserve the import surface for consumers of this sublibrary.
+export '../content/citations_config.dart';
 
 // Include beta tools as part of this library to allow them to extend BuiltInTool
 part '../beta/tools/advisor_tool.dart';
@@ -905,37 +911,6 @@ class WebSearchTool extends BuiltInTool {
       'maxUses: $maxUses, userLocation: $userLocation, '
       'allowedCallers: $allowedCallers, deferLoading: $deferLoading, '
       'strict: $strict)';
-}
-
-/// Citations configuration for web fetch tool output.
-@immutable
-class RequestCitationsConfig {
-  /// Whether citations are enabled for fetched documents.
-  final bool enabled;
-
-  /// Creates a [RequestCitationsConfig].
-  const RequestCitationsConfig({this.enabled = true});
-
-  /// Creates a [RequestCitationsConfig] from JSON.
-  factory RequestCitationsConfig.fromJson(Map<String, dynamic> json) {
-    return RequestCitationsConfig(enabled: json['enabled'] as bool? ?? true);
-  }
-
-  /// Converts to JSON.
-  Map<String, dynamic> toJson() => {'enabled': enabled};
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is RequestCitationsConfig &&
-          runtimeType == other.runtimeType &&
-          enabled == other.enabled;
-
-  @override
-  int get hashCode => enabled.hashCode;
-
-  @override
-  String toString() => 'RequestCitationsConfig(enabled: $enabled)';
 }
 
 /// Web fetch built-in tool.

@@ -312,6 +312,7 @@
           "TextBlockParam": "text",
           "ImageBlockParam": "image",
           "DocumentBlockParam": "document",
+          "SearchResultBlockParam": "search_result",
           "ToolUseBlockParam": "tool_use",
           "ToolResultBlockParam": "tool_result",
           "ServerToolUseBlockParam": "server_tool_use",
@@ -339,10 +340,7 @@
       "dart_class": "TextInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
       "schema": "RequestTextBlock",
-      "parent": "InputContentBlock",
-      "excluded_properties": [
-        "citations"
-      ]
+      "parent": "InputContentBlock"
     },
     "ImageBlockParam": {
       "spec": "main",
@@ -358,11 +356,15 @@
       "dart_class": "DocumentInputBlock",
       "file": "lib/src/models/content/input_content_block.dart",
       "schema": "RequestDocumentBlock",
-      "parent": "InputContentBlock",
-      "excluded_properties": [
-        "citations",
-        "context"
-      ]
+      "parent": "InputContentBlock"
+    },
+    "SearchResultBlockParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SearchResultInputBlock",
+      "file": "lib/src/models/content/input_content_block.dart",
+      "schema": "RequestSearchResultBlock",
+      "parent": "InputContentBlock"
     },
     "ToolUseBlockParam": {
       "spec": "main",
@@ -568,6 +570,64 @@
       "file": "lib/src/models/content/content_block.dart",
       "schema": "BetaResponseSearchResultLocationCitation",
       "parent": "Citation"
+    },
+    "InputCitation": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "InputCitation",
+      "file": "lib/src/models/content/input_content_block.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "InputCitationCharLocation": "char_location",
+          "InputCitationPageLocation": "page_location",
+          "InputCitationContentBlockLocation": "content_block_location",
+          "InputCitationWebSearchResultLocation": "web_search_result_location",
+          "InputCitationSearchResultLocation": "search_result_location"
+        }
+      },
+      "note": null
+    },
+    "InputCitationCharLocation": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "CharLocationInputCitation",
+      "file": "lib/src/models/content/input_content_block.dart",
+      "schema": "RequestCharLocationCitation",
+      "parent": "InputCitation"
+    },
+    "InputCitationPageLocation": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "PageLocationInputCitation",
+      "file": "lib/src/models/content/input_content_block.dart",
+      "schema": "RequestPageLocationCitation",
+      "parent": "InputCitation"
+    },
+    "InputCitationContentBlockLocation": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ContentBlockLocationInputCitation",
+      "file": "lib/src/models/content/input_content_block.dart",
+      "schema": "RequestContentBlockLocationCitation",
+      "parent": "InputCitation"
+    },
+    "InputCitationWebSearchResultLocation": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebSearchResultLocationInputCitation",
+      "file": "lib/src/models/content/input_content_block.dart",
+      "schema": "RequestWebSearchResultLocationCitation",
+      "parent": "InputCitation"
+    },
+    "InputCitationSearchResultLocation": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SearchResultLocationInputCitation",
+      "file": "lib/src/models/content/input_content_block.dart",
+      "schema": "RequestSearchResultLocationCitation",
+      "parent": "InputCitation"
     },
     "WebSearchResult": {
       "spec": "main",

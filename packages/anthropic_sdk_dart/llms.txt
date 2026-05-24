@@ -20,13 +20,14 @@
 - [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/models_example.dart) (~471 tokens): Model listing.
 - [files_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/files_example.dart) (~842 tokens): File management (beta).
 - [skills_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/skills_example.dart) (~1k tokens): Skills management (beta).
-- [managed_agents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/managed_agents_example.dart) (~1.5k tokens): Managed agents: agents, sessions, vaults, multiagent rosters, outcomes, webhooks, credential validation (beta).
+- [managed_agents_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/managed_agents_example.dart) (~1.6k tokens): Managed agents: agents, sessions, vaults, multiagent rosters, outcomes, webhooks, credential validation (beta).
 - [memory_stores_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/memory_stores_example.dart) (~903 tokens): Managed agents memory stores, memories, and versions (beta).
 - [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/error_handling_example.dart) (~632 tokens): Exception handling patterns.
 - [web_search_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/web_search_example.dart) (~793 tokens): Web search tool.
 - [advisor_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/advisor_example.dart) (~967 tokens): Advisor tool (beta).
 - [computer_use_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/computer_use_example.dart) (~866 tokens): Computer use tool.
 - [document_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/document_example.dart) (~937 tokens): Document inputs with citations.
+- [search_result_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/search_result_example.dart) (~707 tokens): Supplying your own cited `search_result` blocks (RAG).
 - [mcp_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/mcp_example.dart) (~904 tokens): MCP tool integration.
 - [session_threads_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/session_threads_example.dart) (~816 tokens): Session threads: list, retrieve, stream events, archive (beta).
 - [user_profiles_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/user_profiles_example.dart) (~649 tokens): User profiles and enrollment URLs (beta).
@@ -36,4 +37,4 @@
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/anthropic_sdk_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~36.4k tokens**
+**Total: ~37.2k tokens**

@@ -39,7 +39,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 
 - Custom tool calling with strict schemas and tool choice controls
 - Computer use, web search, code execution, advisor, and MCP tool integration
-- Vision and document inputs with citations
+- Vision and document inputs with citations, plus your own cited `search_result` blocks (RAG)
 
 ### Operational APIs
 
@@ -667,6 +667,7 @@ See the [example/](example/) directory for complete examples:
 | [`thinking_example.dart`](example/thinking_example.dart) | Extended thinking |
 | [`vision_example.dart`](example/vision_example.dart) | Image and document inputs |
 | [`document_example.dart`](example/document_example.dart) | Document inputs with citations |
+| [`search_result_example.dart`](example/search_result_example.dart) | Supplying your own cited `search_result` blocks (RAG) |
 | [`token_counting_example.dart`](example/token_counting_example.dart) | Token counting |
 | [`message_batches_example.dart`](example/message_batches_example.dart) | Batch processing |
 | [`files_example.dart`](example/files_example.dart) | File management (beta) |
