@@ -1,7 +1,7 @@
 part of 'response_formats.dart';
 
 /// MIME type of the audio output.
-enum AudioResponseFormatMimeType {
+enum InteractionAudioResponseFormatMimeType {
   /// MP3 audio format.
   audioMp3,
 
@@ -21,36 +21,37 @@ enum AudioResponseFormatMimeType {
   audioMulaw,
 }
 
-/// Converts a JSON string to an [AudioResponseFormatMimeType], or `null` if
-/// unrecognized (forward-compatible).
-AudioResponseFormatMimeType? audioResponseFormatMimeTypeFromString(
-  String? value,
-) {
+/// Converts a JSON string to an [InteractionAudioResponseFormatMimeType], or
+/// `null` if unrecognized (forward-compatible).
+InteractionAudioResponseFormatMimeType?
+interactionAudioResponseFormatMimeTypeFromString(String? value) {
   return switch (value) {
-    'audio/mp3' => AudioResponseFormatMimeType.audioMp3,
-    'audio/ogg_opus' => AudioResponseFormatMimeType.audioOggOpus,
-    'audio/l16' => AudioResponseFormatMimeType.audioL16,
-    'audio/wav' => AudioResponseFormatMimeType.audioWav,
-    'audio/alaw' => AudioResponseFormatMimeType.audioAlaw,
-    'audio/mulaw' => AudioResponseFormatMimeType.audioMulaw,
+    'audio/mp3' => InteractionAudioResponseFormatMimeType.audioMp3,
+    'audio/ogg_opus' => InteractionAudioResponseFormatMimeType.audioOggOpus,
+    'audio/l16' => InteractionAudioResponseFormatMimeType.audioL16,
+    'audio/wav' => InteractionAudioResponseFormatMimeType.audioWav,
+    'audio/alaw' => InteractionAudioResponseFormatMimeType.audioAlaw,
+    'audio/mulaw' => InteractionAudioResponseFormatMimeType.audioMulaw,
     _ => null,
   };
 }
 
-/// Converts an [AudioResponseFormatMimeType] to its JSON string.
-String audioResponseFormatMimeTypeToString(AudioResponseFormatMimeType value) {
+/// Converts an [InteractionAudioResponseFormatMimeType] to its JSON string.
+String interactionAudioResponseFormatMimeTypeToString(
+  InteractionAudioResponseFormatMimeType value,
+) {
   return switch (value) {
-    AudioResponseFormatMimeType.audioMp3 => 'audio/mp3',
-    AudioResponseFormatMimeType.audioOggOpus => 'audio/ogg_opus',
-    AudioResponseFormatMimeType.audioL16 => 'audio/l16',
-    AudioResponseFormatMimeType.audioWav => 'audio/wav',
-    AudioResponseFormatMimeType.audioAlaw => 'audio/alaw',
-    AudioResponseFormatMimeType.audioMulaw => 'audio/mulaw',
+    InteractionAudioResponseFormatMimeType.audioMp3 => 'audio/mp3',
+    InteractionAudioResponseFormatMimeType.audioOggOpus => 'audio/ogg_opus',
+    InteractionAudioResponseFormatMimeType.audioL16 => 'audio/l16',
+    InteractionAudioResponseFormatMimeType.audioWav => 'audio/wav',
+    InteractionAudioResponseFormatMimeType.audioAlaw => 'audio/alaw',
+    InteractionAudioResponseFormatMimeType.audioMulaw => 'audio/mulaw',
   };
 }
 
 /// Delivery mode for an audio response.
-enum AudioResponseFormatDelivery {
+enum InteractionAudioResponseFormatDelivery {
   /// Audio data is returned inline in the response.
   inline,
 
@@ -58,33 +59,34 @@ enum AudioResponseFormatDelivery {
   url,
 }
 
-/// Converts a JSON string to an [AudioResponseFormatDelivery], or `null` if
-/// unrecognized (forward-compatible).
-AudioResponseFormatDelivery? audioResponseFormatDeliveryFromString(
-  String? value,
-) {
+/// Converts a JSON string to an [InteractionAudioResponseFormatDelivery], or
+/// `null` if unrecognized (forward-compatible).
+InteractionAudioResponseFormatDelivery?
+interactionAudioResponseFormatDeliveryFromString(String? value) {
   return switch (value) {
-    'inline' => AudioResponseFormatDelivery.inline,
-    'url' => AudioResponseFormatDelivery.url,
+    'inline' => InteractionAudioResponseFormatDelivery.inline,
+    'url' => InteractionAudioResponseFormatDelivery.url,
     _ => null,
   };
 }
 
-/// Converts an [AudioResponseFormatDelivery] to its JSON string.
-String audioResponseFormatDeliveryToString(AudioResponseFormatDelivery value) {
+/// Converts an [InteractionAudioResponseFormatDelivery] to its JSON string.
+String interactionAudioResponseFormatDeliveryToString(
+  InteractionAudioResponseFormatDelivery value,
+) {
   return switch (value) {
-    AudioResponseFormatDelivery.inline => 'inline',
-    AudioResponseFormatDelivery.url => 'url',
+    InteractionAudioResponseFormatDelivery.inline => 'inline',
+    InteractionAudioResponseFormatDelivery.url => 'url',
   };
 }
 
 /// Configuration for audio output format.
-class AudioResponseFormat extends ResponseFormat {
+class InteractionAudioResponseFormat extends InteractionResponseFormat {
   @override
   String get type => 'audio';
 
   /// The MIME type of the audio output.
-  final AudioResponseFormatMimeType? mimeType;
+  final InteractionAudioResponseFormatMimeType? mimeType;
 
   /// Bit rate in bits per second (bps). Only applicable for compressed
   /// formats (MP3, Opus).
@@ -94,28 +96,28 @@ class AudioResponseFormat extends ResponseFormat {
   final int? sampleRate;
 
   /// The delivery mode for the audio output.
-  final AudioResponseFormatDelivery? delivery;
+  final InteractionAudioResponseFormatDelivery? delivery;
 
-  /// Creates an [AudioResponseFormat] instance.
-  const AudioResponseFormat({
+  /// Creates an [InteractionAudioResponseFormat] instance.
+  const InteractionAudioResponseFormat({
     this.mimeType,
     this.bitRate,
     this.sampleRate,
     this.delivery,
   });
 
-  /// Creates an [AudioResponseFormat] from JSON.
-  factory AudioResponseFormat.fromJson(Map<String, dynamic> json) {
+  /// Creates an [InteractionAudioResponseFormat] from JSON.
+  factory InteractionAudioResponseFormat.fromJson(Map<String, dynamic> json) {
     if (json['type'] != 'audio') {
       throw FormatException('Expected type "audio" but got "${json['type']}"');
     }
-    return AudioResponseFormat(
-      mimeType: audioResponseFormatMimeTypeFromString(
+    return InteractionAudioResponseFormat(
+      mimeType: interactionAudioResponseFormatMimeTypeFromString(
         json['mime_type'] as String?,
       ),
       bitRate: json['bit_rate'] as int?,
       sampleRate: json['sample_rate'] as int?,
-      delivery: audioResponseFormatDeliveryFromString(
+      delivery: interactionAudioResponseFormatDeliveryFromString(
         json['delivery'] as String?,
       ),
     );
@@ -125,31 +127,31 @@ class AudioResponseFormat extends ResponseFormat {
   Map<String, dynamic> toJson() => {
     'type': type,
     if (mimeType != null)
-      'mime_type': audioResponseFormatMimeTypeToString(mimeType!),
+      'mime_type': interactionAudioResponseFormatMimeTypeToString(mimeType!),
     if (bitRate != null) 'bit_rate': bitRate,
     if (sampleRate != null) 'sample_rate': sampleRate,
     if (delivery != null)
-      'delivery': audioResponseFormatDeliveryToString(delivery!),
+      'delivery': interactionAudioResponseFormatDeliveryToString(delivery!),
   };
 
   /// Creates a copy with replaced values.
-  AudioResponseFormat copyWith({
+  InteractionAudioResponseFormat copyWith({
     Object? mimeType = unsetCopyWithValue,
     Object? bitRate = unsetCopyWithValue,
     Object? sampleRate = unsetCopyWithValue,
     Object? delivery = unsetCopyWithValue,
   }) {
-    return AudioResponseFormat(
+    return InteractionAudioResponseFormat(
       mimeType: mimeType == unsetCopyWithValue
           ? this.mimeType
-          : mimeType as AudioResponseFormatMimeType?,
+          : mimeType as InteractionAudioResponseFormatMimeType?,
       bitRate: bitRate == unsetCopyWithValue ? this.bitRate : bitRate as int?,
       sampleRate: sampleRate == unsetCopyWithValue
           ? this.sampleRate
           : sampleRate as int?,
       delivery: delivery == unsetCopyWithValue
           ? this.delivery
-          : delivery as AudioResponseFormatDelivery?,
+          : delivery as InteractionAudioResponseFormatDelivery?,
     );
   }
 }

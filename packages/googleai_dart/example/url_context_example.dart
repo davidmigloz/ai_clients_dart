@@ -90,8 +90,8 @@ Future<void> urlContextWithInteractions(GoogleAIClient client) async {
         if (delta is TextDelta) {
           stdout.write(delta.text);
         } else if (delta is ArgumentsDelta) {
-          if (delta.partialArguments != null) {
-            stdout.write(delta.partialArguments);
+          if (delta.arguments != null) {
+            stdout.write(delta.arguments);
           }
         }
       case StepStopEvent():

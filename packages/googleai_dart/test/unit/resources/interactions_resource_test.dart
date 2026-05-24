@@ -102,9 +102,9 @@ void main() {
       await resource.create(
         model: 'gemini-3.5-flash',
         input: const InteractionInput.text('hi'),
-        responseFormat: const ResponseFormatConfig.single(
-          TextResponseFormat(
-            mimeType: TextResponseFormatMimeType.applicationJson,
+        responseFormat: const InteractionResponseFormatConfig.single(
+          InteractionTextResponseFormat(
+            mimeType: InteractionTextResponseFormatMimeType.applicationJson,
             schema: {'type': 'object'},
           ),
         ),

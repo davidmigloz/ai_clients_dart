@@ -131,9 +131,9 @@ void main() {
         input: const InteractionInput.text(
           'Give me a person named Bob who is 42 years old.',
         ),
-        responseFormat: const ResponseFormatConfig.single(
-          TextResponseFormat(
-            mimeType: TextResponseFormatMimeType.applicationJson,
+        responseFormat: const InteractionResponseFormatConfig.single(
+          InteractionTextResponseFormat(
+            mimeType: InteractionTextResponseFormatMimeType.applicationJson,
             schema: {
               'type': 'object',
               'properties': {

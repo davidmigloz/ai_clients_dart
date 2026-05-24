@@ -1,7 +1,7 @@
 part of 'response_formats.dart';
 
 /// Aspect ratio for an image response.
-enum ImageResponseFormatAspectRatio {
+enum InteractionImageResponseFormatAspectRatio {
   /// 1:1 aspect ratio.
   ratio1x1,
 
@@ -45,54 +45,53 @@ enum ImageResponseFormatAspectRatio {
   ratio4x1,
 }
 
-/// Converts a JSON string to an [ImageResponseFormatAspectRatio], or `null`
-/// if unrecognized (forward-compatible).
-ImageResponseFormatAspectRatio? imageResponseFormatAspectRatioFromString(
-  String? value,
-) {
+/// Converts a JSON string to an [InteractionImageResponseFormatAspectRatio], or
+/// `null` if unrecognized (forward-compatible).
+InteractionImageResponseFormatAspectRatio?
+interactionImageResponseFormatAspectRatioFromString(String? value) {
   return switch (value) {
-    '1:1' => ImageResponseFormatAspectRatio.ratio1x1,
-    '2:3' => ImageResponseFormatAspectRatio.ratio2x3,
-    '3:2' => ImageResponseFormatAspectRatio.ratio3x2,
-    '3:4' => ImageResponseFormatAspectRatio.ratio3x4,
-    '4:3' => ImageResponseFormatAspectRatio.ratio4x3,
-    '4:5' => ImageResponseFormatAspectRatio.ratio4x5,
-    '5:4' => ImageResponseFormatAspectRatio.ratio5x4,
-    '9:16' => ImageResponseFormatAspectRatio.ratio9x16,
-    '16:9' => ImageResponseFormatAspectRatio.ratio16x9,
-    '21:9' => ImageResponseFormatAspectRatio.ratio21x9,
-    '1:8' => ImageResponseFormatAspectRatio.ratio1x8,
-    '8:1' => ImageResponseFormatAspectRatio.ratio8x1,
-    '1:4' => ImageResponseFormatAspectRatio.ratio1x4,
-    '4:1' => ImageResponseFormatAspectRatio.ratio4x1,
+    '1:1' => InteractionImageResponseFormatAspectRatio.ratio1x1,
+    '2:3' => InteractionImageResponseFormatAspectRatio.ratio2x3,
+    '3:2' => InteractionImageResponseFormatAspectRatio.ratio3x2,
+    '3:4' => InteractionImageResponseFormatAspectRatio.ratio3x4,
+    '4:3' => InteractionImageResponseFormatAspectRatio.ratio4x3,
+    '4:5' => InteractionImageResponseFormatAspectRatio.ratio4x5,
+    '5:4' => InteractionImageResponseFormatAspectRatio.ratio5x4,
+    '9:16' => InteractionImageResponseFormatAspectRatio.ratio9x16,
+    '16:9' => InteractionImageResponseFormatAspectRatio.ratio16x9,
+    '21:9' => InteractionImageResponseFormatAspectRatio.ratio21x9,
+    '1:8' => InteractionImageResponseFormatAspectRatio.ratio1x8,
+    '8:1' => InteractionImageResponseFormatAspectRatio.ratio8x1,
+    '1:4' => InteractionImageResponseFormatAspectRatio.ratio1x4,
+    '4:1' => InteractionImageResponseFormatAspectRatio.ratio4x1,
     _ => null,
   };
 }
 
-/// Converts an [ImageResponseFormatAspectRatio] to its JSON string.
-String imageResponseFormatAspectRatioToString(
-  ImageResponseFormatAspectRatio value,
+/// Converts an [InteractionImageResponseFormatAspectRatio] to its JSON string.
+String interactionImageResponseFormatAspectRatioToString(
+  InteractionImageResponseFormatAspectRatio value,
 ) {
   return switch (value) {
-    ImageResponseFormatAspectRatio.ratio1x1 => '1:1',
-    ImageResponseFormatAspectRatio.ratio2x3 => '2:3',
-    ImageResponseFormatAspectRatio.ratio3x2 => '3:2',
-    ImageResponseFormatAspectRatio.ratio3x4 => '3:4',
-    ImageResponseFormatAspectRatio.ratio4x3 => '4:3',
-    ImageResponseFormatAspectRatio.ratio4x5 => '4:5',
-    ImageResponseFormatAspectRatio.ratio5x4 => '5:4',
-    ImageResponseFormatAspectRatio.ratio9x16 => '9:16',
-    ImageResponseFormatAspectRatio.ratio16x9 => '16:9',
-    ImageResponseFormatAspectRatio.ratio21x9 => '21:9',
-    ImageResponseFormatAspectRatio.ratio1x8 => '1:8',
-    ImageResponseFormatAspectRatio.ratio8x1 => '8:1',
-    ImageResponseFormatAspectRatio.ratio1x4 => '1:4',
-    ImageResponseFormatAspectRatio.ratio4x1 => '4:1',
+    InteractionImageResponseFormatAspectRatio.ratio1x1 => '1:1',
+    InteractionImageResponseFormatAspectRatio.ratio2x3 => '2:3',
+    InteractionImageResponseFormatAspectRatio.ratio3x2 => '3:2',
+    InteractionImageResponseFormatAspectRatio.ratio3x4 => '3:4',
+    InteractionImageResponseFormatAspectRatio.ratio4x3 => '4:3',
+    InteractionImageResponseFormatAspectRatio.ratio4x5 => '4:5',
+    InteractionImageResponseFormatAspectRatio.ratio5x4 => '5:4',
+    InteractionImageResponseFormatAspectRatio.ratio9x16 => '9:16',
+    InteractionImageResponseFormatAspectRatio.ratio16x9 => '16:9',
+    InteractionImageResponseFormatAspectRatio.ratio21x9 => '21:9',
+    InteractionImageResponseFormatAspectRatio.ratio1x8 => '1:8',
+    InteractionImageResponseFormatAspectRatio.ratio8x1 => '8:1',
+    InteractionImageResponseFormatAspectRatio.ratio1x4 => '1:4',
+    InteractionImageResponseFormatAspectRatio.ratio4x1 => '4:1',
   };
 }
 
 /// Image size for an image response.
-enum ImageResponseFormatSize {
+enum InteractionImageResponseFormatSize {
   /// 512px image size.
   size512,
 
@@ -106,54 +105,58 @@ enum ImageResponseFormatSize {
   size4k,
 }
 
-/// Converts a JSON string to an [ImageResponseFormatSize], or `null` if
-/// unrecognized (forward-compatible).
-ImageResponseFormatSize? imageResponseFormatSizeFromString(String? value) {
+/// Converts a JSON string to an [InteractionImageResponseFormatSize], or `null`
+/// if unrecognized (forward-compatible).
+InteractionImageResponseFormatSize?
+interactionImageResponseFormatSizeFromString(String? value) {
   return switch (value) {
-    '512' => ImageResponseFormatSize.size512,
-    '1K' => ImageResponseFormatSize.size1k,
-    '2K' => ImageResponseFormatSize.size2k,
-    '4K' => ImageResponseFormatSize.size4k,
+    '512' => InteractionImageResponseFormatSize.size512,
+    '1K' => InteractionImageResponseFormatSize.size1k,
+    '2K' => InteractionImageResponseFormatSize.size2k,
+    '4K' => InteractionImageResponseFormatSize.size4k,
     _ => null,
   };
 }
 
-/// Converts an [ImageResponseFormatSize] to its JSON string.
-String imageResponseFormatSizeToString(ImageResponseFormatSize value) {
+/// Converts an [InteractionImageResponseFormatSize] to its JSON string.
+String interactionImageResponseFormatSizeToString(
+  InteractionImageResponseFormatSize value,
+) {
   return switch (value) {
-    ImageResponseFormatSize.size512 => '512',
-    ImageResponseFormatSize.size1k => '1K',
-    ImageResponseFormatSize.size2k => '2K',
-    ImageResponseFormatSize.size4k => '4K',
+    InteractionImageResponseFormatSize.size512 => '512',
+    InteractionImageResponseFormatSize.size1k => '1K',
+    InteractionImageResponseFormatSize.size2k => '2K',
+    InteractionImageResponseFormatSize.size4k => '4K',
   };
 }
 
 /// MIME type of the image output.
-enum ImageResponseFormatMimeType {
+enum InteractionImageResponseFormatMimeType {
   /// JPEG image format (`image/jpeg`).
   imageJpeg,
 }
 
-/// Converts a JSON string to an [ImageResponseFormatMimeType], or `null` if
-/// unrecognized (forward-compatible).
-ImageResponseFormatMimeType? imageResponseFormatMimeTypeFromString(
-  String? value,
-) {
+/// Converts a JSON string to an [InteractionImageResponseFormatMimeType], or
+/// `null` if unrecognized (forward-compatible).
+InteractionImageResponseFormatMimeType?
+interactionImageResponseFormatMimeTypeFromString(String? value) {
   return switch (value) {
-    'image/jpeg' => ImageResponseFormatMimeType.imageJpeg,
+    'image/jpeg' => InteractionImageResponseFormatMimeType.imageJpeg,
     _ => null,
   };
 }
 
-/// Converts an [ImageResponseFormatMimeType] to its JSON string.
-String imageResponseFormatMimeTypeToString(ImageResponseFormatMimeType value) {
+/// Converts an [InteractionImageResponseFormatMimeType] to its JSON string.
+String interactionImageResponseFormatMimeTypeToString(
+  InteractionImageResponseFormatMimeType value,
+) {
   return switch (value) {
-    ImageResponseFormatMimeType.imageJpeg => 'image/jpeg',
+    InteractionImageResponseFormatMimeType.imageJpeg => 'image/jpeg',
   };
 }
 
 /// Delivery mode for an image response.
-enum ImageResponseFormatDelivery {
+enum InteractionImageResponseFormatDelivery {
   /// Image data is returned inline in the response.
   inline,
 
@@ -161,67 +164,68 @@ enum ImageResponseFormatDelivery {
   url,
 }
 
-/// Converts a JSON string to an [ImageResponseFormatDelivery], or `null` if
-/// unrecognized (forward-compatible).
-ImageResponseFormatDelivery? imageResponseFormatDeliveryFromString(
-  String? value,
-) {
+/// Converts a JSON string to an [InteractionImageResponseFormatDelivery], or
+/// `null` if unrecognized (forward-compatible).
+InteractionImageResponseFormatDelivery?
+interactionImageResponseFormatDeliveryFromString(String? value) {
   return switch (value) {
-    'inline' => ImageResponseFormatDelivery.inline,
-    'url' => ImageResponseFormatDelivery.url,
+    'inline' => InteractionImageResponseFormatDelivery.inline,
+    'url' => InteractionImageResponseFormatDelivery.url,
     _ => null,
   };
 }
 
-/// Converts an [ImageResponseFormatDelivery] to its JSON string.
-String imageResponseFormatDeliveryToString(ImageResponseFormatDelivery value) {
+/// Converts an [InteractionImageResponseFormatDelivery] to its JSON string.
+String interactionImageResponseFormatDeliveryToString(
+  InteractionImageResponseFormatDelivery value,
+) {
   return switch (value) {
-    ImageResponseFormatDelivery.inline => 'inline',
-    ImageResponseFormatDelivery.url => 'url',
+    InteractionImageResponseFormatDelivery.inline => 'inline',
+    InteractionImageResponseFormatDelivery.url => 'url',
   };
 }
 
 /// Configuration for image output format.
-class ImageResponseFormat extends ResponseFormat {
+class InteractionImageResponseFormat extends InteractionResponseFormat {
   @override
   String get type => 'image';
 
   /// The aspect ratio of the image output.
-  final ImageResponseFormatAspectRatio? aspectRatio;
+  final InteractionImageResponseFormatAspectRatio? aspectRatio;
 
   /// The size of the image output.
-  final ImageResponseFormatSize? imageSize;
+  final InteractionImageResponseFormatSize? imageSize;
 
   /// The MIME type of the image output.
-  final ImageResponseFormatMimeType? mimeType;
+  final InteractionImageResponseFormatMimeType? mimeType;
 
   /// The delivery mode for the image output.
-  final ImageResponseFormatDelivery? delivery;
+  final InteractionImageResponseFormatDelivery? delivery;
 
-  /// Creates an [ImageResponseFormat] instance.
-  const ImageResponseFormat({
+  /// Creates an [InteractionImageResponseFormat] instance.
+  const InteractionImageResponseFormat({
     this.aspectRatio,
     this.imageSize,
     this.mimeType,
     this.delivery,
   });
 
-  /// Creates an [ImageResponseFormat] from JSON.
-  factory ImageResponseFormat.fromJson(Map<String, dynamic> json) {
+  /// Creates an [InteractionImageResponseFormat] from JSON.
+  factory InteractionImageResponseFormat.fromJson(Map<String, dynamic> json) {
     if (json['type'] != 'image') {
       throw FormatException('Expected type "image" but got "${json['type']}"');
     }
-    return ImageResponseFormat(
-      aspectRatio: imageResponseFormatAspectRatioFromString(
+    return InteractionImageResponseFormat(
+      aspectRatio: interactionImageResponseFormatAspectRatioFromString(
         json['aspect_ratio'] as String?,
       ),
-      imageSize: imageResponseFormatSizeFromString(
+      imageSize: interactionImageResponseFormatSizeFromString(
         json['image_size'] as String?,
       ),
-      mimeType: imageResponseFormatMimeTypeFromString(
+      mimeType: interactionImageResponseFormatMimeTypeFromString(
         json['mime_type'] as String?,
       ),
-      delivery: imageResponseFormatDeliveryFromString(
+      delivery: interactionImageResponseFormatDeliveryFromString(
         json['delivery'] as String?,
       ),
     );
@@ -231,35 +235,37 @@ class ImageResponseFormat extends ResponseFormat {
   Map<String, dynamic> toJson() => {
     'type': type,
     if (aspectRatio != null)
-      'aspect_ratio': imageResponseFormatAspectRatioToString(aspectRatio!),
+      'aspect_ratio': interactionImageResponseFormatAspectRatioToString(
+        aspectRatio!,
+      ),
     if (imageSize != null)
-      'image_size': imageResponseFormatSizeToString(imageSize!),
+      'image_size': interactionImageResponseFormatSizeToString(imageSize!),
     if (mimeType != null)
-      'mime_type': imageResponseFormatMimeTypeToString(mimeType!),
+      'mime_type': interactionImageResponseFormatMimeTypeToString(mimeType!),
     if (delivery != null)
-      'delivery': imageResponseFormatDeliveryToString(delivery!),
+      'delivery': interactionImageResponseFormatDeliveryToString(delivery!),
   };
 
   /// Creates a copy with replaced values.
-  ImageResponseFormat copyWith({
+  InteractionImageResponseFormat copyWith({
     Object? aspectRatio = unsetCopyWithValue,
     Object? imageSize = unsetCopyWithValue,
     Object? mimeType = unsetCopyWithValue,
     Object? delivery = unsetCopyWithValue,
   }) {
-    return ImageResponseFormat(
+    return InteractionImageResponseFormat(
       aspectRatio: aspectRatio == unsetCopyWithValue
           ? this.aspectRatio
-          : aspectRatio as ImageResponseFormatAspectRatio?,
+          : aspectRatio as InteractionImageResponseFormatAspectRatio?,
       imageSize: imageSize == unsetCopyWithValue
           ? this.imageSize
-          : imageSize as ImageResponseFormatSize?,
+          : imageSize as InteractionImageResponseFormatSize?,
       mimeType: mimeType == unsetCopyWithValue
           ? this.mimeType
-          : mimeType as ImageResponseFormatMimeType?,
+          : mimeType as InteractionImageResponseFormatMimeType?,
       delivery: delivery == unsetCopyWithValue
           ? this.delivery
-          : delivery as ImageResponseFormatDelivery?,
+          : delivery as InteractionImageResponseFormatDelivery?,
     );
   }
 }

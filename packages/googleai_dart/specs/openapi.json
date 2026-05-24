@@ -129,6 +129,58 @@
         },
         "type": "object"
       },
+      "AudioResponseFormat": {
+        "description": "Configuration for audio output format.",
+        "properties": {
+          "bitRate": {
+            "description": "Optional. Bit rate in bits per second (bps). Only applicable for compressed formats\n(MP3, Opus).",
+            "format": "int32",
+            "type": "integer"
+          },
+          "delivery": {
+            "description": "Optional. The delivery mode for the audio output.",
+            "enum": [
+              "DELIVERY_UNSPECIFIED",
+              "INLINE",
+              "URI"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Default value. This value is unused.",
+              "Audio data is returned inline in the response.",
+              "Audio data is returned as a URI."
+            ]
+          },
+          "mimeType": {
+            "description": "Optional. The MIME type of the audio output.",
+            "enum": [
+              "MIME_TYPE_UNSPECIFIED",
+              "AUDIO_MP3",
+              "AUDIO_OGG_OPUS",
+              "AUDIO_L16",
+              "AUDIO_WAV",
+              "AUDIO_ALAW",
+              "AUDIO_MULAW"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Default value. This value is unused.",
+              "MP3 audio format.",
+              "OGG Opus audio format.",
+              "Raw PCM (L16) audio format.",
+              "WAV audio format.",
+              "A-law audio format.",
+              "Mu-law audio format."
+            ]
+          },
+          "sampleRate": {
+            "description": "Optional. Sample rate in Hz.",
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "BaseOperation": {
         "description": "This resource represents a long-running operation that is the result of a\nnetwork API call.",
         "properties": {
@@ -2200,7 +2252,7 @@
             "additionalProperties": {
               "description": "Properties of the object."
             },
-            "description": "Required. The function response in JSON object format.\nCallers can use any keys of their choice that fit the function's syntax\nto return the function output, e.g. \"output\", \"result\", etc.\nIn particular, if the function call failed to execute, the response can\nhave an \"error\" key to return error details to the model.",
+            "description": "Required. The function response in JSON object format.\nCallers can use any keys of their choice that fit the function's syntax\nto return the function output, e.g. \"output\", \"result\", etc.\nIn particular, if the function call failed to execute, the response can\nhave an \"error\" key to return error details to the model.\n\nMultimedia can be included by using a subobject containing a single \"$ref\"\nkey whose value is the `inline_data.display_name` of a\n`FunctionResponsePart` holding the multimedia.\nSee https://ai.google.dev/gemini-api/docs/function-calling#multimodal.",
             "type": "object"
           },
           "scheduling": {
@@ -2456,6 +2508,11 @@
           },
           "sha256Hash": {
             "description": "Scotty-provided SHA256 hash for an upload.",
+            "format": "byte",
+            "type": "string"
+          },
+          "sha512Hash": {
+            "description": "Scotty-provided SHA512 hash for an upload.",
             "format": "byte",
             "type": "string"
           },
@@ -3034,6 +3091,14 @@
             "format": "float",
             "type": "number"
           },
+          "responseFormat": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ResponseFormatConfig"
+              }
+            ],
+            "description": "Optional. Configuration for the response output format. Allows specifying output\nconfiguration per modality (text, audio, image) in a flat structure."
+          },
           "responseJsonSchema": {
             "description": "Optional. An internal detail. Use `responseJsonSchema` rather than this field."
           },
@@ -3557,6 +3622,94 @@
           "imageSize": {
             "description": "Optional. Specifies the size of generated images. Supported values are `512`, `1K`,\n`2K`, `4K`. If not specified, the model will use default value `1K`.",
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ImageResponseFormat": {
+        "description": "Configuration for image output format.",
+        "properties": {
+          "aspectRatio": {
+            "description": "Optional. The aspect ratio for the image output.",
+            "enum": [
+              "ASPECT_RATIO_UNSPECIFIED",
+              "ASPECT_RATIO_ONE_BY_ONE",
+              "ASPECT_RATIO_TWO_BY_THREE",
+              "ASPECT_RATIO_THREE_BY_TWO",
+              "ASPECT_RATIO_THREE_BY_FOUR",
+              "ASPECT_RATIO_FOUR_BY_THREE",
+              "ASPECT_RATIO_FOUR_BY_FIVE",
+              "ASPECT_RATIO_FIVE_BY_FOUR",
+              "ASPECT_RATIO_NINE_BY_SIXTEEN",
+              "ASPECT_RATIO_SIXTEEN_BY_NINE",
+              "ASPECT_RATIO_TWENTY_ONE_BY_NINE",
+              "ASPECT_RATIO_ONE_BY_EIGHT",
+              "ASPECT_RATIO_EIGHT_BY_ONE",
+              "ASPECT_RATIO_ONE_BY_FOUR",
+              "ASPECT_RATIO_FOUR_BY_ONE"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Default value. This value is unused.",
+              "1:1 aspect ratio.",
+              "2:3 aspect ratio.",
+              "3:2 aspect ratio.",
+              "3:4 aspect ratio.",
+              "4:3 aspect ratio.",
+              "4:5 aspect ratio.",
+              "5:4 aspect ratio.",
+              "9:16 aspect ratio.",
+              "16:9 aspect ratio.",
+              "21:9 aspect ratio.",
+              "1:8 aspect ratio.",
+              "8:1 aspect ratio.",
+              "1:4 aspect ratio.",
+              "4:1 aspect ratio."
+            ]
+          },
+          "delivery": {
+            "description": "Optional. The delivery mode for the image output.",
+            "enum": [
+              "DELIVERY_UNSPECIFIED",
+              "INLINE",
+              "URI"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Default value. This value is unused.",
+              "Image data is returned inline in the response.",
+              "Image data is returned as a URI."
+            ]
+          },
+          "imageSize": {
+            "description": "Optional. The size of the image output.",
+            "enum": [
+              "IMAGE_SIZE_UNSPECIFIED",
+              "IMAGE_SIZE_FIVE_TWELVE",
+              "IMAGE_SIZE_ONE_K",
+              "IMAGE_SIZE_TWO_K",
+              "IMAGE_SIZE_FOUR_K"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Default value. This value is unused.",
+              "512px image size.",
+              "1K image size.",
+              "2K image size.",
+              "4K image size."
+            ]
+          },
+          "mimeType": {
+            "description": "Optional. The MIME type of the image output.",
+            "enum": [
+              "MIME_TYPE_UNSPECIFIED",
+              "IMAGE_JPEG"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Default value. This value is unused.",
+              "JPEG image format."
+            ]
           }
         },
         "type": "object"
@@ -4821,6 +4974,36 @@
         },
         "type": "object"
       },
+      "ResponseFormatConfig": {
+        "description": "Configuration for the response output format. This is a flat object\nwhere each optional sub-field configures a specific output modality.",
+        "properties": {
+          "audio": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AudioResponseFormat"
+              }
+            ],
+            "description": "Optional. Audio output format configuration."
+          },
+          "image": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ImageResponseFormat"
+              }
+            ],
+            "description": "Optional. Image output format configuration."
+          },
+          "text": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TextResponseFormat"
+              }
+            ],
+            "description": "Optional. Text output format configuration."
+          }
+        },
+        "type": "object"
+      },
       "RetrievalConfig": {
         "description": "Retrieval config.",
         "properties": {
@@ -5419,6 +5602,29 @@
         "required": [
           "text"
         ],
+        "type": "object"
+      },
+      "TextResponseFormat": {
+        "description": "Configuration for text output format.",
+        "properties": {
+          "mimeType": {
+            "description": "Optional. The MIME type of the text output.",
+            "enum": [
+              "MIME_TYPE_UNSPECIFIED",
+              "APPLICATION_JSON",
+              "TEXT_PLAIN"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Default value. This value is unused.",
+              "JSON output format.",
+              "Plain text output format."
+            ]
+          },
+          "schema": {
+            "description": "Optional. The JSON schema that the output should conform to. Only applicable when\nmime_type is APPLICATION_JSON."
+          }
+        },
         "type": "object"
       },
       "ThinkingConfig": {
@@ -6227,7 +6433,7 @@
     "description": "The Gemini API allows developers to build generative AI applications using Gemini models. Gemini is our most capable model, built from the ground up to be multimodal. It can generalize and seamlessly understand, operate across, and combine different types of information including language, images, audio, video, and code. You can use the Gemini API for use cases like reasoning across text and images, content generation, dialogue agents, summarization and classification systems, and more.",
     "title": "Gemini API",
     "version": "v1beta",
-    "x-google-revision": "20260507"
+    "x-google-revision": "20260522"
   },
   "openapi": "3.0.3",
   "paths": {

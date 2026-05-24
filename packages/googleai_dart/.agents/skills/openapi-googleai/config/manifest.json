@@ -205,14 +205,6 @@
       ],
       "parent": "StepDeltaData"
     },
-    "AudioResponseFormat": {
-      "spec": "interactions",
-      "schema": "AudioResponseFormat",
-      "parent": "ResponseFormat",
-      "kind": "sealed_variant",
-      "dart_class": "AudioResponseFormat",
-      "file": "lib/src/models/interactions/response_formats/audio_response_format.dart"
-    },
     "BatchEmbedContentsResponse": {
       "spec": "main",
       "kind": "object",
@@ -436,7 +428,11 @@
       "dart_class": "EmbedContentRequest",
       "file": "lib/src/models/embeddings/embed_content_request.dart",
       "schema": "EmbedContentRequest",
-      "tags": []
+      "tags": [],
+      "note": "Excludes model (only used in endpoint URL path, not serialized in the body)",
+      "excluded_properties": [
+        "model"
+      ]
     },
     "EmbedContentResponse": {
       "spec": "main",
@@ -770,14 +766,6 @@
       ],
       "parent": "StepDeltaData"
     },
-    "ImageResponseFormat": {
-      "spec": "interactions",
-      "schema": "ImageResponseFormat",
-      "parent": "ResponseFormat",
-      "kind": "sealed_variant",
-      "dart_class": "ImageResponseFormat",
-      "file": "lib/src/models/interactions/response_formats/image_response_format.dart"
-    },
     "ImageSearch": {
       "spec": "main",
       "kind": "skip",
@@ -1022,35 +1010,25 @@
       "spec": "interactions",
       "schema": "ResponseFormat",
       "kind": "sealed_parent",
-      "dart_class": "ResponseFormat",
+      "dart_class": "InteractionResponseFormat",
       "file": "lib/src/models/interactions/response_formats/response_formats.dart"
     },
     "ResponseFormatList": {
       "spec": "interactions",
       "schema": "ResponseFormatList",
       "kind": "skip",
-      "dart_class": "ResponseFormatList",
+      "dart_class": "InteractionResponseFormatList",
       "file": "lib/src/models/interactions/response_formats/response_format_config.dart",
       "note": "Spec ResponseFormatList is an array typedef (List<ResponseFormat>), so no field verification applies. Dart exposes a ResponseFormatList class as the list variant of the ResponseFormatConfig sealed wrapper modelling the `response_format` oneOf (ResponseFormatList | ResponseFormat).",
       "tags": [
         "acknowledged"
       ]
     },
-    "ResponseFormatConfig": {
-      "spec": "interactions",
-      "kind": "extension",
-      "dart_class": "ResponseFormatConfig",
-      "file": "lib/src/models/interactions/response_formats/response_format_config.dart",
-      "note": "Dart-only sealed wrapper for the inline `response_format` oneOf (ResponseFormatList | ResponseFormat). Variants: SingleResponseFormat, ResponseFormatList.",
-      "tags": [
-        "acknowledged"
-      ]
-    },
     "SingleResponseFormat": {
       "spec": "interactions",
-      "parent": "ResponseFormatConfig",
+      "parent": "interactions:ResponseFormatConfig",
       "kind": "extension",
-      "dart_class": "SingleResponseFormat",
+      "dart_class": "InteractionSingleResponseFormat",
       "file": "lib/src/models/interactions/response_formats/response_format_config.dart",
       "note": "Dart-only single-format variant of the ResponseFormatConfig wrapper (holds one ResponseFormat).",
       "tags": [
@@ -1144,21 +1122,21 @@
           "video": "#/components/schemas/VideoDelta",
           "thought_summary": "#/components/schemas/ThoughtSummaryDelta",
           "thought_signature": "#/components/schemas/ThoughtSignatureDelta",
-          "function_call": "#/components/schemas/FunctionCallDelta",
-          "function_result": "#/components/schemas/FunctionResultDelta",
+          "text_annotation_delta": "#/components/schemas/TextAnnotationDelta",
+          "arguments_delta": "#/components/schemas/ArgumentsDelta",
           "code_execution_call": "#/components/schemas/CodeExecutionCallDelta",
-          "code_execution_result": "#/components/schemas/CodeExecutionResultDelta",
           "url_context_call": "#/components/schemas/UrlContextCallDelta",
-          "url_context_result": "#/components/schemas/UrlContextResultDelta",
           "google_search_call": "#/components/schemas/GoogleSearchCallDelta",
-          "google_search_result": "#/components/schemas/GoogleSearchResultDelta",
           "google_maps_call": "#/components/schemas/GoogleMapsCallDelta",
-          "google_maps_result": "#/components/schemas/GoogleMapsResultDelta",
           "mcp_server_tool_call": "#/components/schemas/McpServerToolCallDelta",
-          "mcp_server_tool_result": "#/components/schemas/McpServerToolResultDelta",
           "file_search_call": "#/components/schemas/FileSearchCallDelta",
+          "code_execution_result": "#/components/schemas/CodeExecutionResultDelta",
+          "url_context_result": "#/components/schemas/UrlContextResultDelta",
+          "google_search_result": "#/components/schemas/GoogleSearchResultDelta",
+          "google_maps_result": "#/components/schemas/GoogleMapsResultDelta",
+          "mcp_server_tool_result": "#/components/schemas/McpServerToolResultDelta",
           "file_search_result": "#/components/schemas/FileSearchResultDelta",
-          "text_annotation": "#/components/schemas/TextAnnotationDelta"
+          "function_result": "#/components/schemas/FunctionResultDelta"
         }
       }
     },
@@ -1211,14 +1189,6 @@
         "acknowledged"
       ],
       "parent": "StepDeltaData"
-    },
-    "TextResponseFormat": {
-      "spec": "interactions",
-      "schema": "TextResponseFormat",
-      "parent": "ResponseFormat",
-      "kind": "sealed_variant",
-      "dart_class": "TextResponseFormat",
-      "file": "lib/src/models/interactions/response_formats/text_response_format.dart"
     },
     "ThinkingLevel": {
       "spec": "interactions",
@@ -1386,7 +1356,7 @@
       "spec": "interactions",
       "parent": "ResponseFormat",
       "kind": "extension",
-      "dart_class": "UnknownResponseFormat",
+      "dart_class": "UnknownInteractionResponseFormat",
       "file": "lib/src/models/interactions/response_formats/unknown_response_format.dart",
       "tags": [
         "acknowledged"
@@ -1498,14 +1468,6 @@
         "acknowledged"
       ],
       "parent": "StepDeltaData"
-    },
-    "VideoResponseFormat": {
-      "spec": "interactions",
-      "schema": "VideoResponseFormat",
-      "parent": "ResponseFormat",
-      "kind": "sealed_variant",
-      "dart_class": "VideoResponseFormat",
-      "file": "lib/src/models/interactions/response_formats/video_response_format.dart"
     },
     "WebSearch": {
       "spec": "main",
@@ -1737,6 +1699,346 @@
       "dart_class": "VertexAISearchConfig",
       "file": "lib/src/models/interactions/tools/vertex_ai_search_config.dart",
       "kind": "object"
+    },
+    "interactions:AudioResponseFormat": {
+      "spec": "interactions",
+      "schema": "AudioResponseFormat",
+      "parent": "ResponseFormat",
+      "kind": "sealed_variant",
+      "dart_class": "InteractionAudioResponseFormat",
+      "file": "lib/src/models/interactions/response_formats/audio_response_format.dart"
+    },
+    "interactions:ImageResponseFormat": {
+      "spec": "interactions",
+      "schema": "ImageResponseFormat",
+      "parent": "ResponseFormat",
+      "kind": "sealed_variant",
+      "dart_class": "InteractionImageResponseFormat",
+      "file": "lib/src/models/interactions/response_formats/image_response_format.dart"
+    },
+    "interactions:TextResponseFormat": {
+      "spec": "interactions",
+      "schema": "TextResponseFormat",
+      "parent": "ResponseFormat",
+      "kind": "sealed_variant",
+      "dart_class": "InteractionTextResponseFormat",
+      "file": "lib/src/models/interactions/response_formats/text_response_format.dart"
+    },
+    "interactions:ResponseFormatConfig": {
+      "spec": "interactions",
+      "kind": "extension",
+      "dart_class": "InteractionResponseFormatConfig",
+      "file": "lib/src/models/interactions/response_formats/response_format_config.dart",
+      "note": "Dart-only sealed wrapper for the inline `response_format` oneOf (ResponseFormatList | ResponseFormat). Variants: SingleResponseFormat, ResponseFormatList.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "AudioResponseFormat": {
+      "spec": "main",
+      "schema": "AudioResponseFormat",
+      "kind": "object",
+      "dart_class": "AudioResponseFormat",
+      "file": "lib/src/models/generation/response_formats/audio_response_format.dart"
+    },
+    "ImageResponseFormat": {
+      "spec": "main",
+      "schema": "ImageResponseFormat",
+      "kind": "object",
+      "dart_class": "ImageResponseFormat",
+      "file": "lib/src/models/generation/response_formats/image_response_format.dart"
+    },
+    "TextResponseFormat": {
+      "spec": "main",
+      "schema": "TextResponseFormat",
+      "kind": "object",
+      "dart_class": "TextResponseFormat",
+      "file": "lib/src/models/generation/response_formats/text_response_format.dart"
+    },
+    "ResponseFormatConfig": {
+      "spec": "main",
+      "schema": "ResponseFormatConfig",
+      "kind": "object",
+      "dart_class": "ResponseFormatConfig",
+      "file": "lib/src/models/generation/response_formats/response_format_config.dart"
+    },
+    "CodeExecutionCallDelta": {
+      "spec": "interactions",
+      "schema": "CodeExecutionCallDelta",
+      "parent": "StepDeltaData",
+      "kind": "skip",
+      "dart_class": "CodeExecutionCallDelta",
+      "file": "lib/src/models/interactions/deltas/code_execution_call_delta.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "SSE/delta event DTOs follow the existing googleai_dart convention of omitting copyWith on small immutable events."
+    },
+    "UrlContextCallDelta": {
+      "spec": "interactions",
+      "schema": "UrlContextCallDelta",
+      "parent": "StepDeltaData",
+      "kind": "skip",
+      "dart_class": "UrlContextCallDelta",
+      "file": "lib/src/models/interactions/deltas/url_context_call_delta.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "SSE/delta event DTOs follow the existing googleai_dart convention of omitting copyWith on small immutable events."
+    },
+    "GoogleSearchCallDelta": {
+      "spec": "interactions",
+      "schema": "GoogleSearchCallDelta",
+      "parent": "StepDeltaData",
+      "kind": "skip",
+      "dart_class": "GoogleSearchCallDelta",
+      "file": "lib/src/models/interactions/deltas/google_search_call_delta.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "SSE/delta event DTOs follow the existing googleai_dart convention of omitting copyWith on small immutable events."
+    },
+    "GoogleMapsCallDelta": {
+      "spec": "interactions",
+      "schema": "GoogleMapsCallDelta",
+      "parent": "StepDeltaData",
+      "kind": "skip",
+      "dart_class": "GoogleMapsCallDelta",
+      "file": "lib/src/models/interactions/deltas/google_maps_call_delta.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "SSE/delta event DTOs follow the existing googleai_dart convention of omitting copyWith on small immutable events."
+    },
+    "McpServerToolCallDelta": {
+      "spec": "interactions",
+      "schema": "McpServerToolCallDelta",
+      "parent": "StepDeltaData",
+      "kind": "skip",
+      "dart_class": "McpServerToolCallDelta",
+      "file": "lib/src/models/interactions/deltas/mcp_server_tool_call_delta.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "SSE/delta event DTOs follow the existing googleai_dart convention of omitting copyWith on small immutable events."
+    },
+    "FileSearchCallDelta": {
+      "spec": "interactions",
+      "schema": "FileSearchCallDelta",
+      "parent": "StepDeltaData",
+      "kind": "skip",
+      "dart_class": "FileSearchCallDelta",
+      "file": "lib/src/models/interactions/deltas/file_search_call_delta.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "SSE/delta event DTOs follow the existing googleai_dart convention of omitting copyWith on small immutable events."
+    },
+    "CodeExecutionResultDelta": {
+      "spec": "interactions",
+      "schema": "CodeExecutionResultDelta",
+      "parent": "StepDeltaData",
+      "kind": "skip",
+      "dart_class": "CodeExecutionResultDelta",
+      "file": "lib/src/models/interactions/deltas/code_execution_result_delta.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "SSE/delta event DTOs follow the existing googleai_dart convention of omitting copyWith on small immutable events."
+    },
+    "UrlContextResultDelta": {
+      "spec": "interactions",
+      "schema": "UrlContextResultDelta",
+      "parent": "StepDeltaData",
+      "kind": "skip",
+      "dart_class": "UrlContextResultDelta",
+      "file": "lib/src/models/interactions/deltas/url_context_result_delta.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "SSE/delta event DTOs follow the existing googleai_dart convention of omitting copyWith on small immutable events."
+    },
+    "GoogleSearchResultDelta": {
+      "spec": "interactions",
+      "schema": "GoogleSearchResultDelta",
+      "parent": "StepDeltaData",
+      "kind": "skip",
+      "dart_class": "GoogleSearchResultDelta",
+      "file": "lib/src/models/interactions/deltas/google_search_result_delta.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "SSE/delta event DTOs follow the existing googleai_dart convention of omitting copyWith on small immutable events."
+    },
+    "GoogleMapsResultDelta": {
+      "spec": "interactions",
+      "schema": "GoogleMapsResultDelta",
+      "parent": "StepDeltaData",
+      "kind": "skip",
+      "dart_class": "GoogleMapsResultDelta",
+      "file": "lib/src/models/interactions/deltas/google_maps_result_delta.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "SSE/delta event DTOs follow the existing googleai_dart convention of omitting copyWith on small immutable events."
+    },
+    "McpServerToolResultDelta": {
+      "spec": "interactions",
+      "schema": "McpServerToolResultDelta",
+      "parent": "StepDeltaData",
+      "kind": "skip",
+      "dart_class": "McpServerToolResultDelta",
+      "file": "lib/src/models/interactions/deltas/mcp_server_tool_result_delta.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "SSE/delta event DTOs follow the existing googleai_dart convention of omitting copyWith on small immutable events."
+    },
+    "FileSearchResultDelta": {
+      "spec": "interactions",
+      "schema": "FileSearchResultDelta",
+      "parent": "StepDeltaData",
+      "kind": "skip",
+      "dart_class": "FileSearchResultDelta",
+      "file": "lib/src/models/interactions/deltas/file_search_result_delta.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "SSE/delta event DTOs follow the existing googleai_dart convention of omitting copyWith on small immutable events."
+    },
+    "FunctionResultDelta": {
+      "spec": "interactions",
+      "schema": "FunctionResultDelta",
+      "parent": "StepDeltaData",
+      "kind": "skip",
+      "dart_class": "FunctionResultDelta",
+      "file": "lib/src/models/interactions/deltas/function_result_delta.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "SSE/delta event DTOs follow the existing googleai_dart convention of omitting copyWith on small immutable events."
+    },
+    "interactions:ServiceTier": {
+      "spec": "interactions",
+      "schema": "ServiceTier",
+      "kind": "skip",
+      "dart_class": "ServiceTier",
+      "file": "lib/src/models/common/service_tier.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Reuses the main ServiceTier enum (identical flex/standard/priority values)."
+    },
+    "Agent": {
+      "spec": "interactions",
+      "schema": "Agent",
+      "kind": "object",
+      "dart_class": "Agent",
+      "file": "lib/src/models/interactions/agents/agent.dart"
+    },
+    "ListAgentsResponse": {
+      "spec": "interactions",
+      "schema": "ListAgentsResponse",
+      "kind": "object",
+      "dart_class": "ListAgentsResponse",
+      "file": "lib/src/models/interactions/agents/list_agents_response.dart"
+    },
+    "AgentTool": {
+      "spec": "interactions",
+      "schema": "AgentTool",
+      "kind": "skip",
+      "dart_class": "InteractionTool",
+      "file": "lib/src/models/interactions/tools/tools.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "AgentTool is a subset (CodeExecution/GoogleSearch/UrlContext/McpServer) of the InteractionTool sealed union; Agent.tools reuses List<InteractionTool>."
+    },
+    "EnvironmentConfig": {
+      "spec": "interactions",
+      "schema": "EnvironmentConfig",
+      "kind": "object",
+      "dart_class": "EnvironmentConfig",
+      "file": "lib/src/models/interactions/environments/environment_config.dart"
+    },
+    "Source": {
+      "spec": "interactions",
+      "schema": "Source",
+      "kind": "object",
+      "dart_class": "Source",
+      "file": "lib/src/models/interactions/environments/source.dart"
+    },
+    "AllowlistEntry": {
+      "spec": "interactions",
+      "schema": "AllowlistEntry",
+      "kind": "object",
+      "dart_class": "AllowlistEntry",
+      "file": "lib/src/models/interactions/environments/allowlist_entry.dart"
+    },
+    "EnvironmentNetworkEgressAllowlist": {
+      "spec": "interactions",
+      "schema": "EnvironmentNetworkEgressAllowlist",
+      "kind": "skip",
+      "dart_class": "EnvironmentNetworkEgressAllowlist",
+      "file": "lib/src/models/interactions/environments/environment_network_egress_allowlist.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "oneOf({allowlist:[...]} object | string 'disabled') modeled as a sealed type (EnvironmentNetworkAllowlist | EnvironmentNetworkDisabled); no direct fields to verify."
+    },
+    "EnvironmentConfigOrId": {
+      "spec": "interactions",
+      "kind": "extension",
+      "dart_class": "EnvironmentConfigOrId",
+      "file": "lib/src/models/interactions/environments/environment_config_or_id.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Dart-only sealed wrapper for the `environment`/`base_environment` oneOf (EnvironmentConfig | string id). Variants: InlineEnvironmentConfig, EnvironmentIdRef."
+    },
+    "InlineEnvironmentConfig": {
+      "spec": "interactions",
+      "kind": "extension",
+      "dart_class": "InlineEnvironmentConfig",
+      "file": "lib/src/models/interactions/environments/environment_config_or_id.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Dart-only variant of EnvironmentConfigOrId holding an inline EnvironmentConfig.",
+      "parent": "EnvironmentConfigOrId"
+    },
+    "EnvironmentIdRef": {
+      "spec": "interactions",
+      "kind": "extension",
+      "dart_class": "EnvironmentIdRef",
+      "file": "lib/src/models/interactions/environments/environment_config_or_id.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Dart-only variant of EnvironmentConfigOrId referencing an existing environment by id.",
+      "parent": "EnvironmentConfigOrId"
+    },
+    "EnvironmentNetworkAllowlist": {
+      "spec": "interactions",
+      "kind": "extension",
+      "dart_class": "EnvironmentNetworkAllowlist",
+      "file": "lib/src/models/interactions/environments/environment_network_egress_allowlist.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Dart-only object variant of EnvironmentNetworkEgressAllowlist holding the allowlist.",
+      "parent": "EnvironmentNetworkEgressAllowlist"
+    },
+    "EnvironmentNetworkDisabled": {
+      "spec": "interactions",
+      "kind": "extension",
+      "dart_class": "EnvironmentNetworkDisabled",
+      "file": "lib/src/models/interactions/environments/environment_network_egress_allowlist.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Dart-only \"disabled\" string variant of EnvironmentNetworkEgressAllowlist.",
+      "parent": "EnvironmentNetworkEgressAllowlist"
     }
   }
 }

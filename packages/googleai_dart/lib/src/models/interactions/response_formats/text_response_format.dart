@@ -1,7 +1,7 @@
 part of 'response_formats.dart';
 
 /// MIME type of the text output.
-enum TextResponseFormatMimeType {
+enum InteractionTextResponseFormatMimeType {
   /// JSON output format (`application/json`).
   applicationJson,
 
@@ -9,48 +9,49 @@ enum TextResponseFormatMimeType {
   textPlain,
 }
 
-/// Converts a JSON string to a [TextResponseFormatMimeType], or `null` if
-/// unrecognized (forward-compatible).
-TextResponseFormatMimeType? textResponseFormatMimeTypeFromString(
-  String? value,
-) {
+/// Converts a JSON string to an [InteractionTextResponseFormatMimeType], or
+/// `null` if unrecognized (forward-compatible).
+InteractionTextResponseFormatMimeType?
+interactionTextResponseFormatMimeTypeFromString(String? value) {
   return switch (value) {
-    'application/json' => TextResponseFormatMimeType.applicationJson,
-    'text/plain' => TextResponseFormatMimeType.textPlain,
+    'application/json' => InteractionTextResponseFormatMimeType.applicationJson,
+    'text/plain' => InteractionTextResponseFormatMimeType.textPlain,
     _ => null,
   };
 }
 
-/// Converts a [TextResponseFormatMimeType] to its JSON string.
-String textResponseFormatMimeTypeToString(TextResponseFormatMimeType value) {
+/// Converts an [InteractionTextResponseFormatMimeType] to its JSON string.
+String interactionTextResponseFormatMimeTypeToString(
+  InteractionTextResponseFormatMimeType value,
+) {
   return switch (value) {
-    TextResponseFormatMimeType.applicationJson => 'application/json',
-    TextResponseFormatMimeType.textPlain => 'text/plain',
+    InteractionTextResponseFormatMimeType.applicationJson => 'application/json',
+    InteractionTextResponseFormatMimeType.textPlain => 'text/plain',
   };
 }
 
 /// Configuration for text output format.
-class TextResponseFormat extends ResponseFormat {
+class InteractionTextResponseFormat extends InteractionResponseFormat {
   @override
   String get type => 'text';
 
   /// The MIME type of the text output.
-  final TextResponseFormatMimeType? mimeType;
+  final InteractionTextResponseFormatMimeType? mimeType;
 
   /// JSON schema that the output should conform to. Only applicable when
-  /// [mimeType] is [TextResponseFormatMimeType.applicationJson].
+  /// [mimeType] is [InteractionTextResponseFormatMimeType.applicationJson].
   final Map<String, dynamic>? schema;
 
-  /// Creates a [TextResponseFormat] instance.
-  const TextResponseFormat({this.mimeType, this.schema});
+  /// Creates an [InteractionTextResponseFormat] instance.
+  const InteractionTextResponseFormat({this.mimeType, this.schema});
 
-  /// Creates a [TextResponseFormat] from JSON.
-  factory TextResponseFormat.fromJson(Map<String, dynamic> json) {
+  /// Creates an [InteractionTextResponseFormat] from JSON.
+  factory InteractionTextResponseFormat.fromJson(Map<String, dynamic> json) {
     if (json['type'] != 'text') {
       throw FormatException('Expected type "text" but got "${json['type']}"');
     }
-    return TextResponseFormat(
-      mimeType: textResponseFormatMimeTypeFromString(
+    return InteractionTextResponseFormat(
+      mimeType: interactionTextResponseFormatMimeTypeFromString(
         json['mime_type'] as String?,
       ),
       schema: json['schema'] as Map<String, dynamic>?,
@@ -61,19 +62,19 @@ class TextResponseFormat extends ResponseFormat {
   Map<String, dynamic> toJson() => {
     'type': type,
     if (mimeType != null)
-      'mime_type': textResponseFormatMimeTypeToString(mimeType!),
+      'mime_type': interactionTextResponseFormatMimeTypeToString(mimeType!),
     if (schema != null) 'schema': schema,
   };
 
   /// Creates a copy with replaced values.
-  TextResponseFormat copyWith({
+  InteractionTextResponseFormat copyWith({
     Object? mimeType = unsetCopyWithValue,
     Object? schema = unsetCopyWithValue,
   }) {
-    return TextResponseFormat(
+    return InteractionTextResponseFormat(
       mimeType: mimeType == unsetCopyWithValue
           ? this.mimeType
-          : mimeType as TextResponseFormatMimeType?,
+          : mimeType as InteractionTextResponseFormatMimeType?,
       schema: schema == unsetCopyWithValue
           ? this.schema
           : schema as Map<String, dynamic>?,
