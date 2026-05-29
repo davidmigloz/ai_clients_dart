@@ -33,8 +33,8 @@ void main() async {
           // follow-up — all within the messages array.
           InputMessage.userBlocks([
             InputContentBlock.midConversationSystem(
-              content: [
-                const TextInputBlock('From now on, always answer in French.'),
+              content: const [
+                TextInputBlock('From now on, always answer in French.'),
               ],
             ),
             InputContentBlock.text('What is its population?'),
