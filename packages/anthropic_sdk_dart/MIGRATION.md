@@ -6,6 +6,54 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v3.x to v4.0.0
+
+**Most users will not need to make any changes.** v4.0.0 syncs to the latest Anthropic spec for the [Claude Opus 4.8](https://www.anthropic.com/news/claude-opus-4-8) release. The breaking surface is limited to two source-level additions — a new variant on the exported sealed union `InputContentBlock` and a new value on the `MessageRole` enum — which only affect code with *exhaustive* `switch` statements that lack a wildcard or `Unknown*`/`default` branch. Everything else in this release (mid-conversation system messages, `outputTokensDetails`, advisor `stopReason`) is purely additive. Pure-deserialization consumers — and anyone already using a wildcard / `Unknown*` / `default` branch — are unaffected.
+
+### 1) New `MidConversationSystemInputBlock` variant on `InputContentBlock`
+
+The `mid_conv_system` content block adds a `MidConversationSystemInputBlock` variant to the exported sealed `InputContentBlock` union. As in v3.0.0, this is breaking only for exhaustive `switch` statements over `InputContentBlock` that lack a wildcard or `UnknownInputContentBlock` branch.
+
+```dart
+// Before — exhaustive over the prior variant set (stops compiling on upgrade)
+final label = switch (block) {
+  TextInputBlock() => 'text',
+  ImageInputBlock() => 'image',
+  // ... all other variants
+};
+
+// After — handle the new variant, or add a wildcard `_` / UnknownInputContentBlock()
+final label = switch (block) {
+  TextInputBlock() => 'text',
+  ImageInputBlock() => 'image',
+  MidConversationSystemInputBlock() => 'mid_conv_system',
+  UnknownInputContentBlock() => 'unknown',
+};
+```
+
+### 2) New `system` value on the `MessageRole` enum
+
+The spec adds `system` to the message `role` enum (enabling `role: "system"` entries in the `messages` array). `MessageRole` gains a `system` value, and `InputMessage` gains `system(...)` / `systemBlocks(...)` factories. This is breaking only for exhaustive `switch` statements over `MessageRole` that lack a `default` branch.
+
+```dart
+// Before — exhaustive over user/assistant (stops compiling on upgrade)
+final s = switch (role) {
+  MessageRole.user => 'user',
+  MessageRole.assistant => 'assistant',
+};
+
+// After — add the system case (or a default branch)
+final s = switch (role) {
+  MessageRole.user => 'user',
+  MessageRole.assistant => 'assistant',
+  MessageRole.system => 'system',
+};
+```
+
+All newly added *fields* in this release (`Usage.outputTokensDetails`, `MessageDeltaUsage.outputTokensDetails`, `AdvisorResult.stopReason`, `AdvisorRedactedResult.stopReason`) are optional and nullable, so they are non-breaking on their own.
+
+---
+
 ## Migrating from v2.x to v3.0.0
 
 v3.0.0 completes the four-part Anthropic spec refresh. The breaking surface is small and mostly about forward-compatibility: several **exported `sealed` unions gained new variants**, so only code that `switch`es over them *exhaustively* (without a wildcard or `Unknown*` branch) needs updating. There is one concrete API break — `UserProfile.relationship` is now a required constructor parameter. Pure-deserialization consumers (no exhaustive `switch` over these types) are unaffected.

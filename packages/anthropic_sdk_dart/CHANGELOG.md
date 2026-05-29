@@ -1,3 +1,12 @@
+## 4.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Refreshes the package to the latest Anthropic OpenAPI spec for the [Claude Opus 4.8](https://www.anthropic.com/news/claude-opus-4-8) release. Adds **mid-conversation system messages** — the new `mid_conv_system` content block (via `InputContentBlock.midConversationSystem`) updates system instructions inside the `messages` array without a separate user turn or disrupting prompt caching — plus the spec's new `system` message role (`MessageRole.system`, `InputMessage.system(...)` / `systemBlocks(...)`), an `outputTokensDetails` reasoning-token breakdown on `Usage`/`MessageDeltaUsage`, and a nullable `stopReason` on advisor results. **The breaking surface is very small and won't affect most users:** the only breaks are one new variant on the exported sealed union `InputContentBlock` and one new value (`system`) on the `MessageRole` enum, which affect only code that `switch`es over those types *exhaustively* without a wildcard or `Unknown*`/`default` branch. Pure-deserialization consumers are unaffected.
+
+- **BREAKING** **FEAT**: Mid-conversation system + token details ([#241](https://github.com/davidmigloz/ai_clients_dart/issues/241)). ([e833e07f](https://github.com/davidmigloz/ai_clients_dart/commit/e833e07f8088d90c25b7cc0e3f6f9c028d833ddf))
+
 ## 3.0.0
 
 > [!CAUTION]
