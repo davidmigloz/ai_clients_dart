@@ -422,6 +422,47 @@
       "file": "lib/src/models/metadata/usage.dart",
       "schema": "Usage"
     },
+    "BetaUsage": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Usage",
+      "file": "lib/src/models/metadata/usage.dart",
+      "schema": "BetaUsage",
+      "tags": ["acknowledged"],
+      "note": "Beta variant maps to same Dart class as GA Usage."
+    },
+    "OutputTokensDetails": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "OutputTokensDetails",
+      "file": "lib/src/models/metadata/usage.dart",
+      "schema": "OutputTokensDetails"
+    },
+    "BetaOutputTokensDetails": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "OutputTokensDetails",
+      "file": "lib/src/models/metadata/usage.dart",
+      "schema": "BetaOutputTokensDetails",
+      "tags": ["acknowledged"],
+      "note": "Beta variant maps to same Dart class as GA OutputTokensDetails."
+    },
+    "MessageDeltaUsage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "MessageDeltaUsage",
+      "file": "lib/src/models/streaming/message_delta.dart",
+      "schema": "MessageDeltaUsage"
+    },
+    "BetaMessageDeltaUsage": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "MessageDeltaUsage",
+      "file": "lib/src/models/streaming/message_delta.dart",
+      "schema": "BetaMessageDeltaUsage",
+      "tags": ["acknowledged"],
+      "note": "Beta variant maps to same Dart class as GA MessageDeltaUsage."
+    },
     "CacheControlEphemeral": {
       "spec": "main",
       "kind": "object",
@@ -558,6 +599,22 @@
         "caller"
       ]
     },
+    "WebFetchToolResultErrorCode": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "schema": "WebFetchToolResultErrorCode",
+      "tags": ["acknowledged"],
+      "note": "Web fetch error content stored as raw Map<String, dynamic>; not modeled as a typed enum."
+    },
+    "BetaWebFetchToolResultErrorCode": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "schema": "BetaWebFetchToolResultErrorCode",
+      "tags": ["acknowledged"],
+      "note": "Web fetch error content stored as raw Map<String, dynamic>; not modeled as a typed enum."
+    },
     "ResponseCodeExecutionToolResultBlock": {
       "spec": "main",
       "kind": "sealed_variant",
@@ -631,7 +688,8 @@
           "RequestContainerUploadBlockParam": "container_upload",
           "RequestCompactionBlockParam": "compaction",
           "RequestToolReferenceBlockParam": "tool_reference",
-          "RequestAdvisorToolResultBlockParam": "advisor_tool_result"
+          "RequestAdvisorToolResultBlockParam": "advisor_tool_result",
+          "MidConvSystemBlockParam": "mid_conv_system"
         }
       },
       "note": null,
@@ -639,6 +697,33 @@
         "content",
         "source"
       ]
+    },
+    "BetaInputContentBlock": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "InputContentBlock",
+      "file": "lib/src/models/content/input_content_block.dart",
+      "schema": "BetaInputContentBlock",
+      "tags": ["acknowledged"],
+      "note": "Beta union maps to same Dart sealed type as GA InputContentBlock."
+    },
+    "MidConvSystemBlockParam": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "MidConversationSystemInputBlock",
+      "file": "lib/src/models/content/input_content_block.dart",
+      "schema": "RequestMidConvSystemBlock",
+      "parent": "InputContentBlock"
+    },
+    "BetaRequestMidConvSystemBlock": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "MidConversationSystemInputBlock",
+      "file": "lib/src/models/content/input_content_block.dart",
+      "schema": "BetaRequestMidConvSystemBlock",
+      "parent": "InputContentBlock",
+      "tags": ["acknowledged"],
+      "note": "Beta variant maps to same Dart class as GA RequestMidConvSystemBlock."
     },
     "TextBlockParam": {
       "spec": "main",

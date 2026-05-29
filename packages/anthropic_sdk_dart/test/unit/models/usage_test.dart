@@ -22,7 +22,7 @@ void main() {
     test('fromJson parses advisor_message iteration with model', () {
       final json = {
         'type': 'advisor_message',
-        'model': 'claude-opus-4-7',
+        'model': 'claude-opus-4-8',
         'input_tokens': 823,
         'output_tokens': 1612,
         'cache_creation_input_tokens': 0,
@@ -31,7 +31,7 @@ void main() {
       final usage = IterationUsage.fromJson(json);
 
       expect(usage.type, 'advisor_message');
-      expect(usage.model, 'claude-opus-4-7');
+      expect(usage.model, 'claude-opus-4-8');
       expect(usage.inputTokens, 823);
       expect(usage.outputTokens, 1612);
     });
@@ -41,12 +41,12 @@ void main() {
         type: 'advisor_message',
         inputTokens: 100,
         outputTokens: 200,
-        model: 'claude-opus-4-7',
+        model: 'claude-opus-4-8',
       );
       final json = usage.toJson();
 
       expect(json['type'], 'advisor_message');
-      expect(json['model'], 'claude-opus-4-7');
+      expect(json['model'], 'claude-opus-4-8');
     });
 
     test('toJson omits model when null', () {
@@ -63,7 +63,7 @@ void main() {
     test('round-trip advisor_message iteration', () {
       final original = {
         'type': 'advisor_message',
-        'model': 'claude-opus-4-7',
+        'model': 'claude-opus-4-8',
         'input_tokens': 823,
         'output_tokens': 1612,
         'cache_creation_input_tokens': 0,
@@ -78,13 +78,13 @@ void main() {
         type: 'advisor_message',
         inputTokens: 100,
         outputTokens: 200,
-        model: 'claude-opus-4-7',
+        model: 'claude-opus-4-8',
       );
       const b = IterationUsage(
         type: 'advisor_message',
         inputTokens: 100,
         outputTokens: 200,
-        model: 'claude-opus-4-7',
+        model: 'claude-opus-4-8',
       );
       const c = IterationUsage(
         type: 'advisor_message',
@@ -103,7 +103,7 @@ void main() {
         type: 'advisor_message',
         inputTokens: 100,
         outputTokens: 200,
-        model: 'claude-opus-4-7',
+        model: 'claude-opus-4-8',
       );
 
       final changed = original.copyWith(model: 'claude-sonnet-4-6');
@@ -129,7 +129,7 @@ void main() {
           },
           {
             'type': 'advisor_message',
-            'model': 'claude-opus-4-7',
+            'model': 'claude-opus-4-8',
             'input_tokens': 823,
             'output_tokens': 1612,
             'cache_creation_input_tokens': 0,
@@ -153,11 +153,112 @@ void main() {
       expect(usage.iterations![0].model, isNull);
 
       expect(usage.iterations![1].type, 'advisor_message');
-      expect(usage.iterations![1].model, 'claude-opus-4-7');
+      expect(usage.iterations![1].model, 'claude-opus-4-8');
       expect(usage.iterations![1].inputTokens, 823);
 
       expect(usage.iterations![2].type, 'message');
       expect(usage.iterations![2].cacheReadInputTokens, 412);
+    });
+  });
+
+  group('OutputTokensDetails', () {
+    test('fromJson/toJson round-trip', () {
+      final json = {'thinking_tokens': 128};
+      final details = OutputTokensDetails.fromJson(json);
+      expect(details.thinkingTokens, 128);
+      expect(details.toJson(), json);
+    });
+
+    test('defaults thinkingTokens to 0 when absent', () {
+      final json = <String, dynamic>{};
+      final details = OutputTokensDetails.fromJson(json);
+      expect(details.thinkingTokens, 0);
+    });
+
+    test('copyWith and equality', () {
+      const a = OutputTokensDetails(thinkingTokens: 10);
+      expect(a.copyWith(thinkingTokens: 20).thinkingTokens, 20);
+      expect(a, const OutputTokensDetails(thinkingTokens: 10));
+      expect(
+        a.hashCode,
+        const OutputTokensDetails(thinkingTokens: 10).hashCode,
+      );
+      expect(a, isNot(const OutputTokensDetails(thinkingTokens: 20)));
+      expect(a.toString(), contains('thinkingTokens: 10'));
+    });
+  });
+
+  group('Usage.outputTokensDetails', () {
+    test('parses and round-trips outputTokensDetails', () {
+      final json = {
+        'input_tokens': 10,
+        'output_tokens': 200,
+        'output_tokens_details': {'thinking_tokens': 150},
+      };
+      final usage = Usage.fromJson(json);
+      expect(usage.outputTokensDetails, isNotNull);
+      expect(usage.outputTokensDetails!.thinkingTokens, 150);
+      expect(usage.toJson(), json);
+    });
+
+    test('omits output_tokens_details when null', () {
+      const usage = Usage(inputTokens: 10, outputTokens: 20);
+      expect(usage.toJson().containsKey('output_tokens_details'), isFalse);
+    });
+
+    test('copyWith updates and clears outputTokensDetails', () {
+      const usage = Usage(
+        inputTokens: 10,
+        outputTokens: 20,
+        outputTokensDetails: OutputTokensDetails(thinkingTokens: 5),
+      );
+      final updated = usage.copyWith(
+        outputTokensDetails: const OutputTokensDetails(thinkingTokens: 9),
+      );
+      expect(updated.outputTokensDetails!.thinkingTokens, 9);
+      expect(
+        usage.copyWith(outputTokensDetails: null).outputTokensDetails,
+        isNull,
+      );
+    });
+
+    test('equality and toString include outputTokensDetails', () {
+      const a = Usage(
+        inputTokens: 10,
+        outputTokens: 20,
+        outputTokensDetails: OutputTokensDetails(thinkingTokens: 5),
+      );
+      const b = Usage(inputTokens: 10, outputTokens: 20);
+      expect(a, isNot(b));
+      expect(a.toString(), contains('outputTokensDetails'));
+    });
+  });
+
+  group('MessageDeltaUsage.outputTokensDetails', () {
+    test('parses and round-trips outputTokensDetails', () {
+      final json = {
+        'output_tokens': 80,
+        'output_tokens_details': {'thinking_tokens': 40},
+      };
+      final usage = MessageDeltaUsage.fromJson(json);
+      expect(usage.outputTokensDetails!.thinkingTokens, 40);
+      expect(usage.toJson(), json);
+    });
+
+    test('omits output_tokens_details when null', () {
+      const usage = MessageDeltaUsage(outputTokens: 80);
+      expect(usage.toJson().containsKey('output_tokens_details'), isFalse);
+    });
+
+    test('copyWith clears outputTokensDetails', () {
+      const usage = MessageDeltaUsage(
+        outputTokens: 80,
+        outputTokensDetails: OutputTokensDetails(thinkingTokens: 5),
+      );
+      expect(
+        usage.copyWith(outputTokensDetails: null).outputTokensDetails,
+        isNull,
+      );
     });
   });
 }

@@ -9,7 +9,7 @@ void main() {
       'version': 1,
       'name': 'Coordinator',
       'description': null,
-      'model': {'id': 'claude-opus-4-7', 'type': 'model'},
+      'model': {'id': 'claude-opus-4-8', 'type': 'model'},
       'system': null,
       'tools': <Map<String, dynamic>>[],
       'mcp_servers': <Map<String, dynamic>>[],
@@ -62,7 +62,7 @@ void main() {
         'name': 'Coordinator',
         'description': null,
         'system': null,
-        'model': {'id': 'claude-opus-4-7', 'type': 'model'},
+        'model': {'id': 'claude-opus-4-8', 'type': 'model'},
         'mcp_servers': <Map<String, dynamic>>[],
         'skills': <Map<String, dynamic>>[],
         'tools': <Map<String, dynamic>>[],
@@ -104,7 +104,7 @@ void main() {
           'type': 'agent',
           'version': 1,
           'name': 'A',
-          'model': {'id': 'claude-opus-4-7', 'type': 'model'},
+          'model': {'id': 'claude-opus-4-8', 'type': 'model'},
           'mcp_servers': <Map<String, dynamic>>[],
           'skills': <Map<String, dynamic>>[],
           'tools': <Map<String, dynamic>>[],
@@ -160,7 +160,7 @@ void main() {
     test('serializes when set and omits when null', () {
       const withMa = CreateAgentParams(
         name: 'C',
-        model: ModelParamsId(id: 'claude-opus-4-7'),
+        model: ModelParamsId(id: 'claude-opus-4-8'),
         multiagent: MultiagentCoordinatorParams(
           agents: [MultiagentSelfParams()],
         ),
@@ -174,7 +174,7 @@ void main() {
 
       const without = CreateAgentParams(
         name: 'C',
-        model: ModelParamsId(id: 'claude-opus-4-7'),
+        model: ModelParamsId(id: 'claude-opus-4-8'),
       );
       expect(without.toJson().containsKey('multiagent'), isFalse);
     });

@@ -160,7 +160,7 @@ void main() {
         'id': 'msg_ctx',
         'type': 'message',
         'role': 'assistant',
-        'model': 'claude-opus-4-7',
+        'model': 'claude-opus-4-8',
         'content': [
           {'type': 'text', 'text': 'Response truncated by context window.'},
         ],

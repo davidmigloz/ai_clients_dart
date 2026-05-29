@@ -212,14 +212,14 @@ void main() {
 
     test('toJson serializes correctly', () {
       final model = ModelInfo(
-        id: 'claude-3-opus-20240229',
+        id: 'claude-opus-4-8',
         displayName: 'Claude 3 Opus',
         createdAt: DateTime.utc(2024, 2, 29),
       );
 
       final json = model.toJson();
 
-      expect(json['id'], 'claude-3-opus-20240229');
+      expect(json['id'], 'claude-opus-4-8');
       expect(json['type'], 'model');
       expect(json['display_name'], 'Claude 3 Opus');
       expect(json['created_at'], '2024-02-29T00:00:00.000Z');
@@ -426,14 +426,14 @@ void main() {
       final original = ModelListResponse(
         data: [
           ModelInfo(
-            id: 'claude-3-opus-20240229',
+            id: 'claude-opus-4-8',
             displayName: 'Claude 3 Opus',
             createdAt: DateTime.utc(2024, 2, 29),
           ),
         ],
         hasMore: true,
-        firstId: 'claude-3-opus-20240229',
-        lastId: 'claude-3-opus-20240229',
+        firstId: 'claude-opus-4-8',
+        lastId: 'claude-opus-4-8',
       );
 
       final json = original.toJson();

@@ -32,7 +32,7 @@ void main() async {
     print('\n=== Send message with user_profile_id ===');
     final reply = await client.messages.create(
       MessageCreateRequest(
-        model: 'claude-opus-4-7',
+        model: 'claude-opus-4-8',
         maxTokens: 256,
         userProfileId: profile.id,
         messages: [InputMessage.user('Hello!')],

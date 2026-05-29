@@ -1910,8 +1910,15 @@ class AdvisorResult extends AdvisorToolResultContent {
   /// The advisor's advice text.
   final String text;
 
+  /// The advisor sub-inference's stop reason.
+  ///
+  /// Same values as the top-level message `stop_reason`; `max_tokens` indicates
+  /// the advisor's output was truncated at the tool's `max_tokens` value or the
+  /// advisor model's policy cap. May be `null` when absent.
+  final String? stopReason;
+
   /// Creates an [AdvisorResult].
-  const AdvisorResult({required this.text});
+  const AdvisorResult({required this.text, this.stopReason});
 
   /// Creates an [AdvisorResult] from JSON.
   factory AdvisorResult.fromJson(Map<String, dynamic> json) {
@@ -1919,29 +1926,46 @@ class AdvisorResult extends AdvisorToolResultContent {
     if (type != 'advisor_result') {
       throw FormatException('Expected type "advisor_result", got "$type"');
     }
-    return AdvisorResult(text: json['text'] as String);
+    return AdvisorResult(
+      text: json['text'] as String,
+      stopReason: json['stop_reason'] as String?,
+    );
   }
 
   @override
-  Map<String, dynamic> toJson() => {'type': 'advisor_result', 'text': text};
+  Map<String, dynamic> toJson() => {
+    'type': 'advisor_result',
+    'text': text,
+    if (stopReason != null) 'stop_reason': stopReason,
+  };
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is AdvisorResult &&
           runtimeType == other.runtimeType &&
-          text == other.text;
+          text == other.text &&
+          stopReason == other.stopReason;
 
   @override
-  int get hashCode => text.hashCode;
+  int get hashCode => Object.hash(text, stopReason);
 
   /// Creates a copy with replaced values.
-  AdvisorResult copyWith({String? text}) {
-    return AdvisorResult(text: text ?? this.text);
+  AdvisorResult copyWith({
+    String? text,
+    Object? stopReason = unsetCopyWithValue,
+  }) {
+    return AdvisorResult(
+      text: text ?? this.text,
+      stopReason: stopReason == unsetCopyWithValue
+          ? this.stopReason
+          : stopReason as String?,
+    );
   }
 
   @override
-  String toString() => 'AdvisorResult(text: ${text.length} chars)';
+  String toString() =>
+      'AdvisorResult(text: ${text.length} chars, stopReason: $stopReason)';
 }
 
 /// Encrypted (redacted) advisor result.
@@ -1950,8 +1974,17 @@ class AdvisorRedactedResult extends AdvisorToolResultContent {
   /// The opaque encrypted content blob.
   final String encryptedContent;
 
+  /// The advisor sub-inference's stop reason.
+  ///
+  /// Same values as the top-level message `stop_reason`. May be `null` when
+  /// absent.
+  final String? stopReason;
+
   /// Creates an [AdvisorRedactedResult].
-  const AdvisorRedactedResult({required this.encryptedContent});
+  const AdvisorRedactedResult({
+    required this.encryptedContent,
+    this.stopReason,
+  });
 
   /// Creates an [AdvisorRedactedResult] from JSON.
   factory AdvisorRedactedResult.fromJson(Map<String, dynamic> json) {
@@ -1963,6 +1996,7 @@ class AdvisorRedactedResult extends AdvisorToolResultContent {
     }
     return AdvisorRedactedResult(
       encryptedContent: json['encrypted_content'] as String,
+      stopReason: json['stop_reason'] as String?,
     );
   }
 
@@ -1970,6 +2004,7 @@ class AdvisorRedactedResult extends AdvisorToolResultContent {
   Map<String, dynamic> toJson() => {
     'type': 'advisor_redacted_result',
     'encrypted_content': encryptedContent,
+    if (stopReason != null) 'stop_reason': stopReason,
   };
 
   @override
@@ -1977,22 +2012,29 @@ class AdvisorRedactedResult extends AdvisorToolResultContent {
       identical(this, other) ||
       other is AdvisorRedactedResult &&
           runtimeType == other.runtimeType &&
-          encryptedContent == other.encryptedContent;
+          encryptedContent == other.encryptedContent &&
+          stopReason == other.stopReason;
 
   @override
-  int get hashCode => encryptedContent.hashCode;
+  int get hashCode => Object.hash(encryptedContent, stopReason);
 
   /// Creates a copy with replaced values.
-  AdvisorRedactedResult copyWith({String? encryptedContent}) {
+  AdvisorRedactedResult copyWith({
+    String? encryptedContent,
+    Object? stopReason = unsetCopyWithValue,
+  }) {
     return AdvisorRedactedResult(
       encryptedContent: encryptedContent ?? this.encryptedContent,
+      stopReason: stopReason == unsetCopyWithValue
+          ? this.stopReason
+          : stopReason as String?,
     );
   }
 
   @override
   String toString() =>
       'AdvisorRedactedResult(encryptedContent: '
-      '[${encryptedContent.length} chars])';
+      '[${encryptedContent.length} chars], stopReason: $stopReason)';
 }
 
 /// Advisor tool result error.

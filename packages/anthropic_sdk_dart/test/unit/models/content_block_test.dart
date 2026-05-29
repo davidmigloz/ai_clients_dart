@@ -670,6 +670,92 @@ void main() {
       });
     });
 
+    group('MidConversationSystemInputBlock', () {
+      Map<String, dynamic> sampleJson() => {
+        'type': 'mid_conv_system',
+        'content': [
+          {'type': 'text', 'text': 'From now on, answer in French.'},
+        ],
+        'cache_control': {'type': 'ephemeral'},
+      };
+
+      test('factory creates a mid-conversation system block', () {
+        final block = InputContentBlock.midConversationSystem(
+          content: const [TextInputBlock('Answer in French.')],
+        );
+        expect(block, isA<MidConversationSystemInputBlock>());
+        final b = block as MidConversationSystemInputBlock;
+        expect(b.content, hasLength(1));
+        expect(b.content.first.text, 'Answer in French.');
+        expect(b.cacheControl, isNull);
+      });
+
+      test('dispatches via InputContentBlock.fromJson and round-trips', () {
+        final json = sampleJson();
+        final block = InputContentBlock.fromJson(json);
+        expect(block, isA<MidConversationSystemInputBlock>());
+        expect(block.toJson(), json);
+      });
+
+      test('omits cache_control when absent', () {
+        const block = MidConversationSystemInputBlock(
+          content: [TextInputBlock('x')],
+        );
+        expect(block.toJson().containsKey('cache_control'), isFalse);
+      });
+
+      test('fromJson rejects mismatched discriminator', () {
+        final json = <String, dynamic>{'type': 'text', 'content': <dynamic>[]};
+        expect(
+          () => MidConversationSystemInputBlock.fromJson(json),
+          throwsFormatException,
+        );
+      });
+
+      test('fromJson rejects non-list content', () {
+        final json = <String, dynamic>{
+          'type': 'mid_conv_system',
+          'content': 'not-a-list',
+        };
+        expect(
+          () => MidConversationSystemInputBlock.fromJson(json),
+          throwsFormatException,
+        );
+      });
+
+      test('copyWith updates content and clears cacheControl', () {
+        const block = MidConversationSystemInputBlock(
+          content: [TextInputBlock('x')],
+          cacheControl: CacheControlEphemeral(),
+        );
+        expect(
+          block
+              .copyWith(content: const [TextInputBlock('y')])
+              .content
+              .first
+              .text,
+          'y',
+        );
+        expect(block.copyWith(cacheControl: null).cacheControl, isNull);
+      });
+
+      test('equality and toString', () {
+        const a = MidConversationSystemInputBlock(
+          content: [TextInputBlock('x')],
+        );
+        const b = MidConversationSystemInputBlock(
+          content: [TextInputBlock('x')],
+        );
+        const c = MidConversationSystemInputBlock(
+          content: [TextInputBlock('y')],
+        );
+        expect(a, equals(b));
+        expect(a.hashCode, equals(b.hashCode));
+        expect(a, isNot(equals(c)));
+        expect(a.toString(), contains('MidConversationSystemInputBlock'));
+      });
+    });
+
     group('DocumentInputBlock citations/context', () {
       test('round-trips citations and context', () {
         final block = DocumentInputBlock(
@@ -1270,6 +1356,72 @@ void main() {
       final modified = original.copyWith(toolUseId: 'id2');
       expect(modified.toolUseId, 'id2');
       expect(modified.content, isA<AdvisorResult>());
+    });
+  });
+
+  group('AdvisorResult.stopReason', () {
+    test('round-trips when present', () {
+      final json = {
+        'type': 'advisor_result',
+        'text': 'advice',
+        'stop_reason': 'max_tokens',
+      };
+      final result = AdvisorResult.fromJson(json);
+      expect(result.stopReason, 'max_tokens');
+      expect(result.toJson(), json);
+    });
+
+    test('omits stop_reason when absent', () {
+      const result = AdvisorResult(text: 'advice');
+      expect(result.toJson().containsKey('stop_reason'), isFalse);
+    });
+
+    test('copyWith updates and clears stopReason', () {
+      const result = AdvisorResult(text: 'advice', stopReason: 'end_turn');
+      expect(
+        result.copyWith(stopReason: 'max_tokens').stopReason,
+        'max_tokens',
+      );
+      expect(result.copyWith(stopReason: null).stopReason, isNull);
+    });
+
+    test('equality and toString include stopReason', () {
+      const a = AdvisorResult(text: 'advice', stopReason: 'end_turn');
+      const b = AdvisorResult(text: 'advice');
+      expect(a, isNot(equals(b)));
+      expect(a.toString(), contains('stopReason: end_turn'));
+    });
+  });
+
+  group('AdvisorRedactedResult.stopReason', () {
+    test('round-trips when present', () {
+      final json = {
+        'type': 'advisor_redacted_result',
+        'encrypted_content': 'opaque-blob',
+        'stop_reason': 'max_tokens',
+      };
+      final result = AdvisorRedactedResult.fromJson(json);
+      expect(result.stopReason, 'max_tokens');
+      expect(result.toJson(), json);
+    });
+
+    test('toString redacts encryptedContent and shows stopReason', () {
+      const result = AdvisorRedactedResult(
+        encryptedContent: 'opaque-blob',
+        stopReason: 'end_turn',
+      );
+      final s = result.toString();
+      expect(s, isNot(contains('opaque-blob')));
+      expect(s, contains('chars]'));
+      expect(s, contains('stopReason: end_turn'));
+    });
+
+    test('copyWith clears stopReason', () {
+      const result = AdvisorRedactedResult(
+        encryptedContent: 'blob',
+        stopReason: 'end_turn',
+      );
+      expect(result.copyWith(stopReason: null).stopReason, isNull);
     });
   });
 

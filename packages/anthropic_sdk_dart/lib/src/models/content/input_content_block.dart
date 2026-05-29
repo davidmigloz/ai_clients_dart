@@ -141,6 +141,16 @@ sealed class InputContentBlock {
     CacheControlEphemeral? cacheControl,
   }) = ToolReferenceInputBlock;
 
+  /// Creates a mid-conversation system block.
+  ///
+  /// Injects updated system instructions partway through a conversation (e.g.
+  /// with Claude Opus 4.8) without requiring a user turn or disrupting prompt
+  /// caching. The [content] holds the new system instruction as text blocks.
+  factory InputContentBlock.midConversationSystem({
+    required List<TextInputBlock> content,
+    CacheControlEphemeral? cacheControl,
+  }) = MidConversationSystemInputBlock;
+
   /// Creates an [InputContentBlock] from JSON.
   factory InputContentBlock.fromJson(Map<String, dynamic> json) {
     final type = json['type'] as String;
@@ -169,6 +179,7 @@ sealed class InputContentBlock {
       'mcp_tool_use' => MCPToolUseInputBlock.fromJson(json),
       'mcp_tool_result' => MCPToolResultInputBlock.fromJson(json),
       'advisor_tool_result' => AdvisorToolResultInputBlock.fromJson(json),
+      'mid_conv_system' => MidConversationSystemInputBlock.fromJson(json),
       _ => UnknownInputContentBlock.fromJson(json),
     };
   }
@@ -1844,6 +1855,92 @@ class MCPToolResultInputBlock extends InputContentBlock {
   String toString() =>
       'MCPToolResultInputBlock(toolUseId: $toolUseId, '
       'content: $content, isError: $isError, '
+      'cacheControl: $cacheControl)';
+}
+
+/// Mid-conversation system content block for input.
+///
+/// Injects updated system instructions partway through a conversation (e.g.
+/// with Claude Opus 4.8) without requiring a user turn or disrupting prompt
+/// caching. The [content] holds the new system instruction as text blocks.
+@immutable
+class MidConversationSystemInputBlock extends InputContentBlock {
+  /// System instruction text blocks.
+  final List<TextInputBlock> content;
+
+  /// Cache control for this block.
+  final CacheControlEphemeral? cacheControl;
+
+  /// Creates a [MidConversationSystemInputBlock].
+  const MidConversationSystemInputBlock({
+    required this.content,
+    this.cacheControl,
+  });
+
+  /// Creates a [MidConversationSystemInputBlock] from JSON.
+  factory MidConversationSystemInputBlock.fromJson(Map<String, dynamic> json) {
+    final type = json['type'] as String?;
+    if (type != 'mid_conv_system') {
+      throw FormatException('Expected type "mid_conv_system", got "$type"');
+    }
+    final rawContent = json['content'];
+    if (rawContent is! List) {
+      throw FormatException(
+        'mid_conv_system: "content" must be a List, '
+        'got ${rawContent.runtimeType}',
+      );
+    }
+    return MidConversationSystemInputBlock(
+      content: rawContent.map((e) {
+        if (e is! Map<String, dynamic>) {
+          throw FormatException(
+            'mid_conv_system content: expected Map, got ${e.runtimeType}',
+          );
+        }
+        return TextInputBlock.fromJson(e);
+      }).toList(),
+      cacheControl: json['cache_control'] != null
+          ? CacheControlEphemeral.fromJson(
+              json['cache_control'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'mid_conv_system',
+    'content': content.map((e) => e.toJson()).toList(),
+    if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  MidConversationSystemInputBlock copyWith({
+    List<TextInputBlock>? content,
+    Object? cacheControl = unsetCopyWithValue,
+  }) {
+    return MidConversationSystemInputBlock(
+      content: content ?? this.content,
+      cacheControl: cacheControl == unsetCopyWithValue
+          ? this.cacheControl
+          : cacheControl as CacheControlEphemeral?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MidConversationSystemInputBlock &&
+          runtimeType == other.runtimeType &&
+          listsEqual(content, other.content) &&
+          cacheControl == other.cacheControl;
+
+  @override
+  int get hashCode => Object.hash(listHash(content), cacheControl);
+
+  @override
+  String toString() =>
+      'MidConversationSystemInputBlock(content: $content, '
       'cacheControl: $cacheControl)';
 }
 

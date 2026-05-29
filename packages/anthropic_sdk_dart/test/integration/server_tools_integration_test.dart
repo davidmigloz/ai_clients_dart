@@ -121,7 +121,7 @@ void main() {
             maxTokens: 4096,
             tools: [
               ToolDefinition.builtIn(
-                const AdvisorTool(model: 'claude-opus-4-7'),
+                const AdvisorTool(model: 'claude-opus-4-8'),
               ),
             ],
             messages: [
@@ -194,7 +194,7 @@ void main() {
             maxTokens: 4096,
             tools: [
               ToolDefinition.builtIn(
-                const AdvisorTool(model: 'claude-opus-4-7'),
+                const AdvisorTool(model: 'claude-opus-4-8'),
               ),
             ],
             messages: [

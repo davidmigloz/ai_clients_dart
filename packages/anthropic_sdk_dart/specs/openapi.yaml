@@ -4347,6 +4347,7 @@
             "image": "#/components/schemas/BetaRequestImageBlock",
             "mcp_tool_result": "#/components/schemas/BetaRequestMCPToolResultBlock",
             "mcp_tool_use": "#/components/schemas/BetaRequestMCPToolUseBlock",
+            "mid_conv_system": "#/components/schemas/BetaRequestMidConvSystemBlock",
             "redacted_thinking": "#/components/schemas/BetaRequestRedactedThinkingBlock",
             "search_result": "#/components/schemas/BetaRequestSearchResultBlock",
             "server_tool_use": "#/components/schemas/BetaRequestServerToolUseBlock",
@@ -4429,6 +4430,9 @@
           },
           {
             "$ref": "#/components/schemas/BetaRequestCompactionBlock"
+          },
+          {
+            "$ref": "#/components/schemas/BetaRequestMidConvSystemBlock"
           }
         ],
         "x-stainless-go-variant-constructor": {
@@ -4488,7 +4492,8 @@
           "role": {
             "enum": [
               "user",
-              "assistant"
+              "assistant",
+              "system"
             ],
             "title": "Role",
             "type": "string"
@@ -9882,6 +9887,11 @@
             "type": "string"
           },
           {
+            "const": "claude-opus-4-8",
+            "description": "Frontier intelligence for long-running agents and coding",
+            "x-stainless-nominal": false
+          },
+          {
             "const": "claude-opus-4-7",
             "description": "Frontier intelligence for long-running agents and coding",
             "x-stainless-nominal": false
@@ -9927,7 +9937,7 @@
             "x-stainless-nominal": false
           }
         ],
-        "description": "The model that will power your agent.\\n\\nSee [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.",
+        "description": "The model that will power your agent.\n\nSee [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.",
         "title": "BetaManagedAgentsModel"
       },
       "BetaManagedAgentsModelConfig": {
@@ -15659,6 +15669,18 @@
             "title": "Output Tokens",
             "type": "integer"
           },
+          "output_tokens_details": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BetaOutputTokensDetails"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Breakdown of output tokens by category.\n\n`output_tokens` remains the inclusive, authoritative total used for billing.\nThis object provides a read-only decomposition for observability \u2014 for example,\nhow many of the billed output tokens were spent on internal reasoning that may\nhave been summarized before being returned to you."
+          },
           "server_tool_use": {
             "anyOf": [
               {
@@ -15678,6 +15700,7 @@
           "input_tokens",
           "iterations",
           "output_tokens",
+          "output_tokens_details",
           "server_tool_use"
         ],
         "title": "MessageDeltaUsage",
@@ -16029,6 +16052,22 @@
           }
         },
         "title": "OutputConfig",
+        "type": "object"
+      },
+      "BetaOutputTokensDetails": {
+        "properties": {
+          "thinking_tokens": {
+            "default": 0,
+            "description": "Number of output tokens the model generated as internal reasoning, including\nthe thinking-block delimiter tokens.\n\nReflects the raw reasoning the model produced, not the (possibly shorter)\nsummarized thinking text returned in the response body. Computed by\nre-tokenizing the raw reasoning text, so it may differ from the model's exact\ngeneration count by a small number of tokens. Always \u2264 `output_tokens`;\n`output_tokens - thinking_tokens` approximates the non-reasoning output.",
+            "minimum": 0,
+            "title": "Thinking Tokens",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "thinking_tokens"
+        ],
+        "title": "OutputTokensDetails",
         "type": "object"
       },
       "BetaOverloadedError": {
@@ -16574,6 +16613,17 @@
             "title": "Encrypted Content",
             "type": "string"
           },
+          "stop_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stop Reason"
+          },
           "type": {
             "const": "advisor_redacted_result",
             "title": "Type",
@@ -16590,6 +16640,17 @@
       "BetaRequestAdvisorResultBlock": {
         "additionalProperties": false,
         "properties": {
+          "stop_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stop Reason"
+          },
           "text": {
             "title": "Text",
             "type": "string"
@@ -17636,6 +17697,63 @@
           "type"
         ],
         "title": "RequestMCPToolUseBlock",
+        "type": "object"
+      },
+      "BetaRequestMidConvSystemBlock": {
+        "additionalProperties": false,
+        "description": "System instructions that appear mid-conversation.\n\nUse this block to provide or update system-level instructions at a specific\npoint in the conversation, rather than only via the top-level `system` parameter.",
+        "properties": {
+          "cache_control": {
+            "anyOf": [
+              {
+                "discriminator": {
+                  "mapping": {
+                    "ephemeral": "#/components/schemas/BetaCacheControlEphemeral"
+                  },
+                  "propertyName": "type"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/BetaCacheControlEphemeral"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Create a cache control breakpoint at this content block.",
+            "title": "Cache Control"
+          },
+          "content": {
+            "description": "System instruction text blocks.",
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "text": "#/components/schemas/BetaRequestTextBlock"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/BetaRequestTextBlock"
+                }
+              ]
+            },
+            "title": "Content",
+            "type": "array"
+          },
+          "type": {
+            "const": "mid_conv_system",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "content",
+          "type"
+        ],
+        "title": "RequestMidConvSystemBlock",
         "type": "object"
       },
       "BetaRequestPageLocationCitation": {
@@ -18922,6 +19040,19 @@
             "title": "Encrypted Content",
             "type": "string"
           },
+          "stop_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The advisor sub-inference's stop reason (same values as the top-level message `stop_reason`).",
+            "title": "Stop Reason"
+          },
           "type": {
             "const": "advisor_redacted_result",
             "default": "advisor_redacted_result",
@@ -18931,6 +19062,7 @@
         },
         "required": [
           "encrypted_content",
+          "stop_reason",
           "type"
         ],
         "title": "ResponseAdvisorRedactedResultBlock",
@@ -18938,6 +19070,19 @@
       },
       "BetaResponseAdvisorResultBlock": {
         "properties": {
+          "stop_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The advisor sub-inference's stop reason (same values as the top-level message `stop_reason`). `max_tokens` indicates the advisor's output was truncated at the tool's `max_tokens` value or the advisor model's policy cap.",
+            "title": "Stop Reason"
+          },
           "text": {
             "title": "Text",
             "type": "string"
@@ -18950,6 +19095,7 @@
           }
         },
         "required": [
+          "stop_reason",
           "text",
           "type"
         ],
@@ -22524,6 +22670,18 @@
             "title": "Output Tokens",
             "type": "integer"
           },
+          "output_tokens_details": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BetaOutputTokensDetails"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Breakdown of output tokens by category.\n\n`output_tokens` remains the inclusive, authoritative total used for billing.\nThis object provides a read-only decomposition for observability \u2014 for example,\nhow many of the billed output tokens were spent on internal reasoning that may\nhave been summarized before being returned to you."
+          },
           "server_tool_use": {
             "anyOf": [
               {
@@ -22575,6 +22733,7 @@
           "input_tokens",
           "iterations",
           "output_tokens",
+          "output_tokens_details",
           "server_tool_use",
           "service_tier",
           "speed"
@@ -22839,6 +22998,7 @@
           "invalid_tool_input",
           "url_too_long",
           "url_not_allowed",
+          "url_not_in_prior_context",
           "url_not_accessible",
           "unsupported_content_type",
           "too_many_requests",
@@ -26171,6 +26331,7 @@
             "container_upload": "#/components/schemas/RequestContainerUploadBlock",
             "document": "#/components/schemas/RequestDocumentBlock",
             "image": "#/components/schemas/RequestImageBlock",
+            "mid_conv_system": "#/components/schemas/RequestMidConvSystemBlock",
             "redacted_thinking": "#/components/schemas/RequestRedactedThinkingBlock",
             "search_result": "#/components/schemas/RequestSearchResultBlock",
             "server_tool_use": "#/components/schemas/RequestServerToolUseBlock",
@@ -26241,6 +26402,9 @@
           },
           {
             "$ref": "#/components/schemas/RequestContainerUploadBlock"
+          },
+          {
+            "$ref": "#/components/schemas/RequestMidConvSystemBlock"
           }
         ],
         "x-stainless-go-variant-constructor": {
@@ -26306,7 +26470,8 @@
           "role": {
             "enum": [
               "user",
-              "assistant"
+              "assistant",
+              "system"
             ],
             "title": "Role",
             "type": "string"
@@ -27073,6 +27238,18 @@
             "title": "Output Tokens",
             "type": "integer"
           },
+          "output_tokens_details": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OutputTokensDetails"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Breakdown of output tokens by category.\n\n`output_tokens` remains the inclusive, authoritative total used for billing.\nThis object provides a read-only decomposition for observability \u2014 for example,\nhow many of the billed output tokens were spent on internal reasoning that may\nhave been summarized before being returned to you."
+          },
           "server_tool_use": {
             "anyOf": [
               {
@@ -27091,6 +27268,7 @@
           "cache_read_input_tokens",
           "input_tokens",
           "output_tokens",
+          "output_tokens_details",
           "server_tool_use"
         ],
         "title": "MessageDeltaUsage",
@@ -27208,6 +27386,11 @@
             "type": "string"
           },
           {
+            "const": "claude-opus-4-8",
+            "description": "Frontier intelligence for long-running agents and coding",
+            "x-stainless-nominal": false
+          },
+          {
             "const": "claude-opus-4-7",
             "description": "Frontier intelligence for long-running agents and coding",
             "x-stainless-nominal": false
@@ -27303,7 +27486,7 @@
             "x-stainless-nominal": false
           }
         ],
-        "description": "The model that will complete your prompt.\\n\\nSee [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.",
+        "description": "The model that will complete your prompt.\n\nSee [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.",
         "title": "Model"
       },
       "ModelCapabilities": {
@@ -27490,6 +27673,22 @@
           }
         },
         "title": "OutputConfig",
+        "type": "object"
+      },
+      "OutputTokensDetails": {
+        "properties": {
+          "thinking_tokens": {
+            "default": 0,
+            "description": "Number of output tokens the model generated as internal reasoning, including\nthe thinking-block delimiter tokens.\n\nReflects the raw reasoning the model produced, not the (possibly shorter)\nsummarized thinking text returned in the response body. Computed by\nre-tokenizing the raw reasoning text, so it may differ from the model's exact\ngeneration count by a small number of tokens. Always \u2264 `output_tokens`;\n`output_tokens - thinking_tokens` approximates the non-reasoning output.",
+            "minimum": 0,
+            "title": "Thinking Tokens",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "thinking_tokens"
+        ],
+        "title": "OutputTokensDetails",
         "type": "object"
       },
       "OverloadedError": {
@@ -28305,6 +28504,63 @@
           "type"
         ],
         "title": "RequestImageBlock",
+        "type": "object"
+      },
+      "RequestMidConvSystemBlock": {
+        "additionalProperties": false,
+        "description": "System instructions that appear mid-conversation.\n\nUse this block to provide or update system-level instructions at a specific\npoint in the conversation, rather than only via the top-level `system` parameter.",
+        "properties": {
+          "cache_control": {
+            "anyOf": [
+              {
+                "discriminator": {
+                  "mapping": {
+                    "ephemeral": "#/components/schemas/CacheControlEphemeral"
+                  },
+                  "propertyName": "type"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/CacheControlEphemeral"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Create a cache control breakpoint at this content block.",
+            "title": "Cache Control"
+          },
+          "content": {
+            "description": "System instruction text blocks.",
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "text": "#/components/schemas/RequestTextBlock"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/RequestTextBlock"
+                }
+              ]
+            },
+            "title": "Content",
+            "type": "array"
+          },
+          "type": {
+            "const": "mid_conv_system",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "content",
+          "type"
+        ],
+        "title": "RequestMidConvSystemBlock",
         "type": "object"
       },
       "RequestPageLocationCitation": {
@@ -32103,6 +32359,18 @@
             "title": "Output Tokens",
             "type": "integer"
           },
+          "output_tokens_details": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OutputTokensDetails"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Breakdown of output tokens by category.\n\n`output_tokens` remains the inclusive, authoritative total used for billing.\nThis object provides a read-only decomposition for observability \u2014 for example,\nhow many of the billed output tokens were spent on internal reasoning that may\nhave been summarized before being returned to you."
+          },
           "server_tool_use": {
             "anyOf": [
               {
@@ -32141,6 +32409,7 @@
           "inference_geo",
           "input_tokens",
           "output_tokens",
+          "output_tokens_details",
           "server_tool_use",
           "service_tier"
         ],
@@ -32243,6 +32512,7 @@
           "invalid_tool_input",
           "url_too_long",
           "url_not_allowed",
+          "url_not_in_prior_context",
           "url_not_accessible",
           "unsupported_content_type",
           "too_many_requests",

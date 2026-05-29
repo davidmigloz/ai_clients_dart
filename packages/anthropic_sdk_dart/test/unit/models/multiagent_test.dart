@@ -139,7 +139,7 @@ void main() {
       'name': 'Worker',
       'description': null,
       'system': null,
-      'model': {'id': 'claude-opus-4-7'},
+      'model': {'id': 'claude-opus-4-8'},
       'mcp_servers': <dynamic>[],
       'skills': <dynamic>[],
       'tools': <dynamic>[],
