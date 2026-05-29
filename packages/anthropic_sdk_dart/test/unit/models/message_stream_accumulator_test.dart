@@ -542,6 +542,43 @@ void main() {
         },
       );
 
+      test('threads outputTokensDetails from delta into merged usage', () {
+        final acc = _accumulate([
+          _messageStartJson(),
+          _contentBlockStartJson(0, _textBlockJson()),
+          _contentBlockDeltaJson(0, _textDeltaJson('Hi')),
+          _contentBlockStopJson(0),
+          _messageDeltaJson(
+            stopReason: 'end_turn',
+            outputTokens: 50,
+            usageExtra: {
+              'output_tokens_details': {'thinking_tokens': 30},
+            },
+          ),
+          _messageStopJson,
+        ]);
+
+        expect(acc.usage!.outputTokensDetails, isNotNull);
+        expect(acc.usage!.outputTokensDetails!.thinkingTokens, 30);
+      });
+
+      test('preserves base outputTokensDetails when delta omits it', () {
+        final acc = _accumulate([
+          _messageStartJson(
+            usageExtra: {
+              'output_tokens_details': {'thinking_tokens': 12},
+            },
+          ),
+          _contentBlockStartJson(0, _textBlockJson()),
+          _contentBlockDeltaJson(0, _textDeltaJson('Hi')),
+          _contentBlockStopJson(0),
+          _messageDeltaJson(stopReason: 'end_turn', outputTokens: 50),
+          _messageStopJson,
+        ]);
+
+        expect(acc.usage!.outputTokensDetails!.thinkingTokens, 12);
+      });
+
       test('stop reason and stop sequence', () {
         final acc = _accumulate([
           _messageStartJson(),

@@ -113,6 +113,7 @@ class MessageStreamAccumulator {
       _usage = Usage(
         inputTokens: delta.inputTokens ?? 0,
         outputTokens: delta.outputTokens,
+        outputTokensDetails: delta.outputTokensDetails,
         cacheCreationInputTokens: delta.cacheCreationInputTokens,
         cacheReadInputTokens: delta.cacheReadInputTokens,
         serverToolUse: delta.serverToolUse,
@@ -124,6 +125,8 @@ class MessageStreamAccumulator {
     _usage = Usage(
       inputTokens: delta.inputTokens ?? base.inputTokens,
       outputTokens: delta.outputTokens,
+      outputTokensDetails:
+          delta.outputTokensDetails ?? base.outputTokensDetails,
       cacheCreationInputTokens:
           delta.cacheCreationInputTokens ?? base.cacheCreationInputTokens,
       cacheReadInputTokens:

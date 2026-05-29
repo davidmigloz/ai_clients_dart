@@ -213,16 +213,16 @@ void main() {
     test('toJson serializes correctly', () {
       final model = ModelInfo(
         id: 'claude-opus-4-8',
-        displayName: 'Claude 3 Opus',
-        createdAt: DateTime.utc(2024, 2, 29),
+        displayName: 'Claude Opus 4.8',
+        createdAt: DateTime.utc(2026, 2, 28),
       );
 
       final json = model.toJson();
 
       expect(json['id'], 'claude-opus-4-8');
       expect(json['type'], 'model');
-      expect(json['display_name'], 'Claude 3 Opus');
-      expect(json['created_at'], '2024-02-29T00:00:00.000Z');
+      expect(json['display_name'], 'Claude Opus 4.8');
+      expect(json['created_at'], '2026-02-28T00:00:00.000Z');
       expect(json.containsKey('capabilities'), isFalse);
       expect(json.containsKey('max_input_tokens'), isFalse);
       expect(json.containsKey('max_tokens'), isFalse);
@@ -427,8 +427,8 @@ void main() {
         data: [
           ModelInfo(
             id: 'claude-opus-4-8',
-            displayName: 'Claude 3 Opus',
-            createdAt: DateTime.utc(2024, 2, 29),
+            displayName: 'Claude Opus 4.8',
+            createdAt: DateTime.utc(2026, 2, 28),
           ),
         ],
         hasMore: true,

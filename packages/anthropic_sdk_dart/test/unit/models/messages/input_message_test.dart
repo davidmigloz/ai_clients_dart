@@ -38,6 +38,26 @@ void main() {
         expect(message.role, MessageRole.assistant);
         expect(message.content, isA<BlocksMessageContent>());
       });
+
+      test('system() creates system message with text', () {
+        final message = InputMessage.system('Answer in French.');
+
+        expect(message.role, MessageRole.system);
+        expect(
+          (message.content as TextMessageContent).text,
+          'Answer in French.',
+        );
+        expect(message.toJson()['role'], 'system');
+      });
+
+      test('systemBlocks() creates system message with blocks', () {
+        final message = InputMessage.systemBlocks([
+          InputContentBlock.text('Answer in French.'),
+        ]);
+
+        expect(message.role, MessageRole.system);
+        expect(message.content, isA<BlocksMessageContent>());
+      });
     });
 
     group('fromJson', () {
@@ -75,6 +95,15 @@ void main() {
 
         expect(message.content, isA<BlocksMessageContent>());
         expect((message.content as BlocksMessageContent).blocks, hasLength(1));
+      });
+
+      test('parses system role (spec adds system to InputMessage.role)', () {
+        final json = {'role': 'system', 'content': 'Answer in French.'};
+
+        final message = InputMessage.fromJson(json);
+
+        expect(message.role, MessageRole.system);
+        expect(message.toJson()['role'], 'system');
       });
     });
 
@@ -197,6 +226,20 @@ void main() {
           throwsA(isA<FormatException>()),
         );
       });
+    });
+  });
+
+  group('MessageRole', () {
+    test('round-trips user, assistant, and system', () {
+      for (final role in MessageRole.values) {
+        expect(MessageRole.fromJson(role.toJson()), role);
+      }
+      expect(MessageRole.fromJson('system'), MessageRole.system);
+      expect(MessageRole.system.toJson(), 'system');
+    });
+
+    test('throws on unknown role', () {
+      expect(() => MessageRole.fromJson('tool'), throwsFormatException);
     });
   });
 }
