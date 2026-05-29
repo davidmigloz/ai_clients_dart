@@ -4,7 +4,11 @@ enum MessageRole {
   user('user'),
 
   /// Assistant message.
-  assistant('assistant');
+  assistant('assistant'),
+
+  /// System message (e.g. mid-conversation system instructions supplied inside
+  /// the messages array).
+  system('system');
 
   const MessageRole(this.value);
 
@@ -15,6 +19,7 @@ enum MessageRole {
   static MessageRole fromJson(String value) => switch (value) {
     'user' => MessageRole.user,
     'assistant' => MessageRole.assistant,
+    'system' => MessageRole.system,
     _ => throw FormatException('Unknown MessageRole: $value'),
   };
 

@@ -52,7 +52,7 @@ void main() {
   group('MessageCreateRequest.userProfileId', () {
     test('serializes user_profile_id when set', () {
       final request = MessageCreateRequest(
-        model: 'claude-opus-4-7',
+        model: 'claude-opus-4-8',
         messages: [InputMessage.user('hi')],
         maxTokens: 16,
         userProfileId: 'uprof_abc123',
@@ -67,7 +67,7 @@ void main() {
 
     test('omits user_profile_id when null', () {
       final request = MessageCreateRequest(
-        model: 'claude-opus-4-7',
+        model: 'claude-opus-4-8',
         messages: [InputMessage.user('hi')],
         maxTokens: 16,
       );

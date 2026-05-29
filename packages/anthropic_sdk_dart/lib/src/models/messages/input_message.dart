@@ -125,6 +125,23 @@ class InputMessage {
         content: MessageContent.blocks(blocks),
       );
 
+  /// Creates a system message with text content.
+  ///
+  /// Lets you place system instructions inside the messages array (e.g.
+  /// mid-conversation, with Claude Opus 4.8) instead of only the top-level
+  /// `system` prompt.
+  factory InputMessage.system(String text) => InputMessage(
+    role: MessageRole.system,
+    content: MessageContent.text(text),
+  );
+
+  /// Creates a system message with block content.
+  factory InputMessage.systemBlocks(List<InputContentBlock> blocks) =>
+      InputMessage(
+        role: MessageRole.system,
+        content: MessageContent.blocks(blocks),
+      );
+
   /// Returns the content as a list of [InputContentBlock]s.
   ///
   /// For [TextMessageContent], wraps the text in a single [TextInputBlock].

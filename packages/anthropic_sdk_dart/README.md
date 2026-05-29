@@ -32,8 +32,9 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 ### Generation and streaming
 
 - Messages with typed inputs, system prompts, and multi-turn history
+- Mid-conversation system messages: update instructions inside the messages array, no user turn required (Opus 4.8)
 - SSE streaming with cancelation and token counting
-- Extended thinking and adaptive thinking controls
+- Extended thinking and adaptive thinking controls, with `outputTokensDetails` reasoning-token breakdown
 - Prompt-cache diagnostics: report why the cache prefix diverged between turns (beta)
 
 ### Tools and multimodal
@@ -660,6 +661,7 @@ See the [example/](example/) directory for complete examples:
 | Example | Description |
 |---------|-------------|
 | [`messages_example.dart`](example/messages_example.dart) | Basic message creation |
+| [`mid_conversation_system_example.dart`](example/mid_conversation_system_example.dart) | Mid-conversation system messages (Opus 4.8) |
 | [`streaming_example.dart`](example/streaming_example.dart) | Streaming responses |
 | [`tool_calling_example.dart`](example/tool_calling_example.dart) | Tool calling with schemas |
 | [`web_search_example.dart`](example/web_search_example.dart) | Web search tool |

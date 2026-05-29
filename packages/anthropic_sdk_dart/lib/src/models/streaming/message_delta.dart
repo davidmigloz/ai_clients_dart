@@ -107,6 +107,9 @@ class MessageDeltaUsage {
   /// The cumulative number of output tokens generated so far.
   final int outputTokens;
 
+  /// Breakdown of output tokens by category (e.g., reasoning tokens).
+  final OutputTokensDetails? outputTokensDetails;
+
   /// The cumulative number of input tokens used.
   final int? inputTokens;
 
@@ -128,6 +131,7 @@ class MessageDeltaUsage {
   /// Creates a [MessageDeltaUsage].
   const MessageDeltaUsage({
     required this.outputTokens,
+    this.outputTokensDetails,
     this.inputTokens,
     this.cacheCreationInputTokens,
     this.cacheReadInputTokens,
@@ -140,6 +144,11 @@ class MessageDeltaUsage {
   factory MessageDeltaUsage.fromJson(Map<String, dynamic> json) {
     return MessageDeltaUsage(
       outputTokens: json['output_tokens'] as int,
+      outputTokensDetails: json['output_tokens_details'] != null
+          ? OutputTokensDetails.fromJson(
+              json['output_tokens_details'] as Map<String, dynamic>,
+            )
+          : null,
       inputTokens: json['input_tokens'] as int?,
       cacheCreationInputTokens: json['cache_creation_input_tokens'] as int?,
       cacheReadInputTokens: json['cache_read_input_tokens'] as int?,
@@ -162,6 +171,8 @@ class MessageDeltaUsage {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'output_tokens': outputTokens,
+    if (outputTokensDetails != null)
+      'output_tokens_details': outputTokensDetails!.toJson(),
     if (inputTokens != null) 'input_tokens': inputTokens,
     if (cacheCreationInputTokens != null)
       'cache_creation_input_tokens': cacheCreationInputTokens,
@@ -176,6 +187,7 @@ class MessageDeltaUsage {
   /// Creates a copy with replaced values.
   MessageDeltaUsage copyWith({
     int? outputTokens,
+    Object? outputTokensDetails = unsetCopyWithValue,
     Object? inputTokens = unsetCopyWithValue,
     Object? cacheCreationInputTokens = unsetCopyWithValue,
     Object? cacheReadInputTokens = unsetCopyWithValue,
@@ -185,6 +197,9 @@ class MessageDeltaUsage {
   }) {
     return MessageDeltaUsage(
       outputTokens: outputTokens ?? this.outputTokens,
+      outputTokensDetails: outputTokensDetails == unsetCopyWithValue
+          ? this.outputTokensDetails
+          : outputTokensDetails as OutputTokensDetails?,
       inputTokens: inputTokens == unsetCopyWithValue
           ? this.inputTokens
           : inputTokens as int?,
@@ -210,6 +225,7 @@ class MessageDeltaUsage {
       other is MessageDeltaUsage &&
           runtimeType == other.runtimeType &&
           outputTokens == other.outputTokens &&
+          outputTokensDetails == other.outputTokensDetails &&
           inputTokens == other.inputTokens &&
           cacheCreationInputTokens == other.cacheCreationInputTokens &&
           cacheReadInputTokens == other.cacheReadInputTokens &&
@@ -220,6 +236,7 @@ class MessageDeltaUsage {
   @override
   int get hashCode => Object.hash(
     outputTokens,
+    outputTokensDetails,
     inputTokens,
     cacheCreationInputTokens,
     cacheReadInputTokens,
@@ -230,7 +247,8 @@ class MessageDeltaUsage {
 
   @override
   String toString() =>
-      'MessageDeltaUsage(outputTokens: $outputTokens, inputTokens: $inputTokens, '
+      'MessageDeltaUsage(outputTokens: $outputTokens, '
+      'outputTokensDetails: $outputTokensDetails, inputTokens: $inputTokens, '
       'cacheCreationInputTokens: $cacheCreationInputTokens, '
       'cacheReadInputTokens: $cacheReadInputTokens, '
       'serverToolUse: $serverToolUse, iterations: $iterations, speed: $speed)';

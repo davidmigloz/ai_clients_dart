@@ -328,6 +328,54 @@ enum ServiceTier {
   String toJson() => name;
 }
 
+/// Breakdown of output tokens by category.
+///
+/// `outputTokens` remains the inclusive, authoritative total used for billing;
+/// this object is a read-only decomposition for observability.
+@immutable
+class OutputTokensDetails {
+  /// Number of output tokens the model generated as internal reasoning,
+  /// including the thinking-block delimiter tokens.
+  ///
+  /// Always ≤ `outputTokens`; `outputTokens - thinkingTokens` approximates the
+  /// non-reasoning output. Computed by re-tokenizing the raw reasoning text, so
+  /// it may differ from the model's exact generation count by a few tokens.
+  final int thinkingTokens;
+
+  /// Creates an [OutputTokensDetails].
+  const OutputTokensDetails({this.thinkingTokens = 0});
+
+  /// Creates an [OutputTokensDetails] from JSON.
+  factory OutputTokensDetails.fromJson(Map<String, dynamic> json) {
+    return OutputTokensDetails(
+      thinkingTokens: json['thinking_tokens'] as int? ?? 0,
+    );
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {'thinking_tokens': thinkingTokens};
+
+  /// Creates a copy with replaced values.
+  OutputTokensDetails copyWith({int? thinkingTokens}) {
+    return OutputTokensDetails(
+      thinkingTokens: thinkingTokens ?? this.thinkingTokens,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is OutputTokensDetails &&
+          runtimeType == other.runtimeType &&
+          thinkingTokens == other.thinkingTokens;
+
+  @override
+  int get hashCode => thinkingTokens.hashCode;
+
+  @override
+  String toString() => 'OutputTokensDetails(thinkingTokens: $thinkingTokens)';
+}
+
 /// Token usage statistics for a request.
 @immutable
 class Usage {
@@ -336,6 +384,9 @@ class Usage {
 
   /// The number of output tokens generated.
   final int outputTokens;
+
+  /// Breakdown of output tokens by category (e.g., reasoning tokens).
+  final OutputTokensDetails? outputTokensDetails;
 
   /// Breakdown of cached tokens by TTL for creation.
   final CacheCreation? cacheCreation;
@@ -368,6 +419,7 @@ class Usage {
   const Usage({
     required this.inputTokens,
     required this.outputTokens,
+    this.outputTokensDetails,
     this.cacheCreation,
     this.cacheCreationInputTokens,
     this.cacheRead,
@@ -384,6 +436,11 @@ class Usage {
     return Usage(
       inputTokens: json['input_tokens'] as int,
       outputTokens: json['output_tokens'] as int,
+      outputTokensDetails: json['output_tokens_details'] != null
+          ? OutputTokensDetails.fromJson(
+              json['output_tokens_details'] as Map<String, dynamic>,
+            )
+          : null,
       cacheCreation: json['cache_creation'] != null
           ? CacheCreation.fromJson(
               json['cache_creation'] as Map<String, dynamic>,
@@ -416,6 +473,8 @@ class Usage {
   Map<String, dynamic> toJson() => {
     'input_tokens': inputTokens,
     'output_tokens': outputTokens,
+    if (outputTokensDetails != null)
+      'output_tokens_details': outputTokensDetails!.toJson(),
     if (cacheCreation != null) 'cache_creation': cacheCreation!.toJson(),
     if (cacheCreationInputTokens != null)
       'cache_creation_input_tokens': cacheCreationInputTokens,
@@ -434,6 +493,7 @@ class Usage {
   Usage copyWith({
     int? inputTokens,
     int? outputTokens,
+    Object? outputTokensDetails = unsetCopyWithValue,
     Object? cacheCreation = unsetCopyWithValue,
     Object? cacheCreationInputTokens = unsetCopyWithValue,
     Object? cacheRead = unsetCopyWithValue,
@@ -447,6 +507,9 @@ class Usage {
     return Usage(
       inputTokens: inputTokens ?? this.inputTokens,
       outputTokens: outputTokens ?? this.outputTokens,
+      outputTokensDetails: outputTokensDetails == unsetCopyWithValue
+          ? this.outputTokensDetails
+          : outputTokensDetails as OutputTokensDetails?,
       cacheCreation: cacheCreation == unsetCopyWithValue
           ? this.cacheCreation
           : cacheCreation as CacheCreation?,
@@ -482,6 +545,7 @@ class Usage {
           runtimeType == other.runtimeType &&
           inputTokens == other.inputTokens &&
           outputTokens == other.outputTokens &&
+          outputTokensDetails == other.outputTokensDetails &&
           cacheCreation == other.cacheCreation &&
           cacheCreationInputTokens == other.cacheCreationInputTokens &&
           cacheRead == other.cacheRead &&
@@ -496,6 +560,7 @@ class Usage {
   int get hashCode => Object.hash(
     inputTokens,
     outputTokens,
+    outputTokensDetails,
     cacheCreation,
     cacheCreationInputTokens,
     cacheRead,
@@ -510,6 +575,7 @@ class Usage {
   @override
   String toString() =>
       'Usage(inputTokens: $inputTokens, outputTokens: $outputTokens, '
+      'outputTokensDetails: $outputTokensDetails, '
       'cacheCreation: $cacheCreation, '
       'cacheCreationInputTokens: $cacheCreationInputTokens, '
       'cacheRead: $cacheRead, cacheReadInputTokens: $cacheReadInputTokens, '
