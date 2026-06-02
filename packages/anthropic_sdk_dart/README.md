@@ -509,7 +509,7 @@ Future<void> main() async {
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.agents`, `client.sessions`, and `client.vaults` for the Managed Agents beta API. Create an agent configuration, start sessions to interact with Claude, and use vaults to securely store credentials.
+Use `client.agents`, `client.sessions`, and `client.vaults` for the Managed Agents beta API. Create an agent configuration, start sessions to interact with Claude, list session events and session thread events as the agent works, and store vault credentials securely.
 
 ```dart
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';

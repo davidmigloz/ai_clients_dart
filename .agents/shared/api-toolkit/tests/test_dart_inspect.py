@@ -10,6 +10,7 @@ if str(ROOT) not in os.sys.path:
     os.sys.path.insert(0, str(ROOT))
 
 from api_toolkit.dart_inspect import (
+    camel_case,
     extract_class_block,
     extract_fields,
     extract_from_json_keys,
@@ -20,6 +21,19 @@ from api_toolkit.dart_inspect import (
 
 
 class DartInspectTests(unittest.TestCase):
+    def test_camel_case_does_not_uppercase_letter_after_digit(self) -> None:
+        # A digit must not act as a word boundary: "1h"/"5m" stay lowercase so the
+        # result matches Dart fields like `ephemeral1hInputTokens`.
+        self.assertEqual(camel_case("ephemeral_1h_input_tokens"), "ephemeral1hInputTokens")
+        self.assertEqual(camel_case("ephemeral_5m_input_tokens"), "ephemeral5mInputTokens")
+        self.assertEqual(camel_case("ttl_1h"), "ttl1h")
+
+    def test_camel_case_unchanged_for_plain_snake_segments(self) -> None:
+        # Behaviour for all-lowercase snake_case segments is identical to before.
+        self.assertEqual(camel_case("cache_creation_input_tokens"), "cacheCreationInputTokens")
+        self.assertEqual(camel_case("next_page"), "nextPage")
+        self.assertEqual(camel_case("id"), "id")
+
     def test_extract_class_block_returns_matching_class_only(self) -> None:
         content = (
             "class Before {\n"

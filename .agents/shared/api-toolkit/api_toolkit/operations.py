@@ -901,10 +901,14 @@ def _parse_openapi_property(prop: dict[str, Any], required: set[str], name: str)
     # OpenAPI 3.1 allows type to be a list (e.g. ["integer", "null"]).
     # Presence of "null" in the list means the field's value may be null;
     # required-ness is determined solely by the schema's required list.
+    # OpenAPI 3.0 spells the same thing with a separate `nullable: true` boolean,
+    # so honor it too — otherwise required+nullable fields look required+non-nullable.
     type_list_has_null = isinstance(raw_type, list) and "null" in raw_type
     info: dict[str, Any] = {
         "required": name in required,
-        "nullable": type_list_has_null,  # value can be null (orthogonal to required)
+        # value can be null (orthogonal to required); covers both 3.1 type-unions
+        # and the 3.0 `nullable: true` flag
+        "nullable": type_list_has_null or prop.get("nullable") is True,
         "type": raw_type,
         "ref": None,
         "items": prop.get("items"),

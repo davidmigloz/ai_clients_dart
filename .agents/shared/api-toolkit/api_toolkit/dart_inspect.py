@@ -174,7 +174,13 @@ def camel_case(name: str) -> str:
     if "_" not in name:
         return name[0].lower() + name[1:] if name and name[0].isupper() else name
     parts = name.split("_")
-    return parts[0] + "".join(part.title() for part in parts[1:])
+    # Capitalize each trailing segment's first character and lowercase the rest —
+    # like str.title() but WITHOUT treating digits as word boundaries, so a letter
+    # is never uppercased just because a digit precedes it: "1h" stays "1h"
+    # (matching Dart field names like `ephemeral1hInputTokens`) and "v2beta"
+    # becomes "V2beta", where str.title() would yield "1H"/"V2Beta". Behaviour is
+    # identical to str.title() only for segments with no digit-adjacent letters.
+    return parts[0] + "".join(p[:1].upper() + p[1:].lower() for p in parts[1:])
 
 
 def snake_case(name: str) -> str:
