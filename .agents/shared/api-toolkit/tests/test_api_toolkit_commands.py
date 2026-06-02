@@ -2694,10 +2694,15 @@ class ApiToolkitCommandTests(unittest.TestCase):
                 fields=[("id", "String", True)],
             )
 
-            _, payload = command_verify(
+            exit_code, payload = command_verify(
                 SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
             )
 
+            self.assertEqual(
+                exit_code,
+                0,
+                msg="verify should pass cleanly for a correct 3.0 required+nullable field",
+            )
             self.assertFalse(
                 any("required in spec but nullable in Dart" in issue["message"] for issue in payload["results"]["implementation"]["issues"]),
                 msg="OpenAPI 3.0 nullable:true on a required field must not be flagged required-but-nullable",
