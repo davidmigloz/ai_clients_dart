@@ -14,8 +14,8 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 <summary><b>Table of Contents</b></summary>
 
 - [Features](#features)
-- [Quickstart](#quickstart)
 - [Why choose this client?](#why-choose-this-client)
+- [Quickstart](#quickstart)
 - [Configuration](#configuration)
 - [Usage](#usage)
 - [Error Handling](#error-handling)
