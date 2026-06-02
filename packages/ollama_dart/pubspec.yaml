@@ -4,7 +4,7 @@ version: 2.2.0
 repository: https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/ollama_dart
 issue_tracker: https://github.com/davidmigloz/ai_clients_dart/issues?q=label:p:ollama_dart
 homepage: https://github.com/davidmigloz/ai_clients_dart
-documentation: https://langchaindart.dev
+documentation: https://pub.dev/documentation/ollama_dart/latest/
 
 funding:
   - https://github.com/sponsors/davidmigloz
