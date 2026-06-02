@@ -2688,10 +2688,36 @@ class ApiToolkitCommandTests(unittest.TestCase):
                     },
                 },
             )
-            self._write_model(
-                package_root / "lib" / "src" / "models" / "common" / "example.dart",
-                "Example",
-                fields=[("id", "String", True)],
+            # Faithful required+nullable model: `id` is `String?` AND a *required*
+            # constructor parameter, and toJson *always* emits the key (even when
+            # null) — exactly how the SDK models spec required+nullable fields. The
+            # _write_model helper would instead make `id` optional and omit it when
+            # null, which would not actually model "key always present".
+            example_path = package_root / "lib" / "src" / "models" / "common" / "example.dart"
+            example_path.parent.mkdir(parents=True, exist_ok=True)
+            example_path.write_text(
+                "class Example {\n"
+                "  final String? id;\n"
+                "\n"
+                "  const Example({required this.id});\n"
+                "\n"
+                "  factory Example.fromJson(Map<String, dynamic> json) =>\n"
+                "      Example(id: json['id'] as String?);\n"
+                "\n"
+                "  Map<String, dynamic> toJson() => {'id': id};\n"
+                "\n"
+                "  Example copyWith({String? id}) => Example(id: id ?? this.id);\n"
+                "\n"
+                "  @override\n"
+                "  bool operator ==(Object other) =>\n"
+                "      identical(this, other) || (other is Example && other.id == id);\n"
+                "\n"
+                "  @override\n"
+                "  int get hashCode => id.hashCode;\n"
+                "\n"
+                "  @override\n"
+                "  String toString() => 'Example(id: $id)';\n"
+                "}\n"
             )
 
             exit_code, payload = command_verify(
