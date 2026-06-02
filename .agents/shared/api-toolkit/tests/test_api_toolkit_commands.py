@@ -2643,6 +2643,66 @@ class ApiToolkitCommandTests(unittest.TestCase):
                 any("required in spec but nullable in Dart" in issue["message"] for issue in payload["results"]["implementation"]["issues"])
             )
 
+    def test_verify_required_openapi30_nullable_is_not_blocking(self) -> None:
+        # A required field that is ALSO `nullable: true` (OpenAPI 3.0 style) must
+        # map to a nullable Dart field — the key is always present but its value
+        # may be null. The verifier must honor the 3.0 boolean, not only the 3.1
+        # `type: [..., "null"]` union form.
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self._write_workspace(root)
+            self._write_repo_license(root)
+            package_root, config_dir = self._create_openapi_config(root)
+            (package_root / "specs" / "openapi.json").write_text(
+                json.dumps(
+                    {
+                        "openapi": "3.0.0",
+                        "info": {"title": "Sample", "version": "1"},
+                        "paths": {},
+                        "components": {
+                            "schemas": {
+                                "Example": {
+                                    "type": "object",
+                                    "properties": {"id": {"type": "string", "nullable": True}},
+                                    "required": ["id"],
+                                }
+                            }
+                        },
+                    }
+                )
+            )
+            self._write_specs_and_manifest(
+                config_dir,
+                specs_payload={
+                    "specs": {"main": {"name": "Sample", "local_file": "openapi.json", "fetch_mode": "local_file", "source_file": "specs/openapi.json"}},
+                    "specs_dir": "packages/sample_dart/specs",
+                    "output_dir": str(root / "tmp" / "sample"),
+                },
+                manifest_payload={
+                    "surface": "openapi",
+                    "type_mappings": {},
+                    "placement": {"categories": {}, "default_category": "common", "parent_model_patterns": {}},
+                    "coverage": {},
+                    "types": {
+                        "Example": {"spec": "main", "kind": "object", "dart_class": "Example", "file": "lib/src/models/common/example.dart", "schema": "Example"}
+                    },
+                },
+            )
+            self._write_model(
+                package_root / "lib" / "src" / "models" / "common" / "example.dart",
+                "Example",
+                fields=[("id", "String", True)],
+            )
+
+            _, payload = command_verify(
+                SimpleNamespace(config_dir=config_dir, spec_name=None, checks="implementation", scope="all", type_name=None, baseline=None, git_ref=None)
+            )
+
+            self.assertFalse(
+                any("required in spec but nullable in Dart" in issue["message"] for issue in payload["results"]["implementation"]["issues"]),
+                msg="OpenAPI 3.0 nullable:true on a required field must not be flagged required-but-nullable",
+            )
+
     def test_verify_missing_copywith_coverage_is_blocking(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)

@@ -17,7 +17,15 @@
   ],
   "resource_to_example": {
     "messages": "messages",
-    "models": "models"
+    "models": "models",
+    "agents": "managed_agents",
+    "sessions": "managed_agents",
+    "sessionEvents": "managed_agents",
+    "vaults": "managed_agents",
+    "vaultCredentials": "managed_agents",
+    "sessionThreadEvents": "session_threads",
+    "memories": "memory_stores",
+    "memoryVersions": "memory_stores"
   },
   "excluded_from_examples": [],
   "drift_patterns": []

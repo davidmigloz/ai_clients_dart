@@ -174,7 +174,12 @@ def camel_case(name: str) -> str:
     if "_" not in name:
         return name[0].lower() + name[1:] if name and name[0].isupper() else name
     parts = name.split("_")
-    return parts[0] + "".join(part.title() for part in parts[1:])
+    # Capitalize each trailing segment's first character only. Unlike str.title(),
+    # this does NOT treat a digit as a word boundary, so a duration segment such as
+    # "1h" stays "1h" (matching Dart field names like `ephemeral1hInputTokens`)
+    # instead of becoming "1H". For all-lowercase snake segments this is identical
+    # to the previous str.title() behaviour.
+    return parts[0] + "".join(p[:1].upper() + p[1:].lower() for p in parts[1:])
 
 
 def snake_case(name: str) -> str:
