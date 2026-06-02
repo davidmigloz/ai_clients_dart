@@ -53,6 +53,14 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Memory stores for persistent agent memories with versioning and redaction (beta)
 - User profiles with relationship classification (`external`/`resold`/`internal`), trust-grant tracking, and enrollment URLs (beta)
 
+## Why choose this client?
+
+- Pure Dart with no Flutter dependency — works in mobile apps, backends, and CLIs.
+- Type-safe request and response models with minimal dependencies (`http`, `logging`, `meta`).
+- Streaming, retries, interceptors, and cancellation built into the client.
+- Follows Anthropic resource naming closely, so official docs translate directly into Dart code.
+- Strict [semver](https://semver.org/) versioning so downstream packages can depend on stable, predictable version ranges.
+
 ## Quickstart
 
 ```yaml
@@ -81,14 +89,6 @@ Future<void> main() async {
   }
 }
 ```
-
-## Why choose this client?
-
-- Pure Dart with no Flutter dependency — works in mobile apps, backends, and CLIs.
-- Type-safe request and response models with minimal dependencies (`http`, `logging`, `meta`).
-- Streaming, retries, interceptors, and cancellation built into the client.
-- Follows Anthropic resource naming closely, so official docs translate directly into Dart code.
-- Strict [semver](https://semver.org/) versioning so downstream packages can depend on stable, predictable version ranges.
 
 ## Configuration
 

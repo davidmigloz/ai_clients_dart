@@ -520,10 +520,26 @@
           "ResponseToolSearchToolResultBlock": "tool_search_tool_result",
           "ResponseContainerUploadBlock": "container_upload",
           "ResponseCompactionBlock": "compaction",
-          "BetaResponseAdvisorToolResultBlock": "advisor_tool_result"
+          "BetaResponseAdvisorToolResultBlock": "advisor_tool_result",
+          "ResponseTextBlock": "text",
+          "BetaResponseTextBlock": "text",
+          "BetaResponseThinkingBlock": "thinking",
+          "BetaResponseRedactedThinkingBlock": "redacted_thinking",
+          "BetaResponseToolUseBlock": "tool_use",
+          "BetaResponseServerToolUseBlock": "server_tool_use",
+          "BetaResponseWebSearchToolResultBlock": "web_search_tool_result",
+          "BetaResponseWebFetchToolResultBlock": "web_fetch_tool_result",
+          "BetaResponseCodeExecutionToolResultBlock": "code_execution_tool_result",
+          "BetaResponseBashCodeExecutionToolResultBlock": "bash_code_execution_tool_result",
+          "BetaResponseTextEditorCodeExecutionToolResultBlock": "text_editor_code_execution_tool_result",
+          "BetaResponseToolSearchToolResultBlock": "tool_search_tool_result",
+          "BetaResponseMCPToolUseBlock": "mcp_tool_use",
+          "BetaResponseMCPToolResultBlock": "mcp_tool_result",
+          "BetaResponseContainerUploadBlock": "container_upload",
+          "BetaResponseCompactionBlock": "compaction"
         }
       },
-      "note": null,
+      "note": "Unifies the stable ContentBlock and beta BetaContentBlock response unions; ContentBlock.fromJson dispatches every discriminator value from both unions to a single Dart subclass.",
       "excluded_properties": [
         "content"
       ]
@@ -695,7 +711,9 @@
       "note": null,
       "excluded_properties": [
         "content",
-        "source"
+        "source",
+        "citations",
+        "title"
       ]
     },
     "BetaInputContentBlock": {
@@ -2015,7 +2033,11 @@
       "kind": "sealed_parent",
       "dart_class": "AgentTool",
       "file": "lib/src/models/managed_agents/config/agent_tool.dart",
-      "schema": "BetaManagedAgentsAgentTool"
+      "schema": "BetaManagedAgentsAgentTool",
+      "excluded_properties": [
+        "configs",
+        "default_config"
+      ]
     },
     "AgentToolConfig": {
       "spec": "main",
@@ -2043,7 +2065,11 @@
       "kind": "sealed_parent",
       "dart_class": "AgentToolParams",
       "file": "lib/src/models/managed_agents/config/agent_tool.dart",
-      "schema": "BetaManagedAgentsAgentToolParams"
+      "schema": "BetaManagedAgentsAgentToolParams",
+      "excluded_properties": [
+        "configs",
+        "default_config"
+      ]
     },
     "AgentToolset20260401": {
       "spec": "main",
@@ -2298,7 +2324,10 @@
       "kind": "sealed_parent",
       "dart_class": "EventParams",
       "file": "lib/src/models/managed_agents/events/send_event_params.dart",
-      "schema": "BetaManagedAgentsEventParams"
+      "schema": "BetaManagedAgentsEventParams",
+      "excluded_properties": [
+        "content"
+      ]
     },
     "FileDocumentSource": {
       "spec": "main",
@@ -2755,7 +2784,10 @@
       "kind": "sealed_parent",
       "dart_class": "SessionResource",
       "file": "lib/src/models/managed_agents/resources/session_resource.dart",
-      "schema": "BetaManagedAgentsSessionResource"
+      "schema": "BetaManagedAgentsSessionResource",
+      "excluded_properties": [
+        "mount_path"
+      ]
     },
     "SessionResourceParams": {
       "spec": "main",
@@ -2886,7 +2918,13 @@
       "kind": "sealed_parent",
       "dart_class": "SessionEvent",
       "file": "lib/src/models/managed_agents/events/session_event.dart",
-      "schema": "BetaManagedAgentsStreamSessionThreadEvents"
+      "schema": "BetaManagedAgentsStreamSessionThreadEvents",
+      "excluded_properties": [
+        "content",
+        "processed_at",
+        "result",
+        "session_thread_id"
+      ]
     },
     "Struct": {
       "spec": "main",
