@@ -258,6 +258,50 @@ void main() {
         expect(item.outputIndex, 0);
         expect(item.item, isA<ReasoningItem>());
       });
+
+      test(
+        'output_text.annotation.added without index fields defaults to 0',
+        () {
+          final json = {
+            'type': 'response.output_text.annotation.added',
+            'item_id': 'msg_001',
+            'annotation': {
+              'type': 'url_citation',
+              'start_index': 0,
+              'end_index': 5,
+              'url': 'https://example.com',
+              'title': 'Example',
+            },
+          };
+
+          final event = StreamingEvent.fromJson(json);
+
+          expect(event, isA<OutputTextAnnotationAddedEvent>());
+          final annotation = event as OutputTextAnnotationAddedEvent;
+          expect(annotation.outputIndex, 0);
+          expect(annotation.contentIndex, 0);
+          expect(annotation.annotationIndex, 0);
+          expect(annotation.annotation, isA<UrlCitation>());
+        },
+      );
+
+      test(
+        'reasoning_summary_part.added without index fields defaults to 0',
+        () {
+          final json = {
+            'type': 'response.reasoning_summary_part.added',
+            'item_id': 'rs_001',
+          };
+
+          final event = StreamingEvent.fromJson(json);
+
+          expect(event, isA<ReasoningSummaryPartAddedEvent>());
+          final part = event as ReasoningSummaryPartAddedEvent;
+          expect(part.outputIndex, 0);
+          expect(part.summaryIndex, 0);
+          expect(part.itemId, 'rs_001');
+        },
+      );
     });
 
     group('reasoning_text aliases', () {
