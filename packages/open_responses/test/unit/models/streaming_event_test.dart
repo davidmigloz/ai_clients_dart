@@ -204,6 +204,106 @@ void main() {
       expect(event.isFinal, isFalse);
     });
 
+    group('llama.cpp / minimal-server compatibility', () {
+      // Some OpenAI-compatible servers (e.g. llama.cpp) omit the positional
+      // index fields that the spec marks as required. fromJson must tolerate
+      // their absence by defaulting to 0 instead of throwing. See issue #242.
+      test('output_text.delta without index fields defaults to 0', () {
+        final json = {
+          'type': 'response.output_text.delta',
+          'item_id': 'msg_001',
+          'delta': 'Hello',
+        };
+
+        final event = StreamingEvent.fromJson(json);
+
+        expect(event, isA<OutputTextDeltaEvent>());
+        final delta = event as OutputTextDeltaEvent;
+        expect(delta.sequenceNumber, 0);
+        expect(delta.outputIndex, 0);
+        expect(delta.contentIndex, 0);
+        expect(delta.delta, 'Hello');
+      });
+
+      test('content_part.added without index fields defaults to 0', () {
+        final json = {
+          'type': 'response.content_part.added',
+          'item_id': 'msg_001',
+          'part': {
+            'type': 'output_text',
+            'text': 'Hello',
+            'annotations': <dynamic>[],
+          },
+        };
+
+        final event = StreamingEvent.fromJson(json);
+
+        expect(event, isA<ContentPartAddedEvent>());
+        final part = event as ContentPartAddedEvent;
+        expect(part.outputIndex, 0);
+        expect(part.contentIndex, 0);
+        expect(part.itemId, 'msg_001');
+      });
+
+      test('output_item.added without output_index defaults to 0', () {
+        final json = {
+          'type': 'response.output_item.added',
+          'item': {'type': 'reasoning', 'id': 'rs_001', 'summary': <dynamic>[]},
+        };
+
+        final event = StreamingEvent.fromJson(json);
+
+        expect(event, isA<OutputItemAddedEvent>());
+        final item = event as OutputItemAddedEvent;
+        expect(item.outputIndex, 0);
+        expect(item.item, isA<ReasoningItem>());
+      });
+
+      test(
+        'output_text.annotation.added without index fields defaults to 0',
+        () {
+          final json = {
+            'type': 'response.output_text.annotation.added',
+            'item_id': 'msg_001',
+            'annotation': {
+              'type': 'url_citation',
+              'start_index': 0,
+              'end_index': 5,
+              'url': 'https://example.com',
+              'title': 'Example',
+            },
+          };
+
+          final event = StreamingEvent.fromJson(json);
+
+          expect(event, isA<OutputTextAnnotationAddedEvent>());
+          final annotation = event as OutputTextAnnotationAddedEvent;
+          expect(annotation.outputIndex, 0);
+          expect(annotation.contentIndex, 0);
+          expect(annotation.annotationIndex, 0);
+          expect(annotation.annotation, isA<UrlCitation>());
+        },
+      );
+
+      test(
+        'reasoning_summary_part.added without index fields defaults to 0',
+        () {
+          final json = {
+            'type': 'response.reasoning_summary_part.added',
+            'item_id': 'rs_001',
+          };
+
+          final event = StreamingEvent.fromJson(json);
+
+          expect(event, isA<ReasoningSummaryPartAddedEvent>());
+          final part = event as ReasoningSummaryPartAddedEvent;
+          expect(part.outputIndex, 0);
+          expect(part.summaryIndex, 0);
+          expect(part.itemId, 'rs_001');
+        },
+      );
+    });
+
     group('reasoning_text aliases', () {
       test('response.reasoning_text.delta parses to ReasoningDeltaEvent', () {
         final json = {

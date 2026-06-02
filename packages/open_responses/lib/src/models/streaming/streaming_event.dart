@@ -478,6 +478,9 @@ class OutputItemAddedEvent extends StreamingEvent {
   final int sequenceNumber;
 
   /// The index of the output item.
+  ///
+  /// Defaults to 0 if not provided by the server, for compatibility with
+  /// providers that don't include this field in their responses.
   final int outputIndex;
 
   /// The added item.
@@ -494,7 +497,7 @@ class OutputItemAddedEvent extends StreamingEvent {
   factory OutputItemAddedEvent.fromJson(Map<String, dynamic> json) {
     return OutputItemAddedEvent(
       sequenceNumber: json['sequence_number'] as int? ?? 0,
-      outputIndex: json['output_index'] as int,
+      outputIndex: json['output_index'] as int? ?? 0,
       item: OutputItem.fromJson(json['item'] as Map<String, dynamic>),
     );
   }
@@ -563,7 +566,7 @@ class OutputItemDoneEvent extends StreamingEvent {
   factory OutputItemDoneEvent.fromJson(Map<String, dynamic> json) {
     return OutputItemDoneEvent(
       sequenceNumber: json['sequence_number'] as int? ?? 0,
-      outputIndex: json['output_index'] as int,
+      outputIndex: json['output_index'] as int? ?? 0,
       item: OutputItem.fromJson(json['item'] as Map<String, dynamic>),
     );
   }
@@ -626,6 +629,9 @@ class ContentPartAddedEvent extends StreamingEvent {
   final int outputIndex;
 
   /// The content index.
+  ///
+  /// Defaults to 0 if not provided by the server, for compatibility with
+  /// providers that don't include this field in their responses.
   final int contentIndex;
 
   /// The added content part.
@@ -645,8 +651,8 @@ class ContentPartAddedEvent extends StreamingEvent {
     return ContentPartAddedEvent(
       sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
-      outputIndex: json['output_index'] as int,
-      contentIndex: json['content_index'] as int,
+      outputIndex: json['output_index'] as int? ?? 0,
+      contentIndex: json['content_index'] as int? ?? 0,
       part: OutputContent.fromJson(json['part'] as Map<String, dynamic>),
     );
   }
@@ -733,8 +739,8 @@ class ContentPartDoneEvent extends StreamingEvent {
     return ContentPartDoneEvent(
       sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
-      outputIndex: json['output_index'] as int,
-      contentIndex: json['content_index'] as int,
+      outputIndex: json['output_index'] as int? ?? 0,
+      contentIndex: json['content_index'] as int? ?? 0,
       part: OutputContent.fromJson(json['part'] as Map<String, dynamic>),
     );
   }
@@ -833,8 +839,8 @@ class OutputTextDeltaEvent extends StreamingEvent {
     return OutputTextDeltaEvent(
       sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
-      outputIndex: json['output_index'] as int,
-      contentIndex: json['content_index'] as int,
+      outputIndex: json['output_index'] as int? ?? 0,
+      contentIndex: json['content_index'] as int? ?? 0,
       delta: json['delta'] as String,
       logprobs:
           (json['logprobs'] as List?)
@@ -949,8 +955,8 @@ class OutputTextDoneEvent extends StreamingEvent {
     return OutputTextDoneEvent(
       sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
-      outputIndex: json['output_index'] as int,
-      contentIndex: json['content_index'] as int,
+      outputIndex: json['output_index'] as int? ?? 0,
+      contentIndex: json['content_index'] as int? ?? 0,
       text: json['text'] as String,
       logprobs:
           (json['logprobs'] as List?)
@@ -1037,6 +1043,9 @@ class OutputTextAnnotationAddedEvent extends StreamingEvent {
   final int contentIndex;
 
   /// The annotation index.
+  ///
+  /// Defaults to 0 if not provided by the server, for compatibility with
+  /// providers that don't include this field in their responses.
   final int annotationIndex;
 
   /// The added annotation.
@@ -1057,9 +1066,9 @@ class OutputTextAnnotationAddedEvent extends StreamingEvent {
     return OutputTextAnnotationAddedEvent(
       sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
-      outputIndex: json['output_index'] as int,
-      contentIndex: json['content_index'] as int,
-      annotationIndex: json['annotation_index'] as int,
+      outputIndex: json['output_index'] as int? ?? 0,
+      contentIndex: json['content_index'] as int? ?? 0,
+      annotationIndex: json['annotation_index'] as int? ?? 0,
       annotation: Annotation.fromJson(
         json['annotation'] as Map<String, dynamic>,
       ),
@@ -1162,8 +1171,8 @@ class RefusalDeltaEvent extends StreamingEvent {
     return RefusalDeltaEvent(
       sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
-      outputIndex: json['output_index'] as int,
-      contentIndex: json['content_index'] as int,
+      outputIndex: json['output_index'] as int? ?? 0,
+      contentIndex: json['content_index'] as int? ?? 0,
       delta: json['delta'] as String,
     );
   }
@@ -1250,8 +1259,8 @@ class RefusalDoneEvent extends StreamingEvent {
     return RefusalDoneEvent(
       sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
-      outputIndex: json['output_index'] as int,
-      contentIndex: json['content_index'] as int,
+      outputIndex: json['output_index'] as int? ?? 0,
+      contentIndex: json['content_index'] as int? ?? 0,
       refusal: json['refusal'] as String,
     );
   }
@@ -1342,7 +1351,7 @@ class FunctionCallArgumentsDeltaEvent extends StreamingEvent {
     return FunctionCallArgumentsDeltaEvent(
       sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
-      outputIndex: json['output_index'] as int,
+      outputIndex: json['output_index'] as int? ?? 0,
       delta: json['delta'] as String,
       obfuscation: json['obfuscation'] as String?,
     );
@@ -1428,7 +1437,7 @@ class FunctionCallArgumentsDoneEvent extends StreamingEvent {
     return FunctionCallArgumentsDoneEvent(
       sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
-      outputIndex: json['output_index'] as int,
+      outputIndex: json['output_index'] as int? ?? 0,
       arguments: json['arguments'] as String,
     );
   }
@@ -1519,8 +1528,8 @@ class ReasoningDeltaEvent extends StreamingEvent {
     return ReasoningDeltaEvent(
       sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
-      outputIndex: json['output_index'] as int,
-      contentIndex: json['content_index'] as int,
+      outputIndex: json['output_index'] as int? ?? 0,
+      contentIndex: json['content_index'] as int? ?? 0,
       delta: json['delta'] as String,
       obfuscation: json['obfuscation'] as String?,
     );
@@ -1620,8 +1629,8 @@ class ReasoningDoneEvent extends StreamingEvent {
     return ReasoningDoneEvent(
       sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
-      outputIndex: json['output_index'] as int,
-      contentIndex: json['content_index'] as int,
+      outputIndex: json['output_index'] as int? ?? 0,
+      contentIndex: json['content_index'] as int? ?? 0,
       text: json['text'] as String,
     );
   }
@@ -1689,6 +1698,9 @@ class ReasoningSummaryPartAddedEvent extends StreamingEvent {
   final int outputIndex;
 
   /// The summary index.
+  ///
+  /// Defaults to 0 if not provided by the server, for compatibility with
+  /// providers that don't include this field in their responses.
   final int summaryIndex;
 
   /// The summary part, if available.
@@ -1708,8 +1720,8 @@ class ReasoningSummaryPartAddedEvent extends StreamingEvent {
     return ReasoningSummaryPartAddedEvent(
       sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
-      outputIndex: json['output_index'] as int,
-      summaryIndex: json['summary_index'] as int,
+      outputIndex: json['output_index'] as int? ?? 0,
+      summaryIndex: json['summary_index'] as int? ?? 0,
       part: json['part'] != null
           ? ReasoningSummaryContent.fromJson(
               json['part'] as Map<String, dynamic>,
@@ -1802,8 +1814,8 @@ class ReasoningSummaryPartDoneEvent extends StreamingEvent {
     return ReasoningSummaryPartDoneEvent(
       sequenceNumber: json['sequence_number'] as int? ?? 0,
       itemId: json['item_id'] as String,
-      outputIndex: json['output_index'] as int,
-      summaryIndex: json['summary_index'] as int,
+      outputIndex: json['output_index'] as int? ?? 0,
+      summaryIndex: json['summary_index'] as int? ?? 0,
       part: ReasoningSummaryContent.fromJson(
         json['part'] as Map<String, dynamic>,
       ),
