@@ -725,6 +725,14 @@ class AdditionalToolsItemParam extends Item {
     if (type != 'additional_tools') {
       throw FormatException('Expected type "additional_tools", got "$type"');
     }
+    // Only the `developer` role is supported (spec const). Reject other values
+    // when present rather than silently normalizing them on re-serialization.
+    final role = json['role'] as String?;
+    if (role != null && role != 'developer') {
+      throw FormatException(
+        'Expected "additional_tools" role "developer", got "$role"',
+      );
+    }
     return AdditionalToolsItemParam(
       id: json['id'] as String?,
       tools: (json['tools'] as List)

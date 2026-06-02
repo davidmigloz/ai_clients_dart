@@ -1027,6 +1027,27 @@ void main() {
       );
     });
 
+    test('input variant fromJson rejects a non-developer role', () {
+      expect(
+        () => AdditionalToolsItemParam.fromJson(const {
+          'type': 'additional_tools',
+          'role': 'user',
+          'tools': <dynamic>[],
+        }),
+        throwsFormatException,
+      );
+    });
+
+    test('input variant fromJson accepts an explicit developer role', () {
+      final item = AdditionalToolsItemParam.fromJson(const {
+        'type': 'additional_tools',
+        'role': 'developer',
+        'tools': <dynamic>[],
+      });
+      expect(item.tools, isEmpty);
+      expect(item.toJson()['role'], equals('developer'));
+    });
+
     test('output variant round-trips via OutputItem.fromJson', () {
       final item = AdditionalToolsOutputItem(
         id: 'at_456',
