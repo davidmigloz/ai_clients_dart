@@ -4,7 +4,7 @@ version: 4.0.0
 repository: https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/anthropic_sdk_dart
 issue_tracker: https://github.com/davidmigloz/ai_clients_dart/issues?q=label:p:anthropic_sdk_dart
 homepage: https://github.com/davidmigloz/ai_clients_dart
-documentation: https://langchaindart.dev
+documentation: https://pub.dev/documentation/anthropic_sdk_dart/latest/
 
 funding:
   - https://github.com/sponsors/davidmigloz

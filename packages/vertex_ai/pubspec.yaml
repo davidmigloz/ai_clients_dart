@@ -4,7 +4,7 @@ version: 0.2.4
 repository: https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/vertex_ai
 issue_tracker: https://github.com/davidmigloz/ai_clients_dart/issues?q=label:p:vertex_ai
 homepage: https://github.com/davidmigloz/ai_clients_dart
-documentation: https://langchaindart.dev
+documentation: https://pub.dev/documentation/vertex_ai/latest/
 
 funding:
   - https://github.com/sponsors/davidmigloz
