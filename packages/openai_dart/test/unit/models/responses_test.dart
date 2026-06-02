@@ -1080,6 +1080,47 @@ void main() {
     });
   });
 
+  group('MessageRole', () {
+    test('round-trips all spec values without falling back to unknown', () {
+      // The spec MessageRole enum has 8 values; each must parse to its own
+      // member rather than collapsing to `unknown`.
+      const values = [
+        'unknown',
+        'user',
+        'assistant',
+        'system',
+        'critic',
+        'discriminator',
+        'developer',
+        'tool',
+      ];
+      for (final value in values) {
+        final role = MessageRole.fromJson(value);
+        expect(role.value, equals(value));
+        expect(role.toJson(), equals(value));
+      }
+      // The roles previously missing from the enum now resolve explicitly.
+      expect(MessageRole.fromJson('critic'), equals(MessageRole.critic));
+      expect(
+        MessageRole.fromJson('discriminator'),
+        equals(MessageRole.discriminator),
+      );
+      expect(MessageRole.fromJson('tool'), equals(MessageRole.tool));
+    });
+
+    test('additional_tools output item round-trips a tool role', () {
+      const item = AdditionalToolsOutputItem(
+        id: 'at_tool',
+        role: MessageRole.tool,
+        tools: [],
+      );
+
+      final restored = OutputItem.fromJson(item.toJson());
+      expect(restored, equals(item));
+      expect((restored as AdditionalToolsOutputItem).role, MessageRole.tool);
+    });
+  });
+
   group('InputContent', () {
     test('creates text content', () {
       const content = InputContent.text('Hello!');

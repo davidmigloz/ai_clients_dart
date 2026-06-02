@@ -13,7 +13,16 @@ enum MessageRole {
   developer('developer'),
 
   /// Assistant message.
-  assistant('assistant');
+  assistant('assistant'),
+
+  /// A critic role (used in certain evaluation contexts).
+  critic('critic'),
+
+  /// A discriminator role (used in certain evaluation contexts).
+  discriminator('discriminator'),
+
+  /// Tool message.
+  tool('tool');
 
   /// The JSON value for this role.
   final String value;
