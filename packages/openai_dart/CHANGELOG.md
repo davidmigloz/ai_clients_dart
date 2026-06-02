@@ -1,3 +1,9 @@
+## 6.1.0
+
+Adds two new OpenAI Responses features from the latest spec: the `additional_tools` item — surfacing extra tool definitions mid-conversation — across the input, output, and conversation-item unions, and a `personality` style preset on the input-token-count request (`responses.inputTokens.count`), modeled as a sealed `Personality` type with `friendly`/`pragmatic` presets plus a `custom(...)` escape hatch for forward compatibility. Also completes the `MessageRole` enum with the spec's `critic`, `discriminator`, and `tool` values, which previously collapsed to `unknown`.
+
+- **FEAT**: Add additional_tools item and personality preset ([#245](https://github.com/davidmigloz/ai_clients_dart/issues/245)). ([723b3725](https://github.com/davidmigloz/ai_clients_dart/commit/723b3725d2ee47e38922ace4d6dbd4806b4ec9d5))
+
 ## 6.0.0
 
 > [!CAUTION]

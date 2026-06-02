@@ -1,3 +1,9 @@
+## 0.4.1
+
+Fixes a crash when streaming from [llama.cpp](https://github.com/ggml-org/llama.cpp/pull/18486) and other minimal OpenAI-compatible servers that omit the positional index fields the spec marks as required (`output_index`, `content_index`, `annotation_index`, `summary_index`): `StreamingEvent.fromJson` no longer throws `type 'Null' is not a subtype of type 'int'` and instead defaults these fields to `0`, matching the existing `sequence_number` handling. Behavior is unchanged for spec-compliant servers, and `llama.cpp` is now listed in the README's supported-providers table.
+
+- **FIX**: Tolerate streaming events missing index fields ([#243](https://github.com/davidmigloz/ai_clients_dart/issues/243)). ([5d296e87](https://github.com/davidmigloz/ai_clients_dart/commit/5d296e87859f3df7f200ae3b91f90a17a8fbf0ce))
+
 ## 0.4.0
 
 > [!CAUTION]

@@ -1,6 +1,6 @@
 name: open_responses
 description: Dart client for the OpenResponses API. Provides a unified, type-safe interface for interacting with multiple LLM providers through the OpenResponses specification.
-version: 0.4.0
+version: 0.4.1
 repository: https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/open_responses
 issue_tracker: https://github.com/davidmigloz/ai_clients_dart/issues?q=label:p:open_responses
 homepage: https://github.com/davidmigloz/ai_clients_dart
