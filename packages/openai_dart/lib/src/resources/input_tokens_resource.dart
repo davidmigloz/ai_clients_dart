@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../models/responses/config/personality.dart';
 import '../models/responses/input_token_count.dart';
 import '../models/responses/response_input.dart';
 import '../models/responses/tools/response_tool.dart';
@@ -50,6 +51,8 @@ class InputTokensResource extends ResourceBase {
   /// - [toolChoice] - Tool choice configuration.
   /// - [parallelToolCalls] - Whether parallel tool calls would be enabled.
   /// - [truncation] - Truncation strategy ('auto' or 'disabled').
+  /// - [personality] - A model-owned style preset to apply to the request.
+  ///   Omit to use the model's default style.
   /// - [abortTrigger] - Optional future that cancels the request when completed.
   ///
   /// ## Returns
@@ -91,6 +94,7 @@ class InputTokensResource extends ResourceBase {
     ResponseToolChoice? toolChoice,
     bool? parallelToolCalls,
     String? truncation,
+    Personality? personality,
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
@@ -122,6 +126,8 @@ class InputTokensResource extends ResourceBase {
     }
 
     if (truncation != null) body['truncation'] = truncation;
+
+    if (personality != null) body['personality'] = personality.toJson();
 
     final url = requestBuilder.buildUrl('/responses/input_tokens');
     final headers = requestBuilder.buildHeaders();

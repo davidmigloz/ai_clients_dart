@@ -58,6 +58,7 @@ sealed class ConversationItem {
       'custom_tool_call' => ConversationCustomToolCallItem.fromJson(json),
       'custom_tool_call_output' =>
         ConversationCustomToolCallOutputItem.fromJson(json),
+      'additional_tools' => ConversationAdditionalToolsItem.fromJson(json),
       _ => ConversationUnknownItem(type: type, data: json),
     };
   }
@@ -1455,6 +1456,64 @@ class ConversationCustomToolCallOutputItem extends ConversationItem {
   @override
   String toString() =>
       'ConversationCustomToolCallOutputItem(id: $id, callId: $callId, status: $status)';
+}
+
+/// An additional tools item in a conversation.
+///
+/// Surfaces the additional tool definitions that were made available at this
+/// point in the conversation.
+@immutable
+class ConversationAdditionalToolsItem extends ConversationItem {
+  /// Unique identifier.
+  final String id;
+
+  /// The role that provided the additional tools.
+  final ConversationRole role;
+
+  /// The additional tool definitions made available at this item.
+  final List<ResponseTool> tools;
+
+  /// Creates a [ConversationAdditionalToolsItem].
+  const ConversationAdditionalToolsItem({
+    required this.id,
+    required this.role,
+    required this.tools,
+  });
+
+  /// Creates a [ConversationAdditionalToolsItem] from JSON.
+  factory ConversationAdditionalToolsItem.fromJson(Map<String, dynamic> json) {
+    return ConversationAdditionalToolsItem(
+      id: json['id'] as String,
+      role: ConversationRole.fromJson(json['role'] as String),
+      tools: (json['tools'] as List)
+          .map((e) => ResponseTool.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'additional_tools',
+    'id': id,
+    'role': role.toJson(),
+    'tools': tools.map((e) => e.toJson()).toList(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ConversationAdditionalToolsItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          role == other.role &&
+          listsEqual(tools, other.tools);
+
+  @override
+  int get hashCode => Object.hash(id, role, Object.hashAll(tools));
+
+  @override
+  String toString() =>
+      'ConversationAdditionalToolsItem(id: $id, role: $role, tools: $tools)';
 }
 
 /// An unknown item type (for forward compatibility).

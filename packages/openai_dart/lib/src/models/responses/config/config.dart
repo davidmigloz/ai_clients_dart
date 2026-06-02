@@ -9,6 +9,7 @@ export 'include.dart';
 export 'item_status.dart';
 export 'message_phase.dart';
 export 'message_role.dart';
+export 'personality.dart';
 export 'prompt_cache_retention.dart';
 export 'reasoning_config.dart';
 export 'reasoning_effort.dart';

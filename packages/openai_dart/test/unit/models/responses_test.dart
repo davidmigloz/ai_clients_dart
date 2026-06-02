@@ -986,6 +986,162 @@ void main() {
     );
   });
 
+  group('AdditionalTools item', () {
+    test('input variant round-trips via Item.fromJson', () {
+      final item = AdditionalToolsItemParam(
+        id: 'at_123',
+        tools: [
+          ResponseTool.function(
+            name: 'get_weather',
+            parameters: {'type': 'object'},
+          ),
+        ],
+      );
+
+      final json = item.toJson();
+      expect(json['type'], equals('additional_tools'));
+      expect(json['role'], equals('developer'));
+      expect(json['id'], equals('at_123'));
+      expect((json['tools'] as List).length, equals(1));
+
+      final restored = Item.fromJson(json);
+      expect(restored, isA<AdditionalToolsItemParam>());
+      expect(restored, equals(item));
+      expect(restored.toString(), contains('AdditionalToolsItemParam'));
+    });
+
+    test('input variant omits id when null', () {
+      final item = AdditionalToolsItemParam(
+        tools: [
+          ResponseTool.function(name: 'f', parameters: {'type': 'object'}),
+        ],
+      );
+
+      expect(item.toJson().containsKey('id'), isFalse);
+    });
+
+    test('input variant fromJson rejects wrong type', () {
+      expect(
+        () => AdditionalToolsItemParam.fromJson(const {'type': 'message'}),
+        throwsFormatException,
+      );
+    });
+
+    test('input variant fromJson rejects a non-developer role', () {
+      expect(
+        () => AdditionalToolsItemParam.fromJson(const {
+          'type': 'additional_tools',
+          'role': 'user',
+          'tools': <dynamic>[],
+        }),
+        throwsFormatException,
+      );
+    });
+
+    test('input variant fromJson accepts an explicit developer role', () {
+      final item = AdditionalToolsItemParam.fromJson(const {
+        'type': 'additional_tools',
+        'role': 'developer',
+        'tools': <dynamic>[],
+      });
+      expect(item.tools, isEmpty);
+      expect(item.toJson()['role'], equals('developer'));
+    });
+
+    test('output variant round-trips via OutputItem.fromJson', () {
+      final item = AdditionalToolsOutputItem(
+        id: 'at_456',
+        role: MessageRole.developer,
+        tools: [
+          ResponseTool.function(name: 'lookup', parameters: {'type': 'object'}),
+        ],
+      );
+
+      final json = item.toJson();
+      expect(json['type'], equals('additional_tools'));
+      expect(json['id'], equals('at_456'));
+      expect(json['role'], equals('developer'));
+
+      final restored = OutputItem.fromJson(json);
+      expect(restored, isA<AdditionalToolsOutputItem>());
+      expect(restored, equals(item));
+      expect(restored.toString(), contains('AdditionalToolsOutputItem'));
+    });
+  });
+
+  group('Personality', () {
+    test('known presets round-trip', () {
+      for (final personality in const [
+        FriendlyPersonality(),
+        PragmaticPersonality(),
+      ]) {
+        final restored = Personality.fromJson(personality.toJson());
+        expect(restored, equals(personality));
+      }
+
+      expect(Personality.fromJson('friendly'), isA<FriendlyPersonality>());
+      expect(Personality.fromJson('pragmatic'), isA<PragmaticPersonality>());
+      expect(const FriendlyPersonality().toJson(), equals('friendly'));
+      expect(const PragmaticPersonality().toJson(), equals('pragmatic'));
+    });
+
+    test('custom value is preserved', () {
+      final custom = Personality.fromJson('concise');
+      expect(custom, isA<CustomPersonality>());
+      expect(custom.value, equals('concise'));
+      expect(custom.toJson(), equals('concise'));
+      expect(custom, equals(const Personality.custom('concise')));
+      expect(custom, isNot(equals(const FriendlyPersonality())));
+    });
+
+    test('factory constructors build the matching variants', () {
+      expect(const Personality.friendly(), isA<FriendlyPersonality>());
+      expect(const Personality.pragmatic(), isA<PragmaticPersonality>());
+      expect(const Personality.custom('x'), isA<CustomPersonality>());
+    });
+  });
+
+  group('MessageRole', () {
+    test('round-trips all spec values without falling back to unknown', () {
+      // The spec MessageRole enum has 8 values; each must parse to its own
+      // member rather than collapsing to `unknown`.
+      const values = [
+        'unknown',
+        'user',
+        'assistant',
+        'system',
+        'critic',
+        'discriminator',
+        'developer',
+        'tool',
+      ];
+      for (final value in values) {
+        final role = MessageRole.fromJson(value);
+        expect(role.value, equals(value));
+        expect(role.toJson(), equals(value));
+      }
+      // The roles previously missing from the enum now resolve explicitly.
+      expect(MessageRole.fromJson('critic'), equals(MessageRole.critic));
+      expect(
+        MessageRole.fromJson('discriminator'),
+        equals(MessageRole.discriminator),
+      );
+      expect(MessageRole.fromJson('tool'), equals(MessageRole.tool));
+    });
+
+    test('additional_tools output item round-trips a tool role', () {
+      const item = AdditionalToolsOutputItem(
+        id: 'at_tool',
+        role: MessageRole.tool,
+        tools: [],
+      );
+
+      final restored = OutputItem.fromJson(item.toJson());
+      expect(restored, equals(item));
+      expect((restored as AdditionalToolsOutputItem).role, MessageRole.tool);
+    });
+  });
+
   group('InputContent', () {
     test('creates text content', () {
       const content = InputContent.text('Hello!');

@@ -495,6 +495,26 @@ void main() {
       final unknown = item as ConversationUnknownItem;
       expect(unknown.type, equals('future_type'));
     });
+
+    test('round-trips additional_tools item', () {
+      final item = ConversationAdditionalToolsItem(
+        id: 'at_789',
+        role: ConversationRole.fromJson('developer'),
+        tools: [
+          ResponseTool.function(name: 'lookup', parameters: {'type': 'object'}),
+        ],
+      );
+
+      final json = item.toJson();
+      expect(json['type'], equals('additional_tools'));
+      expect(json['id'], equals('at_789'));
+      expect(json['role'], equals('developer'));
+      expect((json['tools'] as List).length, equals(1));
+
+      final restored = ConversationItem.fromJson(json);
+      expect(restored, isA<ConversationAdditionalToolsItem>());
+      expect(restored, equals(item));
+    });
   });
 
   group('ConversationContent', () {
