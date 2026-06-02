@@ -63,6 +63,9 @@ class StreamingEventAccumulatorSnapshot {
 
 /// Accumulates streaming events into progressive state snapshots.
 class StreamingEventAccumulator {
+  /// Creates a [StreamingEventAccumulator].
+  StreamingEventAccumulator();
+
   final _textBuffer = StringBuffer();
   final _reasoningBuffer = StringBuffer();
   final _reasoningSummaryBuffer = StringBuffer();

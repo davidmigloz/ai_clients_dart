@@ -425,6 +425,7 @@ See the [example/](example/) directory for complete examples:
 
 | Example | Description |
 |---------|-------------|
+| [`open_responses_example.dart`](example/open_responses_example.dart) | Quick start |
 | [`create_response_example.dart`](example/create_response_example.dart) | Basic response creation |
 | [`streaming_example.dart`](example/streaming_example.dart) | Streaming events |
 | [`tool_calling_example.dart`](example/tool_calling_example.dart) | Tool calling |
