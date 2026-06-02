@@ -204,6 +204,62 @@ void main() {
       expect(event.isFinal, isFalse);
     });
 
+    group('llama.cpp / minimal-server compatibility', () {
+      // Some OpenAI-compatible servers (e.g. llama.cpp) omit the positional
+      // index fields that the spec marks as required. fromJson must tolerate
+      // their absence by defaulting to 0 instead of throwing. See issue #242.
+      test('output_text.delta without index fields defaults to 0', () {
+        final json = {
+          'type': 'response.output_text.delta',
+          'item_id': 'msg_001',
+          'delta': 'Hello',
+        };
+
+        final event = StreamingEvent.fromJson(json);
+
+        expect(event, isA<OutputTextDeltaEvent>());
+        final delta = event as OutputTextDeltaEvent;
+        expect(delta.sequenceNumber, 0);
+        expect(delta.outputIndex, 0);
+        expect(delta.contentIndex, 0);
+        expect(delta.delta, 'Hello');
+      });
+
+      test('content_part.added without index fields defaults to 0', () {
+        final json = {
+          'type': 'response.content_part.added',
+          'item_id': 'msg_001',
+          'part': {
+            'type': 'output_text',
+            'text': 'Hello',
+            'annotations': <dynamic>[],
+          },
+        };
+
+        final event = StreamingEvent.fromJson(json);
+
+        expect(event, isA<ContentPartAddedEvent>());
+        final part = event as ContentPartAddedEvent;
+        expect(part.outputIndex, 0);
+        expect(part.contentIndex, 0);
+        expect(part.itemId, 'msg_001');
+      });
+
+      test('output_item.added without output_index defaults to 0', () {
+        final json = {
+          'type': 'response.output_item.added',
+          'item': {'type': 'reasoning', 'id': 'rs_001', 'summary': <dynamic>[]},
+        };
+
+        final event = StreamingEvent.fromJson(json);
+
+        expect(event, isA<OutputItemAddedEvent>());
+        final item = event as OutputItemAddedEvent;
+        expect(item.outputIndex, 0);
+        expect(item.item, isA<ReasoningItem>());
+      });
+    });
+
     group('reasoning_text aliases', () {
       test('response.reasoning_text.delta parses to ReasoningDeltaEvent', () {
         final json = {
