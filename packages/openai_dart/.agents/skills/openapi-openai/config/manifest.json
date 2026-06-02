@@ -242,6 +242,104 @@
     "excluded_resources": []
   },
   "types": {
+    "PersonalityEnum": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "Personality",
+      "file": "lib/src/models/responses/config/personality.dart",
+      "schema": "PersonalityEnum",
+      "note": "Open string enum (anyOf string | {friendly, pragmatic}) modeled as a sealed union with friendly/pragmatic variants plus a custom string variant."
+    },
+    "PersonalityEnum:FriendlyPersonality": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "FriendlyPersonality",
+      "file": "lib/src/models/responses/config/personality.dart",
+      "schema": null,
+      "parent": "Personality",
+      "note": "Dart-only string variant for 'friendly'."
+    },
+    "PersonalityEnum:PragmaticPersonality": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "PragmaticPersonality",
+      "file": "lib/src/models/responses/config/personality.dart",
+      "schema": null,
+      "parent": "Personality",
+      "note": "Dart-only string variant for 'pragmatic'."
+    },
+    "PersonalityEnum:CustomPersonality": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "CustomPersonality",
+      "file": "lib/src/models/responses/config/personality.dart",
+      "schema": null,
+      "parent": "Personality",
+      "note": "Dart-only open string variant for forward-compatible/custom values."
+    },
+    "TokenCountsBody": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": "lib/src/resources/input_tokens_resource.dart",
+      "schema": "TokenCountsBody",
+      "tags": ["acknowledged"],
+      "note": "Request body built inline in InputTokensResource.count() (no request model). personality field added."
+    },
+    "Item": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Item",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": null,
+      "tags": ["acknowledged"],
+      "note": "Sealed parent union of input items with untracked variants (matches ConversationItem/OutputItem). AdditionalToolsItemParam variant added."
+    },
+    "ItemField": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": null,
+      "tags": ["acknowledged"],
+      "note": "Orphan spec union unreferenced by any endpoint; shares the OutputItem shape. AdditionalTools variant added."
+    },
+    "AdditionalTools": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "AdditionalToolsOutputItem",
+      "file": "lib/src/models/responses/items/output_item.dart",
+      "schema": "AdditionalTools",
+      "tags": ["acknowledged"],
+      "note": "Output/conversation item variant of the skip parent unions OutputItem/ItemResource/ConversationItem; also implemented as ConversationAdditionalToolsItem."
+    },
+    "AdditionalToolsItemParam": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "AdditionalToolsItemParam",
+      "file": "lib/src/models/responses/items/item.dart",
+      "schema": "AdditionalToolsItemParam",
+      "tags": ["acknowledged"],
+      "note": "Input item variant of the skip parent union Item."
+    },
+    "AuditLog": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "AuditLog",
+      "tags": ["acknowledged"],
+      "note": "Admin API audit-log schema, excluded from coverage (excluded_tags: Administration). Not implemented."
+    },
+    "AuditLogEventType": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "AuditLogEventType",
+      "tags": ["acknowledged"],
+      "note": "Admin API audit-log enum, excluded from coverage (excluded_tags: Administration). Not implemented."
+    },
     "CreateChatCompletionRequest": {
       "spec": "main",
       "kind": "skip",

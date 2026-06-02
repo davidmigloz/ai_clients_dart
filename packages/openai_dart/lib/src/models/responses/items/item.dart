@@ -24,6 +24,8 @@ import '../tools/response_tool.dart';
 /// - [ToolSearchCallItemParam] - A tool search call
 /// - [ToolSearchOutputItemParam] - Tool search results
 /// - [CompactionTriggerItem] - Triggers compaction of the current context
+/// - [AdditionalToolsItemParam] - Additional tool definitions made available
+///   mid-conversation
 sealed class Item {
   /// Creates an [Item].
   const Item();
@@ -40,6 +42,7 @@ sealed class Item {
       'tool_search_call' => ToolSearchCallItemParam.fromJson(json),
       'tool_search_output' => ToolSearchOutputItemParam.fromJson(json),
       'compaction_trigger' => CompactionTriggerItem.fromJson(json),
+      'additional_tools' => AdditionalToolsItemParam.fromJson(json),
       _ => throw FormatException('Unknown Item type: $type'),
     };
   }
@@ -699,4 +702,57 @@ class ToolSearchOutputItemParam extends Item {
   @override
   String toString() =>
       'ToolSearchOutputItemParam(id: $id, callId: $callId, execution: $execution, tools: $tools, status: $status)';
+}
+
+/// An additional tools input item.
+///
+/// Makes a list of additional tool definitions available mid-conversation.
+/// Only the `developer` role is supported.
+@immutable
+class AdditionalToolsItemParam extends Item {
+  /// Unique identifier of this additional tools item.
+  final String? id;
+
+  /// A list of additional tools made available at this item.
+  final List<ResponseTool> tools;
+
+  /// Creates an [AdditionalToolsItemParam].
+  const AdditionalToolsItemParam({this.id, required this.tools});
+
+  /// Creates an [AdditionalToolsItemParam] from JSON.
+  factory AdditionalToolsItemParam.fromJson(Map<String, dynamic> json) {
+    final type = json['type'] as String?;
+    if (type != 'additional_tools') {
+      throw FormatException('Expected type "additional_tools", got "$type"');
+    }
+    return AdditionalToolsItemParam(
+      id: json['id'] as String?,
+      tools: (json['tools'] as List)
+          .map((e) => ResponseTool.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'additional_tools',
+    if (id != null) 'id': id,
+    // Only the `developer` role is supported for this item.
+    'role': 'developer',
+    'tools': tools.map((e) => e.toJson()).toList(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AdditionalToolsItemParam &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          listsEqual(tools, other.tools);
+
+  @override
+  int get hashCode => Object.hash(id, Object.hashAll(tools));
+
+  @override
+  String toString() => 'AdditionalToolsItemParam(id: $id, tools: $tools)';
 }

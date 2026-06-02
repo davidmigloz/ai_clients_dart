@@ -44,6 +44,21 @@ Future<void> main() async {
     );
 
     print('Input tokens (with tools): ${countWithTools.inputTokens}\n');
+
+    // Count tokens with a model-owned style preset (personality).
+    // Known presets: Personality.friendly() / Personality.pragmatic().
+    // Use Personality.custom('...') for values not yet modeled.
+    print('=== Count Tokens with a Personality ===\n');
+
+    final countWithPersonality = await client.responses.inputTokens.count(
+      model: 'gpt-5.5',
+      input: const ResponseInput.text('Hello, how are you?'),
+      personality: const Personality.friendly(),
+    );
+
+    print(
+      'Input tokens (with personality): ${countWithPersonality.inputTokens}\n',
+    );
   } on OpenAIException catch (e) {
     print('OpenAI error: ${e.message}');
     if (e is ApiException) {

@@ -34,6 +34,88 @@
         ],
         "type": "object"
       },
+      "AdditionalTools": {
+        "properties": {
+          "id": {
+            "description": "The unique ID of the additional tools item.",
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/MessageRole",
+            "description": "The role that provided the additional tools."
+          },
+          "tools": {
+            "description": "The additional tool definitions made available at this item.",
+            "items": {
+              "$ref": "#/components/schemas/Tool"
+            },
+            "type": "array"
+          },
+          "type": {
+            "default": "additional_tools",
+            "description": "The type of the item. Always `additional_tools`.",
+            "enum": [
+              "additional_tools"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "role",
+          "tools"
+        ],
+        "type": "object"
+      },
+      "AdditionalToolsItemParam": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "description": "The unique ID of this additional tools item.",
+                "example": "at_123",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "role": {
+            "default": "developer",
+            "description": "The role that provided the additional tools. Only `developer` is supported.",
+            "enum": [
+              "developer"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          },
+          "tools": {
+            "description": "A list of additional tools made available at this item.",
+            "items": {
+              "$ref": "#/components/schemas/Tool"
+            },
+            "type": "array"
+          },
+          "type": {
+            "default": "additional_tools",
+            "description": "The item type. Always `additional_tools`.",
+            "enum": [
+              "additional_tools"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type",
+          "role",
+          "tools"
+        ],
+        "type": "object"
+      },
       "AdminApiKey": {
         "description": "Represents an individual Admin API key in an org.",
         "properties": {
@@ -2380,6 +2462,106 @@
               }
             },
             "type": "object"
+          },
+          "workload_identity_provider.created": {
+            "description": "The details for events with this `type`.",
+            "properties": {
+              "data": {
+                "description": "The payload used to create the workload identity provider.",
+                "type": "object"
+              },
+              "id": {
+                "description": "The workload identity provider ID.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "workload_identity_provider.deleted": {
+            "description": "The details for events with this `type`.",
+            "properties": {
+              "id": {
+                "description": "The workload identity provider ID.",
+                "type": "string"
+              },
+              "name": {
+                "description": "The workload identity provider name.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "workload_identity_provider.updated": {
+            "description": "The details for events with this `type`.",
+            "properties": {
+              "changes_requested": {
+                "description": "The payload used to update the workload identity provider.",
+                "type": "object"
+              },
+              "id": {
+                "description": "The workload identity provider ID.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "workload_identity_provider_mapping.created": {
+            "description": "The details for events with this `type`.",
+            "properties": {
+              "data": {
+                "description": "The payload used to create the workload identity provider mapping.",
+                "type": "object"
+              },
+              "id": {
+                "description": "The workload identity provider mapping ID.",
+                "type": "string"
+              },
+              "identity_provider_id": {
+                "description": "The workload identity provider ID.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "workload_identity_provider_mapping.deleted": {
+            "description": "The details for events with this `type`.",
+            "properties": {
+              "id": {
+                "description": "The workload identity provider mapping ID.",
+                "type": "string"
+              },
+              "identity_provider_id": {
+                "description": "The workload identity provider ID.",
+                "type": "string"
+              },
+              "project_id": {
+                "description": "The project ID.",
+                "type": "string"
+              },
+              "service_account_id": {
+                "description": "The mapped service account ID.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "workload_identity_provider_mapping.updated": {
+            "description": "The details for events with this `type`.",
+            "properties": {
+              "changes_requested": {
+                "description": "The payload used to update the workload identity provider mapping.",
+                "type": "object"
+              },
+              "id": {
+                "description": "The workload identity provider mapping ID.",
+                "type": "string"
+              },
+              "identity_provider_id": {
+                "description": "The workload identity provider ID.",
+                "type": "string"
+              }
+            },
+            "type": "object"
           }
         },
         "required": [
@@ -2515,6 +2697,12 @@
           "tunnel.created",
           "tunnel.updated",
           "tunnel.deleted",
+          "workload_identity_provider.created",
+          "workload_identity_provider.updated",
+          "workload_identity_provider.deleted",
+          "workload_identity_provider_mapping.created",
+          "workload_identity_provider_mapping.updated",
+          "workload_identity_provider_mapping.deleted",
           "role.created",
           "role.updated",
           "role.deleted",
@@ -6554,6 +6742,9 @@
           },
           {
             "$ref": "#/components/schemas/ToolSearchOutput"
+          },
+          {
+            "$ref": "#/components/schemas/AdditionalTools"
           },
           {
             "$ref": "#/components/schemas/ReasoningItem"
@@ -19025,6 +19216,9 @@
             "$ref": "#/components/schemas/ToolSearchOutputItemParam"
           },
           {
+            "$ref": "#/components/schemas/AdditionalToolsItemParam"
+          },
+          {
             "$ref": "#/components/schemas/ReasoningItem"
           },
           {
@@ -19092,6 +19286,9 @@
           },
           {
             "$ref": "#/components/schemas/ToolSearchOutput"
+          },
+          {
+            "$ref": "#/components/schemas/AdditionalTools"
           },
           {
             "$ref": "#/components/schemas/FunctionToolCallOutput"
@@ -19225,6 +19422,9 @@
           },
           {
             "$ref": "#/components/schemas/ToolSearchOutput"
+          },
+          {
+            "$ref": "#/components/schemas/AdditionalTools"
           },
           {
             "$ref": "#/components/schemas/ReasoningItem"
@@ -21854,7 +22054,7 @@
           "prompt_cache_retention": {
             "anyOf": [
               {
-                "description": "The retention policy for the prompt cache. Set to `24h` to enable extended prompt caching, which keeps cached prefixes active for longer, up to a maximum of 24 hours. [Learn more](https://platform.openai.com/docs/guides/prompt-caching#prompt-cache-retention).\n",
+                "description": "The retention policy for the prompt cache. Set to `24h` to enable extended prompt caching, which keeps cached prefixes active for longer, up to a maximum of 24 hours. [Learn more](https://platform.openai.com/docs/guides/prompt-caching#prompt-cache-retention).\nFor `gpt-5.5`, `gpt-5.5-pro`, and future models, only `24h` is supported.\n\nFor older models that support both `in_memory` and `24h`, the default depends on your organization's data retention policy:\n  - Organizations without ZDR enabled default to `24h`.\n  - Organizations with ZDR enabled default to `in_memory` when `prompt_cache_retention` is not specified.\n",
                 "enum": [
                   "in_memory",
                   "24h"
@@ -22881,6 +23081,9 @@
             "$ref": "#/components/schemas/ToolSearchOutput"
           },
           {
+            "$ref": "#/components/schemas/AdditionalTools"
+          },
+          {
             "$ref": "#/components/schemas/CompactionBody"
           },
           {
@@ -23059,6 +23262,20 @@
           },
           {
             "type": "null"
+          }
+        ]
+      },
+      "PersonalityEnum": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "enum": [
+              "friendly",
+              "pragmatic"
+            ],
+            "type": "string"
           }
         ]
       },
@@ -39647,6 +39864,10 @@
               }
             ]
           },
+          "personality": {
+            "$ref": "#/components/schemas/PersonalityEnum",
+            "description": "A model-owned style preset to apply to this request. Omit this parameter to use the model's default style. Supported values may expand over time. Values must be at most 64 characters."
+          },
           "previous_response_id": {
             "anyOf": [
               {
@@ -43829,7 +44050,8 @@
             "type": "array"
           },
           "query": {
-            "description": "[DEPRECATED] The search query.\n",
+            "deprecated": true,
+            "description": "The search query.\n",
             "type": "string"
           },
           "sources": {
@@ -43871,8 +44093,7 @@
           }
         },
         "required": [
-          "type",
-          "query"
+          "type"
         ],
         "title": "Search action",
         "type": "object"

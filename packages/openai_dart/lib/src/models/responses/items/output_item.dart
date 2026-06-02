@@ -37,6 +37,8 @@ import 'item.dart';
 /// - [ComputerCallOutputItem] - Computer use tool calls
 /// - [CustomToolCallItem] - Custom tool calls
 /// - [CustomToolCallOutputItem] - Custom tool call outputs
+/// - [AdditionalToolsOutputItem] - Additional tool definitions made available
+///   mid-conversation
 sealed class OutputItem {
   /// Creates an [OutputItem].
   const OutputItem();
@@ -65,6 +67,7 @@ sealed class OutputItem {
       'computer_call' => ComputerCallOutputItem.fromJson(json),
       'custom_tool_call' => CustomToolCallItem.fromJson(json),
       'custom_tool_call_output' => CustomToolCallOutputItem.fromJson(json),
+      'additional_tools' => AdditionalToolsOutputItem.fromJson(json),
       _ => throw FormatException('Unknown OutputItem type: $type'),
     };
   }
@@ -1926,4 +1929,62 @@ class CustomToolCallOutputItem extends OutputItem {
   @override
   String toString() =>
       'CustomToolCallOutputItem(id: $id, callId: $callId, output: $output, status: $status, createdBy: $createdBy)';
+}
+
+/// An additional tools output item.
+///
+/// Surfaces the additional tool definitions that were made available at this
+/// point in the conversation.
+@immutable
+class AdditionalToolsOutputItem extends OutputItem {
+  /// The unique ID of the additional tools item.
+  final String id;
+
+  /// The role that provided the additional tools.
+  final MessageRole role;
+
+  /// The additional tool definitions made available at this item.
+  final List<ResponseTool> tools;
+
+  /// Creates an [AdditionalToolsOutputItem].
+  const AdditionalToolsOutputItem({
+    required this.id,
+    required this.role,
+    required this.tools,
+  });
+
+  /// Creates an [AdditionalToolsOutputItem] from JSON.
+  factory AdditionalToolsOutputItem.fromJson(Map<String, dynamic> json) {
+    return AdditionalToolsOutputItem(
+      id: json['id'] as String,
+      role: MessageRole.fromJson(json['role'] as String),
+      tools: (json['tools'] as List)
+          .map((e) => ResponseTool.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'additional_tools',
+    'id': id,
+    'role': role.toJson(),
+    'tools': tools.map((e) => e.toJson()).toList(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AdditionalToolsOutputItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          role == other.role &&
+          listsEqual(tools, other.tools);
+
+  @override
+  int get hashCode => Object.hash(id, role, Object.hashAll(tools));
+
+  @override
+  String toString() =>
+      'AdditionalToolsOutputItem(id: $id, role: $role, tools: $tools)';
 }
