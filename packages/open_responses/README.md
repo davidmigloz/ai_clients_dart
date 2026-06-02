@@ -55,6 +55,7 @@ Dart client for the **[OpenResponses specification](https://www.openresponses.or
 | [Databricks](https://docs.databricks.com/aws/en/machine-learning/model-serving/score-model-serving-endpoints) | `https://<host>.databricks.com/serving-endpoints` | Bearer token | Enterprise model serving |
 | [vLLM](https://docs.vllm.ai/en/latest/examples/online_serving/openai_responses_client/) | `http://localhost:8000/v1` | None by default | High-throughput local inference |
 | LM Studio | `http://localhost:1234/v1` | None by default | Desktop local inference |
+| [llama.cpp](https://github.com/ggml-org/llama.cpp/tree/master/tools/server) | `http://localhost:8080/v1` | None by default | Local GGUF inference via `llama-server` |
 
 ## Why choose this client?
 
