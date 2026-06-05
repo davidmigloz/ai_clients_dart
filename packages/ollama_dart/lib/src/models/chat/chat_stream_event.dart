@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/done_reason.dart';
+import '../common/equality_helpers.dart';
 import '../completions/logprob.dart';
 import 'chat_response.dart';
 
@@ -116,20 +117,53 @@ class ChatStreamEvent {
       other is ChatStreamEvent &&
           runtimeType == other.runtimeType &&
           model == other.model &&
+          remoteModel == other.remoteModel &&
+          remoteHost == other.remoteHost &&
           createdAt == other.createdAt &&
-          done == other.done;
+          message == other.message &&
+          done == other.done &&
+          doneReason == other.doneReason &&
+          totalDuration == other.totalDuration &&
+          loadDuration == other.loadDuration &&
+          promptEvalCount == other.promptEvalCount &&
+          promptEvalDuration == other.promptEvalDuration &&
+          evalCount == other.evalCount &&
+          evalDuration == other.evalDuration &&
+          listsEqual(logprobs, other.logprobs);
 
   @override
-  int get hashCode => Object.hash(model, createdAt, done);
+  int get hashCode => Object.hashAll([
+    model,
+    remoteModel,
+    remoteHost,
+    createdAt,
+    message,
+    done,
+    doneReason,
+    totalDuration,
+    loadDuration,
+    promptEvalCount,
+    promptEvalDuration,
+    evalCount,
+    evalDuration,
+    listHash(logprobs),
+  ]);
 
   @override
   String toString() =>
       'ChatStreamEvent('
       'model: $model, '
+      'remoteModel: $remoteModel, '
+      'remoteHost: $remoteHost, '
+      'createdAt: $createdAt, '
       'message: $message, '
       'done: $done, '
       'doneReason: $doneReason, '
       'totalDuration: $totalDuration, '
+      'loadDuration: $loadDuration, '
       'promptEvalCount: $promptEvalCount, '
-      'evalCount: $evalCount)';
+      'promptEvalDuration: $promptEvalDuration, '
+      'evalCount: $evalCount, '
+      'evalDuration: $evalDuration, '
+      'logprobs: $logprobs)';
 }
