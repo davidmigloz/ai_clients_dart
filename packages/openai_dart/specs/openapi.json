@@ -3492,6 +3492,101 @@
           }
         ]
       },
+      "ChatCompletionModeration": {
+        "description": "Moderation results or errors for the request input and generated output.",
+        "properties": {
+          "input": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ChatCompletionModerationResults"
+              },
+              {
+                "$ref": "#/components/schemas/ChatCompletionModerationError"
+              }
+            ],
+            "description": "Moderation for the request input.",
+            "discriminator": {
+              "propertyName": "type"
+            }
+          },
+          "output": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ChatCompletionModerationResults"
+              },
+              {
+                "$ref": "#/components/schemas/ChatCompletionModerationError"
+              }
+            ],
+            "description": "Moderation for the generated output.",
+            "discriminator": {
+              "propertyName": "type"
+            }
+          }
+        },
+        "required": [
+          "input",
+          "output"
+        ],
+        "type": "object"
+      },
+      "ChatCompletionModerationError": {
+        "description": "An error produced while attempting moderation.",
+        "properties": {
+          "code": {
+            "description": "The error code.",
+            "type": "string"
+          },
+          "message": {
+            "description": "The error message.",
+            "type": "string"
+          },
+          "type": {
+            "description": "The object type, which is always `error`.",
+            "enum": [
+              "error"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type",
+          "code",
+          "message"
+        ],
+        "type": "object"
+      },
+      "ChatCompletionModerationResults": {
+        "description": "Successful moderation results for the request input or generated output.",
+        "properties": {
+          "model": {
+            "description": "The moderation model used to generate the results.",
+            "type": "string"
+          },
+          "results": {
+            "description": "A list of moderation results.",
+            "items": {
+              "$ref": "#/components/schemas/ModerationResultBody"
+            },
+            "type": "array"
+          },
+          "type": {
+            "description": "The object type, which is always `moderation_results`.",
+            "enum": [
+              "moderation_results"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type",
+          "model",
+          "results"
+        ],
+        "type": "object"
+      },
       "ChatCompletionNamedToolChoice": {
         "description": "Specifies a tool the model should use. Use to force the model to call a specific function.",
         "properties": {
@@ -7362,6 +7457,17 @@
                 "$ref": "#/components/schemas/ModelIdsShared",
                 "description": "Model ID used to generate the response, like `gpt-4o` or `o3`. OpenAI\noffers a wide range of models with different capabilities, performance\ncharacteristics, and price points. Refer to the [model guide](https://platform.openai.com/docs/models)\nto browse and compare available models.\n"
               },
+              "moderation": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/ModerationParam",
+                    "description": "Configuration for running moderation on the request input and generated output.\n"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "n": {
                 "default": 1,
                 "description": "How many chat completion choices to generate for each input message. Note that you will be charged based on the number of generated tokens across all of the choices. Keep `n` as `1` to minimize costs.",
@@ -7531,7 +7637,7 @@
             "items": {
               "properties": {
                 "finish_reason": {
-                  "description": "The reason the model stopped generating tokens. This will be `stop` if the model hit a natural stop point or a provided stop sequence,\n`length` if the maximum number of tokens specified in the request was reached,\n`content_filter` if content was omitted due to a flag from our content filters,\n`tool_calls` if the model called a tool, or `function_call` (deprecated) if the model called a function.\n",
+                  "description": "The reason the model stopped generating tokens. This will be `stop` if the model hit a natural stop point or a provided stop sequence,\n`length` if the maximum number of tokens specified in the request was reached,\n`content_filter` if content was omitted due to a flag from our content filters,\n`tool_calls` if the model called a tool, or `function_call` (deprecated) if the model called a function.\nRead the [Model Spec](https://model-spec.openai.com/2025-12-18.html) for more.\n",
                   "enum": [
                     "stop",
                     "length",
@@ -7616,6 +7722,17 @@
           "model": {
             "description": "The model used for the chat completion.",
             "type": "string"
+          },
+          "moderation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ChatCompletionModeration",
+                "description": "Moderation results for the request input and generated output, if moderated\ncompletions were requested.\n"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "object": {
             "description": "The object type, which is always `chat.completion`.",
@@ -7726,6 +7843,17 @@
           "model": {
             "description": "The model to generate the completion.",
             "type": "string"
+          },
+          "moderation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ChatCompletionModeration",
+                "description": "Moderation results for the request input and generated output. Present\non the moderation chunk when moderated completions are requested.\n"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "object": {
             "description": "The object type, which is always `chat.completion.chunk`.",
@@ -10270,6 +10398,17 @@
                     "description": "An upper bound for the number of tokens that can be generated for a response, including visible output tokens and [reasoning tokens](https://platform.openai.com/docs/guides/reasoning).\n",
                     "minimum": 16,
                     "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "moderation": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/ModerationParam",
+                    "description": "Configuration for running moderation on the input and output of this response.\n"
                   },
                   {
                     "type": "null"
@@ -22127,6 +22266,74 @@
         },
         "type": "object"
       },
+      "Moderation": {
+        "description": "Moderation results or errors for the response input and output.",
+        "properties": {
+          "input": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ModerationResultBody"
+              },
+              {
+                "$ref": "#/components/schemas/ModerationErrorBody"
+              }
+            ],
+            "description": "Moderation for the response input.",
+            "discriminator": {
+              "propertyName": "type"
+            }
+          },
+          "output": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ModerationResultBody"
+              },
+              {
+                "$ref": "#/components/schemas/ModerationErrorBody"
+              }
+            ],
+            "description": "Moderation for the response output.",
+            "discriminator": {
+              "propertyName": "type"
+            }
+          }
+        },
+        "required": [
+          "input",
+          "output"
+        ],
+        "title": "Moderation",
+        "type": "object"
+      },
+      "ModerationErrorBody": {
+        "description": "An error produced while attempting moderation for the response input or output.",
+        "properties": {
+          "code": {
+            "description": "The error code.",
+            "type": "string"
+          },
+          "message": {
+            "description": "The error message.",
+            "type": "string"
+          },
+          "type": {
+            "default": "error",
+            "description": "The object type, which was always `error` for moderation failures.",
+            "enum": [
+              "error"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type",
+          "code",
+          "message"
+        ],
+        "title": "Moderation error",
+        "type": "object"
+      },
       "ModerationImageURLInput": {
         "description": "An object describing an image to classify.",
         "properties": {
@@ -22158,6 +22365,85 @@
           "type",
           "image_url"
         ],
+        "type": "object"
+      },
+      "ModerationInputType": {
+        "enum": [
+          "text",
+          "image"
+        ],
+        "type": "string"
+      },
+      "ModerationParam": {
+        "description": "Configuration for running moderation on the input and output of this response.",
+        "properties": {
+          "model": {
+            "description": "The moderation model to use for moderated completions, e.g. 'omni-moderation-latest'.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "model"
+        ],
+        "type": "object"
+      },
+      "ModerationResultBody": {
+        "description": "A moderation result produced for the response input or output.",
+        "properties": {
+          "categories": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "description": "A dictionary of moderation categories to booleans, True if the input is flagged under this category.",
+            "type": "object",
+            "x-oaiTypeLabel": "map"
+          },
+          "category_applied_input_types": {
+            "additionalProperties": {
+              "items": {
+                "$ref": "#/components/schemas/ModerationInputType"
+              },
+              "type": "array"
+            },
+            "description": "Which modalities of input are reflected by the score for each category.",
+            "type": "object",
+            "x-oaiTypeLabel": "map"
+          },
+          "category_scores": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "description": "A dictionary of moderation categories to scores.",
+            "type": "object",
+            "x-oaiTypeLabel": "map"
+          },
+          "flagged": {
+            "description": "A boolean indicating whether the content was flagged by any category.",
+            "type": "boolean"
+          },
+          "model": {
+            "description": "The moderation model that produced this result.",
+            "type": "string"
+          },
+          "type": {
+            "default": "moderation_result",
+            "description": "The object type, which was always `moderation_result` for successful moderation results.",
+            "enum": [
+              "moderation_result"
+            ],
+            "type": "string",
+            "x-stainless-const": true
+          }
+        },
+        "required": [
+          "type",
+          "model",
+          "flagged",
+          "categories",
+          "category_scores",
+          "category_applied_input_types"
+        ],
+        "title": "Moderation result",
         "type": "object"
       },
       "ModerationTextInput": {
@@ -33545,6 +33831,17 @@
                   {
                     "description": "An upper bound for the number of tokens that can be generated for a response, including visible output tokens and [reasoning tokens](https://platform.openai.com/docs/guides/reasoning).\n",
                     "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "moderation": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/Moderation",
+                    "description": "Moderation results for the response input and output, if moderated completions were requested.\n"
                   },
                   {
                     "type": "null"

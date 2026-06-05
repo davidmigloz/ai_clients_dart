@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import '../common/response_format.dart';
+import '../moderations/completion_moderation.dart';
 import '../responses/config/prompt_cache_retention.dart';
 import '../responses/config/reasoning_effort.dart';
 import '../responses/config/verbosity.dart';
@@ -66,6 +67,7 @@ class ChatCompletionCreateRequest {
     this.modalities,
     this.audio,
     this.webSearchOptions,
+    this.moderation,
     this.promptCacheKey,
     this.promptCacheRetention,
     this.safetyIdentifier,
@@ -142,6 +144,11 @@ class ChatCompletionCreateRequest {
       webSearchOptions: json['web_search_options'] != null
           ? WebSearchOptions.fromJson(
               json['web_search_options'] as Map<String, dynamic>,
+            )
+          : null,
+      moderation: json['moderation'] != null
+          ? ModerationConfig.fromJson(
+              json['moderation'] as Map<String, dynamic>,
             )
           : null,
       promptCacheKey: json['prompt_cache_key'] as String?,
@@ -335,6 +342,14 @@ class ChatCompletionCreateRequest {
   /// [web search tool](https://platform.openai.com/docs/guides/tools-web-search?api-mode=chat).
   final WebSearchOptions? webSearchOptions;
 
+  /// Configuration for running moderation on the request input and generated
+  /// output.
+  ///
+  /// When set, the response includes `moderation` results
+  /// ([ChatCompletion.moderation]) for both the request input and the
+  /// generated output.
+  final ModerationConfig? moderation;
+
   /// Prompt cache key for optimizing cache hit rates.
   ///
   /// Used by OpenAI to cache responses for similar requests.
@@ -459,6 +474,7 @@ class ChatCompletionCreateRequest {
     if (audio != null) 'audio': audio!.toJson(),
     if (webSearchOptions != null)
       'web_search_options': webSearchOptions!.toJson(),
+    if (moderation != null) 'moderation': moderation!.toJson(),
     if (promptCacheKey != null) 'prompt_cache_key': promptCacheKey,
     if (promptCacheRetention != null)
       'prompt_cache_retention': promptCacheRetention!.toJson(),
@@ -507,6 +523,7 @@ class ChatCompletionCreateRequest {
     Object? modalities = unsetCopyWithValue,
     Object? audio = unsetCopyWithValue,
     Object? webSearchOptions = unsetCopyWithValue,
+    Object? moderation = unsetCopyWithValue,
     Object? promptCacheKey = unsetCopyWithValue,
     Object? promptCacheRetention = unsetCopyWithValue,
     Object? safetyIdentifier = unsetCopyWithValue,
@@ -592,6 +609,9 @@ class ChatCompletionCreateRequest {
       webSearchOptions: webSearchOptions == unsetCopyWithValue
           ? this.webSearchOptions
           : webSearchOptions as WebSearchOptions?,
+      moderation: moderation == unsetCopyWithValue
+          ? this.moderation
+          : moderation as ModerationConfig?,
       promptCacheKey: promptCacheKey == unsetCopyWithValue
           ? this.promptCacheKey
           : promptCacheKey as String?,

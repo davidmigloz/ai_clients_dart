@@ -242,6 +242,121 @@
     "excluded_resources": []
   },
   "types": {
+    "ModerationParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ModerationConfig",
+      "file": "lib/src/models/moderations/completion_moderation.dart",
+      "schema": "ModerationParam"
+    },
+    "Moderation": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Moderation",
+      "file": "lib/src/models/moderations/completion_moderation.dart",
+      "schema": "Moderation"
+    },
+    "ModerationOutcome": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ModerationOutcome",
+      "file": "lib/src/models/moderations/completion_moderation.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "ModerationResultBody": "moderation_result",
+          "ModerationErrorBody": "error"
+        }
+      }
+    },
+    "ModerationResultBody": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ModerationResultBody",
+      "file": "lib/src/models/moderations/completion_moderation.dart",
+      "schema": "ModerationResultBody",
+      "parent": "ModerationOutcome"
+    },
+    "ModerationErrorBody": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ModerationErrorBody",
+      "file": "lib/src/models/moderations/completion_moderation.dart",
+      "schema": "ModerationErrorBody",
+      "parent": "ModerationOutcome"
+    },
+    "ModerationInputType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ModerationInputType",
+      "file": "lib/src/models/moderations/completion_moderation.dart",
+      "schema": "ModerationInputType"
+    },
+    "ChatCompletionModeration": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ChatCompletionModeration",
+      "file": "lib/src/models/chat/chat_completion_moderation.dart",
+      "schema": "ChatCompletionModeration"
+    },
+    "ChatCompletionModerationOutcome": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ChatCompletionModerationOutcome",
+      "file": "lib/src/models/chat/chat_completion_moderation.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "ChatCompletionModerationResults": "moderation_results",
+          "ChatCompletionModerationError": "error"
+        }
+      }
+    },
+    "ChatCompletionModerationResults": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ChatCompletionModerationResults",
+      "file": "lib/src/models/chat/chat_completion_moderation.dart",
+      "schema": "ChatCompletionModerationResults",
+      "parent": "ChatCompletionModerationOutcome"
+    },
+    "ChatCompletionModerationError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ChatCompletionModerationError",
+      "file": "lib/src/models/chat/chat_completion_moderation.dart",
+      "schema": "ChatCompletionModerationError",
+      "parent": "ChatCompletionModerationOutcome"
+    },
+    "CreateResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "CreateResponseRequest",
+      "file": "lib/src/models/responses/create_response_request.dart",
+      "schema": "CreateResponse",
+      "tags": ["acknowledged"],
+      "note": "Spec uses allOf — verifier cannot extract top-level properties."
+    },
+    "Response": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "Response",
+      "file": "lib/src/models/responses/response.dart",
+      "schema": "Response",
+      "tags": ["acknowledged"],
+      "note": "Spec uses allOf — verifier cannot extract top-level properties."
+    },
+    "ResponsesClientEventResponseCreate": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "ResponsesClientEventResponseCreate",
+      "tags": ["acknowledged"],
+      "note": "Realtime client event embedding CreateResponse; constructed inline by the realtime resource."
+    },
     "PersonalityEnum": {
       "spec": "main",
       "kind": "sealed_parent",

@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/equality_helpers.dart';
+import '../moderations/completion_moderation.dart';
 import 'config/prompt_cache_retention.dart';
 import 'config/response_status.dart';
 import 'config/service_tier.dart';
@@ -75,6 +76,12 @@ class Response {
   /// The prompt cache retention policy.
   final PromptCacheRetention? promptCacheRetention;
 
+  /// Moderation results for the response input and output.
+  ///
+  /// Present only when moderated completions were requested via
+  /// [CreateResponseRequest.moderation].
+  final Moderation? moderation;
+
   /// Creates a [Response].
   const Response({
     required this.id,
@@ -97,6 +104,7 @@ class Response {
     this.parallelToolCalls,
     this.promptCacheKey,
     this.promptCacheRetention,
+    this.moderation,
   });
 
   /// Creates a [Response] from JSON.
@@ -138,6 +146,9 @@ class Response {
               json['prompt_cache_retention'] as String,
             )
           : null,
+      moderation: json['moderation'] != null
+          ? Moderation.fromJson(json['moderation'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -165,6 +176,7 @@ class Response {
     if (promptCacheKey != null) 'prompt_cache_key': promptCacheKey,
     if (promptCacheRetention != null)
       'prompt_cache_retention': promptCacheRetention!.toJson(),
+    if (moderation != null) 'moderation': moderation!.toJson(),
   };
 
   // ============================================================
@@ -299,7 +311,8 @@ class Response {
           background == other.background &&
           parallelToolCalls == other.parallelToolCalls &&
           promptCacheKey == other.promptCacheKey &&
-          promptCacheRetention == other.promptCacheRetention;
+          promptCacheRetention == other.promptCacheRetention &&
+          moderation == other.moderation;
 
   @override
   int get hashCode => Object.hashAll([
@@ -323,6 +336,7 @@ class Response {
     parallelToolCalls,
     promptCacheKey,
     promptCacheRetention,
+    moderation,
   ]);
 
   @override

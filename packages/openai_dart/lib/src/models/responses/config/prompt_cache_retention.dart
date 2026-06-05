@@ -7,6 +7,9 @@ enum PromptCacheRetention {
   inMemory('in-memory'),
 
   /// 24-hour cache retention.
+  ///
+  /// As of 2026-05-29 this is the default for organizations without Zero Data
+  /// Retention (ZDR) enabled; previously the default was [inMemory].
   h24('24h');
 
   /// The JSON value for this retention policy.

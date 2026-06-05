@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:meta/meta.dart';
 
 import '../chat/chat_completion.dart';
+import '../chat/chat_completion_moderation.dart';
 import '../chat/chat_message.dart';
 import '../chat/reasoning_detail.dart';
 import '../chat/tool_call.dart';
@@ -40,6 +41,7 @@ class ChatStreamEvent {
     this.usage,
     this.systemFingerprint,
     this.serviceTier,
+    this.moderation,
     this.provider,
   });
 
@@ -58,6 +60,11 @@ class ChatStreamEvent {
           : null,
       systemFingerprint: json['system_fingerprint'] as String?,
       serviceTier: json['service_tier'] as String?,
+      moderation: json['moderation'] != null
+          ? ChatCompletionModeration.fromJson(
+              json['moderation'] as Map<String, dynamic>,
+            )
+          : null,
       provider: json['provider'] as String?,
     );
   }
@@ -99,6 +106,12 @@ class ChatStreamEvent {
   /// The service tier used (if applicable).
   final String? serviceTier;
 
+  /// Moderation results for the request input and generated output.
+  ///
+  /// Present on the dedicated moderation chunk when moderated completions were
+  /// requested via [ChatCompletionCreateRequest.moderation].
+  final ChatCompletionModeration? moderation;
+
   /// **OpenRouter only.** The provider that served the request.
   ///
   /// Not part of the official OpenAI API.
@@ -124,6 +137,7 @@ class ChatStreamEvent {
     if (usage != null) 'usage': usage!.toJson(),
     if (systemFingerprint != null) 'system_fingerprint': systemFingerprint,
     if (serviceTier != null) 'service_tier': serviceTier,
+    if (moderation != null) 'moderation': moderation!.toJson(),
     if (provider != null) 'provider': provider,
   };
 
@@ -536,6 +550,7 @@ class ChatStreamAccumulator {
   String? _serviceTier;
   String? _provider;
   Usage? _usage;
+  ChatCompletionModeration? _moderation;
   final List<_AccumulatedChoice> _choices = [];
 
   _AccumulatedChoice _getOrCreateChoice(int index) {
@@ -554,6 +569,7 @@ class ChatStreamAccumulator {
     _serviceTier ??= event.serviceTier;
     _provider ??= event.provider;
     if (event.usage != null) _usage = event.usage;
+    if (event.moderation != null) _moderation = event.moderation;
 
     // Handle nullable choices for compatibility with providers like Groq
     final choices = event.choices;
@@ -711,6 +727,12 @@ class ChatStreamAccumulator {
   /// Token usage statistics.
   Usage? get usage => _usage;
 
+  /// Moderation results for the request input and generated output.
+  ///
+  /// Populated from the dedicated moderation chunk when moderated completions
+  /// were requested.
+  ChatCompletionModeration? get moderation => _moderation;
+
   /// The accumulated tool calls.
   ///
   /// For multi-choice streams, returns choice 0's tool calls.
@@ -772,6 +794,7 @@ class ChatStreamAccumulator {
       usage: _usage,
       systemFingerprint: _systemFingerprint,
       serviceTier: _serviceTier,
+      moderation: _moderation,
       provider: _provider,
     );
   }
@@ -811,6 +834,7 @@ class ChatStreamAccumulator {
     _serviceTier = null;
     _provider = null;
     _usage = null;
+    _moderation = null;
     _choices.clear();
   }
 }
