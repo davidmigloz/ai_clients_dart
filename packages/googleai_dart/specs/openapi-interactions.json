@@ -60,18 +60,23 @@
             "type": "string"
           },
           {
-            "const": "deep-research-pro-preview-12-2025",
+            "const": "deep-research-preview-04-2026",
             "description": "Gemini Deep Research Agent",
             "x-stainless-nominal": false
           },
           {
-            "const": "deep-research-preview-04-2026",
+            "const": "deep-research-pro-preview-12-2025",
             "description": "Gemini Deep Research Agent",
             "x-stainless-nominal": false
           },
           {
             "const": "deep-research-max-preview-04-2026",
             "description": "Gemini Deep Research Max Agent",
+            "x-stainless-nominal": false
+          },
+          {
+            "const": "antigravity-preview-05-2026",
+            "description": "Use the Antigravity managed agent to perform multi-step tasks that require reasoning, file operations, and tool use.",
             "x-stainless-nominal": false
           }
         ],
@@ -91,10 +96,10 @@
             "$ref": "#/components/schemas/GoogleSearch"
           },
           {
-            "$ref": "#/components/schemas/UrlContext"
+            "$ref": "#/components/schemas/McpServer"
           },
           {
-            "$ref": "#/components/schemas/McpServer"
+            "$ref": "#/components/schemas/UrlContext"
           }
         ],
         "type": "object"
@@ -147,13 +152,13 @@
         },
         "oneOf": [
           {
-            "$ref": "#/components/schemas/UrlCitation"
-          },
-          {
             "$ref": "#/components/schemas/FileCitation"
           },
           {
             "$ref": "#/components/schemas/PlaceCitation"
+          },
+          {
+            "$ref": "#/components/schemas/UrlCitation"
           }
         ],
         "type": "object"
@@ -392,17 +397,17 @@
           {
             "label": "code_execution",
             "lang": "sh",
-            "source": "curl -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\n    \"model\": \"gemini-3-flash-preview\",\n    \"tools\": [{\n      \"type\": \"code_execution\"\n    }],\n    \"input\": \"Calculate the first 10 Fibonacci numbers\"\n  }'\n"
+            "source": "curl -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\n    \"model\": \"gemini-3.5-flash\",\n    \"tools\": [{\n      \"type\": \"code_execution\"\n    }],\n    \"input\": \"Calculate the first 10 Fibonacci numbers\"\n  }'\n"
           },
           {
             "label": "code_execution",
             "lang": "python",
-            "source": "from google import genai\n\nclient = genai.Client()\nresponse = client.interactions.create(\n    model=\"gemini-3-flash-preview\",\n    tools=[{\"type\": \"code_execution\"}],\n    input=\"Calculate the first 10 Fibonacci numbers\"\n)\nprint(response.output_text)\n"
+            "source": "from google import genai\n\nclient = genai.Client()\nresponse = client.interactions.create(\n    model=\"gemini-3.5-flash\",\n    tools=[{\"type\": \"code_execution\"}],\n    input=\"Calculate the first 10 Fibonacci numbers\"\n)\nprint(response.output_text)\n"
           },
           {
             "label": "code_execution",
             "lang": "javascript",
-            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\nconst interaction = await ai.interactions.create({\n    model: 'gemini-3-flash-preview',\n    tools: [{ type: 'code_execution' }],\n    input: 'Calculate the first 10 Fibonacci numbers'\n});\nconsole.log(interaction.output_text);\n"
+            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\nconst interaction = await ai.interactions.create({\n    model: 'gemini-3.5-flash',\n    tools: [{ type: 'code_execution' }],\n    input: 'Calculate the first 10 Fibonacci numbers'\n});\nconsole.log(interaction.output_text);\n"
           }
         ]
       },
@@ -441,8 +446,8 @@
           }
         },
         "required": [
-          "type",
-          "arguments"
+          "arguments",
+          "type"
         ],
         "type": "object"
       },
@@ -481,9 +486,9 @@
           }
         },
         "required": [
-          "type",
           "arguments",
-          "id"
+          "id",
+          "type"
         ],
         "type": "object"
       },
@@ -525,8 +530,8 @@
           }
         },
         "required": [
-          "type",
-          "result"
+          "result",
+          "type"
         ],
         "type": "object"
       },
@@ -567,9 +572,9 @@
           }
         },
         "required": [
-          "type",
+          "call_id",
           "result",
-          "call_id"
+          "type"
         ],
         "type": "object"
       },
@@ -626,16 +631,16 @@
         },
         "oneOf": [
           {
-            "$ref": "#/components/schemas/TextContent"
+            "$ref": "#/components/schemas/AudioContent"
+          },
+          {
+            "$ref": "#/components/schemas/DocumentContent"
           },
           {
             "$ref": "#/components/schemas/ImageContent"
           },
           {
-            "$ref": "#/components/schemas/AudioContent"
-          },
-          {
-            "$ref": "#/components/schemas/DocumentContent"
+            "$ref": "#/components/schemas/TextContent"
           },
           {
             "$ref": "#/components/schemas/VideoContent"
@@ -673,12 +678,16 @@
           "index": {
             "format": "int32",
             "type": "integer"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/StreamMetadata",
+            "description": "Optional metadata accompanying ANY streamed event."
           }
         },
         "required": [
+          "delta",
           "event_type",
-          "index",
-          "delta"
+          "index"
         ],
         "type": "object"
       },
@@ -689,70 +698,70 @@
         },
         "oneOf": [
           {
-            "$ref": "#/components/schemas/TextDelta"
-          },
-          {
-            "$ref": "#/components/schemas/ImageDelta"
-          },
-          {
             "$ref": "#/components/schemas/AudioDelta"
-          },
-          {
-            "$ref": "#/components/schemas/DocumentDelta"
-          },
-          {
-            "$ref": "#/components/schemas/VideoDelta"
-          },
-          {
-            "$ref": "#/components/schemas/ThoughtSummaryDelta"
-          },
-          {
-            "$ref": "#/components/schemas/ThoughtSignatureDelta"
-          },
-          {
-            "$ref": "#/components/schemas/FunctionCallDelta"
           },
           {
             "$ref": "#/components/schemas/CodeExecutionCallDelta"
           },
           {
-            "$ref": "#/components/schemas/UrlContextCallDelta"
+            "$ref": "#/components/schemas/CodeExecutionResultDelta"
           },
           {
-            "$ref": "#/components/schemas/GoogleSearchCallDelta"
-          },
-          {
-            "$ref": "#/components/schemas/McpServerToolCallDelta"
+            "$ref": "#/components/schemas/DocumentDelta"
           },
           {
             "$ref": "#/components/schemas/FileSearchCallDelta"
           },
           {
-            "$ref": "#/components/schemas/GoogleMapsCallDelta"
+            "$ref": "#/components/schemas/FileSearchResultDelta"
+          },
+          {
+            "$ref": "#/components/schemas/FunctionCallDelta"
           },
           {
             "$ref": "#/components/schemas/FunctionResultDelta"
           },
           {
-            "$ref": "#/components/schemas/CodeExecutionResultDelta"
-          },
-          {
-            "$ref": "#/components/schemas/UrlContextResultDelta"
-          },
-          {
-            "$ref": "#/components/schemas/GoogleSearchResultDelta"
-          },
-          {
-            "$ref": "#/components/schemas/McpServerToolResultDelta"
-          },
-          {
-            "$ref": "#/components/schemas/FileSearchResultDelta"
+            "$ref": "#/components/schemas/GoogleMapsCallDelta"
           },
           {
             "$ref": "#/components/schemas/GoogleMapsResultDelta"
           },
           {
+            "$ref": "#/components/schemas/GoogleSearchCallDelta"
+          },
+          {
+            "$ref": "#/components/schemas/GoogleSearchResultDelta"
+          },
+          {
+            "$ref": "#/components/schemas/ImageDelta"
+          },
+          {
+            "$ref": "#/components/schemas/McpServerToolCallDelta"
+          },
+          {
+            "$ref": "#/components/schemas/McpServerToolResultDelta"
+          },
+          {
             "$ref": "#/components/schemas/TextAnnotationDelta"
+          },
+          {
+            "$ref": "#/components/schemas/TextDelta"
+          },
+          {
+            "$ref": "#/components/schemas/ThoughtSignatureDelta"
+          },
+          {
+            "$ref": "#/components/schemas/ThoughtSummaryDelta"
+          },
+          {
+            "$ref": "#/components/schemas/UrlContextCallDelta"
+          },
+          {
+            "$ref": "#/components/schemas/UrlContextResultDelta"
+          },
+          {
+            "$ref": "#/components/schemas/VideoDelta"
           }
         ],
         "type": "object"
@@ -786,12 +795,16 @@
           "index": {
             "format": "int32",
             "type": "integer"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/StreamMetadata",
+            "description": "Optional metadata accompanying ANY streamed event."
           }
         },
         "required": [
+          "content",
           "event_type",
-          "index",
-          "content"
+          "index"
         ],
         "type": "object"
       },
@@ -818,6 +831,10 @@
           "index": {
             "format": "int32",
             "type": "integer"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/StreamMetadata",
+            "description": "Optional metadata accompanying ANY streamed event."
           }
         },
         "required": [
@@ -840,10 +857,10 @@
             },
             "oneOf": [
               {
-                "$ref": "#/components/schemas/DynamicAgentConfig"
+                "$ref": "#/components/schemas/DeepResearchAgentConfig"
               },
               {
-                "$ref": "#/components/schemas/DeepResearchAgentConfig"
+                "$ref": "#/components/schemas/DynamicAgentConfig"
               }
             ]
           },
@@ -862,10 +879,10 @@
             "description": "The environment configuration for the interaction. Can be an object specifying remote environment sources or a string referencing an existing environment ID.",
             "oneOf": [
               {
-                "type": "string"
+                "$ref": "#/components/schemas/EnvironmentConfig"
               },
               {
-                "$ref": "#/components/schemas/EnvironmentConfig"
+                "type": "string"
               }
             ]
           },
@@ -890,10 +907,10 @@
             "description": "Enforces that the generated response is a JSON object that complies with the JSON schema specified in this field.",
             "oneOf": [
               {
-                "$ref": "#/components/schemas/ResponseFormatList"
+                "$ref": "#/components/schemas/ResponseFormat"
               },
               {
-                "$ref": "#/components/schemas/ResponseFormat"
+                "$ref": "#/components/schemas/ResponseFormatList"
               }
             ]
           },
@@ -1002,10 +1019,10 @@
             "description": "The environment configuration for the interaction. Can be an object specifying remote environment sources or a string referencing an existing environment ID.",
             "oneOf": [
               {
-                "type": "string"
+                "$ref": "#/components/schemas/EnvironmentConfig"
               },
               {
-                "$ref": "#/components/schemas/EnvironmentConfig"
+                "type": "string"
               }
             ]
           },
@@ -1039,10 +1056,10 @@
             "description": "Enforces that the generated response is a JSON object that complies with the JSON schema specified in this field.",
             "oneOf": [
               {
-                "$ref": "#/components/schemas/ResponseFormatList"
+                "$ref": "#/components/schemas/ResponseFormat"
               },
               {
-                "$ref": "#/components/schemas/ResponseFormat"
+                "$ref": "#/components/schemas/ResponseFormatList"
               }
             ]
           },
@@ -1129,8 +1146,8 @@
           }
         },
         "required": [
-          "model",
-          "input"
+          "input",
+          "model"
         ]
       },
       "DeepResearchAgentConfig": {
@@ -1138,6 +1155,10 @@
         "properties": {
           "collaborative_planning": {
             "description": "Enables human-in-the-loop planning for the Deep Research agent. If set to\ntrue, the Deep Research agent will provide a research plan in its response.\nThe agent will then proceed only if the user confirms the plan in the next\nturn.",
+            "type": "boolean"
+          },
+          "enable_bigquery_tool": {
+            "description": "Enables bigquery tool for the Deep Research agent.",
             "type": "boolean"
           },
           "thinking_summaries": {
@@ -1165,6 +1186,10 @@
         ],
         "type": "object"
       },
+      "DeleteInteractionResponse": {
+        "description": "Response for InteractionService.DeleteInteraction.",
+        "type": "object"
+      },
       "DocumentContent": {
         "description": "A document content block.",
         "examples": [
@@ -1188,11 +1213,13 @@
           "mime_type": {
             "description": "The mime type of the document.",
             "enum": [
-              "application/pdf"
+              "application/pdf",
+              "text/csv"
             ],
             "type": "string",
             "x-google-enum-descriptions": [
-              "PDF document format"
+              "PDF document format",
+              "CSV document format"
             ]
           },
           "type": {
@@ -1216,11 +1243,13 @@
           },
           "mime_type": {
             "enum": [
-              "application/pdf"
+              "application/pdf",
+              "text/csv"
             ],
             "type": "string",
             "x-google-enum-descriptions": [
-              "PDF document format"
+              "PDF document format",
+              "CSV document format"
             ]
           },
           "type": {
@@ -1373,6 +1402,16 @@
         "oneOf": [
           {
             "description": "Outbound networking configuration for the sandbox. When specified, restricts which external domains the sandbox can reach. Omit entirely to allow all outbound traffic with no header injection.",
+            "example": {
+              "allowlist": [
+                {
+                  "domain": "pypi.org"
+                },
+                {
+                  "domain": "*.github.com"
+                }
+              ]
+            },
             "properties": {
               "allowlist": {
                 "description": "List of allowed outbound domains. Only requests to listed domains are permitted. Use [{'domain': '*'}] to allow all domains while still injecting headers on specific ones.",
@@ -1382,6 +1421,7 @@
                 "type": "array"
               }
             },
+            "title": "Allowlist",
             "type": "object"
           },
           {
@@ -1389,6 +1429,8 @@
             "enum": [
               "disabled"
             ],
+            "example": "disabled",
+            "title": "Disabled",
             "type": "string"
           }
         ]
@@ -1432,10 +1474,34 @@
           },
           "event_type": {
             "const": "error"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/StreamMetadata",
+            "description": "Optional metadata accompanying ANY streamed event."
           }
         },
         "required": [
           "event_type"
+        ],
+        "type": "object"
+      },
+      "ExaAISearchConfig": {
+        "description": "Used to specify configuration for ExaAISearch.",
+        "properties": {
+          "api_key": {
+            "description": "Required. The API key for ExaAiSearch.",
+            "type": "string"
+          },
+          "custom_config": {
+            "additionalProperties": {
+              "description": "Properties of the object."
+            },
+            "description": "Optional. This field can be used to pass any parameter from the Exa.ai Search API.",
+            "type": "object"
+          }
+        },
+        "required": [
+          "api_key"
         ],
         "type": "object"
       },
@@ -1520,17 +1586,17 @@
           {
             "label": "file_search",
             "lang": "sh",
-            "source": "curl -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\n    \"model\": \"gemini-3-flash-preview\",\n    \"tools\": [{\n      \"type\": \"file_search\",\n      \"file_search_store_names\": [\"fileSearchStores/m64d1sevsr4y-xfyawui3fxqg\"]\n    }],\n    \"input\": \"Who is the author of the book?\"\n  }'\n"
+            "source": "curl -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\n    \"model\": \"gemini-3.5-flash\",\n    \"tools\": [{\n      \"type\": \"file_search\",\n      \"file_search_store_names\": [\"fileSearchStores/m64d1sevsr4y-xfyawui3fxqg\"]\n    }],\n    \"input\": \"Who is the author of the book?\"\n  }'\n"
           },
           {
             "label": "file_search",
             "lang": "python",
-            "source": "from google import genai\n\nclient = genai.Client()\n\n# Create a file search store so we have a valid one to use.\nstore = client.file_search_stores.create()\n\nresponse = client.interactions.create(\n    model=\"gemini-3-flash-preview\",\n    tools=[{\n        \"type\": \"file_search\",\n        \"file_search_store_names\": [store.name]\n    }],\n    input=\"What documents are available?\"\n)\nprint(response.output_text)\n\n# [cleanup]\nclient.file_search_stores.delete(name=store.name)\n# [/cleanup]\n"
+            "source": "from google import genai\n\nclient = genai.Client()\n\n# Create a file search store so we have a valid one to use.\nstore = client.file_search_stores.create()\n\nresponse = client.interactions.create(\n    model=\"gemini-3.5-flash\",\n    tools=[{\n        \"type\": \"file_search\",\n        \"file_search_store_names\": [store.name]\n    }],\n    input=\"What documents are available?\"\n)\nprint(response.output_text)\n\n# [cleanup]\nclient.file_search_stores.delete(name=store.name)\n# [/cleanup]\n"
           },
           {
             "label": "file_search",
             "lang": "javascript",
-            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\n\n// Create a file search store so we have a valid one to use.\nconst store = await ai.fileSearchStores.create({});\nif (!store.name) {\n    throw new Error('Store creation failed: Name is undefined');\n}\n\nconst interaction = await ai.interactions.create({\n    model: 'gemini-3-flash-preview',\n    tools: [{\n        type: 'file_search',\n        file_search_store_names: [store.name]\n    }],\n    input: 'What documents are available?'\n});\nconsole.log(interaction.output_text);\n\n// [cleanup]\nawait ai.fileSearchStores.delete({name: store.name});\n// [/cleanup]\n"
+            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\n\n// Create a file search store so we have a valid one to use.\nconst store = await ai.fileSearchStores.create({});\nif (!store.name) {\n    throw new Error('Store creation failed: Name is undefined');\n}\n\nconst interaction = await ai.interactions.create({\n    model: 'gemini-3.5-flash',\n    tools: [{\n        type: 'file_search',\n        file_search_store_names: [store.name]\n    }],\n    input: 'What documents are available?'\n});\nconsole.log(interaction.output_text);\n\n// [cleanup]\nawait ai.fileSearchStores.delete({name: store.name});\n// [/cleanup]\n"
           }
         ]
       },
@@ -1578,8 +1644,8 @@
           }
         },
         "required": [
-          "type",
-          "id"
+          "id",
+          "type"
         ],
         "type": "object"
       },
@@ -1605,8 +1671,8 @@
           }
         },
         "required": [
-          "type",
-          "result"
+          "result",
+          "type"
         ],
         "type": "object"
       },
@@ -1638,9 +1704,29 @@
           }
         },
         "required": [
-          "type",
-          "call_id"
+          "call_id",
+          "type"
         ],
+        "type": "object"
+      },
+      "Filter": {
+        "description": "Config for filters.",
+        "properties": {
+          "metadata_filter": {
+            "description": "Optional. String for metadata filtering.",
+            "type": "string"
+          },
+          "vector_distance_threshold": {
+            "description": "Optional. Only returns contexts with vector distance smaller than the\nthreshold.",
+            "format": "double",
+            "type": "number"
+          },
+          "vector_similarity_threshold": {
+            "description": "Optional. Only returns contexts with vector similarity larger than the\nthreshold.",
+            "format": "double",
+            "type": "number"
+          }
+        },
         "type": "object"
       },
       "Function": {
@@ -1669,17 +1755,17 @@
           {
             "label": "function_calling",
             "lang": "sh",
-            "source": "curl -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\n    \"model\": \"gemini-3-flash-preview\",\n    \"tools\": [{\n      \"type\": \"function\",\n      \"name\": \"get_weather\",\n      \"description\": \"Get the current weather in a given location\",\n      \"parameters\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"location\": {\n            \"type\": \"string\",\n            \"description\": \"The city and state, e.g. San Francisco, CA\"\n          }\n        },\n        \"required\": [\"location\"]\n      }\n    }],\n    \"input\": \"What is the weather like in Boston, MA?\"\n  }'\n"
+            "source": "curl -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\n    \"model\": \"gemini-3.5-flash\",\n    \"tools\": [{\n      \"type\": \"function\",\n      \"name\": \"get_weather\",\n      \"description\": \"Get the current weather in a given location\",\n      \"parameters\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"location\": {\n            \"type\": \"string\",\n            \"description\": \"The city and state, e.g. San Francisco, CA\"\n          }\n        },\n        \"required\": [\"location\"]\n      }\n    }],\n    \"input\": \"What is the weather like in Boston, MA?\"\n  }'\n"
           },
           {
             "label": "function_calling",
             "lang": "python",
-            "source": "from google import genai\n\nclient = genai.Client()\nresponse = client.interactions.create(\n    model=\"gemini-3-flash-preview\",\n    tools=[{\n        \"type\": \"function\",\n        \"name\": \"get_weather\",\n        \"description\": \"Get the current weather in a given location\",\n        \"parameters\": {\n            \"type\": \"object\",\n            \"properties\": {\n                \"location\": {\n                    \"type\": \"string\",\n                    \"description\": \"The city and state, e.g. San Francisco, CA\"\n                }\n            },\n            \"required\": [\"location\"]\n        }\n    }],\n    input=\"What is the weather like in Boston?\"\n)\nprint(response.steps[-1])\n"
+            "source": "from google import genai\n\nclient = genai.Client()\nresponse = client.interactions.create(\n    model=\"gemini-3.5-flash\",\n    tools=[{\n        \"type\": \"function\",\n        \"name\": \"get_weather\",\n        \"description\": \"Get the current weather in a given location\",\n        \"parameters\": {\n            \"type\": \"object\",\n            \"properties\": {\n                \"location\": {\n                    \"type\": \"string\",\n                    \"description\": \"The city and state, e.g. San Francisco, CA\"\n                }\n            },\n            \"required\": [\"location\"]\n        }\n    }],\n    input=\"What is the weather like in Boston?\"\n)\nprint(response.steps[-1])\n"
           },
           {
             "label": "function_calling",
             "lang": "javascript",
-            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\nconst interaction = await ai.interactions.create({\n    model: 'gemini-3-flash-preview',\n    tools: [{\n        type: 'function',\n        name: 'get_weather',\n        description: 'Get the current weather in a given location',\n        parameters: {\n            type: 'object',\n            properties: {\n                location: {\n                    type: 'string',\n                    description: 'The city and state, e.g. San Francisco, CA'\n                }\n            },\n            required: ['location']\n        }\n    }],\n    input: 'What is the weather like in Boston?'\n});\nconsole.log(interaction.steps.at(-1));\n"
+            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\nconst interaction = await ai.interactions.create({\n    model: 'gemini-3.5-flash',\n    tools: [{\n        type: 'function',\n        name: 'get_weather',\n        description: 'Get the current weather in a given location',\n        parameters: {\n            type: 'object',\n            properties: {\n                location: {\n                    type: 'string',\n                    description: 'The city and state, e.g. San Francisco, CA'\n                }\n            },\n            required: ['location']\n        }\n    }],\n    input: 'What is the weather like in Boston?'\n});\nconsole.log(interaction.steps.at(-1));\n"
           }
         ]
       },
@@ -1698,20 +1784,15 @@
           "name": {
             "type": "string"
           },
-          "signature": {
-            "description": "A signature hash for backend validation.",
-            "format": "byte",
-            "type": "string"
-          },
           "type": {
             "const": "function_call"
           }
         },
         "required": [
-          "type",
-          "name",
           "arguments",
-          "id"
+          "id",
+          "name",
+          "type"
         ],
         "type": "object"
       },
@@ -1748,20 +1829,15 @@
             "description": "Required. The name of the tool to call.",
             "type": "string"
           },
-          "signature": {
-            "description": "A signature hash for backend validation.",
-            "format": "byte",
-            "type": "string"
-          },
           "type": {
             "const": "function_call"
           }
         },
         "required": [
-          "type",
-          "name",
           "arguments",
-          "id"
+          "id",
+          "name",
+          "type"
         ],
         "type": "object"
       },
@@ -1780,7 +1856,11 @@
           "result": {
             "oneOf": [
               {
-                "type": "object"
+                "items": {
+                  "$ref": "#/components/schemas/Content"
+                },
+                "title": "ContentList",
+                "type": "array"
               },
               {
                 "items": {
@@ -1799,9 +1879,9 @@
           }
         },
         "required": [
-          "type",
           "call_id",
-          "result"
+          "result",
+          "type"
         ],
         "type": "object"
       },
@@ -1814,10 +1894,12 @@
               "value": {
                 "call_id": "call_98231",
                 "name": "get_weather",
-                "result": {
-                  "conditions": "Partly Cloudy",
-                  "temperature": "72F"
-                },
+                "result": [
+                  {
+                    "text": "{\"weather\":\"sunny\"}",
+                    "type": "text"
+                  }
+                ],
                 "type": "function_result"
               }
             }
@@ -1840,7 +1922,11 @@
             "description": "The result of the tool call.",
             "oneOf": [
               {
-                "type": "object"
+                "items": {
+                  "$ref": "#/components/schemas/Content"
+                },
+                "title": "ContentList",
+                "type": "array"
               },
               {
                 "items": {
@@ -1854,19 +1940,14 @@
               }
             ]
           },
-          "signature": {
-            "description": "A signature hash for backend validation.",
-            "format": "byte",
-            "type": "string"
-          },
           "type": {
             "const": "function_result"
           }
         },
         "required": [
-          "type",
           "call_id",
-          "result"
+          "result",
+          "type"
         ],
         "type": "object"
       },
@@ -1876,10 +1957,10 @@
         },
         "oneOf": [
           {
-            "$ref": "#/components/schemas/TextContent"
+            "$ref": "#/components/schemas/ImageContent"
           },
           {
-            "$ref": "#/components/schemas/ImageContent"
+            "$ref": "#/components/schemas/TextContent"
           }
         ],
         "type": "object"
@@ -1933,10 +2014,10 @@
             "description": "The tool choice configuration.",
             "oneOf": [
               {
-                "$ref": "#/components/schemas/ToolChoiceType"
+                "$ref": "#/components/schemas/ToolChoiceConfig"
               },
               {
-                "$ref": "#/components/schemas/ToolChoiceConfig"
+                "$ref": "#/components/schemas/ToolChoiceType"
               }
             ]
           },
@@ -1977,17 +2058,17 @@
           {
             "label": "google_maps",
             "lang": "sh",
-            "source": "curl -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\n    \"model\": \"gemini-3-flash-preview\",\n    \"tools\": [{\n      \"type\": \"google_maps\",\n      \"latitude\": 37.7749,\n      \"longitude\": -122.4194\n    }],\n    \"input\": \"What is the best food near me?\"\n  }'\n"
+            "source": "curl -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\n    \"model\": \"gemini-3.5-flash\",\n    \"tools\": [{\n      \"type\": \"google_maps\",\n      \"latitude\": 37.7749,\n      \"longitude\": -122.4194\n    }],\n    \"input\": \"What is the best food near me?\"\n  }'\n"
           },
           {
             "label": "google_maps",
             "lang": "python",
-            "source": "from google import genai\n\nclient = genai.Client()\nresponse = client.interactions.create(\n    model=\"gemini-3-flash-preview\",\n    tools=[{\n        \"type\": \"google_maps\",\n        \"latitude\": 37.7749,\n        \"longitude\": -122.4194\n    }],\n    input=\"What is the best food near me?\"\n)\nprint(response.output_text)\n"
+            "source": "from google import genai\n\nclient = genai.Client()\nresponse = client.interactions.create(\n    model=\"gemini-3.5-flash\",\n    tools=[{\n        \"type\": \"google_maps\",\n        \"latitude\": 37.7749,\n        \"longitude\": -122.4194\n    }],\n    input=\"What is the best food near me?\"\n)\nprint(response.output_text)\n"
           },
           {
             "label": "google_maps",
             "lang": "javascript",
-            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\nconst interaction = await ai.interactions.create({\n    model: 'gemini-3-flash-preview',\n    tools: [{\n        type: 'google_maps',\n        latitude: 37.7749,\n        longitude: -122.4194\n    }],\n    input: 'What is the best food near me?'\n});\nconsole.log(interaction.output_text);\n"
+            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\nconst interaction = await ai.interactions.create({\n    model: 'gemini-3.5-flash',\n    tools: [{\n        type: 'google_maps',\n        latitude: 37.7749,\n        longitude: -122.4194\n    }],\n    input: 'What is the best food near me?'\n});\nconsole.log(interaction.output_text);\n"
           }
         ]
       },
@@ -2060,8 +2141,8 @@
           }
         },
         "required": [
-          "type",
-          "id"
+          "id",
+          "type"
         ],
         "type": "object"
       },
@@ -2194,9 +2275,9 @@
           }
         },
         "required": [
-          "type",
+          "call_id",
           "result",
-          "call_id"
+          "type"
         ],
         "type": "object"
       },
@@ -2232,17 +2313,17 @@
           {
             "label": "google_search",
             "lang": "sh",
-            "source": "curl -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\n    \"model\": \"gemini-3-flash-preview\",\n    \"tools\": [{\n      \"type\": \"google_search\"\n    }],\n    \"input\": \"Who is the current president of France?\"\n  }'\n"
+            "source": "curl -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\n    \"model\": \"gemini-3.5-flash\",\n    \"tools\": [{\n      \"type\": \"google_search\"\n    }],\n    \"input\": \"Who is the current president of France?\"\n  }'\n"
           },
           {
             "label": "google_search",
             "lang": "python",
-            "source": "from google import genai\n\nclient = genai.Client()\nresponse = client.interactions.create(\n    model=\"gemini-3-flash-preview\",\n    tools=[{\"type\": \"google_search\"}],\n    input=\"Who is the current president of France?\"\n)\nprint(response.output_text)\n"
+            "source": "from google import genai\n\nclient = genai.Client()\nresponse = client.interactions.create(\n    model=\"gemini-3.5-flash\",\n    tools=[{\"type\": \"google_search\"}],\n    input=\"Who is the current president of France?\"\n)\nprint(response.output_text)\n"
           },
           {
             "label": "google_search",
             "lang": "javascript",
-            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\nconst interaction = await ai.interactions.create({\n    model: 'gemini-3-flash-preview',\n    tools: [{ type: 'google_search' }],\n    input: 'Who is the current president of France?'\n});\nconsole.log(interaction.output_text);\n"
+            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\nconst interaction = await ai.interactions.create({\n    model: 'gemini-3.5-flash',\n    tools: [{ type: 'google_search' }],\n    input: 'Who is the current president of France?'\n});\nconsole.log(interaction.output_text);\n"
           }
         ]
       },
@@ -2274,8 +2355,8 @@
           }
         },
         "required": [
-          "type",
-          "arguments"
+          "arguments",
+          "type"
         ],
         "type": "object"
       },
@@ -2328,9 +2409,9 @@
           }
         },
         "required": [
-          "type",
           "arguments",
-          "id"
+          "id",
+          "type"
         ],
         "type": "object"
       },
@@ -2378,8 +2459,8 @@
           }
         },
         "required": [
-          "type",
-          "result"
+          "result",
+          "type"
         ],
         "type": "object"
       },
@@ -2439,9 +2520,9 @@
           }
         },
         "required": [
-          "type",
+          "call_id",
           "result",
-          "call_id"
+          "type"
         ],
         "type": "object"
       },
@@ -2466,6 +2547,17 @@
               "Grounding with Google Maps.",
               "Grounding with customer's data, for example, VertexAISearch."
             ]
+          }
+        },
+        "type": "object"
+      },
+      "HybridSearch": {
+        "description": "Config for Hybrid Search.",
+        "properties": {
+          "alpha": {
+            "description": "Optional. Alpha value controls the weight between dense and sparse vector search\nresults.",
+            "format": "float",
+            "type": "number"
           }
         },
         "type": "object"
@@ -2734,7 +2826,7 @@
         "example": {
           "created": "2025-12-04T15:01:45Z",
           "id": "v1_ChdXS0l4YWZXTk9xbk0xZThQczhEcmlROBIXV0tJeGFmV05PcW5NMWU4UHM4RHJpUTg",
-          "model": "gemini-3-flash-preview",
+          "model": "gemini-3.5-flash",
           "object": "interaction",
           "status": "completed",
           "steps": [
@@ -2776,10 +2868,10 @@
             },
             "oneOf": [
               {
-                "$ref": "#/components/schemas/DynamicAgentConfig"
+                "$ref": "#/components/schemas/DeepResearchAgentConfig"
               },
               {
-                "$ref": "#/components/schemas/DeepResearchAgentConfig"
+                "$ref": "#/components/schemas/DynamicAgentConfig"
               }
             ]
           },
@@ -2793,10 +2885,10 @@
             "description": "The environment configuration for the interaction. Can be an object specifying remote environment sources or a string referencing an existing environment ID.",
             "oneOf": [
               {
-                "type": "string"
+                "$ref": "#/components/schemas/EnvironmentConfig"
               },
               {
-                "$ref": "#/components/schemas/EnvironmentConfig"
+                "type": "string"
               }
             ]
           },
@@ -2830,10 +2922,10 @@
             "description": "Enforces that the generated response is a JSON object that complies with the JSON schema specified in this field.",
             "oneOf": [
               {
-                "$ref": "#/components/schemas/ResponseFormatList"
+                "$ref": "#/components/schemas/ResponseFormat"
               },
               {
-                "$ref": "#/components/schemas/ResponseFormat"
+                "$ref": "#/components/schemas/ResponseFormatList"
               }
             ]
           },
@@ -2918,11 +3010,11 @@
           }
         },
         "required": [
+          "created",
           "id",
           "status",
-          "created",
-          "updated",
-          "steps"
+          "steps",
+          "updated"
         ]
       },
       "InteractionCompletedEvent": {
@@ -2936,7 +3028,7 @@
                 "interaction": {
                   "created": "2025-12-04T15:01:45Z",
                   "id": "v1_ChdXS0l4YWZXTk9xbk0xZThQczhEcmlROBIXV0tJeGFmV05PcW5NMWU4UHM4RHJpUTg",
-                  "model": "gemini-3-flash-preview",
+                  "model": "gemini-3.5-flash",
                   "status": "completed",
                   "updated": "2025-12-04T15:01:45Z"
                 }
@@ -2955,6 +3047,10 @@
           "interaction": {
             "$ref": "#/components/schemas/Interaction",
             "description": "Required. The completed interaction with empty outputs to reduce the payload size.\nUse the preceding ContentDelta events for the actual output."
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/StreamMetadata",
+            "description": "Optional metadata accompanying ANY streamed event."
           }
         },
         "required": [
@@ -2974,7 +3070,7 @@
                 "interaction": {
                   "created": "2025-12-04T15:01:45Z",
                   "id": "v1_ChdXS0l4YWZXTk9xbk0xZThQczhEcmlROBIXV0tJeGFmV05PcW5NMWU4UHM4RHJpUTg",
-                  "model": "gemini-3-flash-preview",
+                  "model": "gemini-3.5-flash",
                   "status": "in_progress",
                   "updated": "2025-12-04T15:01:45Z"
                 }
@@ -2992,6 +3088,10 @@
           },
           "interaction": {
             "$ref": "#/components/schemas/Interaction"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/StreamMetadata",
+            "description": "Optional metadata accompanying ANY streamed event."
           }
         },
         "required": [
@@ -3006,22 +3106,22 @@
         },
         "oneOf": [
           {
-            "$ref": "#/components/schemas/InteractionCreatedEvent"
+            "$ref": "#/components/schemas/ErrorEvent"
           },
           {
             "$ref": "#/components/schemas/InteractionCompletedEvent"
           },
           {
+            "$ref": "#/components/schemas/InteractionCreatedEvent"
+          },
+          {
             "$ref": "#/components/schemas/InteractionStatusUpdate"
           },
           {
-            "$ref": "#/components/schemas/ErrorEvent"
+            "$ref": "#/components/schemas/StepDelta"
           },
           {
             "$ref": "#/components/schemas/StepStart"
-          },
-          {
-            "$ref": "#/components/schemas/StepDelta"
           },
           {
             "$ref": "#/components/schemas/StepStop"
@@ -3052,6 +3152,10 @@
           },
           "interaction_id": {
             "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/StreamMetadata",
+            "description": "Optional metadata accompanying ANY streamed event."
           },
           "status": {
             "enum": [
@@ -3086,7 +3190,7 @@
         "description": "The input for the interaction.",
         "oneOf": [
           {
-            "type": "string"
+            "$ref": "#/components/schemas/Content"
           },
           {
             "items": {
@@ -3103,7 +3207,7 @@
             "type": "array"
           },
           {
-            "$ref": "#/components/schemas/Content"
+            "type": "string"
           }
         ]
       },
@@ -3115,7 +3219,7 @@
             },
             "type": "array"
           },
-          "nextPageToken": {
+          "next_page_token": {
             "type": "string"
           }
         },
@@ -3175,17 +3279,17 @@
           {
             "label": "mcp_server",
             "lang": "sh",
-            "source": "curl -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\n    \"model\": \"gemini-3-flash-preview\",\n    \"tools\": [{\n      \"type\": \"mcp_server\",\n      \"name\": \"weather_service\",\n      \"url\": \"https://gemini-api-demos.uc.r.appspot.com/mcp\"\n    }],\n    \"input\": \"Today is 12-05-2025, what is the temperature today in London?\"\n  }'\n"
+            "source": "curl -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\n    \"model\": \"gemini-3.5-flash\",\n    \"tools\": [{\n      \"type\": \"mcp_server\",\n      \"name\": \"weather_service\",\n      \"url\": \"https://gemini-api-demos.uc.r.appspot.com/mcp\"\n    }],\n    \"input\": \"Today is 12-05-2025, what is the temperature today in London?\"\n  }'\n"
           },
           {
             "label": "mcp_server",
             "lang": "python",
-            "source": "from google import genai\n\nclient = genai.Client()\nresponse = client.interactions.create(\n    model=\"gemini-3-flash-preview\",\n    tools=[{\n        \"type\": \"mcp_server\",\n        \"name\": \"weather_service\",\n        \"url\": \"https://gemini-api-demos.uc.r.appspot.com/mcp\"\n    }],\n    input=\"Today is 12-05-2025, what is the temperature today in London?\"\n)\nprint(response.output_text)\n"
+            "source": "from google import genai\n\nclient = genai.Client()\nresponse = client.interactions.create(\n    model=\"gemini-3.5-flash\",\n    tools=[{\n        \"type\": \"mcp_server\",\n        \"name\": \"weather_service\",\n        \"url\": \"https://gemini-api-demos.uc.r.appspot.com/mcp\"\n    }],\n    input=\"Today is 12-05-2025, what is the temperature today in London?\"\n)\nprint(response.output_text)\n"
           },
           {
             "label": "mcp_server",
             "lang": "javascript",
-            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\nconst interaction = await ai.interactions.create({\n    model: 'gemini-3-flash-preview',\n    tools: [{\n        type: 'mcp_server',\n        name: 'weather_service',\n        url: 'https://gemini-api-demos.uc.r.appspot.com/mcp'\n    }],\n    input: 'Today is 12-05-2025, what is the temperature today in London?'\n});\nconsole.log(interaction.output_text);\n"
+            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\nconst interaction = await ai.interactions.create({\n    model: 'gemini-3.5-flash',\n    tools: [{\n        type: 'mcp_server',\n        name: 'weather_service',\n        url: 'https://gemini-api-demos.uc.r.appspot.com/mcp'\n    }],\n    input: 'Today is 12-05-2025, what is the temperature today in London?'\n});\nconsole.log(interaction.output_text);\n"
           }
         ]
       },
@@ -3203,20 +3307,15 @@
           "server_name": {
             "type": "string"
           },
-          "signature": {
-            "description": "A signature hash for backend validation.",
-            "format": "byte",
-            "type": "string"
-          },
           "type": {
             "const": "mcp_server_tool_call"
           }
         },
         "required": [
-          "type",
+          "arguments",
           "name",
           "server_name",
-          "arguments"
+          "type"
         ],
         "type": "object"
       },
@@ -3259,21 +3358,16 @@
             "description": "Required. The name of the used MCP server.",
             "type": "string"
           },
-          "signature": {
-            "description": "A signature hash for backend validation.",
-            "format": "byte",
-            "type": "string"
-          },
           "type": {
             "const": "mcp_server_tool_call"
           }
         },
         "required": [
-          "type",
+          "arguments",
+          "id",
           "name",
           "server_name",
-          "arguments",
-          "id"
+          "type"
         ],
         "type": "object"
       },
@@ -3285,7 +3379,11 @@
           "result": {
             "oneOf": [
               {
-                "type": "object"
+                "items": {
+                  "$ref": "#/components/schemas/Content"
+                },
+                "title": "ContentList",
+                "type": "array"
               },
               {
                 "items": {
@@ -3302,18 +3400,13 @@
           "server_name": {
             "type": "string"
           },
-          "signature": {
-            "description": "A signature hash for backend validation.",
-            "format": "byte",
-            "type": "string"
-          },
           "type": {
             "const": "mcp_server_tool_result"
           }
         },
         "required": [
-          "type",
-          "result"
+          "result",
+          "type"
         ],
         "type": "object"
       },
@@ -3346,10 +3439,11 @@
             "description": "The output from the MCP server call. Can be simple text or rich content.",
             "oneOf": [
               {
-                "type": "object"
-              },
-              {
-                "type": "string"
+                "items": {
+                  "$ref": "#/components/schemas/Content"
+                },
+                "title": "ContentList",
+                "type": "array"
               },
               {
                 "items": {
@@ -3357,6 +3451,9 @@
                 },
                 "title": "FunctionResultSubcontentList",
                 "type": "array"
+              },
+              {
+                "type": "object"
               }
             ]
           },
@@ -3364,19 +3461,14 @@
             "description": "The name of the used MCP server.",
             "type": "string"
           },
-          "signature": {
-            "description": "A signature hash for backend validation.",
-            "format": "byte",
-            "type": "string"
-          },
           "type": {
             "const": "mcp_server_tool_result"
           }
         },
         "required": [
-          "type",
           "call_id",
-          "result"
+          "result",
+          "type"
         ],
         "type": "object"
       },
@@ -3421,33 +3513,8 @@
             "x-stainless-nominal": false
           },
           {
-            "const": "gemini-2.5-flash",
-            "description": "Our first hybrid reasoning model which supports a 1M token context window and has thinking budgets.",
-            "x-stainless-nominal": false
-          },
-          {
-            "const": "gemini-2.5-flash-image",
-            "description": "Our native image generation model, optimized for speed, flexibility, and contextual understanding. Text input and output is priced the same as 2.5 Flash.",
-            "x-stainless-nominal": false
-          },
-          {
-            "const": "gemini-2.5-flash-lite",
-            "description": "Our smallest and most cost effective model, built for at scale usage.",
-            "x-stainless-nominal": false
-          },
-          {
-            "const": "gemini-2.5-flash-lite-preview-09-2025",
-            "description": "The latest model based on Gemini 2.5 Flash lite optimized for cost-efficiency, high throughput and high quality.",
-            "x-stainless-nominal": false
-          },
-          {
-            "const": "gemini-2.5-flash-native-audio-preview-12-2025",
-            "description": "Our native audio models optimized for higher quality audio outputs with better pacing, voice naturalness, verbosity, and mood.",
-            "x-stainless-nominal": false
-          },
-          {
-            "const": "gemini-2.5-flash-preview-09-2025",
-            "description": "The latest model based on the 2.5 Flash model. 2.5 Flash Preview is best for large scale processing, low-latency, high volume tasks that require thinking, and agentic use cases.",
+            "const": "gemini-3.1-flash-tts-preview",
+            "description": "Gemini 3.1 Flash TTS: Powerful, low-latency speech generation. Enjoy natural outputs, steerable prompts, and new expressive audio tags for precise narration control.",
             "x-stainless-nominal": false
           },
           {
@@ -3456,28 +3523,18 @@
             "x-stainless-nominal": false
           },
           {
-            "const": "gemini-2.5-pro",
-            "description": "Our state-of-the-art multipurpose model, which excels at coding and complex reasoning tasks.",
-            "x-stainless-nominal": false
-          },
-          {
             "const": "gemini-2.5-pro-preview-tts",
             "description": "Our 2.5 Pro text-to-speech audio model optimized for powerful, low-latency speech generation for more natural outputs and easier to steer prompts.",
             "x-stainless-nominal": false
           },
           {
-            "const": "gemini-3-flash-preview",
-            "description": "Our most intelligent model built for speed, combining frontier intelligence with superior search and grounding.",
+            "const": "lyria-3-pro-preview",
+            "description": "Our advanced, full-song generative model with deep compositional understanding, optimized for precise structural control and complex transitions across diverse musical styles.",
             "x-stainless-nominal": false
           },
           {
-            "const": "gemini-3-pro-image-preview",
-            "description": "State-of-the-art image generation and editing model.",
-            "x-stainless-nominal": "false`"
-          },
-          {
-            "const": "gemini-3-pro-preview",
-            "description": "Our most intelligent model with SOTA reasoning and multimodal understanding, and powerful agentic and vibe coding capabilities.",
+            "const": "gemini-2.5-flash",
+            "description": "Our first hybrid reasoning model which supports a 1M token context window and has thinking budgets.",
             "x-stainless-nominal": false
           },
           {
@@ -3486,8 +3543,8 @@
             "x-stainless-nominal": false
           },
           {
-            "const": "gemini-3.1-flash-image-preview",
-            "description": "Pro-level visual intelligence with Flash-speed efficiency and reality-grounded generation capabilities.",
+            "const": "lyria-3-clip-preview",
+            "description": "Our low-latency, music generation model optimized for high-fidelity audio clips and precise rhythmic control.",
             "x-stainless-nominal": false
           },
           {
@@ -3501,23 +3558,58 @@
             "x-stainless-nominal": false
           },
           {
-            "const": "gemini-3.1-flash-tts-preview",
-            "description": "Gemini 3.1 Flash TTS: Powerful, low-latency speech generation. Enjoy natural outputs, steerable prompts, and new expressive audio tags for precise narration control.",
-            "x-stainless-nominal": false
-          },
-          {
-            "const": "lyria-3-clip-preview",
-            "description": "Our low-latency, music generation model optimized for high-fidelity audio clips and precise rhythmic control.",
-            "x-stainless-nominal": false
-          },
-          {
-            "const": "lyria-3-pro-preview",
-            "description": "Our advanced, full-song generative model with deep compositional understanding, optimized for precise structural control and complex transitions across diverse musical styles.",
+            "const": "gemini-3-flash-preview",
+            "description": "Our most intelligent model built for speed, combining frontier intelligence with superior search and grounding.",
             "x-stainless-nominal": false
           },
           {
             "const": "gemini-3.5-flash",
             "description": "Our most intelligent model for sustained frontier performance in agentic and coding tasks.",
+            "x-stainless-nominal": false
+          },
+          {
+            "const": "gemini-3-pro-preview",
+            "description": "Our most intelligent model with SOTA reasoning and multimodal understanding, and powerful agentic and vibe coding capabilities.",
+            "x-stainless-nominal": false
+          },
+          {
+            "const": "gemini-2.5-flash-native-audio-preview-12-2025",
+            "description": "Our native audio models optimized for higher quality audio outputs with better pacing, voice naturalness, verbosity, and mood.",
+            "x-stainless-nominal": false
+          },
+          {
+            "const": "gemini-2.5-flash-image",
+            "description": "Our native image generation model, optimized for speed, flexibility, and contextual understanding. Text input and output is priced the same as 2.5 Flash.",
+            "x-stainless-nominal": false
+          },
+          {
+            "const": "gemini-2.5-flash-lite",
+            "description": "Our smallest and most cost effective model, built for at scale usage.",
+            "x-stainless-nominal": false
+          },
+          {
+            "const": "gemini-2.5-pro",
+            "description": "Our state-of-the-art multipurpose model, which excels at coding and complex reasoning tasks.",
+            "x-stainless-nominal": false
+          },
+          {
+            "const": "gemini-3.1-flash-image-preview",
+            "description": "Pro-level visual intelligence with Flash-speed efficiency and reality-grounded generation capabilities.",
+            "x-stainless-nominal": false
+          },
+          {
+            "const": "gemini-3-pro-image-preview",
+            "description": "State-of-the-art image generation and editing model.",
+            "x-stainless-nominal": "false`"
+          },
+          {
+            "const": "gemini-2.5-flash-lite-preview-09-2025",
+            "description": "The latest model based on Gemini 2.5 Flash lite optimized for cost-efficiency, high throughput and high quality.",
+            "x-stainless-nominal": false
+          },
+          {
+            "const": "gemini-2.5-flash-preview-09-2025",
+            "description": "The latest model based on the 2.5 Flash model. 2.5 Flash Preview is best for large scale processing, low-latency, high volume tasks that require thinking, and agentic use cases.",
             "x-stainless-nominal": false
           }
         ],
@@ -3556,6 +3648,23 @@
         "required": [
           "type"
         ],
+        "type": "object"
+      },
+      "ParallelAISearchConfig": {
+        "description": "Used to specify configuration for ParallelAISearch.",
+        "properties": {
+          "api_key": {
+            "description": "Optional. The API key for ParallelAiSearch.",
+            "type": "string"
+          },
+          "custom_config": {
+            "additionalProperties": {
+              "description": "Properties of the object."
+            },
+            "description": "Optional. Custom configs for ParallelAiSearch.",
+            "type": "object"
+          }
+        },
         "type": "object"
       },
       "PingWebhookRequest": {
@@ -3633,16 +3742,109 @@
         },
         "type": "object"
       },
+      "RagResource": {
+        "description": "The definition of the Rag resource.",
+        "properties": {
+          "rag_corpus": {
+            "description": "Optional. RagCorpora resource name.",
+            "type": "string"
+          },
+          "rag_file_ids": {
+            "description": "Optional. rag_file_id. The files should be in the same rag_corpus set in\nrag_corpus field.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "RagRetrievalConfig": {
+        "description": "Specifies the context retrieval config.",
+        "properties": {
+          "filter": {
+            "$ref": "#/components/schemas/Filter",
+            "description": "Optional. Config for filters."
+          },
+          "hybrid_search": {
+            "$ref": "#/components/schemas/HybridSearch",
+            "description": "Optional. Config for Hybrid Search."
+          },
+          "ranking": {
+            "$ref": "#/components/schemas/Ranking",
+            "description": "Optional. Config for ranking and reranking."
+          },
+          "top_k": {
+            "description": "Optional. The number of contexts to retrieve.",
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "RagStoreConfig": {
+        "description": "Use to specify configuration for RAG Store.",
+        "properties": {
+          "rag_resources": {
+            "description": "Optional. The representation of the rag source.",
+            "items": {
+              "$ref": "#/components/schemas/RagResource"
+            },
+            "type": "array"
+          },
+          "rag_retrieval_config": {
+            "$ref": "#/components/schemas/RagRetrievalConfig",
+            "description": "Optional. The retrieval config for the Rag query."
+          },
+          "similarity_top_k": {
+            "deprecated": true,
+            "description": "Optional. Number of top k results to return from the selected corpora.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "vector_distance_threshold": {
+            "deprecated": true,
+            "description": "Optional. Only return results with vector distance smaller than the threshold.",
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "RankService": {
+        "description": "Config for Rank Service.",
+        "properties": {
+          "model_name": {
+            "description": "Optional. The model name of the rank service.",
+            "type": "string"
+          },
+          "ranking_config": {
+            "const": "rank_service"
+          }
+        },
+        "required": [
+          "ranking_config"
+        ],
+        "type": "object"
+      },
+      "Ranking": {
+        "$ref": "#/components/schemas/RankService",
+        "description": "Config for ranking and reranking.",
+        "discriminator": {
+          "propertyName": "type"
+        },
+        "type": "object"
+      },
       "ResponseFormat": {
         "oneOf": [
           {
             "$ref": "#/components/schemas/AudioResponseFormat"
           },
           {
-            "$ref": "#/components/schemas/TextResponseFormat"
+            "$ref": "#/components/schemas/ImageResponseFormat"
           },
           {
-            "$ref": "#/components/schemas/ImageResponseFormat"
+            "$ref": "#/components/schemas/TextResponseFormat"
           },
           {
             "type": "object"
@@ -3682,14 +3884,32 @@
       "Retrieval": {
         "description": "A tool that can be used by the model to retrieve files.",
         "properties": {
+          "exa_ai_search_config": {
+            "$ref": "#/components/schemas/ExaAISearchConfig",
+            "description": "Used to specify configuration for ExaAISearch."
+          },
+          "parallel_ai_search_config": {
+            "$ref": "#/components/schemas/ParallelAISearchConfig",
+            "description": "Used to specify configuration for ParallelAISearch."
+          },
+          "rag_store_config": {
+            "$ref": "#/components/schemas/RagStoreConfig",
+            "description": "Used to specify configuration for RagStore."
+          },
           "retrieval_types": {
             "description": "The types of file retrieval to enable.",
             "items": {
               "enum": [
-                "vertex_ai_search"
+                "vertex_ai_search",
+                "rag_store",
+                "exa_ai_search",
+                "parallel_ai_search"
               ],
               "type": "string",
               "x-google-enum-descriptions": [
+                "",
+                "",
+                "",
                 ""
               ]
             },
@@ -3847,7 +4067,40 @@
         },
         "oneOf": [
           {
-            "$ref": "#/components/schemas/UserInputStep"
+            "$ref": "#/components/schemas/CodeExecutionCallStep"
+          },
+          {
+            "$ref": "#/components/schemas/CodeExecutionResultStep"
+          },
+          {
+            "$ref": "#/components/schemas/FileSearchCallStep"
+          },
+          {
+            "$ref": "#/components/schemas/FileSearchResultStep"
+          },
+          {
+            "$ref": "#/components/schemas/FunctionCallStep"
+          },
+          {
+            "$ref": "#/components/schemas/FunctionResultStep"
+          },
+          {
+            "$ref": "#/components/schemas/GoogleMapsCallStep"
+          },
+          {
+            "$ref": "#/components/schemas/GoogleMapsResultStep"
+          },
+          {
+            "$ref": "#/components/schemas/GoogleSearchCallStep"
+          },
+          {
+            "$ref": "#/components/schemas/GoogleSearchResultStep"
+          },
+          {
+            "$ref": "#/components/schemas/McpServerToolCallStep"
+          },
+          {
+            "$ref": "#/components/schemas/McpServerToolResultStep"
           },
           {
             "$ref": "#/components/schemas/ModelOutputStep"
@@ -3856,46 +4109,13 @@
             "$ref": "#/components/schemas/ThoughtStep"
           },
           {
-            "$ref": "#/components/schemas/FunctionCallStep"
-          },
-          {
-            "$ref": "#/components/schemas/CodeExecutionCallStep"
-          },
-          {
             "$ref": "#/components/schemas/UrlContextCallStep"
-          },
-          {
-            "$ref": "#/components/schemas/McpServerToolCallStep"
-          },
-          {
-            "$ref": "#/components/schemas/GoogleSearchCallStep"
-          },
-          {
-            "$ref": "#/components/schemas/FileSearchCallStep"
-          },
-          {
-            "$ref": "#/components/schemas/GoogleMapsCallStep"
-          },
-          {
-            "$ref": "#/components/schemas/FunctionResultStep"
-          },
-          {
-            "$ref": "#/components/schemas/CodeExecutionResultStep"
           },
           {
             "$ref": "#/components/schemas/UrlContextResultStep"
           },
           {
-            "$ref": "#/components/schemas/GoogleSearchResultStep"
-          },
-          {
-            "$ref": "#/components/schemas/McpServerToolResultStep"
-          },
-          {
-            "$ref": "#/components/schemas/FileSearchResultStep"
-          },
-          {
-            "$ref": "#/components/schemas/GoogleMapsResultStep"
+            "$ref": "#/components/schemas/UserInputStep"
           }
         ],
         "type": "object"
@@ -3930,12 +4150,16 @@
           "index": {
             "format": "int32",
             "type": "integer"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/StreamMetadata",
+            "description": "Optional metadata accompanying ANY streamed event."
           }
         },
         "required": [
+          "delta",
           "event_type",
-          "index",
-          "delta"
+          "index"
         ],
         "type": "object"
       },
@@ -3945,70 +4169,70 @@
         },
         "oneOf": [
           {
-            "$ref": "#/components/schemas/TextDelta"
-          },
-          {
-            "$ref": "#/components/schemas/ImageDelta"
+            "$ref": "#/components/schemas/ArgumentsDelta"
           },
           {
             "$ref": "#/components/schemas/AudioDelta"
           },
           {
-            "$ref": "#/components/schemas/DocumentDelta"
-          },
-          {
-            "$ref": "#/components/schemas/VideoDelta"
-          },
-          {
-            "$ref": "#/components/schemas/ThoughtSummaryDelta"
-          },
-          {
-            "$ref": "#/components/schemas/ThoughtSignatureDelta"
-          },
-          {
-            "$ref": "#/components/schemas/TextAnnotationDelta"
-          },
-          {
-            "$ref": "#/components/schemas/ArgumentsDelta"
-          },
-          {
             "$ref": "#/components/schemas/CodeExecutionCallDelta"
-          },
-          {
-            "$ref": "#/components/schemas/UrlContextCallDelta"
-          },
-          {
-            "$ref": "#/components/schemas/GoogleSearchCallDelta"
-          },
-          {
-            "$ref": "#/components/schemas/McpServerToolCallDelta"
-          },
-          {
-            "$ref": "#/components/schemas/FileSearchCallDelta"
-          },
-          {
-            "$ref": "#/components/schemas/GoogleMapsCallDelta"
           },
           {
             "$ref": "#/components/schemas/CodeExecutionResultDelta"
           },
           {
-            "$ref": "#/components/schemas/UrlContextResultDelta"
+            "$ref": "#/components/schemas/DocumentDelta"
           },
           {
-            "$ref": "#/components/schemas/GoogleSearchResultDelta"
-          },
-          {
-            "$ref": "#/components/schemas/McpServerToolResultDelta"
+            "$ref": "#/components/schemas/FileSearchCallDelta"
           },
           {
             "$ref": "#/components/schemas/FileSearchResultDelta"
           },
           {
+            "$ref": "#/components/schemas/FunctionResultDelta"
+          },
+          {
+            "$ref": "#/components/schemas/GoogleMapsCallDelta"
+          },
+          {
             "$ref": "#/components/schemas/GoogleMapsResultDelta"
           },
           {
-            "$ref": "#/components/schemas/FunctionResultDelta"
+            "$ref": "#/components/schemas/GoogleSearchCallDelta"
+          },
+          {
+            "$ref": "#/components/schemas/GoogleSearchResultDelta"
+          },
+          {
+            "$ref": "#/components/schemas/ImageDelta"
+          },
+          {
+            "$ref": "#/components/schemas/McpServerToolCallDelta"
+          },
+          {
+            "$ref": "#/components/schemas/McpServerToolResultDelta"
+          },
+          {
+            "$ref": "#/components/schemas/TextAnnotationDelta"
+          },
+          {
+            "$ref": "#/components/schemas/TextDelta"
+          },
+          {
+            "$ref": "#/components/schemas/ThoughtSignatureDelta"
+          },
+          {
+            "$ref": "#/components/schemas/ThoughtSummaryDelta"
+          },
+          {
+            "$ref": "#/components/schemas/UrlContextCallDelta"
+          },
+          {
+            "$ref": "#/components/schemas/UrlContextResultDelta"
+          },
+          {
+            "$ref": "#/components/schemas/VideoDelta"
           }
         ],
         "type": "object"
@@ -4039,6 +4263,10 @@
           "index": {
             "format": "int32",
             "type": "integer"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/StreamMetadata",
+            "description": "Optional metadata accompanying ANY streamed event."
           },
           "step": {
             "$ref": "#/components/schemas/Step"
@@ -4074,12 +4302,24 @@
           "index": {
             "format": "int32",
             "type": "integer"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/StreamMetadata",
+            "description": "Optional metadata accompanying ANY streamed event."
           }
         },
         "required": [
           "event_type",
           "index"
         ],
+        "type": "object"
+      },
+      "StreamMetadata": {
+        "properties": {
+          "usage": {
+            "$ref": "#/components/schemas/Usage"
+          }
+        },
         "type": "object"
       },
       "TextAnnotationDelta": {
@@ -4130,8 +4370,8 @@
           }
         },
         "required": [
-          "type",
-          "text"
+          "text",
+          "type"
         ],
         "type": "object"
       },
@@ -4145,8 +4385,8 @@
           }
         },
         "required": [
-          "type",
-          "text"
+          "text",
+          "type"
         ],
         "type": "object"
       },
@@ -4171,8 +4411,8 @@
                     }
                   },
                   "required": [
-                    "recipe_name",
-                    "ingredients"
+                    "ingredients",
+                    "recipe_name"
                   ],
                   "type": "object"
                 },
@@ -4340,10 +4580,10 @@
         },
         "oneOf": [
           {
-            "$ref": "#/components/schemas/TextContent"
+            "$ref": "#/components/schemas/ImageContent"
           },
           {
-            "$ref": "#/components/schemas/ImageContent"
+            "$ref": "#/components/schemas/TextContent"
           }
         ],
         "type": "object"
@@ -4351,7 +4591,7 @@
       "ThoughtSummaryDelta": {
         "properties": {
           "content": {
-            "$ref": "#/components/schemas/ThoughtSummaryContent",
+            "$ref": "#/components/schemas/Content",
             "description": "A new summary item to be added to the thought."
           },
           "type": {
@@ -4370,31 +4610,31 @@
         },
         "oneOf": [
           {
-            "$ref": "#/components/schemas/Function"
-          },
-          {
             "$ref": "#/components/schemas/CodeExecution"
-          },
-          {
-            "$ref": "#/components/schemas/UrlContext"
           },
           {
             "$ref": "#/components/schemas/ComputerUse"
           },
           {
-            "$ref": "#/components/schemas/McpServer"
-          },
-          {
-            "$ref": "#/components/schemas/GoogleSearch"
-          },
-          {
             "$ref": "#/components/schemas/FileSearch"
+          },
+          {
+            "$ref": "#/components/schemas/Function"
           },
           {
             "$ref": "#/components/schemas/GoogleMaps"
           },
           {
+            "$ref": "#/components/schemas/GoogleSearch"
+          },
+          {
+            "$ref": "#/components/schemas/McpServer"
+          },
+          {
             "$ref": "#/components/schemas/Retrieval"
+          },
+          {
+            "$ref": "#/components/schemas/UrlContext"
           }
         ],
         "type": "object"
@@ -4493,17 +4733,17 @@
           {
             "label": "url_context",
             "lang": "sh",
-            "source": "curl -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\n    \"model\": \"gemini-3-flash-preview\",\n    \"tools\": [{\n      \"type\": \"url_context\"\n    }],\n    \"input\": \"Summarize https://www.example.com\"\n  }'\n"
+            "source": "curl -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\n    \"model\": \"gemini-3.5-flash\",\n    \"tools\": [{\n      \"type\": \"url_context\"\n    }],\n    \"input\": \"Summarize https://www.example.com\"\n  }'\n"
           },
           {
             "label": "url_context",
             "lang": "python",
-            "source": "from google import genai\n\nclient = genai.Client()\nresponse = client.interactions.create(\n    model=\"gemini-3-flash-preview\",\n    tools=[{\"type\": \"url_context\"}],\n    input=\"Summarize https://www.example.com\"\n)\nprint(response.output_text)\n"
+            "source": "from google import genai\n\nclient = genai.Client()\nresponse = client.interactions.create(\n    model=\"gemini-3.5-flash\",\n    tools=[{\"type\": \"url_context\"}],\n    input=\"Summarize https://www.example.com\"\n)\nprint(response.output_text)\n"
           },
           {
             "label": "url_context",
             "lang": "javascript",
-            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\nconst interaction = await ai.interactions.create({\n    model: 'gemini-3-flash-preview',\n    tools: [{ type: 'url_context' }],\n    input: 'Summarize https://www.example.com'\n});\nconsole.log(interaction.output_text);\n"
+            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\nconst interaction = await ai.interactions.create({\n    model: 'gemini-3.5-flash',\n    tools: [{ type: 'url_context' }],\n    input: 'Summarize https://www.example.com'\n});\nconsole.log(interaction.output_text);\n"
           }
         ]
       },
@@ -4535,8 +4775,8 @@
           }
         },
         "required": [
-          "type",
-          "arguments"
+          "arguments",
+          "type"
         ],
         "type": "object"
       },
@@ -4577,9 +4817,9 @@
           }
         },
         "required": [
-          "type",
           "arguments",
-          "id"
+          "id",
+          "type"
         ],
         "type": "object"
       },
@@ -4643,8 +4883,8 @@
           }
         },
         "required": [
-          "type",
-          "result"
+          "result",
+          "type"
         ],
         "type": "object"
       },
@@ -4720,9 +4960,9 @@
           }
         },
         "required": [
-          "type",
+          "call_id",
           "result",
-          "call_id"
+          "type"
         ],
         "type": "object"
       },
@@ -5012,11 +5252,6 @@
                   "type": "string"
                 },
                 {
-                  "const": "batch.succeeded",
-                  "description": "Batch processing finished successfully.",
-                  "x-stainless-nominal": false
-                },
-                {
                   "const": "batch.expired",
                   "description": "Batch has not been processed within the 48h timeframe.",
                   "x-stainless-nominal": false
@@ -5027,8 +5262,8 @@
                   "x-stainless-nominal": false
                 },
                 {
-                  "const": "interaction.requires_action",
-                  "description": "Interaction requires action (e.g., function calling).",
+                  "const": "batch.succeeded",
+                  "description": "Batch processing finished successfully.",
                   "x-stainless-nominal": false
                 },
                 {
@@ -5039,6 +5274,11 @@
                 {
                   "const": "interaction.failed",
                   "description": "Interaction failed.",
+                  "x-stainless-nominal": false
+                },
+                {
+                  "const": "interaction.requires_action",
+                  "description": "Interaction requires action (e.g., function calling).",
                   "x-stainless-nominal": false
                 },
                 {
@@ -5062,8 +5302,8 @@
           }
         },
         "required": [
-          "uri",
-          "subscribed_events"
+          "subscribed_events",
+          "uri"
         ],
         "type": "object"
       },
@@ -5115,11 +5355,6 @@
                   "type": "string"
                 },
                 {
-                  "const": "batch.succeeded",
-                  "description": "Batch processing finished successfully.",
-                  "x-stainless-nominal": false
-                },
-                {
                   "const": "batch.expired",
                   "description": "Batch has not been processed within the 48h timeframe.",
                   "x-stainless-nominal": false
@@ -5130,8 +5365,8 @@
                   "x-stainless-nominal": false
                 },
                 {
-                  "const": "interaction.requires_action",
-                  "description": "Interaction requires action (e.g., function calling).",
+                  "const": "batch.succeeded",
+                  "description": "Batch processing finished successfully.",
                   "x-stainless-nominal": false
                 },
                 {
@@ -5142,6 +5377,11 @@
                 {
                   "const": "interaction.failed",
                   "description": "Interaction failed.",
+                  "x-stainless-nominal": false
+                },
+                {
+                  "const": "interaction.requires_action",
+                  "description": "Interaction requires action (e.g., function calling).",
                   "x-stainless-nominal": false
                 },
                 {
@@ -5178,14 +5418,7 @@
         "parameters": [
           {
             "in": "query",
-            "name": "parent",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "pageSize",
+            "name": "page_size",
             "schema": {
               "format": "int32",
               "type": "integer"
@@ -5193,7 +5426,14 @@
           },
           {
             "in": "query",
-            "name": "pageToken",
+            "name": "page_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "parent",
             "schema": {
               "type": "string"
             }
@@ -5432,15 +5672,15 @@
       },
       "parameters": [
         {
+          "$ref": "#/components/parameters/api_version"
+        },
+        {
           "in": "path",
           "name": "id",
           "required": true,
           "schema": {
             "type": "string"
           }
-        },
-        {
-          "$ref": "#/components/parameters/api_version"
         }
       ]
     },
@@ -5453,17 +5693,21 @@
       "post": {
         "description": "Creates a new interaction.",
         "operationId": "CreateInteraction",
-        "parameters": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/api_version"
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "oneOf": [
                   {
-                    "$ref": "#/components/schemas/CreateModelInteractionParams"
+                    "$ref": "#/components/schemas/CreateAgentInteractionParams"
                   },
                   {
-                    "$ref": "#/components/schemas/CreateAgentInteractionParams"
+                    "$ref": "#/components/schemas/CreateModelInteractionParams"
                   }
                 ]
               }
@@ -5518,7 +5762,7 @@
                     "value": {
                       "created": "2025-11-26T12:22:47Z",
                       "id": "v1_ChdPU0F4YWFtNkFwS2kxZThQZ05lbXdROBIXT1NBeGFhbTZBcEtpMWU4UGdOZW13UTg",
-                      "model": "gemini-3-flash-preview",
+                      "model": "gemini-3.5-flash",
                       "object": "interaction",
                       "status": "requires_action",
                       "steps": [
@@ -5553,7 +5797,7 @@
                     "value": {
                       "created": "2025-11-26T12:22:47Z",
                       "id": "v1_ChdPU0F4YWFtNkFwS2kxZThQZ05lbXdROBIXT1NBeGFhbTZBcEtpMWU4UGdOZW13UTg",
-                      "model": "gemini-3-flash-preview",
+                      "model": "gemini-3.5-flash",
                       "object": "interaction",
                       "status": "completed",
                       "steps": [
@@ -5589,7 +5833,7 @@
                     "value": {
                       "created": "2025-11-26T12:22:47Z",
                       "id": "v1_ChdPU0F4YWFtNkFwS2kxZThQZ05lbXdROBIXT1NBeGFhbTZBcEtpMWU4UGdOZW13UTg",
-                      "model": "gemini-3-flash-preview",
+                      "model": "gemini-3.5-flash",
                       "object": "interaction",
                       "status": "completed",
                       "steps": [
@@ -5629,7 +5873,7 @@
                     "value": {
                       "created": "2025-11-26T12:25:15Z",
                       "id": "v1_ChdPU0F4YWFtNkFwS2kxZThQZ05lbXdROBIXT1NBeGFhbTZBcEtpMWU4UGdOZW13UTg",
-                      "model": "gemini-3-flash-preview",
+                      "model": "gemini-3.5-flash",
                       "object": "interaction",
                       "status": "completed",
                       "steps": [
@@ -5690,62 +5934,62 @@
           {
             "label": "simple",
             "lang": "sh",
-            "source": "curl -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\n    \"model\": \"gemini-3-flash-preview\",\n    \"input\": \"Hello, how are you?\"\n  }'\n"
+            "source": "curl -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\n    \"model\": \"gemini-3.5-flash\",\n    \"input\": \"Hello, how are you?\"\n  }'\n"
           },
           {
             "label": "simple",
             "lang": "python",
-            "source": "from google import genai\n\nclient = genai.Client()\ninteraction = client.interactions.create(\n    model=\"gemini-3-flash-preview\",\n    input=\"Hello, how are you?\",\n)\nprint(interaction.output_text)\n"
+            "source": "from google import genai\n\nclient = genai.Client()\ninteraction = client.interactions.create(\n    model=\"gemini-3.5-flash\",\n    input=\"Hello, how are you?\",\n)\nprint(interaction.output_text)\n"
           },
           {
             "label": "simple",
             "lang": "javascript",
-            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\nconst interaction = await ai.interactions.create({\n    model: 'gemini-3-flash-preview',\n    input: 'Hello, how are you?',\n});\nconsole.log(interaction.output_text);\n"
+            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\nconst interaction = await ai.interactions.create({\n    model: 'gemini-3.5-flash',\n    input: 'Hello, how are you?',\n});\nconsole.log(interaction.output_text);\n"
           },
           {
             "label": "multi_turn",
             "lang": "sh",
-            "source": "curl -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\n    \"model\": \"gemini-3-flash-preview\",\n    \"input\": [\n      { \"type\": \"user_input\", \"content\": [{ \"type\": \"text\", \"text\": \"Hello!\" }] },\n      { \"type\": \"model_output\", \"content\": [{ \"type\": \"text\", \"text\": \"Hi there! How can I help you today?\" }] },\n      { \"type\": \"user_input\", \"content\": [{ \"type\": \"text\", \"text\": \"What is the capital of France?\" }] }\n    ]\n  }'\n"
+            "source": "curl -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\n    \"model\": \"gemini-3.5-flash\",\n    \"input\": [\n      { \"type\": \"user_input\", \"content\": [{ \"type\": \"text\", \"text\": \"Hello!\" }] },\n      { \"type\": \"model_output\", \"content\": [{ \"type\": \"text\", \"text\": \"Hi there! How can I help you today?\" }] },\n      { \"type\": \"user_input\", \"content\": [{ \"type\": \"text\", \"text\": \"What is the capital of France?\" }] }\n    ]\n  }'\n"
           },
           {
             "label": "multi_turn",
             "lang": "python",
-            "source": "from google import genai\n\nclient = genai.Client()\nresponse = client.interactions.create(\n    model=\"gemini-3-flash-preview\",\n    input=[\n        { \"type\": \"user_input\", \"content\": [{ \"type\": \"text\", \"text\": \"Hello!\" }] },\n        { \"type\": \"model_output\", \"content\": [{ \"type\": \"text\", \"text\": \"Hi there! How can I help you today?\" }] },\n        { \"type\": \"user_input\", \"content\": [{ \"type\": \"text\", \"text\": \"What is the capital of France?\" }] }\n    ]\n)\nprint(response.output_text)\n"
+            "source": "from google import genai\n\nclient = genai.Client()\nresponse = client.interactions.create(\n    model=\"gemini-3.5-flash\",\n    input=[\n        { \"type\": \"user_input\", \"content\": [{ \"type\": \"text\", \"text\": \"Hello!\" }] },\n        { \"type\": \"model_output\", \"content\": [{ \"type\": \"text\", \"text\": \"Hi there! How can I help you today?\" }] },\n        { \"type\": \"user_input\", \"content\": [{ \"type\": \"text\", \"text\": \"What is the capital of France?\" }] }\n    ]\n)\nprint(response.output_text)\n"
           },
           {
             "label": "multi_turn",
             "lang": "javascript",
-            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\nconst interaction = await ai.interactions.create({\n    model: 'gemini-3-flash-preview',\n    input: [\n        { type: 'user_input', content: [{ type: 'text', text: 'Hello' }] },\n        { type: 'model_output', content: [{ type: 'text', text: 'Hi there! How can I help you today?' }] },\n        { type: 'user_input', content: [{ type: 'text', text: 'What is the capital of France?' }] }\n    ]\n});\nconsole.log(interaction.output_text);\n"
+            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\nconst interaction = await ai.interactions.create({\n    model: 'gemini-3.5-flash',\n    input: [\n        { type: 'user_input', content: [{ type: 'text', text: 'Hello' }] },\n        { type: 'model_output', content: [{ type: 'text', text: 'Hi there! How can I help you today?' }] },\n        { type: 'user_input', content: [{ type: 'text', text: 'What is the capital of France?' }] }\n    ]\n});\nconsole.log(interaction.output_text);\n"
           },
           {
             "label": "multimodal_image",
             "lang": "sh",
-            "source": "curl -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\n    \"model\": \"gemini-3-flash-preview\",\n    \"input\": [\n      {\n        \"type\": \"text\",\n        \"text\": \"What is in this picture?\"\n      },\n      {\n        \"type\": \"image\",\n        \"data\": \"BASE64_ENCODED_IMAGE\",\n        \"mime_type\": \"image/png\"\n      }\n    ]\n  }'\n"
+            "source": "curl -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\n    \"model\": \"gemini-3.5-flash\",\n    \"input\": [\n      {\n        \"type\": \"text\",\n        \"text\": \"What is in this picture?\"\n      },\n      {\n        \"type\": \"image\",\n        \"data\": \"BASE64_ENCODED_IMAGE\",\n        \"mime_type\": \"image/png\"\n      }\n    ]\n  }'\n"
           },
           {
             "label": "multimodal_image",
             "lang": "python",
-            "source": "from google import genai\n\nclient = genai.Client()\nresponse = client.interactions.create(\n    model=\"gemini-3-flash-preview\",\n    input=[\n      { \"type\": \"text\", \"text\": \"What is in this picture?\" },\n      { \"type\": \"image\", \"data\": \"BASE64_ENCODED_IMAGE\", \"mime_type\": \"image/png\" }\n    ]\n)\nprint(response.output_text)\n"
+            "source": "from google import genai\n\nclient = genai.Client()\nresponse = client.interactions.create(\n    model=\"gemini-3.5-flash\",\n    input=[\n      { \"type\": \"text\", \"text\": \"What is in this picture?\" },\n      { \"type\": \"image\", \"data\": \"BASE64_ENCODED_IMAGE\", \"mime_type\": \"image/png\" }\n    ]\n)\nprint(response.output_text)\n"
           },
           {
             "label": "multimodal_image",
             "lang": "javascript",
-            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\nconst interaction = await ai.interactions.create({\n    model: 'gemini-3-flash-preview',\n    input: [\n      { type: 'text', text: 'What is in this picture?' },\n      { type: 'image', data: 'BASE64_ENCODED_IMAGE', mime_type: 'image/png' }\n    ]\n});\nconsole.log(interaction.output_text);\n"
+            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\nconst interaction = await ai.interactions.create({\n    model: 'gemini-3.5-flash',\n    input: [\n      { type: 'text', text: 'What is in this picture?' },\n      { type: 'image', data: 'BASE64_ENCODED_IMAGE', mime_type: 'image/png' }\n    ]\n});\nconsole.log(interaction.output_text);\n"
           },
           {
             "label": "function_calling",
             "lang": "sh",
-            "source": "curl -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\n    \"model\": \"gemini-3-flash-preview\",\n    \"tools\": [\n      {\n        \"type\": \"function\",\n        \"name\": \"get_weather\",\n        \"description\": \"Get the current weather in a given location\",\n        \"parameters\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"location\": {\n              \"type\": \"string\",\n              \"description\": \"The city and state, e.g. San Francisco, CA\"\n            }\n          },\n          \"required\": [\n            \"location\"\n          ]\n        }\n      }\n    ],\n    \"input\": \"What is the weather like in Boston, MA?\"\n  }'\n"
+            "source": "curl -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\n    \"model\": \"gemini-3.5-flash\",\n    \"tools\": [\n      {\n        \"type\": \"function\",\n        \"name\": \"get_weather\",\n        \"description\": \"Get the current weather in a given location\",\n        \"parameters\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"location\": {\n              \"type\": \"string\",\n              \"description\": \"The city and state, e.g. San Francisco, CA\"\n            }\n          },\n          \"required\": [\n            \"location\"\n          ]\n        }\n      }\n    ],\n    \"input\": \"What is the weather like in Boston, MA?\"\n  }'\n"
           },
           {
             "label": "function_calling",
             "lang": "python",
-            "source": "from google import genai\n\nclient = genai.Client()\nresponse = client.interactions.create(\n    model=\"gemini-3-flash-preview\",\n    tools=[{\n        \"type\": \"function\",\n        \"name\": \"get_weather\",\n        \"description\": \"Get the current weather in a given location\",\n        \"parameters\": {\n            \"type\": \"object\",\n            \"properties\": {\n                \"location\": {\n                    \"type\": \"string\",\n                    \"description\": \"The city and state, e.g. San Francisco, CA\"\n                }\n            },\n            \"required\": [\"location\"]\n        }\n    }],\n    input=\"What is the weather like in Boston, MA?\"\n)\nprint(response.steps[-1])\n"
+            "source": "from google import genai\n\nclient = genai.Client()\nresponse = client.interactions.create(\n    model=\"gemini-3.5-flash\",\n    tools=[{\n        \"type\": \"function\",\n        \"name\": \"get_weather\",\n        \"description\": \"Get the current weather in a given location\",\n        \"parameters\": {\n            \"type\": \"object\",\n            \"properties\": {\n                \"location\": {\n                    \"type\": \"string\",\n                    \"description\": \"The city and state, e.g. San Francisco, CA\"\n                }\n            },\n            \"required\": [\"location\"]\n        }\n    }],\n    input=\"What is the weather like in Boston, MA?\"\n)\nprint(response.steps[-1])\n"
           },
           {
             "label": "function_calling",
             "lang": "javascript",
-            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\nconst interaction = await ai.interactions.create({\n    model: 'gemini-3-flash-preview',\n    tools: [{\n        type: 'function',\n        name: 'get_weather',\n        description: 'Get the current weather in a given location',\n        parameters: {\n            type: 'object',\n            properties: {\n                location: {\n                    type: 'string',\n                    description: 'The city and state, e.g. San Francisco, CA'\n                }\n            },\n            required: ['location']\n        }\n    }],\n    input: 'What is the weather like in Boston, MA?'\n});\nconsole.log(interaction.steps.at(-1));\n"
+            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\nconst interaction = await ai.interactions.create({\n    model: 'gemini-3.5-flash',\n    tools: [{\n        type: 'function',\n        name: 'get_weather',\n        description: 'Get the current weather in a given location',\n        parameters: {\n            type: 'object',\n            properties: {\n                location: {\n                    type: 'string',\n                    description: 'The city and state, e.g. San Francisco, CA'\n                }\n            },\n            required: ['location']\n        }\n    }],\n    input: 'What is the weather like in Boston, MA?'\n});\nconsole.log(interaction.steps.at(-1));\n"
           },
           {
             "label": "deep_research",
@@ -5771,6 +6015,9 @@
         "operationId": "deleteInteraction",
         "parameters": [
           {
+            "$ref": "#/components/parameters/api_version"
+          },
+          {
             "description": "The unique identifier of the interaction to delete.",
             "in": "path",
             "name": "id",
@@ -5778,9 +6025,6 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "$ref": "#/components/parameters/api_version"
           }
         ],
         "responses": {
@@ -5822,17 +6066,17 @@
           {
             "label": "delete",
             "lang": "sh",
-            "source": "# [setup]\nINTERACTION_ID=$(curl -s -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\"model\": \"gemini-3-flash-preview\", \"input\": \"Hello\"}' \\\n  | python3 -c \"import sys,json; print(json.load(sys.stdin)['id'])\")\n# [/setup]\n\ncurl -X DELETE \"https://generativelanguage.googleapis.com/v1beta/interactions/$INTERACTION_ID\" \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Api-Revision: 2026-05-20\"\n"
+            "source": "# [setup]\nINTERACTION_ID=$(curl -s -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\"model\": \"gemini-3.5-flash\", \"input\": \"Hello\"}' \\\n  | python3 -c \"import sys,json; print(json.load(sys.stdin)['id'])\")\n# [/setup]\n\ncurl -X DELETE \"https://generativelanguage.googleapis.com/v1beta/interactions/$INTERACTION_ID\" \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Api-Revision: 2026-05-20\"\n"
           },
           {
             "label": "delete",
             "lang": "python",
-            "source": "from google import genai\n\nclient = genai.Client()\n\n# [setup]\ncreated = client.interactions.create(\n    model=\"gemini-3-flash-preview\",\n    input=\"Hello\",\n)\n# [/setup]\n\nclient.interactions.delete(id=created.id)\nprint(\"Interaction deleted successfully.\")\n"
+            "source": "from google import genai\n\nclient = genai.Client()\n\n# [setup]\ncreated = client.interactions.create(\n    model=\"gemini-3.5-flash\",\n    input=\"Hello\",\n)\n# [/setup]\n\nclient.interactions.delete(id=created.id)\nprint(\"Interaction deleted successfully.\")\n"
           },
           {
             "label": "delete",
             "lang": "javascript",
-            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\n\n// [setup]\nconst created = await ai.interactions.create({\n    model: 'gemini-3-flash-preview',\n    input: 'Hello',\n});\n// [/setup]\n\nawait ai.interactions.delete(created.id);\nconsole.log('Interaction deleted successfully.');\n"
+            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\n\n// [setup]\nconst created = await ai.interactions.create({\n    model: 'gemini-3.5-flash',\n    input: 'Hello',\n});\n// [/setup]\n\nawait ai.interactions.delete(created.id);\nconsole.log('Interaction deleted successfully.');\n"
           }
         ]
       },
@@ -5841,27 +6085,13 @@
         "operationId": "getInteractionById",
         "parameters": [
           {
+            "$ref": "#/components/parameters/api_version"
+          },
+          {
             "description": "The unique identifier of the interaction to retrieve.",
             "in": "path",
             "name": "id",
             "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "If set to true, the generated content will be streamed incrementally.",
-            "in": "query",
-            "name": "stream",
-            "schema": {
-              "default": false,
-              "type": "boolean"
-            }
-          },
-          {
-            "description": "Optional. If set, resumes the interaction stream from the next chunk after the event marked by the event id. Can only be used if `stream` is true.",
-            "in": "query",
-            "name": "last_event_id",
             "schema": {
               "type": "string"
             }
@@ -5877,7 +6107,21 @@
             }
           },
           {
-            "$ref": "#/components/parameters/api_version"
+            "description": "Optional. If set, resumes the interaction stream from the next chunk after the event marked by the event id. Can only be used if `stream` is true.",
+            "in": "query",
+            "name": "last_event_id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "If set to true, the generated content will be streamed incrementally.",
+            "in": "query",
+            "name": "stream",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -5890,7 +6134,7 @@
                     "value": {
                       "created": "2025-11-26T12:25:15Z",
                       "id": "v1_ChdPU0F4YWFtNkFwS2kxZThQZ05lbXdROBIXT1NBeGFhbTZBcEtpMWU4UGdOZW13UTg",
-                      "model": "gemini-3-flash-preview",
+                      "model": "gemini-3.5-flash",
                       "object": "interaction",
                       "status": "completed",
                       "steps": [
@@ -5937,17 +6181,17 @@
           {
             "label": "get",
             "lang": "sh",
-            "source": "# [setup]\nINTERACTION_ID=$(curl -s -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\"model\": \"gemini-3-flash-preview\", \"input\": \"Say hello.\"}' \\\n  | python3 -c \"import sys,json; print(json.load(sys.stdin)['id'])\")\n# [/setup]\n\ncurl -X GET \"https://generativelanguage.googleapis.com/v1beta/interactions/$INTERACTION_ID\" \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Api-Revision: 2026-05-20\"\n"
+            "source": "# [setup]\nINTERACTION_ID=$(curl -s -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\"model\": \"gemini-3.5-flash\", \"input\": \"Say hello.\"}' \\\n  | python3 -c \"import sys,json; print(json.load(sys.stdin)['id'])\")\n# [/setup]\n\ncurl -X GET \"https://generativelanguage.googleapis.com/v1beta/interactions/$INTERACTION_ID\" \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Api-Revision: 2026-05-20\"\n"
           },
           {
             "label": "get",
             "lang": "python",
-            "source": "from google import genai\n\nclient = genai.Client()\n\n# [setup]\ncreated = client.interactions.create(\n    model=\"gemini-3-flash-preview\",\n    input=\"Say hello.\"\n)\n# [/setup]\n\ninteraction = client.interactions.get(id=created.id)\nprint(interaction.status)\n"
+            "source": "from google import genai\n\nclient = genai.Client()\n\n# [setup]\ncreated = client.interactions.create(\n    model=\"gemini-3.5-flash\",\n    input=\"Say hello.\"\n)\n# [/setup]\n\ninteraction = client.interactions.get(id=created.id)\nprint(interaction.status)\n"
           },
           {
             "label": "get",
             "lang": "javascript",
-            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\n\n// [setup]\nconst created = await ai.interactions.create({\n    model: 'gemini-3-flash-preview',\n    input: 'Say hello.'\n});\n// [/setup]\n\nconst interaction = await ai.interactions.get(created.id);\nconsole.log(interaction.status);\n"
+            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\n\n// [setup]\nconst created = await ai.interactions.create({\n    model: 'gemini-3.5-flash',\n    input: 'Say hello.'\n});\n// [/setup]\n\nconst interaction = await ai.interactions.get(created.id);\nconsole.log(interaction.status);\n"
           }
         ]
       }
@@ -5958,6 +6202,9 @@
         "operationId": "cancelInteractionById",
         "parameters": [
           {
+            "$ref": "#/components/parameters/api_version"
+          },
+          {
             "description": "The unique identifier of the interaction to cancel.",
             "in": "path",
             "name": "id",
@@ -5965,9 +6212,6 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "$ref": "#/components/parameters/api_version"
           }
         ],
         "responses": {
@@ -6016,17 +6260,17 @@
           {
             "label": "cancel",
             "lang": "sh",
-            "source": "# [setup]\nINTERACTION_ID=$(curl -s -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\"model\": \"gemini-3-flash-preview\", \"input\": \"Write a long essay about the history of computing.\", \"background\": true}' \\\n  | python3 -c \"import sys,json; print(json.load(sys.stdin)['id'])\")\n# [/setup]\n\ncurl -X POST \"https://generativelanguage.googleapis.com/v1beta/interactions/$INTERACTION_ID/cancel\" \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Api-Revision: 2026-05-20\"\n"
+            "source": "# [setup]\nINTERACTION_ID=$(curl -s -X POST https://generativelanguage.googleapis.com/v1beta/interactions \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Api-Revision: 2026-05-20\" \\\n  -d '{\"model\": \"gemini-3.5-flash\", \"input\": \"Write a long essay about the history of computing.\", \"background\": true}' \\\n  | python3 -c \"import sys,json; print(json.load(sys.stdin)['id'])\")\n# [/setup]\n\ncurl -X POST \"https://generativelanguage.googleapis.com/v1beta/interactions/$INTERACTION_ID/cancel\" \\\n  -H \"x-goog-api-key: $GEMINI_API_KEY\" \\\n  -H \"Api-Revision: 2026-05-20\"\n"
           },
           {
             "label": "cancel",
             "lang": "python",
-            "source": "from google import genai\n\nclient = genai.Client()\n\n# Start a background interaction so it stays in-progress.\ncreated = client.interactions.create(\n    model=\"gemini-3-flash-preview\",\n    input=\"Write a long essay about the history of computing.\",\n    tools=[{\"type\": \"computer_use\"}],\n    background=True,\n)\n\n# Cancel the in-progress interaction.\ninteraction = client.interactions.cancel(id=created.id)\nprint(interaction.status)\n"
+            "source": "from google import genai\n\nclient = genai.Client()\n\n# Start a background interaction so it stays in-progress.\ncreated = client.interactions.create(\n    model=\"gemini-3.5-flash\",\n    input=\"Write a long essay about the history of computing.\",\n    tools=[{\"type\": \"computer_use\"}],\n    background=True,\n)\n\n# Cancel the in-progress interaction.\ninteraction = client.interactions.cancel(id=created.id)\nprint(interaction.status)\n"
           },
           {
             "label": "cancel",
             "lang": "javascript",
-            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\n\n// Start a background interaction so it stays in-progress.\nconst created = await ai.interactions.create({\n    model: 'gemini-3-flash-preview',\n    input: 'Write a long essay about the history of computing.',\n    tools: [{ type: 'computer_use' }],\n    background: true,\n});\n\n// Cancel the in-progress interaction.\nconst interaction = await ai.interactions.cancel(created.id);\nconsole.log(interaction.status);\n"
+            "source": "import {GoogleGenAI} from '@google/genai';\n\nconst ai = new GoogleGenAI({});\n\n// Start a background interaction so it stays in-progress.\nconst created = await ai.interactions.create({\n    model: 'gemini-3.5-flash',\n    input: 'Write a long essay about the history of computing.',\n    tools: [{ type: 'computer_use' }],\n    background: true,\n});\n\n// Cancel the in-progress interaction.\nconst interaction = await ai.interactions.cancel(created.id);\nconsole.log(interaction.status);\n"
           }
         ]
       }
@@ -6040,7 +6284,11 @@
       "post": {
         "description": "Creates a new interaction.",
         "operationId": "CreateInteraction",
-        "parameters": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/api_version"
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -6093,7 +6341,11 @@
       "post": {
         "description": "Creates a new interaction.",
         "operationId": "CreateInteraction",
-        "parameters": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/api_version"
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -6267,15 +6519,15 @@
       },
       "parameters": [
         {
+          "$ref": "#/components/parameters/api_version"
+        },
+        {
           "in": "path",
           "name": "id",
           "required": true,
           "schema": {
             "type": "string"
           }
-        },
-        {
-          "$ref": "#/components/parameters/api_version"
         }
       ],
       "patch": {
@@ -6330,15 +6582,15 @@
     "/{api_version}/webhooks/{id}:ping": {
       "parameters": [
         {
+          "$ref": "#/components/parameters/api_version"
+        },
+        {
           "in": "path",
           "name": "id",
           "required": true,
           "schema": {
             "type": "string"
           }
-        },
-        {
-          "$ref": "#/components/parameters/api_version"
         }
       ],
       "post": {
@@ -6383,15 +6635,15 @@
     "/{api_version}/webhooks/{id}:rotateSigningSecret": {
       "parameters": [
         {
+          "$ref": "#/components/parameters/api_version"
+        },
+        {
           "in": "path",
           "name": "id",
           "required": true,
           "schema": {
             "type": "string"
           }
-        },
-        {
-          "$ref": "#/components/parameters/api_version"
         }
       ],
       "post": {

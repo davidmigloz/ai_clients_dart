@@ -14,15 +14,11 @@ class FunctionCallStep extends InteractionStep {
   /// The arguments to pass to the function.
   final Map<String, dynamic> arguments;
 
-  /// Signature hash for backend validation.
-  final String? signature;
-
   /// Creates a [FunctionCallStep] instance.
   const FunctionCallStep({
     required this.id,
     required this.name,
     required this.arguments,
-    this.signature,
   });
 
   /// Creates a [FunctionCallStep] from JSON.
@@ -46,12 +42,7 @@ class FunctionCallStep extends InteractionStep {
         'FunctionCallStep: missing required "arguments"',
       );
     }
-    return FunctionCallStep(
-      id: id,
-      name: name,
-      arguments: arguments,
-      signature: json['signature'] as String?,
-    );
+    return FunctionCallStep(id: id, name: name, arguments: arguments);
   }
 
   @override
@@ -60,7 +51,6 @@ class FunctionCallStep extends InteractionStep {
     'id': id,
     'name': name,
     'arguments': arguments,
-    if (signature != null) 'signature': signature,
   };
 
   /// Creates a copy with replaced values.
@@ -68,7 +58,6 @@ class FunctionCallStep extends InteractionStep {
     Object? id = unsetCopyWithValue,
     Object? name = unsetCopyWithValue,
     Object? arguments = unsetCopyWithValue,
-    Object? signature = unsetCopyWithValue,
   }) {
     return FunctionCallStep(
       id: id == unsetCopyWithValue ? this.id : id! as String,
@@ -76,9 +65,6 @@ class FunctionCallStep extends InteractionStep {
       arguments: arguments == unsetCopyWithValue
           ? this.arguments
           : arguments! as Map<String, dynamic>,
-      signature: signature == unsetCopyWithValue
-          ? this.signature
-          : signature as String?,
     );
   }
 }

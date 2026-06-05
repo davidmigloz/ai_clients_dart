@@ -95,7 +95,7 @@ void main() {
         'agents': [
           {'id': 'a1'},
         ],
-        'nextPageToken': 'tok',
+        'next_page_token': 'tok',
       });
 
       final result = await resource.list(pageSize: 5, pageToken: 'p');
@@ -103,8 +103,8 @@ void main() {
       final req = capturedRequests.single;
       expect(req.method, 'GET');
       expect(req.url.path, '/v1beta/agents');
-      expect(req.url.queryParameters['pageSize'], '5');
-      expect(req.url.queryParameters['pageToken'], 'p');
+      expect(req.url.queryParameters['page_size'], '5');
+      expect(req.url.queryParameters['page_token'], 'p');
       expect(result.agents, hasLength(1));
       expect(result.nextPageToken, 'tok');
     });

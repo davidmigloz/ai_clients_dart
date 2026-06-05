@@ -14,16 +14,8 @@ class McpServerToolCallDelta extends StepDeltaData {
   /// The name of the MCP server.
   final String? serverName;
 
-  /// Signature hash for backend validation.
-  final String? signature;
-
   /// Creates an [McpServerToolCallDelta] instance.
-  const McpServerToolCallDelta({
-    this.arguments,
-    this.name,
-    this.serverName,
-    this.signature,
-  });
+  const McpServerToolCallDelta({this.arguments, this.name, this.serverName});
 
   /// Creates an [McpServerToolCallDelta] from JSON.
   factory McpServerToolCallDelta.fromJson(Map<String, dynamic> json) =>
@@ -31,7 +23,6 @@ class McpServerToolCallDelta extends StepDeltaData {
         arguments: json['arguments'] as Map<String, dynamic>?,
         name: json['name'] as String?,
         serverName: json['server_name'] as String?,
-        signature: json['signature'] as String?,
       );
 
   @override
@@ -40,6 +31,5 @@ class McpServerToolCallDelta extends StepDeltaData {
     if (arguments != null) 'arguments': arguments,
     if (name != null) 'name': name,
     if (serverName != null) 'server_name': serverName,
-    if (signature != null) 'signature': signature,
   };
 }

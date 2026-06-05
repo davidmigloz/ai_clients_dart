@@ -16,7 +16,10 @@ enum InteractionStatus {
   cancelled,
 
   /// The interaction is incomplete.
-  incomplete;
+  incomplete,
+
+  /// The interaction was halted because the token budget was exceeded.
+  budgetExceeded;
 
   /// Creates an [InteractionStatus] from a JSON string.
   static InteractionStatus fromString(String? value) {
@@ -27,6 +30,7 @@ enum InteractionStatus {
       'failed' => InteractionStatus.failed,
       'cancelled' => InteractionStatus.cancelled,
       'incomplete' => InteractionStatus.incomplete,
+      'budget_exceeded' => InteractionStatus.budgetExceeded,
       _ => InteractionStatus.inProgress,
     };
   }
@@ -40,6 +44,7 @@ enum InteractionStatus {
       InteractionStatus.failed => 'failed',
       InteractionStatus.cancelled => 'cancelled',
       InteractionStatus.incomplete => 'incomplete',
+      InteractionStatus.budgetExceeded => 'budget_exceeded',
     };
   }
 }

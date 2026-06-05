@@ -115,14 +115,12 @@ void main() {
         id: 'call-1',
         name: 'get_weather',
         arguments: {'city': 'Tokyo'},
-        signature: 'sig123',
       );
       final restored =
           InteractionStep.fromJson(step.toJson()) as FunctionCallStep;
       expect(restored.id, 'call-1');
       expect(restored.name, 'get_weather');
       expect(restored.arguments, {'city': 'Tokyo'});
-      expect(restored.signature, 'sig123');
     });
 
     test('throws when required field missing', () {

@@ -8,8 +8,11 @@ class StepStopEvent extends InteractionEvent {
   /// The index of the step in the interaction's `steps` list.
   final int index;
 
+  /// Optional metadata accompanying this streamed event.
+  final StreamMetadata? metadata;
+
   /// Creates a [StepStopEvent] instance.
-  const StepStopEvent({required this.index, super.eventId});
+  const StepStopEvent({required this.index, this.metadata, super.eventId});
 
   /// Creates a [StepStopEvent] from JSON.
   factory StepStopEvent.fromJson(Map<String, dynamic> json) {
@@ -17,13 +20,20 @@ class StepStopEvent extends InteractionEvent {
     if (index is! int) {
       throw const FormatException('StepStopEvent: missing required "index"');
     }
-    return StepStopEvent(index: index, eventId: json['event_id'] as String?);
+    return StepStopEvent(
+      index: index,
+      metadata: json['metadata'] != null
+          ? StreamMetadata.fromJson(json['metadata'] as Map<String, dynamic>)
+          : null,
+      eventId: json['event_id'] as String?,
+    );
   }
 
   @override
   Map<String, dynamic> toJson() => {
     'event_type': eventType,
     'index': index,
+    if (metadata != null) 'metadata': metadata!.toJson(),
     if (eventId != null) 'event_id': eventId,
   };
 }

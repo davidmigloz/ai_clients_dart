@@ -50,11 +50,13 @@ void main() {
         const config = DeepResearchAgentConfig(
           thinkingSummaries: InteractionThinkingSummaries.auto,
           collaborativePlanning: true,
+          enableBigqueryTool: true,
           visualization: DeepResearchVisualization.auto,
         );
         expect(config.type, 'deep-research');
         expect(config.thinkingSummaries, InteractionThinkingSummaries.auto);
         expect(config.collaborativePlanning, isTrue);
+        expect(config.enableBigqueryTool, isTrue);
         expect(config.visualization, DeepResearchVisualization.auto);
       });
 
@@ -62,6 +64,7 @@ void main() {
         const config = DeepResearchAgentConfig();
         expect(config.thinkingSummaries, isNull);
         expect(config.collaborativePlanning, isNull);
+        expect(config.enableBigqueryTool, isNull);
         expect(config.visualization, isNull);
       });
     });
@@ -72,11 +75,13 @@ void main() {
           'type': 'deep-research',
           'thinking_summaries': 'auto',
           'collaborative_planning': true,
+          'enable_bigquery_tool': true,
           'visualization': 'off',
         };
         final config = DeepResearchAgentConfig.fromJson(json);
         expect(config.thinkingSummaries, InteractionThinkingSummaries.auto);
         expect(config.collaborativePlanning, isTrue);
+        expect(config.enableBigqueryTool, isTrue);
         expect(config.visualization, DeepResearchVisualization.off);
       });
 
@@ -105,12 +110,14 @@ void main() {
         const config = DeepResearchAgentConfig(
           thinkingSummaries: InteractionThinkingSummaries.none,
           collaborativePlanning: true,
+          enableBigqueryTool: true,
           visualization: DeepResearchVisualization.auto,
         );
         final json = config.toJson();
         expect(json['type'], 'deep-research');
         expect(json['thinking_summaries'], 'none');
         expect(json['collaborative_planning'], isTrue);
+        expect(json['enable_bigquery_tool'], isTrue);
         expect(json['visualization'], 'auto');
       });
 

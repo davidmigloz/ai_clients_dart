@@ -105,6 +105,9 @@ class DeepResearchAgentConfig extends AgentConfig {
   /// plan in the next turn.
   final bool? collaborativePlanning;
 
+  /// Enables the BigQuery tool for the Deep Research agent.
+  final bool? enableBigqueryTool;
+
   /// Whether to include visualizations in the response.
   final DeepResearchVisualization? visualization;
 
@@ -112,6 +115,7 @@ class DeepResearchAgentConfig extends AgentConfig {
   const DeepResearchAgentConfig({
     this.thinkingSummaries,
     this.collaborativePlanning,
+    this.enableBigqueryTool,
     this.visualization,
   });
 
@@ -124,6 +128,7 @@ class DeepResearchAgentConfig extends AgentConfig {
               )
             : null,
         collaborativePlanning: json['collaborative_planning'] as bool?,
+        enableBigqueryTool: json['enable_bigquery_tool'] as bool?,
         visualization: json['visualization'] != null
             ? deepResearchVisualizationFromString(
                 json['visualization'] as String?,
@@ -140,6 +145,7 @@ class DeepResearchAgentConfig extends AgentConfig {
       ),
     if (collaborativePlanning != null)
       'collaborative_planning': collaborativePlanning,
+    if (enableBigqueryTool != null) 'enable_bigquery_tool': enableBigqueryTool,
     if (visualization != null)
       'visualization': deepResearchVisualizationToString(visualization!),
   };
@@ -148,6 +154,7 @@ class DeepResearchAgentConfig extends AgentConfig {
   DeepResearchAgentConfig copyWith({
     Object? thinkingSummaries = unsetCopyWithValue,
     Object? collaborativePlanning = unsetCopyWithValue,
+    Object? enableBigqueryTool = unsetCopyWithValue,
     Object? visualization = unsetCopyWithValue,
   }) {
     return DeepResearchAgentConfig(
@@ -157,6 +164,9 @@ class DeepResearchAgentConfig extends AgentConfig {
       collaborativePlanning: collaborativePlanning == unsetCopyWithValue
           ? this.collaborativePlanning
           : collaborativePlanning as bool?,
+      enableBigqueryTool: enableBigqueryTool == unsetCopyWithValue
+          ? this.enableBigqueryTool
+          : enableBigqueryTool as bool?,
       visualization: visualization == unsetCopyWithValue
           ? this.visualization
           : visualization as DeepResearchVisualization?,

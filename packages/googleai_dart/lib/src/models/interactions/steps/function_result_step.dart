@@ -17,16 +17,12 @@ class FunctionResultStep extends InteractionStep {
   /// Whether the tool call resulted in an error.
   final bool? isError;
 
-  /// Signature hash for backend validation.
-  final String? signature;
-
   /// Creates a [FunctionResultStep] instance.
   const FunctionResultStep({
     required this.callId,
     required this.result,
     this.name,
     this.isError,
-    this.signature,
   });
 
   /// Creates a [FunctionResultStep] from JSON.
@@ -53,7 +49,6 @@ class FunctionResultStep extends InteractionStep {
       result: ToolResult.fromJson(result as Object),
       name: json['name'] as String?,
       isError: json['is_error'] as bool?,
-      signature: json['signature'] as String?,
     );
   }
 
@@ -64,7 +59,6 @@ class FunctionResultStep extends InteractionStep {
     'result': result.toJson(),
     if (name != null) 'name': name,
     if (isError != null) 'is_error': isError,
-    if (signature != null) 'signature': signature,
   };
 
   /// Creates a copy with replaced values.
@@ -73,7 +67,6 @@ class FunctionResultStep extends InteractionStep {
     Object? result = unsetCopyWithValue,
     Object? name = unsetCopyWithValue,
     Object? isError = unsetCopyWithValue,
-    Object? signature = unsetCopyWithValue,
   }) {
     return FunctionResultStep(
       callId: callId == unsetCopyWithValue ? this.callId : callId! as String,
@@ -82,9 +75,6 @@ class FunctionResultStep extends InteractionStep {
           : result! as ToolResult,
       name: name == unsetCopyWithValue ? this.name : name as String?,
       isError: isError == unsetCopyWithValue ? this.isError : isError as bool?,
-      signature: signature == unsetCopyWithValue
-          ? this.signature
-          : signature as String?,
     );
   }
 }

@@ -18,13 +18,13 @@ class ListAgentsResponse {
         agents: (json['agents'] as List<dynamic>?)
             ?.map((e) => Agent.fromJson(e as Map<String, dynamic>))
             .toList(),
-        nextPageToken: json['nextPageToken'] as String?,
+        nextPageToken: json['next_page_token'] as String?,
       );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (agents != null) 'agents': agents!.map((e) => e.toJson()).toList(),
-    if (nextPageToken != null) 'nextPageToken': nextPageToken,
+    if (nextPageToken != null) 'next_page_token': nextPageToken,
   };
 
   /// Creates a copy with replaced values.

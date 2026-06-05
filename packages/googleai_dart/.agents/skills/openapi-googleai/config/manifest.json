@@ -459,6 +459,51 @@
         "acknowledged"
       ]
     },
+    "DeleteInteractionResponse": {
+      "spec": "interactions",
+      "schema": "DeleteInteractionResponse",
+      "kind": "skip",
+      "note": "Empty marker; InteractionsResource.delete() returns Future<void>.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "ContentDelta": {
+      "spec": "interactions",
+      "schema": "ContentDelta",
+      "kind": "skip",
+      "note": "content.* event is not a member of the InteractionSseEvent union (the documented streaming response); surfaced via UnknownInteractionEvent. Consistent with the official python-genai SDK, which also omits it.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "ContentStart": {
+      "spec": "interactions",
+      "schema": "ContentStart",
+      "kind": "skip",
+      "note": "content.* event is not a member of the InteractionSseEvent union (the documented streaming response); surfaced via UnknownInteractionEvent. Consistent with the official python-genai SDK, which also omits it.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "ContentStop": {
+      "spec": "interactions",
+      "schema": "ContentStop",
+      "kind": "skip",
+      "note": "content.* event is not a member of the InteractionSseEvent union (the documented streaming response); surfaced via UnknownInteractionEvent. Consistent with the official python-genai SDK, which also omits it.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "FunctionCallDelta": {
+      "spec": "interactions",
+      "schema": "FunctionCallDelta",
+      "kind": "skip",
+      "note": "Member of ContentDeltaData only; reachable solely via the skipped content.delta path. Not a member of StepDeltaData (the only delta union this client dispatches).",
+      "tags": [
+        "acknowledged"
+      ]
+    },
     "Error": {
       "spec": "interactions",
       "schema": "Error",
@@ -1162,6 +1207,13 @@
       ],
       "note": "SSE/delta event DTOs follow the existing googleai_dart convention of omitting copyWith on small immutable events."
     },
+    "StreamMetadata": {
+      "spec": "interactions",
+      "schema": "StreamMetadata",
+      "dart_class": "StreamMetadata",
+      "file": "lib/src/models/interactions/stream_metadata.dart",
+      "kind": "object"
+    },
     "TextAnnotationDelta": {
       "spec": "interactions",
       "schema": "TextAnnotationDelta",
@@ -1699,6 +1751,73 @@
       "dart_class": "VertexAISearchConfig",
       "file": "lib/src/models/interactions/tools/vertex_ai_search_config.dart",
       "kind": "object"
+    },
+    "interactions:ExaAISearchConfig": {
+      "spec": "interactions",
+      "schema": "ExaAISearchConfig",
+      "dart_class": "ExaAISearchConfig",
+      "file": "lib/src/models/interactions/tools/exa_ai_search_config.dart",
+      "kind": "object"
+    },
+    "interactions:ParallelAISearchConfig": {
+      "spec": "interactions",
+      "schema": "ParallelAISearchConfig",
+      "dart_class": "ParallelAISearchConfig",
+      "file": "lib/src/models/interactions/tools/parallel_ai_search_config.dart",
+      "kind": "object"
+    },
+    "interactions:RagStoreConfig": {
+      "spec": "interactions",
+      "schema": "RagStoreConfig",
+      "dart_class": "RagStoreConfig",
+      "file": "lib/src/models/interactions/tools/rag_store_config.dart",
+      "kind": "object"
+    },
+    "interactions:RagResource": {
+      "spec": "interactions",
+      "schema": "RagResource",
+      "dart_class": "RagResource",
+      "file": "lib/src/models/interactions/tools/rag_store_config.dart",
+      "kind": "object"
+    },
+    "interactions:RagRetrievalConfig": {
+      "spec": "interactions",
+      "schema": "RagRetrievalConfig",
+      "dart_class": "RagRetrievalConfig",
+      "file": "lib/src/models/interactions/tools/rag_store_config.dart",
+      "kind": "object"
+    },
+    "interactions:Filter": {
+      "spec": "interactions",
+      "schema": "Filter",
+      "dart_class": "Filter",
+      "file": "lib/src/models/interactions/tools/rag_store_config.dart",
+      "kind": "object"
+    },
+    "interactions:HybridSearch": {
+      "spec": "interactions",
+      "schema": "HybridSearch",
+      "dart_class": "HybridSearch",
+      "file": "lib/src/models/interactions/tools/rag_store_config.dart",
+      "kind": "object"
+    },
+    "interactions:RankService": {
+      "spec": "interactions",
+      "schema": "RankService",
+      "dart_class": "RankService",
+      "file": "lib/src/models/interactions/tools/rag_store_config.dart",
+      "kind": "object"
+    },
+    "interactions:Ranking": {
+      "spec": "interactions",
+      "schema": "Ranking",
+      "dart_class": "RankService",
+      "file": "lib/src/models/interactions/tools/rag_store_config.dart",
+      "kind": "skip",
+      "note": "Ranking is a $ref alias of RankService; modeled directly as RankService (RagRetrievalConfig.ranking is typed RankService).",
+      "tags": [
+        "acknowledged"
+      ]
     },
     "interactions:AudioResponseFormat": {
       "spec": "interactions",

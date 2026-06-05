@@ -17,16 +17,12 @@ class McpServerToolCallStep extends InteractionStep {
   /// The JSON object of arguments for the function.
   final Map<String, dynamic> arguments;
 
-  /// Signature hash for backend validation.
-  final String? signature;
-
   /// Creates an [McpServerToolCallStep] instance.
   const McpServerToolCallStep({
     required this.id,
     required this.name,
     required this.serverName,
     required this.arguments,
-    this.signature,
   });
 
   /// Creates an [McpServerToolCallStep] from JSON.
@@ -65,7 +61,6 @@ class McpServerToolCallStep extends InteractionStep {
       name: name,
       serverName: serverName,
       arguments: arguments,
-      signature: json['signature'] as String?,
     );
   }
 
@@ -76,7 +71,6 @@ class McpServerToolCallStep extends InteractionStep {
     'name': name,
     'server_name': serverName,
     'arguments': arguments,
-    if (signature != null) 'signature': signature,
   };
 
   /// Creates a copy with replaced values.
@@ -85,7 +79,6 @@ class McpServerToolCallStep extends InteractionStep {
     Object? name = unsetCopyWithValue,
     Object? serverName = unsetCopyWithValue,
     Object? arguments = unsetCopyWithValue,
-    Object? signature = unsetCopyWithValue,
   }) {
     return McpServerToolCallStep(
       id: id == unsetCopyWithValue ? this.id : id! as String,
@@ -96,9 +89,6 @@ class McpServerToolCallStep extends InteractionStep {
       arguments: arguments == unsetCopyWithValue
           ? this.arguments
           : arguments! as Map<String, dynamic>,
-      signature: signature == unsetCopyWithValue
-          ? this.signature
-          : signature as String?,
     );
   }
 }

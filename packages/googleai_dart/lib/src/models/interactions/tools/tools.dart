@@ -1,5 +1,8 @@
 import '../../copy_with_sentinel.dart';
 import '../allowed_tools.dart';
+import 'exa_ai_search_config.dart';
+import 'parallel_ai_search_config.dart';
+import 'rag_store_config.dart';
 import 'vertex_ai_search_config.dart';
 
 part 'code_execution_tool.dart';

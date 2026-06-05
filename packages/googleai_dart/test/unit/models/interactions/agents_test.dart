@@ -44,13 +44,13 @@ void main() {
   });
 
   group('ListAgentsResponse', () {
-    test('round-trips agents and nextPageToken', () {
+    test('round-trips agents and next_page_token', () {
       final response = ListAgentsResponse.fromJson({
         'agents': [
           {'id': 'a1'},
           {'id': 'a2'},
         ],
-        'nextPageToken': 'tok',
+        'next_page_token': 'tok',
       });
       expect(response.agents, hasLength(2));
       expect(response.agents!.first.id, 'a1');
@@ -58,7 +58,7 @@ void main() {
 
       final json = response.toJson();
       expect(json['agents'], hasLength(2));
-      expect(json['nextPageToken'], 'tok');
+      expect(json['next_page_token'], 'tok');
     });
   });
 }
