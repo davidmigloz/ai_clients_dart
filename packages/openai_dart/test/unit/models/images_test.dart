@@ -533,12 +533,17 @@ void main() {
     test('exposes well-known model ids', () {
       expect(ImageModels.gptImage2, 'gpt-image-2');
       // Deprecated constants are retained for compatibility; verify their ids.
-      // ignore_for_file: deprecated_member_use_from_same_package
+      // ignore: deprecated_member_use_from_same_package
       expect(ImageModels.gptImage15, 'gpt-image-1.5');
+      // ignore: deprecated_member_use_from_same_package
       expect(ImageModels.gptImage1, 'gpt-image-1');
+      // ignore: deprecated_member_use_from_same_package
       expect(ImageModels.gptImage1Mini, 'gpt-image-1-mini');
+      // ignore: deprecated_member_use_from_same_package
       expect(ImageModels.chatgptImageLatest, 'chatgpt-image-latest');
+      // ignore: deprecated_member_use_from_same_package
       expect(ImageModels.dallE3, 'dall-e-3');
+      // ignore: deprecated_member_use_from_same_package
       expect(ImageModels.dallE2, 'dall-e-2');
     });
   });
