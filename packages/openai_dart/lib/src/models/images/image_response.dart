@@ -385,29 +385,54 @@ class ImagesUsageOutputTokensDetails {
 
 /// Well-known OpenAI image model IDs.
 ///
-/// Mirrors the `ImageModel` literal in the official Python SDK, extended
-/// with `gpt-image-2`. The request `model` field is a free-form `String`;
-/// use these constants or pass any custom model id directly.
+/// The request `model` field is a free-form `String`; use these constants or
+/// pass any custom model id directly. `gpt-image-2` is the only image model
+/// currently recommended by OpenAI — the others have been deprecated or shut
+/// down (see the [deprecations page](https://developers.openai.com/api/docs/deprecations)).
 abstract final class ImageModels {
   /// GPT Image 2 — flagship image model with token-based pricing,
   /// flexible sizes, high-fidelity inputs, and Batch API support.
   static const String gptImage2 = 'gpt-image-2';
 
   /// GPT Image 1.5.
+  @Deprecated(
+    'Deprecated by OpenAI on 2026-06-02 and scheduled for shutdown. '
+    'Use ImageModels.gptImage2 instead.',
+  )
   static const String gptImage15 = 'gpt-image-1.5';
 
   /// GPT Image 1.
+  @Deprecated(
+    'Deprecated by OpenAI on 2026-06-02 and scheduled for shutdown. '
+    'Use ImageModels.gptImage2 instead.',
+  )
   static const String gptImage1 = 'gpt-image-1';
 
   /// GPT Image 1 mini.
+  @Deprecated(
+    'Deprecated by OpenAI on 2026-06-02 and scheduled for shutdown. '
+    'Use ImageModels.gptImage2 instead.',
+  )
   static const String gptImage1Mini = 'gpt-image-1-mini';
 
   /// ChatGPT image latest (snapshot routed to the current ChatGPT image model).
+  @Deprecated(
+    'Deprecated by OpenAI on 2026-06-02 and scheduled for shutdown. '
+    'Use ImageModels.gptImage2 instead.',
+  )
   static const String chatgptImageLatest = 'chatgpt-image-latest';
 
   /// DALL-E 3.
+  @Deprecated(
+    'Removed from the OpenAI API on 2026-05-12. '
+    'Use ImageModels.gptImage2 instead.',
+  )
   static const String dallE3 = 'dall-e-3';
 
   /// DALL-E 2.
+  @Deprecated(
+    'Removed from the OpenAI API on 2026-05-12. '
+    'Use ImageModels.gptImage2 instead.',
+  )
   static const String dallE2 = 'dall-e-2';
 }

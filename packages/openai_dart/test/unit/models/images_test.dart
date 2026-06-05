@@ -532,6 +532,8 @@ void main() {
   group('ImageModels constants', () {
     test('exposes well-known model ids', () {
       expect(ImageModels.gptImage2, 'gpt-image-2');
+      // Deprecated constants are retained for compatibility; verify their ids.
+      // ignore_for_file: deprecated_member_use_from_same_package
       expect(ImageModels.gptImage15, 'gpt-image-1.5');
       expect(ImageModels.gptImage1, 'gpt-image-1');
       expect(ImageModels.gptImage1Mini, 'gpt-image-1-mini');
