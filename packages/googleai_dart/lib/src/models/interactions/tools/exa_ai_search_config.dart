@@ -13,11 +13,18 @@ class ExaAISearchConfig {
   const ExaAISearchConfig({required this.apiKey, this.customConfig});
 
   /// Creates an [ExaAISearchConfig] from JSON.
-  factory ExaAISearchConfig.fromJson(Map<String, dynamic> json) =>
-      ExaAISearchConfig(
-        apiKey: json['api_key'] as String,
-        customConfig: json['custom_config'] as Map<String, dynamic>?,
+  factory ExaAISearchConfig.fromJson(Map<String, dynamic> json) {
+    final apiKey = json['api_key'];
+    if (apiKey is! String) {
+      throw const FormatException(
+        'ExaAISearchConfig: missing required "api_key"',
       );
+    }
+    return ExaAISearchConfig(
+      apiKey: apiKey,
+      customConfig: json['custom_config'] as Map<String, dynamic>?,
+    );
+  }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {

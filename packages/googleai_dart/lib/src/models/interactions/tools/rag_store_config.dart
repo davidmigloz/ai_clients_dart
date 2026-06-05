@@ -267,17 +267,16 @@ class RankService {
   /// Optional. The model name of the rank service.
   final String? modelName;
 
-  /// The ranking config discriminator (always `rank_service`).
-  final String rankingConfig;
-
   /// Creates a [RankService] instance.
-  const RankService({this.modelName, this.rankingConfig = 'rank_service'});
+  const RankService({this.modelName});
+
+  /// The ranking config discriminator. Per the spec this is a required
+  /// `const`, so it is always `rank_service` and not user-configurable.
+  String get rankingConfig => 'rank_service';
 
   /// Creates a [RankService] from JSON.
-  factory RankService.fromJson(Map<String, dynamic> json) => RankService(
-    modelName: json['model_name'] as String?,
-    rankingConfig: json['ranking_config'] as String? ?? 'rank_service',
-  );
+  factory RankService.fromJson(Map<String, dynamic> json) =>
+      RankService(modelName: json['model_name'] as String?);
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
@@ -286,17 +285,11 @@ class RankService {
   };
 
   /// Creates a copy with replaced values.
-  RankService copyWith({
-    Object? modelName = unsetCopyWithValue,
-    Object? rankingConfig = unsetCopyWithValue,
-  }) {
+  RankService copyWith({Object? modelName = unsetCopyWithValue}) {
     return RankService(
       modelName: modelName == unsetCopyWithValue
           ? this.modelName
           : modelName as String?,
-      rankingConfig: rankingConfig == unsetCopyWithValue
-          ? this.rankingConfig
-          : rankingConfig! as String,
     );
   }
 }
