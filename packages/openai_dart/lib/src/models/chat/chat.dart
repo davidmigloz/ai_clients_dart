@@ -3,6 +3,7 @@ library;
 
 export 'chat_audio_config.dart';
 export 'chat_completion.dart';
+export 'chat_completion_moderation.dart';
 export 'chat_completion_request.dart';
 export 'chat_message.dart';
 export 'content_part.dart';

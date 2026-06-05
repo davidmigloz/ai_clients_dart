@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import '../common/finish_reason.dart';
 import '../common/logprobs.dart';
 import '../common/usage.dart';
+import 'chat_completion_moderation.dart';
 import 'chat_message.dart';
 import 'reasoning_detail.dart';
 import 'tool_call.dart';
@@ -37,6 +38,7 @@ class ChatCompletion {
     this.usage,
     this.systemFingerprint,
     this.serviceTier,
+    this.moderation,
     this.provider,
   });
 
@@ -60,6 +62,11 @@ class ChatCompletion {
           : null,
       systemFingerprint: json['system_fingerprint'] as String?,
       serviceTier: json['service_tier'] as String?,
+      moderation: json['moderation'] != null
+          ? ChatCompletionModeration.fromJson(
+              json['moderation'] as Map<String, dynamic>,
+            )
+          : null,
       provider: json['provider'] as String?,
     );
   }
@@ -106,6 +113,12 @@ class ChatCompletion {
   /// The service tier used (if applicable).
   final String? serviceTier;
 
+  /// Moderation results for the request input and generated output.
+  ///
+  /// Present only when moderated completions were requested via
+  /// [ChatCompletionCreateRequest.moderation].
+  final ChatCompletionModeration? moderation;
+
   /// **OpenRouter only.** The provider that served the request.
   ///
   /// Not part of the official OpenAI API.
@@ -135,6 +148,7 @@ class ChatCompletion {
     if (usage != null) 'usage': usage!.toJson(),
     if (systemFingerprint != null) 'system_fingerprint': systemFingerprint,
     if (serviceTier != null) 'service_tier': serviceTier,
+    if (moderation != null) 'moderation': moderation!.toJson(),
     if (provider != null) 'provider': provider,
   };
 

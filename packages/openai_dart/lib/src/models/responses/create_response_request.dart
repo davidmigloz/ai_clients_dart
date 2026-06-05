@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import '../chat/chat_completion_request.dart' show StreamOptions;
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import '../moderations/completion_moderation.dart';
 import 'config/config.dart';
 import 'items/item.dart';
 import 'response_input.dart';
@@ -129,6 +130,12 @@ class CreateResponseRequest {
   /// Safety identifier for content moderation.
   final String? safetyIdentifier;
 
+  /// Configuration for running moderation on the input and generated output.
+  ///
+  /// When set, the response includes `moderation` results
+  /// ([Response.moderation]) for both the input and the generated output.
+  final ModerationConfig? moderation;
+
   /// Prompt cache key for caching.
   final String? promptCacheKey;
 
@@ -162,6 +169,7 @@ class CreateResponseRequest {
     this.background,
     this.maxToolCalls,
     this.safetyIdentifier,
+    this.moderation,
     this.promptCacheKey,
     this.topLogprobs,
   });
@@ -227,6 +235,11 @@ class CreateResponseRequest {
       background: json['background'] as bool?,
       maxToolCalls: json['max_tool_calls'] as int?,
       safetyIdentifier: json['safety_identifier'] as String?,
+      moderation: json['moderation'] != null
+          ? ModerationConfig.fromJson(
+              json['moderation'] as Map<String, dynamic>,
+            )
+          : null,
       promptCacheKey: json['prompt_cache_key'] as String?,
       topLogprobs: json['top_logprobs'] as int?,
     );
@@ -269,6 +282,7 @@ class CreateResponseRequest {
       if (background != null) 'background': background,
       if (maxToolCalls != null) 'max_tool_calls': maxToolCalls,
       if (safetyIdentifier != null) 'safety_identifier': safetyIdentifier,
+      if (moderation != null) 'moderation': moderation!.toJson(),
       if (promptCacheKey != null) 'prompt_cache_key': promptCacheKey,
       if (topLogprobs != null) 'top_logprobs': topLogprobs,
     };
@@ -304,6 +318,7 @@ class CreateResponseRequest {
     Object? background = unsetCopyWithValue,
     Object? maxToolCalls = unsetCopyWithValue,
     Object? safetyIdentifier = unsetCopyWithValue,
+    Object? moderation = unsetCopyWithValue,
     Object? promptCacheKey = unsetCopyWithValue,
     Object? topLogprobs = unsetCopyWithValue,
   }) {
@@ -371,6 +386,9 @@ class CreateResponseRequest {
       safetyIdentifier: safetyIdentifier == unsetCopyWithValue
           ? this.safetyIdentifier
           : safetyIdentifier as String?,
+      moderation: moderation == unsetCopyWithValue
+          ? this.moderation
+          : moderation as ModerationConfig?,
       promptCacheKey: promptCacheKey == unsetCopyWithValue
           ? this.promptCacheKey
           : promptCacheKey as String?,
@@ -411,6 +429,7 @@ class CreateResponseRequest {
         background == other.background &&
         maxToolCalls == other.maxToolCalls &&
         safetyIdentifier == other.safetyIdentifier &&
+        moderation == other.moderation &&
         promptCacheKey == other.promptCacheKey &&
         topLogprobs == other.topLogprobs;
   }
@@ -442,6 +461,7 @@ class CreateResponseRequest {
     background,
     maxToolCalls,
     safetyIdentifier,
+    moderation,
     promptCacheKey,
     topLogprobs,
   ]);
