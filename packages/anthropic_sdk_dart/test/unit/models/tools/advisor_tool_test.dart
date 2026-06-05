@@ -151,5 +151,83 @@ void main() {
       expect(builtIn, isA<AdvisorTool>());
       expect((builtIn as AdvisorTool).model, 'claude-opus-4-8');
     });
+
+    test('toJson includes allowed_callers, defer_loading, strict', () {
+      const tool = AdvisorTool(
+        model: 'claude-opus-4-8',
+        allowedCallers: ['direct', 'code_execution_20260120'],
+        deferLoading: true,
+        strict: true,
+      );
+      final json = tool.toJson();
+
+      expect(json['allowed_callers'], ['direct', 'code_execution_20260120']);
+      expect(json['defer_loading'], true);
+      expect(json['strict'], true);
+    });
+
+    test('fromJson round-trip with parity fields', () {
+      final json = {
+        'type': 'advisor_20260301',
+        'name': 'advisor',
+        'model': 'claude-opus-4-8',
+        'allowed_callers': ['direct'],
+        'defer_loading': false,
+        'strict': true,
+      };
+      final tool = AdvisorTool.fromJson(json);
+
+      expect(tool.allowedCallers, ['direct']);
+      expect(tool.deferLoading, false);
+      expect(tool.strict, true);
+      expect(tool.toJson(), json);
+    });
+
+    test('BuiltInTool.advisor forwards parity fields', () {
+      final tool =
+          BuiltInTool.advisor(
+                model: 'claude-opus-4-8',
+                allowedCallers: const ['direct'],
+                deferLoading: true,
+                strict: true,
+              )
+              as AdvisorTool;
+
+      expect(tool.allowedCallers, ['direct']);
+      expect(tool.deferLoading, true);
+      expect(tool.strict, true);
+    });
+
+    test('copyWith updates and clears parity fields', () {
+      const original = AdvisorTool(
+        model: 'claude-opus-4-8',
+        allowedCallers: ['direct'],
+        deferLoading: true,
+        strict: true,
+      );
+
+      final updated = original.copyWith(allowedCallers: const ['direct', 'x']);
+      expect(updated.allowedCallers, ['direct', 'x']);
+      expect(updated.deferLoading, true);
+
+      final cleared = original.copyWith(
+        allowedCallers: null,
+        deferLoading: null,
+        strict: null,
+      );
+      expect(cleared.allowedCallers, isNull);
+      expect(cleared.deferLoading, isNull);
+      expect(cleared.strict, isNull);
+    });
+
+    test('equality includes parity fields', () {
+      const a = AdvisorTool(model: 'claude-opus-4-8', strict: true);
+      const b = AdvisorTool(model: 'claude-opus-4-8', strict: true);
+      const c = AdvisorTool(model: 'claude-opus-4-8', strict: false);
+
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+      expect(a, isNot(equals(c)));
+    });
   });
 }
