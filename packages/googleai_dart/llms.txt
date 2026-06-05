@@ -2,7 +2,7 @@
 
 > Dart client for the Google AI Gemini Developer API and Vertex AI Gemini API with text generation, image generation, tool calling, grounding tools, Live API WebSocket sessions, service tier routing, and embeddings.
 
-Note: Google lists several Vertex AI products and features (e.g. Vertex AI Platform, Generative AI on Vertex AI) under the Gemini Enterprise Agent Platform brand; the API and SDKs still use the Vertex AI name, which this client keeps. See https://docs.cloud.google.com/gemini-enterprise-agent-platform/vertex-ai-name-changes
+Note: Google lists several Vertex AI products and features (e.g. Vertex AI Platform, Generative AI on Vertex AI) under the Gemini Enterprise Agent Platform brand; the API and SDKs still use the Vertex AI name, which this client keeps. See the [Vertex AI name changes](https://docs.cloud.google.com/gemini-enterprise-agent-platform/vertex-ai-name-changes) page.
 
 ## Docs
 

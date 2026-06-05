@@ -3,8 +3,8 @@
 /// Note: Google's "Vertex AI name changes" list several Vertex AI products and features
 /// (e.g. Vertex AI Platform, Generative AI on Vertex AI) under the Gemini Enterprise Agent
 /// Platform brand. The API and SDKs still use the Vertex AI name, so this library keeps it
-/// (e.g. `GoogleAIConfig.vertexAI`), matching Google's REST API and official SDKs. See
-/// https://docs.cloud.google.com/gemini-enterprise-agent-platform/vertex-ai-name-changes
+/// (e.g. `GoogleAIConfig.vertexAI(...)`), matching Google's REST API and official SDKs.
+/// See the [Vertex AI name changes](https://docs.cloud.google.com/gemini-enterprise-agent-platform/vertex-ai-name-changes).
 library;
 
 // Auth
