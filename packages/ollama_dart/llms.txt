@@ -14,6 +14,7 @@
 - [streaming_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/streaming_example.dart) (~366 tokens): Streaming responses.
 - [tool_calling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/tool_calling_example.dart) (~709 tokens): Tool calling.
 - [completions_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/completions_example.dart) (~918 tokens): Plain text generation.
+- [image_generation_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/image_generation_example.dart) (~450 tokens): Experimental image generation.
 - [embeddings_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/embeddings_example.dart) (~616 tokens): Text embeddings.
 - [models_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/models_example.dart) (~660 tokens): Model management.
 - [error_handling_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/ollama_dart/example/error_handling_example.dart) (~240 tokens): Exception handling patterns.
@@ -24,4 +25,4 @@
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/ollama_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~19.7k tokens**
+**Total: ~20.2k tokens**

@@ -59,6 +59,29 @@ class GenerateResponse {
   /// Log probability information for generated tokens.
   final List<Logprob>? logprobs;
 
+  /// Base64-encoded generated image.
+  ///
+  /// Experimental: only present for image generation models. Decode with
+  /// `base64Decode` before use. May change or be removed in a future Ollama
+  /// release.
+  final String? image;
+
+  /// Number of completed diffusion steps for image generation.
+  ///
+  /// Experimental: image generation models only. Reports diffusion progress;
+  /// streamed progress events carry intermediate values, while a non-streaming
+  /// response carries the final counts. May change or be removed in a future
+  /// Ollama release.
+  final int? completed;
+
+  /// Total number of diffusion steps for image generation.
+  ///
+  /// Experimental: image generation models only. Reports diffusion progress;
+  /// streamed progress events carry intermediate values, while a non-streaming
+  /// response carries the final counts. May change or be removed in a future
+  /// Ollama release.
+  final int? total;
+
   /// Creates a [GenerateResponse].
   const GenerateResponse({
     this.model,
@@ -77,6 +100,9 @@ class GenerateResponse {
     this.evalCount,
     this.evalDuration,
     this.logprobs,
+    this.image,
+    this.completed,
+    this.total,
   });
 
   /// Creates a [GenerateResponse] from JSON.
@@ -100,6 +126,9 @@ class GenerateResponse {
         logprobs: (json['logprobs'] as List?)
             ?.map((e) => Logprob.fromJson(e as Map<String, dynamic>))
             .toList(),
+        image: json['image'] as String?,
+        completed: json['completed'] as int?,
+        total: json['total'] as int?,
       );
 
   /// Converts to JSON.
@@ -120,6 +149,9 @@ class GenerateResponse {
     if (evalCount != null) 'eval_count': evalCount,
     if (evalDuration != null) 'eval_duration': evalDuration,
     if (logprobs != null) 'logprobs': logprobs!.map((e) => e.toJson()).toList(),
+    if (image != null) 'image': image,
+    if (completed != null) 'completed': completed,
+    if (total != null) 'total': total,
   };
 
   /// Creates a copy with replaced values.
@@ -140,6 +172,9 @@ class GenerateResponse {
     Object? evalCount = unsetCopyWithValue,
     Object? evalDuration = unsetCopyWithValue,
     Object? logprobs = unsetCopyWithValue,
+    Object? image = unsetCopyWithValue,
+    Object? completed = unsetCopyWithValue,
+    Object? total = unsetCopyWithValue,
   }) {
     return GenerateResponse(
       model: model == unsetCopyWithValue ? this.model : model as String?,
@@ -186,6 +221,11 @@ class GenerateResponse {
       logprobs: logprobs == unsetCopyWithValue
           ? this.logprobs
           : logprobs as List<Logprob>?,
+      image: image == unsetCopyWithValue ? this.image : image as String?,
+      completed: completed == unsetCopyWithValue
+          ? this.completed
+          : completed as int?,
+      total: total == unsetCopyWithValue ? this.total : total as int?,
     );
   }
 
@@ -209,7 +249,10 @@ class GenerateResponse {
           promptEvalDuration == other.promptEvalDuration &&
           evalCount == other.evalCount &&
           evalDuration == other.evalDuration &&
-          listsEqual(logprobs, other.logprobs);
+          listsEqual(logprobs, other.logprobs) &&
+          image == other.image &&
+          completed == other.completed &&
+          total == other.total;
 
   @override
   int get hashCode => Object.hashAll([
@@ -229,6 +272,9 @@ class GenerateResponse {
     evalCount,
     evalDuration,
     listHash(logprobs),
+    image,
+    completed,
+    total,
   ]);
 
   @override
@@ -249,5 +295,8 @@ class GenerateResponse {
       'promptEvalDuration: $promptEvalDuration, '
       'evalCount: $evalCount, '
       'evalDuration: $evalDuration, '
-      'logprobs: $logprobs)';
+      'logprobs: $logprobs, '
+      'image: ${image == null ? null : '[${image!.length} chars]'}, '
+      'completed: $completed, '
+      'total: $total)';
 }

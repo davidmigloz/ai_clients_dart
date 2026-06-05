@@ -106,6 +106,7 @@
         "stop",
         "num_ctx",
         "num_predict",
+        "draft_num_predict",
         "num_keep",
         "numa",
         "num_batch",
@@ -134,7 +135,10 @@
         "options",
         "think",
         "logprobs",
-        "top_logprobs"
+        "top_logprobs",
+        "width",
+        "height",
+        "steps"
       ],
       "GenerateResponse": [
         "model",
@@ -150,7 +154,10 @@
         "prompt_eval_duration",
         "eval_count",
         "eval_duration",
-        "logprobs"
+        "logprobs",
+        "image",
+        "completed",
+        "total"
       ],
       "ChatRequest": [
         "model",
@@ -241,6 +248,7 @@
       "dart_class": "GenerateRequest",
       "file": "lib/src/models/completions/generate_request.dart",
       "schema": "GenerateRequest",
+      "note": "Dart class adds experimental image-generation request fields (width, height, steps) sourced from Ollama api/types.go + docs/api.md; intentionally ahead of upstream docs/openapi.yaml, which omits them as experimental.",
       "tags": []
     },
     "GenerateResponse": {
@@ -249,6 +257,7 @@
       "dart_class": "GenerateResponse",
       "file": "lib/src/models/completions/generate_response.dart",
       "schema": "GenerateResponse",
+      "note": "Dart class adds experimental image-generation response fields (image, completed, total) sourced from Ollama api/types.go + docs/api.md; intentionally ahead of upstream docs/openapi.yaml, which omits them as experimental.",
       "tags": []
     },
     "EmbedRequest": {
@@ -306,7 +315,7 @@
       "file": "lib/src/models/metadata/model_options.dart",
       "schema": "ModelOptions",
       "tags": ["acknowledged"],
-      "note": "Spec has additionalProperties: true with only 8 fields; Dart class intentionally declares 30 typed fields covering all known Ollama options for type safety"
+      "note": "Spec has additionalProperties: true with only 8 fields; Dart class intentionally declares 31 typed fields covering all known Ollama options for type safety, including draft_num_predict (from docs/modelfile.mdx + api/types.go Runner), which is ahead of upstream docs/openapi.yaml"
     }
   }
 }

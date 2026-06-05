@@ -121,6 +121,42 @@ void main() {
       final outputJson = request.toJson();
       expect(outputJson.containsKey('context'), isFalse);
     });
+
+    test(
+      'image generation params serialize, deserialize, copyWith, toString',
+      () {
+        const request = GenerateRequest(
+          model: 'x/z-image-turbo',
+          prompt: 'a sunset over mountains',
+          width: 1024,
+          height: 768,
+          steps: 20,
+        );
+
+        final json = request.toJson();
+        expect(json['width'], 1024);
+        expect(json['height'], 768);
+        expect(json['steps'], 20);
+
+        final restored = GenerateRequest.fromJson(json);
+        expect(restored.width, 1024);
+        expect(restored.height, 768);
+        expect(restored.steps, 20);
+
+        expect(restored.copyWith(width: 512).width, 512);
+        expect(restored.copyWith(steps: null).steps, isNull);
+        expect(request.toString(), contains('width: 1024'));
+      },
+    );
+
+    test('image generation params omitted when absent', () {
+      const request = GenerateRequest(model: 'llama3.2', prompt: 'Hello');
+
+      final json = request.toJson();
+      expect(json.containsKey('width'), isFalse);
+      expect(json.containsKey('height'), isFalse);
+      expect(json.containsKey('steps'), isFalse);
+    });
   });
 
   group('GenerateResponse', () {
@@ -271,6 +307,55 @@ void main() {
       expect(nextRequest.context, [100, 200, 300]);
       expect(nextRequest.toJson()['context'], [100, 200, 300]);
     });
+
+    test('image generation fields serialize and deserialize', () {
+      final json = {
+        'model': 'x/z-image-turbo',
+        'done': true,
+        'image': 'aW1hZ2VkYXRh', // base64 of "imagedata" (12 chars)
+        'completed': 20,
+        'total': 20,
+      };
+
+      final response = GenerateResponse.fromJson(json);
+      expect(response.image, 'aW1hZ2VkYXRh');
+      expect(response.completed, 20);
+      expect(response.total, 20);
+
+      final roundTrip = response.toJson();
+      expect(roundTrip['image'], 'aW1hZ2VkYXRh');
+      expect(roundTrip['completed'], 20);
+      expect(roundTrip['total'], 20);
+    });
+
+    test('image field is summarized in toString, not dumped raw', () {
+      const response = GenerateResponse(
+        model: 'x/z-image-turbo',
+        done: true,
+        image: 'aW1hZ2VkYXRh',
+      );
+
+      final str = response.toString();
+      expect(str, contains('image: [12 chars]'));
+      expect(str, isNot(contains('aW1hZ2VkYXRh')));
+    });
+
+    test('image generation fields omitted when absent; copyWith clears', () {
+      const response = GenerateResponse(
+        model: 'llama3.2',
+        response: 'Hi',
+        done: true,
+      );
+
+      final json = response.toJson();
+      expect(json.containsKey('image'), isFalse);
+      expect(json.containsKey('completed'), isFalse);
+      expect(json.containsKey('total'), isFalse);
+
+      final withImage = response.copyWith(image: 'abc', completed: 1, total: 2);
+      expect(withImage.image, 'abc');
+      expect(withImage.copyWith(image: null).image, isNull);
+    });
   });
 
   group('GenerateStreamEvent', () {
@@ -300,6 +385,46 @@ void main() {
       expect(event.doneReason, DoneReason.stop);
       expect(event.totalDuration, 5000000000);
       expect(event.evalCount, 50);
+    });
+
+    test('image generation progress and final events round-trip', () {
+      final progress = GenerateStreamEvent.fromJson(const {
+        'model': 'x/z-image-turbo',
+        'completed': 5,
+        'total': 20,
+        'done': false,
+      });
+      expect(progress.completed, 5);
+      expect(progress.total, 20);
+      expect(progress.done, false);
+
+      final finalEvent = GenerateStreamEvent.fromJson(const {
+        'model': 'x/z-image-turbo',
+        'image': 'aW1hZ2VkYXRh',
+        'done': true,
+      });
+      expect(finalEvent.image, 'aW1hZ2VkYXRh');
+      expect(finalEvent.toJson()['image'], 'aW1hZ2VkYXRh');
+      expect(finalEvent.toString(), contains('image: [12 chars]'));
+    });
+
+    test('equality compares all fields, not just model/response/done', () {
+      const a = GenerateStreamEvent(
+        model: 'llama3.2',
+        response: 'Hi',
+        done: true,
+        totalDuration: 1000,
+      );
+      const b = GenerateStreamEvent(
+        model: 'llama3.2',
+        response: 'Hi',
+        done: true,
+        totalDuration: 2000,
+      );
+
+      // Previously these compared equal (totalDuration was ignored).
+      expect(a, isNot(equals(b)));
+      expect(a.hashCode, isNot(equals(b.hashCode)));
     });
   });
 }

@@ -74,6 +74,13 @@ class ModelOptions {
   /// Maximum number of tokens to generate.
   final int? numPredict;
 
+  /// Maximum number of speculative draft tokens to predict per step when a
+  /// draft model is available.
+  ///
+  /// Separate draft models default to 4; set to 0 to disable speculative
+  /// drafting.
+  final int? draftNumPredict;
+
   /// Number of tokens to keep from the initial prompt.
   final int? numKeep;
 
@@ -144,6 +151,7 @@ class ModelOptions {
     // Context and output
     this.numCtx,
     this.numPredict,
+    this.draftNumPredict,
     this.numKeep,
     // Runtime and GPU
     this.numa,
@@ -182,6 +190,7 @@ class ModelOptions {
     // Context and output
     numCtx: json['num_ctx'] as int?,
     numPredict: json['num_predict'] as int?,
+    draftNumPredict: json['draft_num_predict'] as int?,
     numKeep: json['num_keep'] as int?,
     // Runtime and GPU
     numa: json['numa'] as bool?,
@@ -220,6 +229,7 @@ class ModelOptions {
     // Context and output
     if (numCtx != null) 'num_ctx': numCtx,
     if (numPredict != null) 'num_predict': numPredict,
+    if (draftNumPredict != null) 'draft_num_predict': draftNumPredict,
     if (numKeep != null) 'num_keep': numKeep,
     // Runtime and GPU
     if (numa != null) 'numa': numa,
@@ -258,6 +268,7 @@ class ModelOptions {
     // Context and output
     Object? numCtx = unsetCopyWithValue,
     Object? numPredict = unsetCopyWithValue,
+    Object? draftNumPredict = unsetCopyWithValue,
     Object? numKeep = unsetCopyWithValue,
     // Runtime and GPU
     Object? numa = unsetCopyWithValue,
@@ -316,6 +327,9 @@ class ModelOptions {
       numPredict: numPredict == unsetCopyWithValue
           ? this.numPredict
           : numPredict as int?,
+      draftNumPredict: draftNumPredict == unsetCopyWithValue
+          ? this.draftNumPredict
+          : draftNumPredict as int?,
       numKeep: numKeep == unsetCopyWithValue ? this.numKeep : numKeep as int?,
       // Runtime and GPU
       numa: numa == unsetCopyWithValue ? this.numa : numa as bool?,
@@ -366,6 +380,7 @@ class ModelOptions {
           stop == other.stop &&
           numCtx == other.numCtx &&
           numPredict == other.numPredict &&
+          draftNumPredict == other.draftNumPredict &&
           numKeep == other.numKeep &&
           numa == other.numa &&
           numBatch == other.numBatch &&
@@ -399,6 +414,7 @@ class ModelOptions {
     stop,
     numCtx,
     numPredict,
+    draftNumPredict,
     numKeep,
     numa,
     numBatch,
@@ -434,6 +450,7 @@ class ModelOptions {
       'stop: $stop, '
       'numCtx: $numCtx, '
       'numPredict: $numPredict, '
+      'draftNumPredict: $draftNumPredict, '
       'numKeep: $numKeep, '
       'numa: $numa, '
       'numBatch: $numBatch, '

@@ -66,6 +66,24 @@ class GenerateRequest {
   /// Number of most likely tokens to return at each position.
   final int? topLogprobs;
 
+  /// Width of the generated image in pixels.
+  ///
+  /// Experimental: only used by image generation models, and may change or be
+  /// removed in a future Ollama release.
+  final int? width;
+
+  /// Height of the generated image in pixels.
+  ///
+  /// Experimental: only used by image generation models, and may change or be
+  /// removed in a future Ollama release.
+  final int? height;
+
+  /// Number of diffusion steps for image generation.
+  ///
+  /// Experimental: only used by image generation models, and may change or be
+  /// removed in a future Ollama release.
+  final int? steps;
+
   /// Creates a [GenerateRequest].
   const GenerateRequest({
     required this.model,
@@ -83,6 +101,9 @@ class GenerateRequest {
     this.options,
     this.logprobs,
     this.topLogprobs,
+    this.width,
+    this.height,
+    this.steps,
   });
 
   /// Creates a [GenerateRequest] from JSON.
@@ -105,6 +126,9 @@ class GenerateRequest {
             : null,
         logprobs: json['logprobs'] as bool?,
         topLogprobs: json['top_logprobs'] as int?,
+        width: json['width'] as int?,
+        height: json['height'] as int?,
+        steps: json['steps'] as int?,
       );
 
   /// Converts to JSON.
@@ -124,6 +148,9 @@ class GenerateRequest {
     if (options != null) 'options': options!.toJson(),
     if (logprobs != null) 'logprobs': logprobs,
     if (topLogprobs != null) 'top_logprobs': topLogprobs,
+    if (width != null) 'width': width,
+    if (height != null) 'height': height,
+    if (steps != null) 'steps': steps,
   };
 
   /// Creates a copy with replaced values.
@@ -143,6 +170,9 @@ class GenerateRequest {
     Object? options = unsetCopyWithValue,
     Object? logprobs = unsetCopyWithValue,
     Object? topLogprobs = unsetCopyWithValue,
+    Object? width = unsetCopyWithValue,
+    Object? height = unsetCopyWithValue,
+    Object? steps = unsetCopyWithValue,
   }) {
     return GenerateRequest(
       model: model ?? this.model,
@@ -176,6 +206,9 @@ class GenerateRequest {
       topLogprobs: topLogprobs == unsetCopyWithValue
           ? this.topLogprobs
           : topLogprobs as int?,
+      width: width == unsetCopyWithValue ? this.width : width as int?,
+      height: height == unsetCopyWithValue ? this.height : height as int?,
+      steps: steps == unsetCopyWithValue ? this.steps : steps as int?,
     );
   }
 
@@ -198,7 +231,10 @@ class GenerateRequest {
           keepAlive == other.keepAlive &&
           options == other.options &&
           logprobs == other.logprobs &&
-          topLogprobs == other.topLogprobs;
+          topLogprobs == other.topLogprobs &&
+          width == other.width &&
+          height == other.height &&
+          steps == other.steps;
 
   @override
   int get hashCode => Object.hashAll([
@@ -217,6 +253,9 @@ class GenerateRequest {
     options,
     logprobs,
     topLogprobs,
+    width,
+    height,
+    steps,
   ]);
 
   @override
@@ -236,5 +275,8 @@ class GenerateRequest {
       'keepAlive: $keepAlive, '
       'options: $options, '
       'logprobs: $logprobs, '
-      'topLogprobs: $topLogprobs)';
+      'topLogprobs: $topLogprobs, '
+      'width: $width, '
+      'height: $height, '
+      'steps: $steps)';
 }
