@@ -66,14 +66,20 @@ class GenerateResponse {
   /// release.
   final String? image;
 
-  /// Number of completed diffusion steps during image generation.
+  /// Number of completed diffusion steps for image generation.
   ///
-  /// Experimental: only present for image generation models while streaming.
+  /// Experimental: image generation models only. Reports diffusion progress;
+  /// streamed progress events carry intermediate values, while a non-streaming
+  /// response carries the final counts. May change or be removed in a future
+  /// Ollama release.
   final int? completed;
 
   /// Total number of diffusion steps for image generation.
   ///
-  /// Experimental: only present for image generation models while streaming.
+  /// Experimental: image generation models only. Reports diffusion progress;
+  /// streamed progress events carry intermediate values, while a non-streaming
+  /// response carries the final counts. May change or be removed in a future
+  /// Ollama release.
   final int? total;
 
   /// Creates a [GenerateResponse].
