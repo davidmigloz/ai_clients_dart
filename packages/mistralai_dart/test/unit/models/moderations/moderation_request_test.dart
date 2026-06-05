@@ -8,7 +8,7 @@ void main() {
         final request = ModerationRequest.single(input: 'Test content');
 
         expect(request.input, ['Test content']);
-        expect(request.model, 'mistral-moderation-latest');
+        expect(request.model, 'mistral-moderation-2603');
       });
 
       test('should create request with list input', () {
@@ -17,7 +17,7 @@ void main() {
         );
 
         expect(request.input, ['Content 1', 'Content 2', 'Content 3']);
-        expect(request.model, 'mistral-moderation-latest');
+        expect(request.model, 'mistral-moderation-2603');
       });
 
       test('should create request with custom model', () {
@@ -33,19 +33,19 @@ void main() {
     group('fromJson', () {
       test('should parse request with list input', () {
         final json = <String, dynamic>{
-          'model': 'mistral-moderation-latest',
+          'model': 'mistral-moderation-2603',
           'input': ['Content 1', 'Content 2'],
         };
 
         final request = ModerationRequest.fromJson(json);
 
-        expect(request.model, 'mistral-moderation-latest');
+        expect(request.model, 'mistral-moderation-2603');
         expect(request.input, ['Content 1', 'Content 2']);
       });
 
       test('should parse request with string input', () {
         final json = <String, dynamic>{
-          'model': 'mistral-moderation-latest',
+          'model': 'mistral-moderation-2603',
           'input': 'Single content',
         };
 
@@ -61,7 +61,7 @@ void main() {
 
         final request = ModerationRequest.fromJson(json);
 
-        expect(request.model, 'mistral-moderation-latest');
+        expect(request.model, 'mistral-moderation-2603');
       });
 
       test('should handle empty input list', () {
@@ -76,13 +76,13 @@ void main() {
     group('toJson', () {
       test('should serialize request', () {
         final request = ModerationRequest.single(
-          model: 'mistral-moderation-latest',
+          model: 'mistral-moderation-2603',
           input: 'Test content',
         );
 
         final json = request.toJson();
 
-        expect(json['model'], 'mistral-moderation-latest');
+        expect(json['model'], 'mistral-moderation-2603');
         expect(json['input'], ['Test content']);
       });
 

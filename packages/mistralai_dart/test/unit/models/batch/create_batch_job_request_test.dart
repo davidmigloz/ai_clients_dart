@@ -99,7 +99,7 @@ void main() {
         final json = {
           'input_files': ['file-789'],
           'endpoint': '/v1/moderations',
-          'model': 'mistral-moderation-latest',
+          'model': 'mistral-moderation-2603',
           'metadata': {'key': 'value'},
           'timeout_hours': 48,
         };
@@ -108,7 +108,7 @@ void main() {
 
         expect(request.inputFiles, ['file-789']);
         expect(request.endpoint, '/v1/moderations');
-        expect(request.model, 'mistral-moderation-latest');
+        expect(request.model, 'mistral-moderation-2603');
         expect(request.metadata, {'key': 'value'});
         expect(request.timeoutHours, 48);
       });

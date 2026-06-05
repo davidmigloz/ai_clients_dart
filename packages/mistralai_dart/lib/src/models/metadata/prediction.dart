@@ -8,7 +8,7 @@ import 'package:meta/meta.dart';
 /// This is particularly useful for scenarios like code modification tasks,
 /// where significant portions of the output are often predetermined.
 ///
-/// Supported models: `mistral-large-2411`, `codestral-latest`
+/// Supported models: `mistral-large-latest`, `codestral-latest`
 ///
 /// Note: The `n` parameter (number of completions) is not supported when
 /// using predicted outputs.

@@ -382,12 +382,12 @@ void main() {
           action: ModerationLLMAction.block,
           customCategoryThresholds: ModerationLLMV1CategoryThresholds(pii: 0.5),
           ignoreOtherCategories: true,
-          modelName: 'mistral-moderation-latest',
+          modelName: 'mistral-moderation-2603',
         );
         expect(config.action, ModerationLLMAction.block);
         expect(config.customCategoryThresholds?.pii, 0.5);
         expect(config.ignoreOtherCategories, true);
-        expect(config.modelName, 'mistral-moderation-latest');
+        expect(config.modelName, 'mistral-moderation-2603');
       });
     });
 
@@ -407,14 +407,14 @@ void main() {
           action: ModerationLLMAction.block,
           customCategoryThresholds: ModerationLLMV1CategoryThresholds(pii: 0.5),
           ignoreOtherCategories: true,
-          modelName: 'mistral-moderation-latest',
+          modelName: 'mistral-moderation-2603',
         );
         final json = config.toJson();
         expect(json['action'], 'block');
         expect(json['custom_category_thresholds'], isA<Map<String, dynamic>>());
         expect((json['custom_category_thresholds'] as Map)['pii'], 0.5);
         expect(json['ignore_other_categories'], true);
-        expect(json['model_name'], 'mistral-moderation-latest');
+        expect(json['model_name'], 'mistral-moderation-2603');
       });
 
       test('omits null fields', () {
@@ -433,13 +433,13 @@ void main() {
           'action': 'block',
           'custom_category_thresholds': {'pii': 0.5},
           'ignore_other_categories': true,
-          'model_name': 'mistral-moderation-latest',
+          'model_name': 'mistral-moderation-2603',
         };
         final config = ModerationLLMV1Config.fromJson(json);
         expect(config.action, ModerationLLMAction.block);
         expect(config.customCategoryThresholds?.pii, 0.5);
         expect(config.ignoreOtherCategories, true);
-        expect(config.modelName, 'mistral-moderation-latest');
+        expect(config.modelName, 'mistral-moderation-2603');
       });
 
       test('handles missing optional fields', () {
@@ -496,7 +496,7 @@ void main() {
             health: 0.3,
           ),
           ignoreOtherCategories: true,
-          modelName: 'mistral-moderation-latest',
+          modelName: 'mistral-moderation-2603',
         );
         final json = original.toJson();
         final restored = ModerationLLMV1Config.fromJson(json);
@@ -777,7 +777,7 @@ void main() {
               pii: 0.5,
             ),
             ignoreOtherCategories: true,
-            modelName: 'mistral-moderation-latest',
+            modelName: 'mistral-moderation-2603',
           ),
           moderationLlmV2: ModerationLLMV2Config(
             action: ModerationLLMAction.none,

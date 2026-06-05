@@ -13,14 +13,14 @@ class ChatClassificationRequest {
 
   /// Creates a [ChatClassificationRequest].
   const ChatClassificationRequest({
-    this.model = 'mistral-moderation-latest',
+    this.model = 'mistral-moderation-2603',
     required this.input,
   });
 
   /// Creates a [ChatClassificationRequest] from JSON.
   factory ChatClassificationRequest.fromJson(Map<String, dynamic> json) =>
       ChatClassificationRequest(
-        model: json['model'] as String? ?? 'mistral-moderation-latest',
+        model: json['model'] as String? ?? 'mistral-moderation-2603',
         input:
             (json['input'] as List?)
                 ?.map((e) => ChatMessage.fromJson(e as Map<String, dynamic>))

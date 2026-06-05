@@ -14,14 +14,14 @@ class ChatModerationRequest {
 
   /// Creates a [ChatModerationRequest].
   const ChatModerationRequest({
-    this.model = 'mistral-moderation-latest',
+    this.model = 'mistral-moderation-2603',
     required this.input,
   });
 
   /// Creates a [ChatModerationRequest] from JSON.
   factory ChatModerationRequest.fromJson(Map<String, dynamic> json) =>
       ChatModerationRequest(
-        model: json['model'] as String? ?? 'mistral-moderation-latest',
+        model: json['model'] as String? ?? 'mistral-moderation-2603',
         input:
             (json['input'] as List?)
                 ?.map((e) => ChatMessage.fromJson(e as Map<String, dynamic>))

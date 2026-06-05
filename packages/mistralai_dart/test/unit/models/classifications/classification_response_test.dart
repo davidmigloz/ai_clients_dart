@@ -35,7 +35,7 @@ void main() {
       test('should parse complete classification response', () {
         final json = <String, dynamic>{
           'id': 'cls-123',
-          'model': 'mistral-moderation-latest',
+          'model': 'mistral-moderation-2603',
           'results': [
             {
               'categories': <String, dynamic>{'sexual': true},
@@ -51,7 +51,7 @@ void main() {
         final response = ClassificationResponse.fromJson(json);
 
         expect(response.id, 'cls-123');
-        expect(response.model, 'mistral-moderation-latest');
+        expect(response.model, 'mistral-moderation-2603');
         expect(response.results, hasLength(2));
         expect(response.results[0].flagged, isTrue);
         expect(response.results[1].flagged, isFalse);
@@ -60,7 +60,7 @@ void main() {
       test('should handle empty results', () {
         final json = <String, dynamic>{
           'id': 'cls-456',
-          'model': 'mistral-moderation-latest',
+          'model': 'mistral-moderation-2603',
           'results': <Map<String, dynamic>>[],
         };
 
@@ -84,7 +84,7 @@ void main() {
       test('should serialize classification response', () {
         const response = ClassificationResponse(
           id: 'cls-123',
-          model: 'mistral-moderation-latest',
+          model: 'mistral-moderation-2603',
           results: [
             ClassificationResult(
               categories: {'sexual': true},
@@ -96,7 +96,7 @@ void main() {
         final json = response.toJson();
 
         expect(json['id'], 'cls-123');
-        expect(json['model'], 'mistral-moderation-latest');
+        expect(json['model'], 'mistral-moderation-2603');
         expect(json['results'], hasLength(1));
         final firstResult =
             (json['results'] as List).first as Map<String, dynamic>;
@@ -109,7 +109,7 @@ void main() {
       test('should return true if any result is flagged', () {
         const response = ClassificationResponse(
           id: 'cls-123',
-          model: 'mistral-moderation-latest',
+          model: 'mistral-moderation-2603',
           results: [
             ClassificationResult(
               categories: {'sexual': false},
@@ -132,7 +132,7 @@ void main() {
       test('should return false if no results are flagged', () {
         const response = ClassificationResponse(
           id: 'cls-123',
-          model: 'mistral-moderation-latest',
+          model: 'mistral-moderation-2603',
           results: [
             ClassificationResult(
               categories: {'sexual': false},
@@ -151,7 +151,7 @@ void main() {
       test('should return false if results are empty', () {
         const response = ClassificationResponse(
           id: 'cls-123',
-          model: 'mistral-moderation-latest',
+          model: 'mistral-moderation-2603',
           results: [],
         );
 
@@ -163,7 +163,7 @@ void main() {
       test('should return first result when available', () {
         const response = ClassificationResponse(
           id: 'cls-123',
-          model: 'mistral-moderation-latest',
+          model: 'mistral-moderation-2603',
           results: [
             ClassificationResult(
               categories: {'sexual': true},
@@ -179,7 +179,7 @@ void main() {
       test('should return null when no results', () {
         const response = ClassificationResponse(
           id: 'cls-123',
-          model: 'mistral-moderation-latest',
+          model: 'mistral-moderation-2603',
           results: [],
         );
 
@@ -191,12 +191,12 @@ void main() {
       test('should be equal when id and model are the same', () {
         const response1 = ClassificationResponse(
           id: 'cls-123',
-          model: 'mistral-moderation-latest',
+          model: 'mistral-moderation-2603',
           results: [],
         );
         const response2 = ClassificationResponse(
           id: 'cls-123',
-          model: 'mistral-moderation-latest',
+          model: 'mistral-moderation-2603',
           results: [],
         );
 
@@ -224,7 +224,7 @@ void main() {
       test('should return a meaningful string representation', () {
         const response = ClassificationResponse(
           id: 'cls-123',
-          model: 'mistral-moderation-latest',
+          model: 'mistral-moderation-2603',
           results: [
             ClassificationResult(
               categories: {'sexual': true},

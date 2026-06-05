@@ -86,7 +86,7 @@ class ChatCompletionRequest {
   /// Enables users to define anticipated output content, optimizing response
   /// times by leveraging known or predictable content.
   ///
-  /// Supported models: `mistral-large-2411`, `codestral-latest`
+  /// Supported models: `mistral-large-latest`, `codestral-latest`
   ///
   /// Note: The `n` parameter is not supported when using predictions.
   final Prediction? prediction;
