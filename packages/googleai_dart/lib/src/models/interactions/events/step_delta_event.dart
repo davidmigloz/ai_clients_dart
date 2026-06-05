@@ -11,10 +11,14 @@ class StepDeltaEvent extends InteractionEvent {
   /// The delta payload for the step.
   final StepDeltaData delta;
 
+  /// Optional metadata accompanying this streamed event.
+  final StreamMetadata? metadata;
+
   /// Creates a [StepDeltaEvent] instance.
   const StepDeltaEvent({
     required this.index,
     required this.delta,
+    this.metadata,
     super.eventId,
   });
 
@@ -31,6 +35,9 @@ class StepDeltaEvent extends InteractionEvent {
     return StepDeltaEvent(
       index: index,
       delta: StepDeltaData.fromJson(delta),
+      metadata: json['metadata'] != null
+          ? StreamMetadata.fromJson(json['metadata'] as Map<String, dynamic>)
+          : null,
       eventId: json['event_id'] as String?,
     );
   }
@@ -40,6 +47,7 @@ class StepDeltaEvent extends InteractionEvent {
     'event_type': eventType,
     'index': index,
     'delta': delta.toJson(),
+    if (metadata != null) 'metadata': metadata!.toJson(),
     if (eventId != null) 'event_id': eventId,
   };
 }

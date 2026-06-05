@@ -20,9 +20,6 @@ class McpServerToolResultStep extends InteractionStep {
   /// Whether the tool call resulted in an error.
   final bool? isError;
 
-  /// Signature hash for backend validation.
-  final String? signature;
-
   /// Creates an [McpServerToolResultStep] instance.
   const McpServerToolResultStep({
     required this.callId,
@@ -30,7 +27,6 @@ class McpServerToolResultStep extends InteractionStep {
     this.name,
     this.serverName,
     this.isError,
-    this.signature,
   });
 
   /// Creates an [McpServerToolResultStep] from JSON.
@@ -59,7 +55,6 @@ class McpServerToolResultStep extends InteractionStep {
       name: json['name'] as String?,
       serverName: json['server_name'] as String?,
       isError: json['is_error'] as bool?,
-      signature: json['signature'] as String?,
     );
   }
 
@@ -71,7 +66,6 @@ class McpServerToolResultStep extends InteractionStep {
     if (name != null) 'name': name,
     if (serverName != null) 'server_name': serverName,
     if (isError != null) 'is_error': isError,
-    if (signature != null) 'signature': signature,
   };
 
   /// Creates a copy with replaced values.
@@ -81,7 +75,6 @@ class McpServerToolResultStep extends InteractionStep {
     Object? name = unsetCopyWithValue,
     Object? serverName = unsetCopyWithValue,
     Object? isError = unsetCopyWithValue,
-    Object? signature = unsetCopyWithValue,
   }) {
     return McpServerToolResultStep(
       callId: callId == unsetCopyWithValue ? this.callId : callId! as String,
@@ -93,9 +86,6 @@ class McpServerToolResultStep extends InteractionStep {
           ? this.serverName
           : serverName as String?,
       isError: isError == unsetCopyWithValue ? this.isError : isError as bool?,
-      signature: signature == unsetCopyWithValue
-          ? this.signature
-          : signature as String?,
     );
   }
 }

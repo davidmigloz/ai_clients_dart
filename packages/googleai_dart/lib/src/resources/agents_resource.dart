@@ -69,8 +69,8 @@ class AgentsResource extends ResourceBase {
   }) async {
     final queryParams = <String, String>{
       'parent': ?parent,
-      if (pageSize != null) 'pageSize': pageSize.toString(),
-      'pageToken': ?pageToken,
+      if (pageSize != null) 'page_size': pageSize.toString(),
+      'page_token': ?pageToken,
     };
 
     final url = requestBuilder.buildUrl(
