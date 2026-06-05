@@ -1,6 +1,6 @@
 # Core Implementation Patterns
 
-**Contents:** [Manifest Kinds](#manifest-kind-values) · [Type Safety](#type-safety-patterns) · [toString](#tostring-convention) · [Equality & Hashing](#equality-and-hashing) · [copyWith Clearing](#copywith-nullable-clear-semantics) · [Immutability](#immutability-enforcement) · [fromJson Patterns](#fromjson-defensive-patterns) · [Nullable Serialization](#nullable-field-serialization) · [Tri-State Nullable](#tri-state-nullable-serialization) · [Open Objects](#open-object-schemas) · [HTTP Client](#http-client-patterns) · [DateTime](#datetime-handling) · [Security](#security) · [Opaque Redaction](#opaque-payload-redaction) · [JSON](#json-serialization) · [SSE Parsing](#sse-parser-correctness) · [async\* Guard](#eager-ensurenotclosed-wrapping-for-async) · [Stream Lifecycle](#stream-connection-lifecycle) · [API Design](#api-design)
+**Contents:** [Manifest Kinds](#manifest-kind-values) · [Type Safety](#type-safety-patterns) · [toString](#tostring-convention) · [Equality & Hashing](#equality-and-hashing) · [copyWith Clearing](#copywith-nullable-clear-semantics) · [Immutability](#immutability-enforcement) · [fromJson Patterns](#fromjson-defensive-patterns) · [Const & Closed Values](#constant-and-closed-value-spec-fields) · [readOnly Fields](#readonly-output-only-fields) · [Nullable Serialization](#nullable-field-serialization) · [Tri-State Nullable](#tri-state-nullable-serialization) · [Open Objects](#open-object-schemas) · [HTTP Client](#http-client-patterns) · [DateTime](#datetime-handling) · [Security](#security) · [Opaque Redaction](#opaque-payload-redaction) · [JSON](#json-serialization) · [SSE Parsing](#sse-parser-correctness) · [async\* Guard](#eager-ensurenotclosed-wrapping-for-async) · [Stream Lifecycle](#stream-connection-lifecycle) · [API Design](#api-design)
 
 - Keep specs checked in under package `specs/` and compare them against fetched scratch specs.
 - Keep Dart serialization handwritten and deterministic.
@@ -294,6 +294,104 @@ final items = rawItems.map((item) {
 }).toList();
 ```
 
+## Constant and Closed-Value Spec Fields
+
+When the spec pins a field to a single value, don't model it as a freely-settable
+field — that lets callers build invalid requests and contradicts the doc comment.
+Two shapes recur:
+
+### Required `const` discriminator → constant getter
+
+When the spec defines the field as a required `const` (e.g. `EnvironmentConfig.type`
+is const `"remote"`, `RankService.ranking_config` is const `"rank_service"`), make it
+a fixed getter — remove it from the constructor and `copyWith` — and reject any other
+value in `fromJson`. Invalid configs become unrepresentable:
+
+```dart
+// WRONG — settable field accepts arbitrary values and serializes them verbatim
+class EnvironmentConfig {
+  const EnvironmentConfig({this.type = 'remote', ...});
+  final String type;
+  Map<String, dynamic> toJson() => {'type': type, ...}; // can emit "type": "bogus"
+}
+
+// CORRECT — constant getter; fromJson validates the wire value
+class EnvironmentConfig {
+  const EnvironmentConfig({...});           // no `type` parameter
+  String get type => 'remote';              // always serializes the constant
+  factory EnvironmentConfig.fromJson(Map<String, dynamic> json) {
+    final type = json['type'];
+    if (type != 'remote') {
+      throw FormatException('EnvironmentConfig: expected type "remote", got "$type"');
+    }
+    return EnvironmentConfig(...);
+  }
+  Map<String, dynamic> toJson() => {'type': type, ...};
+}
+```
+
+Exclude the const discriminator from manifest verification (it has no settable
+field to compare), the same way the URL-path `model` is excluded on
+`GenerateContentRequest`/`EmbedContentRequest`.
+
+### Closed enum / const-default input field → validate, don't silently accept
+
+For a string member the spec restricts to a closed set (e.g. `["disabled"]`), or a
+const-*default* field that may still appear in input (e.g. a `developer`-only
+`role`), parse leniently on omission but validate when present — throw on a value
+outside the closed set instead of mapping any string to the variant or silently
+re-normalizing it on output:
+
+```dart
+// WRONG — any string maps to the disabled variant; bad input round-trips silently
+factory EnvironmentNetworkEgressAllowlist.fromJson(dynamic json) =>
+    json is String ? EnvironmentNetworkDisabled() : ...;
+
+// CORRECT — only the closed literal is accepted
+factory EnvironmentNetworkEgressAllowlist.fromJson(dynamic json) {
+  if (json is String) {
+    if (json != 'disabled') {
+      throw ArgumentError('EnvironmentNetworkEgressAllowlist: expected "disabled", got "$json"');
+    }
+    return EnvironmentNetworkDisabled();
+  }
+  ...
+}
+```
+
+## readOnly (Output-Only) Fields
+
+A field the spec marks `readOnly: true` is output-only: the server populates it on
+responses, and sending it in a request is out-of-spec and redundant. Keep it on the
+response model, but remove it from request DTOs entirely — both the serialized body
+and any method parameter that fed it:
+
+```dart
+// WRONG — readOnly field serialized in a create request
+class CreateModelInteractionParams {
+  const CreateModelInteractionParams({this.environmentId, ...});
+  final String? environmentId; // readOnly in the spec — must not be sent
+  Map<String, dynamic> toJson() => {
+    if (environmentId != null) 'environment_id': environmentId, // out-of-spec
+    ...
+  };
+}
+
+// CORRECT — environment_id removed from the request DTO; reference via the writable sibling
+class CreateModelInteractionParams {
+  const CreateModelInteractionParams({this.environment, ...});
+  final EnvironmentConfigOrId? environment; // writable; use .id('...') to reference an existing one
+  Map<String, dynamic> toJson() => {
+    if (environment != null) 'environment': environment!.toJson(),
+    ...
+  };
+}
+```
+
+`environment_id` is still parsed on the `Interaction` *response* model — only the
+request side drops it. When removing it, also drop the resource-method parameter
+(`environmentId`) that used to populate it, across every create variant.
+
 ## Nullable Field Serialization
 
 The serialization strategy depends on two factors: whether the OpenAPI spec
@@ -455,6 +553,37 @@ headers.addAll(defaultHeaders);            // lowest priority
 headers.addAll(authHeaders);               // auth overrides defaults
 headers.addAll(userHeaders);               // user overrides auth + defaults
 headers['Accept'] = 'text/event-stream';   // protocol-critical — never overridable
+```
+
+The same ordering applies to any header a resource documents as **always** set —
+e.g. an `Api-Revision` opt-in. Spread caller `additionalHeaders` first, then apply
+the forced header last, or the merge order silently lets callers override it and
+contradicts the doc comment:
+
+```dart
+// WRONG — additionalHeaders applied last; caller can override the "always" header
+final headers = {'Api-Revision': _apiRevision, ...?additionalHeaders};
+
+// CORRECT — forced opt-in wins
+final headers = {...?additionalHeaders, 'Api-Revision': _apiRevision};
+```
+
+Apply the fix to every resource that opts into the same header (e.g. both
+`AgentsResource` and `InteractionsResource`).
+
+### Binary Download Endpoints
+
+A GET endpoint that returns binary (`application/zip`, octet-stream, image bytes)
+must override `accept` and drop the default JSON `content-type` — otherwise it
+advertises the wrong content negotiation. Match the established download convention
+(e.g. `FilesResource.download`):
+
+```dart
+// WRONG — leaves default JSON content-type and a narrow accept on a binary GET
+final headers = {'accept': 'application/binary'}; // + default content-type: application/json
+
+// CORRECT — accept anything (or the spec's media type), no JSON content-type
+final headers = {'accept': '*/*'};                // content-type omitted for the GET
 ```
 
 ### Upload Endpoint URLs
@@ -719,6 +848,42 @@ void _drainBuffer() {
 `StreamController.close()` is itself idempotent, but the explicit `_closed` guard
 makes the contract clear and keeps the drain/emit short-circuits correct if the
 close logic later grows.
+
+### Teardown When `close()` May Throw
+
+When a `close()`/teardown method calls into something that can throw an
+*unexpected* error — not just the expected "already closed" signal — the teardown
+of owned resources (stream controllers, subscriptions) must live in a `finally`
+block, or that error short-circuits cleanup and leaves listeners hanging:
+
+```dart
+// WRONG — if _socket.close() throws anything but WebSocketConnectionClosed,
+//         the controller is never closed and listeners hang forever
+Future<void> close() async {
+  try {
+    await _socket.close();
+  } on WebSocketConnectionClosed {
+    // already closed — fine
+  }
+  await _messageController.close(); // skipped when close() throws ArgumentError/WebSocketException
+}
+
+// CORRECT — controller teardown always runs; unexpected errors propagate after cleanup
+Future<void> close() async {
+  try {
+    await _socket.close();
+  } on WebSocketConnectionClosed {
+    // idempotent close — swallow
+  } finally {
+    await _messageController.close();
+  }
+}
+```
+
+The expected idempotent-close signal is swallowed; any other error (e.g. an
+`ArgumentError` for an invalid close code, a `WebSocketException`) propagates to the
+caller *after* the controller is closed. Cover it with a test asserting the
+unexpected error rethrows while the controller is still torn down.
 
 ## API Design
 
