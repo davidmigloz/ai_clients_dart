@@ -8,6 +8,9 @@
 Dart client for the **[Google AI Gemini Developer API](https://ai.google.dev/gemini-api/docs)** and **[Vertex AI Gemini API](https://cloud.google.com/vertex-ai/generative-ai/docs/overview)** with text generation, image generation, tool calling, grounding tools, Live API WebSocket sessions, service tier routing, and embeddings. It gives Dart and Flutter applications a pure Dart, type-safe client across iOS, Android, macOS, Windows, Linux, Web, and server-side Dart.
 
 > [!NOTE]
+> Google's [Vertex AI name changes](https://docs.cloud.google.com/gemini-enterprise-agent-platform/vertex-ai-name-changes) place several Vertex AI products and features — such as the **Vertex AI Platform** and **Generative AI on Vertex AI** — under the new **Gemini Enterprise Agent Platform** brand. The underlying API and SDKs still use the **Vertex AI** name, so this client keeps it: `GoogleAIConfig.vertexAI(...)`, `ApiMode.vertexAI`, and the `aiplatform.googleapis.com` endpoint match Google's REST API and official SDKs.
+
+> [!NOTE]
 > The official [`google_generative_ai`](https://pub.dev/packages/google_generative_ai) Dart package has been deprecated in favor of [`firebase_ai`](https://pub.dev/packages/firebase_ai). However, since [`firebase_ai`](https://pub.dev/packages/firebase_ai) is a **Flutter package** rather than a **pure Dart package**, this **unofficial client** bridges the gap by providing a **pure Dart, fully type-safe** API client for both Google AI and Vertex AI.
 
 > [!TIP]
