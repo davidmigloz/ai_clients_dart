@@ -15,13 +15,13 @@ class ModerationRequest {
 
   /// Creates a [ModerationRequest].
   const ModerationRequest({
-    this.model = 'mistral-moderation-latest',
+    this.model = 'mistral-moderation-2603',
     required this.input,
   });
 
   /// Creates a [ModerationRequest] for a single text input.
   factory ModerationRequest.single({
-    String model = 'mistral-moderation-latest',
+    String model = 'mistral-moderation-2603',
     required String input,
   }) {
     return ModerationRequest(model: model, input: [input]);
@@ -40,7 +40,7 @@ class ModerationRequest {
     }
 
     return ModerationRequest(
-      model: json['model'] as String? ?? 'mistral-moderation-latest',
+      model: json['model'] as String? ?? 'mistral-moderation-2603',
       input: inputs,
     );
   }

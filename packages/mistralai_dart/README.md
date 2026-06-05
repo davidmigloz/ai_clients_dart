@@ -574,7 +574,7 @@ Use `client.moderations` for text and chat-aware content moderation, and `client
 // Text moderation
 final result = await client.moderations.create(
   request: ModerationRequest(
-    model: 'mistral-moderation-latest',
+    model: 'mistral-moderation-2603',
     input: ['Check this content for safety'],
   ),
 );
@@ -588,7 +588,7 @@ for (final item in result.results) {
 // Chat-aware moderation
 final result = await client.moderations.createChat(
   request: ChatModerationRequest(
-    model: 'mistral-moderation-latest',
+    model: 'mistral-moderation-2603',
     input: [
       ChatMessage.user('Hello'),
       ChatMessage.assistant('Hi there!'),
@@ -600,7 +600,7 @@ final result = await client.moderations.createChat(
 ```dart
 final result = await client.classifications.create(
   request: ClassificationRequest(
-    model: 'mistral-moderation-latest',
+    model: 'mistral-moderation-2603',
     input: ['Is this spam?'],
   ),
 );

@@ -16,14 +16,14 @@ class ClassificationRequest {
 
   /// Creates a [ClassificationRequest].
   const ClassificationRequest({
-    this.model = 'mistral-moderation-latest',
+    this.model = 'mistral-moderation-2603',
     required this.input,
     this.metadata,
   });
 
   /// Creates a [ClassificationRequest] for a single text input.
   factory ClassificationRequest.single({
-    String model = 'mistral-moderation-latest',
+    String model = 'mistral-moderation-2603',
     required String input,
   }) {
     return ClassificationRequest(model: model, input: [input]);
@@ -42,7 +42,7 @@ class ClassificationRequest {
     }
 
     return ClassificationRequest(
-      model: json['model'] as String? ?? 'mistral-moderation-latest',
+      model: json['model'] as String? ?? 'mistral-moderation-2603',
       input: inputs,
       metadata: json['metadata'] as Map<String, dynamic>?,
     );

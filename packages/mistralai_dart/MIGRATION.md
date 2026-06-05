@@ -701,7 +701,7 @@ final response = await client.chat.create(
 ```dart
 final response = await client.chat.create(
   request: ChatCompletionRequest(
-    model: 'mistral-large-2411',
+    model: 'mistral-large-latest',
     messages: [ChatMessage.user('Complete this code...')],
     prediction: Prediction(
       type: 'content',

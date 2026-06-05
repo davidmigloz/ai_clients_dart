@@ -13,7 +13,7 @@ void main() {
         );
 
         expect(request.input, hasLength(2));
-        expect(request.model, 'mistral-moderation-latest');
+        expect(request.model, 'mistral-moderation-2603');
       });
 
       test('should create request with custom model', () {
@@ -29,7 +29,7 @@ void main() {
     group('fromJson', () {
       test('should parse request with messages', () {
         final json = <String, dynamic>{
-          'model': 'mistral-moderation-latest',
+          'model': 'mistral-moderation-2603',
           'input': [
             {'role': 'user', 'content': 'Hello'},
             {'role': 'assistant', 'content': 'Hi there!'},
@@ -38,7 +38,7 @@ void main() {
 
         final request = ChatClassificationRequest.fromJson(json);
 
-        expect(request.model, 'mistral-moderation-latest');
+        expect(request.model, 'mistral-moderation-2603');
         expect(request.input, hasLength(2));
       });
 
@@ -51,7 +51,7 @@ void main() {
 
         final request = ChatClassificationRequest.fromJson(json);
 
-        expect(request.model, 'mistral-moderation-latest');
+        expect(request.model, 'mistral-moderation-2603');
       });
 
       test('should handle empty input list', () {
@@ -66,13 +66,13 @@ void main() {
     group('toJson', () {
       test('should serialize request', () {
         final request = ChatClassificationRequest(
-          model: 'mistral-moderation-latest',
+          model: 'mistral-moderation-2603',
           input: [ChatMessage.user('Hello'), ChatMessage.assistant('Hi!')],
         );
 
         final json = request.toJson();
 
-        expect(json['model'], 'mistral-moderation-latest');
+        expect(json['model'], 'mistral-moderation-2603');
         expect(json['input'], hasLength(2));
       });
     });

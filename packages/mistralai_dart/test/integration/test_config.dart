@@ -17,7 +17,7 @@ const defaultVisionModel = 'mistral-small-latest';
 const defaultFimModel = 'codestral-latest';
 
 /// The default moderation model to use for moderation tests.
-const defaultModerationModel = 'mistral-moderation-latest';
+const defaultModerationModel = 'mistral-moderation-2603';
 
 /// The default TTS model to use for text-to-speech tests.
 const defaultTtsModel = 'voxtral-mini-tts-2603';
