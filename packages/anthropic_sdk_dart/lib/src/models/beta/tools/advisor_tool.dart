@@ -44,6 +44,15 @@ class AdvisorTool extends BuiltInTool {
   /// Cache control breakpoint for the tool definition itself.
   final CacheControlEphemeral? cacheControl;
 
+  /// Allowed caller types.
+  final List<String>? allowedCallers;
+
+  /// Whether to defer loading until requested via tool reference.
+  final bool? deferLoading;
+
+  /// Whether strict schema validation is enabled.
+  final bool? strict;
+
   /// Creates an [AdvisorTool].
   const AdvisorTool({
     String? type,
@@ -51,6 +60,9 @@ class AdvisorTool extends BuiltInTool {
     this.maxUses,
     this.caching,
     this.cacheControl,
+    this.allowedCallers,
+    this.deferLoading,
+    this.strict,
   }) : type = type ?? 'advisor_20260301';
 
   /// Creates an [AdvisorTool] from JSON.
@@ -69,6 +81,9 @@ class AdvisorTool extends BuiltInTool {
               json['cache_control'] as Map<String, dynamic>,
             )
           : null,
+      allowedCallers: (json['allowed_callers'] as List?)?.cast<String>(),
+      deferLoading: json['defer_loading'] as bool?,
+      strict: json['strict'] as bool?,
     );
   }
 
@@ -80,6 +95,9 @@ class AdvisorTool extends BuiltInTool {
     if (maxUses != null) 'max_uses': maxUses,
     if (caching != null) 'caching': caching!.toJson(),
     if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
+    if (allowedCallers != null) 'allowed_callers': allowedCallers,
+    if (deferLoading != null) 'defer_loading': deferLoading,
+    if (strict != null) 'strict': strict,
   };
 
   /// Creates a copy with replaced values.
@@ -89,6 +107,9 @@ class AdvisorTool extends BuiltInTool {
     Object? maxUses = unsetCopyWithValue,
     Object? caching = unsetCopyWithValue,
     Object? cacheControl = unsetCopyWithValue,
+    Object? allowedCallers = unsetCopyWithValue,
+    Object? deferLoading = unsetCopyWithValue,
+    Object? strict = unsetCopyWithValue,
   }) {
     return AdvisorTool(
       type: type ?? this.type,
@@ -100,6 +121,13 @@ class AdvisorTool extends BuiltInTool {
       cacheControl: cacheControl == unsetCopyWithValue
           ? this.cacheControl
           : cacheControl as CacheControlEphemeral?,
+      allowedCallers: allowedCallers == unsetCopyWithValue
+          ? this.allowedCallers
+          : allowedCallers as List<String>?,
+      deferLoading: deferLoading == unsetCopyWithValue
+          ? this.deferLoading
+          : deferLoading as bool?,
+      strict: strict == unsetCopyWithValue ? this.strict : strict as bool?,
     );
   }
 
@@ -112,13 +140,27 @@ class AdvisorTool extends BuiltInTool {
           model == other.model &&
           maxUses == other.maxUses &&
           caching == other.caching &&
-          cacheControl == other.cacheControl;
+          cacheControl == other.cacheControl &&
+          listsEqual(allowedCallers, other.allowedCallers) &&
+          deferLoading == other.deferLoading &&
+          strict == other.strict;
 
   @override
-  int get hashCode => Object.hash(type, model, maxUses, caching, cacheControl);
+  int get hashCode => Object.hash(
+    type,
+    model,
+    maxUses,
+    caching,
+    cacheControl,
+    listHash(allowedCallers),
+    deferLoading,
+    strict,
+  );
 
   @override
   String toString() =>
       'AdvisorTool(type: $type, model: $model, maxUses: $maxUses, '
-      'caching: $caching, cacheControl: $cacheControl)';
+      'caching: $caching, cacheControl: $cacheControl, '
+      'allowedCallers: $allowedCallers, deferLoading: $deferLoading, '
+      'strict: $strict)';
 }

@@ -1687,12 +1687,7 @@
       "schema": "BetaComputerUseTool_20251124",
       "parent": "BuiltInTool",
       "excluded_properties": [
-        "allowed_callers",
-        "defer_loading",
-        "enable_zoom",
-        "input_examples",
-        "name",
-        "strict"
+        "name"
       ]
     },
     "McpToolset (beta)": {
@@ -1716,10 +1711,7 @@
       "schema": "BetaAdvisorTool_20260301",
       "parent": "BuiltInTool",
       "excluded_properties": [
-        "allowed_callers",
-        "defer_loading",
-        "name",
-        "strict"
+        "name"
       ]
     },
     "BetaResponseAdvisorToolResultBlock": {

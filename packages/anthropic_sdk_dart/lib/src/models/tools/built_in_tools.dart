@@ -193,6 +193,11 @@ sealed class BuiltInTool {
     required int displayHeightPx,
     int? displayNumber,
     CacheControlEphemeral? cacheControl,
+    List<String>? allowedCallers,
+    bool? deferLoading,
+    bool? strict,
+    List<Map<String, dynamic>>? inputExamples,
+    bool? enableZoom,
   }) = ComputerUseTool;
 
   /// Creates an advisor tool (Beta).
@@ -204,6 +209,9 @@ sealed class BuiltInTool {
     int? maxUses,
     CacheControlEphemeral? caching,
     CacheControlEphemeral? cacheControl,
+    List<String>? allowedCallers,
+    bool? deferLoading,
+    bool? strict,
   }) = AdvisorTool;
 
   /// Creates an MCP toolset (Beta).
