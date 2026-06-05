@@ -310,23 +310,23 @@ value in `fromJson`. Invalid configs become unrepresentable:
 ```dart
 // WRONG — settable field accepts arbitrary values and serializes them verbatim
 class EnvironmentConfig {
-  const EnvironmentConfig({this.type = 'remote', ...});
+  const EnvironmentConfig({this.type = 'remote'}); // (other fields omitted)
   final String type;
-  Map<String, dynamic> toJson() => {'type': type, ...}; // can emit "type": "bogus"
+  Map<String, dynamic> toJson() => {'type': type}; // can emit "type": "bogus"
 }
 
 // CORRECT — constant getter; fromJson validates the wire value
 class EnvironmentConfig {
-  const EnvironmentConfig({...});           // no `type` parameter
-  String get type => 'remote';              // always serializes the constant
+  const EnvironmentConfig();                 // no `type` parameter
+  String get type => 'remote';               // always serializes the constant
   factory EnvironmentConfig.fromJson(Map<String, dynamic> json) {
     final type = json['type'];
     if (type != 'remote') {
       throw FormatException('EnvironmentConfig: expected type "remote", got "$type"');
     }
-    return EnvironmentConfig(...);
+    return const EnvironmentConfig();
   }
-  Map<String, dynamic> toJson() => {'type': type, ...};
+  Map<String, dynamic> toJson() => {'type': type};
 }
 ```
 
@@ -344,18 +344,22 @@ re-normalizing it on output:
 
 ```dart
 // WRONG — any string maps to the disabled variant; bad input round-trips silently
-factory EnvironmentNetworkEgressAllowlist.fromJson(dynamic json) =>
-    json is String ? EnvironmentNetworkDisabled() : ...;
+factory EnvironmentNetworkEgressAllowlist.fromJson(Object? json) =>
+    json is String
+        ? EnvironmentNetworkDisabled()
+        : EnvironmentNetworkAllowlist.fromJson(json! as Map<String, dynamic>);
 
 // CORRECT — only the closed literal is accepted
-factory EnvironmentNetworkEgressAllowlist.fromJson(dynamic json) {
+factory EnvironmentNetworkEgressAllowlist.fromJson(Object? json) {
   if (json is String) {
     if (json != 'disabled') {
-      throw ArgumentError('EnvironmentNetworkEgressAllowlist: expected "disabled", got "$json"');
+      throw ArgumentError(
+        'EnvironmentNetworkEgressAllowlist: expected "disabled", got "$json"',
+      );
     }
     return EnvironmentNetworkDisabled();
   }
-  ...
+  return EnvironmentNetworkAllowlist.fromJson(json! as Map<String, dynamic>);
 }
 ```
 
@@ -369,22 +373,21 @@ and any method parameter that fed it:
 ```dart
 // WRONG — readOnly field serialized in a create request
 class CreateModelInteractionParams {
-  const CreateModelInteractionParams({this.environmentId, ...});
+  const CreateModelInteractionParams({this.environmentId}); // (other fields omitted)
   final String? environmentId; // readOnly in the spec — must not be sent
   Map<String, dynamic> toJson() => {
-    if (environmentId != null) 'environment_id': environmentId, // out-of-spec
-    ...
-  };
+        if (environmentId != null) 'environment_id': environmentId, // out-of-spec
+      };
 }
 
 // CORRECT — environment_id removed from the request DTO; reference via the writable sibling
 class CreateModelInteractionParams {
-  const CreateModelInteractionParams({this.environment, ...});
-  final EnvironmentConfigOrId? environment; // writable; use .id('...') to reference an existing one
+  const CreateModelInteractionParams({this.environment}); // (other fields omitted)
+  // writable; use EnvironmentConfigOrId.id('...') to reference an existing one
+  final EnvironmentConfigOrId? environment;
   Map<String, dynamic> toJson() => {
-    if (environment != null) 'environment': environment!.toJson(),
-    ...
-  };
+        if (environment != null) 'environment': environment!.toJson(),
+      };
 }
 ```
 
@@ -579,12 +582,19 @@ advertises the wrong content negotiation. Match the established download convent
 (e.g. `FilesResource.download`):
 
 ```dart
-// WRONG — leaves default JSON content-type and a narrow accept on a binary GET
-final headers = {'accept': 'application/binary'}; // + default content-type: application/json
+// WRONG — leaves the default JSON content-type and a narrow accept on a binary GET
+headers['accept'] = 'application/binary'; // default 'content-type': application/json still set
 
-// CORRECT — accept anything (or the spec's media type), no JSON content-type
-final headers = {'accept': '*/*'};                // content-type omitted for the GET
+// CORRECT — widen accept and drop the JSON content-type (this GET has no body)
+headers['accept'] = '*/*';
+headers.remove('content-type');
 ```
+
+Use lowercase header keys here (`accept`/`content-type`) — these snippets *mutate*
+the request's existing default header map, and the default `content-type` is stored
+under the lowercase key, so `remove('content-type')` must match it. (Elsewhere,
+where a header is set fresh, the file uses canonical casing like `Accept` — match
+whatever key the surrounding code actually reads or removes.)
 
 ### Upload Endpoint URLs
 
