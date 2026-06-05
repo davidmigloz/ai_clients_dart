@@ -47,6 +47,23 @@ class GenerateStreamEvent {
   /// Time spent generating tokens in nanoseconds.
   final int? evalDuration;
 
+  /// Base64-encoded generated image (final chunk for image generation models).
+  ///
+  /// Experimental: only present for image generation models. Decode with
+  /// `base64Decode` before use. May change or be removed in a future Ollama
+  /// release.
+  final String? image;
+
+  /// Number of completed diffusion steps during image generation.
+  ///
+  /// Experimental: only present for image generation models while streaming.
+  final int? completed;
+
+  /// Total number of diffusion steps for image generation.
+  ///
+  /// Experimental: only present for image generation models while streaming.
+  final int? total;
+
   /// Creates a [GenerateStreamEvent].
   const GenerateStreamEvent({
     this.model,
@@ -63,6 +80,9 @@ class GenerateStreamEvent {
     this.promptEvalDuration,
     this.evalCount,
     this.evalDuration,
+    this.image,
+    this.completed,
+    this.total,
   });
 
   /// Creates a [GenerateStreamEvent] from JSON.
@@ -82,6 +102,9 @@ class GenerateStreamEvent {
         promptEvalDuration: json['prompt_eval_duration'] as int?,
         evalCount: json['eval_count'] as int?,
         evalDuration: json['eval_duration'] as int?,
+        image: json['image'] as String?,
+        completed: json['completed'] as int?,
+        total: json['total'] as int?,
       );
 
   /// Converts to JSON.
@@ -100,6 +123,9 @@ class GenerateStreamEvent {
     if (promptEvalDuration != null) 'prompt_eval_duration': promptEvalDuration,
     if (evalCount != null) 'eval_count': evalCount,
     if (evalDuration != null) 'eval_duration': evalDuration,
+    if (image != null) 'image': image,
+    if (completed != null) 'completed': completed,
+    if (total != null) 'total': total,
   };
 
   @override
@@ -108,16 +134,62 @@ class GenerateStreamEvent {
       other is GenerateStreamEvent &&
           runtimeType == other.runtimeType &&
           model == other.model &&
+          remoteModel == other.remoteModel &&
+          remoteHost == other.remoteHost &&
+          createdAt == other.createdAt &&
           response == other.response &&
-          done == other.done;
+          thinking == other.thinking &&
+          done == other.done &&
+          doneReason == other.doneReason &&
+          totalDuration == other.totalDuration &&
+          loadDuration == other.loadDuration &&
+          promptEvalCount == other.promptEvalCount &&
+          promptEvalDuration == other.promptEvalDuration &&
+          evalCount == other.evalCount &&
+          evalDuration == other.evalDuration &&
+          image == other.image &&
+          completed == other.completed &&
+          total == other.total;
 
   @override
-  int get hashCode => Object.hash(model, response, done);
+  int get hashCode => Object.hashAll([
+    model,
+    remoteModel,
+    remoteHost,
+    createdAt,
+    response,
+    thinking,
+    done,
+    doneReason,
+    totalDuration,
+    loadDuration,
+    promptEvalCount,
+    promptEvalDuration,
+    evalCount,
+    evalDuration,
+    image,
+    completed,
+    total,
+  ]);
 
   @override
   String toString() =>
       'GenerateStreamEvent('
       'model: $model, '
+      'remoteModel: $remoteModel, '
+      'remoteHost: $remoteHost, '
+      'createdAt: $createdAt, '
       'response: $response, '
-      'done: $done)';
+      'thinking: $thinking, '
+      'done: $done, '
+      'doneReason: $doneReason, '
+      'totalDuration: $totalDuration, '
+      'loadDuration: $loadDuration, '
+      'promptEvalCount: $promptEvalCount, '
+      'promptEvalDuration: $promptEvalDuration, '
+      'evalCount: $evalCount, '
+      'evalDuration: $evalDuration, '
+      'image: ${image == null ? null : '[${image!.length} chars]'}, '
+      'completed: $completed, '
+      'total: $total)';
 }

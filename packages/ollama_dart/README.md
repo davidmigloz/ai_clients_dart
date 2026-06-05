@@ -280,6 +280,47 @@ Future<void> main() async {
 
 </details>
 
+### How do I generate images (experimental)?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Image generation is **experimental** and only works with image generation models. Pass `width`/`height`/`steps` to `/api/generate`; the response carries the image as a base64 string in `image` (decode it before writing bytes). These fields may change or be removed in a future Ollama release.
+
+```dart
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:ollama_dart/ollama_dart.dart';
+
+Future<void> main() async {
+  final client = OllamaClient();
+
+  try {
+    final result = await client.completions.generate(
+      request: const GenerateRequest(
+        model: 'x/z-image-turbo',
+        prompt: 'a sunset over mountains',
+        width: 1024,
+        height: 768,
+        steps: 20,
+      ),
+    );
+
+    final image = result.image;
+    if (image != null) {
+      File('generated_image.png').writeAsBytesSync(base64Decode(image));
+    }
+  } finally {
+    client.close();
+  }
+}
+```
+
+→ [Full example](example/image_generation_example.dart)
+
+</details>
+
 ### How do I create embeddings?
 
 <details>
