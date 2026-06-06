@@ -1,3 +1,13 @@
+## 8.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Syncs the experimental [Interactions API](https://ai.google.dev/api/interactions-api) to the latest Generative Language spec. `RetrievalTool` gains RAG retrieval via `ExaAISearchConfig`, `ParallelAISearchConfig`, and `RagStoreConfig` (with nested `RagResource`/`RagRetrievalConfig`/`Filter`/`HybridSearch`/`RankService`); every streamed SSE event now exposes optional `StreamMetadata` token usage; and `DeepResearchAgentConfig.enableBigqueryTool` and `InteractionStatus.budgetExceeded` are added. **Breaking:** the `signature` field is removed from the function- and MCP-call/result steps and deltas (`FunctionCallStep`, `FunctionResultStep`, `McpServerToolCallStep`, `McpServerToolResultStep`, `McpServerToolCallDelta`, `McpServerToolResultDelta`) following its removal from the spec — the other 23 step/delta types that still declare it are unchanged. This release also documents Google's [Vertex AI → Gemini Enterprise Agent Platform rebrand](https://docs.cloud.google.com/gemini-enterprise-agent-platform/vertex-ai-name-changes) (docs only — no code identifiers, endpoints, or the `vertex_ai` package changed).
+
+- **BREAKING** **FEAT**: Sync experimental Interactions API to latest spec ([#255](https://github.com/davidmigloz/ai_clients_dart/issues/255)). ([e7c3798f](https://github.com/davidmigloz/ai_clients_dart/commit/e7c3798f5d93c196b9a8440d711e447c7e8eeae2))
+- **DOCS**: Note the Gemini Enterprise Agent Platform rebrand for Vertex AI ([#256](https://github.com/davidmigloz/ai_clients_dart/issues/256)). ([e1b70573](https://github.com/davidmigloz/ai_clients_dart/commit/e1b7057344507952189517c88d77cdfcab260f62))
+
 ## 7.0.0
 
 > [!CAUTION]

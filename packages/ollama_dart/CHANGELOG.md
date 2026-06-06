@@ -1,3 +1,9 @@
+## 2.3.0
+
+Adds experimental image generation to the `/api/generate` endpoint: `GenerateRequest` gains `width`/`height`/`steps`, and `GenerateResponse` and the streaming `GenerateStreamEvent` gain `image` (base64), `completed`, and `total` for diffusion progress. These fields are implemented client-side ahead of the upstream spec, which keeps them out of `openapi.yaml` while they remain experimental. Also adds the `draftNumPredict` model option to `ModelOptions` and completes the previously-partial `==`/`hashCode`/`toString` contracts on `GenerateStreamEvent` and `ChatStreamEvent`, which had compared only a subset of fields.
+
+- **FEAT**: Add experimental image generation and draft_num_predict option ([#254](https://github.com/davidmigloz/ai_clients_dart/issues/254)). ([04b901a3](https://github.com/davidmigloz/ai_clients_dart/commit/04b901a3d02e615ad13f549ce03bb9955660ee5c))
+
 ## 2.2.0
 
 Fixes browser usage (Flutter Web / dart2wasm) by no longer sending the non-CORS-safelisted `X-Request-ID` header by default — Ollama's `Access-Control-Allow-Headers` list excludes it, so the preflight previously failed and blocked all browser requests against a real Ollama server. A request ID is still generated internally for logging, error correlation, and retry/abort tracing; the new `OllamaConfig(sendRequestIdHeader: true)` opt-in restores the wire header for callers behind a proxy configured to accept it, and an `X-Request-ID` set explicitly via `defaultHeaders` is always sent.

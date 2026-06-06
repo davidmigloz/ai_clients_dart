@@ -1,3 +1,9 @@
+## 4.1.0
+
+Completes field-level parity for the **advisor** and **computer-use** built-in beta tools, whose parameters were previously dropped on the Dart side and silently lost on serialization. `AdvisorTool` now carries `allowedCallers`, `deferLoading`, and `strict`; `ComputerUseTool` adds those plus `inputExamples` (all versions) and `enableZoom` (only on the `computer_20251124` tool version). See the [Anthropic API release notes](https://platform.claude.com/docs/en/release-notes/overview) for the underlying tool updates.
+
+- **FEAT**: Add advisor & computer-use tool fields ([#253](https://github.com/davidmigloz/ai_clients_dart/issues/253)). ([9cc55a80](https://github.com/davidmigloz/ai_clients_dart/commit/9cc55a80130350409f76f2c3f493de7b0a3d2494))
+
 ## 4.0.0
 
 > [!CAUTION]

@@ -1,3 +1,9 @@
+## 0.4.2
+
+Adds a canonically-named quick-start example (`example/open_responses_example.dart`) so pub.dev's analyzer recognizes the package's examples, and documents the `StreamingEventAccumulator` default constructor — together restoring the package's full documentation score on pub.dev. No API or behavior changes.
+
+- **DOCS**: Add quick-start example to restore pub.dev points ([#249](https://github.com/davidmigloz/ai_clients_dart/issues/249)). ([141f20cc](https://github.com/davidmigloz/ai_clients_dart/commit/141f20ccd0aec60e3084fe7ca420d14d3c2fee2d))
+
 ## 0.4.1
 
 Fixes a crash when streaming from [llama.cpp](https://github.com/ggml-org/llama.cpp/pull/18486) and other minimal OpenAI-compatible servers that omit the positional index fields the spec marks as required (`output_index`, `content_index`, `annotation_index`, `summary_index`): `StreamingEvent.fromJson` no longer throws `type 'Null' is not a subtype of type 'int'` and instead defaults these fields to `0`, matching the existing `sequence_number` handling. Behavior is unchanged for spec-compliant servers, and `llama.cpp` is now listed in the README's supported-providers table.

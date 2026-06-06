@@ -1,3 +1,9 @@
+## 6.2.0
+
+Adds support for the new [moderation scores](https://developers.openai.com/api/docs/guides/moderation#moderate-generated-content) feature on the Chat Completions and Responses APIs — pass a `moderation` object on a request to receive moderation results for both the model input and the generated output, surfaced as sealed input/output outcomes (`ChatCompletion.moderation`, `ChatStreamEvent.moderation`, `Response.moderation`) and captured by `ChatStreamAccumulator` for streaming. All new fields are additive and nullable. Also marks the image-model id constants OpenAI has [deprecated or removed](https://developers.openai.com/api/docs/deprecations) with `@Deprecated` (retained for compatibility), leaving `ImageModels.gptImage2` as the only recommended image model, and refreshes the canonical spec.
+
+- **FEAT**: Add moderation scores and deprecate sunset image models ([#251](https://github.com/davidmigloz/ai_clients_dart/issues/251)). ([068d5a2b](https://github.com/davidmigloz/ai_clients_dart/commit/068d5a2b227895e0ea6a16fd47b40d6b15236dec))
+
 ## 6.1.0
 
 Adds two new OpenAI Responses features from the latest spec: the `additional_tools` item — surfacing extra tool definitions mid-conversation — across the input, output, and conversation-item unions, and a `personality` style preset on the input-token-count request (`responses.inputTokens.count`), modeled as a sealed `Personality` type with `friendly`/`pragmatic` presets plus a `custom(...)` escape hatch for forward compatibility. Also completes the `MessageRole` enum with the spec's `critic`, `discriminator`, and `tool` values, which previously collapsed to `unknown`.

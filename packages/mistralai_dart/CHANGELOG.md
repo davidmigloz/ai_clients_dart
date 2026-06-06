@@ -1,3 +1,9 @@
+## 3.1.1
+
+Migrates deprecated Mistral model identifiers to their current replacements (verified against Mistral's docs). The default `model` on the moderation/classification request classes (`ModerationRequest`, `ChatModerationRequest`, `ClassificationRequest`, `ChatClassificationRequest`) moves from the deprecated `mistral-moderation-latest` to [`mistral-moderation-2603`](https://docs.mistral.ai/models/model-cards/mistral-moderation-26-03) (Mistral Moderation 2) — so requests that omit `model` now target the current model — and the deprecated `mistral-large-2411` doc examples move to the live `mistral-large-latest` alias. No schema changes.
+
+- **FIX**: Migrate deprecated model identifiers ([#252](https://github.com/davidmigloz/ai_clients_dart/issues/252)). ([5f0bf5d9](https://github.com/davidmigloz/ai_clients_dart/commit/5f0bf5d9ee851f02f8178a4380d54d3196d3254e))
+
 ## 3.1.0
 
 Adds `promptCacheKey` to `AgentCompletionRequest`, `ChatCompletionRequest`, and `FimCompletionRequest` — tokens served from a cached prefix are billed at 10% of the standard input price. Re-introduces OCR confidence scores (`OcrConfidenceScore`, `OcrPageConfidenceScores`, the `OcrConfidenceScoresGranularity` enum, and the related fields on `OcrRequest`/`OcrPage`/`OcrTable`) following their return to the upstream spec, and adds the previously-missing `metadata` field on `FimCompletionRequest` for parity with the other completion requests. Refreshes the bundled OpenAPI spec to its 2026-05-09 snapshot. All changes are additive.

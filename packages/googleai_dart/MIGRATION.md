@@ -6,6 +6,27 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v7.x to v8.0.0
+
+v8.0.0 syncs the **experimental Interactions API** to the latest Generative Language spec. The only breaking change is the removal of the `signature` field, which was dropped from the spec for the function- and MCP-call/result steps and their deltas. **If you don't read or set `signature` on these specific types, no changes are required** — and all other step/delta types that still declare `signature` are unchanged.
+
+### 1) `signature` removed from function/MCP call & result steps and deltas
+
+The `signature` field is removed (constructor parameter, `fromJson`/`toJson`, and `copyWith`) from these six types: `FunctionCallStep`, `FunctionResultStep`, `McpServerToolCallStep`, `McpServerToolResultStep`, `McpServerToolCallDelta`, and `McpServerToolResultDelta`. The other 23 delta/step types that still declare `signature` are unaffected.
+
+```dart
+// Before (v7.x)
+final step = FunctionCallStep(id: 'c', name: 'fn', arguments: {}, signature: 'sig');
+final sig = step.signature;
+
+// After (v8.0.0) — `signature` no longer exists on these types
+final step = FunctionCallStep(id: 'c', name: 'fn', arguments: {});
+```
+
+> **Note:** `ListAgents` pagination now sends snake_case wire keys (`page_size`/`page_token`) and `ListAgentsResponse` reads `next_page_token`. This is a wire-format fix only — the Dart `list(pageSize:, pageToken:)` parameters and the `nextPageToken` getter are unchanged, so it is **not** source-breaking.
+
+---
+
 ## Migrating from v6.x to v7.0.0
 
 v7.0.0 migrates the **experimental Interactions API** to its [May-2026 breaking-changes shape](https://ai.google.dev/gemini-api/docs/interactions-breaking-changes-may-2026): tool calls and results move out of `Content` into a new `InteractionStep` sealed family, the SSE event stream is restructured, and the interactions response-format types are renamed to free the bare names for the new main-spec `GenerationConfig.responseFormat`. **All breaking changes are confined to the Interactions API** — if you use only the core `generateContent`/embeddings/files surface, no changes are required.
