@@ -6,6 +6,7 @@ import '../models/managed_agents/deployments/create_deployment_params.dart';
 import '../models/managed_agents/deployments/deployment.dart';
 import '../models/managed_agents/deployments/deployment_list_response.dart';
 import '../models/managed_agents/deployments/deployment_run.dart';
+import '../models/managed_agents/deployments/deployment_status.dart';
 import '../models/managed_agents/deployments/update_deployment_params.dart';
 import 'base_resource.dart';
 
@@ -68,7 +69,7 @@ class DeploymentsResource extends ResourceBase {
     int? limit,
     String? page,
     String? agentId,
-    String? status,
+    DeploymentStatus? status,
     String? createdAtGte,
     String? createdAtLte,
     bool? includeArchived,
@@ -79,7 +80,7 @@ class DeploymentsResource extends ResourceBase {
       'limit': ?limit?.toString(),
       'page': ?page,
       'agent_id': ?agentId,
-      'status': ?status,
+      'status': ?status?.toJson(),
       'created_at[gte]': ?createdAtGte,
       'created_at[lte]': ?createdAtLte,
       'include_archived': ?includeArchived?.toString(),

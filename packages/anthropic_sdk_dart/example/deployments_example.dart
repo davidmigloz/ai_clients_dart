@@ -58,7 +58,9 @@ void main() async {
     print('Triggered run ${run.id} -> session ${run.sessionId}');
 
     // List active deployments.
-    final deployments = await client.deployments.list(status: 'active');
+    final deployments = await client.deployments.list(
+      status: DeploymentStatus.active,
+    );
     print('Active deployments: ${deployments.data.length}');
 
     // List runs for this deployment.

@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../models/managed_agents/deployments/deployment_run.dart';
 import '../models/managed_agents/deployments/deployment_run_list_response.dart';
+import '../models/managed_agents/deployments/trigger_type.dart';
 import 'base_resource.dart';
 
 /// Beta header for the Managed Agents API.
@@ -66,7 +67,7 @@ class DeploymentRunsResource extends ResourceBase {
     int? limit,
     String? page,
     String? deploymentId,
-    String? triggerType,
+    TriggerType? triggerType,
     bool? hasError,
     String? createdAtGte,
     String? createdAtLte,
@@ -79,7 +80,7 @@ class DeploymentRunsResource extends ResourceBase {
       'limit': ?limit?.toString(),
       'page': ?page,
       'deployment_id': ?deploymentId,
-      'trigger_type': ?triggerType,
+      'trigger_type': ?triggerType?.toJson(),
       'has_error': ?hasError?.toString(),
       'created_at[gte]': ?createdAtGte,
       'created_at[lte]': ?createdAtLte,
