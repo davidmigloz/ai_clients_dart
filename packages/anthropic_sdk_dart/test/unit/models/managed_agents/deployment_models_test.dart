@@ -357,6 +357,27 @@ void main() {
       expect(json['vault_ids'], isNull);
     });
 
+    test('untyped empty literals for clearable collections do not throw', () {
+      // `resources: []` / `vaultIds: []` / `metadata: {}` are inferred as
+      // dynamic-typed collections via the `Object?` sentinel params; the
+      // getters and toJson must not throw on them (the clear-to-empty /
+      // full-replacement case).
+      const params = UpdateDeploymentParams(
+        resources: [],
+        vaultIds: [],
+        metadata: {},
+      );
+
+      expect(params.resources, isEmpty);
+      expect(params.vaultIds, isEmpty);
+      expect(params.metadata, isEmpty);
+
+      final json = params.toJson();
+      expect(json['resources'], isEmpty);
+      expect(json['vault_ids'], isEmpty);
+      expect(json['metadata'], isEmpty);
+    });
+
     test('omitting a clearable field leaves the key out', () {
       const params = UpdateDeploymentParams(name: 'Renamed');
 

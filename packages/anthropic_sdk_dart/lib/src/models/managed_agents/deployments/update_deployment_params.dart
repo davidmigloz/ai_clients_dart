@@ -45,14 +45,16 @@ class UpdateDeploymentParams {
 
   /// Metadata patch. Set a key to a string to upsert it, or to null to delete
   /// it. Omit the field to preserve; send null to clear.
-  Map<String, String?>? get metadata =>
-      _metadata == _notSet ? null : _metadata as Map<String, String?>?;
+  Map<String, String?>? get metadata => _metadata == _notSet
+      ? null
+      : (_metadata as Map?)?.cast<String, String?>();
   final Object? _metadata;
 
   /// Session resources. Full replacement. Omit to preserve; send empty array or
   /// null to clear. Maximum 500.
-  List<SessionResourceParams>? get resources =>
-      _resources == _notSet ? null : _resources as List<SessionResourceParams>?;
+  List<SessionResourceParams>? get resources => _resources == _notSet
+      ? null
+      : (_resources as List?)?.cast<SessionResourceParams>();
   final Object? _resources;
 
   /// Cron schedule. Full replacement. Omit to preserve; send null to clear
@@ -64,7 +66,7 @@ class UpdateDeploymentParams {
   /// Vault IDs. Full replacement. Omit to preserve; send empty array or null to
   /// clear. Maximum 50.
   List<String>? get vaultIds =>
-      _vaultIds == _notSet ? null : _vaultIds as List<String>?;
+      _vaultIds == _notSet ? null : (_vaultIds as List?)?.cast<String>();
   final Object? _vaultIds;
 
   /// Creates an [UpdateDeploymentParams].
@@ -145,9 +147,7 @@ class UpdateDeploymentParams {
     if (_description != _notSet) 'description': _description,
     if (_metadata != _notSet) 'metadata': _metadata,
     if (_resources != _notSet)
-      'resources': (_resources as List<SessionResourceParams>?)
-          ?.map((e) => e.toJson())
-          .toList(),
+      'resources': resources?.map((e) => e.toJson()).toList(),
     if (_schedule != _notSet)
       'schedule': (_schedule as ScheduleParams?)?.toJson(),
     if (_vaultIds != _notSet) 'vault_ids': _vaultIds,
