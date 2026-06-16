@@ -23,8 +23,9 @@ class UpdateMemoryStoreParams {
 
   /// Metadata patch. Set a key to a string to upsert it, or to `null` to
   /// delete it. Omit the field to preserve.
-  Map<String, String?>? get metadata =>
-      _metadata == _notSet ? null : _metadata as Map<String, String?>?;
+  Map<String, String?>? get metadata => _metadata == _notSet
+      ? null
+      : (_metadata as Map?)?.cast<String, String?>();
   final Object? _metadata;
 
   /// Creates an [UpdateMemoryStoreParams].
