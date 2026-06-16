@@ -25,7 +25,9 @@
     "vaultCredentials": "managed_agents",
     "sessionThreadEvents": "session_threads",
     "memories": "memory_stores",
-    "memoryVersions": "memory_stores"
+    "memoryVersions": "memory_stores",
+    "deployments": "deployments",
+    "deploymentRuns": "deployments"
   },
   "excluded_from_examples": [],
   "drift_patterns": []

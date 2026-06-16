@@ -75,9 +75,7 @@
     "resource_aliases": {},
     "excluded_resources": [
       "complete",
-      "environments",
-      "deployments",
-      "deployment_runs"
+      "environments"
     ]
   },
   "types": {
@@ -4255,596 +4253,6 @@
       "file": "lib/src/models/managed_agents/credentials/credential_validation.dart",
       "schema": "BetaManagedAgentsCredentialRefreshStatus"
     },
-    "BetaManagedAgentsAgentArchivedDeploymentPausedReasonError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsAgentArchivedDeploymentPausedReasonError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsAgentArchivedRunError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsAgentArchivedRunError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsCreateDeploymentParams": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsCreateDeploymentParams",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsCronSchedule": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsCronSchedule",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsCronScheduleParams": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsCronScheduleParams",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsDeployment": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsDeployment",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsDeploymentInitialEvent": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsDeploymentInitialEvent",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsDeploymentInitialEventParams": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsDeploymentInitialEventParams",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsDeploymentPausedReason": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsDeploymentPausedReason",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsDeploymentPausedReasonError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsDeploymentPausedReasonError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsDeploymentRun": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsDeploymentRun",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsDeploymentStatus": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsDeploymentStatus",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsDeploymentSystemMessageEvent": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsDeploymentSystemMessageEvent",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsDeploymentUserDefineOutcomeEvent": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsDeploymentUserDefineOutcomeEvent",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsDeploymentUserMessageEvent": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsDeploymentUserMessageEvent",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsEnvironmentArchivedDeploymentPausedReasonError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsEnvironmentArchivedDeploymentPausedReasonError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsEnvironmentArchivedRunError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsEnvironmentArchivedRunError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsEnvironmentNotFoundDeploymentPausedReasonError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsEnvironmentNotFoundDeploymentPausedReasonError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsEnvironmentNotFoundRunError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsEnvironmentNotFoundRunError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsErrorDeploymentPausedReason": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsErrorDeploymentPausedReason",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsFileNotFoundDeploymentPausedReasonError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsFileNotFoundDeploymentPausedReasonError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsFileNotFoundRunError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsFileNotFoundRunError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsFileResourceConfig": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsFileResourceConfig",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsGitHubRepositoryResourceConfig": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsGitHubRepositoryResourceConfig",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsListDeploymentRunsData": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsListDeploymentRunsData",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsListDeploymentsData": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsListDeploymentsData",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsManualDeploymentPausedReason": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsManualDeploymentPausedReason",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsManualTriggerContext": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsManualTriggerContext",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsMcpEgressBlockedDeploymentPausedReasonError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsMcpEgressBlockedDeploymentPausedReasonError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsMcpEgressBlockedRunError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsMcpEgressBlockedRunError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsMemoryStoreArchivedDeploymentPausedReasonError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsMemoryStoreArchivedDeploymentPausedReasonError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsMemoryStoreArchivedRunError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsMemoryStoreArchivedRunError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsMemoryStoreResourceConfig": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsMemoryStoreResourceConfig",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsOrganizationDisabledDeploymentPausedReasonError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsOrganizationDisabledDeploymentPausedReasonError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsOrganizationDisabledRunError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsOrganizationDisabledRunError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsRunError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsRunError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsSchedule": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsSchedule",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsScheduleParams": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsScheduleParams",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsScheduleTriggerContext": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsScheduleTriggerContext",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsSelfHostedResourcesUnsupportedDeploymentPausedReasonError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsSelfHostedResourcesUnsupportedDeploymentPausedReasonError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsSelfHostedResourcesUnsupportedRunError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsSelfHostedResourcesUnsupportedRunError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsSessionCreationRejectedRunError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsSessionCreationRejectedRunError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsSessionRateLimitedRunError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsSessionRateLimitedRunError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsSessionResourceConfig": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsSessionResourceConfig",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsSessionResourceNotFoundDeploymentPausedReasonError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsSessionResourceNotFoundDeploymentPausedReasonError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsSessionResourceNotFoundRunError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsSessionResourceNotFoundRunError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsSkillNotFoundDeploymentPausedReasonError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsSkillNotFoundDeploymentPausedReasonError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsSkillNotFoundRunError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsSkillNotFoundRunError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsTriggerContext": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsTriggerContext",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsTriggerType": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsTriggerType",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsUnknownDeploymentPausedReasonError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsUnknownDeploymentPausedReasonError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsUnknownRunError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsUnknownRunError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsUpdateDeploymentParams": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsUpdateDeploymentParams",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsVaultArchivedDeploymentPausedReasonError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsVaultArchivedDeploymentPausedReasonError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsVaultArchivedRunError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsVaultArchivedRunError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsVaultNotFoundDeploymentPausedReasonError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsVaultNotFoundDeploymentPausedReasonError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsVaultNotFoundRunError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsVaultNotFoundRunError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsWorkspaceArchivedDeploymentPausedReasonError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsWorkspaceArchivedDeploymentPausedReasonError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
-    "BetaManagedAgentsWorkspaceArchivedRunError": {
-      "spec": "main",
-      "kind": "skip",
-      "dart_class": null,
-      "schema": "BetaManagedAgentsWorkspaceArchivedRunError",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Deferred to follow-up PR: scheduled Deployments surface (deployments + deployment_runs resources)."
-    },
     "BetaMessageIterationUsage": {
       "spec": "main",
       "kind": "skip",
@@ -5068,6 +4476,537 @@
         "acknowledged"
       ],
       "note": "Beta variant of ModelInfo; unified ModelInfo covers both surfaces (allowed_fallback_models added)."
+    },
+    "RunError": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "RunError",
+      "file": "lib/src/models/managed_agents/deployments/run_error.dart",
+      "schema": "BetaManagedAgentsRunError"
+    },
+    "AgentArchivedRunError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentArchivedRunError",
+      "file": "lib/src/models/managed_agents/deployments/run_error.dart",
+      "schema": "BetaManagedAgentsAgentArchivedRunError",
+      "parent": "RunError"
+    },
+    "EnvironmentArchivedRunError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "EnvironmentArchivedRunError",
+      "file": "lib/src/models/managed_agents/deployments/run_error.dart",
+      "schema": "BetaManagedAgentsEnvironmentArchivedRunError",
+      "parent": "RunError"
+    },
+    "EnvironmentNotFoundRunError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "EnvironmentNotFoundRunError",
+      "file": "lib/src/models/managed_agents/deployments/run_error.dart",
+      "schema": "BetaManagedAgentsEnvironmentNotFoundRunError",
+      "parent": "RunError"
+    },
+    "FileNotFoundRunError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "FileNotFoundRunError",
+      "file": "lib/src/models/managed_agents/deployments/run_error.dart",
+      "schema": "BetaManagedAgentsFileNotFoundRunError",
+      "parent": "RunError"
+    },
+    "McpEgressBlockedRunError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpEgressBlockedRunError",
+      "file": "lib/src/models/managed_agents/deployments/run_error.dart",
+      "schema": "BetaManagedAgentsMcpEgressBlockedRunError",
+      "parent": "RunError"
+    },
+    "MemoryStoreArchivedRunError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "MemoryStoreArchivedRunError",
+      "file": "lib/src/models/managed_agents/deployments/run_error.dart",
+      "schema": "BetaManagedAgentsMemoryStoreArchivedRunError",
+      "parent": "RunError"
+    },
+    "OrganizationDisabledRunError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "OrganizationDisabledRunError",
+      "file": "lib/src/models/managed_agents/deployments/run_error.dart",
+      "schema": "BetaManagedAgentsOrganizationDisabledRunError",
+      "parent": "RunError"
+    },
+    "SelfHostedResourcesUnsupportedRunError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SelfHostedResourcesUnsupportedRunError",
+      "file": "lib/src/models/managed_agents/deployments/run_error.dart",
+      "schema": "BetaManagedAgentsSelfHostedResourcesUnsupportedRunError",
+      "parent": "RunError"
+    },
+    "SessionCreationRejectedRunError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SessionCreationRejectedRunError",
+      "file": "lib/src/models/managed_agents/deployments/run_error.dart",
+      "schema": "BetaManagedAgentsSessionCreationRejectedRunError",
+      "parent": "RunError"
+    },
+    "SessionRateLimitedRunError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SessionRateLimitedRunError",
+      "file": "lib/src/models/managed_agents/deployments/run_error.dart",
+      "schema": "BetaManagedAgentsSessionRateLimitedRunError",
+      "parent": "RunError"
+    },
+    "SessionResourceNotFoundRunError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SessionResourceNotFoundRunError",
+      "file": "lib/src/models/managed_agents/deployments/run_error.dart",
+      "schema": "BetaManagedAgentsSessionResourceNotFoundRunError",
+      "parent": "RunError"
+    },
+    "SkillNotFoundRunError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SkillNotFoundRunError",
+      "file": "lib/src/models/managed_agents/deployments/run_error.dart",
+      "schema": "BetaManagedAgentsSkillNotFoundRunError",
+      "parent": "RunError"
+    },
+    "UnknownRunError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "UnknownRunError",
+      "file": "lib/src/models/managed_agents/deployments/run_error.dart",
+      "schema": "BetaManagedAgentsUnknownRunError",
+      "parent": "RunError"
+    },
+    "VaultArchivedRunError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "VaultArchivedRunError",
+      "file": "lib/src/models/managed_agents/deployments/run_error.dart",
+      "schema": "BetaManagedAgentsVaultArchivedRunError",
+      "parent": "RunError"
+    },
+    "VaultNotFoundRunError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "VaultNotFoundRunError",
+      "file": "lib/src/models/managed_agents/deployments/run_error.dart",
+      "schema": "BetaManagedAgentsVaultNotFoundRunError",
+      "parent": "RunError"
+    },
+    "WorkspaceArchivedRunError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WorkspaceArchivedRunError",
+      "file": "lib/src/models/managed_agents/deployments/run_error.dart",
+      "schema": "BetaManagedAgentsWorkspaceArchivedRunError",
+      "parent": "RunError"
+    },
+    "UnrecognizedRunError": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnrecognizedRunError",
+      "file": "lib/src/models/managed_agents/deployments/run_error.dart",
+      "schema": null,
+      "parent": "RunError",
+      "note": "Forward-compatible fallback for unrecognized RunError types; preserves raw JSON."
+    },
+    "DeploymentPausedReasonError": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DeploymentPausedReasonError",
+      "file": "lib/src/models/managed_agents/deployments/deployment_paused_reason_error.dart",
+      "schema": "BetaManagedAgentsDeploymentPausedReasonError"
+    },
+    "AgentArchivedDeploymentPausedReasonError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentArchivedDeploymentPausedReasonError",
+      "file": "lib/src/models/managed_agents/deployments/deployment_paused_reason_error.dart",
+      "schema": "BetaManagedAgentsAgentArchivedDeploymentPausedReasonError",
+      "parent": "DeploymentPausedReasonError"
+    },
+    "EnvironmentArchivedDeploymentPausedReasonError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "EnvironmentArchivedDeploymentPausedReasonError",
+      "file": "lib/src/models/managed_agents/deployments/deployment_paused_reason_error.dart",
+      "schema": "BetaManagedAgentsEnvironmentArchivedDeploymentPausedReasonError",
+      "parent": "DeploymentPausedReasonError"
+    },
+    "EnvironmentNotFoundDeploymentPausedReasonError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "EnvironmentNotFoundDeploymentPausedReasonError",
+      "file": "lib/src/models/managed_agents/deployments/deployment_paused_reason_error.dart",
+      "schema": "BetaManagedAgentsEnvironmentNotFoundDeploymentPausedReasonError",
+      "parent": "DeploymentPausedReasonError"
+    },
+    "FileNotFoundDeploymentPausedReasonError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "FileNotFoundDeploymentPausedReasonError",
+      "file": "lib/src/models/managed_agents/deployments/deployment_paused_reason_error.dart",
+      "schema": "BetaManagedAgentsFileNotFoundDeploymentPausedReasonError",
+      "parent": "DeploymentPausedReasonError"
+    },
+    "McpEgressBlockedDeploymentPausedReasonError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "McpEgressBlockedDeploymentPausedReasonError",
+      "file": "lib/src/models/managed_agents/deployments/deployment_paused_reason_error.dart",
+      "schema": "BetaManagedAgentsMcpEgressBlockedDeploymentPausedReasonError",
+      "parent": "DeploymentPausedReasonError"
+    },
+    "MemoryStoreArchivedDeploymentPausedReasonError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "MemoryStoreArchivedDeploymentPausedReasonError",
+      "file": "lib/src/models/managed_agents/deployments/deployment_paused_reason_error.dart",
+      "schema": "BetaManagedAgentsMemoryStoreArchivedDeploymentPausedReasonError",
+      "parent": "DeploymentPausedReasonError"
+    },
+    "OrganizationDisabledDeploymentPausedReasonError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "OrganizationDisabledDeploymentPausedReasonError",
+      "file": "lib/src/models/managed_agents/deployments/deployment_paused_reason_error.dart",
+      "schema": "BetaManagedAgentsOrganizationDisabledDeploymentPausedReasonError",
+      "parent": "DeploymentPausedReasonError"
+    },
+    "SelfHostedResourcesUnsupportedDeploymentPausedReasonError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SelfHostedResourcesUnsupportedDeploymentPausedReasonError",
+      "file": "lib/src/models/managed_agents/deployments/deployment_paused_reason_error.dart",
+      "schema": "BetaManagedAgentsSelfHostedResourcesUnsupportedDeploymentPausedReasonError",
+      "parent": "DeploymentPausedReasonError"
+    },
+    "SessionResourceNotFoundDeploymentPausedReasonError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SessionResourceNotFoundDeploymentPausedReasonError",
+      "file": "lib/src/models/managed_agents/deployments/deployment_paused_reason_error.dart",
+      "schema": "BetaManagedAgentsSessionResourceNotFoundDeploymentPausedReasonError",
+      "parent": "DeploymentPausedReasonError"
+    },
+    "SkillNotFoundDeploymentPausedReasonError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SkillNotFoundDeploymentPausedReasonError",
+      "file": "lib/src/models/managed_agents/deployments/deployment_paused_reason_error.dart",
+      "schema": "BetaManagedAgentsSkillNotFoundDeploymentPausedReasonError",
+      "parent": "DeploymentPausedReasonError"
+    },
+    "UnknownDeploymentPausedReasonError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "UnknownDeploymentPausedReasonError",
+      "file": "lib/src/models/managed_agents/deployments/deployment_paused_reason_error.dart",
+      "schema": "BetaManagedAgentsUnknownDeploymentPausedReasonError",
+      "parent": "DeploymentPausedReasonError"
+    },
+    "VaultArchivedDeploymentPausedReasonError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "VaultArchivedDeploymentPausedReasonError",
+      "file": "lib/src/models/managed_agents/deployments/deployment_paused_reason_error.dart",
+      "schema": "BetaManagedAgentsVaultArchivedDeploymentPausedReasonError",
+      "parent": "DeploymentPausedReasonError"
+    },
+    "VaultNotFoundDeploymentPausedReasonError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "VaultNotFoundDeploymentPausedReasonError",
+      "file": "lib/src/models/managed_agents/deployments/deployment_paused_reason_error.dart",
+      "schema": "BetaManagedAgentsVaultNotFoundDeploymentPausedReasonError",
+      "parent": "DeploymentPausedReasonError"
+    },
+    "WorkspaceArchivedDeploymentPausedReasonError": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WorkspaceArchivedDeploymentPausedReasonError",
+      "file": "lib/src/models/managed_agents/deployments/deployment_paused_reason_error.dart",
+      "schema": "BetaManagedAgentsWorkspaceArchivedDeploymentPausedReasonError",
+      "parent": "DeploymentPausedReasonError"
+    },
+    "UnrecognizedDeploymentPausedReasonError": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnrecognizedDeploymentPausedReasonError",
+      "file": "lib/src/models/managed_agents/deployments/deployment_paused_reason_error.dart",
+      "schema": null,
+      "parent": "DeploymentPausedReasonError",
+      "note": "Forward-compatible fallback for unrecognized DeploymentPausedReasonError types; preserves raw JSON."
+    },
+    "DeploymentPausedReason": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DeploymentPausedReason",
+      "file": "lib/src/models/managed_agents/deployments/deployment_paused_reason.dart",
+      "schema": "BetaManagedAgentsDeploymentPausedReason"
+    },
+    "ErrorDeploymentPausedReason": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ErrorDeploymentPausedReason",
+      "file": "lib/src/models/managed_agents/deployments/deployment_paused_reason.dart",
+      "schema": "BetaManagedAgentsErrorDeploymentPausedReason",
+      "parent": "DeploymentPausedReason"
+    },
+    "ManualDeploymentPausedReason": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ManualDeploymentPausedReason",
+      "file": "lib/src/models/managed_agents/deployments/deployment_paused_reason.dart",
+      "schema": "BetaManagedAgentsManualDeploymentPausedReason",
+      "parent": "DeploymentPausedReason"
+    },
+    "UnrecognizedDeploymentPausedReason": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnrecognizedDeploymentPausedReason",
+      "file": "lib/src/models/managed_agents/deployments/deployment_paused_reason.dart",
+      "schema": null,
+      "parent": "DeploymentPausedReason",
+      "note": "Forward-compatible fallback for unrecognized DeploymentPausedReason types; preserves raw JSON."
+    },
+    "Schedule": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "Schedule",
+      "file": "lib/src/models/managed_agents/deployments/schedule.dart",
+      "schema": "BetaManagedAgentsSchedule"
+    },
+    "CronSchedule": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "CronSchedule",
+      "file": "lib/src/models/managed_agents/deployments/schedule.dart",
+      "schema": "BetaManagedAgentsCronSchedule",
+      "parent": "Schedule"
+    },
+    "UnknownSchedule": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownSchedule",
+      "file": "lib/src/models/managed_agents/deployments/schedule.dart",
+      "schema": null,
+      "parent": "Schedule",
+      "note": "Forward-compatible fallback for unrecognized Schedule types; preserves raw JSON."
+    },
+    "ScheduleParams": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ScheduleParams",
+      "file": "lib/src/models/managed_agents/deployments/schedule_params.dart",
+      "schema": "BetaManagedAgentsScheduleParams"
+    },
+    "CronScheduleParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "CronScheduleParams",
+      "file": "lib/src/models/managed_agents/deployments/schedule_params.dart",
+      "schema": "BetaManagedAgentsCronScheduleParams",
+      "parent": "ScheduleParams"
+    },
+    "UnknownScheduleParams": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownScheduleParams",
+      "file": "lib/src/models/managed_agents/deployments/schedule_params.dart",
+      "schema": null,
+      "parent": "ScheduleParams",
+      "note": "Forward-compatible fallback for unrecognized ScheduleParams types; preserves raw JSON."
+    },
+    "TriggerContext": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "TriggerContext",
+      "file": "lib/src/models/managed_agents/deployments/trigger_context.dart",
+      "schema": "BetaManagedAgentsTriggerContext"
+    },
+    "ManualTriggerContext": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ManualTriggerContext",
+      "file": "lib/src/models/managed_agents/deployments/trigger_context.dart",
+      "schema": "BetaManagedAgentsManualTriggerContext",
+      "parent": "TriggerContext"
+    },
+    "ScheduleTriggerContext": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ScheduleTriggerContext",
+      "file": "lib/src/models/managed_agents/deployments/trigger_context.dart",
+      "schema": "BetaManagedAgentsScheduleTriggerContext",
+      "parent": "TriggerContext"
+    },
+    "UnknownTriggerContext": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownTriggerContext",
+      "file": "lib/src/models/managed_agents/deployments/trigger_context.dart",
+      "schema": null,
+      "parent": "TriggerContext",
+      "note": "Forward-compatible fallback for unrecognized TriggerContext types; preserves raw JSON."
+    },
+    "SessionResourceConfig": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "SessionResourceConfig",
+      "file": "lib/src/models/managed_agents/deployments/session_resource_config.dart",
+      "schema": "BetaManagedAgentsSessionResourceConfig"
+    },
+    "FileResourceConfig": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "FileResourceConfig",
+      "file": "lib/src/models/managed_agents/deployments/session_resource_config.dart",
+      "schema": "BetaManagedAgentsFileResourceConfig",
+      "parent": "SessionResourceConfig"
+    },
+    "GitHubRepositoryResourceConfig": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "GitHubRepositoryResourceConfig",
+      "file": "lib/src/models/managed_agents/deployments/session_resource_config.dart",
+      "schema": "BetaManagedAgentsGitHubRepositoryResourceConfig",
+      "parent": "SessionResourceConfig"
+    },
+    "MemoryStoreResourceConfig": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "MemoryStoreResourceConfig",
+      "file": "lib/src/models/managed_agents/deployments/session_resource_config.dart",
+      "schema": "BetaManagedAgentsMemoryStoreResourceConfig",
+      "parent": "SessionResourceConfig"
+    },
+    "UnknownSessionResourceConfig": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownSessionResourceConfig",
+      "file": "lib/src/models/managed_agents/deployments/session_resource_config.dart",
+      "schema": null,
+      "parent": "SessionResourceConfig",
+      "note": "Forward-compatible fallback for unrecognized SessionResourceConfig types; preserves raw JSON."
+    },
+    "DeploymentInitialEvent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DeploymentInitialEvent",
+      "file": "lib/src/models/managed_agents/deployments/deployment_initial_event.dart",
+      "schema": "BetaManagedAgentsDeploymentInitialEvent"
+    },
+    "DeploymentSystemMessageEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "DeploymentSystemMessageEvent",
+      "file": "lib/src/models/managed_agents/deployments/deployment_initial_event.dart",
+      "schema": "BetaManagedAgentsDeploymentSystemMessageEvent",
+      "parent": "DeploymentInitialEvent"
+    },
+    "DeploymentUserDefineOutcomeEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "DeploymentUserDefineOutcomeEvent",
+      "file": "lib/src/models/managed_agents/deployments/deployment_initial_event.dart",
+      "schema": "BetaManagedAgentsDeploymentUserDefineOutcomeEvent",
+      "parent": "DeploymentInitialEvent"
+    },
+    "DeploymentUserMessageEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "DeploymentUserMessageEvent",
+      "file": "lib/src/models/managed_agents/deployments/deployment_initial_event.dart",
+      "schema": "BetaManagedAgentsDeploymentUserMessageEvent",
+      "parent": "DeploymentInitialEvent"
+    },
+    "UnknownDeploymentInitialEvent": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownDeploymentInitialEvent",
+      "file": "lib/src/models/managed_agents/deployments/deployment_initial_event.dart",
+      "schema": null,
+      "parent": "DeploymentInitialEvent",
+      "note": "Forward-compatible fallback for unrecognized DeploymentInitialEvent types; preserves raw JSON."
+    },
+    "DeploymentStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "DeploymentStatus",
+      "file": "lib/src/models/managed_agents/deployments/deployment_status.dart",
+      "schema": "BetaManagedAgentsDeploymentStatus"
+    },
+    "TriggerType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "TriggerType",
+      "file": "lib/src/models/managed_agents/deployments/trigger_type.dart",
+      "schema": "BetaManagedAgentsTriggerType"
+    },
+    "Deployment": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Deployment",
+      "file": "lib/src/models/managed_agents/deployments/deployment.dart",
+      "schema": "BetaManagedAgentsDeployment"
+    },
+    "DeploymentRun": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeploymentRun",
+      "file": "lib/src/models/managed_agents/deployments/deployment_run.dart",
+      "schema": "BetaManagedAgentsDeploymentRun"
+    },
+    "CreateDeploymentParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateDeploymentParams",
+      "file": "lib/src/models/managed_agents/deployments/create_deployment_params.dart",
+      "schema": "BetaManagedAgentsCreateDeploymentParams"
+    },
+    "UpdateDeploymentParams": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateDeploymentParams",
+      "file": "lib/src/models/managed_agents/deployments/update_deployment_params.dart",
+      "schema": "BetaManagedAgentsUpdateDeploymentParams"
+    },
+    "DeploymentListResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeploymentListResponse",
+      "file": "lib/src/models/managed_agents/deployments/deployment_list_response.dart",
+      "schema": "BetaManagedAgentsListDeploymentsData"
+    },
+    "DeploymentRunListResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeploymentRunListResponse",
+      "file": "lib/src/models/managed_agents/deployments/deployment_run_list_response.dart",
+      "schema": "BetaManagedAgentsListDeploymentRunsData"
+    },
+    "BetaManagedAgentsDeploymentInitialEventParams": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "DeploymentInitialEventParams",
+      "file": "lib/src/models/managed_agents/deployments/deployment_initial_event_params.dart",
+      "schema": "BetaManagedAgentsDeploymentInitialEventParams",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Create-side union; oneOf variants are the already-tracked UserMessage/UserDefineOutcome/SystemMessage EventParams. Modeled as thin Dart wrappers (DeploymentInitialEventParams) delegating to those classes; no new spec schema to verify."
     }
   }
 }

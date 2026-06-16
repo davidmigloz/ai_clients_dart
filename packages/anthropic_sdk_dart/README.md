@@ -49,6 +49,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Message batches for large-scale offline processing
 - Model discovery, files (beta), and skills (beta)
 - Managed agents with sessions, threads, vaults, and streaming events (beta)
+- Scheduled deployments: run agent sessions on a cron schedule, with deployment runs, pause/resume, and run-now (beta)
 - Multiagent coordinator orchestration and outcome evaluations with grading rubrics (beta)
 - Typed webhook event parsing and MCP-OAuth / static-bearer / environment-variable credential validation (beta)
 - Memory stores for persistent agent memories with versioning and redaction (beta)
@@ -681,6 +682,7 @@ See the [example/](example/) directory for complete examples:
 | [`mcp_example.dart`](example/mcp_example.dart) | MCP tool integration |
 | [`managed_agents_example.dart`](example/managed_agents_example.dart) | Managed agents: agents, sessions, vaults, multiagent rosters, outcomes, webhooks, credential validation (beta) |
 | [`session_threads_example.dart`](example/session_threads_example.dart) | Session threads: list, retrieve, stream events, archive (beta) |
+| [`deployments_example.dart`](example/deployments_example.dart) | Scheduled deployments and deployment runs: cron schedule, pause/resume, run-now (beta) |
 | [`memory_stores_example.dart`](example/memory_stores_example.dart) | Managed agents memory stores, memories, and versions (beta) |
 | [`user_profiles_example.dart`](example/user_profiles_example.dart) | User profiles and enrollment URLs (beta) |
 | [`models_example.dart`](example/models_example.dart) | Model listing |
