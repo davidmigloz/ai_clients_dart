@@ -28,6 +28,12 @@ class ModelInfo {
   /// Maximum value for the `max_tokens` parameter when using this model.
   final int? maxTokens;
 
+  /// Model IDs this model accepts as `fallbacks[i].model` on the Messages API.
+  ///
+  /// An empty list means the `fallbacks` parameter is not supported for this
+  /// model as primary.
+  final List<String>? allowedFallbackModels;
+
   /// Creates a [ModelInfo].
   const ModelInfo({
     required this.id,
@@ -37,6 +43,7 @@ class ModelInfo {
     this.capabilities,
     this.maxInputTokens,
     this.maxTokens,
+    this.allowedFallbackModels,
   });
 
   /// Creates a [ModelInfo] from JSON.
@@ -53,6 +60,8 @@ class ModelInfo {
           : null,
       maxInputTokens: json['max_input_tokens'] as int?,
       maxTokens: json['max_tokens'] as int?,
+      allowedFallbackModels: (json['allowed_fallback_models'] as List?)
+          ?.cast<String>(),
     );
   }
 
@@ -65,6 +74,8 @@ class ModelInfo {
     if (capabilities != null) 'capabilities': capabilities!.toJson(),
     if (maxInputTokens != null) 'max_input_tokens': maxInputTokens,
     if (maxTokens != null) 'max_tokens': maxTokens,
+    if (allowedFallbackModels != null)
+      'allowed_fallback_models': allowedFallbackModels,
   };
 
   /// Creates a copy with replaced values.
@@ -76,6 +87,7 @@ class ModelInfo {
     Object? capabilities = unsetCopyWithValue,
     Object? maxInputTokens = unsetCopyWithValue,
     Object? maxTokens = unsetCopyWithValue,
+    Object? allowedFallbackModels = unsetCopyWithValue,
   }) {
     return ModelInfo(
       id: id ?? this.id,
@@ -91,6 +103,9 @@ class ModelInfo {
       maxTokens: maxTokens == unsetCopyWithValue
           ? this.maxTokens
           : maxTokens as int?,
+      allowedFallbackModels: allowedFallbackModels == unsetCopyWithValue
+          ? this.allowedFallbackModels
+          : allowedFallbackModels as List<String>?,
     );
   }
 
@@ -105,7 +120,8 @@ class ModelInfo {
           type == other.type &&
           capabilities == other.capabilities &&
           maxInputTokens == other.maxInputTokens &&
-          maxTokens == other.maxTokens;
+          maxTokens == other.maxTokens &&
+          listsEqual(allowedFallbackModels, other.allowedFallbackModels);
 
   @override
   int get hashCode => Object.hash(
@@ -116,13 +132,15 @@ class ModelInfo {
     capabilities,
     maxInputTokens,
     maxTokens,
+    listHash(allowedFallbackModels),
   );
 
   @override
   String toString() =>
       'ModelInfo(id: $id, displayName: $displayName, createdAt: $createdAt, '
       'type: $type, capabilities: $capabilities, '
-      'maxInputTokens: $maxInputTokens, maxTokens: $maxTokens)';
+      'maxInputTokens: $maxInputTokens, maxTokens: $maxTokens, '
+      'allowedFallbackModels: $allowedFallbackModels)';
 }
 
 /// Response for listing models.

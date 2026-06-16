@@ -51,6 +51,7 @@ class SendSessionEventsParams {
 ///
 /// Variants:
 /// - [UserMessageEventParams] — send a user message.
+/// - [SystemMessageEventParams] — append a mid-conversation system message.
 /// - [UserInterruptEventParams] — send an interrupt.
 /// - [UserToolConfirmationEventParams] — confirm or deny a tool execution.
 /// - [UserCustomToolResultEventParams] — provide custom tool result.
@@ -65,6 +66,7 @@ sealed class EventParams {
     final type = json['type'] as String?;
     return switch (type) {
       'user.message' => UserMessageEventParams.fromJson(json),
+      'system.message' => SystemMessageEventParams.fromJson(json),
       'user.interrupt' => UserInterruptEventParams.fromJson(json),
       'user.tool_confirmation' => UserToolConfirmationEventParams.fromJson(
         json,
@@ -123,6 +125,56 @@ class UserMessageEventParams extends EventParams {
 
   @override
   String toString() => 'UserMessageEventParams(content: $content)';
+}
+
+/// Parameters for appending a mid-conversation system message.
+///
+/// Privileged context for the accompanying turn and all subsequent turns,
+/// appended to the session's system context as a `role: "system"` turn rather
+/// than replacing the top-level system prompt. At most one per request: it must
+/// be the final event and immediately follow the `user.message`,
+/// `user.tool_result`, or `user.custom_tool_result` it accompanies. Only
+/// supported on models that accept mid-conversation system messages.
+@immutable
+class SystemMessageEventParams extends EventParams {
+  /// The event type, always 'system.message'.
+  String get type => 'system.message';
+
+  /// System content blocks to append. Text-only.
+  final List<Map<String, dynamic>> content;
+
+  /// Creates a [SystemMessageEventParams].
+  const SystemMessageEventParams({required this.content});
+
+  /// Creates a [SystemMessageEventParams] from JSON.
+  factory SystemMessageEventParams.fromJson(Map<String, dynamic> json) {
+    return SystemMessageEventParams(
+      content: (json['content'] as List)
+          .map((e) => e as Map<String, dynamic>)
+          .toList(),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': type, 'content': content};
+
+  /// Creates a copy with replaced values.
+  SystemMessageEventParams copyWith({List<Map<String, dynamic>>? content}) {
+    return SystemMessageEventParams(content: content ?? this.content);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SystemMessageEventParams &&
+          runtimeType == other.runtimeType &&
+          listOfMapsDeepEqual(content, other.content);
+
+  @override
+  int get hashCode => listOfMapsHashCode(content);
+
+  @override
+  String toString() => 'SystemMessageEventParams(content: $content)';
 }
 
 /// Parameters for sending an interrupt.

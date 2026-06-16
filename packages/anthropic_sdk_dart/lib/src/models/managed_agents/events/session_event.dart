@@ -22,6 +22,7 @@ import 'telemetry.dart';
 /// - [AgentThreadMessageReceivedEvent] — a peer agent thread sent this thread a message.
 /// - [AgentThreadMessageSentEvent] — this thread sent a peer agent thread a message.
 /// - [UserMessageEvent] — user message.
+/// - [SystemMessageEvent] — mid-conversation system message.
 /// - [UserInterruptEvent] — user interrupt.
 /// - [UserToolConfirmationEvent] — user tool confirmation.
 /// - [UserCustomToolResultEvent] — user custom tool result.
@@ -65,6 +66,7 @@ sealed class SessionEvent {
         AgentThreadMessageReceivedEvent.fromJson(json),
       'agent.thread_message_sent' => AgentThreadMessageSentEvent.fromJson(json),
       'user.message' => UserMessageEvent.fromJson(json),
+      'system.message' => SystemMessageEvent.fromJson(json),
       'user.interrupt' => UserInterruptEvent.fromJson(json),
       'user.tool_confirmation' => UserToolConfirmationEvent.fromJson(json),
       'user.custom_tool_result' => UserCustomToolResultEvent.fromJson(json),
@@ -909,6 +911,86 @@ class UserMessageEvent extends SessionEvent {
   @override
   String toString() =>
       'UserMessageEvent(id: $id, content: $content, '
+      'processedAt: $processedAt)';
+}
+
+/// A mid-conversation system message event.
+///
+/// Carries system-role content that is appended to the session as a
+/// `role: "system"` turn.
+@immutable
+class SystemMessageEvent extends SessionEvent {
+  /// The event type, always 'system.message'.
+  String get type => 'system.message';
+
+  /// Unique identifier for this event.
+  final String id;
+
+  /// System content blocks. Text-only.
+  final List<Map<String, dynamic>> content;
+
+  /// Timestamp when this system message was processed.
+  final BetaTimestamp? processedAt;
+
+  /// Creates a [SystemMessageEvent].
+  const SystemMessageEvent({
+    required this.id,
+    required this.content,
+    this.processedAt,
+  });
+
+  /// Creates a [SystemMessageEvent] from JSON.
+  factory SystemMessageEvent.fromJson(Map<String, dynamic> json) {
+    return SystemMessageEvent(
+      id: json['id'] as String,
+      content: (json['content'] as List)
+          .map((e) => e as Map<String, dynamic>)
+          .toList(),
+      processedAt: json['processed_at'] != null
+          ? DateTime.parse(json['processed_at'] as String)
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'content': content,
+    if (processedAt != null)
+      'processed_at': processedAt!.toUtc().toIso8601String(),
+  };
+
+  /// Creates a copy with replaced values.
+  SystemMessageEvent copyWith({
+    String? id,
+    List<Map<String, dynamic>>? content,
+    Object? processedAt = unsetCopyWithValue,
+  }) {
+    return SystemMessageEvent(
+      id: id ?? this.id,
+      content: content ?? this.content,
+      processedAt: processedAt == unsetCopyWithValue
+          ? this.processedAt
+          : processedAt as BetaTimestamp?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SystemMessageEvent &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          listOfMapsDeepEqual(content, other.content) &&
+          processedAt == other.processedAt;
+
+  @override
+  int get hashCode => Object.hash(id, listOfMapsHashCode(content), processedAt);
+
+  @override
+  String toString() =>
+      'SystemMessageEvent(id: $id, content: $content, '
       'processedAt: $processedAt)';
 }
 

@@ -79,6 +79,9 @@ void main() {
       'organization_id': 'org_123',
       'workspace_id': 'wrkspc_123',
       if (withVault) 'vault_id': 'vlt_123',
+      // session.thread_* events carry the multi-agent thread id.
+      if (type.startsWith('session.thread_'))
+        'session_thread_id': 'sessn_thread_123',
     };
   }
 

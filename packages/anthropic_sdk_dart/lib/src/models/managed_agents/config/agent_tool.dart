@@ -1272,26 +1272,44 @@ class CustomToolInputSchema {
   /// List of required property names.
   final List<String>? required;
 
+  /// Additional JSON Schema keywords beyond `type`, `properties`, and
+  /// `required` (the schema is open: `additionalProperties: true`).
+  final Map<String, dynamic>? extra;
+
   /// Creates a [CustomToolInputSchema].
   const CustomToolInputSchema({
     this.type = 'object',
     this.properties,
     this.required,
+    this.extra,
   });
+
+  /// JSON keys backed by a declared, typed field on this class.
+  static const _knownKeys = {'type', 'properties', 'required'};
 
   /// Creates a [CustomToolInputSchema] from JSON.
   factory CustomToolInputSchema.fromJson(Map<String, dynamic> json) {
+    final extraEntries = {
+      for (final entry in json.entries)
+        if (!_knownKeys.contains(entry.key)) entry.key: entry.value,
+    };
     return CustomToolInputSchema(
       type: json['type'] as String? ?? 'object',
       properties: json['properties'] != null
           ? Map<String, dynamic>.from(json['properties'] as Map)
           : null,
       required: (json['required'] as List?)?.cast<String>(),
+      extra: extraEntries.isEmpty ? null : extraEntries,
     );
   }
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
+    // Spread only undeclared keys so `extra` can never emit or override a
+    // declared field.
+    if (extra != null)
+      for (final entry in extra!.entries)
+        if (!_knownKeys.contains(entry.key)) entry.key: entry.value,
     'type': type,
     if (properties != null) 'properties': properties,
     if (required != null) 'required': required,
@@ -1302,6 +1320,7 @@ class CustomToolInputSchema {
     String? type,
     Object? properties = unsetCopyWithValue,
     Object? required = unsetCopyWithValue,
+    Object? extra = unsetCopyWithValue,
   }) {
     return CustomToolInputSchema(
       type: type ?? this.type,
@@ -1311,6 +1330,9 @@ class CustomToolInputSchema {
       required: required == unsetCopyWithValue
           ? this.required
           : required as List<String>?,
+      extra: extra == unsetCopyWithValue
+          ? this.extra
+          : extra as Map<String, dynamic>?,
     );
   }
 
@@ -1321,14 +1343,20 @@ class CustomToolInputSchema {
           runtimeType == other.runtimeType &&
           type == other.type &&
           mapsDeepEqual(properties, other.properties) &&
-          listsEqual(required, other.required);
+          listsEqual(required, other.required) &&
+          mapsDeepEqual(extra, other.extra);
 
   @override
-  int get hashCode =>
-      Object.hash(type, mapDeepHashCode(properties), listHash(required));
+  int get hashCode => Object.hash(
+    type,
+    mapDeepHashCode(properties),
+    listHash(required),
+    mapDeepHashCode(extra),
+  );
 
   @override
   String toString() =>
       'CustomToolInputSchema('
-      'type: $type, properties: $properties, required: $required)';
+      'type: $type, properties: $properties, required: $required, '
+      'extra: $extra)';
 }
