@@ -6,6 +6,8 @@ import '../interceptors/error_interceptor.dart';
 import '../interceptors/interceptor.dart';
 import '../interceptors/logging_interceptor.dart';
 import '../resources/agents_resource.dart';
+import '../resources/deployment_runs_resource.dart';
+import '../resources/deployments_resource.dart';
 import '../resources/files_resource.dart';
 import '../resources/memory_stores_resource.dart';
 import '../resources/message_batches_resource.dart';
@@ -96,6 +98,12 @@ class AnthropicClient {
 
   /// Resource for the Vaults API (Beta).
   late final VaultsResource vaults;
+
+  /// Resource for the Deployments API (Beta).
+  late final DeploymentsResource deployments;
+
+  /// Resource for the Deployment Runs API (Beta).
+  late final DeploymentRunsResource deploymentRuns;
 
   /// Creates an [AnthropicClient].
   ///
@@ -224,6 +232,20 @@ class AnthropicClient {
       ensureNotClosed: _ensureNotClosed,
     );
     vaults = VaultsResource(
+      config: config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+    deployments = DeploymentsResource(
+      config: config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+    deploymentRuns = DeploymentRunsResource(
       config: config,
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,
