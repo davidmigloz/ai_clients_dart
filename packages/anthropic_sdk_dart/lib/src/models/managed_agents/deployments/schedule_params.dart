@@ -22,8 +22,9 @@ sealed class ScheduleParams {
   }
 
   /// Creates parameters for a cron schedule.
+  ///
+  /// The `type` discriminator is fixed to `cron` by [CronScheduleParams].
   const factory ScheduleParams.cron({
-    String type,
     required String expression,
     required String timezone,
   }) = CronScheduleParams;
