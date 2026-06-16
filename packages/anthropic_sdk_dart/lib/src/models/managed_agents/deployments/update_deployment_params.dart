@@ -221,7 +221,7 @@ class UpdateDeploymentParams {
       'initialEvents: ${initialEvents == null ? null : '${initialEvents!.length} items'}, '
       'description: $description, '
       'metadata: $metadata, '
-      'resources: $resources, '
+      'resources: ${resources == null ? null : '${resources!.length} items'}, '
       'schedule: $schedule, '
       'vaultIds: $vaultIds)';
 }

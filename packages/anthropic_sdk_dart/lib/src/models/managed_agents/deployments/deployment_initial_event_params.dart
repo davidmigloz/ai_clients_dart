@@ -10,7 +10,7 @@ import '../events/send_event_params.dart'
 /// An event sent to a session immediately after it is created (create side).
 ///
 /// Supports `user.message`, `user.define_outcome`, and `system.message`. This
-/// is a narrowed view of the broader [EventParams] union: the API accepts only
+/// is a narrowed view of the broader `EventParams` union: the API accepts only
 /// these three event types as deployment initial events, so the variants below
 /// wrap the existing param classes rather than duplicating them.
 ///

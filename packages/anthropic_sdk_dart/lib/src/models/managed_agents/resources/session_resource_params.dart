@@ -192,7 +192,7 @@ class GitHubRepositoryResourceParams extends SessionResourceParams {
       'GitHubRepositoryResourceParams('
       'type: $type, '
       'url: $url, '
-      'authorizationToken: $authorizationToken, '
+      'authorizationToken: [redacted], '
       'mountPath: $mountPath, '
       'checkout: $checkout)';
 }
@@ -356,7 +356,7 @@ class UpdateSessionResourceParams {
   @override
   String toString() =>
       'UpdateSessionResourceParams('
-      'authorizationToken: $authorizationToken)';
+      'authorizationToken: [redacted])';
 }
 
 // ============================================================================

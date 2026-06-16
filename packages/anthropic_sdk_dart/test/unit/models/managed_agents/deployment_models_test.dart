@@ -276,6 +276,47 @@ void main() {
       final reparsed = CreateDeploymentParams.fromJson(params.toJson());
       expect(reparsed, params);
     });
+
+    test('toString summarizes resources and never leaks a GitHub token', () {
+      const token = 'ghp_SUPER_SECRET_TOKEN';
+      const params = CreateDeploymentParams(
+        agent: AgentParamsId(id: 'agent_test123'),
+        environmentId: 'env_test123',
+        name: 'My Deployment',
+        initialEvents: [
+          DeploymentUserMessageEventParams(
+            UserMessageEventParams(
+              content: [
+                {'type': 'text', 'text': 'Hello'},
+              ],
+            ),
+          ),
+        ],
+        resources: [
+          GitHubRepositoryResourceParams(
+            url: 'https://github.com/o/r',
+            authorizationToken: token,
+          ),
+        ],
+      );
+
+      final str = params.toString();
+      expect(str, contains('resources: 1 items'));
+      expect(str, isNot(contains(token)));
+    });
+  });
+
+  group('GitHubRepositoryResourceParams', () {
+    test('toString redacts the authorization token', () {
+      const token = 'ghp_SUPER_SECRET_TOKEN';
+      const params = GitHubRepositoryResourceParams(
+        url: 'https://github.com/o/r',
+        authorizationToken: token,
+      );
+      final str = params.toString();
+      expect(str, isNot(contains(token)));
+      expect(str, contains('[redacted]'));
+    });
   });
 
   group('UpdateDeploymentParams', () {
