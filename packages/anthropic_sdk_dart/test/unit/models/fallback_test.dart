@@ -163,6 +163,18 @@ void main() {
       expect(config.toJson()['model'], 'declared-model');
     });
 
+    test('extra never emits a declared key when its typed field is null', () {
+      // A declared optional key smuggled into `extra` must NOT leak when the
+      // typed field is absent — `extra` is for undeclared keys only.
+      const config = FallbackConfigV2(
+        model: 'm',
+        extra: {'max_tokens': 99, 'custom': 'kept'},
+      );
+      final json = config.toJson();
+      expect(json.containsKey('max_tokens'), isFalse);
+      expect(json['custom'], 'kept'); // undeclared keys still pass through
+    });
+
     test('equality is content-based for extra', () {
       const a = FallbackConfigV2(
         model: 'm',

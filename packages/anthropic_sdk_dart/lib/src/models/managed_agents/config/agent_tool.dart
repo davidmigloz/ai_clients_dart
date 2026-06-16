@@ -1284,12 +1284,14 @@ class CustomToolInputSchema {
     this.extra,
   });
 
+  /// JSON keys backed by a declared, typed field on this class.
+  static const _knownKeys = {'type', 'properties', 'required'};
+
   /// Creates a [CustomToolInputSchema] from JSON.
   factory CustomToolInputSchema.fromJson(Map<String, dynamic> json) {
-    const knownKeys = {'type', 'properties', 'required'};
     final extraEntries = {
       for (final entry in json.entries)
-        if (!knownKeys.contains(entry.key)) entry.key: entry.value,
+        if (!_knownKeys.contains(entry.key)) entry.key: entry.value,
     };
     return CustomToolInputSchema(
       type: json['type'] as String? ?? 'object',
@@ -1303,7 +1305,11 @@ class CustomToolInputSchema {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
-    if (extra != null) ...extra!,
+    // Spread only undeclared keys so `extra` can never emit or override a
+    // declared field.
+    if (extra != null)
+      for (final entry in extra!.entries)
+        if (!_knownKeys.contains(entry.key)) entry.key: entry.value,
     'type': type,
     if (properties != null) 'properties': properties,
     if (required != null) 'required': required,

@@ -47,18 +47,20 @@ class FallbackConfigV2 {
     this.extra,
   });
 
+  /// JSON keys backed by a declared, typed field on this class.
+  static const _knownKeys = {
+    'model',
+    'max_tokens',
+    'thinking',
+    'output_config',
+    'speed',
+  };
+
   /// Creates a [FallbackConfigV2] from JSON.
   factory FallbackConfigV2.fromJson(Map<String, dynamic> json) {
-    const knownKeys = {
-      'model',
-      'max_tokens',
-      'thinking',
-      'output_config',
-      'speed',
-    };
     final extraEntries = {
       for (final entry in json.entries)
-        if (!knownKeys.contains(entry.key)) entry.key: entry.value,
+        if (!_knownKeys.contains(entry.key)) entry.key: entry.value,
     };
     return FallbackConfigV2(
       model: json['model'] as String,
@@ -78,7 +80,12 @@ class FallbackConfigV2 {
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
-    if (extra != null) ...extra!,
+    // Spread only undeclared keys so `extra` can never emit or override a
+    // declared field (e.g. a stray `max_tokens` in `extra` when the typed
+    // `maxTokens` is null).
+    if (extra != null)
+      for (final entry in extra!.entries)
+        if (!_knownKeys.contains(entry.key)) entry.key: entry.value,
     'model': model,
     if (maxTokens != null) 'max_tokens': maxTokens,
     if (thinking != null) 'thinking': thinking!.toJson(),
