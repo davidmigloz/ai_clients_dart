@@ -1,3 +1,11 @@
+## 4.2.0
+
+Adds [scheduled deployments](https://platform.claude.com/docs/en/managed-agents/scheduled-deployments) for Managed Agents — run an agent session on a cron schedule (or on demand) through the new `client.deployments` and `client.deploymentRuns` beta resources, with each firing producing a deployment run. Also introduces the beta [Fallback API](https://platform.claude.com/docs/en/build-with-claude/handling-stop-reasons) for Messages — supply a `fallbacks` chain to automatically re-run a refused request on another model (e.g. [Fable 5](https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5)) or retry manually with a refusal credit token — plus environment-variable vault credentials for Managed Agents. Also fixes a latent runtime crash where passing an untyped empty literal (e.g. `UpdateSessionParams(vaultIds: [])`) to the `Update*Params` family threw a `TypeError`.
+
+- **FEAT**: Scheduled deployments (Managed Agents) ([#259](https://github.com/davidmigloz/ai_clients_dart/issues/259)). ([a784bc63](https://github.com/davidmigloz/ai_clients_dart/commit/a784bc63c942142ad9ecb4eca77d835b18b60f6e))
+- **FEAT**: Fallback API and env-var vault credentials ([#258](https://github.com/davidmigloz/ai_clients_dart/issues/258)). ([5b2ca762](https://github.com/davidmigloz/ai_clients_dart/commit/5b2ca7628563b24d24b9d7148c209ce93320bcd7))
+- **FIX**: Safe casts for Update*Params sentinel collections ([#260](https://github.com/davidmigloz/ai_clients_dart/issues/260)). ([34e24c73](https://github.com/davidmigloz/ai_clients_dart/commit/34e24c738dfc4f1fa5fa8e72eeae450b07470898))
+
 ## 4.1.0
 
 Completes field-level parity for the **advisor** and **computer-use** built-in beta tools, whose parameters were previously dropped on the Dart side and silently lost on serialization. `AdvisorTool` now carries `allowedCallers`, `deferLoading`, and `strict`; `ComputerUseTool` adds those plus `inputExamples` (all versions) and `enableZoom` (only on the `computer_20251124` tool version). See the [Anthropic API release notes](https://platform.claude.com/docs/en/release-notes/overview) for the underlying tool updates.
