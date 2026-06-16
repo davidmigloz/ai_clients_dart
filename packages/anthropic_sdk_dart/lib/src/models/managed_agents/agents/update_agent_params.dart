@@ -40,23 +40,25 @@ class UpdateAgentParams {
   /// Tool configurations. Full replacement. Omit to preserve; send null to
   /// clear.
   List<AgentToolParams>? get tools =>
-      _tools == _notSet ? null : _tools as List<AgentToolParams>?;
+      _tools == _notSet ? null : (_tools as List?)?.cast<AgentToolParams>();
   final Object? _tools;
 
   /// MCP servers. Full replacement. Omit to preserve; send null to clear.
-  List<MCPServerParams>? get mcpServers =>
-      _mcpServers == _notSet ? null : _mcpServers as List<MCPServerParams>?;
+  List<MCPServerParams>? get mcpServers => _mcpServers == _notSet
+      ? null
+      : (_mcpServers as List?)?.cast<MCPServerParams>();
   final Object? _mcpServers;
 
   /// Skills. Full replacement. Omit to preserve; send null to clear.
   List<AgentSkillParams>? get skills =>
-      _skills == _notSet ? null : _skills as List<AgentSkillParams>?;
+      _skills == _notSet ? null : (_skills as List?)?.cast<AgentSkillParams>();
   final Object? _skills;
 
   /// Metadata patch. Set a key to a string to upsert it, or to null to
   /// delete it. Omit the field to preserve.
-  Map<String, String?>? get metadata =>
-      _metadata == _notSet ? null : _metadata as Map<String, String?>?;
+  Map<String, String?>? get metadata => _metadata == _notSet
+      ? null
+      : (_metadata as Map?)?.cast<String, String?>();
   final Object? _metadata;
 
   /// Multiagent orchestration configuration. Full replacement. Omit to
@@ -150,16 +152,19 @@ class UpdateAgentParams {
     if (_system != _notSet) 'system': _system,
     if (_model != _notSet) 'model': (_model as ModelParams?)?.toJson(),
     if (_tools != _notSet)
-      'tools': (_tools as List<AgentToolParams>?)
-          ?.map((e) => e.toJson())
+      'tools': (_tools as List?)
+          ?.cast<AgentToolParams>()
+          .map((e) => e.toJson())
           .toList(),
     if (_mcpServers != _notSet)
-      'mcp_servers': (_mcpServers as List<MCPServerParams>?)
-          ?.map((e) => e.toJson())
+      'mcp_servers': (_mcpServers as List?)
+          ?.cast<MCPServerParams>()
+          .map((e) => e.toJson())
           .toList(),
     if (_skills != _notSet)
-      'skills': (_skills as List<AgentSkillParams>?)
-          ?.map((e) => e.toJson())
+      'skills': (_skills as List?)
+          ?.cast<AgentSkillParams>()
+          .map((e) => e.toJson())
           .toList(),
     if (_metadata != _notSet) 'metadata': _metadata,
     if (_multiagent != _notSet)

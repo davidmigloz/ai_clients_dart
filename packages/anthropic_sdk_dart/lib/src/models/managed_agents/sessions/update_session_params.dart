@@ -18,13 +18,14 @@ class UpdateSessionParams {
   final Object? _title;
 
   /// Metadata patch. Set a key to a string to upsert, or to null to delete.
-  Map<String, String?>? get metadata =>
-      _metadata == _notSet ? null : _metadata as Map<String, String?>?;
+  Map<String, String?>? get metadata => _metadata == _notSet
+      ? null
+      : (_metadata as Map?)?.cast<String, String?>();
   final Object? _metadata;
 
   /// Vault IDs to attach to the session.
   List<String>? get vaultIds =>
-      _vaultIds == _notSet ? null : _vaultIds as List<String>?;
+      _vaultIds == _notSet ? null : (_vaultIds as List?)?.cast<String>();
   final Object? _vaultIds;
 
   /// Agent configuration patch to apply to the session.

@@ -54,7 +54,7 @@ class UpdateUserProfileRequest {
   /// Set a key's value to the empty string to delete it server-side.
   /// Keys not included are preserved.
   Map<String, String>? get metadata =>
-      _metadata == _notSet ? null : _metadata as Map<String, String>?;
+      _metadata == _notSet ? null : (_metadata as Map?)?.cast<String, String>();
 
   /// Whether a metadata update was provided.
   bool get hasMetadata => _metadata != _notSet;
