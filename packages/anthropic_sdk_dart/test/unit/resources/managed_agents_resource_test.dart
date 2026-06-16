@@ -380,6 +380,17 @@ void main() {
       expect(params['statuses[]'], ['running', 'idle']);
     });
 
+    test('list passes deployment_id filter and sets beta header', () async {
+      mockHttpClient.queueJsonResponse({'data': <Map<String, dynamic>>[]});
+
+      await client.sessions.list(deploymentId: 'dpl_123');
+
+      final request = mockHttpClient.lastRequest!;
+      expect(request.url.path, '/v1/sessions');
+      expect(request.url.queryParameters['deployment_id'], 'dpl_123');
+      expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
+    });
+
     test('retrieve sends correct request', () async {
       mockHttpClient.queueJsonResponse(ManagedAgentsFixtures.session());
 

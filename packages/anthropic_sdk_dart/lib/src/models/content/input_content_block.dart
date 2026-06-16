@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import '../messages/fallback_config.dart';
 import '../metadata/cache_control.dart';
 import '../sources/document_source.dart';
 import '../sources/image_source.dart';
@@ -151,6 +152,15 @@ sealed class InputContentBlock {
     CacheControlEphemeral? cacheControl,
   }) = MidConversationSystemInputBlock;
 
+  /// Creates a fallback block echoed back from a prior response.
+  ///
+  /// Callers should echo the assistant turn verbatim, including this block — its
+  /// position is load-bearing for thinking verification across a fallback hop.
+  factory InputContentBlock.fallback({
+    required FallbackHopInfo from,
+    required FallbackHopInfo to,
+  }) = FallbackInputBlock;
+
   /// Creates an [InputContentBlock] from JSON.
   factory InputContentBlock.fromJson(Map<String, dynamic> json) {
     final type = json['type'] as String;
@@ -180,6 +190,7 @@ sealed class InputContentBlock {
       'mcp_tool_result' => MCPToolResultInputBlock.fromJson(json),
       'advisor_tool_result' => AdvisorToolResultInputBlock.fromJson(json),
       'mid_conv_system' => MidConversationSystemInputBlock.fromJson(json),
+      'fallback' => FallbackInputBlock.fromJson(json),
       _ => UnknownInputContentBlock.fromJson(json),
     };
   }
@@ -1594,6 +1605,67 @@ class ToolReferenceInputBlock extends InputContentBlock {
   String toString() =>
       'ToolReferenceInputBlock(toolName: $toolName, '
       'cacheControl: $cacheControl)';
+}
+
+/// A `fallback` block echoed back from a prior response.
+///
+/// Accepted in `messages[].content` and never rendered into the prompt. Callers
+/// should echo the assistant turn verbatim, block included — its position is
+/// load-bearing for thinking verification across a fallback hop.
+@immutable
+class FallbackInputBlock extends InputContentBlock {
+  /// The model whose output ends at this point — the model that declined at
+  /// this hop.
+  final FallbackHopInfo from;
+
+  /// The fallback model producing the content that follows this block.
+  final FallbackHopInfo to;
+
+  /// Creates a [FallbackInputBlock].
+  const FallbackInputBlock({required this.from, required this.to});
+
+  /// Object type. Always "fallback".
+  String get type => 'fallback';
+
+  /// Creates a [FallbackInputBlock] from JSON.
+  factory FallbackInputBlock.fromJson(Map<String, dynamic> json) {
+    final type = json['type'];
+    if (type != 'fallback') {
+      throw FormatException(
+        'FallbackInputBlock: expected type "fallback", got "$type"',
+      );
+    }
+    return FallbackInputBlock(
+      from: FallbackHopInfo.fromJson(json['from'] as Map<String, dynamic>),
+      to: FallbackHopInfo.fromJson(json['to'] as Map<String, dynamic>),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'from': from.toJson(),
+    'to': to.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  FallbackInputBlock copyWith({FallbackHopInfo? from, FallbackHopInfo? to}) {
+    return FallbackInputBlock(from: from ?? this.from, to: to ?? this.to);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FallbackInputBlock &&
+          runtimeType == other.runtimeType &&
+          from == other.from &&
+          to == other.to;
+
+  @override
+  int get hashCode => Object.hash(from, to);
+
+  @override
+  String toString() => 'FallbackInputBlock(from: $from, to: $to)';
 }
 
 /// Advisor tool result block in input (for multi-turn conversations).

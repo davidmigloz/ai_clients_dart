@@ -10,6 +10,7 @@ import '../metadata/speed.dart';
 import '../tools/tool_choice.dart';
 import '../tools/tool_definition.dart';
 import 'diagnostics_param.dart';
+import 'fallback_config.dart';
 import 'input_message.dart';
 import 'thinking_config.dart';
 
@@ -223,6 +224,17 @@ class MessageCreateRequest {
   /// `betas: ['cache-diagnosis-2026-04-07']` to `messages.create`.
   final DiagnosticsParam? diagnostics;
 
+  /// Ordered chain of fallback models to attempt if the primary [model]
+  /// declines.
+  final List<FallbackConfigV2>? fallbacks;
+
+  /// Opaque credit token to redeem on a fallback retry.
+  ///
+  /// Pass the `fallbackCreditToken` from a prior refusal's
+  /// [RefusalStopDetails] to refund the cache-miss cost when retrying the
+  /// refused request.
+  final String? fallbackCreditToken;
+
   /// Creates a [MessageCreateRequest].
   const MessageCreateRequest({
     required this.model,
@@ -246,6 +258,8 @@ class MessageCreateRequest {
     this.cacheControl,
     this.userProfileId,
     this.diagnostics,
+    this.fallbacks,
+    this.fallbackCreditToken,
   });
 
   /// Creates a [MessageCreateRequest] from JSON.
@@ -298,6 +312,10 @@ class MessageCreateRequest {
               json['diagnostics'] as Map<String, dynamic>,
             )
           : null,
+      fallbacks: (json['fallbacks'] as List?)
+          ?.map((e) => FallbackConfigV2.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      fallbackCreditToken: json['fallback_credit_token'] as String?,
     );
   }
 
@@ -324,6 +342,10 @@ class MessageCreateRequest {
     if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
     if (userProfileId != null) 'user_profile_id': userProfileId,
     if (diagnostics != null) 'diagnostics': diagnostics!.toJson(),
+    if (fallbacks != null)
+      'fallbacks': fallbacks!.map((e) => e.toJson()).toList(),
+    if (fallbackCreditToken != null)
+      'fallback_credit_token': fallbackCreditToken,
   };
 
   /// Creates a copy with replaced values.
@@ -349,6 +371,8 @@ class MessageCreateRequest {
     Object? cacheControl = unsetCopyWithValue,
     Object? userProfileId = unsetCopyWithValue,
     Object? diagnostics = unsetCopyWithValue,
+    Object? fallbacks = unsetCopyWithValue,
+    Object? fallbackCreditToken = unsetCopyWithValue,
   }) {
     return MessageCreateRequest(
       model: model ?? this.model,
@@ -400,6 +424,12 @@ class MessageCreateRequest {
       diagnostics: diagnostics == unsetCopyWithValue
           ? this.diagnostics
           : diagnostics as DiagnosticsParam?,
+      fallbacks: fallbacks == unsetCopyWithValue
+          ? this.fallbacks
+          : fallbacks as List<FallbackConfigV2>?,
+      fallbackCreditToken: fallbackCreditToken == unsetCopyWithValue
+          ? this.fallbackCreditToken
+          : fallbackCreditToken as String?,
     );
   }
 
@@ -428,7 +458,9 @@ class MessageCreateRequest {
           speed == other.speed &&
           cacheControl == other.cacheControl &&
           userProfileId == other.userProfileId &&
-          diagnostics == other.diagnostics;
+          diagnostics == other.diagnostics &&
+          listsEqual(fallbacks, other.fallbacks) &&
+          fallbackCreditToken == other.fallbackCreditToken;
 
   @override
   int get hashCode => Object.hashAll([
@@ -453,6 +485,8 @@ class MessageCreateRequest {
     cacheControl,
     userProfileId,
     diagnostics,
+    listHash(fallbacks),
+    fallbackCreditToken,
   ]);
 
   @override
@@ -464,5 +498,8 @@ class MessageCreateRequest {
       'toolChoice: $toolChoice, tools: $tools, topP: $topP, topK: $topK, '
       'inferenceGeo: $inferenceGeo, outputConfig: $outputConfig, '
       'container: $container, speed: $speed, cacheControl: $cacheControl, '
-      'userProfileId: $userProfileId, diagnostics: $diagnostics)';
+      'userProfileId: $userProfileId, diagnostics: $diagnostics, '
+      'fallbacks: ${fallbacks == null ? null : '${fallbacks!.length} items'}, '
+      'fallbackCreditToken: '
+      '${fallbackCreditToken == null ? null : '[redacted]'})';
 }

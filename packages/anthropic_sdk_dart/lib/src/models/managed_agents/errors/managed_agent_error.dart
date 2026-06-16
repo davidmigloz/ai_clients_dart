@@ -75,6 +75,98 @@ class BillingError {
       'BillingError(type: $type, message: $message, retryStatus: $retryStatus)';
 }
 
+/// An `environment_variable` credential's `auth.networking.allowed_hosts`
+/// includes a host the environment's network policy does not permit.
+@immutable
+class CredentialHostUnreachableError {
+  /// The type discriminator. Always `credential_host_unreachable_error`.
+  final String type;
+
+  /// Human-readable error description.
+  final String message;
+
+  /// ID of the affected credential.
+  final String credentialId;
+
+  /// ID of the vault containing the affected credential.
+  final String vaultId;
+
+  /// What the client should do next.
+  final RetryStatus retryStatus;
+
+  /// Creates a [CredentialHostUnreachableError].
+  const CredentialHostUnreachableError({
+    this.type = 'credential_host_unreachable_error',
+    required this.message,
+    required this.credentialId,
+    required this.vaultId,
+    required this.retryStatus,
+  });
+
+  /// Creates a [CredentialHostUnreachableError] from JSON.
+  factory CredentialHostUnreachableError.fromJson(Map<String, dynamic> json) {
+    return CredentialHostUnreachableError(
+      type: json['type'] as String? ?? 'credential_host_unreachable_error',
+      message: json['message'] as String,
+      credentialId: json['credential_id'] as String,
+      vaultId: json['vault_id'] as String,
+      retryStatus: RetryStatus.fromJson(
+        json['retry_status'] as Map<String, dynamic>,
+      ),
+    );
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'message': message,
+    'credential_id': credentialId,
+    'vault_id': vaultId,
+    'retry_status': retryStatus.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  CredentialHostUnreachableError copyWith({
+    String? type,
+    String? message,
+    String? credentialId,
+    String? vaultId,
+    RetryStatus? retryStatus,
+  }) {
+    return CredentialHostUnreachableError(
+      type: type ?? this.type,
+      message: message ?? this.message,
+      credentialId: credentialId ?? this.credentialId,
+      vaultId: vaultId ?? this.vaultId,
+      retryStatus: retryStatus ?? this.retryStatus,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CredentialHostUnreachableError &&
+          runtimeType == other.runtimeType &&
+          type == other.type &&
+          message == other.message &&
+          credentialId == other.credentialId &&
+          vaultId == other.vaultId &&
+          retryStatus == other.retryStatus;
+
+  @override
+  int get hashCode =>
+      Object.hash(type, message, credentialId, vaultId, retryStatus);
+
+  @override
+  String toString() =>
+      'CredentialHostUnreachableError('
+      'type: $type, '
+      'message: $message, '
+      'credentialId: $credentialId, '
+      'vaultId: $vaultId, '
+      'retryStatus: $retryStatus)';
+}
+
 /// Failed to connect to an MCP server.
 @immutable
 class McpConnectionFailedError {

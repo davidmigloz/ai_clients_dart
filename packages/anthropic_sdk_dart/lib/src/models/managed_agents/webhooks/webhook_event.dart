@@ -1030,11 +1030,15 @@ class WebhookSessionThreadCreatedEventData extends WebhookEventData {
   /// ID of the workspace that owns the resource.
   final String workspaceId;
 
+  /// ID of the session thread this event refers to.
+  final String sessionThreadId;
+
   /// Creates a [WebhookSessionThreadCreatedEventData].
   const WebhookSessionThreadCreatedEventData({
     required this.id,
     required this.organizationId,
     required this.workspaceId,
+    required this.sessionThreadId,
   });
 
   /// Creates a [WebhookSessionThreadCreatedEventData] from JSON.
@@ -1045,6 +1049,7 @@ class WebhookSessionThreadCreatedEventData extends WebhookEventData {
       id: json['id'] as String,
       organizationId: json['organization_id'] as String,
       workspaceId: json['workspace_id'] as String,
+      sessionThreadId: json['session_thread_id'] as String,
     );
   }
 
@@ -1054,6 +1059,7 @@ class WebhookSessionThreadCreatedEventData extends WebhookEventData {
     'id': id,
     'organization_id': organizationId,
     'workspace_id': workspaceId,
+    'session_thread_id': sessionThreadId,
   };
 
   /// Creates a copy with replaced values.
@@ -1061,11 +1067,13 @@ class WebhookSessionThreadCreatedEventData extends WebhookEventData {
     String? id,
     String? organizationId,
     String? workspaceId,
+    String? sessionThreadId,
   }) {
     return WebhookSessionThreadCreatedEventData(
       id: id ?? this.id,
       organizationId: organizationId ?? this.organizationId,
       workspaceId: workspaceId ?? this.workspaceId,
+      sessionThreadId: sessionThreadId ?? this.sessionThreadId,
     );
   }
 
@@ -1076,15 +1084,17 @@ class WebhookSessionThreadCreatedEventData extends WebhookEventData {
           runtimeType == other.runtimeType &&
           id == other.id &&
           organizationId == other.organizationId &&
-          workspaceId == other.workspaceId;
+          workspaceId == other.workspaceId &&
+          sessionThreadId == other.sessionThreadId;
 
   @override
-  int get hashCode => Object.hash(id, organizationId, workspaceId);
+  int get hashCode =>
+      Object.hash(id, organizationId, workspaceId, sessionThreadId);
 
   @override
   String toString() =>
       'WebhookSessionThreadCreatedEventData(id: $id, organizationId: $organizationId, '
-      'workspaceId: $workspaceId)';
+      'workspaceId: $workspaceId, sessionThreadId: $sessionThreadId)';
 }
 
 /// Webhook event data signalling a session thread went idle.
@@ -1102,11 +1112,15 @@ class WebhookSessionThreadIdledEventData extends WebhookEventData {
   /// ID of the workspace that owns the resource.
   final String workspaceId;
 
+  /// ID of the session thread this event refers to.
+  final String sessionThreadId;
+
   /// Creates a [WebhookSessionThreadIdledEventData].
   const WebhookSessionThreadIdledEventData({
     required this.id,
     required this.organizationId,
     required this.workspaceId,
+    required this.sessionThreadId,
   });
 
   /// Creates a [WebhookSessionThreadIdledEventData] from JSON.
@@ -1117,6 +1131,7 @@ class WebhookSessionThreadIdledEventData extends WebhookEventData {
       id: json['id'] as String,
       organizationId: json['organization_id'] as String,
       workspaceId: json['workspace_id'] as String,
+      sessionThreadId: json['session_thread_id'] as String,
     );
   }
 
@@ -1126,6 +1141,7 @@ class WebhookSessionThreadIdledEventData extends WebhookEventData {
     'id': id,
     'organization_id': organizationId,
     'workspace_id': workspaceId,
+    'session_thread_id': sessionThreadId,
   };
 
   /// Creates a copy with replaced values.
@@ -1133,11 +1149,13 @@ class WebhookSessionThreadIdledEventData extends WebhookEventData {
     String? id,
     String? organizationId,
     String? workspaceId,
+    String? sessionThreadId,
   }) {
     return WebhookSessionThreadIdledEventData(
       id: id ?? this.id,
       organizationId: organizationId ?? this.organizationId,
       workspaceId: workspaceId ?? this.workspaceId,
+      sessionThreadId: sessionThreadId ?? this.sessionThreadId,
     );
   }
 
@@ -1148,15 +1166,17 @@ class WebhookSessionThreadIdledEventData extends WebhookEventData {
           runtimeType == other.runtimeType &&
           id == other.id &&
           organizationId == other.organizationId &&
-          workspaceId == other.workspaceId;
+          workspaceId == other.workspaceId &&
+          sessionThreadId == other.sessionThreadId;
 
   @override
-  int get hashCode => Object.hash(id, organizationId, workspaceId);
+  int get hashCode =>
+      Object.hash(id, organizationId, workspaceId, sessionThreadId);
 
   @override
   String toString() =>
       'WebhookSessionThreadIdledEventData(id: $id, organizationId: $organizationId, '
-      'workspaceId: $workspaceId)';
+      'workspaceId: $workspaceId, sessionThreadId: $sessionThreadId)';
 }
 
 /// Webhook event data signalling a session thread was terminated.
@@ -1174,11 +1194,15 @@ class WebhookSessionThreadTerminatedEventData extends WebhookEventData {
   /// ID of the workspace that owns the resource.
   final String workspaceId;
 
+  /// ID of the session thread this event refers to.
+  final String sessionThreadId;
+
   /// Creates a [WebhookSessionThreadTerminatedEventData].
   const WebhookSessionThreadTerminatedEventData({
     required this.id,
     required this.organizationId,
     required this.workspaceId,
+    required this.sessionThreadId,
   });
 
   /// Creates a [WebhookSessionThreadTerminatedEventData] from JSON.
@@ -1189,6 +1213,7 @@ class WebhookSessionThreadTerminatedEventData extends WebhookEventData {
       id: json['id'] as String,
       organizationId: json['organization_id'] as String,
       workspaceId: json['workspace_id'] as String,
+      sessionThreadId: json['session_thread_id'] as String,
     );
   }
 
@@ -1198,6 +1223,7 @@ class WebhookSessionThreadTerminatedEventData extends WebhookEventData {
     'id': id,
     'organization_id': organizationId,
     'workspace_id': workspaceId,
+    'session_thread_id': sessionThreadId,
   };
 
   /// Creates a copy with replaced values.
@@ -1205,11 +1231,13 @@ class WebhookSessionThreadTerminatedEventData extends WebhookEventData {
     String? id,
     String? organizationId,
     String? workspaceId,
+    String? sessionThreadId,
   }) {
     return WebhookSessionThreadTerminatedEventData(
       id: id ?? this.id,
       organizationId: organizationId ?? this.organizationId,
       workspaceId: workspaceId ?? this.workspaceId,
+      sessionThreadId: sessionThreadId ?? this.sessionThreadId,
     );
   }
 
@@ -1220,15 +1248,17 @@ class WebhookSessionThreadTerminatedEventData extends WebhookEventData {
           runtimeType == other.runtimeType &&
           id == other.id &&
           organizationId == other.organizationId &&
-          workspaceId == other.workspaceId;
+          workspaceId == other.workspaceId &&
+          sessionThreadId == other.sessionThreadId;
 
   @override
-  int get hashCode => Object.hash(id, organizationId, workspaceId);
+  int get hashCode =>
+      Object.hash(id, organizationId, workspaceId, sessionThreadId);
 
   @override
   String toString() =>
       'WebhookSessionThreadTerminatedEventData(id: $id, organizationId: $organizationId, '
-      'workspaceId: $workspaceId)';
+      'workspaceId: $workspaceId, sessionThreadId: $sessionThreadId)';
 }
 
 /// Webhook event data signalling a vault was created.

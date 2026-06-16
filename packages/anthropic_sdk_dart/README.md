@@ -36,6 +36,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - SSE streaming with cancelation and token counting
 - Extended thinking and adaptive thinking controls, with `outputTokensDetails` reasoning-token breakdown
 - Prompt-cache diagnostics: report why the cache prefix diverged between turns (beta)
+- Server-side fallback: automatically re-run refused requests on another model via the `fallbacks` chain, or retry manually with the refusal `fallback_credit_token` (beta)
 
 ### Tools and multimodal
 
@@ -49,7 +50,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Model discovery, files (beta), and skills (beta)
 - Managed agents with sessions, threads, vaults, and streaming events (beta)
 - Multiagent coordinator orchestration and outcome evaluations with grading rubrics (beta)
-- Typed webhook event parsing and MCP-OAuth credential validation (beta)
+- Typed webhook event parsing and MCP-OAuth / static-bearer / environment-variable credential validation (beta)
 - Memory stores for persistent agent memories with versioning and redaction (beta)
 - User profiles with relationship classification (`external`/`resold`/`internal`), trust-grant tracking, and enrollment URLs (beta)
 
@@ -669,6 +670,7 @@ See the [example/](example/) directory for complete examples:
 | [`computer_use_example.dart`](example/computer_use_example.dart) | Computer use tool |
 | [`thinking_example.dart`](example/thinking_example.dart) | Extended thinking |
 | [`diagnostics_example.dart`](example/diagnostics_example.dart) | Prompt-cache diagnostics: why the cache prefix diverged (beta) |
+| [`fallback_example.dart`](example/fallback_example.dart) | Server-side fallback chain and refusal credit-token retry (beta) |
 | [`vision_example.dart`](example/vision_example.dart) | Image and document inputs |
 | [`document_example.dart`](example/document_example.dart) | Document inputs with citations |
 | [`search_result_example.dart`](example/search_result_example.dart) | Supplying your own cited `search_result` blocks (RAG) |

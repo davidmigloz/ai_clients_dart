@@ -64,6 +64,10 @@ class Session {
   /// ID of the environment defining the container configuration.
   final String environmentId;
 
+  /// Deployment ID when the session was created from a deployment reference.
+  /// Null otherwise.
+  final String? deploymentId;
+
   /// Human-readable session title.
   final String? title;
 
@@ -102,6 +106,7 @@ class Session {
     required this.status,
     required this.agent,
     required this.environmentId,
+    this.deploymentId,
     required this.title,
     required this.metadata,
     required this.resources,
@@ -122,6 +127,7 @@ class Session {
       status: SessionStatus.fromJson(json['status'] as String),
       agent: SessionAgent.fromJson(json['agent'] as Map<String, dynamic>),
       environmentId: json['environment_id'] as String,
+      deploymentId: json['deployment_id'] as String?,
       title: json['title'] as String?,
       metadata: (json['metadata'] as Map<String, dynamic>).map(
         (k, v) => MapEntry(k, v as String),
@@ -154,6 +160,7 @@ class Session {
     'status': status.toJson(),
     'agent': agent.toJson(),
     'environment_id': environmentId,
+    if (deploymentId != null) 'deployment_id': deploymentId,
     'title': title,
     'metadata': metadata,
     'resources': resources.map((e) => e.toJson()).toList(),
@@ -173,6 +180,7 @@ class Session {
     SessionStatus? status,
     SessionAgent? agent,
     String? environmentId,
+    Object? deploymentId = unsetCopyWithValue,
     Object? title = unsetCopyWithValue,
     Map<String, String>? metadata,
     List<SessionResource>? resources,
@@ -190,6 +198,9 @@ class Session {
       status: status ?? this.status,
       agent: agent ?? this.agent,
       environmentId: environmentId ?? this.environmentId,
+      deploymentId: deploymentId == unsetCopyWithValue
+          ? this.deploymentId
+          : deploymentId as String?,
       title: title == unsetCopyWithValue ? this.title : title as String?,
       metadata: metadata ?? this.metadata,
       resources: resources ?? this.resources,
@@ -215,6 +226,7 @@ class Session {
           status == other.status &&
           agent == other.agent &&
           environmentId == other.environmentId &&
+          deploymentId == other.deploymentId &&
           title == other.title &&
           mapsEqual(metadata, other.metadata) &&
           listsEqual(resources, other.resources) &&
@@ -233,6 +245,7 @@ class Session {
     status,
     agent,
     environmentId,
+    deploymentId,
     title,
     mapHash(metadata),
     listHash(resources),
@@ -253,6 +266,7 @@ class Session {
       'status: $status, '
       'agent: $agent, '
       'environmentId: $environmentId, '
+      'deploymentId: $deploymentId, '
       'title: $title, '
       'metadata: $metadata, '
       'resources: $resources, '

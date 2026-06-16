@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
+import 'credential_networking.dart';
 
 // ============================================================================
 // Response types — returned from the API
@@ -12,6 +13,8 @@ import '../../common/equality_helpers.dart';
 /// Variants:
 /// - [McpOauthAuthResponse] — OAuth credential (type: "mcp_oauth")
 /// - [StaticBearerAuthResponse] — Static bearer token (type: "static_bearer")
+/// - [EnvironmentVariableAuthResponse] — Environment variable secret
+///   (type: "environment_variable")
 /// - [UnknownCredentialAuth] — Unrecognized type (preserves raw JSON)
 sealed class CredentialAuth {
   const CredentialAuth();
@@ -22,9 +25,31 @@ sealed class CredentialAuth {
     return switch (type) {
       'mcp_oauth' => McpOauthAuthResponse.fromJson(json),
       'static_bearer' => StaticBearerAuthResponse.fromJson(json),
+      'environment_variable' => EnvironmentVariableAuthResponse.fromJson(json),
       _ => UnknownCredentialAuth.fromJson(json),
     };
   }
+
+  /// Creates an MCP OAuth credential (response).
+  const factory CredentialAuth.mcpOauth({
+    String type,
+    required String mcpServerUrl,
+    DateTime? expiresAt,
+    McpOauthRefreshResponse? refresh,
+  }) = McpOauthAuthResponse;
+
+  /// Creates a static bearer token credential (response).
+  const factory CredentialAuth.staticBearer({
+    String type,
+    required String mcpServerUrl,
+  }) = StaticBearerAuthResponse;
+
+  /// Creates an environment variable credential (response).
+  const factory CredentialAuth.environmentVariable({
+    String type,
+    required String secretName,
+    required CredentialNetworkingResponse networking,
+  }) = EnvironmentVariableAuthResponse;
 
   /// Converts to JSON.
   Map<String, dynamic> toJson();
@@ -169,6 +194,78 @@ class StaticBearerAuthResponse extends CredentialAuth {
   @override
   String toString() =>
       'StaticBearerAuthResponse(type: $type, mcpServerUrl: $mcpServerUrl)';
+}
+
+/// Environment variable credential details.
+///
+/// The secret value is never returned in responses.
+@immutable
+class EnvironmentVariableAuthResponse extends CredentialAuth {
+  /// The type discriminator. Always `environment_variable`.
+  final String type;
+
+  /// Name of the environment variable.
+  final String secretName;
+
+  /// Outbound hosts the secret value is substituted on.
+  final CredentialNetworkingResponse networking;
+
+  /// Creates an [EnvironmentVariableAuthResponse].
+  const EnvironmentVariableAuthResponse({
+    this.type = 'environment_variable',
+    required this.secretName,
+    required this.networking,
+  });
+
+  /// Creates an [EnvironmentVariableAuthResponse] from JSON.
+  factory EnvironmentVariableAuthResponse.fromJson(Map<String, dynamic> json) {
+    return EnvironmentVariableAuthResponse(
+      type: json['type'] as String? ?? 'environment_variable',
+      secretName: json['secret_name'] as String,
+      networking: CredentialNetworkingResponse.fromJson(
+        json['networking'] as Map<String, dynamic>,
+      ),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'secret_name': secretName,
+    'networking': networking.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  EnvironmentVariableAuthResponse copyWith({
+    String? type,
+    String? secretName,
+    CredentialNetworkingResponse? networking,
+  }) {
+    return EnvironmentVariableAuthResponse(
+      type: type ?? this.type,
+      secretName: secretName ?? this.secretName,
+      networking: networking ?? this.networking,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EnvironmentVariableAuthResponse &&
+          runtimeType == other.runtimeType &&
+          type == other.type &&
+          secretName == other.secretName &&
+          networking == other.networking;
+
+  @override
+  int get hashCode => Object.hash(type, secretName, networking);
+
+  @override
+  String toString() =>
+      'EnvironmentVariableAuthResponse('
+      'type: $type, '
+      'secretName: $secretName, '
+      'networking: $networking)';
 }
 
 /// Unrecognized credential auth type (preserves raw JSON).
@@ -482,6 +579,8 @@ class UnknownTokenEndpointAuthResponse extends TokenEndpointAuthResponse {
 /// Variants:
 /// - [McpOauthCreateParams] — OAuth credential (type: "mcp_oauth")
 /// - [StaticBearerCreateParams] — Static bearer token (type: "static_bearer")
+/// - [EnvironmentVariableCreateParams] — Environment variable secret
+///   (type: "environment_variable")
 /// - [UnknownCredentialCreateAuth] — Unrecognized type (preserves raw JSON)
 sealed class CredentialCreateAuth {
   const CredentialCreateAuth();
@@ -492,9 +591,34 @@ sealed class CredentialCreateAuth {
     return switch (type) {
       'mcp_oauth' => McpOauthCreateParams.fromJson(json),
       'static_bearer' => StaticBearerCreateParams.fromJson(json),
+      'environment_variable' => EnvironmentVariableCreateParams.fromJson(json),
       _ => UnknownCredentialCreateAuth.fromJson(json),
     };
   }
+
+  /// Creates parameters for an MCP OAuth credential.
+  const factory CredentialCreateAuth.mcpOauth({
+    String type,
+    required String accessToken,
+    required String mcpServerUrl,
+    DateTime? expiresAt,
+    McpOauthRefreshParams? refresh,
+  }) = McpOauthCreateParams;
+
+  /// Creates parameters for a static bearer token credential.
+  const factory CredentialCreateAuth.staticBearer({
+    String type,
+    required String token,
+    required String mcpServerUrl,
+  }) = StaticBearerCreateParams;
+
+  /// Creates parameters for an environment variable credential.
+  const factory CredentialCreateAuth.environmentVariable({
+    String type,
+    required String secretName,
+    required String secretValue,
+    required CredentialNetworkingParams networking,
+  }) = EnvironmentVariableCreateParams;
 
   /// Converts to JSON.
   Map<String, dynamic> toJson();
@@ -665,6 +789,90 @@ class StaticBearerCreateParams extends CredentialCreateAuth {
       'type: $type, '
       'token: $token, '
       'mcpServerUrl: $mcpServerUrl)';
+}
+
+/// Parameters for creating an environment variable credential.
+@immutable
+class EnvironmentVariableCreateParams extends CredentialCreateAuth {
+  /// The type discriminator. Always `environment_variable`.
+  final String type;
+
+  /// Name of the environment variable. Immutable after create.
+  ///
+  /// Length must be between 1 and 255 characters.
+  final String secretName;
+
+  /// Secret value. Write-only; never returned in responses.
+  ///
+  /// Length must be between 1 and 4096 characters.
+  final String secretValue;
+
+  /// Outbound hosts the secret value is substituted on.
+  final CredentialNetworkingParams networking;
+
+  /// Creates an [EnvironmentVariableCreateParams].
+  const EnvironmentVariableCreateParams({
+    this.type = 'environment_variable',
+    required this.secretName,
+    required this.secretValue,
+    required this.networking,
+  });
+
+  /// Creates an [EnvironmentVariableCreateParams] from JSON.
+  factory EnvironmentVariableCreateParams.fromJson(Map<String, dynamic> json) {
+    return EnvironmentVariableCreateParams(
+      type: json['type'] as String? ?? 'environment_variable',
+      secretName: json['secret_name'] as String,
+      secretValue: json['secret_value'] as String,
+      networking: CredentialNetworkingParams.fromJson(
+        json['networking'] as Map<String, dynamic>,
+      ),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'secret_name': secretName,
+    'secret_value': secretValue,
+    'networking': networking.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  EnvironmentVariableCreateParams copyWith({
+    String? type,
+    String? secretName,
+    String? secretValue,
+    CredentialNetworkingParams? networking,
+  }) {
+    return EnvironmentVariableCreateParams(
+      type: type ?? this.type,
+      secretName: secretName ?? this.secretName,
+      secretValue: secretValue ?? this.secretValue,
+      networking: networking ?? this.networking,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EnvironmentVariableCreateParams &&
+          runtimeType == other.runtimeType &&
+          type == other.type &&
+          secretName == other.secretName &&
+          secretValue == other.secretValue &&
+          networking == other.networking;
+
+  @override
+  int get hashCode => Object.hash(type, secretName, secretValue, networking);
+
+  @override
+  String toString() =>
+      'EnvironmentVariableCreateParams('
+      'type: $type, '
+      'secretName: $secretName, '
+      'secretValue: [redacted], '
+      'networking: $networking)';
 }
 
 /// Unrecognized credential create auth type (preserves raw JSON).
@@ -1023,6 +1231,8 @@ class UnknownTokenEndpointAuthParam extends TokenEndpointAuthParam {
 /// Variants:
 /// - [McpOauthUpdateParams] — OAuth credential (type: "mcp_oauth")
 /// - [StaticBearerUpdateParams] — Static bearer token (type: "static_bearer")
+/// - [EnvironmentVariableUpdateParams] — Environment variable secret
+///   (type: "environment_variable")
 /// - [UnknownCredentialUpdateAuth] — Unrecognized type (preserves raw JSON)
 sealed class CredentialUpdateAuth {
   const CredentialUpdateAuth();
@@ -1033,9 +1243,31 @@ sealed class CredentialUpdateAuth {
     return switch (type) {
       'mcp_oauth' => McpOauthUpdateParams.fromJson(json),
       'static_bearer' => StaticBearerUpdateParams.fromJson(json),
+      'environment_variable' => EnvironmentVariableUpdateParams.fromJson(json),
       _ => UnknownCredentialUpdateAuth.fromJson(json),
     };
   }
+
+  /// Creates parameters for updating an MCP OAuth credential.
+  const factory CredentialUpdateAuth.mcpOauth({
+    String type,
+    String? accessToken,
+    DateTime? expiresAt,
+    McpOauthRefreshUpdateParams? refresh,
+  }) = McpOauthUpdateParams;
+
+  /// Creates parameters for updating a static bearer token credential.
+  const factory CredentialUpdateAuth.staticBearer({
+    String type,
+    String? token,
+  }) = StaticBearerUpdateParams;
+
+  /// Creates parameters for updating an environment variable credential.
+  const factory CredentialUpdateAuth.environmentVariable({
+    String type,
+    String? secretValue,
+    CredentialNetworkingParams? networking,
+  }) = EnvironmentVariableUpdateParams;
 
   /// Converts to JSON.
   Map<String, dynamic> toJson();
@@ -1185,6 +1417,86 @@ class StaticBearerUpdateParams extends CredentialUpdateAuth {
 
   @override
   String toString() => 'StaticBearerUpdateParams(type: $type, token: $token)';
+}
+
+/// Parameters for updating an environment variable credential.
+///
+/// The `secret_name` is immutable.
+@immutable
+class EnvironmentVariableUpdateParams extends CredentialUpdateAuth {
+  /// The type discriminator. Always `environment_variable`.
+  final String type;
+
+  /// Updated secret value. Write-only; never returned in responses.
+  ///
+  /// Length must be between 1 and 4096 characters.
+  final String? secretValue;
+
+  /// Updated networking scope. Full replacement.
+  final CredentialNetworkingParams? networking;
+
+  /// Creates an [EnvironmentVariableUpdateParams].
+  const EnvironmentVariableUpdateParams({
+    this.type = 'environment_variable',
+    this.secretValue,
+    this.networking,
+  });
+
+  /// Creates an [EnvironmentVariableUpdateParams] from JSON.
+  factory EnvironmentVariableUpdateParams.fromJson(Map<String, dynamic> json) {
+    return EnvironmentVariableUpdateParams(
+      type: json['type'] as String? ?? 'environment_variable',
+      secretValue: json['secret_value'] as String?,
+      networking: json['networking'] != null
+          ? CredentialNetworkingParams.fromJson(
+              json['networking'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    if (secretValue != null) 'secret_value': secretValue,
+    if (networking != null) 'networking': networking!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  EnvironmentVariableUpdateParams copyWith({
+    String? type,
+    Object? secretValue = unsetCopyWithValue,
+    Object? networking = unsetCopyWithValue,
+  }) {
+    return EnvironmentVariableUpdateParams(
+      type: type ?? this.type,
+      secretValue: secretValue == unsetCopyWithValue
+          ? this.secretValue
+          : secretValue as String?,
+      networking: networking == unsetCopyWithValue
+          ? this.networking
+          : networking as CredentialNetworkingParams?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EnvironmentVariableUpdateParams &&
+          runtimeType == other.runtimeType &&
+          type == other.type &&
+          secretValue == other.secretValue &&
+          networking == other.networking;
+
+  @override
+  int get hashCode => Object.hash(type, secretValue, networking);
+
+  @override
+  String toString() =>
+      'EnvironmentVariableUpdateParams('
+      'type: $type, '
+      'secretValue: ${secretValue == null ? null : '[redacted]'}, '
+      'networking: $networking)';
 }
 
 /// Unrecognized credential update auth type (preserves raw JSON).

@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import '../messages/fallback_config.dart';
 import '../tools/tool_caller.dart';
 
 /// Content block in a response message.
@@ -36,6 +37,7 @@ sealed class ContentBlock {
       'mcp_tool_use' => MCPToolUseBlock.fromJson(json),
       'mcp_tool_result' => MCPToolResultBlock.fromJson(json),
       'advisor_tool_result' => AdvisorToolResultBlock.fromJson(json),
+      'fallback' => FallbackBlock.fromJson(json),
       _ => UnknownContentBlock.fromJson(json),
     };
   }
@@ -370,6 +372,67 @@ class ServerToolUseBlock extends ContentBlock {
   String toString() =>
       'ServerToolUseBlock(id: $id, name: $name, input: $input, '
       'caller: $caller)';
+}
+
+/// Marks the point in `content` where one model's output gives way to the next.
+///
+/// One block appears per hop where a preceding model actually ran this turn and
+/// declined. It arrives via the standard `content_block_start` /
+/// `content_block_stop` pair and carries no deltas.
+@immutable
+class FallbackBlock extends ContentBlock {
+  /// The model whose output ends at this point — the model that declined at
+  /// this hop.
+  final FallbackHopInfo from;
+
+  /// The fallback model producing the content that follows this block.
+  final FallbackHopInfo to;
+
+  /// Creates a [FallbackBlock].
+  const FallbackBlock({required this.from, required this.to});
+
+  /// Object type. Always "fallback".
+  String get type => 'fallback';
+
+  /// Creates a [FallbackBlock] from JSON.
+  factory FallbackBlock.fromJson(Map<String, dynamic> json) {
+    final type = json['type'];
+    if (type != 'fallback') {
+      throw FormatException(
+        'FallbackBlock: expected type "fallback", got "$type"',
+      );
+    }
+    return FallbackBlock(
+      from: FallbackHopInfo.fromJson(json['from'] as Map<String, dynamic>),
+      to: FallbackHopInfo.fromJson(json['to'] as Map<String, dynamic>),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'from': from.toJson(),
+    'to': to.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  FallbackBlock copyWith({FallbackHopInfo? from, FallbackHopInfo? to}) {
+    return FallbackBlock(from: from ?? this.from, to: to ?? this.to);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FallbackBlock &&
+          runtimeType == other.runtimeType &&
+          from == other.from &&
+          to == other.to;
+
+  @override
+  int get hashCode => Object.hash(from, to);
+
+  @override
+  String toString() => 'FallbackBlock(from: $from, to: $to)';
 }
 
 /// Web search tool result block.
@@ -2133,6 +2196,9 @@ enum AdvisorToolResultErrorCode {
   /// The request reached the max_uses cap.
   maxUsesExceeded,
 
+  /// The requested advisor model could not be found.
+  modelNotFound,
+
   /// The advisor sub-inference hit capacity limits.
   overloaded,
 
@@ -2152,6 +2218,7 @@ enum AdvisorToolResultErrorCode {
   factory AdvisorToolResultErrorCode.fromJson(String value) => switch (value) {
     'execution_time_exceeded' => executionTimeExceeded,
     'max_uses_exceeded' => maxUsesExceeded,
+    'model_not_found' => modelNotFound,
     'overloaded' => overloaded,
     'prompt_too_long' => promptTooLong,
     'too_many_requests' => tooManyRequests,
@@ -2167,6 +2234,7 @@ enum AdvisorToolResultErrorCode {
   String toJson() => switch (this) {
     executionTimeExceeded => 'execution_time_exceeded',
     maxUsesExceeded => 'max_uses_exceeded',
+    modelNotFound => 'model_not_found',
     overloaded => 'overloaded',
     promptTooLong => 'prompt_too_long',
     tooManyRequests => 'too_many_requests',

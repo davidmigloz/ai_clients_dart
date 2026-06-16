@@ -59,7 +59,13 @@ enum RefusalCategory {
   cyber('cyber'),
 
   /// Bio-related policy category.
-  bio('bio');
+  bio('bio'),
+
+  /// Frontier-LLM policy category.
+  frontierLlm('frontier_llm'),
+
+  /// Reasoning-extraction policy category.
+  reasoningExtraction('reasoning_extraction');
 
   const RefusalCategory(this.value);
 
@@ -97,11 +103,34 @@ class RefusalStopDetails {
   /// `null` when no explanation is available for the category.
   final String? explanation;
 
+  /// Opaque code that refunds the cache-miss cost when retrying this refused
+  /// request on the fallback model.
+  ///
+  /// Pass it as `fallbackCreditToken` on the retry request. Expires 5 minutes
+  /// after the refusal. `null` when the refused model isn't eligible for a
+  /// fallback credit.
+  final String? fallbackCreditToken;
+
+  /// Whether the accompanying [fallbackCreditToken] may be redeemed with the
+  /// appended-assistant retry form.
+  ///
+  /// Only set when [fallbackCreditToken] is present.
+  final bool? fallbackHasPrefillClaim;
+
+  /// The server's suggested retry target for this refusal.
+  ///
+  /// Populated when a fallback attempt could not be made (the fallback model's
+  /// rate limit was exhausted, or it was overloaded). `null` otherwise.
+  final String? recommendedModel;
+
   /// Creates a [RefusalStopDetails].
   const RefusalStopDetails({
     this.type = 'refusal',
     this.category,
     this.explanation,
+    this.fallbackCreditToken,
+    this.fallbackHasPrefillClaim,
+    this.recommendedModel,
   });
 
   /// Creates a [RefusalStopDetails] from JSON.
@@ -112,6 +141,9 @@ class RefusalStopDetails {
           ? RefusalCategory.fromJson(json['category'] as String)
           : null,
       explanation: json['explanation'] as String?,
+      fallbackCreditToken: json['fallback_credit_token'] as String?,
+      fallbackHasPrefillClaim: json['fallback_has_prefill_claim'] as bool?,
+      recommendedModel: json['recommended_model'] as String?,
     );
   }
 
@@ -120,6 +152,11 @@ class RefusalStopDetails {
     'type': type,
     'category': category?.toJson(),
     'explanation': explanation,
+    if (fallbackCreditToken != null)
+      'fallback_credit_token': fallbackCreditToken,
+    if (fallbackHasPrefillClaim != null)
+      'fallback_has_prefill_claim': fallbackHasPrefillClaim,
+    if (recommendedModel != null) 'recommended_model': recommendedModel,
   };
 
   /// Creates a copy with replaced values.
@@ -127,6 +164,9 @@ class RefusalStopDetails {
     String? type,
     Object? category = unsetCopyWithValue,
     Object? explanation = unsetCopyWithValue,
+    Object? fallbackCreditToken = unsetCopyWithValue,
+    Object? fallbackHasPrefillClaim = unsetCopyWithValue,
+    Object? recommendedModel = unsetCopyWithValue,
   }) {
     return RefusalStopDetails(
       type: type ?? this.type,
@@ -136,6 +176,15 @@ class RefusalStopDetails {
       explanation: explanation == unsetCopyWithValue
           ? this.explanation
           : explanation as String?,
+      fallbackCreditToken: fallbackCreditToken == unsetCopyWithValue
+          ? this.fallbackCreditToken
+          : fallbackCreditToken as String?,
+      fallbackHasPrefillClaim: fallbackHasPrefillClaim == unsetCopyWithValue
+          ? this.fallbackHasPrefillClaim
+          : fallbackHasPrefillClaim as bool?,
+      recommendedModel: recommendedModel == unsetCopyWithValue
+          ? this.recommendedModel
+          : recommendedModel as String?,
     );
   }
 
@@ -146,13 +195,26 @@ class RefusalStopDetails {
           runtimeType == other.runtimeType &&
           type == other.type &&
           category == other.category &&
-          explanation == other.explanation;
+          explanation == other.explanation &&
+          fallbackCreditToken == other.fallbackCreditToken &&
+          fallbackHasPrefillClaim == other.fallbackHasPrefillClaim &&
+          recommendedModel == other.recommendedModel;
 
   @override
-  int get hashCode => Object.hash(type, category, explanation);
+  int get hashCode => Object.hash(
+    type,
+    category,
+    explanation,
+    fallbackCreditToken,
+    fallbackHasPrefillClaim,
+    recommendedModel,
+  );
 
   @override
   String toString() =>
       'RefusalStopDetails(type: $type, category: $category, '
-      'explanation: $explanation)';
+      'explanation: $explanation, '
+      'fallbackCreditToken: ${fallbackCreditToken == null ? null : '[redacted]'}, '
+      'fallbackHasPrefillClaim: $fallbackHasPrefillClaim, '
+      'recommendedModel: $recommendedModel)';
 }
