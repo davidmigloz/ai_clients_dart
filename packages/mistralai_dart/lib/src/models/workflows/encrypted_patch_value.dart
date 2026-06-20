@@ -26,7 +26,14 @@ class EncryptedPatchValue {
         'EncryptedPatchValue: expected type "__encrypted__", got "$type"',
       );
     }
-    return EncryptedPatchValue(value: json['value'] as String? ?? '');
+    final value = json['value'];
+    if (value is! String) {
+      throw FormatException(
+        'EncryptedPatchValue: missing or invalid required "value" '
+        '(expected String, got ${value.runtimeType})',
+      );
+    }
+    return EncryptedPatchValue(value: value);
   }
 
   /// Converts to JSON.

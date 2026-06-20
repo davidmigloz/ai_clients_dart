@@ -44,6 +44,27 @@ void main() {
       );
     });
 
+    test('fromJson rejects a missing/null/wrong-type value', () {
+      expect(
+        () => EncryptedPatchValue.fromJson(const {'type': '__encrypted__'}),
+        throwsA(isA<FormatException>()),
+      );
+      expect(
+        () => EncryptedPatchValue.fromJson(const {
+          'type': '__encrypted__',
+          'value': null,
+        }),
+        throwsA(isA<FormatException>()),
+      );
+      expect(
+        () => EncryptedPatchValue.fromJson(const {
+          'type': '__encrypted__',
+          'value': 42,
+        }),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
     test('toString redacts the payload', () {
       const value = EncryptedPatchValue(value: 'super-secret-cipher');
 
