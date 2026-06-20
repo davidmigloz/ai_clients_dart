@@ -3922,7 +3922,9 @@ void main() {
     });
 
     test('falls back to unknown for unrecognized context', () {
-      final restored = ReasoningConfig.fromJson(const {'context': 'future_mode'});
+      final restored = ReasoningConfig.fromJson(const {
+        'context': 'future_mode',
+      });
       expect(restored.context, ReasoningContext.unknown);
     });
 
