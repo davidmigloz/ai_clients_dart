@@ -1631,8 +1631,9 @@ class FallbackInputBlock extends InputContentBlock {
   /// The response block's `trigger`, echoed back verbatim.
   ///
   /// Free-form and ignored by the server — any JSON object or `null` is
-  /// accepted. Stored unmodifiable. `null` with [hasTrigger] `true` preserves an
-  /// explicit `null`; with [hasTrigger] `false` the key is omitted entirely.
+  /// accepted. Stored deeply unmodifiable (nested maps and lists are frozen
+  /// too). `null` with [hasTrigger] `true` preserves an explicit `null`; with
+  /// [hasTrigger] `false` the key is omitted entirely.
   final Map<String, dynamic>? trigger;
 
   /// Creates a [FallbackInputBlock].
@@ -1646,7 +1647,7 @@ class FallbackInputBlock extends InputContentBlock {
   }) : hasTrigger = trigger != unsetCopyWithValue,
        trigger = (trigger == unsetCopyWithValue || trigger == null)
            ? null
-           : Map<String, dynamic>.unmodifiable(trigger as Map<String, dynamic>);
+           : deepUnmodifiableMap(trigger as Map<String, dynamic>);
 
   /// Object type. Always "fallback".
   String get type => 'fallback';

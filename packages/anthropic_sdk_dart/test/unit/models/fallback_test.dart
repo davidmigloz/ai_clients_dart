@@ -204,13 +204,47 @@ void main() {
       expect(block.toJson().containsKey('trigger'), isFalse);
     });
 
-    test('stores the trigger map unmodifiable', () {
+    test('stores the trigger map deeply unmodifiable', () {
       final block = FallbackInputBlock(
         from: const FallbackHopInfo(model: 'a'),
         to: const FallbackHopInfo(model: 'b'),
-        trigger: const {'type': 'refusal', 'category': 'cyber'},
+        trigger: const {
+          'type': 'refusal',
+          'meta': {'nested': 1},
+          'list': [
+            {'k': 'v'},
+          ],
+        },
       );
+      // Outer map is frozen...
       expect(() => block.trigger!['x'] = 1, throwsUnsupportedError);
+      // ...and so are nested maps and lists.
+      expect(
+        () => (block.trigger!['meta'] as Map)['nested'] = 2,
+        throwsUnsupportedError,
+      );
+      expect(
+        () => (block.trigger!['list'] as List).add('z'),
+        throwsUnsupportedError,
+      );
+      expect(
+        () => ((block.trigger!['list'] as List)[0] as Map)['k'] = 'w',
+        throwsUnsupportedError,
+      );
+    });
+
+    test('freezing a trigger does not alias the source nested maps', () {
+      final source = {
+        'meta': {'nested': 1},
+      };
+      final block = FallbackInputBlock(
+        from: const FallbackHopInfo(model: 'a'),
+        to: const FallbackHopInfo(model: 'b'),
+        trigger: source,
+      );
+      // Mutating the original nested map must not change the frozen copy.
+      (source['meta']! as Map)['nested'] = 99;
+      expect((block.trigger!['meta'] as Map)['nested'], 1);
     });
 
     test('copyWith preserves trigger presence on omission', () {

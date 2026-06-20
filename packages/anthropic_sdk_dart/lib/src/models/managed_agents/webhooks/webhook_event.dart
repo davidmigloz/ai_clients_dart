@@ -98,6 +98,7 @@ class WebhookEvent {
 /// - [WebhookSessionThreadCreatedEventData] — `session.thread_created`.
 /// - [WebhookSessionThreadIdledEventData] — `session.thread_idled`.
 /// - [WebhookSessionThreadTerminatedEventData] — `session.thread_terminated`.
+/// - [WebhookSessionUpdatedEventData] — `session.updated`.
 /// - [WebhookVaultCreatedEventData] — `vault.created`.
 /// - [WebhookVaultArchivedEventData] — `vault.archived`.
 /// - [WebhookVaultDeletedEventData] — `vault.deleted`.
