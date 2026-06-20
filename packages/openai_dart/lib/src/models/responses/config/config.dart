@@ -12,6 +12,7 @@ export 'message_role.dart';
 export 'personality.dart';
 export 'prompt_cache_retention.dart';
 export 'reasoning_config.dart';
+export 'reasoning_context.dart';
 export 'reasoning_effort.dart';
 export 'reasoning_summary.dart';
 export 'response_status.dart';

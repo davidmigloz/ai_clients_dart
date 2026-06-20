@@ -3,8 +3,10 @@ import 'package:meta/meta.dart';
 import '../common/equality_helpers.dart';
 import '../moderations/completion_moderation.dart';
 import 'config/prompt_cache_retention.dart';
+import 'config/reasoning_config.dart';
 import 'config/response_status.dart';
 import 'config/service_tier.dart';
+import 'config/truncation.dart';
 import 'content/output_content.dart';
 import 'incomplete_details.dart';
 import 'items/output_item.dart';
@@ -82,6 +84,15 @@ class Response {
   /// [CreateResponseRequest.moderation].
   final Moderation? moderation;
 
+  /// The reasoning configuration used for the response.
+  ///
+  /// For reasoning models, reflects the effective reasoning context mode and
+  /// summary settings applied to the response.
+  final ReasoningConfig? reasoning;
+
+  /// The truncation strategy applied to the response.
+  final Truncation? truncation;
+
   /// Creates a [Response].
   const Response({
     required this.id,
@@ -105,6 +116,8 @@ class Response {
     this.promptCacheKey,
     this.promptCacheRetention,
     this.moderation,
+    this.reasoning,
+    this.truncation,
   });
 
   /// Creates a [Response] from JSON.
@@ -149,6 +162,12 @@ class Response {
       moderation: json['moderation'] != null
           ? Moderation.fromJson(json['moderation'] as Map<String, dynamic>)
           : null,
+      reasoning: json['reasoning'] != null
+          ? ReasoningConfig.fromJson(json['reasoning'] as Map<String, dynamic>)
+          : null,
+      truncation: json['truncation'] != null
+          ? Truncation.fromJson(json['truncation'] as String)
+          : null,
     );
   }
 
@@ -177,6 +196,8 @@ class Response {
     if (promptCacheRetention != null)
       'prompt_cache_retention': promptCacheRetention!.toJson(),
     if (moderation != null) 'moderation': moderation!.toJson(),
+    if (reasoning != null) 'reasoning': reasoning!.toJson(),
+    if (truncation != null) 'truncation': truncation!.toJson(),
   };
 
   // ============================================================
@@ -312,7 +333,9 @@ class Response {
           parallelToolCalls == other.parallelToolCalls &&
           promptCacheKey == other.promptCacheKey &&
           promptCacheRetention == other.promptCacheRetention &&
-          moderation == other.moderation;
+          moderation == other.moderation &&
+          reasoning == other.reasoning &&
+          truncation == other.truncation;
 
   @override
   int get hashCode => Object.hashAll([
@@ -337,10 +360,14 @@ class Response {
     promptCacheKey,
     promptCacheRetention,
     moderation,
+    reasoning,
+    truncation,
   ]);
 
   @override
-  String toString() => 'Response(id: $id, status: $status, output: $output)';
+  String toString() =>
+      'Response(id: $id, status: $status, output: $output, '
+      'reasoning: $reasoning, truncation: $truncation)';
 }
 
 /// A list of responses with pagination.

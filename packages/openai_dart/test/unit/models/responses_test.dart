@@ -3904,4 +3904,127 @@ void main() {
       expect(updated.param, isNull);
     });
   });
+
+  group('ReasoningConfig context', () {
+    test('round-trips context', () {
+      const config = ReasoningConfig(
+        effort: ReasoningEffort.high,
+        summary: ReasoningSummary.auto,
+        context: ReasoningContext.currentTurn,
+      );
+
+      final json = config.toJson();
+      expect(json['context'], 'current_turn');
+
+      final restored = ReasoningConfig.fromJson(json);
+      expect(restored.context, ReasoningContext.currentTurn);
+      expect(restored, equals(config));
+    });
+
+    test('falls back to unknown for unrecognized context', () {
+      final restored = ReasoningConfig.fromJson(const {
+        'context': 'future_mode',
+      });
+      expect(restored.context, ReasoningContext.unknown);
+    });
+
+    test('omits context when null', () {
+      const config = ReasoningConfig(effort: ReasoningEffort.low);
+      expect(config.toJson().containsKey('context'), isFalse);
+    });
+  });
+
+  group('McpTool tunnelId / connectorId', () {
+    test('tunnel-only tool omits server_url and round-trips', () {
+      const tool = McpTool(
+        serverLabel: 'test',
+        tunnelId: 'tunnel_0123456789abcdef0123456789abcdef',
+      );
+
+      final json = tool.toJson();
+      expect(json.containsKey('server_url'), isFalse);
+      expect(json['tunnel_id'], 'tunnel_0123456789abcdef0123456789abcdef');
+
+      final restored = McpTool.fromJson(json);
+      expect(restored.serverUrl, isNull);
+      expect(restored.tunnelId, 'tunnel_0123456789abcdef0123456789abcdef');
+      expect(restored, equals(tool));
+    });
+
+    test('fromJson preserves connector_id losslessly (no server_url)', () {
+      final json = {
+        'type': 'mcp',
+        'server_label': 'gmail',
+        'connector_id': 'connector_gmail',
+      };
+
+      final tool = McpTool.fromJson(json);
+      expect(tool.connectorId, 'connector_gmail');
+      expect(tool.serverUrl, isNull);
+      expect(tool.tunnelId, isNull);
+
+      // Re-serializing must not lose the connector address.
+      expect(tool.toJson()['connector_id'], 'connector_gmail');
+    });
+
+    test('ResponseTool.mcp throws when no address is provided', () {
+      expect(() => ResponseTool.mcp(serverLabel: 'test'), throwsArgumentError);
+    });
+
+    test('fromJson throws FormatException when no address is present', () {
+      expect(
+        () => McpTool.fromJson(const {'type': 'mcp', 'server_label': 'test'}),
+        throwsFormatException,
+      );
+    });
+
+    test('ResponseTool.mcp accepts a tunnelId alone', () {
+      final tool = ResponseTool.mcp(
+        serverLabel: 'test',
+        tunnelId: 'tunnel_0123456789abcdef0123456789abcdef',
+      );
+      expect(tool.tunnelId, 'tunnel_0123456789abcdef0123456789abcdef');
+    });
+  });
+
+  group('Response reasoning / truncation', () {
+    test('parses and round-trips reasoning.context + truncation', () {
+      final json = {
+        'id': 'resp_1',
+        'object': 'response',
+        'created_at': 1234567890,
+        'status': 'completed',
+        'output': <Map<String, dynamic>>[],
+        'reasoning': {'effort': 'high', 'context': 'current_turn'},
+        'truncation': 'auto',
+      };
+
+      final response = Response.fromJson(json);
+      expect(response.reasoning?.context, ReasoningContext.currentTurn);
+      expect(response.reasoning?.effort, ReasoningEffort.high);
+      expect(response.truncation, Truncation.auto);
+
+      final roundTrip = Response.fromJson(response.toJson());
+      expect(roundTrip.reasoning?.context, ReasoningContext.currentTurn);
+      expect(roundTrip.truncation, Truncation.auto);
+      expect(roundTrip, equals(response));
+    });
+
+    test('toString includes reasoning and truncation', () {
+      const response = Response(
+        id: 'resp_1',
+        object: 'response',
+        createdAt: 1234567890,
+        status: ResponseStatus.completed,
+        output: [],
+        reasoning: ReasoningConfig(context: ReasoningContext.allTurns),
+        truncation: Truncation.disabled,
+      );
+
+      final str = response.toString();
+      expect(str, contains('truncation: Truncation.disabled'));
+      expect(str, contains('reasoning: ReasoningConfig('));
+      expect(str, contains('context: ReasoningContext.allTurns'));
+    });
+  });
 }
