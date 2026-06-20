@@ -360,6 +360,7 @@ export 'src/models/workflows/deployment_location.dart';
 export 'src/models/workflows/deployment_response.dart';
 export 'src/models/workflows/deployment_worker_response.dart';
 export 'src/models/workflows/encoded_payload_options.dart';
+export 'src/models/workflows/encrypted_patch_value.dart';
 export 'src/models/workflows/event_progress_status.dart';
 export 'src/models/workflows/event_source.dart';
 export 'src/models/workflows/event_type.dart';

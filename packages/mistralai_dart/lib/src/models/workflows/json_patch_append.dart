@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import 'encrypted_patch_value.dart';
+
 /// A JSON patch append operation.
 @immutable
 class JSONPatchAppend {
@@ -10,7 +12,11 @@ class JSONPatchAppend {
   final String path;
 
   /// The value to append.
-  final String value;
+  ///
+  /// Either a plain string ([JSONPatchAppendStringValue]) or, under selective
+  /// encryption, an [EncryptedPatchValue] wrapper
+  /// ([JSONPatchAppendEncryptedValue]).
+  final JSONPatchAppendValue value;
 
   /// Creates a [JSONPatchAppend].
   const JSONPatchAppend({
@@ -24,14 +30,22 @@ class JSONPatchAppend {
       JSONPatchAppend(
         op: json['op'] as String? ?? 'append',
         path: json['path'] as String? ?? '',
-        value: json['value'] as String? ?? '',
+        value: JSONPatchAppendValue.fromJson(json['value']),
       );
 
   /// Converts to JSON.
-  Map<String, dynamic> toJson() => {'op': op, 'path': path, 'value': value};
+  Map<String, dynamic> toJson() => {
+    'op': op,
+    'path': path,
+    'value': value.toJson(),
+  };
 
   /// Creates a copy with replaced values.
-  JSONPatchAppend copyWith({String? op, String? path, String? value}) {
+  JSONPatchAppend copyWith({
+    String? op,
+    String? path,
+    JSONPatchAppendValue? value,
+  }) {
     return JSONPatchAppend(
       op: op ?? this.op,
       path: path ?? this.path,
@@ -52,4 +66,84 @@ class JSONPatchAppend {
 
   @override
   String toString() => 'JSONPatchAppend(op: $op, path: $path, value: $value)';
+}
+
+/// The value carried by a [JSONPatchAppend].
+///
+/// The API returns either a plain string ([JSONPatchAppendStringValue]) or,
+/// when selective encryption is enabled, an [EncryptedPatchValue] wrapper
+/// ([JSONPatchAppendEncryptedValue]).
+@immutable
+sealed class JSONPatchAppendValue {
+  /// Const base constructor for subclasses.
+  const JSONPatchAppendValue();
+
+  /// Parses the raw JSON value (a string or an encrypted wrapper object).
+  factory JSONPatchAppendValue.fromJson(Object? json) {
+    if (json is String) {
+      return JSONPatchAppendStringValue(json);
+    }
+    if (json is Map<String, dynamic>) {
+      return JSONPatchAppendEncryptedValue(EncryptedPatchValue.fromJson(json));
+    }
+    throw FormatException(
+      'JSONPatchAppendValue: expected a String or an encrypted value object, '
+      'got ${json.runtimeType}',
+    );
+  }
+
+  /// Serializes to the raw JSON value (a `String` or a `Map`).
+  Object toJson();
+}
+
+/// A plain string append value.
+@immutable
+class JSONPatchAppendStringValue extends JSONPatchAppendValue {
+  /// The string to append.
+  final String value;
+
+  /// Creates a [JSONPatchAppendStringValue].
+  const JSONPatchAppendStringValue(this.value);
+
+  @override
+  String toJson() => value;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is JSONPatchAppendStringValue &&
+          runtimeType == other.runtimeType &&
+          value == other.value;
+
+  @override
+  int get hashCode => value.hashCode;
+
+  @override
+  String toString() => 'JSONPatchAppendStringValue(value: $value)';
+}
+
+/// An encrypted append value (selective `json_patch` encryption).
+@immutable
+class JSONPatchAppendEncryptedValue extends JSONPatchAppendValue {
+  /// The encrypted value wrapper.
+  final EncryptedPatchValue value;
+
+  /// Creates a [JSONPatchAppendEncryptedValue].
+  const JSONPatchAppendEncryptedValue(this.value);
+
+  @override
+  Map<String, dynamic> toJson() => value.toJson();
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is JSONPatchAppendEncryptedValue &&
+          runtimeType == other.runtimeType &&
+          value == other.value;
+
+  @override
+  int get hashCode => value.hashCode;
+
+  @override
+  String toString() => 'JSONPatchAppendEncryptedValue(value: $value)';
 }

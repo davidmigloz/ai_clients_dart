@@ -1303,6 +1303,44 @@
       "schema": "JSONPatchAppend",
       "tags": []
     },
+    "EncryptedPatchValue": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EncryptedPatchValue",
+      "file": "lib/src/models/workflows/encrypted_patch_value.dart",
+      "schema": "EncryptedPatchValue",
+      "excluded_properties": [
+        "type"
+      ],
+      "note": "`type` is a const `__encrypted__` discriminator modeled as a constant getter (validated in fromJson); excluded from field verification.",
+      "tags": []
+    },
+    "JSONPatchAppendValue": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "JSONPatchAppendValue",
+      "file": "lib/src/models/workflows/json_patch_append.dart",
+      "schema": null,
+      "note": "Type-discriminated union for JSONPatchAppend.value (string | EncryptedPatchValue); discriminated by JSON type, not a field."
+    },
+    "JSONPatchAppendValue:JSONPatchAppendStringValue": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "JSONPatchAppendStringValue",
+      "file": "lib/src/models/workflows/json_patch_append.dart",
+      "schema": null,
+      "parent": "JSONPatchAppendValue",
+      "note": null
+    },
+    "JSONPatchAppendValue:JSONPatchAppendEncryptedValue": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "JSONPatchAppendEncryptedValue",
+      "file": "lib/src/models/workflows/json_patch_append.dart",
+      "schema": null,
+      "parent": "JSONPatchAppendValue",
+      "note": null
+    },
     "JSONPatchPayloadResponse": {
       "spec": "main",
       "kind": "object",
@@ -1310,6 +1348,32 @@
       "file": "lib/src/models/workflows/json_patch_payload_response.dart",
       "schema": "JSONPatchPayloadResponse",
       "tags": []
+    },
+    "JSONPatchPayloadValue": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "JSONPatchPayloadValue",
+      "file": "lib/src/models/workflows/json_patch_payload_value.dart",
+      "schema": "JSONPatchPayloadValueResponse",
+      "note": "Type-discriminated union (array of operations | encrypted string); discriminated by JSON type, not a field."
+    },
+    "JSONPatchPayloadValue:JSONPatchPayloadOperations": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "JSONPatchPayloadOperations",
+      "file": "lib/src/models/workflows/json_patch_payload_value.dart",
+      "schema": null,
+      "parent": "JSONPatchPayloadValue",
+      "note": null
+    },
+    "JSONPatchPayloadValue:JSONPatchPayloadEncryptedValue": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "JSONPatchPayloadEncryptedValue",
+      "file": "lib/src/models/workflows/json_patch_payload_value.dart",
+      "schema": null,
+      "parent": "JSONPatchPayloadValue",
+      "note": null
     },
     "JSONPatchRemove": {
       "spec": "main",
