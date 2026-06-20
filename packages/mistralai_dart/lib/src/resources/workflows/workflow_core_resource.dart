@@ -91,8 +91,12 @@ class WorkflowCoreResource extends ResourceBase {
     bool? activeOnly,
   }) async {
     ensureNotClosed?.call();
-    final queryParams = <String, String>{};
-    if (status != null) queryParams['status'] = status.join(',');
+    // Array query params (status/deployment_name/tags) use form/explode
+    // serialization — each value is sent as a repeated parameter. Passing the
+    // List through to Uri.replace produces `status=a&status=b`, not a single
+    // comma-joined value (which the API would reject as one invalid value).
+    final queryParams = <String, dynamic>{};
+    if (status != null) queryParams['status'] = status;
     if (includeShared != null) {
       queryParams['include_shared'] = includeShared.toString();
     }
@@ -101,13 +105,13 @@ class WorkflowCoreResource extends ResourceBase {
           .toString();
     }
     if (deploymentName != null) {
-      queryParams['deployment_name'] = deploymentName.join(',');
+      queryParams['deployment_name'] = deploymentName;
     }
     if (deploymentStatus != null) {
       queryParams['deployment_status'] = deploymentStatus;
     }
     if (archived != null) queryParams['archived'] = archived.toString();
-    if (tags != null) queryParams['tags'] = tags.join(',');
+    if (tags != null) queryParams['tags'] = tags;
     if (sortBy != null) queryParams['sort_by'] = sortBy;
     if (order != null) queryParams['order'] = order;
     if (cursor != null) queryParams['cursor'] = cursor;

@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import 'encoded_payload_options.dart';
+import 'json_patch_payload_value.dart';
 
 /// A JSON patch payload response.
 @immutable
@@ -10,24 +11,28 @@ class JSONPatchPayloadResponse {
   /// The payload type.
   final String type;
 
-  /// The list of JSON patch operations.
-  final List<Map<String, dynamic>> value;
+  /// The payload value.
+  ///
+  /// Either a list of JSON Patch operations
+  /// ([JSONPatchPayloadOperations]) or, when encrypted, a base64-encoded
+  /// string ([JSONPatchPayloadEncryptedValue]).
+  final JSONPatchPayloadValue value;
 
   /// The encoding options applied to the payload.
   final List<EncodedPayloadOptions>? encodingOptions;
 
   /// Creates a [JSONPatchPayloadResponse].
-  JSONPatchPayloadResponse({
+  const JSONPatchPayloadResponse({
     this.type = 'json_patch',
-    required List<Map<String, dynamic>> value,
+    required this.value,
     this.encodingOptions,
-  }) : value = List.unmodifiable(value);
+  });
 
   /// Creates a [JSONPatchPayloadResponse] from JSON.
   factory JSONPatchPayloadResponse.fromJson(Map<String, dynamic> json) =>
       JSONPatchPayloadResponse(
         type: json['type'] as String? ?? 'json_patch',
-        value: (json['value'] as List?)?.cast<Map<String, dynamic>>() ?? [],
+        value: JSONPatchPayloadValue.fromJson(json['value']),
         encodingOptions: (json['encoding_options'] as List?)
             ?.map((e) => EncodedPayloadOptions.fromJson(e as String))
             .toList(),
@@ -36,7 +41,7 @@ class JSONPatchPayloadResponse {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'type': type,
-    'value': value,
+    'value': value.toJson(),
     if (encodingOptions != null)
       'encoding_options': encodingOptions?.map((e) => e.toJson()).toList(),
   };
@@ -44,7 +49,7 @@ class JSONPatchPayloadResponse {
   /// Creates a copy with replaced values.
   JSONPatchPayloadResponse copyWith({
     String? type,
-    List<Map<String, dynamic>>? value,
+    JSONPatchPayloadValue? value,
     Object? encodingOptions = unsetCopyWithValue,
   }) {
     return JSONPatchPayloadResponse(
@@ -61,20 +66,18 @@ class JSONPatchPayloadResponse {
     if (identical(this, other)) return true;
     if (other is! JSONPatchPayloadResponse) return false;
     if (runtimeType != other.runtimeType) return false;
-    if (!listOfMapsDeepEqual(value, other.value)) return false;
     if (!listsEqual(encodingOptions, other.encodingOptions)) return false;
-    return type == other.type;
+    return type == other.type && value == other.value;
   }
 
   @override
-  int get hashCode =>
-      Object.hash(type, listOfMapsHashCode(value), listHash(encodingOptions));
+  int get hashCode => Object.hash(type, value, listHash(encodingOptions));
 
   @override
   String toString() =>
       'JSONPatchPayloadResponse('
       'type: $type, '
-      'value: ${value.length}, '
+      'value: $value, '
       'encodingOptions: ${encodingOptions?.length ?? 'null'}'
       ')';
 }

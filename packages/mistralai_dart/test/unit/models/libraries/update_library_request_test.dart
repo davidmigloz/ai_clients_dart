@@ -19,6 +19,32 @@ void main() {
       expect(request.toJson(), {'name': 'My Library'});
     });
 
+    test('supports description-only update (name omitted)', () {
+      const request = UpdateLibraryRequest(description: 'New description');
+
+      expect(request.name, isNull);
+      expect(request.toJson(), {'description': 'New description'});
+    });
+
+    test('clearDescription emits an explicit null', () {
+      const request = UpdateLibraryRequest(clearDescription: true);
+
+      expect(request.toJson(), {'description': null});
+    });
+
+    test('fromJson distinguishes explicit null from absent', () {
+      final cleared = UpdateLibraryRequest.fromJson(const {
+        'description': null,
+      });
+      expect(cleared.description, isNull);
+      expect(cleared.clearDescription, isTrue);
+      expect(cleared.toJson(), {'description': null});
+
+      final absent = UpdateLibraryRequest.fromJson(const {'name': 'L'});
+      expect(absent.clearDescription, isFalse);
+      expect(absent.toJson(), {'name': 'L'});
+    });
+
     test('toJson round-trips', () {
       const request = UpdateLibraryRequest(name: 'Lib', description: 'Desc');
 

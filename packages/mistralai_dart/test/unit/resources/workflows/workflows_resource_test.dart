@@ -38,6 +38,7 @@ void main() {
 
       final result = await client.workflows.core.listWorkflows(
         archived: false,
+        status: const ['running', 'completed'],
         tags: const ['a', 'b'],
         limit: 10,
         deploymentStatus: 'active',
@@ -46,7 +47,13 @@ void main() {
       expect(captured.method, 'GET');
       expect(captured.url.path, '/v1/workflows');
       expect(captured.url.queryParameters['archived'], 'false');
-      expect(captured.url.queryParameters['tags'], 'a,b');
+      // Array params are serialized as repeated query parameters
+      // (form/explode), not comma-joined.
+      expect(captured.url.queryParametersAll['status'], [
+        'running',
+        'completed',
+      ]);
+      expect(captured.url.queryParametersAll['tags'], ['a', 'b']);
       expect(captured.url.queryParameters['limit'], '10');
       expect(captured.url.queryParameters['deployment_status'], 'active');
       expect(result.workflows, hasLength(1));

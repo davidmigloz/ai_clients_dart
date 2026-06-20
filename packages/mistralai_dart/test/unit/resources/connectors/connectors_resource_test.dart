@@ -99,6 +99,20 @@ void main() {
       expect(result.id, 'c-1');
     });
 
+    test('get forwards fetch_user_data and fetch_customer_data', () async {
+      final client = clientReturning(connectorJson('c-1'));
+      addTearDown(client.close);
+
+      await client.connectors.get(
+        connectorIdOrName: 'my_name',
+        fetchUserData: true,
+        fetchCustomerData: false,
+      );
+
+      expect(captured.url.queryParameters['fetch_user_data'], 'true');
+      expect(captured.url.queryParameters['fetch_customer_data'], 'false');
+    });
+
     test('update issues PATCH with request body', () async {
       final client = clientReturning(connectorJson('c-1'));
       addTearDown(client.close);

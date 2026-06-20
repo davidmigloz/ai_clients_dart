@@ -21,6 +21,39 @@ void main() {
       expect(request.toJson(), {'name': 'doc.pdf'});
     });
 
+    test('supports update without a name', () {
+      const request = UpdateDocumentRequest(attributes: {'k': 'v'});
+
+      expect(request.name, isNull);
+      expect(request.toJson(), {
+        'attributes': {'k': 'v'},
+      });
+    });
+
+    test('clear flags emit explicit nulls', () {
+      const request = UpdateDocumentRequest(
+        clearAttributes: true,
+        clearExpiresAt: true,
+      );
+
+      expect(request.toJson(), {'attributes': null, 'expires_at': null});
+    });
+
+    test('fromJson distinguishes explicit null from absent', () {
+      final cleared = UpdateDocumentRequest.fromJson(const {
+        'attributes': null,
+        'expires_at': null,
+      });
+      expect(cleared.clearAttributes, isTrue);
+      expect(cleared.clearExpiresAt, isTrue);
+      expect(cleared.toJson(), {'attributes': null, 'expires_at': null});
+
+      final absent = UpdateDocumentRequest.fromJson(const {'name': 'doc.pdf'});
+      expect(absent.clearAttributes, isFalse);
+      expect(absent.clearExpiresAt, isFalse);
+      expect(absent.toJson(), {'name': 'doc.pdf'});
+    });
+
     test('toJson round-trips', () {
       const request = UpdateDocumentRequest(
         name: 'doc.pdf',

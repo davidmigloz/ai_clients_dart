@@ -369,6 +369,7 @@ export 'src/models/workflows/failure.dart';
 export 'src/models/workflows/json_patch_add.dart';
 export 'src/models/workflows/json_patch_append.dart';
 export 'src/models/workflows/json_patch_payload_response.dart';
+export 'src/models/workflows/json_patch_payload_value.dart';
 export 'src/models/workflows/json_patch_remove.dart';
 export 'src/models/workflows/json_patch_replace.dart';
 export 'src/models/workflows/json_payload_response.dart';

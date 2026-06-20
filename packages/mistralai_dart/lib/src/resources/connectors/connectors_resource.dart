@@ -125,8 +125,24 @@ class ConnectorsResource extends ResourceBase {
   /// variants.
   ///
   /// [connectorIdOrName] is the unique identifier or name of the connector.
-  Future<Connector> get({required String connectorIdOrName}) async {
-    final url = requestBuilder.buildUrl('/v1/connectors/$connectorIdOrName');
+  /// [fetchUserData] requests the caller's user credentials be returned.
+  /// [fetchCustomerData] requests the customer configuration be returned.
+  Future<Connector> get({
+    required String connectorIdOrName,
+    bool? fetchUserData,
+    bool? fetchCustomerData,
+  }) async {
+    final queryParams = <String, dynamic>{};
+    if (fetchUserData != null) {
+      queryParams['fetch_user_data'] = fetchUserData.toString();
+    }
+    if (fetchCustomerData != null) {
+      queryParams['fetch_customer_data'] = fetchCustomerData.toString();
+    }
+    final url = requestBuilder.buildUrl(
+      '/v1/connectors/$connectorIdOrName',
+      queryParams: queryParams.isEmpty ? null : queryParams,
+    );
     final headers = requestBuilder.buildHeaders();
 
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
