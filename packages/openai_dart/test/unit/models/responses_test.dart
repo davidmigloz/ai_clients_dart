@@ -3971,6 +3971,13 @@ void main() {
       expect(() => ResponseTool.mcp(serverLabel: 'test'), throwsArgumentError);
     });
 
+    test('fromJson throws FormatException when no address is present', () {
+      expect(
+        () => McpTool.fromJson(const {'type': 'mcp', 'server_label': 'test'}),
+        throwsFormatException,
+      );
+    });
+
     test('ResponseTool.mcp accepts a tunnelId alone', () {
       final tool = ResponseTool.mcp(
         serverLabel: 'test',
@@ -4001,6 +4008,23 @@ void main() {
       expect(roundTrip.reasoning?.context, ReasoningContext.currentTurn);
       expect(roundTrip.truncation, Truncation.auto);
       expect(roundTrip, equals(response));
+    });
+
+    test('toString includes reasoning and truncation', () {
+      const response = Response(
+        id: 'resp_1',
+        object: 'response',
+        createdAt: 1234567890,
+        status: ResponseStatus.completed,
+        output: [],
+        reasoning: ReasoningConfig(context: ReasoningContext.allTurns),
+        truncation: Truncation.disabled,
+      );
+
+      final str = response.toString();
+      expect(str, contains('truncation: Truncation.disabled'));
+      expect(str, contains('reasoning: ReasoningConfig('));
+      expect(str, contains('context: ReasoningContext.allTurns'));
     });
   });
 }

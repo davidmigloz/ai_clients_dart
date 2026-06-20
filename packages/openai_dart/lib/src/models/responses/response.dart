@@ -365,7 +365,9 @@ class Response {
   ]);
 
   @override
-  String toString() => 'Response(id: $id, status: $status, output: $output)';
+  String toString() =>
+      'Response(id: $id, status: $status, output: $output, '
+      'reasoning: $reasoning, truncation: $truncation)';
 }
 
 /// A list of responses with pagination.

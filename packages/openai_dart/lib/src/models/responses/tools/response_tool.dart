@@ -891,28 +891,25 @@ class McpTool extends ResponseTool {
          'McpTool requires one of serverUrl, connectorId, or tunnelId',
        );
 
-  /// Unchecked constructor used by [fromJson].
-  ///
-  /// Deserialization is intentionally lenient — it does not enforce the
-  /// one-of constraint — so server-originated tools always parse and
-  /// round-trip without loss.
-  const McpTool._parsed({
-    required this.serverLabel,
-    this.serverUrl,
-    this.connectorId,
-    this.tunnelId,
-    this.allowedTools,
-    this.requireApproval,
-    this.deferLoading,
-  });
-
   /// Creates an [McpTool] from JSON.
+  ///
+  /// Throws a [FormatException] if none of `server_url`, `connector_id`, or
+  /// `tunnel_id` is present, since such a tool has no address and would
+  /// re-serialize as an invalid request.
   factory McpTool.fromJson(Map<String, dynamic> json) {
-    return McpTool._parsed(
+    final serverUrl = json['server_url'] as String?;
+    final connectorId = json['connector_id'] as String?;
+    final tunnelId = json['tunnel_id'] as String?;
+    if (serverUrl == null && connectorId == null && tunnelId == null) {
+      throw const FormatException(
+        'McpTool requires one of server_url, connector_id, or tunnel_id',
+      );
+    }
+    return McpTool(
       serverLabel: json['server_label'] as String,
-      serverUrl: json['server_url'] as String?,
-      connectorId: json['connector_id'] as String?,
-      tunnelId: json['tunnel_id'] as String?,
+      serverUrl: serverUrl,
+      connectorId: connectorId,
+      tunnelId: tunnelId,
       allowedTools: (json['allowed_tools'] as List?)?.cast<String>(),
       requireApproval: json['require_approval'] as String?,
       deferLoading: json['defer_loading'] as bool?,
