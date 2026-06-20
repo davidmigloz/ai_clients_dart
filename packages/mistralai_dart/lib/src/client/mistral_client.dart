@@ -10,6 +10,7 @@ import '../resources/audio/audio_resource.dart';
 import '../resources/batch/batch_resource.dart';
 import '../resources/chat_resource.dart';
 import '../resources/classifications_resource.dart';
+import '../resources/connectors/connectors_resource.dart';
 import '../resources/conversations/conversations_resource.dart';
 import '../resources/embeddings_resource.dart';
 import '../resources/files/files_resource.dart';
@@ -20,6 +21,7 @@ import '../resources/models_resource.dart';
 import '../resources/moderations_resource.dart';
 import '../resources/observability/observability_resource.dart';
 import '../resources/ocr_resource.dart';
+import '../resources/rag/rag_resource.dart';
 import '../resources/workflows/workflows_resource.dart';
 import 'config.dart';
 import 'interceptor_chain.dart';
@@ -45,8 +47,10 @@ import 'retry_wrapper.dart';
 /// - [audio] - Audio transcription
 /// - [agents] - AI agents (Beta)
 /// - [conversations] - Conversations (Beta)
+/// - [connectors] - MCP connectors (Beta)
 /// - [libraries] - Document libraries for RAG (Beta)
 /// - [observability] - Observability: campaigns, datasets, judges (Beta)
+/// - [rag] - RAG ingestion pipelines and search indexes (Beta)
 /// - [workflows] - Workflow execution, scheduling, management (Beta)
 /// - [models] - Model listing and management
 /// - [moderations] - Content moderation
@@ -160,11 +164,17 @@ class MistralClient {
   /// Resource for conversations (Beta).
   late final ConversationsResource conversations;
 
+  /// Resource for MCP connectors (Beta).
+  late final ConnectorsResource connectors;
+
   /// Resource for document libraries (Beta).
   late final LibrariesResource libraries;
 
   /// Resource for observability operations (Beta).
   late final ObservabilityResource observability;
+
+  /// Resource for RAG ingestion pipelines and search indexes (Beta).
+  late final RagResource rag;
 
   /// Resource for workflow operations (Beta).
   late final WorkflowsResource workflows;
@@ -318,6 +328,14 @@ class MistralClient {
       ensureNotClosed: _ensureNotClosed,
     );
 
+    connectors = ConnectorsResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+
     libraries = LibrariesResource(
       config: this.config,
       httpClient: _httpClient,
@@ -327,6 +345,14 @@ class MistralClient {
     );
 
     observability = ObservabilityResource(
+      config: this.config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+
+    rag = RagResource(
       config: this.config,
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,

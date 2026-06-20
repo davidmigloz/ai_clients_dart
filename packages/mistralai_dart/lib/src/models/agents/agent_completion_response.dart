@@ -69,7 +69,7 @@ class AgentCompletionResponse {
 
   /// The text content from the first choice.
   String? get text {
-    final content = firstChoice?.message.content;
+    final content = firstChoice?.message?.content;
     if (content is MessageTextContent) return content.text;
     return null;
   }

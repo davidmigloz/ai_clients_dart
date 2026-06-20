@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import '../../models/workflows/batch_execution_body.dart';
 import '../../models/workflows/batch_execution_response.dart';
 import '../../models/workflows/event_source.dart';
+import '../../models/workflows/execution_log_record.dart';
+import '../../models/workflows/execution_log_search_response.dart';
 import '../../models/workflows/query_invocation_body.dart';
 import '../../models/workflows/query_workflow_response.dart';
 import '../../models/workflows/reset_invocation_body.dart';
@@ -81,6 +83,120 @@ class ExecutionsResource extends ResourceBase with StreamingResource {
         throwInlineStreamError(json, sseEvent, error);
       }
       yield StreamEventSsePayload.fromJson(json);
+    }
+  }
+
+  /// Gets logs for a workflow execution.
+  ///
+  /// Maps to the official Python SDK's
+  /// `executions.get_workflow_execution_logs`
+  /// (`GET /v1/workflows/executions/{execution_id}/logs`).
+  ///
+  /// Use [after]/[before]/[order] on the first request to set the time range
+  /// and sort order; for later pages pass the [cursor] from a previous
+  /// response (which carries the window and order, so [after]/[before]/[order]
+  /// are then ignored).
+  ///
+  /// - [runId] filters logs by workflow run ID.
+  /// - [activityId] filters logs by activity ID.
+  /// - [after] only returns logs at or after this timestamp.
+  /// - [before] only returns logs before this timestamp.
+  /// - [order] is the first-page sort order (`asc` or `desc`, default `asc`).
+  /// - [cursor] is the pagination cursor from a previous `next_cursor`.
+  /// - [limit] is the maximum number of logs to return (1-100, default 50).
+  Future<ExecutionLogSearchResponse> getLogs({
+    required String executionId,
+    String? runId,
+    String? activityId,
+    String? after,
+    String? before,
+    String? order,
+    String? cursor,
+    int? limit,
+  }) async {
+    ensureNotClosed?.call();
+    final queryParams = <String, String>{};
+    if (runId != null) queryParams['run_id'] = runId;
+    if (activityId != null) queryParams['activity_id'] = activityId;
+    if (after != null) queryParams['after'] = after;
+    if (before != null) queryParams['before'] = before;
+    if (order != null) queryParams['order'] = order;
+    if (cursor != null) queryParams['cursor'] = cursor;
+    if (limit != null) queryParams['limit'] = limit.toString();
+
+    final url = requestBuilder.buildUrl(
+      '/v1/workflows/executions/$executionId/logs',
+      queryParams: queryParams,
+    );
+    final headers = requestBuilder.buildHeaders();
+    final httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    final response = await interceptorChain.execute(httpRequest);
+    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
+    return ExecutionLogSearchResponse.fromJson(responseBody);
+  }
+
+  /// Streams logs for a workflow execution via SSE.
+  ///
+  /// Maps to the official Python SDK's
+  /// `executions.stream_workflow_execution_logs`
+  /// (`GET /v1/workflows/executions/{execution_id}/logs/stream`).
+  ///
+  /// Each `log` event yields an [ExecutionLogRecord]. An `error` event (a
+  /// `StreamError` payload) raises a [StreamException].
+  ///
+  /// If [lastEventId] is set it resumes from that cursor and takes precedence
+  /// over [after]; otherwise [after] sets a fresh stream's start point (omit
+  /// both to tail from the execution start).
+  ///
+  /// - [runId] filters logs by workflow run ID.
+  /// - [activityId] filters logs by activity ID.
+  Stream<ExecutionLogRecord> streamLogs({
+    required String executionId,
+    String? runId,
+    String? activityId,
+    String? after,
+    String? lastEventId,
+  }) {
+    ensureNotClosed?.call();
+    return _streamLogs(
+      executionId: executionId,
+      runId: runId,
+      activityId: activityId,
+      after: after,
+      lastEventId: lastEventId,
+    );
+  }
+
+  Stream<ExecutionLogRecord> _streamLogs({
+    required String executionId,
+    String? runId,
+    String? activityId,
+    String? after,
+    String? lastEventId,
+  }) async* {
+    final queryParams = <String, String>{};
+    if (runId != null) queryParams['run_id'] = runId;
+    if (activityId != null) queryParams['activity_id'] = activityId;
+    if (after != null) queryParams['after'] = after;
+    if (lastEventId != null) queryParams['last_event_id'] = lastEventId;
+
+    final url = requestBuilder.buildUrl(
+      '/v1/workflows/executions/$executionId/logs/stream',
+      queryParams: queryParams,
+    );
+    final headers = requestBuilder.buildHeaders();
+
+    var httpRequest = http.Request('GET', url)..headers.addAll(headers);
+    httpRequest = await prepareStreamingRequest(httpRequest);
+    final streamedResponse = await sendStreamingRequest(httpRequest);
+
+    await for (final json in parseSSE(streamedResponse.stream)) {
+      final sseEvent = json['_event'] as String?;
+      final error = json['error'];
+      if (sseEvent == 'error' || error != null) {
+        throwInlineStreamError(json, sseEvent, error);
+      }
+      yield ExecutionLogRecord.fromJson(json);
     }
   }
 

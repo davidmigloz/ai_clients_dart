@@ -9,6 +9,9 @@ import 'chat_completion_fields_resource.dart';
 import 'dataset_records_resource.dart';
 import 'datasets_resource.dart';
 import 'judges_resource.dart';
+import 'logs_resource.dart';
+import 'spans_resource.dart';
+import 'traces_resource.dart';
 
 /// Resource for Observability API operations (beta).
 ///
@@ -20,6 +23,9 @@ import 'judges_resource.dart';
 /// - **Datasets**: Curate conversation collections for evaluation
 /// - **Dataset records**: Manage individual records within datasets
 /// - **Judges**: Create LLM-based evaluators (classification or regression)
+/// - **Traces**: Search and inspect end-to-end execution traces
+/// - **Spans**: Search spans and span evaluations within traces
+/// - **Logs**: Search structured log records
 ///
 /// Example usage:
 /// ```dart
@@ -75,6 +81,15 @@ class ObservabilityResource {
   /// Sub-resource for judges.
   late final JudgesResource judges;
 
+  /// Sub-resource for traces.
+  late final TracesResource traces;
+
+  /// Sub-resource for spans.
+  late final SpansResource spans;
+
+  /// Sub-resource for logs.
+  late final LogsResource logs;
+
   /// Creates an [ObservabilityResource].
   ObservabilityResource({
     required this.config,
@@ -119,6 +134,27 @@ class ObservabilityResource {
       ensureNotClosed: ensureNotClosed,
     );
     judges = JudgesResource(
+      config: config,
+      httpClient: httpClient,
+      interceptorChain: interceptorChain,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
+    );
+    traces = TracesResource(
+      config: config,
+      httpClient: httpClient,
+      interceptorChain: interceptorChain,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
+    );
+    spans = SpansResource(
+      config: config,
+      httpClient: httpClient,
+      interceptorChain: interceptorChain,
+      requestBuilder: requestBuilder,
+      ensureNotClosed: ensureNotClosed,
+    );
+    logs = LogsResource(
       config: config,
       httpClient: httpClient,
       interceptorChain: interceptorChain,

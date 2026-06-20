@@ -190,6 +190,24 @@ class ModelCapabilities {
   /// Whether the model supports audio transcription.
   final bool? audioTranscription;
 
+  /// Whether the model supports speech generation.
+  final bool? audioSpeech;
+
+  /// Whether the model supports realtime audio transcription.
+  final bool? audioTranscriptionRealtime;
+
+  /// Whether the model supports reasoning.
+  final bool? reasoning;
+
+  /// Whether the model supports audio inputs.
+  final bool? audio;
+
+  /// Whether the model supports moderation.
+  final bool? moderation;
+
+  /// Whether the model supports OCR.
+  final bool? ocr;
+
   /// Creates [ModelCapabilities].
   const ModelCapabilities({
     this.completionChat,
@@ -199,6 +217,12 @@ class ModelCapabilities {
     this.vision,
     this.classification,
     this.audioTranscription,
+    this.audioSpeech,
+    this.audioTranscriptionRealtime,
+    this.reasoning,
+    this.audio,
+    this.moderation,
+    this.ocr,
   });
 
   /// Creates [ModelCapabilities] from JSON.
@@ -211,6 +235,13 @@ class ModelCapabilities {
         vision: json['vision'] as bool?,
         classification: json['classification'] as bool?,
         audioTranscription: json['audio_transcription'] as bool?,
+        audioSpeech: json['audio_speech'] as bool?,
+        audioTranscriptionRealtime:
+            json['audio_transcription_realtime'] as bool?,
+        reasoning: json['reasoning'] as bool?,
+        audio: json['audio'] as bool?,
+        moderation: json['moderation'] as bool?,
+        ocr: json['ocr'] as bool?,
       );
 
   /// Converts to JSON.
@@ -222,7 +253,65 @@ class ModelCapabilities {
     if (vision != null) 'vision': vision,
     if (classification != null) 'classification': classification,
     if (audioTranscription != null) 'audio_transcription': audioTranscription,
+    if (audioSpeech != null) 'audio_speech': audioSpeech,
+    if (audioTranscriptionRealtime != null)
+      'audio_transcription_realtime': audioTranscriptionRealtime,
+    if (reasoning != null) 'reasoning': reasoning,
+    if (audio != null) 'audio': audio,
+    if (moderation != null) 'moderation': moderation,
+    if (ocr != null) 'ocr': ocr,
   };
+
+  /// Creates a copy with replaced values.
+  ModelCapabilities copyWith({
+    Object? completionChat = unsetCopyWithValue,
+    Object? completionFim = unsetCopyWithValue,
+    Object? functionCalling = unsetCopyWithValue,
+    Object? fineTuning = unsetCopyWithValue,
+    Object? vision = unsetCopyWithValue,
+    Object? classification = unsetCopyWithValue,
+    Object? audioTranscription = unsetCopyWithValue,
+    Object? audioSpeech = unsetCopyWithValue,
+    Object? audioTranscriptionRealtime = unsetCopyWithValue,
+    Object? reasoning = unsetCopyWithValue,
+    Object? audio = unsetCopyWithValue,
+    Object? moderation = unsetCopyWithValue,
+    Object? ocr = unsetCopyWithValue,
+  }) => ModelCapabilities(
+    completionChat: completionChat == unsetCopyWithValue
+        ? this.completionChat
+        : completionChat as bool?,
+    completionFim: completionFim == unsetCopyWithValue
+        ? this.completionFim
+        : completionFim as bool?,
+    functionCalling: functionCalling == unsetCopyWithValue
+        ? this.functionCalling
+        : functionCalling as bool?,
+    fineTuning: fineTuning == unsetCopyWithValue
+        ? this.fineTuning
+        : fineTuning as bool?,
+    vision: vision == unsetCopyWithValue ? this.vision : vision as bool?,
+    classification: classification == unsetCopyWithValue
+        ? this.classification
+        : classification as bool?,
+    audioTranscription: audioTranscription == unsetCopyWithValue
+        ? this.audioTranscription
+        : audioTranscription as bool?,
+    audioSpeech: audioSpeech == unsetCopyWithValue
+        ? this.audioSpeech
+        : audioSpeech as bool?,
+    audioTranscriptionRealtime: audioTranscriptionRealtime == unsetCopyWithValue
+        ? this.audioTranscriptionRealtime
+        : audioTranscriptionRealtime as bool?,
+    reasoning: reasoning == unsetCopyWithValue
+        ? this.reasoning
+        : reasoning as bool?,
+    audio: audio == unsetCopyWithValue ? this.audio : audio as bool?,
+    moderation: moderation == unsetCopyWithValue
+        ? this.moderation
+        : moderation as bool?,
+    ocr: ocr == unsetCopyWithValue ? this.ocr : ocr as bool?,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -235,7 +324,13 @@ class ModelCapabilities {
           fineTuning == other.fineTuning &&
           vision == other.vision &&
           classification == other.classification &&
-          audioTranscription == other.audioTranscription;
+          audioTranscription == other.audioTranscription &&
+          audioSpeech == other.audioSpeech &&
+          audioTranscriptionRealtime == other.audioTranscriptionRealtime &&
+          reasoning == other.reasoning &&
+          audio == other.audio &&
+          moderation == other.moderation &&
+          ocr == other.ocr;
 
   @override
   int get hashCode => Object.hash(
@@ -246,13 +341,28 @@ class ModelCapabilities {
     vision,
     classification,
     audioTranscription,
+    audioSpeech,
+    audioTranscriptionRealtime,
+    reasoning,
+    audio,
+    moderation,
+    ocr,
   );
 
   @override
   String toString() =>
       'ModelCapabilities('
-      'chat: $completionChat, '
-      'fim: $completionFim, '
-      'functions: $functionCalling, '
-      'vision: $vision)';
+      'completionChat: $completionChat, '
+      'completionFim: $completionFim, '
+      'functionCalling: $functionCalling, '
+      'fineTuning: $fineTuning, '
+      'vision: $vision, '
+      'classification: $classification, '
+      'audioTranscription: $audioTranscription, '
+      'audioSpeech: $audioSpeech, '
+      'audioTranscriptionRealtime: $audioTranscriptionRealtime, '
+      'reasoning: $reasoning, '
+      'audio: $audio, '
+      'moderation: $moderation, '
+      'ocr: $ocr)';
 }

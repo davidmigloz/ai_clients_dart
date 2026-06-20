@@ -517,9 +517,9 @@ void main() {
       );
 
       final str = caps.toString();
-      expect(str, contains('chat: true'));
-      expect(str, contains('fim: false'));
-      expect(str, contains('functions: true'));
+      expect(str, contains('completionChat: true'));
+      expect(str, contains('completionFim: false'));
+      expect(str, contains('functionCalling: true'));
       expect(str, contains('vision: true'));
     });
   });

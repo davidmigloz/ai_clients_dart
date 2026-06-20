@@ -24,7 +24,7 @@ extension ChatCompletionResponseExtensions on ChatCompletionResponse {
   /// print(response.text); // Prints the generated text
   /// ```
   String? get text {
-    final content = firstChoice?.message.content;
+    final content = firstChoice?.message?.content;
     if (content is MessageTextContent) return content.text;
     return null;
   }
@@ -36,7 +36,7 @@ extension ChatCompletionResponseExtensions on ChatCompletionResponse {
     final buffer = StringBuffer();
     var hasText = false;
     for (final choice in choices) {
-      final content = choice.message.content;
+      final content = choice.message?.content;
       if (content is MessageTextContent) {
         buffer.write(content.text);
         hasText = true;
@@ -47,21 +47,23 @@ extension ChatCompletionResponseExtensions on ChatCompletionResponse {
 
   /// The message from the first choice.
   ///
-  /// Throws [StateError] if no choices exist.
-  ChatMessage get message => choices.first.message;
+  /// Throws [StateError] if no choices exist. May be `null` when the choice
+  /// carries [ChatChoice.messages] instead of a single message.
+  ChatMessage? get message => choices.first.message;
 
-  /// All messages from all choices.
-  List<ChatMessage> get messages => choices.map((c) => c.message).toList();
+  /// All non-null messages from all choices.
+  List<ChatMessage> get messages =>
+      choices.map((c) => c.message).whereType<ChatMessage>().toList();
 
   /// Tool calls from the first choice's message.
   ///
   /// Returns an empty list if no tool calls exist.
   List<ToolCall> get toolCalls =>
-      firstChoice?.message.toolCalls ?? <ToolCall>[];
+      firstChoice?.message?.toolCalls ?? <ToolCall>[];
 
   /// All tool calls from all choices.
   List<ToolCall> get allToolCalls => [
-    for (final choice in choices) ...choice.message.toolCalls ?? <ToolCall>[],
+    for (final choice in choices) ...?choice.message?.toolCalls,
   ];
 
   /// Whether the first choice has tool calls.
@@ -75,7 +77,7 @@ extension ChatCompletionResponseExtensions on ChatCompletionResponse {
 
   /// Whether the response has valid content.
   bool get hasContent =>
-      (firstChoice?.message.hasContent ?? false) || hasToolCalls;
+      (firstChoice?.message?.hasContent ?? false) || hasToolCalls;
 
   /// The finish reason from the first choice.
   FinishReason? get finishReason => firstChoice?.finishReason;
@@ -94,13 +96,13 @@ extension ChatCompletionResponseExtensions on ChatCompletionResponse {
 extension ChatChoiceExtensions on ChatChoice {
   /// The text content from this choice's message.
   String? get text {
-    final content = message.content;
+    final content = message?.content;
     if (content is MessageTextContent) return content.text;
     return null;
   }
 
   /// Tool calls from this choice's message.
-  List<ToolCall> get toolCalls => message.toolCalls ?? <ToolCall>[];
+  List<ToolCall> get toolCalls => message?.toolCalls ?? <ToolCall>[];
 
   /// Whether this choice has tool calls.
   bool get hasToolCalls => toolCalls.isNotEmpty;

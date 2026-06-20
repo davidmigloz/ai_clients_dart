@@ -1,6 +1,8 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import 'deployment_location.dart';
 import 'deployment_worker_response.dart';
 
 /// Detailed response for a deployment.
@@ -24,6 +26,12 @@ class DeploymentDetailResponse {
   /// Workers in this deployment.
   final List<DeploymentWorkerResponse> workers;
 
+  /// Whether the deployment is hardened.
+  final bool isHardened;
+
+  /// The deployment location.
+  final DeploymentLocation? location;
+
   /// Creates a [DeploymentDetailResponse].
   DeploymentDetailResponse({
     required this.id,
@@ -32,26 +40,32 @@ class DeploymentDetailResponse {
     required this.createdAt,
     required this.updatedAt,
     required List<DeploymentWorkerResponse> workers,
+    this.isHardened = false,
+    this.location,
   }) : workers = List.unmodifiable(workers);
 
   /// Creates a [DeploymentDetailResponse] from JSON.
-  factory DeploymentDetailResponse.fromJson(Map<String, dynamic> json) =>
-      DeploymentDetailResponse(
-        id: json['id'] as String? ?? '',
-        name: json['name'] as String? ?? '',
-        isActive: json['is_active'] as bool? ?? false,
-        createdAt: json['created_at'] as String? ?? '',
-        updatedAt: json['updated_at'] as String? ?? '',
-        workers:
-            (json['workers'] as List?)
-                ?.map(
-                  (e) => DeploymentWorkerResponse.fromJson(
-                    e as Map<String, dynamic>,
-                  ),
-                )
-                .toList() ??
-            [],
-      );
+  factory DeploymentDetailResponse.fromJson(
+    Map<String, dynamic> json,
+  ) => DeploymentDetailResponse(
+    id: json['id'] as String? ?? '',
+    name: json['name'] as String? ?? '',
+    isActive: json['is_active'] as bool? ?? false,
+    createdAt: json['created_at'] as String? ?? '',
+    updatedAt: json['updated_at'] as String? ?? '',
+    workers:
+        (json['workers'] as List?)
+            ?.map(
+              (e) =>
+                  DeploymentWorkerResponse.fromJson(e as Map<String, dynamic>),
+            )
+            .toList() ??
+        [],
+    isHardened: json['is_hardened'] as bool? ?? false,
+    location: json['location'] == null
+        ? null
+        : DeploymentLocation.fromJson(json['location'] as Map<String, dynamic>),
+  );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
@@ -61,6 +75,8 @@ class DeploymentDetailResponse {
     'created_at': createdAt,
     'updated_at': updatedAt,
     'workers': workers.map((e) => e.toJson()).toList(),
+    'is_hardened': isHardened,
+    if (location != null) 'location': location!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -71,6 +87,8 @@ class DeploymentDetailResponse {
     String? createdAt,
     String? updatedAt,
     List<DeploymentWorkerResponse>? workers,
+    bool? isHardened,
+    Object? location = unsetCopyWithValue,
   }) {
     return DeploymentDetailResponse(
       id: id ?? this.id,
@@ -79,6 +97,10 @@ class DeploymentDetailResponse {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       workers: workers ?? this.workers,
+      isHardened: isHardened ?? this.isHardened,
+      location: location == unsetCopyWithValue
+          ? this.location
+          : location as DeploymentLocation?,
     );
   }
 
@@ -92,12 +114,22 @@ class DeploymentDetailResponse {
         name == other.name &&
         isActive == other.isActive &&
         createdAt == other.createdAt &&
-        updatedAt == other.updatedAt;
+        updatedAt == other.updatedAt &&
+        isHardened == other.isHardened &&
+        location == other.location;
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, isActive, createdAt, updatedAt, listHash(workers));
+  int get hashCode => Object.hash(
+    id,
+    name,
+    isActive,
+    createdAt,
+    updatedAt,
+    listHash(workers),
+    isHardened,
+    location,
+  );
 
   @override
   String toString() =>
@@ -107,6 +139,8 @@ class DeploymentDetailResponse {
       'isActive: $isActive, '
       'createdAt: $createdAt, '
       'updatedAt: $updatedAt, '
-      'workers: ${workers.length}'
+      'workers: ${workers.length}, '
+      'isHardened: $isHardened, '
+      'location: $location'
       ')';
 }

@@ -8,6 +8,7 @@ import '../metadata/prompt_mode.dart';
 import '../metadata/reasoning_effort.dart';
 import '../metadata/response_format.dart';
 import '../metadata/stop_sequence.dart';
+import '../moderations/guardrail_config.dart';
 import '../tools/tool.dart';
 import '../tools/tool_choice.dart';
 
@@ -87,6 +88,9 @@ class AgentCompletionRequest {
   /// the standard input token price.
   final String? promptCacheKey;
 
+  /// Guardrail configurations applied to this request.
+  final List<GuardrailConfig>? guardrails;
+
   /// Creates an [AgentCompletionRequest].
   const AgentCompletionRequest({
     required this.agentId,
@@ -109,6 +113,7 @@ class AgentCompletionRequest {
     this.promptMode,
     this.reasoningEffort,
     this.promptCacheKey,
+    this.guardrails,
   });
 
   /// Creates an [AgentCompletionRequest] from JSON.
@@ -154,6 +159,9 @@ class AgentCompletionRequest {
           json['reasoning_effort'] as String?,
         ),
         promptCacheKey: json['prompt_cache_key'] as String?,
+        guardrails: (json['guardrails'] as List?)
+            ?.map((e) => GuardrailConfig.fromJson(e as Map<String, dynamic>))
+            .toList(),
       );
 
   /// Converts to JSON.
@@ -178,6 +186,8 @@ class AgentCompletionRequest {
     if (promptMode != null) 'prompt_mode': promptMode!.value,
     if (reasoningEffort != null) 'reasoning_effort': reasoningEffort!.value,
     if (promptCacheKey != null) 'prompt_cache_key': promptCacheKey,
+    if (guardrails != null)
+      'guardrails': guardrails!.map((e) => e.toJson()).toList(),
   };
 
   /// Creates a copy with replaced values.
@@ -202,6 +212,7 @@ class AgentCompletionRequest {
     Object? promptMode = unsetCopyWithValue,
     Object? reasoningEffort = unsetCopyWithValue,
     Object? promptCacheKey = unsetCopyWithValue,
+    Object? guardrails = unsetCopyWithValue,
   }) {
     return AgentCompletionRequest(
       agentId: agentId ?? this.agentId,
@@ -250,6 +261,9 @@ class AgentCompletionRequest {
       promptCacheKey: promptCacheKey == unsetCopyWithValue
           ? this.promptCacheKey
           : promptCacheKey as String?,
+      guardrails: guardrails == unsetCopyWithValue
+          ? this.guardrails
+          : guardrails as List<GuardrailConfig>?,
     );
   }
 
@@ -262,6 +276,7 @@ class AgentCompletionRequest {
     // Compare lists with deep equality
     if (!listsEqual(messages, other.messages)) return false;
     if (!listsEqual(tools, other.tools)) return false;
+    if (!listsEqual(guardrails, other.guardrails)) return false;
 
     return agentId == other.agentId &&
         maxTokens == other.maxTokens &&
@@ -281,7 +296,7 @@ class AgentCompletionRequest {
         promptMode == other.promptMode &&
         reasoningEffort == other.reasoningEffort &&
         promptCacheKey == other.promptCacheKey;
-    // messages and tools compared above via listsEqual
+    // messages, tools, and guardrails compared above via listsEqual
   }
 
   @override
@@ -304,6 +319,7 @@ class AgentCompletionRequest {
     mapHash(metadata),
     Object.hash(prediction, promptMode, reasoningEffort),
     promptCacheKey,
+    listHash(guardrails),
   );
 
   @override
@@ -327,5 +343,6 @@ class AgentCompletionRequest {
       'prediction: $prediction, '
       'promptMode: $promptMode, '
       'reasoningEffort: $reasoningEffort, '
-      'promptCacheKey: $promptCacheKey)';
+      'promptCacheKey: $promptCacheKey, '
+      'guardrails: $guardrails)';
 }

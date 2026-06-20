@@ -21,16 +21,31 @@ class DeploymentsResource extends ResourceBase {
 
   /// Lists deployments.
   ///
-  /// Use [activeOnly] to filter for active deployments, and [workflowName]
-  /// to filter by workflow name.
+  /// - [activeOnly] filters for active deployments.
+  /// - [workflowName] filters by workflow name.
+  /// - [isHardened] filters by hardened status.
+  /// - [search] filters by name or ID prefix.
+  /// - [limit] is the maximum number of deployments to return.
+  /// - [cursor] is the pagination cursor from a previous response.
+  /// - [workspaceId] scopes the request to a workspace.
   Future<DeploymentListResponse> list({
     bool? activeOnly,
     String? workflowName,
+    bool? isHardened,
+    String? search,
+    int? limit,
+    String? cursor,
+    String? workspaceId,
   }) async {
     ensureNotClosed?.call();
     final queryParams = <String, String>{};
     if (activeOnly != null) queryParams['active_only'] = activeOnly.toString();
     if (workflowName != null) queryParams['workflow_name'] = workflowName;
+    if (isHardened != null) queryParams['is_hardened'] = isHardened.toString();
+    if (search != null) queryParams['search'] = search;
+    if (limit != null) queryParams['limit'] = limit.toString();
+    if (cursor != null) queryParams['cursor'] = cursor;
+    if (workspaceId != null) queryParams['workspace_id'] = workspaceId;
 
     final url = requestBuilder.buildUrl(
       '/v1/workflows/deployments',

@@ -30,6 +30,9 @@ class WorkflowExecutionWithoutResultResponse {
   /// Total duration in milliseconds.
   final int? totalDurationMs;
 
+  /// The run identifier.
+  final String? runId;
+
   /// Creates a [WorkflowExecutionWithoutResultResponse].
   const WorkflowExecutionWithoutResultResponse({
     required this.workflowName,
@@ -40,6 +43,7 @@ class WorkflowExecutionWithoutResultResponse {
     required this.endTime,
     this.parentExecutionId,
     this.totalDurationMs,
+    this.runId,
   });
 
   /// Creates a [WorkflowExecutionWithoutResultResponse] from JSON.
@@ -56,6 +60,7 @@ class WorkflowExecutionWithoutResultResponse {
     endTime: json['end_time'] as String?,
     parentExecutionId: json['parent_execution_id'] as String?,
     totalDurationMs: json['total_duration_ms'] as int?,
+    runId: json['run_id'] as String?,
   );
 
   /// Converts to JSON.
@@ -68,6 +73,7 @@ class WorkflowExecutionWithoutResultResponse {
     'end_time': endTime,
     if (parentExecutionId != null) 'parent_execution_id': parentExecutionId,
     if (totalDurationMs != null) 'total_duration_ms': totalDurationMs,
+    if (runId != null) 'run_id': runId,
   };
 
   /// Creates a copy with replaced values.
@@ -80,6 +86,7 @@ class WorkflowExecutionWithoutResultResponse {
     Object? endTime = unsetCopyWithValue,
     Object? parentExecutionId = unsetCopyWithValue,
     Object? totalDurationMs = unsetCopyWithValue,
+    Object? runId = unsetCopyWithValue,
   }) {
     return WorkflowExecutionWithoutResultResponse(
       workflowName: workflowName ?? this.workflowName,
@@ -98,6 +105,7 @@ class WorkflowExecutionWithoutResultResponse {
       totalDurationMs: totalDurationMs == unsetCopyWithValue
           ? this.totalDurationMs
           : totalDurationMs as int?,
+      runId: runId == unsetCopyWithValue ? this.runId : runId as String?,
     );
   }
 
@@ -113,7 +121,8 @@ class WorkflowExecutionWithoutResultResponse {
         startTime == other.startTime &&
         endTime == other.endTime &&
         parentExecutionId == other.parentExecutionId &&
-        totalDurationMs == other.totalDurationMs;
+        totalDurationMs == other.totalDurationMs &&
+        runId == other.runId;
   }
 
   @override
@@ -126,6 +135,7 @@ class WorkflowExecutionWithoutResultResponse {
     endTime,
     parentExecutionId,
     totalDurationMs,
+    runId,
   );
 
   @override
@@ -138,6 +148,7 @@ class WorkflowExecutionWithoutResultResponse {
       'startTime: $startTime, '
       'endTime: $endTime, '
       'parentExecutionId: $parentExecutionId, '
-      'totalDurationMs: $totalDurationMs'
+      'totalDurationMs: $totalDurationMs, '
+      'runId: $runId'
       ')';
 }

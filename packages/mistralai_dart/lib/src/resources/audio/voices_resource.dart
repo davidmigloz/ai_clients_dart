@@ -41,11 +41,18 @@ class VoicesResource extends ResourceBase {
 
   /// Lists all voices.
   ///
+  /// Use [type] to filter by voice type.
+  ///
   /// Returns a paginated [VoiceListResponse] of available voices.
-  Future<VoiceListResponse> list({int? limit, int? offset}) async {
+  Future<VoiceListResponse> list({
+    int? limit,
+    int? offset,
+    String? type,
+  }) async {
     final queryParams = <String, String>{};
     if (limit != null) queryParams['limit'] = limit.toString();
     if (offset != null) queryParams['offset'] = offset.toString();
+    if (type != null) queryParams['type'] = type;
 
     final url = requestBuilder.buildUrl(
       '/v1/audio/voices',

@@ -34,6 +34,9 @@ class WorkflowExecutionResponse {
   /// Total duration in milliseconds.
   final int? totalDurationMs;
 
+  /// The run identifier.
+  final String? runId;
+
   /// Creates a [WorkflowExecutionResponse].
   const WorkflowExecutionResponse({
     required this.workflowName,
@@ -45,6 +48,7 @@ class WorkflowExecutionResponse {
     required this.result,
     this.parentExecutionId,
     this.totalDurationMs,
+    this.runId,
   });
 
   /// Creates a [WorkflowExecutionResponse] from JSON.
@@ -61,6 +65,7 @@ class WorkflowExecutionResponse {
         result: json['result'],
         parentExecutionId: json['parent_execution_id'] as String?,
         totalDurationMs: json['total_duration_ms'] as int?,
+        runId: json['run_id'] as String?,
       );
 
   /// Converts to JSON.
@@ -74,6 +79,7 @@ class WorkflowExecutionResponse {
     'result': result,
     if (parentExecutionId != null) 'parent_execution_id': parentExecutionId,
     if (totalDurationMs != null) 'total_duration_ms': totalDurationMs,
+    if (runId != null) 'run_id': runId,
   };
 
   /// Creates a copy with replaced values.
@@ -87,6 +93,7 @@ class WorkflowExecutionResponse {
     Object? result = unsetCopyWithValue,
     Object? parentExecutionId = unsetCopyWithValue,
     Object? totalDurationMs = unsetCopyWithValue,
+    Object? runId = unsetCopyWithValue,
   }) {
     return WorkflowExecutionResponse(
       workflowName: workflowName ?? this.workflowName,
@@ -106,6 +113,7 @@ class WorkflowExecutionResponse {
       totalDurationMs: totalDurationMs == unsetCopyWithValue
           ? this.totalDurationMs
           : totalDurationMs as int?,
+      runId: runId == unsetCopyWithValue ? this.runId : runId as String?,
     );
   }
 
@@ -122,7 +130,8 @@ class WorkflowExecutionResponse {
         endTime == other.endTime &&
         valuesDeepEqual(result, other.result) &&
         parentExecutionId == other.parentExecutionId &&
-        totalDurationMs == other.totalDurationMs;
+        totalDurationMs == other.totalDurationMs &&
+        runId == other.runId;
   }
 
   @override
@@ -136,6 +145,7 @@ class WorkflowExecutionResponse {
     valueDeepHashCode(result),
     parentExecutionId,
     totalDurationMs,
+    runId,
   );
 
   @override
@@ -149,6 +159,7 @@ class WorkflowExecutionResponse {
       'endTime: $endTime, '
       'result: $result, '
       'parentExecutionId: $parentExecutionId, '
-      'totalDurationMs: $totalDurationMs'
+      'totalDurationMs: $totalDurationMs, '
+      'runId: $runId'
       ')';
 }

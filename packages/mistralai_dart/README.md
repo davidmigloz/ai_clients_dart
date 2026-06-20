@@ -44,7 +44,7 @@ Dart client for the **[Mistral AI API](https://docs.mistral.ai/)** with chat com
 ### Operational APIs
 
 - Files, fine-tuning, and batch processing
-- Agents, conversations, and libraries (beta)
+- Agents, conversations, connectors, and libraries (beta)
 - Observability: campaigns, datasets, judges, and chat completion events (beta)
 - Workflows: execution, scheduling, deployments, and management (beta)
 
@@ -53,7 +53,7 @@ Dart client for the **[Mistral AI API](https://docs.mistral.ai/)** with chat com
 - Pure Dart with no Flutter dependency — works in mobile apps, backends, and CLIs.
 - Type-safe request and response models with minimal dependencies (`http`, `logging`, `meta`).
 - Streaming, retries, interceptors, and error handling built into the client.
-- Covers the full Mistral AI API surface, including beta agents, conversations, libraries, observability, and workflows.
+- Covers the full Mistral AI API surface, including beta agents, conversations, connectors, libraries, observability, and workflows.
 - Strict [semver](https://semver.org/) versioning so downstream packages can depend on stable, predictable version ranges.
 
 ## Quickstart
@@ -839,12 +839,57 @@ await client.libraries.delete(libraryId: library.id);
 
 </details>
 
+### How do I use connectors?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.connectors` to manage MCP connectors (Beta): create and configure connectors, manage their credentials, activate or deactivate them at the organization, workspace, or user level, and list or call their tools.
+
+```dart
+// Create an MCP connector
+final connector = await client.connectors.create(
+  request: const CreateConnectorRequest(
+    name: 'my_connector',
+    description: 'My MCP connector',
+    server: 'https://mcp.example.com',
+    visibility: ResourceVisibility.sharedOrg,
+  ),
+);
+
+// Configure user-level credentials
+await client.connectors.createOrUpdateUserCredentials(
+  connectorIdOrName: connector.id,
+  request: const CredentialsCreateOrUpdate(
+    name: 'my-cred',
+    credentials: ConnectionCredentials(bearerToken: 'secret-token'),
+  ),
+);
+
+// Activate the connector for the organization
+await client.connectors.activateForOrganization(connectorId: connector.id);
+
+// List and call the connector's tools
+final tools = await client.connectors.listTools(
+  connectorIdOrName: connector.id,
+);
+final result = await client.connectors.callTool(
+  connectorIdOrName: connector.id,
+  toolName: 'search',
+  request: const ConnectorCallToolRequest(arguments: {'query': 'mistral'}),
+);
+```
+
+→ [Full example](example/connectors_example.dart)
+
+</details>
+
 ### How do I use observability?
 
 <details>
 <summary><b>Show example</b></summary>
 
-Use `client.observability` to manage campaigns, datasets, dataset records, judges, chat completion events, and chat completion fields. These APIs help you monitor and evaluate your Mistral AI usage.
+Use `client.observability` to manage campaigns, datasets, dataset records, judges, chat completion events, and chat completion fields. You can also explore OpenTelemetry traces, spans, and logs. These APIs help you monitor and evaluate your Mistral AI usage.
 
 ```dart
 // List datasets
@@ -874,9 +919,64 @@ final campaigns = await client.observability.campaigns.list();
 
 // Browse chat completion fields
 final fields = await client.observability.chatCompletionFields.list();
+
+// Search traces and inspect their spans
+final traces = await client.observability.traces.search(
+  request: const TracesRequest(searchExpression: 'status_code = "Error"'),
+);
+final spans = await client.observability.spans.search();
+
+// Search structured logs
+final logs = await client.observability.logs.search();
 ```
 
 → [Full example](example/observability_example.dart)
+
+</details>
+
+### How do I use RAG?
+
+<details>
+<summary><b>Show example</b></summary>
+
+Use `client.rag` to configure document ingestion pipelines and manage the search indexes used for retrieval (Beta). The `ingestionPipelineConfigurations` sub-resource registers and lists pipeline configurations, while the `searchIndexes` sub-resource inspects and registers search indexes.
+
+```dart
+// List ingestion pipeline configurations
+final configs = await client.rag.ingestionPipelineConfigurations.list();
+
+// Register a configuration
+final config = await client.rag.ingestionPipelineConfigurations.register(
+  request: const CreateIngestionPipelineConfigurationRequest(
+    name: 'My ingestion pipeline',
+  ),
+);
+
+// Update the run info after a pipeline run
+await client.rag.ingestionPipelineConfigurations.updateRunInfo(
+  id: config.id,
+  request: UpdateRunInfo(
+    executionTime: DateTime.now().toUtc(),
+    chunksCount: 128,
+  ),
+);
+
+// Inspect and register search indexes
+final indexes = await client.rag.searchIndexes.list();
+final index = await client.rag.searchIndexes.register(
+  request: const CreateSearchIndexInfoRequest(
+    name: 'My search index',
+    index: CreateVespaSearchIndexInfoRequest(
+      k8sCluster: 'cluster',
+      k8sNamespace: 'namespace',
+      vespaInstanceName: 'instance',
+      schemas: [CreateVespaSchemaRequest(name: 'documents')],
+    ),
+  ),
+);
+```
+
+→ [Full example](example/rag_index_example.dart)
 
 </details>
 
@@ -992,6 +1092,7 @@ See the [example/](example/) directory for complete examples:
 | [`libraries_example.dart`](example/libraries_example.dart) | Document storage (beta) |
 | [`observability_example.dart`](example/observability_example.dart) | Observability: datasets, judges, campaigns (beta) |
 | [`workflows_example.dart`](example/workflows_example.dart) | Workflow execution and scheduling (beta) |
+| [`rag_index_example.dart`](example/rag_index_example.dart) | RAG ingestion pipelines and search indexes (beta) |
 | [`models_example.dart`](example/models_example.dart) | Model listing |
 | [`error_handling_example.dart`](example/error_handling_example.dart) | Exception handling patterns |
 | [`config_example.dart`](example/config_example.dart) | Client configuration options |

@@ -18,9 +18,6 @@ enum ObservabilityErrorCode {
   /// Role not found.
   authForbiddenRoleNotFound('AUTH_FORBIDDEN_ROLE_NOT_FOUND'),
 
-  /// Organization not whitelisted.
-  authForbiddenOrgNotWhitelisted('AUTH_FORBIDDEN_ORG_NOT_WHITELISTED'),
-
   /// Unauthorized.
   authUnauthorized('AUTH_UNAUTHORIZED'),
 
@@ -130,8 +127,26 @@ enum ObservabilityErrorCode {
   /// Evaluation run transition error.
   evaluationRunTransitionError('EVALUATION_RUN_TRANSITION_ERROR'),
 
+  /// Evaluation name already exists.
+  evaluationNameAlreadyExists('EVALUATION_NAME_ALREADY_EXISTS'),
+
+  /// Project name already exists.
+  projectNameAlreadyExists('PROJECT_NAME_ALREADY_EXISTS'),
+
+  /// Span not found.
+  spanNotFound('SPAN_NOT_FOUND'),
+
+  /// Trace not found.
+  traceNotFound('TRACE_NOT_FOUND'),
+
+  /// Traces filter query parse error.
+  tracesFilterQueryParseError('TRACES_FILTER_QUERY_PARSE_ERROR'),
+
   /// Template syntax error.
   templateSyntaxError('TEMPLATE_SYNTAX_ERROR'),
+
+  /// Template error.
+  templateError('TEMPLATE_ERROR'),
 
   /// Unknown error code (forward-compatible fallback).
   unknown('UNKNOWN');

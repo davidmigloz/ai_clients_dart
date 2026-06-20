@@ -11,7 +11,6 @@ void main() {
 
         expect(request.model, 'mistral-ocr-latest');
         expect(request.document, isA<UrlDocument>());
-        expect(request.id, isNull);
         expect(request.pages, isNull);
         expect(request.includeImageBase64, isNull);
         expect(request.tableFormat, isNull);
@@ -25,7 +24,6 @@ void main() {
         final request = OcrRequest(
           model: 'custom-ocr-model',
           document: const FileDocument('file-123'),
-          id: 'req-001',
           pages: const [0, 1, 2],
           includeImageBase64: true,
           imageLimit: 10,
@@ -46,7 +44,6 @@ void main() {
 
         expect(request.model, 'custom-ocr-model');
         expect(request.document, isA<FileDocument>());
-        expect(request.id, 'req-001');
         expect(request.pages, [0, 1, 2]);
         expect(request.includeImageBase64, isTrue);
         expect(request.imageLimit, 10);
@@ -112,7 +109,6 @@ void main() {
         expect(json['document'], isA<Map<String, dynamic>>());
         final document = json['document'] as Map<String, dynamic>;
         expect(document['document_url'], 'https://example.com/doc.pdf');
-        expect(json.containsKey('id'), isFalse);
         expect(json.containsKey('pages'), isFalse);
         expect(json.containsKey('document_annotation_prompt'), isFalse);
         expect(json.containsKey('table_format'), isFalse);
@@ -126,7 +122,6 @@ void main() {
         const request = OcrRequest(
           model: 'custom-model',
           document: FileDocument('file-123'),
-          id: 'req-001',
           pages: [1, 2, 3],
           includeImageBase64: true,
           imageLimit: 5,
@@ -142,7 +137,6 @@ void main() {
         expect(json['model'], 'custom-model');
         final document = json['document'] as Map<String, dynamic>;
         expect(document['file_id'], 'file-123');
-        expect(json['id'], 'req-001');
         expect(json['pages'], [1, 2, 3]);
         expect(json['include_image_base64'], true);
         expect(json['image_limit'], 5);
@@ -184,7 +178,6 @@ void main() {
             'type': 'document_url',
             'document_url': 'https://example.com/doc.pdf',
           },
-          'id': 'req-123',
           'pages': [0, 1],
           'include_image_base64': true,
         };
@@ -193,7 +186,6 @@ void main() {
 
         expect(request.model, 'mistral-ocr-latest');
         expect(request.document, isA<UrlDocument>());
-        expect(request.id, 'req-123');
         expect(request.pages, [0, 1]);
         expect(request.includeImageBase64, isTrue);
         expect(request.documentAnnotationPrompt, isNull);
@@ -289,7 +281,6 @@ void main() {
         const original = OcrRequest(
           model: 'custom-model',
           document: FileDocument('file-123'),
-          id: 'req-001',
           pages: [0],
           includeImageBase64: true,
           documentAnnotationPrompt: 'Annotate all',
@@ -301,7 +292,6 @@ void main() {
         final copy = original.copyWith();
 
         expect(copy.model, 'custom-model');
-        expect(copy.id, 'req-001');
         expect(copy.pages, [0]);
         expect(copy.includeImageBase64, isTrue);
         expect(copy.documentAnnotationPrompt, 'Annotate all');

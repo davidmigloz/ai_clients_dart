@@ -42,6 +42,9 @@ class ScheduleDefinition {
   /// Calendars to skip.
   final List<ScheduleCalendar>? skip;
 
+  /// Maximum number of executions.
+  final int? maxExecutions;
+
   /// Creates a [ScheduleDefinition].
   ScheduleDefinition({
     required this.input,
@@ -55,6 +58,7 @@ class ScheduleDefinition {
     this.timeZoneName,
     this.policy,
     List<ScheduleCalendar>? skip,
+    this.maxExecutions,
   }) : calendars = calendars != null ? List.unmodifiable(calendars) : null,
        intervals = intervals != null ? List.unmodifiable(intervals) : null,
        cronExpressions = cronExpressions != null
@@ -84,6 +88,7 @@ class ScheduleDefinition {
         skip: (json['skip'] as List?)
             ?.map((e) => ScheduleCalendar.fromJson(e as Map<String, dynamic>))
             .toList(),
+        maxExecutions: json['max_executions'] as int?,
       );
 
   /// Converts to JSON.
@@ -101,6 +106,7 @@ class ScheduleDefinition {
     if (timeZoneName != null) 'time_zone_name': timeZoneName,
     if (policy != null) 'policy': policy?.toJson(),
     if (skip != null) 'skip': skip?.map((e) => e.toJson()).toList(),
+    if (maxExecutions != null) 'max_executions': maxExecutions,
   };
 
   /// Creates a copy with replaced values.
@@ -116,6 +122,7 @@ class ScheduleDefinition {
     Object? timeZoneName = unsetCopyWithValue,
     Object? policy = unsetCopyWithValue,
     Object? skip = unsetCopyWithValue,
+    Object? maxExecutions = unsetCopyWithValue,
   }) {
     return ScheduleDefinition(
       input: input ?? this.input,
@@ -145,6 +152,9 @@ class ScheduleDefinition {
       skip: skip == unsetCopyWithValue
           ? this.skip
           : skip as List<ScheduleCalendar>?,
+      maxExecutions: maxExecutions == unsetCopyWithValue
+          ? this.maxExecutions
+          : maxExecutions as int?,
     );
   }
 
@@ -163,7 +173,8 @@ class ScheduleDefinition {
         endAt == other.endAt &&
         jitter == other.jitter &&
         timeZoneName == other.timeZoneName &&
-        policy == other.policy;
+        policy == other.policy &&
+        maxExecutions == other.maxExecutions;
   }
 
   @override
@@ -179,6 +190,7 @@ class ScheduleDefinition {
     timeZoneName,
     policy,
     listHash(skip),
+    maxExecutions,
   );
 
   @override
@@ -194,6 +206,7 @@ class ScheduleDefinition {
       'jitter: $jitter, '
       'timeZoneName: $timeZoneName, '
       'policy: $policy, '
-      'skip: ${skip?.length ?? 'null'}'
+      'skip: ${skip?.length ?? 'null'}, '
+      'maxExecutions: $maxExecutions'
       ')';
 }

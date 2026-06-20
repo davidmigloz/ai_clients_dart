@@ -6,6 +6,9 @@ enum EventSource {
   /// Live events.
   live('LIVE'),
 
+  /// Hybrid of database and live events.
+  hybrid('HYBRID'),
+
   /// Unknown event source (forward-compatibility fallback).
   unknown('unknown');
 

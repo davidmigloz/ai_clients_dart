@@ -9,6 +9,8 @@ import '../../models/libraries/processing_status_out.dart';
 import '../../models/libraries/sharing_list.dart';
 import '../../models/libraries/sharing_request.dart';
 import '../../models/libraries/sharing_response.dart';
+import '../../models/libraries/update_document_request.dart';
+import '../../models/libraries/update_library_request.dart';
 import '../base_resource.dart';
 
 /// Resource for managing document libraries (Beta).
@@ -83,10 +85,17 @@ class LibrariesResource extends ResourceBase {
   ///
   /// [page] is the page number to retrieve (0-indexed).
   /// [pageSize] is the number of libraries per page.
-  Future<LibraryList> list({int? page, int? pageSize}) async {
+  /// [filterOwnedByMe] filters to libraries owned by the caller (deprecated).
+  Future<LibraryList> list({
+    int? page,
+    int? pageSize,
+    bool? filterOwnedByMe,
+  }) async {
     final queryParams = <String, String>{
       if (page != null) 'page': page.toString(),
       if (pageSize != null) 'page_size': pageSize.toString(),
+      if (filterOwnedByMe != null)
+        'filter_owned_by_me': filterOwnedByMe.toString(),
     };
 
     final url = requestBuilder.buildUrl(
@@ -136,6 +145,31 @@ class LibrariesResource extends ResourceBase {
     final httpRequest = http.Request('PUT', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(body);
+
+    final response = await interceptorChain.execute(httpRequest);
+    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
+    return Library.fromJson(responseBody);
+  }
+
+  /// Partially updates a library.
+  ///
+  /// Maps to the official `PATCH /v1/libraries/{library_id}` operation
+  /// (the Python SDK's `libraries.update`).
+  ///
+  /// [libraryId] is the unique identifier of the library.
+  /// [request] contains the fields to update.
+  Future<Library> updatePartial({
+    required String libraryId,
+    required UpdateLibraryRequest request,
+  }) async {
+    final url = requestBuilder.buildUrl('/v1/libraries/$libraryId');
+    final headers = requestBuilder.buildHeaders(
+      additionalHeaders: {'Content-Type': 'application/json'},
+    );
+
+    final httpRequest = http.Request('PATCH', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
 
     final response = await interceptorChain.execute(httpRequest);
     final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
@@ -346,6 +380,36 @@ class LibraryDocumentsResource extends ResourceBase {
     return LibraryDocument.fromJson(responseBody);
   }
 
+  /// Partially updates a document.
+  ///
+  /// Maps to the official
+  /// `PATCH /v1/libraries/{library_id}/documents/{document_id}` operation
+  /// (the Python SDK's `documents.update`).
+  ///
+  /// [libraryId] is the ID of the library.
+  /// [documentId] is the unique identifier of the document.
+  /// [request] contains the fields to update.
+  Future<LibraryDocument> updatePartial({
+    required String libraryId,
+    required String documentId,
+    required UpdateDocumentRequest request,
+  }) async {
+    final url = requestBuilder.buildUrl(
+      '/v1/libraries/$libraryId/documents/$documentId',
+    );
+    final headers = requestBuilder.buildHeaders(
+      additionalHeaders: {'Content-Type': 'application/json'},
+    );
+
+    final httpRequest = http.Request('PATCH', url)
+      ..headers.addAll(headers)
+      ..body = jsonEncode(request.toJson());
+
+    final response = await interceptorChain.execute(httpRequest);
+    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
+    return LibraryDocument.fromJson(responseBody);
+  }
+
   /// Deletes a document from a library.
   ///
   /// [libraryId] is the ID of the library.
@@ -372,12 +436,21 @@ class LibraryDocumentsResource extends ResourceBase {
   ///
   /// [libraryId] is the ID of the library.
   /// [documentId] is the unique identifier of the document.
+  /// [pageStart] is the first page to include (0-indexed).
+  /// [pageEnd] is the last page to include (0-indexed).
   Future<LibraryDocumentContent> getContent({
     required String libraryId,
     required String documentId,
+    int? pageStart,
+    int? pageEnd,
   }) async {
+    final queryParams = <String, String>{
+      if (pageStart != null) 'page_start': pageStart.toString(),
+      if (pageEnd != null) 'page_end': pageEnd.toString(),
+    };
     final url = requestBuilder.buildUrl(
       '/v1/libraries/$libraryId/documents/$documentId/text_content',
+      queryParams: queryParams.isNotEmpty ? queryParams : null,
     );
     final headers = requestBuilder.buildHeaders();
 

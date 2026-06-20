@@ -30,6 +30,12 @@ class WorkflowCodeDefinition {
   /// Update definitions.
   final List<UpdateDefinition>? updates;
 
+  /// Whether to execute on behalf of the caller.
+  final bool onBehalfOf;
+
+  /// Plugin metadata.
+  final Map<String, dynamic>? pluginMetadata;
+
   /// Creates a [WorkflowCodeDefinition].
   WorkflowCodeDefinition({
     required this.inputSchema,
@@ -39,6 +45,8 @@ class WorkflowCodeDefinition {
     List<QueryDefinition>? queries,
     List<SignalDefinition>? signals,
     List<UpdateDefinition>? updates,
+    this.onBehalfOf = false,
+    this.pluginMetadata,
   }) : queries = queries != null ? List.unmodifiable(queries) : null,
        signals = signals != null ? List.unmodifiable(signals) : null,
        updates = updates != null ? List.unmodifiable(updates) : null;
@@ -59,6 +67,8 @@ class WorkflowCodeDefinition {
         updates: (json['updates'] as List?)
             ?.map((e) => UpdateDefinition.fromJson(e as Map<String, dynamic>))
             .toList(),
+        onBehalfOf: json['on_behalf_of'] as bool? ?? false,
+        pluginMetadata: json['plugin_metadata'] as Map<String, dynamic>?,
       );
 
   /// Converts to JSON.
@@ -70,6 +80,8 @@ class WorkflowCodeDefinition {
     if (queries != null) 'queries': queries?.map((e) => e.toJson()).toList(),
     if (signals != null) 'signals': signals?.map((e) => e.toJson()).toList(),
     if (updates != null) 'updates': updates?.map((e) => e.toJson()).toList(),
+    'on_behalf_of': onBehalfOf,
+    if (pluginMetadata != null) 'plugin_metadata': pluginMetadata,
   };
 
   /// Creates a copy with replaced values.
@@ -81,6 +93,8 @@ class WorkflowCodeDefinition {
     Object? queries = unsetCopyWithValue,
     Object? signals = unsetCopyWithValue,
     Object? updates = unsetCopyWithValue,
+    bool? onBehalfOf,
+    Object? pluginMetadata = unsetCopyWithValue,
   }) {
     return WorkflowCodeDefinition(
       inputSchema: inputSchema ?? this.inputSchema,
@@ -100,6 +114,10 @@ class WorkflowCodeDefinition {
       updates: updates == unsetCopyWithValue
           ? this.updates
           : updates as List<UpdateDefinition>?,
+      onBehalfOf: onBehalfOf ?? this.onBehalfOf,
+      pluginMetadata: pluginMetadata == unsetCopyWithValue
+          ? this.pluginMetadata
+          : pluginMetadata as Map<String, dynamic>?,
     );
   }
 
@@ -113,8 +131,10 @@ class WorkflowCodeDefinition {
     if (!listsEqual(queries, other.queries)) return false;
     if (!listsEqual(signals, other.signals)) return false;
     if (!listsEqual(updates, other.updates)) return false;
+    if (!mapsDeepEqual(pluginMetadata, other.pluginMetadata)) return false;
     return enforceDeterminism == other.enforceDeterminism &&
-        executionTimeout == other.executionTimeout;
+        executionTimeout == other.executionTimeout &&
+        onBehalfOf == other.onBehalfOf;
   }
 
   @override
@@ -126,6 +146,8 @@ class WorkflowCodeDefinition {
     listHash(queries),
     listHash(signals),
     listHash(updates),
+    onBehalfOf,
+    mapDeepHashCode(pluginMetadata),
   );
 
   @override
@@ -137,6 +159,8 @@ class WorkflowCodeDefinition {
       'executionTimeout: $executionTimeout, '
       'queries: ${queries?.length ?? 'null'}, '
       'signals: ${signals?.length ?? 'null'}, '
-      'updates: ${updates?.length ?? 'null'}'
+      'updates: ${updates?.length ?? 'null'}, '
+      'onBehalfOf: $onBehalfOf, '
+      'pluginMetadata: $pluginMetadata'
       ')';
 }
