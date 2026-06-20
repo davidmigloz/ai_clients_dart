@@ -28,7 +28,7 @@ class CodeExecutionTool {
 
   /// Creates a [CodeExecutionTool].
   const CodeExecutionTool({
-    this.type = 'code_execution_20250825',
+    this.type = 'code_execution_20260521',
     this.cacheControl,
     this.container,
     this.allowedCallers,

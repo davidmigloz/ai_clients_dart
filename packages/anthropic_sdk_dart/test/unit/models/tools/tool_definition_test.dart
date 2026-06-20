@@ -219,6 +219,21 @@ void main() {
         );
       });
 
+      test('code execution tools default to the latest version', () {
+        // Bumped to the latest GA version in the breaking spec refresh.
+        expect(
+          const CodeExecutionBuiltInTool().type,
+          'code_execution_20260521',
+        );
+        expect(
+          CodeExecutionBuiltInTool.fromJson(const {
+            'name': 'code_execution',
+          }).type,
+          'code_execution_20260521',
+        );
+        expect(const CodeExecutionTool().type, 'code_execution_20260521');
+      });
+
       test('CodeExecutionTool.v20260521 carries the new version and '
           'round-trips', () {
         final tool = CodeExecutionTool.v20260521(

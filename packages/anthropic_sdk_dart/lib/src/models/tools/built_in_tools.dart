@@ -1460,12 +1460,12 @@ class CodeExecutionBuiltInTool extends BuiltInTool {
     this.allowedCallers,
     this.deferLoading,
     this.strict,
-  }) : type = type ?? 'code_execution_20260120';
+  }) : type = type ?? 'code_execution_20260521';
 
   /// Creates a [CodeExecutionBuiltInTool] from JSON.
   factory CodeExecutionBuiltInTool.fromJson(Map<String, dynamic> json) {
     return CodeExecutionBuiltInTool(
-      type: json['type'] as String? ?? 'code_execution_20260120',
+      type: json['type'] as String? ?? 'code_execution_20260521',
       cacheControl: json['cache_control'] != null
           ? CacheControlEphemeral.fromJson(
               json['cache_control'] as Map<String, dynamic>,
