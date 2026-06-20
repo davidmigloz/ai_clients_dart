@@ -2,8 +2,8 @@
   "specs": {
     "main": {
       "current_version": "2.3.0",
-      "last_fetched": "2026-06-05T14:05:05.024506Z",
-      "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/openai/openai-0161cb2a0faadedfc17ff59c7fcad9671962dbd170f83811003c23702148cf36.yml",
+      "last_fetched": "2026-06-20T14:45:09.941722Z",
+      "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/openai/openai-b5b621065906a2579dc180db1236ee3b08a4fca9539accc2fbbf88da0ca3923f.yml",
       "title": "OpenAI API",
       "version_history": [
         {
@@ -20,8 +20,14 @@
         },
         {
           "fetched_at": "2026-06-02T11:45:18.699766Z",
-          "note": "a6fedde… replaced by 0161cb2… on 2026-06-05 to pick up moderation scores on the Responses API (Moderation) and Chat Completions API (ChatCompletionModeration): the `moderation` request param (ModerationParam) plus input/output moderation results, including on chat completion stream chunks.",
+          "note": "a6fedde\u2026 replaced by 0161cb2\u2026 on 2026-06-05 to pick up moderation scores on the Responses API (Moderation) and Chat Completions API (ChatCompletionModeration): the `moderation` request param (ModerationParam) plus input/output moderation results, including on chat completion stream chunks.",
           "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/openai/openai-a6fedde02dc6241719ebb2589062ba2892baa8dbe928a2d718643beede85e7b3.yml",
+          "version": "2.3.0"
+        },
+        {
+          "fetched_at": "2026-06-05T14:05:05.024506Z",
+          "note": "0161cb2\u2026 replaced by b5b6210\u2026 on 2026-06-20 to pick up the Responses API reasoning context mode (Reasoning.context \u2014 which reasoning items are rendered back to the model on later turns) and the MCP tool Secure Tunnel ID (MCPTool.tunnel_id; connector_id also modeled, server_url now optional). Administration-only changes (AdminApiKey.expires_at, audit-log event types + tenant_only, spend-alert lookups) are excluded from coverage.",
+          "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/openai/openai-0161cb2a0faadedfc17ff59c7fcad9671962dbd170f83811003c23702148cf36.yml",
           "version": "2.3.0"
         }
       ]

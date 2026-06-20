@@ -157,19 +157,33 @@ sealed class ResponseTool {
   );
 
   /// Creates an MCP tool.
+  ///
+  /// One of [serverUrl], [connectorId], or [tunnelId] must be provided;
+  /// otherwise an [ArgumentError] is thrown.
   static McpTool mcp({
     required String serverLabel,
-    required String serverUrl,
+    String? serverUrl,
+    String? connectorId,
+    String? tunnelId,
     List<String>? allowedTools,
     String? requireApproval,
     bool? deferLoading,
-  }) => McpTool(
-    serverLabel: serverLabel,
-    serverUrl: serverUrl,
-    allowedTools: allowedTools,
-    requireApproval: requireApproval,
-    deferLoading: deferLoading,
-  );
+  }) {
+    if (serverUrl == null && connectorId == null && tunnelId == null) {
+      throw ArgumentError(
+        'McpTool requires one of serverUrl, connectorId, or tunnelId',
+      );
+    }
+    return McpTool(
+      serverLabel: serverLabel,
+      serverUrl: serverUrl,
+      connectorId: connectorId,
+      tunnelId: tunnelId,
+      allowedTools: allowedTools,
+      requireApproval: requireApproval,
+      deferLoading: deferLoading,
+    );
+  }
 
   /// Creates a hosted shell tool.
   static ShellTool shell() => const ShellTool();
@@ -823,13 +837,34 @@ class ImageGenerationTool extends ResponseTool {
 }
 
 /// Model Context Protocol (MCP) tool.
+///
+/// One of [serverUrl], [connectorId], or [tunnelId] must be provided. The
+/// default [McpTool] constructor enforces this with an `assert` (debug/test
+/// builds); use [ResponseTool.mcp] for a runtime [ArgumentError] in all build
+/// modes.
 @immutable
 class McpTool extends ResponseTool {
   /// Label for the MCP server.
   final String serverLabel;
 
   /// URL of the MCP server.
-  final String serverUrl;
+  ///
+  /// One of [serverUrl], [connectorId], or [tunnelId] must be provided.
+  final String? serverUrl;
+
+  /// Identifier for a service connector, like those available in ChatGPT
+  /// (e.g. `connector_dropbox`, `connector_gmail`, `connector_googlecalendar`,
+  /// `connector_googledrive`, `connector_microsoftteams`,
+  /// `connector_outlookcalendar`, `connector_outlookemail`,
+  /// `connector_sharepoint`).
+  ///
+  /// One of [serverUrl], [connectorId], or [tunnelId] must be provided.
+  final String? connectorId;
+
+  /// The Secure MCP Tunnel ID to use instead of a direct server URL.
+  ///
+  /// One of [serverUrl], [connectorId], or [tunnelId] must be provided.
+  final String? tunnelId;
 
   /// List of allowed tools from this server.
   final List<String>? allowedTools;
@@ -841,9 +876,31 @@ class McpTool extends ResponseTool {
   final bool? deferLoading;
 
   /// Creates an [McpTool].
+  ///
+  /// One of [serverUrl], [connectorId], or [tunnelId] must be provided.
   const McpTool({
     required this.serverLabel,
-    required this.serverUrl,
+    this.serverUrl,
+    this.connectorId,
+    this.tunnelId,
+    this.allowedTools,
+    this.requireApproval,
+    this.deferLoading,
+  }) : assert(
+         serverUrl != null || connectorId != null || tunnelId != null,
+         'McpTool requires one of serverUrl, connectorId, or tunnelId',
+       );
+
+  /// Unchecked constructor used by [fromJson].
+  ///
+  /// Deserialization is intentionally lenient — it does not enforce the
+  /// one-of constraint — so server-originated tools always parse and
+  /// round-trip without loss.
+  const McpTool._parsed({
+    required this.serverLabel,
+    this.serverUrl,
+    this.connectorId,
+    this.tunnelId,
     this.allowedTools,
     this.requireApproval,
     this.deferLoading,
@@ -851,9 +908,11 @@ class McpTool extends ResponseTool {
 
   /// Creates an [McpTool] from JSON.
   factory McpTool.fromJson(Map<String, dynamic> json) {
-    return McpTool(
+    return McpTool._parsed(
       serverLabel: json['server_label'] as String,
-      serverUrl: json['server_url'] as String,
+      serverUrl: json['server_url'] as String?,
+      connectorId: json['connector_id'] as String?,
+      tunnelId: json['tunnel_id'] as String?,
       allowedTools: (json['allowed_tools'] as List?)?.cast<String>(),
       requireApproval: json['require_approval'] as String?,
       deferLoading: json['defer_loading'] as bool?,
@@ -864,7 +923,9 @@ class McpTool extends ResponseTool {
   Map<String, dynamic> toJson() => {
     'type': 'mcp',
     'server_label': serverLabel,
-    'server_url': serverUrl,
+    if (serverUrl != null) 'server_url': serverUrl,
+    if (connectorId != null) 'connector_id': connectorId,
+    if (tunnelId != null) 'tunnel_id': tunnelId,
     if (allowedTools != null) 'allowed_tools': allowedTools,
     if (requireApproval != null) 'require_approval': requireApproval,
     if (deferLoading != null) 'defer_loading': deferLoading,
@@ -877,6 +938,8 @@ class McpTool extends ResponseTool {
           runtimeType == other.runtimeType &&
           serverLabel == other.serverLabel &&
           serverUrl == other.serverUrl &&
+          connectorId == other.connectorId &&
+          tunnelId == other.tunnelId &&
           listsEqual(allowedTools, other.allowedTools) &&
           requireApproval == other.requireApproval &&
           deferLoading == other.deferLoading;
@@ -885,6 +948,8 @@ class McpTool extends ResponseTool {
   int get hashCode => Object.hash(
     serverLabel,
     serverUrl,
+    connectorId,
+    tunnelId,
     allowedTools != null ? Object.hashAll(allowedTools!) : null,
     requireApproval,
     deferLoading,
@@ -892,7 +957,7 @@ class McpTool extends ResponseTool {
 
   @override
   String toString() =>
-      'McpTool(serverLabel: $serverLabel, serverUrl: $serverUrl, allowedTools: $allowedTools, requireApproval: $requireApproval, deferLoading: $deferLoading)';
+      'McpTool(serverLabel: $serverLabel, serverUrl: $serverUrl, connectorId: $connectorId, tunnelId: $tunnelId, allowedTools: $allowedTools, requireApproval: $requireApproval, deferLoading: $deferLoading)';
 }
 
 /// Hosted shell tool for command execution.

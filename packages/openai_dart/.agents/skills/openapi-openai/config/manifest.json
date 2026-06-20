@@ -455,6 +455,42 @@
       "tags": ["acknowledged"],
       "note": "Admin API audit-log enum, excluded from coverage (excluded_tags: Administration). Not implemented."
     },
+    "AdminApiKey": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "AdminApiKey",
+      "tags": ["acknowledged"],
+      "note": "Admin API key schema, excluded from coverage (excluded_tags: Administration). Not implemented."
+    },
+    "AdminApiKeyCreateResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "AdminApiKeyCreateResponse",
+      "tags": ["acknowledged"],
+      "note": "Admin API key creation response, excluded from coverage (excluded_tags: Administration). Not implemented."
+    },
+    "Reasoning": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "ReasoningConfig",
+      "file": "lib/src/models/responses/config/reasoning_config.dart",
+      "schema": "Reasoning",
+      "tags": ["acknowledged"],
+      "note": "Implemented (not codegen-tracked) as ReasoningConfig; context added."
+    },
+    "MCPTool": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "McpTool",
+      "file": "lib/src/models/responses/tools/response_tool.dart",
+      "schema": "MCPTool",
+      "tags": ["acknowledged"],
+      "note": "Implemented (not codegen-tracked) as McpTool (a ResponseTool variant); tunnel_id + connector_id added, server_url now optional."
+    },
     "CreateChatCompletionRequest": {
       "spec": "main",
       "kind": "skip",
@@ -793,7 +829,7 @@
       "file": null,
       "schema": "ResponseProperties",
       "tags": ["acknowledged"],
-      "note": "Spec helper schema; properties inlined on CreateResponse and Response. max_output_tokens moved to inline."
+      "note": "Spec helper schema; properties inlined on CreateResponse and Response. max_output_tokens, reasoning, and truncation moved to inline."
     },
     "ToolChoice": {
       "spec": "main",
