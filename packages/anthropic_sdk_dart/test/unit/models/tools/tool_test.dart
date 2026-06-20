@@ -67,7 +67,7 @@ void main() {
             },
           },
           'cache_control': {'type': 'ephemeral'},
-          'allowed_callers': ['direct', 'code_execution_20260120'],
+          'allowed_callers': ['direct', 'code_execution_20260521'],
           'defer_loading': true,
           'strict': true,
           'input_examples': [
@@ -82,7 +82,7 @@ void main() {
         expect(tool.name, 'search');
         expect(tool.description, 'Search the web');
         expect(tool.cacheControl, isNotNull);
-        expect(tool.allowedCallers, ['direct', 'code_execution_20260120']);
+        expect(tool.allowedCallers, ['direct', 'code_execution_20260521']);
         expect(tool.deferLoading, isTrue);
         expect(tool.strict, isTrue);
         expect(tool.inputExamples, [

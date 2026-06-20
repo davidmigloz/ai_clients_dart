@@ -144,6 +144,7 @@ sealed class WebhookEventData {
       ),
       'session.thread_terminated' =>
         WebhookSessionThreadTerminatedEventData.fromJson(json),
+      'session.updated' => WebhookSessionUpdatedEventData.fromJson(json),
       'vault.created' => WebhookVaultCreatedEventData.fromJson(json),
       'vault.archived' => WebhookVaultArchivedEventData.fromJson(json),
       'vault.deleted' => WebhookVaultDeletedEventData.fromJson(json),
@@ -300,6 +301,83 @@ class WebhookSessionCreatedEventData extends WebhookEventData {
   @override
   String toString() =>
       'WebhookSessionCreatedEventData(id: $id, organizationId: $organizationId, '
+      'workspaceId: $workspaceId)';
+}
+
+/// Webhook event data signalling a session was updated.
+@immutable
+class WebhookSessionUpdatedEventData extends WebhookEventData {
+  /// The event-data type, always 'session.updated'.
+  String get type => 'session.updated';
+
+  /// ID of the resource this event concerns.
+  final String id;
+
+  /// ID of the organization that owns the resource.
+  final String organizationId;
+
+  /// ID of the workspace that owns the resource.
+  final String workspaceId;
+
+  /// Creates a [WebhookSessionUpdatedEventData].
+  const WebhookSessionUpdatedEventData({
+    required this.id,
+    required this.organizationId,
+    required this.workspaceId,
+  });
+
+  /// Creates a [WebhookSessionUpdatedEventData] from JSON.
+  factory WebhookSessionUpdatedEventData.fromJson(Map<String, dynamic> json) {
+    final type = json['type'];
+    if (type != 'session.updated') {
+      throw FormatException(
+        'WebhookSessionUpdatedEventData: expected type "session.updated", '
+        'got "$type"',
+      );
+    }
+    return WebhookSessionUpdatedEventData(
+      id: json['id'] as String,
+      organizationId: json['organization_id'] as String,
+      workspaceId: json['workspace_id'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'organization_id': organizationId,
+    'workspace_id': workspaceId,
+  };
+
+  /// Creates a copy with replaced values.
+  WebhookSessionUpdatedEventData copyWith({
+    String? id,
+    String? organizationId,
+    String? workspaceId,
+  }) {
+    return WebhookSessionUpdatedEventData(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      workspaceId: workspaceId ?? this.workspaceId,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WebhookSessionUpdatedEventData &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          organizationId == other.organizationId &&
+          workspaceId == other.workspaceId;
+
+  @override
+  int get hashCode => Object.hash(id, organizationId, workspaceId);
+
+  @override
+  String toString() =>
+      'WebhookSessionUpdatedEventData(id: $id, organizationId: $organizationId, '
       'workspaceId: $workspaceId)';
 }
 

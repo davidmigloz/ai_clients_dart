@@ -13,12 +13,14 @@ void main() {
         'type': 'fallback',
         'from': {'model': 'claude-opus-4-8'},
         'to': {'model': 'claude-sonnet-4-6'},
+        'trigger': {'type': 'refusal', 'category': 'frontier_llm'},
       };
 
       final block = FallbackBlock.fromJson(json);
       expect(block.from, const FallbackHopInfo(model: 'claude-opus-4-8'));
       expect(block.to, const FallbackHopInfo(model: 'claude-sonnet-4-6'));
       expect(block.type, 'fallback');
+      expect(block.trigger.category, RefusalCategory.frontierLlm);
       expect(block.toJson(), json);
     });
 
@@ -27,12 +29,14 @@ void main() {
         'type': 'fallback',
         'from': {'model': 'claude-opus-4-8'},
         'to': {'model': 'claude-sonnet-4-6'},
+        'trigger': {'type': 'refusal', 'category': null},
       });
 
       expect(block, isA<FallbackBlock>());
       final fallback = block as FallbackBlock;
       expect(fallback.from.model, 'claude-opus-4-8');
       expect(fallback.to.model, 'claude-sonnet-4-6');
+      expect(fallback.trigger.category, isNull);
     });
 
     test('fromJson rejects a mismatched discriminator', () {
@@ -46,19 +50,83 @@ void main() {
       );
     });
 
-    test('copyWith replaces hop info', () {
+    test('copyWith replaces hop info and trigger', () {
       const original = FallbackBlock(
         from: FallbackHopInfo(model: 'a'),
         to: FallbackHopInfo(model: 'b'),
+        trigger: FallbackRefusalTrigger(rawCategory: 'cyber'),
       );
-      final modified = original.copyWith(to: const FallbackHopInfo(model: 'c'));
+      final modified = original.copyWith(
+        to: const FallbackHopInfo(model: 'c'),
+        trigger: const FallbackRefusalTrigger(rawCategory: 'bio'),
+      );
       expect(modified.from.model, 'a');
       expect(modified.to.model, 'c');
+      expect(modified.trigger.category, RefusalCategory.bio);
+    });
+  });
+
+  group('FallbackRefusalTrigger', () {
+    test('round-trips a known category', () {
+      final json = {'type': 'refusal', 'category': 'cyber'};
+      final trigger = FallbackRefusalTrigger.fromJson(json);
+      expect(trigger.type, 'refusal');
+      expect(trigger.category, RefusalCategory.cyber);
+      expect(trigger.rawCategory, 'cyber');
+      expect(trigger.toJson(), json);
+    });
+
+    test('round-trips a null category', () {
+      final json = {'type': 'refusal', 'category': null};
+      final trigger = FallbackRefusalTrigger.fromJson(json);
+      expect(trigger.category, isNull);
+      expect(trigger.rawCategory, isNull);
+      expect(trigger.toJson(), json);
+    });
+
+    test('preserves an unrecognized category verbatim', () {
+      final json = {'type': 'refusal', 'category': 'future_policy'};
+      final trigger = FallbackRefusalTrigger.fromJson(json);
+      // The typed getter degrades to unknown...
+      expect(trigger.category, RefusalCategory.unknown);
+      // ...but the raw wire value round-trips unchanged.
+      expect(trigger.rawCategory, 'future_policy');
+      expect(trigger.toJson()['category'], 'future_policy');
+    });
+
+    test('copyWith clears category to null vs preserves on omission', () {
+      const trigger = FallbackRefusalTrigger(rawCategory: 'cyber');
+      expect(trigger.copyWith(rawCategory: null).rawCategory, isNull);
+      expect(trigger.copyWith().rawCategory, 'cyber');
+    });
+
+    test('fromJson throws on a wrong discriminator', () {
+      expect(
+        () => FallbackRefusalTrigger.fromJson(const {
+          'type': 'other',
+          'category': null,
+        }),
+        throwsFormatException,
+      );
+    });
+
+    test('fromJson throws when the type is missing', () {
+      expect(
+        () => FallbackRefusalTrigger.fromJson(const {'category': null}),
+        throwsFormatException,
+      );
+    });
+
+    test('fromJson throws when the required category key is absent', () {
+      expect(
+        () => FallbackRefusalTrigger.fromJson(const {'type': 'refusal'}),
+        throwsFormatException,
+      );
     });
   });
 
   group('FallbackInputBlock (request)', () {
-    test('fromJson/toJson round-trip', () {
+    test('fromJson/toJson round-trip (no trigger)', () {
       final json = {
         'type': 'fallback',
         'from': {'model': 'claude-opus-4-8'},
@@ -69,6 +137,7 @@ void main() {
       expect(block.from.model, 'claude-opus-4-8');
       expect(block.to.model, 'claude-sonnet-4-6');
       expect(block.type, 'fallback');
+      expect(block.hasTrigger, isFalse);
       expect(block.toJson(), json);
     });
 
@@ -94,6 +163,66 @@ void main() {
         'from': {'model': 'claude-opus-4-8'},
         'to': {'model': 'claude-sonnet-4-6'},
       });
+    });
+
+    test('echoes a free-form trigger map verbatim', () {
+      final json = {
+        'type': 'fallback',
+        'from': {'model': 'a'},
+        'to': {'model': 'b'},
+        'trigger': {'type': 'refusal', 'category': 'frontier_llm'},
+      };
+      final block = FallbackInputBlock.fromJson(json);
+      expect(block.hasTrigger, isTrue);
+      expect(block.trigger, {'type': 'refusal', 'category': 'frontier_llm'});
+      expect(block.toJson(), json);
+    });
+
+    test('preserves an explicit null trigger', () {
+      final json = {
+        'type': 'fallback',
+        'from': {'model': 'a'},
+        'to': {'model': 'b'},
+        'trigger': null,
+      };
+      final block = FallbackInputBlock.fromJson(json);
+      expect(block.hasTrigger, isTrue);
+      expect(block.trigger, isNull);
+      expect(block.toJson().containsKey('trigger'), isTrue);
+      expect(block.toJson()['trigger'], isNull);
+    });
+
+    test('omits an absent trigger key', () {
+      final json = {
+        'type': 'fallback',
+        'from': {'model': 'a'},
+        'to': {'model': 'b'},
+      };
+      final block = FallbackInputBlock.fromJson(json);
+      expect(block.hasTrigger, isFalse);
+      expect(block.trigger, isNull);
+      expect(block.toJson().containsKey('trigger'), isFalse);
+    });
+
+    test('stores the trigger map unmodifiable', () {
+      final block = FallbackInputBlock(
+        from: const FallbackHopInfo(model: 'a'),
+        to: const FallbackHopInfo(model: 'b'),
+        trigger: const {'type': 'refusal', 'category': 'cyber'},
+      );
+      expect(() => block.trigger!['x'] = 1, throwsUnsupportedError);
+    });
+
+    test('copyWith preserves trigger presence on omission', () {
+      final block = FallbackInputBlock(
+        from: const FallbackHopInfo(model: 'a'),
+        to: const FallbackHopInfo(model: 'b'),
+        trigger: const {'k': 'v'},
+      );
+      final copy = block.copyWith(to: const FallbackHopInfo(model: 'c'));
+      expect(copy.hasTrigger, isTrue);
+      expect(copy.trigger, {'k': 'v'});
+      expect(copy.toString(), contains('hasTrigger: true'));
     });
   });
 

@@ -388,8 +388,15 @@ class FallbackBlock extends ContentBlock {
   /// The fallback model producing the content that follows this block.
   final FallbackHopInfo to;
 
+  /// What caused the `from` model to hand over at this hop.
+  final FallbackRefusalTrigger trigger;
+
   /// Creates a [FallbackBlock].
-  const FallbackBlock({required this.from, required this.to});
+  const FallbackBlock({
+    required this.from,
+    required this.to,
+    required this.trigger,
+  });
 
   /// Object type. Always "fallback".
   String get type => 'fallback';
@@ -405,6 +412,9 @@ class FallbackBlock extends ContentBlock {
     return FallbackBlock(
       from: FallbackHopInfo.fromJson(json['from'] as Map<String, dynamic>),
       to: FallbackHopInfo.fromJson(json['to'] as Map<String, dynamic>),
+      trigger: FallbackRefusalTrigger.fromJson(
+        json['trigger'] as Map<String, dynamic>,
+      ),
     );
   }
 
@@ -413,11 +423,20 @@ class FallbackBlock extends ContentBlock {
     'type': type,
     'from': from.toJson(),
     'to': to.toJson(),
+    'trigger': trigger.toJson(),
   };
 
   /// Creates a copy with replaced values.
-  FallbackBlock copyWith({FallbackHopInfo? from, FallbackHopInfo? to}) {
-    return FallbackBlock(from: from ?? this.from, to: to ?? this.to);
+  FallbackBlock copyWith({
+    FallbackHopInfo? from,
+    FallbackHopInfo? to,
+    FallbackRefusalTrigger? trigger,
+  }) {
+    return FallbackBlock(
+      from: from ?? this.from,
+      to: to ?? this.to,
+      trigger: trigger ?? this.trigger,
+    );
   }
 
   @override
@@ -426,13 +445,14 @@ class FallbackBlock extends ContentBlock {
       other is FallbackBlock &&
           runtimeType == other.runtimeType &&
           from == other.from &&
-          to == other.to;
+          to == other.to &&
+          trigger == other.trigger;
 
   @override
-  int get hashCode => Object.hash(from, to);
+  int get hashCode => Object.hash(from, to, trigger);
 
   @override
-  String toString() => 'FallbackBlock(from: $from, to: $to)';
+  String toString() => 'FallbackBlock(from: $from, to: $to, trigger: $trigger)';
 }
 
 /// Web search tool result block.

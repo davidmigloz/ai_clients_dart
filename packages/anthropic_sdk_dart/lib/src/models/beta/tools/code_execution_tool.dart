@@ -70,6 +70,22 @@ class CodeExecutionTool {
     );
   }
 
+  /// Creates a [CodeExecutionTool] with version 2026-05-21.
+  factory CodeExecutionTool.v20260521({
+    CacheControlEphemeral? cacheControl,
+    List<String>? allowedCallers,
+    bool? deferLoading,
+    bool? strict,
+  }) {
+    return CodeExecutionTool(
+      type: 'code_execution_20260521',
+      cacheControl: cacheControl,
+      allowedCallers: allowedCallers,
+      deferLoading: deferLoading,
+      strict: strict,
+    );
+  }
+
   /// Creates a [CodeExecutionTool] from JSON.
   factory CodeExecutionTool.fromJson(Map<String, dynamic> json) {
     return CodeExecutionTool(

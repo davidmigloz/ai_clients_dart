@@ -47,6 +47,7 @@ void main() {
       false,
       isA<WebhookSessionThreadTerminatedEventData>(),
     ),
+    ('session.updated', false, isA<WebhookSessionUpdatedEventData>()),
     ('vault.created', false, isA<WebhookVaultCreatedEventData>()),
     ('vault.archived', false, isA<WebhookVaultArchivedEventData>()),
     ('vault.deleted', false, isA<WebhookVaultDeletedEventData>()),
@@ -86,8 +87,8 @@ void main() {
   }
 
   group('WebhookEventData dispatch', () {
-    test('covers all 22 spec variants', () {
-      expect(variants, hasLength(22));
+    test('covers all 23 spec variants', () {
+      expect(variants, hasLength(23));
     });
 
     for (final (type, withVault, matcher) in variants) {
@@ -98,6 +99,24 @@ void main() {
         expect(data.toJson(), json);
       });
     }
+
+    test('WebhookSessionUpdatedEventData.fromJson parses directly', () {
+      final json = dataJson('session.updated', withVault: false);
+      final data = WebhookSessionUpdatedEventData.fromJson(json);
+      expect(data.id, 'res_123');
+      expect(data.organizationId, 'org_123');
+      expect(data.workspaceId, 'wrkspc_123');
+      expect(data.toJson(), json);
+    });
+
+    test('WebhookSessionUpdatedEventData.fromJson rejects a wrong type', () {
+      expect(
+        () => WebhookSessionUpdatedEventData.fromJson(
+          dataJson('session.created', withVault: false),
+        ),
+        throwsFormatException,
+      );
+    });
 
     test('unknown type falls back to UnknownWebhookEventData', () {
       final json = {'type': 'mystery.event', 'foo': 'bar'};

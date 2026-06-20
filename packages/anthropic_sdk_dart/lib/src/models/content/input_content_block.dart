@@ -159,7 +159,8 @@ sealed class InputContentBlock {
   factory InputContentBlock.fallback({
     required FallbackHopInfo from,
     required FallbackHopInfo to,
-  }) = FallbackInputBlock;
+    Object? trigger = unsetCopyWithValue,
+  }) => FallbackInputBlock(from: from, to: to, trigger: trigger);
 
   /// Creates an [InputContentBlock] from JSON.
   factory InputContentBlock.fromJson(Map<String, dynamic> json) {
@@ -1621,8 +1622,31 @@ class FallbackInputBlock extends InputContentBlock {
   /// The fallback model producing the content that follows this block.
   final FallbackHopInfo to;
 
+  /// Whether a `trigger` value was present.
+  ///
+  /// Distinguishes an absent key from an explicit `null`, so an echoed response
+  /// block round-trips verbatim.
+  final bool hasTrigger;
+
+  /// The response block's `trigger`, echoed back verbatim.
+  ///
+  /// Free-form and ignored by the server — any JSON object or `null` is
+  /// accepted. Stored unmodifiable. `null` with [hasTrigger] `true` preserves an
+  /// explicit `null`; with [hasTrigger] `false` the key is omitted entirely.
+  final Map<String, dynamic>? trigger;
+
   /// Creates a [FallbackInputBlock].
-  const FallbackInputBlock({required this.from, required this.to});
+  ///
+  /// Omit [trigger] to leave the key absent; pass `null` to echo an explicit
+  /// `null`; pass a map to echo it verbatim.
+  FallbackInputBlock({
+    required this.from,
+    required this.to,
+    Object? trigger = unsetCopyWithValue,
+  }) : hasTrigger = trigger != unsetCopyWithValue,
+       trigger = (trigger == unsetCopyWithValue || trigger == null)
+           ? null
+           : Map<String, dynamic>.unmodifiable(trigger as Map<String, dynamic>);
 
   /// Object type. Always "fallback".
   String get type => 'fallback';
@@ -1638,6 +1662,9 @@ class FallbackInputBlock extends InputContentBlock {
     return FallbackInputBlock(
       from: FallbackHopInfo.fromJson(json['from'] as Map<String, dynamic>),
       to: FallbackHopInfo.fromJson(json['to'] as Map<String, dynamic>),
+      trigger: json.containsKey('trigger')
+          ? json['trigger']
+          : unsetCopyWithValue,
     );
   }
 
@@ -1646,11 +1673,22 @@ class FallbackInputBlock extends InputContentBlock {
     'type': type,
     'from': from.toJson(),
     'to': to.toJson(),
+    if (hasTrigger) 'trigger': trigger,
   };
 
   /// Creates a copy with replaced values.
-  FallbackInputBlock copyWith({FallbackHopInfo? from, FallbackHopInfo? to}) {
-    return FallbackInputBlock(from: from ?? this.from, to: to ?? this.to);
+  FallbackInputBlock copyWith({
+    FallbackHopInfo? from,
+    FallbackHopInfo? to,
+    Object? trigger = unsetCopyWithValue,
+  }) {
+    return FallbackInputBlock(
+      from: from ?? this.from,
+      to: to ?? this.to,
+      trigger: trigger == unsetCopyWithValue
+          ? (hasTrigger ? this.trigger : unsetCopyWithValue)
+          : trigger,
+    );
   }
 
   @override
@@ -1659,13 +1697,18 @@ class FallbackInputBlock extends InputContentBlock {
       other is FallbackInputBlock &&
           runtimeType == other.runtimeType &&
           from == other.from &&
-          to == other.to;
+          to == other.to &&
+          hasTrigger == other.hasTrigger &&
+          mapsDeepEqual(trigger, other.trigger);
 
   @override
-  int get hashCode => Object.hash(from, to);
+  int get hashCode =>
+      Object.hash(from, to, hasTrigger, mapDeepHashCode(trigger));
 
   @override
-  String toString() => 'FallbackInputBlock(from: $from, to: $to)';
+  String toString() =>
+      'FallbackInputBlock(from: $from, to: $to, hasTrigger: $hasTrigger, '
+      'trigger: $trigger)';
 }
 
 /// Advisor tool result block in input (for multi-turn conversations).

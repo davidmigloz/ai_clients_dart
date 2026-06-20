@@ -245,6 +245,7 @@ sealed class BuiltInTool {
       'code_execution_20250522' => CodeExecutionBuiltInTool.fromJson(json),
       'code_execution_20250825' => CodeExecutionBuiltInTool.fromJson(json),
       'code_execution_20260120' => CodeExecutionBuiltInTool.fromJson(json),
+      'code_execution_20260521' => CodeExecutionBuiltInTool.fromJson(json),
       // Beta tools
       final String t when t.startsWith('advisor_') => AdvisorTool.fromJson(
         json,

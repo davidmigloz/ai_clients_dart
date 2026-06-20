@@ -202,6 +202,42 @@ void main() {
         expect(builtIn, isA<CodeExecutionBuiltInTool>());
       });
 
+      test('parses code_execution_20260521 built-in tool', () {
+        final json = {
+          'type': 'code_execution_20260521',
+          'name': 'code_execution',
+        };
+
+        final definition = ToolDefinition.fromJson(json);
+
+        expect(definition, isA<BuiltInToolDefinition>());
+        final builtIn = (definition as BuiltInToolDefinition).tool;
+        expect(builtIn, isA<CodeExecutionBuiltInTool>());
+        expect(
+          (builtIn as CodeExecutionBuiltInTool).type,
+          'code_execution_20260521',
+        );
+      });
+
+      test('CodeExecutionTool.v20260521 carries the new version and '
+          'round-trips', () {
+        final tool = CodeExecutionTool.v20260521(
+          allowedCallers: const ['direct', 'code_execution_20260521'],
+        );
+
+        expect(tool.type, 'code_execution_20260521');
+        expect(tool.container, isNull);
+
+        final json = tool.toJson();
+        expect(json['type'], 'code_execution_20260521');
+        expect(json['name'], 'code_execution');
+        expect(json['allowed_callers'], ['direct', 'code_execution_20260521']);
+        expect(CodeExecutionTool.fromJson(json).allowedCallers, [
+          'direct',
+          'code_execution_20260521',
+        ]);
+      });
+
       test('parses computer_use built-in tool', () {
         final json = {
           'type': 'computer_20250124',
