@@ -4,6 +4,7 @@ import '../beta/config/output_config.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../metadata/speed.dart';
+import '../metadata/stop_reason.dart';
 import 'thinking_config.dart';
 
 /// One entry in the `fallbacks` chain on a message create request.
@@ -185,4 +186,73 @@ class FallbackHopInfo {
 
   @override
   String toString() => 'FallbackHopInfo(model: $model)';
+}
+
+/// What caused the `from` model to hand over at a fallback hop.
+///
+/// Currently the only trigger is a policy refusal by the `from` model.
+@immutable
+class FallbackRefusalTrigger {
+  /// The raw policy-category string from the API.
+  ///
+  /// Preserved for round-trip fidelity — unrecognized categories are stored
+  /// verbatim and serialized back unchanged. `null` when the refusal doesn't
+  /// map to a named category.
+  final String? rawCategory;
+
+  /// The parsed policy category that triggered the `from` model's refusal at
+  /// this hop, derived from [rawCategory].
+  ///
+  /// `null` when [rawCategory] is `null`. Same vocabulary as
+  /// `stop_details.category`.
+  RefusalCategory? get category =>
+      rawCategory == null ? null : RefusalCategory.fromJson(rawCategory!);
+
+  /// Object type. Always "refusal".
+  String get type => 'refusal';
+
+  /// Creates a [FallbackRefusalTrigger].
+  const FallbackRefusalTrigger({this.rawCategory});
+
+  /// Creates a [FallbackRefusalTrigger] from JSON.
+  factory FallbackRefusalTrigger.fromJson(Map<String, dynamic> json) {
+    final type = json['type'];
+    if (type != 'refusal') {
+      throw FormatException(
+        'FallbackRefusalTrigger: expected type "refusal", got "$type"',
+      );
+    }
+    if (!json.containsKey('category')) {
+      throw const FormatException(
+        'FallbackRefusalTrigger: missing required field "category"',
+      );
+    }
+    return FallbackRefusalTrigger(rawCategory: json['category'] as String?);
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson() => {'type': type, 'category': rawCategory};
+
+  /// Creates a copy with replaced values.
+  FallbackRefusalTrigger copyWith({Object? rawCategory = unsetCopyWithValue}) {
+    return FallbackRefusalTrigger(
+      rawCategory: rawCategory == unsetCopyWithValue
+          ? this.rawCategory
+          : rawCategory as String?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FallbackRefusalTrigger &&
+          runtimeType == other.runtimeType &&
+          rawCategory == other.rawCategory;
+
+  @override
+  int get hashCode => rawCategory.hashCode;
+
+  @override
+  String toString() =>
+      'FallbackRefusalTrigger(category: $category, rawCategory: $rawCategory)';
 }

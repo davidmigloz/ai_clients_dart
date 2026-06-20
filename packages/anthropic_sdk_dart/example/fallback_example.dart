@@ -36,7 +36,12 @@ void main() async {
     // iteration.
     for (final block in response.content) {
       if (block is FallbackBlock) {
-        print('Fallback hop: ${block.from.model} -> ${block.to.model}');
+        // `trigger` explains why `from` handed over — e.g. a policy refusal in
+        // a named category (or `null` when uncategorized).
+        print(
+          'Fallback hop: ${block.from.model} -> ${block.to.model} '
+          '(trigger: ${block.trigger.category?.value ?? 'uncategorized'})',
+        );
       }
       if (block is TextBlock) {
         print('Response: ${block.text}');

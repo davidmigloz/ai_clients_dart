@@ -126,3 +126,33 @@ int _valueDeepHashCode(dynamic value) {
   }
   return value.hashCode;
 }
+
+// ============================================================================
+// Deep immutability helpers
+// ============================================================================
+
+/// Returns a deeply-unmodifiable copy of a decoded-JSON map.
+///
+/// Recursively copies nested [Map]s and [List]s into unmodifiable views, so the
+/// result cannot be mutated at any depth. Use this to freeze free-form JSON
+/// stored on an `@immutable` model — `Map.unmodifiable` alone only protects the
+/// outer map, leaving nested containers aliased and mutable, which would let the
+/// model's deep `==`/`hashCode` and serialized output change after construction.
+Map<String, dynamic> deepUnmodifiableMap(Map<String, dynamic> map) {
+  return Map<String, dynamic>.unmodifiable(
+    map.map((key, value) => MapEntry(key, _deepUnmodifiableValue(value))),
+  );
+}
+
+dynamic _deepUnmodifiableValue(dynamic value) {
+  if (value is Map) {
+    return Map<String, dynamic>.unmodifiable(
+      value.map(
+        (key, v) => MapEntry(key.toString(), _deepUnmodifiableValue(v)),
+      ),
+    );
+  } else if (value is List) {
+    return List<dynamic>.unmodifiable(value.map(_deepUnmodifiableValue));
+  }
+  return value;
+}

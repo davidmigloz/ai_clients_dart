@@ -245,6 +245,7 @@ sealed class BuiltInTool {
       'code_execution_20250522' => CodeExecutionBuiltInTool.fromJson(json),
       'code_execution_20250825' => CodeExecutionBuiltInTool.fromJson(json),
       'code_execution_20260120' => CodeExecutionBuiltInTool.fromJson(json),
+      'code_execution_20260521' => CodeExecutionBuiltInTool.fromJson(json),
       // Beta tools
       final String t when t.startsWith('advisor_') => AdvisorTool.fromJson(
         json,
@@ -1459,12 +1460,12 @@ class CodeExecutionBuiltInTool extends BuiltInTool {
     this.allowedCallers,
     this.deferLoading,
     this.strict,
-  }) : type = type ?? 'code_execution_20260120';
+  }) : type = type ?? 'code_execution_20260521';
 
   /// Creates a [CodeExecutionBuiltInTool] from JSON.
   factory CodeExecutionBuiltInTool.fromJson(Map<String, dynamic> json) {
     return CodeExecutionBuiltInTool(
-      type: json['type'] as String? ?? 'code_execution_20260120',
+      type: json['type'] as String? ?? 'code_execution_20260521',
       cacheControl: json['cache_control'] != null
           ? CacheControlEphemeral.fromJson(
               json['cache_control'] as Map<String, dynamic>,

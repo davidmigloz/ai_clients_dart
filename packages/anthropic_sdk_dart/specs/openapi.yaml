@@ -23,11 +23,12 @@
         "type": "object"
       },
       "AllowedCaller": {
-        "description": "Specifies who can invoke a tool.\n\nValues:\n    direct: The model can call this tool directly.\n    code_execution_20250825: The tool can be called from the code execution environment (v1).\n    code_execution_20260120: The tool can be called from the code execution environment (v2 with persistence).",
+        "description": "Specifies who can invoke a tool.\n\nValues:\n    direct: The model can call this tool directly.\n    code_execution_20250825: The tool can be called from the code execution environment (v1).\n    code_execution_20260120: The tool can be called from the code execution environment (v2 with persistence).\n    code_execution_20260521: The tool can be called from the code execution environment (v2 with persistence).",
         "enum": [
           "direct",
           "code_execution_20250825",
-          "code_execution_20260120"
+          "code_execution_20260120",
+          "code_execution_20260521"
         ],
         "title": "AllowedCaller",
         "type": "string"
@@ -462,11 +463,12 @@
         "type": "object"
       },
       "BetaAllowedCaller": {
-        "description": "Specifies who can invoke a tool.\n\nValues:\n    direct: The model can call this tool directly.\n    code_execution_20250825: The tool can be called from the code execution environment (v1).\n    code_execution_20260120: The tool can be called from the code execution environment (v2 with persistence).",
+        "description": "Specifies who can invoke a tool.\n\nValues:\n    direct: The model can call this tool directly.\n    code_execution_20250825: The tool can be called from the code execution environment (v1).\n    code_execution_20260120: The tool can be called from the code execution environment (v2 with persistence).\n    code_execution_20260521: The tool can be called from the code execution environment (v2 with persistence).",
         "enum": [
           "direct",
           "code_execution_20250825",
-          "code_execution_20260120"
+          "code_execution_20260120",
+          "code_execution_20260521"
         ],
         "title": "AllowedCaller",
         "type": "string"
@@ -1543,6 +1545,68 @@
           "type"
         ],
         "title": "CodeExecutionTool_20260120",
+        "type": "object"
+      },
+      "BetaCodeExecutionTool_20260521": {
+        "additionalProperties": false,
+        "description": "Code execution tool with REPL state persistence.",
+        "properties": {
+          "allowed_callers": {
+            "items": {
+              "$ref": "#/components/schemas/BetaAllowedCaller"
+            },
+            "title": "Allowed Callers",
+            "type": "array"
+          },
+          "cache_control": {
+            "anyOf": [
+              {
+                "discriminator": {
+                  "mapping": {
+                    "ephemeral": "#/components/schemas/BetaCacheControlEphemeral"
+                  },
+                  "propertyName": "type"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/BetaCacheControlEphemeral"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Create a cache control breakpoint at this content block.",
+            "title": "Cache Control"
+          },
+          "defer_loading": {
+            "description": "If true, tool will not be included in initial system prompt. Only loaded when returned via tool_reference from tool search.",
+            "title": "Defer Loading",
+            "type": "boolean"
+          },
+          "name": {
+            "const": "code_execution",
+            "description": "Name of the tool.\n\nThis is how the tool will be called by the model and in `tool_use` blocks.",
+            "title": "Name",
+            "type": "string"
+          },
+          "strict": {
+            "description": "When true, guarantees schema validation on tool names and inputs",
+            "title": "Strict",
+            "type": "boolean"
+          },
+          "type": {
+            "const": "code_execution_20260521",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ],
+        "title": "CodeExecutionTool_20260521",
         "type": "object"
       },
       "BetaCompact20260112": {
@@ -2629,6 +2693,9 @@
                   "$ref": "#/components/schemas/BetaCodeExecutionTool_20260120"
                 },
                 {
+                  "$ref": "#/components/schemas/BetaCodeExecutionTool_20260521"
+                },
+                {
                   "$ref": "#/components/schemas/BetaComputerUseTool_20241022"
                 },
                 {
@@ -3031,6 +3098,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/BetaCodeExecutionTool_20260120"
+                },
+                {
+                  "$ref": "#/components/schemas/BetaCodeExecutionTool_20260521"
                 },
                 {
                   "$ref": "#/components/schemas/BetaComputerUseTool_20241022"
@@ -4120,6 +4190,40 @@
           "type"
         ],
         "title": "FallbackMessageIterationUsage",
+        "type": "object"
+      },
+      "BetaFallbackRefusalTrigger": {
+        "description": "The `from` model declined for policy reasons.",
+        "properties": {
+          "category": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BetaRefusalCategory"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The policy category that triggered the `from` model's refusal at this hop. `null` when the refusal doesn't map to a named category. Same vocabulary as `stop_details.category`.",
+            "x-stainless-naming": {
+              "csharp": {
+                "type_name": "BetaFallbackRefusalTriggerCategory"
+              }
+            }
+          },
+          "type": {
+            "const": "refusal",
+            "default": "refusal",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "type"
+        ],
+        "title": "FallbackRefusalTrigger",
         "type": "object"
       },
       "BetaFileDeleteResponse": {
@@ -18774,27 +18878,31 @@
         "title": "RateLimitError",
         "type": "object"
       },
+      "BetaRefusalCategory": {
+        "description": "The policy category that triggered a refusal.",
+        "enum": [
+          "cyber",
+          "bio",
+          "frontier_llm",
+          "reasoning_extraction"
+        ],
+        "title": "RefusalCategory",
+        "type": "string"
+      },
       "BetaRefusalStopDetails": {
         "description": "Structured information about a refusal.",
         "properties": {
           "category": {
             "anyOf": [
               {
-                "enum": [
-                  "cyber",
-                  "bio",
-                  "frontier_llm",
-                  "reasoning_extraction"
-                ],
-                "type": "string"
+                "$ref": "#/components/schemas/BetaRefusalCategory"
               },
               {
                 "type": "null"
               }
             ],
             "default": null,
-            "description": "The policy category that triggered the refusal.\n\n`null` when the refusal doesn't map to a named category.",
-            "title": "Category"
+            "description": "The policy category that triggered the refusal.\n\n`null` when the refusal doesn't map to a named category."
           },
           "explanation": {
             "anyOf": [
@@ -19701,13 +19809,17 @@
       },
       "BetaRequestFallbackBlock": {
         "additionalProperties": false,
-        "description": "A `fallback` block echoed back from a prior response.\n\nAccepted in `messages[].content` and never rendered into the prompt,\nnot validated against the request's `fallbacks` chain or top-level\n`model`, and stripped before the sticky-routing cache key is computed.\n\nCallers should echo the assistant turn verbatim \u2014 block included. The\nblock's position is load-bearing for thinking verification: the thinking\nruns on either side of a fallback hop carry independently-rooted\nverification hash chains, and this block is the only record of where one\nchain ends and the next begins. When thinking runs flank the boundary,\nomitting the block merges the runs into one contiguous span whose hashes\ncannot verify (the request is rejected), and moving it into the middle of\na single run splits that run's chain and is likewise rejected; between\nnon-thinking blocks the block's placement has no verification effect.",
+        "description": "A `fallback` block echoed back from a prior response.\n\nAccepted in `messages[].content` and not rendered into the prompt; not\nvalidated against the request's `fallbacks` chain or top-level `model`.\n\nEcho the assistant turn back verbatim, including this block in its\noriginal position. The block marks the boundary between content produced\nbefore and after a fallback hop, and the server relies on that boundary\nto validate the turn: when thinking runs flank the boundary, omitting\nthe block merges them into one span the server cannot validate (the\nrequest is rejected), and moving it into the middle of a single run is\nlikewise rejected; between non-thinking blocks the block's placement has\nno validation effect.",
         "properties": {
           "from": {
             "$ref": "#/components/schemas/BetaRequestFallbackHopInfo"
           },
           "to": {
             "$ref": "#/components/schemas/BetaRequestFallbackHopInfo"
+          },
+          "trigger": {
+            "description": "The response block's `trigger`, echoed verbatim. Accepted and ignored by the server; any object or `null` is allowed.",
+            "title": "Trigger"
           },
           "type": {
             "const": "fallback",
@@ -22087,7 +22199,7 @@
         "type": "object"
       },
       "BetaResponseFallbackBlock": {
-        "description": "Marks the point in `content` where one model's output gives way to the next.\n\nOne block appears per hop where a preceding model actually ran this turn and\ndeclined. A turn routed directly by the sticky decision has no such boundary\nand carries no block \u2014 the signal for whether a fallback model served the\nresponse is the presence of a `fallback_message` entry in\n`usage.iterations`, not this block.\n\nThe block is treated like a server-tool content block for streaming: it\narrives via the standard `content_block_start` / `content_block_stop`\npair and carries no deltas.",
+        "description": "Marks the point in `content` where one model's output gives way to the next.\n\nOne block appears per hop where a preceding model actually ran this turn and\ndeclined. A turn where no preceding model ran and declined has no such\nboundary and carries no block \u2014 the signal for whether a fallback model\nserved the response is the presence of a `fallback_message` entry in\n`usage.iterations`, not this block.\n\nThe block is treated like a server-tool content block for streaming: it\narrives via the standard `content_block_start` / `content_block_stop`\npair and carries no deltas.",
         "properties": {
           "from": {
             "$ref": "#/components/schemas/BetaResponseFallbackHopInfo",
@@ -22096,6 +22208,10 @@
           "to": {
             "$ref": "#/components/schemas/BetaResponseFallbackHopInfo",
             "description": "The fallback model producing the content that follows this block. Its `model` is always the canonical id."
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/BetaFallbackRefusalTrigger",
+            "description": "What caused the `from` model to hand over at this hop."
           },
           "type": {
             "const": "fallback",
@@ -22107,6 +22223,7 @@
         "required": [
           "from",
           "to",
+          "trigger",
           "type"
         ],
         "title": "ResponseFallbackBlock",
@@ -26064,6 +26181,7 @@
             "session.thread_created": "#/components/schemas/BetaWebhookSessionThreadCreatedEventData",
             "session.thread_idled": "#/components/schemas/BetaWebhookSessionThreadIdledEventData",
             "session.thread_terminated": "#/components/schemas/BetaWebhookSessionThreadTerminatedEventData",
+            "session.updated": "#/components/schemas/BetaWebhookSessionUpdatedEventData",
             "vault.archived": "#/components/schemas/BetaWebhookVaultArchivedEventData",
             "vault.created": "#/components/schemas/BetaWebhookVaultCreatedEventData",
             "vault.deleted": "#/components/schemas/BetaWebhookVaultDeletedEventData",
@@ -26140,6 +26258,9 @@
           },
           {
             "$ref": "#/components/schemas/BetaWebhookVaultCredentialRefreshFailedEventData"
+          },
+          {
+            "$ref": "#/components/schemas/BetaWebhookSessionUpdatedEventData"
           }
         ],
         "title": "BetaWebhookEventData"
@@ -26583,6 +26704,32 @@
           "session_thread_id"
         ],
         "title": "BetaWebhookSessionThreadTerminatedEventData",
+        "type": "object"
+      },
+      "BetaWebhookSessionUpdatedEventData": {
+        "properties": {
+          "id": {
+            "description": "ID of the session that triggered the event.",
+            "type": "string"
+          },
+          "organization_id": {
+            "type": "string"
+          },
+          "type": {
+            "const": "session.updated",
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "organization_id",
+          "workspace_id"
+        ],
+        "title": "BetaWebhookSessionUpdatedEventData",
         "type": "object"
       },
       "BetaWebhookVaultArchivedEventData": {
@@ -27214,6 +27361,68 @@
         "title": "CodeExecutionTool_20260120",
         "type": "object"
       },
+      "CodeExecutionTool_20260521": {
+        "additionalProperties": false,
+        "description": "Code execution tool with REPL state persistence.",
+        "properties": {
+          "allowed_callers": {
+            "items": {
+              "$ref": "#/components/schemas/AllowedCaller"
+            },
+            "title": "Allowed Callers",
+            "type": "array"
+          },
+          "cache_control": {
+            "anyOf": [
+              {
+                "discriminator": {
+                  "mapping": {
+                    "ephemeral": "#/components/schemas/CacheControlEphemeral"
+                  },
+                  "propertyName": "type"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/CacheControlEphemeral"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Create a cache control breakpoint at this content block.",
+            "title": "Cache Control"
+          },
+          "defer_loading": {
+            "description": "If true, tool will not be included in initial system prompt. Only loaded when returned via tool_reference from tool search.",
+            "title": "Defer Loading",
+            "type": "boolean"
+          },
+          "name": {
+            "const": "code_execution",
+            "description": "Name of the tool.\n\nThis is how the tool will be called by the model and in `tool_use` blocks.",
+            "title": "Name",
+            "type": "string"
+          },
+          "strict": {
+            "description": "When true, guarantees schema validation on tool names and inputs",
+            "title": "Strict",
+            "type": "boolean"
+          },
+          "type": {
+            "const": "code_execution_20260521",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ],
+        "title": "CodeExecutionTool_20260521",
+        "type": "object"
+      },
       "CompletionRequest": {
         "additionalProperties": false,
         "examples": [
@@ -27833,6 +28042,9 @@
                   "$ref": "#/components/schemas/CodeExecutionTool_20260120"
                 },
                 {
+                  "$ref": "#/components/schemas/CodeExecutionTool_20260521"
+                },
+                {
                   "$ref": "#/components/schemas/MemoryTool_20250818"
                 },
                 {
@@ -28116,6 +28328,9 @@
                   "$ref": "#/components/schemas/CodeExecutionTool_20260120"
                 },
                 {
+                  "$ref": "#/components/schemas/CodeExecutionTool_20260521"
+                },
+                {
                   "$ref": "#/components/schemas/MemoryTool_20250818"
                 },
                 {
@@ -28371,6 +28586,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/CodeExecutionTool_20260120"
+                },
+                {
+                  "$ref": "#/components/schemas/CodeExecutionTool_20260521"
                 },
                 {
                   "$ref": "#/components/schemas/MemoryTool_20250818"
@@ -30125,27 +30343,31 @@
         "title": "RateLimitError",
         "type": "object"
       },
+      "RefusalCategory": {
+        "description": "The policy category that triggered a refusal.",
+        "enum": [
+          "cyber",
+          "bio",
+          "frontier_llm",
+          "reasoning_extraction"
+        ],
+        "title": "RefusalCategory",
+        "type": "string"
+      },
       "RefusalStopDetails": {
         "description": "Structured information about a refusal.",
         "properties": {
           "category": {
             "anyOf": [
               {
-                "enum": [
-                  "cyber",
-                  "bio",
-                  "frontier_llm",
-                  "reasoning_extraction"
-                ],
-                "type": "string"
+                "$ref": "#/components/schemas/RefusalCategory"
               },
               {
                 "type": "null"
               }
             ],
             "default": null,
-            "description": "The policy category that triggered the refusal.\n\n`null` when the refusal doesn't map to a named category.",
-            "title": "Category"
+            "description": "The policy category that triggered the refusal.\n\n`null` when the refusal doesn't map to a named category."
           },
           "explanation": {
             "anyOf": [
@@ -55462,6 +55684,27 @@
           }
         },
         "summary": "session.thread_terminated webhook"
+      }
+    },
+    "session.updated": {
+      "post": {
+        "operationId": "BetaSessionUpdatedWebhook",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BetaWebhookEvent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Return any 2xx status to acknowledge receipt."
+          }
+        },
+        "summary": "session.updated webhook"
       }
     },
     "vault.archived": {

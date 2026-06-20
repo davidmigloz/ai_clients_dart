@@ -28,7 +28,7 @@ class CodeExecutionTool {
 
   /// Creates a [CodeExecutionTool].
   const CodeExecutionTool({
-    this.type = 'code_execution_20250825',
+    this.type = 'code_execution_20260521',
     this.cacheControl,
     this.container,
     this.allowedCallers,
@@ -63,6 +63,22 @@ class CodeExecutionTool {
   }) {
     return CodeExecutionTool(
       type: 'code_execution_20260120',
+      cacheControl: cacheControl,
+      allowedCallers: allowedCallers,
+      deferLoading: deferLoading,
+      strict: strict,
+    );
+  }
+
+  /// Creates a [CodeExecutionTool] with version 2026-05-21.
+  factory CodeExecutionTool.v20260521({
+    CacheControlEphemeral? cacheControl,
+    List<String>? allowedCallers,
+    bool? deferLoading,
+    bool? strict,
+  }) {
+    return CodeExecutionTool(
+      type: 'code_execution_20260521',
       cacheControl: cacheControl,
       allowedCallers: allowedCallers,
       deferLoading: deferLoading,

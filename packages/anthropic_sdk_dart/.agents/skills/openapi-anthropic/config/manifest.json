@@ -1641,7 +1641,7 @@
           "MemoryTool20250818": "memory_20250818",
           "ToolSearchToolBm25": "tool_search_tool_bm25, tool_search_tool_bm25_20251119",
           "ToolSearchToolRegex": "tool_search_tool_regex, tool_search_tool_regex_20251119",
-          "CodeExecutionTool20250522": "code_execution_20250522, code_execution_20250825, code_execution_20260120",
+          "CodeExecutionTool20250522": "code_execution_20250522, code_execution_20250825, code_execution_20260120, code_execution_20260521",
           "ComputerUseTool (beta)": "computer_* prefix",
           "McpToolset (beta)": "mcp_* prefix",
           "AdvisorTool (beta)": "advisor_* prefix"
@@ -1761,6 +1761,50 @@
       "excluded_properties": [
         "name"
       ]
+    },
+    "BetaCodeExecutionTool_20260521": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "CodeExecutionBuiltInTool",
+      "file": "lib/src/models/tools/built_in_tools.dart",
+      "schema": "BetaCodeExecutionTool_20260521",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Versioned variant of the code_execution tool — covered by CodeExecutionBuiltInTool (GA) and CodeExecutionTool (beta) via the `type` discriminator; see CodeExecutionTool20250522."
+    },
+    "CodeExecutionTool_20260521": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "CodeExecutionBuiltInTool",
+      "file": "lib/src/models/tools/built_in_tools.dart",
+      "schema": "CodeExecutionTool_20260521",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Non-beta GA variant of the code_execution tool — covered by CodeExecutionBuiltInTool via the `type` discriminator; see CodeExecutionTool20250522."
+    },
+    "AllowedCaller": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "CodeExecutionBuiltInTool",
+      "file": "lib/src/models/tools/built_in_tools.dart",
+      "schema": "AllowedCaller",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Modeled as open-ended `List<String> allowedCallers` across built-in tool classes — caller identifiers (direct, code_execution_*) are not generated as a closed Dart enum."
+    },
+    "BetaAllowedCaller": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "CodeExecutionBuiltInTool",
+      "file": "lib/src/models/tools/built_in_tools.dart",
+      "schema": "BetaAllowedCaller",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Modeled as open-ended `List<String> allowedCallers` across built-in tool classes — caller identifiers (direct, code_execution_*) are not generated as a closed Dart enum."
     },
     "ComputerUseTool (beta)": {
       "spec": "main",
@@ -2033,6 +2077,24 @@
         "acknowledged"
       ],
       "note": "Unified with non-beta RefusalStopDetails \u2014 identical schema."
+    },
+    "RefusalCategory": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "RefusalCategory",
+      "file": "lib/src/models/metadata/stop_reason.dart",
+      "schema": "RefusalCategory"
+    },
+    "BetaRefusalCategory": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "RefusalCategory",
+      "file": "lib/src/models/metadata/stop_reason.dart",
+      "schema": "BetaRefusalCategory",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Unified with non-beta RefusalCategory \u2014 identical values (bio, cyber, frontier_llm, reasoning_extraction)."
     },
     "FileScope": {
       "spec": "main",
@@ -4041,6 +4103,14 @@
       "schema": "BetaWebhookSessionCreatedEventData",
       "parent": "WebhookEventData"
     },
+    "WebhookSessionUpdatedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookSessionUpdatedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookSessionUpdatedEventData",
+      "parent": "WebhookEventData"
+    },
     "WebhookSessionDeletedEventData": {
       "spec": "main",
       "kind": "sealed_variant",
@@ -4465,6 +4535,16 @@
       "file": "lib/src/models/content/input_content_block.dart",
       "schema": "BetaRequestFallbackBlock",
       "parent": "InputContentBlock"
+    },
+    "BetaFallbackRefusalTrigger": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "FallbackRefusalTrigger",
+      "file": "lib/src/models/messages/fallback_config.dart",
+      "schema": "BetaFallbackRefusalTrigger",
+      "excluded_properties": [
+        "type"
+      ]
     },
     "BetaModelInfo": {
       "spec": "main",
