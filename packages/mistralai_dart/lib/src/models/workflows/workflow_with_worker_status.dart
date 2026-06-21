@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 import 'workflow_type.dart';
 
 /// A workflow with worker status information.
@@ -42,6 +43,9 @@ class WorkflowWithWorkerStatus {
   /// The shared namespace.
   final String? sharedNamespace;
 
+  /// The workflow tags.
+  final List<String>? tags;
+
   /// Creates a [WorkflowWithWorkerStatus].
   const WorkflowWithWorkerStatus({
     required this.id,
@@ -56,6 +60,7 @@ class WorkflowWithWorkerStatus {
     this.availableInChatAssistant = false,
     this.isTechnical = false,
     this.sharedNamespace,
+    this.tags,
   });
 
   /// Creates a [WorkflowWithWorkerStatus] from JSON.
@@ -74,6 +79,7 @@ class WorkflowWithWorkerStatus {
             json['available_in_chat_assistant'] as bool? ?? false,
         isTechnical: json['is_technical'] as bool? ?? false,
         sharedNamespace: json['shared_namespace'] as String?,
+        tags: (json['tags'] as List?)?.map((e) => e as String).toList(),
       );
 
   /// Converts to JSON.
@@ -90,6 +96,7 @@ class WorkflowWithWorkerStatus {
     'available_in_chat_assistant': availableInChatAssistant,
     'is_technical': isTechnical,
     if (sharedNamespace != null) 'shared_namespace': sharedNamespace,
+    if (tags != null) 'tags': tags,
   };
 
   /// Creates a copy with replaced values.
@@ -106,6 +113,7 @@ class WorkflowWithWorkerStatus {
     bool? availableInChatAssistant,
     bool? isTechnical,
     Object? sharedNamespace = unsetCopyWithValue,
+    Object? tags = unsetCopyWithValue,
   }) {
     return WorkflowWithWorkerStatus(
       id: id ?? this.id,
@@ -125,6 +133,7 @@ class WorkflowWithWorkerStatus {
       sharedNamespace: sharedNamespace == unsetCopyWithValue
           ? this.sharedNamespace
           : sharedNamespace as String?,
+      tags: tags == unsetCopyWithValue ? this.tags : tags as List<String>?,
     );
   }
 
@@ -144,7 +153,8 @@ class WorkflowWithWorkerStatus {
         archived == other.archived &&
         availableInChatAssistant == other.availableInChatAssistant &&
         isTechnical == other.isTechnical &&
-        sharedNamespace == other.sharedNamespace;
+        sharedNamespace == other.sharedNamespace &&
+        listsEqual(tags, other.tags);
   }
 
   @override
@@ -161,6 +171,7 @@ class WorkflowWithWorkerStatus {
     availableInChatAssistant,
     isTechnical,
     sharedNamespace,
+    listHash(tags),
   );
 
   @override
@@ -177,6 +188,7 @@ class WorkflowWithWorkerStatus {
       'archived: $archived, '
       'availableInChatAssistant: $availableInChatAssistant, '
       'isTechnical: $isTechnical, '
-      'sharedNamespace: $sharedNamespace'
+      'sharedNamespace: $sharedNamespace, '
+      'tags: $tags'
       ')';
 }

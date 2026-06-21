@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import '../../models/batch/batch_job.dart';
 import '../../models/batch/batch_job_list.dart';
 import '../../models/batch/create_batch_job_request.dart';
+import '../../models/batch/delete_batch_job_response.dart';
 import '../base_resource.dart';
 
 /// Resource for batch jobs.
@@ -127,5 +128,20 @@ class BatchJobsResource extends ResourceBase {
 
     final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
     return BatchJob.fromJson(responseBody);
+  }
+
+  /// Deletes a batch job.
+  ///
+  /// Returns a [DeleteBatchJobResponse] confirming the deletion.
+  Future<DeleteBatchJobResponse> delete({required String jobId}) async {
+    final url = requestBuilder.buildUrl('/v1/batch/jobs/$jobId');
+    final headers = requestBuilder.buildHeaders();
+
+    final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
+
+    final response = await interceptorChain.execute(httpRequest);
+
+    final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
+    return DeleteBatchJobResponse.fromJson(responseBody);
   }
 }

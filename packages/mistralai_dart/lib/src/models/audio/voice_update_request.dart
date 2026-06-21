@@ -9,6 +9,9 @@ class VoiceUpdateRequest {
   /// The voice name.
   final String? name;
 
+  /// A description of the voice.
+  final String? description;
+
   /// The voice gender.
   final String? gender;
 
@@ -24,6 +27,7 @@ class VoiceUpdateRequest {
   /// Creates a [VoiceUpdateRequest].
   const VoiceUpdateRequest({
     this.name,
+    this.description,
     this.gender,
     this.age,
     this.languages,
@@ -34,6 +38,7 @@ class VoiceUpdateRequest {
   factory VoiceUpdateRequest.fromJson(Map<String, dynamic> json) =>
       VoiceUpdateRequest(
         name: json['name'] as String?,
+        description: json['description'] as String?,
         gender: json['gender'] as String?,
         age: json['age'] as int?,
         languages: (json['languages'] as List?)?.cast<String>(),
@@ -43,6 +48,7 @@ class VoiceUpdateRequest {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (name != null) 'name': name,
+    if (description != null) 'description': description,
     if (gender != null) 'gender': gender,
     if (age != null) 'age': age,
     if (languages != null) 'languages': languages,
@@ -52,6 +58,7 @@ class VoiceUpdateRequest {
   /// Creates a copy with replaced values.
   VoiceUpdateRequest copyWith({
     Object? name = unsetCopyWithValue,
+    Object? description = unsetCopyWithValue,
     Object? gender = unsetCopyWithValue,
     Object? age = unsetCopyWithValue,
     Object? languages = unsetCopyWithValue,
@@ -59,6 +66,9 @@ class VoiceUpdateRequest {
   }) {
     return VoiceUpdateRequest(
       name: name == unsetCopyWithValue ? this.name : name as String?,
+      description: description == unsetCopyWithValue
+          ? this.description
+          : description as String?,
       gender: gender == unsetCopyWithValue ? this.gender : gender as String?,
       age: age == unsetCopyWithValue ? this.age : age as int?,
       languages: languages == unsetCopyWithValue
@@ -74,18 +84,26 @@ class VoiceUpdateRequest {
       other is VoiceUpdateRequest &&
           runtimeType == other.runtimeType &&
           name == other.name &&
+          description == other.description &&
           gender == other.gender &&
           age == other.age &&
           listsEqual(languages, other.languages) &&
           listsEqual(tags, other.tags);
 
   @override
-  int get hashCode =>
-      Object.hash(name, gender, age, listHash(languages), listHash(tags));
+  int get hashCode => Object.hash(
+    name,
+    description,
+    gender,
+    age,
+    listHash(languages),
+    listHash(tags),
+  );
 
   @override
   String toString() =>
       'VoiceUpdateRequest(name: $name, '
+      'description: $description, '
       'gender: $gender, '
       'age: $age, '
       'languages: $languages, '

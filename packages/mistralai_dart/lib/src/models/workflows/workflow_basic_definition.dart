@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 import 'workflow_metadata.dart';
 
 /// Basic workflow definition.
@@ -24,6 +25,9 @@ class WorkflowBasicDefinition {
   /// Workflow metadata.
   final WorkflowMetadata? metadata;
 
+  /// The workflow tags.
+  final List<String>? tags;
+
   /// Creates a [WorkflowBasicDefinition].
   const WorkflowBasicDefinition({
     required this.id,
@@ -32,6 +36,7 @@ class WorkflowBasicDefinition {
     required this.archived,
     this.description,
     this.metadata,
+    this.tags,
   });
 
   /// Creates a [WorkflowBasicDefinition] from JSON.
@@ -47,6 +52,7 @@ class WorkflowBasicDefinition {
                 json['metadata'] as Map<String, dynamic>,
               )
             : null,
+        tags: (json['tags'] as List?)?.map((e) => e as String).toList(),
       );
 
   /// Converts to JSON.
@@ -57,6 +63,7 @@ class WorkflowBasicDefinition {
     'archived': archived,
     if (description != null) 'description': description,
     if (metadata != null) 'metadata': metadata?.toJson(),
+    if (tags != null) 'tags': tags,
   };
 
   /// Creates a copy with replaced values.
@@ -67,6 +74,7 @@ class WorkflowBasicDefinition {
     bool? archived,
     Object? description = unsetCopyWithValue,
     Object? metadata = unsetCopyWithValue,
+    Object? tags = unsetCopyWithValue,
   }) {
     return WorkflowBasicDefinition(
       id: id ?? this.id,
@@ -79,6 +87,7 @@ class WorkflowBasicDefinition {
       metadata: metadata == unsetCopyWithValue
           ? this.metadata
           : metadata as WorkflowMetadata?,
+      tags: tags == unsetCopyWithValue ? this.tags : tags as List<String>?,
     );
   }
 
@@ -92,12 +101,20 @@ class WorkflowBasicDefinition {
         displayName == other.displayName &&
         archived == other.archived &&
         description == other.description &&
-        metadata == other.metadata;
+        metadata == other.metadata &&
+        listsEqual(tags, other.tags);
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, displayName, archived, description, metadata);
+  int get hashCode => Object.hash(
+    id,
+    name,
+    displayName,
+    archived,
+    description,
+    metadata,
+    listHash(tags),
+  );
 
   @override
   String toString() =>
@@ -107,6 +124,7 @@ class WorkflowBasicDefinition {
       'displayName: $displayName, '
       'archived: $archived, '
       'description: $description, '
-      'metadata: $metadata'
+      'metadata: $metadata, '
+      'tags: $tags'
       ')';
 }

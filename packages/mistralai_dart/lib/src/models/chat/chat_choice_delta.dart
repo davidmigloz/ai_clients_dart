@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../metadata/finish_reason.dart';
 import '../tools/tool_call.dart';
@@ -71,8 +72,24 @@ class DeltaContent {
   /// Tool calls delta.
   final List<ToolCall>? toolCalls;
 
+  /// The ID of the tool call this delta responds to.
+  final String? toolCallId;
+
+  /// The index of this message.
+  final int? index;
+
+  /// Additional metadata attached to the message.
+  final Map<String, dynamic>? metadata;
+
   /// Creates a [DeltaContent].
-  const DeltaContent({this.role, this.content, this.toolCalls});
+  const DeltaContent({
+    this.role,
+    this.content,
+    this.toolCalls,
+    this.toolCallId,
+    this.index,
+    this.metadata,
+  });
 
   /// Creates a [DeltaContent] from JSON.
   factory DeltaContent.fromJson(Map<String, dynamic> json) => DeltaContent(
@@ -81,6 +98,9 @@ class DeltaContent {
     toolCalls: (json['tool_calls'] as List?)
         ?.map((e) => ToolCall.fromJson(e as Map<String, dynamic>))
         .toList(),
+    toolCallId: json['tool_call_id'] as String?,
+    index: json['index'] as int?,
+    metadata: json['metadata'] as Map<String, dynamic>?,
   );
 
   /// Converts to JSON.
@@ -89,7 +109,33 @@ class DeltaContent {
     if (content != null) 'content': content,
     if (toolCalls != null)
       'tool_calls': toolCalls!.map((e) => e.toJson()).toList(),
+    if (toolCallId != null) 'tool_call_id': toolCallId,
+    if (index != null) 'index': index,
+    if (metadata != null) 'metadata': metadata,
   };
+
+  /// Creates a copy with replaced values.
+  DeltaContent copyWith({
+    Object? role = unsetCopyWithValue,
+    Object? content = unsetCopyWithValue,
+    Object? toolCalls = unsetCopyWithValue,
+    Object? toolCallId = unsetCopyWithValue,
+    Object? index = unsetCopyWithValue,
+    Object? metadata = unsetCopyWithValue,
+  }) => DeltaContent(
+    role: role == unsetCopyWithValue ? this.role : role as String?,
+    content: content == unsetCopyWithValue ? this.content : content as String?,
+    toolCalls: toolCalls == unsetCopyWithValue
+        ? this.toolCalls
+        : toolCalls as List<ToolCall>?,
+    toolCallId: toolCallId == unsetCopyWithValue
+        ? this.toolCallId
+        : toolCallId as String?,
+    index: index == unsetCopyWithValue ? this.index : index as int?,
+    metadata: metadata == unsetCopyWithValue
+        ? this.metadata
+        : metadata as Map<String, dynamic>?,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -98,13 +144,23 @@ class DeltaContent {
           runtimeType == other.runtimeType &&
           role == other.role &&
           content == other.content &&
-          listsEqual(toolCalls, other.toolCalls);
+          listsEqual(toolCalls, other.toolCalls) &&
+          toolCallId == other.toolCallId &&
+          index == other.index &&
+          mapsDeepEqual(metadata, other.metadata);
 
   @override
-  int get hashCode =>
-      Object.hash(role, content, Object.hashAll(toolCalls ?? []));
+  int get hashCode => Object.hash(
+    role,
+    content,
+    listHash(toolCalls),
+    toolCallId,
+    index,
+    mapDeepHashCode(metadata),
+  );
 
   @override
   String toString() =>
-      'DeltaContent(role: $role, content: $content, toolCalls: $toolCalls)';
+      'DeltaContent(role: $role, content: $content, toolCalls: $toolCalls, '
+      'toolCallId: $toolCallId, index: $index, metadata: $metadata)';
 }

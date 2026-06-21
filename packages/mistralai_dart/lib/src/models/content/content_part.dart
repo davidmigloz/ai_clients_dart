@@ -325,8 +325,15 @@ class ThinkContentPart extends ContentPart {
   /// Whether the thinking block is closed.
   final bool closed;
 
+  /// An opaque signature for the thinking block, when provided by the API.
+  final String? signature;
+
   /// Creates a [ThinkContentPart].
-  const ThinkContentPart({required this.thinking, required this.closed});
+  const ThinkContentPart({
+    required this.thinking,
+    required this.closed,
+    this.signature,
+  });
 
   /// Creates a [ThinkContentPart] from JSON.
   factory ThinkContentPart.fromJson(Map<String, dynamic> json) =>
@@ -337,6 +344,7 @@ class ThinkContentPart extends ContentPart {
                 .toList() ??
             const <ContentPart>[],
         closed: json['closed'] as bool? ?? true,
+        signature: json['signature'] as String?,
       );
 
   @override
@@ -344,14 +352,21 @@ class ThinkContentPart extends ContentPart {
     'type': type,
     'thinking': thinking.map((e) => e.toJson()).toList(),
     'closed': closed,
+    if (signature != null) 'signature': signature,
   };
 
   /// Creates a copy with the given fields replaced.
-  ThinkContentPart copyWith({List<ContentPart>? thinking, bool? closed}) =>
-      ThinkContentPart(
-        thinking: thinking ?? this.thinking,
-        closed: closed ?? this.closed,
-      );
+  ThinkContentPart copyWith({
+    List<ContentPart>? thinking,
+    bool? closed,
+    Object? signature = unsetCopyWithValue,
+  }) => ThinkContentPart(
+    thinking: thinking ?? this.thinking,
+    closed: closed ?? this.closed,
+    signature: signature == unsetCopyWithValue
+        ? this.signature
+        : signature as String?,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -359,14 +374,17 @@ class ThinkContentPart extends ContentPart {
       other is ThinkContentPart &&
           runtimeType == other.runtimeType &&
           listsEqual(thinking, other.thinking) &&
-          closed == other.closed;
+          closed == other.closed &&
+          signature == other.signature;
 
   @override
-  int get hashCode => Object.hash(type, Object.hashAll(thinking), closed);
+  int get hashCode =>
+      Object.hash(type, Object.hashAll(thinking), closed, signature);
 
   @override
   String toString() =>
-      'ThinkContentPart(thinking: ${thinking.length} parts, closed: $closed)';
+      'ThinkContentPart(thinking: ${thinking.length} parts, closed: $closed, '
+      'signature: ${signature == null ? null : '[${signature!.length} chars]'})';
 }
 
 /// File content part produced by a built-in tool (e.g. code interpreter).

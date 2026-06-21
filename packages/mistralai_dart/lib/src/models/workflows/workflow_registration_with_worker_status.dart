@@ -1,3 +1,4 @@
+// ignore_for_file: deprecated_member_use_from_same_package
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
@@ -10,8 +11,14 @@ class WorkflowRegistrationWithWorkerStatus {
   /// The registration identifier.
   final String id;
 
-  /// The task queue name.
-  final String taskQueue;
+  /// The deployment identifier.
+  final String? deploymentId;
+
+  /// The task queue.
+  ///
+  /// Deprecated: this field is deprecated in the API.
+  @Deprecated('task_queue is deprecated in the Mistral API')
+  final String? taskQueue;
 
   /// The workflow code definition.
   final WorkflowCodeDefinition definition;
@@ -31,7 +38,8 @@ class WorkflowRegistrationWithWorkerStatus {
   /// Creates a [WorkflowRegistrationWithWorkerStatus].
   const WorkflowRegistrationWithWorkerStatus({
     required this.id,
-    required this.taskQueue,
+    this.deploymentId,
+    @Deprecated('task_queue is deprecated in the Mistral API') this.taskQueue,
     required this.definition,
     required this.workflowId,
     required this.active,
@@ -44,7 +52,8 @@ class WorkflowRegistrationWithWorkerStatus {
     Map<String, dynamic> json,
   ) => WorkflowRegistrationWithWorkerStatus(
     id: json['id'] as String? ?? '',
-    taskQueue: json['task_queue'] as String? ?? '',
+    deploymentId: json['deployment_id'] as String?,
+    taskQueue: json['task_queue'] as String?,
     definition: WorkflowCodeDefinition.fromJson(
       json['definition'] as Map<String, dynamic>,
     ),
@@ -60,7 +69,8 @@ class WorkflowRegistrationWithWorkerStatus {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'id': id,
-    'task_queue': taskQueue,
+    if (deploymentId != null) 'deployment_id': deploymentId,
+    if (taskQueue != null) 'task_queue': taskQueue,
     'definition': definition.toJson(),
     'workflow_id': workflowId,
     'active': active,
@@ -71,7 +81,8 @@ class WorkflowRegistrationWithWorkerStatus {
   /// Creates a copy with replaced values.
   WorkflowRegistrationWithWorkerStatus copyWith({
     String? id,
-    String? taskQueue,
+    Object? deploymentId = unsetCopyWithValue,
+    Object? taskQueue = unsetCopyWithValue,
     WorkflowCodeDefinition? definition,
     String? workflowId,
     bool? active,
@@ -80,7 +91,12 @@ class WorkflowRegistrationWithWorkerStatus {
   }) {
     return WorkflowRegistrationWithWorkerStatus(
       id: id ?? this.id,
-      taskQueue: taskQueue ?? this.taskQueue,
+      deploymentId: deploymentId == unsetCopyWithValue
+          ? this.deploymentId
+          : deploymentId as String?,
+      taskQueue: taskQueue == unsetCopyWithValue
+          ? this.taskQueue
+          : taskQueue as String?,
       definition: definition ?? this.definition,
       workflowId: workflowId ?? this.workflowId,
       active: active ?? this.active,
@@ -98,6 +114,7 @@ class WorkflowRegistrationWithWorkerStatus {
     if (other is! WorkflowRegistrationWithWorkerStatus) return false;
     if (runtimeType != other.runtimeType) return false;
     return id == other.id &&
+        deploymentId == other.deploymentId &&
         taskQueue == other.taskQueue &&
         definition == other.definition &&
         workflowId == other.workflowId &&
@@ -109,6 +126,7 @@ class WorkflowRegistrationWithWorkerStatus {
   @override
   int get hashCode => Object.hash(
     id,
+    deploymentId,
     taskQueue,
     definition,
     workflowId,
@@ -121,6 +139,7 @@ class WorkflowRegistrationWithWorkerStatus {
   String toString() =>
       'WorkflowRegistrationWithWorkerStatus('
       'id: $id, '
+      'deploymentId: $deploymentId, '
       'taskQueue: $taskQueue, '
       'definition: $definition, '
       'workflowId: $workflowId, '

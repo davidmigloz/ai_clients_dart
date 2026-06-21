@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import 'deployment_response.dart';
 
@@ -9,9 +10,18 @@ class DeploymentListResponse {
   /// The list of deployments.
   final List<DeploymentResponse> deployments;
 
+  /// The cursor for the next page.
+  final String? nextCursor;
+
+  /// The workspace identifier.
+  final String workspaceId;
+
   /// Creates a [DeploymentListResponse].
-  DeploymentListResponse({required List<DeploymentResponse> deployments})
-    : deployments = List.unmodifiable(deployments);
+  DeploymentListResponse({
+    required List<DeploymentResponse> deployments,
+    required this.nextCursor,
+    required this.workspaceId,
+  }) : deployments = List.unmodifiable(deployments);
 
   /// Creates a [DeploymentListResponse] from JSON.
   factory DeploymentListResponse.fromJson(Map<String, dynamic> json) =>
@@ -23,16 +33,30 @@ class DeploymentListResponse {
                 )
                 .toList() ??
             [],
+        nextCursor: json['next_cursor'] as String?,
+        workspaceId: json['workspace_id'] as String? ?? '',
       );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'deployments': deployments.map((e) => e.toJson()).toList(),
+    'next_cursor': nextCursor,
+    'workspace_id': workspaceId,
   };
 
   /// Creates a copy with replaced values.
-  DeploymentListResponse copyWith({List<DeploymentResponse>? deployments}) {
-    return DeploymentListResponse(deployments: deployments ?? this.deployments);
+  DeploymentListResponse copyWith({
+    List<DeploymentResponse>? deployments,
+    Object? nextCursor = unsetCopyWithValue,
+    String? workspaceId,
+  }) {
+    return DeploymentListResponse(
+      deployments: deployments ?? this.deployments,
+      nextCursor: nextCursor == unsetCopyWithValue
+          ? this.nextCursor
+          : nextCursor as String?,
+      workspaceId: workspaceId ?? this.workspaceId,
+    );
   }
 
   @override
@@ -41,13 +65,18 @@ class DeploymentListResponse {
     if (other is! DeploymentListResponse) return false;
     if (runtimeType != other.runtimeType) return false;
     if (!listsEqual(deployments, other.deployments)) return false;
-    return true;
+    return nextCursor == other.nextCursor && workspaceId == other.workspaceId;
   }
 
   @override
-  int get hashCode => listHash(deployments);
+  int get hashCode =>
+      Object.hash(listHash(deployments), nextCursor, workspaceId);
 
   @override
   String toString() =>
-      'DeploymentListResponse(deployments: ${deployments.length})';
+      'DeploymentListResponse('
+      'deployments: ${deployments.length}, '
+      'nextCursor: $nextCursor, '
+      'workspaceId: $workspaceId'
+      ')';
 }

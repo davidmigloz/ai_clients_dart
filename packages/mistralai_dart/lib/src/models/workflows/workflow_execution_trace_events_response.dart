@@ -37,6 +37,9 @@ class WorkflowExecutionTraceEventsResponse {
   /// Total duration in milliseconds.
   final int? totalDurationMs;
 
+  /// The run identifier.
+  final String? runId;
+
   /// Creates a [WorkflowExecutionTraceEventsResponse].
   WorkflowExecutionTraceEventsResponse({
     required this.workflowName,
@@ -49,6 +52,7 @@ class WorkflowExecutionTraceEventsResponse {
     List<Map<String, dynamic>>? events,
     this.parentExecutionId,
     this.totalDurationMs,
+    this.runId,
   }) : events = events != null ? List.unmodifiable(events) : null;
 
   /// Creates a [WorkflowExecutionTraceEventsResponse] from JSON.
@@ -67,6 +71,7 @@ class WorkflowExecutionTraceEventsResponse {
     events: (json['events'] as List?)?.cast<Map<String, dynamic>>(),
     parentExecutionId: json['parent_execution_id'] as String?,
     totalDurationMs: json['total_duration_ms'] as int?,
+    runId: json['run_id'] as String?,
   );
 
   /// Converts to JSON.
@@ -81,6 +86,7 @@ class WorkflowExecutionTraceEventsResponse {
     if (events != null) 'events': events,
     if (parentExecutionId != null) 'parent_execution_id': parentExecutionId,
     if (totalDurationMs != null) 'total_duration_ms': totalDurationMs,
+    if (runId != null) 'run_id': runId,
   };
 
   /// Creates a copy with replaced values.
@@ -95,6 +101,7 @@ class WorkflowExecutionTraceEventsResponse {
     Object? events = unsetCopyWithValue,
     Object? parentExecutionId = unsetCopyWithValue,
     Object? totalDurationMs = unsetCopyWithValue,
+    Object? runId = unsetCopyWithValue,
   }) {
     return WorkflowExecutionTraceEventsResponse(
       workflowName: workflowName ?? this.workflowName,
@@ -117,6 +124,7 @@ class WorkflowExecutionTraceEventsResponse {
       totalDurationMs: totalDurationMs == unsetCopyWithValue
           ? this.totalDurationMs
           : totalDurationMs as int?,
+      runId: runId == unsetCopyWithValue ? this.runId : runId as String?,
     );
   }
 
@@ -134,7 +142,8 @@ class WorkflowExecutionTraceEventsResponse {
         endTime == other.endTime &&
         valuesDeepEqual(result, other.result) &&
         parentExecutionId == other.parentExecutionId &&
-        totalDurationMs == other.totalDurationMs;
+        totalDurationMs == other.totalDurationMs &&
+        runId == other.runId;
   }
 
   @override
@@ -149,6 +158,7 @@ class WorkflowExecutionTraceEventsResponse {
     listOfMapsHashCode(events),
     parentExecutionId,
     totalDurationMs,
+    runId,
   );
 
   @override
@@ -163,6 +173,7 @@ class WorkflowExecutionTraceEventsResponse {
       'result: $result, '
       'events: ${events?.length ?? 'null'}, '
       'parentExecutionId: $parentExecutionId, '
-      'totalDurationMs: $totalDurationMs'
+      'totalDurationMs: $totalDurationMs, '
+      'runId: $runId'
       ')';
 }

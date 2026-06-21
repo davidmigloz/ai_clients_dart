@@ -1,3 +1,4 @@
+// ignore_for_file: deprecated_member_use_from_same_package
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
@@ -10,8 +11,14 @@ class WorkflowRegistration {
   /// The registration identifier.
   final String id;
 
-  /// The task queue name.
-  final String taskQueue;
+  /// The deployment identifier.
+  final String? deploymentId;
+
+  /// The task queue.
+  ///
+  /// Deprecated: this field is deprecated in the API.
+  @Deprecated('task_queue is deprecated in the Mistral API')
+  final String? taskQueue;
 
   /// The workflow code definition.
   final WorkflowCodeDefinition definition;
@@ -28,7 +35,8 @@ class WorkflowRegistration {
   /// Creates a [WorkflowRegistration].
   const WorkflowRegistration({
     required this.id,
-    required this.taskQueue,
+    this.deploymentId,
+    @Deprecated('task_queue is deprecated in the Mistral API') this.taskQueue,
     required this.definition,
     required this.workflowId,
     this.compatibleWithChatAssistant = false,
@@ -39,7 +47,8 @@ class WorkflowRegistration {
   factory WorkflowRegistration.fromJson(Map<String, dynamic> json) =>
       WorkflowRegistration(
         id: json['id'] as String? ?? '',
-        taskQueue: json['task_queue'] as String? ?? '',
+        deploymentId: json['deployment_id'] as String?,
+        taskQueue: json['task_queue'] as String?,
         definition: WorkflowCodeDefinition.fromJson(
           json['definition'] as Map<String, dynamic>,
         ),
@@ -54,7 +63,8 @@ class WorkflowRegistration {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     'id': id,
-    'task_queue': taskQueue,
+    if (deploymentId != null) 'deployment_id': deploymentId,
+    if (taskQueue != null) 'task_queue': taskQueue,
     'definition': definition.toJson(),
     'workflow_id': workflowId,
     'compatible_with_chat_assistant': compatibleWithChatAssistant,
@@ -64,7 +74,8 @@ class WorkflowRegistration {
   /// Creates a copy with replaced values.
   WorkflowRegistration copyWith({
     String? id,
-    String? taskQueue,
+    Object? deploymentId = unsetCopyWithValue,
+    Object? taskQueue = unsetCopyWithValue,
     WorkflowCodeDefinition? definition,
     String? workflowId,
     bool? compatibleWithChatAssistant,
@@ -72,7 +83,12 @@ class WorkflowRegistration {
   }) {
     return WorkflowRegistration(
       id: id ?? this.id,
-      taskQueue: taskQueue ?? this.taskQueue,
+      deploymentId: deploymentId == unsetCopyWithValue
+          ? this.deploymentId
+          : deploymentId as String?,
+      taskQueue: taskQueue == unsetCopyWithValue
+          ? this.taskQueue
+          : taskQueue as String?,
       definition: definition ?? this.definition,
       workflowId: workflowId ?? this.workflowId,
       compatibleWithChatAssistant:
@@ -89,6 +105,7 @@ class WorkflowRegistration {
     if (other is! WorkflowRegistration) return false;
     if (runtimeType != other.runtimeType) return false;
     return id == other.id &&
+        deploymentId == other.deploymentId &&
         taskQueue == other.taskQueue &&
         definition == other.definition &&
         workflowId == other.workflowId &&
@@ -99,6 +116,7 @@ class WorkflowRegistration {
   @override
   int get hashCode => Object.hash(
     id,
+    deploymentId,
     taskQueue,
     definition,
     workflowId,
@@ -110,6 +128,7 @@ class WorkflowRegistration {
   String toString() =>
       'WorkflowRegistration('
       'id: $id, '
+      'deploymentId: $deploymentId, '
       'taskQueue: $taskQueue, '
       'definition: $definition, '
       'workflowId: $workflowId, '

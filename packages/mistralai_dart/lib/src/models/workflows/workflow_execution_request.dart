@@ -2,7 +2,6 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
-import 'network_encoded_input.dart';
 
 /// Request to execute a workflow.
 @immutable
@@ -10,8 +9,8 @@ class WorkflowExecutionRequest {
   /// The execution input.
   final Map<String, dynamic>? input;
 
-  /// Encoded input payload.
-  final NetworkEncodedInput? encodedInput;
+  /// Extensions.
+  final Map<String, dynamic>? extensions;
 
   /// Optional execution ID.
   final String? executionId;
@@ -34,7 +33,7 @@ class WorkflowExecutionRequest {
   /// Creates a [WorkflowExecutionRequest].
   const WorkflowExecutionRequest({
     this.input,
-    this.encodedInput,
+    this.extensions,
     this.executionId,
     this.deploymentName,
     this.taskQueue,
@@ -47,11 +46,7 @@ class WorkflowExecutionRequest {
   factory WorkflowExecutionRequest.fromJson(Map<String, dynamic> json) =>
       WorkflowExecutionRequest(
         input: json['input'] as Map<String, dynamic>?,
-        encodedInput: json['encoded_input'] != null
-            ? NetworkEncodedInput.fromJson(
-                json['encoded_input'] as Map<String, dynamic>,
-              )
-            : null,
+        extensions: json['extensions'] as Map<String, dynamic>?,
         executionId: json['execution_id'] as String?,
         deploymentName: json['deployment_name'] as String?,
         taskQueue: json['task_queue'] as String?,
@@ -64,7 +59,7 @@ class WorkflowExecutionRequest {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (input != null) 'input': input,
-    if (encodedInput != null) 'encoded_input': encodedInput?.toJson(),
+    if (extensions != null) 'extensions': extensions,
     if (executionId != null) 'execution_id': executionId,
     if (deploymentName != null) 'deployment_name': deploymentName,
     if (taskQueue != null) 'task_queue': taskQueue,
@@ -77,7 +72,7 @@ class WorkflowExecutionRequest {
   /// Creates a copy with replaced values.
   WorkflowExecutionRequest copyWith({
     Object? input = unsetCopyWithValue,
-    Object? encodedInput = unsetCopyWithValue,
+    Object? extensions = unsetCopyWithValue,
     Object? executionId = unsetCopyWithValue,
     Object? deploymentName = unsetCopyWithValue,
     Object? taskQueue = unsetCopyWithValue,
@@ -89,9 +84,9 @@ class WorkflowExecutionRequest {
       input: input == unsetCopyWithValue
           ? this.input
           : input as Map<String, dynamic>?,
-      encodedInput: encodedInput == unsetCopyWithValue
-          ? this.encodedInput
-          : encodedInput as NetworkEncodedInput?,
+      extensions: extensions == unsetCopyWithValue
+          ? this.extensions
+          : extensions as Map<String, dynamic>?,
       executionId: executionId == unsetCopyWithValue
           ? this.executionId
           : executionId as String?,
@@ -117,14 +112,14 @@ class WorkflowExecutionRequest {
     if (other is! WorkflowExecutionRequest) return false;
     if (runtimeType != other.runtimeType) return false;
     if (!mapsDeepEqual(input, other.input)) return false;
+    if (!mapsDeepEqual(extensions, other.extensions)) return false;
     if (!mapsDeepEqual(
       customTracingAttributes,
       other.customTracingAttributes,
     )) {
       return false;
     }
-    return encodedInput == other.encodedInput &&
-        executionId == other.executionId &&
+    return executionId == other.executionId &&
         deploymentName == other.deploymentName &&
         taskQueue == other.taskQueue &&
         timeoutSeconds == other.timeoutSeconds &&
@@ -134,7 +129,7 @@ class WorkflowExecutionRequest {
   @override
   int get hashCode => Object.hash(
     mapDeepHashCode(input),
-    encodedInput,
+    mapDeepHashCode(extensions),
     executionId,
     deploymentName,
     taskQueue,
@@ -147,7 +142,7 @@ class WorkflowExecutionRequest {
   String toString() =>
       'WorkflowExecutionRequest('
       'input: ${input?.length ?? 'null'}, '
-      'encodedInput: $encodedInput, '
+      'extensions: ${extensions?.length ?? 'null'}, '
       'executionId: $executionId, '
       'deploymentName: $deploymentName, '
       'taskQueue: $taskQueue, '

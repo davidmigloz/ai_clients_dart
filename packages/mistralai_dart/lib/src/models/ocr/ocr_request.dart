@@ -18,9 +18,6 @@ class OcrRequest {
   /// The document to process.
   final OcrDocument document;
 
-  /// Unique identifier for the request.
-  final String? id;
-
   /// Specific pages to process (0-indexed).
   ///
   /// If null, all pages are processed.
@@ -68,7 +65,6 @@ class OcrRequest {
   const OcrRequest({
     this.model = 'mistral-ocr-latest',
     required this.document,
-    this.id,
     this.pages,
     this.includeImageBase64,
     this.imageLimit,
@@ -86,13 +82,11 @@ class OcrRequest {
   factory OcrRequest.fromUrl({
     String model = 'mistral-ocr-latest',
     required String url,
-    String? id,
     List<int>? pages,
     bool? includeImageBase64,
   }) => OcrRequest(
     model: model,
     document: OcrDocument.url(url),
-    id: id,
     pages: pages,
     includeImageBase64: includeImageBase64,
   );
@@ -101,13 +95,11 @@ class OcrRequest {
   factory OcrRequest.fromFile({
     String model = 'mistral-ocr-latest',
     required String fileId,
-    String? id,
     List<int>? pages,
     bool? includeImageBase64,
   }) => OcrRequest(
     model: model,
     document: OcrDocument.file(fileId),
-    id: id,
     pages: pages,
     includeImageBase64: includeImageBase64,
   );
@@ -117,13 +109,11 @@ class OcrRequest {
     String model = 'mistral-ocr-latest',
     required String data,
     required String mimeType,
-    String? id,
     List<int>? pages,
     bool? includeImageBase64,
   }) => OcrRequest(
     model: model,
     document: OcrDocument.base64(data: data, mimeType: mimeType),
-    id: id,
     pages: pages,
     includeImageBase64: includeImageBase64,
   );
@@ -132,7 +122,6 @@ class OcrRequest {
   factory OcrRequest.fromJson(Map<String, dynamic> json) => OcrRequest(
     model: json['model'] as String? ?? 'mistral-ocr-latest',
     document: OcrDocument.fromJson(json['document'] as Map<String, dynamic>),
-    id: json['id'] as String?,
     pages: (json['pages'] as List?)?.cast<int>(),
     includeImageBase64: json['include_image_base64'] as bool?,
     imageLimit: json['image_limit'] as int?,
@@ -160,7 +149,6 @@ class OcrRequest {
   Map<String, dynamic> toJson() => {
     'model': model,
     'document': document.toJson(),
-    if (id != null) 'id': id,
     if (pages != null) 'pages': pages,
     if (includeImageBase64 != null) 'include_image_base64': includeImageBase64,
     if (imageLimit != null) 'image_limit': imageLimit,
@@ -184,7 +172,6 @@ class OcrRequest {
   OcrRequest copyWith({
     String? model,
     OcrDocument? document,
-    Object? id = unsetCopyWithValue,
     Object? pages = unsetCopyWithValue,
     Object? includeImageBase64 = unsetCopyWithValue,
     Object? imageLimit = unsetCopyWithValue,
@@ -199,7 +186,6 @@ class OcrRequest {
   }) => OcrRequest(
     model: model ?? this.model,
     document: document ?? this.document,
-    id: id == unsetCopyWithValue ? this.id : id as String?,
     pages: pages == unsetCopyWithValue ? this.pages : pages as List<int>?,
     includeImageBase64: includeImageBase64 == unsetCopyWithValue
         ? this.includeImageBase64
@@ -241,7 +227,6 @@ class OcrRequest {
           runtimeType == other.runtimeType &&
           model == other.model &&
           document == other.document &&
-          id == other.id &&
           listsEqual(pages, other.pages) &&
           includeImageBase64 == other.includeImageBase64 &&
           imageLimit == other.imageLimit &&
@@ -258,7 +243,6 @@ class OcrRequest {
   int get hashCode => Object.hash(
     model,
     document,
-    id,
     listHash(pages),
     includeImageBase64,
     imageLimit,

@@ -28,6 +28,9 @@ class SpeechRequest {
   /// Whether to stream the response.
   final bool? stream;
 
+  /// Custom request metadata.
+  final Map<String, dynamic>? metadata;
+
   /// Additional properties not covered by the named fields.
   final Map<String, dynamic>? extra;
 
@@ -39,6 +42,7 @@ class SpeechRequest {
     this.refAudio,
     this.responseFormat,
     this.stream,
+    this.metadata,
     this.extra,
   });
 
@@ -51,6 +55,7 @@ class SpeechRequest {
       'ref_audio',
       'response_format',
       'stream',
+      'metadata',
     };
     final extraEntries = {
       for (final entry in json.entries)
@@ -65,6 +70,7 @@ class SpeechRequest {
         json['response_format'] as String?,
       ),
       stream: json['stream'] as bool?,
+      metadata: json['metadata'] as Map<String, dynamic>?,
       extra: extraEntries.isEmpty ? null : extraEntries,
     );
   }
@@ -81,6 +87,7 @@ class SpeechRequest {
     if (refAudio != null) 'ref_audio': refAudio,
     if (responseFormat != null) 'response_format': responseFormat!.value,
     if (stream != null) 'stream': stream,
+    if (metadata != null) 'metadata': metadata,
   };
 
   /// Creates a copy with replaced values.
@@ -91,6 +98,7 @@ class SpeechRequest {
     Object? refAudio = unsetCopyWithValue,
     Object? responseFormat = unsetCopyWithValue,
     Object? stream = unsetCopyWithValue,
+    Object? metadata = unsetCopyWithValue,
     Object? extra = unsetCopyWithValue,
   }) {
     return SpeechRequest(
@@ -106,6 +114,9 @@ class SpeechRequest {
           ? this.responseFormat
           : responseFormat as SpeechOutputFormat?,
       stream: stream == unsetCopyWithValue ? this.stream : stream as bool?,
+      metadata: metadata == unsetCopyWithValue
+          ? this.metadata
+          : metadata as Map<String, dynamic>?,
       extra: extra == unsetCopyWithValue
           ? this.extra
           : extra as Map<String, dynamic>?,
@@ -123,6 +134,7 @@ class SpeechRequest {
           refAudio == other.refAudio &&
           responseFormat == other.responseFormat &&
           stream == other.stream &&
+          mapsDeepEqual(metadata, other.metadata) &&
           mapsDeepEqual(extra, other.extra);
 
   @override
@@ -133,6 +145,7 @@ class SpeechRequest {
     refAudio,
     responseFormat,
     stream,
+    mapDeepHashCode(metadata),
     mapDeepHashCode(extra),
   );
 
@@ -144,5 +157,6 @@ class SpeechRequest {
       'refAudio: ${refAudio != null ? '${refAudio!.length} chars' : null}, '
       'responseFormat: $responseFormat, '
       'stream: $stream, '
+      'metadata: $metadata, '
       'extra: ${extra != null ? '${extra!.length} entries' : null})';
 }

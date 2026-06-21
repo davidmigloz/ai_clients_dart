@@ -12,6 +12,9 @@ class VoiceCreateRequest {
   /// Base64-encoded audio file.
   final String sampleAudio;
 
+  /// A description of the voice.
+  final String? description;
+
   /// The voice slug identifier.
   final String? slug;
 
@@ -40,6 +43,7 @@ class VoiceCreateRequest {
   const VoiceCreateRequest({
     required this.name,
     required this.sampleAudio,
+    this.description,
     this.slug,
     this.gender,
     this.age,
@@ -55,6 +59,7 @@ class VoiceCreateRequest {
       VoiceCreateRequest(
         name: json['name'] as String? ?? '',
         sampleAudio: json['sample_audio'] as String? ?? '',
+        description: json['description'] as String?,
         slug: json['slug'] as String?,
         gender: json['gender'] as String?,
         age: json['age'] as int?,
@@ -69,6 +74,7 @@ class VoiceCreateRequest {
   Map<String, dynamic> toJson() => {
     'name': name,
     'sample_audio': sampleAudio,
+    if (description != null) 'description': description,
     if (slug != null) 'slug': slug,
     if (gender != null) 'gender': gender,
     if (age != null) 'age': age,
@@ -83,6 +89,7 @@ class VoiceCreateRequest {
   VoiceCreateRequest copyWith({
     String? name,
     String? sampleAudio,
+    Object? description = unsetCopyWithValue,
     Object? slug = unsetCopyWithValue,
     Object? gender = unsetCopyWithValue,
     Object? age = unsetCopyWithValue,
@@ -95,6 +102,9 @@ class VoiceCreateRequest {
     return VoiceCreateRequest(
       name: name ?? this.name,
       sampleAudio: sampleAudio ?? this.sampleAudio,
+      description: description == unsetCopyWithValue
+          ? this.description
+          : description as String?,
       slug: slug == unsetCopyWithValue ? this.slug : slug as String?,
       gender: gender == unsetCopyWithValue ? this.gender : gender as String?,
       age: age == unsetCopyWithValue ? this.age : age as int?,
@@ -119,6 +129,7 @@ class VoiceCreateRequest {
           runtimeType == other.runtimeType &&
           name == other.name &&
           sampleAudio == other.sampleAudio &&
+          description == other.description &&
           slug == other.slug &&
           gender == other.gender &&
           age == other.age &&
@@ -132,6 +143,7 @@ class VoiceCreateRequest {
   int get hashCode => Object.hash(
     name,
     sampleAudio,
+    description,
     slug,
     gender,
     age,
@@ -146,6 +158,7 @@ class VoiceCreateRequest {
   String toString() =>
       'VoiceCreateRequest(name: $name, '
       'sampleAudio: ${sampleAudio.length} chars, '
+      'description: $description, '
       'slug: $slug, '
       'gender: $gender, '
       'age: $age, '

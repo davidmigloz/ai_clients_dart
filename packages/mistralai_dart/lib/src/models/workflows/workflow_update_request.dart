@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 
 /// Request to update a workflow.
 @immutable
@@ -14,11 +15,15 @@ class WorkflowUpdateRequest {
   /// Whether to make available in chat assistant.
   final bool? availableInChatAssistant;
 
+  /// The workflow tags.
+  final List<String>? tags;
+
   /// Creates a [WorkflowUpdateRequest].
   const WorkflowUpdateRequest({
     this.displayName,
     this.description,
     this.availableInChatAssistant,
+    this.tags,
   });
 
   /// Creates a [WorkflowUpdateRequest] from JSON.
@@ -27,6 +32,7 @@ class WorkflowUpdateRequest {
         displayName: json['display_name'] as String?,
         description: json['description'] as String?,
         availableInChatAssistant: json['available_in_chat_assistant'] as bool?,
+        tags: (json['tags'] as List?)?.map((e) => e as String).toList(),
       );
 
   /// Converts to JSON.
@@ -35,6 +41,7 @@ class WorkflowUpdateRequest {
     if (description != null) 'description': description,
     if (availableInChatAssistant != null)
       'available_in_chat_assistant': availableInChatAssistant,
+    if (tags != null) 'tags': tags,
   };
 
   /// Creates a copy with replaced values.
@@ -42,6 +49,7 @@ class WorkflowUpdateRequest {
     Object? displayName = unsetCopyWithValue,
     Object? description = unsetCopyWithValue,
     Object? availableInChatAssistant = unsetCopyWithValue,
+    Object? tags = unsetCopyWithValue,
   }) {
     return WorkflowUpdateRequest(
       displayName: displayName == unsetCopyWithValue
@@ -53,6 +61,7 @@ class WorkflowUpdateRequest {
       availableInChatAssistant: availableInChatAssistant == unsetCopyWithValue
           ? this.availableInChatAssistant
           : availableInChatAssistant as bool?,
+      tags: tags == unsetCopyWithValue ? this.tags : tags as List<String>?,
     );
   }
 
@@ -63,14 +72,19 @@ class WorkflowUpdateRequest {
     if (runtimeType != other.runtimeType) return false;
     return displayName == other.displayName &&
         description == other.description &&
-        availableInChatAssistant == other.availableInChatAssistant;
+        availableInChatAssistant == other.availableInChatAssistant &&
+        listsEqual(tags, other.tags);
   }
 
   @override
-  int get hashCode =>
-      Object.hash(displayName, description, availableInChatAssistant);
+  int get hashCode => Object.hash(
+    displayName,
+    description,
+    availableInChatAssistant,
+    listHash(tags),
+  );
 
   @override
   String toString() =>
-      'WorkflowUpdateRequest(displayName: $displayName, description: $description, availableInChatAssistant: $availableInChatAssistant)';
+      'WorkflowUpdateRequest(displayName: $displayName, description: $description, availableInChatAssistant: $availableInChatAssistant, tags: $tags)';
 }

@@ -21,12 +21,27 @@ class RunsResource extends ResourceBase {
 
   /// Lists workflow runs.
   ///
-  /// Supports filtering by workflow identifier, search query, status, and
-  /// pagination.
+  /// Supports filtering by workflow identifier, search query, status,
+  /// deployment, time ranges, user, sorting, and pagination.
+  ///
+  /// - [deploymentName] filters by deployment name.
+  /// - [sortBy] is the field to sort by (`start_time` or `end_time`).
+  /// - [order] is the sort order.
+  /// - [startTimeAfter]/[startTimeBefore] bound the start time (ISO 8601).
+  /// - [endTimeAfter]/[endTimeBefore] bound the end time (ISO 8601).
+  /// - [userId] filters by user ID (`current` for the authenticated user).
   Future<WorkflowExecutionListResponse> list({
     String? workflowIdentifier,
     String? search,
     String? status,
+    String? deploymentName,
+    String? sortBy,
+    String? order,
+    String? startTimeAfter,
+    String? startTimeBefore,
+    String? endTimeAfter,
+    String? endTimeBefore,
+    String? userId,
     int? pageSize,
     String? nextPageToken,
   }) async {
@@ -37,6 +52,18 @@ class RunsResource extends ResourceBase {
     }
     if (search != null) queryParams['search'] = search;
     if (status != null) queryParams['status'] = status;
+    if (deploymentName != null) queryParams['deployment_name'] = deploymentName;
+    if (sortBy != null) queryParams['sort_by'] = sortBy;
+    if (order != null) queryParams['order'] = order;
+    if (startTimeAfter != null) {
+      queryParams['start_time_after'] = startTimeAfter;
+    }
+    if (startTimeBefore != null) {
+      queryParams['start_time_before'] = startTimeBefore;
+    }
+    if (endTimeAfter != null) queryParams['end_time_after'] = endTimeAfter;
+    if (endTimeBefore != null) queryParams['end_time_before'] = endTimeBefore;
+    if (userId != null) queryParams['user_id'] = userId;
     if (pageSize != null) queryParams['page_size'] = pageSize.toString();
     if (nextPageToken != null) queryParams['next_page_token'] = nextPageToken;
 

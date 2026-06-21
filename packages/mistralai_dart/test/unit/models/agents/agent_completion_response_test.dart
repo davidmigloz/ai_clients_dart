@@ -137,7 +137,7 @@ void main() {
         expect(response.model, 'mistral-large-latest');
         expect(response.choices, hasLength(1));
         expect(
-          (response.choices.first.message.content! as MessageTextContent).text,
+          (response.choices.first.message!.content! as MessageTextContent).text,
           'Full response',
         );
         expect(response.usage?.totalTokens, 40);
@@ -185,7 +185,7 @@ void main() {
           ],
         );
         final content =
-            response.firstChoice!.message.content! as MessageTextContent;
+            response.firstChoice!.message!.content! as MessageTextContent;
         expect(content.text, 'First');
       });
 

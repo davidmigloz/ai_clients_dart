@@ -44,6 +44,9 @@ class WorkflowExecutionTraceOTelResponse {
   /// Total duration in milliseconds.
   final int? totalDurationMs;
 
+  /// The run identifier.
+  final String? runId;
+
   /// Creates a [WorkflowExecutionTraceOTelResponse].
   const WorkflowExecutionTraceOTelResponse({
     required this.workflowName,
@@ -58,6 +61,7 @@ class WorkflowExecutionTraceOTelResponse {
     this.otelTraceId,
     this.parentExecutionId,
     this.totalDurationMs,
+    this.runId,
   });
 
   /// Creates a [WorkflowExecutionTraceOTelResponse] from JSON.
@@ -82,6 +86,7 @@ class WorkflowExecutionTraceOTelResponse {
     otelTraceId: json['otel_trace_id'] as String?,
     parentExecutionId: json['parent_execution_id'] as String?,
     totalDurationMs: json['total_duration_ms'] as int?,
+    runId: json['run_id'] as String?,
   );
 
   /// Converts to JSON.
@@ -98,6 +103,7 @@ class WorkflowExecutionTraceOTelResponse {
     if (otelTraceId != null) 'otel_trace_id': otelTraceId,
     if (parentExecutionId != null) 'parent_execution_id': parentExecutionId,
     if (totalDurationMs != null) 'total_duration_ms': totalDurationMs,
+    if (runId != null) 'run_id': runId,
   };
 
   /// Creates a copy with replaced values.
@@ -114,6 +120,7 @@ class WorkflowExecutionTraceOTelResponse {
     Object? otelTraceId = unsetCopyWithValue,
     Object? parentExecutionId = unsetCopyWithValue,
     Object? totalDurationMs = unsetCopyWithValue,
+    Object? runId = unsetCopyWithValue,
   }) {
     return WorkflowExecutionTraceOTelResponse(
       workflowName: workflowName ?? this.workflowName,
@@ -140,6 +147,7 @@ class WorkflowExecutionTraceOTelResponse {
       totalDurationMs: totalDurationMs == unsetCopyWithValue
           ? this.totalDurationMs
           : totalDurationMs as int?,
+      runId: runId == unsetCopyWithValue ? this.runId : runId as String?,
     );
   }
 
@@ -159,7 +167,8 @@ class WorkflowExecutionTraceOTelResponse {
         otelTraceData == other.otelTraceData &&
         otelTraceId == other.otelTraceId &&
         parentExecutionId == other.parentExecutionId &&
-        totalDurationMs == other.totalDurationMs;
+        totalDurationMs == other.totalDurationMs &&
+        runId == other.runId;
   }
 
   @override
@@ -176,6 +185,7 @@ class WorkflowExecutionTraceOTelResponse {
     otelTraceId,
     parentExecutionId,
     totalDurationMs,
+    runId,
   );
 
   @override
@@ -192,6 +202,7 @@ class WorkflowExecutionTraceOTelResponse {
       'otelTraceData: $otelTraceData, '
       'otelTraceId: $otelTraceId, '
       'parentExecutionId: $parentExecutionId, '
-      'totalDurationMs: $totalDurationMs'
+      'totalDurationMs: $totalDurationMs, '
+      'runId: $runId'
       ')';
 }

@@ -1,5 +1,8 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
+import 'deployment_location.dart';
+
 /// Response for a deployment.
 @immutable
 class DeploymentResponse {
@@ -18,6 +21,12 @@ class DeploymentResponse {
   /// Last update timestamp.
   final String updatedAt;
 
+  /// Whether the deployment is hardened.
+  final bool isHardened;
+
+  /// The deployment location.
+  final DeploymentLocation? location;
+
   /// Creates a [DeploymentResponse].
   const DeploymentResponse({
     required this.id,
@@ -25,6 +34,8 @@ class DeploymentResponse {
     required this.isActive,
     required this.createdAt,
     required this.updatedAt,
+    this.isHardened = false,
+    this.location,
   });
 
   /// Creates a [DeploymentResponse] from JSON.
@@ -35,6 +46,12 @@ class DeploymentResponse {
         isActive: json['is_active'] as bool? ?? false,
         createdAt: json['created_at'] as String? ?? '',
         updatedAt: json['updated_at'] as String? ?? '',
+        isHardened: json['is_hardened'] as bool? ?? false,
+        location: json['location'] == null
+            ? null
+            : DeploymentLocation.fromJson(
+                json['location'] as Map<String, dynamic>,
+              ),
       );
 
   /// Converts to JSON.
@@ -44,6 +61,8 @@ class DeploymentResponse {
     'is_active': isActive,
     'created_at': createdAt,
     'updated_at': updatedAt,
+    'is_hardened': isHardened,
+    if (location != null) 'location': location!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -53,6 +72,8 @@ class DeploymentResponse {
     bool? isActive,
     String? createdAt,
     String? updatedAt,
+    bool? isHardened,
+    Object? location = unsetCopyWithValue,
   }) {
     return DeploymentResponse(
       id: id ?? this.id,
@@ -60,6 +81,10 @@ class DeploymentResponse {
       isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      isHardened: isHardened ?? this.isHardened,
+      location: location == unsetCopyWithValue
+          ? this.location
+          : location as DeploymentLocation?,
     );
   }
 
@@ -72,11 +97,21 @@ class DeploymentResponse {
         name == other.name &&
         isActive == other.isActive &&
         createdAt == other.createdAt &&
-        updatedAt == other.updatedAt;
+        updatedAt == other.updatedAt &&
+        isHardened == other.isHardened &&
+        location == other.location;
   }
 
   @override
-  int get hashCode => Object.hash(id, name, isActive, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+    id,
+    name,
+    isActive,
+    createdAt,
+    updatedAt,
+    isHardened,
+    location,
+  );
 
   @override
   String toString() =>
@@ -85,6 +120,8 @@ class DeploymentResponse {
       'name: $name, '
       'isActive: $isActive, '
       'createdAt: $createdAt, '
-      'updatedAt: $updatedAt'
+      'updatedAt: $updatedAt, '
+      'isHardened: $isHardened, '
+      'location: $location'
       ')';
 }

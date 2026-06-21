@@ -134,6 +134,142 @@
     "excluded_resources": []
   },
   "types": {
+    "IngestionPipelineConfiguration": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "IngestionPipelineConfiguration",
+      "file": "lib/src/models/rag/ingestion_pipeline_configuration.dart",
+      "schema": "IngestionPipelineConfiguration",
+      "tags": []
+    },
+    "CreateIngestionPipelineConfigurationRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateIngestionPipelineConfigurationRequest",
+      "file": "lib/src/models/rag/create_ingestion_pipeline_configuration_request.dart",
+      "schema": "CreateIngestionPipelineConfigurationRequest",
+      "tags": []
+    },
+    "UpdateRunInfo": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateRunInfo",
+      "file": "lib/src/models/rag/update_run_info.dart",
+      "schema": "UpdateRunInfo",
+      "tags": []
+    },
+    "SearchIndexResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SearchIndexResponse",
+      "file": "lib/src/models/rag/search_index_response.dart",
+      "schema": "SearchIndexResponse",
+      "tags": []
+    },
+    "CreateSearchIndexInfoRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateSearchIndexInfoRequest",
+      "file": "lib/src/models/rag/create_search_index_info_request.dart",
+      "schema": "CreateSearchIndexInfoRequest",
+      "tags": []
+    },
+    "VespaSearchIndexInfoResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VespaSearchIndexInfoResponse",
+      "file": "lib/src/models/rag/vespa_search_index_info_response.dart",
+      "schema": "VespaSearchIndexInfoResponse",
+      "tags": []
+    },
+    "CreateVespaSearchIndexInfoRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateVespaSearchIndexInfoRequest",
+      "file": "lib/src/models/rag/create_vespa_search_index_info_request.dart",
+      "schema": "CreateVespaSearchIndexInfoRequest",
+      "tags": []
+    },
+    "VespaSchemaResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "VespaSchemaResponse",
+      "file": "lib/src/models/rag/vespa_schema_response.dart",
+      "schema": "VespaSchemaResponse",
+      "tags": []
+    },
+    "CreateVespaSchemaRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateVespaSchemaRequest",
+      "file": "lib/src/models/rag/create_vespa_schema_request.dart",
+      "schema": "CreateVespaSchemaRequest",
+      "tags": []
+    },
+    "DeleteBatchJobResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeleteBatchJobResponse",
+      "file": "lib/src/models/batch/delete_batch_job_response.dart",
+      "schema": "DeleteBatchJobResponse",
+      "tags": []
+    },
+    "ChatChoice": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ChatChoice",
+      "file": "lib/src/models/chat/chat_choice.dart",
+      "schema": "ChatCompletionChoice",
+      "tags": []
+    },
+    "DeltaContent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeltaContent",
+      "file": "lib/src/models/chat/chat_choice_delta.dart",
+      "schema": "DeltaMessage",
+      "tags": []
+    },
+    "ModelCapabilities": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ModelCapabilities",
+      "file": "lib/src/models/models/model.dart",
+      "schema": "ModelCapabilities",
+      "tags": []
+    },
+    "DeploymentLocation": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DeploymentLocation",
+      "file": "lib/src/models/workflows/deployment_location.dart",
+      "schema": "DeploymentLocation",
+      "tags": []
+    },
+    "LocationType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "LocationType",
+      "file": "lib/src/models/workflows/location_type.dart",
+      "schema": "LocationType",
+      "tags": []
+    },
+    "ScheduleFutureExecution": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ScheduleFutureExecution",
+      "file": "lib/src/models/workflows/schedule_future_execution.dart",
+      "schema": "ScheduleFutureExecution",
+      "tags": []
+    },
+    "ScheduleRecentExecution": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ScheduleRecentExecution",
+      "file": "lib/src/models/workflows/schedule_recent_execution.dart",
+      "schema": "ScheduleRecentExecution",
+      "tags": []
+    },
     "APIKeyAuth": {
       "spec": "main",
       "kind": "sealed_variant",
@@ -265,14 +401,11 @@
     },
     "AuthData": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "AuthData",
-      "file": "",
+      "file": "lib/src/models/connectors/auth_data.dart",
       "schema": "AuthData",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Internal platform API"
+      "tags": []
     },
     "BaseFieldDefinition": {
       "spec": "main",
@@ -525,14 +658,11 @@
     },
     "Connector": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "Connector",
-      "file": "",
+      "file": "lib/src/models/connectors/connector.dart",
       "schema": "Connector",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Internal connector management API"
+      "tags": []
     },
     "ConnectorAuth": {
       "spec": "main",
@@ -584,14 +714,11 @@
     },
     "ConnectorsQueryFilters": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "ConnectorsQueryFilters",
-      "file": "",
+      "file": "lib/src/models/connectors/connectors_query_filters.dart",
       "schema": "ConnectorsQueryFilters",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Internal connector management API"
+      "tags": []
     },
     "ContentPart": {
       "spec": "main",
@@ -955,6 +1082,22 @@
       ],
       "note": "Internal platform API"
     },
+    "ExecutionLogRecord": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ExecutionLogRecord",
+      "file": "lib/src/models/workflows/execution_log_record.dart",
+      "schema": "ExecutionLogRecord",
+      "tags": []
+    },
+    "ExecutionLogSearchResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ExecutionLogSearchResponse",
+      "file": "lib/src/models/workflows/execution_log_search_response.dart",
+      "schema": "ExecutionLogSearchResponse",
+      "tags": []
+    },
     "Failure": {
       "spec": "main",
       "kind": "object",
@@ -1160,6 +1303,44 @@
       "schema": "JSONPatchAppend",
       "tags": []
     },
+    "EncryptedPatchValue": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "EncryptedPatchValue",
+      "file": "lib/src/models/workflows/encrypted_patch_value.dart",
+      "schema": "EncryptedPatchValue",
+      "excluded_properties": [
+        "type"
+      ],
+      "note": "`type` is a const `__encrypted__` discriminator modeled as a constant getter (validated in fromJson); excluded from field verification.",
+      "tags": []
+    },
+    "JSONPatchAppendValue": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "JSONPatchAppendValue",
+      "file": "lib/src/models/workflows/json_patch_append.dart",
+      "schema": null,
+      "note": "Type-discriminated union for JSONPatchAppend.value (string | EncryptedPatchValue); discriminated by JSON type, not a field."
+    },
+    "JSONPatchAppendValue:JSONPatchAppendStringValue": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "JSONPatchAppendStringValue",
+      "file": "lib/src/models/workflows/json_patch_append.dart",
+      "schema": null,
+      "parent": "JSONPatchAppendValue",
+      "note": null
+    },
+    "JSONPatchAppendValue:JSONPatchAppendEncryptedValue": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "JSONPatchAppendEncryptedValue",
+      "file": "lib/src/models/workflows/json_patch_append.dart",
+      "schema": null,
+      "parent": "JSONPatchAppendValue",
+      "note": null
+    },
     "JSONPatchPayloadResponse": {
       "spec": "main",
       "kind": "object",
@@ -1167,6 +1348,32 @@
       "file": "lib/src/models/workflows/json_patch_payload_response.dart",
       "schema": "JSONPatchPayloadResponse",
       "tags": []
+    },
+    "JSONPatchPayloadValue": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "JSONPatchPayloadValue",
+      "file": "lib/src/models/workflows/json_patch_payload_value.dart",
+      "schema": "JSONPatchPayloadValueResponse",
+      "note": "Type-discriminated union (array of operations | encrypted string); discriminated by JSON type, not a field."
+    },
+    "JSONPatchPayloadValue:JSONPatchPayloadOperations": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "JSONPatchPayloadOperations",
+      "file": "lib/src/models/workflows/json_patch_payload_value.dart",
+      "schema": null,
+      "parent": "JSONPatchPayloadValue",
+      "note": null
+    },
+    "JSONPatchPayloadValue:JSONPatchPayloadEncryptedValue": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "JSONPatchPayloadEncryptedValue",
+      "file": "lib/src/models/workflows/json_patch_payload_value.dart",
+      "schema": null,
+      "parent": "JSONPatchPayloadValue",
+      "note": null
     },
     "JSONPatchRemove": {
       "spec": "main",
@@ -1342,14 +1549,11 @@
     },
     "MessageResponse": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "MessageResponse",
-      "file": "",
+      "file": "lib/src/models/connectors/message_response.dart",
       "schema": "MessageResponse",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Internal platform API"
+      "tags": []
     },
     "ModelCard": {
       "spec": "main",
@@ -1493,14 +1697,11 @@
     },
     "PaginatedConnectors": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "PaginatedConnectors",
-      "file": "",
+      "file": "lib/src/models/connectors/connector.dart",
       "schema": "PaginatedConnectors",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Internal connector management API"
+      "tags": []
     },
     "PaginatedResult_CampaignPreview_": {
       "spec": "main",
@@ -1581,14 +1782,11 @@
     },
     "PaginationResponse": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "object",
       "dart_class": "PaginationResponse",
-      "file": "",
+      "file": "lib/src/models/connectors/pagination_response.dart",
       "schema": "PaginationResponse",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Internal platform API \u2014 pagination"
+      "tags": []
     },
     "PatchDatasetInSchema": {
       "spec": "main",
@@ -1724,11 +1922,14 @@
     },
     "PromptTokensDetails": {
       "spec": "main",
-      "kind": "object",
+      "kind": "skip",
       "dart_class": "PromptTokensDetails",
       "file": "lib/src/models/metadata/prompt_tokens_details.dart",
       "schema": "PromptTokensDetails",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Spec schema is now empty/unreferenced; Dart model retained (matches official client) but no longer used by UsageInfo"
     },
     "PutDatasetRecordPayloadInSchema": {
       "spec": "main",
@@ -1762,6 +1963,14 @@
         "acknowledged"
       ],
       "note": "Internal platform API \u2014 judges"
+    },
+    "PartialScheduleDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PartialScheduleDefinition",
+      "file": "lib/src/models/workflows/partial_schedule_definition.dart",
+      "schema": "PartialScheduleDefinition",
+      "tags": []
     },
     "QueryDefinition": {
       "spec": "main",
@@ -1828,14 +2037,11 @@
     },
     "ResourceVisibility": {
       "spec": "main",
-      "kind": "skip",
+      "kind": "enum",
       "dart_class": "ResourceVisibility",
-      "file": "",
+      "file": "lib/src/models/connectors/resource_visibility.dart",
       "schema": "ResourceVisibility",
-      "tags": [
-        "acknowledged"
-      ],
-      "note": "Internal MCP protocol type"
+      "tags": []
     },
     "ResponseFormat:ResponseFormatJsonObject": {
       "spec": "main",
@@ -1969,27 +2175,38 @@
     },
     "SpeechResponse": {
       "spec": "main",
-      "kind": "object",
+      "kind": "skip",
       "dart_class": "SpeechResponse",
       "file": "lib/src/models/audio/speech_response.dart",
       "schema": "SpeechResponse",
-      "tags": []
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Schema inlined in POST /v1/audio/speech response (no named component); Dart model retained"
     },
     "SpeechStreamAudioDelta": {
       "spec": "main",
-      "kind": "sealed_variant",
+      "kind": "skip",
       "dart_class": "SpeechStreamAudioDelta",
       "file": "lib/src/models/audio/speech_stream_event.dart",
       "schema": "SpeechStreamAudioDelta",
-      "parent": "SpeechStreamEvent"
+      "parent": "SpeechStreamEvent",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Schema inlined in POST /v1/audio/speech text/event-stream response; Dart model retained"
     },
     "SpeechStreamDone": {
       "spec": "main",
-      "kind": "sealed_variant",
+      "kind": "skip",
       "dart_class": "SpeechStreamDone",
       "file": "lib/src/models/audio/speech_stream_event.dart",
       "schema": "SpeechStreamDone",
-      "parent": "SpeechStreamEvent"
+      "parent": "SpeechStreamEvent",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Schema inlined in POST /v1/audio/speech text/event-stream response; Dart model retained"
     },
     "SpeechStreamEvent": {
       "spec": "main",
@@ -2015,6 +2232,14 @@
         "acknowledged"
       ],
       "note": "SSE transport wrapper; data variants modeled as SpeechStreamEvent sealed class"
+    },
+    "StreamError": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "StreamError",
+      "file": "lib/src/models/workflows/stream_error.dart",
+      "schema": "StreamError",
+      "tags": []
     },
     "StreamEventSsePayload": {
       "spec": "main",
@@ -2270,12 +2495,28 @@
       "schema": "UpdateDefinition",
       "tags": []
     },
+    "UpdateDocumentRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateDocumentRequest",
+      "file": "lib/src/models/libraries/update_document_request.dart",
+      "schema": "UpdateDocumentRequest",
+      "tags": []
+    },
     "UpdateInvocationBody": {
       "spec": "main",
       "kind": "object",
       "dart_class": "UpdateInvocationBody",
       "file": "lib/src/models/workflows/update_invocation_body.dart",
       "schema": "UpdateInvocationBody",
+      "tags": []
+    },
+    "UpdateLibraryRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateLibraryRequest",
+      "file": "lib/src/models/libraries/update_library_request.dart",
+      "schema": "UpdateLibraryRequest",
       "tags": []
     },
     "UpdateWorkflowResponse": {
@@ -2345,14 +2586,6 @@
       "schema": "VoiceUpdateRequest",
       "tags": []
     },
-    "WorkerInfo": {
-      "spec": "main",
-      "kind": "object",
-      "dart_class": "WorkerInfo",
-      "file": "lib/src/models/workflows/worker_info.dart",
-      "schema": "WorkerInfo",
-      "tags": []
-    },
     "Workflow": {
       "spec": "main",
       "kind": "object",
@@ -2367,6 +2600,46 @@
       "dart_class": "WorkflowArchiveResponse",
       "file": "lib/src/models/workflows/workflow_archive_response.dart",
       "schema": "WorkflowArchiveResponse",
+      "tags": []
+    },
+    "WorkflowBulkArchiveRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowBulkArchiveRequest",
+      "file": "lib/src/models/workflows/workflow_bulk_archive_request.dart",
+      "schema": "WorkflowBulkArchiveRequest",
+      "tags": []
+    },
+    "WorkflowBulkArchiveResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowBulkArchiveResponse",
+      "file": "lib/src/models/workflows/workflow_bulk_archive_response.dart",
+      "schema": "WorkflowBulkArchiveResponse",
+      "tags": []
+    },
+    "WorkflowBulkError": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowBulkError",
+      "file": "lib/src/models/workflows/workflow_bulk_error.dart",
+      "schema": "WorkflowBulkError",
+      "tags": []
+    },
+    "WorkflowBulkUnarchiveRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowBulkUnarchiveRequest",
+      "file": "lib/src/models/workflows/workflow_bulk_unarchive_request.dart",
+      "schema": "WorkflowBulkUnarchiveRequest",
+      "tags": []
+    },
+    "WorkflowBulkUnarchiveResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowBulkUnarchiveResponse",
+      "file": "lib/src/models/workflows/workflow_bulk_unarchive_response.dart",
+      "schema": "WorkflowBulkUnarchiveResponse",
       "tags": []
     },
     "WorkflowBasicDefinition": {
@@ -2588,6 +2861,14 @@
       "schema": "WorkflowGetResponse",
       "tags": []
     },
+    "WorkflowListResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowListResponse",
+      "file": "lib/src/models/workflows/workflow_list_response.dart",
+      "schema": "WorkflowListResponse",
+      "tags": []
+    },
     "WorkflowMetadata": {
       "spec": "main",
       "kind": "object",
@@ -2658,6 +2939,30 @@
       "dart_class": "WorkflowScheduleResponse",
       "file": "lib/src/models/workflows/workflow_schedule_response.dart",
       "schema": "WorkflowScheduleResponse",
+      "tags": []
+    },
+    "WorkflowScheduleUpdateRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowScheduleUpdateRequest",
+      "file": "lib/src/models/workflows/workflow_schedule_update_request.dart",
+      "schema": "WorkflowScheduleUpdateRequest",
+      "tags": []
+    },
+    "WorkflowSchedulePauseRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowSchedulePauseRequest",
+      "file": "lib/src/models/workflows/workflow_schedule_pause_request.dart",
+      "schema": "WorkflowSchedulePauseRequest",
+      "tags": []
+    },
+    "WorkflowScheduleTriggerRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "WorkflowScheduleTriggerRequest",
+      "file": "lib/src/models/workflows/workflow_schedule_trigger_request.dart",
+      "schema": "WorkflowScheduleTriggerRequest",
       "tags": []
     },
     "WorkflowTaskFailedAttributes": {
@@ -2753,6 +3058,430 @@
         "acknowledged"
       ],
       "note": "Internal integration schema"
+    },
+    "CreateConnectorRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateConnectorRequest",
+      "file": "lib/src/models/connectors/create_connector_request.dart",
+      "schema": "CreateConnectorRequest",
+      "tags": []
+    },
+    "UpdateConnectorRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "UpdateConnectorRequest",
+      "file": "lib/src/models/connectors/update_connector_request.dart",
+      "schema": "UpdateConnectorRequest",
+      "tags": []
+    },
+    "AuthUrlResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AuthUrlResponse",
+      "file": "lib/src/models/connectors/auth_url_response.dart",
+      "schema": "AuthUrlResponse",
+      "tags": []
+    },
+    "OAuth2Token": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "OAuth2Token",
+      "file": "lib/src/models/connectors/oauth2_token.dart",
+      "schema": "OAuth2Token",
+      "tags": []
+    },
+    "ConnectionCredentials": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConnectionCredentials",
+      "file": "lib/src/models/connectors/connection_credentials.dart",
+      "schema": "ConnectionCredentials",
+      "tags": []
+    },
+    "ConnectorAuthenticationHeader": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConnectorAuthenticationHeader",
+      "file": "lib/src/models/connectors/connector_authentication_header.dart",
+      "schema": "ConnectorAuthenticationHeader",
+      "tags": []
+    },
+    "PublicAuthenticationMethod": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PublicAuthenticationMethod",
+      "file": "lib/src/models/connectors/public_authentication_method.dart",
+      "schema": "PublicAuthenticationMethod",
+      "tags": []
+    },
+    "PublicConnectionConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PublicConnectionConfig",
+      "file": "lib/src/models/connectors/public_connection_config.dart",
+      "schema": "PublicConnectionConfig",
+      "tags": []
+    },
+    "CredentialsStatus": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CredentialsStatus",
+      "file": "lib/src/models/connectors/credentials_status.dart",
+      "schema": "CredentialsStatus",
+      "tags": []
+    },
+    "AuthenticationConfiguration": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AuthenticationConfiguration",
+      "file": "lib/src/models/connectors/authentication_configuration.dart",
+      "schema": "AuthenticationConfiguration",
+      "tags": []
+    },
+    "ConnectorLocale": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConnectorLocale",
+      "file": "lib/src/models/connectors/connector_locale.dart",
+      "schema": "ConnectorLocale",
+      "tags": []
+    },
+    "ToolExecutionConfiguration": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ToolExecutionConfiguration",
+      "file": "lib/src/models/connectors/tool_execution_configuration.dart",
+      "schema": "ToolExecutionConfiguration",
+      "tags": []
+    },
+    "ConnectionPreference": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConnectionPreference",
+      "file": "lib/src/models/connectors/connection_preference.dart",
+      "schema": "ConnectionPreference",
+      "tags": []
+    },
+    "ConnectorTool": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConnectorTool",
+      "file": "lib/src/models/connectors/connector_tool.dart",
+      "schema": "ConnectorTool",
+      "tags": []
+    },
+    "CredentialsCreateOrUpdate": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CredentialsCreateOrUpdate",
+      "file": "lib/src/models/connectors/credentials_create_or_update.dart",
+      "schema": "CredentialsCreateOrUpdate",
+      "tags": []
+    },
+    "CredentialsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CredentialsResponse",
+      "file": "lib/src/models/connectors/credentials_response.dart",
+      "schema": "CredentialsResponse",
+      "tags": []
+    },
+    "ConnectorCallToolRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConnectorCallToolRequest",
+      "file": "lib/src/models/connectors/connector_call_tool_request.dart",
+      "schema": "ConnectorCallToolRequest",
+      "tags": []
+    },
+    "ConnectorToolCallResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConnectorToolCallResponse",
+      "file": "lib/src/models/connectors/connector_tool_call_response.dart",
+      "schema": "ConnectorToolCallResponse",
+      "tags": []
+    },
+    "ConnectorToolCallMetadata": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConnectorToolCallMetadata",
+      "file": "lib/src/models/connectors/connector_tool_call_response.dart",
+      "schema": "ConnectorToolCallMetadata",
+      "tags": []
+    },
+    "ConnectorToolResultMetadata": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ConnectorToolResultMetadata",
+      "file": "lib/src/models/connectors/connector_tool_call_response.dart",
+      "schema": "ConnectorToolResultMetadata",
+      "tags": [],
+      "excluded_properties": [
+        "_meta"
+      ],
+      "note": "The MCP '_meta' passthrough field has no idiomatic Dart field name (camelCase yields the invalid identifier 'Meta'); it is exposed via the 'meta' field and preserved through additionalProperties."
+    },
+    "ResourceType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ResourceType",
+      "file": "lib/src/models/connectors/resource_type.dart",
+      "schema": "ResourceType",
+      "tags": []
+    },
+    "ConsumerType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ConsumerType",
+      "file": "lib/src/models/connectors/consumer_type.dart",
+      "schema": "ConsumerType",
+      "tags": []
+    },
+    "ConnectorProtocol": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ConnectorProtocol",
+      "file": "lib/src/models/connectors/connector_protocol.dart",
+      "schema": "ConnectorProtocol",
+      "tags": []
+    },
+    "ConnectionConfigType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ConnectionConfigType",
+      "file": "lib/src/models/connectors/connection_config_type.dart",
+      "schema": "ConnectionConfigType",
+      "tags": []
+    },
+    "OutboundAuthenticationType": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "OutboundAuthenticationType",
+      "file": "lib/src/models/connectors/outbound_authentication_type.dart",
+      "schema": "OutboundAuthenticationType",
+      "tags": []
+    },
+    "AuthStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AuthStatus",
+      "file": "lib/src/models/connectors/auth_status.dart",
+      "schema": "AuthStatus",
+      "tags": []
+    },
+    "GetTrace": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GetTrace",
+      "file": "lib/src/models/observability/get_trace.dart",
+      "schema": "GetTrace",
+      "tags": []
+    },
+    "GetSpan": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GetSpan",
+      "file": "lib/src/models/observability/get_span.dart",
+      "schema": "GetSpan",
+      "tags": []
+    },
+    "GetSpanEvaluation": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GetSpanEvaluation",
+      "file": "lib/src/models/observability/get_span_evaluation.dart",
+      "schema": "GetSpanEvaluation",
+      "tags": []
+    },
+    "GetLog": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GetLog",
+      "file": "lib/src/models/observability/get_log.dart",
+      "schema": "GetLog",
+      "tags": []
+    },
+    "GetTraces": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GetTraces",
+      "file": "lib/src/models/observability/get_traces.dart",
+      "schema": "GetTraces",
+      "tags": []
+    },
+    "GetSpans": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GetSpans",
+      "file": "lib/src/models/observability/get_spans.dart",
+      "schema": "GetSpans",
+      "tags": []
+    },
+    "GetSpanEvaluations": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GetSpanEvaluations",
+      "file": "lib/src/models/observability/get_span_evaluations.dart",
+      "schema": "GetSpanEvaluations",
+      "tags": []
+    },
+    "GetLogs": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GetLogs",
+      "file": "lib/src/models/observability/get_logs.dart",
+      "schema": "GetLogs",
+      "tags": []
+    },
+    "GetTraceFields": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GetTraceFields",
+      "file": "lib/src/models/observability/get_trace_fields.dart",
+      "schema": "GetTraceFields",
+      "tags": []
+    },
+    "GetSpanFields": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GetSpanFields",
+      "file": "lib/src/models/observability/get_span_fields.dart",
+      "schema": "GetSpanFields",
+      "tags": []
+    },
+    "GetSpanEvaluationFields": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GetSpanEvaluationFields",
+      "file": "lib/src/models/observability/get_span_evaluation_fields.dart",
+      "schema": "GetSpanEvaluationFields",
+      "tags": []
+    },
+    "GetLogFields": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GetLogFields",
+      "file": "lib/src/models/observability/get_log_fields.dart",
+      "schema": "GetLogFields",
+      "tags": []
+    },
+    "GetTraceFieldOptions": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GetTraceFieldOptions",
+      "file": "lib/src/models/observability/get_trace_field_options.dart",
+      "schema": "GetTraceFieldOptions",
+      "tags": []
+    },
+    "GetSpanFieldOptions": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GetSpanFieldOptions",
+      "file": "lib/src/models/observability/get_span_field_options.dart",
+      "schema": "GetSpanFieldOptions",
+      "tags": []
+    },
+    "GetSpanEvaluationFieldOptions": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GetSpanEvaluationFieldOptions",
+      "file": "lib/src/models/observability/get_span_evaluation_field_options.dart",
+      "schema": "GetSpanEvaluationFieldOptions",
+      "tags": []
+    },
+    "GetLogFieldOptions": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "GetLogFieldOptions",
+      "file": "lib/src/models/observability/get_log_field_options.dart",
+      "schema": "GetLogFieldOptions",
+      "tags": []
+    },
+    "OtelFieldDefinition": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "OtelFieldDefinition",
+      "file": "lib/src/models/observability/otel_field_definition.dart",
+      "schema": "OtelFieldDefinition",
+      "tags": []
+    },
+    "TracesRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TracesRequest",
+      "file": "lib/src/models/observability/traces_request.dart",
+      "schema": "TracesRequest",
+      "tags": []
+    },
+    "SpansRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SpansRequest",
+      "file": "lib/src/models/observability/spans_request.dart",
+      "schema": "SpansRequest",
+      "tags": []
+    },
+    "SpanEvaluationsRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "SpanEvaluationsRequest",
+      "file": "lib/src/models/observability/span_evaluations_request.dart",
+      "schema": "SpanEvaluationsRequest",
+      "tags": []
+    },
+    "LogsRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "LogsRequest",
+      "file": "lib/src/models/observability/logs_request.dart",
+      "schema": "LogsRequest",
+      "tags": []
+    },
+    "FeedResultGetTrace": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "FeedResultGetTrace",
+      "file": "lib/src/models/observability/feed_result.dart",
+      "schema": "FeedResultGetTrace",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Reuses generic FeedResult<T>"
+    },
+    "FeedResultGetSpan": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "FeedResultGetSpan",
+      "file": "lib/src/models/observability/feed_result.dart",
+      "schema": "FeedResultGetSpan",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Reuses generic FeedResult<T>"
+    },
+    "FeedResultGetSpanEvaluation": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "FeedResultGetSpanEvaluation",
+      "file": "lib/src/models/observability/feed_result.dart",
+      "schema": "FeedResultGetSpanEvaluation",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Reuses generic FeedResult<T>"
+    },
+    "FeedResultGetLog": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "FeedResultGetLog",
+      "file": "lib/src/models/observability/feed_result.dart",
+      "schema": "FeedResultGetLog",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Reuses generic FeedResult<T>"
     }
   }
 }

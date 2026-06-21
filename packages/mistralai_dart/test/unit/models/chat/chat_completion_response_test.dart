@@ -71,7 +71,7 @@ void main() {
       expect(response.model, 'mistral-small-latest');
       expect(response.choices, hasLength(1));
       expect(
-        (response.choices.first.message.content! as MessageTextContent).text,
+        (response.choices.first.message!.content! as MessageTextContent).text,
         'Hi there!',
       );
       expect(response.usage, isNotNull);
@@ -202,7 +202,7 @@ void main() {
         expect(copied.model, 'mistral-large-latest');
         expect(copied.choices, hasLength(1));
         expect(
-          (copied.choices.first.message.content! as MessageTextContent).text,
+          (copied.choices.first.message!.content! as MessageTextContent).text,
           'New',
         );
         expect(copied.usage!.totalTokens, 50);

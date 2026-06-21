@@ -9,6 +9,9 @@ enum EncodedPayloadOptions {
   /// Payload is partially encrypted.
   encryptedPartial('encrypted-partial'),
 
+  /// Payload is compressed.
+  compressed('compressed'),
+
   /// Unknown option (forward-compatibility fallback).
   unknown('unknown');
 

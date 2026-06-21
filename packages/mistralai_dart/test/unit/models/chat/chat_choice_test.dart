@@ -10,8 +10,8 @@ void main() {
       );
 
       expect(choice.index, 0);
-      expect((choice.message.content! as MessageTextContent).text, 'Hello!');
-      expect(choice.finishReason, isNull);
+      expect((choice.message!.content! as MessageTextContent).text, 'Hello!');
+      expect(choice.finishReason, FinishReason.unknown);
     });
 
     test('creates with finish reason', () {
@@ -42,7 +42,7 @@ void main() {
         finishReason: FinishReason.toolCalls,
       );
 
-      expect(choice.message.toolCalls, hasLength(1));
+      expect(choice.message!.toolCalls, hasLength(1));
       expect(choice.finishReason, FinishReason.toolCalls);
     });
 
@@ -56,7 +56,7 @@ void main() {
 
       expect(choice.index, 0);
       expect(
-        (choice.message.content! as MessageTextContent).text,
+        (choice.message!.content! as MessageTextContent).text,
         'Test response',
       );
       expect(choice.finishReason, FinishReason.stop);
@@ -79,8 +79,8 @@ void main() {
       };
       final choice = ChatChoice.fromJson(json);
 
-      expect(choice.message.toolCalls, hasLength(1));
-      expect(choice.message.toolCalls!.first.id, 'call_abc');
+      expect(choice.message!.toolCalls, hasLength(1));
+      expect(choice.message!.toolCalls!.first.id, 'call_abc');
       expect(choice.finishReason, FinishReason.toolCalls);
     });
 

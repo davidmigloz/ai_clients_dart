@@ -10,14 +10,13 @@ import 'metrics_resource.dart';
 import 'registrations_resource.dart';
 import 'runs_resource.dart';
 import 'schedules_resource.dart';
-import 'workers_resource.dart';
 import 'workflow_core_resource.dart';
 
 /// Resource for Workflows API operations (beta).
 ///
 /// Provides access to all workflow sub-resources for managing workflows,
-/// executions, deployments, events, registrations, runs, schedules, metrics,
-/// and workers.
+/// executions, deployments, events, registrations, runs, schedules, and
+/// metrics.
 ///
 /// Example usage:
 /// ```dart
@@ -82,9 +81,6 @@ class WorkflowsResource {
   /// Sub-resource for metrics operations.
   late final MetricsResource metrics;
 
-  /// Sub-resource for worker operations.
-  late final WorkersResource workers;
-
   /// Creates a [WorkflowsResource].
   WorkflowsResource({
     required this.config,
@@ -143,13 +139,6 @@ class WorkflowsResource {
       ensureNotClosed: ensureNotClosed,
     );
     metrics = MetricsResource(
-      config: config,
-      httpClient: httpClient,
-      interceptorChain: interceptorChain,
-      requestBuilder: requestBuilder,
-      ensureNotClosed: ensureNotClosed,
-    );
-    workers = WorkersResource(
       config: config,
       httpClient: httpClient,
       interceptorChain: interceptorChain,
