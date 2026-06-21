@@ -6,6 +6,65 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v4.x to v5.0.0
+
+**Most users will not need to make any changes.** v5.0.0 syncs to the latest Anthropic spec. `FallbackBlock` and `FallbackInputBlock` are normally consumed by deserializing API responses (`fromJson`), so pure-deserialization consumers are unaffected. The only behavioral change for typical callers is that code-execution tools constructed without an explicit `type` now default to the newer `code_execution_20260521` version. Everything else in this release (the `session.updated` webhook event, the typed refusal `trigger`) is additive.
+
+### 1) `FallbackBlock` now requires a `trigger`
+
+The response-side `FallbackBlock` gains a required `trigger` (a `FallbackRefusalTrigger`), mirroring the spec where `trigger` became required on the block. `FallbackBlock` is normally consumed via `fromJson`, so most callers are unaffected — only code that *constructs* a `FallbackBlock` directly needs to pass `trigger`.
+
+```dart
+// Before
+const FallbackBlock(from: from, to: to);
+
+// After
+const FallbackBlock(
+  from: from,
+  to: to,
+  trigger: FallbackRefusalTrigger(rawCategory: 'cyber'),
+);
+```
+
+The typed category is derived via a getter, so unrecognized future categories round-trip verbatim instead of collapsing to `unknown`:
+
+```dart
+for (final block in response.content) {
+  if (block is FallbackBlock) {
+    print('${block.from.model} -> ${block.to.model} '
+        '(${block.trigger.category?.value ?? 'uncategorized'})');
+  }
+}
+```
+
+### 2) `FallbackInputBlock` constructor is no longer `const`
+
+The request-side `FallbackInputBlock` now stores its echoed `trigger` as a deeply-unmodifiable map, so its constructor can no longer be `const`. Drop the `const` keyword from any direct construction.
+
+```dart
+// Before
+const block = FallbackInputBlock(/* ... */);
+
+// After
+final block = FallbackInputBlock(/* ... */);
+```
+
+### 3) Code-execution tools default to `code_execution_20260521`
+
+Code-execution tools constructed **without an explicit `type`** now default to the new `code_execution_20260521` version:
+
+- `BuiltInTool.codeExecution()` / `CodeExecutionBuiltInTool()`: `code_execution_20260120` → `code_execution_20260521`
+- beta `CodeExecutionTool()`: `code_execution_20250825` → `code_execution_20260521`
+
+Pin an older version by passing `type` explicitly:
+
+```dart
+// Keep the previous GA version
+BuiltInTool.codeExecution(type: 'code_execution_20260120');
+```
+
+---
+
 ## Migrating from v3.x to v4.0.0
 
 **Most users will not need to make any changes.** v4.0.0 syncs to the latest Anthropic spec for the [Claude Opus 4.8](https://www.anthropic.com/news/claude-opus-4-8) release. The breaking surface is limited to two source-level additions — a new variant on the exported sealed union `InputContentBlock` and a new value on the `MessageRole` enum — which only affect code with *exhaustive* `switch` statements that lack a wildcard or `Unknown*`/`default` branch. Everything else in this release (mid-conversation system messages, `outputTokensDetails`, advisor `stopReason`) is purely additive. Pure-deserialization consumers — and anyone already using a wildcard / `Unknown*` / `default` branch — are unaffected.

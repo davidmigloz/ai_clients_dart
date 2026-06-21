@@ -1,3 +1,12 @@
+## 4.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Syncs `mistralai_dart` with the latest Mistral OpenAPI spec (+46 paths, +123 schemas over the 2026-06-05 baseline), cross-checked field-by-field against the official `mistralai/client-python` SDK. Adds four new beta surfaces — **Connectors** (`client.connectors`: full CRUD + auth + tools + credentials), **Observability** traces/spans/logs (`client.observability`), **RAG** (`client.rag`: ingestion pipelines + search index), and new **Workflow** operations (bulk archive/unarchive, schedule pause/resume/trigger, execution logs + SSE) — plus many additive fields and enum values (`ReasoningEffort.minimal`/`xhigh`, expanded `ModelCapabilities`, `ThinkContentPart.signature`, and more). **The breaking changes mirror server-side removals from the official Python SDK and affect a narrow surface:** `UsageInfo` drops cached-token detail fields, `OcrRequest` drops its `id`, `ChatChoice.message` becomes nullable (with `finishReason` now non-nullable), and the deleted `workers/whoami` endpoint plus a few workflow fields are removed. See the [Migration Guide](MIGRATION.md) for the full list and upgrade paths.
+
+- **BREAKING** **FEAT**: Connectors, RAG, observability & workflow ops ([#263](https://github.com/davidmigloz/ai_clients_dart/issues/263)). ([00db1583](https://github.com/davidmigloz/ai_clients_dart/commit/00db158326a94d037629308f818f39e55a6a03ac))
+
 ## 3.1.1
 
 Migrates deprecated Mistral model identifiers to their current replacements (verified against Mistral's docs). The default `model` on the moderation/classification request classes (`ModerationRequest`, `ChatModerationRequest`, `ClassificationRequest`, `ChatClassificationRequest`) moves from the deprecated `mistral-moderation-latest` to [`mistral-moderation-2603`](https://docs.mistral.ai/models/model-cards/mistral-moderation-26-03) (Mistral Moderation 2) — so requests that omit `model` now target the current model — and the deprecated `mistral-large-2411` doc examples move to the live `mistral-large-latest` alias. No schema changes.

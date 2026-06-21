@@ -6,6 +6,28 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v6.x to v7.0.0
+
+**Most users will not need to make any changes.** v7.0.0 syncs to the latest OpenAI spec and is otherwise additive (reasoning context mode, MCP tunnel/connector addressing, `reasoning`/`truncation` surfaced on responses). The single breaking change is confined to `McpTool.serverUrl`.
+
+### 1) `McpTool.serverUrl` is now nullable
+
+To express the spec's `server_url` / `connector_id` / `tunnel_id` one-of, `McpTool.serverUrl` is now optional (`String?`) instead of a required `String`. Existing code that always passed `serverUrl` continues to compile and behave the same — only callers that *read* `McpTool.serverUrl` must now handle `null`.
+
+```dart
+// Before — serverUrl required, getter non-nullable
+final tool = McpTool(serverLabel: 'x', serverUrl: 'https://mcp.example.com');
+final String url = tool.serverUrl;
+
+// After — provide any one of serverUrl / connectorId / tunnelId; getter is nullable
+final tool = McpTool(serverLabel: 'x', tunnelId: 'tunnel_…');
+final String? url = tool.serverUrl;
+```
+
+Constructing a tool via `ResponseTool.mcp(...)` with none of `serverUrl` / `connectorId` / `tunnelId` provided now throws an `ArgumentError`.
+
+---
+
 ## Migrating from v5.x to v6.0.0
 
 v6.0.0 migrates the **Realtime API** client to the GA shape announced with OpenAI's 2026-05-07 Voice Intelligence drop. **All breaking changes are confined to the Realtime API** (`client.realtime` / `client.realtimeSessions`) — the Chat Completions and Responses APIs are unaffected.

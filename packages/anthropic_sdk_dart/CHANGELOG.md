@@ -1,3 +1,12 @@
+## 5.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Syncs to the latest Anthropic OpenAPI spec (cross-checked field-for-field against `anthropic-sdk-python`). Adds the new `code_execution_20260521` code-execution tool version — now the default for both the GA `BuiltInTool.codeExecution(...)` and the beta `CodeExecutionTool` — plus the **fallback refusal trigger** (`FallbackBlock.trigger`, a new `FallbackRefusalTrigger` that explains *why* a model handed over at a fallback hop) and the `session.updated` webhook event (`WebhookSessionUpdatedEventData`). **The breaking surface is small and won't affect most users:** `FallbackBlock`/`FallbackInputBlock` are normally consumed via `fromJson`, so pure-deserialization callers are unaffected; the only behavioral change is the code-execution default version, which you can pin by passing `type` explicitly. See the [Migration Guide](MIGRATION.md) for details.
+
+- **BREAKING** **FEAT**: Fallback refusal trigger + code-exec tool ([#262](https://github.com/davidmigloz/ai_clients_dart/issues/262)). ([d2a57c88](https://github.com/davidmigloz/ai_clients_dart/commit/d2a57c8803f1a987231702bffc3aef16dacac42e))
+
 ## 4.2.0
 
 Adds [scheduled deployments](https://platform.claude.com/docs/en/managed-agents/scheduled-deployments) for Managed Agents — run an agent session on a cron schedule (or on demand) through the new `client.deployments` and `client.deploymentRuns` beta resources, with each firing producing a deployment run. Also introduces the beta [Fallback API](https://platform.claude.com/docs/en/build-with-claude/handling-stop-reasons) for Messages — supply a `fallbacks` chain to automatically re-run a refused request on another model (e.g. [Fable 5](https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5)) or retry manually with a refusal credit token — plus environment-variable vault credentials for Managed Agents. Also fixes a latent runtime crash where passing an untyped empty literal (e.g. `UpdateSessionParams(vaultIds: [])`) to the `Update*Params` family threw a `TypeError`.

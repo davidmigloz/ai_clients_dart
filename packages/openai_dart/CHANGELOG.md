@@ -1,3 +1,12 @@
+## 7.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Syncs `openai_dart` to the latest OpenAI OpenAPI spec. Adds a **reasoning context mode** — `ReasoningConfig.context` (new `ReasoningContext` enum: `auto`/`currentTurn`/`allTurns`) controls which reasoning items are rendered back to the model on later turns, and the effective mode is now surfaced on the response (which also carries `reasoning` + `truncation`, so it's no longer silently dropped). Also adds [MCP Secure Tunnel and connector](https://platform.openai.com/docs/guides/tools-remote-mcp) addressing for remote MCP tools via `McpTool.tunnelId` and `McpTool.connectorId`. **The single breaking change has limited real-world impact:** to express the spec's `server_url`/`connector_id`/`tunnel_id` one-of, `McpTool.serverUrl` is now nullable (`String?`) — existing code that always passed `serverUrl` continues to compile and behave the same; only callers that *read* `McpTool.serverUrl` must now handle `null`. See the [Migration Guide](MIGRATION.md).
+
+- **BREAKING** **FEAT**: Reasoning context mode + MCP tunnel/connector ([#261](https://github.com/davidmigloz/ai_clients_dart/issues/261)). ([9c14d9ae](https://github.com/davidmigloz/ai_clients_dart/commit/9c14d9aeb2ddafa9b977c8685f389a20cf8fd422))
+
 ## 6.2.0
 
 Adds support for the new [moderation scores](https://developers.openai.com/api/docs/guides/moderation#moderate-generated-content) feature on the Chat Completions and Responses APIs — pass a `moderation` object on a request to receive moderation results for both the model input and the generated output, surfaced as sealed input/output outcomes (`ChatCompletion.moderation`, `ChatStreamEvent.moderation`, `Response.moderation`) and captured by `ChatStreamAccumulator` for streaming. All new fields are additive and nullable. Also marks the image-model id constants OpenAI has [deprecated or removed](https://developers.openai.com/api/docs/deprecations) with `@Deprecated` (retained for compatibility), leaving `ImageModels.gptImage2` as the only recommended image model, and refreshes the canonical spec.

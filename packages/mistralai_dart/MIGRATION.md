@@ -6,6 +6,59 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v3.x to v4.0.0
+
+v4.0.0 syncs with the latest Mistral spec and is dominated by **additive** changes (Connectors, Observability, RAG, and new Workflow operations). The breaking changes all mirror removals the official `mistralai/client-python` SDK made when Mistral dropped fields/endpoints server-side, so most callers — especially those only using chat completions — need few or no changes. The most likely to affect you is `ChatChoice.message` becoming nullable.
+
+### 1) `ChatChoice.message` is now nullable; `finishReason` is non-nullable
+
+A choice may now carry a `messages` list instead of a single `message`, so `ChatChoice.message` is now `AssistantMessage?`. Conversely, `finishReason` is now non-nullable (`FinishReason`, defaulting to `FinishReason.unknown`). The `ChatCompletionResponseExtensions.message` getter is nullable accordingly.
+
+```dart
+// Before
+final text = response.choices.first.message.content;
+
+// After — message may be null
+final text = response.choices.first.message?.content;
+```
+
+### 2) `UsageInfo` drops cached-token detail fields
+
+`numCachedTokens`, `promptTokenDetails`, and `promptTokensDetails` were dropped upstream. `UsageInfo` now exposes only `promptTokens`, `completionTokens`, `totalTokens`, and `promptAudioSeconds`. (`PromptTokensDetails` is retained as a standalone model, matching the official client, but is no longer referenced by `UsageInfo`.)
+
+```dart
+// Before
+final cached = response.usage?.promptTokensDetails?.cachedTokens;
+// After — no longer returned by the API; remove these references
+```
+
+### 3) `OcrRequest` drops the `id` field
+
+The `id` field and its `id` named parameter were removed from `OcrRequest.fromUrl` / `fromFile` / `fromBase64`.
+
+```dart
+// Before
+OcrRequest.fromUrl(url: '...', id: 'req-1');
+// After
+OcrRequest.fromUrl(url: '...');
+```
+
+### 4) Workflow surface changes
+
+- **`WorkerInfo` and `client.workflows.workers` (`whoami()`) removed** — `GET /v1/workflows/workers/whoami` was deleted from the API.
+- **`WorkflowExecutionRequest`** — `encodedInput` removed; `extensions` (`Map<String, dynamic>?`) added.
+- **`WorkflowRegistration` / `WorkflowRegistrationWithWorkerStatus`** — `taskQueue` is now optional/nullable and `@Deprecated` (deprecated server-side).
+
+### 5) `ObservabilityErrorCode` drops a value
+
+`authForbiddenOrgNotWhitelisted` (`AUTH_FORBIDDEN_ORG_NOT_WHITELISTED`) was removed. Remove any references; exhaustive `switch` statements over `ObservabilityErrorCode` should drop that case.
+
+### 6) `ModelCapabilities.toString()` output changed
+
+`toString()` now emits full field names (`completionChat:` instead of `chat:`, etc.). This affects only code that parses or asserts on the string representation — the fields themselves are unchanged.
+
+---
+
 ## Migrating from v2.x to v3.0.0
 
 v3.0.0 syncs with the 2026-04-22 Mistral AI spec. The only breaking change is the removal of the OCR confidence-score API surface — Mistral dropped it server-side, so the client no longer exposes the corresponding types and fields. If you do not use OCR confidence scoring, no migration is needed.
