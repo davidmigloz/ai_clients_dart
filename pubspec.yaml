@@ -6,7 +6,7 @@ environment:
   sdk: ^3.9.0
 
 dev_dependencies:
-  melos: ^7.3.0
+  melos: ^8.0.0
 
 workspace:
   - packages/anthropic_sdk_dart
