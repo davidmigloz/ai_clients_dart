@@ -10,12 +10,15 @@ enum ThinkLevel {
 
   /// Low level of thinking/reasoning.
   low,
+
+  /// Maximum level of thinking/reasoning.
+  max,
 }
 
 /// Value for the think parameter.
 ///
 /// Controls whether thinking/reasoning models will think before responding.
-/// Can be either a boolean (enabled/disabled) or a level (high/medium/low).
+/// Can be either a boolean (enabled/disabled) or a level (high/medium/low/max).
 @immutable
 sealed class ThinkValue {
   const ThinkValue();
@@ -36,6 +39,7 @@ sealed class ThinkValue {
       'high' => const ThinkWithLevel(ThinkLevel.high),
       'medium' => const ThinkWithLevel(ThinkLevel.medium),
       'low' => const ThinkWithLevel(ThinkLevel.low),
+      'max' => const ThinkWithLevel(ThinkLevel.max),
       _ => null,
     };
   }
@@ -86,6 +90,7 @@ class ThinkWithLevel extends ThinkValue {
       ThinkLevel.high => 'high',
       ThinkLevel.medium => 'medium',
       ThinkLevel.low => 'low',
+      ThinkLevel.max => 'max',
     };
   }
 

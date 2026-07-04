@@ -26,6 +26,11 @@ void main() {
         (ThinkValue.fromJson('low')! as ThinkWithLevel).level,
         ThinkLevel.low,
       );
+      expect(ThinkValue.fromJson('max'), isA<ThinkWithLevel>());
+      expect(
+        (ThinkValue.fromJson('max')! as ThinkWithLevel).level,
+        ThinkLevel.max,
+      );
     });
 
     test('ThinkValue.fromJson returns null for unknown values', () {
@@ -43,6 +48,7 @@ void main() {
       expect(const ThinkWithLevel(ThinkLevel.high).toJson(), 'high');
       expect(const ThinkWithLevel(ThinkLevel.medium).toJson(), 'medium');
       expect(const ThinkWithLevel(ThinkLevel.low).toJson(), 'low');
+      expect(const ThinkWithLevel(ThinkLevel.max).toJson(), 'max');
     });
 
     test('ThinkValue equality works correctly', () {
@@ -150,6 +156,50 @@ void main() {
       final request = GenerateRequest.fromJson(json);
       expect(request.think, isA<ThinkWithLevel>());
       expect((request.think! as ThinkWithLevel).level, ThinkLevel.low);
+    });
+
+    test('ChatRequest serializes ThinkLevel.max correctly', () {
+      const request = ChatRequest(
+        model: 'llama3.2',
+        messages: [ChatMessage.user('Hello')],
+        think: ThinkWithLevel(ThinkLevel.max),
+      );
+
+      final json = request.toJson();
+      expect(json['think'], 'max');
+    });
+
+    test('ChatRequest deserializes ThinkLevel.max correctly', () {
+      final json = {
+        'model': 'llama3.2',
+        'messages': [
+          {'role': 'user', 'content': 'Hello'},
+        ],
+        'think': 'max',
+      };
+
+      final request = ChatRequest.fromJson(json);
+      expect(request.think, isA<ThinkWithLevel>());
+      expect((request.think! as ThinkWithLevel).level, ThinkLevel.max);
+    });
+
+    test('GenerateRequest serializes ThinkLevel.max correctly', () {
+      const request = GenerateRequest(
+        model: 'llama3.2',
+        prompt: 'Hello',
+        think: ThinkWithLevel(ThinkLevel.max),
+      );
+
+      final json = request.toJson();
+      expect(json['think'], 'max');
+    });
+
+    test('GenerateRequest deserializes ThinkLevel.max correctly', () {
+      final json = {'model': 'llama3.2', 'prompt': 'Hello', 'think': 'max'};
+
+      final request = GenerateRequest.fromJson(json);
+      expect(request.think, isA<ThinkWithLevel>());
+      expect((request.think! as ThinkWithLevel).level, ThinkLevel.max);
     });
   });
 }
