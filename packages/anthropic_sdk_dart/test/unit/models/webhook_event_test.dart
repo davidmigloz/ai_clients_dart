@@ -71,6 +71,31 @@ void main() {
       true,
       isA<WebhookVaultCredentialRefreshFailedEventData>(),
     ),
+    ('agent.created', false, isA<WebhookAgentCreatedEventData>()),
+    ('agent.updated', false, isA<WebhookAgentUpdatedEventData>()),
+    ('agent.deleted', false, isA<WebhookAgentDeletedEventData>()),
+    ('agent.archived', false, isA<WebhookAgentArchivedEventData>()),
+    ('deployment.created', false, isA<WebhookDeploymentCreatedEventData>()),
+    ('deployment.updated', false, isA<WebhookDeploymentUpdatedEventData>()),
+    ('deployment.deleted', false, isA<WebhookDeploymentDeletedEventData>()),
+    ('deployment.archived', false, isA<WebhookDeploymentArchivedEventData>()),
+    ('deployment.paused', false, isA<WebhookDeploymentPausedEventData>()),
+    ('deployment.unpaused', false, isA<WebhookDeploymentUnpausedEventData>()),
+    (
+      'deployment_run.started',
+      false,
+      isA<WebhookDeploymentRunStartedEventData>(),
+    ),
+    (
+      'deployment_run.succeeded',
+      false,
+      isA<WebhookDeploymentRunSucceededEventData>(),
+    ),
+    (
+      'deployment_run.failed',
+      false,
+      isA<WebhookDeploymentRunFailedEventData>(),
+    ),
   ];
 
   Map<String, dynamic> dataJson(String type, {required bool withVault}) {
@@ -87,8 +112,8 @@ void main() {
   }
 
   group('WebhookEventData dispatch', () {
-    test('covers all 23 spec variants', () {
-      expect(variants, hasLength(23));
+    test('covers all 36 spec variants', () {
+      expect(variants, hasLength(36));
     });
 
     for (final (type, withVault, matcher) in variants) {

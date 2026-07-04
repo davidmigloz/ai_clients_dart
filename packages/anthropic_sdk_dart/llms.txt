@@ -5,8 +5,8 @@
 ## Docs
 
 - [README](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/README.md) (~5.3k tokens): Primary package documentation with installation, configuration, and usage examples.
-- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/CHANGELOG.md) (~10.1k tokens): Release history and version-by-version changes.
-- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/MIGRATION.md) (~6.1k tokens): Upgrade notes and breaking-change guidance.
+- [CHANGELOG](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/CHANGELOG.md) (~10.4k tokens): Release history and version-by-version changes.
+- [MIGRATION](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/MIGRATION.md) (~6.7k tokens): Upgrade notes and breaking-change guidance.
 
 ## Examples
 
@@ -34,11 +34,11 @@
 - [mcp_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/mcp_example.dart) (~904 tokens): MCP tool integration.
 - [session_threads_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/session_threads_example.dart) (~816 tokens): Session threads: list, retrieve, stream events, archive (beta).
 - [deployments_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/deployments_example.dart) (~609 tokens): Scheduled deployments and deployment runs: cron schedule, pause/resume, run-now (beta).
-- [user_profiles_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/user_profiles_example.dart) (~649 tokens): User profiles and enrollment URLs (beta).
+- [user_profiles_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/user_profiles_example.dart) (~552 tokens): User profiles and enrollment URLs (beta).
 - [anthropic_sdk_dart_example.dart](https://github.com/davidmigloz/ai_clients_dart/blob/main/packages/anthropic_sdk_dart/example/anthropic_sdk_dart_example.dart) (~670 tokens): Quick-start overview.
 
 ## Optional
 
 - [Package directory](https://github.com/davidmigloz/ai_clients_dart/tree/main/packages/anthropic_sdk_dart): Source tree, pubspec, and package-local files.
 
-**Total: ~43.8k tokens**
+**Total: ~44.6k tokens**

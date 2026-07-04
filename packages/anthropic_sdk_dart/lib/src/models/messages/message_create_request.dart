@@ -214,9 +214,6 @@ class MessageCreateRequest {
   /// in the request.
   final CacheControlEphemeral? cacheControl;
 
-  /// Optional identifier of the end-user profile this request belongs to.
-  final String? userProfileId;
-
   /// Cache diagnostics configuration.
   ///
   /// Opts the request into prompt-cache diagnostics. Requires the
@@ -256,7 +253,6 @@ class MessageCreateRequest {
     this.container,
     this.speed,
     this.cacheControl,
-    this.userProfileId,
     this.diagnostics,
     this.fallbacks,
     this.fallbackCreditToken,
@@ -306,7 +302,6 @@ class MessageCreateRequest {
               json['cache_control'] as Map<String, dynamic>,
             )
           : null,
-      userProfileId: json['user_profile_id'] as String?,
       diagnostics: json['diagnostics'] != null
           ? DiagnosticsParam.fromJson(
               json['diagnostics'] as Map<String, dynamic>,
@@ -340,7 +335,6 @@ class MessageCreateRequest {
     if (container != null) 'container': container,
     if (speed != null) 'speed': speed!.toJson(),
     if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
-    if (userProfileId != null) 'user_profile_id': userProfileId,
     if (diagnostics != null) 'diagnostics': diagnostics!.toJson(),
     if (fallbacks != null)
       'fallbacks': fallbacks!.map((e) => e.toJson()).toList(),
@@ -369,7 +363,6 @@ class MessageCreateRequest {
     Object? container = unsetCopyWithValue,
     Object? speed = unsetCopyWithValue,
     Object? cacheControl = unsetCopyWithValue,
-    Object? userProfileId = unsetCopyWithValue,
     Object? diagnostics = unsetCopyWithValue,
     Object? fallbacks = unsetCopyWithValue,
     Object? fallbackCreditToken = unsetCopyWithValue,
@@ -418,9 +411,6 @@ class MessageCreateRequest {
       cacheControl: cacheControl == unsetCopyWithValue
           ? this.cacheControl
           : cacheControl as CacheControlEphemeral?,
-      userProfileId: userProfileId == unsetCopyWithValue
-          ? this.userProfileId
-          : userProfileId as String?,
       diagnostics: diagnostics == unsetCopyWithValue
           ? this.diagnostics
           : diagnostics as DiagnosticsParam?,
@@ -457,7 +447,6 @@ class MessageCreateRequest {
           container == other.container &&
           speed == other.speed &&
           cacheControl == other.cacheControl &&
-          userProfileId == other.userProfileId &&
           diagnostics == other.diagnostics &&
           listsEqual(fallbacks, other.fallbacks) &&
           fallbackCreditToken == other.fallbackCreditToken;
@@ -483,7 +472,6 @@ class MessageCreateRequest {
     container,
     speed,
     cacheControl,
-    userProfileId,
     diagnostics,
     listHash(fallbacks),
     fallbackCreditToken,
@@ -498,7 +486,7 @@ class MessageCreateRequest {
       'toolChoice: $toolChoice, tools: $tools, topP: $topP, topK: $topK, '
       'inferenceGeo: $inferenceGeo, outputConfig: $outputConfig, '
       'container: $container, speed: $speed, cacheControl: $cacheControl, '
-      'userProfileId: $userProfileId, diagnostics: $diagnostics, '
+      'diagnostics: $diagnostics, '
       'fallbacks: ${fallbacks == null ? null : '${fallbacks!.length} items'}, '
       'fallbackCreditToken: '
       '${fallbackCreditToken == null ? null : '[redacted]'})';

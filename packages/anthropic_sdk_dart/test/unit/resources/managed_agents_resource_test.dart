@@ -558,6 +558,42 @@ void main() {
       expect(request.method, 'GET');
       expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
     });
+
+    test('stream sends event_deltas[] and parses preview events', () async {
+      mockHttpClient.queueStreamingResponse([
+        {
+          'type': 'event_start',
+          'event': {'type': 'agent.message', 'id': 'event_010'},
+        },
+        {
+          'type': 'event_delta',
+          'event_id': 'event_010',
+          'delta': {
+            'type': 'content_delta',
+            'content': {'type': 'text', 'text': 'Hi'},
+            'index': 0,
+          },
+        },
+      ]);
+
+      final events = await client.sessions
+          .events('session_test123')
+          .stream(eventDeltas: ['agent.message', 'agent.thinking'])
+          .toList();
+
+      expect(events, hasLength(2));
+      expect(events[0], isA<EventStartEvent>());
+      expect(events[1], isA<EventDeltaEvent>());
+      expect((events[1] as EventDeltaEvent).eventId, 'event_010');
+
+      final request = mockHttpClient.lastRequest!;
+      expect(request.url.path, '/v1/sessions/session_test123/events/stream');
+      expect(request.url.queryParametersAll['event_deltas[]'], [
+        'agent.message',
+        'agent.thinking',
+      ]);
+      expect(request.headers['anthropic-beta'], 'managed-agents-2026-04-01');
+    });
   });
 
   group('SessionThreadsResource', () {

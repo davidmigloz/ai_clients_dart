@@ -109,6 +109,7 @@ export 'src/models/managed_agents/credentials/credential_auth.dart';
 export 'src/models/managed_agents/credentials/credential_list_response.dart';
 export 'src/models/managed_agents/credentials/credential_networking.dart';
 export 'src/models/managed_agents/credentials/credential_validation.dart';
+export 'src/models/managed_agents/credentials/injection_location.dart';
 export 'src/models/managed_agents/credentials/update_credential_params.dart';
 export 'src/models/managed_agents/deployments/create_deployment_params.dart';
 export 'src/models/managed_agents/deployments/deployment.dart';

@@ -28,19 +28,7 @@ void main() async {
     );
     print('Created ${profile.id} (external_id: ${profile.externalId})');
 
-    // 2. Send a message scoped to this user.
-    print('\n=== Send message with user_profile_id ===');
-    final reply = await client.messages.create(
-      MessageCreateRequest(
-        model: 'claude-opus-4-8',
-        maxTokens: 256,
-        userProfileId: profile.id,
-        messages: [InputMessage.user('Hello!')],
-      ),
-    );
-    print('Model replied: ${reply.content.first.runtimeType}');
-
-    // 3. List user profiles (paginated).
+    // 2. List user profiles (paginated).
     print('\n=== List ===');
     final page = await client.userProfiles.list(
       limit: 10,
@@ -48,7 +36,7 @@ void main() async {
     );
     print('Returned ${page.data.length} profile(s); nextPage=${page.nextPage}');
 
-    // 4. Retrieve the profile and inspect trust grants.
+    // 3. Retrieve the profile and inspect trust grants.
     print('\n=== Retrieve ===');
     final fetched = await client.userProfiles.retrieve(profile.id);
     for (final entry in fetched.trustGrants.entries) {
@@ -58,7 +46,7 @@ void main() async {
       print('  (no trust grants)');
     }
 
-    // 5. Update metadata. Empty-string values remove a key server-side.
+    // 4. Update metadata. Empty-string values remove a key server-side.
     print('\n=== Update ===');
     final updated = await client.userProfiles.update(
       profile.id,
@@ -68,7 +56,7 @@ void main() async {
     );
     print('Updated metadata: ${updated.metadata}');
 
-    // 6. Generate an enrollment URL to send to the end user.
+    // 5. Generate an enrollment URL to send to the end user.
     print('\n=== Enrollment URL ===');
     final enrollment = await client.userProfiles.createEnrollmentUrl(
       profile.id,

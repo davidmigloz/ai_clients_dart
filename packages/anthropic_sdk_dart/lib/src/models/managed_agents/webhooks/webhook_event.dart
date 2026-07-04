@@ -106,6 +106,19 @@ class WebhookEvent {
 /// - [WebhookVaultCredentialArchivedEventData] — `vault_credential.archived`.
 /// - [WebhookVaultCredentialDeletedEventData] — `vault_credential.deleted`.
 /// - [WebhookVaultCredentialRefreshFailedEventData] — `vault_credential.refresh_failed`.
+/// - [WebhookAgentCreatedEventData] — `agent.created`.
+/// - [WebhookAgentUpdatedEventData] — `agent.updated`.
+/// - [WebhookAgentDeletedEventData] — `agent.deleted`.
+/// - [WebhookAgentArchivedEventData] — `agent.archived`.
+/// - [WebhookDeploymentCreatedEventData] — `deployment.created`.
+/// - [WebhookDeploymentUpdatedEventData] — `deployment.updated`.
+/// - [WebhookDeploymentDeletedEventData] — `deployment.deleted`.
+/// - [WebhookDeploymentArchivedEventData] — `deployment.archived`.
+/// - [WebhookDeploymentPausedEventData] — `deployment.paused`.
+/// - [WebhookDeploymentUnpausedEventData] — `deployment.unpaused`.
+/// - [WebhookDeploymentRunStartedEventData] — `deployment_run.started`.
+/// - [WebhookDeploymentRunSucceededEventData] — `deployment_run.succeeded`.
+/// - [WebhookDeploymentRunFailedEventData] — `deployment_run.failed`.
 /// - [UnknownWebhookEventData] — unrecognized event-data type, for forward
 ///   compatibility.
 sealed class WebhookEventData {
@@ -157,6 +170,28 @@ sealed class WebhookEventData {
         WebhookVaultCredentialDeletedEventData.fromJson(json),
       'vault_credential.refresh_failed' =>
         WebhookVaultCredentialRefreshFailedEventData.fromJson(json),
+      'agent.created' => WebhookAgentCreatedEventData.fromJson(json),
+      'agent.updated' => WebhookAgentUpdatedEventData.fromJson(json),
+      'agent.deleted' => WebhookAgentDeletedEventData.fromJson(json),
+      'agent.archived' => WebhookAgentArchivedEventData.fromJson(json),
+      'deployment.created' => WebhookDeploymentCreatedEventData.fromJson(json),
+      'deployment.updated' => WebhookDeploymentUpdatedEventData.fromJson(json),
+      'deployment.deleted' => WebhookDeploymentDeletedEventData.fromJson(json),
+      'deployment.archived' => WebhookDeploymentArchivedEventData.fromJson(
+        json,
+      ),
+      'deployment.paused' => WebhookDeploymentPausedEventData.fromJson(json),
+      'deployment.unpaused' => WebhookDeploymentUnpausedEventData.fromJson(
+        json,
+      ),
+      'deployment_run.started' => WebhookDeploymentRunStartedEventData.fromJson(
+        json,
+      ),
+      'deployment_run.succeeded' =>
+        WebhookDeploymentRunSucceededEventData.fromJson(json),
+      'deployment_run.failed' => WebhookDeploymentRunFailedEventData.fromJson(
+        json,
+      ),
       _ => UnknownWebhookEventData(rawJson: json),
     };
   }
@@ -1872,6 +1907,932 @@ class WebhookVaultCredentialRefreshFailedEventData extends WebhookEventData {
   String toString() =>
       'WebhookVaultCredentialRefreshFailedEventData(id: $id, organizationId: $organizationId, '
       'workspaceId: $workspaceId, vaultId: $vaultId)';
+}
+
+/// Webhook event data signalling an agent was created.
+@immutable
+class WebhookAgentCreatedEventData extends WebhookEventData {
+  /// The event-data type, always 'agent.created'.
+  String get type => 'agent.created';
+
+  /// ID of the resource this event concerns.
+  final String id;
+
+  /// ID of the organization that owns the resource.
+  final String organizationId;
+
+  /// ID of the workspace that owns the resource.
+  final String workspaceId;
+
+  /// Creates a [WebhookAgentCreatedEventData].
+  const WebhookAgentCreatedEventData({
+    required this.id,
+    required this.organizationId,
+    required this.workspaceId,
+  });
+
+  /// Creates a [WebhookAgentCreatedEventData] from JSON.
+  factory WebhookAgentCreatedEventData.fromJson(Map<String, dynamic> json) {
+    return WebhookAgentCreatedEventData(
+      id: json['id'] as String,
+      organizationId: json['organization_id'] as String,
+      workspaceId: json['workspace_id'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'organization_id': organizationId,
+    'workspace_id': workspaceId,
+  };
+
+  /// Creates a copy with replaced values.
+  WebhookAgentCreatedEventData copyWith({
+    String? id,
+    String? organizationId,
+    String? workspaceId,
+  }) {
+    return WebhookAgentCreatedEventData(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      workspaceId: workspaceId ?? this.workspaceId,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WebhookAgentCreatedEventData &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          organizationId == other.organizationId &&
+          workspaceId == other.workspaceId;
+
+  @override
+  int get hashCode => Object.hash(id, organizationId, workspaceId);
+
+  @override
+  String toString() =>
+      'WebhookAgentCreatedEventData(id: $id, organizationId: $organizationId, '
+      'workspaceId: $workspaceId)';
+}
+
+/// Webhook event data signalling an agent was updated.
+@immutable
+class WebhookAgentUpdatedEventData extends WebhookEventData {
+  /// The event-data type, always 'agent.updated'.
+  String get type => 'agent.updated';
+
+  /// ID of the resource this event concerns.
+  final String id;
+
+  /// ID of the organization that owns the resource.
+  final String organizationId;
+
+  /// ID of the workspace that owns the resource.
+  final String workspaceId;
+
+  /// Creates a [WebhookAgentUpdatedEventData].
+  const WebhookAgentUpdatedEventData({
+    required this.id,
+    required this.organizationId,
+    required this.workspaceId,
+  });
+
+  /// Creates a [WebhookAgentUpdatedEventData] from JSON.
+  factory WebhookAgentUpdatedEventData.fromJson(Map<String, dynamic> json) {
+    return WebhookAgentUpdatedEventData(
+      id: json['id'] as String,
+      organizationId: json['organization_id'] as String,
+      workspaceId: json['workspace_id'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'organization_id': organizationId,
+    'workspace_id': workspaceId,
+  };
+
+  /// Creates a copy with replaced values.
+  WebhookAgentUpdatedEventData copyWith({
+    String? id,
+    String? organizationId,
+    String? workspaceId,
+  }) {
+    return WebhookAgentUpdatedEventData(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      workspaceId: workspaceId ?? this.workspaceId,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WebhookAgentUpdatedEventData &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          organizationId == other.organizationId &&
+          workspaceId == other.workspaceId;
+
+  @override
+  int get hashCode => Object.hash(id, organizationId, workspaceId);
+
+  @override
+  String toString() =>
+      'WebhookAgentUpdatedEventData(id: $id, organizationId: $organizationId, '
+      'workspaceId: $workspaceId)';
+}
+
+/// Webhook event data signalling an agent was deleted.
+@immutable
+class WebhookAgentDeletedEventData extends WebhookEventData {
+  /// The event-data type, always 'agent.deleted'.
+  String get type => 'agent.deleted';
+
+  /// ID of the resource this event concerns.
+  final String id;
+
+  /// ID of the organization that owns the resource.
+  final String organizationId;
+
+  /// ID of the workspace that owns the resource.
+  final String workspaceId;
+
+  /// Creates a [WebhookAgentDeletedEventData].
+  const WebhookAgentDeletedEventData({
+    required this.id,
+    required this.organizationId,
+    required this.workspaceId,
+  });
+
+  /// Creates a [WebhookAgentDeletedEventData] from JSON.
+  factory WebhookAgentDeletedEventData.fromJson(Map<String, dynamic> json) {
+    return WebhookAgentDeletedEventData(
+      id: json['id'] as String,
+      organizationId: json['organization_id'] as String,
+      workspaceId: json['workspace_id'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'organization_id': organizationId,
+    'workspace_id': workspaceId,
+  };
+
+  /// Creates a copy with replaced values.
+  WebhookAgentDeletedEventData copyWith({
+    String? id,
+    String? organizationId,
+    String? workspaceId,
+  }) {
+    return WebhookAgentDeletedEventData(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      workspaceId: workspaceId ?? this.workspaceId,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WebhookAgentDeletedEventData &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          organizationId == other.organizationId &&
+          workspaceId == other.workspaceId;
+
+  @override
+  int get hashCode => Object.hash(id, organizationId, workspaceId);
+
+  @override
+  String toString() =>
+      'WebhookAgentDeletedEventData(id: $id, organizationId: $organizationId, '
+      'workspaceId: $workspaceId)';
+}
+
+/// Webhook event data signalling an agent was archived.
+@immutable
+class WebhookAgentArchivedEventData extends WebhookEventData {
+  /// The event-data type, always 'agent.archived'.
+  String get type => 'agent.archived';
+
+  /// ID of the resource this event concerns.
+  final String id;
+
+  /// ID of the organization that owns the resource.
+  final String organizationId;
+
+  /// ID of the workspace that owns the resource.
+  final String workspaceId;
+
+  /// Creates a [WebhookAgentArchivedEventData].
+  const WebhookAgentArchivedEventData({
+    required this.id,
+    required this.organizationId,
+    required this.workspaceId,
+  });
+
+  /// Creates a [WebhookAgentArchivedEventData] from JSON.
+  factory WebhookAgentArchivedEventData.fromJson(Map<String, dynamic> json) {
+    return WebhookAgentArchivedEventData(
+      id: json['id'] as String,
+      organizationId: json['organization_id'] as String,
+      workspaceId: json['workspace_id'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'organization_id': organizationId,
+    'workspace_id': workspaceId,
+  };
+
+  /// Creates a copy with replaced values.
+  WebhookAgentArchivedEventData copyWith({
+    String? id,
+    String? organizationId,
+    String? workspaceId,
+  }) {
+    return WebhookAgentArchivedEventData(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      workspaceId: workspaceId ?? this.workspaceId,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WebhookAgentArchivedEventData &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          organizationId == other.organizationId &&
+          workspaceId == other.workspaceId;
+
+  @override
+  int get hashCode => Object.hash(id, organizationId, workspaceId);
+
+  @override
+  String toString() =>
+      'WebhookAgentArchivedEventData(id: $id, organizationId: $organizationId, '
+      'workspaceId: $workspaceId)';
+}
+
+/// Webhook event data signalling a deployment was created.
+@immutable
+class WebhookDeploymentCreatedEventData extends WebhookEventData {
+  /// The event-data type, always 'deployment.created'.
+  String get type => 'deployment.created';
+
+  /// ID of the resource this event concerns.
+  final String id;
+
+  /// ID of the organization that owns the resource.
+  final String organizationId;
+
+  /// ID of the workspace that owns the resource.
+  final String workspaceId;
+
+  /// Creates a [WebhookDeploymentCreatedEventData].
+  const WebhookDeploymentCreatedEventData({
+    required this.id,
+    required this.organizationId,
+    required this.workspaceId,
+  });
+
+  /// Creates a [WebhookDeploymentCreatedEventData] from JSON.
+  factory WebhookDeploymentCreatedEventData.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return WebhookDeploymentCreatedEventData(
+      id: json['id'] as String,
+      organizationId: json['organization_id'] as String,
+      workspaceId: json['workspace_id'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'organization_id': organizationId,
+    'workspace_id': workspaceId,
+  };
+
+  /// Creates a copy with replaced values.
+  WebhookDeploymentCreatedEventData copyWith({
+    String? id,
+    String? organizationId,
+    String? workspaceId,
+  }) {
+    return WebhookDeploymentCreatedEventData(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      workspaceId: workspaceId ?? this.workspaceId,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WebhookDeploymentCreatedEventData &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          organizationId == other.organizationId &&
+          workspaceId == other.workspaceId;
+
+  @override
+  int get hashCode => Object.hash(id, organizationId, workspaceId);
+
+  @override
+  String toString() =>
+      'WebhookDeploymentCreatedEventData(id: $id, organizationId: $organizationId, '
+      'workspaceId: $workspaceId)';
+}
+
+/// Webhook event data signalling a deployment was updated.
+@immutable
+class WebhookDeploymentUpdatedEventData extends WebhookEventData {
+  /// The event-data type, always 'deployment.updated'.
+  String get type => 'deployment.updated';
+
+  /// ID of the resource this event concerns.
+  final String id;
+
+  /// ID of the organization that owns the resource.
+  final String organizationId;
+
+  /// ID of the workspace that owns the resource.
+  final String workspaceId;
+
+  /// Creates a [WebhookDeploymentUpdatedEventData].
+  const WebhookDeploymentUpdatedEventData({
+    required this.id,
+    required this.organizationId,
+    required this.workspaceId,
+  });
+
+  /// Creates a [WebhookDeploymentUpdatedEventData] from JSON.
+  factory WebhookDeploymentUpdatedEventData.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return WebhookDeploymentUpdatedEventData(
+      id: json['id'] as String,
+      organizationId: json['organization_id'] as String,
+      workspaceId: json['workspace_id'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'organization_id': organizationId,
+    'workspace_id': workspaceId,
+  };
+
+  /// Creates a copy with replaced values.
+  WebhookDeploymentUpdatedEventData copyWith({
+    String? id,
+    String? organizationId,
+    String? workspaceId,
+  }) {
+    return WebhookDeploymentUpdatedEventData(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      workspaceId: workspaceId ?? this.workspaceId,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WebhookDeploymentUpdatedEventData &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          organizationId == other.organizationId &&
+          workspaceId == other.workspaceId;
+
+  @override
+  int get hashCode => Object.hash(id, organizationId, workspaceId);
+
+  @override
+  String toString() =>
+      'WebhookDeploymentUpdatedEventData(id: $id, organizationId: $organizationId, '
+      'workspaceId: $workspaceId)';
+}
+
+/// Webhook event data signalling a deployment was deleted.
+@immutable
+class WebhookDeploymentDeletedEventData extends WebhookEventData {
+  /// The event-data type, always 'deployment.deleted'.
+  String get type => 'deployment.deleted';
+
+  /// ID of the resource this event concerns.
+  final String id;
+
+  /// ID of the organization that owns the resource.
+  final String organizationId;
+
+  /// ID of the workspace that owns the resource.
+  final String workspaceId;
+
+  /// Creates a [WebhookDeploymentDeletedEventData].
+  const WebhookDeploymentDeletedEventData({
+    required this.id,
+    required this.organizationId,
+    required this.workspaceId,
+  });
+
+  /// Creates a [WebhookDeploymentDeletedEventData] from JSON.
+  factory WebhookDeploymentDeletedEventData.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return WebhookDeploymentDeletedEventData(
+      id: json['id'] as String,
+      organizationId: json['organization_id'] as String,
+      workspaceId: json['workspace_id'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'organization_id': organizationId,
+    'workspace_id': workspaceId,
+  };
+
+  /// Creates a copy with replaced values.
+  WebhookDeploymentDeletedEventData copyWith({
+    String? id,
+    String? organizationId,
+    String? workspaceId,
+  }) {
+    return WebhookDeploymentDeletedEventData(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      workspaceId: workspaceId ?? this.workspaceId,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WebhookDeploymentDeletedEventData &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          organizationId == other.organizationId &&
+          workspaceId == other.workspaceId;
+
+  @override
+  int get hashCode => Object.hash(id, organizationId, workspaceId);
+
+  @override
+  String toString() =>
+      'WebhookDeploymentDeletedEventData(id: $id, organizationId: $organizationId, '
+      'workspaceId: $workspaceId)';
+}
+
+/// Webhook event data signalling a deployment was archived.
+@immutable
+class WebhookDeploymentArchivedEventData extends WebhookEventData {
+  /// The event-data type, always 'deployment.archived'.
+  String get type => 'deployment.archived';
+
+  /// ID of the resource this event concerns.
+  final String id;
+
+  /// ID of the organization that owns the resource.
+  final String organizationId;
+
+  /// ID of the workspace that owns the resource.
+  final String workspaceId;
+
+  /// Creates a [WebhookDeploymentArchivedEventData].
+  const WebhookDeploymentArchivedEventData({
+    required this.id,
+    required this.organizationId,
+    required this.workspaceId,
+  });
+
+  /// Creates a [WebhookDeploymentArchivedEventData] from JSON.
+  factory WebhookDeploymentArchivedEventData.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return WebhookDeploymentArchivedEventData(
+      id: json['id'] as String,
+      organizationId: json['organization_id'] as String,
+      workspaceId: json['workspace_id'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'organization_id': organizationId,
+    'workspace_id': workspaceId,
+  };
+
+  /// Creates a copy with replaced values.
+  WebhookDeploymentArchivedEventData copyWith({
+    String? id,
+    String? organizationId,
+    String? workspaceId,
+  }) {
+    return WebhookDeploymentArchivedEventData(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      workspaceId: workspaceId ?? this.workspaceId,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WebhookDeploymentArchivedEventData &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          organizationId == other.organizationId &&
+          workspaceId == other.workspaceId;
+
+  @override
+  int get hashCode => Object.hash(id, organizationId, workspaceId);
+
+  @override
+  String toString() =>
+      'WebhookDeploymentArchivedEventData(id: $id, organizationId: $organizationId, '
+      'workspaceId: $workspaceId)';
+}
+
+/// Webhook event data signalling a deployment was paused.
+@immutable
+class WebhookDeploymentPausedEventData extends WebhookEventData {
+  /// The event-data type, always 'deployment.paused'.
+  String get type => 'deployment.paused';
+
+  /// ID of the resource this event concerns.
+  final String id;
+
+  /// ID of the organization that owns the resource.
+  final String organizationId;
+
+  /// ID of the workspace that owns the resource.
+  final String workspaceId;
+
+  /// Creates a [WebhookDeploymentPausedEventData].
+  const WebhookDeploymentPausedEventData({
+    required this.id,
+    required this.organizationId,
+    required this.workspaceId,
+  });
+
+  /// Creates a [WebhookDeploymentPausedEventData] from JSON.
+  factory WebhookDeploymentPausedEventData.fromJson(Map<String, dynamic> json) {
+    return WebhookDeploymentPausedEventData(
+      id: json['id'] as String,
+      organizationId: json['organization_id'] as String,
+      workspaceId: json['workspace_id'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'organization_id': organizationId,
+    'workspace_id': workspaceId,
+  };
+
+  /// Creates a copy with replaced values.
+  WebhookDeploymentPausedEventData copyWith({
+    String? id,
+    String? organizationId,
+    String? workspaceId,
+  }) {
+    return WebhookDeploymentPausedEventData(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      workspaceId: workspaceId ?? this.workspaceId,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WebhookDeploymentPausedEventData &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          organizationId == other.organizationId &&
+          workspaceId == other.workspaceId;
+
+  @override
+  int get hashCode => Object.hash(id, organizationId, workspaceId);
+
+  @override
+  String toString() =>
+      'WebhookDeploymentPausedEventData(id: $id, organizationId: $organizationId, '
+      'workspaceId: $workspaceId)';
+}
+
+/// Webhook event data signalling a deployment was unpaused.
+@immutable
+class WebhookDeploymentUnpausedEventData extends WebhookEventData {
+  /// The event-data type, always 'deployment.unpaused'.
+  String get type => 'deployment.unpaused';
+
+  /// ID of the resource this event concerns.
+  final String id;
+
+  /// ID of the organization that owns the resource.
+  final String organizationId;
+
+  /// ID of the workspace that owns the resource.
+  final String workspaceId;
+
+  /// Creates a [WebhookDeploymentUnpausedEventData].
+  const WebhookDeploymentUnpausedEventData({
+    required this.id,
+    required this.organizationId,
+    required this.workspaceId,
+  });
+
+  /// Creates a [WebhookDeploymentUnpausedEventData] from JSON.
+  factory WebhookDeploymentUnpausedEventData.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return WebhookDeploymentUnpausedEventData(
+      id: json['id'] as String,
+      organizationId: json['organization_id'] as String,
+      workspaceId: json['workspace_id'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'organization_id': organizationId,
+    'workspace_id': workspaceId,
+  };
+
+  /// Creates a copy with replaced values.
+  WebhookDeploymentUnpausedEventData copyWith({
+    String? id,
+    String? organizationId,
+    String? workspaceId,
+  }) {
+    return WebhookDeploymentUnpausedEventData(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      workspaceId: workspaceId ?? this.workspaceId,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WebhookDeploymentUnpausedEventData &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          organizationId == other.organizationId &&
+          workspaceId == other.workspaceId;
+
+  @override
+  int get hashCode => Object.hash(id, organizationId, workspaceId);
+
+  @override
+  String toString() =>
+      'WebhookDeploymentUnpausedEventData(id: $id, organizationId: $organizationId, '
+      'workspaceId: $workspaceId)';
+}
+
+/// Webhook event data signalling a deployment run started.
+@immutable
+class WebhookDeploymentRunStartedEventData extends WebhookEventData {
+  /// The event-data type, always 'deployment_run.started'.
+  String get type => 'deployment_run.started';
+
+  /// ID of the resource this event concerns.
+  final String id;
+
+  /// ID of the organization that owns the resource.
+  final String organizationId;
+
+  /// ID of the workspace that owns the resource.
+  final String workspaceId;
+
+  /// Creates a [WebhookDeploymentRunStartedEventData].
+  const WebhookDeploymentRunStartedEventData({
+    required this.id,
+    required this.organizationId,
+    required this.workspaceId,
+  });
+
+  /// Creates a [WebhookDeploymentRunStartedEventData] from JSON.
+  factory WebhookDeploymentRunStartedEventData.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return WebhookDeploymentRunStartedEventData(
+      id: json['id'] as String,
+      organizationId: json['organization_id'] as String,
+      workspaceId: json['workspace_id'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'organization_id': organizationId,
+    'workspace_id': workspaceId,
+  };
+
+  /// Creates a copy with replaced values.
+  WebhookDeploymentRunStartedEventData copyWith({
+    String? id,
+    String? organizationId,
+    String? workspaceId,
+  }) {
+    return WebhookDeploymentRunStartedEventData(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      workspaceId: workspaceId ?? this.workspaceId,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WebhookDeploymentRunStartedEventData &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          organizationId == other.organizationId &&
+          workspaceId == other.workspaceId;
+
+  @override
+  int get hashCode => Object.hash(id, organizationId, workspaceId);
+
+  @override
+  String toString() =>
+      'WebhookDeploymentRunStartedEventData(id: $id, organizationId: $organizationId, '
+      'workspaceId: $workspaceId)';
+}
+
+/// Webhook event data signalling a deployment run succeeded.
+@immutable
+class WebhookDeploymentRunSucceededEventData extends WebhookEventData {
+  /// The event-data type, always 'deployment_run.succeeded'.
+  String get type => 'deployment_run.succeeded';
+
+  /// ID of the resource this event concerns.
+  final String id;
+
+  /// ID of the organization that owns the resource.
+  final String organizationId;
+
+  /// ID of the workspace that owns the resource.
+  final String workspaceId;
+
+  /// Creates a [WebhookDeploymentRunSucceededEventData].
+  const WebhookDeploymentRunSucceededEventData({
+    required this.id,
+    required this.organizationId,
+    required this.workspaceId,
+  });
+
+  /// Creates a [WebhookDeploymentRunSucceededEventData] from JSON.
+  factory WebhookDeploymentRunSucceededEventData.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return WebhookDeploymentRunSucceededEventData(
+      id: json['id'] as String,
+      organizationId: json['organization_id'] as String,
+      workspaceId: json['workspace_id'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'organization_id': organizationId,
+    'workspace_id': workspaceId,
+  };
+
+  /// Creates a copy with replaced values.
+  WebhookDeploymentRunSucceededEventData copyWith({
+    String? id,
+    String? organizationId,
+    String? workspaceId,
+  }) {
+    return WebhookDeploymentRunSucceededEventData(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      workspaceId: workspaceId ?? this.workspaceId,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WebhookDeploymentRunSucceededEventData &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          organizationId == other.organizationId &&
+          workspaceId == other.workspaceId;
+
+  @override
+  int get hashCode => Object.hash(id, organizationId, workspaceId);
+
+  @override
+  String toString() =>
+      'WebhookDeploymentRunSucceededEventData(id: $id, organizationId: $organizationId, '
+      'workspaceId: $workspaceId)';
+}
+
+/// Webhook event data signalling a deployment run failed.
+@immutable
+class WebhookDeploymentRunFailedEventData extends WebhookEventData {
+  /// The event-data type, always 'deployment_run.failed'.
+  String get type => 'deployment_run.failed';
+
+  /// ID of the resource this event concerns.
+  final String id;
+
+  /// ID of the organization that owns the resource.
+  final String organizationId;
+
+  /// ID of the workspace that owns the resource.
+  final String workspaceId;
+
+  /// Creates a [WebhookDeploymentRunFailedEventData].
+  const WebhookDeploymentRunFailedEventData({
+    required this.id,
+    required this.organizationId,
+    required this.workspaceId,
+  });
+
+  /// Creates a [WebhookDeploymentRunFailedEventData] from JSON.
+  factory WebhookDeploymentRunFailedEventData.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return WebhookDeploymentRunFailedEventData(
+      id: json['id'] as String,
+      organizationId: json['organization_id'] as String,
+      workspaceId: json['workspace_id'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'id': id,
+    'organization_id': organizationId,
+    'workspace_id': workspaceId,
+  };
+
+  /// Creates a copy with replaced values.
+  WebhookDeploymentRunFailedEventData copyWith({
+    String? id,
+    String? organizationId,
+    String? workspaceId,
+  }) {
+    return WebhookDeploymentRunFailedEventData(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      workspaceId: workspaceId ?? this.workspaceId,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WebhookDeploymentRunFailedEventData &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          organizationId == other.organizationId &&
+          workspaceId == other.workspaceId;
+
+  @override
+  int get hashCode => Object.hash(id, organizationId, workspaceId);
+
+  @override
+  String toString() =>
+      'WebhookDeploymentRunFailedEventData(id: $id, organizationId: $organizationId, '
+      'workspaceId: $workspaceId)';
 }
 
 /// Unrecognized webhook event-data type — preserves raw JSON for forward

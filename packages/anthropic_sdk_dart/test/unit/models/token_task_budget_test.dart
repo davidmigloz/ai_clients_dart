@@ -48,31 +48,4 @@ void main() {
       expect(parsed, equals(config));
     });
   });
-
-  group('MessageCreateRequest.userProfileId', () {
-    test('serializes user_profile_id when set', () {
-      final request = MessageCreateRequest(
-        model: 'claude-opus-4-8',
-        messages: [InputMessage.user('hi')],
-        maxTokens: 16,
-        userProfileId: 'uprof_abc123',
-      );
-
-      final json = request.toJson();
-      expect(json['user_profile_id'], 'uprof_abc123');
-
-      final parsed = MessageCreateRequest.fromJson(json);
-      expect(parsed.userProfileId, 'uprof_abc123');
-    });
-
-    test('omits user_profile_id when null', () {
-      final request = MessageCreateRequest(
-        model: 'claude-opus-4-8',
-        messages: [InputMessage.user('hi')],
-        maxTokens: 16,
-      );
-
-      expect(request.toJson().containsKey('user_profile_id'), isFalse);
-    });
-  });
 }

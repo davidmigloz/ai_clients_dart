@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
 import 'credential_networking.dart';
+import 'injection_location.dart';
 
 // ============================================================================
 // Response types — returned from the API
@@ -49,6 +50,7 @@ sealed class CredentialAuth {
     String type,
     required String secretName,
     required CredentialNetworkingResponse networking,
+    required InjectionLocationResponse injectionLocation,
   }) = EnvironmentVariableAuthResponse;
 
   /// Converts to JSON.
@@ -210,11 +212,15 @@ class EnvironmentVariableAuthResponse extends CredentialAuth {
   /// Outbound hosts the secret value is substituted on.
   final CredentialNetworkingResponse networking;
 
+  /// Where in the outbound request the secret value is substituted.
+  final InjectionLocationResponse injectionLocation;
+
   /// Creates an [EnvironmentVariableAuthResponse].
   const EnvironmentVariableAuthResponse({
     this.type = 'environment_variable',
     required this.secretName,
     required this.networking,
+    required this.injectionLocation,
   });
 
   /// Creates an [EnvironmentVariableAuthResponse] from JSON.
@@ -225,6 +231,9 @@ class EnvironmentVariableAuthResponse extends CredentialAuth {
       networking: CredentialNetworkingResponse.fromJson(
         json['networking'] as Map<String, dynamic>,
       ),
+      injectionLocation: InjectionLocationResponse.fromJson(
+        json['injection_location'] as Map<String, dynamic>,
+      ),
     );
   }
 
@@ -233,6 +242,7 @@ class EnvironmentVariableAuthResponse extends CredentialAuth {
     'type': type,
     'secret_name': secretName,
     'networking': networking.toJson(),
+    'injection_location': injectionLocation.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -240,11 +250,13 @@ class EnvironmentVariableAuthResponse extends CredentialAuth {
     String? type,
     String? secretName,
     CredentialNetworkingResponse? networking,
+    InjectionLocationResponse? injectionLocation,
   }) {
     return EnvironmentVariableAuthResponse(
       type: type ?? this.type,
       secretName: secretName ?? this.secretName,
       networking: networking ?? this.networking,
+      injectionLocation: injectionLocation ?? this.injectionLocation,
     );
   }
 
@@ -255,17 +267,20 @@ class EnvironmentVariableAuthResponse extends CredentialAuth {
           runtimeType == other.runtimeType &&
           type == other.type &&
           secretName == other.secretName &&
-          networking == other.networking;
+          networking == other.networking &&
+          injectionLocation == other.injectionLocation;
 
   @override
-  int get hashCode => Object.hash(type, secretName, networking);
+  int get hashCode =>
+      Object.hash(type, secretName, networking, injectionLocation);
 
   @override
   String toString() =>
       'EnvironmentVariableAuthResponse('
       'type: $type, '
       'secretName: $secretName, '
-      'networking: $networking)';
+      'networking: $networking, '
+      'injectionLocation: $injectionLocation)';
 }
 
 /// Unrecognized credential auth type (preserves raw JSON).
@@ -618,6 +633,7 @@ sealed class CredentialCreateAuth {
     required String secretName,
     required String secretValue,
     required CredentialNetworkingParams networking,
+    InjectionLocation? injectionLocation,
   }) = EnvironmentVariableCreateParams;
 
   /// Converts to JSON.
@@ -810,12 +826,16 @@ class EnvironmentVariableCreateParams extends CredentialCreateAuth {
   /// Outbound hosts the secret value is substituted on.
   final CredentialNetworkingParams networking;
 
+  /// Where in the outbound request the secret value may be substituted.
+  final InjectionLocation? injectionLocation;
+
   /// Creates an [EnvironmentVariableCreateParams].
   const EnvironmentVariableCreateParams({
     this.type = 'environment_variable',
     required this.secretName,
     required this.secretValue,
     required this.networking,
+    this.injectionLocation,
   });
 
   /// Creates an [EnvironmentVariableCreateParams] from JSON.
@@ -827,6 +847,11 @@ class EnvironmentVariableCreateParams extends CredentialCreateAuth {
       networking: CredentialNetworkingParams.fromJson(
         json['networking'] as Map<String, dynamic>,
       ),
+      injectionLocation: json['injection_location'] != null
+          ? InjectionLocation.fromJson(
+              json['injection_location'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
@@ -836,6 +861,8 @@ class EnvironmentVariableCreateParams extends CredentialCreateAuth {
     'secret_name': secretName,
     'secret_value': secretValue,
     'networking': networking.toJson(),
+    if (injectionLocation != null)
+      'injection_location': injectionLocation!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -844,12 +871,16 @@ class EnvironmentVariableCreateParams extends CredentialCreateAuth {
     String? secretName,
     String? secretValue,
     CredentialNetworkingParams? networking,
+    Object? injectionLocation = unsetCopyWithValue,
   }) {
     return EnvironmentVariableCreateParams(
       type: type ?? this.type,
       secretName: secretName ?? this.secretName,
       secretValue: secretValue ?? this.secretValue,
       networking: networking ?? this.networking,
+      injectionLocation: injectionLocation == unsetCopyWithValue
+          ? this.injectionLocation
+          : injectionLocation as InjectionLocation?,
     );
   }
 
@@ -861,10 +892,12 @@ class EnvironmentVariableCreateParams extends CredentialCreateAuth {
           type == other.type &&
           secretName == other.secretName &&
           secretValue == other.secretValue &&
-          networking == other.networking;
+          networking == other.networking &&
+          injectionLocation == other.injectionLocation;
 
   @override
-  int get hashCode => Object.hash(type, secretName, secretValue, networking);
+  int get hashCode =>
+      Object.hash(type, secretName, secretValue, networking, injectionLocation);
 
   @override
   String toString() =>
@@ -872,7 +905,8 @@ class EnvironmentVariableCreateParams extends CredentialCreateAuth {
       'type: $type, '
       'secretName: $secretName, '
       'secretValue: [redacted], '
-      'networking: $networking)';
+      'networking: $networking, '
+      'injectionLocation: $injectionLocation)';
 }
 
 /// Unrecognized credential create auth type (preserves raw JSON).
@@ -1267,6 +1301,7 @@ sealed class CredentialUpdateAuth {
     String type,
     String? secretValue,
     CredentialNetworkingParams? networking,
+    InjectionLocation? injectionLocation,
   }) = EnvironmentVariableUpdateParams;
 
   /// Converts to JSON.
@@ -1435,11 +1470,15 @@ class EnvironmentVariableUpdateParams extends CredentialUpdateAuth {
   /// Updated networking scope. Full replacement.
   final CredentialNetworkingParams? networking;
 
+  /// Updated injection location.
+  final InjectionLocation? injectionLocation;
+
   /// Creates an [EnvironmentVariableUpdateParams].
   const EnvironmentVariableUpdateParams({
     this.type = 'environment_variable',
     this.secretValue,
     this.networking,
+    this.injectionLocation,
   });
 
   /// Creates an [EnvironmentVariableUpdateParams] from JSON.
@@ -1452,6 +1491,11 @@ class EnvironmentVariableUpdateParams extends CredentialUpdateAuth {
               json['networking'] as Map<String, dynamic>,
             )
           : null,
+      injectionLocation: json['injection_location'] != null
+          ? InjectionLocation.fromJson(
+              json['injection_location'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
@@ -1460,6 +1504,8 @@ class EnvironmentVariableUpdateParams extends CredentialUpdateAuth {
     'type': type,
     if (secretValue != null) 'secret_value': secretValue,
     if (networking != null) 'networking': networking!.toJson(),
+    if (injectionLocation != null)
+      'injection_location': injectionLocation!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -1467,6 +1513,7 @@ class EnvironmentVariableUpdateParams extends CredentialUpdateAuth {
     String? type,
     Object? secretValue = unsetCopyWithValue,
     Object? networking = unsetCopyWithValue,
+    Object? injectionLocation = unsetCopyWithValue,
   }) {
     return EnvironmentVariableUpdateParams(
       type: type ?? this.type,
@@ -1476,6 +1523,9 @@ class EnvironmentVariableUpdateParams extends CredentialUpdateAuth {
       networking: networking == unsetCopyWithValue
           ? this.networking
           : networking as CredentialNetworkingParams?,
+      injectionLocation: injectionLocation == unsetCopyWithValue
+          ? this.injectionLocation
+          : injectionLocation as InjectionLocation?,
     );
   }
 
@@ -1486,17 +1536,20 @@ class EnvironmentVariableUpdateParams extends CredentialUpdateAuth {
           runtimeType == other.runtimeType &&
           type == other.type &&
           secretValue == other.secretValue &&
-          networking == other.networking;
+          networking == other.networking &&
+          injectionLocation == other.injectionLocation;
 
   @override
-  int get hashCode => Object.hash(type, secretValue, networking);
+  int get hashCode =>
+      Object.hash(type, secretValue, networking, injectionLocation);
 
   @override
   String toString() =>
       'EnvironmentVariableUpdateParams('
       'type: $type, '
       'secretValue: ${secretValue == null ? null : '[redacted]'}, '
-      'networking: $networking)';
+      'networking: $networking, '
+      'injectionLocation: $injectionLocation)';
 }
 
 /// Unrecognized credential update auth type (preserves raw JSON).

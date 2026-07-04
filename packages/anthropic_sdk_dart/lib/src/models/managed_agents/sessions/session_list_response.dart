@@ -13,8 +13,18 @@ class ListSessionsResponse {
   /// Opaque cursor for the next page. Null when no more results.
   final String? nextPage;
 
+  /// Opaque cursor for the previous page.
+  ///
+  /// Null when on the first page. Pass as the `page` parameter to navigate
+  /// backward.
+  final String? prevPage;
+
   /// Creates a [ListSessionsResponse].
-  const ListSessionsResponse({required this.data, this.nextPage});
+  const ListSessionsResponse({
+    required this.data,
+    this.nextPage,
+    this.prevPage,
+  });
 
   /// Creates a [ListSessionsResponse] from JSON.
   factory ListSessionsResponse.fromJson(Map<String, dynamic> json) {
@@ -23,6 +33,7 @@ class ListSessionsResponse {
           .map((e) => Session.fromJson(e as Map<String, dynamic>))
           .toList(),
       nextPage: json['next_page'] as String?,
+      prevPage: json['prev_page'] as String?,
     );
   }
 
@@ -30,18 +41,23 @@ class ListSessionsResponse {
   Map<String, dynamic> toJson() => {
     'data': data.map((e) => e.toJson()).toList(),
     if (nextPage != null) 'next_page': nextPage,
+    if (prevPage != null) 'prev_page': prevPage,
   };
 
   /// Creates a copy with replaced values.
   ListSessionsResponse copyWith({
     List<Session>? data,
     Object? nextPage = unsetCopyWithValue,
+    Object? prevPage = unsetCopyWithValue,
   }) {
     return ListSessionsResponse(
       data: data ?? this.data,
       nextPage: nextPage == unsetCopyWithValue
           ? this.nextPage
           : nextPage as String?,
+      prevPage: prevPage == unsetCopyWithValue
+          ? this.prevPage
+          : prevPage as String?,
     );
   }
 
@@ -51,11 +67,14 @@ class ListSessionsResponse {
       other is ListSessionsResponse &&
           runtimeType == other.runtimeType &&
           listsEqual(data, other.data) &&
-          nextPage == other.nextPage;
+          nextPage == other.nextPage &&
+          prevPage == other.prevPage;
 
   @override
-  int get hashCode => Object.hash(listHash(data), nextPage);
+  int get hashCode => Object.hash(listHash(data), nextPage, prevPage);
 
   @override
-  String toString() => 'ListSessionsResponse(data: $data, nextPage: $nextPage)';
+  String toString() =>
+      'ListSessionsResponse(data: $data, nextPage: $nextPage, '
+      'prevPage: $prevPage)';
 }

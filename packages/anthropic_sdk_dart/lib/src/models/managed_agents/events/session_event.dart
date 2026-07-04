@@ -45,6 +45,8 @@ import 'telemetry.dart';
 /// - [SpanOutcomeEvaluationOngoingEvent] — outcome evaluation heartbeat.
 /// - [SpanOutcomeEvaluationEndEvent] — outcome evaluation cycle completed.
 /// - [UserDefineOutcomeEvent] — echo of a `user.define_outcome` input event.
+/// - [EventStartEvent] — previews an upcoming event's type and id.
+/// - [EventDeltaEvent] — previews a fragment of an event as it is generated.
 /// - [UnknownSessionEvent] — unrecognized event type.
 sealed class SessionEvent {
   const SessionEvent();
@@ -102,6 +104,8 @@ sealed class SessionEvent {
         json,
       ),
       'user.define_outcome' => UserDefineOutcomeEvent.fromJson(json),
+      'event_start' => EventStartEvent.fromJson(json),
+      'event_delta' => EventDeltaEvent.fromJson(json),
       _ => UnknownSessionEvent(rawJson: json),
     };
   }
@@ -3282,4 +3286,342 @@ class UnknownSessionEvent extends SessionEvent {
 
   @override
   String toString() => 'UnknownSessionEvent(rawJson: $rawJson)';
+}
+
+// ---------------------------------------------------------------------------
+// Event preview streaming (event_start / event_delta)
+// ---------------------------------------------------------------------------
+
+/// Previews an upcoming agent message or thinking event's type and id before
+/// the complete event arrives.
+///
+/// Emitted on the session event stream when opted in via the `event_deltas[]`
+/// query parameter.
+@immutable
+class EventStartEvent extends SessionEvent {
+  /// The event type, always 'event_start'.
+  String get type => 'event_start';
+
+  /// The previewed event's type and id.
+  final EventStartPreview event;
+
+  /// Creates an [EventStartEvent].
+  const EventStartEvent({required this.event});
+
+  /// Creates an [EventStartEvent] from JSON.
+  factory EventStartEvent.fromJson(Map<String, dynamic> json) {
+    return EventStartEvent(
+      event: EventStartPreview.fromJson(json['event'] as Map<String, dynamic>),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': type, 'event': event.toJson()};
+
+  /// Creates a copy with replaced values.
+  EventStartEvent copyWith({EventStartPreview? event}) {
+    return EventStartEvent(event: event ?? this.event);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EventStartEvent &&
+          runtimeType == other.runtimeType &&
+          event == other.event;
+
+  @override
+  int get hashCode => event.hashCode;
+
+  @override
+  String toString() => 'EventStartEvent(event: $event)';
+}
+
+/// The previewed event's type and id in an [EventStartEvent].
+///
+/// Variants:
+/// - [AgentMessagePreview] — preview of a buffered `agent.message`.
+/// - [AgentThinkingPreview] — preview of a buffered `agent.thinking`.
+/// - [UnknownEventStartPreview] — unrecognized preview type.
+sealed class EventStartPreview {
+  const EventStartPreview();
+
+  /// Creates an [EventStartPreview] from JSON.
+  factory EventStartPreview.fromJson(Map<String, dynamic> json) {
+    final type = json['type'] as String?;
+    return switch (type) {
+      'agent.message' => AgentMessagePreview.fromJson(json),
+      'agent.thinking' => AgentThinkingPreview.fromJson(json),
+      _ => UnknownEventStartPreview(rawJson: json),
+    };
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson();
+}
+
+/// Preview of a buffered `agent.message` event.
+@immutable
+class AgentMessagePreview extends EventStartPreview {
+  /// The preview type, always 'agent.message'.
+  String get type => 'agent.message';
+
+  /// The id the buffered `agent.message` will carry once complete.
+  final String id;
+
+  /// Creates an [AgentMessagePreview].
+  const AgentMessagePreview({required this.id});
+
+  /// Creates an [AgentMessagePreview] from JSON.
+  factory AgentMessagePreview.fromJson(Map<String, dynamic> json) {
+    return AgentMessagePreview(id: json['id'] as String);
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': type, 'id': id};
+
+  /// Creates a copy with replaced values.
+  AgentMessagePreview copyWith({String? id}) {
+    return AgentMessagePreview(id: id ?? this.id);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AgentMessagePreview &&
+          runtimeType == other.runtimeType &&
+          id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+
+  @override
+  String toString() => 'AgentMessagePreview(id: $id)';
+}
+
+/// Preview of a buffered `agent.thinking` event.
+@immutable
+class AgentThinkingPreview extends EventStartPreview {
+  /// The preview type, always 'agent.thinking'.
+  String get type => 'agent.thinking';
+
+  /// The id the buffered `agent.thinking` will carry once complete.
+  final String id;
+
+  /// Creates an [AgentThinkingPreview].
+  const AgentThinkingPreview({required this.id});
+
+  /// Creates an [AgentThinkingPreview] from JSON.
+  factory AgentThinkingPreview.fromJson(Map<String, dynamic> json) {
+    return AgentThinkingPreview(id: json['id'] as String);
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {'type': type, 'id': id};
+
+  /// Creates a copy with replaced values.
+  AgentThinkingPreview copyWith({String? id}) {
+    return AgentThinkingPreview(id: id ?? this.id);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AgentThinkingPreview &&
+          runtimeType == other.runtimeType &&
+          id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+
+  @override
+  String toString() => 'AgentThinkingPreview(id: $id)';
+}
+
+/// Unrecognized event-start preview type — preserves raw JSON for forward
+/// compatibility.
+@immutable
+class UnknownEventStartPreview extends EventStartPreview {
+  /// The raw JSON.
+  final Map<String, dynamic> rawJson;
+
+  /// Creates an [UnknownEventStartPreview].
+  const UnknownEventStartPreview({required this.rawJson});
+
+  @override
+  Map<String, dynamic> toJson() => rawJson;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnknownEventStartPreview &&
+          runtimeType == other.runtimeType &&
+          mapsDeepEqual(rawJson, other.rawJson);
+
+  @override
+  int get hashCode => mapDeepHashCode(rawJson);
+
+  @override
+  String toString() => 'UnknownEventStartPreview(rawJson: $rawJson)';
+}
+
+/// Previews a fragment of an event's content as it is generated.
+///
+/// Emitted on the session event stream when opted in via the `event_deltas[]`
+/// query parameter.
+@immutable
+class EventDeltaEvent extends SessionEvent {
+  /// The event type, always 'event_delta'.
+  String get type => 'event_delta';
+
+  /// The id of the event being previewed. Matches the eventual event's id.
+  final String eventId;
+
+  /// One fragment of the previewed event.
+  final EventDelta delta;
+
+  /// Creates an [EventDeltaEvent].
+  const EventDeltaEvent({required this.eventId, required this.delta});
+
+  /// Creates an [EventDeltaEvent] from JSON.
+  factory EventDeltaEvent.fromJson(Map<String, dynamic> json) {
+    return EventDeltaEvent(
+      eventId: json['event_id'] as String,
+      delta: EventDelta.fromJson(json['delta'] as Map<String, dynamic>),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'event_id': eventId,
+    'delta': delta.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  EventDeltaEvent copyWith({String? eventId, EventDelta? delta}) {
+    return EventDeltaEvent(
+      eventId: eventId ?? this.eventId,
+      delta: delta ?? this.delta,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EventDeltaEvent &&
+          runtimeType == other.runtimeType &&
+          eventId == other.eventId &&
+          delta == other.delta;
+
+  @override
+  int get hashCode => Object.hash(eventId, delta);
+
+  @override
+  String toString() => 'EventDeltaEvent(eventId: $eventId, delta: $delta)';
+}
+
+/// One fragment of a previewed event in an [EventDeltaEvent].
+///
+/// Variants:
+/// - [ContentDelta] — a partial element of the previewed content array.
+/// - [UnknownEventDelta] — unrecognized delta type.
+sealed class EventDelta {
+  const EventDelta();
+
+  /// Creates an [EventDelta] from JSON.
+  factory EventDelta.fromJson(Map<String, dynamic> json) {
+    final type = json['type'] as String?;
+    return switch (type) {
+      'content_delta' => ContentDelta.fromJson(json),
+      _ => UnknownEventDelta(rawJson: json),
+    };
+  }
+
+  /// Converts to JSON.
+  Map<String, dynamic> toJson();
+}
+
+/// A partial element of the previewed event's content array.
+@immutable
+class ContentDelta extends EventDelta {
+  /// The delta type, always 'content_delta'.
+  String get type => 'content_delta';
+
+  /// A partial element of the content array at [index], typed like the element
+  /// itself (the same shape the buffered `agent.message` carries).
+  final Map<String, dynamic> content;
+
+  /// Which entry in the previewed event's content array this fragment updates.
+  final int? index;
+
+  /// Creates a [ContentDelta].
+  const ContentDelta({required this.content, this.index});
+
+  /// Creates a [ContentDelta] from JSON.
+  factory ContentDelta.fromJson(Map<String, dynamic> json) {
+    return ContentDelta(
+      content: json['content'] as Map<String, dynamic>,
+      index: json['index'] as int?,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'content': content,
+    if (index != null) 'index': index,
+  };
+
+  /// Creates a copy with replaced values.
+  ContentDelta copyWith({
+    Map<String, dynamic>? content,
+    Object? index = unsetCopyWithValue,
+  }) {
+    return ContentDelta(
+      content: content ?? this.content,
+      index: index == unsetCopyWithValue ? this.index : index as int?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ContentDelta &&
+          runtimeType == other.runtimeType &&
+          mapsDeepEqual(content, other.content) &&
+          index == other.index;
+
+  @override
+  int get hashCode => Object.hash(mapDeepHashCode(content), index);
+
+  @override
+  String toString() => 'ContentDelta(content: $content, index: $index)';
+}
+
+/// Unrecognized event-delta type — preserves raw JSON for forward
+/// compatibility.
+@immutable
+class UnknownEventDelta extends EventDelta {
+  /// The raw JSON.
+  final Map<String, dynamic> rawJson;
+
+  /// Creates an [UnknownEventDelta].
+  const UnknownEventDelta({required this.rawJson});
+
+  @override
+  Map<String, dynamic> toJson() => rawJson;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnknownEventDelta &&
+          runtimeType == other.runtimeType &&
+          mapsDeepEqual(rawJson, other.rawJson);
+
+  @override
+  int get hashCode => mapDeepHashCode(rawJson);
+
+  @override
+  String toString() => 'UnknownEventDelta(rawJson: $rawJson)';
 }
