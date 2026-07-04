@@ -1604,6 +1604,30 @@
       "schema": "OAuth2TokenAuth",
       "parent": "ConnectorAuth"
     },
+    "OCRAsideTextBlock": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "OcrAsideTextBlock",
+      "file": "lib/src/models/ocr/ocr_block.dart",
+      "schema": "OCRAsideTextBlock",
+      "parent": "OcrBlock"
+    },
+    "OCRCaptionBlock": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "OcrCaptionBlock",
+      "file": "lib/src/models/ocr/ocr_block.dart",
+      "schema": "OCRCaptionBlock",
+      "parent": "OcrBlock"
+    },
+    "OCRCodeBlock": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "OcrCodeBlock",
+      "file": "lib/src/models/ocr/ocr_block.dart",
+      "schema": "OCRCodeBlock",
+      "parent": "OcrBlock"
+    },
     "OCRConfidenceScore": {
       "spec": "main",
       "kind": "object",
@@ -1611,12 +1635,52 @@
       "file": "lib/src/models/ocr/ocr_confidence_score.dart",
       "schema": "OCRConfidenceScore"
     },
+    "OCREquationBlock": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "OcrEquationBlock",
+      "file": "lib/src/models/ocr/ocr_block.dart",
+      "schema": "OCREquationBlock",
+      "parent": "OcrBlock"
+    },
+    "OCRFooterBlock": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "OcrFooterBlock",
+      "file": "lib/src/models/ocr/ocr_block.dart",
+      "schema": "OCRFooterBlock",
+      "parent": "OcrBlock"
+    },
+    "OCRHeaderBlock": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "OcrHeaderBlock",
+      "file": "lib/src/models/ocr/ocr_block.dart",
+      "schema": "OCRHeaderBlock",
+      "parent": "OcrBlock"
+    },
+    "OCRImageBlock": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "OcrImageBlock",
+      "file": "lib/src/models/ocr/ocr_block.dart",
+      "schema": "OCRImageBlock",
+      "parent": "OcrBlock"
+    },
     "OCRImageObject": {
       "spec": "main",
       "kind": "object",
       "dart_class": "OcrImage",
       "file": "lib/src/models/ocr/ocr_image.dart",
       "schema": "OCRImageObject"
+    },
+    "OCRListBlock": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "OcrListBlock",
+      "file": "lib/src/models/ocr/ocr_block.dart",
+      "schema": "OCRListBlock",
+      "parent": "OcrBlock"
     },
     "OCRPageConfidenceScores": {
       "spec": "main",
@@ -1639,12 +1703,36 @@
       "file": "lib/src/models/ocr/ocr_page.dart",
       "schema": "OCRPageObject"
     },
+    "OCRReferencesBlock": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "OcrReferencesBlock",
+      "file": "lib/src/models/ocr/ocr_block.dart",
+      "schema": "OCRReferencesBlock",
+      "parent": "OcrBlock"
+    },
     "OCRRequest": {
       "spec": "main",
       "kind": "object",
       "dart_class": "OcrRequest",
       "file": "lib/src/models/ocr/ocr_request.dart",
       "schema": "OCRRequest"
+    },
+    "OCRSignatureBlock": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "OcrSignatureBlock",
+      "file": "lib/src/models/ocr/ocr_block.dart",
+      "schema": "OCRSignatureBlock",
+      "parent": "OcrBlock"
+    },
+    "OCRTableBlock": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "OcrTableBlock",
+      "file": "lib/src/models/ocr/ocr_block.dart",
+      "schema": "OCRTableBlock",
+      "parent": "OcrBlock"
     },
     "OCRTableObject": {
       "spec": "main",
@@ -1653,12 +1741,54 @@
       "file": "lib/src/models/ocr/ocr_table.dart",
       "schema": "OCRTableObject"
     },
+    "OCRTextBlock": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "OcrTextBlock",
+      "file": "lib/src/models/ocr/ocr_block.dart",
+      "schema": "OCRTextBlock",
+      "parent": "OcrBlock"
+    },
+    "OCRTitleBlock": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "OcrTitleBlock",
+      "file": "lib/src/models/ocr/ocr_block.dart",
+      "schema": "OCRTitleBlock",
+      "parent": "OcrBlock"
+    },
     "OCRUsageInfo": {
       "spec": "main",
       "kind": "object",
       "dart_class": "OcrUsageInfo",
       "file": "lib/src/models/ocr/ocr_usage_info.dart",
       "schema": "OCRUsageInfo"
+    },
+    "OcrBlock": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "OcrBlock",
+      "file": "lib/src/models/ocr/ocr_block.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "OCRTextBlock": "text",
+          "OCRTitleBlock": "title",
+          "OCRListBlock": "list",
+          "OCRTableBlock": "table",
+          "OCRImageBlock": "image",
+          "OCREquationBlock": "equation",
+          "OCRCaptionBlock": "caption",
+          "OCRCodeBlock": "code",
+          "OCRReferencesBlock": "references",
+          "OCRAsideTextBlock": "aside_text",
+          "OCRHeaderBlock": "header",
+          "OCRFooterBlock": "footer",
+          "OCRSignatureBlock": "signature"
+        }
+      },
+      "note": null
     },
     "ObservabilityError": {
       "spec": "main",

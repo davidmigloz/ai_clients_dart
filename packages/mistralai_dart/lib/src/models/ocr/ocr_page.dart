@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import 'ocr_block.dart';
 import 'ocr_image.dart';
 import 'ocr_page_confidence_scores.dart';
 import 'ocr_page_dimensions.dart';
@@ -45,6 +46,12 @@ class OcrPage {
   /// [OcrConfidenceScoresGranularity.page]); `null` otherwise.
   final OcrPageConfidenceScores? confidenceScores;
 
+  /// Paragraph-level content blocks with bounding boxes, in reading order.
+  ///
+  /// Populated when [OcrRequest.includeBlocks] is set to `true` in the request;
+  /// `null` otherwise.
+  final List<OcrBlock>? blocks;
+
   /// Creates an [OcrPage].
   const OcrPage({
     required this.index,
@@ -56,6 +63,7 @@ class OcrPage {
     this.footer,
     this.hyperlinks = const [],
     this.confidenceScores,
+    this.blocks,
   });
 
   /// Creates an [OcrPage] from JSON.
@@ -83,6 +91,9 @@ class OcrPage {
             json['confidence_scores'] as Map<String, dynamic>,
           )
         : null,
+    blocks: (json['blocks'] as List?)
+        ?.map((e) => OcrBlock.fromJson(e as Map<String, dynamic>))
+        .toList(),
   );
 
   /// Converts to JSON.
@@ -97,6 +108,7 @@ class OcrPage {
     if (hyperlinks.isNotEmpty) 'hyperlinks': hyperlinks,
     if (confidenceScores != null)
       'confidence_scores': confidenceScores!.toJson(),
+    if (blocks != null) 'blocks': blocks!.map((e) => e.toJson()).toList(),
   };
 
   /// Creates a copy with the specified fields replaced.
@@ -112,6 +124,7 @@ class OcrPage {
     Object? footer = unsetCopyWithValue,
     List<String>? hyperlinks,
     Object? confidenceScores = unsetCopyWithValue,
+    Object? blocks = unsetCopyWithValue,
   }) => OcrPage(
     index: index ?? this.index,
     markdown: markdown ?? this.markdown,
@@ -126,6 +139,9 @@ class OcrPage {
     confidenceScores: confidenceScores == unsetCopyWithValue
         ? this.confidenceScores
         : confidenceScores as OcrPageConfidenceScores?,
+    blocks: blocks == unsetCopyWithValue
+        ? this.blocks
+        : blocks as List<OcrBlock>?,
   );
 
   @override
@@ -141,7 +157,8 @@ class OcrPage {
           header == other.header &&
           footer == other.footer &&
           listsEqual(hyperlinks, other.hyperlinks) &&
-          confidenceScores == other.confidenceScores;
+          confidenceScores == other.confidenceScores &&
+          listsEqual(blocks, other.blocks);
 
   @override
   int get hashCode => Object.hash(
@@ -154,6 +171,7 @@ class OcrPage {
     footer,
     listHash(hyperlinks),
     confidenceScores,
+    listHash(blocks),
   );
 
   @override
