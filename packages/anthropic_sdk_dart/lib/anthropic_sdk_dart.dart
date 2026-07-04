@@ -209,6 +209,7 @@ export 'src/models/tokens/token_count.dart';
 // Models - Tools
 export 'src/models/tools/built_in_tools.dart';
 export 'src/models/tools/input_schema.dart';
+export 'src/models/tools/response_inclusion.dart';
 export 'src/models/tools/tool.dart';
 export 'src/models/tools/tool_caller.dart';
 export 'src/models/tools/tool_choice.dart';
