@@ -24,8 +24,9 @@ void main() {
         final request = OcrRequest(
           model: 'custom-ocr-model',
           document: const FileDocument('file-123'),
-          pages: const [0, 1, 2],
+          pages: const OcrPages.list([0, 1, 2]),
           includeImageBase64: true,
+          includeBlocks: true,
           imageLimit: 10,
           imageMinSize: 100,
           documentAnnotationPrompt: 'Annotate tables and charts',
@@ -44,8 +45,9 @@ void main() {
 
         expect(request.model, 'custom-ocr-model');
         expect(request.document, isA<FileDocument>());
-        expect(request.pages, [0, 1, 2]);
+        expect(request.pages, const OcrPages.list([0, 1, 2]));
         expect(request.includeImageBase64, isTrue);
+        expect(request.includeBlocks, isTrue);
         expect(request.imageLimit, 10);
         expect(request.imageMinSize, 100);
         expect(request.documentAnnotationPrompt, 'Annotate tables and charts');
@@ -74,12 +76,12 @@ void main() {
       test('fromFile creates file document', () {
         final request = OcrRequest.fromFile(
           fileId: 'file-456',
-          pages: const [0],
+          pages: const OcrPages.list([0]),
         );
 
         expect(request.document, isA<FileDocument>());
         expect((request.document as FileDocument).fileId, 'file-456');
-        expect(request.pages, [0]);
+        expect(request.pages, const OcrPages.list([0]));
       });
 
       test('fromBase64 creates base64 document', () {
@@ -122,7 +124,7 @@ void main() {
         const request = OcrRequest(
           model: 'custom-model',
           document: FileDocument('file-123'),
-          pages: [1, 2, 3],
+          pages: OcrPages.list([1, 2, 3]),
           includeImageBase64: true,
           imageLimit: 5,
           imageMinSize: 50,
@@ -186,7 +188,7 @@ void main() {
 
         expect(request.model, 'mistral-ocr-latest');
         expect(request.document, isA<UrlDocument>());
-        expect(request.pages, [0, 1]);
+        expect(request.pages, const OcrPages.list([0, 1]));
         expect(request.includeImageBase64, isTrue);
         expect(request.documentAnnotationPrompt, isNull);
         expect(request.tableFormat, isNull);
@@ -267,13 +269,13 @@ void main() {
 
         final copy = original.copyWith(
           model: 'new-model',
-          pages: [1, 2],
+          pages: const OcrPages.list([1, 2]),
           tableFormat: OcrTableFormat.html,
         );
 
         expect(copy.model, 'new-model');
         expect(copy.document, equals(original.document));
-        expect(copy.pages, [1, 2]);
+        expect(copy.pages, const OcrPages.list([1, 2]));
         expect(copy.tableFormat, OcrTableFormat.html);
       });
 
@@ -281,7 +283,7 @@ void main() {
         const original = OcrRequest(
           model: 'custom-model',
           document: FileDocument('file-123'),
-          pages: [0],
+          pages: OcrPages.list([0]),
           includeImageBase64: true,
           documentAnnotationPrompt: 'Annotate all',
           tableFormat: OcrTableFormat.markdown,
@@ -292,7 +294,7 @@ void main() {
         final copy = original.copyWith();
 
         expect(copy.model, 'custom-model');
-        expect(copy.pages, [0]);
+        expect(copy.pages, const OcrPages.list([0]));
         expect(copy.includeImageBase64, isTrue);
         expect(copy.documentAnnotationPrompt, 'Annotate all');
         expect(copy.tableFormat, OcrTableFormat.markdown);
@@ -318,11 +320,11 @@ void main() {
       test('requests with same fields are equal', () {
         const request1 = OcrRequest(
           document: UrlDocument('https://example.com/doc.pdf'),
-          pages: [0, 1],
+          pages: OcrPages.list([0, 1]),
         );
         const request2 = OcrRequest(
           document: UrlDocument('https://example.com/doc.pdf'),
-          pages: [0, 1],
+          pages: OcrPages.list([0, 1]),
         );
 
         expect(request1, equals(request2));
@@ -446,6 +448,101 @@ void main() {
           OcrConfidenceScoresGranularity.fromString('character'),
           OcrConfidenceScoresGranularity.unknown,
         );
+      });
+    });
+
+    group('pages', () {
+      test('serializes a list of page numbers', () {
+        const request = OcrRequest(
+          document: UrlDocument('https://example.com/doc.pdf'),
+          pages: OcrPages.list([0, 2, 4]),
+        );
+
+        expect(request.toJson()['pages'], [0, 2, 4]);
+      });
+
+      test('serializes a comma-separated range string', () {
+        const request = OcrRequest(
+          document: UrlDocument('https://example.com/doc.pdf'),
+          pages: OcrPages.string('0,2-4'),
+        );
+
+        expect(request.toJson()['pages'], '0,2-4');
+      });
+
+      test('round-trips the list variant', () {
+        const original = OcrRequest(
+          document: UrlDocument('https://example.com/doc.pdf'),
+          pages: OcrPages.list([0, 1, 2]),
+        );
+
+        final roundTripped = OcrRequest.fromJson(original.toJson());
+
+        expect(roundTripped.pages, const OcrPages.list([0, 1, 2]));
+      });
+
+      test('round-trips the string variant', () {
+        const original = OcrRequest(
+          document: UrlDocument('https://example.com/doc.pdf'),
+          pages: OcrPages.string('0-5'),
+        );
+
+        final roundTripped = OcrRequest.fromJson(original.toJson());
+
+        expect(roundTripped.pages, const OcrPages.string('0-5'));
+      });
+
+      test('copyWith clears with explicit null', () {
+        const original = OcrRequest(
+          document: UrlDocument('https://example.com/doc.pdf'),
+          pages: OcrPages.list([0]),
+        );
+
+        final cleared = original.copyWith(pages: null);
+
+        expect(cleared.pages, isNull);
+      });
+    });
+
+    group('includeBlocks', () {
+      test('serializes when set', () {
+        const request = OcrRequest(
+          document: UrlDocument('https://example.com/doc.pdf'),
+          includeBlocks: true,
+        );
+
+        expect(request.toJson()['include_blocks'], true);
+      });
+
+      test('omitted from JSON when null', () {
+        const request = OcrRequest(
+          document: UrlDocument('https://example.com/doc.pdf'),
+        );
+
+        expect(request.toJson().containsKey('include_blocks'), isFalse);
+      });
+
+      test('parses from JSON', () {
+        final request = OcrRequest.fromJson(const {
+          'document': {
+            'type': 'document_url',
+            'document_url': 'https://example.com/doc.pdf',
+          },
+          'include_blocks': true,
+        });
+
+        expect(request.includeBlocks, isTrue);
+      });
+
+      test('copyWith clears with explicit null', () {
+        const original = OcrRequest(
+          document: UrlDocument('https://example.com/doc.pdf'),
+          includeBlocks: true,
+        );
+
+        final cleared = original.copyWith(includeBlocks: null);
+
+        expect(cleared.includeBlocks, isNull);
       });
     });
   });

@@ -76,7 +76,7 @@ print('Pages processed: ${response.pages.length}');
 final response = await client.ocr.process(
   request: OcrRequest.fromUrl(
     url: 'https://example.com/long-document.pdf',
-    pages: [0, 1, 4], // Only process pages 1, 2, and 5 (0-indexed)
+    pages: OcrPages.list([0, 1, 4]), // Only pages 1, 2, and 5 (0-indexed)
   ),
 );
 

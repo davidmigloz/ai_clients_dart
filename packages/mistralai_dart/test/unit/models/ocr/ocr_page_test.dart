@@ -17,6 +17,7 @@ void main() {
         expect(page.header, isNull);
         expect(page.footer, isNull);
         expect(page.hyperlinks, isEmpty);
+        expect(page.blocks, isNull);
       });
 
       test('parses page with images', () {
@@ -307,6 +308,89 @@ void main() {
 
         expect(cleared.confidenceScores, isNull);
         expect(cleared.markdown, 'text');
+      });
+    });
+
+    group('blocks', () {
+      test('is null when absent', () {
+        final page = OcrPage.fromJson(const {'index': 0, 'markdown': 'text'});
+
+        expect(page.blocks, isNull);
+      });
+
+      test('parses blocks when present', () {
+        final page = OcrPage.fromJson(const {
+          'index': 0,
+          'markdown': 'text',
+          'blocks': [
+            {
+              'type': 'title',
+              'top_left_x': 0,
+              'top_left_y': 0,
+              'bottom_right_x': 100,
+              'bottom_right_y': 30,
+              'content': 'Heading',
+            },
+            {
+              'type': 'text',
+              'top_left_x': 0,
+              'top_left_y': 40,
+              'bottom_right_x': 100,
+              'bottom_right_y': 80,
+              'content': 'Body',
+            },
+          ],
+        });
+
+        expect(page.blocks, hasLength(2));
+        expect(page.blocks!.first, isA<OcrTitleBlock>());
+        expect(page.blocks![1], isA<OcrTextBlock>());
+      });
+
+      test('omits blocks from JSON when null', () {
+        const page = OcrPage(index: 0, markdown: 'text');
+
+        expect(page.toJson().containsKey('blocks'), isFalse);
+      });
+
+      test('round-trips a populated blocks list', () {
+        const original = OcrPage(
+          index: 1,
+          markdown: 'text',
+          blocks: [
+            OcrTitleBlock(
+              topLeftX: 0,
+              topLeftY: 0,
+              bottomRightX: 100,
+              bottomRightY: 30,
+              content: 'Heading',
+            ),
+          ],
+        );
+
+        final roundTripped = OcrPage.fromJson(original.toJson());
+
+        expect(roundTripped, equals(original));
+      });
+
+      test('copyWith clears blocks with explicit null', () {
+        const original = OcrPage(
+          index: 0,
+          markdown: 'text',
+          blocks: [
+            OcrTextBlock(
+              topLeftX: 0,
+              topLeftY: 0,
+              bottomRightX: 10,
+              bottomRightY: 10,
+              content: 'c',
+            ),
+          ],
+        );
+
+        final cleared = original.copyWith(blocks: null);
+
+        expect(cleared.blocks, isNull);
       });
     });
   });

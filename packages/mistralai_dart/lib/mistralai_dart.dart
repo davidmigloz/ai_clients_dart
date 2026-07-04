@@ -298,6 +298,7 @@ export 'src/models/observability/span_evaluations_request.dart';
 export 'src/models/observability/spans_request.dart';
 export 'src/models/observability/traces_request.dart';
 // --- Models: OCR ---
+export 'src/models/ocr/ocr_block.dart';
 export 'src/models/ocr/ocr_confidence_score.dart';
 export 'src/models/ocr/ocr_confidence_scores_granularity.dart';
 export 'src/models/ocr/ocr_document.dart';
@@ -305,6 +306,7 @@ export 'src/models/ocr/ocr_image.dart';
 export 'src/models/ocr/ocr_page.dart';
 export 'src/models/ocr/ocr_page_confidence_scores.dart';
 export 'src/models/ocr/ocr_page_dimensions.dart';
+export 'src/models/ocr/ocr_pages.dart';
 export 'src/models/ocr/ocr_request.dart';
 export 'src/models/ocr/ocr_response.dart';
 export 'src/models/ocr/ocr_table.dart';
