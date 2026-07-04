@@ -80,6 +80,24 @@
     ]
   },
   "types": {
+    "BetaWebSearchToolResultErrorCode": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "WebSearchToolResultErrorCode",
+      "file": "lib/src/models/content/content_block.dart",
+      "schema": "BetaWebSearchToolResultErrorCode"
+    },
+    "WebSearchToolResultErrorCode": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "WebSearchToolResultErrorCode",
+      "file": "lib/src/models/content/content_block.dart",
+      "schema": "WebSearchToolResultErrorCode",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Non-beta GA variant of the web_search tool result error code - covered by the WebSearchToolResultErrorCode enum; see BetaWebSearchToolResultErrorCode."
+    },
     "WebSearchTool_20260318": {
       "spec": "main",
       "kind": "skip",

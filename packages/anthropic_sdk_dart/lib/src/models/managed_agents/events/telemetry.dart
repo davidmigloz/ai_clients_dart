@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../../common/copy_with_sentinel.dart';
 import '../../common/equality_helpers.dart';
+import '../config/model_config.dart' show AgentSpeed;
 
 /// Token usage for a single model request.
 @immutable
@@ -19,7 +20,7 @@ class SpanModelUsage {
   final int cacheReadInputTokens;
 
   /// Inference speed tier this request ran at.
-  final String? speed;
+  final AgentSpeed? speed;
 
   /// Creates a [SpanModelUsage].
   const SpanModelUsage({
@@ -37,7 +38,9 @@ class SpanModelUsage {
       outputTokens: json['output_tokens'] as int,
       cacheCreationInputTokens: json['cache_creation_input_tokens'] as int,
       cacheReadInputTokens: json['cache_read_input_tokens'] as int,
-      speed: json['speed'] as String?,
+      speed: json['speed'] != null
+          ? AgentSpeed.fromJson(json['speed'] as String)
+          : null,
     );
   }
 
@@ -47,7 +50,7 @@ class SpanModelUsage {
     'output_tokens': outputTokens,
     'cache_creation_input_tokens': cacheCreationInputTokens,
     'cache_read_input_tokens': cacheReadInputTokens,
-    if (speed != null) 'speed': speed,
+    if (speed != null) 'speed': speed!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -64,7 +67,7 @@ class SpanModelUsage {
       cacheCreationInputTokens:
           cacheCreationInputTokens ?? this.cacheCreationInputTokens,
       cacheReadInputTokens: cacheReadInputTokens ?? this.cacheReadInputTokens,
-      speed: speed == unsetCopyWithValue ? this.speed : speed as String?,
+      speed: speed == unsetCopyWithValue ? this.speed : speed as AgentSpeed?,
     );
   }
 
