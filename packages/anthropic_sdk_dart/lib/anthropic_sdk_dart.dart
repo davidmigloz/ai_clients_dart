@@ -109,6 +109,7 @@ export 'src/models/managed_agents/credentials/credential_auth.dart';
 export 'src/models/managed_agents/credentials/credential_list_response.dart';
 export 'src/models/managed_agents/credentials/credential_networking.dart';
 export 'src/models/managed_agents/credentials/credential_validation.dart';
+export 'src/models/managed_agents/credentials/injection_location.dart';
 export 'src/models/managed_agents/credentials/update_credential_params.dart';
 export 'src/models/managed_agents/deployments/create_deployment_params.dart';
 export 'src/models/managed_agents/deployments/deployment.dart';
@@ -208,6 +209,7 @@ export 'src/models/tokens/token_count.dart';
 // Models - Tools
 export 'src/models/tools/built_in_tools.dart';
 export 'src/models/tools/input_schema.dart';
+export 'src/models/tools/response_inclusion.dart';
 export 'src/models/tools/tool.dart';
 export 'src/models/tools/tool_caller.dart';
 export 'src/models/tools/tool_choice.dart';

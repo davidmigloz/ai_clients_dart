@@ -253,7 +253,25 @@ void main() {
         expect(result.toolUseId, 'tu_ws_err');
         expect(result.content, isA<WebSearchResultError>());
         final error = result.content as WebSearchResultError;
-        expect(error.errorCode, 'max_results_reached');
+        // Unrecognized code: raw preserved, typed getter falls back to unknown.
+        expect(error.rawErrorCode, 'max_results_reached');
+        expect(error.errorCode, WebSearchToolResultErrorCode.unknown);
+      });
+
+      test('parses a known web search error code as a typed enum', () {
+        final json = {
+          'type': 'web_search_tool_result',
+          'tool_use_id': 'tu_ws_err2',
+          'content': {
+            'type': 'web_search_tool_result_error',
+            'error_code': 'max_uses_exceeded',
+          },
+        };
+        final block = ContentBlock.fromJson(json) as WebSearchToolResultBlock;
+        final error = block.content as WebSearchResultError;
+        expect(error.rawErrorCode, 'max_uses_exceeded');
+        expect(error.errorCode, WebSearchToolResultErrorCode.maxUsesExceeded);
+        expect(block.toJson(), json);
       });
 
       test('roundtrip fromJson → toJson → fromJson (success)', () {
@@ -305,8 +323,9 @@ void main() {
 
         expect(block2.toolUseId, block.toolUseId);
         expect(block2.content, isA<WebSearchResultError>());
+        // Raw value round-trips verbatim even for unrecognized codes.
         expect(
-          (block2.content as WebSearchResultError).errorCode,
+          (block2.content as WebSearchResultError).rawErrorCode,
           'search_unavailable',
         );
       });

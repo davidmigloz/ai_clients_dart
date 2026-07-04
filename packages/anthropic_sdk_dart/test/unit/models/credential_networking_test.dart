@@ -138,6 +138,7 @@ void main() {
         'type': 'limited',
         'allowed_hosts': ['api.example.com'],
       },
+      'injection_location': {'header': true, 'body': false},
     };
 
     test('CredentialAuth.fromJson dispatches and round-trips', () {
@@ -155,6 +156,7 @@ void main() {
         'type': 'environment_variable',
         'secret_name': 'TOKEN',
         'networking': {'type': 'unrestricted'},
+        'injection_location': {'header': false, 'body': true},
       };
       final a = CredentialAuth.fromJson(j);
       expect(

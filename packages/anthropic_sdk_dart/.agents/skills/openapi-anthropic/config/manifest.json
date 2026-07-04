@@ -75,10 +75,374 @@
     "resource_aliases": {},
     "excluded_resources": [
       "complete",
-      "environments"
+      "environments",
+      "tunnels"
     ]
   },
   "types": {
+    "BetaWebSearchToolResultErrorCode": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "WebSearchToolResultErrorCode",
+      "file": "lib/src/models/content/content_block.dart",
+      "schema": "BetaWebSearchToolResultErrorCode"
+    },
+    "WebSearchToolResultErrorCode": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "WebSearchToolResultErrorCode",
+      "file": "lib/src/models/content/content_block.dart",
+      "schema": "WebSearchToolResultErrorCode",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Non-beta GA variant of the web_search tool result error code - covered by the WebSearchToolResultErrorCode enum; see BetaWebSearchToolResultErrorCode."
+    },
+    "WebSearchTool_20260318": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "WebSearchTool",
+      "file": "lib/src/models/tools/built_in_tools.dart",
+      "schema": "WebSearchTool_20260318",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Non-beta GA variant of the web_search tool - covered by WebSearchTool via the `type` discriminator; see WebSearchTool20250305."
+    },
+    "BetaWebSearchTool_20260318": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "WebSearchTool",
+      "file": "lib/src/models/tools/built_in_tools.dart",
+      "schema": "BetaWebSearchTool_20260318",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Versioned variant of the web_search tool - covered by WebSearchTool via the `type` discriminator; see WebSearchTool20250305."
+    },
+    "WebFetchTool_20260318": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "WebFetchTool",
+      "file": "lib/src/models/tools/built_in_tools.dart",
+      "schema": "WebFetchTool_20260318",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Non-beta GA variant of the web_fetch tool - covered by WebFetchTool via the `type` discriminator; see WebFetchTool20250910."
+    },
+    "BetaWebFetchTool_20260318": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "WebFetchTool",
+      "file": "lib/src/models/tools/built_in_tools.dart",
+      "schema": "BetaWebFetchTool_20260318",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Versioned variant of the web_fetch tool - covered by WebFetchTool via the `type` discriminator; see WebFetchTool20250910."
+    },
+    "EventStartEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "EventStartEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsEventStartEvent",
+      "parent": "SessionEvent"
+    },
+    "EventDeltaEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "EventDeltaEvent",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsEventDeltaEvent",
+      "parent": "SessionEvent"
+    },
+    "EventStartPreview": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "EventStartPreview",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsEventStartEvent_Event"
+    },
+    "AgentMessagePreview": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentMessagePreview",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsEventStartEvent_AgentMessagePreview",
+      "parent": "EventStartPreview"
+    },
+    "AgentThinkingPreview": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentThinkingPreview",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsEventStartEvent_AgentThinkingPreview",
+      "parent": "EventStartPreview"
+    },
+    "EventDelta": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "EventDelta",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsEventDeltaEvent_Delta"
+    },
+    "ContentDelta": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ContentDelta",
+      "file": "lib/src/models/managed_agents/events/session_event.dart",
+      "schema": "BetaManagedAgentsEventDeltaEvent_ContentDelta",
+      "parent": "EventDelta"
+    },
+    "BetaManagedAgentsEventDeltaType": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaManagedAgentsEventDeltaType",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "EventDeltaType enum (agent.message/agent.thinking) modeled as raw String values of the `event_deltas[]` stream query parameter; not a Dart enum."
+    },
+    "InjectionLocation": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "InjectionLocation",
+      "file": "lib/src/models/managed_agents/credentials/injection_location.dart",
+      "schema": "BetaManagedAgentsInjectionLocationParams"
+    },
+    "InjectionLocationResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "InjectionLocationResponse",
+      "file": "lib/src/models/managed_agents/credentials/injection_location.dart",
+      "schema": "BetaManagedAgentsInjectionLocationResponse"
+    },
+    "BetaManagedAgentsInjectionLocationUpdateParams": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "InjectionLocation",
+      "file": "lib/src/models/managed_agents/credentials/injection_location.dart",
+      "schema": "BetaManagedAgentsInjectionLocationUpdateParams",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Update injection-location params share the same shape and Dart class as InjectionLocation (create/update params)."
+    },
+    "AgentParamsWithOverrides": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "AgentParamsWithOverrides",
+      "file": "lib/src/models/managed_agents/sessions/create_session_params.dart",
+      "schema": "BetaManagedAgentsAgentWithOverridesParams",
+      "parent": "AgentParams"
+    },
+    "BetaManagedAgentsCreateSessionAgentUnionParams": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "AgentParams",
+      "file": "lib/src/models/managed_agents/sessions/create_session_params.dart",
+      "schema": "BetaManagedAgentsCreateSessionAgentUnionParams",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Session agent union (string | agent | agent_with_overrides) - covered by the AgentParams sealed class and its variants."
+    },
+    "WebhookAgentCreatedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookAgentCreatedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookAgentCreatedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookAgentUpdatedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookAgentUpdatedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookAgentUpdatedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookAgentDeletedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookAgentDeletedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookAgentDeletedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookAgentArchivedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookAgentArchivedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookAgentArchivedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookDeploymentCreatedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookDeploymentCreatedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookDeploymentCreatedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookDeploymentUpdatedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookDeploymentUpdatedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookDeploymentUpdatedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookDeploymentDeletedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookDeploymentDeletedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookDeploymentDeletedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookDeploymentArchivedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookDeploymentArchivedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookDeploymentArchivedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookDeploymentPausedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookDeploymentPausedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookDeploymentPausedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookDeploymentUnpausedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookDeploymentUnpausedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookDeploymentUnpausedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookDeploymentRunStartedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookDeploymentRunStartedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookDeploymentRunStartedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookDeploymentRunSucceededEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookDeploymentRunSucceededEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookDeploymentRunSucceededEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookDeploymentRunFailedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookDeploymentRunFailedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookDeploymentRunFailedEventData",
+      "parent": "WebhookEventData"
+    },
+    "BetaTunnel": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaTunnel",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Tunnels research-preview management API - out of scope, not covered by the SDK (resource excluded via coverage.excluded_resources)."
+    },
+    "BetaTunnelCertificate": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaTunnelCertificate",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Tunnels research-preview management API - out of scope, not covered by the SDK (resource excluded via coverage.excluded_resources)."
+    },
+    "BetaTunnelToken": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaTunnelToken",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Tunnels research-preview management API - out of scope, not covered by the SDK (resource excluded via coverage.excluded_resources)."
+    },
+    "BetaCreateTunnelRequest": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaCreateTunnelRequest",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Tunnels research-preview management API - out of scope, not covered by the SDK (resource excluded via coverage.excluded_resources)."
+    },
+    "BetaCreateTunnelCertificateRequestBody": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaCreateTunnelCertificateRequestBody",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Tunnels research-preview management API - out of scope, not covered by the SDK (resource excluded via coverage.excluded_resources)."
+    },
+    "BetaListTunnelsResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaListTunnelsResponse",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Tunnels research-preview management API - out of scope, not covered by the SDK (resource excluded via coverage.excluded_resources)."
+    },
+    "BetaListTunnelCertificatesResponse": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaListTunnelCertificatesResponse",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Tunnels research-preview management API - out of scope, not covered by the SDK (resource excluded via coverage.excluded_resources)."
+    },
+    "BetaRotateTunnelTokenRequestBody": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": null,
+      "file": null,
+      "schema": "BetaRotateTunnelTokenRequestBody",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Tunnels research-preview management API - out of scope, not covered by the SDK (resource excluded via coverage.excluded_resources)."
+    },
     "DiagnosticsParam": {
       "spec": "main",
       "kind": "object",

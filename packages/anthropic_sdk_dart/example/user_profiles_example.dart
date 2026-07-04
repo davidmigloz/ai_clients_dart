@@ -28,15 +28,16 @@ void main() async {
     );
     print('Created ${profile.id} (external_id: ${profile.externalId})');
 
-    // 2. Send a message scoped to this user.
-    print('\n=== Send message with user_profile_id ===');
+    // 2. Send a message attributed to this user. The profile ID is sent as the
+    //    `anthropic-user-profile-id` header, not as a request-body field.
+    print('\n=== Send message attributed to the profile ===');
     final reply = await client.messages.create(
       MessageCreateRequest(
         model: 'claude-opus-4-8',
         maxTokens: 256,
-        userProfileId: profile.id,
         messages: [InputMessage.user('Hello!')],
       ),
+      userProfileId: profile.id,
     );
     print('Model replied: ${reply.content.first.runtimeType}');
 

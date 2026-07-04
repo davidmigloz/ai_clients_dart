@@ -1067,21 +1067,28 @@ class WebSearchResultItem {
 /// Web search error result.
 @immutable
 class WebSearchResultError extends WebSearchResult {
-  /// Error code.
-  final String errorCode;
+  /// The raw error code string from the API.
+  ///
+  /// Preserved for round-trip fidelity — unrecognized codes are stored
+  /// verbatim and serialized back unchanged.
+  final String rawErrorCode;
+
+  /// The parsed error code, derived from [rawErrorCode].
+  WebSearchToolResultErrorCode get errorCode =>
+      WebSearchToolResultErrorCode.fromJson(rawErrorCode);
 
   /// Creates a [WebSearchResultError].
-  const WebSearchResultError({required this.errorCode});
+  const WebSearchResultError({required this.rawErrorCode});
 
   /// Creates a [WebSearchResultError] from JSON.
   factory WebSearchResultError.fromJson(Map<String, dynamic> json) {
-    return WebSearchResultError(errorCode: json['error_code'] as String);
+    return WebSearchResultError(rawErrorCode: json['error_code'] as String);
   }
 
   @override
   Map<String, dynamic> toJson() => {
     'type': 'web_search_tool_result_error',
-    'error_code': errorCode,
+    'error_code': rawErrorCode,
   };
 
   @override
@@ -1089,13 +1096,13 @@ class WebSearchResultError extends WebSearchResult {
       identical(this, other) ||
       other is WebSearchResultError &&
           runtimeType == other.runtimeType &&
-          errorCode == other.errorCode;
+          rawErrorCode == other.rawErrorCode;
 
   @override
-  int get hashCode => errorCode.hashCode;
+  int get hashCode => rawErrorCode.hashCode;
 
   @override
-  String toString() => 'WebSearchResultError(errorCode: $errorCode)';
+  String toString() => 'WebSearchResultError(rawErrorCode: $rawErrorCode)';
 }
 
 /// Citation for text content.
@@ -2259,6 +2266,57 @@ enum AdvisorToolResultErrorCode {
     promptTooLong => 'prompt_too_long',
     tooManyRequests => 'too_many_requests',
     unavailable => 'unavailable',
+    unknown => 'unknown',
+  };
+}
+
+/// Error codes for web search tool result errors.
+enum WebSearchToolResultErrorCode {
+  /// The tool input failed validation.
+  invalidToolInput,
+
+  /// The web search service was unavailable.
+  unavailable,
+
+  /// The request reached the max_uses cap.
+  maxUsesExceeded,
+
+  /// The request was rate-limited.
+  tooManyRequests,
+
+  /// The search query exceeded the maximum length.
+  queryTooLong,
+
+  /// The request payload was too large.
+  requestTooLarge,
+
+  /// Forward-compatible fallback for unrecognized error codes.
+  unknown;
+
+  /// Creates a [WebSearchToolResultErrorCode] from JSON.
+  factory WebSearchToolResultErrorCode.fromJson(String value) =>
+      switch (value) {
+        'invalid_tool_input' => invalidToolInput,
+        'unavailable' => unavailable,
+        'max_uses_exceeded' => maxUsesExceeded,
+        'too_many_requests' => tooManyRequests,
+        'query_too_long' => queryTooLong,
+        'request_too_large' => requestTooLarge,
+        _ => unknown,
+      };
+
+  /// Converts to a known JSON string.
+  ///
+  /// Returns `'unknown'` for [unknown] — this is lossy for unrecognized codes.
+  /// For round-trip serialization, use [WebSearchResultError.rawErrorCode]
+  /// instead of `errorCode.toJson()`.
+  String toJson() => switch (this) {
+    invalidToolInput => 'invalid_tool_input',
+    unavailable => 'unavailable',
+    maxUsesExceeded => 'max_uses_exceeded',
+    tooManyRequests => 'too_many_requests',
+    queryTooLong => 'query_too_long',
+    requestTooLarge => 'request_too_large',
     unknown => 'unknown',
   };
 }

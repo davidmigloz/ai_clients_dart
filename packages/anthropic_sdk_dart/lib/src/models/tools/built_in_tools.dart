@@ -4,6 +4,7 @@ import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
 import '../content/citations_config.dart';
 import '../metadata/cache_control.dart';
+import 'response_inclusion.dart';
 
 // RequestCitationsConfig now lives in content/citations_config.dart but is part
 // of this library's API surface (e.g. WebFetchTool.citations), so re-export it
@@ -131,6 +132,7 @@ sealed class BuiltInTool {
     List<String>? allowedCallers,
     bool? deferLoading,
     bool? strict,
+    ResponseInclusion? responseInclusion,
   }) = WebSearchTool;
 
   /// Creates a web fetch tool.
@@ -146,6 +148,7 @@ sealed class BuiltInTool {
     bool? deferLoading,
     bool? strict,
     bool? useCache,
+    ResponseInclusion? responseInclusion,
   }) = WebFetchTool;
 
   /// Creates a memory tool.
@@ -234,9 +237,11 @@ sealed class BuiltInTool {
       'text_editor_20250728' => TextEditorTool.fromJson(json),
       'web_search_20250305' => WebSearchTool.fromJson(json),
       'web_search_20260209' => WebSearchTool.fromJson(json),
+      'web_search_20260318' => WebSearchTool.fromJson(json),
       'web_fetch_20250910' => WebFetchTool.fromJson(json),
       'web_fetch_20260209' => WebFetchTool.fromJson(json),
       'web_fetch_20260309' => WebFetchTool.fromJson(json),
+      'web_fetch_20260318' => WebFetchTool.fromJson(json),
       'memory_20250818' => MemoryTool.fromJson(json),
       'tool_search_tool_bm25' => ToolSearchToolBm25.fromJson(json),
       'tool_search_tool_bm25_20251119' => ToolSearchToolBm25.fromJson(json),
@@ -800,7 +805,18 @@ class WebSearchTool extends BuiltInTool {
   /// Whether strict schema validation is enabled.
   final bool? strict;
 
+  /// How this tool's result blocks appear in the API response when consumed by
+  /// a completed `code_execution` call in the same turn.
+  ///
+  /// `full` returns the complete content (default); `excluded` drops the nested
+  /// server_tool_use and result block pair entirely. Only supported for
+  /// `web_search_20260318` and normalized to `null` for other versions.
+  final ResponseInclusion? responseInclusion;
+
   /// Creates a [WebSearchTool].
+  ///
+  /// [responseInclusion] is only supported for `web_search_20260318` and is
+  /// normalized to `null` for other versions.
   const WebSearchTool({
     String? type,
     this.allowedDomains,
@@ -811,7 +827,11 @@ class WebSearchTool extends BuiltInTool {
     this.allowedCallers,
     this.deferLoading,
     this.strict,
-  }) : type = type ?? 'web_search_20250305';
+    ResponseInclusion? responseInclusion,
+  }) : type = type ?? 'web_search_20250305',
+       responseInclusion = type == 'web_search_20260318'
+           ? responseInclusion
+           : null;
 
   /// Creates a [WebSearchTool] from JSON.
   factory WebSearchTool.fromJson(Map<String, dynamic> json) {
@@ -831,6 +851,9 @@ class WebSearchTool extends BuiltInTool {
       allowedCallers: (json['allowed_callers'] as List?)?.cast<String>(),
       deferLoading: json['defer_loading'] as bool?,
       strict: json['strict'] as bool?,
+      responseInclusion: json['response_inclusion'] != null
+          ? ResponseInclusion.fromJson(json['response_inclusion'] as String)
+          : null,
     );
   }
 
@@ -846,6 +869,8 @@ class WebSearchTool extends BuiltInTool {
     if (allowedCallers != null) 'allowed_callers': allowedCallers,
     if (deferLoading != null) 'defer_loading': deferLoading,
     if (strict != null) 'strict': strict,
+    if (responseInclusion != null)
+      'response_inclusion': responseInclusion!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -859,6 +884,7 @@ class WebSearchTool extends BuiltInTool {
     Object? allowedCallers = unsetCopyWithValue,
     Object? deferLoading = unsetCopyWithValue,
     Object? strict = unsetCopyWithValue,
+    Object? responseInclusion = unsetCopyWithValue,
   }) {
     return WebSearchTool(
       type: type ?? this.type,
@@ -882,6 +908,9 @@ class WebSearchTool extends BuiltInTool {
           ? this.deferLoading
           : deferLoading as bool?,
       strict: strict == unsetCopyWithValue ? this.strict : strict as bool?,
+      responseInclusion: responseInclusion == unsetCopyWithValue
+          ? this.responseInclusion
+          : responseInclusion as ResponseInclusion?,
     );
   }
 
@@ -898,7 +927,8 @@ class WebSearchTool extends BuiltInTool {
           userLocation == other.userLocation &&
           listsEqual(allowedCallers, other.allowedCallers) &&
           deferLoading == other.deferLoading &&
-          strict == other.strict;
+          strict == other.strict &&
+          responseInclusion == other.responseInclusion;
 
   @override
   int get hashCode => Object.hash(
@@ -911,6 +941,7 @@ class WebSearchTool extends BuiltInTool {
     listHash(allowedCallers),
     deferLoading,
     strict,
+    responseInclusion,
   );
 
   @override
@@ -919,7 +950,7 @@ class WebSearchTool extends BuiltInTool {
       'blockedDomains: $blockedDomains, cacheControl: $cacheControl, '
       'maxUses: $maxUses, userLocation: $userLocation, '
       'allowedCallers: $allowedCallers, deferLoading: $deferLoading, '
-      'strict: $strict)';
+      'strict: $strict, responseInclusion: $responseInclusion)';
 }
 
 /// Web fetch built-in tool.
@@ -962,10 +993,20 @@ class WebFetchTool extends BuiltInTool {
   /// rapidly-changing sources.
   final bool? useCache;
 
+  /// How this tool's result blocks appear in the API response when consumed by
+  /// a completed `code_execution` call in the same turn.
+  ///
+  /// `full` returns the complete content (default); `excluded` drops the nested
+  /// server_tool_use and result block pair entirely. Only supported for
+  /// `web_fetch_20260318` and normalized to `null` for other versions.
+  final ResponseInclusion? responseInclusion;
+
   /// Creates a [WebFetchTool].
   ///
-  /// [useCache] is only supported for `web_fetch_20260309` and is normalized
-  /// to `null` for other versions.
+  /// [useCache] is only supported for `web_fetch_20260309` and
+  /// `web_fetch_20260318` and is normalized to `null` for other versions.
+  /// [responseInclusion] is only supported for `web_fetch_20260318` and is
+  /// normalized to `null` for other versions.
   const WebFetchTool({
     String? type,
     this.allowedDomains,
@@ -978,9 +1019,16 @@ class WebFetchTool extends BuiltInTool {
     this.deferLoading,
     this.strict,
     bool? useCache,
+    ResponseInclusion? responseInclusion,
   }) : type = type ?? 'web_fetch_20260309',
-       useCache = (type == null || type == 'web_fetch_20260309')
+       useCache =
+           (type == null ||
+               type == 'web_fetch_20260309' ||
+               type == 'web_fetch_20260318')
            ? useCache
+           : null,
+       responseInclusion = type == 'web_fetch_20260318'
+           ? responseInclusion
            : null;
 
   /// Creates a [WebFetchTool] from JSON.
@@ -1005,6 +1053,9 @@ class WebFetchTool extends BuiltInTool {
       deferLoading: json['defer_loading'] as bool?,
       strict: json['strict'] as bool?,
       useCache: json['use_cache'] as bool?,
+      responseInclusion: json['response_inclusion'] != null
+          ? ResponseInclusion.fromJson(json['response_inclusion'] as String)
+          : null,
     );
   }
 
@@ -1021,7 +1072,11 @@ class WebFetchTool extends BuiltInTool {
     if (allowedCallers != null) 'allowed_callers': allowedCallers,
     if (deferLoading != null) 'defer_loading': deferLoading,
     if (strict != null) 'strict': strict,
-    if (useCache != null && type == 'web_fetch_20260309') 'use_cache': useCache,
+    if (useCache != null &&
+        (type == 'web_fetch_20260309' || type == 'web_fetch_20260318'))
+      'use_cache': useCache,
+    if (responseInclusion != null)
+      'response_inclusion': responseInclusion!.toJson(),
   };
 
   @override
@@ -1039,7 +1094,8 @@ class WebFetchTool extends BuiltInTool {
           listsEqual(allowedCallers, other.allowedCallers) &&
           deferLoading == other.deferLoading &&
           strict == other.strict &&
-          useCache == other.useCache;
+          useCache == other.useCache &&
+          responseInclusion == other.responseInclusion;
 
   /// Creates a copy with replaced values.
   WebFetchTool copyWith({
@@ -1054,6 +1110,7 @@ class WebFetchTool extends BuiltInTool {
     Object? deferLoading = unsetCopyWithValue,
     Object? strict = unsetCopyWithValue,
     Object? useCache = unsetCopyWithValue,
+    Object? responseInclusion = unsetCopyWithValue,
   }) {
     return WebFetchTool(
       type: type ?? this.type,
@@ -1083,6 +1140,9 @@ class WebFetchTool extends BuiltInTool {
       useCache: useCache == unsetCopyWithValue
           ? this.useCache
           : useCache as bool?,
+      responseInclusion: responseInclusion == unsetCopyWithValue
+          ? this.responseInclusion
+          : responseInclusion as ResponseInclusion?,
     );
   }
 
@@ -1099,6 +1159,7 @@ class WebFetchTool extends BuiltInTool {
     deferLoading,
     strict,
     useCache,
+    responseInclusion,
   );
 
   @override
@@ -1107,7 +1168,8 @@ class WebFetchTool extends BuiltInTool {
       'blockedDomains: $blockedDomains, cacheControl: $cacheControl, '
       'maxUses: $maxUses, maxContentTokens: $maxContentTokens, '
       'citations: $citations, allowedCallers: $allowedCallers, '
-      'deferLoading: $deferLoading, strict: $strict, useCache: $useCache)';
+      'deferLoading: $deferLoading, strict: $strict, useCache: $useCache, '
+      'responseInclusion: $responseInclusion)';
 }
 
 /// Memory built-in tool.
