@@ -51,8 +51,8 @@ melos:
   scripts:
     test:
       description: Run all Dart tests
-      run: dart test
       exec:
+        command: dart test
         concurrency: 1
         failFast: true
       packageFilters:
@@ -60,8 +60,8 @@ melos:
 
     test:diff:
       description: Run tests for changed packages
-      run: dart test
       exec:
+        command: dart test
         concurrency: 1
         failFast: true
       packageFilters:
