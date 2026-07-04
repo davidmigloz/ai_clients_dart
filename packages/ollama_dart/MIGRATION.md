@@ -676,7 +676,7 @@ final request = ChatRequest(
 
 Available classes:
 - `ThinkEnabled(bool)` - Enable/disable thinking
-- `ThinkWithLevel(ThinkLevel)` - Set thinking level (`ThinkLevel.high`, `ThinkLevel.medium`, `ThinkLevel.low`)
+- `ThinkWithLevel(ThinkLevel)` - Set thinking level (`ThinkLevel.high`, `ThinkLevel.medium`, `ThinkLevel.low`, `ThinkLevel.max`)
 
 ### ResponseFormat Sealed Class
 
