@@ -77,23 +77,29 @@ void main() {
   });
 
   group('StreamMetadata', () {
-    test('parses usage and round-trips on a streamed event', () {
+    test('parses total_usage and round-trips on a streamed event', () {
       final event =
           InteractionEvent.fromJson({
                 'event_type': 'step.stop',
                 'index': 1,
                 'metadata': {
-                  'usage': {'total_tokens': 42, 'total_output_tokens': 10},
+                  'total_usage': {
+                    'total_tokens': 42,
+                    'total_output_tokens': 10,
+                  },
                 },
               })
               as StepStopEvent;
       expect(event.metadata, isNotNull);
-      expect(event.metadata!.usage, isNotNull);
-      expect(event.metadata!.usage!.totalTokens, 42);
-      expect(event.metadata!.usage!.totalOutputTokens, 10);
+      expect(event.metadata!.totalUsage, isNotNull);
+      expect(event.metadata!.totalUsage!.totalTokens, 42);
+      expect(event.metadata!.totalUsage!.totalOutputTokens, 10);
 
       final json = event.toJson();
-      expect((json['metadata'] as Map)['usage'], isA<Map<String, dynamic>>());
+      expect(
+        (json['metadata'] as Map)['total_usage'],
+        isA<Map<String, dynamic>>(),
+      );
     });
 
     test('metadata is absent when not provided', () {

@@ -3,6 +3,7 @@ import '../../content/content.dart';
 import '../../tools/tool.dart';
 import 'audio_transcription_config.dart';
 import 'context_window_compression_config.dart';
+import 'history_config.dart';
 import 'live_generation_config.dart';
 import 'proactivity_config.dart';
 import 'realtime_input_config.dart';
@@ -40,6 +41,9 @@ class LiveConfig {
   /// Proactive audio configuration.
   final ProactivityConfig? proactivity;
 
+  /// Configuration for how conversation history is handled.
+  final HistoryConfig? historyConfig;
+
   /// Creates a [LiveConfig].
   const LiveConfig({
     this.generationConfig,
@@ -51,6 +55,7 @@ class LiveConfig {
     this.inputAudioTranscription,
     this.outputAudioTranscription,
     this.proactivity,
+    this.historyConfig,
   });
 
   /// Creates a basic audio configuration.
@@ -148,6 +153,11 @@ class LiveConfig {
               json['proactivity'] as Map<String, dynamic>,
             )
           : null,
+      historyConfig: json['historyConfig'] != null
+          ? HistoryConfig.fromJson(
+              json['historyConfig'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
@@ -169,6 +179,7 @@ class LiveConfig {
     if (outputAudioTranscription != null)
       'outputAudioTranscription': outputAudioTranscription!.toJson(),
     if (proactivity != null) 'proactivity': proactivity!.toJson(),
+    if (historyConfig != null) 'historyConfig': historyConfig!.toJson(),
   };
 
   /// Creates a copy with the given fields replaced.
@@ -182,6 +193,7 @@ class LiveConfig {
     AudioTranscriptionConfig? inputAudioTranscription,
     AudioTranscriptionConfig? outputAudioTranscription,
     ProactivityConfig? proactivity,
+    HistoryConfig? historyConfig,
   }) {
     return LiveConfig(
       generationConfig: generationConfig ?? this.generationConfig,
@@ -196,6 +208,7 @@ class LiveConfig {
       outputAudioTranscription:
           outputAudioTranscription ?? this.outputAudioTranscription,
       proactivity: proactivity ?? this.proactivity,
+      historyConfig: historyConfig ?? this.historyConfig,
     );
   }
 

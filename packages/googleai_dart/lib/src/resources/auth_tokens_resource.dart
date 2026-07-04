@@ -64,7 +64,7 @@ class AuthTokensResource extends ResourceBase {
   /// // Use token.name for client-side authentication
   /// ```
   Future<AuthToken> create({required AuthToken authToken}) async {
-    final url = requestBuilder.buildUrl('/{version}/authTokens:create');
+    final url = requestBuilder.buildUrl('/{version}/auth_tokens');
 
     final headers = requestBuilder.buildHeaders(
       additionalHeaders: {'Content-Type': 'application/json'},
@@ -72,7 +72,7 @@ class AuthTokensResource extends ResourceBase {
 
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
-      ..body = jsonEncode({'authToken': authToken.toJson()});
+      ..body = jsonEncode(authToken.toJson());
 
     final response = await interceptorChain.execute(httpRequest);
 

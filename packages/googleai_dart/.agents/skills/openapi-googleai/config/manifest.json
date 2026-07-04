@@ -874,6 +874,28 @@
         "acknowledged"
       ]
     },
+    "InteractionSseStreamEvent": {
+      "spec": "interactions",
+      "schema": "InteractionSseStreamEvent",
+      "dart_class": "InteractionEvent",
+      "file": "lib/src/resources/interactions_resource.dart",
+      "kind": "skip",
+      "note": "SSE `data:` frame envelope ({data: InteractionSseEvent}); the transport layer (parseSSE) strips the envelope and decodes InteractionSseEvent (InteractionEvent) directly.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "InteractionSseEventInteraction": {
+      "spec": "interactions",
+      "schema": "InteractionSseEventInteraction",
+      "dart_class": "Interaction",
+      "file": "lib/src/models/interactions/interaction.dart",
+      "kind": "skip",
+      "note": "Partial Interaction resource emitted by lifecycle SSE events; decoded by the full Interaction type (a superset), so no separate DTO is tracked.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
     "InteractionStatusUpdate": {
       "spec": "interactions",
       "schema": "InteractionStatusUpdate",
@@ -1151,6 +1173,17 @@
       ],
       "note": "SSE/delta event DTOs follow the existing googleai_dart convention of omitting copyWith on small immutable events."
     },
+    "StepDeltaMetadata": {
+      "spec": "interactions",
+      "schema": "StepDeltaMetadata",
+      "kind": "skip",
+      "dart_class": "StreamMetadata",
+      "file": "lib/src/models/interactions/stream_metadata.dart",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Structurally identical to StreamMetadata ({total_usage: Usage}); StepDeltaEvent.metadata reuses StreamMetadata, so no separate DTO is tracked."
+    },
     "StepDeltaData": {
       "spec": "interactions",
       "schema": "StepDeltaData",
@@ -1373,6 +1406,31 @@
       "file": "lib/src/models/tools/tool_response.dart",
       "schema": "ToolResponse"
     },
+    "AuthToken": {
+      "spec": "main",
+      "schema": "AuthToken",
+      "kind": "object",
+      "dart_class": "AuthToken",
+      "file": "lib/src/models/auth/auth_token.dart"
+    },
+    "ComputerUse": {
+      "spec": "main",
+      "schema": "ComputerUse",
+      "kind": "skip",
+      "dart_class": "ComputerUse",
+      "file": "lib/src/models/tools/computer_use.dart",
+      "note": "Spec marks `environment` required; Dart keeps it nullable because ComputerUseEnvironment already carries an `unspecified` default and making it required would be a breaking API change. New spec fields (disabledSafetyPolicies, enablePromptInjectionDetection) are implemented.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "TranslationConfig": {
+      "spec": "main",
+      "schema": "TranslationConfig",
+      "kind": "object",
+      "dart_class": "TranslationConfig",
+      "file": "lib/src/models/generation/translation_config.dart"
+    },
     "ToolType": {
       "spec": "main",
       "kind": "skip",
@@ -1459,17 +1517,19 @@
     },
     "UrlContextCallStepArguments": {
       "spec": "interactions",
-      "schema": "UrlContextCallStepArguments",
+      "schema": "UrlContextCallArguments",
       "kind": "object",
       "dart_class": "UrlContextCallStepArguments",
-      "file": "lib/src/models/interactions/steps/url_context_call_step.dart"
+      "file": "lib/src/models/interactions/steps/url_context_call_step.dart",
+      "note": "Spec renamed UrlContextCallStepArguments -> UrlContextCallArguments (identical `urls` field); Dart class name retained to avoid a breaking rename."
     },
     "UrlContextResultItem": {
       "spec": "interactions",
-      "schema": "UrlContextResultItem",
+      "schema": "UrlContextResult",
       "kind": "object",
       "dart_class": "UrlContextResultItem",
-      "file": "lib/src/models/interactions/steps/url_context_result_step.dart"
+      "file": "lib/src/models/interactions/steps/url_context_result_step.dart",
+      "note": "Spec renamed UrlContextResultItem -> UrlContextResult (identical `status`/`url` fields); Dart class name retained to avoid a breaking rename."
     },
     "UrlContextResultStep": {
       "spec": "interactions",

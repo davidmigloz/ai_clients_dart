@@ -3,30 +3,30 @@ import 'usage.dart';
 
 /// Optional metadata accompanying any streamed interaction event.
 class StreamMetadata {
-  /// Token usage statistics for the interaction so far.
-  final InteractionUsage? usage;
+  /// Total token usage statistics for the interaction so far.
+  final InteractionUsage? totalUsage;
 
   /// Creates a [StreamMetadata] instance.
-  const StreamMetadata({this.usage});
+  const StreamMetadata({this.totalUsage});
 
   /// Creates a [StreamMetadata] from JSON.
   factory StreamMetadata.fromJson(Map<String, dynamic> json) => StreamMetadata(
-    usage: json['usage'] != null
-        ? InteractionUsage.fromJson(json['usage'] as Map<String, dynamic>)
+    totalUsage: json['total_usage'] != null
+        ? InteractionUsage.fromJson(json['total_usage'] as Map<String, dynamic>)
         : null,
   );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
-    if (usage != null) 'usage': usage!.toJson(),
+    if (totalUsage != null) 'total_usage': totalUsage!.toJson(),
   };
 
   /// Creates a copy with replaced values.
-  StreamMetadata copyWith({Object? usage = unsetCopyWithValue}) {
+  StreamMetadata copyWith({Object? totalUsage = unsetCopyWithValue}) {
     return StreamMetadata(
-      usage: usage == unsetCopyWithValue
-          ? this.usage
-          : usage as InteractionUsage?,
+      totalUsage: totalUsage == unsetCopyWithValue
+          ? this.totalUsage
+          : totalUsage as InteractionUsage?,
     );
   }
 }

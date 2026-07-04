@@ -106,6 +106,11 @@ void main() {
       });
     });
 
+    test('parses ESCALATION', () {
+      expect(finishReasonFromString('ESCALATION'), FinishReason.escalation);
+      expect(finishReasonToString(FinishReason.escalation), 'ESCALATION');
+    });
+
     test('round-trip conversion preserves all values', () {
       for (final reason in FinishReason.values) {
         final str = finishReasonToString(reason);

@@ -59,6 +59,9 @@ enum FinishReason {
 
   /// Malformed response.
   malformedResponse,
+
+  /// The interaction was escalated (e.g. handed off for further handling).
+  escalation,
 }
 
 /// Converts string to FinishReason enum.
@@ -83,6 +86,7 @@ FinishReason finishReasonFromString(String? value) {
     'TOO_MANY_TOOL_CALLS' => FinishReason.tooManyToolCalls,
     'MISSING_THOUGHT_SIGNATURE' => FinishReason.missingThoughtSignature,
     'MALFORMED_RESPONSE' => FinishReason.malformedResponse,
+    'ESCALATION' => FinishReason.escalation,
     _ => FinishReason.unspecified,
   };
 }
@@ -109,6 +113,7 @@ String finishReasonToString(FinishReason reason) {
     FinishReason.tooManyToolCalls => 'TOO_MANY_TOOL_CALLS',
     FinishReason.missingThoughtSignature => 'MISSING_THOUGHT_SIGNATURE',
     FinishReason.malformedResponse => 'MALFORMED_RESPONSE',
+    FinishReason.escalation => 'ESCALATION',
     FinishReason.unspecified => 'FINISH_REASON_UNSPECIFIED',
   };
 }

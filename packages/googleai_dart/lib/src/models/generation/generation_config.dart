@@ -5,6 +5,7 @@ import 'image_config.dart';
 import 'response_formats/response_format_config.dart';
 import 'response_modality.dart';
 import 'thinking_config.dart';
+import 'translation_config.dart';
 
 /// Configuration options for model generation.
 class GenerationConfig {
@@ -90,6 +91,9 @@ class GenerationConfig {
   /// in a flat structure.
   final ResponseFormatConfig? responseFormat;
 
+  /// Config for translation.
+  final TranslationConfig? translationConfig;
+
   /// Creates a [GenerationConfig].
   const GenerationConfig({
     this.candidateCount,
@@ -113,6 +117,7 @@ class GenerationConfig {
     this.enableEnhancedCivicAnswers,
     this.speechConfig,
     this.responseFormat,
+    this.translationConfig,
   });
 
   /// Creates a [GenerationConfig] from JSON.
@@ -157,6 +162,11 @@ class GenerationConfig {
                 json['responseFormat'] as Map<String, dynamic>,
               )
             : null,
+        translationConfig: json['translationConfig'] != null
+            ? TranslationConfig.fromJson(
+                json['translationConfig'] as Map<String, dynamic>,
+              )
+            : null,
       );
 
   /// Converts to JSON.
@@ -187,6 +197,8 @@ class GenerationConfig {
       'enableEnhancedCivicAnswers': enableEnhancedCivicAnswers,
     if (speechConfig != null) 'speechConfig': speechConfig!.toJson(),
     if (responseFormat != null) 'responseFormat': responseFormat!.toJson(),
+    if (translationConfig != null)
+      'translationConfig': translationConfig!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -212,6 +224,7 @@ class GenerationConfig {
     Object? enableEnhancedCivicAnswers = unsetCopyWithValue,
     Object? speechConfig = unsetCopyWithValue,
     Object? responseFormat = unsetCopyWithValue,
+    Object? translationConfig = unsetCopyWithValue,
   }) {
     return GenerationConfig(
       candidateCount: candidateCount == unsetCopyWithValue
@@ -272,6 +285,9 @@ class GenerationConfig {
       responseFormat: responseFormat == unsetCopyWithValue
           ? this.responseFormat
           : responseFormat as ResponseFormatConfig?,
+      translationConfig: translationConfig == unsetCopyWithValue
+          ? this.translationConfig
+          : translationConfig as TranslationConfig?,
     );
   }
 }

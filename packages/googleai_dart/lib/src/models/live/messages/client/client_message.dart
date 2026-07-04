@@ -6,6 +6,7 @@ import '../../../tools/function_response.dart';
 import '../../../tools/tool.dart';
 import '../../config/audio_transcription_config.dart';
 import '../../config/context_window_compression_config.dart';
+import '../../config/history_config.dart';
 import '../../config/live_generation_config.dart';
 import '../../config/proactivity_config.dart';
 import '../../config/realtime_input_config.dart';
@@ -91,6 +92,9 @@ class BidiGenerateContentSetup extends BidiGenerateContentClientMessage {
   /// Optional. Proactive audio configuration.
   final ProactivityConfig? proactivity;
 
+  /// Optional. Configuration for how conversation history is handled.
+  final HistoryConfig? historyConfig;
+
   /// Creates a [BidiGenerateContentSetup].
   const BidiGenerateContentSetup({
     required this.model,
@@ -103,6 +107,7 @@ class BidiGenerateContentSetup extends BidiGenerateContentClientMessage {
     this.inputAudioTranscription,
     this.outputAudioTranscription,
     this.proactivity,
+    this.historyConfig,
   });
 
   /// Creates from JSON (inner object, not wrapped).
@@ -152,6 +157,11 @@ class BidiGenerateContentSetup extends BidiGenerateContentClientMessage {
               json['proactivity'] as Map<String, dynamic>,
             )
           : null,
+      historyConfig: json['historyConfig'] != null
+          ? HistoryConfig.fromJson(
+              json['historyConfig'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
@@ -175,6 +185,7 @@ class BidiGenerateContentSetup extends BidiGenerateContentClientMessage {
       if (outputAudioTranscription != null)
         'outputAudioTranscription': outputAudioTranscription!.toJson(),
       if (proactivity != null) 'proactivity': proactivity!.toJson(),
+      if (historyConfig != null) 'historyConfig': historyConfig!.toJson(),
     },
   };
 
