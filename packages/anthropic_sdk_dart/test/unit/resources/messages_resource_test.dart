@@ -118,6 +118,84 @@ void main() {
       },
     );
 
+    test(
+      'create sends anthropic-user-profile-id header, not a body field',
+      () async {
+        mockHttpClient.queueJsonResponse(
+          MockResponses.message(id: 'msg_test', text: 'Hi'),
+        );
+
+        await client.messages.create(
+          MessageCreateRequest(
+            model: 'claude-sonnet-4-6',
+            maxTokens: 256,
+            messages: [InputMessage.user('Hello!')],
+          ),
+          userProfileId: 'uprof_abc123',
+        );
+
+        final request = mockHttpClient.lastRequest!;
+        expect(request.headers['anthropic-user-profile-id'], 'uprof_abc123');
+        expect(
+          (request as dynamic).body as String,
+          isNot(contains('user_profile_id')),
+        );
+      },
+    );
+
+    test('create omits anthropic-user-profile-id header when unset', () async {
+      mockHttpClient.queueJsonResponse(
+        MockResponses.message(id: 'msg_test', text: 'Hi'),
+      );
+
+      await client.messages.create(
+        MessageCreateRequest(
+          model: 'claude-sonnet-4-6',
+          maxTokens: 256,
+          messages: [InputMessage.user('Hello!')],
+        ),
+      );
+
+      final request = mockHttpClient.lastRequest!;
+      expect(request.headers.containsKey('anthropic-user-profile-id'), isFalse);
+    });
+
+    test('createStream sends anthropic-user-profile-id header', () async {
+      mockHttpClient.queueStreamingResponse(
+        MockResponses.streamingEvents(text: 'Hi!'),
+      );
+
+      final stream = client.messages.createStream(
+        MessageCreateRequest(
+          model: 'claude-sonnet-4-6',
+          maxTokens: 256,
+          messages: [InputMessage.user('Hello!')],
+        ),
+        userProfileId: 'uprof_abc123',
+      );
+      await stream.toList();
+
+      final request = mockHttpClient.lastRequest!;
+      expect(request.headers['anthropic-user-profile-id'], 'uprof_abc123');
+    });
+
+    test('countTokens sends anthropic-user-profile-id header', () async {
+      mockHttpClient.queueJsonResponse(
+        MockResponses.tokenCount(inputTokens: 42),
+      );
+
+      await client.messages.countTokens(
+        TokenCountRequest(
+          model: 'claude-sonnet-4-6',
+          messages: [InputMessage.user('Count my tokens!')],
+        ),
+        userProfileId: 'uprof_abc123',
+      );
+
+      final request = mockHttpClient.lastRequest!;
+      expect(request.headers['anthropic-user-profile-id'], 'uprof_abc123');
+    });
+
     test('create handles tool use response', () async {
       mockHttpClient.queueJsonResponse({
         'id': 'msg_tools',
@@ -280,6 +358,34 @@ void main() {
 
       expect(response.id, 'batch_123');
       expect(response.processingStatus, ProcessingStatus.inProgress);
+    });
+
+    test('create sends anthropic-user-profile-id header', () async {
+      mockHttpClient.queueJsonResponse(
+        MockResponses.messageBatch(
+          id: 'batch_123',
+          processingStatus: 'in_progress',
+        ),
+      );
+
+      await client.messages.batches.create(
+        MessageBatchCreateRequest(
+          requests: [
+            BatchRequestItem(
+              customId: 'req_1',
+              params: MessageCreateRequest(
+                model: 'claude-sonnet-4-6',
+                maxTokens: 100,
+                messages: [InputMessage.user('Hello')],
+              ),
+            ),
+          ],
+        ),
+        userProfileId: 'uprof_abc123',
+      );
+
+      final request = mockHttpClient.lastRequest!;
+      expect(request.headers['anthropic-user-profile-id'], 'uprof_abc123');
     });
 
     test('retrieve returns batch status', () async {

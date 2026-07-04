@@ -28,7 +28,20 @@ void main() async {
     );
     print('Created ${profile.id} (external_id: ${profile.externalId})');
 
-    // 2. List user profiles (paginated).
+    // 2. Send a message attributed to this user. The profile ID is sent as the
+    //    `anthropic-user-profile-id` header, not as a request-body field.
+    print('\n=== Send message attributed to the profile ===');
+    final reply = await client.messages.create(
+      MessageCreateRequest(
+        model: 'claude-opus-4-8',
+        maxTokens: 256,
+        messages: [InputMessage.user('Hello!')],
+      ),
+      userProfileId: profile.id,
+    );
+    print('Model replied: ${reply.content.first.runtimeType}');
+
+    // 3. List user profiles (paginated).
     print('\n=== List ===');
     final page = await client.userProfiles.list(
       limit: 10,
@@ -36,7 +49,7 @@ void main() async {
     );
     print('Returned ${page.data.length} profile(s); nextPage=${page.nextPage}');
 
-    // 3. Retrieve the profile and inspect trust grants.
+    // 4. Retrieve the profile and inspect trust grants.
     print('\n=== Retrieve ===');
     final fetched = await client.userProfiles.retrieve(profile.id);
     for (final entry in fetched.trustGrants.entries) {
@@ -46,7 +59,7 @@ void main() async {
       print('  (no trust grants)');
     }
 
-    // 4. Update metadata. Empty-string values remove a key server-side.
+    // 5. Update metadata. Empty-string values remove a key server-side.
     print('\n=== Update ===');
     final updated = await client.userProfiles.update(
       profile.id,
@@ -56,7 +69,7 @@ void main() async {
     );
     print('Updated metadata: ${updated.metadata}');
 
-    // 5. Generate an enrollment URL to send to the end user.
+    // 6. Generate an enrollment URL to send to the end user.
     print('\n=== Enrollment URL ===');
     final enrollment = await client.userProfiles.createEnrollmentUrl(
       profile.id,

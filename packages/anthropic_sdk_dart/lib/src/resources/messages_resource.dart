@@ -42,17 +42,24 @@ class MessagesResource extends ResourceBase with StreamingResource {
   /// Send a structured list of input messages with text and/or image content,
   /// and the model will generate the next message in the conversation.
   ///
+  /// [userProfileId] attributes this request to an end-user profile; it is sent
+  /// as the `anthropic-user-profile-id` header.
+  ///
   /// The optional [abortTrigger] allows canceling the request.
   Future<Message> create(
     MessageCreateRequest request, {
     Future<void>? abortTrigger,
     List<String> betas = const [],
+    String? userProfileId,
   }) async {
     ensureNotClosed?.call();
     final body = request.toJson()..remove('stream'); // Ensure non-streaming
     final url = requestBuilder.buildUrl('/v1/messages');
     final headers = requestBuilder.buildHeaders(
-      additionalHeaders: _betaHeaders(betas),
+      additionalHeaders: _requestHeaders(
+        betas: betas,
+        userProfileId: userProfileId,
+      ),
     );
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
@@ -70,11 +77,15 @@ class MessagesResource extends ResourceBase with StreamingResource {
   ///
   /// Returns a stream of [MessageStreamEvent]s as the response is generated.
   ///
+  /// [userProfileId] attributes this request to an end-user profile; it is sent
+  /// as the `anthropic-user-profile-id` header.
+  ///
   /// The optional [abortTrigger] allows canceling the stream.
   Stream<MessageStreamEvent> createStream(
     MessageCreateRequest request, {
     Future<void>? abortTrigger,
     List<String> betas = const [],
+    String? userProfileId,
   }) async* {
     final body = request.toJson();
     body['stream'] = true;
@@ -82,7 +93,7 @@ class MessagesResource extends ResourceBase with StreamingResource {
     final eventStream = postStream(
       '/v1/messages',
       body: body,
-      headers: _betaHeaders(betas),
+      headers: _requestHeaders(betas: betas, userProfileId: userProfileId),
       abortTrigger: abortTrigger,
     );
 
@@ -95,16 +106,23 @@ class MessagesResource extends ResourceBase with StreamingResource {
   ///
   /// Returns the count of input tokens for the given request.
   ///
+  /// [userProfileId] attributes this request to an end-user profile; it is sent
+  /// as the `anthropic-user-profile-id` header.
+  ///
   /// The optional [abortTrigger] allows canceling the request.
   Future<TokenCountResponse> countTokens(
     TokenCountRequest request, {
     Future<void>? abortTrigger,
     List<String> betas = const [],
+    String? userProfileId,
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('/v1/messages/count_tokens');
     final headers = requestBuilder.buildHeaders(
-      additionalHeaders: _betaHeaders(betas),
+      additionalHeaders: _requestHeaders(
+        betas: betas,
+        userProfileId: userProfileId,
+      ),
     );
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
@@ -120,11 +138,20 @@ class MessagesResource extends ResourceBase with StreamingResource {
     );
   }
 
-  /// Builds the `anthropic-beta` header map from a list of beta feature names.
+  /// Builds the per-request header map from the [betas] feature list and an
+  /// optional [userProfileId].
   ///
-  /// Returns `null` if [betas] is empty, so that no extra header is sent.
-  static Map<String, String>? _betaHeaders(List<String> betas) {
-    if (betas.isEmpty) return null;
-    return {'anthropic-beta': betas.join(',')};
+  /// Sets `anthropic-beta` when [betas] is non-empty and
+  /// `anthropic-user-profile-id` when [userProfileId] is provided. Returns
+  /// `null` when neither applies, so that no extra header is sent.
+  static Map<String, String>? _requestHeaders({
+    List<String> betas = const [],
+    String? userProfileId,
+  }) {
+    final headers = <String, String>{
+      if (betas.isNotEmpty) 'anthropic-beta': betas.join(','),
+      'anthropic-user-profile-id': ?userProfileId,
+    };
+    return headers.isEmpty ? null : headers;
   }
 }

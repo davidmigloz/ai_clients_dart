@@ -27,14 +27,22 @@ class MessageBatchesResource extends ResourceBase {
   ///
   /// Send a list of requests to be processed asynchronously.
   ///
+  /// [userProfileId] attributes the requests in this batch to an end-user
+  /// profile; it is sent as the `anthropic-user-profile-id` header.
+  ///
   /// The optional [abortTrigger] allows canceling the request.
   Future<MessageBatch> create(
     MessageBatchCreateRequest request, {
     Future<void>? abortTrigger,
+    String? userProfileId,
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrl('/v1/messages/batches');
-    final headers = requestBuilder.buildHeaders();
+    final headers = requestBuilder.buildHeaders(
+      additionalHeaders: userProfileId != null
+          ? {'anthropic-user-profile-id': userProfileId}
+          : null,
+    );
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
