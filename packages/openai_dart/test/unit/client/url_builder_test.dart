@@ -162,6 +162,47 @@ void main() {
       );
       expect(url.queryParameters['api-version'], equals('2024-08-01-preview'));
     });
+
+    test('preserves repeated query keys carried by the base URL', () {
+      const builder = RequestBuilder(
+        config: OpenAIConfig(
+          authProvider: ApiKeyProvider('sk-test'),
+          baseUrl: 'https://proxy.example.com/v1?k=a&k=b',
+        ),
+      );
+
+      final url = builder.buildUrl('/models');
+
+      expect(url.queryParametersAll['k'], equals(['a', 'b']));
+      expect(url.toString(), contains('k=a&k=b'));
+    });
+
+    test('request params replace the whole repeated-key list', () {
+      const builder = RequestBuilder(
+        config: OpenAIConfig(
+          authProvider: ApiKeyProvider('sk-test'),
+          baseUrl: 'https://proxy.example.com/v1?k=a&k=b',
+        ),
+      );
+
+      final url = builder.buildUrl('/models', queryParams: {'k': 'c'});
+
+      expect(url.queryParametersAll['k'], equals(['c']));
+    });
+
+    test('preserves repeated base-URL keys when merging other params', () {
+      const builder = RequestBuilder(
+        config: OpenAIConfig(
+          authProvider: ApiKeyProvider('sk-test'),
+          baseUrl: 'https://proxy.example.com/v1?k=a&k=b',
+        ),
+      );
+
+      final url = builder.buildUrl('/models', queryParams: {'x': '1'});
+
+      expect(url.queryParametersAll['k'], equals(['a', 'b']));
+      expect(url.queryParameters['x'], equals('1'));
+    });
   });
 
   group('buildUrlWithQueryAll', () {

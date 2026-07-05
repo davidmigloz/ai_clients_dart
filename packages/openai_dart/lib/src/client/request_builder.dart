@@ -36,7 +36,9 @@ class RequestBuilder {
   ///
   /// The [path] should start with a `/`, e.g., `/chat/completions`.
   /// Optional [queryParams] are merged with any query parameters in the
-  /// base URL (request-level params override base-level on key conflicts).
+  /// base URL (request-level params override base-level on key conflicts;
+  /// the whole value list for that key is replaced). Repeated keys carried
+  /// by the base URL (e.g. `?k=a&k=b`) are preserved.
   ///
   /// This correctly handles base URLs with existing query parameters,
   /// such as Azure OpenAI endpoints with `api-version`.
@@ -51,9 +53,10 @@ class RequestBuilder {
     final normalizedPath = path.startsWith('/') ? path : '/$path';
     final combinedPath = '$basePath$normalizedPath';
 
-    // Merge query params: base URL params + request params (request wins on conflict)
-    final mergedQueryParams = <String, String>{
-      ...baseUri.queryParameters,
+    // Merge query params: base URL params + request params (request wins on
+    // conflict). `queryParametersAll` preserves repeated base-URL keys.
+    final mergedQueryParams = <String, dynamic>{
+      ...baseUri.queryParametersAll,
       ...?queryParams,
     };
 
