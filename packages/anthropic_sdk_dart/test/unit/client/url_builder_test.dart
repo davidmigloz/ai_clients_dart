@@ -110,5 +110,122 @@ void main() {
 
       expect(url.queryParameters['api-version'], equals('2025'));
     });
+
+    test('handles a base URL with multiple path segments', () {
+      const builder = RequestBuilder(
+        config: AnthropicConfig(
+          authProvider: ApiKeyProvider('sk-test'),
+          baseUrl: 'https://proxy.example.com/api/anthropic',
+        ),
+      );
+
+      final url = builder.buildUrl('/v1/messages');
+
+      expect(url.path, equals('/api/anthropic/v1/messages'));
+    });
+
+    test('default params override base-URL params on conflict', () {
+      const builder = RequestBuilder(
+        config: AnthropicConfig(
+          authProvider: ApiKeyProvider('sk-test'),
+          baseUrl: 'https://proxy.example.com/?api-version=2024',
+          defaultQueryParams: {'api-version': '2025'},
+        ),
+      );
+
+      final url = builder.buildUrl('/v1/messages');
+
+      expect(url.queryParameters['api-version'], equals('2025'));
+    });
+
+    test('preserves repeated query keys carried by the base URL', () {
+      const builder = RequestBuilder(
+        config: AnthropicConfig(
+          authProvider: ApiKeyProvider('sk-test'),
+          baseUrl: 'https://proxy.example.com/?k=a&k=b',
+        ),
+      );
+
+      final url = builder.buildUrl('/v1/messages');
+
+      expect(url.queryParametersAll['k'], equals(['a', 'b']));
+      expect(url.toString(), contains('k=a&k=b'));
+    });
+
+    test('per-request params replace the whole repeated-key list', () {
+      const builder = RequestBuilder(
+        config: AnthropicConfig(
+          authProvider: ApiKeyProvider('sk-test'),
+          baseUrl: 'https://proxy.example.com/?k=a&k=b',
+        ),
+      );
+
+      final url = builder.buildUrl('/v1/messages', queryParams: {'k': 'c'});
+
+      expect(url.queryParametersAll['k'], equals(['c']));
+    });
+
+    test('default params replace repeated base-URL keys', () {
+      const builder = RequestBuilder(
+        config: AnthropicConfig(
+          authProvider: ApiKeyProvider('sk-test'),
+          baseUrl: 'https://proxy.example.com/?k=a&k=b',
+          defaultQueryParams: {'k': 'c'},
+        ),
+      );
+
+      final url = builder.buildUrl('/v1/messages');
+
+      expect(url.queryParametersAll['k'], equals(['c']));
+    });
+
+    test('renders Iterable query param values as repeated keys', () {
+      // Mirrors SessionEventsResource, which passes List<String> values for
+      // `types[]` / `event_deltas[]` array params.
+      const builder = RequestBuilder(
+        config: AnthropicConfig(authProvider: ApiKeyProvider('sk-test')),
+      );
+
+      final url = builder.buildUrl(
+        '/v1/sessions/s_123/events',
+        queryParams: {
+          'types[]': ['message', 'tool_use'],
+        },
+      );
+
+      expect(
+        url.queryParametersAll['types[]'],
+        equals(['message', 'tool_use']),
+      );
+    });
+
+    test('preserves a non-standard port in the base URL', () {
+      const builder = RequestBuilder(
+        config: AnthropicConfig(
+          authProvider: ApiKeyProvider('sk-test'),
+          baseUrl: 'https://api.example.com:8443',
+        ),
+      );
+
+      final url = builder.buildUrl('/v1/messages');
+
+      expect(url.port, equals(8443));
+      expect(url.path, equals('/v1/messages'));
+    });
+
+    test('preserves userInfo and fragment from the base URL', () {
+      const builder = RequestBuilder(
+        config: AnthropicConfig(
+          authProvider: ApiKeyProvider('sk-test'),
+          baseUrl: 'https://user:pass@api.example.com/base#frag',
+        ),
+      );
+
+      final url = builder.buildUrl('/v1/messages');
+
+      expect(url.userInfo, equals('user:pass'));
+      expect(url.path, equals('/base/v1/messages'));
+      expect(url.fragment, equals('frag'));
+    });
   });
 }
