@@ -222,7 +222,7 @@ mixin StreamingResource on ResourceBase {
     } else {
       final uri = request.url;
       if (!uri.queryParameters.containsKey('key')) {
-        final queryParams = Map<String, dynamic>.from(uri.queryParameters);
+        final queryParams = Map<String, dynamic>.from(uri.queryParametersAll);
         queryParams['key'] = apiKey;
         final newUri = uri.replace(queryParameters: queryParams);
 
@@ -255,7 +255,7 @@ mixin StreamingResource on ResourceBase {
     if (uri.queryParameters.containsKey('access_token')) {
       return request;
     }
-    final queryParams = Map<String, dynamic>.from(uri.queryParameters);
+    final queryParams = Map<String, dynamic>.from(uri.queryParametersAll);
     queryParams['access_token'] = token;
     final newUri = uri.replace(queryParameters: queryParams);
 

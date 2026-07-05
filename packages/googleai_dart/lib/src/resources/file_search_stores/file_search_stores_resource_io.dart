@@ -278,10 +278,6 @@ class FileSearchStoresResource extends ResourceBase {
 
     // FileSearchStores uses resumable upload protocol
     // Step 1: Initiate the upload and get upload URL
-    final uploadUrl = Uri.parse(
-      '${config.baseUrl}/upload/${config.apiVersion.value}/$parent:uploadToFileSearchStore',
-    );
-
     final initiationHeaders = <String, String>{
       'X-Goog-Upload-Protocol': 'resumable',
       'X-Goog-Upload-Command': 'start',
@@ -290,47 +286,36 @@ class FileSearchStoresResource extends ResourceBase {
       'Content-Type': 'application/json',
     };
 
-    // Apply authentication to initiation request
+    // Apply authentication to the initiation request. Query-placement
+    // credentials are collected and merged into the upload URL below.
+    final authQueryParams = <String, String>{};
     if (config.authProvider != null) {
       final credentials = await config.authProvider!.getCredentials();
       switch (credentials) {
         case ApiKeyCredentials(:final apiKey, :final placement):
           if (placement == AuthPlacement.header) {
             initiationHeaders['X-Goog-Api-Key'] = apiKey;
+          } else {
+            authQueryParams['key'] = apiKey;
           }
         case BearerTokenCredentials(:final token):
           initiationHeaders['Authorization'] = 'Bearer $token';
         case EphemeralTokenCredentials(:final token, :final placement):
           if (placement == EphemeralTokenPlacement.header) {
             initiationHeaders['Authorization'] = 'Token $token';
+          } else {
+            authQueryParams['access_token'] = token;
           }
-        // Query param handled below
         case NoAuthCredentials():
           // No auth needed
           break;
       }
     }
 
-    // Add API key or ephemeral token as query param if needed
-    final Uri uploadUrlWithAuth;
-    if (config.authProvider != null) {
-      final credentials = await config.authProvider!.getCredentials();
-      if (credentials is ApiKeyCredentials &&
-          credentials.placement == AuthPlacement.queryParam) {
-        uploadUrlWithAuth = uploadUrl.replace(
-          queryParameters: {'key': credentials.apiKey},
-        );
-      } else if (credentials is EphemeralTokenCredentials &&
-          credentials.placement == EphemeralTokenPlacement.queryParam) {
-        uploadUrlWithAuth = uploadUrl.replace(
-          queryParameters: {'access_token': credentials.token},
-        );
-      } else {
-        uploadUrlWithAuth = uploadUrl;
-      }
-    } else {
-      uploadUrlWithAuth = uploadUrl;
-    }
+    final uploadUrlWithAuth = requestBuilder.buildUploadUrl(
+      '/upload/{version}/$parent:uploadToFileSearchStore',
+      queryParams: authQueryParams,
+    );
 
     // Build request body with metadata
     final requestBody = <String, dynamic>{
