@@ -55,6 +55,19 @@
       }
     },
     "schemas": {
+      "ActivityHandling": {
+        "enum": [
+          "ACTIVITY_HANDLING_UNSPECIFIED",
+          "START_OF_ACTIVITY_INTERRUPTS",
+          "NO_INTERRUPTION"
+        ],
+        "type": "string",
+        "x-google-enum-descriptions": [
+          "If unspecified, the default behavior is `START_OF_ACTIVITY_INTERRUPTS`.",
+          "If true, start of activity will interrupt the model's response (also\ncalled \"barge in\"). The model's current response will be cut-off in the\nmoment of the interruption. This is the default behavior.",
+          "The model's response will not be interrupted."
+        ]
+      },
       "AsyncBatchEmbedContentOperation": {
         "allOf": [
           {
@@ -177,6 +190,134 @@
             "description": "Optional. Sample rate in Hz.",
             "format": "int32",
             "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "AudioTranscriptionConfig": {
+        "description": "The audio transcription configuration.",
+        "properties": {
+          "adaptationPhrases": {
+            "description": "Optional. A list of phrases used for speech adaptation, which biases the ASR model to\nimprove recognition of these specific terms.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "languageAuto": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LanguageAuto"
+              }
+            ],
+            "description": "Optional. The model will detect the language automatically."
+          },
+          "languageHints": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LanguageHints"
+              }
+            ],
+            "description": "Optional. Specifies one or more languages in the audio."
+          }
+        },
+        "type": "object"
+      },
+      "AuthToken": {
+        "description": "A request to create an ephemeral authentication token.",
+        "properties": {
+          "bidiGenerateContentSetup": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BidiGenerateContentSetup"
+              }
+            ],
+            "description": "Optional. Input only. Immutable. Configuration specific to `BidiGenerateContent`.",
+            "writeOnly": true,
+            "x-google-immutable": true
+          },
+          "expireTime": {
+            "description": "Optional. Input only. Immutable. An optional time after which, when using the resulting token, messages in\nBidiGenerateContent sessions will be rejected. (Gemini may preemptively\nclose the session after this time.)\n\nIf not set then this defaults to 30 minutes in the future. If set, this\nvalue must be less than 20 hours in the future.",
+            "format": "date-time",
+            "type": "string",
+            "writeOnly": true,
+            "x-google-immutable": true
+          },
+          "fieldMask": {
+            "description": "Optional. Input only. Immutable. If field_mask is empty, and `bidi_generate_content_setup` is not present,\nthen the effective `BidiGenerateContentSetup` message is taken from the\nLive API connection.\n\nIf field_mask is empty, and `bidi_generate_content_setup` _is_ present,\nthen the effective `BidiGenerateContentSetup` message is taken entirely\nfrom `bidi_generate_content_setup` in this request. The setup message from\nthe Live API connection is ignored.\n\nIf field_mask is not empty, then the corresponding fields from\n`bidi_generate_content_setup` will overwrite the fields from the setup\nmessage in the Live API connection.",
+            "format": "google-fieldmask",
+            "pattern": "^(\\s*[^,\\s.]+(\\s*[,.]\\s*[^,\\s.]+)*)?$",
+            "type": "string",
+            "writeOnly": true,
+            "x-google-immutable": true
+          },
+          "name": {
+            "description": "Output only. Identifier. The token itself.",
+            "readOnly": true,
+            "type": "string",
+            "x-google-identifier": true
+          },
+          "newSessionExpireTime": {
+            "description": "Optional. Input only. Immutable. The time after which new Live API sessions using the token resulting from\nthis request will be rejected.\n\nIf not set this defaults to 60 seconds in the future. If set, this value\nmust be less than 20 hours in the future.",
+            "format": "date-time",
+            "type": "string",
+            "writeOnly": true,
+            "x-google-immutable": true
+          },
+          "uses": {
+            "description": "Optional. Input only. Immutable. The number of times the token can be used. If this value is zero then no\nlimit is applied. Resuming a Live API session does not count as a use. If\nunspecified, the default is 1.",
+            "format": "int32",
+            "type": "integer",
+            "writeOnly": true,
+            "x-google-immutable": true
+          }
+        },
+        "type": "object"
+      },
+      "AutomaticActivityDetection": {
+        "description": "Configures automatic detection of activity.",
+        "properties": {
+          "disabled": {
+            "description": "Optional. If enabled (the default), detected voice and text input count as\nactivity. If disabled, the client must send activity signals.",
+            "type": "boolean"
+          },
+          "endOfSpeechSensitivity": {
+            "description": "Optional. Determines how likely detected speech is ended.",
+            "enum": [
+              "END_SENSITIVITY_UNSPECIFIED",
+              "END_SENSITIVITY_HIGH",
+              "END_SENSITIVITY_LOW"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "The default is END_SENSITIVITY_HIGH.",
+              "Automatic detection ends speech more often.",
+              "Automatic detection ends speech less often."
+            ]
+          },
+          "prefixPaddingMs": {
+            "description": "Optional. The required duration of detected speech before start-of-speech is\ncommitted. The lower this value, the more sensitive the start-of-speech\ndetection is and shorter speech can be recognized. However, this also\nincreases the probability of false positives.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "silenceDurationMs": {
+            "description": "Optional. The required duration of detected non-speech (e.g. silence) before\nend-of-speech is committed. The larger this value, the longer speech gaps\ncan be without interrupting the user's activity but this will increase\nthe model's latency.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "startOfSpeechSensitivity": {
+            "description": "Optional. Determines how likely speech is to be detected.",
+            "enum": [
+              "START_SENSITIVITY_UNSPECIFIED",
+              "START_SENSITIVITY_HIGH",
+              "START_SENSITIVITY_LOW"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "The default is START_SENSITIVITY_HIGH.",
+              "Automatic detection will detect the start of speech more often.",
+              "Automatic detection will detect the start of speech less often."
+            ]
           }
         },
         "type": "object"
@@ -377,6 +518,90 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "BidiGenerateContentSetup": {
+        "description": "Message to be sent in the first (and only in the first)\n`BidiGenerateContentClientMessage`. Contains configuration that will apply\nfor the duration of the streaming RPC.\n\nClients should wait for a `BidiGenerateContentSetupComplete` message before\nsending any additional messages.",
+        "properties": {
+          "contextWindowCompression": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContextWindowCompressionConfig"
+              }
+            ],
+            "description": "Optional. Configures a context window compression mechanism.\n\nIf included, the server will automatically reduce the size of the context\nwhen it exceeds the configured length."
+          },
+          "generationConfig": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GenerationConfig"
+              }
+            ],
+            "description": "Optional. Generation config.\n\nThe following fields are not supported:\n\n - `response_logprobs`\n - `response_mime_type`\n - `logprobs`\n - `response_schema`\n - `response_json_schema`\n - `stop_sequence`\n - `skip_response_cache`\n - `routing_config`\n - `audio_timestamp`"
+          },
+          "historyConfig": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/HistoryConfig"
+              }
+            ],
+            "description": "Optional. Configures the exchange of history between the client and the server."
+          },
+          "inputAudioTranscription": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AudioTranscriptionConfig"
+              }
+            ],
+            "description": "Optional. If set, enables transcription of voice input. The transcription aligns\nwith the input audio language, if configured."
+          },
+          "model": {
+            "description": "Required. The model's resource name. This serves as an ID for the Model to use.\n\nFormat: `models/{model}`",
+            "type": "string"
+          },
+          "outputAudioTranscription": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AudioTranscriptionConfig"
+              }
+            ],
+            "description": "Optional. If set, enables transcription of the model's audio output. The\ntranscription aligns with the language code specified for the output\naudio, if configured."
+          },
+          "realtimeInputConfig": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RealtimeInputConfig"
+              }
+            ],
+            "description": "Optional. Configures the handling of realtime input."
+          },
+          "sessionResumption": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SessionResumptionConfig"
+              }
+            ],
+            "description": "Optional. Configures session resumption mechanism.\n\nIf included, the server will send `SessionResumptionUpdate` messages."
+          },
+          "systemInstruction": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Content"
+              }
+            ],
+            "description": "Optional. The user provided system instructions for the model.\n\nNote: Only text should be used in parts and content in each part will be\nin a separate paragraph."
+          },
+          "tools": {
+            "description": "Optional. A list of `Tools` the model may use to generate the next response.\n\nA `Tool` is a piece of code that enables the system to interact with\nexternal systems to perform an action, or set of actions, outside of\nknowledge and scope of the model.",
+            "items": {
+              "$ref": "#/components/schemas/Tool"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "model"
+        ],
         "type": "object"
       },
       "Blob": {
@@ -593,7 +818,8 @@
               "UNEXPECTED_TOOL_CALL",
               "TOO_MANY_TOOL_CALLS",
               "MISSING_THOUGHT_SIGNATURE",
-              "MALFORMED_RESPONSE"
+              "MALFORMED_RESPONSE",
+              "ESCALATION"
             ],
             "readOnly": true,
             "type": "string",
@@ -617,7 +843,8 @@
               "Model generated a tool call but no tools were enabled in the request.",
               "Model called too many tools consecutively, thus the system exited\nexecution.",
               "Request has at least one thought signature missing.",
-              "Finished due to malformed response."
+              "Finished due to malformed response.",
+              "Request was filtered by an escalation rule."
             ]
           },
           "groundingAttributions": {
@@ -850,16 +1077,51 @@
       "ComputerUse": {
         "description": "Computer Use tool type.",
         "properties": {
+          "disabledSafetyPolicies": {
+            "description": "Optional. Disabled safety policies for computer use.",
+            "items": {
+              "enum": [
+                "SAFETY_POLICY_UNSPECIFIED",
+                "FINANCIAL_TRANSACTIONS",
+                "SENSITIVE_DATA_MODIFICATION",
+                "COMMUNICATION_TOOL",
+                "ACCOUNT_CREATION",
+                "DATA_MODIFICATION",
+                "USER_CONSENT_MANAGEMENT",
+                "LEGAL_TERMS_AND_AGREEMENTS"
+              ],
+              "type": "string",
+              "x-google-enum-descriptions": [
+                "Unspecified safety policy.",
+                "Safety policy for financial transactions.",
+                "Safety policy for sensitive data modification.",
+                "Safety policy for communication tools (e.g. Gmail, Chat, Meet).",
+                "Safety policy for account creation.",
+                "Safety policy for data modification.",
+                "Safety policy for user consent management.",
+                "Safety policy for legal terms and agreements."
+              ]
+            },
+            "type": "array"
+          },
+          "enablePromptInjectionDetection": {
+            "description": "Optional. Whether enable the prompt injection detection check on computer-use\nrequest.",
+            "type": "boolean"
+          },
           "environment": {
             "description": "Required. The environment being operated.",
             "enum": [
               "ENVIRONMENT_UNSPECIFIED",
-              "ENVIRONMENT_BROWSER"
+              "ENVIRONMENT_BROWSER",
+              "ENVIRONMENT_MOBILE",
+              "ENVIRONMENT_DESKTOP"
             ],
             "type": "string",
             "x-google-enum-descriptions": [
               "Defaults to browser.",
-              "Operates in a web browser."
+              "Operates in a web browser.",
+              "Operates in a mobile environment.",
+              "Operates in a desktop environment."
             ]
           },
           "excludedPredefinedFunctions": {
@@ -1012,6 +1274,25 @@
           "fusionIdDetectionMetadata": {
             "description": "Metadata information from Fusion ID detection. Serialized\nFusionIdDetectionMetadata proto. Only set if from_fusion_id is set.",
             "format": "byte",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ContextWindowCompressionConfig": {
+        "description": "Enables context window compression \u2014 a mechanism for managing the model's\ncontext window so that it does not exceed a given length.",
+        "properties": {
+          "slidingWindow": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SlidingWindow"
+              }
+            ],
+            "description": "A sliding-window mechanism."
+          },
+          "triggerTokens": {
+            "description": "The number of tokens (before running a turn) required to trigger a context\nwindow compression.\n\nThis can be used to balance quality against latency as shorter context\nwindows may result in faster model responses. However, any compression\noperation will cause a temporary latency increase, so they should not be\ntriggered frequently.\n\nIf not set, the default is 80% of the model's context window limit. This\nleaves 20% for the next user request/model response.",
+            "format": "int64",
             "type": "string"
           }
         },
@@ -3179,6 +3460,14 @@
             "description": "Optional. The maximum cumulative probability of tokens to consider when sampling.\n\nThe model uses combined Top-k and Top-p (nucleus) sampling.\n\nTokens are sorted based on their assigned probabilities so that only the\nmost likely tokens are considered. Top-k sampling directly limits the\nmaximum number of tokens to consider, while Nucleus sampling limits the\nnumber of tokens based on the cumulative probability.\n\nNote: The default value varies by `Model` and is specified by\nthe`Model.top_p` attribute returned from the `getModel` function. An empty\n`top_k` attribute indicates that the model doesn't apply top-k sampling\nand doesn't allow setting `top_k` on requests.",
             "format": "float",
             "type": "number"
+          },
+          "translationConfig": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TranslationConfig"
+              }
+            ],
+            "description": "Optional. Config for translation."
           }
         },
         "type": "object"
@@ -3559,6 +3848,16 @@
           "**Gemini** - Dangerous content.",
           "**Gemini** - Content that may be used to harm civic integrity.\nDEPRECATED: use enable_enhanced_civic_answers instead."
         ]
+      },
+      "HistoryConfig": {
+        "description": "History configuration.\n\nThis message is included in the session configuration as\n`BidiGenerateContentSetup.history_config`. Configures the exchange of\nhistory messages.",
+        "properties": {
+          "initialHistoryInClientContent": {
+            "description": "Optional. If true, after sending `setup_complete`, the server will wait\nand at first process `client_content` messages until `turn_complete` is\n`true`. This initial history will not trigger a model call and\nmay end with role `MODEL`. After `turn_complete` is `true`, the client\ncan start the realtime conversation via `realtime_input`.",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
       },
       "Hyperparameters": {
         "description": "Hyperparameters controlling the tuning process. Read more at\nhttps://ai.google.dev/docs/model_tuning_guidance",
@@ -4035,6 +4334,26 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "LanguageAuto": {
+        "description": "Indicates the language of the audio should be automatically detected.",
+        "type": "object"
+      },
+      "LanguageHints": {
+        "description": "Provides hints to the model about possible languages present in the audio.",
+        "properties": {
+          "languageCodes": {
+            "description": "Required. BCP-47 language codes.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "languageCodes"
+        ],
         "type": "object"
       },
       "LatLng": {
@@ -4945,6 +5264,44 @@
         },
         "type": "object"
       },
+      "RealtimeInputConfig": {
+        "description": "Configures the realtime input behavior in `BidiGenerateContent`.",
+        "properties": {
+          "activityHandling": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ActivityHandling"
+              }
+            ],
+            "description": "Optional. Defines what effect activity has."
+          },
+          "automaticActivityDetection": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AutomaticActivityDetection"
+              }
+            ],
+            "description": "Optional. If not set, automatic activity detection is enabled by default. If\nautomatic voice detection is disabled, the client must send activity\nsignals."
+          },
+          "turnCoverage": {
+            "description": "Optional. Defines which input is included in the user's turn.",
+            "enum": [
+              "TURN_COVERAGE_UNSPECIFIED",
+              "TURN_INCLUDES_ONLY_ACTIVITY",
+              "TURN_INCLUDES_ALL_INPUT",
+              "TURN_INCLUDES_AUDIO_ACTIVITY_AND_ALL_VIDEO"
+            ],
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "If unspecified, a default behavior is selected based on the model. E.g.,\nfor Gemini 2.5, the default is `TURN_INCLUDES_ONLY_ACTIVITY`, while for\nGemini 3.1 and onwards, it's\n`TURN_INCLUDES_AUDIO_ACTIVITY_AND_ALL_VIDEO`.",
+              "Includes activity since the last turn, excluding inactivity (e.g. silence\non the audio stream).",
+              "Includes all realtime input since the last turn, including inactivity\n(e.g. silence on the audio stream).",
+              "Includes audio activity and all video since the last turn. With automatic\nactivity detection, audio activity means speech and excludes silence."
+            ]
+          }
+        },
+        "type": "object"
+      },
       "RegisterFilesRequest": {
         "description": "Request for `RegisterFiles`.",
         "properties": {
@@ -5422,6 +5779,27 @@
           "Priority service tier."
         ]
       },
+      "SessionResumptionConfig": {
+        "description": "Session resumption configuration.\n\nThis message is included in the session configuration as\n`BidiGenerateContentSetup.session_resumption`. If configured, the server\nwill send `SessionResumptionUpdate` messages.",
+        "properties": {
+          "handle": {
+            "description": "The handle of a previous session. If not present then a new session is\ncreated.\n\nSession handles come from `SessionResumptionUpdate.token` values in\nprevious connections.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SlidingWindow": {
+        "description": "The SlidingWindow method operates by discarding content at the beginning of\nthe context window. The resulting context will always begin at the start of\na USER role turn. System instructions and any\n`BidiGenerateContentSetup.prefix_turns` will always remain at the beginning\nof the result.",
+        "properties": {
+          "targetTokens": {
+            "description": "The target number of tokens to keep. The default value is\ntrigger_tokens/2.\n\nDiscarding parts of the context window causes a temporary latency\nincrease so this value should be calibrated to avoid frequent compression\noperations.",
+            "format": "int64",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "SpeakerVoiceConfig": {
         "description": "The configuration for a single speaker in a multi speaker setup.",
         "properties": {
@@ -5846,6 +6224,23 @@
       },
       "TransferOwnershipResponse": {
         "description": "Response from `TransferOwnership`.",
+        "type": "object"
+      },
+      "TranslationConfig": {
+        "description": "Config for translation features.",
+        "properties": {
+          "echoTargetLanguage": {
+            "description": "Optional. If true, the model will generate audio when the target language is spoken,\nessentially it will parrot the input. If false, we will not produce audio\nfor the target language.",
+            "type": "boolean"
+          },
+          "targetLanguageCode": {
+            "description": "Required. The target language for translation. Supported values are BCP-47 language\ncodes (e.g. \"en\", \"es\", \"fr\").",
+            "type": "string"
+          }
+        },
+        "required": [
+          "targetLanguageCode"
+        ],
         "type": "object"
       },
       "TunedModel": {
@@ -6433,10 +6828,57 @@
     "description": "The Gemini API allows developers to build generative AI applications using Gemini models. Gemini is our most capable model, built from the ground up to be multimodal. It can generalize and seamlessly understand, operate across, and combine different types of information including language, images, audio, video, and code. You can use the Gemini API for use cases like reasoning across text and images, content generation, dialogue agents, summarization and classification systems, and more.",
     "title": "Gemini API",
     "version": "v1beta",
-    "x-google-revision": "20260522"
+    "x-google-revision": "20260702"
   },
   "openapi": "3.0.3",
   "paths": {
+    "/v1beta/auth_tokens": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/alt"
+        },
+        {
+          "$ref": "#/components/parameters/callback"
+        },
+        {
+          "$ref": "#/components/parameters/prettyPrint"
+        },
+        {
+          "$ref": "#/components/parameters/_.xgafv"
+        }
+      ],
+      "post": {
+        "description": "Creates a token that can be used to constrain the behavior of a\nBidiGenerateContent session.",
+        "operationId": "CreateToken",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthToken"
+              }
+            }
+          },
+          "description": "Required. The token to create."
+        },
+        "responses": {
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthToken"
+                }
+              }
+            },
+            "description": "Successful operation"
+          }
+        },
+        "security": [],
+        "tags": [
+          "generativelanguage"
+        ]
+      }
+    },
     "/v1beta/batches": {
       "get": {
         "description": "Lists operations that match the specified filter in the request. If the\nserver doesn't support this method, it returns `UNIMPLEMENTED`.",

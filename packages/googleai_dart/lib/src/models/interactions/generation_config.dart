@@ -13,6 +13,18 @@ class InteractionGenerationConfig {
   /// The maximum cumulative probability of tokens to consider when sampling.
   final double? topP;
 
+  /// Penalizes tokens based on their frequency in the generated text.
+  ///
+  /// A positive value helps to reduce the repetition of words and phrases.
+  /// Valid values range from [-2.0, 2.0].
+  final double? frequencyPenalty;
+
+  /// Penalizes tokens that have already appeared in the generated text.
+  ///
+  /// A positive value encourages the model to generate more diverse and less
+  /// repetitive text. Valid values range from [-2.0, 2.0].
+  final double? presencePenalty;
+
   /// Seed used in decoding for reproducibility.
   final int? seed;
 
@@ -41,6 +53,8 @@ class InteractionGenerationConfig {
   const InteractionGenerationConfig({
     this.temperature,
     this.topP,
+    this.frequencyPenalty,
+    this.presencePenalty,
     this.seed,
     this.stopSequences,
     this.toolChoice,
@@ -57,6 +71,8 @@ class InteractionGenerationConfig {
   ) => InteractionGenerationConfig(
     temperature: (json['temperature'] as num?)?.toDouble(),
     topP: (json['top_p'] as num?)?.toDouble(),
+    frequencyPenalty: (json['frequency_penalty'] as num?)?.toDouble(),
+    presencePenalty: (json['presence_penalty'] as num?)?.toDouble(),
     seed: json['seed'] as int?,
     stopSequences: (json['stop_sequences'] as List<dynamic>?)?.cast<String>(),
     toolChoice: json['tool_choice'] != null
@@ -87,6 +103,8 @@ class InteractionGenerationConfig {
   Map<String, dynamic> toJson() => {
     if (temperature != null) 'temperature': temperature,
     if (topP != null) 'top_p': topP,
+    if (frequencyPenalty != null) 'frequency_penalty': frequencyPenalty,
+    if (presencePenalty != null) 'presence_penalty': presencePenalty,
     if (seed != null) 'seed': seed,
     if (stopSequences != null) 'stop_sequences': stopSequences,
     if (toolChoice != null) 'tool_choice': toolChoice!.toJson(),
@@ -106,6 +124,8 @@ class InteractionGenerationConfig {
   InteractionGenerationConfig copyWith({
     Object? temperature = unsetCopyWithValue,
     Object? topP = unsetCopyWithValue,
+    Object? frequencyPenalty = unsetCopyWithValue,
+    Object? presencePenalty = unsetCopyWithValue,
     Object? seed = unsetCopyWithValue,
     Object? stopSequences = unsetCopyWithValue,
     Object? toolChoice = unsetCopyWithValue,
@@ -120,6 +140,12 @@ class InteractionGenerationConfig {
           ? this.temperature
           : temperature as double?,
       topP: topP == unsetCopyWithValue ? this.topP : topP as double?,
+      frequencyPenalty: frequencyPenalty == unsetCopyWithValue
+          ? this.frequencyPenalty
+          : frequencyPenalty as double?,
+      presencePenalty: presencePenalty == unsetCopyWithValue
+          ? this.presencePenalty
+          : presencePenalty as double?,
       seed: seed == unsetCopyWithValue ? this.seed : seed as int?,
       stopSequences: stopSequences == unsetCopyWithValue
           ? this.stopSequences

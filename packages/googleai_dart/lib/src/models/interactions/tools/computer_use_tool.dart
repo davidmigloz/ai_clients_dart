@@ -13,8 +13,16 @@ class ComputerUseTool extends InteractionTool {
   /// The list of predefined functions that are excluded from the model call.
   final List<String>? excludedPredefinedFunctions;
 
+  /// Whether to enable the prompt injection detection check on the
+  /// computer-use request.
+  final bool? enablePromptInjectionDetection;
+
   /// Creates a [ComputerUseTool] instance.
-  const ComputerUseTool({this.environment, this.excludedPredefinedFunctions});
+  const ComputerUseTool({
+    this.environment,
+    this.excludedPredefinedFunctions,
+    this.enablePromptInjectionDetection,
+  });
 
   /// Creates a [ComputerUseTool] from JSON.
   factory ComputerUseTool.fromJson(Map<String, dynamic> json) =>
@@ -23,6 +31,8 @@ class ComputerUseTool extends InteractionTool {
         excludedPredefinedFunctions:
             (json['excluded_predefined_functions'] as List<dynamic>?)
                 ?.cast<String>(),
+        enablePromptInjectionDetection:
+            json['enable_prompt_injection_detection'] as bool?,
       );
 
   @override
@@ -31,5 +41,7 @@ class ComputerUseTool extends InteractionTool {
     if (environment != null) 'environment': environment,
     if (excludedPredefinedFunctions != null)
       'excluded_predefined_functions': excludedPredefinedFunctions,
+    if (enablePromptInjectionDetection != null)
+      'enable_prompt_injection_detection': enablePromptInjectionDetection,
   };
 }

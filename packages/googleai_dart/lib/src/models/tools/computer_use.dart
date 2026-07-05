@@ -1,5 +1,6 @@
 import '../copy_with_sentinel.dart';
 import 'computer_use_environment.dart';
+import 'computer_use_safety_policy.dart';
 
 /// Computer Use tool type.
 ///
@@ -18,8 +19,20 @@ class ComputerUse {
   /// or to provide improved definitions for predefined functions.
   final List<String>? excludedPredefinedFunctions;
 
+  /// Safety policies to disable for computer use.
+  final List<ComputerUseSafetyPolicy>? disabledSafetyPolicies;
+
+  /// Whether to enable the prompt injection detection check on the
+  /// computer-use request.
+  final bool? enablePromptInjectionDetection;
+
   /// Creates a [ComputerUse].
-  const ComputerUse({this.environment, this.excludedPredefinedFunctions});
+  const ComputerUse({
+    this.environment,
+    this.excludedPredefinedFunctions,
+    this.disabledSafetyPolicies,
+    this.enablePromptInjectionDetection,
+  });
 
   /// Creates a [ComputerUse] from JSON.
   factory ComputerUse.fromJson(Map<String, dynamic> json) => ComputerUse(
@@ -28,6 +41,11 @@ class ComputerUse {
         : null,
     excludedPredefinedFunctions:
         (json['excludedPredefinedFunctions'] as List<dynamic>?)?.cast<String>(),
+    disabledSafetyPolicies: (json['disabledSafetyPolicies'] as List<dynamic>?)
+        ?.map((e) => computerUseSafetyPolicyFromString(e as String))
+        .toList(),
+    enablePromptInjectionDetection:
+        json['enablePromptInjectionDetection'] as bool?,
   );
 
   /// Converts to JSON.
@@ -36,12 +54,20 @@ class ComputerUse {
       'environment': computerUseEnvironmentToString(environment!),
     if (excludedPredefinedFunctions != null)
       'excludedPredefinedFunctions': excludedPredefinedFunctions,
+    if (disabledSafetyPolicies != null)
+      'disabledSafetyPolicies': disabledSafetyPolicies!
+          .map(computerUseSafetyPolicyToString)
+          .toList(),
+    if (enablePromptInjectionDetection != null)
+      'enablePromptInjectionDetection': enablePromptInjectionDetection,
   };
 
   /// Creates a copy with replaced values.
   ComputerUse copyWith({
     Object? environment = unsetCopyWithValue,
     Object? excludedPredefinedFunctions = unsetCopyWithValue,
+    Object? disabledSafetyPolicies = unsetCopyWithValue,
+    Object? enablePromptInjectionDetection = unsetCopyWithValue,
   }) {
     return ComputerUse(
       environment: environment == unsetCopyWithValue
@@ -51,6 +77,13 @@ class ComputerUse {
           excludedPredefinedFunctions == unsetCopyWithValue
           ? this.excludedPredefinedFunctions
           : excludedPredefinedFunctions as List<String>?,
+      disabledSafetyPolicies: disabledSafetyPolicies == unsetCopyWithValue
+          ? this.disabledSafetyPolicies
+          : disabledSafetyPolicies as List<ComputerUseSafetyPolicy>?,
+      enablePromptInjectionDetection:
+          enablePromptInjectionDetection == unsetCopyWithValue
+          ? this.enablePromptInjectionDetection
+          : enablePromptInjectionDetection as bool?,
     );
   }
 
@@ -58,5 +91,7 @@ class ComputerUse {
   String toString() =>
       'ComputerUse('
       'environment: $environment, '
-      'excludedPredefinedFunctions: $excludedPredefinedFunctions)';
+      'excludedPredefinedFunctions: $excludedPredefinedFunctions, '
+      'disabledSafetyPolicies: $disabledSafetyPolicies, '
+      'enablePromptInjectionDetection: $enablePromptInjectionDetection)';
 }

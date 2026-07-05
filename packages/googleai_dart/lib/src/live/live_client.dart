@@ -307,6 +307,7 @@ class LiveClient {
       inputAudioTranscription: liveConfig?.inputAudioTranscription,
       outputAudioTranscription: liveConfig?.outputAudioTranscription,
       proactivity: liveConfig?.proactivity,
+      historyConfig: liveConfig?.historyConfig,
     );
 
     // Send setup

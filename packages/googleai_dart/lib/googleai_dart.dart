@@ -25,7 +25,6 @@ export 'src/live/live_client.dart';
 export 'src/live/live_session.dart';
 // Models - Auth Tokens
 export 'src/models/auth/auth_token.dart';
-export 'src/models/auth/create_auth_token_request.dart';
 // Models - Batch API
 export 'src/models/batch/batch_state.dart';
 export 'src/models/batch/batch_stats.dart';
@@ -137,6 +136,7 @@ export 'src/models/generation/semantic_retriever_chunk.dart';
 export 'src/models/generation/semantic_retriever_config.dart';
 export 'src/models/generation/thinking_config.dart';
 export 'src/models/generation/thinking_level.dart';
+export 'src/models/generation/translation_config.dart';
 // Models - Interactions API (Experimental)
 export 'src/models/interactions/agent_config.dart';
 export 'src/models/interactions/agents/agent.dart';
@@ -178,6 +178,7 @@ export 'src/models/interactions/webhook_config.dart';
 export 'src/models/live/config/audio_transcription_config.dart';
 export 'src/models/live/config/automatic_activity_detection.dart';
 export 'src/models/live/config/context_window_compression_config.dart';
+export 'src/models/live/config/history_config.dart';
 export 'src/models/live/config/live_config.dart';
 export 'src/models/live/config/live_generation_config.dart';
 export 'src/models/live/config/proactivity_config.dart';
@@ -243,6 +244,7 @@ export 'src/models/tools/code_execution.dart';
 export 'src/models/tools/code_execution_result.dart';
 export 'src/models/tools/computer_use.dart';
 export 'src/models/tools/computer_use_environment.dart';
+export 'src/models/tools/computer_use_safety_policy.dart';
 export 'src/models/tools/dynamic_retrieval_config.dart';
 export 'src/models/tools/dynamic_retrieval_mode.dart';
 export 'src/models/tools/executable_code.dart';

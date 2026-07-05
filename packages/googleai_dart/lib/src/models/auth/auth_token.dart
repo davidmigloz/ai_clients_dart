@@ -60,6 +60,15 @@ class AuthToken {
   /// can access, providing an additional layer of security.
   final BidiGenerateContentSetup? bidiGenerateContentSetup;
 
+  /// Field mask controlling how [bidiGenerateContentSetup] is applied.
+  ///
+  /// If empty and [bidiGenerateContentSetup] is not present, the effective
+  /// setup is taken from the Live API connection. If empty and
+  /// [bidiGenerateContentSetup] is present, the effective setup is taken
+  /// entirely from [bidiGenerateContentSetup]. If not empty, the listed fields
+  /// from [bidiGenerateContentSetup] overwrite the connection's setup fields.
+  final String? fieldMask;
+
   /// Creates an [AuthToken] with the specified configuration.
   const AuthToken({
     this.name,
@@ -67,6 +76,7 @@ class AuthToken {
     this.newSessionExpireTime,
     this.uses,
     this.bidiGenerateContentSetup,
+    this.fieldMask,
   });
 
   /// Creates an AuthToken from JSON.
@@ -85,6 +95,7 @@ class AuthToken {
               json['bidiGenerateContentSetup'] as Map<String, dynamic>,
             )
           : null,
+      fieldMask: json['fieldMask'] as String?,
     );
   }
 
@@ -99,6 +110,7 @@ class AuthToken {
       if (uses != null) 'uses': uses,
       if (bidiGenerateContentSetup != null)
         'bidiGenerateContentSetup': bidiGenerateContentSetup!.toJson()['setup'],
+      if (fieldMask != null) 'fieldMask': fieldMask,
     };
   }
 
@@ -109,6 +121,7 @@ class AuthToken {
     DateTime? newSessionExpireTime,
     int? uses,
     BidiGenerateContentSetup? bidiGenerateContentSetup,
+    String? fieldMask,
   }) {
     return AuthToken(
       name: name ?? this.name,
@@ -117,6 +130,7 @@ class AuthToken {
       uses: uses ?? this.uses,
       bidiGenerateContentSetup:
           bidiGenerateContentSetup ?? this.bidiGenerateContentSetup,
+      fieldMask: fieldMask ?? this.fieldMask,
     );
   }
 
@@ -144,7 +158,8 @@ class AuthToken {
         'expireTime: $expireTime, '
         'newSessionExpireTime: $newSessionExpireTime, '
         'uses: $uses, '
-        'bidiGenerateContentSetup: ${bidiGenerateContentSetup != null ? "..." : "null"}'
+        'bidiGenerateContentSetup: ${bidiGenerateContentSetup != null ? "..." : "null"}, '
+        'fieldMask: $fieldMask'
         ')';
   }
 
@@ -155,11 +170,20 @@ class AuthToken {
         other.name == name &&
         other.expireTime == expireTime &&
         other.newSessionExpireTime == newSessionExpireTime &&
-        other.uses == uses;
+        other.uses == uses &&
+        other.bidiGenerateContentSetup == bidiGenerateContentSetup &&
+        other.fieldMask == fieldMask;
   }
 
   @override
   int get hashCode {
-    return Object.hash(name, expireTime, newSessionExpireTime, uses);
+    return Object.hash(
+      name,
+      expireTime,
+      newSessionExpireTime,
+      uses,
+      bidiGenerateContentSetup,
+      fieldMask,
+    );
   }
 }

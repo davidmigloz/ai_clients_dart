@@ -11,6 +11,20 @@ void main() {
         );
       });
 
+      test('parses ENVIRONMENT_MOBILE', () {
+        expect(
+          computerUseEnvironmentFromString('ENVIRONMENT_MOBILE'),
+          ComputerUseEnvironment.mobile,
+        );
+      });
+
+      test('parses ENVIRONMENT_DESKTOP', () {
+        expect(
+          computerUseEnvironmentFromString('ENVIRONMENT_DESKTOP'),
+          ComputerUseEnvironment.desktop,
+        );
+      });
+
       test('returns unspecified for ENVIRONMENT_UNSPECIFIED', () {
         expect(
           computerUseEnvironmentFromString('ENVIRONMENT_UNSPECIFIED'),

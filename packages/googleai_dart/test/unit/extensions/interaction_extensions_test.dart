@@ -145,6 +145,60 @@ void main() {
       });
     });
 
+    group('output getters (SDK-derived)', () {
+      test('outputText returns text from the last model_output step only', () {
+        final interaction = withSteps([
+          const ModelOutputStep(content: [TextContent(text: 'first')]),
+          const ModelOutputStep(
+            content: [
+              TextContent(text: 'last '),
+              TextContent(text: 'output'),
+            ],
+          ),
+        ]);
+        expect(interaction.outputText, 'last output');
+      });
+
+      test('outputText is null when the last model output has no text', () {
+        final interaction = withSteps([
+          const ModelOutputStep(content: [ImageContent(data: 'img')]),
+        ]);
+        expect(interaction.outputText, isNull);
+      });
+
+      test('output media getters return the last of each type', () {
+        final interaction = withSteps([
+          const ModelOutputStep(
+            content: [
+              ImageContent(data: 'img1'),
+              AudioContent(data: 'aud1'),
+              VideoContent(data: 'vid1'),
+            ],
+          ),
+          const ModelOutputStep(
+            content: [
+              ImageContent(data: 'img2'),
+              AudioContent(data: 'aud2'),
+              VideoContent(data: 'vid2'),
+            ],
+          ),
+        ]);
+        expect(interaction.outputImage!.data, 'img2');
+        expect(interaction.outputAudio!.data, 'aud2');
+        expect(interaction.outputVideo!.data, 'vid2');
+        expect(interaction.videoOutputs, hasLength(2));
+      });
+
+      test('output media getters are null when absent', () {
+        final interaction = withSteps([
+          const ModelOutputStep(content: [TextContent(text: 'only text')]),
+        ]);
+        expect(interaction.outputImage, isNull);
+        expect(interaction.outputAudio, isNull);
+        expect(interaction.outputVideo, isNull);
+      });
+    });
+
     group('hasTextOutput / hasFunctionCalls', () {
       test('hasTextOutput true with text content', () {
         final interaction = withSteps([
