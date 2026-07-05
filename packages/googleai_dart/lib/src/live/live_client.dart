@@ -1,6 +1,7 @@
 import 'dart:async' show Completer, StreamSubscription, unawaited;
 
 import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
 
 import '../auth/auth_provider.dart';
 import '../client/config.dart';
@@ -176,35 +177,63 @@ class LiveClient {
 
   Future<Uri> _buildWebSocketUri(String model, {String? accessToken}) async {
     // Get auth credentials for query params
-    final queryParams = await _getAuthQueryParams(accessToken: accessToken);
+    final authQueryParams = await _getAuthQueryParams(accessToken: accessToken);
+    return buildWebSocketUri(_config, authQueryParams);
+  }
 
-    switch (_config.apiMode) {
+  /// Builds the WebSocket URI for a Live API connection.
+  ///
+  /// For Google AI mode, the configured base URL is parsed so a trailing
+  /// slash, sub-path (proxy), explicit port, or query params carried by the
+  /// base URL are handled correctly. An `http`/`ws` base URL maps to `ws`;
+  /// anything else (including scheme-less values) maps to `wss`.
+  ///
+  /// Merges query parameters in order: base URL → auth → config defaults
+  /// (last-write-wins by key).
+  @visibleForTesting
+  static Uri buildWebSocketUri(
+    GoogleAIConfig config,
+    Map<String, String> authQueryParams,
+  ) {
+    switch (config.apiMode) {
       case ApiMode.googleAI:
         // Google AI endpoint
         // wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent
-        final baseUrl = _config.baseUrl.isNotEmpty
-            ? _config.baseUrl
-            : 'generativelanguage.googleapis.com';
+        var raw = config.baseUrl.isNotEmpty
+            ? config.baseUrl
+            : 'https://generativelanguage.googleapis.com';
+        // Back-compat: scheme-less host strings were previously accepted.
+        if (!raw.contains('://')) {
+          raw = 'https://$raw';
+        }
+        final baseUri = Uri.parse(raw);
+        final basePath = baseUri.path.endsWith('/')
+            ? baseUri.path.substring(0, baseUri.path.length - 1)
+            : baseUri.path;
+        final secure = baseUri.scheme != 'http' && baseUri.scheme != 'ws';
 
-        queryParams.addAll(_config.defaultQueryParams);
+        final queryParams = <String, dynamic>{
+          ...baseUri.queryParametersAll,
+          ...authQueryParams,
+          ...config.defaultQueryParams,
+        };
 
         return Uri(
-          scheme: 'wss',
-          host: baseUrl
-              .replaceFirst('https://', '')
-              .replaceFirst('http://', ''),
-          port: 443, // Explicit port to avoid :0 issue
+          scheme: secure ? 'wss' : 'ws',
+          host: baseUri.host,
+          // Explicit port to avoid :0 issue.
+          port: baseUri.hasPort ? baseUri.port : (secure ? 443 : 80),
           path:
-              '/ws/google.ai.generativelanguage.${_config.apiVersion.value}.GenerativeService.BidiGenerateContent',
-          queryParameters: queryParams,
+              '$basePath/ws/google.ai.generativelanguage.${config.apiVersion.value}.GenerativeService.BidiGenerateContent',
+          queryParameters: queryParams.isEmpty ? null : queryParams,
         );
 
       case ApiMode.vertexAI:
         // Vertex AI endpoint
         // wss://{location}-aiplatform.googleapis.com/ws/...
         // ('global' uses aiplatform.googleapis.com without location prefix)
-        final location = _config.location ?? 'us-central1';
-        final projectId = _config.projectId;
+        final location = config.location ?? 'us-central1';
+        final projectId = config.projectId;
 
         if (projectId == null) {
           throw const LiveSessionSetupException(
@@ -213,11 +242,14 @@ class LiveClient {
         }
 
         final host = GoogleAIConfig.vertexAIHost(location);
-        final version = _config.apiVersion == ApiVersion.v1 ? 'v1' : 'v1beta1';
+        final version = config.apiVersion == ApiVersion.v1 ? 'v1' : 'v1beta1';
 
-        queryParams['project'] = projectId;
-        queryParams['location'] = location;
-        queryParams.addAll(_config.defaultQueryParams);
+        final queryParams = <String, String>{
+          ...authQueryParams,
+          'project': projectId,
+          'location': location,
+          ...config.defaultQueryParams,
+        };
 
         // Note: Vertex AI requires OAuth Bearer token in headers.
         // On native platforms, the websocket_connector passes headers to dart:io.

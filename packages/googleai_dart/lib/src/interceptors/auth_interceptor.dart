@@ -81,7 +81,7 @@ class AuthInterceptor implements Interceptor {
     } else {
       // Add as query parameter (default)
       final uri = request.url;
-      final queryParams = Map<String, dynamic>.from(uri.queryParameters);
+      final queryParams = Map<String, dynamic>.from(uri.queryParametersAll);
 
       // Don't overwrite existing 'key' query parameter
       if (queryParams.containsKey('key')) {
@@ -144,7 +144,7 @@ class AuthInterceptor implements Interceptor {
     } else {
       // Add as query parameter (default)
       final uri = request.url;
-      final queryParams = Map<String, dynamic>.from(uri.queryParameters);
+      final queryParams = Map<String, dynamic>.from(uri.queryParametersAll);
 
       // Don't overwrite existing 'access_token' query parameter
       if (queryParams.containsKey('access_token')) {
