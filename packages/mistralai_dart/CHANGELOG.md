@@ -1,3 +1,13 @@
+## 5.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Adds [OCR-4 paragraph-level block extraction](https://docs.mistral.ai/studio-api/document-processing/basic_ocr#block-extraction): set `OcrRequest.includeBlocks: true` to receive `OcrPage.blocks`, a sealed 13-variant `OcrBlock` union (text, title, list, table, image, equation, caption, code, and more), each with a bounding box and `content` in reading order. **Breaking:** `OcrRequest.pages` changes from `List<int>?` to the sealed `OcrPages` union, which also supports the new comma-separated string/range form (`OcrPages.string('0,2-4')`) alongside explicit lists (`OcrPages.list([0, 1, 2])`). Also fixes `buildUrl` producing a double slash when the base URL has a trailing slash and dropping (or collapsing repeated) base-URL query params, and adds a canonical package example so pub.dev's "Package has an example" check passes.
+
+- **BREAKING** **FEAT**: OCR-4 block extraction & pages union ([#269](https://github.com/davidmigloz/ai_clients_dart/issues/269)). ([ce96a1a3](https://github.com/davidmigloz/ai_clients_dart/commit/ce96a1a3fe5272932912f827c72592e43a5baf8c))
+- **FIX**: Avoid double slash and preserve base URL query params in buildUrl ([#272](https://github.com/davidmigloz/ai_clients_dart/issues/272)). ([2c403df3](https://github.com/davidmigloz/ai_clients_dart/commit/2c403df34a842c07042dd4f64650096b7ffb974f))
+
 ## 4.0.0
 
 > [!CAUTION]

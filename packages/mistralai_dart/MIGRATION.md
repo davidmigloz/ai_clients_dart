@@ -6,6 +6,27 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v4.x to v5.0.0
+
+v5.0.0 adds OCR-4 paragraph-level block extraction and the new comma-separated page-range form. The single breaking change is on the OCR request: `pages` becomes a sealed union so it can carry either an explicit page list or the new string/range form (this also corrects a pre-existing drift — the spec already typed `pages` as `string | array<int> | null`). Only OCR callers that pass `pages` are affected.
+
+### 1) `OcrRequest.pages` is now the sealed `OcrPages` union
+
+`OcrRequest.pages` and the `pages` parameter of the `fromUrl`/`fromFile`/`fromBase64` factories change from `List<int>?` to `OcrPages?`. Wrap existing lists in `OcrPages.list(...)`, or use the new `OcrPages.string(...)` form for comma-separated numbers and ranges.
+
+```dart
+// Before
+OcrRequest.fromUrl(url: url, pages: [0, 1, 2]);
+
+// After — list of page numbers
+OcrRequest.fromUrl(url: url, pages: OcrPages.list([0, 1, 2]));
+
+// After — comma-separated numbers and ranges
+OcrRequest.fromUrl(url: url, pages: OcrPages.string('0,2-4'));
+```
+
+---
+
 ## Migrating from v3.x to v4.0.0
 
 v4.0.0 syncs with the latest Mistral spec and is dominated by **additive** changes (Connectors, Observability, RAG, and new Workflow operations). The breaking changes all mirror removals the official `mistralai/client-python` SDK made when Mistral dropped fields/endpoints server-side, so most callers — especially those only using chat completions — need few or no changes. The most likely to affect you is `ChatChoice.message` becoming nullable.

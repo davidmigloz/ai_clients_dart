@@ -68,7 +68,7 @@ Dart client for the **[Google AI Gemini Developer API](https://ai.google.dev/gem
 
 ```yaml
 dependencies:
-  googleai_dart: ^8.0.0
+  googleai_dart: ^9.0.0
 ```
 
 ```dart

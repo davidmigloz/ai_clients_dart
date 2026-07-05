@@ -6,6 +6,52 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v5.x to v6.0.0
+
+v6.0.0 syncs to the latest Anthropic spec. The breaking surface is small: the API relocated end-user attribution from the message request body to a request header, and two remaining closed-enum `String` fields are now typed enums. Everything else in this release (Claude Sonnet 5, the `web_search_20260318`/`web_fetch_20260318` tool versions, Managed Agents event-delta streaming, credential injection location, per-session agent overrides, backward pagination, and the new webhook events) is additive.
+
+### 1) `user_profile_id` moved from the request body to a header
+
+`user_profile_id` is no longer a message-creation body field: `MessageCreateRequest.userProfileId` is removed, and attribution now travels in the `anthropic-user-profile-id` header via a `userProfileId` method parameter on `messages.create`, `messages.createStream`, `messages.countTokens`, and `messageBatches.create`. The API relocated the parameter — it was not removed — and the User Profiles resource itself (`client.userProfiles`) is unchanged.
+
+```dart
+// Before — body field on the request
+await client.messages.create(MessageCreateRequest(
+  model: 'claude-opus-4-8',
+  maxTokens: 256,
+  userProfileId: profile.id,
+  messages: [InputMessage.user('Hello!')],
+));
+
+// After — header via method parameter
+await client.messages.create(
+  MessageCreateRequest(
+    model: 'claude-opus-4-8',
+    maxTokens: 256,
+    messages: [InputMessage.user('Hello!')],
+  ),
+  userProfileId: profile.id,
+);
+```
+
+### 2) Two closed-enum `String` fields are now typed enums
+
+- `SpanModelUsage.speed`: `String?` → `AgentSpeed?` (has an `unknown` fallback).
+- `WebSearchResultError.errorCode`: was a plain `String`; now a derived `WebSearchToolResultErrorCode get errorCode`, with the raw wire value available on the new `rawErrorCode` field (mirrors `AdvisorToolResultError`).
+
+```dart
+// Before
+final code = webSearchError.errorCode; // String
+
+// After
+final code = webSearchError.errorCode;   // WebSearchToolResultErrorCode
+final raw = webSearchError.rawErrorCode; // String (round-trip fidelity)
+```
+
+Relatedly, the new `responseInclusion` field on `WebSearchTool`/`WebFetchTool` is typed as a `ResponseInclusion` enum (not a `String`) from the start.
+
+---
+
 ## Migrating from v4.x to v5.0.0
 
 **Most users will not need to make any changes.** v5.0.0 syncs to the latest Anthropic spec. `FallbackBlock` and `FallbackInputBlock` are normally consumed by deserializing API responses (`fromJson`), so pure-deserialization consumers are unaffected. The only behavioral change for typical callers is that code-execution tools constructed without an explicit `type` now default to the newer `code_execution_20260521` version. Everything else in this release (the `session.updated` webhook event, the typed refusal `trigger`) is additive.

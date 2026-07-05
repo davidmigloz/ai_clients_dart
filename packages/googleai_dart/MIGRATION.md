@@ -6,6 +6,40 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v8.x to v9.0.0
+
+v9.0.0 syncs to the latest Gemini core and interactions specs (cross-checked against the official `googleapis/python-genai` SDK). The breaking changes are confined to ephemeral auth tokens and the experimental Interactions API — chat/generation callers need no changes. Everything else (translation config, computer-use safety policies, `FinishReason.ESCALATION`, Live `historyConfig`, interactions penalties and output accessors, and the base-URL normalization) is additive or bug-fixing.
+
+### 1) Auth tokens: corrected endpoint and flat request body
+
+Ephemeral auth token creation now calls `POST /v1beta/auth_tokens` with a flat `AuthToken` body (previously `authTokens:create` with a `{"authToken": {...}}` wrapper — which did not match the real API). The unused `CreateAuthTokenRequest` wrapper class is removed, and `AuthToken` gains a `fieldMask` field.
+
+```dart
+// Before — POST /{version}/authTokens:create, body: {"authToken": {...}}
+// After  — POST /v1beta/auth_tokens, body is the flat AuthToken JSON
+await client.authTokens.create(authToken: AuthToken(uses: 1));
+```
+
+The method signature is unchanged; only the wire format and endpoint changed. If you constructed `CreateAuthTokenRequest` directly, pass the inner `AuthToken` instead.
+
+### 2) `Interaction.role` removed
+
+The `role` field was dropped from the `Interaction` spec and is removed from the Dart model (constructor parameter, `fromJson`/`toJson`, `copyWith`). Roles remain available on the interaction's inputs/steps.
+
+### 3) `StreamMetadata.usage` renamed to `totalUsage`
+
+The streaming metadata usage field is renamed to match the spec's `total_usage` JSON key.
+
+```dart
+// Before
+final usage = streamMetadata.usage;
+
+// After
+final usage = streamMetadata.totalUsage;
+```
+
+---
+
 ## Migrating from v7.x to v8.0.0
 
 v8.0.0 syncs the **experimental Interactions API** to the latest Generative Language spec. The only breaking change is the removal of the `signature` field, which was dropped from the spec for the function- and MCP-call/result steps and their deltas. **If you don't read or set `signature` on these specific types, no changes are required** — and all other step/delta types that still declare `signature` are unchanged.

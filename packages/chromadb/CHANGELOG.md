@@ -1,3 +1,11 @@
+## 1.4.1
+
+Fixes `buildUrl` wiping query parameters carried by the base URL (e.g. `?tenant=...` on a proxy/gateway URL) whenever default or per-request query params were merged, collapsing repeated base-URL query keys, and producing a double slash for base URLs with a sub-path and a trailing slash. URL building now matches the normalization used across the monorepo's clients: base path trailing slash stripped, and query params merged base URL → config defaults → per-request. Also repoints the pub.dev `documentation` link to the package's API docs.
+
+- **FIX**: Preserve base URL query params and normalize path joining in buildUrl ([#276](https://github.com/davidmigloz/ai_clients_dart/issues/276)). ([b8738f49](https://github.com/davidmigloz/ai_clients_dart/commit/b8738f49d45b8ab583f627722672ebb506b8c200))
+- **CHORE**: Replace dead langchaindart.dev documentation URL ([#248](https://github.com/davidmigloz/ai_clients_dart/issues/248)). ([c0765c27](https://github.com/davidmigloz/ai_clients_dart/commit/c0765c2784d6feffc3d528edb1000be7bdd2e3e9))
+- **CHORE**: Fix use_null_aware_elements lint flagged by Dart 3.12 ([#232](https://github.com/davidmigloz/ai_clients_dart/issues/232)). ([31ac5efc](https://github.com/davidmigloz/ai_clients_dart/commit/31ac5efcaf8367e844a3485f80a6c0e6219af7cb))
+
 ## 1.4.0
 
 Adds the new `ReadLevel.indexAndBoundedWal` variant (`index_and_bounded_wal`) — a third read-consistency option between `index_only` (fastest) and `index_and_wal` (most up-to-date) that reads the index plus a bounded portion of the write-ahead log. Refreshes the OpenAPI spec from the latest upstream.

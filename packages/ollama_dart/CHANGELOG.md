@@ -1,3 +1,10 @@
+## 2.4.0
+
+Adds the new `max` thinking level (`ThinkLevel.max`), matching Ollama's spec update that added `"max"` to the `think` enum on `ChatRequest` and `GenerateRequest` — use `ChatRequest(..., think: ThinkWithLevel(ThinkLevel.max))` to request the highest thinking level on supported reasoning models. Also fixes `buildUrl` producing a double slash (`//api/...`) when `OllamaConfig.baseUrl` (or `OLLAMA_HOST`) has a trailing slash, and preserves base-URL query params (including repeated keys) that were previously dropped — proxy setups with tokens in the base URL now work correctly.
+
+- **FEAT**: Add "max" thinking level ([#267](https://github.com/davidmigloz/ai_clients_dart/issues/267)). ([8061f857](https://github.com/davidmigloz/ai_clients_dart/commit/8061f857587bb37506da0514b1e0b6376f6c950b))
+- **FIX**: Avoid double slash and preserve base URL query params in buildUrl ([#273](https://github.com/davidmigloz/ai_clients_dart/issues/273)). ([7686e397](https://github.com/davidmigloz/ai_clients_dart/commit/7686e397bc0c30b6dd6df50862273416ffda54a7))
+
 ## 2.3.0
 
 Adds experimental image generation to the `/api/generate` endpoint: `GenerateRequest` gains `width`/`height`/`steps`, and `GenerateResponse` and the streaming `GenerateStreamEvent` gain `image` (base64), `completed`, and `total` for diffusion progress. These fields are implemented client-side ahead of the upstream spec, which keeps them out of `openapi.yaml` while they remain experimental. Also adds the `draftNumPredict` model option to `ModelOptions` and completes the previously-partial `==`/`hashCode`/`toString` contracts on `GenerateStreamEvent` and `ChatStreamEvent`, which had compared only a subset of fields.

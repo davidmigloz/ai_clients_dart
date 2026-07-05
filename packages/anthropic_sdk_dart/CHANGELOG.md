@@ -1,3 +1,14 @@
+## 6.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Syncs to Anthropic OpenAPI spec `506a5ad7`, adding [Claude Sonnet 5](https://platform.claude.com/docs/en/about-claude/models/whats-new-sonnet-5) (`claude-sonnet-5`), the `web_search_20260318`/`web_fetch_20260318` built-in tool versions with the new `responseInclusion` control, and Managed Agents parity: [event-delta streaming](https://platform.claude.com/docs/en/managed-agents/events-and-streaming#event-deltas), credential injection location for env-var vault credentials, per-session agent overrides, backward session pagination, and 13 new agent/deployment webhook events. **Breaking:** `user_profile_id` moved from the message request body to the `anthropic-user-profile-id` header (now a `userProfileId` method parameter), and two closed-enum `String` fields are now typed enums (`SpanModelUsage.speed`, `WebSearchResultError.errorCode`). Also fixes two `buildUrl` edge cases with custom base URLs: a trailing slash no longer produces a double slash in the path (which some gateways 404 on), and query params embedded in the base URL (including repeated keys) are now preserved instead of being dropped or collapsed.
+
+- **BREAKING** **FEAT**: Sonnet 5, web tool 20260318 & Managed Agents parity ([#268](https://github.com/davidmigloz/ai_clients_dart/issues/268)). ([04d74218](https://github.com/davidmigloz/ai_clients_dart/commit/04d742186d64b43e8a7e622ae8a4f5042abe1a1d))
+- **FIX**: Preserve repeated base URL query params in buildUrl ([#278](https://github.com/davidmigloz/ai_clients_dart/issues/278)). ([b5dbb725](https://github.com/davidmigloz/ai_clients_dart/commit/b5dbb7250cee269cdd26aac734296406c72d2c61))
+- **FIX**: Avoid double slash when base URL has a trailing slash ([#271](https://github.com/davidmigloz/ai_clients_dart/issues/271)). ([d35d49bf](https://github.com/davidmigloz/ai_clients_dart/commit/d35d49bffa9d4be45659d1fa2f65f5b9a8c33292))
+
 ## 5.0.0
 
 > [!CAUTION]

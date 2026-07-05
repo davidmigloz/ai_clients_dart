@@ -1,3 +1,9 @@
+## 7.0.1
+
+Fixes `buildUrl` collapsing repeated query keys carried by the base URL (`?k=a&k=b`) to the last value — a proxy/gateway base URL with duplicate keys now keeps all of them on every request. Single-value behavior (including Azure `api-version` handling) is unchanged.
+
+- **FIX**: Preserve repeated base URL query params in buildUrl ([#277](https://github.com/davidmigloz/ai_clients_dart/issues/277)). ([5fff6c28](https://github.com/davidmigloz/ai_clients_dart/commit/5fff6c2897750a98733c580bd51dea99fe08a155))
+
 ## 7.0.0
 
 > [!CAUTION]

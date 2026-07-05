@@ -1,3 +1,13 @@
+## 9.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Syncs to the latest Gemini core and interactions specs. Ephemeral auth tokens now use the correct `POST /v1beta/auth_tokens` endpoint with a flat `AuthToken` body, and new generation capabilities land: `GenerationConfig.translationConfig`, `ComputerUse` safety-policy controls and prompt-injection detection, `FinishReason.ESCALATION`, Live `historyConfig`, plus Interactions `frequencyPenalty`/`presencePenalty`, `cachedContent`, and SDK-derived `outputText`/`outputImage`/`outputAudio`/`outputVideo` accessors. **Breaking:** the auth-token endpoint/body shape changed (the `CreateAuthTokenRequest` wrapper is removed), `Interaction.role` is removed, and `StreamMetadata.usage` is renamed to `totalUsage`. Also normalizes base URL handling across request, upload, and Live WebSocket URLs — trailing slashes, proxy sub-paths, and base-URL query params (including repeated keys) now work consistently at every URL-construction site.
+
+- **BREAKING** **FEAT**: Rework auth tokens + sync latest Gemini spec ([#270](https://github.com/davidmigloz/ai_clients_dart/issues/270)). ([e562404f](https://github.com/davidmigloz/ai_clients_dart/commit/e562404f8a96fed079e7300cb9bd678d0fe486c7))
+- **FIX**: Normalize base URL handling across request, upload, and live URLs ([#275](https://github.com/davidmigloz/ai_clients_dart/issues/275)). ([49888d6c](https://github.com/davidmigloz/ai_clients_dart/commit/49888d6cb4ea1063f292109c5bfa7d5901b15403))
+
 ## 8.0.0
 
 > [!CAUTION]

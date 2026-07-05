@@ -1,3 +1,9 @@
+## 0.4.3
+
+Fixes `buildUrl` producing a double slash (`/v1//responses`) when `OpenResponsesConfig.baseUrl` (or `OPENAI_BASE_URL`) has a trailing slash — especially likely here since the default base URL carries a `/v1` sub-path and alternate backends (Ollama, vLLM, proxies) are common. Also preserves query parameters carried by the base URL (including repeated keys), which were previously dropped or mangled into the path.
+
+- **FIX**: Avoid double slash and preserve base URL query params in buildUrl ([#274](https://github.com/davidmigloz/ai_clients_dart/issues/274)). ([b0517469](https://github.com/davidmigloz/ai_clients_dart/commit/b0517469931c39b980b53315bac9f943a7fdd880))
+
 ## 0.4.2
 
 Adds a canonically-named quick-start example (`example/open_responses_example.dart`) so pub.dev's analyzer recognizes the package's examples, and documents the `StreamingEventAccumulator` default constructor — together restoring the package's full documentation score on pub.dev. No API or behavior changes.
