@@ -15,10 +15,14 @@ class RequestBuilder {
   /// Builds a URL for an API endpoint.
   ///
   /// The [path] is a URL path (e.g. `/v1/messages`); pass query parameters via
-  /// [queryParams] rather than embedding them in [path].
+  /// [queryParams] rather than embedding them in [path]. Values may be a
+  /// `String` or an `Iterable<String>` (rendered as repeated keys, e.g.
+  /// `?types[]=a&types[]=b`).
   ///
-  /// Merges query parameters in order: Global → Request.
-  /// Later values override earlier ones (last-write-wins).
+  /// Merges query parameters in order: base URL → config defaults → request.
+  /// Later sources override earlier ones by key (last-write-wins; the whole
+  /// value list for that key is replaced). Repeated keys carried by the base
+  /// URL (e.g. `?k=a&k=b`) are preserved.
   Uri buildUrl(String path, {Map<String, dynamic>? queryParams}) {
     // Parse the base URL so any existing path/query components are handled
     // correctly. Mirrors openai_dart's builder.
@@ -32,10 +36,11 @@ class RequestBuilder {
         : baseUri.path;
     final normalizedPath = path.startsWith('/') ? path : '/$path';
 
-    // Merge query params (last-write-wins), preserving any carried by the base
-    // URL: base URL → configured defaults → per-request.
+    // Merge query params (last-write-wins by key), preserving any carried by
+    // the base URL: base URL → configured defaults → per-request.
+    // `queryParametersAll` preserves repeated base-URL keys.
     final mergedParams = <String, dynamic>{
-      ...baseUri.queryParameters,
+      ...baseUri.queryParametersAll,
       ...config.defaultQueryParams,
       ...?queryParams,
     };
