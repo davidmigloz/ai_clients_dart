@@ -188,7 +188,8 @@ void main() {
         final url = builder.buildUrl('/endpoint');
 
         expect(url.toString(), startsWith('https://api.example.com'));
-        expect(url.path, contains('endpoint'));
+        // No double slash: /endpoint, not //endpoint.
+        expect(url.path, equals('/endpoint'));
       });
     });
 
