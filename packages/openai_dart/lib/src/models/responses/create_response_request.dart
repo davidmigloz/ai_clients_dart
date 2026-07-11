@@ -6,6 +6,7 @@ import '../common/equality_helpers.dart';
 import '../moderations/completion_moderation.dart';
 import 'config/config.dart';
 import 'items/item.dart';
+import 'multi_agent/multi_agent_config.dart';
 import 'response_input.dart';
 import 'tools/tools.dart';
 
@@ -139,8 +140,22 @@ class CreateResponseRequest {
   /// Prompt cache key for caching.
   final String? promptCacheKey;
 
+  /// Options for prompt caching.
+  ///
+  /// Supported for `gpt-5.6` and later models. Lets you disable the implicit
+  /// cache breakpoint and control the cache breakpoint TTL. See
+  /// [PromptCacheOptionsParam] for details.
+  final PromptCacheOptionsParam? promptCacheOptions;
+
   /// Number of top log probabilities to return.
   final int? topLogprobs;
+
+  /// Configuration for server-hosted multi-agent execution.
+  ///
+  /// This belongs to the beta multi-agent protocol and requires passing
+  /// `beta: true` (which sends `OpenAI-Beta: responses_multi_agent=v1`) when
+  /// calling the resource method.
+  final MultiAgentConfig? multiAgent;
 
   /// Creates a [CreateResponseRequest].
   const CreateResponseRequest({
@@ -171,7 +186,9 @@ class CreateResponseRequest {
     this.safetyIdentifier,
     this.moderation,
     this.promptCacheKey,
+    this.promptCacheOptions,
     this.topLogprobs,
+    this.multiAgent,
   });
 
   /// Creates a simple text request.
@@ -241,7 +258,17 @@ class CreateResponseRequest {
             )
           : null,
       promptCacheKey: json['prompt_cache_key'] as String?,
+      promptCacheOptions: json['prompt_cache_options'] != null
+          ? PromptCacheOptionsParam.fromJson(
+              json['prompt_cache_options'] as Map<String, dynamic>,
+            )
+          : null,
       topLogprobs: json['top_logprobs'] as int?,
+      multiAgent: json['multi_agent'] != null
+          ? MultiAgentConfig.fromJson(
+              json['multi_agent'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
@@ -284,7 +311,10 @@ class CreateResponseRequest {
       if (safetyIdentifier != null) 'safety_identifier': safetyIdentifier,
       if (moderation != null) 'moderation': moderation!.toJson(),
       if (promptCacheKey != null) 'prompt_cache_key': promptCacheKey,
+      if (promptCacheOptions != null)
+        'prompt_cache_options': promptCacheOptions!.toJson(),
       if (topLogprobs != null) 'top_logprobs': topLogprobs,
+      if (multiAgent != null) 'multi_agent': multiAgent!.toJson(),
     };
   }
 
@@ -320,7 +350,9 @@ class CreateResponseRequest {
     Object? safetyIdentifier = unsetCopyWithValue,
     Object? moderation = unsetCopyWithValue,
     Object? promptCacheKey = unsetCopyWithValue,
+    Object? promptCacheOptions = unsetCopyWithValue,
     Object? topLogprobs = unsetCopyWithValue,
+    Object? multiAgent = unsetCopyWithValue,
   }) {
     return CreateResponseRequest(
       model: model ?? this.model,
@@ -392,9 +424,15 @@ class CreateResponseRequest {
       promptCacheKey: promptCacheKey == unsetCopyWithValue
           ? this.promptCacheKey
           : promptCacheKey as String?,
+      promptCacheOptions: promptCacheOptions == unsetCopyWithValue
+          ? this.promptCacheOptions
+          : promptCacheOptions as PromptCacheOptionsParam?,
       topLogprobs: topLogprobs == unsetCopyWithValue
           ? this.topLogprobs
           : topLogprobs as int?,
+      multiAgent: multiAgent == unsetCopyWithValue
+          ? this.multiAgent
+          : multiAgent as MultiAgentConfig?,
     );
   }
 
@@ -431,7 +469,9 @@ class CreateResponseRequest {
         safetyIdentifier == other.safetyIdentifier &&
         moderation == other.moderation &&
         promptCacheKey == other.promptCacheKey &&
-        topLogprobs == other.topLogprobs;
+        promptCacheOptions == other.promptCacheOptions &&
+        topLogprobs == other.topLogprobs &&
+        multiAgent == other.multiAgent;
   }
 
   @override
@@ -463,7 +503,9 @@ class CreateResponseRequest {
     safetyIdentifier,
     moderation,
     promptCacheKey,
+    promptCacheOptions,
     topLogprobs,
+    multiAgent,
   ]);
 
   @override

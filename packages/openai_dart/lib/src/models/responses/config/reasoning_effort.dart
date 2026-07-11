@@ -4,7 +4,8 @@
 /// effort can result in faster responses and fewer tokens used on reasoning
 /// in a response.
 ///
-/// Supported values: [none], [minimal], [low], [medium], [high], [xhigh].
+/// Supported values: [none], [minimal], [low], [medium], [high], [xhigh],
+/// [max].
 ///
 /// **Model-Specific Support:**
 ///
@@ -34,7 +35,10 @@ enum ReasoningEffort {
   high('high'),
 
   /// Extra-high reasoning effort. Supported for models after gpt-5.1-codex-max.
-  xhigh('xhigh');
+  xhigh('xhigh'),
+
+  /// Maximum reasoning effort.
+  max('max');
 
   /// The JSON value for this effort level.
   final String value;

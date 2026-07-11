@@ -102,6 +102,9 @@ sealed class ResponseToolChoice {
       return switch (type) {
         'function' => ResponseToolChoiceFunction.fromJson(json),
         'allowed_tools' => ResponseToolChoiceAllowedTools.fromJson(json),
+        'programmatic_tool_calling' => ResponseToolChoiceProgrammatic.fromJson(
+          json,
+        ),
         _ => throw FormatException('Unknown ResponseToolChoice type: $type'),
       };
     }
@@ -268,4 +271,34 @@ class ResponseToolChoiceAllowedTools extends ResponseToolChoice {
   @override
   String toString() =>
       'ResponseToolChoiceAllowedTools(tools: $tools, mode: $mode)';
+}
+
+/// The model must call the programmatic tool calling tool.
+@immutable
+class ResponseToolChoiceProgrammatic extends ResponseToolChoice {
+  /// Creates a [ResponseToolChoiceProgrammatic].
+  const ResponseToolChoiceProgrammatic();
+
+  /// Creates a [ResponseToolChoiceProgrammatic] from JSON.
+  factory ResponseToolChoiceProgrammatic.fromJson(Map<String, dynamic> json) {
+    if ((json['type'] as String?) != 'programmatic_tool_calling') {
+      throw const FormatException(
+        'Invalid type for ResponseToolChoiceProgrammatic',
+      );
+    }
+    return const ResponseToolChoiceProgrammatic();
+  }
+
+  @override
+  Object toJson() => const {'type': 'programmatic_tool_calling'};
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || other is ResponseToolChoiceProgrammatic;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  String toString() => 'ResponseToolChoiceProgrammatic()';
 }

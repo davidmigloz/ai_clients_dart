@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import 'reasoning_context.dart';
 import 'reasoning_effort.dart';
+import 'reasoning_mode.dart';
 import 'reasoning_summary.dart';
 
 /// Configuration for reasoning models.
@@ -18,8 +19,13 @@ class ReasoningConfig {
   /// context mode used for the response.
   final ReasoningContext? context;
 
+  /// Controls the reasoning execution mode for the request.
+  ///
+  /// When returned on a response, this is the effective execution mode.
+  final ReasoningMode? mode;
+
   /// Creates a [ReasoningConfig].
-  const ReasoningConfig({this.effort, this.summary, this.context});
+  const ReasoningConfig({this.effort, this.summary, this.context, this.mode});
 
   /// Creates a [ReasoningConfig] from JSON.
   factory ReasoningConfig.fromJson(Map<String, dynamic> json) {
@@ -33,6 +39,9 @@ class ReasoningConfig {
       context: json['context'] != null
           ? ReasoningContext.fromJson(json['context'] as String)
           : null,
+      mode: json['mode'] != null
+          ? ReasoningMode.fromJson(json['mode'] as String)
+          : null,
     );
   }
 
@@ -41,6 +50,7 @@ class ReasoningConfig {
     if (effort != null) 'effort': effort!.toJson(),
     if (summary != null) 'summary': summary!.toJson(),
     if (context != null) 'context': context!.toJson(),
+    if (mode != null) 'mode': mode!.toJson(),
   };
 
   @override
@@ -50,12 +60,13 @@ class ReasoningConfig {
           runtimeType == other.runtimeType &&
           effort == other.effort &&
           summary == other.summary &&
-          context == other.context;
+          context == other.context &&
+          mode == other.mode;
 
   @override
-  int get hashCode => Object.hash(effort, summary, context);
+  int get hashCode => Object.hash(effort, summary, context, mode);
 
   @override
   String toString() =>
-      'ReasoningConfig(effort: $effort, summary: $summary, context: $context)';
+      'ReasoningConfig(effort: $effort, summary: $summary, context: $context, mode: $mode)';
 }

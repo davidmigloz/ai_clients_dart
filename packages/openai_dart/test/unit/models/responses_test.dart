@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:openai_dart/src/models/chat/content_part.dart' show ImageDetail;
+import 'package:openai_dart/src/models/common/prompt_cache_breakpoint.dart';
 import 'package:openai_dart/src/models/containers/containers.dart';
 import 'package:openai_dart/src/models/responses/responses.dart';
 import 'package:test/test.dart';
@@ -348,6 +349,56 @@ void main() {
       expect(request.contextManagement!.first.type, equals('compaction'));
       expect(request.contextManagement!.first.compactThreshold, equals(5000));
     });
+
+    test('promptCacheOptions round-trips and is omitted when null', () {
+      const request = CreateResponseRequest(
+        model: 'gpt-4o',
+        input: ResponseInput.text('Hello!'),
+        promptCacheOptions: PromptCacheOptionsParam(
+          mode: PromptCacheMode.explicit,
+          ttl: PromptCacheTtl.minutes30,
+        ),
+      );
+
+      final json = request.toJson();
+      expect(json['prompt_cache_options'], {'mode': 'explicit', 'ttl': '30m'});
+
+      final restored = CreateResponseRequest.fromJson(json);
+      expect(restored.promptCacheOptions, equals(request.promptCacheOptions));
+
+      const withoutOptions = CreateResponseRequest(
+        model: 'gpt-4o',
+        input: ResponseInput.text('Hello!'),
+      );
+      expect(
+        withoutOptions.toJson().containsKey('prompt_cache_options'),
+        isFalse,
+      );
+    });
+
+    test('multiAgent round-trips and is omitted when null', () {
+      const request = CreateResponseRequest(
+        model: 'gpt-4o',
+        input: ResponseInput.text('Hello!'),
+        multiAgent: MultiAgentConfig(enabled: true, maxConcurrentSubagents: 5),
+      );
+
+      final json = request.toJson();
+      expect(json['multi_agent'], {
+        'enabled': true,
+        'max_concurrent_subagents': 5,
+      });
+
+      final restored = CreateResponseRequest.fromJson(json);
+      expect(restored.multiAgent, equals(request.multiAgent));
+
+      const withoutMultiAgent = CreateResponseRequest(
+        model: 'gpt-4o',
+        input: ResponseInput.text('Hello!'),
+      );
+      expect(withoutMultiAgent.toJson().containsKey('multi_agent'), isFalse);
+      expect(withoutMultiAgent.multiAgent, isNull);
+    });
   });
 
   group('CompactResponseRequest', () {
@@ -638,6 +689,77 @@ void main() {
       );
     });
 
+    test('FunctionTool round-trips allowedCallers and outputSchema', () {
+      const tool = FunctionTool(
+        name: 'calculate',
+        parameters: {'type': 'object'},
+        allowedCallers: [
+          CallableToolAllowedCaller.direct,
+          CallableToolAllowedCaller.programmatic,
+        ],
+        outputSchema: {'type': 'object', 'properties': <String, dynamic>{}},
+      );
+
+      final json = tool.toJson();
+      expect(json['allowed_callers'], ['direct', 'programmatic']);
+      expect(json['output_schema'], {
+        'type': 'object',
+        'properties': <String, dynamic>{},
+      });
+
+      final restored = ResponseTool.fromJson(json) as FunctionTool;
+      expect(restored, tool);
+      expect(restored.allowedCallers, tool.allowedCallers);
+      expect(restored.outputSchema, tool.outputSchema);
+    });
+
+    test(
+      'CodeInterpreterTool, McpTool and CustomTool round-trip allowedCallers',
+      () {
+        const codeInterpreterTool = CodeInterpreterTool(
+          container: CodeInterpreterContainerId('container_1'),
+          allowedCallers: [CallableToolAllowedCaller.direct],
+        );
+        expect(
+          (ResponseTool.fromJson(codeInterpreterTool.toJson())
+                  as CodeInterpreterTool)
+              .allowedCallers,
+          codeInterpreterTool.allowedCallers,
+        );
+
+        const mcpTool = McpTool(
+          serverLabel: 'label',
+          serverUrl: 'https://example.com',
+          allowedCallers: [CallableToolAllowedCaller.programmatic],
+        );
+        expect(
+          (ResponseTool.fromJson(mcpTool.toJson()) as McpTool).allowedCallers,
+          mcpTool.allowedCallers,
+        );
+
+        const customTool = CustomTool(
+          name: 'custom',
+          allowedCallers: [CallableToolAllowedCaller.direct],
+        );
+        expect(
+          (ResponseTool.fromJson(customTool.toJson()) as CustomTool)
+              .allowedCallers,
+          customTool.allowedCallers,
+        );
+      },
+    );
+
+    test('ProgrammaticToolCallingTool round-trips via ResponseTool', () {
+      const tool = ProgrammaticToolCallingTool();
+      final json = tool.toJson();
+
+      expect(json, {'type': 'programmatic_tool_calling'});
+
+      final restored = ResponseTool.fromJson(json);
+      expect(restored, isA<ProgrammaticToolCallingTool>());
+      expect(restored, tool);
+    });
+
     test('ApproximateLocation construction and toJson', () {
       const loc = ApproximateLocation(
         country: 'US',
@@ -880,6 +1002,15 @@ void main() {
 
       expect(choice, isA<ResponseToolChoiceFunction>());
       expect(choice.name, equals('get_weather'));
+    });
+
+    test('dispatches to ResponseToolChoiceProgrammatic from JSON', () {
+      final choice = ResponseToolChoice.fromJson({
+        'type': 'programmatic_tool_calling',
+      });
+
+      expect(choice, isA<ResponseToolChoiceProgrammatic>());
+      expect(choice.toJson(), {'type': 'programmatic_tool_calling'});
     });
   });
 
@@ -1278,6 +1409,123 @@ void main() {
       final restored = InputFileContent.fromJson(json);
       expect(restored, equals(content));
       expect(restored.detail, isNull);
+    });
+
+    test('InputTextContent round-trip with promptCacheBreakpoint', () {
+      const content = InputTextContent(
+        'Hello!',
+        promptCacheBreakpoint: PromptCacheBreakpointConfig(),
+      );
+      final json = content.toJson();
+
+      expect(json['prompt_cache_breakpoint'], {'mode': 'explicit'});
+
+      final restored = InputContent.fromJson(json);
+      expect(restored, equals(content));
+    });
+
+    test('InputImageContent round-trip with promptCacheBreakpoint', () {
+      const content = InputImageContent.url(
+        'https://example.com/img.png',
+        promptCacheBreakpoint: PromptCacheBreakpointConfig(),
+      );
+      final json = content.toJson();
+
+      expect(json['prompt_cache_breakpoint'], {'mode': 'explicit'});
+
+      final restored = InputContent.fromJson(json);
+      expect(restored, equals(content));
+    });
+
+    test('InputFileContent round-trip with promptCacheBreakpoint', () {
+      const content = InputFileContent.file(
+        'file_123',
+        promptCacheBreakpoint: PromptCacheBreakpointConfig(),
+      );
+      final json = content.toJson();
+
+      expect(json['prompt_cache_breakpoint'], {'mode': 'explicit'});
+
+      final restored = InputContent.fromJson(json);
+      expect(restored, equals(content));
+    });
+
+    test('promptCacheBreakpoint omitted when null', () {
+      const content = InputTextContent('Hello!');
+      expect(content.toJson().containsKey('prompt_cache_breakpoint'), isFalse);
+    });
+  });
+
+  group('ComputerScreenshotContent', () {
+    test('creates from URL', () {
+      const content = ComputerScreenshotContent.url(
+        'https://example.com/shot.png',
+      );
+
+      expect(content.imageUrl, equals('https://example.com/shot.png'));
+      expect(content.fileId, isNull);
+      expect(content.toJson()['type'], equals('computer_screenshot'));
+    });
+
+    test('creates from file ID', () {
+      const content = ComputerScreenshotContent.file('file_789');
+
+      expect(content.fileId, equals('file_789'));
+      expect(content.imageUrl, isNull);
+    });
+
+    test('dispatches via InputContent.fromJson', () {
+      final json = {
+        'type': 'computer_screenshot',
+        'image_url': 'https://example.com/shot.png',
+        'detail': 'high',
+      };
+
+      final content = InputContent.fromJson(json);
+      expect(content, isA<ComputerScreenshotContent>());
+      expect(
+        (content as ComputerScreenshotContent).imageUrl,
+        equals('https://example.com/shot.png'),
+      );
+      expect(content.detail, equals(ImageDetail.high));
+    });
+
+    test('round-trip with all fields', () {
+      const content = ComputerScreenshotContent(
+        imageUrl: 'https://example.com/shot.png',
+        detail: ImageDetail.high,
+        promptCacheBreakpoint: PromptCacheBreakpointConfig(),
+      );
+      final json = content.toJson();
+
+      expect(json, {
+        'type': 'computer_screenshot',
+        'image_url': 'https://example.com/shot.png',
+        'detail': 'high',
+        'prompt_cache_breakpoint': {'mode': 'explicit'},
+      });
+
+      final restored = InputContent.fromJson(json);
+      expect(restored, equals(content));
+    });
+
+    test('toJson omits null fields', () {
+      const content = ComputerScreenshotContent.file('file_789');
+      final json = content.toJson();
+
+      expect(json.containsKey('image_url'), isFalse);
+      expect(json.containsKey('detail'), isFalse);
+      expect(json.containsKey('prompt_cache_breakpoint'), isFalse);
+    });
+
+    test('equality and hashCode', () {
+      const a = ComputerScreenshotContent.file('file_1');
+      const b = ComputerScreenshotContent.file('file_1');
+      const c = ComputerScreenshotContent.file('file_2');
+
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+      expect(a, isNot(equals(c)));
     });
   });
 
@@ -2364,6 +2612,72 @@ void main() {
 
       expect(completedEvent.isFinal, isTrue);
     });
+
+    test(
+      'ReasoningSummaryPartDoneEvent deserializes and roundtrips status',
+      () {
+        final json = {
+          'type': 'response.reasoning_summary_part.done',
+          'item_id': 'rs_123',
+          'output_index': 0,
+          'summary_index': 0,
+          'part': {'type': 'summary_text', 'text': 'done'},
+          'sequence_number': 1,
+          'status': 'incomplete',
+        };
+
+        final event = ResponseStreamEvent.fromJson(json);
+
+        expect(event, isA<ReasoningSummaryPartDoneEvent>());
+        expect(
+          (event as ReasoningSummaryPartDoneEvent).status,
+          equals(ReasoningSummaryPartStatus.incomplete),
+        );
+        expect(event.toJson(), equals(json));
+      },
+    );
+
+    test('ReasoningSummaryPartDoneEvent omits status when null', () {
+      final json = {
+        'type': 'response.reasoning_summary_part.done',
+        'item_id': 'rs_123',
+        'output_index': 0,
+        'summary_index': 0,
+        'part': {'type': 'summary_text', 'text': 'done'},
+        'sequence_number': 1,
+      };
+
+      final event = ResponseStreamEvent.fromJson(json);
+
+      expect((event as ReasoningSummaryPartDoneEvent).status, isNull);
+      expect(event.toJson(), equals(json));
+      expect(event.toJson().containsKey('status'), isFalse);
+    });
+
+    test(
+      'ReasoningSummaryPartDoneEvent equality accounts for part contents',
+      () {
+        const a = ReasoningSummaryPartDoneEvent(
+          outputIndex: 0,
+          summaryIndex: 0,
+          part: {'type': 'summary_text', 'text': 'foo'},
+        );
+        const b = ReasoningSummaryPartDoneEvent(
+          outputIndex: 0,
+          summaryIndex: 0,
+          part: {'type': 'summary_text', 'text': 'bar'},
+        );
+        const c = ReasoningSummaryPartDoneEvent(
+          outputIndex: 0,
+          summaryIndex: 0,
+          part: {'type': 'summary_text', 'text': 'foo'},
+        );
+
+        expect(a, isNot(equals(b)));
+        expect(a, equals(c));
+        expect(a.hashCode, equals(c.hashCode));
+      },
+    );
   });
 
   group('ResponseUsage', () {
@@ -2792,13 +3106,18 @@ void main() {
       expect(FileInputDetail.fromJson('low'), FileInputDetail.low);
     });
 
+    test('fromJson parses auto', () {
+      expect(FileInputDetail.fromJson('auto'), FileInputDetail.auto);
+    });
+
     test('toJson returns correct values', () {
       expect(FileInputDetail.high.toJson(), 'high');
       expect(FileInputDetail.low.toJson(), 'low');
+      expect(FileInputDetail.auto.toJson(), 'auto');
     });
 
     test('fromJson returns unknown for unrecognized value', () {
-      expect(FileInputDetail.fromJson('auto'), FileInputDetail.unknown);
+      expect(FileInputDetail.fromJson('ultra'), FileInputDetail.unknown);
     });
   });
 
@@ -3658,6 +3977,44 @@ void main() {
     });
   });
 
+  group('CompactResponseRequest with promptCacheOptions', () {
+    test('round-trip', () {
+      const request = CompactResponseRequest(
+        model: 'gpt-4o',
+        promptCacheOptions: PromptCacheOptionsParam(
+          mode: PromptCacheMode.explicit,
+          ttl: PromptCacheTtl.minutes30,
+        ),
+      );
+
+      final json = request.toJson();
+      expect(json['prompt_cache_options'], {'mode': 'explicit', 'ttl': '30m'});
+
+      final restored = CompactResponseRequest.fromJson(json);
+      expect(restored.promptCacheOptions, equals(request.promptCacheOptions));
+      expect(restored, equals(request));
+    });
+
+    test('omitted when null', () {
+      const request = CompactResponseRequest(model: 'gpt-4o');
+      final json = request.toJson();
+      expect(json.containsKey('prompt_cache_options'), isFalse);
+    });
+
+    test('copyWith sets and clears promptCacheOptions', () {
+      const request = CompactResponseRequest(model: 'gpt-4o');
+      final updated = request.copyWith(
+        promptCacheOptions: const PromptCacheOptionsParam(
+          mode: PromptCacheMode.implicit,
+        ),
+      );
+      expect(updated.promptCacheOptions?.mode, PromptCacheMode.implicit);
+
+      final cleared = updated.copyWith(promptCacheOptions: null);
+      expect(cleared.promptCacheOptions, isNull);
+    });
+  });
+
   group('Response with promptCacheKey and promptCacheRetention', () {
     test('fromJson parses new fields', () {
       final json = {
@@ -3703,6 +4060,44 @@ void main() {
       final json = response.toJson();
       expect(json.containsKey('prompt_cache_key'), isFalse);
       expect(json.containsKey('prompt_cache_retention'), isFalse);
+    });
+
+    test('promptCacheOptions round-trips and is omitted when null', () {
+      final json = {
+        'id': 'resp_1',
+        'object': 'response',
+        'created_at': 1234567890,
+        'status': 'completed',
+        'output': <dynamic>[],
+        'prompt_cache_options': {'mode': 'implicit', 'ttl': '30m'},
+      };
+
+      final response = Response.fromJson(json);
+      expect(
+        response.promptCacheOptions,
+        equals(
+          const PromptCacheOptions(
+            mode: PromptCacheMode.implicit,
+            ttl: PromptCacheTtl.minutes30,
+          ),
+        ),
+      );
+      expect(
+        response.toJson()['prompt_cache_options'],
+        json['prompt_cache_options'],
+      );
+
+      const withoutOptions = Response(
+        id: 'resp_1',
+        object: 'response',
+        createdAt: 1234567890,
+        status: ResponseStatus.completed,
+        output: [],
+      );
+      expect(
+        withoutOptions.toJson().containsKey('prompt_cache_options'),
+        isFalse,
+      );
     });
   });
 
@@ -3931,6 +4326,37 @@ void main() {
     test('omits context when null', () {
       const config = ReasoningConfig(effort: ReasoningEffort.low);
       expect(config.toJson().containsKey('context'), isFalse);
+    });
+
+    test('round-trips mode', () {
+      const config = ReasoningConfig(
+        effort: ReasoningEffort.high,
+        mode: ReasoningMode.pro(),
+      );
+
+      final json = config.toJson();
+      expect(json['mode'], 'pro');
+
+      final restored = ReasoningConfig.fromJson(json);
+      expect(restored.mode, equals(const ReasoningMode.pro()));
+      expect(restored, equals(config));
+    });
+
+    test('parses custom mode values', () {
+      final restored = ReasoningConfig.fromJson(const {'mode': 'turbo'});
+      expect(restored.mode, equals(const ReasoningMode.custom('turbo')));
+    });
+
+    test('omits mode when null', () {
+      const config = ReasoningConfig(effort: ReasoningEffort.low);
+      expect(config.toJson().containsKey('mode'), isFalse);
+    });
+  });
+
+  group('ReasoningEffort max', () {
+    test('round-trips the max wire value', () {
+      expect(ReasoningEffort.max.toJson(), 'max');
+      expect(ReasoningEffort.fromJson('max'), ReasoningEffort.max);
     });
   });
 

@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import 'config/prompt_cache_options.dart';
 import 'config/prompt_cache_retention.dart';
 import 'config/service_tier.dart';
 import 'response_input.dart';
@@ -31,6 +32,13 @@ class CompactResponseRequest {
   /// are accepted on read.
   final PromptCacheRetention? promptCacheRetention;
 
+  /// Options for prompt caching.
+  ///
+  /// Supported for `gpt-5.6` and later models. Lets you disable the implicit
+  /// cache breakpoint and control the cache breakpoint TTL. See
+  /// [PromptCacheOptionsParam] for details.
+  final PromptCacheOptionsParam? promptCacheOptions;
+
   /// The service tier for request processing.
   final ServiceTier? serviceTier;
 
@@ -42,6 +50,7 @@ class CompactResponseRequest {
     this.instructions,
     this.promptCacheKey,
     this.promptCacheRetention,
+    this.promptCacheOptions,
     this.serviceTier,
   });
 
@@ -61,6 +70,11 @@ class CompactResponseRequest {
         '24h' => PromptCacheRetention.h24,
         _ => PromptCacheRetention.unknown,
       },
+      promptCacheOptions: json['prompt_cache_options'] != null
+          ? PromptCacheOptionsParam.fromJson(
+              json['prompt_cache_options'] as Map<String, dynamic>,
+            )
+          : null,
       serviceTier: json['service_tier'] != null
           ? ServiceTier.fromJson(json['service_tier'] as String)
           : null,
@@ -80,6 +94,8 @@ class CompactResponseRequest {
         PromptCacheRetention.h24 => '24h',
         PromptCacheRetention.unknown => 'unknown',
       },
+    if (promptCacheOptions != null)
+      'prompt_cache_options': promptCacheOptions!.toJson(),
     if (serviceTier != null) 'service_tier': serviceTier!.toJson(),
   };
 
@@ -93,6 +109,7 @@ class CompactResponseRequest {
     Object? instructions = unsetCopyWithValue,
     Object? promptCacheKey = unsetCopyWithValue,
     Object? promptCacheRetention = unsetCopyWithValue,
+    Object? promptCacheOptions = unsetCopyWithValue,
     Object? serviceTier = unsetCopyWithValue,
   }) {
     return CompactResponseRequest(
@@ -110,6 +127,9 @@ class CompactResponseRequest {
       promptCacheRetention: promptCacheRetention == unsetCopyWithValue
           ? this.promptCacheRetention
           : promptCacheRetention as PromptCacheRetention?,
+      promptCacheOptions: promptCacheOptions == unsetCopyWithValue
+          ? this.promptCacheOptions
+          : promptCacheOptions as PromptCacheOptionsParam?,
       serviceTier: serviceTier == unsetCopyWithValue
           ? this.serviceTier
           : serviceTier as ServiceTier?,
@@ -127,6 +147,7 @@ class CompactResponseRequest {
           instructions == other.instructions &&
           promptCacheKey == other.promptCacheKey &&
           promptCacheRetention == other.promptCacheRetention &&
+          promptCacheOptions == other.promptCacheOptions &&
           serviceTier == other.serviceTier;
 
   @override
@@ -137,6 +158,7 @@ class CompactResponseRequest {
     instructions,
     promptCacheKey,
     promptCacheRetention,
+    promptCacheOptions,
     serviceTier,
   );
 
@@ -149,5 +171,6 @@ class CompactResponseRequest {
       'instructions: $instructions, '
       'promptCacheKey: $promptCacheKey, '
       'promptCacheRetention: $promptCacheRetention, '
+      'promptCacheOptions: $promptCacheOptions, '
       'serviceTier: $serviceTier)';
 }

@@ -7,10 +7,14 @@ import '../config/function_call_output_status.dart';
 import '../config/item_status.dart';
 import '../config/message_phase.dart';
 import '../config/message_role.dart';
+import '../config/program_output_status.dart';
 import '../config/tool_search_execution_type.dart';
 import '../content/output_content.dart';
+import '../multi_agent/agent_tag.dart';
+import '../multi_agent/multi_agent_action.dart';
 import '../tools/computer_action.dart';
 import '../tools/response_tool.dart';
+import '../tools/tool_call_caller.dart';
 import 'item.dart';
 
 /// Output item from a response.
@@ -39,6 +43,15 @@ import 'item.dart';
 /// - [CustomToolCallOutputItem] - Custom tool call outputs
 /// - [AdditionalToolsOutputItem] - Additional tool definitions made available
 ///   mid-conversation
+/// - [ProgramOutputItemResponse] - Programmatic tool calling source code
+/// - [ProgramOutputResultItem] - Result of a programmatic tool calling
+///   execution
+/// - [AgentMessageOutputItem] - A message routed between agents (beta
+///   multi-agent)
+/// - [MultiAgentCallOutputItemResponse] - A multi-agent action call (beta
+///   multi-agent)
+/// - [MultiAgentCallOutputResultItem] - Output of a multi-agent action call
+///   (beta multi-agent)
 sealed class OutputItem {
   /// Creates an [OutputItem].
   const OutputItem();
@@ -68,6 +81,13 @@ sealed class OutputItem {
       'custom_tool_call' => CustomToolCallItem.fromJson(json),
       'custom_tool_call_output' => CustomToolCallOutputItem.fromJson(json),
       'additional_tools' => AdditionalToolsOutputItem.fromJson(json),
+      'program' => ProgramOutputItemResponse.fromJson(json),
+      'program_output' => ProgramOutputResultItem.fromJson(json),
+      'agent_message' => AgentMessageOutputItem.fromJson(json),
+      'multi_agent_call' => MultiAgentCallOutputItemResponse.fromJson(json),
+      'multi_agent_call_output' => MultiAgentCallOutputResultItem.fromJson(
+        json,
+      ),
       _ => throw FormatException('Unknown OutputItem type: $type'),
     };
   }
@@ -188,6 +208,9 @@ class FunctionCallOutputItemResponse extends OutputItem {
   /// The identifier of the actor that created the item.
   final String? createdBy;
 
+  /// The execution context that produced this tool call.
+  final ToolCallCaller? caller;
+
   /// Creates a [FunctionCallOutputItemResponse].
   const FunctionCallOutputItemResponse({
     required this.id,
@@ -197,6 +220,7 @@ class FunctionCallOutputItemResponse extends OutputItem {
     this.status,
     this.namespace,
     this.createdBy,
+    this.caller,
   });
 
   /// Creates a [FunctionCallOutputItemResponse] from JSON.
@@ -211,6 +235,9 @@ class FunctionCallOutputItemResponse extends OutputItem {
           : null,
       namespace: json['namespace'] as String?,
       createdBy: json['created_by'] as String?,
+      caller: json['caller'] != null
+          ? ToolCallCaller.fromJson(json['caller'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -224,6 +251,7 @@ class FunctionCallOutputItemResponse extends OutputItem {
     if (status != null) 'status': status!.toJson(),
     if (namespace != null) 'namespace': namespace,
     if (createdBy != null) 'created_by': createdBy,
+    if (caller != null) 'caller': caller!.toJson(),
   };
 
   /// Converts to a [FunctionCallItem] for use as input.
@@ -234,6 +262,7 @@ class FunctionCallOutputItemResponse extends OutputItem {
     arguments: arguments,
     status: status,
     namespace: namespace,
+    caller: caller,
   );
 
   @override
@@ -247,15 +276,24 @@ class FunctionCallOutputItemResponse extends OutputItem {
           arguments == other.arguments &&
           status == other.status &&
           namespace == other.namespace &&
-          createdBy == other.createdBy;
+          createdBy == other.createdBy &&
+          caller == other.caller;
 
   @override
-  int get hashCode =>
-      Object.hash(id, callId, name, arguments, status, namespace, createdBy);
+  int get hashCode => Object.hash(
+    id,
+    callId,
+    name,
+    arguments,
+    status,
+    namespace,
+    createdBy,
+    caller,
+  );
 
   @override
   String toString() =>
-      'FunctionCallOutputItemResponse(id: $id, callId: $callId, name: $name, arguments: $arguments, status: $status, namespace: $namespace, createdBy: $createdBy)';
+      'FunctionCallOutputItemResponse(id: $id, callId: $callId, name: $name, arguments: $arguments, status: $status, namespace: $namespace, createdBy: $createdBy, caller: $caller)';
 }
 
 /// A reasoning item from reasoning models.
@@ -1802,6 +1840,9 @@ class CustomToolCallItem extends OutputItem {
   /// The identifier of the actor that created the item.
   final String? createdBy;
 
+  /// The execution context that produced this tool call.
+  final ToolCallCaller? caller;
+
   /// Creates a [CustomToolCallItem].
   const CustomToolCallItem({
     required this.id,
@@ -1811,6 +1852,7 @@ class CustomToolCallItem extends OutputItem {
     this.namespace,
     this.status,
     this.createdBy,
+    this.caller,
   });
 
   /// Creates a [CustomToolCallItem] from JSON.
@@ -1825,6 +1867,9 @@ class CustomToolCallItem extends OutputItem {
           ? ItemStatus.fromJson(json['status'] as String)
           : null,
       createdBy: json['created_by'] as String?,
+      caller: json['caller'] != null
+          ? ToolCallCaller.fromJson(json['caller'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -1838,6 +1883,7 @@ class CustomToolCallItem extends OutputItem {
     if (namespace != null) 'namespace': namespace,
     if (status != null) 'status': status!.toJson(),
     if (createdBy != null) 'created_by': createdBy,
+    if (caller != null) 'caller': caller!.toJson(),
   };
 
   @override
@@ -1851,15 +1897,24 @@ class CustomToolCallItem extends OutputItem {
           input == other.input &&
           namespace == other.namespace &&
           status == other.status &&
-          createdBy == other.createdBy;
+          createdBy == other.createdBy &&
+          caller == other.caller;
 
   @override
-  int get hashCode =>
-      Object.hash(id, callId, name, input, namespace, status, createdBy);
+  int get hashCode => Object.hash(
+    id,
+    callId,
+    name,
+    input,
+    namespace,
+    status,
+    createdBy,
+    caller,
+  );
 
   @override
   String toString() =>
-      'CustomToolCallItem(id: $id, callId: $callId, name: $name, input: $input, namespace: $namespace, status: $status, createdBy: $createdBy)';
+      'CustomToolCallItem(id: $id, callId: $callId, name: $name, input: $input, namespace: $namespace, status: $status, createdBy: $createdBy, caller: $caller)';
 }
 
 /// A custom tool call output item.
@@ -1880,6 +1935,10 @@ class CustomToolCallOutputItem extends OutputItem {
   /// The identifier of the actor that created the item.
   final String? createdBy;
 
+  /// The execution context that produced the tool call this output responds
+  /// to.
+  final ToolCallCaller? caller;
+
   /// Creates a [CustomToolCallOutputItem].
   const CustomToolCallOutputItem({
     required this.id,
@@ -1887,6 +1946,7 @@ class CustomToolCallOutputItem extends OutputItem {
     required this.output,
     this.status,
     this.createdBy,
+    this.caller,
   });
 
   /// Creates a [CustomToolCallOutputItem] from JSON.
@@ -1899,6 +1959,9 @@ class CustomToolCallOutputItem extends OutputItem {
           ? FunctionCallOutputStatus.fromJson(json['status'] as String)
           : null,
       createdBy: json['created_by'] as String?,
+      caller: json['caller'] != null
+          ? ToolCallCaller.fromJson(json['caller'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -1910,6 +1973,7 @@ class CustomToolCallOutputItem extends OutputItem {
     'output': output.toJson(),
     if (status != null) 'status': status!.toJson(),
     if (createdBy != null) 'created_by': createdBy,
+    if (caller != null) 'caller': caller!.toJson(),
   };
 
   @override
@@ -1921,14 +1985,16 @@ class CustomToolCallOutputItem extends OutputItem {
           callId == other.callId &&
           output == other.output &&
           status == other.status &&
-          createdBy == other.createdBy;
+          createdBy == other.createdBy &&
+          caller == other.caller;
 
   @override
-  int get hashCode => Object.hash(id, callId, output, status, createdBy);
+  int get hashCode =>
+      Object.hash(id, callId, output, status, createdBy, caller);
 
   @override
   String toString() =>
-      'CustomToolCallOutputItem(id: $id, callId: $callId, output: $output, status: $status, createdBy: $createdBy)';
+      'CustomToolCallOutputItem(id: $id, callId: $callId, output: $output, status: $status, createdBy: $createdBy, caller: $caller)';
 }
 
 /// An additional tools output item.
@@ -1987,4 +2053,353 @@ class AdditionalToolsOutputItem extends OutputItem {
   @override
   String toString() =>
       'AdditionalToolsOutputItem(id: $id, role: $role, tools: $tools)';
+}
+
+/// Programmatic tool calling source code, as an output item.
+///
+/// Mirrors the `Program` schema.
+@immutable
+class ProgramOutputItemResponse extends OutputItem {
+  /// The unique ID of the program item.
+  final String id;
+
+  /// The stable call ID of the program item.
+  final String callId;
+
+  /// The JavaScript source executed by programmatic tool calling.
+  final String code;
+
+  /// Opaque program replay fingerprint that must be round-tripped.
+  final String fingerprint;
+
+  /// Creates a [ProgramOutputItemResponse].
+  const ProgramOutputItemResponse({
+    required this.id,
+    required this.callId,
+    required this.code,
+    required this.fingerprint,
+  });
+
+  /// Creates a [ProgramOutputItemResponse] from JSON.
+  factory ProgramOutputItemResponse.fromJson(Map<String, dynamic> json) {
+    return ProgramOutputItemResponse(
+      id: json['id'] as String,
+      callId: json['call_id'] as String,
+      code: json['code'] as String,
+      fingerprint: json['fingerprint'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'program',
+    'id': id,
+    'call_id': callId,
+    'code': code,
+    'fingerprint': fingerprint,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ProgramOutputItemResponse &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          callId == other.callId &&
+          code == other.code &&
+          fingerprint == other.fingerprint;
+
+  @override
+  int get hashCode => Object.hash(id, callId, code, fingerprint);
+
+  @override
+  String toString() =>
+      'ProgramOutputItemResponse(id: $id, callId: $callId, code: $code, fingerprint: $fingerprint)';
+}
+
+/// The result of a programmatic tool calling execution, as an output item.
+///
+/// Mirrors the `ProgramOutput` schema.
+@immutable
+class ProgramOutputResultItem extends OutputItem {
+  /// The unique ID of the program output item.
+  final String id;
+
+  /// The call ID of the program item.
+  final String callId;
+
+  /// The result produced by the program item.
+  final String result;
+
+  /// The terminal status of the program output item.
+  final ProgramOutputStatus status;
+
+  /// Creates a [ProgramOutputResultItem].
+  const ProgramOutputResultItem({
+    required this.id,
+    required this.callId,
+    required this.result,
+    required this.status,
+  });
+
+  /// Creates a [ProgramOutputResultItem] from JSON.
+  factory ProgramOutputResultItem.fromJson(Map<String, dynamic> json) {
+    return ProgramOutputResultItem(
+      id: json['id'] as String,
+      callId: json['call_id'] as String,
+      result: json['result'] as String,
+      status: ProgramOutputStatus.fromJson(json['status'] as String),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'program_output',
+    'id': id,
+    'call_id': callId,
+    'result': result,
+    'status': status.toJson(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ProgramOutputResultItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          callId == other.callId &&
+          result == other.result &&
+          status == other.status;
+
+  @override
+  int get hashCode => Object.hash(id, callId, result, status);
+
+  @override
+  String toString() =>
+      'ProgramOutputResultItem(id: $id, callId: $callId, result: $result, status: $status)';
+}
+
+/// A message routed between agents, as an output item.
+///
+/// This belongs to the beta multi-agent protocol
+/// (`OpenAI-Beta: responses_multi_agent=v1`). Mirrors the `BetaAgentMessage`
+/// schema.
+@immutable
+class AgentMessageOutputItem extends OutputItem {
+  /// The unique ID of the agent message.
+  final String id;
+
+  /// The agent that produced this item.
+  final AgentTag? agent;
+
+  /// The sending agent identity.
+  final String author;
+
+  /// The destination agent identity.
+  final String recipient;
+
+  /// Encrypted content sent between agents.
+  final List<OutputContent> content;
+
+  /// Creates an [AgentMessageOutputItem].
+  const AgentMessageOutputItem({
+    required this.id,
+    this.agent,
+    required this.author,
+    required this.recipient,
+    required this.content,
+  });
+
+  /// Creates an [AgentMessageOutputItem] from JSON.
+  factory AgentMessageOutputItem.fromJson(Map<String, dynamic> json) {
+    return AgentMessageOutputItem(
+      id: json['id'] as String,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
+      author: json['author'] as String,
+      recipient: json['recipient'] as String,
+      content: (json['content'] as List)
+          .map((e) => OutputContent.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'agent_message',
+    'id': id,
+    if (agent != null) 'agent': agent!.toJson(),
+    'author': author,
+    'recipient': recipient,
+    'content': content.map((e) => e.toJson()).toList(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AgentMessageOutputItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          agent == other.agent &&
+          author == other.author &&
+          recipient == other.recipient &&
+          listsEqual(content, other.content);
+
+  @override
+  int get hashCode =>
+      Object.hash(id, agent, author, recipient, Object.hashAll(content));
+
+  @override
+  String toString() =>
+      'AgentMessageOutputItem(id: $id, agent: $agent, author: $author, recipient: $recipient, content: $content)';
+}
+
+/// A multi-agent action call, as an output item.
+///
+/// This belongs to the beta multi-agent protocol
+/// (`OpenAI-Beta: responses_multi_agent=v1`). Mirrors the `BetaMultiAgentCall`
+/// schema.
+@immutable
+class MultiAgentCallOutputItemResponse extends OutputItem {
+  /// The unique ID of the multi-agent call item.
+  final String id;
+
+  /// The agent that produced this item.
+  final AgentTag? agent;
+
+  /// The unique ID linking this call to its output.
+  final String callId;
+
+  /// The multi-agent action to execute.
+  final MultiAgentAction action;
+
+  /// The JSON string of arguments generated for the action.
+  final String arguments;
+
+  /// Creates a [MultiAgentCallOutputItemResponse].
+  const MultiAgentCallOutputItemResponse({
+    required this.id,
+    this.agent,
+    required this.callId,
+    required this.action,
+    required this.arguments,
+  });
+
+  /// Creates a [MultiAgentCallOutputItemResponse] from JSON.
+  factory MultiAgentCallOutputItemResponse.fromJson(Map<String, dynamic> json) {
+    return MultiAgentCallOutputItemResponse(
+      id: json['id'] as String,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
+      callId: json['call_id'] as String,
+      action: MultiAgentAction.fromJson(json['action'] as String),
+      arguments: json['arguments'] as String,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'multi_agent_call',
+    'id': id,
+    if (agent != null) 'agent': agent!.toJson(),
+    'call_id': callId,
+    'action': action.toJson(),
+    'arguments': arguments,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MultiAgentCallOutputItemResponse &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          agent == other.agent &&
+          callId == other.callId &&
+          action == other.action &&
+          arguments == other.arguments;
+
+  @override
+  int get hashCode => Object.hash(id, agent, callId, action, arguments);
+
+  @override
+  String toString() =>
+      'MultiAgentCallOutputItemResponse(id: $id, agent: $agent, callId: $callId, action: $action, arguments: $arguments)';
+}
+
+/// The output of a multi-agent action call, as an output item.
+///
+/// This belongs to the beta multi-agent protocol
+/// (`OpenAI-Beta: responses_multi_agent=v1`). Mirrors the
+/// `BetaMultiAgentCallOutput` schema.
+@immutable
+class MultiAgentCallOutputResultItem extends OutputItem {
+  /// The unique ID of the multi-agent call output item.
+  final String id;
+
+  /// The agent that produced this item.
+  final AgentTag? agent;
+
+  /// The unique ID of the multi-agent call.
+  final String callId;
+
+  /// The multi-agent action that produced this result.
+  final MultiAgentAction action;
+
+  /// Text output returned by the multi-agent action.
+  final List<OutputTextContent> output;
+
+  /// Creates a [MultiAgentCallOutputResultItem].
+  const MultiAgentCallOutputResultItem({
+    required this.id,
+    this.agent,
+    required this.callId,
+    required this.action,
+    required this.output,
+  });
+
+  /// Creates a [MultiAgentCallOutputResultItem] from JSON.
+  factory MultiAgentCallOutputResultItem.fromJson(Map<String, dynamic> json) {
+    return MultiAgentCallOutputResultItem(
+      id: json['id'] as String,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
+      callId: json['call_id'] as String,
+      action: MultiAgentAction.fromJson(json['action'] as String),
+      output: (json['output'] as List)
+          .map((e) => OutputTextContent.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'multi_agent_call_output',
+    'id': id,
+    if (agent != null) 'agent': agent!.toJson(),
+    'call_id': callId,
+    'action': action.toJson(),
+    'output': output.map((e) => e.toJson()).toList(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MultiAgentCallOutputResultItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          agent == other.agent &&
+          callId == other.callId &&
+          action == other.action &&
+          listsEqual(output, other.output);
+
+  @override
+  int get hashCode =>
+      Object.hash(id, agent, callId, action, Object.hashAll(output));
+
+  @override
+  String toString() =>
+      'MultiAgentCallOutputResultItem(id: $id, agent: $agent, callId: $callId, action: $action, output: $output)';
 }

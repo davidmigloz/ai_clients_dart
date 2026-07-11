@@ -76,6 +76,7 @@ export 'create_response_request.dart';
 export 'incomplete_details.dart';
 export 'input_token_count.dart';
 export 'items/items.dart';
+export 'multi_agent/multi_agent.dart';
 export 'response.dart';
 export 'response_compaction.dart';
 export 'response_error.dart';

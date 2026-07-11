@@ -1848,6 +1848,12 @@ class ReasoningSummaryPartDoneEvent extends ResponseStreamEvent {
   /// The summary part.
   final Map<String, dynamic> part;
 
+  /// The completion status of the summary part.
+  ///
+  /// Omitted when the part completed normally and set to `incomplete` when
+  /// generation was interrupted.
+  final ReasoningSummaryPartStatus? status;
+
   /// Creates a [ReasoningSummaryPartDoneEvent].
   const ReasoningSummaryPartDoneEvent({
     required this.outputIndex,
@@ -1855,6 +1861,7 @@ class ReasoningSummaryPartDoneEvent extends ResponseStreamEvent {
     required this.part,
     this.itemId,
     this.sequenceNumber,
+    this.status,
   });
 
   /// Creates a [ReasoningSummaryPartDoneEvent] from JSON.
@@ -1865,6 +1872,9 @@ class ReasoningSummaryPartDoneEvent extends ResponseStreamEvent {
       summaryIndex: json['summary_index'] as int,
       part: json['part'] as Map<String, dynamic>,
       sequenceNumber: json['sequence_number'] as int?,
+      status: json['status'] != null
+          ? ReasoningSummaryPartStatus.fromJson(json['status'] as String)
+          : null,
     );
   }
 
@@ -1876,6 +1886,7 @@ class ReasoningSummaryPartDoneEvent extends ResponseStreamEvent {
     'summary_index': summaryIndex,
     'part': part,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (status != null) 'status': status!.toJson(),
   };
 
   @override
@@ -1886,11 +1897,19 @@ class ReasoningSummaryPartDoneEvent extends ResponseStreamEvent {
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
           summaryIndex == other.summaryIndex &&
-          sequenceNumber == other.sequenceNumber;
+          mapsEqual(part, other.part) &&
+          sequenceNumber == other.sequenceNumber &&
+          status == other.status;
 
   @override
-  int get hashCode =>
-      Object.hash(itemId, outputIndex, summaryIndex, part, sequenceNumber);
+  int get hashCode => Object.hash(
+    itemId,
+    outputIndex,
+    summaryIndex,
+    mapHash(part),
+    sequenceNumber,
+    status,
+  );
 
   /// Creates a copy with replaced values.
   ReasoningSummaryPartDoneEvent copyWith({
@@ -1899,6 +1918,7 @@ class ReasoningSummaryPartDoneEvent extends ResponseStreamEvent {
     Map<String, dynamic>? part,
     Object? itemId = unsetCopyWithValue,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? status = unsetCopyWithValue,
   }) {
     return ReasoningSummaryPartDoneEvent(
       outputIndex: outputIndex ?? this.outputIndex,
@@ -1908,12 +1928,40 @@ class ReasoningSummaryPartDoneEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      status: status == unsetCopyWithValue
+          ? this.status
+          : status as ReasoningSummaryPartStatus?,
     );
   }
 
   @override
   String toString() =>
-      'ReasoningSummaryPartDoneEvent(outputIndex: $outputIndex, summaryIndex: $summaryIndex)';
+      'ReasoningSummaryPartDoneEvent(outputIndex: $outputIndex, summaryIndex: $summaryIndex, status: $status)';
+}
+
+/// The completion status of a reasoning summary part.
+enum ReasoningSummaryPartStatus {
+  /// Unknown status (fallback for unrecognized values).
+  unknown('unknown'),
+
+  /// Generation was interrupted before the summary part completed normally.
+  incomplete('incomplete');
+
+  /// The JSON value for this status.
+  final String value;
+
+  const ReasoningSummaryPartStatus(this.value);
+
+  /// Creates a [ReasoningSummaryPartStatus] from a JSON value.
+  factory ReasoningSummaryPartStatus.fromJson(String json) {
+    return ReasoningSummaryPartStatus.values.firstWhere(
+      (e) => e.value == json,
+      orElse: () => ReasoningSummaryPartStatus.unknown,
+    );
+  }
+
+  /// Converts to JSON value.
+  String toJson() => value;
 }
 
 /// Event emitted when reasoning summary text is generated (delta).

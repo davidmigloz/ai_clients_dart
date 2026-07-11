@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../common/equality_helpers.dart';
 import '../moderations/completion_moderation.dart';
+import 'config/prompt_cache_options.dart';
 import 'config/prompt_cache_retention.dart';
 import 'config/reasoning_config.dart';
 import 'config/response_status.dart';
@@ -78,6 +79,11 @@ class Response {
   /// The prompt cache retention policy.
   final PromptCacheRetention? promptCacheRetention;
 
+  /// The prompt-caching options that were applied to the response.
+  ///
+  /// Supported for `gpt-5.6` and later models.
+  final PromptCacheOptions? promptCacheOptions;
+
   /// Moderation results for the response input and output.
   ///
   /// Present only when moderated completions were requested via
@@ -115,6 +121,7 @@ class Response {
     this.parallelToolCalls,
     this.promptCacheKey,
     this.promptCacheRetention,
+    this.promptCacheOptions,
     this.moderation,
     this.reasoning,
     this.truncation,
@@ -159,6 +166,11 @@ class Response {
               json['prompt_cache_retention'] as String,
             )
           : null,
+      promptCacheOptions: json['prompt_cache_options'] != null
+          ? PromptCacheOptions.fromJson(
+              json['prompt_cache_options'] as Map<String, dynamic>,
+            )
+          : null,
       moderation: json['moderation'] != null
           ? Moderation.fromJson(json['moderation'] as Map<String, dynamic>)
           : null,
@@ -195,6 +207,8 @@ class Response {
     if (promptCacheKey != null) 'prompt_cache_key': promptCacheKey,
     if (promptCacheRetention != null)
       'prompt_cache_retention': promptCacheRetention!.toJson(),
+    if (promptCacheOptions != null)
+      'prompt_cache_options': promptCacheOptions!.toJson(),
     if (moderation != null) 'moderation': moderation!.toJson(),
     if (reasoning != null) 'reasoning': reasoning!.toJson(),
     if (truncation != null) 'truncation': truncation!.toJson(),
@@ -333,6 +347,7 @@ class Response {
           parallelToolCalls == other.parallelToolCalls &&
           promptCacheKey == other.promptCacheKey &&
           promptCacheRetention == other.promptCacheRetention &&
+          promptCacheOptions == other.promptCacheOptions &&
           moderation == other.moderation &&
           reasoning == other.reasoning &&
           truncation == other.truncation;
@@ -359,6 +374,7 @@ class Response {
     parallelToolCalls,
     promptCacheKey,
     promptCacheRetention,
+    promptCacheOptions,
     moderation,
     reasoning,
     truncation,

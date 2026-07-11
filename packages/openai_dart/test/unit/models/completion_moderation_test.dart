@@ -37,6 +37,62 @@ void main() {
       expect(a.hashCode, b.hashCode);
       expect(a, isNot(c));
     });
+
+    test('omits policy from JSON when null', () {
+      const config = ModerationConfig(model: 'omni-moderation-latest');
+      expect(config.toJson(), {'model': 'omni-moderation-latest'});
+      expect(config.policy, isNull);
+    });
+
+    test('round-trips policy through JSON', () {
+      const config = ModerationConfig(
+        model: 'omni-moderation-latest',
+        policy: ModerationPolicyParam(
+          input: ModerationConfigParam(mode: ModerationMode.score),
+          output: ModerationConfigParam(mode: ModerationMode.block),
+        ),
+      );
+      expect(config.toJson(), {
+        'model': 'omni-moderation-latest',
+        'policy': {
+          'input': {'mode': 'score'},
+          'output': {'mode': 'block'},
+        },
+      });
+      expect(ModerationConfig.fromJson(config.toJson()), config);
+    });
+
+    test('policy affects equality and hashCode', () {
+      const withPolicy = ModerationConfig(
+        model: 'omni-moderation-latest',
+        policy: ModerationPolicyParam(
+          input: ModerationConfigParam(mode: ModerationMode.block),
+        ),
+      );
+      const withoutPolicy = ModerationConfig(model: 'omni-moderation-latest');
+      expect(withPolicy, isNot(withoutPolicy));
+      expect(
+        withPolicy,
+        const ModerationConfig(
+          model: 'omni-moderation-latest',
+          policy: ModerationPolicyParam(
+            input: ModerationConfigParam(mode: ModerationMode.block),
+          ),
+        ),
+      );
+    });
+
+    test('copyWith can set and clear policy explicitly', () {
+      const config = ModerationConfig(model: 'omni-moderation-latest');
+      final withPolicy = config.copyWith(
+        policy: const ModerationPolicyParam(
+          input: ModerationConfigParam(mode: ModerationMode.score),
+        ),
+      );
+      expect(withPolicy.policy, isNotNull);
+      expect(withPolicy.copyWith().policy, withPolicy.policy);
+      expect(withPolicy.copyWith(policy: null).policy, isNull);
+    });
   });
 
   group('ModerationInputType', () {

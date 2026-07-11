@@ -9,6 +9,9 @@ import 'base_resource.dart';
 import 'input_tokens_resource.dart';
 import 'streaming_resource.dart';
 
+/// The `OpenAI-Beta` header value for the multi-agent Responses beta.
+const _multiAgentBetaFeature = 'responses_multi_agent=v1';
+
 /// Resource for responses operations.
 ///
 /// The Responses API is OpenAI's next-generation interface that unifies
@@ -116,6 +119,9 @@ class ResponsesResource extends ResourceBase with StreamingResource {
   /// ## Parameters
   ///
   /// - [request] - The response creation request parameters.
+  /// - [beta] - Opts into the multi-agent Responses beta
+  ///   (`OpenAI-Beta: responses_multi_agent=v1`); required when using
+  ///   `multiAgent` on the request.
   /// - [abortTrigger] - Optional future that cancels the request when completed.
   ///
   /// ## Returns
@@ -135,11 +141,17 @@ class ResponsesResource extends ResourceBase with StreamingResource {
   /// ```
   Future<Response> create(
     CreateResponseRequest request, {
+    bool beta = false,
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl(_endpoint);
-    final headers = requestBuilder.buildHeaders();
+    final url = requestBuilder.buildUrl(
+      _endpoint,
+      queryParams: beta ? const {'beta': 'true'} : null,
+    );
+    final headers = beta
+        ? requestBuilder.buildBetaHeaders(betaFeature: _multiAgentBetaFeature)
+        : requestBuilder.buildHeaders();
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
@@ -154,13 +166,27 @@ class ResponsesResource extends ResourceBase with StreamingResource {
   ///
   /// Use this to reduce context length for long-running conversations while
   /// preserving enough state for follow-up turns.
+  ///
+  /// ## Parameters
+  ///
+  /// - [request] - The compaction request parameters.
+  /// - [beta] - Opts into the multi-agent Responses beta
+  ///   (`OpenAI-Beta: responses_multi_agent=v1`); required when compacting a
+  ///   response created with `multiAgent`.
+  /// - [abortTrigger] - Optional future that cancels the request when completed.
   Future<ResponseCompaction> compact(
     CompactResponseRequest request, {
+    bool beta = false,
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl(_compactEndpoint);
-    final headers = requestBuilder.buildHeaders();
+    final url = requestBuilder.buildUrl(
+      _compactEndpoint,
+      queryParams: beta ? const {'beta': 'true'} : null,
+    );
+    final headers = beta
+        ? requestBuilder.buildBetaHeaders(betaFeature: _multiAgentBetaFeature)
+        : requestBuilder.buildHeaders();
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(request.toJson());
@@ -182,6 +208,9 @@ class ResponsesResource extends ResourceBase with StreamingResource {
   /// ## Parameters
   ///
   /// - [request] - The response creation request parameters.
+  /// - [beta] - Opts into the multi-agent Responses beta
+  ///   (`OpenAI-Beta: responses_multi_agent=v1`); required when using
+  ///   `multiAgent` on the request.
   /// - [abortTrigger] - Optional future that cancels the stream when completed.
   ///
   /// ## Returns
@@ -209,6 +238,7 @@ class ResponsesResource extends ResourceBase with StreamingResource {
   /// ```
   Stream<ResponseStreamEvent> createStream(
     CreateResponseRequest request, {
+    bool beta = false,
     Future<void>? abortTrigger,
   }) {
     // Ensure stream is enabled in the request body
@@ -218,6 +248,8 @@ class ResponsesResource extends ResourceBase with StreamingResource {
     return streamSseEvents(
       endpoint: _endpoint,
       body: requestBody,
+      queryParams: beta ? const {'beta': 'true'} : null,
+      additionalHeaders: beta ? {'OpenAI-Beta': _multiAgentBetaFeature} : null,
       abortTrigger: abortTrigger,
     ).map(ResponseStreamEvent.fromJson);
   }
@@ -231,6 +263,9 @@ class ResponsesResource extends ResourceBase with StreamingResource {
   /// ## Parameters
   ///
   /// - [request] - The response creation request parameters.
+  /// - [beta] - Opts into the multi-agent Responses beta
+  ///   (`OpenAI-Beta: responses_multi_agent=v1`); required when using
+  ///   `multiAgent` on the request.
   /// - [abortTrigger] - Optional future that cancels the stream when completed.
   ///
   /// ## Example
@@ -249,10 +284,13 @@ class ResponsesResource extends ResourceBase with StreamingResource {
   /// ```
   Stream<ResponseStreamAccumulator> createStreamWithAccumulator(
     CreateResponseRequest request, {
+    bool beta = false,
     Future<void>? abortTrigger,
   }) {
     final accumulator = ResponseStreamAccumulator();
-    return createStream(request, abortTrigger: abortTrigger).map((event) {
+    return createStream(request, beta: beta, abortTrigger: abortTrigger).map((
+      event,
+    ) {
       accumulator.add(event);
       return accumulator;
     });
@@ -264,6 +302,9 @@ class ResponsesResource extends ResourceBase with StreamingResource {
   ///
   /// - [responseId] - The ID of the response to retrieve.
   /// - [include] - Additional data to include in the response.
+  /// - [beta] - Opts into the multi-agent Responses beta
+  ///   (`OpenAI-Beta: responses_multi_agent=v1`); required when retrieving a
+  ///   response created with `multiAgent`.
   /// - [abortTrigger] - Optional future that cancels the request when completed.
   ///
   /// ## Returns
@@ -279,14 +320,18 @@ class ResponsesResource extends ResourceBase with StreamingResource {
   Future<Response> retrieve(
     String responseId, {
     List<Include>? include,
+    bool beta = false,
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
     final url = requestBuilder.buildUrlWithQueryAll(
       '$_endpoint/$responseId',
+      queryParameters: beta ? const {'beta': 'true'} : null,
       queryParametersAll: _buildIncludeParams(include),
     );
-    final headers = requestBuilder.buildHeaders();
+    final headers = beta
+        ? requestBuilder.buildBetaHeaders(betaFeature: _multiAgentBetaFeature)
+        : requestBuilder.buildHeaders();
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(
       httpRequest,
@@ -361,6 +406,9 @@ class ResponsesResource extends ResourceBase with StreamingResource {
   /// ## Parameters
   ///
   /// - [responseId] - The ID of the response to delete.
+  /// - [beta] - Opts into the multi-agent Responses beta
+  ///   (`OpenAI-Beta: responses_multi_agent=v1`); required when deleting a
+  ///   response created with `multiAgent`.
   /// - [abortTrigger] - Optional future that cancels the request when completed.
   ///
   /// ## Returns
@@ -375,11 +423,17 @@ class ResponsesResource extends ResourceBase with StreamingResource {
   /// ```
   Future<DeleteResponseResult> delete(
     String responseId, {
+    bool beta = false,
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('$_endpoint/$responseId');
-    final headers = requestBuilder.buildHeaders();
+    final url = requestBuilder.buildUrl(
+      '$_endpoint/$responseId',
+      queryParams: beta ? const {'beta': 'true'} : null,
+    );
+    final headers = beta
+        ? requestBuilder.buildBetaHeaders(betaFeature: _multiAgentBetaFeature)
+        : requestBuilder.buildHeaders();
     final httpRequest = http.Request('DELETE', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(
       httpRequest,
@@ -398,6 +452,9 @@ class ResponsesResource extends ResourceBase with StreamingResource {
   /// ## Parameters
   ///
   /// - [responseId] - The ID of the response to cancel.
+  /// - [beta] - Opts into the multi-agent Responses beta
+  ///   (`OpenAI-Beta: responses_multi_agent=v1`); required when cancelling a
+  ///   response created with `multiAgent`.
   /// - [abortTrigger] - Optional future that cancels the request when completed.
   ///
   /// ## Returns
@@ -422,11 +479,17 @@ class ResponsesResource extends ResourceBase with StreamingResource {
   /// ```
   Future<Response> cancel(
     String responseId, {
+    bool beta = false,
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
-    final url = requestBuilder.buildUrl('$_endpoint/$responseId/cancel');
-    final headers = requestBuilder.buildHeaders();
+    final url = requestBuilder.buildUrl(
+      '$_endpoint/$responseId/cancel',
+      queryParams: beta ? const {'beta': 'true'} : null,
+    );
+    final headers = beta
+        ? requestBuilder.buildBetaHeaders(betaFeature: _multiAgentBetaFeature)
+        : requestBuilder.buildHeaders();
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(<String, dynamic>{});
@@ -460,6 +523,9 @@ class ResponseInputItemsResource extends ResourceBase {
   /// - [before] - A cursor for pagination.
   /// - [limit] - Maximum number of items to return (1-100, default 20).
   /// - [order] - Sort order: 'asc' or 'desc' (default 'asc').
+  /// - [beta] - Opts into the multi-agent Responses beta
+  ///   (`OpenAI-Beta: responses_multi_agent=v1`); required when listing input
+  ///   items for a response created with `multiAgent`.
   /// - [abortTrigger] - Optional future that cancels the request when completed.
   ///
   /// ## Returns
@@ -480,6 +546,7 @@ class ResponseInputItemsResource extends ResourceBase {
     String? before,
     int? limit,
     String? order,
+    bool beta = false,
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
@@ -488,12 +555,15 @@ class ResponseInputItemsResource extends ResourceBase {
     if (before != null) queryParameters['before'] = before;
     if (limit != null) queryParameters['limit'] = limit.toString();
     if (order != null) queryParameters['order'] = order;
+    if (beta) queryParameters['beta'] = 'true';
 
     final url = requestBuilder.buildUrl(
       '/responses/$responseId/input_items',
       queryParams: queryParameters.isNotEmpty ? queryParameters : null,
     );
-    final headers = requestBuilder.buildHeaders();
+    final headers = beta
+        ? requestBuilder.buildBetaHeaders(betaFeature: _multiAgentBetaFeature)
+        : requestBuilder.buildHeaders();
     final httpRequest = http.Request('GET', url)..headers.addAll(headers);
     final response = await interceptorChain.execute(
       httpRequest,

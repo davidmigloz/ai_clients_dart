@@ -1271,6 +1271,24 @@ void main() {
           isNot(equals(const TextContentPart(text: 'b'))),
         );
       });
+
+      test('promptCacheBreakpoint round-trip', () {
+        const part = TextContentPart(
+          text: 'a',
+          promptCacheBreakpoint: PromptCacheBreakpointConfig(),
+        );
+        final json = part.toJson();
+
+        expect(json['prompt_cache_breakpoint'], {'mode': 'explicit'});
+
+        final restored = ContentPart.fromJson(json);
+        expect(restored, equals(part));
+      });
+
+      test('promptCacheBreakpoint omitted when null', () {
+        const part = TextContentPart(text: 'a');
+        expect(part.toJson().containsKey('prompt_cache_breakpoint'), isFalse);
+      });
     });
 
     group('ImageContentPart', () {
@@ -1310,6 +1328,24 @@ void main() {
           isFalse,
         );
       });
+
+      test('promptCacheBreakpoint round-trip', () {
+        const part = ImageContentPart(
+          url: 'https://example.com/img.jpg',
+          promptCacheBreakpoint: PromptCacheBreakpointConfig(),
+        );
+        final json = part.toJson();
+
+        expect(json['prompt_cache_breakpoint'], {'mode': 'explicit'});
+
+        final restored = ContentPart.fromJson(json);
+        expect(restored, equals(part));
+      });
+
+      test('promptCacheBreakpoint omitted when null', () {
+        final part = ContentPart.imageUrl('https://example.com/img.jpg');
+        expect(part.toJson().containsKey('prompt_cache_breakpoint'), isFalse);
+      });
     });
 
     group('AudioContentPart', () {
@@ -1332,6 +1368,28 @@ void main() {
         final part = ContentPart.fromJson(json);
         expect(part, isA<AudioContentPart>());
         expect(part.toJson(), json);
+      });
+
+      test('promptCacheBreakpoint round-trip', () {
+        const part = AudioContentPart(
+          data: 'base64data',
+          format: AudioFormat.wav,
+          promptCacheBreakpoint: PromptCacheBreakpointConfig(),
+        );
+        final json = part.toJson();
+
+        expect(json['prompt_cache_breakpoint'], {'mode': 'explicit'});
+
+        final restored = ContentPart.fromJson(json);
+        expect(restored, equals(part));
+      });
+
+      test('promptCacheBreakpoint omitted when null', () {
+        final part = ContentPart.inputAudio(
+          data: 'base64data',
+          format: AudioFormat.wav,
+        );
+        expect(part.toJson().containsKey('prompt_cache_breakpoint'), isFalse);
       });
     });
 
@@ -1475,6 +1533,24 @@ void main() {
       test('toString shows hasFileData false when null', () {
         const part = FileContentPart(fileId: 'file-1');
         expect(part.toString(), contains('hasFileData: false'));
+      });
+
+      test('promptCacheBreakpoint round-trip', () {
+        const part = FileContentPart(
+          fileId: 'file-1',
+          promptCacheBreakpoint: PromptCacheBreakpointConfig(),
+        );
+        final json = part.toJson();
+
+        expect(json['prompt_cache_breakpoint'], {'mode': 'explicit'});
+
+        final restored = ContentPart.fromJson(json);
+        expect(restored, equals(part));
+      });
+
+      test('promptCacheBreakpoint omitted when null', () {
+        const part = FileContentPart(fileId: 'file-1');
+        expect(part.toJson().containsKey('prompt_cache_breakpoint'), isFalse);
       });
     });
 

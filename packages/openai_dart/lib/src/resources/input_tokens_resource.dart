@@ -33,6 +33,9 @@ class InputTokensResource extends ResourceBase {
     super.ensureNotClosed,
   });
 
+  /// The `OpenAI-Beta` header value for the multi-agent Responses beta.
+  static const _multiAgentBetaFeature = 'responses_multi_agent=v1';
+
   /// Gets input token counts for a potential response request.
   ///
   /// This allows you to calculate token usage before actually sending a request.
@@ -53,6 +56,9 @@ class InputTokensResource extends ResourceBase {
   /// - [truncation] - Truncation strategy ('auto' or 'disabled').
   /// - [personality] - A model-owned style preset to apply to the request.
   ///   Omit to use the model's default style.
+  /// - [beta] - Opts into the multi-agent Responses beta
+  ///   (`OpenAI-Beta: responses_multi_agent=v1`); required when using
+  ///   `multiAgent` on the request.
   /// - [abortTrigger] - Optional future that cancels the request when completed.
   ///
   /// ## Returns
@@ -95,6 +101,7 @@ class InputTokensResource extends ResourceBase {
     bool? parallelToolCalls,
     String? truncation,
     Personality? personality,
+    bool beta = false,
     Future<void>? abortTrigger,
   }) async {
     ensureNotClosed?.call();
@@ -129,8 +136,13 @@ class InputTokensResource extends ResourceBase {
 
     if (personality != null) body['personality'] = personality.toJson();
 
-    final url = requestBuilder.buildUrl('/responses/input_tokens');
-    final headers = requestBuilder.buildHeaders();
+    final url = requestBuilder.buildUrl(
+      '/responses/input_tokens',
+      queryParams: beta ? const {'beta': 'true'} : null,
+    );
+    final headers = beta
+        ? requestBuilder.buildBetaHeaders(betaFeature: _multiAgentBetaFeature)
+        : requestBuilder.buildHeaders();
     final httpRequest = http.Request('POST', url)
       ..headers.addAll(headers)
       ..body = jsonEncode(body);

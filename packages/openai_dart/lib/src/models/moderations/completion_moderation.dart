@@ -1,6 +1,8 @@
 import 'package:meta/meta.dart';
 
+import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import 'moderation_policy.dart';
 
 /// The input modality a moderation category score applies to.
 ///
@@ -51,35 +53,60 @@ enum ModerationInputType {
 @immutable
 class ModerationConfig {
   /// Creates a [ModerationConfig].
-  const ModerationConfig({required this.model});
+  const ModerationConfig({required this.model, this.policy});
 
   /// Creates a [ModerationConfig] from JSON.
   factory ModerationConfig.fromJson(Map<String, dynamic> json) {
-    return ModerationConfig(model: json['model'] as String);
+    return ModerationConfig(
+      model: json['model'] as String,
+      policy: json['policy'] != null
+          ? ModerationPolicyParam.fromJson(
+              json['policy'] as Map<String, dynamic>,
+            )
+          : null,
+    );
   }
 
   /// The moderation model to use, e.g. `omni-moderation-latest`.
   final String model;
 
+  /// The policy to apply to moderated response input and output.
+  final ModerationPolicyParam? policy;
+
   /// Converts to JSON.
-  Map<String, dynamic> toJson() => {'model': model};
+  Map<String, dynamic> toJson() => {
+    'model': model,
+    if (policy != null) 'policy': policy!.toJson(),
+  };
 
   /// Creates a copy with the given fields replaced.
-  ModerationConfig copyWith({String? model}) =>
-      ModerationConfig(model: model ?? this.model);
+  ///
+  /// Nullable fields can be explicitly set to `null` to clear them.
+  ModerationConfig copyWith({
+    String? model,
+    Object? policy = unsetCopyWithValue,
+  }) {
+    return ModerationConfig(
+      model: model ?? this.model,
+      policy: policy == unsetCopyWithValue
+          ? this.policy
+          : policy as ModerationPolicyParam?,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ModerationConfig &&
           runtimeType == other.runtimeType &&
-          model == other.model;
+          model == other.model &&
+          policy == other.policy;
 
   @override
-  int get hashCode => model.hashCode;
+  int get hashCode => Object.hash(model, policy);
 
   @override
-  String toString() => 'ModerationConfig(model: $model)';
+  String toString() => 'ModerationConfig(model: $model, policy: $policy)';
 }
 
 /// Moderation results or errors for the input and output of a Responses API
