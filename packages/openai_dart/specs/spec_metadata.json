@@ -2,8 +2,8 @@
   "specs": {
     "main": {
       "current_version": "2.3.0",
-      "last_fetched": "2026-06-20T14:45:09.941722Z",
-      "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/openai/openai-b5b621065906a2579dc180db1236ee3b08a4fca9539accc2fbbf88da0ca3923f.yml",
+      "last_fetched": "2026-07-11T09:28:29.337787Z",
+      "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/openai/openai-356010b9b9fd6228b457b8fcfa376cf4928a8f3bd4728e7ba5e4b6b5ef4f5843.yml",
       "title": "OpenAI API",
       "version_history": [
         {
@@ -28,6 +28,12 @@
           "fetched_at": "2026-06-05T14:05:05.024506Z",
           "note": "0161cb2\u2026 replaced by b5b6210\u2026 on 2026-06-20 to pick up the Responses API reasoning context mode (Reasoning.context \u2014 which reasoning items are rendered back to the model on later turns) and the MCP tool Secure Tunnel ID (MCPTool.tunnel_id; connector_id also modeled, server_url now optional). Administration-only changes (AdminApiKey.expires_at, audit-log event types + tenant_only, spend-alert lookups) are excluded from coverage.",
           "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/openai/openai-0161cb2a0faadedfc17ff59c7fcad9671962dbd170f83811003c23702148cf36.yml",
+          "version": "2.3.0"
+        },
+        {
+          "fetched_at": "2026-06-20T14:45:09.941722Z",
+          "note": "b5b6210… replaced by 356010b… on 2026-07-11 to pick up the GPT-5.6-era API surface: programmatic tool calling (ToolCallCaller/allowed_callers, Program/ProgramOutput items, programmatic_tool_calling tool + tool choice), explicit prompt caching (PromptCacheOptions, prompt_cache_breakpoint on content parts), reasoning mode (standard/pro) and max reasoning effort, moderation policy param, and the beta multi-agent Responses surface (Beta* schema family, ?beta=true endpoint variants gated by OpenAI-Beta: responses_multi_agent=v1). Webhook and admin-only additions are excluded from coverage.",
+          "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/openai/openai-b5b621065906a2579dc180db1236ee3b08a4fca9539accc2fbbf88da0ca3923f.yml",
           "version": "2.3.0"
         }
       ]

@@ -4,6 +4,7 @@ import '../../common/equality_helpers.dart';
 import '../config/search_content_type.dart';
 import '../config/tool_search_execution_type.dart';
 import 'code_interpreter_container.dart';
+import 'tool_call_caller.dart';
 
 /// Marker interface for tools that may appear inside a [NamespaceTool].
 ///
@@ -30,6 +31,7 @@ abstract interface class NamespaceAllowedTool {
 /// - [NamespaceTool] - Group tools under a namespace
 /// - [ShellTool] - Hosted shell tool
 /// - [LocalShellTool] - Local shell tool
+/// - [ProgrammaticToolCallingTool] - Programmatic tool calling
 sealed class ResponseTool {
   /// Creates a [ResponseTool].
   const ResponseTool();
@@ -53,6 +55,7 @@ sealed class ResponseTool {
       'local_shell' => LocalShellTool.fromJson(json),
       'tool_search' => ToolSearchTool.fromJson(json),
       'custom' => CustomTool.fromJson(json),
+      'programmatic_tool_calling' => ProgrammaticToolCallingTool.fromJson(json),
       _ => throw FormatException('Unknown ResponseTool type: $type'),
     };
   }
@@ -213,6 +216,13 @@ class FunctionTool extends ResponseTool implements NamespaceAllowedTool {
   /// Whether to defer loading this tool until needed.
   final bool? deferLoading;
 
+  /// The tool invocation context(s) this function may be called from.
+  final List<CallableToolAllowedCaller>? allowedCallers;
+
+  /// A JSON schema object describing the JSON value encoded in string
+  /// outputs for this function.
+  final Map<String, dynamic>? outputSchema;
+
   /// Creates a [FunctionTool].
   const FunctionTool({
     required this.name,
@@ -220,6 +230,8 @@ class FunctionTool extends ResponseTool implements NamespaceAllowedTool {
     this.parameters,
     this.strict,
     this.deferLoading,
+    this.allowedCallers,
+    this.outputSchema,
   });
 
   /// Creates a [FunctionTool] from JSON.
@@ -230,6 +242,10 @@ class FunctionTool extends ResponseTool implements NamespaceAllowedTool {
       parameters: json['parameters'] as Map<String, dynamic>?,
       strict: json['strict'] as bool?,
       deferLoading: json['defer_loading'] as bool?,
+      allowedCallers: (json['allowed_callers'] as List?)
+          ?.map((e) => CallableToolAllowedCaller.fromJson(e as String))
+          .toList(),
+      outputSchema: json['output_schema'] as Map<String, dynamic>?,
     );
   }
 
@@ -241,6 +257,9 @@ class FunctionTool extends ResponseTool implements NamespaceAllowedTool {
     if (parameters != null) 'parameters': parameters,
     if (strict != null) 'strict': strict,
     if (deferLoading != null) 'defer_loading': deferLoading,
+    if (allowedCallers != null)
+      'allowed_callers': allowedCallers!.map((e) => e.toJson()).toList(),
+    if (outputSchema != null) 'output_schema': outputSchema,
   };
 
   @override
@@ -252,15 +271,24 @@ class FunctionTool extends ResponseTool implements NamespaceAllowedTool {
           description == other.description &&
           mapsEqual(parameters, other.parameters) &&
           strict == other.strict &&
-          deferLoading == other.deferLoading;
+          deferLoading == other.deferLoading &&
+          listsEqual(allowedCallers, other.allowedCallers) &&
+          mapsEqual(outputSchema, other.outputSchema);
 
   @override
-  int get hashCode =>
-      Object.hash(name, description, mapHash(parameters), strict, deferLoading);
+  int get hashCode => Object.hash(
+    name,
+    description,
+    mapHash(parameters),
+    strict,
+    deferLoading,
+    listHash(allowedCallers),
+    mapHash(outputSchema),
+  );
 
   @override
   String toString() =>
-      'FunctionTool(name: $name, description: $description, parameters: $parameters, strict: $strict, deferLoading: $deferLoading)';
+      'FunctionTool(name: $name, description: $description, parameters: $parameters, strict: $strict, deferLoading: $deferLoading, allowedCallers: $allowedCallers, outputSchema: $outputSchema)';
 }
 
 /// Approximate user location for localized web search results.
@@ -646,13 +674,19 @@ class CodeInterpreterTool extends ResponseTool {
   /// The container to use for code execution.
   final CodeInterpreterContainer container;
 
+  /// The tool invocation context(s) this tool may be called from.
+  final List<CallableToolAllowedCaller>? allowedCallers;
+
   /// Creates a [CodeInterpreterTool].
-  const CodeInterpreterTool({required this.container});
+  const CodeInterpreterTool({required this.container, this.allowedCallers});
 
   /// Creates a [CodeInterpreterTool] from JSON.
   factory CodeInterpreterTool.fromJson(Map<String, dynamic> json) {
     return CodeInterpreterTool(
       container: CodeInterpreterContainer.fromJson(json['container'] as Object),
+      allowedCallers: (json['allowed_callers'] as List?)
+          ?.map((e) => CallableToolAllowedCaller.fromJson(e as String))
+          .toList(),
     );
   }
 
@@ -660,6 +694,8 @@ class CodeInterpreterTool extends ResponseTool {
   Map<String, dynamic> toJson() => {
     'type': 'code_interpreter',
     'container': container.toJson(),
+    if (allowedCallers != null)
+      'allowed_callers': allowedCallers!.map((e) => e.toJson()).toList(),
   };
 
   @override
@@ -667,13 +703,15 @@ class CodeInterpreterTool extends ResponseTool {
       identical(this, other) ||
       other is CodeInterpreterTool &&
           runtimeType == other.runtimeType &&
-          container == other.container;
+          container == other.container &&
+          listsEqual(allowedCallers, other.allowedCallers);
 
   @override
-  int get hashCode => container.hashCode;
+  int get hashCode => Object.hash(container, listHash(allowedCallers));
 
   @override
-  String toString() => 'CodeInterpreterTool(container: $container)';
+  String toString() =>
+      'CodeInterpreterTool(container: $container, allowedCallers: $allowedCallers)';
 }
 
 /// Computer use tool for controlling a computer.
@@ -875,6 +913,9 @@ class McpTool extends ResponseTool {
   /// Whether to defer loading this tool until needed.
   final bool? deferLoading;
 
+  /// The tool invocation context(s) this tool may be called from.
+  final List<CallableToolAllowedCaller>? allowedCallers;
+
   /// Creates an [McpTool].
   ///
   /// One of [serverUrl], [connectorId], or [tunnelId] must be provided.
@@ -886,6 +927,7 @@ class McpTool extends ResponseTool {
     this.allowedTools,
     this.requireApproval,
     this.deferLoading,
+    this.allowedCallers,
   }) : assert(
          serverUrl != null || connectorId != null || tunnelId != null,
          'McpTool requires one of serverUrl, connectorId, or tunnelId',
@@ -913,6 +955,9 @@ class McpTool extends ResponseTool {
       allowedTools: (json['allowed_tools'] as List?)?.cast<String>(),
       requireApproval: json['require_approval'] as String?,
       deferLoading: json['defer_loading'] as bool?,
+      allowedCallers: (json['allowed_callers'] as List?)
+          ?.map((e) => CallableToolAllowedCaller.fromJson(e as String))
+          .toList(),
     );
   }
 
@@ -926,6 +971,8 @@ class McpTool extends ResponseTool {
     if (allowedTools != null) 'allowed_tools': allowedTools,
     if (requireApproval != null) 'require_approval': requireApproval,
     if (deferLoading != null) 'defer_loading': deferLoading,
+    if (allowedCallers != null)
+      'allowed_callers': allowedCallers!.map((e) => e.toJson()).toList(),
   };
 
   @override
@@ -939,7 +986,8 @@ class McpTool extends ResponseTool {
           tunnelId == other.tunnelId &&
           listsEqual(allowedTools, other.allowedTools) &&
           requireApproval == other.requireApproval &&
-          deferLoading == other.deferLoading;
+          deferLoading == other.deferLoading &&
+          listsEqual(allowedCallers, other.allowedCallers);
 
   @override
   int get hashCode => Object.hash(
@@ -950,39 +998,54 @@ class McpTool extends ResponseTool {
     allowedTools != null ? Object.hashAll(allowedTools!) : null,
     requireApproval,
     deferLoading,
+    listHash(allowedCallers),
   );
 
   @override
   String toString() =>
-      'McpTool(serverLabel: $serverLabel, serverUrl: $serverUrl, connectorId: $connectorId, tunnelId: $tunnelId, allowedTools: $allowedTools, requireApproval: $requireApproval, deferLoading: $deferLoading)';
+      'McpTool(serverLabel: $serverLabel, serverUrl: $serverUrl, connectorId: $connectorId, tunnelId: $tunnelId, allowedTools: $allowedTools, requireApproval: $requireApproval, deferLoading: $deferLoading, allowedCallers: $allowedCallers)';
 }
 
 /// Hosted shell tool for command execution.
 @immutable
 class ShellTool extends ResponseTool {
+  /// The tool invocation context(s) this tool may be called from.
+  final List<CallableToolAllowedCaller>? allowedCallers;
+
   /// Creates a [ShellTool].
-  const ShellTool();
+  const ShellTool({this.allowedCallers});
 
   /// Creates a [ShellTool] from JSON.
   factory ShellTool.fromJson(Map<String, dynamic> json) {
     if ((json['type'] as String?) != 'shell') {
       throw const FormatException('Invalid type for ShellTool');
     }
-    return const ShellTool();
+    return ShellTool(
+      allowedCallers: (json['allowed_callers'] as List?)
+          ?.map((e) => CallableToolAllowedCaller.fromJson(e as String))
+          .toList(),
+    );
   }
 
   @override
-  Map<String, dynamic> toJson() => const {'type': 'shell'};
+  Map<String, dynamic> toJson() => {
+    'type': 'shell',
+    if (allowedCallers != null)
+      'allowed_callers': allowedCallers!.map((e) => e.toJson()).toList(),
+  };
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || other is ShellTool;
+      identical(this, other) ||
+      other is ShellTool &&
+          runtimeType == other.runtimeType &&
+          listsEqual(allowedCallers, other.allowedCallers);
 
   @override
-  int get hashCode => runtimeType.hashCode;
+  int get hashCode => listHash(allowedCallers);
 
   @override
-  String toString() => 'ShellTool()';
+  String toString() => 'ShellTool(allowedCallers: $allowedCallers)';
 }
 
 /// Computer tool (GA) for controlling a computer.
@@ -1154,6 +1217,37 @@ class LocalShellTool extends ResponseTool {
   String toString() => 'LocalShellTool()';
 }
 
+/// Programmatic tool calling tool, letting the model call tools from
+/// generated code instead of one function call per turn.
+@immutable
+class ProgrammaticToolCallingTool extends ResponseTool {
+  /// Creates a [ProgrammaticToolCallingTool].
+  const ProgrammaticToolCallingTool();
+
+  /// Creates a [ProgrammaticToolCallingTool] from JSON.
+  factory ProgrammaticToolCallingTool.fromJson(Map<String, dynamic> json) {
+    if ((json['type'] as String?) != 'programmatic_tool_calling') {
+      throw const FormatException(
+        'Invalid type for ProgrammaticToolCallingTool',
+      );
+    }
+    return const ProgrammaticToolCallingTool();
+  }
+
+  @override
+  Map<String, dynamic> toJson() => const {'type': 'programmatic_tool_calling'};
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || other is ProgrammaticToolCallingTool;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  String toString() => 'ProgrammaticToolCallingTool()';
+}
+
 /// A custom tool (type: 'custom').
 ///
 /// Custom tools allow models to use provider-defined or operator-defined
@@ -1173,12 +1267,16 @@ class CustomTool extends ResponseTool implements NamespaceAllowedTool {
   /// Whether to defer loading this tool until needed.
   final bool? deferLoading;
 
+  /// The tool invocation context(s) this tool may be called from.
+  final List<CallableToolAllowedCaller>? allowedCallers;
+
   /// Creates a [CustomTool].
   const CustomTool({
     required this.name,
     this.description,
     this.format,
     this.deferLoading,
+    this.allowedCallers,
   });
 
   /// Creates a [CustomTool] from JSON.
@@ -1188,6 +1286,9 @@ class CustomTool extends ResponseTool implements NamespaceAllowedTool {
       description: json['description'] as String?,
       format: json['format'] as Map<String, dynamic>?,
       deferLoading: json['defer_loading'] as bool?,
+      allowedCallers: (json['allowed_callers'] as List?)
+          ?.map((e) => CallableToolAllowedCaller.fromJson(e as String))
+          .toList(),
     );
   }
 
@@ -1198,6 +1299,8 @@ class CustomTool extends ResponseTool implements NamespaceAllowedTool {
     if (description != null) 'description': description,
     if (format != null) 'format': format,
     if (deferLoading != null) 'defer_loading': deferLoading,
+    if (allowedCallers != null)
+      'allowed_callers': allowedCallers!.map((e) => e.toJson()).toList(),
   };
 
   @override
@@ -1208,15 +1311,21 @@ class CustomTool extends ResponseTool implements NamespaceAllowedTool {
           name == other.name &&
           description == other.description &&
           mapsEqual(format, other.format) &&
-          deferLoading == other.deferLoading;
+          deferLoading == other.deferLoading &&
+          listsEqual(allowedCallers, other.allowedCallers);
 
   @override
-  int get hashCode =>
-      Object.hash(name, description, mapHash(format), deferLoading);
+  int get hashCode => Object.hash(
+    name,
+    description,
+    mapHash(format),
+    deferLoading,
+    listHash(allowedCallers),
+  );
 
   @override
   String toString() =>
-      'CustomTool(name: $name, description: $description, format: $format, deferLoading: $deferLoading)';
+      'CustomTool(name: $name, description: $description, format: $format, deferLoading: $deferLoading, allowedCallers: $allowedCallers)';
 }
 
 /// An unknown namespace tool for forward compatibility.

@@ -200,10 +200,11 @@ mixin StreamingResource on ResourceBase {
   Future<http.StreamedResponse> sendStreamRequest({
     required String endpoint,
     required Map<String, dynamic> body,
+    Map<String, String>? queryParams,
     Map<String, String>? additionalHeaders,
     Future<void>? abortTrigger,
   }) {
-    final url = requestBuilder.buildUrl(endpoint);
+    final url = requestBuilder.buildUrl(endpoint, queryParams: queryParams);
     final request = http.Request('POST', url);
 
     return sendStream(
@@ -221,12 +222,14 @@ mixin StreamingResource on ResourceBase {
   Stream<Map<String, dynamic>> streamSseEvents({
     required String endpoint,
     required Map<String, dynamic> body,
+    Map<String, String>? queryParams,
     Map<String, String>? additionalHeaders,
     Future<void>? abortTrigger,
   }) async* {
     final response = await sendStreamRequest(
       endpoint: endpoint,
       body: body,
+      queryParams: queryParams,
       additionalHeaders: additionalHeaders,
       abortTrigger: abortTrigger,
     );

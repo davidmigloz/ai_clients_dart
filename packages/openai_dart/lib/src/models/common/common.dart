@@ -10,5 +10,6 @@ export 'copy_with_sentinel.dart';
 export 'finish_reason.dart';
 export 'logprobs.dart';
 export 'metadata.dart';
+export 'prompt_cache_breakpoint.dart';
 export 'response_format.dart';
 export 'usage.dart';

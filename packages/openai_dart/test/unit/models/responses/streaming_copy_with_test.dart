@@ -227,4 +227,54 @@ void main() {
       expect(copy.delta, equals('thinking'));
     });
   });
+
+  group('ReasoningSummaryPartDoneEvent copyWith', () {
+    const original = ReasoningSummaryPartDoneEvent(
+      outputIndex: 0,
+      summaryIndex: 0,
+      part: {'type': 'summary_text', 'text': 'thinking'},
+      itemId: 'reason_1',
+      sequenceNumber: 7,
+      status: ReasoningSummaryPartStatus.incomplete,
+    );
+
+    test('no changes returns equal object', () {
+      final copy = original.copyWith();
+      expect(copy, equals(original));
+    });
+
+    test('changes required fields', () {
+      final copy = original.copyWith(
+        outputIndex: 1,
+        summaryIndex: 2,
+        part: {'type': 'summary_text', 'text': 'done'},
+      );
+
+      expect(copy.outputIndex, equals(1));
+      expect(copy.summaryIndex, equals(2));
+      expect(copy.part, equals({'type': 'summary_text', 'text': 'done'}));
+      expect(copy.itemId, equals('reason_1'));
+    });
+
+    test('sets nullable status to null', () {
+      final copy = original.copyWith(status: null);
+      expect(copy.status, isNull);
+    });
+
+    test('sets nullable status to new value', () {
+      final copy = original.copyWith(
+        status: ReasoningSummaryPartStatus.unknown,
+      );
+      expect(copy.status, equals(ReasoningSummaryPartStatus.unknown));
+    });
+
+    test('sets nullable itemId and sequenceNumber to null', () {
+      final copy = original.copyWith(itemId: null, sequenceNumber: null);
+      expect(copy.itemId, isNull);
+      expect(copy.sequenceNumber, isNull);
+      // Required fields preserved
+      expect(copy.outputIndex, equals(0));
+      expect(copy.summaryIndex, equals(0));
+    });
+  });
 }

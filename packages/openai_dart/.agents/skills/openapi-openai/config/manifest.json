@@ -336,8 +336,10 @@
       "dart_class": "CreateResponseRequest",
       "file": "lib/src/models/responses/create_response_request.dart",
       "schema": "CreateResponse",
-      "tags": ["acknowledged"],
-      "note": "Spec uses allOf — verifier cannot extract top-level properties."
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Spec uses allOf — verifier cannot extract top-level properties. GPT-5.6 sync: prompt_cache_options (PromptCacheOptionsParam) and beta multi_agent (BetaMultiAgentParam, from BetaCreateResponse) added."
     },
     "Response": {
       "spec": "main",
@@ -345,8 +347,10 @@
       "dart_class": "Response",
       "file": "lib/src/models/responses/response.dart",
       "schema": "Response",
-      "tags": ["acknowledged"],
-      "note": "Spec uses allOf — verifier cannot extract top-level properties."
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Spec uses allOf — verifier cannot extract top-level properties. GPT-5.6 sync: prompt_cache_options (PromptCacheOptions echo) added."
     },
     "ResponsesClientEventResponseCreate": {
       "spec": "main",
@@ -354,7 +358,9 @@
       "dart_class": null,
       "file": null,
       "schema": "ResponsesClientEventResponseCreate",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Realtime client event embedding CreateResponse; constructed inline by the realtime resource."
     },
     "PersonalityEnum": {
@@ -398,7 +404,9 @@
       "dart_class": null,
       "file": "lib/src/resources/input_tokens_resource.dart",
       "schema": "TokenCountsBody",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Request body built inline in InputTokensResource.count() (no request model). personality field added."
     },
     "Item": {
@@ -407,8 +415,10 @@
       "dart_class": "Item",
       "file": "lib/src/models/responses/items/item.dart",
       "schema": null,
-      "tags": ["acknowledged"],
-      "note": "Sealed parent union of input items with untracked variants (matches ConversationItem/OutputItem). AdditionalToolsItemParam variant added."
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Sealed parent union of input items with untracked variants (matches ConversationItem/OutputItem). AdditionalToolsItemParam variant added. GPT-5.6 sync: program/program_output (ProgramItem/ProgramOutputItem) and beta multi-agent agent_message/multi_agent_call/multi_agent_call_output variants added; caller (ToolCallCaller) added to function/custom tool call items; nullable agent (AgentTag) added to all variants with beta multi-agent twins."
     },
     "ItemField": {
       "spec": "main",
@@ -416,7 +426,9 @@
       "dart_class": null,
       "file": "lib/src/models/responses/items/output_item.dart",
       "schema": null,
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Orphan spec union unreferenced by any endpoint; shares the OutputItem shape. AdditionalTools variant added."
     },
     "AdditionalTools": {
@@ -425,7 +437,9 @@
       "dart_class": "AdditionalToolsOutputItem",
       "file": "lib/src/models/responses/items/output_item.dart",
       "schema": "AdditionalTools",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Output/conversation item variant of the skip parent unions OutputItem/ItemResource/ConversationItem; also implemented as ConversationAdditionalToolsItem."
     },
     "AdditionalToolsItemParam": {
@@ -434,7 +448,9 @@
       "dart_class": "AdditionalToolsItemParam",
       "file": "lib/src/models/responses/items/item.dart",
       "schema": "AdditionalToolsItemParam",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Input item variant of the skip parent union Item."
     },
     "AuditLog": {
@@ -443,7 +459,9 @@
       "dart_class": null,
       "file": null,
       "schema": "AuditLog",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Admin API audit-log schema, excluded from coverage (excluded_tags: Administration). Not implemented."
     },
     "AuditLogEventType": {
@@ -452,7 +470,9 @@
       "dart_class": null,
       "file": null,
       "schema": "AuditLogEventType",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Admin API audit-log enum, excluded from coverage (excluded_tags: Administration). Not implemented."
     },
     "AdminApiKey": {
@@ -461,7 +481,9 @@
       "dart_class": null,
       "file": null,
       "schema": "AdminApiKey",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Admin API key schema, excluded from coverage (excluded_tags: Administration). Not implemented."
     },
     "AdminApiKeyCreateResponse": {
@@ -470,7 +492,9 @@
       "dart_class": null,
       "file": null,
       "schema": "AdminApiKeyCreateResponse",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Admin API key creation response, excluded from coverage (excluded_tags: Administration). Not implemented."
     },
     "Reasoning": {
@@ -479,8 +503,10 @@
       "dart_class": "ReasoningConfig",
       "file": "lib/src/models/responses/config/reasoning_config.dart",
       "schema": "Reasoning",
-      "tags": ["acknowledged"],
-      "note": "Implemented (not codegen-tracked) as ReasoningConfig; context added."
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Implemented (not codegen-tracked) as ReasoningConfig; context added. GPT-5.6 sync: mode (ReasoningModeEnum) added."
     },
     "MCPTool": {
       "spec": "main",
@@ -488,8 +514,10 @@
       "dart_class": "McpTool",
       "file": "lib/src/models/responses/tools/response_tool.dart",
       "schema": "MCPTool",
-      "tags": ["acknowledged"],
-      "note": "Implemented (not codegen-tracked) as McpTool (a ResponseTool variant); tunnel_id + connector_id added, server_url now optional."
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Implemented (not codegen-tracked) as McpTool (a ResponseTool variant); tunnel_id + connector_id added, server_url now optional. GPT-5.6 sync: allowed_callers added."
     },
     "CreateChatCompletionRequest": {
       "spec": "main",
@@ -497,7 +525,9 @@
       "dart_class": "ChatCompletionCreateRequest",
       "file": "lib/src/models/chat/chat_completion_request.dart",
       "schema": "CreateChatCompletionRequest",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Spec uses allOf — verifier cannot extract top-level properties. Missing copyWith."
     },
     "CreateChatCompletionResponse": {
@@ -506,7 +536,9 @@
       "dart_class": "ChatCompletion",
       "file": "lib/src/models/chat/chat_completion.dart",
       "schema": "CreateChatCompletionResponse",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Missing copyWith. Has extra non-spec field (provider) for OpenRouter compat."
     },
     "ChatCompletionRequestMessage": {
@@ -515,7 +547,9 @@
       "dart_class": "ChatMessage",
       "file": "lib/src/models/chat/chat_message.dart",
       "schema": "ChatCompletionRequestMessage",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Spec schema is a oneOf discriminated union, not a verifiable object. Already tracked as sealed_parent via ChatMessage entry."
     },
     "CreateEmbeddingRequest": {
@@ -535,7 +569,9 @@
       "file": "lib/src/models/embeddings/embedding_response.dart",
       "schema": "CreateEmbeddingResponse",
       "tags": [],
-      "excluded_properties": ["usage"]
+      "excluded_properties": [
+        "usage"
+      ]
     },
     "CreateImageRequest": {
       "spec": "main",
@@ -543,7 +579,9 @@
       "dart_class": "ImageGenerateRequest",
       "file": "lib/src/models/images/image_request.dart",
       "schema": "CreateImageRequest",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Missing copyWith. Spec has many new fields (output_format, stream, moderation, background) not yet in Dart."
     },
     "CreateSpeechRequest": {
@@ -552,7 +590,9 @@
       "dart_class": "SpeechRequest",
       "file": "lib/src/models/audio/speech_request.dart",
       "schema": "CreateSpeechRequest",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Missing copyWith. Spec has new fields (instructions, stream_format) not yet in Dart."
     },
     "CreateTranscriptionRequest": {
@@ -561,7 +601,9 @@
       "dart_class": "TranscriptionRequest",
       "file": "lib/src/models/audio/transcription.dart",
       "schema": "CreateTranscriptionRequest",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Missing copyWith. Spec has many new fields (include, stream, chunking_strategy, etc.) not yet in Dart."
     },
     "AssistantObject": {
@@ -586,7 +628,9 @@
       "dart_class": "Run",
       "file": "lib/src/models/runs/run.dart",
       "schema": "RunObject",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Many spec-required fields are intentionally nullable in Dart (required_action, last_error, expires_at, started_at, etc.) because the API returns null for these depending on run state."
     },
     "CompletionUsage": {
@@ -595,7 +639,9 @@
       "dart_class": "Usage",
       "file": "lib/src/models/common/usage.dart",
       "schema": "CompletionUsage",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "completionTokens is nullable for provider compat but spec requires non-null. toString missing promptTokensDetails/completionTokensDetails."
     },
     "ChatCompletionTool": {
@@ -657,7 +703,10 @@
       "file": "lib/src/models/chat/chat_message.dart",
       "schema": "ChatCompletionRequestAssistantMessage",
       "parent": "ChatMessage",
-      "excluded_properties": ["audio", "function_call"]
+      "excluded_properties": [
+        "audio",
+        "function_call"
+      ]
     },
     "ChatCompletionRequestToolMessage": {
       "spec": "main",
@@ -681,7 +730,9 @@
       "dart_class": null,
       "file": null,
       "schema": "ChatCompletionRequestFunctionMessage",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Deprecated in spec. The 'function' role is superseded by 'tool' messages. Not implemented in Dart."
     },
     "ContentPart": {
@@ -717,7 +768,9 @@
       "file": "lib/src/models/chat/content_part.dart",
       "schema": "ChatCompletionRequestMessageContentPartImage",
       "parent": "ContentPart",
-      "excluded_properties": ["image_url"]
+      "excluded_properties": [
+        "image_url"
+      ]
     },
     "ChatCompletionRequestMessageContentPartAudio": {
       "spec": "main",
@@ -726,7 +779,9 @@
       "file": "lib/src/models/chat/content_part.dart",
       "schema": "ChatCompletionRequestMessageContentPartAudio",
       "parent": "ContentPart",
-      "excluded_properties": ["input_audio"]
+      "excluded_properties": [
+        "input_audio"
+      ]
     },
     "ChatCompletionRequestMessageContentPartFile": {
       "spec": "main",
@@ -735,7 +790,9 @@
       "file": "lib/src/models/chat/content_part.dart",
       "schema": "ChatCompletionRequestMessageContentPartFile",
       "parent": "ContentPart",
-      "excluded_properties": ["file"]
+      "excluded_properties": [
+        "file"
+      ]
     },
     "ChatCompletionRequestMessageContentPartRefusal": {
       "spec": "main",
@@ -757,7 +814,9 @@
           "CreateChatCompletionStreamResponse": "chat.completion.chunk"
         }
       },
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Not a sealed class in Dart (plain class). No spec schema. All required spec fields are nullable for provider compat. Has extra provider field for OpenRouter."
     },
     "CreateChatCompletionStreamResponse": {
@@ -767,7 +826,9 @@
       "file": "lib/src/models/streaming/chat_stream_event.dart",
       "schema": "CreateChatCompletionStreamResponse",
       "parent": "ChatStreamEvent",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Dart uses ChatStreamEvent (plain class) instead of separate ChatStreamChunk subclass. Required spec fields (id, choices, created, model, object) are nullable for provider compat."
     },
     "ResponseFormat": {
@@ -810,7 +871,9 @@
       "file": "lib/src/models/common/response_format.dart",
       "schema": "ResponseFormatJsonSchema",
       "parent": "ResponseFormat",
-      "excluded_properties": ["json_schema"]
+      "excluded_properties": [
+        "json_schema"
+      ]
     },
     "TextResponseFormatJsonSchema": {
       "spec": "main",
@@ -819,7 +882,9 @@
       "file": "lib/src/models/common/response_format.dart",
       "schema": "TextResponseFormatJsonSchema",
       "parent": "ResponseFormat",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Shares discriminator value 'json_schema' with ResponseFormatJsonSchema. Both handled by JsonSchemaResponseFormat. TextResponseFormatJsonSchema has flat properties while ResponseFormatJsonSchema nests under json_schema key."
     },
     "ResponseProperties": {
@@ -828,7 +893,9 @@
       "dart_class": null,
       "file": null,
       "schema": "ResponseProperties",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Spec helper schema; properties inlined on CreateResponse and Response. max_output_tokens, reasoning, and truncation moved to inline."
     },
     "ToolChoice": {
@@ -881,7 +948,9 @@
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": "ChatCompletionNamedToolChoice",
       "parent": "ToolChoice",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "toJson() returns Object instead of Map<String, dynamic> because parent sealed class uses string values for other variants. Verifier cannot inspect non-Map toJson."
     },
     "ChatCompletionAllowedToolsChoice": {
@@ -891,7 +960,9 @@
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": "ChatCompletionAllowedToolsChoice",
       "parent": "ToolChoice",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "toJson() returns Object instead of Map<String, dynamic> because parent sealed class uses string values for other variants. Verifier cannot inspect non-Map toJson."
     },
     "ChatCompletionNamedToolChoiceCustom": {
@@ -901,7 +972,9 @@
       "file": "lib/src/models/tools/tool_choice.dart",
       "schema": "ChatCompletionNamedToolChoiceCustom",
       "parent": "ToolChoice",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "toJson() returns Object instead of Map<String, dynamic> because parent sealed class uses string values for other variants. Verifier cannot inspect non-Map toJson."
     },
     "AssistantTool": {
@@ -935,7 +1008,9 @@
       "file": "lib/src/models/assistants/assistant_tool.dart",
       "schema": "AssistantToolsFileSearch",
       "parent": "AssistantTool",
-      "excluded_properties": ["file_search"]
+      "excluded_properties": [
+        "file_search"
+      ]
     },
     "AssistantToolsFunction": {
       "spec": "main",
@@ -944,7 +1019,9 @@
       "file": "lib/src/models/assistants/assistant_tool.dart",
       "schema": "AssistantToolsFunction",
       "parent": "AssistantTool",
-      "excluded_properties": ["function"]
+      "excluded_properties": [
+        "function"
+      ]
     },
     "StepDetails": {
       "spec": "main",
@@ -968,7 +1045,9 @@
       "file": "lib/src/models/runs/run_step.dart",
       "schema": "RunStepDetailsMessageCreationObject",
       "parent": "StepDetails",
-      "excluded_properties": ["message_creation"]
+      "excluded_properties": [
+        "message_creation"
+      ]
     },
     "RunStepDetailsToolCallsObject": {
       "spec": "main",
@@ -1001,7 +1080,9 @@
       "file": "lib/src/models/runs/run_step.dart",
       "schema": "RunStepDetailsToolCallsCodeObject",
       "parent": "StepToolCall",
-      "excluded_properties": ["code_interpreter"]
+      "excluded_properties": [
+        "code_interpreter"
+      ]
     },
     "RunStepDetailsToolCallsFileSearchObject": {
       "spec": "main",
@@ -1018,7 +1099,9 @@
       "file": "lib/src/models/runs/run_step.dart",
       "schema": "RunStepDetailsToolCallsFunctionObject",
       "parent": "StepToolCall",
-      "excluded_properties": ["function"]
+      "excluded_properties": [
+        "function"
+      ]
     },
     "CodeInterpreterOutput": {
       "spec": "main",
@@ -1050,7 +1133,9 @@
       "file": "lib/src/models/runs/run_step.dart",
       "schema": "RunStepDetailsToolCallsCodeOutputImageObject",
       "parent": "CodeInterpreterOutput",
-      "excluded_properties": ["image"]
+      "excluded_properties": [
+        "image"
+      ]
     },
     "MessageContent": {
       "spec": "main",
@@ -1138,7 +1223,9 @@
       "dart_class": null,
       "file": null,
       "schema": "ChatModel",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Package uses String for model IDs, not an enum type."
     },
     "ClickParam": {
@@ -1147,7 +1234,9 @@
       "dart_class": "ClickAction",
       "file": "lib/src/models/responses/tools/computer_action.dart",
       "schema": "ClickParam",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Spec ClickParam maps to Dart ClickAction. Keys property added."
     },
     "ComputerCallOutputStatus": {
@@ -1156,7 +1245,9 @@
       "dart_class": "ItemStatus",
       "file": "lib/src/models/responses/config/item_status.dart",
       "schema": "ComputerCallOutputStatus",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Spec enum maps to existing ItemStatus enum with same values."
     },
     "ComputerToolCallOutputResource": {
@@ -1165,7 +1256,9 @@
       "dart_class": "ComputerCallOutputItem",
       "file": "lib/src/models/responses/items/output_item.dart",
       "schema": "ComputerToolCallOutputResource",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Spec resource maps to Dart ComputerCallOutputItem. createdBy added."
     },
     "ConversationItem": {
@@ -1174,7 +1267,9 @@
       "dart_class": "ConversationItem",
       "file": "lib/src/models/conversations/conversation_item.dart",
       "schema": null,
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Sealed parent with different naming convention. CompactionBody variant added."
     },
     "CreateVideoBody": {
@@ -1183,7 +1278,9 @@
       "dart_class": null,
       "file": null,
       "schema": "CreateVideoBody",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Removed from spec. Replaced by CreateVideoJsonBody/CreateVideoMultipartBody."
     },
     "CreateVideoCharacterBody": {
@@ -1192,7 +1289,9 @@
       "dart_class": null,
       "file": null,
       "schema": "CreateVideoCharacterBody",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Multipart upload deferred; not currently implemented in VideosResource."
     },
     "CreateVideoEditJsonBody": {
@@ -1201,7 +1300,9 @@
       "dart_class": "CreateVideoEditRequest",
       "file": "lib/src/models/videos/video_request.dart",
       "schema": "CreateVideoEditJsonBody",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Spec JSON body maps to Dart CreateVideoEditRequest."
     },
     "CreateVideoEditMultipartBody": {
@@ -1210,7 +1311,9 @@
       "dart_class": null,
       "file": null,
       "schema": "CreateVideoEditMultipartBody",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Multipart variant deferred; JSON variant covers primary use case."
     },
     "CreateVideoExtendJsonBody": {
@@ -1219,7 +1322,9 @@
       "dart_class": "CreateVideoExtendRequest",
       "file": "lib/src/models/videos/video_request.dart",
       "schema": "CreateVideoExtendJsonBody",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Spec JSON body maps to Dart CreateVideoExtendRequest."
     },
     "CreateVideoExtendMultipartBody": {
@@ -1228,7 +1333,9 @@
       "dart_class": null,
       "file": null,
       "schema": "CreateVideoExtendMultipartBody",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Multipart variant deferred; JSON variant covers primary use case."
     },
     "CreateVideoJsonBody": {
@@ -1237,7 +1344,9 @@
       "dart_class": "CreateVideoRequest",
       "file": "lib/src/models/videos/video_request.dart",
       "schema": "CreateVideoJsonBody",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Spec JSON body maps to Dart CreateVideoRequest. inputReference added."
     },
     "CreateVideoMultipartBody": {
@@ -1246,7 +1355,9 @@
       "dart_class": null,
       "file": null,
       "schema": "CreateVideoMultipartBody",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Multipart variant deferred; JSON variant covers primary use case."
     },
     "CustomToolCallOutputResource": {
@@ -1255,7 +1366,9 @@
       "dart_class": "CustomToolCallOutputItem",
       "file": "lib/src/models/responses/items/output_item.dart",
       "schema": "CustomToolCallOutputResource",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Spec resource maps to Dart CustomToolCallOutputItem."
     },
     "CustomToolCallResource": {
@@ -1264,7 +1377,9 @@
       "dart_class": "CustomToolCallItem",
       "file": "lib/src/models/responses/items/output_item.dart",
       "schema": "CustomToolCallResource",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Spec resource maps to Dart CustomToolCallItem."
     },
     "DoubleClickAction": {
@@ -1273,7 +1388,9 @@
       "dart_class": "DoubleClickAction",
       "file": "lib/src/models/responses/tools/computer_action.dart",
       "schema": "DoubleClickAction",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Keys property added."
     },
     "DragParam": {
@@ -1282,7 +1399,9 @@
       "dart_class": "DragAction",
       "file": "lib/src/models/responses/tools/computer_action.dart",
       "schema": "DragParam",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Spec DragParam maps to Dart DragAction. Keys property added."
     },
     "FileDetailEnum": {
@@ -1291,7 +1410,9 @@
       "dart_class": "FileInputDetail",
       "file": "lib/src/models/responses/content/input_content.dart",
       "schema": "FileDetailEnum",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Identical to FileInputDetail; single Dart enum serves both schemas."
     },
     "FileInputDetail": {
@@ -1300,8 +1421,10 @@
       "dart_class": "FileInputDetail",
       "file": "lib/src/models/responses/content/input_content.dart",
       "schema": "FileInputDetail",
-      "tags": ["acknowledged"],
-      "note": "Enum co-located in input_content.dart with InputFileContent."
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Enum co-located in input_content.dart with InputFileContent. GPT-5.6 sync: auto value added."
     },
     "FunctionToolCallOutputResource": {
       "spec": "main",
@@ -1309,7 +1432,9 @@
       "dart_class": "FunctionCallOutputItemResponse",
       "file": "lib/src/models/responses/items/output_item.dart",
       "schema": "FunctionToolCallOutputResource",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Spec resource maps to existing Dart type. createdBy added."
     },
     "FunctionToolCallResource": {
@@ -1318,7 +1443,9 @@
       "dart_class": "FunctionCallOutputItemResponse",
       "file": "lib/src/models/responses/items/output_item.dart",
       "schema": "FunctionToolCallResource",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Spec resource maps to existing function call output item. createdBy added."
     },
     "FunctionToolParam": {
@@ -1327,7 +1454,9 @@
       "dart_class": "FunctionTool",
       "file": "lib/src/models/responses/tools/response_tool.dart",
       "schema": "FunctionToolParam",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "defer_loading already implemented in FunctionTool."
     },
     "InputFileContent": {
@@ -1336,7 +1465,9 @@
       "dart_class": "InputFileContent",
       "file": "lib/src/models/responses/content/input_content.dart",
       "schema": "InputFileContent",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Manual class with detail property. Serves both InputFileContent and InputFileContentParam roles."
     },
     "InputFileContentParam": {
@@ -1345,7 +1476,9 @@
       "dart_class": "InputFileContent",
       "file": "lib/src/models/responses/content/input_content.dart",
       "schema": "InputFileContentParam",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "No separate Param class; InputFileContent serves both roles."
     },
     "ItemResource": {
@@ -1354,7 +1487,9 @@
       "dart_class": null,
       "file": "lib/src/models/responses/items/output_item.dart",
       "schema": null,
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Sealed parent union of output items. Custom tool variants added."
     },
     "MoveParam": {
@@ -1363,7 +1498,9 @@
       "dart_class": "MoveAction",
       "file": "lib/src/models/responses/tools/computer_action.dart",
       "schema": "MoveParam",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Spec MoveParam maps to Dart MoveAction. Keys property added."
     },
     "OutputItem": {
@@ -1372,8 +1509,10 @@
       "dart_class": "OutputItem",
       "file": "lib/src/models/responses/items/output_item.dart",
       "schema": null,
-      "tags": ["acknowledged"],
-      "note": "Sealed parent. Custom tool variants added."
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Sealed parent. Custom tool variants added. GPT-5.6 sync: program/program_output (ProgramOutputItemResponse/ProgramOutputResultItem) and beta multi-agent agent_message/multi_agent_call/multi_agent_call_output variants added; caller (ToolCallCaller) added to function/custom tool call items; nullable agent (AgentTag) added to all variants with beta multi-agent twins; caller added to shell_call/shell_call_output."
     },
     "ScrollParam": {
       "spec": "main",
@@ -1381,7 +1520,9 @@
       "dart_class": "ScrollAction",
       "file": "lib/src/models/responses/tools/computer_action.dart",
       "schema": "ScrollParam",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Spec ScrollParam maps to Dart ScrollAction. Keys property added."
     },
     "VideoCharacterResource": {
@@ -1390,7 +1531,9 @@
       "dart_class": "VideoCharacter",
       "file": "lib/src/models/videos/video.dart",
       "schema": "VideoCharacterResource",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Spec resource maps to Dart VideoCharacter."
     },
     "VideoReferenceInputParam": {
@@ -1399,7 +1542,9 @@
       "dart_class": null,
       "file": null,
       "schema": "VideoReferenceInputParam",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Video ID passed as String in request types, no separate class."
     },
     "VoiceIdsOrCustomVoice": {
@@ -1408,7 +1553,9 @@
       "dart_class": null,
       "file": null,
       "schema": "VoiceIdsOrCustomVoice",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Deferred. Current voice enums sufficient for known voice IDs."
     },
     "Message": {
@@ -1417,7 +1564,9 @@
       "dart_class": null,
       "file": null,
       "schema": "Message",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Maps to multiple Dart classes: MessageItem (responses input), MessageOutputItem (responses output), ConversationMessageItem (conversations). Not a single verifiable object."
     },
     "MessagePhase-2": {
@@ -1433,7 +1582,9 @@
       "dart_class": null,
       "file": null,
       "schema": "OAuthErrorCode",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Orphan schema used only on OAuthError exception in Python SDK. No endpoint or request/response model references it. OAuth error handling not yet in Dart."
     },
     "PromptCacheRetentionEnum": {
@@ -1442,7 +1593,9 @@
       "dart_class": "PromptCacheRetention",
       "file": "lib/src/models/responses/config/prompt_cache_retention.dart",
       "schema": "PromptCacheRetentionEnum",
-      "tags": ["acknowledged"],
+      "tags": [
+        "acknowledged"
+      ],
       "note": "Spec inconsistency: this named enum uses 'in_memory' (underscore) but the inline ModelResponseProperties.prompt_cache_retention used by chat/responses still uses 'in-memory' (hyphen). The Dart PromptCacheRetention enum maps inMemory -> 'in-memory'; CompactResponseRequest serializes/deserializes 'in_memory' explicitly to bridge the gap. Marked skip to avoid verifier flagging the value mismatch."
     },
     "CompactResponseMethodPublicBody": {
@@ -1452,6 +1605,175 @@
       "file": "lib/src/models/responses/compact_response_request.dart",
       "schema": "CompactResponseMethodPublicBody",
       "tags": []
+    },
+    "ModerationMode": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ModerationMode",
+      "file": "lib/src/models/moderations/moderation_policy.dart",
+      "schema": "ModerationMode",
+      "note": "Also covers identical BetaModerationMode."
+    },
+    "ModerationConfigParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ModerationConfigParam",
+      "file": "lib/src/models/moderations/moderation_policy.dart",
+      "schema": "ModerationConfigParam",
+      "note": "Also covers identical BetaModerationConfigParam."
+    },
+    "ModerationPolicyParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ModerationPolicyParam",
+      "file": "lib/src/models/moderations/moderation_policy.dart",
+      "schema": "ModerationPolicyParam",
+      "note": "Also covers identical BetaModerationPolicyParam."
+    },
+    "PromptCacheModeEnum": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "PromptCacheMode",
+      "file": "lib/src/models/responses/config/prompt_cache_options.dart",
+      "schema": "PromptCacheModeEnum",
+      "note": "Also covers identical BetaPromptCacheModeEnum."
+    },
+    "PromptCacheTTLEnum": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "PromptCacheTtl",
+      "file": "lib/src/models/responses/config/prompt_cache_options.dart",
+      "schema": "PromptCacheTTLEnum",
+      "note": "Wire value '30m' is the minutes30 member. Also covers identical Beta twin."
+    },
+    "PromptCacheOptions": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PromptCacheOptions",
+      "file": "lib/src/models/responses/config/prompt_cache_options.dart",
+      "schema": "PromptCacheOptions",
+      "note": "Response echo (mode/ttl required). Also covers identical Beta twin."
+    },
+    "PromptCacheOptionsParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PromptCacheOptionsParam",
+      "file": "lib/src/models/responses/config/prompt_cache_options.dart",
+      "schema": "PromptCacheOptionsParam",
+      "note": "Request param (mode/ttl optional). Also covers identical Beta twin."
+    },
+    "PromptCacheBreakpointConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "PromptCacheBreakpointConfig",
+      "file": "lib/src/models/common/prompt_cache_breakpoint.dart",
+      "schema": "PromptCacheBreakpointConfig",
+      "note": "Single const field mode='explicit' (getter). One class serves PromptCacheBreakpointConfig, PromptCacheBreakpointParam, and Beta twins."
+    },
+    "ReasoningModeEnum": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ReasoningMode",
+      "file": "lib/src/models/responses/config/reasoning_mode.dart",
+      "schema": "ReasoningModeEnum",
+      "note": "Open string enum (anyOf string | {standard, pro}) modeled as a sealed union with standard/pro variants plus a custom string variant, following Personality. Also covers identical BetaReasoningModeEnum."
+    },
+    "ToolCallCaller": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ToolCallCaller",
+      "file": "lib/src/models/responses/tools/tool_call_caller.dart",
+      "schema": "ToolCallCaller",
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "DirectToolCallCaller": "direct",
+          "ProgramToolCallCaller": "program"
+        }
+      },
+      "note": "Also covers structurally identical ToolCallCallerParam and Beta twins."
+    },
+    "DirectToolCallCaller": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "DirectToolCallCaller",
+      "file": "lib/src/models/responses/tools/tool_call_caller.dart",
+      "schema": "DirectToolCallCaller",
+      "parent": "ToolCallCaller",
+      "note": "Also covers DirectToolCallCallerParam and Beta twins."
+    },
+    "ProgramToolCallCaller": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ProgramToolCallCaller",
+      "file": "lib/src/models/responses/tools/tool_call_caller.dart",
+      "schema": "ProgramToolCallCaller",
+      "parent": "ToolCallCaller",
+      "note": "Also covers ProgramToolCallCallerParam and Beta twins."
+    },
+    "CallableToolAllowedCaller": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "CallableToolAllowedCaller",
+      "file": "lib/src/models/responses/tools/tool_call_caller.dart",
+      "schema": "CallableToolAllowedCaller",
+      "note": "Also covers identical Beta twin."
+    },
+    "ProgramOutputStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ProgramOutputStatus",
+      "file": "lib/src/models/responses/config/program_output_status.dart",
+      "schema": "ProgramOutputStatus",
+      "note": "Also covers identical ProgramOutputItemStatus and Beta twins."
+    },
+    "BetaAgentTag": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "AgentTag",
+      "file": "lib/src/models/responses/multi_agent/agent_tag.dart",
+      "schema": "BetaAgentTag",
+      "note": "Also covers identical Beta_AgentTagParam."
+    },
+    "BetaMultiAgentAction": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "MultiAgentAction",
+      "file": "lib/src/models/responses/multi_agent/multi_agent_action.dart",
+      "schema": "BetaMultiAgentAction",
+      "note": "Also covers identical BetaMultiAgentAction1."
+    },
+    "BetaMultiAgentParam": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "MultiAgentConfig",
+      "file": "lib/src/models/responses/multi_agent/multi_agent_config.dart",
+      "schema": "BetaMultiAgentParam",
+      "note": "Multi-agent beta config; set via CreateResponseRequest.multiAgent with beta: true on the resource call."
+    },
+    "BetaResponseInjectEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseInjectEvent",
+      "file": "lib/src/models/responses/multi_agent/response_inject_event.dart",
+      "schema": "BetaResponseInjectEvent",
+      "note": "Beta multi-agent WebSocket protocol event; no HTTP path in spec, no transport wired (data model only)."
+    },
+    "BetaResponseInjectCreatedEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseInjectCreatedEvent",
+      "file": "lib/src/models/responses/multi_agent/response_inject_event.dart",
+      "schema": "BetaResponseInjectCreatedEvent",
+      "note": "Beta multi-agent WebSocket protocol event; data model only."
+    },
+    "BetaResponseInjectFailedEvent": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ResponseInjectFailedEvent",
+      "file": "lib/src/models/responses/multi_agent/response_inject_event.dart",
+      "schema": "BetaResponseInjectFailedEvent",
+      "note": "Beta multi-agent WebSocket protocol event; data model only. Inline error object modeled as ResponseInjectError + ResponseInjectErrorCode."
     }
   }
 }

@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/prompt_cache_breakpoint.dart';
 
 /// A part of a multimodal message content.
 ///
@@ -92,25 +93,48 @@ sealed class ContentPart {
 @immutable
 class TextContentPart extends ContentPart {
   /// Creates a [TextContentPart].
-  const TextContentPart({required this.text});
+  const TextContentPart({required this.text, this.promptCacheBreakpoint});
 
   /// Creates a [TextContentPart] from JSON.
   factory TextContentPart.fromJson(Map<String, dynamic> json) {
-    return TextContentPart(text: json['text'] as String);
+    return TextContentPart(
+      text: json['text'] as String,
+      promptCacheBreakpoint: json['prompt_cache_breakpoint'] != null
+          ? PromptCacheBreakpointConfig.fromJson(
+              json['prompt_cache_breakpoint'] as Map<String, dynamic>,
+            )
+          : null,
+    );
   }
 
   /// The text content.
   final String text;
 
+  /// Cache breakpoint marker for this content block.
+  final PromptCacheBreakpointConfig? promptCacheBreakpoint;
+
   @override
   String get type => 'text';
 
   @override
-  Map<String, dynamic> toJson() => {'type': type, 'text': text};
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'text': text,
+    if (promptCacheBreakpoint != null)
+      'prompt_cache_breakpoint': promptCacheBreakpoint!.toJson(),
+  };
 
   /// Creates a copy with the given fields replaced.
-  TextContentPart copyWith({String? text}) {
-    return TextContentPart(text: text ?? this.text);
+  TextContentPart copyWith({
+    String? text,
+    Object? promptCacheBreakpoint = unsetCopyWithValue,
+  }) {
+    return TextContentPart(
+      text: text ?? this.text,
+      promptCacheBreakpoint: promptCacheBreakpoint == unsetCopyWithValue
+          ? this.promptCacheBreakpoint
+          : promptCacheBreakpoint as PromptCacheBreakpointConfig?,
+    );
   }
 
   @override
@@ -118,20 +142,26 @@ class TextContentPart extends ContentPart {
       identical(this, other) ||
       other is TextContentPart &&
           runtimeType == other.runtimeType &&
-          text == other.text;
+          text == other.text &&
+          promptCacheBreakpoint == other.promptCacheBreakpoint;
 
   @override
-  int get hashCode => text.hashCode;
+  int get hashCode => Object.hash(text, promptCacheBreakpoint);
 
   @override
-  String toString() => 'ContentPart.text($text)';
+  String toString() =>
+      'ContentPart.text($text, promptCacheBreakpoint: $promptCacheBreakpoint)';
 }
 
 /// An image URL content part.
 @immutable
 class ImageContentPart extends ContentPart {
   /// Creates an [ImageContentPart].
-  const ImageContentPart({required this.url, this.detail});
+  const ImageContentPart({
+    required this.url,
+    this.detail,
+    this.promptCacheBreakpoint,
+  });
 
   /// Creates an [ImageContentPart] from JSON.
   factory ImageContentPart.fromJson(Map<String, dynamic> json) {
@@ -140,6 +170,11 @@ class ImageContentPart extends ContentPart {
       url: imageUrl['url'] as String,
       detail: imageUrl['detail'] != null
           ? ImageDetail.fromJson(imageUrl['detail'] as String)
+          : null,
+      promptCacheBreakpoint: json['prompt_cache_breakpoint'] != null
+          ? PromptCacheBreakpointConfig.fromJson(
+              json['prompt_cache_breakpoint'] as Map<String, dynamic>,
+            )
           : null,
     );
   }
@@ -160,6 +195,9 @@ class ImageContentPart extends ContentPart {
   /// - [ImageDetail.auto]: Let the model decide (default)
   final ImageDetail? detail;
 
+  /// Cache breakpoint marker for this content block.
+  final PromptCacheBreakpointConfig? promptCacheBreakpoint;
+
   @override
   String get type => 'image_url';
 
@@ -167,18 +205,24 @@ class ImageContentPart extends ContentPart {
   Map<String, dynamic> toJson() => {
     'type': type,
     'image_url': {'url': url, if (detail != null) 'detail': detail!.toJson()},
+    if (promptCacheBreakpoint != null)
+      'prompt_cache_breakpoint': promptCacheBreakpoint!.toJson(),
   };
 
   /// Creates a copy with the given fields replaced.
   ImageContentPart copyWith({
     String? url,
     Object? detail = unsetCopyWithValue,
+    Object? promptCacheBreakpoint = unsetCopyWithValue,
   }) {
     return ImageContentPart(
       url: url ?? this.url,
       detail: detail == unsetCopyWithValue
           ? this.detail
           : detail as ImageDetail?,
+      promptCacheBreakpoint: promptCacheBreakpoint == unsetCopyWithValue
+          ? this.promptCacheBreakpoint
+          : promptCacheBreakpoint as PromptCacheBreakpointConfig?,
     );
   }
 
@@ -188,20 +232,26 @@ class ImageContentPart extends ContentPart {
       other is ImageContentPart &&
           runtimeType == other.runtimeType &&
           url == other.url &&
-          detail == other.detail;
+          detail == other.detail &&
+          promptCacheBreakpoint == other.promptCacheBreakpoint;
 
   @override
-  int get hashCode => Object.hash(url, detail);
+  int get hashCode => Object.hash(url, detail, promptCacheBreakpoint);
 
   @override
-  String toString() => 'ContentPart.imageUrl($url)';
+  String toString() =>
+      'ContentPart.imageUrl($url, promptCacheBreakpoint: $promptCacheBreakpoint)';
 }
 
 /// An audio content part for audio input.
 @immutable
 class AudioContentPart extends ContentPart {
   /// Creates an [AudioContentPart].
-  const AudioContentPart({required this.data, required this.format});
+  const AudioContentPart({
+    required this.data,
+    required this.format,
+    this.promptCacheBreakpoint,
+  });
 
   /// Creates an [AudioContentPart] from JSON.
   factory AudioContentPart.fromJson(Map<String, dynamic> json) {
@@ -209,6 +259,11 @@ class AudioContentPart extends ContentPart {
     return AudioContentPart(
       data: inputAudio['data'] as String,
       format: AudioFormat.fromJson(inputAudio['format'] as String),
+      promptCacheBreakpoint: json['prompt_cache_breakpoint'] != null
+          ? PromptCacheBreakpointConfig.fromJson(
+              json['prompt_cache_breakpoint'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
@@ -218,6 +273,9 @@ class AudioContentPart extends ContentPart {
   /// The format of the audio data.
   final AudioFormat format;
 
+  /// Cache breakpoint marker for this content block.
+  final PromptCacheBreakpointConfig? promptCacheBreakpoint;
+
   @override
   String get type => 'input_audio';
 
@@ -225,13 +283,22 @@ class AudioContentPart extends ContentPart {
   Map<String, dynamic> toJson() => {
     'type': type,
     'input_audio': {'data': data, 'format': format.toJson()},
+    if (promptCacheBreakpoint != null)
+      'prompt_cache_breakpoint': promptCacheBreakpoint!.toJson(),
   };
 
   /// Creates a copy with the given fields replaced.
-  AudioContentPart copyWith({String? data, AudioFormat? format}) {
+  AudioContentPart copyWith({
+    String? data,
+    AudioFormat? format,
+    Object? promptCacheBreakpoint = unsetCopyWithValue,
+  }) {
     return AudioContentPart(
       data: data ?? this.data,
       format: format ?? this.format,
+      promptCacheBreakpoint: promptCacheBreakpoint == unsetCopyWithValue
+          ? this.promptCacheBreakpoint
+          : promptCacheBreakpoint as PromptCacheBreakpointConfig?,
     );
   }
 
@@ -241,13 +308,15 @@ class AudioContentPart extends ContentPart {
       other is AudioContentPart &&
           runtimeType == other.runtimeType &&
           data == other.data &&
-          format == other.format;
+          format == other.format &&
+          promptCacheBreakpoint == other.promptCacheBreakpoint;
 
   @override
-  int get hashCode => Object.hash(data, format);
+  int get hashCode => Object.hash(data, format, promptCacheBreakpoint);
 
   @override
-  String toString() => 'ContentPart.inputAudio(${format.name})';
+  String toString() =>
+      'ContentPart.inputAudio(${format.name}, promptCacheBreakpoint: $promptCacheBreakpoint)';
 }
 
 /// A file content part for document/file inputs.
@@ -261,7 +330,12 @@ class AudioContentPart extends ContentPart {
 @immutable
 class FileContentPart extends ContentPart {
   /// Creates a [FileContentPart].
-  const FileContentPart({this.fileId, this.fileData, this.filename});
+  const FileContentPart({
+    this.fileId,
+    this.fileData,
+    this.filename,
+    this.promptCacheBreakpoint,
+  });
 
   /// Creates a [FileContentPart] from JSON.
   factory FileContentPart.fromJson(Map<String, dynamic> json) {
@@ -270,6 +344,11 @@ class FileContentPart extends ContentPart {
       fileId: file['file_id'] as String?,
       fileData: file['file_data'] as String?,
       filename: file['filename'] as String?,
+      promptCacheBreakpoint: json['prompt_cache_breakpoint'] != null
+          ? PromptCacheBreakpointConfig.fromJson(
+              json['prompt_cache_breakpoint'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
@@ -284,6 +363,9 @@ class FileContentPart extends ContentPart {
   /// The name of the file.
   final String? filename;
 
+  /// Cache breakpoint marker for this content block.
+  final PromptCacheBreakpointConfig? promptCacheBreakpoint;
+
   @override
   String get type => 'file';
 
@@ -295,6 +377,8 @@ class FileContentPart extends ContentPart {
       if (fileData != null) 'file_data': fileData,
       if (filename != null) 'filename': filename,
     },
+    if (promptCacheBreakpoint != null)
+      'prompt_cache_breakpoint': promptCacheBreakpoint!.toJson(),
   };
 
   /// Creates a copy with the given fields replaced.
@@ -302,6 +386,7 @@ class FileContentPart extends ContentPart {
     Object? fileId = unsetCopyWithValue,
     Object? fileData = unsetCopyWithValue,
     Object? filename = unsetCopyWithValue,
+    Object? promptCacheBreakpoint = unsetCopyWithValue,
   }) {
     return FileContentPart(
       fileId: fileId == unsetCopyWithValue ? this.fileId : fileId as String?,
@@ -311,6 +396,9 @@ class FileContentPart extends ContentPart {
       filename: filename == unsetCopyWithValue
           ? this.filename
           : filename as String?,
+      promptCacheBreakpoint: promptCacheBreakpoint == unsetCopyWithValue
+          ? this.promptCacheBreakpoint
+          : promptCacheBreakpoint as PromptCacheBreakpointConfig?,
     );
   }
 
@@ -321,14 +409,16 @@ class FileContentPart extends ContentPart {
           runtimeType == other.runtimeType &&
           fileId == other.fileId &&
           fileData == other.fileData &&
-          filename == other.filename;
+          filename == other.filename &&
+          promptCacheBreakpoint == other.promptCacheBreakpoint;
 
   @override
-  int get hashCode => Object.hash(fileId, fileData, filename);
+  int get hashCode =>
+      Object.hash(fileId, fileData, filename, promptCacheBreakpoint);
 
   @override
   String toString() =>
-      'ContentPart.file(fileId: $fileId, hasFileData: ${fileData != null}, filename: $filename)';
+      'ContentPart.file(fileId: $fileId, hasFileData: ${fileData != null}, filename: $filename, promptCacheBreakpoint: $promptCacheBreakpoint)';
 }
 
 /// A refusal content part indicating the model declined to respond.

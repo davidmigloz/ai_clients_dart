@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../../chat/content_part.dart' show ImageDetail;
+import '../../common/prompt_cache_breakpoint.dart';
 
 /// Input content for messages.
 ///
@@ -73,6 +74,8 @@ sealed class InputContent {
       'input_image' => InputImageContent.fromJson(json),
       'input_file' => InputFileContent.fromJson(json),
       'input_video' => InputVideoContent.fromJson(json),
+      'computer_screenshot' => ComputerScreenshotContent.fromJson(json),
+      'encrypted_content' => EncryptedContent.fromJson(json),
       _ => throw FormatException('Unknown InputContent type: $type'),
     };
   }
@@ -90,29 +93,46 @@ class InputTextContent extends InputContent {
   /// The text content.
   final String text;
 
+  /// Cache breakpoint marker for this content block.
+  final PromptCacheBreakpointConfig? promptCacheBreakpoint;
+
   /// Creates an [InputTextContent].
-  const InputTextContent(this.text);
+  const InputTextContent(this.text, {this.promptCacheBreakpoint});
 
   /// Creates an [InputTextContent] from JSON.
   factory InputTextContent.fromJson(Map<String, dynamic> json) {
-    return InputTextContent(json['text'] as String);
+    return InputTextContent(
+      json['text'] as String,
+      promptCacheBreakpoint: json['prompt_cache_breakpoint'] != null
+          ? PromptCacheBreakpointConfig.fromJson(
+              json['prompt_cache_breakpoint'] as Map<String, dynamic>,
+            )
+          : null,
+    );
   }
 
   @override
-  Map<String, dynamic> toJson() => {'type': 'input_text', 'text': text};
+  Map<String, dynamic> toJson() => {
+    'type': 'input_text',
+    'text': text,
+    if (promptCacheBreakpoint != null)
+      'prompt_cache_breakpoint': promptCacheBreakpoint!.toJson(),
+  };
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is InputTextContent &&
           runtimeType == other.runtimeType &&
-          text == other.text;
+          text == other.text &&
+          promptCacheBreakpoint == other.promptCacheBreakpoint;
 
   @override
-  int get hashCode => text.hashCode;
+  int get hashCode => Object.hash(text, promptCacheBreakpoint);
 
   @override
-  String toString() => 'InputTextContent(text: $text)';
+  String toString() =>
+      'InputTextContent(text: $text, promptCacheBreakpoint: $promptCacheBreakpoint)';
 }
 
 /// Text content for assistant messages.
@@ -164,22 +184,35 @@ class InputImageContent extends InputContent {
   /// Optional detail level.
   final ImageDetail? detail;
 
+  /// Cache breakpoint marker for this content block.
+  final PromptCacheBreakpointConfig? promptCacheBreakpoint;
+
   /// Creates an [InputImageContent] with URL or file ID.
-  const InputImageContent({this.imageUrl, this.fileId, this.detail})
-    : assert(
-        imageUrl != null || fileId != null,
-        'Either imageUrl or fileId must be provided',
-      );
+  const InputImageContent({
+    this.imageUrl,
+    this.fileId,
+    this.detail,
+    this.promptCacheBreakpoint,
+  }) : assert(
+         imageUrl != null || fileId != null,
+         'Either imageUrl or fileId must be provided',
+       );
 
   /// Creates an [InputImageContent] from a URL.
-  const InputImageContent.url(String url, {this.detail})
-    : imageUrl = url,
-      fileId = null;
+  const InputImageContent.url(
+    String url, {
+    this.detail,
+    this.promptCacheBreakpoint,
+  }) : imageUrl = url,
+       fileId = null;
 
   /// Creates an [InputImageContent] from a file ID.
-  const InputImageContent.file(String id, {this.detail})
-    : imageUrl = null,
-      fileId = id;
+  const InputImageContent.file(
+    String id, {
+    this.detail,
+    this.promptCacheBreakpoint,
+  }) : imageUrl = null,
+       fileId = id;
 
   /// Creates an [InputImageContent] from JSON.
   factory InputImageContent.fromJson(Map<String, dynamic> json) {
@@ -188,6 +221,11 @@ class InputImageContent extends InputContent {
       fileId: json['file_id'] as String?,
       detail: json['detail'] != null
           ? ImageDetail.fromJson(json['detail'] as String)
+          : null,
+      promptCacheBreakpoint: json['prompt_cache_breakpoint'] != null
+          ? PromptCacheBreakpointConfig.fromJson(
+              json['prompt_cache_breakpoint'] as Map<String, dynamic>,
+            )
           : null,
     );
   }
@@ -198,6 +236,8 @@ class InputImageContent extends InputContent {
     if (imageUrl != null) 'image_url': imageUrl,
     if (fileId != null) 'file_id': fileId,
     if (detail != null) 'detail': detail!.toJson(),
+    if (promptCacheBreakpoint != null)
+      'prompt_cache_breakpoint': promptCacheBreakpoint!.toJson(),
   };
 
   @override
@@ -207,14 +247,16 @@ class InputImageContent extends InputContent {
           runtimeType == other.runtimeType &&
           imageUrl == other.imageUrl &&
           fileId == other.fileId &&
-          detail == other.detail;
+          detail == other.detail &&
+          promptCacheBreakpoint == other.promptCacheBreakpoint;
 
   @override
-  int get hashCode => Object.hash(imageUrl, fileId, detail);
+  int get hashCode =>
+      Object.hash(imageUrl, fileId, detail, promptCacheBreakpoint);
 
   @override
   String toString() =>
-      'InputImageContent(imageUrl: $imageUrl, fileId: $fileId, detail: $detail)';
+      'InputImageContent(imageUrl: $imageUrl, fileId: $fileId, detail: $detail, promptCacheBreakpoint: $promptCacheBreakpoint)';
 }
 
 /// File content via URL, file ID, or base64-encoded data.
@@ -238,6 +280,9 @@ class InputFileContent extends InputContent {
   /// Optional detail level for file processing.
   final FileInputDetail? detail;
 
+  /// Cache breakpoint marker for this content block.
+  final PromptCacheBreakpointConfig? promptCacheBreakpoint;
+
   /// Creates an [InputFileContent].
   const InputFileContent({
     this.fileUrl,
@@ -245,19 +290,28 @@ class InputFileContent extends InputContent {
     this.fileData,
     this.filename,
     this.detail,
+    this.promptCacheBreakpoint,
   });
 
   /// Creates an [InputFileContent] from a URL.
-  const InputFileContent.url(String url, {this.filename, this.detail})
-    : fileUrl = url,
-      fileId = null,
-      fileData = null;
+  const InputFileContent.url(
+    String url, {
+    this.filename,
+    this.detail,
+    this.promptCacheBreakpoint,
+  }) : fileUrl = url,
+       fileId = null,
+       fileData = null;
 
   /// Creates an [InputFileContent] from a file ID.
-  const InputFileContent.file(String id, {this.filename, this.detail})
-    : fileUrl = null,
-      fileId = id,
-      fileData = null;
+  const InputFileContent.file(
+    String id, {
+    this.filename,
+    this.detail,
+    this.promptCacheBreakpoint,
+  }) : fileUrl = null,
+       fileId = id,
+       fileData = null;
 
   /// Creates an [InputFileContent] from base64-encoded data.
   ///
@@ -270,6 +324,7 @@ class InputFileContent extends InputContent {
     required String mediaType,
     this.filename,
     this.detail,
+    this.promptCacheBreakpoint,
   }) : fileUrl = null,
        fileId = null,
        fileData = 'data:$mediaType;base64,$data';
@@ -284,6 +339,11 @@ class InputFileContent extends InputContent {
       detail: json['detail'] != null
           ? FileInputDetail.fromJson(json['detail'] as String)
           : null,
+      promptCacheBreakpoint: json['prompt_cache_breakpoint'] != null
+          ? PromptCacheBreakpointConfig.fromJson(
+              json['prompt_cache_breakpoint'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
@@ -295,6 +355,8 @@ class InputFileContent extends InputContent {
     if (fileData != null) 'file_data': fileData,
     if (filename != null) 'filename': filename,
     if (detail != null) 'detail': detail!.toJson(),
+    if (promptCacheBreakpoint != null)
+      'prompt_cache_breakpoint': promptCacheBreakpoint!.toJson(),
   };
 
   @override
@@ -306,14 +368,22 @@ class InputFileContent extends InputContent {
           fileId == other.fileId &&
           fileData == other.fileData &&
           filename == other.filename &&
-          detail == other.detail;
+          detail == other.detail &&
+          promptCacheBreakpoint == other.promptCacheBreakpoint;
 
   @override
-  int get hashCode => Object.hash(fileUrl, fileId, fileData, filename, detail);
+  int get hashCode => Object.hash(
+    fileUrl,
+    fileId,
+    fileData,
+    filename,
+    detail,
+    promptCacheBreakpoint,
+  );
 
   @override
   String toString() =>
-      'InputFileContent(fileUrl: $fileUrl, fileId: $fileId, fileData: $fileData, filename: $filename, detail: $detail)';
+      'InputFileContent(fileUrl: $fileUrl, fileId: $fileId, fileData: $fileData, filename: $filename, detail: $detail, promptCacheBreakpoint: $promptCacheBreakpoint)';
 }
 
 /// Video content via URL.
@@ -350,13 +420,144 @@ class InputVideoContent extends InputContent {
   String toString() => 'InputVideoContent(videoUrl: $videoUrl)';
 }
 
+/// A screenshot of a computer, used as input for the computer use tool.
+@immutable
+class ComputerScreenshotContent extends InputContent {
+  /// The URL of the screenshot image.
+  final String? imageUrl;
+
+  /// The identifier of an uploaded file that contains the screenshot.
+  final String? fileId;
+
+  /// The detail level of the screenshot image to be sent to the model.
+  final ImageDetail? detail;
+
+  /// Cache breakpoint marker for this content block.
+  final PromptCacheBreakpointConfig? promptCacheBreakpoint;
+
+  /// Creates a [ComputerScreenshotContent] with URL or file ID.
+  const ComputerScreenshotContent({
+    this.imageUrl,
+    this.fileId,
+    this.detail,
+    this.promptCacheBreakpoint,
+  }) : assert(
+         imageUrl != null || fileId != null,
+         'Either imageUrl or fileId must be provided',
+       );
+
+  /// Creates a [ComputerScreenshotContent] from a URL.
+  const ComputerScreenshotContent.url(
+    String url, {
+    this.detail,
+    this.promptCacheBreakpoint,
+  }) : imageUrl = url,
+       fileId = null;
+
+  /// Creates a [ComputerScreenshotContent] from a file ID.
+  const ComputerScreenshotContent.file(
+    String id, {
+    this.detail,
+    this.promptCacheBreakpoint,
+  }) : imageUrl = null,
+       fileId = id;
+
+  /// Creates a [ComputerScreenshotContent] from JSON.
+  factory ComputerScreenshotContent.fromJson(Map<String, dynamic> json) {
+    return ComputerScreenshotContent(
+      imageUrl: json['image_url'] as String?,
+      fileId: json['file_id'] as String?,
+      detail: json['detail'] != null
+          ? ImageDetail.fromJson(json['detail'] as String)
+          : null,
+      promptCacheBreakpoint: json['prompt_cache_breakpoint'] != null
+          ? PromptCacheBreakpointConfig.fromJson(
+              json['prompt_cache_breakpoint'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'computer_screenshot',
+    if (imageUrl != null) 'image_url': imageUrl,
+    if (fileId != null) 'file_id': fileId,
+    if (detail != null) 'detail': detail!.toJson(),
+    if (promptCacheBreakpoint != null)
+      'prompt_cache_breakpoint': promptCacheBreakpoint!.toJson(),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ComputerScreenshotContent &&
+          runtimeType == other.runtimeType &&
+          imageUrl == other.imageUrl &&
+          fileId == other.fileId &&
+          detail == other.detail &&
+          promptCacheBreakpoint == other.promptCacheBreakpoint;
+
+  @override
+  int get hashCode =>
+      Object.hash(imageUrl, fileId, detail, promptCacheBreakpoint);
+
+  @override
+  String toString() =>
+      'ComputerScreenshotContent(imageUrl: $imageUrl, fileId: $fileId, detail: $detail, promptCacheBreakpoint: $promptCacheBreakpoint)';
+}
+
+/// Opaque encrypted content that the Responses API decrypts inside trusted
+/// model execution.
+///
+/// This belongs to the beta multi-agent protocol
+/// (`OpenAI-Beta: responses_multi_agent=v1`).
+@immutable
+class EncryptedContent extends InputContent {
+  /// Opaque encrypted content.
+  final String encryptedContent;
+
+  /// Creates an [EncryptedContent].
+  const EncryptedContent(this.encryptedContent);
+
+  /// Creates an [EncryptedContent] from JSON.
+  factory EncryptedContent.fromJson(Map<String, dynamic> json) {
+    return EncryptedContent(json['encrypted_content'] as String);
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'encrypted_content',
+    'encrypted_content': encryptedContent,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EncryptedContent &&
+          runtimeType == other.runtimeType &&
+          encryptedContent == other.encryptedContent;
+
+  @override
+  int get hashCode => encryptedContent.hashCode;
+
+  @override
+  String toString() => 'EncryptedContent(encryptedContent: $encryptedContent)';
+}
+
 /// Detail level for file inputs.
 ///
-/// Controls how the model processes file content. Use `low` for the default
-/// rendering behavior, or `high` to render the file at higher quality.
+/// Controls how the model processes file content. Use `auto` to let the
+/// system select the detail level; for GPT-5.6 and later models, `auto` uses
+/// high-quality rendering, which may increase input token usage. Use `low`
+/// for lower-cost rendering, or `high` to render the file at higher quality.
+/// Defaults to `auto`.
 enum FileInputDetail {
   /// Unknown detail level (fallback for unrecognized values).
   unknown('unknown'),
+
+  /// Auto detail: the system selects the detail level.
+  auto('auto'),
 
   /// High detail: more thorough processing.
   high('high'),
