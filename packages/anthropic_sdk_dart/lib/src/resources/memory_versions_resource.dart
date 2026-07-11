@@ -7,8 +7,8 @@ import '../models/managed_agents/memory_stores/memory_version_list_response.dart
 import '../models/managed_agents/memory_stores/memory_view.dart';
 import 'base_resource.dart';
 
-/// Beta header for the Managed Agents API.
-const _betaHeader = 'managed-agents-2026-04-01';
+/// Beta header for the Agent Memory API.
+const _betaHeader = 'agent-memory-2026-07-22';
 
 /// Resource for memory versions within a single [MemoryStore] (Beta).
 ///

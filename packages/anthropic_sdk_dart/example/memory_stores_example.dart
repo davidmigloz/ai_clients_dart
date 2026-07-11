@@ -15,7 +15,7 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 /// 7. Archive and delete the store
 ///
 /// Note: Memory Stores are a beta feature and require the
-/// `anthropic-beta: managed-agents-2026-04-01` header (sent automatically by
+/// `anthropic-beta: agent-memory-2026-07-22` header (sent automatically by
 /// the SDK).
 void main() async {
   final client = AnthropicClient(

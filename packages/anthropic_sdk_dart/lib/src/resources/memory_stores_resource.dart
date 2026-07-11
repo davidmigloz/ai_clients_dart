@@ -10,8 +10,8 @@ import 'base_resource.dart';
 import 'memories_resource.dart';
 import 'memory_versions_resource.dart';
 
-/// Beta header for the Managed Agents API.
-const _betaHeader = 'managed-agents-2026-04-01';
+/// Beta header for the Agent Memory API.
+const _betaHeader = 'agent-memory-2026-07-22';
 
 /// Resource for the Memory Stores API (Beta).
 ///
