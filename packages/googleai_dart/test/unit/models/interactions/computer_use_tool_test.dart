@@ -29,5 +29,32 @@ void main() {
         isFalse,
       );
     });
+
+    test('serializes disabledSafetyPolicies and round-trips', () {
+      const tool = ComputerUseTool(
+        environment: 'browser',
+        disabledSafetyPolicies: [
+          ComputerUseSafetyPolicy.financialTransactions,
+          ComputerUseSafetyPolicy.legalTermsAndAgreements,
+        ],
+      );
+
+      final json = tool.toJson();
+      expect(json['disabled_safety_policies'], [
+        'financial_transactions',
+        'legal_terms_and_agreements',
+      ]);
+
+      final restored = InteractionTool.fromJson(json) as ComputerUseTool;
+      expect(restored.disabledSafetyPolicies, [
+        ComputerUseSafetyPolicy.financialTransactions,
+        ComputerUseSafetyPolicy.legalTermsAndAgreements,
+      ]);
+    });
+
+    test('omits disabledSafetyPolicies when null', () {
+      const tool = ComputerUseTool(environment: 'browser');
+      expect(tool.toJson().containsKey('disabled_safety_policies'), isFalse);
+    });
   });
 }

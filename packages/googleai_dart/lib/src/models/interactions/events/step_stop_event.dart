@@ -11,8 +11,20 @@ class StepStopEvent extends InteractionEvent {
   /// Optional metadata accompanying this streamed event.
   final StreamMetadata? metadata;
 
+  /// Cumulative model usage stats from the start of the session.
+  final InteractionUsage? usage;
+
+  /// Model usage stats for this specific step.
+  final InteractionUsage? stepUsage;
+
   /// Creates a [StepStopEvent] instance.
-  const StepStopEvent({required this.index, this.metadata, super.eventId});
+  const StepStopEvent({
+    required this.index,
+    this.metadata,
+    this.usage,
+    this.stepUsage,
+    super.eventId,
+  });
 
   /// Creates a [StepStopEvent] from JSON.
   factory StepStopEvent.fromJson(Map<String, dynamic> json) {
@@ -25,6 +37,14 @@ class StepStopEvent extends InteractionEvent {
       metadata: json['metadata'] != null
           ? StreamMetadata.fromJson(json['metadata'] as Map<String, dynamic>)
           : null,
+      usage: json['usage'] != null
+          ? InteractionUsage.fromJson(json['usage'] as Map<String, dynamic>)
+          : null,
+      stepUsage: json['step_usage'] != null
+          ? InteractionUsage.fromJson(
+              json['step_usage'] as Map<String, dynamic>,
+            )
+          : null,
       eventId: json['event_id'] as String?,
     );
   }
@@ -34,6 +54,8 @@ class StepStopEvent extends InteractionEvent {
     'event_type': eventType,
     'index': index,
     if (metadata != null) 'metadata': metadata!.toJson(),
+    if (usage != null) 'usage': usage!.toJson(),
+    if (stepUsage != null) 'step_usage': stepUsage!.toJson(),
     if (eventId != null) 'event_id': eventId,
   };
 }

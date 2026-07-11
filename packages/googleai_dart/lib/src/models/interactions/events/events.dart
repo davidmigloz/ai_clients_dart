@@ -3,6 +3,7 @@ import '../interaction.dart';
 import '../interaction_status.dart';
 import '../steps/steps.dart';
 import '../stream_metadata.dart';
+import '../usage.dart';
 
 part 'error_event.dart';
 part 'interaction_completed_event.dart';

@@ -20,6 +20,8 @@ part 'google_search_result_delta.dart';
 part 'image_delta.dart';
 part 'mcp_server_tool_call_delta.dart';
 part 'mcp_server_tool_result_delta.dart';
+part 'retrieval_call_delta.dart';
+part 'retrieval_result_delta.dart';
 part 'text_annotation_delta.dart';
 part 'text_delta.dart';
 part 'thought_signature_delta.dart';
@@ -38,10 +40,11 @@ part 'video_delta.dart';
 ///   [TextAnnotationDelta], [ArgumentsDelta].
 /// - Tool-call deltas: [CodeExecutionCallDelta], [UrlContextCallDelta],
 ///   [GoogleSearchCallDelta], [GoogleMapsCallDelta], [McpServerToolCallDelta],
-///   [FileSearchCallDelta].
+///   [FileSearchCallDelta], [RetrievalCallDelta].
 /// - Tool-result deltas: [CodeExecutionResultDelta], [UrlContextResultDelta],
 ///   [GoogleSearchResultDelta], [GoogleMapsResultDelta],
-///   [McpServerToolResultDelta], [FileSearchResultDelta], [FunctionResultDelta].
+///   [McpServerToolResultDelta], [FileSearchResultDelta], [FunctionResultDelta],
+///   [RetrievalResultDelta].
 ///
 /// Plus an [UnknownStepDelta] fallback for any `type` this client does not yet
 /// model, keeping streams forward-compatible.
@@ -81,6 +84,8 @@ sealed class StepDeltaData {
       'mcp_server_tool_result' => McpServerToolResultDelta.fromJson(json),
       'file_search_result' => FileSearchResultDelta.fromJson(json),
       'function_result' => FunctionResultDelta.fromJson(json),
+      'retrieval_call' => RetrievalCallDelta.fromJson(json),
+      'retrieval_result' => RetrievalResultDelta.fromJson(json),
       _ => UnknownStepDelta.fromJson(json),
     };
   }

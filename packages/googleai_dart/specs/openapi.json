@@ -3029,7 +3029,7 @@
             "type": "string"
           },
           "safetySettings": {
-            "description": "Optional. A list of unique `SafetySetting` instances for blocking unsafe content.\n\nThis will be enforced on the `GenerateContentRequest.contents` and\n`GenerateContentResponse.candidates`. There should not be more than one\nsetting for each `SafetyCategory` type. The API will block any contents and\nresponses that fail to meet the thresholds set by these settings. This list\noverrides the default settings for each `SafetyCategory` specified in the\nsafety_settings. If there is no `SafetySetting` for a given\n`SafetyCategory` provided in the list, the API will use the default safety\nsetting for that category. Harm categories HARM_CATEGORY_HATE_SPEECH,\nHARM_CATEGORY_SEXUALLY_EXPLICIT, HARM_CATEGORY_DANGEROUS_CONTENT,\nHARM_CATEGORY_HARASSMENT, HARM_CATEGORY_CIVIC_INTEGRITY are supported.\nRefer to the [guide](https://ai.google.dev/gemini-api/docs/safety-settings)\nfor detailed information on available safety settings. Also refer to the\n[Safety guidance](https://ai.google.dev/gemini-api/docs/safety-guidance) to\nlearn how to incorporate safety considerations in your AI applications.",
+            "description": "Optional. A list of unique `SafetySetting` instances for blocking unsafe content.\n\nThis will be enforced on the `GenerateContentRequest.contents` and\n`GenerateContentResponse.candidates`. There should not be more than one\nsetting for each `SafetyCategory` type. The API will block any contents and\nresponses that fail to meet the thresholds set by these settings. This list\noverrides the default settings for each `SafetyCategory` specified in the\nsafety_settings. If there is no `SafetySetting` for a given\n`SafetyCategory` provided in the list, the API will use the default safety\nsetting for that category. Harm categories HARM_CATEGORY_HATE_SPEECH,\nHARM_CATEGORY_SEXUALLY_EXPLICIT, HARM_CATEGORY_DANGEROUS_CONTENT,\nHARM_CATEGORY_HARASSMENT, HARM_CATEGORY_CIVIC_INTEGRITY,\nHARM_CATEGORY_JAILBREAK are supported.\nRefer to the [guide](https://ai.google.dev/gemini-api/docs/safety-settings)\nfor detailed information on available safety settings. Also refer to the\n[Safety guidance](https://ai.google.dev/gemini-api/docs/safety-guidance) to\nlearn how to incorporate safety considerations in your AI applications.",
             "items": {
               "$ref": "#/components/schemas/SafetySetting"
             },
@@ -3817,7 +3817,8 @@
           "HARM_CATEGORY_HATE_SPEECH",
           "HARM_CATEGORY_SEXUALLY_EXPLICIT",
           "HARM_CATEGORY_DANGEROUS_CONTENT",
-          "HARM_CATEGORY_CIVIC_INTEGRITY"
+          "HARM_CATEGORY_CIVIC_INTEGRITY",
+          "HARM_CATEGORY_JAILBREAK"
         ],
         "type": "string",
         "x-google-enum-deprecated": [
@@ -3832,7 +3833,8 @@
           false,
           false,
           false,
-          true
+          true,
+          false
         ],
         "x-google-enum-descriptions": [
           "Category is unspecified.",
@@ -3846,7 +3848,8 @@
           "**Gemini** - Hate speech and content.",
           "**Gemini** - Sexually explicit content.",
           "**Gemini** - Dangerous content.",
-          "**Gemini** - Content that may be used to harm civic integrity.\nDEPRECATED: use enable_enhanced_civic_answers instead."
+          "**Gemini** - Content that may be used to harm civic integrity.\nDEPRECATED: use enable_enhanced_civic_answers instead.",
+          "**Gemini** - Prompts attempting to bypass or subvert the model's safety\nguidelines (jailbreak attempts)."
         ]
       },
       "HistoryConfig": {
@@ -6828,7 +6831,7 @@
     "description": "The Gemini API allows developers to build generative AI applications using Gemini models. Gemini is our most capable model, built from the ground up to be multimodal. It can generalize and seamlessly understand, operate across, and combine different types of information including language, images, audio, video, and code. You can use the Gemini API for use cases like reasoning across text and images, content generation, dialogue agents, summarization and classification systems, and more.",
     "title": "Gemini API",
     "version": "v1beta",
-    "x-google-revision": "20260702"
+    "x-google-revision": "20260709"
   },
   "openapi": "3.0.3",
   "paths": {

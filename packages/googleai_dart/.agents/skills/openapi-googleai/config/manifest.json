@@ -784,6 +784,13 @@
       "dart_class": "GroundingToolCount",
       "file": "lib/src/models/interactions/grounding_tool_count.dart"
     },
+    "HarmCategory": {
+      "spec": "main",
+      "schema": "HarmCategory",
+      "kind": "enum",
+      "dart_class": "HarmCategory",
+      "file": "lib/src/models/safety/harm_category.dart"
+    },
     "Image": {
       "spec": "main",
       "kind": "object",
@@ -1078,7 +1085,16 @@
       "schema": "ResponseFormat",
       "kind": "sealed_parent",
       "dart_class": "InteractionResponseFormat",
-      "file": "lib/src/models/interactions/response_formats/response_formats.dart"
+      "file": "lib/src/models/interactions/response_formats/response_formats.dart",
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "audio": "#/components/schemas/AudioResponseFormat",
+          "text": "#/components/schemas/TextResponseFormat",
+          "image": "#/components/schemas/ImageResponseFormat",
+          "video": "#/components/schemas/VideoResponseFormat"
+        }
+      }
     },
     "ResponseFormatList": {
       "spec": "interactions",
@@ -1214,7 +1230,9 @@
           "google_maps_result": "#/components/schemas/GoogleMapsResultDelta",
           "mcp_server_tool_result": "#/components/schemas/McpServerToolResultDelta",
           "file_search_result": "#/components/schemas/FileSearchResultDelta",
-          "function_result": "#/components/schemas/FunctionResultDelta"
+          "function_result": "#/components/schemas/FunctionResultDelta",
+          "retrieval_call": "#/components/schemas/RetrievalCallDelta",
+          "retrieval_result": "#/components/schemas/RetrievalResultDelta"
         }
       }
     },
@@ -1724,12 +1742,26 @@
         "acknowledged"
       ]
     },
+    "interactions:HarmCategory": {
+      "spec": "interactions",
+      "schema": "HarmCategory",
+      "kind": "enum",
+      "dart_class": "InteractionHarmCategory",
+      "file": "lib/src/models/interactions/safety_setting.dart"
+    },
     "interactions:ImageConfig": {
       "spec": "interactions",
       "schema": "ImageConfig",
       "dart_class": "InteractionImageConfig",
       "file": "lib/src/models/interactions/image_config.dart",
       "kind": "object"
+    },
+    "interactions:VideoConfig": {
+      "spec": "interactions",
+      "schema": "VideoConfig",
+      "kind": "object",
+      "dart_class": "InteractionVideoConfig",
+      "file": "lib/src/models/interactions/video_config.dart"
     },
     "interactions:McpServer": {
       "spec": "interactions",
@@ -1761,6 +1793,13 @@
       "file": "lib/src/models/interactions/tools/retrieval_tool.dart",
       "kind": "sealed_variant",
       "parent": "InteractionTool"
+    },
+    "interactions:SafetySetting": {
+      "spec": "interactions",
+      "schema": "SafetySetting",
+      "kind": "object",
+      "dart_class": "InteractionSafetySetting",
+      "file": "lib/src/models/interactions/safety_setting.dart"
     },
     "interactions:SpeechConfig": {
       "spec": "interactions",
@@ -1912,6 +1951,14 @@
       "tags": [
         "acknowledged"
       ]
+    },
+    "interactions:VideoResponseFormat": {
+      "spec": "interactions",
+      "schema": "VideoResponseFormat",
+      "parent": "ResponseFormat",
+      "kind": "sealed_variant",
+      "dart_class": "InteractionVideoResponseFormat",
+      "file": "lib/src/models/interactions/response_formats/video_response_format.dart"
     },
     "AudioResponseFormat": {
       "spec": "main",
@@ -2096,6 +2143,65 @@
         "acknowledged"
       ],
       "note": "SSE/delta event DTOs follow the existing googleai_dart convention of omitting copyWith on small immutable events."
+    },
+    "RetrievalCallDelta": {
+      "spec": "interactions",
+      "schema": "RetrievalCallDelta",
+      "parent": "StepDeltaData",
+      "kind": "sealed_variant",
+      "dart_class": "RetrievalCallDelta",
+      "file": "lib/src/models/interactions/deltas/retrieval_call_delta.dart"
+    },
+    "RetrievalResultDelta": {
+      "spec": "interactions",
+      "schema": "RetrievalResultDelta",
+      "parent": "StepDeltaData",
+      "kind": "sealed_variant",
+      "dart_class": "RetrievalResultDelta",
+      "file": "lib/src/models/interactions/deltas/retrieval_result_delta.dart"
+    },
+    "RetrievalStepArguments": {
+      "spec": "interactions",
+      "schema": "RetrievalStepArguments",
+      "kind": "object",
+      "dart_class": "RetrievalCallArguments",
+      "file": "lib/src/models/interactions/deltas/retrieval_call_delta.dart",
+      "note": "Spec applies a speakeasy name-override renaming this schema's generated type to RetrievalCallArguments; Dart follows the override name."
+    },
+    "interactions:Status": {
+      "spec": "interactions",
+      "schema": "Status",
+      "kind": "object",
+      "dart_class": "Status",
+      "file": "lib/src/models/batch/status.dart",
+      "note": "Reuses the existing batch Status model; the interactions google.rpc.Status shape is identical (code/message/details)."
+    },
+    "RetrievalCallStep": {
+      "spec": "interactions",
+      "schema": "RetrievalCallStep",
+      "kind": "skip",
+      "note": "Orphan schema: not referenced by any spec union/property; python-genai omits it. Review when a spec union gains it.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "RetrievalResultStep": {
+      "spec": "interactions",
+      "schema": "RetrievalResultStep",
+      "kind": "skip",
+      "note": "Orphan schema: not referenced by any spec union/property; python-genai omits it. Review when a spec union gains it.",
+      "tags": [
+        "acknowledged"
+      ]
+    },
+    "LocalEnvironmentConfig": {
+      "spec": "interactions",
+      "schema": "LocalEnvironmentConfig",
+      "kind": "skip",
+      "note": "Orphan schema: not referenced by any spec union/property; python-genai omits it. Review when a spec union gains it.",
+      "tags": [
+        "acknowledged"
+      ]
     },
     "interactions:ServiceTier": {
       "spec": "interactions",

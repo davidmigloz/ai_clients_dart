@@ -111,6 +111,39 @@ void main() {
     });
   });
 
+  group('StepStopEvent usage', () {
+    test('parses usage and stepUsage and round-trips', () {
+      final event =
+          InteractionEvent.fromJson({
+                'event_type': 'step.stop',
+                'index': 2,
+                'usage': {'total_tokens': 100},
+                'step_usage': {'total_tokens': 10},
+              })
+              as StepStopEvent;
+
+      expect(event.usage, isNotNull);
+      expect(event.usage!.totalTokens, 100);
+      expect(event.stepUsage, isNotNull);
+      expect(event.stepUsage!.totalTokens, 10);
+
+      final json = event.toJson();
+      final restored = InteractionEvent.fromJson(json) as StepStopEvent;
+      expect(restored.usage!.totalTokens, 100);
+      expect(restored.stepUsage!.totalTokens, 10);
+    });
+
+    test('usage and stepUsage are absent when not provided', () {
+      final event =
+          InteractionEvent.fromJson({'event_type': 'step.stop', 'index': 0})
+              as StepStopEvent;
+      expect(event.usage, isNull);
+      expect(event.stepUsage, isNull);
+      expect(event.toJson().containsKey('usage'), isFalse);
+      expect(event.toJson().containsKey('step_usage'), isFalse);
+    });
+  });
+
   group('InteractionStatus', () {
     test('round-trips budget_exceeded', () {
       expect(

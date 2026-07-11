@@ -5,11 +5,13 @@ part 'image_response_format.dart';
 part 'response_format_config.dart';
 part 'text_response_format.dart';
 part 'unknown_response_format.dart';
+part 'video_response_format.dart';
 
 /// A single response format for an interaction.
 ///
 /// This is a sealed class with subtypes [InteractionAudioResponseFormat],
-/// [InteractionTextResponseFormat], [InteractionImageResponseFormat], and
+/// [InteractionTextResponseFormat], [InteractionImageResponseFormat],
+/// [InteractionVideoResponseFormat], and
 /// [UnknownInteractionResponseFormat] for the spec's open `{ "type": object }`
 /// member.
 ///
@@ -31,6 +33,7 @@ sealed class InteractionResponseFormat {
       'audio' => InteractionAudioResponseFormat.fromJson(json),
       'text' => InteractionTextResponseFormat.fromJson(json),
       'image' => InteractionImageResponseFormat.fromJson(json),
+      'video' => InteractionVideoResponseFormat.fromJson(json),
       _ => UnknownInteractionResponseFormat.fromJson(json),
     };
   }

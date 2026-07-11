@@ -25,7 +25,7 @@ void main() {
     });
 
     test(
-      'the 13 tool-call/result delta variants dispatch to typed classes',
+      'the 15 tool-call/result delta variants dispatch to typed classes',
       () {
         final expected = <String, Type>{
           'code_execution_call': CodeExecutionCallDelta,
@@ -34,6 +34,7 @@ void main() {
           'google_maps_call': GoogleMapsCallDelta,
           'mcp_server_tool_call': McpServerToolCallDelta,
           'file_search_call': FileSearchCallDelta,
+          'retrieval_call': RetrievalCallDelta,
           'code_execution_result': CodeExecutionResultDelta,
           'url_context_result': UrlContextResultDelta,
           'google_search_result': GoogleSearchResultDelta,
@@ -41,9 +42,15 @@ void main() {
           'mcp_server_tool_result': McpServerToolResultDelta,
           'file_search_result': FileSearchResultDelta,
           'function_result': FunctionResultDelta,
+          'retrieval_result': RetrievalResultDelta,
         };
         for (final entry in expected.entries) {
-          final delta = StepDeltaData.fromJson({'type': entry.key});
+          final json = <String, dynamic>{'type': entry.key};
+          // RetrievalCallDelta.arguments is required.
+          if (entry.key == 'retrieval_call') {
+            json['arguments'] = <String, dynamic>{};
+          }
+          final delta = StepDeltaData.fromJson(json);
           expect(delta.runtimeType, entry.value, reason: entry.key);
           expect(delta, isNot(isA<UnknownStepDelta>()), reason: entry.key);
           expect(delta.type, entry.key);
@@ -109,6 +116,72 @@ void main() {
                 as CodeExecutionResultDelta;
         expect(delta.result, '42');
         expect(delta.toJson()['result'], '42');
+      });
+
+      test('RetrievalCallDelta round-trips arguments + retrieval_type', () {
+        final delta =
+            StepDeltaData.fromJson({
+                  'type': 'retrieval_call',
+                  'arguments': {
+                    'queries': ['dart', 'flutter'],
+                  },
+                  'retrieval_type': 'vertex_ai_search',
+                  'signature': 'sig',
+                })
+                as RetrievalCallDelta;
+        expect(delta.arguments.queries, ['dart', 'flutter']);
+        expect(delta.retrievalType, RetrievalType.vertexAiSearch);
+        expect(delta.signature, 'sig');
+
+        final json = delta.toJson();
+        expect(json['type'], 'retrieval_call');
+        expect((json['arguments'] as Map)['queries'], ['dart', 'flutter']);
+        expect(json['retrieval_type'], 'vertex_ai_search');
+
+        final restored = StepDeltaData.fromJson(json) as RetrievalCallDelta;
+        expect(restored.retrievalType, RetrievalType.vertexAiSearch);
+      });
+
+      test('RetrievalCallDelta copyWith replaces values', () {
+        const delta = RetrievalCallDelta(
+          arguments: RetrievalCallArguments(queries: ['a']),
+          retrievalType: RetrievalType.ragStore,
+        );
+
+        final copy = delta.copyWith(
+          arguments: const RetrievalCallArguments(queries: ['b']),
+          signature: 'sig',
+        );
+
+        expect(copy.arguments.queries, ['b']);
+        expect(copy.retrievalType, RetrievalType.ragStore);
+        expect(copy.signature, 'sig');
+      });
+
+      test('RetrievalResultDelta round-trips is_error + signature', () {
+        final delta =
+            StepDeltaData.fromJson({
+                  'type': 'retrieval_result',
+                  'is_error': true,
+                  'signature': 'sig',
+                })
+                as RetrievalResultDelta;
+        expect(delta.isError, true);
+        expect(delta.signature, 'sig');
+
+        final json = delta.toJson();
+        expect(json['type'], 'retrieval_result');
+        expect(json['is_error'], true);
+        expect(json['signature'], 'sig');
+      });
+
+      test('RetrievalResultDelta copyWith replaces values', () {
+        const delta = RetrievalResultDelta(isError: false);
+
+        final copy = delta.copyWith(isError: true, signature: 'sig');
+
+        expect(copy.isError, true);
+        expect(copy.signature, 'sig');
       });
 
       test('McpServerToolCallDelta round-trips name + raw arguments', () {

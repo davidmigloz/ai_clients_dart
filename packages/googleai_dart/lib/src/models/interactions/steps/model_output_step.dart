@@ -11,8 +11,11 @@ class ModelOutputStep extends InteractionStep {
   /// The content of the model output.
   final List<InteractionContent>? content;
 
+  /// The error result of the operation in case of failure or cancellation.
+  final Status? error;
+
   /// Creates a [ModelOutputStep] instance.
-  const ModelOutputStep({this.content});
+  const ModelOutputStep({this.content, this.error});
 
   /// Creates a [ModelOutputStep] from JSON.
   factory ModelOutputStep.fromJson(Map<String, dynamic> json) {
@@ -25,6 +28,9 @@ class ModelOutputStep extends InteractionStep {
       content: (json['content'] as List<dynamic>?)
           ?.map((e) => InteractionContent.fromJson(e as Map<String, dynamic>))
           .toList(),
+      error: json['error'] != null
+          ? Status.fromJson(json['error'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -32,14 +38,19 @@ class ModelOutputStep extends InteractionStep {
   Map<String, dynamic> toJson() => {
     'type': type,
     if (content != null) 'content': content!.map((e) => e.toJson()).toList(),
+    if (error != null) 'error': error!.toJson(),
   };
 
   /// Creates a copy with replaced values.
-  ModelOutputStep copyWith({Object? content = unsetCopyWithValue}) {
+  ModelOutputStep copyWith({
+    Object? content = unsetCopyWithValue,
+    Object? error = unsetCopyWithValue,
+  }) {
     return ModelOutputStep(
       content: content == unsetCopyWithValue
           ? this.content
           : content as List<InteractionContent>?,
+      error: error == unsetCopyWithValue ? this.error : error as Status?,
     );
   }
 }

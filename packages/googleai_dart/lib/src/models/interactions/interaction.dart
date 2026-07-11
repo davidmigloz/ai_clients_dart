@@ -7,6 +7,7 @@ import 'interaction_input.dart';
 import 'interaction_status.dart';
 import 'response_formats/response_formats.dart';
 import 'response_modality.dart';
+import 'safety_setting.dart';
 import 'steps/steps.dart';
 import 'tools/tools.dart';
 import 'usage.dart';
@@ -97,6 +98,12 @@ class Interaction {
   /// completes.
   final WebhookConfig? webhookConfig;
 
+  /// The labels with user-defined metadata for the request.
+  final Map<String, String>? labels;
+
+  /// Safety settings for the interaction.
+  final List<InteractionSafetySetting>? safetySettings;
+
   /// Creates an [Interaction] instance.
   const Interaction({
     required this.id,
@@ -122,6 +129,8 @@ class Interaction {
     this.environment,
     this.environmentId,
     this.webhookConfig,
+    this.labels,
+    this.safetySettings,
   });
 
   /// Creates an [Interaction] from JSON.
@@ -179,6 +188,12 @@ class Interaction {
     webhookConfig: json['webhook_config'] != null
         ? WebhookConfig.fromJson(json['webhook_config'] as Map<String, dynamic>)
         : null,
+    labels: (json['labels'] as Map<String, dynamic>?)?.cast<String, String>(),
+    safetySettings: (json['safety_settings'] as List<dynamic>?)
+        ?.map(
+          (e) => InteractionSafetySetting.fromJson(e as Map<String, dynamic>),
+        )
+        .toList(),
   );
 
   /// Converts to JSON.
@@ -212,6 +227,9 @@ class Interaction {
     if (environment != null) 'environment': environment!.toJson(),
     if (environmentId != null) 'environment_id': environmentId,
     if (webhookConfig != null) 'webhook_config': webhookConfig!.toJson(),
+    if (labels != null) 'labels': labels,
+    if (safetySettings != null)
+      'safety_settings': safetySettings!.map((e) => e.toJson()).toList(),
   };
 
   /// Creates a copy with replaced values.
@@ -239,6 +257,8 @@ class Interaction {
     Object? environment = unsetCopyWithValue,
     Object? environmentId = unsetCopyWithValue,
     Object? webhookConfig = unsetCopyWithValue,
+    Object? labels = unsetCopyWithValue,
+    Object? safetySettings = unsetCopyWithValue,
   }) {
     return Interaction(
       id: id == unsetCopyWithValue ? this.id : id! as String,
@@ -302,6 +322,12 @@ class Interaction {
       webhookConfig: webhookConfig == unsetCopyWithValue
           ? this.webhookConfig
           : webhookConfig as WebhookConfig?,
+      labels: labels == unsetCopyWithValue
+          ? this.labels
+          : labels as Map<String, String>?,
+      safetySettings: safetySettings == unsetCopyWithValue
+          ? this.safetySettings
+          : safetySettings as List<InteractionSafetySetting>?,
     );
   }
 }
@@ -359,6 +385,12 @@ class CreateModelInteractionParams {
   /// completes.
   final WebhookConfig? webhookConfig;
 
+  /// The labels with user-defined metadata for the request.
+  final Map<String, String>? labels;
+
+  /// Safety settings for the interaction.
+  final List<InteractionSafetySetting>? safetySettings;
+
   /// Creates a [CreateModelInteractionParams] instance.
   const CreateModelInteractionParams({
     required this.model,
@@ -375,48 +407,55 @@ class CreateModelInteractionParams {
     this.serviceTier,
     this.environment,
     this.webhookConfig,
+    this.labels,
+    this.safetySettings,
   });
 
   /// Creates from JSON.
-  factory CreateModelInteractionParams.fromJson(Map<String, dynamic> json) =>
-      CreateModelInteractionParams(
-        model: json['model'] as String,
-        cachedContent: json['cached_content'] as String?,
-        input: json['input'] != null
-            ? InteractionInput.fromJson(json['input'] as Object)
-            : null,
-        systemInstruction: json['system_instruction'] as String?,
-        tools: (json['tools'] as List<dynamic>?)
-            ?.map((e) => InteractionTool.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        generationConfig: json['generation_config'] != null
-            ? InteractionGenerationConfig.fromJson(
-                json['generation_config'] as Map<String, dynamic>,
-              )
-            : null,
-        responseModalities: (json['response_modalities'] as List<dynamic>?)
-            ?.map((e) => interactionResponseModalityFromString(e as String))
-            .toList(),
-        responseMimeType: json['response_mime_type'] as String?,
-        responseFormat: json['response_format'] != null
-            ? InteractionResponseFormatConfig.fromJson(
-                json['response_format'] as Object,
-              )
-            : null,
-        previousInteractionId: json['previous_interaction_id'] as String?,
-        background: json['background'] as bool?,
-        serviceTier: json['service_tier'] != null
-            ? serviceTierFromString(json['service_tier'] as String?)
-            : null,
-        environment: json['environment'] != null
-            ? EnvironmentConfigOrId.fromJson(json['environment'] as Object)
-            : null,
-        webhookConfig: json['webhook_config'] != null
-            ? WebhookConfig.fromJson(
-                json['webhook_config'] as Map<String, dynamic>,
-              )
-            : null,
-      );
+  factory CreateModelInteractionParams.fromJson(
+    Map<String, dynamic> json,
+  ) => CreateModelInteractionParams(
+    model: json['model'] as String,
+    cachedContent: json['cached_content'] as String?,
+    input: json['input'] != null
+        ? InteractionInput.fromJson(json['input'] as Object)
+        : null,
+    systemInstruction: json['system_instruction'] as String?,
+    tools: (json['tools'] as List<dynamic>?)
+        ?.map((e) => InteractionTool.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    generationConfig: json['generation_config'] != null
+        ? InteractionGenerationConfig.fromJson(
+            json['generation_config'] as Map<String, dynamic>,
+          )
+        : null,
+    responseModalities: (json['response_modalities'] as List<dynamic>?)
+        ?.map((e) => interactionResponseModalityFromString(e as String))
+        .toList(),
+    responseMimeType: json['response_mime_type'] as String?,
+    responseFormat: json['response_format'] != null
+        ? InteractionResponseFormatConfig.fromJson(
+            json['response_format'] as Object,
+          )
+        : null,
+    previousInteractionId: json['previous_interaction_id'] as String?,
+    background: json['background'] as bool?,
+    serviceTier: json['service_tier'] != null
+        ? serviceTierFromString(json['service_tier'] as String?)
+        : null,
+    environment: json['environment'] != null
+        ? EnvironmentConfigOrId.fromJson(json['environment'] as Object)
+        : null,
+    webhookConfig: json['webhook_config'] != null
+        ? WebhookConfig.fromJson(json['webhook_config'] as Map<String, dynamic>)
+        : null,
+    labels: (json['labels'] as Map<String, dynamic>?)?.cast<String, String>(),
+    safetySettings: (json['safety_settings'] as List<dynamic>?)
+        ?.map(
+          (e) => InteractionSafetySetting.fromJson(e as Map<String, dynamic>),
+        )
+        .toList(),
+  );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
@@ -440,6 +479,9 @@ class CreateModelInteractionParams {
       'service_tier': serviceTierToString(serviceTier!),
     if (environment != null) 'environment': environment!.toJson(),
     if (webhookConfig != null) 'webhook_config': webhookConfig!.toJson(),
+    if (labels != null) 'labels': labels,
+    if (safetySettings != null)
+      'safety_settings': safetySettings!.map((e) => e.toJson()).toList(),
   };
 }
 
@@ -478,6 +520,12 @@ class CreateAgentInteractionParams {
   /// completes.
   final WebhookConfig? webhookConfig;
 
+  /// The labels with user-defined metadata for the request.
+  final Map<String, String>? labels;
+
+  /// Safety settings for the interaction.
+  final List<InteractionSafetySetting>? safetySettings;
+
   /// Creates a [CreateAgentInteractionParams] instance.
   const CreateAgentInteractionParams({
     required this.agent,
@@ -489,37 +537,44 @@ class CreateAgentInteractionParams {
     this.serviceTier,
     this.environment,
     this.webhookConfig,
+    this.labels,
+    this.safetySettings,
   });
 
   /// Creates from JSON.
-  factory CreateAgentInteractionParams.fromJson(Map<String, dynamic> json) =>
-      CreateAgentInteractionParams(
-        agent: json['agent'] as String,
-        input: json['input'] != null
-            ? InteractionInput.fromJson(json['input'] as Object)
-            : null,
-        agentConfig: json['agent_config'] != null
-            ? AgentConfig.fromJson(json['agent_config'] as Map<String, dynamic>)
-            : null,
-        responseFormat: json['response_format'] != null
-            ? InteractionResponseFormatConfig.fromJson(
-                json['response_format'] as Object,
-              )
-            : null,
-        previousInteractionId: json['previous_interaction_id'] as String?,
-        background: json['background'] as bool?,
-        serviceTier: json['service_tier'] != null
-            ? serviceTierFromString(json['service_tier'] as String?)
-            : null,
-        environment: json['environment'] != null
-            ? EnvironmentConfigOrId.fromJson(json['environment'] as Object)
-            : null,
-        webhookConfig: json['webhook_config'] != null
-            ? WebhookConfig.fromJson(
-                json['webhook_config'] as Map<String, dynamic>,
-              )
-            : null,
-      );
+  factory CreateAgentInteractionParams.fromJson(
+    Map<String, dynamic> json,
+  ) => CreateAgentInteractionParams(
+    agent: json['agent'] as String,
+    input: json['input'] != null
+        ? InteractionInput.fromJson(json['input'] as Object)
+        : null,
+    agentConfig: json['agent_config'] != null
+        ? AgentConfig.fromJson(json['agent_config'] as Map<String, dynamic>)
+        : null,
+    responseFormat: json['response_format'] != null
+        ? InteractionResponseFormatConfig.fromJson(
+            json['response_format'] as Object,
+          )
+        : null,
+    previousInteractionId: json['previous_interaction_id'] as String?,
+    background: json['background'] as bool?,
+    serviceTier: json['service_tier'] != null
+        ? serviceTierFromString(json['service_tier'] as String?)
+        : null,
+    environment: json['environment'] != null
+        ? EnvironmentConfigOrId.fromJson(json['environment'] as Object)
+        : null,
+    webhookConfig: json['webhook_config'] != null
+        ? WebhookConfig.fromJson(json['webhook_config'] as Map<String, dynamic>)
+        : null,
+    labels: (json['labels'] as Map<String, dynamic>?)?.cast<String, String>(),
+    safetySettings: (json['safety_settings'] as List<dynamic>?)
+        ?.map(
+          (e) => InteractionSafetySetting.fromJson(e as Map<String, dynamic>),
+        )
+        .toList(),
+  );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
@@ -534,5 +589,8 @@ class CreateAgentInteractionParams {
       'service_tier': serviceTierToString(serviceTier!),
     if (environment != null) 'environment': environment!.toJson(),
     if (webhookConfig != null) 'webhook_config': webhookConfig!.toJson(),
+    if (labels != null) 'labels': labels,
+    if (safetySettings != null)
+      'safety_settings': safetySettings!.map((e) => e.toJson()).toList(),
   };
 }

@@ -508,4 +508,201 @@ void main() {
       expect((restored.tools![1] as FunctionTool).name, 'get_weather');
     });
   });
+
+  group('Interaction labels and safetySettings', () {
+    test('round-trip conversion preserves labels and safetySettings', () {
+      const original = Interaction(
+        id: 'labels-test',
+        status: InteractionStatus.completed,
+        labels: {'env': 'test', 'team': 'growth'},
+        safetySettings: [
+          InteractionSafetySetting(
+            type: InteractionHarmCategory.jailbreak,
+            threshold: InteractionHarmBlockThreshold.blockOnlyHigh,
+            method: InteractionSafetyMethod.probability,
+          ),
+        ],
+      );
+
+      final json = original.toJson();
+      final restored = Interaction.fromJson(json);
+
+      expect(restored.labels, {'env': 'test', 'team': 'growth'});
+      expect(restored.safetySettings, hasLength(1));
+      expect(
+        restored.safetySettings!.first.type,
+        InteractionHarmCategory.jailbreak,
+      );
+      expect(
+        restored.safetySettings!.first.threshold,
+        InteractionHarmBlockThreshold.blockOnlyHigh,
+      );
+      expect(
+        restored.safetySettings!.first.method,
+        InteractionSafetyMethod.probability,
+      );
+    });
+
+    test('CreateModelInteractionParams round-trip preserves labels and '
+        'safetySettings', () {
+      const original = CreateModelInteractionParams(
+        model: 'gemini-3.5-flash',
+        labels: {'env': 'test'},
+        safetySettings: [
+          InteractionSafetySetting(
+            type: InteractionHarmCategory.harassment,
+            threshold: InteractionHarmBlockThreshold.blockNone,
+          ),
+        ],
+      );
+
+      final json = original.toJson();
+      final restored = CreateModelInteractionParams.fromJson(json);
+
+      expect(restored.labels, {'env': 'test'});
+      expect(restored.safetySettings, hasLength(1));
+      expect(
+        restored.safetySettings!.first.type,
+        InteractionHarmCategory.harassment,
+      );
+    });
+
+    test('CreateAgentInteractionParams round-trip preserves labels and '
+        'safetySettings', () {
+      const original = CreateAgentInteractionParams(
+        agent: 'my-agent',
+        labels: {'env': 'test'},
+        safetySettings: [
+          InteractionSafetySetting(
+            type: InteractionHarmCategory.civicIntegrity,
+            threshold: InteractionHarmBlockThreshold.off,
+          ),
+        ],
+      );
+
+      final json = original.toJson();
+      final restored = CreateAgentInteractionParams.fromJson(json);
+
+      expect(restored.labels, {'env': 'test'});
+      expect(restored.safetySettings, hasLength(1));
+      expect(
+        restored.safetySettings!.first.type,
+        InteractionHarmCategory.civicIntegrity,
+      );
+    });
+  });
+
+  group('InteractionHarmCategory', () {
+    test('fromString parses all values', () {
+      final cases = {
+        'hate_speech': InteractionHarmCategory.hateSpeech,
+        'dangerous_content': InteractionHarmCategory.dangerousContent,
+        'harassment': InteractionHarmCategory.harassment,
+        'sexually_explicit': InteractionHarmCategory.sexuallyExplicit,
+        'civic_integrity': InteractionHarmCategory.civicIntegrity,
+        'image_hate': InteractionHarmCategory.imageHate,
+        'image_dangerous_content':
+            InteractionHarmCategory.imageDangerousContent,
+        'image_harassment': InteractionHarmCategory.imageHarassment,
+        'image_sexually_explicit':
+            InteractionHarmCategory.imageSexuallyExplicit,
+        'jailbreak': InteractionHarmCategory.jailbreak,
+      };
+
+      for (final entry in cases.entries) {
+        expect(interactionHarmCategoryFromString(entry.key), entry.value);
+        expect(interactionHarmCategoryToString(entry.value), entry.key);
+      }
+    });
+
+    test('fromString falls back to unknown for unrecognized value', () {
+      expect(
+        interactionHarmCategoryFromString('unknown_category'),
+        InteractionHarmCategory.unknown,
+      );
+      expect(
+        interactionHarmCategoryFromString(null),
+        InteractionHarmCategory.unknown,
+      );
+    });
+
+    test('toString serializes unknown', () {
+      expect(
+        interactionHarmCategoryToString(InteractionHarmCategory.unknown),
+        'unknown',
+      );
+    });
+  });
+
+  group('InteractionHarmBlockThreshold', () {
+    test('fromString parses all values', () {
+      final cases = {
+        'block_low_and_above': InteractionHarmBlockThreshold.blockLowAndAbove,
+        'block_medium_and_above':
+            InteractionHarmBlockThreshold.blockMediumAndAbove,
+        'block_only_high': InteractionHarmBlockThreshold.blockOnlyHigh,
+        'block_none': InteractionHarmBlockThreshold.blockNone,
+        'off': InteractionHarmBlockThreshold.off,
+      };
+
+      for (final entry in cases.entries) {
+        expect(interactionHarmBlockThresholdFromString(entry.key), entry.value);
+        expect(interactionHarmBlockThresholdToString(entry.value), entry.key);
+      }
+    });
+
+    test('fromString falls back to unknown for unrecognized value', () {
+      expect(
+        interactionHarmBlockThresholdFromString('some_future_threshold'),
+        InteractionHarmBlockThreshold.unknown,
+      );
+      expect(
+        interactionHarmBlockThresholdFromString(null),
+        InteractionHarmBlockThreshold.unknown,
+      );
+    });
+
+    test('toString serializes unknown', () {
+      expect(
+        interactionHarmBlockThresholdToString(
+          InteractionHarmBlockThreshold.unknown,
+        ),
+        'unknown',
+      );
+    });
+
+    test('InteractionSafetySetting round-trips an unrecognized threshold as '
+        'unknown', () {
+      final setting = InteractionSafetySetting.fromJson({
+        'type': 'jailbreak',
+        'threshold': 'some_future_threshold',
+      });
+
+      expect(setting.threshold, InteractionHarmBlockThreshold.unknown);
+
+      final json = setting.toJson();
+      expect(json['threshold'], 'unknown');
+    });
+  });
+
+  group('InteractionGenerationConfig', () {
+    test('fromJson and toJson round-trip videoConfig', () {
+      const original = InteractionGenerationConfig(
+        videoConfig: InteractionVideoConfig(
+          task: InteractionVideoConfigTask.imageToVideo,
+        ),
+      );
+
+      final json = original.toJson();
+      final restored = InteractionGenerationConfig.fromJson(json);
+
+      expect(json.containsKey('frequency_penalty'), false);
+      expect(json.containsKey('presence_penalty'), false);
+      expect(restored.videoConfig, isNotNull);
+      expect(
+        restored.videoConfig!.task,
+        InteractionVideoConfigTask.imageToVideo,
+      );
+    });
+  });
 }

@@ -158,6 +158,7 @@ export 'src/models/interactions/media_resolution.dart';
 export 'src/models/interactions/modality_tokens.dart';
 export 'src/models/interactions/response_formats/response_formats.dart';
 export 'src/models/interactions/response_modality.dart';
+export 'src/models/interactions/safety_setting.dart';
 export 'src/models/interactions/speech_config.dart';
 export 'src/models/interactions/steps/steps.dart';
 export 'src/models/interactions/stream_metadata.dart';
@@ -173,6 +174,7 @@ export 'src/models/interactions/tools/rag_store_config.dart';
 export 'src/models/interactions/tools/tools.dart';
 export 'src/models/interactions/tools/vertex_ai_search_config.dart';
 export 'src/models/interactions/usage.dart';
+export 'src/models/interactions/video_config.dart';
 export 'src/models/interactions/webhook_config.dart';
 // Models - Live API
 export 'src/models/live/config/audio_transcription_config.dart';

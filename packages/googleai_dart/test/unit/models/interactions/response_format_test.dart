@@ -90,7 +90,7 @@ void main() {
   });
 
   group('InteractionResponseFormat dispatch', () {
-    test('dispatches the three typed variants', () {
+    test('dispatches the four typed variants', () {
       expect(
         InteractionResponseFormat.fromJson({'type': 'audio'}),
         isA<InteractionAudioResponseFormat>(),
@@ -103,14 +103,13 @@ void main() {
         InteractionResponseFormat.fromJson({'type': 'image'}),
         isA<InteractionImageResponseFormat>(),
       );
+      expect(
+        InteractionResponseFormat.fromJson({'type': 'video'}),
+        isA<InteractionVideoResponseFormat>(),
+      );
     });
 
-    test('removed/unknown type parses as UnknownInteractionResponseFormat', () {
-      // `video` was removed from the spec union and now falls through to the
-      // forward-compatible fallback (raw JSON preserved).
-      final video = InteractionResponseFormat.fromJson({'type': 'video'});
-      expect(video, isA<UnknownInteractionResponseFormat>());
-
+    test('unknown type parses as UnknownInteractionResponseFormat', () {
       final unknown = InteractionResponseFormat.fromJson({
         'type': 'object',
         'properties': {
@@ -122,6 +121,48 @@ void main() {
       expect(unknown.toJson()['properties'], {
         'x': {'type': 'string'},
       });
+    });
+  });
+
+  group('InteractionVideoResponseFormat', () {
+    test('round-trips aspect_ratio/delivery/duration/gcs_uri', () {
+      final video =
+          InteractionResponseFormat.fromJson({
+                'type': 'video',
+                'aspect_ratio': '16:9',
+                'delivery': 'uri',
+                'duration': '5s',
+                'gcs_uri': 'gs://bucket/video.mp4',
+              })
+              as InteractionVideoResponseFormat;
+
+      expect(
+        video.aspectRatio,
+        InteractionVideoResponseFormatAspectRatio.ratio16x9,
+      );
+      expect(video.delivery, InteractionVideoResponseFormatDelivery.uri);
+      expect(video.duration, '5s');
+      expect(video.gcsUri, 'gs://bucket/video.mp4');
+
+      final json = video.toJson();
+      expect(json['type'], 'video');
+      expect(json['aspect_ratio'], '16:9');
+      expect(json['delivery'], 'uri');
+      expect(json['duration'], '5s');
+      expect(json['gcs_uri'], 'gs://bucket/video.mp4');
+
+      final restored =
+          InteractionResponseFormat.fromJson(json)
+              as InteractionVideoResponseFormat;
+      expect(
+        restored.aspectRatio,
+        InteractionVideoResponseFormatAspectRatio.ratio16x9,
+      );
+    });
+
+    test('omits null fields from JSON', () {
+      const video = InteractionVideoResponseFormat();
+      expect(video.toJson(), {'type': 'video'});
     });
   });
 

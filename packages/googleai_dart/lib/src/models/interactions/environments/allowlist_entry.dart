@@ -10,18 +10,28 @@ class AllowlistEntry {
   /// Headers to inject on all outbound requests matching this [domain].
   ///
   /// Each entry is a flat `{header_name: header_value}` object; the egress
-  /// proxy injects these automatically.
+  /// proxy injects these automatically. The spec accepts a single dict or a
+  /// list of dicts; a single dict is normalized to a one-element list.
   final List<Map<String, String>>? transform;
 
   /// Creates an [AllowlistEntry].
   const AllowlistEntry({required this.domain, this.transform});
 
   /// Creates an [AllowlistEntry] from JSON.
+  ///
+  /// `transform` accepts either a single `{header_name: header_value}` object
+  /// or a list of such objects; a single object is normalized to a
+  /// one-element list.
   factory AllowlistEntry.fromJson(Map<String, dynamic> json) => AllowlistEntry(
     domain: json['domain'] as String,
-    transform: (json['transform'] as List<dynamic>?)
-        ?.map((e) => (e as Map<String, dynamic>).cast<String, String>())
-        .toList(),
+    transform: switch (json['transform']) {
+      final List<dynamic> list =>
+        list
+            .map((e) => (e as Map<String, dynamic>).cast<String, String>())
+            .toList(),
+      final Map<String, dynamic> map => [map.cast<String, String>()],
+      _ => null,
+    },
   );
 
   /// Converts to JSON.
