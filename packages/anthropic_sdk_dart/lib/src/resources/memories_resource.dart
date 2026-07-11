@@ -10,8 +10,8 @@ import '../models/managed_agents/memory_stores/memory_view.dart';
 import '../models/managed_agents/memory_stores/update_memory_params.dart';
 import 'base_resource.dart';
 
-/// Beta header for the Managed Agents API.
-const _betaHeader = 'managed-agents-2026-04-01';
+/// Beta header for the Agent Memory API.
+const _betaHeader = 'agent-memory-2026-07-22';
 
 /// Resource for memories within a single [MemoryStore] (Beta).
 ///
@@ -67,12 +67,18 @@ class MemoriesResource extends ResourceBase {
   ///
   /// Parameters:
   /// - [pathPrefix]: Restrict results to memories whose path starts with this
-  ///   prefix.
+  ///   prefix. Must end with `/` and matches whole path segments.
   /// - [depth]: Roll up entries deeper than this into [MemoryPrefix] items.
-  /// - [orderBy]: Field to sort by (e.g., `path`, `updated_at`).
-  /// - [order]: Sort order.
+  ///   Only `0`, `1`, or omitted are accepted; other values return a `400`
+  ///   error.
+  /// - [orderBy]: Field to sort by (e.g., `path`, `updated_at`). Ignored by
+  ///   the server — results are returned in a stable, server-defined order.
+  /// - [order]: Sort order. Ignored by the server — results are returned in
+  ///   a stable, server-defined order.
   /// - [limit]: Maximum number of items to return.
-  /// - [page]: Pagination token from a previous response.
+  /// - [page]: Pagination token from a previous response. Cursors issued
+  ///   under the `managed-agents-2026-04-01` header are not valid — restart
+  ///   from the first page.
   /// - [view]: How much of each memory's content to return.
   /// - [abortTrigger]: Allows canceling the request.
   Future<MemoryListResponse> list({
