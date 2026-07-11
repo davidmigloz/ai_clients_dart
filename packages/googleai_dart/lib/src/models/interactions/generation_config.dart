@@ -4,6 +4,7 @@ import 'speech_config.dart';
 import 'thinking_level.dart';
 import 'thinking_summaries.dart';
 import 'tool_choice.dart';
+import 'video_config.dart';
 
 /// Configuration parameters for model interactions.
 class InteractionGenerationConfig {
@@ -12,18 +13,6 @@ class InteractionGenerationConfig {
 
   /// The maximum cumulative probability of tokens to consider when sampling.
   final double? topP;
-
-  /// Penalizes tokens based on their frequency in the generated text.
-  ///
-  /// A positive value helps to reduce the repetition of words and phrases.
-  /// Valid values range from [-2.0, 2.0].
-  final double? frequencyPenalty;
-
-  /// Penalizes tokens that have already appeared in the generated text.
-  ///
-  /// A positive value encourages the model to generate more diverse and less
-  /// repetitive text. Valid values range from [-2.0, 2.0].
-  final double? presencePenalty;
 
   /// Seed used in decoding for reproducibility.
   final int? seed;
@@ -49,12 +38,13 @@ class InteractionGenerationConfig {
   /// Configuration for image interaction.
   final InteractionImageConfig? imageConfig;
 
+  /// Configuration for video generation.
+  final InteractionVideoConfig? videoConfig;
+
   /// Creates an [InteractionGenerationConfig] instance.
   const InteractionGenerationConfig({
     this.temperature,
     this.topP,
-    this.frequencyPenalty,
-    this.presencePenalty,
     this.seed,
     this.stopSequences,
     this.toolChoice,
@@ -63,6 +53,7 @@ class InteractionGenerationConfig {
     this.maxOutputTokens,
     this.speechConfig,
     this.imageConfig,
+    this.videoConfig,
   });
 
   /// Creates an [InteractionGenerationConfig] from JSON.
@@ -71,8 +62,6 @@ class InteractionGenerationConfig {
   ) => InteractionGenerationConfig(
     temperature: (json['temperature'] as num?)?.toDouble(),
     topP: (json['top_p'] as num?)?.toDouble(),
-    frequencyPenalty: (json['frequency_penalty'] as num?)?.toDouble(),
-    presencePenalty: (json['presence_penalty'] as num?)?.toDouble(),
     seed: json['seed'] as int?,
     stopSequences: (json['stop_sequences'] as List<dynamic>?)?.cast<String>(),
     toolChoice: json['tool_choice'] != null
@@ -97,14 +86,17 @@ class InteractionGenerationConfig {
             json['image_config'] as Map<String, dynamic>,
           )
         : null,
+    videoConfig: json['video_config'] != null
+        ? InteractionVideoConfig.fromJson(
+            json['video_config'] as Map<String, dynamic>,
+          )
+        : null,
   );
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (temperature != null) 'temperature': temperature,
     if (topP != null) 'top_p': topP,
-    if (frequencyPenalty != null) 'frequency_penalty': frequencyPenalty,
-    if (presencePenalty != null) 'presence_penalty': presencePenalty,
     if (seed != null) 'seed': seed,
     if (stopSequences != null) 'stop_sequences': stopSequences,
     if (toolChoice != null) 'tool_choice': toolChoice!.toJson(),
@@ -118,14 +110,13 @@ class InteractionGenerationConfig {
     if (speechConfig != null)
       'speech_config': speechConfig!.map((e) => e.toJson()).toList(),
     if (imageConfig != null) 'image_config': imageConfig!.toJson(),
+    if (videoConfig != null) 'video_config': videoConfig!.toJson(),
   };
 
   /// Creates a copy with replaced values.
   InteractionGenerationConfig copyWith({
     Object? temperature = unsetCopyWithValue,
     Object? topP = unsetCopyWithValue,
-    Object? frequencyPenalty = unsetCopyWithValue,
-    Object? presencePenalty = unsetCopyWithValue,
     Object? seed = unsetCopyWithValue,
     Object? stopSequences = unsetCopyWithValue,
     Object? toolChoice = unsetCopyWithValue,
@@ -134,18 +125,13 @@ class InteractionGenerationConfig {
     Object? maxOutputTokens = unsetCopyWithValue,
     Object? speechConfig = unsetCopyWithValue,
     Object? imageConfig = unsetCopyWithValue,
+    Object? videoConfig = unsetCopyWithValue,
   }) {
     return InteractionGenerationConfig(
       temperature: temperature == unsetCopyWithValue
           ? this.temperature
           : temperature as double?,
       topP: topP == unsetCopyWithValue ? this.topP : topP as double?,
-      frequencyPenalty: frequencyPenalty == unsetCopyWithValue
-          ? this.frequencyPenalty
-          : frequencyPenalty as double?,
-      presencePenalty: presencePenalty == unsetCopyWithValue
-          ? this.presencePenalty
-          : presencePenalty as double?,
       seed: seed == unsetCopyWithValue ? this.seed : seed as int?,
       stopSequences: stopSequences == unsetCopyWithValue
           ? this.stopSequences
@@ -168,6 +154,9 @@ class InteractionGenerationConfig {
       imageConfig: imageConfig == unsetCopyWithValue
           ? this.imageConfig
           : imageConfig as InteractionImageConfig?,
+      videoConfig: videoConfig == unsetCopyWithValue
+          ? this.videoConfig
+          : videoConfig as InteractionVideoConfig?,
     );
   }
 }

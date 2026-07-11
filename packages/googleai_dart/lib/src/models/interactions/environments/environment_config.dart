@@ -17,8 +17,13 @@ class EnvironmentConfig {
   /// Sources mounted into the environment's sandbox.
   final List<Source>? sources;
 
+  /// Optional. The environment ID for the interaction. If specified, the
+  /// request will update the existing environment instead of creating a new
+  /// one.
+  final String? environmentId;
+
   /// Creates an [EnvironmentConfig].
-  const EnvironmentConfig({this.network, this.sources});
+  const EnvironmentConfig({this.network, this.sources, this.environmentId});
 
   /// Creates an [EnvironmentConfig] from JSON.
   ///
@@ -40,6 +45,7 @@ class EnvironmentConfig {
       sources: (json['sources'] as List<dynamic>?)
           ?.map((e) => Source.fromJson(e as Map<String, dynamic>))
           .toList(),
+      environmentId: json['environment_id'] as String?,
     );
   }
 
@@ -48,12 +54,14 @@ class EnvironmentConfig {
     'type': type,
     if (network != null) 'network': network!.toJson(),
     if (sources != null) 'sources': sources!.map((e) => e.toJson()).toList(),
+    if (environmentId != null) 'environment_id': environmentId,
   };
 
   /// Creates a copy with replaced values.
   EnvironmentConfig copyWith({
     Object? network = unsetCopyWithValue,
     Object? sources = unsetCopyWithValue,
+    Object? environmentId = unsetCopyWithValue,
   }) {
     return EnvironmentConfig(
       network: network == unsetCopyWithValue
@@ -62,6 +70,9 @@ class EnvironmentConfig {
       sources: sources == unsetCopyWithValue
           ? this.sources
           : sources as List<Source>?,
+      environmentId: environmentId == unsetCopyWithValue
+          ? this.environmentId
+          : environmentId as String?,
     );
   }
 }

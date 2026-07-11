@@ -39,6 +39,34 @@ void main() {
       expect(restored.domain, 'api.example.com');
       expect(restored.transform!.first['x-goog-api-key'], 'k');
     });
+
+    test('accepts a single dict form for transform', () {
+      final entry = AllowlistEntry.fromJson({
+        'domain': 'api.example.com',
+        'transform': {'x-goog-api-key': 'k'},
+      });
+
+      expect(entry.transform, hasLength(1));
+      expect(entry.transform!.first['x-goog-api-key'], 'k');
+    });
+
+    test('accepts a list of dicts form for transform', () {
+      final entry = AllowlistEntry.fromJson({
+        'domain': 'api.example.com',
+        'transform': [
+          {'x-goog-api-key': 'k1'},
+          {'x-goog-api-key': 'k2'},
+        ],
+      });
+
+      expect(entry.transform, hasLength(2));
+      expect(entry.transform![1]['x-goog-api-key'], 'k2');
+    });
+
+    test('transform is null when absent', () {
+      final entry = AllowlistEntry.fromJson({'domain': 'api.example.com'});
+      expect(entry.transform, isNull);
+    });
   });
 
   group('EnvironmentNetworkEgressAllowlist', () {
@@ -98,6 +126,22 @@ void main() {
       expect(json['network'], 'disabled');
       final restored = EnvironmentConfig.fromJson(json);
       expect(restored.network, isA<EnvironmentNetworkDisabled>());
+    });
+
+    test('round-trips environmentId', () {
+      const config = EnvironmentConfig(environmentId: 'env-123');
+      final json = config.toJson();
+      expect(json['environment_id'], 'env-123');
+
+      final restored = EnvironmentConfig.fromJson(json);
+      expect(restored.environmentId, 'env-123');
+    });
+
+    test('environmentId is omitted from JSON when null', () {
+      expect(
+        const EnvironmentConfig().toJson().containsKey('environment_id'),
+        isFalse,
+      );
     });
 
     test('type is the constant "remote" and is always serialized', () {

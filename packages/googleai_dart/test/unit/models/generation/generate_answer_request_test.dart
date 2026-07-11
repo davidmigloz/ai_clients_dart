@@ -89,6 +89,65 @@ void main() {
         );
         expect(request.temperature, 0.2);
       });
+
+      test('parses jailbreak harm category', () {
+        final json = {
+          'contents': [
+            {
+              'parts': [
+                {'text': 'Question'},
+              ],
+            },
+          ],
+          'answerStyle': 'ABSTRACTIVE',
+          'safetySettings': [
+            {
+              'category': 'HARM_CATEGORY_JAILBREAK',
+              'threshold': 'BLOCK_ONLY_HIGH',
+            },
+          ],
+        };
+
+        final request = GenerateAnswerRequest.fromJson(json);
+
+        expect(request.safetySettings![0].category, HarmCategory.jailbreak);
+      });
+
+      test('parses legacy PaLM harm categories', () {
+        final cases = {
+          'HARM_CATEGORY_DEROGATORY': HarmCategory.derogatory,
+          'HARM_CATEGORY_TOXICITY': HarmCategory.toxicity,
+          'HARM_CATEGORY_VIOLENCE': HarmCategory.violence,
+          'HARM_CATEGORY_SEXUAL': HarmCategory.sexual,
+          'HARM_CATEGORY_MEDICAL': HarmCategory.medical,
+          'HARM_CATEGORY_DANGEROUS': HarmCategory.dangerous,
+        };
+
+        for (final entry in cases.entries) {
+          expect(harmCategoryFromString(entry.key), entry.value);
+          expect(harmCategoryToString(entry.value), entry.key);
+        }
+      });
+
+      test('falls back to unspecified for unknown harm category', () {
+        final json = {
+          'contents': [
+            {
+              'parts': [
+                {'text': 'Question'},
+              ],
+            },
+          ],
+          'answerStyle': 'ABSTRACTIVE',
+          'safetySettings': [
+            {'category': 'HARM_CATEGORY_UNKNOWN', 'threshold': 'BLOCK_NONE'},
+          ],
+        };
+
+        final request = GenerateAnswerRequest.fromJson(json);
+
+        expect(request.safetySettings![0].category, HarmCategory.unspecified);
+      });
     });
 
     group('toJson', () {
