@@ -1009,29 +1009,43 @@ class McpTool extends ResponseTool {
 /// Hosted shell tool for command execution.
 @immutable
 class ShellTool extends ResponseTool {
+  /// The tool invocation context(s) this tool may be called from.
+  final List<CallableToolAllowedCaller>? allowedCallers;
+
   /// Creates a [ShellTool].
-  const ShellTool();
+  const ShellTool({this.allowedCallers});
 
   /// Creates a [ShellTool] from JSON.
   factory ShellTool.fromJson(Map<String, dynamic> json) {
     if ((json['type'] as String?) != 'shell') {
       throw const FormatException('Invalid type for ShellTool');
     }
-    return const ShellTool();
+    return ShellTool(
+      allowedCallers: (json['allowed_callers'] as List?)
+          ?.map((e) => CallableToolAllowedCaller.fromJson(e as String))
+          .toList(),
+    );
   }
 
   @override
-  Map<String, dynamic> toJson() => const {'type': 'shell'};
+  Map<String, dynamic> toJson() => {
+    'type': 'shell',
+    if (allowedCallers != null)
+      'allowed_callers': allowedCallers!.map((e) => e.toJson()).toList(),
+  };
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || other is ShellTool;
+      identical(this, other) ||
+      other is ShellTool &&
+          runtimeType == other.runtimeType &&
+          listsEqual(allowedCallers, other.allowedCallers);
 
   @override
-  int get hashCode => runtimeType.hashCode;
+  int get hashCode => listHash(allowedCallers);
 
   @override
-  String toString() => 'ShellTool()';
+  String toString() => 'ShellTool(allowedCallers: $allowedCallers)';
 }
 
 /// Computer tool (GA) for controlling a computer.

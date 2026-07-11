@@ -713,41 +713,57 @@ void main() {
       expect(restored.outputSchema, tool.outputSchema);
     });
 
-    test(
-      'CodeInterpreterTool, McpTool and CustomTool round-trip allowedCallers',
-      () {
-        const codeInterpreterTool = CodeInterpreterTool(
-          container: CodeInterpreterContainerId('container_1'),
-          allowedCallers: [CallableToolAllowedCaller.direct],
-        );
-        expect(
-          (ResponseTool.fromJson(codeInterpreterTool.toJson())
-                  as CodeInterpreterTool)
-              .allowedCallers,
-          codeInterpreterTool.allowedCallers,
-        );
+    test('CodeInterpreterTool, McpTool, CustomTool and ShellTool round-trip '
+        'allowedCallers', () {
+      const codeInterpreterTool = CodeInterpreterTool(
+        container: CodeInterpreterContainerId('container_1'),
+        allowedCallers: [CallableToolAllowedCaller.direct],
+      );
+      expect(
+        (ResponseTool.fromJson(codeInterpreterTool.toJson())
+                as CodeInterpreterTool)
+            .allowedCallers,
+        codeInterpreterTool.allowedCallers,
+      );
 
-        const mcpTool = McpTool(
-          serverLabel: 'label',
-          serverUrl: 'https://example.com',
-          allowedCallers: [CallableToolAllowedCaller.programmatic],
-        );
-        expect(
-          (ResponseTool.fromJson(mcpTool.toJson()) as McpTool).allowedCallers,
-          mcpTool.allowedCallers,
-        );
+      const mcpTool = McpTool(
+        serverLabel: 'label',
+        serverUrl: 'https://example.com',
+        allowedCallers: [CallableToolAllowedCaller.programmatic],
+      );
+      expect(
+        (ResponseTool.fromJson(mcpTool.toJson()) as McpTool).allowedCallers,
+        mcpTool.allowedCallers,
+      );
 
-        const customTool = CustomTool(
-          name: 'custom',
-          allowedCallers: [CallableToolAllowedCaller.direct],
-        );
-        expect(
-          (ResponseTool.fromJson(customTool.toJson()) as CustomTool)
-              .allowedCallers,
-          customTool.allowedCallers,
-        );
-      },
-    );
+      const customTool = CustomTool(
+        name: 'custom',
+        allowedCallers: [CallableToolAllowedCaller.direct],
+      );
+      expect(
+        (ResponseTool.fromJson(customTool.toJson()) as CustomTool)
+            .allowedCallers,
+        customTool.allowedCallers,
+      );
+
+      const shellTool = ShellTool(
+        allowedCallers: [
+          CallableToolAllowedCaller.direct,
+          CallableToolAllowedCaller.programmatic,
+        ],
+      );
+      final shellJson = shellTool.toJson();
+      expect(shellJson['allowed_callers'], ['direct', 'programmatic']);
+      expect(
+        (ResponseTool.fromJson(shellJson) as ShellTool).allowedCallers,
+        shellTool.allowedCallers,
+      );
+
+      expect(
+        const ShellTool().toJson().containsKey('allowed_callers'),
+        isFalse,
+      );
+    });
 
     test('ProgrammaticToolCallingTool round-trips via ResponseTool', () {
       const tool = ProgrammaticToolCallingTool();
@@ -2678,6 +2694,182 @@ void main() {
         expect(a.hashCode, equals(c.hashCode));
       },
     );
+
+    group('multi-agent agent tag', () {
+      test('OutputTextDeltaEvent fromJson populates agent', () {
+        final json = {
+          'type': 'response.output_text.delta',
+          'output_index': 0,
+          'content_index': 0,
+          'delta': 'Hello',
+          'agent': {'agent_name': 'researcher'},
+        };
+
+        final event = ResponseStreamEvent.fromJson(json);
+
+        expect(event, isA<OutputTextDeltaEvent>());
+        final textEvent = event as OutputTextDeltaEvent;
+        expect(textEvent.agent, isNotNull);
+        expect(textEvent.agent!.agentName, equals('researcher'));
+        expect(textEvent.toJson(), equals(json));
+      });
+
+      test('OutputTextDeltaEvent omits agent key when null', () {
+        final json = {
+          'type': 'response.output_text.delta',
+          'output_index': 0,
+          'content_index': 0,
+          'delta': 'Hello',
+        };
+
+        final event = ResponseStreamEvent.fromJson(json);
+
+        expect((event as OutputTextDeltaEvent).agent, isNull);
+        expect(event.toJson(), equals(json));
+        expect(event.toJson().containsKey('agent'), isFalse);
+      });
+
+      test('ResponseCompletedEvent fromJson populates agent', () {
+        final json = {
+          'type': 'response.completed',
+          'response': {
+            'id': 'resp_123',
+            'object': 'response',
+            'created_at': 1234567890,
+            'model': 'gpt-4o',
+            'status': 'completed',
+            'output': <dynamic>[],
+          },
+          'agent': {'agent_name': 'orchestrator'},
+        };
+
+        final event = ResponseStreamEvent.fromJson(json);
+
+        expect(event, isA<ResponseCompletedEvent>());
+        final completedEvent = event as ResponseCompletedEvent;
+        expect(completedEvent.agent?.agentName, equals('orchestrator'));
+        expect(completedEvent.toJson(), equals(json));
+      });
+
+      test('ResponseCompletedEvent omits agent key when null', () {
+        final json = {
+          'type': 'response.completed',
+          'response': {
+            'id': 'resp_123',
+            'object': 'response',
+            'created_at': 1234567890,
+            'model': 'gpt-4o',
+            'status': 'completed',
+            'output': <dynamic>[],
+          },
+        };
+
+        final event = ResponseStreamEvent.fromJson(json);
+
+        expect((event as ResponseCompletedEvent).agent, isNull);
+        expect(event.toJson(), equals(json));
+        expect(event.toJson().containsKey('agent'), isFalse);
+      });
+
+      test('OutputItemAddedEvent fromJson populates agent', () {
+        final json = {
+          'type': 'response.output_item.added',
+          'output_index': 0,
+          'item': {
+            'type': 'message',
+            'id': 'msg_123',
+            'role': 'assistant',
+            'content': <dynamic>[],
+          },
+          'agent': {'agent_name': 'writer'},
+        };
+
+        final event = ResponseStreamEvent.fromJson(json);
+
+        expect(event, isA<OutputItemAddedEvent>());
+        final addedEvent = event as OutputItemAddedEvent;
+        expect(addedEvent.agent?.agentName, equals('writer'));
+        expect(addedEvent.toJson(), equals(json));
+      });
+
+      test('OutputItemAddedEvent omits agent key when null', () {
+        final json = {
+          'type': 'response.output_item.added',
+          'output_index': 0,
+          'item': {
+            'type': 'message',
+            'id': 'msg_123',
+            'role': 'assistant',
+            'content': <dynamic>[],
+          },
+        };
+
+        final event = ResponseStreamEvent.fromJson(json);
+
+        expect((event as OutputItemAddedEvent).agent, isNull);
+        expect(event.toJson(), equals(json));
+        expect(event.toJson().containsKey('agent'), isFalse);
+      });
+
+      test('ErrorEvent fromJson populates agent', () {
+        final json = {
+          'type': 'error',
+          'error': {'code': 'server_error', 'message': 'Something broke'},
+          'agent': {'agent_name': 'critic'},
+        };
+
+        final event = ResponseStreamEvent.fromJson(json);
+
+        expect(event, isA<ErrorEvent>());
+        final errorEvent = event as ErrorEvent;
+        expect(errorEvent.agent?.agentName, equals('critic'));
+        expect(
+          errorEvent.toJson(),
+          equals({
+            'type': 'error',
+            'error': {'code': 'server_error', 'message': 'Something broke'},
+            'agent': {'agent_name': 'critic'},
+          }),
+        );
+      });
+
+      test('ErrorEvent omits agent key when null', () {
+        final json = {
+          'type': 'error',
+          'error': {'code': 'server_error', 'message': 'Something broke'},
+        };
+
+        final event = ResponseStreamEvent.fromJson(json);
+
+        expect((event as ErrorEvent).agent, isNull);
+        expect(event.toJson().containsKey('agent'), isFalse);
+      });
+
+      test('events with different agents are unequal', () {
+        const eventA = OutputTextDeltaEvent(
+          outputIndex: 0,
+          contentIndex: 0,
+          delta: 'Hello',
+          agent: AgentTag(agentName: 'researcher'),
+        );
+        const eventB = OutputTextDeltaEvent(
+          outputIndex: 0,
+          contentIndex: 0,
+          delta: 'Hello',
+          agent: AgentTag(agentName: 'writer'),
+        );
+        const eventC = OutputTextDeltaEvent(
+          outputIndex: 0,
+          contentIndex: 0,
+          delta: 'Hello',
+          agent: AgentTag(agentName: 'researcher'),
+        );
+
+        expect(eventA, isNot(equals(eventB)));
+        expect(eventA, equals(eventC));
+        expect(eventA.hashCode, equals(eventC.hashCode));
+      });
+    });
   });
 
   group('ResponseUsage', () {

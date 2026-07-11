@@ -6,6 +6,7 @@ import '../content/annotation.dart';
 import '../content/logprob.dart';
 import '../content/output_content.dart';
 import '../items/output_item.dart';
+import '../multi_agent/agent_tag.dart';
 import '../response.dart';
 
 /// A streaming event from the Responses API.
@@ -189,17 +190,30 @@ class ResponseCreatedEvent extends ResponseStreamEvent {
   @override
   final int? sequenceNumber;
 
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
+
   /// The response that was created.
   final Response response;
 
   /// Creates a [ResponseCreatedEvent].
-  const ResponseCreatedEvent({required this.response, this.sequenceNumber});
+  const ResponseCreatedEvent({
+    required this.response,
+    this.sequenceNumber,
+    this.agent,
+  });
 
   /// Creates a [ResponseCreatedEvent] from JSON.
   factory ResponseCreatedEvent.fromJson(Map<String, dynamic> json) {
     return ResponseCreatedEvent(
       response: Response.fromJson(json['response'] as Map<String, dynamic>),
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -208,6 +222,7 @@ class ResponseCreatedEvent extends ResponseStreamEvent {
     'type': type,
     'response': response.toJson(),
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -216,26 +231,30 @@ class ResponseCreatedEvent extends ResponseStreamEvent {
       other is ResponseCreatedEvent &&
           runtimeType == other.runtimeType &&
           response == other.response &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(response, sequenceNumber);
+  int get hashCode => Object.hash(response, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseCreatedEvent copyWith({
     Response? response,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseCreatedEvent(
       response: response ?? this.response,
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ResponseCreatedEvent(response: ${response.id})';
+  String toString() =>
+      'ResponseCreatedEvent(response: ${response.id}, agent: $agent)';
 }
 
 /// Event emitted when a response is queued for processing.
@@ -247,17 +266,30 @@ class ResponseQueuedEvent extends ResponseStreamEvent {
   @override
   final int? sequenceNumber;
 
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
+
   /// The response that was queued.
   final Response response;
 
   /// Creates a [ResponseQueuedEvent].
-  const ResponseQueuedEvent({required this.response, this.sequenceNumber});
+  const ResponseQueuedEvent({
+    required this.response,
+    this.sequenceNumber,
+    this.agent,
+  });
 
   /// Creates a [ResponseQueuedEvent] from JSON.
   factory ResponseQueuedEvent.fromJson(Map<String, dynamic> json) {
     return ResponseQueuedEvent(
       response: Response.fromJson(json['response'] as Map<String, dynamic>),
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -266,6 +298,7 @@ class ResponseQueuedEvent extends ResponseStreamEvent {
     'type': type,
     'response': response.toJson(),
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -274,26 +307,30 @@ class ResponseQueuedEvent extends ResponseStreamEvent {
       other is ResponseQueuedEvent &&
           runtimeType == other.runtimeType &&
           response == other.response &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(response, sequenceNumber);
+  int get hashCode => Object.hash(response, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseQueuedEvent copyWith({
     Response? response,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseQueuedEvent(
       response: response ?? this.response,
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ResponseQueuedEvent(response: ${response.id})';
+  String toString() =>
+      'ResponseQueuedEvent(response: ${response.id}, agent: $agent)';
 }
 
 /// Event emitted when a response is in progress.
@@ -305,17 +342,30 @@ class ResponseInProgressEvent extends ResponseStreamEvent {
   @override
   final int? sequenceNumber;
 
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
+
   /// The response that is in progress.
   final Response response;
 
   /// Creates a [ResponseInProgressEvent].
-  const ResponseInProgressEvent({required this.response, this.sequenceNumber});
+  const ResponseInProgressEvent({
+    required this.response,
+    this.sequenceNumber,
+    this.agent,
+  });
 
   /// Creates a [ResponseInProgressEvent] from JSON.
   factory ResponseInProgressEvent.fromJson(Map<String, dynamic> json) {
     return ResponseInProgressEvent(
       response: Response.fromJson(json['response'] as Map<String, dynamic>),
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -324,6 +374,7 @@ class ResponseInProgressEvent extends ResponseStreamEvent {
     'type': type,
     'response': response.toJson(),
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -332,26 +383,30 @@ class ResponseInProgressEvent extends ResponseStreamEvent {
       other is ResponseInProgressEvent &&
           runtimeType == other.runtimeType &&
           response == other.response &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(response, sequenceNumber);
+  int get hashCode => Object.hash(response, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseInProgressEvent copyWith({
     Response? response,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseInProgressEvent(
       response: response ?? this.response,
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ResponseInProgressEvent(response: ${response.id})';
+  String toString() =>
+      'ResponseInProgressEvent(response: ${response.id}, agent: $agent)';
 }
 
 /// Event emitted when a response is completed.
@@ -363,17 +418,30 @@ class ResponseCompletedEvent extends ResponseStreamEvent {
   @override
   final int? sequenceNumber;
 
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
+
   /// The completed response.
   final Response response;
 
   /// Creates a [ResponseCompletedEvent].
-  const ResponseCompletedEvent({required this.response, this.sequenceNumber});
+  const ResponseCompletedEvent({
+    required this.response,
+    this.sequenceNumber,
+    this.agent,
+  });
 
   /// Creates a [ResponseCompletedEvent] from JSON.
   factory ResponseCompletedEvent.fromJson(Map<String, dynamic> json) {
     return ResponseCompletedEvent(
       response: Response.fromJson(json['response'] as Map<String, dynamic>),
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -382,6 +450,7 @@ class ResponseCompletedEvent extends ResponseStreamEvent {
     'type': type,
     'response': response.toJson(),
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -390,10 +459,11 @@ class ResponseCompletedEvent extends ResponseStreamEvent {
       other is ResponseCompletedEvent &&
           runtimeType == other.runtimeType &&
           response == other.response &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(response, sequenceNumber);
+  int get hashCode => Object.hash(response, sequenceNumber, agent);
 
   @override
   bool get isFinal => true;
@@ -402,17 +472,20 @@ class ResponseCompletedEvent extends ResponseStreamEvent {
   ResponseCompletedEvent copyWith({
     Response? response,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseCompletedEvent(
       response: response ?? this.response,
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ResponseCompletedEvent(response: ${response.id})';
+  String toString() =>
+      'ResponseCompletedEvent(response: ${response.id}, agent: $agent)';
 }
 
 /// Event emitted when a response fails.
@@ -424,17 +497,30 @@ class ResponseFailedEvent extends ResponseStreamEvent {
   @override
   final int? sequenceNumber;
 
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
+
   /// The failed response.
   final Response response;
 
   /// Creates a [ResponseFailedEvent].
-  const ResponseFailedEvent({required this.response, this.sequenceNumber});
+  const ResponseFailedEvent({
+    required this.response,
+    this.sequenceNumber,
+    this.agent,
+  });
 
   /// Creates a [ResponseFailedEvent] from JSON.
   factory ResponseFailedEvent.fromJson(Map<String, dynamic> json) {
     return ResponseFailedEvent(
       response: Response.fromJson(json['response'] as Map<String, dynamic>),
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -443,6 +529,7 @@ class ResponseFailedEvent extends ResponseStreamEvent {
     'type': type,
     'response': response.toJson(),
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -451,10 +538,11 @@ class ResponseFailedEvent extends ResponseStreamEvent {
       other is ResponseFailedEvent &&
           runtimeType == other.runtimeType &&
           response == other.response &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(response, sequenceNumber);
+  int get hashCode => Object.hash(response, sequenceNumber, agent);
 
   @override
   bool get isFinal => true;
@@ -463,17 +551,20 @@ class ResponseFailedEvent extends ResponseStreamEvent {
   ResponseFailedEvent copyWith({
     Response? response,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseFailedEvent(
       response: response ?? this.response,
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ResponseFailedEvent(response: ${response.id})';
+  String toString() =>
+      'ResponseFailedEvent(response: ${response.id}, agent: $agent)';
 }
 
 /// Event emitted when a response is incomplete.
@@ -485,17 +576,30 @@ class ResponseIncompleteEvent extends ResponseStreamEvent {
   @override
   final int? sequenceNumber;
 
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
+
   /// The incomplete response.
   final Response response;
 
   /// Creates a [ResponseIncompleteEvent].
-  const ResponseIncompleteEvent({required this.response, this.sequenceNumber});
+  const ResponseIncompleteEvent({
+    required this.response,
+    this.sequenceNumber,
+    this.agent,
+  });
 
   /// Creates a [ResponseIncompleteEvent] from JSON.
   factory ResponseIncompleteEvent.fromJson(Map<String, dynamic> json) {
     return ResponseIncompleteEvent(
       response: Response.fromJson(json['response'] as Map<String, dynamic>),
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -504,6 +608,7 @@ class ResponseIncompleteEvent extends ResponseStreamEvent {
     'type': type,
     'response': response.toJson(),
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -512,10 +617,11 @@ class ResponseIncompleteEvent extends ResponseStreamEvent {
       other is ResponseIncompleteEvent &&
           runtimeType == other.runtimeType &&
           response == other.response &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(response, sequenceNumber);
+  int get hashCode => Object.hash(response, sequenceNumber, agent);
 
   @override
   bool get isFinal => true;
@@ -524,17 +630,20 @@ class ResponseIncompleteEvent extends ResponseStreamEvent {
   ResponseIncompleteEvent copyWith({
     Response? response,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseIncompleteEvent(
       response: response ?? this.response,
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ResponseIncompleteEvent(response: ${response.id})';
+  String toString() =>
+      'ResponseIncompleteEvent(response: ${response.id}, agent: $agent)';
 }
 
 // ============================================================
@@ -550,6 +659,12 @@ class OutputItemAddedEvent extends ResponseStreamEvent {
   @override
   final int? sequenceNumber;
 
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
+
   /// The index of the output item.
   final int outputIndex;
 
@@ -561,6 +676,7 @@ class OutputItemAddedEvent extends ResponseStreamEvent {
     required this.outputIndex,
     required this.item,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates an [OutputItemAddedEvent] from JSON.
@@ -569,6 +685,9 @@ class OutputItemAddedEvent extends ResponseStreamEvent {
       outputIndex: json['output_index'] as int,
       item: OutputItem.fromJson(json['item'] as Map<String, dynamic>),
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -578,6 +697,7 @@ class OutputItemAddedEvent extends ResponseStreamEvent {
     'output_index': outputIndex,
     'item': item.toJson(),
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -587,16 +707,18 @@ class OutputItemAddedEvent extends ResponseStreamEvent {
           runtimeType == other.runtimeType &&
           outputIndex == other.outputIndex &&
           item == other.item &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(outputIndex, item, sequenceNumber);
+  int get hashCode => Object.hash(outputIndex, item, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   OutputItemAddedEvent copyWith({
     int? outputIndex,
     OutputItem? item,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return OutputItemAddedEvent(
       outputIndex: outputIndex ?? this.outputIndex,
@@ -604,11 +726,13 @@ class OutputItemAddedEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'OutputItemAddedEvent(outputIndex: $outputIndex)';
+  String toString() =>
+      'OutputItemAddedEvent(outputIndex: $outputIndex, agent: $agent)';
 }
 
 /// Event emitted when an output item is complete.
@@ -619,6 +743,12 @@ class OutputItemDoneEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The index of the output item.
   final int outputIndex;
@@ -631,6 +761,7 @@ class OutputItemDoneEvent extends ResponseStreamEvent {
     required this.outputIndex,
     required this.item,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates an [OutputItemDoneEvent] from JSON.
@@ -639,6 +770,9 @@ class OutputItemDoneEvent extends ResponseStreamEvent {
       outputIndex: json['output_index'] as int,
       item: OutputItem.fromJson(json['item'] as Map<String, dynamic>),
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -648,6 +782,7 @@ class OutputItemDoneEvent extends ResponseStreamEvent {
     'output_index': outputIndex,
     'item': item.toJson(),
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -657,16 +792,18 @@ class OutputItemDoneEvent extends ResponseStreamEvent {
           runtimeType == other.runtimeType &&
           outputIndex == other.outputIndex &&
           item == other.item &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(outputIndex, item, sequenceNumber);
+  int get hashCode => Object.hash(outputIndex, item, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   OutputItemDoneEvent copyWith({
     int? outputIndex,
     OutputItem? item,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return OutputItemDoneEvent(
       outputIndex: outputIndex ?? this.outputIndex,
@@ -674,11 +811,13 @@ class OutputItemDoneEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'OutputItemDoneEvent(outputIndex: $outputIndex)';
+  String toString() =>
+      'OutputItemDoneEvent(outputIndex: $outputIndex, agent: $agent)';
 }
 
 // ============================================================
@@ -693,6 +832,12 @@ class ContentPartAddedEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the item containing this content part.
   final String? itemId;
@@ -713,6 +858,7 @@ class ContentPartAddedEvent extends ResponseStreamEvent {
     required this.part,
     this.itemId,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ContentPartAddedEvent] from JSON.
@@ -723,6 +869,9 @@ class ContentPartAddedEvent extends ResponseStreamEvent {
       contentIndex: json['content_index'] as int,
       part: OutputContent.fromJson(json['part'] as Map<String, dynamic>),
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -734,6 +883,7 @@ class ContentPartAddedEvent extends ResponseStreamEvent {
     'content_index': contentIndex,
     'part': part.toJson(),
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -745,11 +895,18 @@ class ContentPartAddedEvent extends ResponseStreamEvent {
           outputIndex == other.outputIndex &&
           contentIndex == other.contentIndex &&
           part == other.part &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode =>
-      Object.hash(itemId, outputIndex, contentIndex, part, sequenceNumber);
+  int get hashCode => Object.hash(
+    itemId,
+    outputIndex,
+    contentIndex,
+    part,
+    sequenceNumber,
+    agent,
+  );
 
   /// Creates a copy with replaced values.
   ContentPartAddedEvent copyWith({
@@ -758,6 +915,7 @@ class ContentPartAddedEvent extends ResponseStreamEvent {
     OutputContent? part,
     Object? itemId = unsetCopyWithValue,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ContentPartAddedEvent(
       outputIndex: outputIndex ?? this.outputIndex,
@@ -767,12 +925,13 @@ class ContentPartAddedEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
   String toString() =>
-      'ContentPartAddedEvent(outputIndex: $outputIndex, contentIndex: $contentIndex)';
+      'ContentPartAddedEvent(outputIndex: $outputIndex, contentIndex: $contentIndex, agent: $agent)';
 }
 
 /// Event emitted when a content part is complete.
@@ -783,6 +942,12 @@ class ContentPartDoneEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the item containing this content part.
   final String? itemId;
@@ -803,6 +968,7 @@ class ContentPartDoneEvent extends ResponseStreamEvent {
     required this.part,
     this.itemId,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ContentPartDoneEvent] from JSON.
@@ -813,6 +979,9 @@ class ContentPartDoneEvent extends ResponseStreamEvent {
       contentIndex: json['content_index'] as int,
       part: OutputContent.fromJson(json['part'] as Map<String, dynamic>),
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -824,6 +993,7 @@ class ContentPartDoneEvent extends ResponseStreamEvent {
     'content_index': contentIndex,
     'part': part.toJson(),
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -835,11 +1005,18 @@ class ContentPartDoneEvent extends ResponseStreamEvent {
           outputIndex == other.outputIndex &&
           contentIndex == other.contentIndex &&
           part == other.part &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode =>
-      Object.hash(itemId, outputIndex, contentIndex, part, sequenceNumber);
+  int get hashCode => Object.hash(
+    itemId,
+    outputIndex,
+    contentIndex,
+    part,
+    sequenceNumber,
+    agent,
+  );
 
   /// Creates a copy with replaced values.
   ContentPartDoneEvent copyWith({
@@ -848,6 +1025,7 @@ class ContentPartDoneEvent extends ResponseStreamEvent {
     OutputContent? part,
     Object? itemId = unsetCopyWithValue,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ContentPartDoneEvent(
       outputIndex: outputIndex ?? this.outputIndex,
@@ -857,12 +1035,13 @@ class ContentPartDoneEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
   String toString() =>
-      'ContentPartDoneEvent(outputIndex: $outputIndex, contentIndex: $contentIndex)';
+      'ContentPartDoneEvent(outputIndex: $outputIndex, contentIndex: $contentIndex, agent: $agent)';
 }
 
 // ============================================================
@@ -877,6 +1056,12 @@ class OutputTextDeltaEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the item containing this text.
   final String? itemId;
@@ -901,6 +1086,7 @@ class OutputTextDeltaEvent extends ResponseStreamEvent {
     this.itemId,
     this.logprobs,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates an [OutputTextDeltaEvent] from JSON.
@@ -914,6 +1100,9 @@ class OutputTextDeltaEvent extends ResponseStreamEvent {
           ?.map((e) => LogProb.fromJson(e as Map<String, dynamic>))
           .toList(),
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -926,6 +1115,7 @@ class OutputTextDeltaEvent extends ResponseStreamEvent {
     'delta': delta,
     if (logprobs != null) 'logprobs': logprobs!.map((e) => e.toJson()).toList(),
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -937,11 +1127,18 @@ class OutputTextDeltaEvent extends ResponseStreamEvent {
           outputIndex == other.outputIndex &&
           contentIndex == other.contentIndex &&
           delta == other.delta &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode =>
-      Object.hash(itemId, outputIndex, contentIndex, delta, sequenceNumber);
+  int get hashCode => Object.hash(
+    itemId,
+    outputIndex,
+    contentIndex,
+    delta,
+    sequenceNumber,
+    agent,
+  );
 
   /// Creates a copy with replaced values.
   OutputTextDeltaEvent copyWith({
@@ -951,6 +1148,7 @@ class OutputTextDeltaEvent extends ResponseStreamEvent {
     Object? itemId = unsetCopyWithValue,
     Object? logprobs = unsetCopyWithValue,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return OutputTextDeltaEvent(
       outputIndex: outputIndex ?? this.outputIndex,
@@ -963,11 +1161,12 @@ class OutputTextDeltaEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'OutputTextDeltaEvent(delta: $delta)';
+  String toString() => 'OutputTextDeltaEvent(delta: $delta, agent: $agent)';
 }
 
 /// Event emitted when text generation is complete.
@@ -978,6 +1177,12 @@ class OutputTextDoneEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the item containing this text.
   final String? itemId;
@@ -1002,6 +1207,7 @@ class OutputTextDoneEvent extends ResponseStreamEvent {
     this.itemId,
     this.logprobs,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates an [OutputTextDoneEvent] from JSON.
@@ -1015,6 +1221,9 @@ class OutputTextDoneEvent extends ResponseStreamEvent {
           ?.map((e) => LogProb.fromJson(e as Map<String, dynamic>))
           .toList(),
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -1027,6 +1236,7 @@ class OutputTextDoneEvent extends ResponseStreamEvent {
     'text': text,
     if (logprobs != null) 'logprobs': logprobs!.map((e) => e.toJson()).toList(),
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -1038,11 +1248,18 @@ class OutputTextDoneEvent extends ResponseStreamEvent {
           outputIndex == other.outputIndex &&
           contentIndex == other.contentIndex &&
           text == other.text &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode =>
-      Object.hash(itemId, outputIndex, contentIndex, text, sequenceNumber);
+  int get hashCode => Object.hash(
+    itemId,
+    outputIndex,
+    contentIndex,
+    text,
+    sequenceNumber,
+    agent,
+  );
 
   /// Creates a copy with replaced values.
   OutputTextDoneEvent copyWith({
@@ -1052,6 +1269,7 @@ class OutputTextDoneEvent extends ResponseStreamEvent {
     Object? itemId = unsetCopyWithValue,
     Object? logprobs = unsetCopyWithValue,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return OutputTextDoneEvent(
       outputIndex: outputIndex ?? this.outputIndex,
@@ -1064,12 +1282,13 @@ class OutputTextDoneEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
   String toString() =>
-      'OutputTextDoneEvent(text: ${text.length > 50 ? '${text.substring(0, 50)}...' : text})';
+      'OutputTextDoneEvent(text: ${text.length > 50 ? '${text.substring(0, 50)}...' : text}, agent: $agent)';
 }
 
 /// Event emitted when a text annotation is added.
@@ -1080,6 +1299,12 @@ class OutputTextAnnotationAddedEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the item containing this annotation.
   final String? itemId;
@@ -1104,6 +1329,7 @@ class OutputTextAnnotationAddedEvent extends ResponseStreamEvent {
     required this.annotation,
     this.itemId,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates an [OutputTextAnnotationAddedEvent] from JSON.
@@ -1117,6 +1343,9 @@ class OutputTextAnnotationAddedEvent extends ResponseStreamEvent {
         json['annotation'] as Map<String, dynamic>,
       ),
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -1129,6 +1358,7 @@ class OutputTextAnnotationAddedEvent extends ResponseStreamEvent {
     'annotation_index': annotationIndex,
     'annotation': annotation.toJson(),
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -1141,7 +1371,8 @@ class OutputTextAnnotationAddedEvent extends ResponseStreamEvent {
           contentIndex == other.contentIndex &&
           annotationIndex == other.annotationIndex &&
           annotation == other.annotation &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
   int get hashCode => Object.hash(
@@ -1151,6 +1382,7 @@ class OutputTextAnnotationAddedEvent extends ResponseStreamEvent {
     annotationIndex,
     annotation,
     sequenceNumber,
+    agent,
   );
 
   /// Creates a copy with replaced values.
@@ -1161,6 +1393,7 @@ class OutputTextAnnotationAddedEvent extends ResponseStreamEvent {
     Annotation? annotation,
     Object? itemId = unsetCopyWithValue,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return OutputTextAnnotationAddedEvent(
       outputIndex: outputIndex ?? this.outputIndex,
@@ -1171,12 +1404,13 @@ class OutputTextAnnotationAddedEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
   String toString() =>
-      'OutputTextAnnotationAddedEvent(annotationIndex: $annotationIndex)';
+      'OutputTextAnnotationAddedEvent(annotationIndex: $annotationIndex, agent: $agent)';
 }
 
 // ============================================================
@@ -1191,6 +1425,12 @@ class RefusalDeltaEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the item containing this refusal.
   final String? itemId;
@@ -1211,6 +1451,7 @@ class RefusalDeltaEvent extends ResponseStreamEvent {
     required this.delta,
     this.itemId,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [RefusalDeltaEvent] from JSON.
@@ -1221,6 +1462,9 @@ class RefusalDeltaEvent extends ResponseStreamEvent {
       contentIndex: json['content_index'] as int,
       delta: json['delta'] as String,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -1232,6 +1476,7 @@ class RefusalDeltaEvent extends ResponseStreamEvent {
     'content_index': contentIndex,
     'delta': delta,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -1243,11 +1488,18 @@ class RefusalDeltaEvent extends ResponseStreamEvent {
           outputIndex == other.outputIndex &&
           contentIndex == other.contentIndex &&
           delta == other.delta &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode =>
-      Object.hash(itemId, outputIndex, contentIndex, delta, sequenceNumber);
+  int get hashCode => Object.hash(
+    itemId,
+    outputIndex,
+    contentIndex,
+    delta,
+    sequenceNumber,
+    agent,
+  );
 
   /// Creates a copy with replaced values.
   RefusalDeltaEvent copyWith({
@@ -1256,6 +1508,7 @@ class RefusalDeltaEvent extends ResponseStreamEvent {
     String? delta,
     Object? itemId = unsetCopyWithValue,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return RefusalDeltaEvent(
       outputIndex: outputIndex ?? this.outputIndex,
@@ -1265,11 +1518,12 @@ class RefusalDeltaEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'RefusalDeltaEvent(delta: $delta)';
+  String toString() => 'RefusalDeltaEvent(delta: $delta, agent: $agent)';
 }
 
 /// Event emitted when refusal generation is complete.
@@ -1280,6 +1534,12 @@ class RefusalDoneEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the item containing this refusal.
   final String? itemId;
@@ -1300,6 +1560,7 @@ class RefusalDoneEvent extends ResponseStreamEvent {
     required this.refusal,
     this.itemId,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [RefusalDoneEvent] from JSON.
@@ -1310,6 +1571,9 @@ class RefusalDoneEvent extends ResponseStreamEvent {
       contentIndex: json['content_index'] as int,
       refusal: json['refusal'] as String,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -1321,6 +1585,7 @@ class RefusalDoneEvent extends ResponseStreamEvent {
     'content_index': contentIndex,
     'refusal': refusal,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -1332,11 +1597,18 @@ class RefusalDoneEvent extends ResponseStreamEvent {
           outputIndex == other.outputIndex &&
           contentIndex == other.contentIndex &&
           refusal == other.refusal &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode =>
-      Object.hash(itemId, outputIndex, contentIndex, refusal, sequenceNumber);
+  int get hashCode => Object.hash(
+    itemId,
+    outputIndex,
+    contentIndex,
+    refusal,
+    sequenceNumber,
+    agent,
+  );
 
   /// Creates a copy with replaced values.
   RefusalDoneEvent copyWith({
@@ -1345,6 +1617,7 @@ class RefusalDoneEvent extends ResponseStreamEvent {
     String? refusal,
     Object? itemId = unsetCopyWithValue,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return RefusalDoneEvent(
       outputIndex: outputIndex ?? this.outputIndex,
@@ -1354,11 +1627,12 @@ class RefusalDoneEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'RefusalDoneEvent(refusal: $refusal)';
+  String toString() => 'RefusalDoneEvent(refusal: $refusal, agent: $agent)';
 }
 
 // ============================================================
@@ -1373,6 +1647,12 @@ class FunctionCallArgumentsDeltaEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the function call item.
   final String? itemId;
@@ -1389,6 +1669,7 @@ class FunctionCallArgumentsDeltaEvent extends ResponseStreamEvent {
     required this.delta,
     this.itemId,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [FunctionCallArgumentsDeltaEvent] from JSON.
@@ -1398,6 +1679,9 @@ class FunctionCallArgumentsDeltaEvent extends ResponseStreamEvent {
       outputIndex: json['output_index'] as int,
       delta: json['delta'] as String,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -1408,6 +1692,7 @@ class FunctionCallArgumentsDeltaEvent extends ResponseStreamEvent {
     'output_index': outputIndex,
     'delta': delta,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -1418,10 +1703,12 @@ class FunctionCallArgumentsDeltaEvent extends ResponseStreamEvent {
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
           delta == other.delta &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, delta, sequenceNumber);
+  int get hashCode =>
+      Object.hash(itemId, outputIndex, delta, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   FunctionCallArgumentsDeltaEvent copyWith({
@@ -1429,6 +1716,7 @@ class FunctionCallArgumentsDeltaEvent extends ResponseStreamEvent {
     String? delta,
     Object? itemId = unsetCopyWithValue,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return FunctionCallArgumentsDeltaEvent(
       outputIndex: outputIndex ?? this.outputIndex,
@@ -1437,12 +1725,13 @@ class FunctionCallArgumentsDeltaEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
   String toString() =>
-      'FunctionCallArgumentsDeltaEvent(itemId: $itemId, delta: $delta)';
+      'FunctionCallArgumentsDeltaEvent(itemId: $itemId, delta: $delta, agent: $agent)';
 }
 
 /// Event emitted when function call arguments are complete.
@@ -1453,6 +1742,12 @@ class FunctionCallArgumentsDoneEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the function call item.
   final String? itemId;
@@ -1473,6 +1768,7 @@ class FunctionCallArgumentsDoneEvent extends ResponseStreamEvent {
     this.itemId,
     this.name,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [FunctionCallArgumentsDoneEvent] from JSON.
@@ -1483,6 +1779,9 @@ class FunctionCallArgumentsDoneEvent extends ResponseStreamEvent {
       name: json['name'] as String?,
       arguments: json['arguments'] as String,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -1494,6 +1793,7 @@ class FunctionCallArgumentsDoneEvent extends ResponseStreamEvent {
     if (name != null) 'name': name,
     'arguments': arguments,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -1505,11 +1805,12 @@ class FunctionCallArgumentsDoneEvent extends ResponseStreamEvent {
           outputIndex == other.outputIndex &&
           name == other.name &&
           arguments == other.arguments &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
   int get hashCode =>
-      Object.hash(itemId, outputIndex, name, arguments, sequenceNumber);
+      Object.hash(itemId, outputIndex, name, arguments, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   FunctionCallArgumentsDoneEvent copyWith({
@@ -1518,6 +1819,7 @@ class FunctionCallArgumentsDoneEvent extends ResponseStreamEvent {
     Object? itemId = unsetCopyWithValue,
     Object? name = unsetCopyWithValue,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return FunctionCallArgumentsDoneEvent(
       outputIndex: outputIndex ?? this.outputIndex,
@@ -1527,12 +1829,13 @@ class FunctionCallArgumentsDoneEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
   String toString() =>
-      'FunctionCallArgumentsDoneEvent(itemId: $itemId, name: $name, arguments: $arguments)';
+      'FunctionCallArgumentsDoneEvent(itemId: $itemId, name: $name, arguments: $arguments, agent: $agent)';
 }
 
 // ============================================================
@@ -1549,6 +1852,12 @@ class ReasoningTextDeltaEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the item containing this reasoning.
   final String? itemId;
@@ -1569,6 +1878,7 @@ class ReasoningTextDeltaEvent extends ResponseStreamEvent {
     this.itemId,
     this.contentIndex,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ReasoningTextDeltaEvent] from JSON.
@@ -1579,6 +1889,9 @@ class ReasoningTextDeltaEvent extends ResponseStreamEvent {
       contentIndex: json['content_index'] as int?,
       delta: json['delta'] as String,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -1590,6 +1903,7 @@ class ReasoningTextDeltaEvent extends ResponseStreamEvent {
     if (contentIndex != null) 'content_index': contentIndex,
     'delta': delta,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -1601,11 +1915,18 @@ class ReasoningTextDeltaEvent extends ResponseStreamEvent {
           outputIndex == other.outputIndex &&
           contentIndex == other.contentIndex &&
           delta == other.delta &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode =>
-      Object.hash(itemId, outputIndex, contentIndex, delta, sequenceNumber);
+  int get hashCode => Object.hash(
+    itemId,
+    outputIndex,
+    contentIndex,
+    delta,
+    sequenceNumber,
+    agent,
+  );
 
   /// Creates a copy with replaced values.
   ReasoningTextDeltaEvent copyWith({
@@ -1614,6 +1935,7 @@ class ReasoningTextDeltaEvent extends ResponseStreamEvent {
     Object? itemId = unsetCopyWithValue,
     Object? contentIndex = unsetCopyWithValue,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ReasoningTextDeltaEvent(
       outputIndex: outputIndex ?? this.outputIndex,
@@ -1625,11 +1947,12 @@ class ReasoningTextDeltaEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ReasoningTextDeltaEvent(delta: $delta)';
+  String toString() => 'ReasoningTextDeltaEvent(delta: $delta, agent: $agent)';
 }
 
 /// Event emitted when reasoning text is complete.
@@ -1642,6 +1965,12 @@ class ReasoningTextDoneEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the item containing this reasoning.
   final String? itemId;
@@ -1662,6 +1991,7 @@ class ReasoningTextDoneEvent extends ResponseStreamEvent {
     this.itemId,
     this.contentIndex,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ReasoningTextDoneEvent] from JSON.
@@ -1672,6 +2002,9 @@ class ReasoningTextDoneEvent extends ResponseStreamEvent {
       contentIndex: json['content_index'] as int?,
       text: json['text'] as String,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -1683,6 +2016,7 @@ class ReasoningTextDoneEvent extends ResponseStreamEvent {
     if (contentIndex != null) 'content_index': contentIndex,
     'text': text,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -1694,11 +2028,18 @@ class ReasoningTextDoneEvent extends ResponseStreamEvent {
           outputIndex == other.outputIndex &&
           contentIndex == other.contentIndex &&
           text == other.text &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode =>
-      Object.hash(itemId, outputIndex, contentIndex, text, sequenceNumber);
+  int get hashCode => Object.hash(
+    itemId,
+    outputIndex,
+    contentIndex,
+    text,
+    sequenceNumber,
+    agent,
+  );
 
   /// Creates a copy with replaced values.
   ReasoningTextDoneEvent copyWith({
@@ -1707,6 +2048,7 @@ class ReasoningTextDoneEvent extends ResponseStreamEvent {
     Object? itemId = unsetCopyWithValue,
     Object? contentIndex = unsetCopyWithValue,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ReasoningTextDoneEvent(
       outputIndex: outputIndex ?? this.outputIndex,
@@ -1718,11 +2060,12 @@ class ReasoningTextDoneEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ReasoningTextDoneEvent(text: $text)';
+  String toString() => 'ReasoningTextDoneEvent(text: $text, agent: $agent)';
 }
 
 // Deprecated aliases for migration
@@ -1747,6 +2090,12 @@ class ReasoningSummaryPartAddedEvent extends ResponseStreamEvent {
   @override
   final int? sequenceNumber;
 
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
+
   /// The ID of the item containing this reasoning summary.
   final String? itemId;
 
@@ -1766,6 +2115,7 @@ class ReasoningSummaryPartAddedEvent extends ResponseStreamEvent {
     required this.part,
     this.itemId,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ReasoningSummaryPartAddedEvent] from JSON.
@@ -1776,6 +2126,9 @@ class ReasoningSummaryPartAddedEvent extends ResponseStreamEvent {
       summaryIndex: json['summary_index'] as int,
       part: json['part'] as Map<String, dynamic>,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -1787,6 +2140,7 @@ class ReasoningSummaryPartAddedEvent extends ResponseStreamEvent {
     'summary_index': summaryIndex,
     'part': part,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -1797,11 +2151,18 @@ class ReasoningSummaryPartAddedEvent extends ResponseStreamEvent {
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
           summaryIndex == other.summaryIndex &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode =>
-      Object.hash(itemId, outputIndex, summaryIndex, part, sequenceNumber);
+  int get hashCode => Object.hash(
+    itemId,
+    outputIndex,
+    summaryIndex,
+    part,
+    sequenceNumber,
+    agent,
+  );
 
   /// Creates a copy with replaced values.
   ReasoningSummaryPartAddedEvent copyWith({
@@ -1810,6 +2171,7 @@ class ReasoningSummaryPartAddedEvent extends ResponseStreamEvent {
     Map<String, dynamic>? part,
     Object? itemId = unsetCopyWithValue,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ReasoningSummaryPartAddedEvent(
       outputIndex: outputIndex ?? this.outputIndex,
@@ -1819,12 +2181,13 @@ class ReasoningSummaryPartAddedEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
   String toString() =>
-      'ReasoningSummaryPartAddedEvent(outputIndex: $outputIndex, summaryIndex: $summaryIndex)';
+      'ReasoningSummaryPartAddedEvent(outputIndex: $outputIndex, summaryIndex: $summaryIndex, agent: $agent)';
 }
 
 /// Event emitted when a reasoning summary part is complete.
@@ -1835,6 +2198,12 @@ class ReasoningSummaryPartDoneEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the item containing this reasoning summary.
   final String? itemId;
@@ -1862,6 +2231,7 @@ class ReasoningSummaryPartDoneEvent extends ResponseStreamEvent {
     this.itemId,
     this.sequenceNumber,
     this.status,
+    this.agent,
   });
 
   /// Creates a [ReasoningSummaryPartDoneEvent] from JSON.
@@ -1875,6 +2245,9 @@ class ReasoningSummaryPartDoneEvent extends ResponseStreamEvent {
       status: json['status'] != null
           ? ReasoningSummaryPartStatus.fromJson(json['status'] as String)
           : null,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -1887,6 +2260,7 @@ class ReasoningSummaryPartDoneEvent extends ResponseStreamEvent {
     'part': part,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
     if (status != null) 'status': status!.toJson(),
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -1899,7 +2273,8 @@ class ReasoningSummaryPartDoneEvent extends ResponseStreamEvent {
           summaryIndex == other.summaryIndex &&
           mapsEqual(part, other.part) &&
           sequenceNumber == other.sequenceNumber &&
-          status == other.status;
+          status == other.status &&
+          agent == other.agent;
 
   @override
   int get hashCode => Object.hash(
@@ -1909,6 +2284,7 @@ class ReasoningSummaryPartDoneEvent extends ResponseStreamEvent {
     mapHash(part),
     sequenceNumber,
     status,
+    agent,
   );
 
   /// Creates a copy with replaced values.
@@ -1919,6 +2295,7 @@ class ReasoningSummaryPartDoneEvent extends ResponseStreamEvent {
     Object? itemId = unsetCopyWithValue,
     Object? sequenceNumber = unsetCopyWithValue,
     Object? status = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ReasoningSummaryPartDoneEvent(
       outputIndex: outputIndex ?? this.outputIndex,
@@ -1931,12 +2308,13 @@ class ReasoningSummaryPartDoneEvent extends ResponseStreamEvent {
       status: status == unsetCopyWithValue
           ? this.status
           : status as ReasoningSummaryPartStatus?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
   String toString() =>
-      'ReasoningSummaryPartDoneEvent(outputIndex: $outputIndex, summaryIndex: $summaryIndex, status: $status)';
+      'ReasoningSummaryPartDoneEvent(outputIndex: $outputIndex, summaryIndex: $summaryIndex, status: $status, agent: $agent)';
 }
 
 /// The completion status of a reasoning summary part.
@@ -1973,6 +2351,12 @@ class ReasoningSummaryTextDeltaEvent extends ResponseStreamEvent {
   @override
   final int? sequenceNumber;
 
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
+
   /// The ID of the item containing this reasoning summary.
   final String? itemId;
 
@@ -1992,6 +2376,7 @@ class ReasoningSummaryTextDeltaEvent extends ResponseStreamEvent {
     required this.delta,
     this.itemId,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ReasoningSummaryTextDeltaEvent] from JSON.
@@ -2002,6 +2387,9 @@ class ReasoningSummaryTextDeltaEvent extends ResponseStreamEvent {
       summaryIndex: json['summary_index'] as int,
       delta: json['delta'] as String,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -2013,6 +2401,7 @@ class ReasoningSummaryTextDeltaEvent extends ResponseStreamEvent {
     'summary_index': summaryIndex,
     'delta': delta,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -2024,11 +2413,18 @@ class ReasoningSummaryTextDeltaEvent extends ResponseStreamEvent {
           outputIndex == other.outputIndex &&
           summaryIndex == other.summaryIndex &&
           delta == other.delta &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode =>
-      Object.hash(itemId, outputIndex, summaryIndex, delta, sequenceNumber);
+  int get hashCode => Object.hash(
+    itemId,
+    outputIndex,
+    summaryIndex,
+    delta,
+    sequenceNumber,
+    agent,
+  );
 
   /// Creates a copy with replaced values.
   ReasoningSummaryTextDeltaEvent copyWith({
@@ -2037,6 +2433,7 @@ class ReasoningSummaryTextDeltaEvent extends ResponseStreamEvent {
     String? delta,
     Object? itemId = unsetCopyWithValue,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ReasoningSummaryTextDeltaEvent(
       outputIndex: outputIndex ?? this.outputIndex,
@@ -2046,12 +2443,13 @@ class ReasoningSummaryTextDeltaEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
   String toString() =>
-      'ReasoningSummaryTextDeltaEvent(outputIndex: $outputIndex, delta: $delta)';
+      'ReasoningSummaryTextDeltaEvent(outputIndex: $outputIndex, delta: $delta, agent: $agent)';
 }
 
 /// Event emitted when reasoning summary text is complete.
@@ -2062,6 +2460,12 @@ class ReasoningSummaryTextDoneEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the item containing this reasoning summary.
   final String? itemId;
@@ -2082,6 +2486,7 @@ class ReasoningSummaryTextDoneEvent extends ResponseStreamEvent {
     required this.text,
     this.itemId,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ReasoningSummaryTextDoneEvent] from JSON.
@@ -2092,6 +2497,9 @@ class ReasoningSummaryTextDoneEvent extends ResponseStreamEvent {
       summaryIndex: json['summary_index'] as int,
       text: json['text'] as String,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -2103,6 +2511,7 @@ class ReasoningSummaryTextDoneEvent extends ResponseStreamEvent {
     'summary_index': summaryIndex,
     'text': text,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -2114,11 +2523,18 @@ class ReasoningSummaryTextDoneEvent extends ResponseStreamEvent {
           outputIndex == other.outputIndex &&
           summaryIndex == other.summaryIndex &&
           text == other.text &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode =>
-      Object.hash(itemId, outputIndex, summaryIndex, text, sequenceNumber);
+  int get hashCode => Object.hash(
+    itemId,
+    outputIndex,
+    summaryIndex,
+    text,
+    sequenceNumber,
+    agent,
+  );
 
   /// Creates a copy with replaced values.
   ReasoningSummaryTextDoneEvent copyWith({
@@ -2127,6 +2543,7 @@ class ReasoningSummaryTextDoneEvent extends ResponseStreamEvent {
     String? text,
     Object? itemId = unsetCopyWithValue,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ReasoningSummaryTextDoneEvent(
       outputIndex: outputIndex ?? this.outputIndex,
@@ -2136,12 +2553,13 @@ class ReasoningSummaryTextDoneEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
   String toString() =>
-      'ReasoningSummaryTextDoneEvent(outputIndex: $outputIndex, text: $text)';
+      'ReasoningSummaryTextDoneEvent(outputIndex: $outputIndex, text: $text, agent: $agent)';
 }
 
 // ============================================================
@@ -2157,17 +2575,30 @@ class ResponseAudioDeltaEvent extends ResponseStreamEvent {
   @override
   final int? sequenceNumber;
 
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
+
   /// The base64-encoded audio delta.
   final String delta;
 
   /// Creates a [ResponseAudioDeltaEvent].
-  const ResponseAudioDeltaEvent({required this.delta, this.sequenceNumber});
+  const ResponseAudioDeltaEvent({
+    required this.delta,
+    this.sequenceNumber,
+    this.agent,
+  });
 
   /// Creates a [ResponseAudioDeltaEvent] from JSON.
   factory ResponseAudioDeltaEvent.fromJson(Map<String, dynamic> json) {
     return ResponseAudioDeltaEvent(
       delta: json['delta'] as String,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -2176,6 +2607,7 @@ class ResponseAudioDeltaEvent extends ResponseStreamEvent {
     'type': type,
     'delta': delta,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -2184,26 +2616,30 @@ class ResponseAudioDeltaEvent extends ResponseStreamEvent {
       other is ResponseAudioDeltaEvent &&
           runtimeType == other.runtimeType &&
           delta == other.delta &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(delta, sequenceNumber);
+  int get hashCode => Object.hash(delta, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseAudioDeltaEvent copyWith({
     String? delta,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseAudioDeltaEvent(
       delta: delta ?? this.delta,
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ResponseAudioDeltaEvent(deltaLength: ${delta.length})';
+  String toString() =>
+      'ResponseAudioDeltaEvent(deltaLength: ${delta.length}, agent: $agent)';
 }
 
 /// Event emitted when audio generation is complete.
@@ -2215,13 +2651,22 @@ class ResponseAudioDoneEvent extends ResponseStreamEvent {
   @override
   final int? sequenceNumber;
 
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
+
   /// Creates a [ResponseAudioDoneEvent].
-  const ResponseAudioDoneEvent({this.sequenceNumber});
+  const ResponseAudioDoneEvent({this.sequenceNumber, this.agent});
 
   /// Creates a [ResponseAudioDoneEvent] from JSON.
   factory ResponseAudioDoneEvent.fromJson(Map<String, dynamic> json) {
     return ResponseAudioDoneEvent(
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -2229,6 +2674,7 @@ class ResponseAudioDoneEvent extends ResponseStreamEvent {
   Map<String, dynamic> toJson() => {
     'type': type,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -2236,24 +2682,27 @@ class ResponseAudioDoneEvent extends ResponseStreamEvent {
       identical(this, other) ||
       other is ResponseAudioDoneEvent &&
           runtimeType == other.runtimeType &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => sequenceNumber.hashCode;
+  int get hashCode => Object.hash(sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseAudioDoneEvent copyWith({
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseAudioDoneEvent(
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ResponseAudioDoneEvent()';
+  String toString() => 'ResponseAudioDoneEvent(agent: $agent)';
 }
 
 /// Event emitted when audio transcript is generated (delta).
@@ -2265,6 +2714,12 @@ class ResponseAudioTranscriptDeltaEvent extends ResponseStreamEvent {
   @override
   final int? sequenceNumber;
 
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
+
   /// The transcript delta.
   final String delta;
 
@@ -2272,6 +2727,7 @@ class ResponseAudioTranscriptDeltaEvent extends ResponseStreamEvent {
   const ResponseAudioTranscriptDeltaEvent({
     required this.delta,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ResponseAudioTranscriptDeltaEvent] from JSON.
@@ -2281,6 +2737,9 @@ class ResponseAudioTranscriptDeltaEvent extends ResponseStreamEvent {
     return ResponseAudioTranscriptDeltaEvent(
       delta: json['delta'] as String,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -2289,6 +2748,7 @@ class ResponseAudioTranscriptDeltaEvent extends ResponseStreamEvent {
     'type': type,
     'delta': delta,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -2297,26 +2757,30 @@ class ResponseAudioTranscriptDeltaEvent extends ResponseStreamEvent {
       other is ResponseAudioTranscriptDeltaEvent &&
           runtimeType == other.runtimeType &&
           delta == other.delta &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(delta, sequenceNumber);
+  int get hashCode => Object.hash(delta, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseAudioTranscriptDeltaEvent copyWith({
     String? delta,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseAudioTranscriptDeltaEvent(
       delta: delta ?? this.delta,
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ResponseAudioTranscriptDeltaEvent(delta: $delta)';
+  String toString() =>
+      'ResponseAudioTranscriptDeltaEvent(delta: $delta, agent: $agent)';
 }
 
 /// Event emitted when audio transcript is complete.
@@ -2328,13 +2792,22 @@ class ResponseAudioTranscriptDoneEvent extends ResponseStreamEvent {
   @override
   final int? sequenceNumber;
 
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
+
   /// Creates a [ResponseAudioTranscriptDoneEvent].
-  const ResponseAudioTranscriptDoneEvent({this.sequenceNumber});
+  const ResponseAudioTranscriptDoneEvent({this.sequenceNumber, this.agent});
 
   /// Creates a [ResponseAudioTranscriptDoneEvent] from JSON.
   factory ResponseAudioTranscriptDoneEvent.fromJson(Map<String, dynamic> json) {
     return ResponseAudioTranscriptDoneEvent(
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -2342,6 +2815,7 @@ class ResponseAudioTranscriptDoneEvent extends ResponseStreamEvent {
   Map<String, dynamic> toJson() => {
     'type': type,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -2349,24 +2823,27 @@ class ResponseAudioTranscriptDoneEvent extends ResponseStreamEvent {
       identical(this, other) ||
       other is ResponseAudioTranscriptDoneEvent &&
           runtimeType == other.runtimeType &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => sequenceNumber.hashCode;
+  int get hashCode => Object.hash(sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseAudioTranscriptDoneEvent copyWith({
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseAudioTranscriptDoneEvent(
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ResponseAudioTranscriptDoneEvent()';
+  String toString() => 'ResponseAudioTranscriptDoneEvent(agent: $agent)';
 }
 
 // ============================================================
@@ -2382,6 +2859,12 @@ class ResponseWebSearchCallInProgressEvent extends ResponseStreamEvent {
   @override
   final int? sequenceNumber;
 
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
+
   /// The ID of the web search call item.
   final String itemId;
 
@@ -2393,6 +2876,7 @@ class ResponseWebSearchCallInProgressEvent extends ResponseStreamEvent {
     required this.itemId,
     required this.outputIndex,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ResponseWebSearchCallInProgressEvent] from JSON.
@@ -2403,6 +2887,9 @@ class ResponseWebSearchCallInProgressEvent extends ResponseStreamEvent {
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -2412,6 +2899,7 @@ class ResponseWebSearchCallInProgressEvent extends ResponseStreamEvent {
     'item_id': itemId,
     'output_index': outputIndex,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -2421,16 +2909,18 @@ class ResponseWebSearchCallInProgressEvent extends ResponseStreamEvent {
           runtimeType == other.runtimeType &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
+  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseWebSearchCallInProgressEvent copyWith({
     String? itemId,
     int? outputIndex,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseWebSearchCallInProgressEvent(
       itemId: itemId ?? this.itemId,
@@ -2438,11 +2928,13 @@ class ResponseWebSearchCallInProgressEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ResponseWebSearchCallInProgressEvent(itemId: $itemId)';
+  String toString() =>
+      'ResponseWebSearchCallInProgressEvent(itemId: $itemId, agent: $agent)';
 }
 
 /// Event emitted when a web search call is searching.
@@ -2453,6 +2945,12 @@ class ResponseWebSearchCallSearchingEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the web search call item.
   final String itemId;
@@ -2465,6 +2963,7 @@ class ResponseWebSearchCallSearchingEvent extends ResponseStreamEvent {
     required this.itemId,
     required this.outputIndex,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ResponseWebSearchCallSearchingEvent] from JSON.
@@ -2475,6 +2974,9 @@ class ResponseWebSearchCallSearchingEvent extends ResponseStreamEvent {
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -2484,6 +2986,7 @@ class ResponseWebSearchCallSearchingEvent extends ResponseStreamEvent {
     'item_id': itemId,
     'output_index': outputIndex,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -2493,16 +2996,18 @@ class ResponseWebSearchCallSearchingEvent extends ResponseStreamEvent {
           runtimeType == other.runtimeType &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
+  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseWebSearchCallSearchingEvent copyWith({
     String? itemId,
     int? outputIndex,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseWebSearchCallSearchingEvent(
       itemId: itemId ?? this.itemId,
@@ -2510,11 +3015,13 @@ class ResponseWebSearchCallSearchingEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ResponseWebSearchCallSearchingEvent(itemId: $itemId)';
+  String toString() =>
+      'ResponseWebSearchCallSearchingEvent(itemId: $itemId, agent: $agent)';
 }
 
 /// Event emitted when a web search call is completed.
@@ -2525,6 +3032,12 @@ class ResponseWebSearchCallCompletedEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the web search call item.
   final String itemId;
@@ -2537,6 +3050,7 @@ class ResponseWebSearchCallCompletedEvent extends ResponseStreamEvent {
     required this.itemId,
     required this.outputIndex,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ResponseWebSearchCallCompletedEvent] from JSON.
@@ -2547,6 +3061,9 @@ class ResponseWebSearchCallCompletedEvent extends ResponseStreamEvent {
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -2556,6 +3073,7 @@ class ResponseWebSearchCallCompletedEvent extends ResponseStreamEvent {
     'item_id': itemId,
     'output_index': outputIndex,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -2565,16 +3083,18 @@ class ResponseWebSearchCallCompletedEvent extends ResponseStreamEvent {
           runtimeType == other.runtimeType &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
+  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseWebSearchCallCompletedEvent copyWith({
     String? itemId,
     int? outputIndex,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseWebSearchCallCompletedEvent(
       itemId: itemId ?? this.itemId,
@@ -2582,11 +3102,13 @@ class ResponseWebSearchCallCompletedEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ResponseWebSearchCallCompletedEvent(itemId: $itemId)';
+  String toString() =>
+      'ResponseWebSearchCallCompletedEvent(itemId: $itemId, agent: $agent)';
 }
 
 // ============================================================
@@ -2602,6 +3124,12 @@ class ResponseFileSearchCallInProgressEvent extends ResponseStreamEvent {
   @override
   final int? sequenceNumber;
 
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
+
   /// The ID of the file search call item.
   final String itemId;
 
@@ -2613,6 +3141,7 @@ class ResponseFileSearchCallInProgressEvent extends ResponseStreamEvent {
     required this.itemId,
     required this.outputIndex,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ResponseFileSearchCallInProgressEvent] from JSON.
@@ -2623,6 +3152,9 @@ class ResponseFileSearchCallInProgressEvent extends ResponseStreamEvent {
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -2632,6 +3164,7 @@ class ResponseFileSearchCallInProgressEvent extends ResponseStreamEvent {
     'item_id': itemId,
     'output_index': outputIndex,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -2641,16 +3174,18 @@ class ResponseFileSearchCallInProgressEvent extends ResponseStreamEvent {
           runtimeType == other.runtimeType &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
+  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseFileSearchCallInProgressEvent copyWith({
     String? itemId,
     int? outputIndex,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseFileSearchCallInProgressEvent(
       itemId: itemId ?? this.itemId,
@@ -2658,11 +3193,13 @@ class ResponseFileSearchCallInProgressEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ResponseFileSearchCallInProgressEvent(itemId: $itemId)';
+  String toString() =>
+      'ResponseFileSearchCallInProgressEvent(itemId: $itemId, agent: $agent)';
 }
 
 /// Event emitted when a file search call is searching.
@@ -2673,6 +3210,12 @@ class ResponseFileSearchCallSearchingEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the file search call item.
   final String itemId;
@@ -2685,6 +3228,7 @@ class ResponseFileSearchCallSearchingEvent extends ResponseStreamEvent {
     required this.itemId,
     required this.outputIndex,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ResponseFileSearchCallSearchingEvent] from JSON.
@@ -2695,6 +3239,9 @@ class ResponseFileSearchCallSearchingEvent extends ResponseStreamEvent {
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -2704,6 +3251,7 @@ class ResponseFileSearchCallSearchingEvent extends ResponseStreamEvent {
     'item_id': itemId,
     'output_index': outputIndex,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -2713,16 +3261,18 @@ class ResponseFileSearchCallSearchingEvent extends ResponseStreamEvent {
           runtimeType == other.runtimeType &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
+  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseFileSearchCallSearchingEvent copyWith({
     String? itemId,
     int? outputIndex,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseFileSearchCallSearchingEvent(
       itemId: itemId ?? this.itemId,
@@ -2730,11 +3280,13 @@ class ResponseFileSearchCallSearchingEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ResponseFileSearchCallSearchingEvent(itemId: $itemId)';
+  String toString() =>
+      'ResponseFileSearchCallSearchingEvent(itemId: $itemId, agent: $agent)';
 }
 
 /// Event emitted when a file search call is completed.
@@ -2745,6 +3297,12 @@ class ResponseFileSearchCallCompletedEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the file search call item.
   final String itemId;
@@ -2757,6 +3315,7 @@ class ResponseFileSearchCallCompletedEvent extends ResponseStreamEvent {
     required this.itemId,
     required this.outputIndex,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ResponseFileSearchCallCompletedEvent] from JSON.
@@ -2767,6 +3326,9 @@ class ResponseFileSearchCallCompletedEvent extends ResponseStreamEvent {
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -2776,6 +3338,7 @@ class ResponseFileSearchCallCompletedEvent extends ResponseStreamEvent {
     'item_id': itemId,
     'output_index': outputIndex,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -2785,16 +3348,18 @@ class ResponseFileSearchCallCompletedEvent extends ResponseStreamEvent {
           runtimeType == other.runtimeType &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
+  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseFileSearchCallCompletedEvent copyWith({
     String? itemId,
     int? outputIndex,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseFileSearchCallCompletedEvent(
       itemId: itemId ?? this.itemId,
@@ -2802,11 +3367,13 @@ class ResponseFileSearchCallCompletedEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ResponseFileSearchCallCompletedEvent(itemId: $itemId)';
+  String toString() =>
+      'ResponseFileSearchCallCompletedEvent(itemId: $itemId, agent: $agent)';
 }
 
 // ============================================================
@@ -2822,6 +3389,12 @@ class ResponseCodeInterpreterCallInProgressEvent extends ResponseStreamEvent {
   @override
   final int? sequenceNumber;
 
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
+
   /// The ID of the code interpreter call item.
   final String itemId;
 
@@ -2833,6 +3406,7 @@ class ResponseCodeInterpreterCallInProgressEvent extends ResponseStreamEvent {
     required this.itemId,
     required this.outputIndex,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ResponseCodeInterpreterCallInProgressEvent] from JSON.
@@ -2843,6 +3417,9 @@ class ResponseCodeInterpreterCallInProgressEvent extends ResponseStreamEvent {
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -2852,6 +3429,7 @@ class ResponseCodeInterpreterCallInProgressEvent extends ResponseStreamEvent {
     'item_id': itemId,
     'output_index': outputIndex,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -2861,16 +3439,18 @@ class ResponseCodeInterpreterCallInProgressEvent extends ResponseStreamEvent {
           runtimeType == other.runtimeType &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
+  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseCodeInterpreterCallInProgressEvent copyWith({
     String? itemId,
     int? outputIndex,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseCodeInterpreterCallInProgressEvent(
       itemId: itemId ?? this.itemId,
@@ -2878,12 +3458,13 @@ class ResponseCodeInterpreterCallInProgressEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
   String toString() =>
-      'ResponseCodeInterpreterCallInProgressEvent(itemId: $itemId)';
+      'ResponseCodeInterpreterCallInProgressEvent(itemId: $itemId, agent: $agent)';
 }
 
 /// Event emitted when a code interpreter call is interpreting.
@@ -2894,6 +3475,12 @@ class ResponseCodeInterpreterCallInterpretingEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the code interpreter call item.
   final String itemId;
@@ -2906,6 +3493,7 @@ class ResponseCodeInterpreterCallInterpretingEvent extends ResponseStreamEvent {
     required this.itemId,
     required this.outputIndex,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ResponseCodeInterpreterCallInterpretingEvent] from JSON.
@@ -2916,6 +3504,9 @@ class ResponseCodeInterpreterCallInterpretingEvent extends ResponseStreamEvent {
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -2925,6 +3516,7 @@ class ResponseCodeInterpreterCallInterpretingEvent extends ResponseStreamEvent {
     'item_id': itemId,
     'output_index': outputIndex,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -2934,16 +3526,18 @@ class ResponseCodeInterpreterCallInterpretingEvent extends ResponseStreamEvent {
           runtimeType == other.runtimeType &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
+  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseCodeInterpreterCallInterpretingEvent copyWith({
     String? itemId,
     int? outputIndex,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseCodeInterpreterCallInterpretingEvent(
       itemId: itemId ?? this.itemId,
@@ -2951,12 +3545,13 @@ class ResponseCodeInterpreterCallInterpretingEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
   String toString() =>
-      'ResponseCodeInterpreterCallInterpretingEvent(itemId: $itemId)';
+      'ResponseCodeInterpreterCallInterpretingEvent(itemId: $itemId, agent: $agent)';
 }
 
 /// Event emitted when code interpreter code is generated (delta).
@@ -2967,6 +3562,12 @@ class ResponseCodeInterpreterCallCodeDeltaEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the code interpreter call item.
   final String itemId;
@@ -2983,6 +3584,7 @@ class ResponseCodeInterpreterCallCodeDeltaEvent extends ResponseStreamEvent {
     required this.outputIndex,
     required this.delta,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ResponseCodeInterpreterCallCodeDeltaEvent] from JSON.
@@ -2994,6 +3596,9 @@ class ResponseCodeInterpreterCallCodeDeltaEvent extends ResponseStreamEvent {
       outputIndex: json['output_index'] as int,
       delta: json['delta'] as String,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -3004,6 +3609,7 @@ class ResponseCodeInterpreterCallCodeDeltaEvent extends ResponseStreamEvent {
     'output_index': outputIndex,
     'delta': delta,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -3014,10 +3620,12 @@ class ResponseCodeInterpreterCallCodeDeltaEvent extends ResponseStreamEvent {
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
           delta == other.delta &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, delta, sequenceNumber);
+  int get hashCode =>
+      Object.hash(itemId, outputIndex, delta, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseCodeInterpreterCallCodeDeltaEvent copyWith({
@@ -3025,6 +3633,7 @@ class ResponseCodeInterpreterCallCodeDeltaEvent extends ResponseStreamEvent {
     int? outputIndex,
     String? delta,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseCodeInterpreterCallCodeDeltaEvent(
       itemId: itemId ?? this.itemId,
@@ -3033,12 +3642,13 @@ class ResponseCodeInterpreterCallCodeDeltaEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
   String toString() =>
-      'ResponseCodeInterpreterCallCodeDeltaEvent(delta: $delta)';
+      'ResponseCodeInterpreterCallCodeDeltaEvent(delta: $delta, agent: $agent)';
 }
 
 /// Event emitted when code interpreter code generation is complete.
@@ -3049,6 +3659,12 @@ class ResponseCodeInterpreterCallCodeDoneEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the code interpreter call item.
   final String itemId;
@@ -3065,6 +3681,7 @@ class ResponseCodeInterpreterCallCodeDoneEvent extends ResponseStreamEvent {
     required this.outputIndex,
     required this.code,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ResponseCodeInterpreterCallCodeDoneEvent] from JSON.
@@ -3076,6 +3693,9 @@ class ResponseCodeInterpreterCallCodeDoneEvent extends ResponseStreamEvent {
       outputIndex: json['output_index'] as int,
       code: json['code'] as String,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -3086,6 +3706,7 @@ class ResponseCodeInterpreterCallCodeDoneEvent extends ResponseStreamEvent {
     'output_index': outputIndex,
     'code': code,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -3096,10 +3717,12 @@ class ResponseCodeInterpreterCallCodeDoneEvent extends ResponseStreamEvent {
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
           code == other.code &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, code, sequenceNumber);
+  int get hashCode =>
+      Object.hash(itemId, outputIndex, code, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseCodeInterpreterCallCodeDoneEvent copyWith({
@@ -3107,6 +3730,7 @@ class ResponseCodeInterpreterCallCodeDoneEvent extends ResponseStreamEvent {
     int? outputIndex,
     String? code,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseCodeInterpreterCallCodeDoneEvent(
       itemId: itemId ?? this.itemId,
@@ -3115,12 +3739,13 @@ class ResponseCodeInterpreterCallCodeDoneEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
   String toString() =>
-      'ResponseCodeInterpreterCallCodeDoneEvent(codeLength: ${code.length})';
+      'ResponseCodeInterpreterCallCodeDoneEvent(codeLength: ${code.length}, agent: $agent)';
 }
 
 /// Event emitted when a code interpreter call is completed.
@@ -3131,6 +3756,12 @@ class ResponseCodeInterpreterCallCompletedEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the code interpreter call item.
   final String itemId;
@@ -3143,6 +3774,7 @@ class ResponseCodeInterpreterCallCompletedEvent extends ResponseStreamEvent {
     required this.itemId,
     required this.outputIndex,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ResponseCodeInterpreterCallCompletedEvent] from JSON.
@@ -3153,6 +3785,9 @@ class ResponseCodeInterpreterCallCompletedEvent extends ResponseStreamEvent {
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -3162,6 +3797,7 @@ class ResponseCodeInterpreterCallCompletedEvent extends ResponseStreamEvent {
     'item_id': itemId,
     'output_index': outputIndex,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -3171,16 +3807,18 @@ class ResponseCodeInterpreterCallCompletedEvent extends ResponseStreamEvent {
           runtimeType == other.runtimeType &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
+  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseCodeInterpreterCallCompletedEvent copyWith({
     String? itemId,
     int? outputIndex,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseCodeInterpreterCallCompletedEvent(
       itemId: itemId ?? this.itemId,
@@ -3188,12 +3826,13 @@ class ResponseCodeInterpreterCallCompletedEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
   String toString() =>
-      'ResponseCodeInterpreterCallCompletedEvent(itemId: $itemId)';
+      'ResponseCodeInterpreterCallCompletedEvent(itemId: $itemId, agent: $agent)';
 }
 
 // ============================================================
@@ -3209,6 +3848,12 @@ class ResponseImageGenerationCallInProgressEvent extends ResponseStreamEvent {
   @override
   final int? sequenceNumber;
 
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
+
   /// The ID of the image generation call item.
   final String itemId;
 
@@ -3220,6 +3865,7 @@ class ResponseImageGenerationCallInProgressEvent extends ResponseStreamEvent {
     required this.itemId,
     required this.outputIndex,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ResponseImageGenerationCallInProgressEvent] from JSON.
@@ -3230,6 +3876,9 @@ class ResponseImageGenerationCallInProgressEvent extends ResponseStreamEvent {
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -3239,6 +3888,7 @@ class ResponseImageGenerationCallInProgressEvent extends ResponseStreamEvent {
     'item_id': itemId,
     'output_index': outputIndex,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -3248,16 +3898,18 @@ class ResponseImageGenerationCallInProgressEvent extends ResponseStreamEvent {
           runtimeType == other.runtimeType &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
+  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseImageGenerationCallInProgressEvent copyWith({
     String? itemId,
     int? outputIndex,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseImageGenerationCallInProgressEvent(
       itemId: itemId ?? this.itemId,
@@ -3265,12 +3917,13 @@ class ResponseImageGenerationCallInProgressEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
   String toString() =>
-      'ResponseImageGenerationCallInProgressEvent(itemId: $itemId)';
+      'ResponseImageGenerationCallInProgressEvent(itemId: $itemId, agent: $agent)';
 }
 
 /// Event emitted when an image generation call is generating.
@@ -3281,6 +3934,12 @@ class ResponseImageGenerationCallGeneratingEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the image generation call item.
   final String itemId;
@@ -3293,6 +3952,7 @@ class ResponseImageGenerationCallGeneratingEvent extends ResponseStreamEvent {
     required this.itemId,
     required this.outputIndex,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ResponseImageGenerationCallGeneratingEvent] from JSON.
@@ -3303,6 +3963,9 @@ class ResponseImageGenerationCallGeneratingEvent extends ResponseStreamEvent {
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -3312,6 +3975,7 @@ class ResponseImageGenerationCallGeneratingEvent extends ResponseStreamEvent {
     'item_id': itemId,
     'output_index': outputIndex,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -3321,16 +3985,18 @@ class ResponseImageGenerationCallGeneratingEvent extends ResponseStreamEvent {
           runtimeType == other.runtimeType &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
+  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseImageGenerationCallGeneratingEvent copyWith({
     String? itemId,
     int? outputIndex,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseImageGenerationCallGeneratingEvent(
       itemId: itemId ?? this.itemId,
@@ -3338,12 +4004,13 @@ class ResponseImageGenerationCallGeneratingEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
   String toString() =>
-      'ResponseImageGenerationCallGeneratingEvent(itemId: $itemId)';
+      'ResponseImageGenerationCallGeneratingEvent(itemId: $itemId, agent: $agent)';
 }
 
 /// Event emitted when a partial image is generated.
@@ -3354,6 +4021,12 @@ class ResponseImageGenerationCallPartialImageEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the image generation call item.
   final String itemId;
@@ -3374,6 +4047,7 @@ class ResponseImageGenerationCallPartialImageEvent extends ResponseStreamEvent {
     required this.partialImageB64,
     required this.partialImageIndex,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ResponseImageGenerationCallPartialImageEvent] from JSON.
@@ -3386,6 +4060,9 @@ class ResponseImageGenerationCallPartialImageEvent extends ResponseStreamEvent {
       partialImageB64: json['partial_image_b64'] as String,
       partialImageIndex: json['partial_image_index'] as int,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -3397,6 +4074,7 @@ class ResponseImageGenerationCallPartialImageEvent extends ResponseStreamEvent {
     'partial_image_b64': partialImageB64,
     'partial_image_index': partialImageIndex,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -3407,11 +4085,17 @@ class ResponseImageGenerationCallPartialImageEvent extends ResponseStreamEvent {
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
           partialImageIndex == other.partialImageIndex &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode =>
-      Object.hash(itemId, outputIndex, partialImageIndex, sequenceNumber);
+  int get hashCode => Object.hash(
+    itemId,
+    outputIndex,
+    partialImageIndex,
+    sequenceNumber,
+    agent,
+  );
 
   /// Creates a copy with replaced values.
   ResponseImageGenerationCallPartialImageEvent copyWith({
@@ -3420,6 +4104,7 @@ class ResponseImageGenerationCallPartialImageEvent extends ResponseStreamEvent {
     String? partialImageB64,
     int? partialImageIndex,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseImageGenerationCallPartialImageEvent(
       itemId: itemId ?? this.itemId,
@@ -3429,12 +4114,13 @@ class ResponseImageGenerationCallPartialImageEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
   String toString() =>
-      'ResponseImageGenerationCallPartialImageEvent(partialImageIndex: $partialImageIndex)';
+      'ResponseImageGenerationCallPartialImageEvent(partialImageIndex: $partialImageIndex, agent: $agent)';
 }
 
 /// Event emitted when an image generation call is completed.
@@ -3445,6 +4131,12 @@ class ResponseImageGenerationCallCompletedEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the image generation call item.
   final String itemId;
@@ -3457,6 +4149,7 @@ class ResponseImageGenerationCallCompletedEvent extends ResponseStreamEvent {
     required this.itemId,
     required this.outputIndex,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ResponseImageGenerationCallCompletedEvent] from JSON.
@@ -3467,6 +4160,9 @@ class ResponseImageGenerationCallCompletedEvent extends ResponseStreamEvent {
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -3476,6 +4172,7 @@ class ResponseImageGenerationCallCompletedEvent extends ResponseStreamEvent {
     'item_id': itemId,
     'output_index': outputIndex,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -3485,16 +4182,18 @@ class ResponseImageGenerationCallCompletedEvent extends ResponseStreamEvent {
           runtimeType == other.runtimeType &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
+  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseImageGenerationCallCompletedEvent copyWith({
     String? itemId,
     int? outputIndex,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseImageGenerationCallCompletedEvent(
       itemId: itemId ?? this.itemId,
@@ -3502,12 +4201,13 @@ class ResponseImageGenerationCallCompletedEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
   String toString() =>
-      'ResponseImageGenerationCallCompletedEvent(itemId: $itemId)';
+      'ResponseImageGenerationCallCompletedEvent(itemId: $itemId, agent: $agent)';
 }
 
 // ============================================================
@@ -3523,6 +4223,12 @@ class ResponseMcpCallInProgressEvent extends ResponseStreamEvent {
   @override
   final int? sequenceNumber;
 
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
+
   /// The ID of the MCP call item.
   final String itemId;
 
@@ -3534,6 +4240,7 @@ class ResponseMcpCallInProgressEvent extends ResponseStreamEvent {
     required this.itemId,
     required this.outputIndex,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ResponseMcpCallInProgressEvent] from JSON.
@@ -3542,6 +4249,9 @@ class ResponseMcpCallInProgressEvent extends ResponseStreamEvent {
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -3551,6 +4261,7 @@ class ResponseMcpCallInProgressEvent extends ResponseStreamEvent {
     'item_id': itemId,
     'output_index': outputIndex,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -3560,16 +4271,18 @@ class ResponseMcpCallInProgressEvent extends ResponseStreamEvent {
           runtimeType == other.runtimeType &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
+  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseMcpCallInProgressEvent copyWith({
     String? itemId,
     int? outputIndex,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseMcpCallInProgressEvent(
       itemId: itemId ?? this.itemId,
@@ -3577,11 +4290,13 @@ class ResponseMcpCallInProgressEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ResponseMcpCallInProgressEvent(itemId: $itemId)';
+  String toString() =>
+      'ResponseMcpCallInProgressEvent(itemId: $itemId, agent: $agent)';
 }
 
 /// Event emitted when an MCP call is completed.
@@ -3592,6 +4307,12 @@ class ResponseMcpCallCompletedEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the MCP call item.
   final String itemId;
@@ -3604,6 +4325,7 @@ class ResponseMcpCallCompletedEvent extends ResponseStreamEvent {
     required this.itemId,
     required this.outputIndex,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ResponseMcpCallCompletedEvent] from JSON.
@@ -3612,6 +4334,9 @@ class ResponseMcpCallCompletedEvent extends ResponseStreamEvent {
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -3621,6 +4346,7 @@ class ResponseMcpCallCompletedEvent extends ResponseStreamEvent {
     'item_id': itemId,
     'output_index': outputIndex,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -3630,16 +4356,18 @@ class ResponseMcpCallCompletedEvent extends ResponseStreamEvent {
           runtimeType == other.runtimeType &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
+  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseMcpCallCompletedEvent copyWith({
     String? itemId,
     int? outputIndex,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseMcpCallCompletedEvent(
       itemId: itemId ?? this.itemId,
@@ -3647,11 +4375,13 @@ class ResponseMcpCallCompletedEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ResponseMcpCallCompletedEvent(itemId: $itemId)';
+  String toString() =>
+      'ResponseMcpCallCompletedEvent(itemId: $itemId, agent: $agent)';
 }
 
 /// Event emitted when an MCP call fails.
@@ -3662,6 +4392,12 @@ class ResponseMcpCallFailedEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the MCP call item.
   final String itemId;
@@ -3674,6 +4410,7 @@ class ResponseMcpCallFailedEvent extends ResponseStreamEvent {
     required this.itemId,
     required this.outputIndex,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ResponseMcpCallFailedEvent] from JSON.
@@ -3682,6 +4419,9 @@ class ResponseMcpCallFailedEvent extends ResponseStreamEvent {
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -3691,6 +4431,7 @@ class ResponseMcpCallFailedEvent extends ResponseStreamEvent {
     'item_id': itemId,
     'output_index': outputIndex,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -3700,16 +4441,18 @@ class ResponseMcpCallFailedEvent extends ResponseStreamEvent {
           runtimeType == other.runtimeType &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
+  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseMcpCallFailedEvent copyWith({
     String? itemId,
     int? outputIndex,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseMcpCallFailedEvent(
       itemId: itemId ?? this.itemId,
@@ -3717,11 +4460,13 @@ class ResponseMcpCallFailedEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ResponseMcpCallFailedEvent(itemId: $itemId)';
+  String toString() =>
+      'ResponseMcpCallFailedEvent(itemId: $itemId, agent: $agent)';
 }
 
 /// Event emitted when MCP call arguments are generated (delta).
@@ -3732,6 +4477,12 @@ class ResponseMcpCallArgumentsDeltaEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the MCP call item.
   final String itemId;
@@ -3748,6 +4499,7 @@ class ResponseMcpCallArgumentsDeltaEvent extends ResponseStreamEvent {
     required this.outputIndex,
     required this.delta,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ResponseMcpCallArgumentsDeltaEvent] from JSON.
@@ -3759,6 +4511,9 @@ class ResponseMcpCallArgumentsDeltaEvent extends ResponseStreamEvent {
       outputIndex: json['output_index'] as int,
       delta: json['delta'] as String,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -3769,6 +4524,7 @@ class ResponseMcpCallArgumentsDeltaEvent extends ResponseStreamEvent {
     'output_index': outputIndex,
     'delta': delta,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -3779,10 +4535,12 @@ class ResponseMcpCallArgumentsDeltaEvent extends ResponseStreamEvent {
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
           delta == other.delta &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, delta, sequenceNumber);
+  int get hashCode =>
+      Object.hash(itemId, outputIndex, delta, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseMcpCallArgumentsDeltaEvent copyWith({
@@ -3790,6 +4548,7 @@ class ResponseMcpCallArgumentsDeltaEvent extends ResponseStreamEvent {
     int? outputIndex,
     String? delta,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseMcpCallArgumentsDeltaEvent(
       itemId: itemId ?? this.itemId,
@@ -3798,11 +4557,13 @@ class ResponseMcpCallArgumentsDeltaEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ResponseMcpCallArgumentsDeltaEvent(delta: $delta)';
+  String toString() =>
+      'ResponseMcpCallArgumentsDeltaEvent(delta: $delta, agent: $agent)';
 }
 
 /// Event emitted when MCP call arguments are complete.
@@ -3813,6 +4574,12 @@ class ResponseMcpCallArgumentsDoneEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the MCP call item.
   final String itemId;
@@ -3829,6 +4596,7 @@ class ResponseMcpCallArgumentsDoneEvent extends ResponseStreamEvent {
     required this.outputIndex,
     required this.arguments,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ResponseMcpCallArgumentsDoneEvent] from JSON.
@@ -3840,6 +4608,9 @@ class ResponseMcpCallArgumentsDoneEvent extends ResponseStreamEvent {
       outputIndex: json['output_index'] as int,
       arguments: json['arguments'] as String,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -3850,6 +4621,7 @@ class ResponseMcpCallArgumentsDoneEvent extends ResponseStreamEvent {
     'output_index': outputIndex,
     'arguments': arguments,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -3860,11 +4632,12 @@ class ResponseMcpCallArgumentsDoneEvent extends ResponseStreamEvent {
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
           arguments == other.arguments &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
   int get hashCode =>
-      Object.hash(itemId, outputIndex, arguments, sequenceNumber);
+      Object.hash(itemId, outputIndex, arguments, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseMcpCallArgumentsDoneEvent copyWith({
@@ -3872,6 +4645,7 @@ class ResponseMcpCallArgumentsDoneEvent extends ResponseStreamEvent {
     int? outputIndex,
     String? arguments,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseMcpCallArgumentsDoneEvent(
       itemId: itemId ?? this.itemId,
@@ -3880,12 +4654,13 @@ class ResponseMcpCallArgumentsDoneEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
   String toString() =>
-      'ResponseMcpCallArgumentsDoneEvent(arguments: $arguments)';
+      'ResponseMcpCallArgumentsDoneEvent(arguments: $arguments, agent: $agent)';
 }
 
 /// Event emitted when MCP list tools is in progress.
@@ -3896,6 +4671,12 @@ class ResponseMcpListToolsInProgressEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the MCP list tools item.
   final String itemId;
@@ -3908,6 +4689,7 @@ class ResponseMcpListToolsInProgressEvent extends ResponseStreamEvent {
     required this.itemId,
     required this.outputIndex,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ResponseMcpListToolsInProgressEvent] from JSON.
@@ -3918,6 +4700,9 @@ class ResponseMcpListToolsInProgressEvent extends ResponseStreamEvent {
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -3927,6 +4712,7 @@ class ResponseMcpListToolsInProgressEvent extends ResponseStreamEvent {
     'item_id': itemId,
     'output_index': outputIndex,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -3936,16 +4722,18 @@ class ResponseMcpListToolsInProgressEvent extends ResponseStreamEvent {
           runtimeType == other.runtimeType &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
+  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseMcpListToolsInProgressEvent copyWith({
     String? itemId,
     int? outputIndex,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseMcpListToolsInProgressEvent(
       itemId: itemId ?? this.itemId,
@@ -3953,11 +4741,13 @@ class ResponseMcpListToolsInProgressEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ResponseMcpListToolsInProgressEvent(itemId: $itemId)';
+  String toString() =>
+      'ResponseMcpListToolsInProgressEvent(itemId: $itemId, agent: $agent)';
 }
 
 /// Event emitted when MCP list tools is completed.
@@ -3968,6 +4758,12 @@ class ResponseMcpListToolsCompletedEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the MCP list tools item.
   final String itemId;
@@ -3980,6 +4776,7 @@ class ResponseMcpListToolsCompletedEvent extends ResponseStreamEvent {
     required this.itemId,
     required this.outputIndex,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ResponseMcpListToolsCompletedEvent] from JSON.
@@ -3990,6 +4787,9 @@ class ResponseMcpListToolsCompletedEvent extends ResponseStreamEvent {
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -3999,6 +4799,7 @@ class ResponseMcpListToolsCompletedEvent extends ResponseStreamEvent {
     'item_id': itemId,
     'output_index': outputIndex,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -4008,16 +4809,18 @@ class ResponseMcpListToolsCompletedEvent extends ResponseStreamEvent {
           runtimeType == other.runtimeType &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
+  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseMcpListToolsCompletedEvent copyWith({
     String? itemId,
     int? outputIndex,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseMcpListToolsCompletedEvent(
       itemId: itemId ?? this.itemId,
@@ -4025,11 +4828,13 @@ class ResponseMcpListToolsCompletedEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ResponseMcpListToolsCompletedEvent(itemId: $itemId)';
+  String toString() =>
+      'ResponseMcpListToolsCompletedEvent(itemId: $itemId, agent: $agent)';
 }
 
 /// Event emitted when MCP list tools fails.
@@ -4040,6 +4845,12 @@ class ResponseMcpListToolsFailedEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the MCP list tools item.
   final String itemId;
@@ -4052,6 +4863,7 @@ class ResponseMcpListToolsFailedEvent extends ResponseStreamEvent {
     required this.itemId,
     required this.outputIndex,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ResponseMcpListToolsFailedEvent] from JSON.
@@ -4060,6 +4872,9 @@ class ResponseMcpListToolsFailedEvent extends ResponseStreamEvent {
       itemId: json['item_id'] as String,
       outputIndex: json['output_index'] as int,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -4069,6 +4884,7 @@ class ResponseMcpListToolsFailedEvent extends ResponseStreamEvent {
     'item_id': itemId,
     'output_index': outputIndex,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -4078,16 +4894,18 @@ class ResponseMcpListToolsFailedEvent extends ResponseStreamEvent {
           runtimeType == other.runtimeType &&
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber);
+  int get hashCode => Object.hash(itemId, outputIndex, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseMcpListToolsFailedEvent copyWith({
     String? itemId,
     int? outputIndex,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseMcpListToolsFailedEvent(
       itemId: itemId ?? this.itemId,
@@ -4095,11 +4913,13 @@ class ResponseMcpListToolsFailedEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ResponseMcpListToolsFailedEvent(itemId: $itemId)';
+  String toString() =>
+      'ResponseMcpListToolsFailedEvent(itemId: $itemId, agent: $agent)';
 }
 
 // ============================================================
@@ -4114,6 +4934,12 @@ class ResponseCustomToolCallInputDeltaEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the custom tool call item.
   final String itemId;
@@ -4130,6 +4956,7 @@ class ResponseCustomToolCallInputDeltaEvent extends ResponseStreamEvent {
     required this.outputIndex,
     required this.delta,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ResponseCustomToolCallInputDeltaEvent] from JSON.
@@ -4141,6 +4968,9 @@ class ResponseCustomToolCallInputDeltaEvent extends ResponseStreamEvent {
       outputIndex: json['output_index'] as int,
       delta: json['delta'] as String,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -4151,6 +4981,7 @@ class ResponseCustomToolCallInputDeltaEvent extends ResponseStreamEvent {
     'output_index': outputIndex,
     'delta': delta,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -4161,10 +4992,12 @@ class ResponseCustomToolCallInputDeltaEvent extends ResponseStreamEvent {
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
           delta == other.delta &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, delta, sequenceNumber);
+  int get hashCode =>
+      Object.hash(itemId, outputIndex, delta, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseCustomToolCallInputDeltaEvent copyWith({
@@ -4172,6 +5005,7 @@ class ResponseCustomToolCallInputDeltaEvent extends ResponseStreamEvent {
     int? outputIndex,
     String? delta,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseCustomToolCallInputDeltaEvent(
       itemId: itemId ?? this.itemId,
@@ -4180,11 +5014,13 @@ class ResponseCustomToolCallInputDeltaEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ResponseCustomToolCallInputDeltaEvent(delta: $delta)';
+  String toString() =>
+      'ResponseCustomToolCallInputDeltaEvent(delta: $delta, agent: $agent)';
 }
 
 /// Event emitted when custom tool call input is complete.
@@ -4195,6 +5031,12 @@ class ResponseCustomToolCallInputDoneEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The ID of the custom tool call item.
   final String itemId;
@@ -4211,6 +5053,7 @@ class ResponseCustomToolCallInputDoneEvent extends ResponseStreamEvent {
     required this.outputIndex,
     required this.input,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates a [ResponseCustomToolCallInputDoneEvent] from JSON.
@@ -4222,6 +5065,9 @@ class ResponseCustomToolCallInputDoneEvent extends ResponseStreamEvent {
       outputIndex: json['output_index'] as int,
       input: json['input'] as String,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -4232,6 +5078,7 @@ class ResponseCustomToolCallInputDoneEvent extends ResponseStreamEvent {
     'output_index': outputIndex,
     'input': input,
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -4242,10 +5089,12 @@ class ResponseCustomToolCallInputDoneEvent extends ResponseStreamEvent {
           itemId == other.itemId &&
           outputIndex == other.outputIndex &&
           input == other.input &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(itemId, outputIndex, input, sequenceNumber);
+  int get hashCode =>
+      Object.hash(itemId, outputIndex, input, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ResponseCustomToolCallInputDoneEvent copyWith({
@@ -4253,6 +5102,7 @@ class ResponseCustomToolCallInputDoneEvent extends ResponseStreamEvent {
     int? outputIndex,
     String? input,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ResponseCustomToolCallInputDoneEvent(
       itemId: itemId ?? this.itemId,
@@ -4261,11 +5111,13 @@ class ResponseCustomToolCallInputDoneEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ResponseCustomToolCallInputDoneEvent(input: $input)';
+  String toString() =>
+      'ResponseCustomToolCallInputDoneEvent(input: $input, agent: $agent)';
 }
 
 // ============================================================
@@ -4280,6 +5132,12 @@ class ErrorEvent extends ResponseStreamEvent {
 
   @override
   final int? sequenceNumber;
+
+  /// The agent that owns this multi-agent streaming event.
+  ///
+  /// Only populated on the beta multi-agent protocol
+  /// (`OpenAI-Beta: responses_multi_agent=v1`).
+  final AgentTag? agent;
 
   /// The error code.
   final String code;
@@ -4296,6 +5154,7 @@ class ErrorEvent extends ResponseStreamEvent {
     required this.message,
     this.param,
     this.sequenceNumber,
+    this.agent,
   });
 
   /// Creates an [ErrorEvent] from JSON.
@@ -4306,6 +5165,9 @@ class ErrorEvent extends ResponseStreamEvent {
       message: error['message'] as String? ?? 'Unknown error',
       param: error['param'] as String?,
       sequenceNumber: json['sequence_number'] as int?,
+      agent: json['agent'] != null
+          ? AgentTag.fromJson(json['agent'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -4318,6 +5180,7 @@ class ErrorEvent extends ResponseStreamEvent {
       if (param != null) 'param': param,
     },
     if (sequenceNumber != null) 'sequence_number': sequenceNumber,
+    if (agent != null) 'agent': agent!.toJson(),
   };
 
   @override
@@ -4328,10 +5191,11 @@ class ErrorEvent extends ResponseStreamEvent {
           code == other.code &&
           message == other.message &&
           param == other.param &&
-          sequenceNumber == other.sequenceNumber;
+          sequenceNumber == other.sequenceNumber &&
+          agent == other.agent;
 
   @override
-  int get hashCode => Object.hash(code, message, param, sequenceNumber);
+  int get hashCode => Object.hash(code, message, param, sequenceNumber, agent);
 
   /// Creates a copy with replaced values.
   ErrorEvent copyWith({
@@ -4339,6 +5203,7 @@ class ErrorEvent extends ResponseStreamEvent {
     String? message,
     Object? param = unsetCopyWithValue,
     Object? sequenceNumber = unsetCopyWithValue,
+    Object? agent = unsetCopyWithValue,
   }) {
     return ErrorEvent(
       code: code ?? this.code,
@@ -4347,11 +5212,13 @@ class ErrorEvent extends ResponseStreamEvent {
       sequenceNumber: sequenceNumber == unsetCopyWithValue
           ? this.sequenceNumber
           : sequenceNumber as int?,
+      agent: agent == unsetCopyWithValue ? this.agent : agent as AgentTag?,
     );
   }
 
   @override
-  String toString() => 'ErrorEvent(code: $code, message: $message)';
+  String toString() =>
+      'ErrorEvent(code: $code, message: $message, agent: $agent)';
 }
 
 // ============================================================

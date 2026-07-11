@@ -154,6 +154,67 @@ void main() {
     });
   });
 
+  group('ShellCallOutputItem.caller', () {
+    test('round-trips through JSON', () {
+      const item = ShellCallOutputItem(
+        id: 'sc_1',
+        callId: 'call_1',
+        action: ShellCallAction(commands: ['ls']),
+        status: ItemStatus.completed,
+        caller: ProgramToolCallCaller(callerId: 'call_123'),
+      );
+
+      final json = item.toJson();
+      expect(json['caller'], {'type': 'program', 'caller_id': 'call_123'});
+      expect(OutputItem.fromJson(json), item);
+    });
+
+    test('omits caller when null', () {
+      const item = ShellCallOutputItem(
+        id: 'sc_1',
+        callId: 'call_1',
+        action: ShellCallAction(commands: ['ls']),
+        status: ItemStatus.completed,
+      );
+
+      final json = item.toJson();
+      expect(json.containsKey('caller'), isFalse);
+      expect((OutputItem.fromJson(json) as ShellCallOutputItem).caller, isNull);
+    });
+  });
+
+  group('ShellCallOutputResultItem.caller', () {
+    test('round-trips through JSON', () {
+      const item = ShellCallOutputResultItem(
+        id: 'sco_1',
+        callId: 'call_1',
+        output: [],
+        maxOutputLength: 1000,
+        caller: ProgramToolCallCaller(callerId: 'call_123'),
+      );
+
+      final json = item.toJson();
+      expect(json['caller'], {'type': 'program', 'caller_id': 'call_123'});
+      expect(OutputItem.fromJson(json), item);
+    });
+
+    test('omits caller when null', () {
+      const item = ShellCallOutputResultItem(
+        id: 'sco_1',
+        callId: 'call_1',
+        output: [],
+        maxOutputLength: 1000,
+      );
+
+      final json = item.toJson();
+      expect(json.containsKey('caller'), isFalse);
+      expect(
+        (OutputItem.fromJson(json) as ShellCallOutputResultItem).caller,
+        isNull,
+      );
+    });
+  });
+
   group('CustomToolCallOutputItem.caller', () {
     test('round-trips through JSON', () {
       const item = CustomToolCallOutputItem(

@@ -1,3 +1,5 @@
+import 'package:openai_dart/src/models/responses/config/item_status.dart';
+import 'package:openai_dart/src/models/responses/config/message_role.dart';
 import 'package:openai_dart/src/models/responses/content/input_content.dart';
 import 'package:openai_dart/src/models/responses/content/output_content.dart';
 import 'package:openai_dart/src/models/responses/items/item.dart';
@@ -236,6 +238,104 @@ void main() {
         'output': <Map<String, dynamic>>[],
       });
       expect(item, isA<MultiAgentCallOutputResultItem>());
+    });
+  });
+
+  group('agent field on other output item variants', () {
+    test('MessageOutputItem round-trips agent and omits when null', () {
+      const withAgent = MessageOutputItem(
+        id: 'msg_1',
+        agent: AgentTag(agentName: 'researcher'),
+        role: MessageRole.assistant,
+        content: [OutputTextContent(text: 'hello')],
+      );
+      final json = withAgent.toJson();
+      expect(json['agent'], {'agent_name': 'researcher'});
+      expect(OutputItem.fromJson(json), withAgent);
+
+      const withoutAgent = MessageOutputItem(
+        id: 'msg_1',
+        role: MessageRole.assistant,
+        content: [OutputTextContent(text: 'hello')],
+      );
+      final jsonWithout = withoutAgent.toJson();
+      expect(jsonWithout.containsKey('agent'), isFalse);
+      expect(
+        (OutputItem.fromJson(jsonWithout) as MessageOutputItem).agent,
+        isNull,
+      );
+    });
+
+    test(
+      'FunctionCallOutputItemResponse round-trips agent and omits when null',
+      () {
+        const withAgent = FunctionCallOutputItemResponse(
+          id: 'fc_1',
+          agent: AgentTag(agentName: 'researcher'),
+          callId: 'call_1',
+          name: 'get_weather',
+          arguments: '{}',
+        );
+        final json = withAgent.toJson();
+        expect(json['agent'], {'agent_name': 'researcher'});
+        expect(OutputItem.fromJson(json), withAgent);
+
+        const withoutAgent = FunctionCallOutputItemResponse(
+          id: 'fc_1',
+          callId: 'call_1',
+          name: 'get_weather',
+          arguments: '{}',
+        );
+        final jsonWithout = withoutAgent.toJson();
+        expect(jsonWithout.containsKey('agent'), isFalse);
+        expect(
+          (OutputItem.fromJson(jsonWithout) as FunctionCallOutputItemResponse)
+              .agent,
+          isNull,
+        );
+      },
+    );
+
+    test('ReasoningItem round-trips agent and omits when null', () {
+      const withAgent = ReasoningItem(
+        id: 'rs_1',
+        agent: AgentTag(agentName: 'researcher'),
+        summary: [],
+      );
+      final json = withAgent.toJson();
+      expect(json['agent'], {'agent_name': 'researcher'});
+      expect(OutputItem.fromJson(json), withAgent);
+
+      const withoutAgent = ReasoningItem(id: 'rs_1', summary: []);
+      final jsonWithout = withoutAgent.toJson();
+      expect(jsonWithout.containsKey('agent'), isFalse);
+      expect((OutputItem.fromJson(jsonWithout) as ReasoningItem).agent, isNull);
+    });
+
+    test('ShellCallOutputItem round-trips agent and omits when null', () {
+      const withAgent = ShellCallOutputItem(
+        id: 'sc_1',
+        agent: AgentTag(agentName: 'researcher'),
+        callId: 'call_1',
+        action: ShellCallAction(commands: ['ls']),
+        status: ItemStatus.completed,
+      );
+      final json = withAgent.toJson();
+      expect(json['agent'], {'agent_name': 'researcher'});
+      expect(OutputItem.fromJson(json), withAgent);
+
+      const withoutAgent = ShellCallOutputItem(
+        id: 'sc_1',
+        callId: 'call_1',
+        action: ShellCallAction(commands: ['ls']),
+        status: ItemStatus.completed,
+      );
+      final jsonWithout = withoutAgent.toJson();
+      expect(jsonWithout.containsKey('agent'), isFalse);
+      expect(
+        (OutputItem.fromJson(jsonWithout) as ShellCallOutputItem).agent,
+        isNull,
+      );
     });
   });
 }

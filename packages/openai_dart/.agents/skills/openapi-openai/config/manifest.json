@@ -418,7 +418,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Sealed parent union of input items with untracked variants (matches ConversationItem/OutputItem). AdditionalToolsItemParam variant added. GPT-5.6 sync: program/program_output (ProgramItem/ProgramOutputItem) and beta multi-agent agent_message/multi_agent_call/multi_agent_call_output variants added; caller (ToolCallCaller) added to function/custom tool call items."
+      "note": "Sealed parent union of input items with untracked variants (matches ConversationItem/OutputItem). AdditionalToolsItemParam variant added. GPT-5.6 sync: program/program_output (ProgramItem/ProgramOutputItem) and beta multi-agent agent_message/multi_agent_call/multi_agent_call_output variants added; caller (ToolCallCaller) added to function/custom tool call items; nullable agent (AgentTag) added to all variants with beta multi-agent twins."
     },
     "ItemField": {
       "spec": "main",
@@ -1512,7 +1512,7 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Sealed parent. Custom tool variants added. GPT-5.6 sync: program/program_output (ProgramOutputItemResponse/ProgramOutputResultItem) and beta multi-agent agent_message/multi_agent_call/multi_agent_call_output variants added; caller (ToolCallCaller) added to function/custom tool call items."
+      "note": "Sealed parent. Custom tool variants added. GPT-5.6 sync: program/program_output (ProgramOutputItemResponse/ProgramOutputResultItem) and beta multi-agent agent_message/multi_agent_call/multi_agent_call_output variants added; caller (ToolCallCaller) added to function/custom tool call items; nullable agent (AgentTag) added to all variants with beta multi-agent twins; caller added to shell_call/shell_call_output."
     },
     "ScrollParam": {
       "spec": "main",
