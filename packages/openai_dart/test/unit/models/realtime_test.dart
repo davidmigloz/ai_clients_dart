@@ -1,4 +1,9 @@
-import 'package:openai_dart/openai_dart.dart' show InfOrInt;
+import 'package:openai_dart/openai_dart.dart'
+    show
+        InfOrInt,
+        TranscriptTextUsageDuration,
+        TranscriptTextUsageTokens,
+        TranscriptionLanguage;
 import 'package:openai_dart/openai_dart_realtime.dart';
 import 'package:test/test.dart';
 
@@ -353,6 +358,52 @@ void main() {
       expect(str, contains('whisper-1'));
       expect(str, contains('guidance'));
     });
+
+    test('roundtrips keywords and languages', () {
+      const transcription = InputAudioTranscription(
+        keywords: ['hello', 'world'],
+        languages: ['en', 'es'],
+        model: 'gpt-transcribe',
+      );
+      final json = transcription.toJson();
+      expect(json, {
+        'keywords': ['hello', 'world'],
+        'languages': ['en', 'es'],
+        'model': 'gpt-transcribe',
+      });
+
+      final parsed = InputAudioTranscription.fromJson(json);
+      expect(parsed, transcription);
+    });
+
+    test('omits null keywords and languages', () {
+      const transcription = InputAudioTranscription(model: 'whisper-1');
+      expect(transcription.toJson().containsKey('keywords'), isFalse);
+      expect(transcription.toJson().containsKey('languages'), isFalse);
+    });
+
+    test('copyWith clears keywords and languages', () {
+      const transcription = InputAudioTranscription(
+        keywords: ['hello'],
+        languages: ['en'],
+        model: 'gpt-transcribe',
+      );
+      final cleared = transcription.copyWith(keywords: null, languages: null);
+      expect(cleared.keywords, isNull);
+      expect(cleared.languages, isNull);
+      expect(cleared.model, 'gpt-transcribe');
+    });
+
+    test('toString includes keywords and languages', () {
+      const transcription = InputAudioTranscription(
+        keywords: ['hello'],
+        languages: ['en'],
+        model: 'gpt-transcribe',
+      );
+      final str = transcription.toString();
+      expect(str, contains('hello'));
+      expect(str, contains('en'));
+    });
   });
 
   group('AudioTranscriptionDelay', () {
@@ -475,6 +526,104 @@ void main() {
       expect(parsed.clearNoiseReduction, isFalse);
       expect(parsed.clearTranscription, isFalse);
       expect(parsed.clearTurnDetection, isFalse);
+    });
+  });
+
+  group('InputAudioTranscriptionCompletedEvent', () {
+    test('roundtrips languages', () {
+      const event = InputAudioTranscriptionCompletedEvent(
+        eventId: 'evt_123',
+        itemId: 'item_123',
+        contentIndex: 0,
+        transcript: 'hello world',
+        languages: [TranscriptionLanguage(code: 'en')],
+      );
+      final json = event.toJson();
+      expect(json['languages'], [
+        {'code': 'en'},
+      ]);
+
+      final parsed = RealtimeEvent.fromJson(json);
+      expect(parsed, isA<InputAudioTranscriptionCompletedEvent>());
+      expect((parsed as InputAudioTranscriptionCompletedEvent).languages, [
+        const TranscriptionLanguage(code: 'en'),
+      ]);
+    });
+
+    test('omits languages when absent', () {
+      const event = InputAudioTranscriptionCompletedEvent(
+        eventId: 'evt_123',
+        itemId: 'item_123',
+        contentIndex: 0,
+        transcript: 'hello world',
+      );
+      expect(event.toJson().containsKey('languages'), isFalse);
+
+      final parsed = InputAudioTranscriptionCompletedEvent.fromJson(
+        event.toJson(),
+      );
+      expect(parsed.languages, isNull);
+    });
+
+    test('roundtrips tokens-shaped usage', () {
+      final json = <String, dynamic>{
+        'type': 'conversation.item.input_audio_transcription.completed',
+        'event_id': 'evt_123',
+        'item_id': 'item_123',
+        'content_index': 0,
+        'transcript': 'hello world',
+        'usage': {
+          'type': 'tokens',
+          'input_tokens': 10,
+          'output_tokens': 5,
+          'total_tokens': 15,
+        },
+      };
+      final parsed = InputAudioTranscriptionCompletedEvent.fromJson(json);
+      expect(
+        parsed.usage,
+        isA<TranscriptTextUsageTokens>()
+            .having((u) => u.inputTokens, 'inputTokens', 10)
+            .having((u) => u.outputTokens, 'outputTokens', 5)
+            .having((u) => u.totalTokens, 'totalTokens', 15),
+      );
+      expect(parsed.toJson(), json);
+    });
+
+    test('roundtrips duration-shaped usage', () {
+      final json = <String, dynamic>{
+        'type': 'conversation.item.input_audio_transcription.completed',
+        'event_id': 'evt_123',
+        'item_id': 'item_123',
+        'content_index': 0,
+        'transcript': 'hello world',
+        'usage': {'type': 'duration', 'seconds': 3.5},
+      };
+      final parsed = InputAudioTranscriptionCompletedEvent.fromJson(json);
+      expect(
+        parsed.usage,
+        isA<TranscriptTextUsageDuration>().having(
+          (u) => u.seconds,
+          'seconds',
+          3.5,
+        ),
+      );
+      expect(parsed.toJson(), json);
+    });
+
+    test('omits usage when absent', () {
+      const event = InputAudioTranscriptionCompletedEvent(
+        eventId: 'evt_123',
+        itemId: 'item_123',
+        contentIndex: 0,
+        transcript: 'hello world',
+      );
+      expect(event.toJson().containsKey('usage'), isFalse);
+
+      final parsed = InputAudioTranscriptionCompletedEvent.fromJson(
+        event.toJson(),
+      );
+      expect(parsed.usage, isNull);
     });
   });
 

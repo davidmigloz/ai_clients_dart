@@ -249,7 +249,8 @@ class ChatCompletionCreateRequest {
 
   /// The service tier to use.
   ///
-  /// Can be `auto` or `default`. If not specified, defaults to `auto`.
+  /// Can be `auto`, `default`, or `fast`. If not specified, defaults to
+  /// `auto`.
   final String? serviceTier;
 
   /// Stop sequences to end generation.

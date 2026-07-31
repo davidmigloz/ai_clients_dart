@@ -4357,6 +4357,7 @@ void main() {
       expect(ServiceTier.fromJson('flex'), ServiceTier.flex);
       expect(ServiceTier.fromJson('scale'), ServiceTier.scale);
       expect(ServiceTier.fromJson('priority'), ServiceTier.priority);
+      expect(ServiceTier.fromJson('fast'), ServiceTier.fast);
     });
 
     test('preserves unknown provider-specific values', () {
@@ -4376,6 +4377,7 @@ void main() {
       expect(ServiceTier.flex.toJson(), 'flex');
       expect(ServiceTier.scale.toJson(), 'scale');
       expect(ServiceTier.priority.toJson(), 'priority');
+      expect(ServiceTier.fast.toJson(), 'fast');
     });
 
     test('equality based on value', () {

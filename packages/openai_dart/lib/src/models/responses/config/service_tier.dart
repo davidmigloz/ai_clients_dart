@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 ///
 /// Known tiers are available as static constants (e.g., [ServiceTier.auto],
 /// [ServiceTier.defaultTier], [ServiceTier.flex], [ServiceTier.scale],
-/// [ServiceTier.priority]).
+/// [ServiceTier.priority], [ServiceTier.fast]).
 /// Providers may define
 /// additional tiers; use the [ServiceTier.new] constructor for custom values
 /// (e.g., `ServiceTier('batch')`).
@@ -25,6 +25,12 @@ class ServiceTier {
   /// Priority tier (higher priority).
   static const priority = ServiceTier('priority');
 
+  /// Fast mode — up to 2.5× faster processing at higher cost.
+  ///
+  /// Replaces the Priority Processing offering; `priority` requests are
+  /// automatically routed to Fast mode.
+  static const fast = ServiceTier('fast');
+
   /// The raw string value for this tier.
   final String value;
 
@@ -44,6 +50,7 @@ class ServiceTier {
     'flex' => flex,
     'scale' => scale,
     'priority' => priority,
+    'fast' => fast,
     _ => ServiceTier(json),
   };
 

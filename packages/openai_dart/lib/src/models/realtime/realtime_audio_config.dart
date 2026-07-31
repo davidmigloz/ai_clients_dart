@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
+import '../common/equality_helpers.dart';
 import 'realtime_audio_formats.dart';
 import 'realtime_audio_input_turn_detection.dart';
 import 'realtime_enums.dart';
@@ -69,7 +70,9 @@ class InputAudioTranscription {
   /// Creates an [InputAudioTranscription].
   const InputAudioTranscription({
     this.delay,
+    this.keywords,
     this.language,
+    this.languages,
     this.model,
     this.prompt,
   });
@@ -80,7 +83,13 @@ class InputAudioTranscription {
       delay: json['delay'] != null
           ? AudioTranscriptionDelay.fromJson(json['delay'] as String)
           : null,
+      keywords: (json['keywords'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
       language: json['language'] as String?,
+      languages: (json['languages'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
       model: json['model'] as String?,
       prompt: json['prompt'] as String?,
     );
@@ -92,8 +101,18 @@ class InputAudioTranscription {
   /// `gpt-realtime-whisper` in Realtime sessions.
   final AudioTranscriptionDelay? delay;
 
+  /// Words or phrases to guide transcription of the input audio.
+  ///
+  /// Supported by `gpt-transcribe` and `gpt-live-transcribe`.
+  final List<String>? keywords;
+
   /// ISO-639-1 language hint, e.g. `'en'`.
   final String? language;
+
+  /// Possible languages of the input audio, in ISO-639-1 format.
+  ///
+  /// Supported by `gpt-transcribe` and `gpt-live-transcribe`.
+  final List<String>? languages;
 
   /// Transcription model identifier (e.g. `'whisper-1'`,
   /// `'gpt-realtime-whisper'`).
@@ -107,7 +126,9 @@ class InputAudioTranscription {
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
     if (delay != null) 'delay': delay!.toJson(),
+    if (keywords != null) 'keywords': keywords,
     if (language != null) 'language': language,
+    if (languages != null) 'languages': languages,
     if (model != null) 'model': model,
     if (prompt != null) 'prompt': prompt,
   };
@@ -116,16 +137,24 @@ class InputAudioTranscription {
   /// replaced. Pass `null` for any field to clear the existing value.
   InputAudioTranscription copyWith({
     Object? delay = unsetCopyWithValue,
+    Object? keywords = unsetCopyWithValue,
     Object? language = unsetCopyWithValue,
+    Object? languages = unsetCopyWithValue,
     Object? model = unsetCopyWithValue,
     Object? prompt = unsetCopyWithValue,
   }) => InputAudioTranscription(
     delay: identical(delay, unsetCopyWithValue)
         ? this.delay
         : delay as AudioTranscriptionDelay?,
+    keywords: identical(keywords, unsetCopyWithValue)
+        ? this.keywords
+        : keywords as List<String>?,
     language: identical(language, unsetCopyWithValue)
         ? this.language
         : language as String?,
+    languages: identical(languages, unsetCopyWithValue)
+        ? this.languages
+        : languages as List<String>?,
     model: identical(model, unsetCopyWithValue) ? this.model : model as String?,
     prompt: identical(prompt, unsetCopyWithValue)
         ? this.prompt
@@ -138,16 +167,26 @@ class InputAudioTranscription {
       other is InputAudioTranscription &&
           runtimeType == other.runtimeType &&
           delay == other.delay &&
+          listsEqual(keywords, other.keywords) &&
           language == other.language &&
+          listsEqual(languages, other.languages) &&
           model == other.model &&
           prompt == other.prompt;
 
   @override
-  int get hashCode => Object.hash(delay, language, model, prompt);
+  int get hashCode => Object.hash(
+    delay,
+    listHash(keywords),
+    language,
+    listHash(languages),
+    model,
+    prompt,
+  );
 
   @override
   String toString() =>
-      'InputAudioTranscription(delay: $delay, language: $language, '
+      'InputAudioTranscription(delay: $delay, keywords: $keywords, '
+      'language: $language, languages: $languages, '
       'model: $model, prompt: $prompt)';
 }
 
