@@ -13,6 +13,7 @@ import '../resources/chat_resource.dart';
 import '../resources/chatkit_resource.dart';
 import '../resources/completions_resource.dart';
 import '../resources/containers_resource.dart';
+import '../resources/content_provenance_checks_resource.dart';
 import '../resources/conversations_resource.dart';
 import '../resources/embeddings_resource.dart';
 import '../resources/evals_resource.dart';
@@ -76,6 +77,7 @@ import 'retry_wrapper.dart';
 /// - [skills] - Skills API for skill bundles and versions
 /// - [beta] - Beta features (Assistants, Threads, etc.)
 /// - [realtime] - Real-time API (WebSocket)
+/// - [contentProvenanceChecks] - Content provenance detection
 ///
 /// ## Configuration
 ///
@@ -361,6 +363,7 @@ class OpenAIClient {
     interceptorChain: _interceptorChain,
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
+    streamClientFactory: _streamClientFactory,
   );
 
   ImagesResource? _images;
@@ -884,6 +887,21 @@ class OpenAIClient {
     requestBuilder: _requestBuilder,
     ensureNotClosed: _ensureNotClosed,
   );
+
+  ContentProvenanceChecksResource? _contentProvenanceChecks;
+
+  /// Content provenance checks resource.
+  ///
+  /// Use this to detect OpenAI C2PA/SynthID provenance signals in an
+  /// uploaded image or audio file.
+  ContentProvenanceChecksResource get contentProvenanceChecks =>
+      _contentProvenanceChecks ??= ContentProvenanceChecksResource(
+        config: config,
+        httpClient: _httpClient,
+        interceptorChain: _interceptorChain,
+        requestBuilder: _requestBuilder,
+        ensureNotClosed: _ensureNotClosed,
+      );
 
   void _ensureNotClosed() {
     if (_closed) {
