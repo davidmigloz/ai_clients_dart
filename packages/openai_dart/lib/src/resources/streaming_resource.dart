@@ -233,7 +233,30 @@ mixin StreamingResource on ResourceBase {
       additionalHeaders: additionalHeaders,
       abortTrigger: abortTrigger,
     );
+    yield* _consumeSseResponse(response);
+  }
 
+  /// Streams SSE events from a pre-built [http.BaseRequest].
+  ///
+  /// Lower-level than [streamSseEvents] — the caller has already fully
+  /// configured the request (e.g. a multipart request with files/fields set),
+  /// so resources that can't express their body as a JSON map (like
+  /// multipart transcription streaming) can still reuse the same
+  /// abort-support and SSE-parsing/error-handling logic.
+  Stream<Map<String, dynamic>> streamSseEventsForRequest({
+    required http.BaseRequest request,
+    Future<void>? abortTrigger,
+  }) async* {
+    final response = await sendStream(
+      request: request,
+      abortTrigger: abortTrigger,
+    );
+    yield* _consumeSseResponse(response);
+  }
+
+  Stream<Map<String, dynamic>> _consumeSseResponse(
+    http.StreamedResponse response,
+  ) async* {
     // Extract request ID from response headers for error reporting
     final requestId =
         response.headers['x-request-id'] ??

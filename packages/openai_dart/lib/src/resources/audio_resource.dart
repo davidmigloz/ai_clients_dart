@@ -3,8 +3,10 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
+import '../errors/exceptions.dart';
 import '../models/audio/audio.dart';
 import 'base_resource.dart';
+import 'streaming_resource.dart';
 
 /// Resource for audio operations.
 ///
@@ -41,6 +43,7 @@ class AudioResource extends ResourceBase {
     required super.interceptorChain,
     required super.requestBuilder,
     super.ensureNotClosed,
+    super.streamClientFactory,
   });
 
   SpeechResource? _speech;
@@ -64,6 +67,7 @@ class AudioResource extends ResourceBase {
         interceptorChain: interceptorChain,
         requestBuilder: requestBuilder,
         ensureNotClosed: ensureNotClosed,
+        streamClientFactory: streamClientFactory,
       );
 
   /// Access to audio translation operations.
@@ -136,7 +140,7 @@ class SpeechResource extends ResourceBase {
 /// Resource for transcription (speech-to-text) operations.
 ///
 /// Transcribes audio into text in the original language.
-class TranscriptionsResource extends ResourceBase {
+class TranscriptionsResource extends ResourceBase with StreamingResource {
   /// Creates a [TranscriptionsResource].
   TranscriptionsResource({
     required super.config,
@@ -144,14 +148,22 @@ class TranscriptionsResource extends ResourceBase {
     required super.interceptorChain,
     required super.requestBuilder,
     super.ensureNotClosed,
+    super.streamClientFactory,
   });
 
   static const _endpoint = '/audio/transcriptions';
 
+  static const Set<AudioResponseFormat> _rawFormats = {
+    AudioResponseFormat.text,
+    AudioResponseFormat.srt,
+    AudioResponseFormat.vtt,
+  };
+
   /// Transcribes audio into text.
   ///
-  /// Supports multiple audio formats including MP3, MP4, MPEG, MPGA,
-  /// M4A, WAV, and WebM.
+  /// Only supports the `json` response format (the default) — use
+  /// [createVerbose] for `verbose_json`, [createDiarized] for
+  /// `diarized_json`, or [createRaw] for `text`/`srt`/`vtt`.
   ///
   /// ## Parameters
   ///
@@ -170,7 +182,7 @@ class TranscriptionsResource extends ResourceBase {
   ///   TranscriptionRequest(
   ///     file: audioBytes,
   ///     filename: 'audio.mp3',
-  ///     model: 'whisper-1',
+  ///     model: 'gpt-4o-transcribe',
   ///     language: 'en',
   ///   ),
   /// );
@@ -179,6 +191,8 @@ class TranscriptionsResource extends ResourceBase {
   /// ```
   Future<TranscriptionResponse> create(TranscriptionRequest request) async {
     ensureNotClosed?.call();
+    _rejectStream(request);
+    _rejectNonJsonFormat(request);
     final httpRequest = _createMultipartRequest(request);
     httpRequest.headers.addAll(requestBuilder.buildMultipartHeaders());
     final response = await interceptorChain.execute(httpRequest);
@@ -188,8 +202,8 @@ class TranscriptionsResource extends ResourceBase {
 
   /// Transcribes audio with verbose output including timing.
   ///
-  /// Returns detailed information including segments and word-level
-  /// timestamps if requested.
+  /// Forces `responseFormat: verbose_json`. Returns detailed information
+  /// including segments and word-level timestamps if requested.
   ///
   /// ## Example
   ///
@@ -198,7 +212,7 @@ class TranscriptionsResource extends ResourceBase {
   ///   TranscriptionRequest(
   ///     file: audioBytes,
   ///     filename: 'audio.mp3',
-  ///     model: 'whisper-1',
+  ///     model: 'gpt-4o-transcribe',
   ///     timestampGranularities: [
   ///       TimestampGranularity.word,
   ///       TimestampGranularity.segment,
@@ -214,18 +228,10 @@ class TranscriptionsResource extends ResourceBase {
     TranscriptionRequest request,
   ) async {
     ensureNotClosed?.call();
-    // Force verbose_json format
-    final verboseRequest = TranscriptionRequest(
-      file: request.file,
-      filename: request.filename,
-      model: request.model,
-      language: request.language,
-      prompt: request.prompt,
-      responseFormat: TranscriptionResponseFormat.verboseJson,
-      temperature: request.temperature,
-      timestampGranularities: request.timestampGranularities,
+    _rejectStream(request);
+    final verboseRequest = request.copyWith(
+      responseFormat: AudioResponseFormat.verboseJson,
     );
-
     final httpRequest = _createMultipartRequest(verboseRequest);
     httpRequest.headers.addAll(requestBuilder.buildMultipartHeaders());
     final response = await interceptorChain.execute(httpRequest);
@@ -233,7 +239,175 @@ class TranscriptionsResource extends ResourceBase {
     return TranscriptionVerboseResponse.fromJson(json);
   }
 
-  http.MultipartRequest _createMultipartRequest(TranscriptionRequest request) {
+  /// Transcribes audio with per-speaker diarization.
+  ///
+  /// Forces `responseFormat: diarized_json`. Typically used with the
+  /// `gpt-4o-transcribe-diarize` model; pass [TranscriptionRequest.knownSpeakerNames]
+  /// and [TranscriptionRequest.knownSpeakerReferences] to label known
+  /// speakers instead of the default sequential letters (`A`, `B`, ...).
+  ///
+  /// ## Example
+  ///
+  /// ```dart
+  /// final response = await client.audio.transcriptions.createDiarized(
+  ///   TranscriptionRequest(
+  ///     file: audioBytes,
+  ///     filename: 'call.mp3',
+  ///     model: 'gpt-4o-transcribe-diarize',
+  ///   ),
+  /// );
+  ///
+  /// for (final segment in response.segments) {
+  ///   print('${segment.speaker}: ${segment.text}');
+  /// }
+  /// ```
+  Future<TranscriptionDiarizedResponse> createDiarized(
+    TranscriptionRequest request,
+  ) async {
+    ensureNotClosed?.call();
+    _rejectStream(request);
+    final diarizedRequest = request.copyWith(
+      responseFormat: AudioResponseFormat.diarizedJson,
+    );
+    final httpRequest = _createMultipartRequest(diarizedRequest);
+    httpRequest.headers.addAll(requestBuilder.buildMultipartHeaders());
+    final response = await interceptorChain.execute(httpRequest);
+    final json = jsonDecode(response.body) as Map<String, dynamic>;
+    return TranscriptionDiarizedResponse.fromJson(json);
+  }
+
+  /// Transcribes audio and returns the raw response body.
+  ///
+  /// Use this for the `text`, `srt`, and `vtt` response formats, which are
+  /// plain strings rather than JSON — [request.responseFormat] must be set
+  /// to one of [AudioResponseFormat.text], [AudioResponseFormat.srt], or
+  /// [AudioResponseFormat.vtt].
+  ///
+  /// ## Example
+  ///
+  /// ```dart
+  /// final srt = await client.audio.transcriptions.createRaw(
+  ///   TranscriptionRequest(
+  ///     file: audioBytes,
+  ///     filename: 'audio.mp3',
+  ///     model: 'gpt-4o-transcribe',
+  ///     responseFormat: AudioResponseFormat.srt,
+  ///   ),
+  /// );
+  /// ```
+  Future<String> createRaw(TranscriptionRequest request) async {
+    ensureNotClosed?.call();
+    _rejectStream(request);
+    if (!_rawFormats.contains(request.responseFormat)) {
+      throw ArgumentError(
+        'createRaw() requires responseFormat to be text, srt, or vtt. Use '
+        'create() for json, createVerbose() for verbose_json, or '
+        'createDiarized() for diarized_json.',
+      );
+    }
+    final httpRequest = _createMultipartRequest(request);
+    httpRequest.headers.addAll(requestBuilder.buildMultipartHeaders());
+    // response_format text/srt/vtt is not JSON — ErrorInterceptor still
+    // handles non-2xx responses, so returning the raw body directly is safe.
+    final response = await interceptorChain.execute(httpRequest);
+    return response.body;
+  }
+
+  /// Streams a transcription as Server-Sent Events.
+  ///
+  /// Forces `stream: true` on the multipart request. Yields
+  /// [TranscriptTextDeltaEvent]s as text is transcribed, a terminal
+  /// [TranscriptTextDoneEvent], and (with `responseFormat: diarized_json`)
+  /// [TranscriptTextSegmentEvent]s per completed diarized segment.
+  ///
+  /// Streaming is not supported for the `whisper-1` model.
+  ///
+  /// ## Example
+  ///
+  /// ```dart
+  /// final stream = client.audio.transcriptions.createStream(
+  ///   TranscriptionRequest(
+  ///     file: audioBytes,
+  ///     filename: 'audio.mp3',
+  ///     model: 'gpt-4o-transcribe',
+  ///   ),
+  /// );
+  ///
+  /// await for (final event in stream) {
+  ///   switch (event) {
+  ///     case TranscriptTextDeltaEvent():
+  ///       stdout.write(event.delta);
+  ///     case TranscriptTextDoneEvent():
+  ///       print('\ndone — ${event.usage?.totalTokens} tokens');
+  ///     case TranscriptTextSegmentEvent():
+  ///       print('${event.speaker}: ${event.text}');
+  ///     case TranscriptTextUnknownEvent():
+  ///       // Forward-compatibility fallback.
+  ///   }
+  /// }
+  /// ```
+  Stream<TranscriptionStreamEvent> createStream(
+    TranscriptionRequest request, {
+    Future<void>? abortTrigger,
+  }) {
+    ensureNotClosed?.call();
+    final httpRequest = _createMultipartRequest(request, forceStream: true);
+    return streamSseEventsForRequest(
+      request: httpRequest,
+      abortTrigger: abortTrigger,
+    ).map((json) {
+      final sseEvent = json['_event'] as String?;
+      final error = json['error'];
+      if (sseEvent == 'error' || error != null) {
+        throwInlineStreamError(json, sseEvent, error);
+      }
+      try {
+        return TranscriptionStreamEvent.fromJson(json);
+      } on FormatException catch (e) {
+        throw ParseException(
+          message: 'Failed to parse transcription stream event: $e',
+          responseBody: json.toString(),
+          cause: e,
+        );
+      } on TypeError catch (e) {
+        throw ParseException(
+          message: 'Failed to parse transcription stream event: $e',
+          responseBody: json.toString(),
+          cause: e,
+        );
+      }
+    });
+  }
+
+  void _rejectStream(TranscriptionRequest request) {
+    if (request.stream ?? false) {
+      throw ArgumentError(
+        'stream: true is not supported here. Use createStream() instead.',
+      );
+    }
+  }
+
+  void _rejectNonJsonFormat(TranscriptionRequest request) {
+    const disallowed = {
+      AudioResponseFormat.verboseJson,
+      AudioResponseFormat.diarizedJson,
+      AudioResponseFormat.text,
+      AudioResponseFormat.srt,
+      AudioResponseFormat.vtt,
+    };
+    if (disallowed.contains(request.responseFormat)) {
+      throw ArgumentError(
+        'create() only supports responseFormat json (or null/unset). Use '
+        'createVerbose() for verbose_json, createDiarized() for '
+        'diarized_json, or createRaw() for text/srt/vtt.',
+      );
+    }
+  }
+
+  http.MultipartRequest _createMultipartRequest(
+    TranscriptionRequest request, {
+    bool forceStream = false,
+  }) {
     final url = requestBuilder.buildUrl(_endpoint);
     final httpRequest = http.MultipartRequest('POST', url);
 
@@ -249,7 +423,7 @@ class TranscriptionsResource extends ResourceBase {
     // Add required fields
     httpRequest.fields['model'] = request.model;
 
-    // Add optional fields
+    // Add optional scalar fields
     if (request.language != null) {
       httpRequest.fields['language'] = request.language!;
     }
@@ -262,18 +436,60 @@ class TranscriptionsResource extends ResourceBase {
     if (request.temperature != null) {
       httpRequest.fields['temperature'] = request.temperature.toString();
     }
-    if (request.timestampGranularities != null) {
-      // OpenAI API expects repeated form fields for array parameters.
-      // Using indexed field names (timestamp_granularities[0], etc.) is a
-      // common pattern that servers typically understand for repeated fields.
-      for (var i = 0; i < request.timestampGranularities!.length; i++) {
-        httpRequest.fields['timestamp_granularities[$i]'] = request
-            .timestampGranularities![i]
-            .toJson();
-      }
+    if (forceStream) {
+      httpRequest.fields['stream'] = 'true';
+    } else if (request.stream != null) {
+      httpRequest.fields['stream'] = request.stream! ? 'true' : 'false';
     }
 
+    // chunking_strategy is either the literal string "auto" or a
+    // bracket-nested object (chunking_strategy[type], etc.) — both encode
+    // as plain form fields.
+    if (request.chunkingStrategy != null) {
+      httpRequest.fields.addAll(request.chunkingStrategy!.toFormFields());
+    }
+
+    // Array parameters use the documented `qs`-style wire format: the same
+    // key repeated with a `[]` suffix, e.g. `keywords[]=foo&keywords[]=bar`.
+    // http.MultipartRequest.fields is a Map and can't hold repeated keys, so
+    // these go through .files as filename-less MultipartFile parts, which
+    // still read as plain form fields on the wire (no Content-Disposition
+    // `filename=`).
+    _addRepeatedField(
+      httpRequest,
+      'timestamp_granularities',
+      request.timestampGranularities?.map((g) => g.toJson()),
+    );
+    _addRepeatedField(
+      httpRequest,
+      'include',
+      request.include?.map((i) => i.toJson()),
+    );
+    _addRepeatedField(httpRequest, 'keywords', request.keywords);
+    _addRepeatedField(httpRequest, 'languages', request.languages);
+    _addRepeatedField(
+      httpRequest,
+      'known_speaker_names',
+      request.knownSpeakerNames,
+    );
+    _addRepeatedField(
+      httpRequest,
+      'known_speaker_references',
+      request.knownSpeakerReferences,
+    );
+
     return httpRequest;
+  }
+
+  void _addRepeatedField(
+    http.MultipartRequest request,
+    String name,
+    Iterable<String>? values,
+  ) {
+    if (values == null) return;
+    for (final value in values) {
+      request.files.add(http.MultipartFile.fromString('$name[]', value));
+    }
   }
 }
 
