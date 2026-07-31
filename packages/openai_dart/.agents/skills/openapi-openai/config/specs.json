@@ -28,7 +28,7 @@
       "local_file": "openapi.json",
       "name": "OpenAI API",
       "requires_auth": false,
-      "url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/openai/openai-356010b9b9fd6228b457b8fcfa376cf4928a8f3bd4728e7ba5e4b6b5ef4f5843.yml"
+      "url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/openai/openai-31fcc3c97e5c432754bf0b72c5d5abbe1493573f0ca888af914baf81188b453e.yml"
     }
   },
   "specs_dir": "packages/openai_dart/specs"

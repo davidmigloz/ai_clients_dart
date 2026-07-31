@@ -604,7 +604,215 @@
       "tags": [
         "acknowledged"
       ],
-      "note": "Missing copyWith. Spec has many new fields (include, stream, chunking_strategy, etc.) not yet in Dart."
+      "note": "Multipart form request (file bytes + filename, no JSON round-trip by design, so kind:object fromJson/toJson checks cannot apply). Fully implements the 31fcc3c spec surface: chunking_strategy, include, keywords, known_speaker_names/references, languages, stream, diarized_json response format. Has full copyWith/==/hashCode/toString."
+    },
+    "CreateTranscriptionResponseJson": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TranscriptionResponse",
+      "file": "lib/src/models/audio/transcription.dart",
+      "schema": "CreateTranscriptionResponseJson"
+    },
+    "CreateTranscriptionResponseVerboseJson": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TranscriptionVerboseResponse",
+      "file": "lib/src/models/audio/transcription.dart",
+      "schema": "CreateTranscriptionResponseVerboseJson"
+    },
+    "CreateTranscriptionResponseDiarizedJson": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TranscriptionDiarizedResponse",
+      "file": "lib/src/models/audio/transcription.dart",
+      "schema": "CreateTranscriptionResponseDiarizedJson"
+    },
+    "TranscriptionDiarizedSegment": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TranscriptionDiarizedSegment",
+      "file": "lib/src/models/audio/transcription.dart",
+      "schema": "TranscriptionDiarizedSegment"
+    },
+    "TranscriptionLanguage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "TranscriptionLanguage",
+      "file": "lib/src/models/audio/transcription.dart",
+      "schema": "TranscriptionLanguage"
+    },
+    "VadConfig": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "TranscriptionVadConfig",
+      "file": "lib/src/models/audio/transcription.dart",
+      "schema": "VadConfig",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Request-only VAD tuning object serialized to bracketed multipart form fields (chunking_strategy[...]); the type=server_vad discriminator is emitted by the TranscriptionChunkingStrategyServerVad wrapper, so the Dart class has no type field and no JSON round-trip."
+    },
+    "AudioResponseFormat": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "AudioResponseFormat",
+      "file": "lib/src/models/audio/transcription.dart",
+      "schema": "AudioResponseFormat"
+    },
+    "TranscriptionInclude": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "TranscriptionInclude",
+      "file": "lib/src/models/audio/transcription.dart",
+      "schema": "TranscriptionInclude"
+    },
+    "TranscriptionChunkingStrategy": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "TranscriptionChunkingStrategy",
+      "file": "lib/src/models/audio/transcription.dart",
+      "schema": "TranscriptionChunkingStrategy",
+      "note": "Request-only string-or-object union (\"auto\" | VadConfig) dispatched by JSON shape, not a discriminator field. Serialized to multipart form fields, no fromJson."
+    },
+    "TranscriptionChunkingStrategy:TranscriptionChunkingStrategyAuto": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "TranscriptionChunkingStrategyAuto",
+      "file": "lib/src/models/audio/transcription.dart",
+      "schema": null,
+      "parent": "TranscriptionChunkingStrategy",
+      "note": "Dart-only variant for the \"auto\" string member of the union."
+    },
+    "TranscriptionChunkingStrategy:TranscriptionChunkingStrategyServerVad": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "TranscriptionChunkingStrategyServerVad",
+      "file": "lib/src/models/audio/transcription.dart",
+      "schema": null,
+      "parent": "TranscriptionChunkingStrategy",
+      "note": "Dart-only wrapper variant holding a TranscriptionVadConfig (spec VadConfig)."
+    },
+    "CreateTranscriptionResponseStreamEvent": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "TranscriptionStreamEvent",
+      "file": "lib/src/models/audio/transcription.dart",
+      "schema": "CreateTranscriptionResponseStreamEvent",
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "TranscriptTextSegmentEvent": "transcript.text.segment",
+          "TranscriptTextDeltaEvent": "transcript.text.delta",
+          "TranscriptTextDoneEvent": "transcript.text.done"
+        }
+      }
+    },
+    "TranscriptTextSegmentEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "TranscriptTextSegmentEvent",
+      "file": "lib/src/models/audio/transcription.dart",
+      "schema": "TranscriptTextSegmentEvent",
+      "parent": "CreateTranscriptionResponseStreamEvent"
+    },
+    "TranscriptTextDeltaEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "TranscriptTextDeltaEvent",
+      "file": "lib/src/models/audio/transcription.dart",
+      "schema": "TranscriptTextDeltaEvent",
+      "parent": "CreateTranscriptionResponseStreamEvent"
+    },
+    "TranscriptTextDoneEvent": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "TranscriptTextDoneEvent",
+      "file": "lib/src/models/audio/transcription.dart",
+      "schema": "TranscriptTextDoneEvent",
+      "parent": "CreateTranscriptionResponseStreamEvent"
+    },
+    "TranscriptUsage": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "TranscriptUsage",
+      "file": "lib/src/models/audio/transcription.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "TranscriptTextUsageTokens": "tokens",
+          "TranscriptTextUsageDuration": "duration"
+        }
+      },
+      "note": "Synthetic union: CreateTranscriptionResponseJson.usage is an inline anyOf of TranscriptTextUsageTokens | TranscriptTextUsageDuration with no named spec schema."
+    },
+    "TranscriptTextUsageTokens": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "TranscriptTextUsageTokens",
+      "file": "lib/src/models/audio/transcription.dart",
+      "schema": "TranscriptTextUsageTokens",
+      "parent": "TranscriptUsage"
+    },
+    "TranscriptTextUsageDuration": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "TranscriptTextUsageDuration",
+      "file": "lib/src/models/audio/transcription.dart",
+      "schema": "TranscriptTextUsageDuration",
+      "parent": "TranscriptUsage"
+    },
+    "ProvenanceResource": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ContentProvenanceCheck",
+      "file": "lib/src/models/content_provenance_checks/content_provenance_check.dart",
+      "schema": "ProvenanceResource"
+    },
+    "ProvenanceResult": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ProvenanceResult",
+      "file": "lib/src/models/content_provenance_checks/content_provenance_check.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "C2PAProvenanceResult": "c2pa",
+          "SynthIDProvenanceResult": "synthid"
+        }
+      },
+      "note": "Synthetic union: ProvenanceResource.results items are an inline anyOf of C2PAProvenanceResult | SynthIDProvenanceResult with no named spec schema."
+    },
+    "C2PAProvenanceResult": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "C2PAProvenanceResult",
+      "file": "lib/src/models/content_provenance_checks/content_provenance_check.dart",
+      "schema": "C2PAProvenanceResult",
+      "parent": "ProvenanceResult"
+    },
+    "SynthIDProvenanceResult": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "SynthIDProvenanceResult",
+      "file": "lib/src/models/content_provenance_checks/content_provenance_check.dart",
+      "schema": "SynthIDProvenanceResult",
+      "parent": "ProvenanceResult"
+    },
+    "ProvenanceDetectionResultApi": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "ProvenanceDetectionResult",
+      "file": "lib/src/models/content_provenance_checks/content_provenance_check.dart",
+      "schema": "ProvenanceDetectionResultApi"
+    },
+    "C2PAValidationStateApi": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "C2PAValidationState",
+      "file": "lib/src/models/content_provenance_checks/content_provenance_check.dart",
+      "schema": "C2PAValidationStateApi"
     },
     "AssistantObject": {
       "spec": "main",
