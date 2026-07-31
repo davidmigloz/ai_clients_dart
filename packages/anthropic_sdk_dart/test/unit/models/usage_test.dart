@@ -261,4 +261,94 @@ void main() {
       );
     });
   });
+
+  group('Usage.fallbackCredit', () {
+    test('parses and round-trips a redeemed fallbackCredit', () {
+      final json = {
+        'input_tokens': 10,
+        'output_tokens': 20,
+        'fallback_credit': {
+          'status': {'type': 'redeemed'},
+        },
+      };
+      final usage = Usage.fromJson(json);
+      expect(usage.fallbackCredit, isNotNull);
+      expect(usage.fallbackCredit!.status, isA<FallbackCreditRedeemed>());
+      expect(usage.toJson(), json);
+    });
+
+    test('parses and round-trips a not_applied fallbackCredit', () {
+      final json = {
+        'input_tokens': 10,
+        'output_tokens': 20,
+        'fallback_credit': {
+          'status': {'type': 'not_applied', 'reason': 'expired'},
+        },
+      };
+      final usage = Usage.fromJson(json);
+      final status = usage.fallbackCredit!.status as FallbackCreditNotApplied;
+      expect(status.reason, FallbackCreditNotAppliedReason.expired);
+      expect(usage.toJson(), json);
+    });
+
+    test('omits fallback_credit when null', () {
+      const usage = Usage(inputTokens: 10, outputTokens: 20);
+      expect(usage.toJson().containsKey('fallback_credit'), isFalse);
+    });
+
+    test('copyWith updates and clears fallbackCredit', () {
+      const usage = Usage(
+        inputTokens: 10,
+        outputTokens: 20,
+        fallbackCredit: FallbackCreditUsage(status: FallbackCreditRedeemed()),
+      );
+      final updated = usage.copyWith(
+        fallbackCredit: const FallbackCreditUsage(
+          status: FallbackCreditNotApplied(
+            reason: FallbackCreditNotAppliedReason.notEnabled,
+          ),
+        ),
+      );
+      expect(updated.fallbackCredit!.status, isA<FallbackCreditNotApplied>());
+      expect(usage.copyWith(fallbackCredit: null).fallbackCredit, isNull);
+    });
+
+    test('equality and toString include fallbackCredit', () {
+      const a = Usage(
+        inputTokens: 10,
+        outputTokens: 20,
+        fallbackCredit: FallbackCreditUsage(status: FallbackCreditRedeemed()),
+      );
+      const b = Usage(inputTokens: 10, outputTokens: 20);
+      expect(a, isNot(b));
+      expect(a.toString(), contains('fallbackCredit'));
+    });
+  });
+
+  group('MessageDeltaUsage.fallbackCredit', () {
+    test('parses and round-trips fallbackCredit', () {
+      final json = {
+        'output_tokens': 80,
+        'fallback_credit': {
+          'status': {'type': 'redeemed'},
+        },
+      };
+      final usage = MessageDeltaUsage.fromJson(json);
+      expect(usage.fallbackCredit!.status, isA<FallbackCreditRedeemed>());
+      expect(usage.toJson(), json);
+    });
+
+    test('omits fallback_credit when null', () {
+      const usage = MessageDeltaUsage(outputTokens: 80);
+      expect(usage.toJson().containsKey('fallback_credit'), isFalse);
+    });
+
+    test('copyWith clears fallbackCredit', () {
+      const usage = MessageDeltaUsage(
+        outputTokens: 80,
+        fallbackCredit: FallbackCreditUsage(status: FallbackCreditRedeemed()),
+      );
+      expect(usage.copyWith(fallbackCredit: null).fallbackCredit, isNull);
+    });
+  });
 }

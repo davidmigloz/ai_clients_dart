@@ -7,6 +7,7 @@ import '../metadata/cache_control.dart';
 import '../sources/document_source.dart';
 import '../sources/image_source.dart';
 import '../tools/tool_caller.dart';
+import '../tools/tool_change_reference.dart';
 import 'citations_config.dart';
 import 'content_block.dart';
 
@@ -142,6 +143,26 @@ sealed class InputContentBlock {
     CacheControlEphemeral? cacheControl,
   }) = ToolReferenceInputBlock;
 
+  /// Creates a mid-conversation directive to surface a declared tool.
+  ///
+  /// [tool] references a tool (or MCP toolset) by name from the request's
+  /// `tools`; it is offered to the model from this point in the conversation
+  /// onward.
+  factory InputContentBlock.toolAddition({
+    required ToolChangeReference tool,
+    CacheControlEphemeral? cacheControl,
+  }) = ToolAdditionInputBlock;
+
+  /// Creates a mid-conversation directive to withdraw a tool.
+  ///
+  /// [tool] references a tool (or MCP toolset) by name from the request's
+  /// `tools`; it is no longer offered to the model from this point in the
+  /// conversation onward.
+  factory InputContentBlock.toolRemoval({
+    required ToolChangeReference tool,
+    CacheControlEphemeral? cacheControl,
+  }) = ToolRemovalInputBlock;
+
   /// Creates a mid-conversation system block.
   ///
   /// Injects updated system instructions partway through a conversation (e.g.
@@ -187,6 +208,8 @@ sealed class InputContentBlock {
       'container_upload' => ContainerUploadInputBlock.fromJson(json),
       'compaction' => CompactionInputBlock.fromJson(json),
       'tool_reference' => ToolReferenceInputBlock.fromJson(json),
+      'tool_addition' => ToolAdditionInputBlock.fromJson(json),
+      'tool_removal' => ToolRemovalInputBlock.fromJson(json),
       'mcp_tool_use' => MCPToolUseInputBlock.fromJson(json),
       'mcp_tool_result' => MCPToolResultInputBlock.fromJson(json),
       'advisor_tool_result' => AdvisorToolResultInputBlock.fromJson(json),
@@ -1606,6 +1629,134 @@ class ToolReferenceInputBlock extends InputContentBlock {
   String toString() =>
       'ToolReferenceInputBlock(toolName: $toolName, '
       'cacheControl: $cacheControl)';
+}
+
+/// Mid-conversation directive to surface a declared tool.
+///
+/// [tool] references a tool (or MCP toolset) by name from the request's
+/// `tools`; it is offered to the model from this point in the conversation
+/// onward.
+@immutable
+class ToolAdditionInputBlock extends InputContentBlock {
+  /// The tool (or MCP toolset) to surface.
+  final ToolChangeReference tool;
+
+  /// Cache control for this block.
+  final CacheControlEphemeral? cacheControl;
+
+  /// Creates a [ToolAdditionInputBlock].
+  const ToolAdditionInputBlock({required this.tool, this.cacheControl});
+
+  /// Creates a [ToolAdditionInputBlock] from JSON.
+  factory ToolAdditionInputBlock.fromJson(Map<String, dynamic> json) {
+    return ToolAdditionInputBlock(
+      tool: ToolChangeReference.fromJson(json['tool'] as Map<String, dynamic>),
+      cacheControl: json['cache_control'] != null
+          ? CacheControlEphemeral.fromJson(
+              json['cache_control'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'tool_addition',
+    'tool': tool.toJson(),
+    if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  ToolAdditionInputBlock copyWith({
+    ToolChangeReference? tool,
+    Object? cacheControl = unsetCopyWithValue,
+  }) {
+    return ToolAdditionInputBlock(
+      tool: tool ?? this.tool,
+      cacheControl: cacheControl == unsetCopyWithValue
+          ? this.cacheControl
+          : cacheControl as CacheControlEphemeral?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ToolAdditionInputBlock &&
+          runtimeType == other.runtimeType &&
+          tool == other.tool &&
+          cacheControl == other.cacheControl;
+
+  @override
+  int get hashCode => Object.hash(tool, cacheControl);
+
+  @override
+  String toString() =>
+      'ToolAdditionInputBlock(tool: $tool, cacheControl: $cacheControl)';
+}
+
+/// Mid-conversation directive to withdraw a tool.
+///
+/// [tool] references a tool (or MCP toolset) by name from the request's
+/// `tools`; it is no longer offered to the model from this point in the
+/// conversation onward.
+@immutable
+class ToolRemovalInputBlock extends InputContentBlock {
+  /// The tool (or MCP toolset) to withdraw.
+  final ToolChangeReference tool;
+
+  /// Cache control for this block.
+  final CacheControlEphemeral? cacheControl;
+
+  /// Creates a [ToolRemovalInputBlock].
+  const ToolRemovalInputBlock({required this.tool, this.cacheControl});
+
+  /// Creates a [ToolRemovalInputBlock] from JSON.
+  factory ToolRemovalInputBlock.fromJson(Map<String, dynamic> json) {
+    return ToolRemovalInputBlock(
+      tool: ToolChangeReference.fromJson(json['tool'] as Map<String, dynamic>),
+      cacheControl: json['cache_control'] != null
+          ? CacheControlEphemeral.fromJson(
+              json['cache_control'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'type': 'tool_removal',
+    'tool': tool.toJson(),
+    if (cacheControl != null) 'cache_control': cacheControl!.toJson(),
+  };
+
+  /// Creates a copy with replaced values.
+  ToolRemovalInputBlock copyWith({
+    ToolChangeReference? tool,
+    Object? cacheControl = unsetCopyWithValue,
+  }) {
+    return ToolRemovalInputBlock(
+      tool: tool ?? this.tool,
+      cacheControl: cacheControl == unsetCopyWithValue
+          ? this.cacheControl
+          : cacheControl as CacheControlEphemeral?,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ToolRemovalInputBlock &&
+          runtimeType == other.runtimeType &&
+          tool == other.tool &&
+          cacheControl == other.cacheControl;
+
+  @override
+  int get hashCode => Object.hash(tool, cacheControl);
+
+  @override
+  String toString() =>
+      'ToolRemovalInputBlock(tool: $tool, cacheControl: $cacheControl)';
 }
 
 /// A `fallback` block echoed back from a prior response.

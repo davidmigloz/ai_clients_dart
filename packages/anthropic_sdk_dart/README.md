@@ -36,11 +36,12 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - SSE streaming with cancelation and token counting
 - Extended thinking and adaptive thinking controls, with `outputTokensDetails` reasoning-token breakdown
 - Prompt-cache diagnostics: report why the cache prefix diverged between turns (beta)
-- Server-side fallback: automatically re-run refused requests on another model via the `fallbacks` chain, or retry manually with the refusal `fallback_credit_token` (beta)
+- Server-side fallback: automatically re-run refused requests on another model via the `fallbacks` chain, or retry manually with the refusal `fallback_credit_token` — including best-effort redemption mode and per-response `fallback_credit` usage outcomes (beta)
 
 ### Tools and multimodal
 
 - Custom tool calling with strict schemas and tool choice controls
+- Mid-conversation tool changes: add or remove tools between turns with `tool_addition`/`tool_removal` blocks while preserving the prompt cache (beta)
 - Computer use, web search, code execution, advisor, and MCP tool integration
 - Vision and document inputs with citations, plus your own cited `search_result` blocks (RAG)
 
@@ -53,6 +54,7 @@ Dart client for the **[Anthropic API](https://docs.anthropic.com/en/api)** to bu
 - Multiagent coordinator orchestration and outcome evaluations with grading rubrics (beta)
 - Typed webhook event parsing and MCP-OAuth / static-bearer / environment-variable credential validation (beta)
 - Memory stores for persistent agent memories with versioning and redaction (beta)
+- Dreams: asynchronous memory-consolidation jobs over memory stores and session transcripts (beta, research preview)
 - User profiles with relationship classification (`external`/`resold`/`internal`), trust-grant tracking, and enrollment URLs (beta)
 
 ## Why choose this client?
@@ -684,6 +686,7 @@ See the [example/](example/) directory for complete examples:
 | [`session_threads_example.dart`](example/session_threads_example.dart) | Session threads: list, retrieve, stream events, archive (beta) |
 | [`deployments_example.dart`](example/deployments_example.dart) | Scheduled deployments and deployment runs: cron schedule, pause/resume, run-now (beta) |
 | [`memory_stores_example.dart`](example/memory_stores_example.dart) | Managed agents memory stores, memories, and versions (beta) |
+| [`dreams_example.dart`](example/dreams_example.dart) | Dreams: memory-consolidation jobs — create, poll, list, archive (beta, research preview) |
 | [`user_profiles_example.dart`](example/user_profiles_example.dart) | User profiles and enrollment URLs (beta) |
 | [`models_example.dart`](example/models_example.dart) | Model listing |
 | [`error_handling_example.dart`](example/error_handling_example.dart) | Exception handling patterns |
@@ -702,6 +705,7 @@ See the [example/](example/) directory for complete examples:
 | Sessions (Beta) | ✅ Full |
 | Vaults (Beta) | ✅ Full |
 | Memory Stores (Beta) | ✅ Full |
+| Dreams (Beta) | ✅ Full |
 | User Profiles (Beta) | ✅ Full |
 | Webhooks (Beta) | ✅ Full |
 

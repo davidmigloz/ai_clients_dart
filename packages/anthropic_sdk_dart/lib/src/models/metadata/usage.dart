@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import 'fallback_credit_usage.dart';
 import 'speed.dart';
 
 /// Token usage breakdown for cache creation.
@@ -415,6 +416,13 @@ class Usage {
   /// Speed mode used for this request.
   final Speed? speed;
 
+  /// Outcome of the `fallback_credit_token` presented on this request.
+  ///
+  /// Present on every response to a non-batch request that carried a
+  /// `fallback_credit_token`, in either redemption mode; absent otherwise
+  /// (batch items accept and ignore the token and carry no outcome object).
+  final FallbackCreditUsage? fallbackCredit;
+
   /// Creates a [Usage].
   const Usage({
     required this.inputTokens,
@@ -429,6 +437,7 @@ class Usage {
     this.inferenceGeo,
     this.iterations,
     this.speed,
+    this.fallbackCredit,
   });
 
   /// Creates a [Usage] from JSON.
@@ -466,6 +475,11 @@ class Usage {
       speed: json['speed'] != null
           ? Speed.fromJson(json['speed'] as String)
           : null,
+      fallbackCredit: json['fallback_credit'] != null
+          ? FallbackCreditUsage.fromJson(
+              json['fallback_credit'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
@@ -487,6 +501,7 @@ class Usage {
     if (iterations != null)
       'iterations': iterations!.map((e) => e.toJson()).toList(),
     if (speed != null) 'speed': speed!.toJson(),
+    if (fallbackCredit != null) 'fallback_credit': fallbackCredit!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -503,6 +518,7 @@ class Usage {
     Object? inferenceGeo = unsetCopyWithValue,
     Object? iterations = unsetCopyWithValue,
     Object? speed = unsetCopyWithValue,
+    Object? fallbackCredit = unsetCopyWithValue,
   }) {
     return Usage(
       inputTokens: inputTokens ?? this.inputTokens,
@@ -535,6 +551,9 @@ class Usage {
           ? this.iterations
           : iterations as List<IterationUsage>?,
       speed: speed == unsetCopyWithValue ? this.speed : speed as Speed?,
+      fallbackCredit: fallbackCredit == unsetCopyWithValue
+          ? this.fallbackCredit
+          : fallbackCredit as FallbackCreditUsage?,
     );
   }
 
@@ -554,7 +573,8 @@ class Usage {
           serviceTier == other.serviceTier &&
           inferenceGeo == other.inferenceGeo &&
           listsEqual(iterations, other.iterations) &&
-          speed == other.speed;
+          speed == other.speed &&
+          fallbackCredit == other.fallbackCredit;
 
   @override
   int get hashCode => Object.hash(
@@ -570,6 +590,7 @@ class Usage {
     inferenceGeo,
     listHash(iterations),
     speed,
+    fallbackCredit,
   );
 
   @override
@@ -580,5 +601,6 @@ class Usage {
       'cacheCreationInputTokens: $cacheCreationInputTokens, '
       'cacheRead: $cacheRead, cacheReadInputTokens: $cacheReadInputTokens, '
       'serverToolUse: $serverToolUse, serviceTier: $serviceTier, '
-      'inferenceGeo: $inferenceGeo, iterations: $iterations, speed: $speed)';
+      'inferenceGeo: $inferenceGeo, iterations: $iterations, speed: $speed, '
+      'fallbackCredit: $fallbackCredit)';
 }

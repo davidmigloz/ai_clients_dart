@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import '../beta/config/container.dart';
 import '../common/copy_with_sentinel.dart';
 import '../common/equality_helpers.dart';
+import '../metadata/fallback_credit_usage.dart';
 import '../metadata/speed.dart';
 import '../metadata/stop_reason.dart';
 import '../metadata/usage.dart';
@@ -128,6 +129,13 @@ class MessageDeltaUsage {
   /// Speed mode used for this response (beta).
   final Speed? speed;
 
+  /// Outcome of the `fallback_credit_token` presented on this request.
+  ///
+  /// Present on every response to a non-batch request that carried a
+  /// `fallback_credit_token`, in either redemption mode; absent otherwise
+  /// (batch items accept and ignore the token and carry no outcome object).
+  final FallbackCreditUsage? fallbackCredit;
+
   /// Creates a [MessageDeltaUsage].
   const MessageDeltaUsage({
     required this.outputTokens,
@@ -138,6 +146,7 @@ class MessageDeltaUsage {
     this.serverToolUse,
     this.iterations,
     this.speed,
+    this.fallbackCredit,
   });
 
   /// Creates a [MessageDeltaUsage] from JSON.
@@ -165,6 +174,11 @@ class MessageDeltaUsage {
       speed: json['speed'] != null
           ? Speed.fromJson(json['speed'] as String)
           : null,
+      fallbackCredit: json['fallback_credit'] != null
+          ? FallbackCreditUsage.fromJson(
+              json['fallback_credit'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 
@@ -182,6 +196,7 @@ class MessageDeltaUsage {
     if (iterations != null)
       'iterations': iterations!.map((e) => e.toJson()).toList(),
     if (speed != null) 'speed': speed!.toJson(),
+    if (fallbackCredit != null) 'fallback_credit': fallbackCredit!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -194,6 +209,7 @@ class MessageDeltaUsage {
     Object? serverToolUse = unsetCopyWithValue,
     Object? iterations = unsetCopyWithValue,
     Object? speed = unsetCopyWithValue,
+    Object? fallbackCredit = unsetCopyWithValue,
   }) {
     return MessageDeltaUsage(
       outputTokens: outputTokens ?? this.outputTokens,
@@ -216,6 +232,9 @@ class MessageDeltaUsage {
           ? this.iterations
           : iterations as List<IterationUsage>?,
       speed: speed == unsetCopyWithValue ? this.speed : speed as Speed?,
+      fallbackCredit: fallbackCredit == unsetCopyWithValue
+          ? this.fallbackCredit
+          : fallbackCredit as FallbackCreditUsage?,
     );
   }
 
@@ -231,7 +250,8 @@ class MessageDeltaUsage {
           cacheReadInputTokens == other.cacheReadInputTokens &&
           serverToolUse == other.serverToolUse &&
           listsEqual(iterations, other.iterations) &&
-          speed == other.speed;
+          speed == other.speed &&
+          fallbackCredit == other.fallbackCredit;
 
   @override
   int get hashCode => Object.hash(
@@ -243,6 +263,7 @@ class MessageDeltaUsage {
     serverToolUse,
     listHash(iterations),
     speed,
+    fallbackCredit,
   );
 
   @override
@@ -251,5 +272,6 @@ class MessageDeltaUsage {
       'outputTokensDetails: $outputTokensDetails, inputTokens: $inputTokens, '
       'cacheCreationInputTokens: $cacheCreationInputTokens, '
       'cacheReadInputTokens: $cacheReadInputTokens, '
-      'serverToolUse: $serverToolUse, iterations: $iterations, speed: $speed)';
+      'serverToolUse: $serverToolUse, iterations: $iterations, speed: $speed, '
+      'fallbackCredit: $fallbackCredit)';
 }

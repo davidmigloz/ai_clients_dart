@@ -2,8 +2,8 @@
   "specs": {
     "main": {
       "current_version": "unknown",
-      "last_fetched": "2026-07-11T06:54:31.075636Z",
-      "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/anthropic/anthropic-506a5ad71d522b4ae56ac3429380486647af1f92eddde80603480fb592d62b54.yml",
+      "last_fetched": "2026-07-31T21:20:04.243480Z",
+      "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/anthropic/anthropic-6d5c96a475b06ff067a4491fc2258181f0426af6c64bcfd4be5d167a8c0d9d16.yml",
       "title": "Anthropic API",
       "version_history": [
         {

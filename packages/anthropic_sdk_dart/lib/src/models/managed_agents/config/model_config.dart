@@ -1,6 +1,8 @@
 import 'package:meta/meta.dart';
 
+import '../../beta/config/output_config.dart' show EffortLevel;
 import '../../common/copy_with_sentinel.dart';
+import 'effort_params.dart';
 
 /// Inference speed mode for agents.
 enum AgentSpeed {
@@ -38,8 +40,11 @@ class ModelConfig {
   /// Inference speed mode.
   final AgentSpeed? speed;
 
+  /// Response effort level for model generation, e.g. `{"type": "high"}`.
+  final EffortLevel? effort;
+
   /// Creates a [ModelConfig].
-  const ModelConfig({required this.id, this.speed});
+  const ModelConfig({required this.id, this.speed, this.effort});
 
   /// Creates a [ModelConfig] from JSON.
   factory ModelConfig.fromJson(Map<String, dynamic> json) {
@@ -48,6 +53,11 @@ class ModelConfig {
       speed: json['speed'] != null
           ? AgentSpeed.fromJson(json['speed'] as String)
           : null,
+      effort: json['effort'] != null
+          ? EffortLevel.fromJson(
+              (json['effort'] as Map<String, dynamic>)['type'] as String,
+            )
+          : null,
     );
   }
 
@@ -55,13 +65,21 @@ class ModelConfig {
   Map<String, dynamic> toJson() => {
     'id': id,
     if (speed != null) 'speed': speed!.toJson(),
+    if (effort != null) 'effort': {'type': effort!.toJson()},
   };
 
   /// Creates a copy with replaced values.
-  ModelConfig copyWith({String? id, Object? speed = unsetCopyWithValue}) {
+  ModelConfig copyWith({
+    String? id,
+    Object? speed = unsetCopyWithValue,
+    Object? effort = unsetCopyWithValue,
+  }) {
     return ModelConfig(
       id: id ?? this.id,
       speed: speed == unsetCopyWithValue ? this.speed : speed as AgentSpeed?,
+      effort: effort == unsetCopyWithValue
+          ? this.effort
+          : effort as EffortLevel?,
     );
   }
 
@@ -71,13 +89,14 @@ class ModelConfig {
       other is ModelConfig &&
           runtimeType == other.runtimeType &&
           id == other.id &&
-          speed == other.speed;
+          speed == other.speed &&
+          effort == other.effort;
 
   @override
-  int get hashCode => Object.hash(id, speed);
+  int get hashCode => Object.hash(id, speed, effort);
 
   @override
-  String toString() => 'ModelConfig(id: $id, speed: $speed)';
+  String toString() => 'ModelConfig(id: $id, speed: $speed, effort: $effort)';
 }
 
 /// Model parameter — either a simple model ID string or a [ModelConfig].
@@ -138,8 +157,12 @@ class ModelParamsConfig extends ModelParams {
   /// Inference speed mode.
   final AgentSpeed? speed;
 
+  /// Response effort level for model generation — a bare level string or an
+  /// object with a `type` field.
+  final EffortParams? effort;
+
   /// Creates a [ModelParamsConfig].
-  const ModelParamsConfig({required this.id, this.speed});
+  const ModelParamsConfig({required this.id, this.speed, this.effort});
 
   /// Creates a [ModelParamsConfig] from JSON.
   factory ModelParamsConfig.fromJson(Map<String, dynamic> json) {
@@ -148,6 +171,9 @@ class ModelParamsConfig extends ModelParams {
       speed: json['speed'] != null
           ? AgentSpeed.fromJson(json['speed'] as String)
           : null,
+      effort: json['effort'] != null
+          ? EffortParams.fromJson(json['effort'] as Object)
+          : null,
     );
   }
 
@@ -155,7 +181,23 @@ class ModelParamsConfig extends ModelParams {
   Map<String, dynamic> toJson() => {
     'id': id,
     if (speed != null) 'speed': speed!.toJson(),
+    if (effort != null) 'effort': effort!.toJson(),
   };
+
+  /// Creates a copy with replaced values.
+  ModelParamsConfig copyWith({
+    String? id,
+    Object? speed = unsetCopyWithValue,
+    Object? effort = unsetCopyWithValue,
+  }) {
+    return ModelParamsConfig(
+      id: id ?? this.id,
+      speed: speed == unsetCopyWithValue ? this.speed : speed as AgentSpeed?,
+      effort: effort == unsetCopyWithValue
+          ? this.effort
+          : effort as EffortParams?,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -163,11 +205,13 @@ class ModelParamsConfig extends ModelParams {
       other is ModelParamsConfig &&
           runtimeType == other.runtimeType &&
           id == other.id &&
-          speed == other.speed;
+          speed == other.speed &&
+          effort == other.effort;
 
   @override
-  int get hashCode => Object.hash(id, speed);
+  int get hashCode => Object.hash(id, speed, effort);
 
   @override
-  String toString() => 'ModelParamsConfig(id: $id, speed: $speed)';
+  String toString() =>
+      'ModelParamsConfig(id: $id, speed: $speed, effort: $effort)';
 }

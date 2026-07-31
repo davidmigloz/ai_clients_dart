@@ -72,23 +72,35 @@ class SessionThreadEventsResource extends ResourceBase with StreamingResource {
   ///
   /// Parameters:
   /// - [lastEventId]: Resume streaming from after this event ID.
+  /// - [eventDeltas]: Event types to preview incrementally via [EventStartEvent]
+  ///   and [EventDeltaEvent] before the complete event arrives. Accepts
+  ///   `agent.message` and `agent.thinking`.
   /// - [abortTrigger]: Allows canceling the stream.
   ///
   /// Uses the eager-guard wrapper pattern so `ensureNotClosed()` runs at call
   /// time rather than on `.listen()`.
   Stream<SessionEvent> stream({
     String? lastEventId,
+    List<String>? eventDeltas,
     Future<void>? abortTrigger,
   }) {
     ensureNotClosed?.call();
-    return _streamImpl(lastEventId: lastEventId, abortTrigger: abortTrigger);
+    return _streamImpl(
+      lastEventId: lastEventId,
+      eventDeltas: eventDeltas,
+      abortTrigger: abortTrigger,
+    );
   }
 
   Stream<SessionEvent> _streamImpl({
     String? lastEventId,
+    List<String>? eventDeltas,
     Future<void>? abortTrigger,
   }) async* {
-    final queryParams = <String, dynamic>{'last_event_id': ?lastEventId};
+    final queryParams = <String, dynamic>{
+      'last_event_id': ?lastEventId,
+      'event_deltas[]': ?eventDeltas,
+    };
 
     final eventStream = getStream(
       '/v1/sessions/$sessionId/threads/$threadId/stream',

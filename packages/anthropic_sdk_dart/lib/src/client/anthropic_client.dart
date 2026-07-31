@@ -8,6 +8,7 @@ import '../interceptors/logging_interceptor.dart';
 import '../resources/agents_resource.dart';
 import '../resources/deployment_runs_resource.dart';
 import '../resources/deployments_resource.dart';
+import '../resources/dreams_resource.dart';
 import '../resources/files_resource.dart';
 import '../resources/memory_stores_resource.dart';
 import '../resources/message_batches_resource.dart';
@@ -98,6 +99,9 @@ class AnthropicClient {
 
   /// Resource for the Vaults API (Beta).
   late final VaultsResource vaults;
+
+  /// Resource for the Dreams API (Beta, research preview).
+  late final DreamsResource dreams;
 
   /// Resource for the Deployments API (Beta).
   late final DeploymentsResource deployments;
@@ -232,6 +236,13 @@ class AnthropicClient {
       ensureNotClosed: _ensureNotClosed,
     );
     vaults = VaultsResource(
+      config: config,
+      httpClient: _httpClient,
+      interceptorChain: _interceptorChain,
+      requestBuilder: _requestBuilder,
+      ensureNotClosed: _ensureNotClosed,
+    );
+    dreams = DreamsResource(
       config: config,
       httpClient: _httpClient,
       interceptorChain: _interceptorChain,

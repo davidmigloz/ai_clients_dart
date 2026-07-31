@@ -17,8 +17,11 @@ const Object _notSet = Object();
 /// Pass `null` explicitly to clear a clearable field.
 @immutable
 class UpdateAgentParams {
-  /// The agent's current version — for optimistic concurrency.
-  final int version;
+  /// The agent's current version, obtained from create/retrieve.
+  ///
+  /// When supplied, the request fails on a version mismatch (optimistic
+  /// concurrency). Omit to apply the update unconditionally.
+  final int? version;
 
   /// Human-readable name. Omit to preserve.
   String? get name => _name == _notSet ? null : _name as String?;
@@ -72,7 +75,7 @@ class UpdateAgentParams {
   /// Omit a field to preserve its current value on the server.
   /// Pass `null` explicitly to clear a clearable field.
   const UpdateAgentParams({
-    required this.version,
+    this.version,
     Object? name = _notSet,
     Object? description = _notSet,
     Object? system = _notSet,
@@ -95,7 +98,7 @@ class UpdateAgentParams {
   /// Creates an [UpdateAgentParams] from JSON.
   factory UpdateAgentParams.fromJson(Map<String, dynamic> json) {
     return UpdateAgentParams(
-      version: json['version'] as int,
+      version: json['version'] as int?,
       name: json.containsKey('name') ? json['name'] as String? : _notSet,
       description: json.containsKey('description')
           ? json['description'] as String?
@@ -146,7 +149,7 @@ class UpdateAgentParams {
   /// Fields explicitly set to `null` are included as `null` to clear
   /// the value on the server.
   Map<String, dynamic> toJson() => {
-    'version': version,
+    if (version != null) 'version': version,
     if (_name != _notSet) 'name': _name,
     if (_description != _notSet) 'description': _description,
     if (_system != _notSet) 'system': _system,
@@ -173,7 +176,7 @@ class UpdateAgentParams {
 
   /// Creates a copy with replaced values.
   UpdateAgentParams copyWith({
-    int? version,
+    Object? version = unsetCopyWithValue,
     Object? name = unsetCopyWithValue,
     Object? description = unsetCopyWithValue,
     Object? system = unsetCopyWithValue,
@@ -185,7 +188,7 @@ class UpdateAgentParams {
     Object? multiagent = unsetCopyWithValue,
   }) {
     return UpdateAgentParams(
-      version: version ?? this.version,
+      version: version == unsetCopyWithValue ? this.version : version as int?,
       name: name == unsetCopyWithValue ? _name : name,
       description: description == unsetCopyWithValue
           ? _description

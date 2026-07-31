@@ -7,6 +7,7 @@ import '../config/agent_tool.dart';
 import '../config/mcp_server.dart';
 import '../config/model_config.dart';
 import '../resources/session_resource_params.dart';
+import 'session_initial_event_params.dart';
 
 /// Private sentinel to distinguish "not provided" from explicit `null`.
 const Object _notSet = Object();
@@ -305,6 +306,9 @@ class CreateSessionParams {
   /// Resources to mount into the session's container.
   final List<SessionResourceParams>? resources;
 
+  /// Events sent to the session immediately after it is created.
+  final List<SessionInitialEventParams>? initialEvents;
+
   /// Creates a [CreateSessionParams].
   const CreateSessionParams({
     required this.agent,
@@ -313,6 +317,7 @@ class CreateSessionParams {
     this.metadata,
     this.vaultIds,
     this.resources,
+    this.initialEvents,
   });
 
   /// Creates a [CreateSessionParams] from JSON.
@@ -330,6 +335,12 @@ class CreateSessionParams {
             (e) => SessionResourceParams.fromJson(e as Map<String, dynamic>),
           )
           .toList(),
+      initialEvents: (json['initial_events'] as List?)
+          ?.map(
+            (e) =>
+                SessionInitialEventParams.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(),
     );
   }
 
@@ -342,6 +353,8 @@ class CreateSessionParams {
     if (vaultIds != null) 'vault_ids': vaultIds,
     if (resources != null)
       'resources': resources!.map((e) => e.toJson()).toList(),
+    if (initialEvents != null)
+      'initial_events': initialEvents!.map((e) => e.toJson()).toList(),
   };
 
   /// Creates a copy with replaced values.
@@ -352,6 +365,7 @@ class CreateSessionParams {
     Object? metadata = unsetCopyWithValue,
     Object? vaultIds = unsetCopyWithValue,
     Object? resources = unsetCopyWithValue,
+    Object? initialEvents = unsetCopyWithValue,
   }) {
     return CreateSessionParams(
       agent: agent ?? this.agent,
@@ -366,6 +380,9 @@ class CreateSessionParams {
       resources: resources == unsetCopyWithValue
           ? this.resources
           : resources as List<SessionResourceParams>?,
+      initialEvents: initialEvents == unsetCopyWithValue
+          ? this.initialEvents
+          : initialEvents as List<SessionInitialEventParams>?,
     );
   }
 
@@ -379,7 +396,8 @@ class CreateSessionParams {
           title == other.title &&
           mapsEqual(metadata, other.metadata) &&
           listsEqual(vaultIds, other.vaultIds) &&
-          listsEqual(resources, other.resources);
+          listsEqual(resources, other.resources) &&
+          listsEqual(initialEvents, other.initialEvents);
 
   @override
   int get hashCode => Object.hash(
@@ -389,6 +407,7 @@ class CreateSessionParams {
     mapHash(metadata),
     listHash(vaultIds),
     listHash(resources),
+    listHash(initialEvents),
   );
 
   @override
@@ -399,5 +418,6 @@ class CreateSessionParams {
       'title: $title, '
       'metadata: $metadata, '
       'vaultIds: $vaultIds, '
-      'resources: $resources)';
+      'resources: $resources, '
+      'initialEvents: $initialEvents)';
 }
