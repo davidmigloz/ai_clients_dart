@@ -225,12 +225,19 @@ class ModelParamsConfig extends ModelParams {
     bool? clearEffort,
   }) {
     final effortSet = effort != unsetCopyWithValue;
+    assert(
+      !(clearEffort ?? false) || !effortSet || effort == null,
+      'Cannot pass both a non-null effort and clearEffort: true',
+    );
+    final clear =
+        clearEffort ?? (effortSet ? effort == null : this.clearEffort);
     return ModelParamsConfig(
       id: id ?? this.id,
       speed: speed == unsetCopyWithValue ? this.speed : speed as AgentSpeed?,
-      effort: effortSet ? effort as EffortParams? : this.effort,
-      clearEffort:
-          clearEffort ?? (effortSet ? effort == null : this.clearEffort),
+      effort: clear
+          ? null
+          : (effortSet ? effort as EffortParams? : this.effort),
+      clearEffort: clear,
     );
   }
 

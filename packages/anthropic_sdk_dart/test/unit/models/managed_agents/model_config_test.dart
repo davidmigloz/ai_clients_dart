@@ -189,6 +189,12 @@ void main() {
         final reCleared = unCleared.copyWith(clearEffort: true);
         expect(reCleared.clearEffort, isTrue);
         expect(reCleared.toJson()['effort'], isNull);
+
+        final clearedFromConfigured = config.copyWith(clearEffort: true);
+        expect(clearedFromConfigured.clearEffort, isTrue);
+        expect(clearedFromConfigured.effort, isNull);
+        expect(clearedFromConfigured.toJson()['effort'], isNull);
+        expect(clearedFromConfigured.toJson().containsKey('effort'), isTrue);
       },
     );
 
