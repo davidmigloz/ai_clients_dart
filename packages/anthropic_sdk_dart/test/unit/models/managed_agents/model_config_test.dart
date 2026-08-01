@@ -92,20 +92,61 @@ void main() {
       expect(config.toJson().containsKey('effort'), isFalse);
     });
 
-    test('copyWith replaces and clears effort', () {
-      const config = ModelParamsConfig(
-        id: 'claude-opus-4-8',
-        effort: EffortParamsLevel(EffortLevel.low),
-      );
-      expect(
-        config
-            .copyWith(effort: const EffortParamsObject(EffortLevel.max))
-            .effort,
-        isA<EffortParamsObject>(),
-      );
-      expect(config.copyWith(effort: null).effort, isNull);
-      expect(config.copyWith().effort, isA<EffortParamsLevel>());
+    test('explicit null is null but present as null in toJson', () {
+      final config = ModelParamsConfig.fromJson(const {
+        'id': 'claude-opus-4-8',
+        'effort': null,
+      });
+      expect(config.effort, isNull);
+      expect(config.toJson().containsKey('effort'), isTrue);
+      expect(config.toJson()['effort'], isNull);
     });
+
+    test('fromJson round-trips omitted, explicit null, and set states', () {
+      final omitted = ModelParamsConfig.fromJson(const {
+        'id': 'claude-opus-4-8',
+      });
+      expect(omitted.toJson(), const {'id': 'claude-opus-4-8'});
+
+      final explicitNull = ModelParamsConfig.fromJson(const {
+        'id': 'claude-opus-4-8',
+        'effort': null,
+      });
+      expect(explicitNull.toJson(), const {
+        'id': 'claude-opus-4-8',
+        'effort': null,
+      });
+
+      final set = ModelParamsConfig.fromJson(const {
+        'id': 'claude-opus-4-8',
+        'effort': 'high',
+      });
+      expect(set.toJson(), const {'id': 'claude-opus-4-8', 'effort': 'high'});
+    });
+
+    test(
+      'copyWith replaces effort, clears to explicit null, and preserves',
+      () {
+        const config = ModelParamsConfig(
+          id: 'claude-opus-4-8',
+          effort: EffortParamsLevel(EffortLevel.low),
+        );
+        expect(
+          config
+              .copyWith(effort: const EffortParamsObject(EffortLevel.max))
+              .effort,
+          isA<EffortParamsObject>(),
+        );
+
+        final cleared = config.copyWith(effort: null);
+        expect(cleared.effort, isNull);
+        expect(cleared.toJson()['effort'], isNull);
+
+        final preserved = config.copyWith();
+        expect(preserved.effort, isA<EffortParamsLevel>());
+        expect(preserved.toJson()['effort'], 'low');
+      },
+    );
 
     test('equality and hashCode include effort', () {
       const a = ModelParamsConfig(

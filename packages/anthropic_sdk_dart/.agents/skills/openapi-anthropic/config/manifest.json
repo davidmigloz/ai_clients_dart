@@ -5593,6 +5593,15 @@
       "schema": "BetaToolChangeMCPToolsetReference",
       "parent": "ToolChangeReference"
     },
+    "UnknownToolChangeReference": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownToolChangeReference",
+      "file": "lib/src/models/tools/tool_change_reference.dart",
+      "schema": null,
+      "parent": "ToolChangeReference",
+      "note": "Forward-compatible fallback for unrecognized tool-change reference types; preserves raw JSON."
+    },
     "WebhookEnvironmentArchivedEventData": {
       "spec": "main",
       "kind": "sealed_variant",

@@ -303,7 +303,7 @@ void main() {
         fallbackCredit: FallbackCreditUsage(status: FallbackCreditRedeemed()),
       );
       final updated = usage.copyWith(
-        fallbackCredit: const FallbackCreditUsage(
+        fallbackCredit: FallbackCreditUsage(
           status: FallbackCreditNotApplied(
             reason: FallbackCreditNotAppliedReason.notEnabled,
           ),

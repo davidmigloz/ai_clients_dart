@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../common/equality_helpers.dart';
+
 /// Reference to a tool (or MCP toolset) affected by a mid-conversation
 /// tool-change directive.
 ///
@@ -7,6 +9,8 @@ import 'package:meta/meta.dart';
 /// - [ToolChangeToolReference] — a tool declared directly in `tools[]`.
 /// - [ToolChangeMCPToolReference] — a single MCP tool by server and name.
 /// - [ToolChangeMCPToolsetReference] — every tool in an MCP server's toolset.
+/// - [UnknownToolChangeReference] — unrecognized type, for forward
+///   compatibility (preserves raw JSON).
 sealed class ToolChangeReference {
   const ToolChangeReference();
 
@@ -24,13 +28,16 @@ sealed class ToolChangeReference {
       ToolChangeMCPToolsetReference;
 
   /// Creates a [ToolChangeReference] from JSON.
+  ///
+  /// Dispatches on the `type` discriminator; unrecognized values fall back to
+  /// [UnknownToolChangeReference].
   factory ToolChangeReference.fromJson(Map<String, dynamic> json) {
-    final type = json['type'] as String;
+    final type = json['type'] as String?;
     return switch (type) {
       'tool_reference' => ToolChangeToolReference.fromJson(json),
       'mcp_tool_reference' => ToolChangeMCPToolReference.fromJson(json),
       'mcp_toolset_reference' => ToolChangeMCPToolsetReference.fromJson(json),
-      _ => throw FormatException('Unknown ToolChangeReference type: $type'),
+      _ => UnknownToolChangeReference(rawJson: json),
     };
   }
 
@@ -190,4 +197,36 @@ class ToolChangeMCPToolsetReference extends ToolChangeReference {
 
   @override
   String toString() => 'ToolChangeMCPToolsetReference(serverName: $serverName)';
+}
+
+/// Unrecognized [ToolChangeReference] — preserves raw JSON for forward
+/// compatibility.
+@immutable
+class UnknownToolChangeReference extends ToolChangeReference {
+  /// The raw JSON data.
+  final Map<String, dynamic> rawJson;
+
+  /// Creates an [UnknownToolChangeReference].
+  const UnknownToolChangeReference({required this.rawJson});
+
+  /// Creates an [UnknownToolChangeReference] from JSON.
+  factory UnknownToolChangeReference.fromJson(Map<String, dynamic> json) {
+    return UnknownToolChangeReference(rawJson: json);
+  }
+
+  @override
+  Map<String, dynamic> toJson() => rawJson;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UnknownToolChangeReference &&
+          runtimeType == other.runtimeType &&
+          mapsDeepEqual(rawJson, other.rawJson);
+
+  @override
+  int get hashCode => mapDeepHashCode(rawJson);
+
+  @override
+  String toString() => 'UnknownToolChangeReference(rawJson: $rawJson)';
 }

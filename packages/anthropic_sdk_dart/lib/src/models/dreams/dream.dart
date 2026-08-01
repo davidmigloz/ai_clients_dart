@@ -30,8 +30,15 @@ class Dream {
   /// Output destinations the dream writes consolidated memories into.
   final List<DreamOutput> outputs;
 
-  /// Lifecycle status of the dream.
-  final DreamStatus status;
+  /// The raw wire status string, preserved verbatim for round-tripping.
+  ///
+  /// Use [status] for typed access; this field exists so an unrecognized
+  /// status value survives a `fromJson`/`toJson` round-trip instead of being
+  /// collapsed to the literal string `"unknown"`.
+  final String rawStatus;
+
+  /// Lifecycle status of the dream, derived from [rawStatus].
+  DreamStatus get status => DreamStatus.fromJson(rawStatus);
 
   /// When the dream was created.
   final DateTime createdAt;
@@ -64,7 +71,7 @@ class Dream {
     required this.id,
     required this.inputs,
     required this.outputs,
-    required this.status,
+    required this.rawStatus,
     required this.createdAt,
     this.endedAt,
     this.archivedAt,
@@ -102,7 +109,7 @@ class Dream {
       id: json['id'] as String,
       inputs: inputs,
       outputs: outputs,
-      status: DreamStatus.fromJson(json['status'] as String),
+      rawStatus: json['status'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
       endedAt: json['ended_at'] != null
           ? DateTime.parse(json['ended_at'] as String)
@@ -126,7 +133,7 @@ class Dream {
     'id': id,
     'inputs': inputs.map((e) => e.toJson()).toList(),
     'outputs': outputs.map((e) => e.toJson()).toList(),
-    'status': status.toJson(),
+    'status': rawStatus,
     'created_at': createdAt.toUtc().toIso8601String(),
     'ended_at': endedAt?.toUtc().toIso8601String(),
     'archived_at': archivedAt?.toUtc().toIso8601String(),
@@ -148,7 +155,7 @@ class Dream {
     String? id,
     List<DreamInput>? inputs,
     List<DreamOutput>? outputs,
-    DreamStatus? status,
+    String? rawStatus,
     DateTime? createdAt,
     Object? endedAt = unsetCopyWithValue,
     Object? archivedAt = unsetCopyWithValue,
@@ -163,7 +170,7 @@ class Dream {
       id: id ?? this.id,
       inputs: inputs ?? this.inputs,
       outputs: outputs ?? this.outputs,
-      status: status ?? this.status,
+      rawStatus: rawStatus ?? this.rawStatus,
       createdAt: createdAt ?? this.createdAt,
       endedAt: endedAt == unsetCopyWithValue
           ? this.endedAt
@@ -192,7 +199,7 @@ class Dream {
           id == other.id &&
           listsEqual(inputs, other.inputs) &&
           listsEqual(outputs, other.outputs) &&
-          status == other.status &&
+          rawStatus == other.rawStatus &&
           createdAt == other.createdAt &&
           endedAt == other.endedAt &&
           archivedAt == other.archivedAt &&
@@ -208,7 +215,7 @@ class Dream {
     id,
     listHash(inputs),
     listHash(outputs),
-    status,
+    rawStatus,
     createdAt,
     endedAt,
     archivedAt,

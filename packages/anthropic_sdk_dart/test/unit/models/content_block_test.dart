@@ -1200,11 +1200,13 @@ void main() {
         );
       });
 
-      test('fromJson throws FormatException on unknown type', () {
-        expect(
-          () => ToolChangeReference.fromJson({'type': 'bogus'}),
-          throwsFormatException,
-        );
+      test('fromJson preserves an unrecognized type verbatim', () {
+        final json = {'type': 'bogus', 'name': 'calculator'};
+        final ref = ToolChangeReference.fromJson(json);
+
+        expect(ref, isA<UnknownToolChangeReference>());
+        expect((ref as UnknownToolChangeReference).rawJson, json);
+        expect(ref.toJson(), json);
       });
     });
 

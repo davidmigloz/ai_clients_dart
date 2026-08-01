@@ -105,6 +105,14 @@ void main() {
       expect(dream.status, DreamStatus.unknown);
     });
 
+    test('unknown status round-trips the raw wire value', () {
+      final json = _dreamJson(status: 'something_new');
+      final dream = Dream.fromJson(json);
+      expect(dream.status, DreamStatus.unknown);
+      expect(dream.rawStatus, 'something_new');
+      expect(dream.toJson()['status'], 'something_new');
+    });
+
     test('unknown input/output types round-trip via unknown fallbacks', () {
       final json = _dreamJson();
       json['inputs'] = [

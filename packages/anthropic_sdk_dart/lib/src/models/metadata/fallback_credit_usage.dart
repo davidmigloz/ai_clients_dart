@@ -95,7 +95,7 @@ sealed class FallbackCreditStatus {
   const factory FallbackCreditStatus.redeemed() = FallbackCreditRedeemed;
 
   /// Creates a [FallbackCreditNotApplied] status.
-  const factory FallbackCreditStatus.notApplied({
+  factory FallbackCreditStatus.notApplied({
     required FallbackCreditNotAppliedReason reason,
     List<String>? removeToRedeem,
   }) = FallbackCreditNotApplied;
@@ -154,8 +154,16 @@ class FallbackCreditRedeemed extends FallbackCreditStatus {
 /// No reprice was applied; [reason] says why.
 @immutable
 class FallbackCreditNotApplied extends FallbackCreditStatus {
-  /// Why the reprice was not applied.
-  final FallbackCreditNotAppliedReason reason;
+  /// The raw wire value for [reason], preserved verbatim.
+  ///
+  /// Kept alongside the derived [reason] getter so an unrecognized reason
+  /// round-trips through `fromJson`/`toJson` instead of being collapsed to
+  /// the literal string `"unknown"`.
+  final String rawReason;
+
+  /// Why the reprice was not applied, derived from [rawReason].
+  FallbackCreditNotAppliedReason get reason =>
+      FallbackCreditNotAppliedReason.fromJson(rawReason);
 
   /// Request fields to remove before retrying, so the retry can redeem this
   /// token.
@@ -170,7 +178,17 @@ class FallbackCreditNotApplied extends FallbackCreditStatus {
   final List<String>? removeToRedeem;
 
   /// Creates a [FallbackCreditNotApplied].
-  const FallbackCreditNotApplied({required this.reason, this.removeToRedeem});
+  FallbackCreditNotApplied({
+    required FallbackCreditNotAppliedReason reason,
+    this.removeToRedeem,
+  }) : rawReason = reason.value;
+
+  /// Creates a [FallbackCreditNotApplied], preserving [rawReason] verbatim
+  /// even when it does not match a known [FallbackCreditNotAppliedReason].
+  const FallbackCreditNotApplied.raw({
+    required this.rawReason,
+    this.removeToRedeem,
+  });
 
   /// Creates a [FallbackCreditNotApplied] from JSON.
   factory FallbackCreditNotApplied.fromJson(Map<String, dynamic> json) {
@@ -181,8 +199,8 @@ class FallbackCreditNotApplied extends FallbackCreditStatus {
       );
     }
     final rawRemoveToRedeem = json['remove_to_redeem'] as List?;
-    return FallbackCreditNotApplied(
-      reason: FallbackCreditNotAppliedReason.fromJson(json['reason'] as String),
+    return FallbackCreditNotApplied.raw(
+      rawReason: json['reason'] as String,
       removeToRedeem: rawRemoveToRedeem?.map((e) {
         if (e is! String) {
           throw FormatException(
@@ -197,7 +215,7 @@ class FallbackCreditNotApplied extends FallbackCreditStatus {
   @override
   Map<String, dynamic> toJson() => {
     'type': 'not_applied',
-    'reason': reason.toJson(),
+    'reason': rawReason,
     if (removeToRedeem != null) 'remove_to_redeem': removeToRedeem,
   };
 
@@ -205,8 +223,8 @@ class FallbackCreditNotApplied extends FallbackCreditStatus {
   FallbackCreditNotApplied copyWith({
     FallbackCreditNotAppliedReason? reason,
     Object? removeToRedeem = unsetCopyWithValue,
-  }) => FallbackCreditNotApplied(
-    reason: reason ?? this.reason,
+  }) => FallbackCreditNotApplied.raw(
+    rawReason: reason?.value ?? rawReason,
     removeToRedeem: removeToRedeem == unsetCopyWithValue
         ? this.removeToRedeem
         : removeToRedeem as List<String>?,
@@ -217,11 +235,11 @@ class FallbackCreditNotApplied extends FallbackCreditStatus {
       identical(this, other) ||
       other is FallbackCreditNotApplied &&
           runtimeType == other.runtimeType &&
-          reason == other.reason &&
+          rawReason == other.rawReason &&
           listsEqual(removeToRedeem, other.removeToRedeem);
 
   @override
-  int get hashCode => Object.hash(reason, listHash(removeToRedeem));
+  int get hashCode => Object.hash(rawReason, listHash(removeToRedeem));
 
   @override
   String toString() =>
