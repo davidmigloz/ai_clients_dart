@@ -6,6 +6,59 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v7.x to v8.0.0
+
+v8.0.0 modernizes the transcription surface for the GPT-Transcribe generation. **Most users will not need to make any changes** — the primary rename ships with a deprecated typedef, and the other changes only affect code that reads specific response/event fields.
+
+### 1) `TranscriptionResponseFormat` renamed to `AudioResponseFormat`
+
+The enum is renamed and gains `diarizedJson` and `unknown` members. A deprecated typedef keeps existing code compiling.
+
+```dart
+// Before
+responseFormat: TranscriptionResponseFormat.json
+
+// After (typedef still works, but is deprecated)
+responseFormat: AudioResponseFormat.json
+```
+
+### 2) `TranslationRequest.responseFormat` now uses `TranslationResponseFormat`
+
+The spec defines a separate 5-value enum for translations (without `diarized_json`), so `TranslationRequest.responseFormat` no longer accepts `TranscriptionResponseFormat`/`AudioResponseFormat`.
+
+```dart
+// Before
+TranslationRequest(responseFormat: TranscriptionResponseFormat.text, ...)
+
+// After
+TranslationRequest(responseFormat: TranslationResponseFormat.text, ...)
+```
+
+### 3) `TranscriptionVerboseResponse.task` is now `String?`
+
+`task` is not a declared spec property and servers may omit it, so the field is now nullable instead of required.
+
+### 4) `InputAudioTranscriptionCompletedEvent.usage` is now typed
+
+`usage` changed from `Map<String, dynamic>?` to a typed `TranscriptUsage?` union.
+
+```dart
+// Before
+final total = (event.usage?['total_tokens'] as int?) ?? 0;
+
+// After
+final total = switch (event.usage) {
+  TranscriptTextUsageTokens(:final totalTokens) => totalTokens,
+  _ => 0,
+};
+```
+
+### 5) Multipart array encoding for `timestamp_granularities`
+
+Multipart array fields are now encoded as bracket-repeated keys (`timestamp_granularities[]`) instead of indexed keys (`[0]`/`[1]`), matching the OpenAI API and `openai-python`. This is not a Dart API change, but affects anyone snapshot-testing raw request bytes.
+
+---
+
 ## Migrating from v6.x to v7.0.0
 
 **Most users will not need to make any changes.** v7.0.0 syncs to the latest OpenAI spec and is otherwise additive (reasoning context mode, MCP tunnel/connector addressing, `reasoning`/`truncation` surfaced on responses). The single breaking change is confined to `McpTool.serverUrl`.

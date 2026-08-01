@@ -1,3 +1,13 @@
+## 8.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Adds [Fast mode](https://developers.openai.com/api/docs/guides/fast-mode) (`ServiceTier.fast`, up to 2.5× faster processing, replacing Priority Processing) and a full modernization of the [GPT-Transcribe](https://developers.openai.com/api/docs/guides/transcription) generation — chunking strategy control, `logprobs`, keyword hints, multi-language input, speaker diarization, and new `createStream()`/`createDiarized()`/`createRaw()` methods on `client.audio.transcriptions`. Also adds a `client.contentProvenanceChecks` resource for detecting OpenAI C2PA and SynthID provenance signals, and syncs the pinned spec to GPT-5.6 with programmatic tool calling, explicit prompt caching, and a multi-agent Responses beta. **Breaking:** `TranscriptionResponseFormat` is renamed to `AudioResponseFormat` (a deprecated typedef keeps old code compiling), `TranslationRequest.responseFormat` now uses a dedicated `TranslationResponseFormat` enum, `TranscriptionVerboseResponse.task` is now `String?`, `InputAudioTranscriptionCompletedEvent.usage` is now a typed `TranscriptUsage?`, and multipart array fields switch to spec-correct bracket-repeated encoding. See the [Migration Guide](MIGRATION.md).
+
+- **BREAKING** **FEAT**: Fast service tier, gpt-transcribe streaming/diarization, and content provenance checks ([#284](https://github.com/davidmigloz/ai_clients_dart/issues/284)). ([0b8d8d61](https://github.com/davidmigloz/ai_clients_dart/commit/0b8d8d619b513401e378930b4d04a1f080ef14aa))
+- **FEAT**: GPT-5.6 spec sync with multi-agent Responses beta ([#281](https://github.com/davidmigloz/ai_clients_dart/issues/281)). ([e2764117](https://github.com/davidmigloz/ai_clients_dart/commit/e276411732506ea657e58c2b2a90c4412e4bce8c))
+
 ## 7.0.1
 
 Fixes `buildUrl` collapsing repeated query keys carried by the base URL (`?k=a&k=b`) to the last value — a proxy/gateway base URL with duplicate keys now keeps all of them on every request. Single-value behavior (including Azure `api-version` handling) is unchanged.

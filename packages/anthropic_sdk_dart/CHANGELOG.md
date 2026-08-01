@@ -1,3 +1,13 @@
+## 7.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Adds the beta [Dreams API](https://platform.claude.com/docs/en/managed-agents/dreams) (`client.dreams`) for asynchronous memory-consolidation jobs over memory stores and session transcripts, mid-conversation tool changes that add or remove tools between turns via `tool_addition`/`tool_removal` blocks while preserving the prompt cache, and a `strict`/`best_effort` [redemption mode](https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback) for fallback credit tokens, with the outcome reported on the new `Usage.fallbackCredit` field. **Breaking:** `MessageCreateRequest.fallbackCreditToken` changed from `String?` to `FallbackCreditTokenParam?` to carry the new redemption mode. Also adds managed-agent [effort levels](https://platform.claude.com/docs/en/build-with-claude/effort#effort-levels), `initialEvents` session seeding, and new environment/memory-store webhook events, and switches memory store endpoints to the `agent-memory-2026-07-22` beta header (replacing `managed-agents-2026-04-01`).
+
+- **BREAKING** **FEAT**: Dreams API, tool changes, fallback credits ([#283](https://github.com/davidmigloz/ai_clients_dart/issues/283)). ([9dde9c91](https://github.com/davidmigloz/ai_clients_dart/commit/9dde9c915052c21c46920457d938007bc16e2c88))
+- **FIX**: Adopt agent-memory-2026-07-22 beta header ([#279](https://github.com/davidmigloz/ai_clients_dart/issues/279)). ([7e57914f](https://github.com/davidmigloz/ai_clients_dart/commit/7e57914f4349d6463890b7ef02f315a8374388a7))
+
 ## 6.0.0
 
 > [!CAUTION]

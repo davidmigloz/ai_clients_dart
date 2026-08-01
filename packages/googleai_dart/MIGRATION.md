@@ -6,6 +6,30 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v9.x to v10.0.0
+
+v10.0.0 syncs `googleai_dart` to the June 2026 Gemini main and interactions specs. The only breaking change is the removal of two ineffective generation-config fields — everything else (safety settings, video generation, Computer Use safety policies, retrieval streaming deltas, and the expanded `HarmCategory` enum) is additive.
+
+### 1) `InteractionGenerationConfig.frequencyPenalty` and `presencePenalty` removed
+
+Both fields were dropped from the Interactions API spec and official SDKs — requests setting them were already ineffective, since the API no longer accepted `frequency_penalty` / `presence_penalty`.
+
+```dart
+// Before
+final config = InteractionGenerationConfig(
+  temperature: 0.7,
+  frequencyPenalty: 0.5,
+  presencePenalty: 0.5,
+);
+
+// After — drop the penalty parameters
+final config = InteractionGenerationConfig(
+  temperature: 0.7,
+);
+```
+
+---
+
 ## Migrating from v8.x to v9.0.0
 
 v9.0.0 syncs to the latest Gemini core and interactions specs (cross-checked against the official `googleapis/python-genai` SDK). The breaking changes are confined to ephemeral auth tokens and the experimental Interactions API — chat/generation callers need no changes. Everything else (translation config, computer-use safety policies, `FinishReason.ESCALATION`, Live `historyConfig`, interactions penalties and output accessors, and the base-URL normalization) is additive or bug-fixing.

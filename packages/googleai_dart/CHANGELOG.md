@@ -1,3 +1,12 @@
+## 10.0.0
+
+> [!CAUTION]
+> This release has breaking changes. See the [Migration Guide](MIGRATION.md) for upgrade instructions.
+
+Syncs `googleai_dart` to the latest main and interactions Gemini OpenAPI specs (June 2026 updates). Adds Interactions safety settings (`InteractionSafetySetting` with harm-category, threshold, and method enums) plus `labels` on interaction requests, [video generation](https://ai.google.dev/gemini-api/docs/changelog) support via a new `InteractionVideoConfig` (text-to-video, image-to-video, reference-to-video, edit), [Computer Use safety policies](https://ai.google.dev/gemini-api/docs/changelog) (`ComputerUseTool.disabledSafetyPolicies`), streaming retrieval-tool deltas for Vertex AI Search/RAG store/Exa AI/Parallel AI, and expands `HarmCategory` with `jailbreak` plus the legacy PaLM categories. **Breaking:** `InteractionGenerationConfig.frequencyPenalty` and `presencePenalty` are removed, matching their removal from the Interactions API spec and official SDKs.
+
+- **BREAKING** **FEAT**: Sync clients to latest Gemini API specs ([#280](https://github.com/davidmigloz/ai_clients_dart/issues/280)). ([ba83b8cb](https://github.com/davidmigloz/ai_clients_dart/commit/ba83b8cb7bc336a2fb9a9c67dd378ca2d9ac4025))
+
 ## 9.0.0
 
 > [!CAUTION]

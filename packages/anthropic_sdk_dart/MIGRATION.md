@@ -6,6 +6,40 @@ For the complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Migrating from v6.x to v7.0.0
+
+v7.0.0's breaking surface is limited to one field: fallback credit tokens now support a redemption `mode`, so the plain `String?` field became a typed union. Everything else in this release (the Dreams API, mid-conversation tool changes, managed-agent effort levels, and the `agent-memory-2026-07-22` beta header switch) is additive.
+
+### 1) `MessageCreateRequest.fallbackCreditToken` changed from `String?` to `FallbackCreditTokenParam?`
+
+To support the new `strict`/`best_effort` redemption mode (requires the `fallback-credit-2026-07-01` beta header), `fallbackCreditToken` is now a sealed union instead of a plain string. Use `FallbackCreditTokenParam.token(...)` for the previous bare-token behavior (equivalent to `strict` mode), or `FallbackCreditTokenParam.config(...)` to pass an explicit `mode`.
+
+```dart
+// Before
+MessageCreateRequest(fallbackCreditToken: 'fct_...')
+
+// After — bare token (same behavior as before, implicitly strict)
+MessageCreateRequest(
+  fallbackCreditToken: FallbackCreditTokenParam.token('fct_...'),
+);
+
+// After — explicit best-effort redemption mode
+MessageCreateRequest(
+  fallbackCreditToken: FallbackCreditTokenParam.config(
+    token: refusal.fallbackCreditToken!,
+    mode: FallbackCreditMode.bestEffort,
+  ),
+);
+```
+
+The redemption outcome is now reported on the response via the new `fallbackCredit` field:
+
+```dart
+final status = response.usage.fallbackCredit?.status; // redeemed / notApplied
+```
+
+---
+
 ## Migrating from v5.x to v6.0.0
 
 v6.0.0 syncs to the latest Anthropic spec. The breaking surface is small: the API relocated end-user attribution from the message request body to a request header, and two remaining closed-enum `String` fields are now typed enums. Everything else in this release (Claude Sonnet 5, the `web_search_20260318`/`web_fetch_20260318` tool versions, Managed Agents event-delta streaming, credential injection location, per-session agent overrides, backward pagination, and the new webhook events) is additive.
