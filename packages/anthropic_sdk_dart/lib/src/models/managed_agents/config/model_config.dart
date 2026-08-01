@@ -172,20 +172,22 @@ class ModelParamsConfig extends ModelParams {
   final EffortParams? effort;
 
   /// Whether to emit an explicit JSON `null` for `effort`, resetting it to
-  /// the model's default. Ignored — and must be `false` — when [effort] is
-  /// non-null.
+  /// the model's default.
+  ///
+  /// A non-null [effort] takes precedence: when one is supplied, this is
+  /// normalized to `false`.
   final bool clearEffort;
 
   /// Creates a [ModelParamsConfig].
+  ///
+  /// A non-null [effort] takes precedence over [clearEffort]; passing both
+  /// stores the effort and normalizes [clearEffort] to `false`.
   const ModelParamsConfig({
     required this.id,
     this.speed,
     this.effort,
-    this.clearEffort = false,
-  }) : assert(
-         effort == null || !clearEffort,
-         'Cannot pass both a non-null effort and clearEffort: true',
-       );
+    bool clearEffort = false,
+  }) : clearEffort = effort == null && clearEffort;
 
   /// Creates a [ModelParamsConfig] from JSON.
   factory ModelParamsConfig.fromJson(Map<String, dynamic> json) {
@@ -216,8 +218,10 @@ class ModelParamsConfig extends ModelParams {
   /// Omit [effort] to preserve its current value (including whether it is
   /// currently marked for clearing). Pass `null` explicitly to reset it to
   /// the model's default; pass a value to replace it. Pass
+  /// `clearEffort: true` to clear the inherited effort, or
   /// `clearEffort: false` to return a cleared instance to the omitted /
-  /// no-change state.
+  /// no-change state. As in the constructor, an explicitly supplied non-null
+  /// [effort] takes precedence over `clearEffort: true`.
   ModelParamsConfig copyWith({
     String? id,
     Object? speed = unsetCopyWithValue,
@@ -225,19 +229,14 @@ class ModelParamsConfig extends ModelParams {
     bool? clearEffort,
   }) {
     final effortSet = effort != unsetCopyWithValue;
-    assert(
-      !(clearEffort ?? false) || !effortSet || effort == null,
-      'Cannot pass both a non-null effort and clearEffort: true',
-    );
-    final clear =
-        clearEffort ?? (effortSet ? effort == null : this.clearEffort);
     return ModelParamsConfig(
       id: id ?? this.id,
       speed: speed == unsetCopyWithValue ? this.speed : speed as AgentSpeed?,
-      effort: clear
-          ? null
-          : (effortSet ? effort as EffortParams? : this.effort),
-      clearEffort: clear,
+      effort: effortSet
+          ? effort as EffortParams?
+          : ((clearEffort ?? false) ? null : this.effort),
+      clearEffort:
+          clearEffort ?? (effortSet ? effort == null : this.clearEffort),
     );
   }
 

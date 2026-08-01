@@ -113,15 +113,22 @@ void main() {
       expect(config.toJson()['effort'], isNull);
     });
 
-    test('passing both effort and clearEffort: true asserts', () {
-      expect(
-        () => ModelParamsConfig(
-          id: 'claude-opus-4-8',
-          effort: const EffortParamsLevel(EffortLevel.high),
-          clearEffort: true,
-        ),
-        throwsA(isA<AssertionError>()),
+    test('non-null effort takes precedence over clearEffort: true', () {
+      const config = ModelParamsConfig(
+        id: 'claude-opus-4-8',
+        effort: EffortParamsLevel(EffortLevel.high),
+        clearEffort: true,
       );
+      expect(config.clearEffort, isFalse);
+      expect(config.toJson()['effort'], 'high');
+
+      final viaCopyWith = const ModelParamsConfig(id: 'claude-opus-4-8')
+          .copyWith(
+            effort: const EffortParamsLevel(EffortLevel.high),
+            clearEffort: true,
+          );
+      expect(viaCopyWith.clearEffort, isFalse);
+      expect(viaCopyWith.toJson()['effort'], 'high');
     });
 
     test('fromJson round-trips omitted, explicit null, and set states', () {
