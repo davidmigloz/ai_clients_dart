@@ -58,6 +58,43 @@ void main() {
       expect(a.hashCode, b.hashCode);
       expect(a, isNot(c));
     });
+
+    test('object is a constant getter, not exposed via copyWith', () {
+      final check = ContentProvenanceCheck.fromJson(const {
+        'object': 'content_provenance_check',
+        'created_at': 1,
+        'results': <Map<String, dynamic>>[],
+      });
+      expect(check.object, 'content_provenance_check');
+      // copyWith() takes no `object` parameter — the field is constant.
+      expect(check.copyWith().object, 'content_provenance_check');
+    });
+
+    test('fromJson throws FormatException on wrong object value', () {
+      final json = {
+        'object': 'something_else',
+        'created_at': 1,
+        'results': <Map<String, dynamic>>[],
+      };
+      expect(
+        () => ContentProvenanceCheck.fromJson(json),
+        throwsA(
+          isA<FormatException>().having(
+            (e) => e.message,
+            'message',
+            contains('Expected object "content_provenance_check"'),
+          ),
+        ),
+      );
+    });
+
+    test('fromJson throws FormatException on missing object key', () {
+      final json = {'created_at': 1, 'results': <Map<String, dynamic>>[]};
+      expect(
+        () => ContentProvenanceCheck.fromJson(json),
+        throwsFormatException,
+      );
+    });
   });
 
   group('C2PAProvenanceResult', () {

@@ -1757,11 +1757,29 @@ class TranscriptionSegment {
       other is TranscriptionSegment &&
           runtimeType == other.runtimeType &&
           id == other.id &&
+          seek == other.seek &&
           start == other.start &&
-          end == other.end;
+          end == other.end &&
+          text == other.text &&
+          listsEqual(tokens, other.tokens) &&
+          temperature == other.temperature &&
+          avgLogprob == other.avgLogprob &&
+          compressionRatio == other.compressionRatio &&
+          noSpeechProb == other.noSpeechProb;
 
   @override
-  int get hashCode => Object.hash(id, start, end);
+  int get hashCode => Object.hash(
+    id,
+    seek,
+    start,
+    end,
+    text,
+    listHash(tokens),
+    temperature,
+    avgLogprob,
+    compressionRatio,
+    noSpeechProb,
+  );
 
   @override
   String toString() => 'TranscriptionSegment(id: $id, $start-$end)';
@@ -1804,10 +1822,11 @@ class TranscriptionWord {
       other is TranscriptionWord &&
           runtimeType == other.runtimeType &&
           word == other.word &&
-          start == other.start;
+          start == other.start &&
+          end == other.end;
 
   @override
-  int get hashCode => Object.hash(word, start);
+  int get hashCode => Object.hash(word, start, end);
 
   @override
   String toString() => 'TranscriptionWord($word, $start-$end)';

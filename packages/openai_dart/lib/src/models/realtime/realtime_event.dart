@@ -9,6 +9,18 @@ import '../audio/transcription.dart'
 import '../common/equality_helpers.dart';
 import 'realtime_session.dart';
 
+// Re-exported so importers of `openai_dart_realtime.dart` alone can name
+// the audio-transcription types used by [InputAudioTranscriptionCompletedEvent]
+// (`usage`/`languages`) without also importing `openai_dart.dart`.
+export '../audio/transcription.dart'
+    show
+        TranscriptTextUsageDuration,
+        TranscriptTextUsageTokens,
+        TranscriptUsage,
+        TranscriptUsageInputTokenDetails,
+        TranscriptUsageUnknown,
+        TranscriptionLanguage;
+
 /// Base class for all realtime events.
 ///
 /// Events are sent and received over the WebSocket connection.

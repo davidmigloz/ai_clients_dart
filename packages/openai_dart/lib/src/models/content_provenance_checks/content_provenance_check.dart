@@ -10,9 +10,6 @@ import '../common/equality_helpers.dart';
 /// [OpenAIClient.contentProvenanceChecks].
 @immutable
 class ContentProvenanceCheck {
-  /// The object type. Always `content_provenance_check`.
-  final String object;
-
   /// Unix timestamp (in seconds) of when the check was created.
   final int createdAt;
 
@@ -21,21 +18,27 @@ class ContentProvenanceCheck {
 
   /// Creates a [ContentProvenanceCheck].
   const ContentProvenanceCheck({
-    required this.object,
     required this.createdAt,
     required this.results,
   });
 
   /// Creates a [ContentProvenanceCheck] from JSON.
   factory ContentProvenanceCheck.fromJson(Map<String, dynamic> json) {
+    if (json['object'] != 'content_provenance_check') {
+      throw FormatException(
+        'Expected object "content_provenance_check", got "${json['object']}"',
+      );
+    }
     return ContentProvenanceCheck(
-      object: json['object'] as String,
       createdAt: json['created_at'] as int,
       results: (json['results'] as List)
           .map((e) => ProvenanceResult.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
   }
+
+  /// The object type. Always `content_provenance_check`.
+  String get object => 'content_provenance_check';
 
   /// Converts to JSON.
   Map<String, dynamic> toJson() => {
@@ -46,12 +49,10 @@ class ContentProvenanceCheck {
 
   /// Creates a copy with replaced values.
   ContentProvenanceCheck copyWith({
-    String? object,
     int? createdAt,
     List<ProvenanceResult>? results,
   }) {
     return ContentProvenanceCheck(
-      object: object ?? this.object,
       createdAt: createdAt ?? this.createdAt,
       results: results ?? this.results,
     );
@@ -62,12 +63,11 @@ class ContentProvenanceCheck {
       identical(this, other) ||
       other is ContentProvenanceCheck &&
           runtimeType == other.runtimeType &&
-          object == other.object &&
           createdAt == other.createdAt &&
           listsEqual(results, other.results);
 
   @override
-  int get hashCode => Object.hash(object, createdAt, listHash(results));
+  int get hashCode => Object.hash(createdAt, listHash(results));
 
   @override
   String toString() =>

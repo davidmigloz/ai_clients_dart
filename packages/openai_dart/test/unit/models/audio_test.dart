@@ -1316,6 +1316,251 @@ void main() {
       expect(segment.tokens, [1, 2, 3]);
       expect(segment.noSpeechProb, 0.01);
     });
+
+    test('equality covers every field', () {
+      const base = TranscriptionSegment(
+        id: 0,
+        seek: 0,
+        start: 0.5,
+        end: 2.5,
+        text: 'Hello world',
+        tokens: [1, 2, 3],
+        temperature: 0.0,
+        avgLogprob: -0.5,
+        compressionRatio: 1.2,
+        noSpeechProb: 0.01,
+      );
+
+      expect(base, equals(base));
+      expect(base.hashCode, base.hashCode);
+      expect(
+        base,
+        isNot(
+          equals(
+            TranscriptionSegment(
+              id: 1,
+              seek: base.seek,
+              start: base.start,
+              end: base.end,
+              text: base.text,
+              tokens: base.tokens,
+              temperature: base.temperature,
+              avgLogprob: base.avgLogprob,
+              compressionRatio: base.compressionRatio,
+              noSpeechProb: base.noSpeechProb,
+            ),
+          ),
+        ),
+      );
+      expect(
+        base,
+        isNot(
+          equals(
+            TranscriptionSegment(
+              id: base.id,
+              seek: 9,
+              start: base.start,
+              end: base.end,
+              text: base.text,
+              tokens: base.tokens,
+              temperature: base.temperature,
+              avgLogprob: base.avgLogprob,
+              compressionRatio: base.compressionRatio,
+              noSpeechProb: base.noSpeechProb,
+            ),
+          ),
+        ),
+      );
+      expect(
+        base,
+        isNot(
+          equals(
+            TranscriptionSegment(
+              id: base.id,
+              seek: base.seek,
+              start: 9.9,
+              end: base.end,
+              text: base.text,
+              tokens: base.tokens,
+              temperature: base.temperature,
+              avgLogprob: base.avgLogprob,
+              compressionRatio: base.compressionRatio,
+              noSpeechProb: base.noSpeechProb,
+            ),
+          ),
+        ),
+      );
+      expect(
+        base,
+        isNot(
+          equals(
+            TranscriptionSegment(
+              id: base.id,
+              seek: base.seek,
+              start: base.start,
+              end: 9.9,
+              text: base.text,
+              tokens: base.tokens,
+              temperature: base.temperature,
+              avgLogprob: base.avgLogprob,
+              compressionRatio: base.compressionRatio,
+              noSpeechProb: base.noSpeechProb,
+            ),
+          ),
+        ),
+      );
+      expect(
+        base,
+        isNot(
+          equals(
+            TranscriptionSegment(
+              id: base.id,
+              seek: base.seek,
+              start: base.start,
+              end: base.end,
+              text: 'different text',
+              tokens: base.tokens,
+              temperature: base.temperature,
+              avgLogprob: base.avgLogprob,
+              compressionRatio: base.compressionRatio,
+              noSpeechProb: base.noSpeechProb,
+            ),
+          ),
+        ),
+      );
+      expect(
+        base,
+        isNot(
+          equals(
+            TranscriptionSegment(
+              id: base.id,
+              seek: base.seek,
+              start: base.start,
+              end: base.end,
+              text: base.text,
+              tokens: const [9, 9, 9],
+              temperature: base.temperature,
+              avgLogprob: base.avgLogprob,
+              compressionRatio: base.compressionRatio,
+              noSpeechProb: base.noSpeechProb,
+            ),
+          ),
+        ),
+      );
+      expect(
+        base,
+        isNot(
+          equals(
+            TranscriptionSegment(
+              id: base.id,
+              seek: base.seek,
+              start: base.start,
+              end: base.end,
+              text: base.text,
+              tokens: base.tokens,
+              temperature: 9.9,
+              avgLogprob: base.avgLogprob,
+              compressionRatio: base.compressionRatio,
+              noSpeechProb: base.noSpeechProb,
+            ),
+          ),
+        ),
+      );
+      expect(
+        base,
+        isNot(
+          equals(
+            TranscriptionSegment(
+              id: base.id,
+              seek: base.seek,
+              start: base.start,
+              end: base.end,
+              text: base.text,
+              tokens: base.tokens,
+              temperature: base.temperature,
+              avgLogprob: 9.9,
+              compressionRatio: base.compressionRatio,
+              noSpeechProb: base.noSpeechProb,
+            ),
+          ),
+        ),
+      );
+      expect(
+        base,
+        isNot(
+          equals(
+            TranscriptionSegment(
+              id: base.id,
+              seek: base.seek,
+              start: base.start,
+              end: base.end,
+              text: base.text,
+              tokens: base.tokens,
+              temperature: base.temperature,
+              avgLogprob: base.avgLogprob,
+              compressionRatio: 9.9,
+              noSpeechProb: base.noSpeechProb,
+            ),
+          ),
+        ),
+      );
+      expect(
+        base,
+        isNot(
+          equals(
+            TranscriptionSegment(
+              id: base.id,
+              seek: base.seek,
+              start: base.start,
+              end: base.end,
+              text: base.text,
+              tokens: base.tokens,
+              temperature: base.temperature,
+              avgLogprob: base.avgLogprob,
+              compressionRatio: base.compressionRatio,
+              noSpeechProb: 0.99,
+            ),
+          ),
+        ),
+      );
+    });
+  });
+
+  group('TranscriptionWord', () {
+    test('fromJson parses correctly', () {
+      final json = {'word': 'hello', 'start': 0.0, 'end': 0.5};
+
+      final word = TranscriptionWord.fromJson(json);
+
+      expect(word.word, 'hello');
+      expect(word.start, 0.0);
+      expect(word.end, 0.5);
+    });
+
+    test('equality covers every field', () {
+      const base = TranscriptionWord(word: 'hello', start: 0.0, end: 0.5);
+
+      expect(base, equals(base));
+      expect(base.hashCode, base.hashCode);
+      expect(
+        base,
+        isNot(
+          equals(const TranscriptionWord(word: 'bye', start: 0.0, end: 0.5)),
+        ),
+      );
+      expect(
+        base,
+        isNot(
+          equals(const TranscriptionWord(word: 'hello', start: 9.9, end: 0.5)),
+        ),
+      );
+      expect(
+        base,
+        isNot(
+          equals(const TranscriptionWord(word: 'hello', start: 0.0, end: 9.9)),
+        ),
+      );
+    });
   });
 
   group('TranslationResponse', () {
@@ -1386,5 +1631,109 @@ void main() {
         expect(request.responseFormat, TranslationResponseFormat.srt);
       },
     );
+
+    test('equality covers every field', () {
+      final base = TranslationRequest(
+        file: Uint8List.fromList([1, 2, 3, 4]),
+        filename: 'audio.mp3',
+        model: 'whisper-1',
+        prompt: 'a prompt',
+        responseFormat: TranslationResponseFormat.srt,
+        temperature: 0.2,
+      );
+
+      expect(base, equals(base));
+      expect(base.hashCode, base.hashCode);
+      expect(
+        base,
+        isNot(
+          equals(
+            TranslationRequest(
+              file: Uint8List.fromList([9, 9, 9, 9]),
+              filename: base.filename,
+              model: base.model,
+              prompt: base.prompt,
+              responseFormat: base.responseFormat,
+              temperature: base.temperature,
+            ),
+          ),
+        ),
+      );
+      expect(
+        base,
+        isNot(
+          equals(
+            TranslationRequest(
+              file: base.file,
+              filename: 'other.mp3',
+              model: base.model,
+              prompt: base.prompt,
+              responseFormat: base.responseFormat,
+              temperature: base.temperature,
+            ),
+          ),
+        ),
+      );
+      expect(
+        base,
+        isNot(
+          equals(
+            TranslationRequest(
+              file: base.file,
+              filename: base.filename,
+              model: 'gpt-4o-transcribe',
+              prompt: base.prompt,
+              responseFormat: base.responseFormat,
+              temperature: base.temperature,
+            ),
+          ),
+        ),
+      );
+      expect(
+        base,
+        isNot(
+          equals(
+            TranslationRequest(
+              file: base.file,
+              filename: base.filename,
+              model: base.model,
+              prompt: 'different prompt',
+              responseFormat: base.responseFormat,
+              temperature: base.temperature,
+            ),
+          ),
+        ),
+      );
+      expect(
+        base,
+        isNot(
+          equals(
+            TranslationRequest(
+              file: base.file,
+              filename: base.filename,
+              model: base.model,
+              prompt: base.prompt,
+              responseFormat: TranslationResponseFormat.vtt,
+              temperature: base.temperature,
+            ),
+          ),
+        ),
+      );
+      expect(
+        base,
+        isNot(
+          equals(
+            TranslationRequest(
+              file: base.file,
+              filename: base.filename,
+              model: base.model,
+              prompt: base.prompt,
+              responseFormat: base.responseFormat,
+              temperature: 0.9,
+            ),
+          ),
+        ),
+      );
+    });
   });
 }

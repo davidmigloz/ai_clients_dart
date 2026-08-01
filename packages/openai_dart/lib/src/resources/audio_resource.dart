@@ -212,7 +212,7 @@ class TranscriptionsResource extends ResourceBase with StreamingResource {
   ///   TranscriptionRequest(
   ///     file: audioBytes,
   ///     filename: 'audio.mp3',
-  ///     model: 'gpt-4o-transcribe',
+  ///     model: 'whisper-1',
   ///     timestampGranularities: [
   ///       TimestampGranularity.word,
   ///       TimestampGranularity.segment,
@@ -290,7 +290,7 @@ class TranscriptionsResource extends ResourceBase with StreamingResource {
   ///   TranscriptionRequest(
   ///     file: audioBytes,
   ///     filename: 'audio.mp3',
-  ///     model: 'gpt-4o-transcribe',
+  ///     model: 'whisper-1',
   ///     responseFormat: AudioResponseFormat.srt,
   ///   ),
   /// );

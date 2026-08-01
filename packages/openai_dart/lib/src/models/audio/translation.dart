@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
+import '../common/equality_helpers.dart';
 import 'transcription.dart' show TranscriptionSegment;
 
 /// A request to translate audio into English text.
@@ -64,11 +65,22 @@ class TranslationRequest {
       identical(this, other) ||
       other is TranslationRequest &&
           runtimeType == other.runtimeType &&
+          listsEqual(file, other.file) &&
           filename == other.filename &&
-          model == other.model;
+          model == other.model &&
+          prompt == other.prompt &&
+          responseFormat == other.responseFormat &&
+          temperature == other.temperature;
 
   @override
-  int get hashCode => Object.hash(filename, model);
+  int get hashCode => Object.hash(
+    listHash(file),
+    filename,
+    model,
+    prompt,
+    responseFormat,
+    temperature,
+  );
 
   @override
   String toString() => 'TranslationRequest(filename: $filename, model: $model)';
