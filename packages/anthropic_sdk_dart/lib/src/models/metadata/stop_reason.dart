@@ -65,7 +65,10 @@ enum RefusalCategory {
   frontierLlm('frontier_llm'),
 
   /// Reasoning-extraction policy category.
-  reasoningExtraction('reasoning_extraction');
+  reasoningExtraction('reasoning_extraction'),
+
+  /// General-harms policy category.
+  generalHarms('general_harms');
 
   const RefusalCategory(this.value);
 

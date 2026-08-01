@@ -83,6 +83,17 @@ export 'src/models/content/citations_config.dart';
 export 'src/models/content/content_block.dart';
 export 'src/models/content/input_content_block.dart';
 
+// Models - Dreams (Beta, research preview)
+export 'src/models/dreams/create_dream_request.dart';
+export 'src/models/dreams/dream.dart';
+export 'src/models/dreams/dream_error.dart';
+export 'src/models/dreams/dream_input.dart';
+export 'src/models/dreams/dream_model_config.dart';
+export 'src/models/dreams/dream_output.dart';
+export 'src/models/dreams/dream_status.dart';
+export 'src/models/dreams/dream_usage.dart';
+export 'src/models/dreams/list_dreams_response.dart';
+
 // Models - Files (Beta)
 export 'src/models/files/file_delete_response.dart';
 export 'src/models/files/file_list_response.dart';
@@ -100,6 +111,7 @@ export 'src/models/managed_agents/common/list_order.dart';
 export 'src/models/managed_agents/common/managed_agent_actor.dart';
 export 'src/models/managed_agents/config/agent_skill.dart';
 export 'src/models/managed_agents/config/agent_tool.dart';
+export 'src/models/managed_agents/config/effort_params.dart';
 export 'src/models/managed_agents/config/mcp_server.dart';
 export 'src/models/managed_agents/config/model_config.dart';
 export 'src/models/managed_agents/config/permission_policy.dart';
@@ -153,6 +165,7 @@ export 'src/models/managed_agents/resources/session_resource_params.dart';
 export 'src/models/managed_agents/sessions/create_session_params.dart';
 export 'src/models/managed_agents/sessions/session.dart';
 export 'src/models/managed_agents/sessions/session_agent_update.dart';
+export 'src/models/managed_agents/sessions/session_initial_event_params.dart';
 export 'src/models/managed_agents/sessions/session_list_response.dart';
 export 'src/models/managed_agents/sessions/session_thread.dart';
 export 'src/models/managed_agents/sessions/session_thread_list_response.dart';
@@ -168,6 +181,7 @@ export 'src/models/messages/cache_miss_reason.dart';
 export 'src/models/messages/diagnostics.dart';
 export 'src/models/messages/diagnostics_param.dart';
 export 'src/models/messages/fallback_config.dart';
+export 'src/models/messages/fallback_credit_token_param.dart';
 export 'src/models/messages/input_message.dart';
 export 'src/models/messages/message.dart';
 export 'src/models/messages/message_create_request.dart';
@@ -176,6 +190,7 @@ export 'src/models/messages/thinking_config.dart';
 
 // Models - Metadata
 export 'src/models/metadata/cache_control.dart';
+export 'src/models/metadata/fallback_credit_usage.dart';
 export 'src/models/metadata/metadata.dart';
 export 'src/models/metadata/processing_status.dart';
 export 'src/models/metadata/service_tier.dart';
@@ -212,6 +227,7 @@ export 'src/models/tools/input_schema.dart';
 export 'src/models/tools/response_inclusion.dart';
 export 'src/models/tools/tool.dart';
 export 'src/models/tools/tool_caller.dart';
+export 'src/models/tools/tool_change_reference.dart';
 export 'src/models/tools/tool_choice.dart';
 export 'src/models/tools/tool_definition.dart';
 
@@ -229,6 +245,7 @@ export 'src/models/user_profiles/user_profile_trust_grant.dart';
 export 'src/resources/agents_resource.dart';
 export 'src/resources/deployment_runs_resource.dart';
 export 'src/resources/deployments_resource.dart';
+export 'src/resources/dreams_resource.dart';
 export 'src/resources/files_resource.dart';
 export 'src/resources/memories_resource.dart';
 export 'src/resources/memory_stores_resource.dart';

@@ -965,6 +965,251 @@ void main() {
       });
     });
 
+    group('ToolAdditionInputBlock', () {
+      test('round-trips without cacheControl', () {
+        const block = ToolAdditionInputBlock(
+          tool: ToolChangeToolReference('calculator'),
+        );
+        final json = block.toJson();
+
+        expect(json['type'], 'tool_addition');
+        expect(json['tool'], {'type': 'tool_reference', 'name': 'calculator'});
+        expect(json.containsKey('cache_control'), isFalse);
+
+        final parsed = InputContentBlock.fromJson(json);
+        expect(parsed, isA<ToolAdditionInputBlock>());
+        final addition = parsed as ToolAdditionInputBlock;
+        expect(addition.tool, const ToolChangeToolReference('calculator'));
+        expect(addition.cacheControl, isNull);
+      });
+
+      test('round-trips with cacheControl', () {
+        const block = ToolAdditionInputBlock(
+          tool: ToolChangeMCPToolsetReference('my-server'),
+          cacheControl: CacheControlEphemeral(),
+        );
+        final json = block.toJson();
+
+        expect(json['cache_control'], {'type': 'ephemeral'});
+
+        final parsed =
+            InputContentBlock.fromJson(json) as ToolAdditionInputBlock;
+        expect(parsed.tool, const ToolChangeMCPToolsetReference('my-server'));
+        expect(parsed.cacheControl, const CacheControlEphemeral());
+      });
+
+      test('copyWith replaces fields', () {
+        const block = ToolAdditionInputBlock(
+          tool: ToolChangeToolReference('calculator'),
+        );
+        final modified = block.copyWith(
+          tool: const ToolChangeToolReference('other'),
+          cacheControl: const CacheControlEphemeral(),
+        );
+
+        expect(modified.tool, const ToolChangeToolReference('other'));
+        expect(modified.cacheControl, const CacheControlEphemeral());
+      });
+
+      test('toString includes all fields', () {
+        const block = ToolAdditionInputBlock(
+          tool: ToolChangeToolReference('calculator'),
+        );
+
+        expect(block.toString(), contains('tool:'));
+        expect(block.toString(), contains('cacheControl:'));
+      });
+
+      test('supports the InputContentBlock.toolAddition factory', () {
+        final block = InputContentBlock.toolAddition(
+          tool: const ToolChangeToolReference('calculator'),
+        );
+
+        expect(block, isA<ToolAdditionInputBlock>());
+        expect(block.toJson()['type'], 'tool_addition');
+      });
+    });
+
+    group('ToolRemovalInputBlock', () {
+      test('round-trips without cacheControl', () {
+        const block = ToolRemovalInputBlock(
+          tool: ToolChangeMCPToolReference(
+            serverName: 'my-server',
+            name: 'search',
+          ),
+        );
+        final json = block.toJson();
+
+        expect(json['type'], 'tool_removal');
+        expect(json['tool'], {
+          'type': 'mcp_tool_reference',
+          'server_name': 'my-server',
+          'name': 'search',
+        });
+        expect(json.containsKey('cache_control'), isFalse);
+
+        final parsed = InputContentBlock.fromJson(json);
+        expect(parsed, isA<ToolRemovalInputBlock>());
+        final removal = parsed as ToolRemovalInputBlock;
+        expect(
+          removal.tool,
+          const ToolChangeMCPToolReference(
+            serverName: 'my-server',
+            name: 'search',
+          ),
+        );
+        expect(removal.cacheControl, isNull);
+      });
+
+      test('round-trips with cacheControl', () {
+        const block = ToolRemovalInputBlock(
+          tool: ToolChangeToolReference('calculator'),
+          cacheControl: CacheControlEphemeral(),
+        );
+        final json = block.toJson();
+
+        expect(json['cache_control'], {'type': 'ephemeral'});
+
+        final parsed =
+            InputContentBlock.fromJson(json) as ToolRemovalInputBlock;
+        expect(parsed.tool, const ToolChangeToolReference('calculator'));
+        expect(parsed.cacheControl, const CacheControlEphemeral());
+      });
+
+      test('copyWith replaces fields', () {
+        const block = ToolRemovalInputBlock(
+          tool: ToolChangeToolReference('calculator'),
+        );
+        final modified = block.copyWith(
+          tool: const ToolChangeMCPToolsetReference('my-server'),
+        );
+
+        expect(modified.tool, const ToolChangeMCPToolsetReference('my-server'));
+      });
+
+      test('toString includes all fields', () {
+        const block = ToolRemovalInputBlock(
+          tool: ToolChangeToolReference('calculator'),
+        );
+
+        expect(block.toString(), contains('tool:'));
+        expect(block.toString(), contains('cacheControl:'));
+      });
+
+      test('supports the InputContentBlock.toolRemoval factory', () {
+        final block = InputContentBlock.toolRemoval(
+          tool: const ToolChangeToolReference('calculator'),
+        );
+
+        expect(block, isA<ToolRemovalInputBlock>());
+        expect(block.toJson()['type'], 'tool_removal');
+      });
+    });
+
+    group('ToolChangeReference', () {
+      test('round-trips ToolChangeToolReference', () {
+        const ref = ToolChangeToolReference('calculator');
+        final json = ref.toJson();
+
+        expect(json, {'type': 'tool_reference', 'name': 'calculator'});
+        expect(ToolChangeReference.fromJson(json), ref);
+      });
+
+      test('round-trips ToolChangeMCPToolReference', () {
+        const ref = ToolChangeMCPToolReference(
+          serverName: 'my-server',
+          name: 'search',
+        );
+        final json = ref.toJson();
+
+        expect(json, {
+          'type': 'mcp_tool_reference',
+          'server_name': 'my-server',
+          'name': 'search',
+        });
+        expect(ToolChangeReference.fromJson(json), ref);
+      });
+
+      test('round-trips ToolChangeMCPToolsetReference', () {
+        const ref = ToolChangeMCPToolsetReference('my-server');
+        final json = ref.toJson();
+
+        expect(json, {
+          'type': 'mcp_toolset_reference',
+          'server_name': 'my-server',
+        });
+        expect(ToolChangeReference.fromJson(json), ref);
+      });
+
+      test('factory constructors build expected variants', () {
+        expect(
+          ToolChangeReference.tool('calculator'),
+          const ToolChangeToolReference('calculator'),
+        );
+        expect(
+          ToolChangeReference.mcpTool(serverName: 'my-server', name: 'search'),
+          const ToolChangeMCPToolReference(
+            serverName: 'my-server',
+            name: 'search',
+          ),
+        );
+        expect(
+          ToolChangeReference.mcpToolset('my-server'),
+          const ToolChangeMCPToolsetReference('my-server'),
+        );
+      });
+
+      test('copyWith replaces fields on each variant', () {
+        expect(
+          const ToolChangeToolReference('calculator').copyWith(name: 'other'),
+          const ToolChangeToolReference('other'),
+        );
+        expect(
+          const ToolChangeMCPToolReference(
+            serverName: 'my-server',
+            name: 'search',
+          ).copyWith(name: 'other'),
+          const ToolChangeMCPToolReference(
+            serverName: 'my-server',
+            name: 'other',
+          ),
+        );
+        expect(
+          const ToolChangeMCPToolsetReference(
+            'my-server',
+          ).copyWith(serverName: 'other-server'),
+          const ToolChangeMCPToolsetReference('other-server'),
+        );
+      });
+
+      test('toString includes all fields per variant', () {
+        expect(
+          const ToolChangeToolReference('calculator').toString(),
+          contains('name:'),
+        );
+        expect(
+          const ToolChangeMCPToolReference(
+            serverName: 'my-server',
+            name: 'search',
+          ).toString(),
+          allOf(contains('serverName:'), contains('name:')),
+        );
+        expect(
+          const ToolChangeMCPToolsetReference('my-server').toString(),
+          contains('serverName:'),
+        );
+      });
+
+      test('fromJson preserves an unrecognized type verbatim', () {
+        final json = {'type': 'bogus', 'name': 'calculator'};
+        final ref = ToolChangeReference.fromJson(json);
+
+        expect(ref, isA<UnknownToolChangeReference>());
+        expect((ref as UnknownToolChangeReference).rawJson, json);
+        expect(ref.toJson(), json);
+      });
+    });
+
     group('MCPToolUseInputBlock', () {
       test('fromJson parses all fields', () {
         final json = {

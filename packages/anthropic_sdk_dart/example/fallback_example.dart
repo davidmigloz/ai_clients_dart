@@ -69,15 +69,29 @@ final first = await client.messages.create(
 
 if (first.stopReason == StopReason.refusal) {
   final details = first.stopDetails; // RefusalStopDetails
+  final token = details?.fallbackCreditToken;
   final retry = await client.messages.create(
     request.copyWith(
       model: details?.recommendedModel ?? 'claude-opus-4-8',
-      fallbackCreditToken: details?.fallbackCreditToken,
+      fallbackCreditToken: token != null
+          ? FallbackCreditTokenParam.token(token)
+          : null,
     ),
     betas: const ['fallback-credit-2026-06-01'],
   );
   // ... use `retry`
 }
+
+To opt into a best-effort retry (served even if redemption fails, billed at
+normal price if it does), pass the object form instead — it requires the
+`anthropic-beta: fallback-credit-2026-07-01` header:
+
+fallbackCreditToken: token != null
+    ? FallbackCreditTokenParam.config(
+        token: token,
+        mode: FallbackCreditMode.bestEffort,
+      )
+    : null,
 ''');
   } finally {
     client.close();

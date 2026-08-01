@@ -96,6 +96,17 @@ void main() {
       false,
       isA<WebhookDeploymentRunFailedEventData>(),
     ),
+    ('environment.archived', false, isA<WebhookEnvironmentArchivedEventData>()),
+    ('environment.created', false, isA<WebhookEnvironmentCreatedEventData>()),
+    ('environment.deleted', false, isA<WebhookEnvironmentDeletedEventData>()),
+    ('environment.updated', false, isA<WebhookEnvironmentUpdatedEventData>()),
+    (
+      'memory_store.archived',
+      false,
+      isA<WebhookMemoryStoreArchivedEventData>(),
+    ),
+    ('memory_store.created', false, isA<WebhookMemoryStoreCreatedEventData>()),
+    ('memory_store.deleted', false, isA<WebhookMemoryStoreDeletedEventData>()),
   ];
 
   Map<String, dynamic> dataJson(String type, {required bool withVault}) {
@@ -112,8 +123,8 @@ void main() {
   }
 
   group('WebhookEventData dispatch', () {
-    test('covers all 36 spec variants', () {
-      expect(variants, hasLength(36));
+    test('covers all 43 spec variants', () {
+      expect(variants, hasLength(43));
     });
 
     for (final (type, withVault, matcher) in variants) {

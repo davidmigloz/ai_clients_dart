@@ -65,9 +65,12 @@
               "advisor-tool-2026-03-01",
               "managed-agents-2026-04-01",
               "cache-diagnosis-2026-04-07",
+              "dreaming-2026-04-21",
               "thinking-token-count-2026-05-13",
               "server-side-fallback-2026-06-01",
+              "server-side-fallback-2026-07-01",
               "fallback-credit-2026-06-01",
+              "fallback-credit-2026-07-01",
               "agent-memory-2026-07-22"
             ],
             "type": "string",
@@ -2051,6 +2054,9 @@
           },
           "id": {
             "description": "Identifier for the container used in this request",
+            "examples": [
+              "container_011CpZohnwH4vuy7gazohgSP"
+            ],
             "title": "Id",
             "type": "string"
           },
@@ -2786,6 +2792,31 @@
         "title": "CountMessageTokensResponse",
         "type": "object"
       },
+      "BetaCreateDreamRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/BetaDreamInput"
+            },
+            "type": "array"
+          },
+          "instructions": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "nullable": true,
+            "type": "string"
+          },
+          "model": {
+            "$ref": "#/components/schemas/BetaDreamModelParams"
+          }
+        },
+        "required": [
+          "inputs",
+          "model"
+        ],
+        "type": "object"
+      },
       "BetaCreateMessageBatchParams": {
         "additionalProperties": false,
         "properties": {
@@ -2886,6 +2917,9 @@
                 "type": "string"
               },
               {
+                "$ref": "#/components/schemas/BetaFallbackCreditTokenParam"
+              },
+              {
                 "type": "null"
               }
             ],
@@ -2903,10 +2937,16 @@
                 "type": "array"
               },
               {
+                "const": "default",
+                "title": "FallbacksDefault",
+                "type": "string",
+                "x-stainless-variantName": "Default"
+              },
+              {
                 "type": "null"
               }
             ],
-            "description": "Opt-in server-side retry on one or more substitute models when the requested model declines for policy reasons. Tried in order: if the first entry also declines, the second is tried, and so on.",
+            "description": "Opt-in server-side retry on one or more substitute models when the requested model declines for policy reasons. Tried in order: if the first entry also declines, the second is tried, and so on. The string \"default\" requests the requested model's server-defined default fallback configuration.",
             "title": "Fallbacks"
           },
           "inference_geo": {
@@ -3587,6 +3627,297 @@
         "title": "DirectCaller",
         "type": "object"
       },
+      "BetaDream": {
+        "additionalProperties": false,
+        "description": "An asynchronous memory-consolidation job that reads a memory store plus a set of session transcripts and writes consolidated memories into a new output memory store. The Dreams API is in research preview: the request and response shapes are volatile and may change without the deprecation period that applies to generally-available endpoints.",
+        "properties": {
+          "archived_at": {
+            "$ref": "#/components/schemas/BetaTimestamp",
+            "nullable": true
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/BetaTimestamp"
+          },
+          "ended_at": {
+            "$ref": "#/components/schemas/BetaTimestamp",
+            "nullable": true
+          },
+          "error": {
+            "$ref": "#/components/schemas/BetaDreamError",
+            "nullable": true
+          },
+          "id": {
+            "type": "string"
+          },
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/BetaDreamInput"
+            },
+            "type": "array"
+          },
+          "instructions": {
+            "nullable": true,
+            "type": "string"
+          },
+          "model": {
+            "$ref": "#/components/schemas/BetaDreamModelConfig"
+          },
+          "outputs": {
+            "items": {
+              "$ref": "#/components/schemas/BetaDreamOutput"
+            },
+            "type": "array"
+          },
+          "session_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/BetaDreamStatus"
+          },
+          "type": {
+            "enum": [
+              "dream"
+            ],
+            "type": "string"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/BetaDreamUsage"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "inputs",
+          "outputs",
+          "status",
+          "created_at",
+          "ended_at",
+          "archived_at",
+          "error",
+          "model",
+          "instructions",
+          "session_id",
+          "usage"
+        ],
+        "type": "object"
+      },
+      "BetaDreamError": {
+        "additionalProperties": false,
+        "description": "Failure detail for a Dream whose `status` is `failed`.",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "message"
+        ],
+        "type": "object"
+      },
+      "BetaDreamInput": {
+        "discriminator": {
+          "mapping": {
+            "memory_store": "#/components/schemas/BetaDreamMemoryStoreInput",
+            "sessions": "#/components/schemas/BetaDreamSessionsInput"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/BetaDreamMemoryStoreInput"
+          },
+          {
+            "$ref": "#/components/schemas/BetaDreamSessionsInput"
+          }
+        ],
+        "type": "object"
+      },
+      "BetaDreamMemoryStoreInput": {
+        "additionalProperties": false,
+        "description": "An input memory store the dream reads from. The dream never mutates this store.",
+        "properties": {
+          "memory_store_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "memory_store"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "memory_store_id"
+        ],
+        "type": "object"
+      },
+      "BetaDreamMemoryStoreOutput": {
+        "additionalProperties": false,
+        "description": "An output memory store the dream writes consolidated memories into.",
+        "properties": {
+          "memory_store_id": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "memory_store"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "memory_store_id"
+        ],
+        "type": "object"
+      },
+      "BetaDreamModelConfig": {
+        "additionalProperties": false,
+        "description": "Model identifier and configuration applied to every pipeline stage. Same wire shape as the Agents API ModelConfig.",
+        "properties": {
+          "id": {
+            "description": "Model identifier, e.g. \"claude-opus-4-7\". 1-256 characters.",
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "speed": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BetaSpeed"
+              }
+            ],
+            "description": "Inference speed mode. Defaults to `standard`."
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "BetaDreamModelConfigParams": {
+        "additionalProperties": false,
+        "description": "Model identifier and configuration applied to every pipeline stage.",
+        "properties": {
+          "id": {
+            "description": "Model identifier, e.g. \"claude-opus-4-7\". 1-256 characters.",
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "speed": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BetaSpeed"
+              }
+            ],
+            "description": "Inference speed mode. Defaults to `standard`.",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "BetaDreamModelParams": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "$ref": "#/components/schemas/BetaDreamModelConfigParams"
+          }
+        ]
+      },
+      "BetaDreamOutput": {
+        "discriminator": {
+          "mapping": {
+            "memory_store": "#/components/schemas/BetaDreamMemoryStoreOutput"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/BetaDreamMemoryStoreOutput"
+          }
+        ],
+        "type": "object"
+      },
+      "BetaDreamSessionsInput": {
+        "additionalProperties": false,
+        "description": "Input session transcripts the dream reads.",
+        "properties": {
+          "session_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "type": {
+            "enum": [
+              "sessions"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "session_ids"
+        ],
+        "type": "object"
+      },
+      "BetaDreamStatus": {
+        "description": "Lifecycle status of a Dream.",
+        "enum": [
+          "pending",
+          "running",
+          "completed",
+          "failed",
+          "canceled"
+        ],
+        "type": "string"
+      },
+      "BetaDreamUsage": {
+        "additionalProperties": false,
+        "description": "Cumulative token usage for the dream across every pipeline stage.",
+        "properties": {
+          "cache_creation_input_tokens": {
+            "description": "Total tokens used to create prompt-cache entries (sum of all TTL tiers).",
+            "format": "int32",
+            "type": "integer"
+          },
+          "cache_read_input_tokens": {
+            "description": "Total tokens read from prompt cache.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "input_tokens": {
+            "description": "Total uncached input tokens consumed across every pipeline stage.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "output_tokens": {
+            "description": "Total output tokens generated across every pipeline stage.",
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "input_tokens",
+          "output_tokens",
+          "cache_read_input_tokens",
+          "cache_creation_input_tokens"
+        ],
+        "type": "object"
+      },
       "BetaEffortCapability": {
         "description": "Effort (reasoning_effort) capability details.",
         "properties": {
@@ -3888,9 +4219,11 @@
             "type": "string"
           },
           "type": {
-            "const": "environment_deleted",
             "default": "environment_deleted",
             "description": "The type of response",
+            "enum": [
+              "environment_deleted"
+            ],
             "examples": [
               "environment_deleted"
             ],
@@ -4072,7 +4405,7 @@
       },
       "BetaFallbackConfigV2": {
         "additionalProperties": true,
-        "description": "One entry in the `fallbacks` chain on a `/v1/messages` request.\n\n`model` is required. The four override fields (`max_tokens`, `thinking`,\n`output_config`, and `speed`) replace the corresponding top-level field\nfor this attempt only and are validated as if the request were made to\n`model`. Any other key is rejected at parse time.",
+        "description": "One entry in the `fallbacks` chain on a `/v1/messages` request.\n\n`model` is required. The override fields (`max_tokens`, `thinking`,\n`output_config`, and `speed`) set the corresponding parameter for this\nattempt only and are validated as if the request were made to `model`.\nAny other key is rejected at parse time.",
         "properties": {
           "max_tokens": {
             "anyOf": [
@@ -4142,6 +4475,130 @@
           "model"
         ],
         "title": "FallbackConfigV2",
+        "type": "object"
+      },
+      "BetaFallbackCreditNotApplied": {
+        "description": "No reprice was applied; ``reason`` says why.",
+        "properties": {
+          "reason": {
+            "description": "Why the reprice was not applied.\n\nA closed enum; additions to the redemption-check vocabulary arrive as\ndeliberate schema updates.",
+            "enum": [
+              "body_mismatch",
+              "continuation_excluded",
+              "continuation_only",
+              "expired",
+              "invalid_target_model",
+              "not_enabled",
+              "reprice_unavailable",
+              "temporarily_unavailable",
+              "variant_fields_present",
+              "wrong_organization",
+              "wrong_platform",
+              "wrong_workspace"
+            ],
+            "title": "Reason",
+            "type": "string"
+          },
+          "remove_to_redeem": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Request fields to remove before retrying, so the retry can redeem this\ntoken.\n\nPresent exactly when `reason` is `variant_fields_present` \u2014 never null,\nnever an empty array; absent otherwise. Fields are named only from your own request, and only after\nthe sealed variant hash matched. A served best-effort retry has already\nbeen billed at normal price; nothing redeems retroactively, but a corrected\nre-send inside the token's five-minute window can still redeem.",
+            "title": "Remove To Redeem"
+          },
+          "type": {
+            "const": "not_applied",
+            "default": "not_applied",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason",
+          "type"
+        ],
+        "title": "FallbackCreditNotApplied",
+        "type": "object"
+      },
+      "BetaFallbackCreditRedeemed": {
+        "description": "The reprice was applied: the retry is billed as if the conversation\nhad been on the retry model all along.",
+        "properties": {
+          "type": {
+            "const": "redeemed",
+            "default": "redeemed",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "FallbackCreditRedeemed",
+        "type": "object"
+      },
+      "BetaFallbackCreditTokenParam": {
+        "additionalProperties": false,
+        "description": "Object form of ``fallback_credit_token``: the token plus a redemption\nmode.\n\nRequires ``anthropic-beta: fallback-credit-2026-07-01``; without that\nheader the field accepts the bare string only. The bare string and the\nmode-less object are equivalent (both select ``strict``), so wrapping\nan existing token changes nothing by itself.",
+        "properties": {
+          "mode": {
+            "description": "How a failing token affects the retry. `strict` (the default, and the bare-string behavior): a failing redemption is a 400 and the retry is not served. `best_effort`: the retry is served either way \u2014 a token-layer failure no longer rejects the request; the retry proceeds at normal price and the outcome is reported on the response's `usage.fallback_credit`. Two failures stay hard in both modes: a malformed token, and combining `fallback_credit_token` with `fallbacks`.",
+            "enum": [
+              "strict",
+              "best_effort"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "token": {
+            "description": "The opaque `fallback_credit_token` from a prior refusal's `stop_details` \u2014 the same string the bare-string form carries.",
+            "maxLength": 2048,
+            "minLength": 1,
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ],
+        "title": "FallbackCreditTokenParam",
+        "type": "object"
+      },
+      "BetaFallbackCreditUsage": {
+        "description": "Outcome of the ``fallback_credit_token`` presented on this request.",
+        "properties": {
+          "status": {
+            "description": "Whether the fallback-credit reprice was applied to this response's billing.\n\nA union discriminated on `type`. `redeemed`: the retry is billed as if\nthe conversation had been on the retry model all along \u2014 including when the\nresulting shift is zero because there was nothing to move. `not_applied`:\nno reprice was applied; the arm's `reason` says why.",
+            "discriminator": {
+              "mapping": {
+                "not_applied": "#/components/schemas/BetaFallbackCreditNotApplied",
+                "redeemed": "#/components/schemas/BetaFallbackCreditRedeemed"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/BetaFallbackCreditRedeemed"
+              },
+              {
+                "$ref": "#/components/schemas/BetaFallbackCreditNotApplied"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "FallbackCreditUsage",
         "type": "object"
       },
       "BetaFallbackMessageIterationUsage": {
@@ -4668,6 +5125,8 @@
             "text": "#/components/schemas/BetaRequestTextBlock",
             "text_editor_code_execution_tool_result": "#/components/schemas/BetaRequestTextEditorCodeExecutionToolResultBlock",
             "thinking": "#/components/schemas/BetaRequestThinkingBlock",
+            "tool_addition": "#/components/schemas/BetaRequestToolAdditionBlock",
+            "tool_removal": "#/components/schemas/BetaRequestToolRemovalBlock",
             "tool_result": "#/components/schemas/BetaRequestToolResultBlock",
             "tool_search_tool_result": "#/components/schemas/BetaRequestToolSearchToolResultBlock",
             "tool_use": "#/components/schemas/BetaRequestToolUseBlock",
@@ -4747,6 +5206,12 @@
           },
           {
             "$ref": "#/components/schemas/BetaRequestMidConvSystemBlock"
+          },
+          {
+            "$ref": "#/components/schemas/BetaRequestToolAdditionBlock"
+          },
+          {
+            "$ref": "#/components/schemas/BetaRequestToolRemovalBlock"
           },
           {
             "$ref": "#/components/schemas/BetaRequestFallbackBlock"
@@ -5087,6 +5552,26 @@
           "type"
         ],
         "title": "LimitedNetworkParams",
+        "type": "object"
+      },
+      "BetaListDreamsResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/BetaDream"
+            },
+            "type": "array"
+          },
+          "next_page": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "data",
+          "next_page"
+        ],
         "type": "object"
       },
       "BetaListResponse_MessageBatch_": {
@@ -7488,6 +7973,13 @@
             "minLength": 1,
             "type": "string"
           },
+          "initial_events": {
+            "description": "Initial events to send to the `session` at creation, processed in order. Supports `user.message` and `user.define_outcome` events. Maximum 50 events.",
+            "items": {
+              "$ref": "#/components/schemas/BetaManagedAgentsSessionInitialEventParams"
+            },
+            "type": "array"
+          },
           "metadata": {
             "additionalProperties": {
               "type": "string"
@@ -8227,8 +8719,8 @@
         "description": "A custom tool that is executed by the API client rather than the agent. When the agent calls this tool, an `agent.custom_tool_use` event is emitted and the session goes idle, waiting for the client to provide the result via a `user.custom_tool_result` event.",
         "properties": {
           "description": {
-            "description": "Description of what the tool does, shown to the agent to help it decide when to use the tool. 1-1024 characters.",
-            "maxLength": 1024,
+            "description": "Description of what the tool does, shown to the agent to help it decide when to use the tool. 1-4096 characters.",
+            "maxLength": 4096,
             "minLength": 1,
             "type": "string"
           },
@@ -9043,6 +9535,138 @@
           {
             "$ref": "#/components/schemas/BetaManagedAgentsFileDocumentSource"
           }
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsEffort": {
+        "description": "How hard Claude works on each turn. Sets `output_config.effort` on every Messages call the session makes.",
+        "discriminator": {
+          "mapping": {
+            "high": "#/components/schemas/BetaManagedAgentsEffortHigh",
+            "low": "#/components/schemas/BetaManagedAgentsEffortLow",
+            "max": "#/components/schemas/BetaManagedAgentsEffortMax",
+            "medium": "#/components/schemas/BetaManagedAgentsEffortMedium",
+            "xhigh": "#/components/schemas/BetaManagedAgentsEffortXhigh"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsEffortLow"
+          },
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsEffortMedium"
+          },
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsEffortHigh"
+          },
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsEffortXhigh"
+          },
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsEffortMax"
+          }
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsEffortHigh": {
+        "additionalProperties": false,
+        "description": "High effort. Favors reasoning depth.",
+        "properties": {
+          "type": {
+            "enum": [
+              "high"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsEffortLevel": {
+        "description": "How hard Claude works on each turn. Higher levels favor reasoning depth over latency. Not all models accept every level; invalid combinations are rejected at create time.",
+        "enum": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "type": "string"
+      },
+      "BetaManagedAgentsEffortLow": {
+        "additionalProperties": false,
+        "description": "Low effort. Favors latency over reasoning depth.",
+        "properties": {
+          "type": {
+            "enum": [
+              "low"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsEffortMax": {
+        "additionalProperties": false,
+        "description": "Maximum effort. Favors reasoning depth over latency.",
+        "properties": {
+          "type": {
+            "enum": [
+              "max"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsEffortMedium": {
+        "additionalProperties": false,
+        "description": "Medium effort. Balances latency and reasoning depth.",
+        "properties": {
+          "type": {
+            "enum": [
+              "medium"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "BetaManagedAgentsEffortParams": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsEffortLevel"
+          },
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsEffort"
+          }
+        ]
+      },
+      "BetaManagedAgentsEffortXhigh": {
+        "additionalProperties": false,
+        "description": "Extra-high effort. Not all models accept this level.",
+        "properties": {
+          "type": {
+            "enum": [
+              "xhigh"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
         ],
         "type": "object"
       },
@@ -10576,7 +11200,7 @@
         },
         "properties": {
           "data": {
-            "description": "Events for the session, ordered by `created_at`.",
+            "description": "Events for the session, ordered by `processed_at`.",
             "examples": [
               [
                 {
@@ -10710,7 +11334,7 @@
         "description": "Paginated list of events for a single thread within a `session`.",
         "properties": {
           "data": {
-            "description": "Events for the thread, ordered by `created_at`.",
+            "description": "Events for the thread, ordered by `processed_at`.",
             "items": {
               "$ref": "#/components/schemas/BetaManagedAgentsSessionEvent"
             },
@@ -12125,18 +12749,23 @@
             "x-stainless-nominal": false
           },
           {
+            "const": "claude-opus-5",
+            "description": "Powerful intelligence for long-running agents and coding",
+            "x-stainless-nominal": false
+          },
+          {
             "const": "claude-opus-4-8",
-            "description": "Frontier intelligence for long-running agents and coding",
+            "description": "Powerful intelligence for long-running agents and coding",
             "x-stainless-nominal": false
           },
           {
             "const": "claude-opus-4-7",
-            "description": "Frontier intelligence for long-running agents and coding",
+            "description": "Powerful intelligence for long-running agents and coding",
             "x-stainless-nominal": false
           },
           {
             "const": "claude-opus-4-6",
-            "description": "Most intelligent model for building agents and coding",
+            "description": "Powerful intelligence for long-running agents and coding",
             "x-stainless-nominal": false
           },
           {
@@ -12156,12 +12785,12 @@
           },
           {
             "const": "claude-opus-4-5",
-            "description": "Premium model combining maximum intelligence with practical performance",
+            "description": "Powerful intelligence for long-running agents and coding",
             "x-stainless-nominal": false
           },
           {
             "const": "claude-opus-4-5-20251101",
-            "description": "Premium model combining maximum intelligence with practical performance",
+            "description": "Powerful intelligence for long-running agents and coding",
             "x-stainless-nominal": false
           },
           {
@@ -12182,10 +12811,18 @@
         "additionalProperties": false,
         "description": "Model identifier and configuration.",
         "example": {
-          "id": "claude-opus-4-6",
+          "id": "claude-opus-4-8",
           "speed": "standard"
         },
         "properties": {
+          "effort": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BetaManagedAgentsEffort"
+              }
+            ],
+            "description": "How hard Claude works on each inference call. One of `low`, `medium`, `high`, `xhigh`, `max`. Always present; resolved to the per-model default at save time when not supplied."
+          },
           "id": {
             "$ref": "#/components/schemas/BetaManagedAgentsModel"
           },
@@ -12210,9 +12847,18 @@
         "additionalProperties": false,
         "description": "An object that defines additional configuration control over model use",
         "example": {
-          "id": "claude-opus-4-6"
+          "id": "claude-opus-4-8"
         },
         "properties": {
+          "effort": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BetaManagedAgentsEffortParams"
+              }
+            ],
+            "description": "How hard Claude works on each inference call. Accepts a bare level string (`\"high\"`) or `{\"type\": \"high\"}`. On create, omitting it resolves the per-model default; on update, omitting it leaves the stored value unchanged.",
+            "nullable": true
+          },
           "id": {
             "$ref": "#/components/schemas/BetaManagedAgentsModel"
           },
@@ -14013,6 +14659,25 @@
         ],
         "type": "object"
       },
+      "BetaManagedAgentsSessionInitialEventParams": {
+        "description": "An event sent to the `session` immediately after it is created. Supports `user.message` and `user.define_outcome`.",
+        "discriminator": {
+          "mapping": {
+            "user.define_outcome": "#/components/schemas/BetaManagedAgentsUserDefineOutcomeEventParams",
+            "user.message": "#/components/schemas/BetaManagedAgentsUserMessageEventParams"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsUserMessageEventParams"
+          },
+          {
+            "$ref": "#/components/schemas/BetaManagedAgentsUserDefineOutcomeEventParams"
+          }
+        ],
+        "type": "object"
+      },
       "BetaManagedAgentsSessionMultiagent": {
         "description": "Resolved multiagent orchestration configuration as returned on a `session`.",
         "discriminator": {
@@ -14208,7 +14873,7 @@
       },
       "BetaManagedAgentsSessionRetriesExhausted": {
         "additionalProperties": false,
-        "description": "The turn ended because the retry budget was exhausted (`max_iterations` hit or an error escalated to `retry_status: 'exhausted'`).",
+        "description": "The turn ended because repeated errors exhausted the retry budget or an error escalated to `retry_status: 'exhausted'`.",
         "properties": {
           "type": {
             "enum": [
@@ -16653,7 +17318,7 @@
             "type": "array"
           },
           "version": {
-            "description": "The agent's current version, used to prevent concurrent overwrites. Obtain this value from a create or retrieve response. The request fails if this does not match the server's current version.",
+            "description": "The agent's current version, used to prevent concurrent overwrites. Obtain this value from a create or retrieve response. Must be at least 1 if specified. When supplied, the request fails if it does not match the server's current version; omit to apply the update unconditionally.",
             "examples": [
               1
             ],
@@ -16661,9 +17326,6 @@
             "type": "integer"
           }
         },
-        "required": [
-          "version"
-        ],
         "type": "object"
       },
       "BetaManagedAgentsUpdateCredentialRequestBody": {
@@ -18220,7 +18882,7 @@
                 "type": "null"
               }
             ],
-            "description": "The reason that we stopped.\n\nThis may be one the following values:\n* `\"end_turn\"`: the model reached a natural stopping point\n* `\"max_tokens\"`: we exceeded the requested `max_tokens` or the model's maximum\n* `\"stop_sequence\"`: one of your provided custom `stop_sequences` was generated\n* `\"tool_use\"`: the model invoked one or more tools\n* `\"pause_turn\"`: we paused a long-running turn. You may provide the response back as-is in a subsequent request to let the model continue.\n* `\"refusal\"`: when streaming classifiers intervene to handle potential policy violations\n\nIn non-streaming mode this value is always non-null. In streaming mode, it is null in the `message_start` event and non-null otherwise.",
+            "description": "The reason that we stopped.\n\nThis may be one the following values:\n* `\"end_turn\"`: the model reached a natural stopping point\n* `\"max_tokens\"`: we exceeded the requested `max_tokens` or the model's maximum\n* `\"stop_sequence\"`: one of your provided custom `stop_sequences` was generated\n* `\"tool_use\"`: the model invoked one or more tools\n* `\"pause_turn\"`: we paused a long-running turn. You may provide the response back as-is in a subsequent request to let the model continue.\n* `\"refusal\"`: when streaming classifiers intervene to handle potential policy violations\n* `\"model_context_window_exceeded\"`: we exceeded the model's context window\n\nIn non-streaming mode this value is always non-null. In streaming mode, it is null in the `message_start` event and non-null otherwise.",
             "title": "Stop Reason"
           },
           "stop_sequence": {
@@ -18615,6 +19277,18 @@
             ],
             "title": "Cache Read Input Tokens"
           },
+          "fallback_credit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BetaFallbackCreditUsage"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Outcome of the `fallback_credit_token` presented on this request.\n\nPresent on every response to a non-batch request that carried a\n`fallback_credit_token`, in either redemption mode; absent otherwise (batch\nitems accept and ignore the token and carry no outcome object)."
+          },
           "input_tokens": {
             "anyOf": [
               {
@@ -18671,6 +19345,7 @@
         "required": [
           "cache_creation_input_tokens",
           "cache_read_input_tokens",
+          "fallback_credit",
           "input_tokens",
           "iterations",
           "output_tokens",
@@ -19557,10 +20232,18 @@
           "cyber",
           "bio",
           "frontier_llm",
-          "reasoning_extraction"
+          "reasoning_extraction",
+          "general_harms"
         ],
         "title": "RefusalCategory",
-        "type": "string"
+        "type": "string",
+        "x-enum-descriptions": [
+          "The request could enable cyber harm, such as malware or exploit development. Benign cybersecurity work can also trigger this category.",
+          "The request could enable biological harm, such as dangerous lab methods. Beneficial life sciences work can also trigger this category.",
+          "The request could assist the development of competing AI models, which is restricted under [Anthropic's commercial terms](https://www.anthropic.com/legal/commercial-terms). Benign machine learning work can also trigger this category.",
+          "The request asks the model to reproduce its internal reasoning in the response text. To get reasoning in a structured form instead, use [adaptive thinking](https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking).",
+          "The request could be related to an area that was determined as harmful. Benign work might sometimes trigger this category."
+        ]
       },
       "BetaRefusalStopDetails": {
         "description": "Structured information about a refusal.",
@@ -19588,6 +20271,9 @@
             ],
             "default": null,
             "description": "Human-readable explanation of the refusal.\n\nThis text is not guaranteed to be stable. `null` when no explanation is available for the category.",
+            "examples": [
+              "This request was declined because it conflicts with Anthropic's Usage Policy."
+            ],
             "title": "Explanation"
           },
           "fallback_credit_token": {
@@ -19601,6 +20287,9 @@
             ],
             "default": null,
             "description": "Opaque code that refunds the cache-miss cost when retrying this refused\nrequest on the fallback model. Pass it as `fallback_credit_token` on the\nretry request. Expires 5 minutes after the refusal.\n\nThe retry is sent either with the same request body (`system`, `messages`,\n`tools`, and other render-shaping fields), or with the same body plus one\nappended `assistant` message whose content is the partial text (with any\ntrailing whitespace stripped from the final text block) and paired\nserver-tool blocks from this refusal \u2014 which also authorizes that\nappended turn as an assistant-prefill continuation on models that otherwise\ndisallow prefill. A token minted mid-server-tool-loop whose partial content\nwas continuable may only be redeemed the second way \u2014 if a same-body retry\nis rejected with a 400 saying the token must be redeemed by continuing the\npartial response, retry the second way instead. Either way: same workspace,\nsame platform; a mismatch is a 400. Resending a token for an already-warm\nprefix is permitted but yields no additional credit.\n\n`null` when the refused model isn't eligible for a fallback credit.",
+            "examples": [
+              "QW50aHJvcGljL0NsYXVkZQ=="
+            ],
             "title": "Fallback Credit Token"
           },
           "fallback_has_prefill_claim": {
@@ -19627,6 +20316,9 @@
             ],
             "default": null,
             "description": "The server's suggested retry target for this refusal. Populated when a fallback attempt could not be made (the fallback model's rate limit was exhausted, or it was overloaded); names the fallback model the caller can retry directly. Null otherwise.",
+            "examples": [
+              "claude-sonnet-4-6"
+            ],
             "title": "Recommended Model"
           },
           "type": {
@@ -19923,6 +20615,9 @@
         "additionalProperties": false,
         "properties": {
           "cited_text": {
+            "examples": [
+              "The grass is green. The sky is blue."
+            ],
             "title": "Cited Text",
             "type": "string"
           },
@@ -20231,6 +20926,9 @@
         "properties": {
           "cited_text": {
             "description": "The full text of the cited block range, concatenated.\n\nAlways equals the contents of `content[start_block_index:end_block_index]` joined together. The text block is the minimal citable unit; this field is never a substring of a single block. Not counted toward output tokens, and not counted toward input tokens when sent back in subsequent turns.",
+            "examples": [
+              "The grass is green. The sky is blue."
+            ],
             "title": "Cited Text",
             "type": "string"
           },
@@ -20814,13 +21512,21 @@
             "items": {
               "discriminator": {
                 "mapping": {
-                  "text": "#/components/schemas/BetaRequestTextBlock"
+                  "text": "#/components/schemas/BetaRequestTextBlock",
+                  "tool_addition": "#/components/schemas/BetaRequestToolAdditionBlock",
+                  "tool_removal": "#/components/schemas/BetaRequestToolRemovalBlock"
                 },
                 "propertyName": "type"
               },
               "oneOf": [
                 {
                   "$ref": "#/components/schemas/BetaRequestTextBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/BetaRequestToolAdditionBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/BetaRequestToolRemovalBlock"
                 }
               ]
             },
@@ -20844,6 +21550,9 @@
         "additionalProperties": false,
         "properties": {
           "cited_text": {
+            "examples": [
+              "The grass is green. The sky is blue."
+            ],
             "title": "Cited Text",
             "type": "string"
           },
@@ -20974,6 +21683,9 @@
         "properties": {
           "cited_text": {
             "description": "The full text of the cited block range, concatenated.\n\nAlways equals the contents of `content[start_block_index:end_block_index]` joined together. The text block is the minimal citable unit; this field is never a substring of a single block. Not counted toward output tokens, and not counted toward input tokens when sent back in subsequent turns.",
+            "examples": [
+              "The grass is green. The sky is blue."
+            ],
             "title": "Cited Text",
             "type": "string"
           },
@@ -21468,6 +22180,67 @@
         "title": "RequestThinkingBlock",
         "type": "object"
       },
+      "BetaRequestToolAdditionBlock": {
+        "additionalProperties": false,
+        "description": "Mid-conversation directive to surface a declared tool.\n\n``tool`` references a tool (or MCP toolset) by name from the request's\n``tools``; it is offered to the model from this point in the\nconversation onward.",
+        "properties": {
+          "cache_control": {
+            "anyOf": [
+              {
+                "discriminator": {
+                  "mapping": {
+                    "ephemeral": "#/components/schemas/BetaCacheControlEphemeral"
+                  },
+                  "propertyName": "type"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/BetaCacheControlEphemeral"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Create a cache control breakpoint at this content block.",
+            "title": "Cache Control"
+          },
+          "tool": {
+            "discriminator": {
+              "mapping": {
+                "mcp_tool_reference": "#/components/schemas/BetaToolChangeMCPToolReference",
+                "mcp_toolset_reference": "#/components/schemas/BetaToolChangeMCPToolsetReference",
+                "tool_reference": "#/components/schemas/BetaToolChangeToolReference"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/BetaToolChangeToolReference"
+              },
+              {
+                "$ref": "#/components/schemas/BetaToolChangeMCPToolReference"
+              },
+              {
+                "$ref": "#/components/schemas/BetaToolChangeMCPToolsetReference"
+              }
+            ],
+            "title": "Tool"
+          },
+          "type": {
+            "const": "tool_addition",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool",
+          "type"
+        ],
+        "title": "RequestToolAdditionBlock",
+        "type": "object"
+      },
       "BetaRequestToolReferenceBlock": {
         "additionalProperties": false,
         "description": "Tool reference block that can be included in tool_result content.",
@@ -21512,6 +22285,67 @@
           "type"
         ],
         "title": "RequestToolReferenceBlock",
+        "type": "object"
+      },
+      "BetaRequestToolRemovalBlock": {
+        "additionalProperties": false,
+        "description": "Mid-conversation directive to withdraw a tool.\n\n``tool`` references a tool (or MCP toolset) by name from the request's\n``tools``; it is no longer offered to the model from this point in the\nconversation onward.",
+        "properties": {
+          "cache_control": {
+            "anyOf": [
+              {
+                "discriminator": {
+                  "mapping": {
+                    "ephemeral": "#/components/schemas/BetaCacheControlEphemeral"
+                  },
+                  "propertyName": "type"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/BetaCacheControlEphemeral"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Create a cache control breakpoint at this content block.",
+            "title": "Cache Control"
+          },
+          "tool": {
+            "discriminator": {
+              "mapping": {
+                "mcp_tool_reference": "#/components/schemas/BetaToolChangeMCPToolReference",
+                "mcp_toolset_reference": "#/components/schemas/BetaToolChangeMCPToolsetReference",
+                "tool_reference": "#/components/schemas/BetaToolChangeToolReference"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/BetaToolChangeToolReference"
+              },
+              {
+                "$ref": "#/components/schemas/BetaToolChangeMCPToolReference"
+              },
+              {
+                "$ref": "#/components/schemas/BetaToolChangeMCPToolsetReference"
+              }
+            ],
+            "title": "Tool"
+          },
+          "type": {
+            "const": "tool_removal",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool",
+          "type"
+        ],
+        "title": "RequestToolRemovalBlock",
         "type": "object"
       },
       "BetaRequestToolResultBlock": {
@@ -21981,6 +22815,9 @@
         "additionalProperties": false,
         "properties": {
           "cited_text": {
+            "examples": [
+              "The grass is green. The sky is blue."
+            ],
             "title": "Cited Text",
             "type": "string"
           },
@@ -22365,6 +23202,9 @@
       "BetaResponseCharLocationCitation": {
         "properties": {
           "cited_text": {
+            "examples": [
+              "The grass is green. The sky is blue."
+            ],
             "title": "Cited Text",
             "type": "string"
           },
@@ -22382,6 +23222,9 @@
                 "type": "null"
               }
             ],
+            "examples": [
+              "My Document"
+            ],
             "title": "Document Title"
           },
           "end_char_index": {
@@ -22398,6 +23241,9 @@
               }
             ],
             "default": null,
+            "examples": [
+              "file_011CNha8iCJcU1wXNR6q4V8w"
+            ],
             "title": "File Id"
           },
           "start_char_index": {
@@ -22679,6 +23525,9 @@
         "properties": {
           "cited_text": {
             "description": "The full text of the cited block range, concatenated.\n\nAlways equals the contents of `content[start_block_index:end_block_index]` joined together. The text block is the minimal citable unit; this field is never a substring of a single block. Not counted toward output tokens, and not counted toward input tokens when sent back in subsequent turns.",
+            "examples": [
+              "The grass is green. The sky is blue."
+            ],
             "title": "Cited Text",
             "type": "string"
           },
@@ -22695,6 +23544,9 @@
               {
                 "type": "null"
               }
+            ],
+            "examples": [
+              "My Document"
             ],
             "title": "Document Title"
           },
@@ -22713,6 +23565,9 @@
               }
             ],
             "default": null,
+            "examples": [
+              "file_011CNha8iCJcU1wXNR6q4V8w"
+            ],
             "title": "File Id"
           },
           "start_block_index": {
@@ -23001,6 +23856,9 @@
       "BetaResponsePageLocationCitation": {
         "properties": {
           "cited_text": {
+            "examples": [
+              "The grass is green. The sky is blue."
+            ],
             "title": "Cited Text",
             "type": "string"
           },
@@ -23018,6 +23876,9 @@
                 "type": "null"
               }
             ],
+            "examples": [
+              "My Document"
+            ],
             "title": "Document Title"
           },
           "end_page_number": {
@@ -23034,6 +23895,9 @@
               }
             ],
             "default": null,
+            "examples": [
+              "file_011CNha8iCJcU1wXNR6q4V8w"
+            ],
             "title": "File Id"
           },
           "start_page_number": {
@@ -23084,6 +23948,9 @@
         "properties": {
           "cited_text": {
             "description": "The full text of the cited block range, concatenated.\n\nAlways equals the contents of `content[start_block_index:end_block_index]` joined together. The text block is the minimal citable unit; this field is never a substring of a single block. Not counted toward output tokens, and not counted toward input tokens when sent back in subsequent turns.",
+            "examples": [
+              "The grass is green. The sky is blue."
+            ],
             "title": "Cited Text",
             "type": "string"
           },
@@ -23860,6 +24727,9 @@
       "BetaResponseWebSearchResultLocationCitation": {
         "properties": {
           "cited_text": {
+            "examples": [
+              "The grass is green. The sky is blue."
+            ],
             "title": "Cited Text",
             "type": "string"
           },
@@ -24077,6 +24947,18 @@
             "title": "Metadata",
             "type": "object"
           },
+          "secret": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Credential payload used by the environment worker to execute this work item. May be populated when polling for work; null on all other retrieval paths.",
+            "title": "Secret"
+          },
           "started_at": {
             "anyOf": [
               {
@@ -24141,6 +25023,7 @@
           "id",
           "latest_heartbeat_at",
           "metadata",
+          "secret",
           "started_at",
           "state",
           "stop_requested_at",
@@ -24611,11 +25494,11 @@
         "type": "object"
       },
       "BetaSpeed": {
+        "description": "Inference speed mode. `fast` provides significantly faster output token generation at premium pricing. Not all models support `fast`; invalid combinations are rejected at create time.",
         "enum": [
           "standard",
           "fast"
         ],
-        "title": "Speed",
         "type": "string"
       },
       "BetaStopReason": {
@@ -25347,6 +26230,75 @@
         "title": "Tool",
         "type": "object"
       },
+      "BetaToolChangeMCPToolReference": {
+        "additionalProperties": false,
+        "description": "Reference to a single MCP tool by its server and remote name \u2014 the\nsame ``server_name``/``name`` pair ``mcp_tool_use`` carries.",
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "server_name": {
+            "title": "Server Name",
+            "type": "string"
+          },
+          "type": {
+            "const": "mcp_tool_reference",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "server_name",
+          "type"
+        ],
+        "title": "ToolChangeMCPToolReference",
+        "type": "object"
+      },
+      "BetaToolChangeMCPToolsetReference": {
+        "additionalProperties": false,
+        "description": "Reference to every tool in the named MCP server's toolset.",
+        "properties": {
+          "server_name": {
+            "title": "Server Name",
+            "type": "string"
+          },
+          "type": {
+            "const": "mcp_toolset_reference",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "server_name",
+          "type"
+        ],
+        "title": "ToolChangeMCPToolsetReference",
+        "type": "object"
+      },
+      "BetaToolChangeToolReference": {
+        "additionalProperties": false,
+        "description": "Reference to a single tool the caller declared directly in\n``tools[]``. Does not accept the composed ``{server}_{name}`` form the\nserver assigns to MCP-resolved tools \u2014 use ``mcp_tool_reference`` or\n``mcp_toolset_reference`` for those.",
+        "properties": {
+          "name": {
+            "pattern": "^[a-zA-Z0-9_-]{1,128}$",
+            "title": "Name",
+            "type": "string"
+          },
+          "type": {
+            "const": "tool_reference",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ],
+        "title": "ToolChangeToolReference",
+        "type": "object"
+      },
       "BetaToolChoice": {
         "description": "How the model should use the provided tools. The model can use a specific tool, any available tool, decide by itself, or not use tools at all.",
         "discriminator": {
@@ -25675,9 +26627,7 @@
             "type": "string"
           },
           "type": {
-            "enum": [
-              "tunnel"
-            ],
+            "const": "tunnel",
             "type": "string"
           }
         },
@@ -25734,9 +26684,7 @@
             "type": "string"
           },
           "type": {
-            "enum": [
-              "tunnel_certificate"
-            ],
+            "const": "tunnel_certificate",
             "type": "string"
           }
         },
@@ -25764,9 +26712,7 @@
             "type": "string"
           },
           "type": {
-            "enum": [
-              "tunnel_token"
-            ],
+            "const": "tunnel_token",
             "type": "string"
           }
         },
@@ -25924,6 +26870,18 @@
             ],
             "title": "Cache Read Input Tokens"
           },
+          "fallback_credit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BetaFallbackCreditUsage"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Outcome of the `fallback_credit_token` presented on this request.\n\nPresent on every response to a non-batch request that carried a\n`fallback_credit_token`, in either redemption mode; absent otherwise (batch\nitems accept and ignore the token and carry no outcome object)."
+          },
           "inference_geo": {
             "anyOf": [
               {
@@ -25935,6 +26893,9 @@
             ],
             "default": null,
             "description": "The geographic region where inference was performed for this request.",
+            "examples": [
+              "global"
+            ],
             "title": "Inference Geo"
           },
           "input_tokens": {
@@ -26017,6 +26978,7 @@
           "cache_creation",
           "cache_creation_input_tokens",
           "cache_read_input_tokens",
+          "fallback_credit",
           "inference_geo",
           "input_tokens",
           "iterations",
@@ -27532,6 +28494,110 @@
         "title": "BetaWebhookDeploymentUpdatedEventData",
         "type": "object"
       },
+      "BetaWebhookEnvironmentArchivedEventData": {
+        "properties": {
+          "id": {
+            "description": "ID of the environment that triggered the event.",
+            "type": "string"
+          },
+          "organization_id": {
+            "type": "string"
+          },
+          "type": {
+            "const": "environment.archived",
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "organization_id",
+          "workspace_id"
+        ],
+        "title": "BetaWebhookEnvironmentArchivedEventData",
+        "type": "object"
+      },
+      "BetaWebhookEnvironmentCreatedEventData": {
+        "properties": {
+          "id": {
+            "description": "ID of the environment that triggered the event.",
+            "type": "string"
+          },
+          "organization_id": {
+            "type": "string"
+          },
+          "type": {
+            "const": "environment.created",
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "organization_id",
+          "workspace_id"
+        ],
+        "title": "BetaWebhookEnvironmentCreatedEventData",
+        "type": "object"
+      },
+      "BetaWebhookEnvironmentDeletedEventData": {
+        "properties": {
+          "id": {
+            "description": "ID of the environment that triggered the event.",
+            "type": "string"
+          },
+          "organization_id": {
+            "type": "string"
+          },
+          "type": {
+            "const": "environment.deleted",
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "organization_id",
+          "workspace_id"
+        ],
+        "title": "BetaWebhookEnvironmentDeletedEventData",
+        "type": "object"
+      },
+      "BetaWebhookEnvironmentUpdatedEventData": {
+        "properties": {
+          "id": {
+            "description": "ID of the environment that triggered the event.",
+            "type": "string"
+          },
+          "organization_id": {
+            "type": "string"
+          },
+          "type": {
+            "const": "environment.updated",
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "organization_id",
+          "workspace_id"
+        ],
+        "title": "BetaWebhookEnvironmentUpdatedEventData",
+        "type": "object"
+      },
       "BetaWebhookEvent": {
         "example": {
           "created_at": "2026-03-15T10:00:00Z",
@@ -27541,7 +28607,7 @@
             "type": "session.status_idled",
             "workspace_id": "wrkspc_011CZkZaBF1tNoB5wlCeusgy"
           },
-          "id": "wevt_011CZkZYZd9rLmz3ujAcsqEw",
+          "id": "whe_0f1e2d3c4b5a69788796a5b4c3d2e1f0",
           "type": "event"
         },
         "properties": {
@@ -27567,7 +28633,7 @@
           "id": {
             "description": "Unique event identifier for idempotency.",
             "examples": [
-              "wevt_011CZkZYZd9rLmz3ujAcsqEw"
+              "whe_0f1e2d3c4b5a69788796a5b4c3d2e1f0"
             ],
             "type": "string"
           },
@@ -27605,6 +28671,13 @@
             "deployment_run.failed": "#/components/schemas/BetaWebhookDeploymentRunFailedEventData",
             "deployment_run.started": "#/components/schemas/BetaWebhookDeploymentRunStartedEventData",
             "deployment_run.succeeded": "#/components/schemas/BetaWebhookDeploymentRunSucceededEventData",
+            "environment.archived": "#/components/schemas/BetaWebhookEnvironmentArchivedEventData",
+            "environment.created": "#/components/schemas/BetaWebhookEnvironmentCreatedEventData",
+            "environment.deleted": "#/components/schemas/BetaWebhookEnvironmentDeletedEventData",
+            "environment.updated": "#/components/schemas/BetaWebhookEnvironmentUpdatedEventData",
+            "memory_store.archived": "#/components/schemas/BetaWebhookMemoryStoreArchivedEventData",
+            "memory_store.created": "#/components/schemas/BetaWebhookMemoryStoreCreatedEventData",
+            "memory_store.deleted": "#/components/schemas/BetaWebhookMemoryStoreDeletedEventData",
             "session.archived": "#/components/schemas/BetaWebhookSessionArchivedEventData",
             "session.created": "#/components/schemas/BetaWebhookSessionCreatedEventData",
             "session.deleted": "#/components/schemas/BetaWebhookSessionDeletedEventData",
@@ -27739,9 +28812,108 @@
           },
           {
             "$ref": "#/components/schemas/BetaWebhookDeploymentRunSucceededEventData"
+          },
+          {
+            "$ref": "#/components/schemas/BetaWebhookEnvironmentCreatedEventData"
+          },
+          {
+            "$ref": "#/components/schemas/BetaWebhookEnvironmentUpdatedEventData"
+          },
+          {
+            "$ref": "#/components/schemas/BetaWebhookEnvironmentArchivedEventData"
+          },
+          {
+            "$ref": "#/components/schemas/BetaWebhookEnvironmentDeletedEventData"
+          },
+          {
+            "$ref": "#/components/schemas/BetaWebhookMemoryStoreCreatedEventData"
+          },
+          {
+            "$ref": "#/components/schemas/BetaWebhookMemoryStoreArchivedEventData"
+          },
+          {
+            "$ref": "#/components/schemas/BetaWebhookMemoryStoreDeletedEventData"
           }
         ],
         "title": "BetaWebhookEventData"
+      },
+      "BetaWebhookMemoryStoreArchivedEventData": {
+        "properties": {
+          "id": {
+            "description": "ID of the memory store that triggered the event.",
+            "type": "string"
+          },
+          "organization_id": {
+            "type": "string"
+          },
+          "type": {
+            "const": "memory_store.archived",
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "organization_id",
+          "workspace_id"
+        ],
+        "title": "BetaWebhookMemoryStoreArchivedEventData",
+        "type": "object"
+      },
+      "BetaWebhookMemoryStoreCreatedEventData": {
+        "properties": {
+          "id": {
+            "description": "ID of the memory store that triggered the event.",
+            "type": "string"
+          },
+          "organization_id": {
+            "type": "string"
+          },
+          "type": {
+            "const": "memory_store.created",
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "organization_id",
+          "workspace_id"
+        ],
+        "title": "BetaWebhookMemoryStoreCreatedEventData",
+        "type": "object"
+      },
+      "BetaWebhookMemoryStoreDeletedEventData": {
+        "properties": {
+          "id": {
+            "description": "ID of the memory store that triggered the event.",
+            "type": "string"
+          },
+          "organization_id": {
+            "type": "string"
+          },
+          "type": {
+            "const": "memory_store.deleted",
+            "type": "string"
+          },
+          "workspace_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "organization_id",
+          "workspace_id"
+        ],
+        "title": "BetaWebhookMemoryStoreDeletedEventData",
+        "type": "object"
       },
       "BetaWebhookSessionArchivedEventData": {
         "properties": {
@@ -29062,6 +30234,9 @@
           },
           "id": {
             "description": "Identifier for the container used in this request",
+            "examples": [
+              "container_011CpZohnwH4vuy7gazohgSP"
+            ],
             "title": "Id",
             "type": "string"
           }
@@ -30907,7 +32082,7 @@
                 "type": "null"
               }
             ],
-            "description": "The reason that we stopped.\n\nThis may be one the following values:\n* `\"end_turn\"`: the model reached a natural stopping point\n* `\"max_tokens\"`: we exceeded the requested `max_tokens` or the model's maximum\n* `\"stop_sequence\"`: one of your provided custom `stop_sequences` was generated\n* `\"tool_use\"`: the model invoked one or more tools\n* `\"pause_turn\"`: we paused a long-running turn. You may provide the response back as-is in a subsequent request to let the model continue.\n* `\"refusal\"`: when streaming classifiers intervene to handle potential policy violations\n\nIn non-streaming mode this value is always non-null. In streaming mode, it is null in the `message_start` event and non-null otherwise.",
+            "description": "The reason that we stopped.\n\nThis may be one the following values:\n* `\"end_turn\"`: the model reached a natural stopping point\n* `\"max_tokens\"`: we exceeded the requested `max_tokens` or the model's maximum\n* `\"stop_sequence\"`: one of your provided custom `stop_sequences` was generated\n* `\"tool_use\"`: the model invoked one or more tools\n* `\"pause_turn\"`: we paused a long-running turn. You may provide the response back as-is in a subsequent request to let the model continue.\n* `\"refusal\"`: when streaming classifiers intervene to handle potential policy violations\n* `\"model_context_window_exceeded\"`: we exceeded the model's context window\n\nIn non-streaming mode this value is always non-null. In streaming mode, it is null in the `message_start` event and non-null otherwise.",
             "title": "Stop Reason"
           },
           "stop_sequence": {
@@ -31480,13 +32655,18 @@
             "x-stainless-nominal": false
           },
           {
+            "const": "claude-opus-5",
+            "description": "Powerful intelligence for long-running agents and coding",
+            "x-stainless-nominal": false
+          },
+          {
             "const": "claude-opus-4-8",
-            "description": "Frontier intelligence for long-running agents and coding",
+            "description": "Powerful intelligence for long-running agents and coding",
             "x-stainless-nominal": false
           },
           {
             "const": "claude-opus-4-7",
-            "description": "Frontier intelligence for long-running agents and coding",
+            "description": "Powerful intelligence for long-running agents and coding",
             "x-stainless-nominal": false
           },
           {
@@ -31498,7 +32678,7 @@
           },
           {
             "const": "claude-opus-4-6",
-            "description": "Frontier intelligence for long-running agents and coding",
+            "description": "Powerful intelligence for long-running agents and coding",
             "x-stainless-nominal": false
           },
           {
@@ -31518,12 +32698,12 @@
           },
           {
             "const": "claude-opus-4-5",
-            "description": "Premium model combining maximum intelligence with practical performance",
+            "description": "Powerful intelligence for long-running agents and coding",
             "x-stainless-nominal": false
           },
           {
             "const": "claude-opus-4-5-20251101",
-            "description": "Premium model combining maximum intelligence with practical performance",
+            "description": "Powerful intelligence for long-running agents and coding",
             "x-stainless-nominal": false
           },
           {
@@ -31539,14 +32719,14 @@
           {
             "const": "claude-opus-4-1",
             "deprecated": true,
-            "description": "Exceptional model for specialized complex tasks",
+            "description": "Powerful intelligence for long-running agents and coding",
             "x-stainless-deprecation-message": "Will reach end-of-life on August 5, 2026. Please migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
             "x-stainless-nominal": false
           },
           {
             "const": "claude-opus-4-1-20250805",
             "deprecated": true,
-            "description": "Exceptional model for specialized complex tasks",
+            "description": "Powerful intelligence for long-running agents and coding",
             "x-stainless-deprecation-message": "Will reach end-of-life on August 5, 2026. Please migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.",
             "x-stainless-nominal": false
           }
@@ -31851,10 +33031,18 @@
           "cyber",
           "bio",
           "frontier_llm",
-          "reasoning_extraction"
+          "reasoning_extraction",
+          "general_harms"
         ],
         "title": "RefusalCategory",
-        "type": "string"
+        "type": "string",
+        "x-enum-descriptions": [
+          "The request could enable cyber harm, such as malware or exploit development. Benign cybersecurity work can also trigger this category.",
+          "The request could enable biological harm, such as dangerous lab methods. Beneficial life sciences work can also trigger this category.",
+          "The request could assist the development of competing AI models, which is restricted under [Anthropic's commercial terms](https://www.anthropic.com/legal/commercial-terms). Benign machine learning work can also trigger this category.",
+          "The request asks the model to reproduce its internal reasoning in the response text. To get reasoning in a structured form instead, use [adaptive thinking](https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking).",
+          "The request could be related to an area that was determined as harmful. Benign work might sometimes trigger this category."
+        ]
       },
       "RefusalStopDetails": {
         "description": "Structured information about a refusal.",
@@ -31882,6 +33070,9 @@
             ],
             "default": null,
             "description": "Human-readable explanation of the refusal.\n\nThis text is not guaranteed to be stable. `null` when no explanation is available for the category.",
+            "examples": [
+              "This request was declined because it conflicts with Anthropic's Usage Policy."
+            ],
             "title": "Explanation"
           },
           "type": {
@@ -32035,6 +33226,9 @@
         "additionalProperties": false,
         "properties": {
           "cited_text": {
+            "examples": [
+              "The grass is green. The sky is blue."
+            ],
             "title": "Cited Text",
             "type": "string"
           },
@@ -32276,6 +33470,9 @@
         "properties": {
           "cited_text": {
             "description": "The full text of the cited block range, concatenated.\n\nAlways equals the contents of `content[start_block_index:end_block_index]` joined together. The text block is the minimal citable unit; this field is never a substring of a single block. Not counted toward output tokens, and not counted toward input tokens when sent back in subsequent turns.",
+            "examples": [
+              "The grass is green. The sky is blue."
+            ],
             "title": "Cited Text",
             "type": "string"
           },
@@ -32638,6 +33835,9 @@
         "additionalProperties": false,
         "properties": {
           "cited_text": {
+            "examples": [
+              "The grass is green. The sky is blue."
+            ],
             "title": "Cited Text",
             "type": "string"
           },
@@ -32768,6 +33968,9 @@
         "properties": {
           "cited_text": {
             "description": "The full text of the cited block range, concatenated.\n\nAlways equals the contents of `content[start_block_index:end_block_index]` joined together. The text block is the minimal citable unit; this field is never a substring of a single block. Not counted toward output tokens, and not counted toward input tokens when sent back in subsequent turns.",
+            "examples": [
+              "The grass is green. The sky is blue."
+            ],
             "title": "Cited Text",
             "type": "string"
           },
@@ -33774,6 +34977,9 @@
         "additionalProperties": false,
         "properties": {
           "cited_text": {
+            "examples": [
+              "The grass is green. The sky is blue."
+            ],
             "title": "Cited Text",
             "type": "string"
           },
@@ -34034,6 +35240,9 @@
       "ResponseCharLocationCitation": {
         "properties": {
           "cited_text": {
+            "examples": [
+              "The grass is green. The sky is blue."
+            ],
             "title": "Cited Text",
             "type": "string"
           },
@@ -34051,6 +35260,9 @@
                 "type": "null"
               }
             ],
+            "examples": [
+              "My Document"
+            ],
             "title": "Document Title"
           },
           "end_char_index": {
@@ -34067,6 +35279,9 @@
               }
             ],
             "default": null,
+            "examples": [
+              "file_011CNha8iCJcU1wXNR6q4V8w"
+            ],
             "title": "File Id"
           },
           "start_char_index": {
@@ -34245,6 +35460,9 @@
         "properties": {
           "cited_text": {
             "description": "The full text of the cited block range, concatenated.\n\nAlways equals the contents of `content[start_block_index:end_block_index]` joined together. The text block is the minimal citable unit; this field is never a substring of a single block. Not counted toward output tokens, and not counted toward input tokens when sent back in subsequent turns.",
+            "examples": [
+              "The grass is green. The sky is blue."
+            ],
             "title": "Cited Text",
             "type": "string"
           },
@@ -34261,6 +35479,9 @@
               {
                 "type": "null"
               }
+            ],
+            "examples": [
+              "My Document"
             ],
             "title": "Document Title"
           },
@@ -34279,6 +35500,9 @@
               }
             ],
             "default": null,
+            "examples": [
+              "file_011CNha8iCJcU1wXNR6q4V8w"
+            ],
             "title": "File Id"
           },
           "start_block_index": {
@@ -34409,6 +35633,9 @@
       "ResponsePageLocationCitation": {
         "properties": {
           "cited_text": {
+            "examples": [
+              "The grass is green. The sky is blue."
+            ],
             "title": "Cited Text",
             "type": "string"
           },
@@ -34426,6 +35653,9 @@
                 "type": "null"
               }
             ],
+            "examples": [
+              "My Document"
+            ],
             "title": "Document Title"
           },
           "end_page_number": {
@@ -34442,6 +35672,9 @@
               }
             ],
             "default": null,
+            "examples": [
+              "file_011CNha8iCJcU1wXNR6q4V8w"
+            ],
             "title": "File Id"
           },
           "start_page_number": {
@@ -34492,6 +35725,9 @@
         "properties": {
           "cited_text": {
             "description": "The full text of the cited block range, concatenated.\n\nAlways equals the contents of `content[start_block_index:end_block_index]` joined together. The text block is the minimal citable unit; this field is never a substring of a single block. Not counted toward output tokens, and not counted toward input tokens when sent back in subsequent turns.",
+            "examples": [
+              "The grass is green. The sky is blue."
+            ],
             "title": "Cited Text",
             "type": "string"
           },
@@ -35279,6 +36515,9 @@
       "ResponseWebSearchResultLocationCitation": {
         "properties": {
           "cited_text": {
+            "examples": [
+              "The grass is green. The sky is blue."
+            ],
             "title": "Cited Text",
             "type": "string"
           },
@@ -35500,7 +36739,8 @@
           "stop_sequence",
           "tool_use",
           "pause_turn",
-          "refusal"
+          "refusal",
+          "model_context_window_exceeded"
         ],
         "type": "string"
       },
@@ -36421,6 +37661,9 @@
             ],
             "default": null,
             "description": "The geographic region where inference was performed for this request.",
+            "examples": [
+              "global"
+            ],
             "title": "Inference Geo"
           },
           "input_tokens": {
@@ -38226,6 +39469,9 @@
         "requestBody": {
           "content": {
             "application/json": {
+              "example": {
+                "description": "updated"
+              },
               "schema": {
                 "$ref": "#/components/schemas/BetaManagedAgentsUpdateAgentParams"
               }
@@ -41182,6 +42428,1110 @@
           }
         },
         "summary": "Create Deployment"
+      }
+    },
+    "/v1/dreams/{dream_id}/archive?beta=true": {
+      "post": {
+        "operationId": "BetaArchiveDream",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          },
+          {
+            "description": "Path parameter dream_id",
+            "in": "path",
+            "name": "dream_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-stainless-cli-data-alias": "id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaDream"
+                }
+              }
+            },
+            "description": "Successful response (OK)"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid argument - The client specified an invalid argument"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthenticated - The request does not have valid authentication credentials"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Permission denied - The caller does not have permission to execute the specified operation"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Not found - Some requested entity was not found"
+          },
+          "408": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - The deadline expired before the operation could complete"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Aborted - The operation was aborted due to concurrency issue"
+          },
+          "412": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Failed precondition - Operation was rejected because the system is not in required state"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Out of range - Operation was attempted past the valid range"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Resource exhausted - Some resource has been exhausted (rate limiting)"
+          },
+          "431": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Request header fields too large - Request metadata was too large"
+          },
+          "499": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Cancelled - The operation was cancelled by the client"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Internal - Internal server error"
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unimplemented - The operation is not implemented or supported"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unavailable - The service is currently unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - Upstream service did not respond in time"
+          }
+        },
+        "summary": "Archive a Dream"
+      }
+    },
+    "/v1/dreams/{dream_id}/cancel?beta=true": {
+      "post": {
+        "operationId": "BetaCancelDream",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          },
+          {
+            "description": "Path parameter dream_id",
+            "in": "path",
+            "name": "dream_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-stainless-cli-data-alias": "id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaDream"
+                }
+              }
+            },
+            "description": "Successful response (OK)"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid argument - The client specified an invalid argument"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthenticated - The request does not have valid authentication credentials"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Permission denied - The caller does not have permission to execute the specified operation"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Not found - Some requested entity was not found"
+          },
+          "408": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - The deadline expired before the operation could complete"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Aborted - The operation was aborted due to concurrency issue"
+          },
+          "412": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Failed precondition - Operation was rejected because the system is not in required state"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Out of range - Operation was attempted past the valid range"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Resource exhausted - Some resource has been exhausted (rate limiting)"
+          },
+          "431": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Request header fields too large - Request metadata was too large"
+          },
+          "499": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Cancelled - The operation was cancelled by the client"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Internal - Internal server error"
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unimplemented - The operation is not implemented or supported"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unavailable - The service is currently unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - Upstream service did not respond in time"
+          }
+        },
+        "summary": "Cancel a Dream"
+      }
+    },
+    "/v1/dreams/{dream_id}?beta=true": {
+      "get": {
+        "operationId": "BetaGetDream",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-api-key",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          },
+          {
+            "description": "Path parameter dream_id",
+            "in": "path",
+            "name": "dream_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-stainless-cli-data-alias": "id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaDream"
+                }
+              }
+            },
+            "description": "Successful response (OK)"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid argument - The client specified an invalid argument"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthenticated - The request does not have valid authentication credentials"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Permission denied - The caller does not have permission to execute the specified operation"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Not found - Some requested entity was not found"
+          },
+          "408": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - The deadline expired before the operation could complete"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Aborted - The operation was aborted due to concurrency issue"
+          },
+          "412": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Failed precondition - Operation was rejected because the system is not in required state"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Out of range - Operation was attempted past the valid range"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Resource exhausted - Some resource has been exhausted (rate limiting)"
+          },
+          "431": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Request header fields too large - Request metadata was too large"
+          },
+          "499": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Cancelled - The operation was cancelled by the client"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Internal - Internal server error"
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unimplemented - The operation is not implemented or supported"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unavailable - The service is currently unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - Upstream service did not respond in time"
+          }
+        },
+        "summary": "Get a Dream"
+      }
+    },
+    "/v1/dreams?beta=true": {
+      "get": {
+        "operationId": "BetaListDreams",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-api-key",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          },
+          {
+            "description": "Query parameter for limit",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Query parameter for page",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Query parameter for include_archived",
+            "in": "query",
+            "name": "include_archived",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Filter by lifecycle status. Repeat the parameter to match any of multiple statuses. Empty applies no status filter.",
+            "explode": true,
+            "in": "query",
+            "name": "statuses[]",
+            "required": false,
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/BetaDreamStatus"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Return dreams with `created_at` strictly after this timestamp (exclusive lower bound, RFC 3339). Unset applies no lower bound.",
+            "in": "query",
+            "name": "created_at[gt]",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/BetaTimestamp"
+            }
+          },
+          {
+            "description": "Return dreams with `created_at` strictly before this timestamp (exclusive upper bound, RFC 3339). Unset applies no upper bound.",
+            "in": "query",
+            "name": "created_at[lt]",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/BetaTimestamp"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaListDreamsResponse"
+                }
+              }
+            },
+            "description": "Successful response (OK)"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid argument - The client specified an invalid argument"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthenticated - The request does not have valid authentication credentials"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Permission denied - The caller does not have permission to execute the specified operation"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Not found - Some requested entity was not found"
+          },
+          "408": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - The deadline expired before the operation could complete"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Aborted - The operation was aborted due to concurrency issue"
+          },
+          "412": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Failed precondition - Operation was rejected because the system is not in required state"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Out of range - Operation was attempted past the valid range"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Resource exhausted - Some resource has been exhausted (rate limiting)"
+          },
+          "431": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Request header fields too large - Request metadata was too large"
+          },
+          "499": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Cancelled - The operation was cancelled by the client"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Internal - Internal server error"
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unimplemented - The operation is not implemented or supported"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unavailable - The service is currently unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - Upstream service did not respond in time"
+          }
+        },
+        "summary": "List Dreams"
+      },
+      "post": {
+        "operationId": "BetaCreateDream",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "anthropic-version",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "anthropic-beta",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "string",
+              "x-stainless-override-schema": {
+                "description": "Optional header to specify the beta version(s) you want to use.",
+                "items": {
+                  "$ref": "#/components/schemas/AnthropicBeta"
+                },
+                "type": "array",
+                "x-stainless-extend-default": true,
+                "x-stainless-param": "betas"
+              }
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BetaCreateDreamRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaDream"
+                }
+              }
+            },
+            "description": "Successful response (OK)"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid argument - The client specified an invalid argument"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthenticated - The request does not have valid authentication credentials"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Permission denied - The caller does not have permission to execute the specified operation"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Not found - Some requested entity was not found"
+          },
+          "408": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - The deadline expired before the operation could complete"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Aborted - The operation was aborted due to concurrency issue"
+          },
+          "412": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Failed precondition - Operation was rejected because the system is not in required state"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Out of range - Operation was attempted past the valid range"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Resource exhausted - Some resource has been exhausted (rate limiting)"
+          },
+          "431": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Request header fields too large - Request metadata was too large"
+          },
+          "499": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Cancelled - The operation was cancelled by the client"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Internal - Internal server error"
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unimplemented - The operation is not implemented or supported"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Unavailable - The service is currently unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaErrorResponse"
+                }
+              }
+            },
+            "description": "Deadline exceeded - Upstream service did not respond in time"
+          }
+        },
+        "summary": "Create a Dream"
       }
     },
     "/v1/environments/{environment_id}/archive?beta=true": {
@@ -48493,7 +50843,7 @@
             }
           },
           {
-            "description": "Sort direction for results, ordered by created_at. Defaults to asc (chronological).",
+            "description": "Sort direction for results, ordered by the event's `processed_at`. Defaults to asc (chronological).",
             "in": "query",
             "name": "order",
             "required": false,
@@ -48516,7 +50866,7 @@
             "style": "form"
           },
           {
-            "description": "Return events created at or after this time (inclusive).",
+            "description": "Return events created at or after this time (inclusive). Compared against the event's `processed_at` value.",
             "in": "query",
             "name": "created_at[gte]",
             "required": false,
@@ -48525,7 +50875,7 @@
             }
           },
           {
-            "description": "Return events created after this time (exclusive).",
+            "description": "Return events created after this time (exclusive). Compared against the event's `processed_at` value.",
             "in": "query",
             "name": "created_at[gt]",
             "required": false,
@@ -48534,7 +50884,7 @@
             }
           },
           {
-            "description": "Return events created at or before this time (inclusive).",
+            "description": "Return events created at or before this time (inclusive). Compared against the event's `processed_at` value.",
             "in": "query",
             "name": "created_at[lte]",
             "required": false,
@@ -48543,7 +50893,7 @@
             }
           },
           {
-            "description": "Return events created before this time (exclusive).",
+            "description": "Return events created before this time (exclusive). Compared against the event's `processed_at` value.",
             "in": "query",
             "name": "created_at[lt]",
             "required": false,
@@ -50583,6 +52933,20 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "description": "When set, this connection also receives streaming deltas (`event_start`, `event_delta`) while an event is being produced, before the event itself arrives. Deltas are best-effort; when the final event is produced it carries the complete content. A model request that ends early (an error or interrupt) produces no final event \u2014 its terminal `span.model_request_end` closes the preview. Accepts one or more event types to preview and may be repeated: `agent.message` streams `content_delta` fragments; `agent.thinking` is start-only \u2014 a signal that the agent has begun extended thinking, concluded by the `agent.thinking` event itself. Only previews of the requested event types are sent.",
+            "explode": true,
+            "in": "query",
+            "name": "event_deltas[]",
+            "required": false,
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/BetaManagedAgentsEventDeltaType"
+              },
+              "type": "array"
+            },
+            "style": "form"
           }
         ],
         "responses": {
@@ -59680,6 +62044,153 @@
           }
         },
         "summary": "deployment_run.succeeded webhook"
+      }
+    },
+    "environment.archived": {
+      "post": {
+        "operationId": "BetaEnvironmentArchivedWebhook",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BetaWebhookEvent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Return any 2xx status to acknowledge receipt."
+          }
+        },
+        "summary": "environment.archived webhook"
+      }
+    },
+    "environment.created": {
+      "post": {
+        "operationId": "BetaEnvironmentCreatedWebhook",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BetaWebhookEvent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Return any 2xx status to acknowledge receipt."
+          }
+        },
+        "summary": "environment.created webhook"
+      }
+    },
+    "environment.deleted": {
+      "post": {
+        "operationId": "BetaEnvironmentDeletedWebhook",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BetaWebhookEvent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Return any 2xx status to acknowledge receipt."
+          }
+        },
+        "summary": "environment.deleted webhook"
+      }
+    },
+    "environment.updated": {
+      "post": {
+        "operationId": "BetaEnvironmentUpdatedWebhook",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BetaWebhookEvent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Return any 2xx status to acknowledge receipt."
+          }
+        },
+        "summary": "environment.updated webhook"
+      }
+    },
+    "memory_store.archived": {
+      "post": {
+        "operationId": "BetaMemoryStoreArchivedWebhook",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BetaWebhookEvent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Return any 2xx status to acknowledge receipt."
+          }
+        },
+        "summary": "memory_store.archived webhook"
+      }
+    },
+    "memory_store.created": {
+      "post": {
+        "operationId": "BetaMemoryStoreCreatedWebhook",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BetaWebhookEvent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Return any 2xx status to acknowledge receipt."
+          }
+        },
+        "summary": "memory_store.created webhook"
+      }
+    },
+    "memory_store.deleted": {
+      "post": {
+        "operationId": "BetaMemoryStoreDeletedWebhook",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BetaWebhookEvent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Return any 2xx status to acknowledge receipt."
+          }
+        },
+        "summary": "memory_store.deleted webhook"
       }
     },
     "session.archived": {

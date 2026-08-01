@@ -1144,6 +1144,8 @@
           "BetaRequestTextBlock": "text",
           "BetaRequestTextEditorCodeExecutionToolResultBlock": "text_editor_code_execution_tool_result",
           "BetaRequestThinkingBlock": "thinking",
+          "BetaRequestToolAdditionBlock": "tool_addition",
+          "BetaRequestToolRemovalBlock": "tool_removal",
           "BetaRequestToolResultBlock": "tool_result",
           "BetaRequestToolSearchToolResultBlock": "tool_search_tool_result",
           "BetaRequestToolUseBlock": "tool_use",
@@ -5451,6 +5453,453 @@
         "acknowledged"
       ],
       "note": "Create-side union; oneOf variants are the already-tracked UserMessage/UserDefineOutcome/SystemMessage EventParams. Modeled as thin Dart wrappers (DeploymentInitialEventParams) delegating to those classes; no new spec schema to verify."
+    },
+    "StopReason": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "StopReason",
+      "file": "lib/src/models/metadata/stop_reason.dart",
+      "schema": "StopReason"
+    },
+    "FallbackCreditUsage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "FallbackCreditUsage",
+      "file": "lib/src/models/metadata/fallback_credit_usage.dart",
+      "schema": "BetaFallbackCreditUsage"
+    },
+    "FallbackCreditStatus": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "FallbackCreditStatus",
+      "file": "lib/src/models/metadata/fallback_credit_usage.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "BetaFallbackCreditRedeemed": "redeemed",
+          "BetaFallbackCreditNotApplied": "not_applied"
+        }
+      },
+      "note": "Synthetic parent for the inline status union nested in BetaFallbackCreditUsage.status."
+    },
+    "FallbackCreditRedeemed": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "FallbackCreditRedeemed",
+      "file": "lib/src/models/metadata/fallback_credit_usage.dart",
+      "schema": "BetaFallbackCreditRedeemed",
+      "parent": "FallbackCreditStatus"
+    },
+    "FallbackCreditNotApplied": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "FallbackCreditNotApplied",
+      "file": "lib/src/models/metadata/fallback_credit_usage.dart",
+      "schema": "BetaFallbackCreditNotApplied",
+      "parent": "FallbackCreditStatus"
+    },
+    "UnknownFallbackCreditStatus": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownFallbackCreditStatus",
+      "file": "lib/src/models/metadata/fallback_credit_usage.dart",
+      "schema": null,
+      "parent": "FallbackCreditStatus",
+      "note": "Forward-compatible fallback for unrecognized fallback-credit status types; preserves raw JSON."
+    },
+    "FallbackCreditTokenParam": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "FallbackCreditTokenParam",
+      "file": "lib/src/models/messages/fallback_credit_token_param.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "runtime_type",
+        "mapping": {}
+      },
+      "note": "fromJson accepts dynamic: String -> FallbackCreditTokenParamToken, Map -> FallbackCreditTokenParamConfig (anyOf[string, BetaFallbackCreditTokenParam] on BetaCreateMessageParams.fallback_credit_token)."
+    },
+    "FallbackCreditTokenParamToken": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "FallbackCreditTokenParamToken",
+      "file": "lib/src/models/messages/fallback_credit_token_param.dart",
+      "schema": null,
+      "parent": "FallbackCreditTokenParam",
+      "note": "Bare-string wire form of fallback_credit_token; no dedicated spec schema."
+    },
+    "FallbackCreditTokenParamConfig": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "FallbackCreditTokenParamConfig",
+      "file": "lib/src/models/messages/fallback_credit_token_param.dart",
+      "schema": "BetaFallbackCreditTokenParam",
+      "parent": "FallbackCreditTokenParam"
+    },
+    "ToolAdditionInputBlock": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ToolAdditionInputBlock",
+      "file": "lib/src/models/content/input_content_block.dart",
+      "schema": "BetaRequestToolAdditionBlock",
+      "parent": "InputContentBlock"
+    },
+    "ToolRemovalInputBlock": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ToolRemovalInputBlock",
+      "file": "lib/src/models/content/input_content_block.dart",
+      "schema": "BetaRequestToolRemovalBlock",
+      "parent": "InputContentBlock"
+    },
+    "ToolChangeReference": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "ToolChangeReference",
+      "file": "lib/src/models/tools/tool_change_reference.dart",
+      "schema": null,
+      "discriminator": {
+        "field": "type",
+        "mapping": {
+          "BetaToolChangeToolReference": "tool_reference",
+          "BetaToolChangeMCPToolReference": "mcp_tool_reference",
+          "BetaToolChangeMCPToolsetReference": "mcp_toolset_reference"
+        }
+      },
+      "note": "Synthetic parent for the inline tool-reference union in the tool field of tool_addition/tool_removal blocks."
+    },
+    "ToolChangeToolReference": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ToolChangeToolReference",
+      "file": "lib/src/models/tools/tool_change_reference.dart",
+      "schema": "BetaToolChangeToolReference",
+      "parent": "ToolChangeReference"
+    },
+    "ToolChangeMCPToolReference": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ToolChangeMCPToolReference",
+      "file": "lib/src/models/tools/tool_change_reference.dart",
+      "schema": "BetaToolChangeMCPToolReference",
+      "parent": "ToolChangeReference"
+    },
+    "ToolChangeMCPToolsetReference": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "ToolChangeMCPToolsetReference",
+      "file": "lib/src/models/tools/tool_change_reference.dart",
+      "schema": "BetaToolChangeMCPToolsetReference",
+      "parent": "ToolChangeReference"
+    },
+    "UnknownToolChangeReference": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownToolChangeReference",
+      "file": "lib/src/models/tools/tool_change_reference.dart",
+      "schema": null,
+      "parent": "ToolChangeReference",
+      "note": "Forward-compatible fallback for unrecognized tool-change reference types; preserves raw JSON."
+    },
+    "WebhookEnvironmentArchivedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookEnvironmentArchivedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookEnvironmentArchivedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookEnvironmentCreatedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookEnvironmentCreatedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookEnvironmentCreatedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookEnvironmentDeletedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookEnvironmentDeletedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookEnvironmentDeletedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookEnvironmentUpdatedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookEnvironmentUpdatedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookEnvironmentUpdatedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookMemoryStoreArchivedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookMemoryStoreArchivedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookMemoryStoreArchivedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookMemoryStoreCreatedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookMemoryStoreCreatedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookMemoryStoreCreatedEventData",
+      "parent": "WebhookEventData"
+    },
+    "WebhookMemoryStoreDeletedEventData": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "WebhookMemoryStoreDeletedEventData",
+      "file": "lib/src/models/managed_agents/webhooks/webhook_event.dart",
+      "schema": "BetaWebhookMemoryStoreDeletedEventData",
+      "parent": "WebhookEventData"
+    },
+    "BetaManagedAgentsSessionInitialEventParams": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "SessionInitialEventParams",
+      "file": "lib/src/models/managed_agents/sessions/session_initial_event_params.dart",
+      "schema": "BetaManagedAgentsSessionInitialEventParams",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Create-side union; oneOf variants are the already-tracked UserMessage/UserDefineOutcome EventParams. Modeled as thin Dart wrappers (SessionInitialEventParams) delegating to those classes; no new spec schema to verify."
+    },
+    "EffortParams": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "EffortParams",
+      "file": "lib/src/models/managed_agents/config/effort_params.dart",
+      "schema": "BetaManagedAgentsEffortParams",
+      "note": "fromJson accepts dynamic: String -> EffortParamsLevel (bare BetaManagedAgentsEffortLevel), Map -> EffortParamsObject ({type: level} BetaManagedAgentsEffort form)."
+    },
+    "EffortParamsLevel": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "EffortParamsLevel",
+      "file": "lib/src/models/managed_agents/config/effort_params.dart",
+      "schema": null,
+      "parent": "EffortParams",
+      "note": "Bare-string wire form (BetaManagedAgentsEffortLevel), collapsed to the shared EffortLevel enum."
+    },
+    "EffortParamsObject": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "EffortParamsObject",
+      "file": "lib/src/models/managed_agents/config/effort_params.dart",
+      "schema": null,
+      "parent": "EffortParams",
+      "note": "Object wire form {type: level}; level collapsed to the shared EffortLevel enum."
+    },
+    "BetaManagedAgentsEffortLevel": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "EffortLevel",
+      "file": "lib/src/models/beta/config/output_config.dart",
+      "schema": "BetaManagedAgentsEffortLevel",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Identical value set (low/medium/high/xhigh/max) to the existing EffortLevel enum; reused rather than duplicated."
+    },
+    "BetaManagedAgentsEffort": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "EffortLevel",
+      "file": "lib/src/models/beta/config/output_config.dart",
+      "schema": "BetaManagedAgentsEffort",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Discriminated {type: level} object union collapsed to the EffortLevel enum: ModelConfig.effort unwraps/rewraps the object form; EffortParamsObject covers the params side."
+    },
+    "BetaManagedAgentsEffortLow": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "EffortLevel",
+      "file": "lib/src/models/beta/config/output_config.dart",
+      "schema": "BetaManagedAgentsEffortLow",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Empty {type} discriminated variant of BetaManagedAgentsEffort, collapsed to EffortLevel.low."
+    },
+    "BetaManagedAgentsEffortMedium": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "EffortLevel",
+      "file": "lib/src/models/beta/config/output_config.dart",
+      "schema": "BetaManagedAgentsEffortMedium",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Empty {type} discriminated variant of BetaManagedAgentsEffort, collapsed to EffortLevel.medium."
+    },
+    "BetaManagedAgentsEffortHigh": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "EffortLevel",
+      "file": "lib/src/models/beta/config/output_config.dart",
+      "schema": "BetaManagedAgentsEffortHigh",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Empty {type} discriminated variant of BetaManagedAgentsEffort, collapsed to EffortLevel.high."
+    },
+    "BetaManagedAgentsEffortXhigh": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "EffortLevel",
+      "file": "lib/src/models/beta/config/output_config.dart",
+      "schema": "BetaManagedAgentsEffortXhigh",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Empty {type} discriminated variant of BetaManagedAgentsEffort, collapsed to EffortLevel.xhigh."
+    },
+    "BetaManagedAgentsEffortMax": {
+      "spec": "main",
+      "kind": "skip",
+      "dart_class": "EffortLevel",
+      "file": "lib/src/models/beta/config/output_config.dart",
+      "schema": "BetaManagedAgentsEffortMax",
+      "tags": [
+        "acknowledged"
+      ],
+      "note": "Empty {type} discriminated variant of BetaManagedAgentsEffort, collapsed to EffortLevel.max."
+    },
+    "DreamStatus": {
+      "spec": "main",
+      "kind": "enum",
+      "dart_class": "DreamStatus",
+      "file": "lib/src/models/dreams/dream_status.dart",
+      "schema": "BetaDreamStatus"
+    },
+    "DreamInput": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DreamInput",
+      "file": "lib/src/models/dreams/dream_input.dart",
+      "schema": "BetaDreamInput"
+    },
+    "DreamMemoryStoreInput": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "DreamMemoryStoreInput",
+      "file": "lib/src/models/dreams/dream_input.dart",
+      "schema": "BetaDreamMemoryStoreInput",
+      "parent": "DreamInput"
+    },
+    "DreamSessionsInput": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "DreamSessionsInput",
+      "file": "lib/src/models/dreams/dream_input.dart",
+      "schema": "BetaDreamSessionsInput",
+      "parent": "DreamInput"
+    },
+    "UnknownDreamInput": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownDreamInput",
+      "file": "lib/src/models/dreams/dream_input.dart",
+      "schema": null,
+      "parent": "DreamInput",
+      "note": "Forward-compatible fallback for unrecognized DreamInput types; preserves raw JSON."
+    },
+    "DreamOutput": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DreamOutput",
+      "file": "lib/src/models/dreams/dream_output.dart",
+      "schema": "BetaDreamOutput"
+    },
+    "DreamMemoryStoreOutput": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "DreamMemoryStoreOutput",
+      "file": "lib/src/models/dreams/dream_output.dart",
+      "schema": "BetaDreamMemoryStoreOutput",
+      "parent": "DreamOutput"
+    },
+    "UnknownDreamOutput": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "UnknownDreamOutput",
+      "file": "lib/src/models/dreams/dream_output.dart",
+      "schema": null,
+      "parent": "DreamOutput",
+      "note": "Forward-compatible fallback for unrecognized DreamOutput types; preserves raw JSON."
+    },
+    "DreamModelConfig": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DreamModelConfig",
+      "file": "lib/src/models/dreams/dream_model_config.dart",
+      "schema": "BetaDreamModelConfig"
+    },
+    "DreamModelParams": {
+      "spec": "main",
+      "kind": "sealed_parent",
+      "dart_class": "DreamModelParams",
+      "file": "lib/src/models/dreams/dream_model_config.dart",
+      "schema": "BetaDreamModelParams"
+    },
+    "DreamModelParamsId": {
+      "spec": "main",
+      "kind": "extension",
+      "dart_class": "DreamModelParamsId",
+      "file": "lib/src/models/dreams/dream_model_config.dart",
+      "schema": null,
+      "parent": "DreamModelParams",
+      "note": "Bare model-id string variant of BetaDreamModelParams; no dedicated spec schema."
+    },
+    "DreamModelConfigParams": {
+      "spec": "main",
+      "kind": "sealed_variant",
+      "dart_class": "DreamModelConfigParams",
+      "file": "lib/src/models/dreams/dream_model_config.dart",
+      "schema": "BetaDreamModelConfigParams",
+      "parent": "DreamModelParams"
+    },
+    "DreamError": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DreamError",
+      "file": "lib/src/models/dreams/dream_error.dart",
+      "schema": "BetaDreamError"
+    },
+    "DreamUsage": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "DreamUsage",
+      "file": "lib/src/models/dreams/dream_usage.dart",
+      "schema": "BetaDreamUsage"
+    },
+    "Dream": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "Dream",
+      "file": "lib/src/models/dreams/dream.dart",
+      "schema": "BetaDream"
+    },
+    "CreateDreamRequest": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "CreateDreamRequest",
+      "file": "lib/src/models/dreams/create_dream_request.dart",
+      "schema": "BetaCreateDreamRequest"
+    },
+    "ListDreamsResponse": {
+      "spec": "main",
+      "kind": "object",
+      "dart_class": "ListDreamsResponse",
+      "file": "lib/src/models/dreams/list_dreams_response.dart",
+      "schema": "BetaListDreamsResponse"
     }
   }
 }

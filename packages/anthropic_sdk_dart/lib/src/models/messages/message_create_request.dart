@@ -11,6 +11,7 @@ import '../tools/tool_choice.dart';
 import '../tools/tool_definition.dart';
 import 'diagnostics_param.dart';
 import 'fallback_config.dart';
+import 'fallback_credit_token_param.dart';
 import 'input_message.dart';
 import 'thinking_config.dart';
 
@@ -229,8 +230,13 @@ class MessageCreateRequest {
   ///
   /// Pass the `fallbackCreditToken` from a prior refusal's
   /// [RefusalStopDetails] to refund the cache-miss cost when retrying the
-  /// refused request.
-  final String? fallbackCreditToken;
+  /// refused request. A bare [FallbackCreditTokenParam.token] selects strict
+  /// redemption mode (the default). The object form,
+  /// [FallbackCreditTokenParam.config], additionally lets a caller select
+  /// [FallbackCreditMode.bestEffort] — but requires the
+  /// `anthropic-beta: fallback-credit-2026-07-01` header; without that header
+  /// the field accepts the bare string only.
+  final FallbackCreditTokenParam? fallbackCreditToken;
 
   /// Creates a [MessageCreateRequest].
   const MessageCreateRequest({
@@ -310,7 +316,9 @@ class MessageCreateRequest {
       fallbacks: (json['fallbacks'] as List?)
           ?.map((e) => FallbackConfigV2.fromJson(e as Map<String, dynamic>))
           .toList(),
-      fallbackCreditToken: json['fallback_credit_token'] as String?,
+      fallbackCreditToken: json['fallback_credit_token'] != null
+          ? FallbackCreditTokenParam.fromJson(json['fallback_credit_token'])
+          : null,
     );
   }
 
@@ -339,7 +347,7 @@ class MessageCreateRequest {
     if (fallbacks != null)
       'fallbacks': fallbacks!.map((e) => e.toJson()).toList(),
     if (fallbackCreditToken != null)
-      'fallback_credit_token': fallbackCreditToken,
+      'fallback_credit_token': fallbackCreditToken!.toJson(),
   };
 
   /// Creates a copy with replaced values.
@@ -419,7 +427,7 @@ class MessageCreateRequest {
           : fallbacks as List<FallbackConfigV2>?,
       fallbackCreditToken: fallbackCreditToken == unsetCopyWithValue
           ? this.fallbackCreditToken
-          : fallbackCreditToken as String?,
+          : fallbackCreditToken as FallbackCreditTokenParam?,
     );
   }
 

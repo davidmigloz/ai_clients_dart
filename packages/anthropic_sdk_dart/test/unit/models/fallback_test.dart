@@ -366,7 +366,9 @@ void main() {
           FallbackConfigV2(model: 'claude-sonnet-4-6', maxTokens: 512),
           FallbackConfigV2(model: 'claude-haiku-4-5-20251001'),
         ],
-        fallbackCreditToken: 'tok_secret_abc123',
+        fallbackCreditToken: FallbackCreditTokenParam.token(
+          'tok_secret_abc123',
+        ),
       );
 
       final json = request.toJson();
@@ -391,7 +393,10 @@ void main() {
       expect(request.fallbacks, hasLength(1));
       expect(request.fallbacks!.first.model, 'claude-sonnet-4-6');
       expect(request.fallbacks!.first.maxTokens, 512);
-      expect(request.fallbackCreditToken, 'tok_secret_abc123');
+      expect(
+        request.fallbackCreditToken,
+        const FallbackCreditTokenParam.token('tok_secret_abc123'),
+      );
     });
 
     test('omits fallback fields when null', () {
@@ -436,7 +441,9 @@ void main() {
           maxTokens: 1024,
           messages: [InputMessage.user('Hi')],
           fallbacks: const [FallbackConfigV2(model: 'claude-sonnet-4-6')],
-          fallbackCreditToken: 'tok_secret_abc123',
+          fallbackCreditToken: const FallbackCreditTokenParam.token(
+            'tok_secret_abc123',
+          ),
         ),
         betas: const [
           'server-side-fallback-2026-06-01',
@@ -466,7 +473,9 @@ void main() {
         model: 'claude-opus-4-8',
         maxTokens: 1024,
         messages: [],
-        fallbackCreditToken: 'tok_super_secret_value',
+        fallbackCreditToken: FallbackCreditTokenParam.token(
+          'tok_super_secret_value',
+        ),
       );
 
       final str = request.toString();
@@ -521,6 +530,14 @@ void main() {
         RefusalCategory.reasoningExtraction.toJson(),
         'reasoning_extraction',
       );
+    });
+
+    test('general_harms round-trips', () {
+      expect(
+        RefusalCategory.fromJson('general_harms'),
+        RefusalCategory.generalHarms,
+      );
+      expect(RefusalCategory.generalHarms.toJson(), 'general_harms');
     });
   });
 

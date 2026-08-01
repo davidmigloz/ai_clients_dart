@@ -223,4 +223,46 @@ void main() {
       expect(set.multiagent, isA<MultiagentCoordinatorParams>());
     });
   });
+
+  group('UpdateAgentParams.version optional', () {
+    test('omitted: no version key in toJson', () {
+      const params = UpdateAgentParams(name: 'Updated');
+      expect(params.version, isNull);
+      expect(params.toJson().containsKey('version'), isFalse);
+    });
+
+    test('provided: version key is emitted', () {
+      const params = UpdateAgentParams(version: 1, name: 'Updated');
+      expect(params.toJson()['version'], 1);
+    });
+
+    test('fromJson without version leaves it null', () {
+      final params = UpdateAgentParams.fromJson(const {'name': 'Updated'});
+      expect(params.version, isNull);
+      expect(params.toJson().containsKey('version'), isFalse);
+    });
+
+    test('copyWith omitted preserves the existing version', () {
+      const params = UpdateAgentParams(version: 1);
+      expect(params.copyWith().version, 1);
+    });
+
+    test('copyWith can set a new version', () {
+      const params = UpdateAgentParams();
+      expect(params.copyWith(version: 2).version, 2);
+    });
+
+    test('copyWith can clear version back to null', () {
+      const params = UpdateAgentParams(version: 1);
+      expect(params.copyWith(version: null).version, isNull);
+    });
+
+    test('toString still includes version when set and when absent', () {
+      expect(
+        const UpdateAgentParams(version: 1).toString(),
+        contains('version: 1'),
+      );
+      expect(const UpdateAgentParams().toString(), contains('version: null'));
+    });
+  });
 }
