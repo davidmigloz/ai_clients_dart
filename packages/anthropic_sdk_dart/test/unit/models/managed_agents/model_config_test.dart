@@ -180,6 +180,15 @@ void main() {
         final stillCleared = cleared.copyWith();
         expect(stillCleared.clearEffort, isTrue);
         expect(stillCleared.toJson()['effort'], isNull);
+
+        final unCleared = cleared.copyWith(clearEffort: false);
+        expect(unCleared.clearEffort, isFalse);
+        expect(unCleared.effort, isNull);
+        expect(unCleared.toJson().containsKey('effort'), isFalse);
+
+        final reCleared = unCleared.copyWith(clearEffort: true);
+        expect(reCleared.clearEffort, isTrue);
+        expect(reCleared.toJson()['effort'], isNull);
       },
     );
 

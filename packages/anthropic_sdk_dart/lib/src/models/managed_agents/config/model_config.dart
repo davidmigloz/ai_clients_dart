@@ -215,18 +215,22 @@ class ModelParamsConfig extends ModelParams {
   ///
   /// Omit [effort] to preserve its current value (including whether it is
   /// currently marked for clearing). Pass `null` explicitly to reset it to
-  /// the model's default; pass a value to replace it.
+  /// the model's default; pass a value to replace it. Pass
+  /// `clearEffort: false` to return a cleared instance to the omitted /
+  /// no-change state.
   ModelParamsConfig copyWith({
     String? id,
     Object? speed = unsetCopyWithValue,
     Object? effort = unsetCopyWithValue,
+    bool? clearEffort,
   }) {
     final effortSet = effort != unsetCopyWithValue;
     return ModelParamsConfig(
       id: id ?? this.id,
       speed: speed == unsetCopyWithValue ? this.speed : speed as AgentSpeed?,
       effort: effortSet ? effort as EffortParams? : this.effort,
-      clearEffort: effortSet ? effort == null : clearEffort,
+      clearEffort:
+          clearEffort ?? (effortSet ? effort == null : this.clearEffort),
     );
   }
 
