@@ -4,9 +4,6 @@ import '../../beta/config/output_config.dart' show EffortLevel;
 import '../../common/copy_with_sentinel.dart';
 import 'effort_params.dart';
 
-/// Private sentinel to distinguish "not provided" from explicit `null`.
-const Object _notSet = Object();
-
 /// Inference speed mode for agents.
 enum AgentSpeed {
   /// Standard throughput mode.
@@ -154,8 +151,9 @@ class ModelParamsId extends ModelParams {
 /// A model configuration object with optional speed setting.
 ///
 /// [effort] distinguishes omission from an explicit `null` on update: omitting
-/// the field leaves the stored effort unchanged, while passing `null`
-/// explicitly resets it to the model's default effort.
+/// the field (and [clearEffort]) leaves the stored effort unchanged, while
+/// passing `clearEffort: true` emits an explicit JSON `null` that resets it to
+/// the model's default effort.
 @immutable
 class ModelParamsConfig extends ModelParams {
   /// The model identifier.
@@ -167,21 +165,27 @@ class ModelParamsConfig extends ModelParams {
   /// Response effort level for model generation — a bare level string or an
   /// object with a `type` field.
   ///
-  /// Omit to preserve the current value on update; pass `null` explicitly to
-  /// reset it to the model's default.
-  EffortParams? get effort =>
-      _effort == _notSet ? null : _effort as EffortParams?;
-  final Object? _effort;
+  /// Leave both this and [clearEffort] at their defaults to preserve the
+  /// current value on update; set this to reset it to a new value; or pass
+  /// `clearEffort: true` (with this left `null`) to reset it to the model's
+  /// default.
+  final EffortParams? effort;
+
+  /// Whether to emit an explicit JSON `null` for `effort`, resetting it to
+  /// the model's default. Ignored — and must be `false` — when [effort] is
+  /// non-null.
+  final bool clearEffort;
 
   /// Creates a [ModelParamsConfig].
-  ///
-  /// Omit [effort] to preserve its current value on update. Pass `null`
-  /// explicitly to reset it to the model's default.
   const ModelParamsConfig({
     required this.id,
     this.speed,
-    Object? effort = _notSet,
-  }) : _effort = effort;
+    this.effort,
+    this.clearEffort = false,
+  }) : assert(
+         effort == null || !clearEffort,
+         'Cannot pass both a non-null effort and clearEffort: true',
+       );
 
   /// Creates a [ModelParamsConfig] from JSON.
   factory ModelParamsConfig.fromJson(Map<String, dynamic> json) {
@@ -190,11 +194,10 @@ class ModelParamsConfig extends ModelParams {
       speed: json['speed'] != null
           ? AgentSpeed.fromJson(json['speed'] as String)
           : null,
-      effort: json.containsKey('effort')
-          ? (json['effort'] != null
-                ? EffortParams.fromJson(json['effort'] as Object)
-                : null)
-          : _notSet,
+      effort: json['effort'] != null
+          ? EffortParams.fromJson(json['effort'] as Object)
+          : null,
+      clearEffort: json.containsKey('effort') && json['effort'] == null,
     );
   }
 
@@ -202,22 +205,28 @@ class ModelParamsConfig extends ModelParams {
   Map<String, dynamic> toJson() => {
     'id': id,
     if (speed != null) 'speed': speed!.toJson(),
-    if (_effort != _notSet) 'effort': effort?.toJson(),
+    if (effort != null)
+      'effort': effort!.toJson()
+    else if (clearEffort)
+      'effort': null,
   };
 
   /// Creates a copy with replaced values.
   ///
-  /// Omit [effort] to preserve its current value. Pass `null` explicitly to
-  /// reset it to the model's default.
+  /// Omit [effort] to preserve its current value (including whether it is
+  /// currently marked for clearing). Pass `null` explicitly to reset it to
+  /// the model's default; pass a value to replace it.
   ModelParamsConfig copyWith({
     String? id,
     Object? speed = unsetCopyWithValue,
     Object? effort = unsetCopyWithValue,
   }) {
+    final effortSet = effort != unsetCopyWithValue;
     return ModelParamsConfig(
       id: id ?? this.id,
       speed: speed == unsetCopyWithValue ? this.speed : speed as AgentSpeed?,
-      effort: effort == unsetCopyWithValue ? _effort : effort,
+      effort: effortSet ? effort as EffortParams? : this.effort,
+      clearEffort: effortSet ? effort == null : clearEffort,
     );
   }
 
@@ -228,12 +237,14 @@ class ModelParamsConfig extends ModelParams {
           runtimeType == other.runtimeType &&
           id == other.id &&
           speed == other.speed &&
-          _effort == other._effort;
+          effort == other.effort &&
+          clearEffort == other.clearEffort;
 
   @override
-  int get hashCode => Object.hash(id, speed, _effort);
+  int get hashCode => Object.hash(id, speed, effort, clearEffort);
 
   @override
   String toString() =>
-      'ModelParamsConfig(id: $id, speed: $speed, effort: $effort)';
+      'ModelParamsConfig(id: $id, speed: $speed, effort: $effort, '
+      'clearEffort: $clearEffort)';
 }

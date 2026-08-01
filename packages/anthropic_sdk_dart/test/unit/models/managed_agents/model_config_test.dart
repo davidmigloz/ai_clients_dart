@@ -98,20 +98,44 @@ void main() {
         'effort': null,
       });
       expect(config.effort, isNull);
+      expect(config.clearEffort, isTrue);
       expect(config.toJson().containsKey('effort'), isTrue);
       expect(config.toJson()['effort'], isNull);
+    });
+
+    test('clearEffort: true emits an explicit JSON null', () {
+      const config = ModelParamsConfig(
+        id: 'claude-opus-4-8',
+        clearEffort: true,
+      );
+      expect(config.effort, isNull);
+      expect(config.toJson().containsKey('effort'), isTrue);
+      expect(config.toJson()['effort'], isNull);
+    });
+
+    test('passing both effort and clearEffort: true asserts', () {
+      expect(
+        () => ModelParamsConfig(
+          id: 'claude-opus-4-8',
+          effort: const EffortParamsLevel(EffortLevel.high),
+          clearEffort: true,
+        ),
+        throwsA(isA<AssertionError>()),
+      );
     });
 
     test('fromJson round-trips omitted, explicit null, and set states', () {
       final omitted = ModelParamsConfig.fromJson(const {
         'id': 'claude-opus-4-8',
       });
+      expect(omitted.clearEffort, isFalse);
       expect(omitted.toJson(), const {'id': 'claude-opus-4-8'});
 
       final explicitNull = ModelParamsConfig.fromJson(const {
         'id': 'claude-opus-4-8',
         'effort': null,
       });
+      expect(explicitNull.clearEffort, isTrue);
       expect(explicitNull.toJson(), const {
         'id': 'claude-opus-4-8',
         'effort': null,
@@ -121,6 +145,7 @@ void main() {
         'id': 'claude-opus-4-8',
         'effort': 'high',
       });
+      expect(set.clearEffort, isFalse);
       expect(set.toJson(), const {'id': 'claude-opus-4-8', 'effort': 'high'});
     });
 
@@ -145,6 +170,16 @@ void main() {
         final preserved = config.copyWith();
         expect(preserved.effort, isA<EffortParamsLevel>());
         expect(preserved.toJson()['effort'], 'low');
+
+        final reset = cleared.copyWith(
+          effort: const EffortParamsLevel(EffortLevel.medium),
+        );
+        expect(reset.clearEffort, isFalse);
+        expect(reset.toJson()['effort'], 'medium');
+
+        final stillCleared = cleared.copyWith();
+        expect(stillCleared.clearEffort, isTrue);
+        expect(stillCleared.toJson()['effort'], isNull);
       },
     );
 

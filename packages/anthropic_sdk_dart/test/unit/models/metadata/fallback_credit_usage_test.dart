@@ -124,9 +124,9 @@ void main() {
     });
 
     test('not_applied copyWith replaces reason and clears removeToRedeem', () {
-      final original = FallbackCreditNotApplied(
+      const original = FallbackCreditNotApplied(
         reason: FallbackCreditNotAppliedReason.variantFieldsPresent,
-        removeToRedeem: const ['top_p'],
+        removeToRedeem: ['top_p'],
       );
       final changed = original.copyWith(
         reason: FallbackCreditNotAppliedReason.expired,
@@ -148,13 +148,13 @@ void main() {
     });
 
     test('equality and hashCode for not_applied', () {
-      final a = FallbackCreditNotApplied(
+      const a = FallbackCreditNotApplied(
         reason: FallbackCreditNotAppliedReason.expired,
       );
-      final b = FallbackCreditNotApplied(
+      const b = FallbackCreditNotApplied(
         reason: FallbackCreditNotAppliedReason.expired,
       );
-      final c = FallbackCreditNotApplied(
+      const c = FallbackCreditNotApplied(
         reason: FallbackCreditNotAppliedReason.notEnabled,
       );
       expect(a, equals(b));
@@ -162,6 +162,18 @@ void main() {
       expect(a, isNot(equals(c)));
       expect(a.toString(), contains('reason: FallbackCreditNotAppliedReason'));
     });
+
+    test(
+      'a const typed instance equals an equivalent .raw-parsed instance',
+      () {
+        const typed = FallbackCreditNotApplied(
+          reason: FallbackCreditNotAppliedReason.expired,
+        );
+        const raw = FallbackCreditNotApplied.raw(rawReason: 'expired');
+        expect(typed, equals(raw));
+        expect(typed.hashCode, equals(raw.hashCode));
+      },
+    );
 
     test('equality and hashCode for unknown status', () {
       const a = UnknownFallbackCreditStatus(
@@ -205,7 +217,7 @@ void main() {
     test('copyWith replaces status', () {
       const usage = FallbackCreditUsage(status: FallbackCreditRedeemed());
       final changed = usage.copyWith(
-        status: FallbackCreditNotApplied(
+        status: const FallbackCreditNotApplied(
           reason: FallbackCreditNotAppliedReason.expired,
         ),
       );

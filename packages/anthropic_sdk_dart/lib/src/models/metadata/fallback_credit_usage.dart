@@ -95,7 +95,7 @@ sealed class FallbackCreditStatus {
   const factory FallbackCreditStatus.redeemed() = FallbackCreditRedeemed;
 
   /// Creates a [FallbackCreditNotApplied] status.
-  factory FallbackCreditStatus.notApplied({
+  const factory FallbackCreditStatus.notApplied({
     required FallbackCreditNotAppliedReason reason,
     List<String>? removeToRedeem,
   }) = FallbackCreditNotApplied;
@@ -154,16 +154,25 @@ class FallbackCreditRedeemed extends FallbackCreditStatus {
 /// No reprice was applied; [reason] says why.
 @immutable
 class FallbackCreditNotApplied extends FallbackCreditStatus {
+  /// Backing field for [reason] when constructed with a typed reason. Null
+  /// when constructed via [FallbackCreditNotApplied.raw].
+  final FallbackCreditNotAppliedReason? _reason;
+
+  /// Backing field for [rawReason] when constructed via
+  /// [FallbackCreditNotApplied.raw]. Null when constructed with a typed
+  /// [reason].
+  final String? _rawReason;
+
+  /// Why the reprice was not applied.
+  FallbackCreditNotAppliedReason get reason =>
+      _reason ?? FallbackCreditNotAppliedReason.fromJson(_rawReason!);
+
   /// The raw wire value for [reason], preserved verbatim.
   ///
   /// Kept alongside the derived [reason] getter so an unrecognized reason
   /// round-trips through `fromJson`/`toJson` instead of being collapsed to
   /// the literal string `"unknown"`.
-  final String rawReason;
-
-  /// Why the reprice was not applied, derived from [rawReason].
-  FallbackCreditNotAppliedReason get reason =>
-      FallbackCreditNotAppliedReason.fromJson(rawReason);
+  String get rawReason => _rawReason ?? _reason!.value;
 
   /// Request fields to remove before retrying, so the retry can redeem this
   /// token.
@@ -178,17 +187,19 @@ class FallbackCreditNotApplied extends FallbackCreditStatus {
   final List<String>? removeToRedeem;
 
   /// Creates a [FallbackCreditNotApplied].
-  FallbackCreditNotApplied({
+  const FallbackCreditNotApplied({
     required FallbackCreditNotAppliedReason reason,
     this.removeToRedeem,
-  }) : rawReason = reason.value;
+  }) : _reason = reason,
+       _rawReason = null;
 
   /// Creates a [FallbackCreditNotApplied], preserving [rawReason] verbatim
   /// even when it does not match a known [FallbackCreditNotAppliedReason].
   const FallbackCreditNotApplied.raw({
-    required this.rawReason,
+    required String rawReason,
     this.removeToRedeem,
-  });
+  }) : _rawReason = rawReason,
+       _reason = null;
 
   /// Creates a [FallbackCreditNotApplied] from JSON.
   factory FallbackCreditNotApplied.fromJson(Map<String, dynamic> json) {

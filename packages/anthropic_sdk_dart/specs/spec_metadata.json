@@ -7,6 +7,11 @@
       "title": "Anthropic API",
       "version_history": [
         {
+          "fetched_at": "2026-07-11T06:54:31.075636Z",
+          "source_url": "https://storage.googleapis.com/stainless-sdk-openapi-specs/anthropic/anthropic-506a5ad71d522b4ae56ac3429380486647af1f92eddde80603480fb592d62b54.yml",
+          "version": "unknown"
+        },
+        {
           "fetched_at": "2026-03-20T12:00:00Z",
           "version": "ebeeaa9a9bf7603f0bbcce30389e27ca"
         },
